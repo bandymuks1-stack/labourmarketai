@@ -17,6 +17,13 @@
  *   - demand.role_request_count / demand.skill_request_count — the two
  *     demand aggregates the platform actually derives
  *     (skills-demand-model.ts).
+ *   - labour.employment_rate / labour.unemployment_rate /
+ *     labour.job_vacancy_rate / labour.cost_index_yoy — four official
+ *     macro labour indicators produced by the Eurostat source adapter
+ *     (eurostat-source-v1.ts). Each maps 1:1 to one Eurostat dataset and
+ *     one unit (EUROSTAT_METRIC_EXPECTED_UNIT). Aggregates only, never
+ *     person-level; imported only once the owner activates the eurostat
+ *     source (fail-closed until then).
  * Supply / skill-gap / trend metrics have NO derivation yet, so they are
  * deliberately absent — the vocabulary grows only when a derivation
  * becomes real.
@@ -34,6 +41,13 @@ export const INTELLIGENCE_METRIC_KEYS = [
   "salary.hour.net",
   "demand.role_request_count",
   "demand.skill_request_count",
+  // Official Eurostat macro labour indicators (aggregates only) — see
+  // eurostat-source-v1.ts. Each carries a fixed 1:1 unit binding
+  // (EUROSTAT_METRIC_EXPECTED_UNIT) enforced by observation validation.
+  "labour.employment_rate",
+  "labour.unemployment_rate",
+  "labour.job_vacancy_rate",
+  "labour.cost_index_yoy",
 ] as const;
 
 export type IntelligenceMetricKey = (typeof INTELLIGENCE_METRIC_KEYS)[number];
@@ -61,6 +75,42 @@ export const SALARY_METRIC_EXPECTED_UNIT: Readonly<
   "salary.hour.gross": "eur_hour_gross",
   "salary.hour.net": "eur_hour_net",
 };
+
+/**
+ * The 1:1 unit each NON-salary Eurostat labour metric MUST carry. A labour
+ * metric on the wrong unit (e.g. an employment RATE reported as an index)
+ * is a contradictory row that can never validate — the parser always emits
+ * the correct unit, and validation rejects any hand-crafted mismatch
+ * (task Phase 3: unknown or incompatible units fail closed). Kept here
+ * beside the salary map so unit governance lives in one module.
+ */
+export const LABOUR_METRIC_EXPECTED_UNIT: Readonly<
+  Partial<Record<IntelligenceMetricKey, string>>
+> = {
+  "labour.employment_rate": "pc_pop",
+  "labour.unemployment_rate": "pc_act",
+  "labour.job_vacancy_rate": "pc_posts",
+  "labour.cost_index_yoy": "pch_yoy",
+};
+
+/**
+ * Unified metric→unit expectation (salary + labour). A metric key present
+ * here MUST carry exactly its bound unit; a key absent here has no
+ * unit-vocabulary binding today. `undefined` = no expectation, never
+ * "any unit is fine" for a bound key.
+ */
+export const METRIC_EXPECTED_UNIT: Readonly<
+  Partial<Record<IntelligenceMetricKey, string>>
+> = {
+  ...SALARY_METRIC_EXPECTED_UNIT,
+  ...LABOUR_METRIC_EXPECTED_UNIT,
+};
+
+export function expectedUnitFor(metricKey: string): string | undefined {
+  return isKnownMetricKey(metricKey)
+    ? METRIC_EXPECTED_UNIT[metricKey]
+    : undefined;
+}
 
 /**
  * The RECORDED metric half of a source's import policy: the closed set of

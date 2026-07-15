@@ -41,8 +41,23 @@ export const TRUST_INSIGHT_KINDS = [
   "supply",
   "skill_gap",
   "market_trend",
+  // Official Eurostat macro labour-market context (aggregates only). Each
+  // maps to one Eurostat dataset via eurostat-source-v1.ts. Until the owner
+  // activates the eurostat source these render as honest unavailable cards.
+  "eurostat_employment",
+  "eurostat_unemployment",
+  "eurostat_vacancy",
+  "eurostat_labour_cost",
 ] as const;
 export type TrustInsightKind = (typeof TRUST_INSIGHT_KINDS)[number];
+
+/** The four Eurostat context kinds, in display order. */
+export const EUROSTAT_TRUST_KINDS = [
+  "eurostat_employment",
+  "eurostat_unemployment",
+  "eurostat_vacancy",
+  "eurostat_labour_cost",
+] as const;
 
 export type TrustCardStatus = "ready" | "conflict" | "unavailable";
 
@@ -83,6 +98,10 @@ const KIND_TITLE_LEAF: Record<TrustInsightKind, string> = {
   supply: "supply",
   skill_gap: "skillGap",
   market_trend: "marketTrend",
+  eurostat_employment: "eurostatEmployment",
+  eurostat_unemployment: "eurostatUnemployment",
+  eurostat_vacancy: "eurostatVacancy",
+  eurostat_labour_cost: "eurostatLabourCost",
 };
 
 export function trustCardTitleCode(kind: TrustInsightKind): string {
@@ -175,6 +194,10 @@ const KIND_SOURCE_KEYS: Record<TrustInsightKind, readonly string[]> = {
   supply: ["uzt_lt", "eures"],
   skill_gap: ["uzt_lt", "eures"],
   market_trend: ["stat_gov_lt", "eurostat"],
+  eurostat_employment: ["eurostat"],
+  eurostat_unemployment: ["eurostat"],
+  eurostat_vacancy: ["eurostat"],
+  eurostat_labour_cost: ["eurostat"],
 };
 
 const KIND_REASON_LEAF: Record<TrustInsightKind, string> = {
@@ -183,6 +206,10 @@ const KIND_REASON_LEAF: Record<TrustInsightKind, string> = {
   supply: "supplyNotMeasured",
   skill_gap: "skillGapNeedsBoth",
   market_trend: "trendNeedsHistory",
+  eurostat_employment: "eurostatNeedsActivation",
+  eurostat_unemployment: "eurostatNeedsActivation",
+  eurostat_vacancy: "eurostatNeedsActivation",
+  eurostat_labour_cost: "eurostatNeedsActivation",
 };
 
 /** Registry keys from the kind mapping whose derived lifecycle state is not
@@ -219,6 +246,45 @@ export function buildUnavailableTrustCard(
       afterActivationCode: "intelligence.trustCard.after.activation",
     },
   });
+}
+
+// ── Eurostat context cards ───────────────────────────────────────────────────
+
+/** Visible attribution required by the Eurostat reuse terms — a stable i18n
+ *  code, never an endorsement/partnership claim. */
+export const EUROSTAT_ATTRIBUTION_CODE = "intelligence.eurostat.attribution";
+
+/** The Eurostat dataset code each context kind draws from (documentation /
+ *  card subtitle). Kept in lock-step with eurostat-source-v1.ts. */
+export const EUROSTAT_KIND_DATASET: Record<
+  (typeof EUROSTAT_TRUST_KINDS)[number],
+  string
+> = {
+  eurostat_employment: "lfsi_emp_q",
+  eurostat_unemployment: "une_rt_m",
+  eurostat_vacancy: "ei_lmjv_q_r2",
+  eurostat_labour_cost: "lc_lci_r2_q",
+};
+
+/**
+ * The four European labour-market context cards. Until the owner activates
+ * the eurostat source (and one bounded import writes public_aggregate rows)
+ * there is no deterministic figure, so every card is an HONEST unavailable
+ * card: WHY (source not yet activated), WHAT is required (owner activation),
+ * WHICH source is off (eurostat), and WHAT changes after activation — never
+ * a placeholder number, never "coming soon".
+ *
+ * This is the smallest useful Eurostat surface and reuses the canonical
+ * Trust Card engine (buildUnavailableTrustCard) exactly.
+ */
+export function buildEurostatContextCards(): readonly TrustCardV1[] {
+  return EUROSTAT_TRUST_KINDS.map((kind) =>
+    buildUnavailableTrustCard(kind, {
+      id: `${kind}-context`,
+      requirementCode:
+        "intelligence.trustCard.requirement.eurostatActivation",
+    }),
+  );
 }
 
 // ── Worker salary benchmark card ─────────────────────────────────────────────

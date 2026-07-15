@@ -62,6 +62,37 @@ const CONTEXT: ObservationValidationContextV1 = {
   allowedLanguages: ["lt"],
 };
 
+describe("metric_unit check — non-salary metrics with a fixed unit binding", () => {
+  it("flags a labour metric carrying the wrong unit (fail-closed)", () => {
+    const obs = validObservation({
+      metricKey: "labour.unemployment_rate",
+      unit: "index_2020", // wrong — expected pc_act
+      statMethod: "ratio",
+    });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.failures).toContainEqual({
+        checkId: "metric_unit",
+        reasonCode: "metric_unit_mismatch",
+      });
+    }
+  });
+
+  it("does NOT flag a labour metric carrying its correct unit", () => {
+    const obs = validObservation({
+      metricKey: "labour.unemployment_rate",
+      unit: "pc_act", // correct
+      statMethod: "ratio",
+    });
+    const result = validateObservationCandidate(candidate(obs), CONTEXT);
+    const unitFailures = result.ok
+      ? []
+      : result.failures.filter((f) => f.checkId === "metric_unit");
+    expect(unitFailures).toEqual([]);
+  });
+});
+
 function candidate(
   observation: unknown,
   sourceLanguage: string | null = "lt",

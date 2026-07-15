@@ -9522,7 +9522,11 @@
         "demand": "Vraag",
         "supply": "Aanbod",
         "skillGap": "Vaardigheidskloof",
-        "marketTrend": "Markttrend"
+        "marketTrend": "Markttrend",
+        "eurostatEmployment": "Europese werkgelegenheidsgraad (Eurostat)",
+        "eurostatUnemployment": "Europese werkloosheidsgraad (Eurostat)",
+        "eurostatVacancy": "Europese vacaturegraad (Eurostat)",
+        "eurostatLabourCost": "Europese loonkostentrend (Eurostat)"
       },
       "status": {
         "ready": "Gereed",
@@ -9545,14 +9549,16 @@
         "skillGapNeedsBoth": "Hier staat geen vaardigheidskloof-cijfer omdat daarvoor zowel een vraag- als een aanbodaggregaat nodig is — geen van beide wordt gepubliceerd zolang de observatie-opslag uit staat.",
         "trendNeedsHistory": "Hier staat geen trend omdat een trend een geschiedenis van gedateerde observaties nodig heeft, en de observatie-opslag is voorbereid maar uitgeschakeld. Een trend wordt nooit uit één punt getekend.",
         "salaryBasisNotComparable": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat voor uw beroep en land, maar het niet eerlijk kan worden vergeleken: er is niet vastgelegd of de bedragen bruto of netto zijn. Een onduidelijke vergelijking wordt nooit getoond.",
-        "salaryInputsMissing": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat, maar uw eigen verwachte salaris ontbreekt, dus er valt niets te vergelijken."
+        "salaryInputsMissing": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat, maar uw eigen verwachte salaris ontbreekt, dus er valt niets te vergelijken.",
+        "eurostatNeedsActivation": "Officiële Eurostat-context is voorbereid, maar de eurostat-bron is nog niet geactiveerd, dus er is geen cijfer geïmporteerd."
       },
       "requirement": {
         "ownerEnableStore": "De platformeigenaar moet de observatie-opslag inschakelen en ten minste één gegevensbron goedkeuren.",
         "salaryBenchmark": "Een beheerder moet een gecureerd markttarief invoeren voor uw beroep en land, of de platformeigenaar moet een externe salarisbron goedkeuren.",
         "demandOwnRows": "Voeg werkaanvragen toe — deze kaart vult zich met de gegevens van uw eigen organisatie zodra er registraties bestaan.",
         "salaryBasis": "De salarisbasis (bruto of netto) moet zijn vastgelegd voor zowel uw verwachte salaris als het gecureerde markttarief voordat een eerlijke vergelijking kan worden getoond.",
-        "salaryInputs": "Voer uw verwachte salaris in uw werknemersprofiel in — de vergelijking verschijnt zodra het er is."
+        "salaryInputs": "Voer uw verwachte salaris in uw werknemersprofiel in — de vergelijking verschijnt zodra het er is.",
+        "eurostatActivation": "De eigenaar activeert de eurostat-bron en voert één begrensde officiële import uit."
       },
       "after": {
         "activation": "Nadat de eigenaar een gegevensbron heeft goedgekeurd en geactiveerd, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
@@ -9687,6 +9693,23 @@
         "unknown": "onbekend",
         "none": "geen"
       }
+    },
+    "eurostat": {
+      "attribution": "Bron: Eurostat. Officiële EU-statistiek, hergebruikt met bronvermelding; geen goedkeuring door Eurostat of de Europese Commissie.",
+      "meaning": {
+        "employmentRate": "Aandeel van de bevolking van 20-64 jaar dat werkt (EU-concept, seizoensgecorrigeerd).",
+        "unemploymentRate": "Aandeel van de beroepsbevolking dat werkloos is (seizoensgecorrigeerd, maandelijks).",
+        "jobVacancyRate": "Vacante plaatsen als aandeel van alle plaatsen (bezet plus vacant), bedrijfsleven.",
+        "labourCostIndex": "Jaar-op-jaar verandering van de uurloonkosten (industrie, bouw en diensten)."
+      },
+      "prohibited": {
+        "employmentRate": "Geen persoonlijk baanvooruitzicht, geen werkgeverspecifiek cijfer, geen actuele vacature.",
+        "unemploymentRate": "Geen individuele voorspelling, geen LabourMarket.ai-gemiddelde, geen live telling.",
+        "jobVacancyRate": "Geen actuele lijst met openstaande banen en geen werkgeverspecifieke vraag.",
+        "labourCostIndex": "Geen salarisaanbod en nooit een basis om het loon van een individu af te leiden."
+      },
+      "sectionTitle": "Europese arbeidsmarktcontext",
+      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar."
     }
   }
 }

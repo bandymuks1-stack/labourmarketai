@@ -9522,7 +9522,11 @@
         "demand": "Demand",
         "supply": "Supply",
         "skillGap": "Skill gap",
-        "marketTrend": "Market trend"
+        "marketTrend": "Market trend",
+        "eurostatEmployment": "European employment rate (Eurostat)",
+        "eurostatUnemployment": "European unemployment rate (Eurostat)",
+        "eurostatVacancy": "European job vacancy rate (Eurostat)",
+        "eurostatLabourCost": "European labour cost trend (Eurostat)"
       },
       "status": {
         "ready": "Ready",
@@ -9545,14 +9549,16 @@
         "skillGapNeedsBoth": "There is no skill-gap figure here because it needs both a demand and a supply aggregate — neither is published while the observations data store is switched off.",
         "trendNeedsHistory": "There is no trend here because a trend needs a history of dated observations, and the observations data store is prepared but switched off. A trend is never drawn from a single point.",
         "salaryBasisNotComparable": "There is no salary figure here because a curated market rate exists for your profession and country, but it cannot be honestly compared: it is not recorded whether the amounts are gross or net. An unclear comparison is never shown.",
-        "salaryInputsMissing": "There is no salary figure here because a curated market rate exists, but your own expected salary is missing, so there is nothing to compare it against."
+        "salaryInputsMissing": "There is no salary figure here because a curated market rate exists, but your own expected salary is missing, so there is nothing to compare it against.",
+        "eurostatNeedsActivation": "Official Eurostat context is prepared but the eurostat source is not yet activated, so no figure has been imported."
       },
       "requirement": {
         "ownerEnableStore": "The platform owner must switch on the observations data store and approve at least one data source.",
         "salaryBenchmark": "An administrator must enter a curated market rate for your profession and country, or the platform owner must approve an external salary source.",
         "demandOwnRows": "Add work requests — this card fills from your organisation's own data as soon as entries exist.",
         "salaryBasis": "The pay basis (gross or net) must be recorded for both your expected salary and the curated market rate before an honest comparison can be shown.",
-        "salaryInputs": "Enter your expected salary in your worker profile — the comparison appears as soon as it exists."
+        "salaryInputs": "Enter your expected salary in your worker profile — the comparison appears as soon as it exists.",
+        "eurostatActivation": "The owner activates the eurostat source and runs one bounded official import."
       },
       "after": {
         "activation": "After the owner approves and activates an input, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."
@@ -9687,6 +9693,23 @@
         "unknown": "unknown",
         "none": "none"
       }
+    },
+    "eurostat": {
+      "attribution": "Source: Eurostat. Official EU statistics, reused with attribution; not an endorsement by Eurostat or the European Commission.",
+      "meaning": {
+        "employmentRate": "Share of the population aged 20-64 in employment (EU concept, seasonally adjusted).",
+        "unemploymentRate": "Share of the labour force that is unemployed (seasonally adjusted, monthly).",
+        "jobVacancyRate": "Vacant posts as a share of all posts (occupied plus vacant), business economy.",
+        "labourCostIndex": "Year-on-year change in hourly labour cost (industry, construction and services)."
+      },
+      "prohibited": {
+        "employmentRate": "Not a personal job prospect, not an employer-specific figure, not a live vacancy.",
+        "unemploymentRate": "Not an individual prediction, not a LabourMarket.ai average, not a live count.",
+        "jobVacancyRate": "Not a live list of open jobs and not employer-specific demand.",
+        "labourCostIndex": "Not a salary offer and never a basis to infer an individual's pay."
+      },
+      "sectionTitle": "European labour-market context",
+      "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets. Prepared, pending owner activation."
     }
   }
 }
