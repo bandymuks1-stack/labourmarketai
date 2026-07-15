@@ -2518,7 +2518,7 @@
     "directionAdded": "Kryptis pridėta",
     "reviewBanner": {
       "title": "Dalis įgūdžių laukia peržiūros",
-      "body": "Kai kurie įrašai dar nėra aiškiai suklasifikuoti. Papildykite informaciją arba peržiūrėkite įgūdžius, kad profilis būtų tikslesnis.",
+      "body": "Kai kurie įrašai dar neaiškūs. Papildykite informaciją arba peržiūrėkite įgūdžius, kad darbdaviai jus rastų tiksliau.",
       "cta": "Peržiūrėti įgūdžius"
     },
     "pageTitle": "Mano profilis",
@@ -2830,7 +2830,7 @@
       "uploadErrorType": "Netinkamas failas. Naudokite PDF, DOCX arba TXT.",
       "uploadErrorSize": "Failas per didelis (iki 5 MB).",
       "uploadErrorEmpty": "Faile teksto nerasta. Pabandykite kitą failą arba įklijuokite tekstą.",
-      "uploadErrorAuth": "Prisijunkite iš naujo, kad importuotumėte CV.",
+      "uploadErrorAuth": "Prisijunkite iš naujo, kad įkeltumėte CV.",
       "uploadErrorFailed": "Nepavyko nuskaityti failo. Pabandykite kitą failą arba įklijuokite tekstą.",
       "pasteLabel": "Įklijuoti CV tekstą",
       "pastePlaceholder": "Įklijuokite savo CV tekstą čia.",
@@ -7088,7 +7088,7 @@
     "ctaReadiness": "Patikrinti šalies pasiruošimą",
     "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija.",
-    "structuredNote": "Jūsų CV tekstas automatiškai struktūrizuojamas į profilį — kiekvieną pasiūlymą peržiūrite ir nusprendžiate jūs."
+    "structuredNote": "Perskaitome jūsų CV ir paruošiame profilį, kurį galite peržiūrėti — kiekvieną pasiūlymą tikrinate ir sprendžiate jūs."
   },
   "needStructuring": {
     "pageTitle": "Poreikių struktūrinimas",
@@ -7394,7 +7394,7 @@
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
     "targetCountries": "Šalys, kuriose norite dirbti",
-    "targetCountriesHelp": "Dviraidžiai kodai, atskirti kableliais (pvz. NL, DE).",
+    "targetCountriesHelp": "Šalys, kuriose norite dirbti, atskirtos kableliais (pavyzdžiui: Nyderlandai, Vokietija).",
     "availableFrom": "Laisvas nuo",
     "accommodation": "Apgyvendinimas",
     "accNeeds": "Man reikia apgyvendinimo",
@@ -7413,7 +7413,7 @@
     "engBrigade": "Brigada / komanda",
     "engAgency": "Per agentūrą",
     "languages": "Kalbos",
-    "languagesHelp": "Atskirtos kableliais (pvz. en, lt).",
+    "languagesHelp": "Kalbos, kuriomis kalbate, atskirtos kableliais (pavyzdžiui: anglų, lietuvių).",
     "comment": "Kita informacija",
     "commentHelp": "Keli sakiniai apie jūsų patirtį — asistentas pagal tai paruošia jūsų profilį.",
     "submit": "Sukurti profilio juodraštį",
@@ -7504,7 +7504,7 @@
     "aiBadge": "AI pasiūlymas",
     "aiNotVerified": "Peržiūrėkite prieš publikuojant — niekas nepublikuojama automatiškai.",
     "aiDisabled": "AI juodraštis dar nesukurtas — asistentas neįjungtas. Jūsų duomenys neišsaugomi.",
-    "aiRole": "Normalizuota pareigybė",
+    "aiRole": "Pareigybė",
     "aiSkills": "Reikalingi įgūdžiai",
     "aiDocs": "Reikalingi dokumentai",
     "aiMissing": "Trūkstami laukai",
@@ -8795,7 +8795,7 @@
   },
   "externalProfiles": {
     "title": "Išoriniai profiliai",
-    "hint": "Susiekite profilius, kuriuos turite kitose svetainėse — portfolio, GitHub, LinkedIn ar sertifikatų registrą.",
+    "hint": "Susiekite profilius, kuriuos turite kitose svetainėse — portfolio, GitHub, LinkedIn ar sertifikatų sąrašą.",
     "selfManaged": "Šias nuorodas pridedate ir valdote patys. Platforma niekada nesiunčia užklausų į šias svetaines ir netikrina jų turinio.",
     "platform": "Svetainė",
     "url": "Nuoroda (https://)",
@@ -8820,7 +8820,7 @@
       "github": "GitHub",
       "behance": "Behance",
       "portfolio": "Portfolio",
-      "certificationRegistry": "Sertifikatų registras",
+      "certificationRegistry": "Sertifikatų sąrašas",
       "other": "Kita"
     }
   },
@@ -9198,9 +9198,9 @@
     }
   },
   "cvImport": {
-    "reviewTitle": "Aptiktos CV dalys",
+    "reviewTitle": "Ką radome jūsų CV",
     "reviewHint": "Sistema tik siūlo. Kiekvieną įrašą išsaugokite arba atmeskite — sprendžiate jūs.",
-    "empty": "Tekste struktūruotų įrašų neaptikta.",
+    "empty": "Iš šio teksto dalių nuskaityti nepavyko — galite jas įrašyti ranka.",
     "groups": {
       "workHistory": "Darbo patirtis",
       "education": "Išsilavinimas",
@@ -9220,7 +9220,7 @@
     "needsMigration": "Ši dalis paruošta, bet dar neįjungta — įrašas neišsaugotas.",
     "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "invalid": "Netinkama reikšmė.",
-    "aiHint": "DI pasiūlymas — peržiūrėkite prieš išsaugodami",
+    "aiHint": "Pasiūlymas — patikrinkite prieš išsaugodami",
     "chooseLevel": "Pasirinkite lygį",
     "perMonth": "€/mėn.",
     "availabilityKeys": {

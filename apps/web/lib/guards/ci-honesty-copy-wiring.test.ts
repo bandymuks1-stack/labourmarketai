@@ -20,6 +20,7 @@ describe("quality.yml runs the honesty-copy gates", () => {
     "check:fit-signal-copy",
     "check:pilot-honesty-copy",
     "check:pricing-honesty-copy",
+    "check:worker-plain-language",
   ]) {
     it(`runs ${script}`, () => {
       expect(workflow).toContain(script);

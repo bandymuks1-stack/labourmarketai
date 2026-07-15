@@ -17,6 +17,14 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+/** Never show a worker a raw database code. Turns `chat_message` /
+ *  `contact_email` into "Chat message" / "Contact email" as a safe fallback
+ *  when no localized label exists (low-cognitive-load: plain words only). */
+function humanizeCode(value: string): string {
+  const words = value.replace(/[_-]+/g, " ").trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : value;
+}
+
 /**
  * CANONICAL privacy control screen (consent-and-disclosure v1).
  *
@@ -137,10 +145,17 @@ export default async function PrivacyPage({
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2 text-sm"
               >
                 <span className="text-text-primary">
-                  {r.contextType ?? "—"} ·{" "}
+                  {r.contextType
+                    ? tc.has(`contextType.${r.contextType}` as never)
+                      ? tc(`contextType.${r.contextType}` as never)
+                      : humanizeCode(r.contextType)
+                    : "—"}{" "}
+                  ·{" "}
                   {(r.selectedFields ?? [])
                     .map((f) =>
-                      tc.has(`fields.${f}` as never) ? tc(`fields.${f}` as never) : f,
+                      tc.has(`fields.${f}` as never)
+                        ? tc(`fields.${f}` as never)
+                        : humanizeCode(f),
                     )
                     .join(", ")}
                 </span>
@@ -259,7 +274,7 @@ export default async function PrivacyPage({
                     ? t("requests.type.data_export")
                     : r.type === "account_deletion"
                       ? t("requests.type.account_deletion")
-                      : r.type}
+                      : humanizeCode(r.type)}
                 </span>
                 <span className="flex items-center gap-3">
                   <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -268,7 +283,7 @@ export default async function PrivacyPage({
                   <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
                     {t.has(`requests.status.${r.status}` as never)
                       ? t(`requests.status.${r.status}` as never)
-                      : r.status}
+                      : humanizeCode(r.status)}
                   </span>
                 </span>
               </li>

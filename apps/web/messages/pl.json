@@ -2188,7 +2188,7 @@
   },
   "externalProfiles": {
     "title": "[EN] External profiles",
-    "hint": "[EN] Link profiles you hold on other sites — a portfolio, GitHub, LinkedIn or a certification registry.",
+    "hint": "[EN] Link profiles you hold on other sites — a portfolio, GitHub, LinkedIn or a certificate listing.",
     "selfManaged": "[EN] You add and control these links yourself. The platform never fetches or checks content from these sites.",
     "platform": "[EN] Site",
     "url": "[EN] Link (https://)",
@@ -2213,7 +2213,7 @@
       "github": "GitHub",
       "behance": "Behance",
       "portfolio": "Portfolio",
-      "certificationRegistry": "[EN] Certification registry",
+      "certificationRegistry": "[EN] Certificate listing",
       "other": "[EN] Other"
     }
   },

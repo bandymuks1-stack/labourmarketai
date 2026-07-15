@@ -113,7 +113,7 @@ export function WorkerIntakeForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.targetCountries}</span>
-          <input type="text" name="target_countries" maxLength={120} placeholder="NL, DE" className={FIELD} />
+          <input type="text" name="target_countries" maxLength={120} className={FIELD} />
           <span className={HELP}>{labels.targetCountriesHelp}</span>
         </label>
 
@@ -155,7 +155,7 @@ export function WorkerIntakeForm({
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.languages}</span>
-          <input type="text" name="languages" maxLength={120} placeholder="en, lt" className={FIELD} />
+          <input type="text" name="languages" maxLength={120} className={FIELD} />
           <span className={HELP}>{labels.languagesHelp}</span>
         </label>
 

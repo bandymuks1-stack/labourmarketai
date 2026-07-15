@@ -71,6 +71,9 @@ jobs:
       - name: Pricing honesty copy guard (SR-5)
         run: pnpm -F web check:pricing-honesty-copy
 
+      - name: Worker plain-language copy guard (low-cognitive-load v1)
+        run: pnpm -F web check:worker-plain-language
+
       - name: Primary route smoke / dead-UI guard
         run: pnpm check:primary-route-smoke
 
