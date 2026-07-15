@@ -84,6 +84,20 @@ export async function submitCompanyNeedAction(
     description: str(formData.get("description")) ?? "",
   };
 
+  // Actionability guard (Pre-Advertising Launch Readiness v1): a stored
+  // intake with no reachable contact is un-actionable. The public form marks
+  // contact_email `required`, but markup is bypassable (no-JS, bots, direct
+  // action calls), so enforce a valid email server-side BEFORE persisting —
+  // return the honest `invalid` state (rendered as statusInvalid), never a
+  // silent un-contactable row. (An RPC-level CHECK is the owner-gated schema
+  // follow-up in docs/launch/launch-blocker-register-v1.md §F1.)
+  const contactEmail = str(formData.get("contact_email"));
+  const contactEmailOk =
+    !!contactEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
+  if (!contactEmailOk) {
+    return { ok: false, code: "invalid" };
+  }
+
   const rawLocale = await getLocale();
   const locale = toAiLocale(rawLocale);
 
@@ -95,7 +109,7 @@ export async function submitCompanyNeedAction(
     locale: rawLocale,
     companyName: raw.companyName,
     contactName: raw.contactPerson,
-    contactEmail: str(formData.get("contact_email")),
+    contactEmail,
     country: raw.country,
     cityRegion: raw.cityRegion,
     sector: raw.profession,

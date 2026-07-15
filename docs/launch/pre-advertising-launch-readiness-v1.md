@@ -44,7 +44,7 @@ does **not** yet hold end-to-end for the **company** side, and there is **not en
 | Agency | Reachable via company/agency identity; no over-promised functionality found. | Agency is a company type; no fake capability. |
 | i18n (LT/EN/RU/NL/DE) | **Clean** — full parity, no raw keys, no Lithuanian leakage, natural copy. | Secondary locales (pl/lv/et/da/no/sv) are `[EN]` shells and not routed. |
 
-Journey testing was source/markup-based and production-read-only; live authenticated browser walkthroughs were **not** run (no test accounts / to avoid writing test telemetry to production) — see §14 evidence gaps.
+Journey testing was source/markup-based and production-read-only; live authenticated browser walkthroughs were **not** run (no test accounts / to avoid writing test telemetry to production) — see §14 evidence gaps. An independent adversarial review of the diff was run and its two RISK findings were fixed (server-side email enforcement; preview-host funnel exclusion) — see §13.
 
 ---
 
@@ -76,7 +76,7 @@ New public-funnel events (registry `lib/telemetry/funnel-events.ts`, emitted thr
 
 PII safety: every event carries only bounded, allowlisted scalars (`lib/telemetry/actions.ts`). No CV, job-requirement text, phone, email, name, token, or personal identifier can reach an event — the server-side allowlist drops anything else and caps sizes.
 
-Owner-visible measurement: an **Acquisition Funnel** panel was added to the existing superadmin telemetry page (`/dashboard/admin/telemetry`) — counts per stage, conversion rates (landing→CTA, landing→registration, onboarding completion, company-need submit), and a first-touch `utm_source` breakdown of conversions. Computed by `lib/admin/conversion-funnel.ts`. No new dashboard; extends the existing admin area.
+Owner-visible measurement: an **Acquisition Funnel** panel was added to the existing superadmin telemetry page (`/dashboard/admin/telemetry`) — counts per stage, conversion rates (landing→CTA, landing→registration, onboarding completion, company-need submit), and a first-touch `utm_source` breakdown of conversions. Computed by `lib/admin/conversion-funnel.ts`. No new dashboard; extends the existing admin area. **Non-production (localhost/Vercel-preview) funnel events are stamped `preview_host` by `trackFunnel` and excluded from the owner funnel**, so dev/preview traffic can't inflate the numbers used to judge ad spend.
 
 ---
 
@@ -99,7 +99,7 @@ Traced chain (file:line in the register). Current production reality:
 - **Owner queue: BROKEN.** `listCompanyNeedIntakes` reads via service-role, but the table was created without a service-role grant; the fix migration `20260713190000` is a **DRAFT, not applied to production**. Every submitted need is invisible in the queue until it is applied. **P0.**
 - **Masking fixed in this PR:** a permission-denied (42501) was rendered as the benign "being prepared" state, hiding the outage. Now surfaced as a distinct, actionable operator banner naming the exact migration (`lib/admin/company-need-intakes.ts`, admin page).
 - **Alert:** best-effort owner notification; if unconfigured, a persisted request reaches no human while the queue is broken. Alert content is appropriately minimal (no sensitive excess).
-- **Hardening in this PR:** contact email is now required on the public form, so a stored intake is always actionable.
+- **Hardening in this PR:** contact email is now required on the public form **and enforced server-side** in `submitCompanyNeedAction` (a markup-only `required` is bypassable by no-JS clients/bots/direct calls), so a stored intake is always actionable.
 - **Gaps documented as owner-gated:** status-transition audit (actor/timestamp/note), alert delivery-status indicator, submit idempotency — DDL sketch in the register (not applied).
 
 ---
@@ -187,6 +187,7 @@ Do **not** run company/employer ads until worker supply reaches the benchmark AN
 - **Copy honesty (5 locales):** removed the misleading "System ranks best matches / scored against your demand" claim on `/for-companies`, replaced with the product's honest "you choose, nothing is ranked or scored automatically."
 - **Mobile P1:** language switcher visible on every viewport.
 - Guard test extended in lockstep (`activation-funnel-telemetry.test.ts`): funnel contract, emitting surfaces, UTM allowlist bounds, first-touch-wins.
+- **Adversarial-review fixes:** (1) server-side contact-email enforcement (markup `required` was bypassable); (2) `preview_host` stamping + exclusion so non-production traffic can't pollute the owner funnel.
 
 ---
 

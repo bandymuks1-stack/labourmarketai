@@ -43,7 +43,7 @@ No PR was merged or closed by this session — closing/superseding is an owner a
 
 ### B4. Un-contactable intakes (FIXED in code this PR)
 - **Was:** contact fields optional → a stored need with no way to reach the company.
-- **Fix:** `contact_email` now `required` on the public form (`apps/web/components/app/company-need-form.tsx`). Server-side enforcement (RPC CHECK) is queued as owner-gated DDL (§F1).
+- **Fix:** `contact_email` `required` on the public form (`apps/web/components/app/company-need-form.tsx`) **AND enforced server-side** (valid-email check → honest `invalid` state) in `apps/web/lib/staffing/company-need-form-actions.ts`, since markup `required` is bypassable (no-JS, bots, direct action calls). A defence-in-depth RPC-level CHECK stays queued as owner-gated DDL (§F1).
 
 ---
 
@@ -51,7 +51,7 @@ No PR was merged or closed by this session — closing/superseding is an owner a
 
 ### C1. No ad-funnel conversion measurement (FIXED in code this PR)
 - **Was:** first-party `pilot_events` pipe existed but only on authenticated surfaces; public/ad surface had zero instrumentation and no UTM (query string was actively stripped).
-- **Fix:** public funnel + first-touch UTM attribution + owner Acquisition-Funnel panel — see readiness report §5/§6. No schema change.
+- **Fix:** public funnel + first-touch UTM attribution + owner Acquisition-Funnel panel — see readiness report §5/§6. No schema change. Non-production (localhost/preview) events are stamped `preview_host` and excluded from the owner funnel so dev/preview traffic cannot pollute the decision numbers.
 
 ### C2. Insufficient worker supply for an employer promise (owner action)
 - 23 workers, ~10 test/demo, 0 CVs, 0 completeness ≥60, 2 with skills, 2 with availability, 2 countries. **Employer ads would hit an empty marketplace.**
@@ -129,7 +129,8 @@ alter table public.company_need_public_intakes
 
 ## G. Files changed this PR (code)
 
-- `apps/web/lib/telemetry/attribution.ts` (new) · `funnel-events.ts` · `actions.ts`
+- `apps/web/lib/telemetry/attribution.ts` (new) · `funnel-events.ts` · `actions.ts` · `task.ts`
+- `apps/web/lib/staffing/company-need-form-actions.ts`
 - `apps/web/components/app/marketing-funnel-beacon.tsx` (new) · `tracked-cta.tsx` (new) · `company-need-form.tsx` · `signup-form.tsx` · `onboarding-wizard.tsx`
 - `apps/web/components/marketing/page-hero.tsx`
 - `apps/web/app/[locale]/(marketing)/layout.tsx`

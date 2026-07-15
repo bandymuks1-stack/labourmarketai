@@ -120,7 +120,9 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
   it("trackFunnel is a thin wrapper over the existing fire-and-forget helper", () => {
     expect(trackFile).toMatch(/export function trackFunnel\(/);
     // It routes through the same private `fire(...)` path (fire-and-forget).
-    expect(trackFile).toMatch(/trackFunnel[\s\S]{0,160}fire\(/);
+    // Window widened for the preview_host enrichment (Pre-Advertising Launch
+    // Readiness v1); still asserts trackFunnel delegates to fire().
+    expect(trackFile).toMatch(/trackFunnel[\s\S]{0,400}fire\(/);
   });
 
   it("server action still derives profile_id server-side and uses no service_role", () => {

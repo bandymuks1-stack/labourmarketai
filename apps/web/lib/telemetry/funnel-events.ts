@@ -83,6 +83,10 @@ export type FunnelMetadata = {
   entity_type?: string;
   /** Coarse success/failure flag for an attempted action. */
   success?: boolean;
+  /** True when the event was fired from a non-production origin (localhost /
+   *  Vercel preview). Stamped automatically by `trackFunnel` so dev/preview
+   *  traffic can be excluded from the owner's real acquisition funnel. */
+  preview_host?: boolean;
   /** Coarse audience of a public marketing surface: 'workers' | 'companies' | 'agencies' | 'home'. */
   audience?: string;
   /** Stable, non-PII identifier of a CTA button, e.g. 'hero_signup' | 'company_need'. */

@@ -50,6 +50,8 @@ export type AcquisitionFunnel = {
   /** Top first-touch utm_source values among conversion events. */
   sources: { source: string; count: number }[];
   totalEvents: number;
+  /** Count of non-production (localhost / preview) events excluded. */
+  excludedPreview: number;
 };
 
 type FunnelRow = {
@@ -95,10 +97,15 @@ export async function getAcquisitionFunnel(
       rates: [],
       sources: [],
       totalEvents: 0,
+      excludedPreview: 0,
     };
   }
 
-  const rows: FunnelRow[] = (data ?? []) as FunnelRow[];
+  const allRows: FunnelRow[] = (data ?? []) as FunnelRow[];
+  // Exclude events fired from non-production origins (localhost / Vercel
+  // preview) so dev/preview traffic never inflates the owner's real funnel.
+  const rows = allRows.filter((r) => r.metadata?.["preview_host"] !== true);
+  const excludedPreview = allRows.length - rows.length;
   const countByEvent = new Map<string, number>();
   const sourceCounts = new Map<string, number>();
   for (const r of rows) {
@@ -163,5 +170,6 @@ export async function getAcquisitionFunnel(
     rates,
     sources,
     totalEvents: rows.length,
+    excludedPreview,
   };
 }
