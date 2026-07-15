@@ -87,9 +87,9 @@ describe("deriveSourceHealth — deterministic precedence", () => {
         lastSessionOutcome: null,
         consecutiveFailures: null,
       });
-      if (profile.sourceKind === "internal_aggregated") {
-        // Active lifecycle but no import sessions exist (computed reads) —
-        // "unknown" is the honest recorded-signal answer.
+      if (profile.sourceKind === "internal_aggregated" || profile.key === "eurostat") {
+        // Active lifecycle (internal, or the activated eurostat) but no
+        // recorded import session yet → "unknown" is the honest answer.
         expect(health, profile.key).toBe("unknown");
       } else {
         expect(health, profile.key).toBe("waiting_approval");

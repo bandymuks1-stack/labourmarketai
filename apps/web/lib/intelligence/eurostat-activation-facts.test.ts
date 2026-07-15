@@ -41,20 +41,22 @@ describe("Eurostat activation facts", () => {
     }
   });
 
-  it("the shipped eurostat profile is still OFF (facts do not activate it)", () => {
-    expect(EUROSTAT.activation).toBe("off");
-    expect(EUROSTAT.legalStatus).toBe("unconfirmed");
-    expect(EUROSTAT.importPolicy).toBeNull();
+  it("the shipped eurostat profile is now ACTIVATED (confirmed, on, policy recorded)", () => {
+    expect(EUROSTAT.activation).toBe("on");
+    expect(EUROSTAT.legalStatus).toBe("confirmed");
+    expect(EUROSTAT.importPolicy).not.toBeNull();
   });
 
-  it("with the OFF profile, legal_approval is NOT satisfied (honest red gate)", () => {
+  it("the shipped eurostat profile greens all TEN activation gates with the recorded facts", () => {
     const readiness = evaluateActivationReadiness(EUROSTAT, EUROSTAT_ACTIVATION_FACTS);
-    expect(readiness.ready).toBe(false);
-    const legal = readiness.requirements.find((r) => r.id === "legal_approval");
-    expect(legal?.satisfied).toBe(false);
+    expect(readiness.vetoCodes).toEqual([]);
+    for (const r of readiness.requirements) {
+      expect(r.satisfied, r.id).toBe(true);
+    }
+    expect(readiness.ready).toBe(true);
   });
 
-  it("all TEN gates green once the owner confirms legal status (post-activation profile)", () => {
+  it("all TEN gates green (explicit post-activation profile)", () => {
     const readiness = evaluateActivationReadiness(ACTIVATED_PROFILE, EUROSTAT_ACTIVATION_FACTS);
     expect(readiness.vetoCodes).toEqual([]);
     for (const r of readiness.requirements) {
@@ -69,21 +71,52 @@ describe("Eurostat activation facts", () => {
     }
   });
 
-  it("Eurostat context cards are honest unavailable cards while the source is off", () => {
-    const cards = buildEurostatContextCards();
+  it("Eurostat context cards are honest unavailable cards when NO observations exist yet", () => {
+    const cards = buildEurostatContextCards(); // no rows
     expect(cards.length).toBe(4);
     for (const card of cards) {
       expect(card.status).toBe("unavailable");
       expect(card.report).toBeNull();
       expect(card.unavailable).not.toBeNull();
-      // names eurostat as the disabled source, never a placeholder number
-      expect(card.unavailable!.disabledSourceKeys).toContain("eurostat");
       expect(card.headlineCode).toBeNull();
-      // every context kind maps to a real Eurostat dataset code
+      // honest four-answer state, never a placeholder number
+      expect(card.unavailable!.reasonCode).toMatch(/^intelligence\.trustCard\.reason\./);
+      expect(card.unavailable!.requirementCode).toMatch(
+        /^intelligence\.trustCard\.requirement\./,
+      );
       expect(
         EUROSTAT_KIND_DATASET[card.kind as keyof typeof EUROSTAT_KIND_DATASET],
       ).toBeTruthy();
     }
+  });
+
+  it("Eurostat context cards become READY with a real observation (attributed, traceable)", () => {
+    const rows = [
+      {
+        metricKey: "labour.unemployment_rate",
+        subjectId: "EU27_2020",
+        valueNumeric: 5.9,
+        unit: "pc_act",
+        windowStart: "2026-05-01",
+        windowEnd: "2026-05-31",
+        capturedAt: "2026-07-02T21:00:00.000Z",
+        contentHash: "hash_une_eu",
+      },
+    ];
+    const cards = buildEurostatContextCards(rows, Date.parse("2026-07-10T00:00:00Z"));
+    const une = cards.find((c) => c.kind === "eurostat_unemployment")!;
+    expect(une.status).toBe("ready");
+    expect(une.report).not.toBeNull();
+    // the number is traceable to its real observation, sourced to eurostat
+    expect(une.report!.observationRefs).toEqual(["hash_une_eu"]);
+    expect(une.report!.sourceKeys).toEqual(["eurostat"]);
+    expect(une.headlineCode).toBe(
+      "intelligence.eurostat.headline.unemploymentRate",
+    );
+    expect(une.headlineParams.value).toBe(5.9);
+    // the other three metrics have no row → still honest unavailable
+    const emp = cards.find((c) => c.kind === "eurostat_employment")!;
+    expect(emp.status).toBe("unavailable");
   });
 
   it("an engaged kill switch vetoes readiness even with every gate green", () => {

@@ -9550,7 +9550,7 @@
         "trendNeedsHistory": "Tendencijos čia nėra, nes tendencijai reikia datuotų stebėjimų istorijos, o stebėjimų duomenų saugykla parengta, bet neįjungta. Tendencija niekada nebraižoma iš vieno taško.",
         "salaryBasisNotComparable": "Atlygio skaičiaus čia nėra, nes jūsų profesijai ir šaliai kuruojama rinkos gairė jau įvesta, tačiau jos negalima sąžiningai palyginti: neužfiksuota, ar sumos yra bruto, ar neto. Neaiškus palyginimas niekada nerodomas.",
         "salaryInputsMissing": "Atlygio skaičiaus čia nėra, nes kuruojama rinkos gairė jau įvesta, tačiau trūksta jūsų nurodyto pageidaujamo atlygio, todėl nėra ko palyginti.",
-        "eurostatNeedsActivation": "Oficialus Eurostato kontekstas paruoštas, bet eurostat šaltinis dar neaktyvuotas, todėl jokia reikšmė neimportuota."
+        "eurostatNeedsActivation": "Oficialus Eurostato kontekstas paruoštas; pirmasis oficialus importas dar nevykdytas, todėl reikšmės nėra."
       },
       "requirement": {
         "ownerEnableStore": "Platformos savininkas turi įjungti stebėjimų duomenų saugyklą ir patvirtinti bent vieną duomenų šaltinį.",
@@ -9558,7 +9558,7 @@
         "demandOwnRows": "Pridėkite darbo užklausų — ši kortelė užsipildo iš jūsų organizacijos duomenų, vos tik atsiranda įrašų.",
         "salaryBasis": "Prieš rodant sąžiningą palyginimą turi būti užfiksuota, ar jūsų pageidaujamas atlygis ir kuruojama rinkos gairė nurodyti bruto, ar neto.",
         "salaryInputs": "Įveskite pageidaujamą atlygį savo darbuotojo profilyje — palyginimas atsiras vos tik jis bus įvestas.",
-        "eurostatActivation": "Savininkas aktyvuoja eurostat šaltinį ir atlieka vieną apribotą oficialų importą."
+        "eurostatActivation": "Įvykdomas apribotas oficialus Eurostato importas."
       },
       "after": {
         "activation": "Savininkui patvirtinus ir įjungus duomenų įvestį, ši kortelė užsipildo šaltiniais pagrįstais, datuotais skaičiais — kiekvienas turės patikimumą, šviežumą, šaltinį ir žingsnis po žingsnio kilmę."
@@ -9709,7 +9709,15 @@
         "labourCostIndex": "Tai nėra atlyginimo pasiūlymas ir niekada nėra pagrindas nustatyti asmens atlygį."
       },
       "sectionTitle": "Europos darbo rinkos kontekstas",
-      "sectionIntro": "Oficialūs Eurostato agregatai ES ir pasirinktoms Europos rinkoms. Paruošta, laukiama savininko aktyvavimo."
+      "sectionIntro": "Oficialūs Eurostato agregatai ES ir pasirinktoms Europos rinkoms. Paruošta, laukiama savininko aktyvavimo.",
+      "dataBasis": "Oficialus Eurostato agregatas (šaltinis: Eurostatas)",
+      "whyVisible": "Rodoma kaip oficialus Europos darbo rinkos kontekstas.",
+      "headline": {
+        "employmentRate": "{value}% užimtumas · {geo} · {period}",
+        "unemploymentRate": "{value}% nedarbas · {geo} · {period}",
+        "jobVacancyRate": "{value}% laisvų darbo vietų lygis · {geo} · {period}",
+        "labourCostIndex": "{value}% darbo sąnaudos (metinis) · {geo} · {period}"
+      }
     }
   }
 }

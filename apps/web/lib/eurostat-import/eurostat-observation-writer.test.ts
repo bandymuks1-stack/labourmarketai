@@ -60,19 +60,32 @@ describe("observationToDbRow", () => {
 });
 
 describe("writeEurostatObservations — last-gate refusals", () => {
-  it("REFUSES when eurostat is OFF in the code registry (import boundary)", async () => {
-    // eurostat ships activation=off/unconfirmed → boundary refuses.
+  it("WRITES when eurostat is activated (boundary passes) — idempotent insert", async () => {
+    // eurostat is now confirmed+on → the import boundary allows the write.
     enable();
-    const client: ObservationInsertClient = {
-      from: () => ({ insert: vi.fn().mockResolvedValue({ error: null }) }),
-    };
+    const insert = vi.fn().mockResolvedValue({ error: null });
+    const client: ObservationInsertClient = { from: () => ({ insert }) };
     const res = await writeEurostatObservations(client, [eurostatObs()], "snap-1");
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.reasonCode).toBe("import_boundary_refused");
-      // Refusal order checks legal status before activation — eurostat is
-      // unconfirmed, so this is the first gate that fails.
-      expect(res.detail).toBe("legal_status_unconfirmed");
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.attempted).toBe(1);
+      expect(res.inserted).toBe(1);
+      expect(res.duplicates).toBe(0);
+    }
+    expect(insert).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats a unique-violation on content_hash as an idempotent duplicate, not an error", async () => {
+    enable();
+    const insert = vi
+      .fn()
+      .mockResolvedValue({ error: { code: "23505", message: "duplicate key" } });
+    const client: ObservationInsertClient = { from: () => ({ insert }) };
+    const res = await writeEurostatObservations(client, [eurostatObs()], "snap-1");
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.inserted).toBe(0);
+      expect(res.duplicates).toBe(1);
     }
   });
 

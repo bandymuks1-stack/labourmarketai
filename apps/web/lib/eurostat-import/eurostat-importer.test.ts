@@ -35,8 +35,8 @@ function enable() {
   vi.stubEnv("EUROSTAT_KILL_SWITCH", "");
 }
 
-describe("runEurostatImport — dry-run is fail-closed while eurostat is OFF", () => {
-  it("fetches, parses, validates and classifies every candidate as valid-after-activation", async () => {
+describe("runEurostatImport — eurostat is activated; dry-run accepts but never persists", () => {
+  it("fetches, parses and validates candidates as ACCEPTED (source active), persisting nothing in dry-run", async () => {
     enable();
     // Fresh Response per call, filtered to the requested geo (as the real
     // API does). A Response body can only be read once.
@@ -64,25 +64,23 @@ describe("runEurostatImport — dry-run is fail-closed while eurostat is OFF", (
     });
 
     expect(res.operational).toBe(true);
-    // 2 geos × 2 months = 4 candidate cells; none accepted (source OFF)
-    expect(res.acceptedObservations.length).toBe(0);
-    expect(res.validAfterActivation).toBe(4);
+    // 2 geos × 2 months = 4 candidate cells; eurostat is active → all accepted
+    expect(res.acceptedObservations.length).toBe(4);
+    expect(res.validAfterActivation).toBe(0);
     // session accounting balances exactly
     expect(res.session).not.toBeNull();
     if (res.session) {
       expect(
         res.session.itemsAccepted + res.session.itemsRejected + res.session.itemsDuplicated,
       ).toBe(res.session.itemsScanned);
-      expect(res.session.itemsAccepted).toBe(0);
+      expect(res.session.itemsAccepted).toBe(4);
     }
-    // the ONLY reasons are the two owner-activation gates
-    const reasons = new Set(res.session?.reasonCounts.map((r) => r.code));
-    expect(reasons.has("gated_source_not_active")).toBe(true);
-    expect(reasons.has("gated_import_policy_missing")).toBe(true);
     // no genuine data-defect reason
+    const reasons = new Set(res.session?.reasonCounts.map((r) => r.code));
     for (const code of reasons) {
       expect(code.startsWith("data_"), code).toBe(false);
     }
+    // dry-run NEVER persists, even with the source active
     expect(res.persistedInserted).toBe(0);
   });
 

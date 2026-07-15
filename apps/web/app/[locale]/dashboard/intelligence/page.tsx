@@ -6,6 +6,7 @@ import type { Role } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 import {
   getCompanyDemandIntelligence,
+  getEurostatContextObservations,
   getWorkerSalaryIntelligence,
 } from "@/lib/intelligence/intelligence-read";
 import {
@@ -137,6 +138,16 @@ export default async function IntelligencePage({
     });
   }
 
+  // Eurostat context — real public-aggregate observations once the source is
+  // activated and the first import has run; otherwise no rows → honest
+  // unavailable cards. Non-customer roles only (macro context is shared).
+  const eurostatContext =
+    role === "customer" ? null : await getEurostatContextObservations();
+  const eurostatRows =
+    eurostatContext && eurostatContext.kind === "ok"
+      ? eurostatContext.rows
+      : null;
+
   return (
     <div className="flex flex-col gap-6" data-testid="intelligence-page">
       {header}
@@ -201,7 +212,7 @@ export default async function IntelligencePage({
           <p className="text-xs leading-relaxed text-text-secondary">
             {t("eurostat.sectionIntro")}
           </p>
-          {buildEurostatContextCards().map((card) => (
+          {buildEurostatContextCards(eurostatRows, Date.now()).map((card) => (
             <div key={card.id} className="flex flex-col gap-1">
               <TrustInsightCard card={card} locale={locale} />
               <span className="pl-1 font-mono text-[10px] text-text-muted">

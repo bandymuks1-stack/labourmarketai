@@ -73,17 +73,23 @@ describe("registry names every roadmap provider — all external ones OFF", () =
     }
   });
 
-  it("≥4 distinct external providers coexist, every one inactive", () => {
+  it("≥4 distinct external providers coexist; only eurostat is active, the rest proposed", () => {
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated",
     );
     expect(external.length).toBeGreaterThanOrEqual(4);
     expect(new Set(external.map((p) => p.key)).size).toBe(external.length);
     for (const p of external) {
-      expect(isExternalSourceActive(p.key), p.key).toBe(false);
-      expect(deriveSourceLifecycleState(p), p.key).toBe("proposed");
+      if (p.key === "eurostat") {
+        expect(isExternalSourceActive(p.key), p.key).toBe(true);
+        expect(deriveSourceLifecycleState(p), p.key).toBe("active");
+      } else {
+        expect(isExternalSourceActive(p.key), p.key).toBe(false);
+        expect(deriveSourceLifecycleState(p), p.key).toBe("proposed");
+      }
     }
-    expect(allExternalSourcesOff()).toBe(true);
+    // eurostat is active → not all off
+    expect(allExternalSourcesOff()).toBe(false);
   });
 });
 

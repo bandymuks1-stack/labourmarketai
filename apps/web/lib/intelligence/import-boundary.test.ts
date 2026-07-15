@@ -17,16 +17,20 @@ function importFor(sourceKey: string): ExternalObservationImportV1 {
 }
 
 describe("external observation import boundary", () => {
-  it("refuses EVERY registered source today (no external source is active)", () => {
+  it("allows ONLY eurostat today; refuses every other registered source", () => {
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
       const result = validateExternalImport(importFor(p.key));
-      expect(result.ok, p.key).toBe(false);
+      if (p.key === "eurostat") {
+        expect(result.ok, p.key).toBe(true);
+      } else {
+        expect(result.ok, p.key).toBe(false);
+      }
     }
   });
 
-  it("refuses every non-internal source with an honest governance reason", () => {
+  it("refuses every non-internal source EXCEPT eurostat with an honest governance reason", () => {
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated",
+      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -39,6 +43,11 @@ describe("external observation import boundary", () => {
         ).toContain(result.reasonCode);
       }
     }
+  });
+
+  it("allows eurostat — the one activated external source", () => {
+    const result = validateExternalImport(importFor("eurostat"));
+    expect(result.ok).toBe(true);
   });
 
   it("refuses an unknown source", () => {

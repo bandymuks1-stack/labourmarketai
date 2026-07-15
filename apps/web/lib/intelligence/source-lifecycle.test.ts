@@ -14,10 +14,10 @@ const EXTERNAL_UNCONFIRMED = {
 };
 
 describe("deriveSourceLifecycleState — deterministic precedence", () => {
-  it("today's registry: internal sources are active, every external is proposed", () => {
+  it("today's registry: internal + eurostat are active, every other external is proposed", () => {
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
       const state = deriveSourceLifecycleState(p);
-      if (p.sourceKind === "internal_aggregated") {
+      if (p.sourceKind === "internal_aggregated" || p.key === "eurostat") {
         expect(state, p.key).toBe("active");
       } else {
         expect(state, p.key).toBe("proposed");
