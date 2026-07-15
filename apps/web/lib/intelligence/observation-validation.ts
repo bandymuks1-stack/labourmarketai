@@ -28,6 +28,7 @@ import {
 import { computeObservationContentHash } from "./observation-hash";
 import {
   evaluateMetricPermission,
+  expectedUnitFor,
   isKnownMetricKey,
   SALARY_METRIC_EXPECTED_UNIT,
 } from "./metric-keys";
@@ -43,6 +44,7 @@ export const OBSERVATION_VALIDATION_CHECKS = [
   "country",
   "language",
   "salary_structure",
+  "metric_unit",
   "hash_integrity",
   "duplicate",
 ] as const;
@@ -249,6 +251,21 @@ export function validateObservationCandidate(
       failures.push({
         checkId: "salary_structure",
         reasonCode: "salary_value_not_positive",
+      });
+    }
+  }
+
+  // ── metric unit binding (non-salary metrics with a fixed unit) ────────
+  // Salary keys are already unit-checked above. For every OTHER known
+  // metric that carries a 1:1 unit binding (the Eurostat labour metrics),
+  // a contradictory unit is a fail-closed rejection — the value would not
+  // mean what the metric key claims. Unknown units never pass silently.
+  if (!observation.metricKey.startsWith(SALARY_METRIC_PREFIX)) {
+    const expectedUnit = expectedUnitFor(observation.metricKey);
+    if (expectedUnit !== undefined && observation.unit !== expectedUnit) {
+      failures.push({
+        checkId: "metric_unit",
+        reasonCode: "metric_unit_mismatch",
       });
     }
   }

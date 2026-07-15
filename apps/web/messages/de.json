@@ -9522,7 +9522,11 @@
         "demand": "Nachfrage",
         "supply": "Angebot",
         "skillGap": "Kompetenzlücke",
-        "marketTrend": "Markttrend"
+        "marketTrend": "Markttrend",
+        "eurostatEmployment": "Europäische Beschäftigungsquote (Eurostat)",
+        "eurostatUnemployment": "Europäische Arbeitslosenquote (Eurostat)",
+        "eurostatVacancy": "Europäische Quote offener Stellen (Eurostat)",
+        "eurostatLabourCost": "Europäischer Arbeitskostentrend (Eurostat)"
       },
       "status": {
         "ready": "Bereit",
@@ -9545,14 +9549,16 @@
         "skillGapNeedsBoth": "Hier steht keine Kompetenzlücken-Zahl, weil dafür sowohl ein Nachfrage- als auch ein Angebotsaggregat nötig ist — keines wird veröffentlicht, solange der Beobachtungsspeicher ausgeschaltet ist.",
         "trendNeedsHistory": "Hier steht kein Trend, weil ein Trend eine Historie datierter Beobachtungen braucht und der Beobachtungsspeicher vorbereitet, aber ausgeschaltet ist. Ein Trend wird nie aus einem einzigen Punkt gezeichnet.",
         "salaryBasisNotComparable": "Hier steht keine Gehaltszahl, weil für Ihren Beruf und Ihr Land zwar ein kuratierter Marktrichtwert erfasst ist, er aber nicht ehrlich verglichen werden kann: Es ist nicht erfasst, ob die Beträge brutto oder netto sind. Ein unklarer Vergleich wird nie angezeigt.",
-        "salaryInputsMissing": "Hier steht keine Gehaltszahl, weil ein kuratierter Marktrichtwert erfasst ist, aber Ihr eigenes Wunschgehalt fehlt, sodass es nichts zu vergleichen gibt."
+        "salaryInputsMissing": "Hier steht keine Gehaltszahl, weil ein kuratierter Marktrichtwert erfasst ist, aber Ihr eigenes Wunschgehalt fehlt, sodass es nichts zu vergleichen gibt.",
+        "eurostatNeedsActivation": "Der offizielle Eurostat-Kontext ist vorbereitet, aber die Quelle eurostat ist noch nicht aktiviert, daher wurde kein Wert importiert."
       },
       "requirement": {
         "ownerEnableStore": "Der Plattforminhaber muss den Beobachtungsspeicher einschalten und mindestens eine Datenquelle freigeben.",
         "salaryBenchmark": "Ein Administrator muss einen kuratierten Marktrichtwert für Ihren Beruf und Ihr Land erfassen, oder der Plattforminhaber muss eine externe Gehaltsquelle freigeben.",
         "demandOwnRows": "Erfassen Sie Arbeitsanfragen — diese Karte füllt sich aus den Daten Ihrer eigenen Organisation, sobald Einträge existieren.",
         "salaryBasis": "Die Gehaltsbasis (brutto oder netto) muss sowohl für Ihr Wunschgehalt als auch für den kuratierten Marktrichtwert erfasst sein, bevor ein ehrlicher Vergleich angezeigt werden kann.",
-        "salaryInputs": "Tragen Sie Ihr Wunschgehalt in Ihrem Arbeitnehmerprofil ein — der Vergleich erscheint, sobald es vorliegt."
+        "salaryInputs": "Tragen Sie Ihr Wunschgehalt in Ihrem Arbeitnehmerprofil ein — der Vergleich erscheint, sobald es vorliegt.",
+        "eurostatActivation": "Der Eigentümer aktiviert die Quelle eurostat und führt einen begrenzten offiziellen Import durch."
       },
       "after": {
         "activation": "Nachdem der Inhaber eine Datenquelle freigegeben und aktiviert hat, füllt sich diese Karte mit belegten, datierten Zahlen — jede mit Verlässlichkeit, Aktualität, Quelle und Schritt-für-Schritt-Herkunft."
@@ -9687,6 +9693,23 @@
         "unknown": "unbekannt",
         "none": "keine"
       }
+    },
+    "eurostat": {
+      "attribution": "Quelle: Eurostat. Amtliche EU-Statistik, mit Quellenangabe weiterverwendet; keine Billigung durch Eurostat oder die Europäische Kommission.",
+      "meaning": {
+        "employmentRate": "Anteil der 20- bis 64-Jährigen in Beschäftigung (EU-Konzept, saisonbereinigt).",
+        "unemploymentRate": "Anteil der Arbeitslosen an den Erwerbspersonen (saisonbereinigt, monatlich).",
+        "jobVacancyRate": "Offene Stellen als Anteil aller Stellen (besetzt plus offen), gewerbliche Wirtschaft.",
+        "labourCostIndex": "Jährliche Veränderung der Arbeitskosten je Stunde (Industrie, Bau und Dienstleistungen)."
+      },
+      "prohibited": {
+        "employmentRate": "Keine persönliche Jobaussicht, keine arbeitgeberspezifische Zahl, keine Echtzeit-Stelle.",
+        "unemploymentRate": "Keine individuelle Prognose, kein LabourMarket.ai-Durchschnitt, keine Echtzeit-Zählung.",
+        "jobVacancyRate": "Keine aktuelle Liste offener Stellen und keine arbeitgeberspezifische Nachfrage.",
+        "labourCostIndex": "Kein Gehaltsangebot und niemals Grundlage, das Gehalt einer Person abzuleiten."
+      },
+      "sectionTitle": "Europäischer Arbeitsmarktkontext",
+      "sectionIntro": "Offizielle Eurostat-Aggregate für die EU und ausgewählte europäische Märkte. Vorbereitet, wartet auf Aktivierung durch den Eigentümer."
     }
   }
 }

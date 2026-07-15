@@ -65,3 +65,14 @@ Runbook: `docs/intelligence/activation-runbook-v1.md`
 - Licensed-partner sources (`source_kind='licensed_partner'` exists in the
   contract; no partner is registered).
 - Export endpoint for `public_aggregate` observations.
+
+## Eurostat source (v1) — honest status
+
+- Implemented: official JSON-stat adapter, pure parser, 4 canonical metric
+  keys, import policy, ten-gate activation-facts record, kill switch, live
+  dry-run (persists nothing), 4 unavailable context cards with attribution.
+- NOT done in code (owner runtime action): eurostat stays `off`/`unconfirmed`
+  with `importPolicy: null`; NO observations exist; NO source is active; NO
+  scheduler; NO scraper. The dry-run against the live API returned 0 accepted
+  / all valid-after-activation — the pipeline is fail-closed until the owner
+  activates. See [`eurostat-source-v1.md`](./eurostat-source-v1.md) §10-§12.

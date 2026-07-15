@@ -20,6 +20,12 @@ import {
 } from "@/lib/intelligence/source-governance";
 import { deriveSourceLifecycleState } from "@/lib/intelligence/source-lifecycle";
 import { SourceStatusBadge } from "@/components/intelligence/source-status-badge";
+import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
+import {
+  buildEurostatContextCards,
+  EUROSTAT_ATTRIBUTION_CODE,
+  EUROSTAT_KIND_DATASET,
+} from "@/lib/intelligence/trust-card-model";
 
 /**
  * Market intelligence workspace (Labour Market Intelligence v1) — the ONE
@@ -178,6 +184,45 @@ export default async function IntelligencePage({
           </section>
         </>
       )}
+
+      {/* European labour-market context (Eurostat) — official aggregates,
+          rendered as honest unavailable cards until the owner activates the
+          eurostat source. Shown to every non-customer role (macro context is
+          not tenant-specific). Each card names its exact Eurostat dataset. */}
+      {role !== "customer" ? (
+        <section
+          className={SECTION_CLASS}
+          data-testid="intelligence-eurostat-context"
+          aria-label={t("eurostat.sectionTitle")}
+        >
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+            {t("eurostat.sectionTitle")}
+          </h2>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {t("eurostat.sectionIntro")}
+          </p>
+          {buildEurostatContextCards().map((card) => (
+            <div key={card.id} className="flex flex-col gap-1">
+              <TrustInsightCard card={card} locale={locale} />
+              <span className="pl-1 font-mono text-[10px] text-text-muted">
+                {
+                  EUROSTAT_KIND_DATASET[
+                    card.kind as keyof typeof EUROSTAT_KIND_DATASET
+                  ]
+                }
+              </span>
+            </div>
+          ))}
+          <p
+            className="pt-1 text-[11px] leading-relaxed text-text-muted"
+            data-testid="intelligence-eurostat-attribution"
+          >
+            {t(
+              EUROSTAT_ATTRIBUTION_CODE.replace(/^intelligence\./, "") as never,
+            ) as string}
+          </p>
+        </section>
+      ) : null}
 
       {/* (c) Methodology footer — static honest note + the source registry.
           No external link, no claim beyond what the governance module pins. */}

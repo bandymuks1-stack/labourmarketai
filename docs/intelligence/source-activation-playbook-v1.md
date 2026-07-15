@@ -181,3 +181,13 @@ is re-evaluated from scratch; nothing remembers a previous "ready".
   implement (and will be guard-pinned when an importer lands).
 - Health states other than `waiting_approval`/`unknown` are reachable
   only in tests today — no sessions exist to produce them.
+
+## Eurostat (first external source) — v1
+
+The first external source to reach implementation is **Eurostat** (official EU
+labour statistics). Its full activation contract, dataset table, legal basis,
+ten-gate evidence, kill switch and rollback live in
+[`eurostat-source-v1.md`](./eurostat-source-v1.md). Activation stays an owner
+runtime action (DB governance row + code registry flip + `EUROSTAT_SOURCE_ENABLED`
+env) exactly as §3/§5 of this playbook require; the shipped code keeps eurostat
+`off`/`unconfirmed` so no external source is active by default.
