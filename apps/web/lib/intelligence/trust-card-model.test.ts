@@ -164,16 +164,25 @@ describe("unavailable defaults — the four honest answers, never 'coming soon'"
         "intelligence.trustCard.after.activation",
       );
       // Sources named as disabled must be REAL registry keys, all inactive.
-      expect(u.disabledSourceKeys.length).toBeGreaterThan(0);
+      // The eurostat_* kinds map only to the now-ACTIVE eurostat source, so
+      // their disabled-source list is legitimately empty (the gap is
+      // no-data-yet, not a disabled source).
+      if (!kind.startsWith("eurostat_")) {
+        expect(u.disabledSourceKeys.length).toBeGreaterThan(0);
+      }
     }
   });
 
   it("disabledSourceKeysFor names only registry sources that are not active", () => {
     for (const kind of TRUST_INSIGHT_KINDS) {
       const keys = disabledSourceKeysFor(kind);
-      // Today every mapped external source is proposed-only → all listed.
-      expect(keys.length).toBeGreaterThan(0);
+      // eurostat is active → its kinds list no disabled sources; every other
+      // kind still maps to proposed-only externals.
+      if (!kind.startsWith("eurostat_")) {
+        expect(keys.length).toBeGreaterThan(0);
+      }
       expect(keys).not.toContain("internal_platform_aggregates");
+      expect(keys).not.toContain("eurostat"); // active → never "disabled"
     }
   });
 });

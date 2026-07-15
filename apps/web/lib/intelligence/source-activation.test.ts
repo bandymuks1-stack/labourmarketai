@@ -46,14 +46,22 @@ describe("evaluateActivationReadiness — ten requirements, all mandatory", () =
         profile,
         EMPTY_ACTIVATION_FACTS,
       );
+      // With NO recorded facts nothing is ready (even eurostat, whose
+      // legal_approval is met by its confirmed profile, still lacks
+      // owner/technical/rate/policy/… facts).
       expect(readiness.ready, profile.key).toBe(false);
       expect(readiness.requirements.map((r) => r.id)).toEqual([
         ...ACTIVATION_REQUIREMENT_IDS,
       ]);
-      // Every fact-based requirement is honestly unsatisfied today.
-      expect(
-        readiness.requirements.filter((r) => r.satisfied).length,
-      ).toBe(0);
+      // Every FACT-based requirement is unsatisfied under empty facts. The
+      // activated eurostat profile additionally greens legal_approval (a
+      // profile fact, not an activation fact), so it alone has one satisfied.
+      const satisfied = readiness.requirements.filter((r) => r.satisfied);
+      if (profile.key === "eurostat") {
+        expect(satisfied.map((r) => r.id)).toEqual(["legal_approval"]);
+      } else {
+        expect(satisfied.length, profile.key).toBe(0);
+      }
     }
   });
 

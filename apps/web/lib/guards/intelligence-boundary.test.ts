@@ -108,10 +108,12 @@ describe("(b) lib/intelligence never imports an LLM SDK", () => {
 
 // ── (c) every external source stays OFF ─────────────────────────────────────
 
-describe("(c) source governance keeps every external source inactive", () => {
-  it("all external profiles: activation off, unconfirmed, proposedOnly, inactive", () => {
+describe("(c) source governance keeps every external source EXCEPT eurostat inactive", () => {
+  // eurostat is the ONE owner-activated external source (2026-07-15). Every
+  // OTHER external source stays off/unconfirmed/proposed-only/inactive.
+  it("all external profiles except eurostat: activation off, unconfirmed, proposedOnly, inactive", () => {
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated",
+      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -120,15 +122,37 @@ describe("(c) source governance keeps every external source inactive", () => {
       expect(p.proposedOnly, `${p.key} proposedOnly`).toBe(true);
       expect(isExternalSourceActive(p.key), `${p.key} active`).toBe(false);
     }
-    expect(allExternalSourcesOff()).toBe(true);
   });
 
-  it("metric import policy stays fail-closed: externals unrecorded, no wildcard anywhere, no allow-all escape", () => {
+  it("eurostat is the only active external source (confirmed, on, policy recorded)", () => {
+    const p = INTELLIGENCE_SOURCE_PROFILES.find((x) => x.key === "eurostat")!;
+    expect(p.activation).toBe("on");
+    expect(p.legalStatus).toBe("confirmed");
+    expect(p.proposedOnly).toBe(false);
+    expect(isExternalSourceActive("eurostat")).toBe(true);
+    // exactly one external source is active
+    const activeExternals = INTELLIGENCE_SOURCE_PROFILES.filter(
+      (x) => x.sourceKind !== "internal_aggregated" && isExternalSourceActive(x.key),
+    );
+    expect(activeExternals.map((x) => x.key)).toEqual(["eurostat"]);
+    // allExternalSourcesOff reflects the activation
+    expect(allExternalSourcesOff()).toBe(false);
+  });
+
+  it("metric import policy stays fail-closed: non-eurostat externals unrecorded, no wildcard anywhere, no allow-all escape", () => {
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
-      if (p.sourceKind !== "internal_aggregated") {
-        // The owner has recorded NO metric policy for any external source —
-        // even activation would import nothing. Recording one is an owner
-        // action; this pin fails if code ever pre-fills it.
+      if (p.key === "eurostat") {
+        // The owner recorded eurostat's policy at activation — the four
+        // Eurostat labour metrics, all canonical, no wildcard.
+        expect(p.importPolicy, "eurostat importPolicy").not.toBeNull();
+        expect(p.importPolicy!.metricKeys.length).toBeGreaterThan(0);
+        for (const key of p.importPolicy!.metricKeys) {
+          expect(isKnownMetricKey(key), `eurostat:${key}`).toBe(true);
+          expect(key).not.toContain("*");
+        }
+      } else if (p.sourceKind !== "internal_aggregated") {
+        // Every OTHER external source has NO recorded policy — even
+        // activation would import nothing. This pin fails if code pre-fills it.
         expect(p.importPolicy, `${p.key} importPolicy`).toBeNull();
       } else {
         // Internal policies are explicit, non-empty canonical subsets —

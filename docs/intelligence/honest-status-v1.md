@@ -76,3 +76,15 @@ Runbook: `docs/intelligence/activation-runbook-v1.md`
   scheduler; NO scraper. The dry-run against the live API returned 0 accepted
   / all valid-after-activation — the pipeline is fail-closed until the owner
   activates. See [`eurostat-source-v1.md`](./eurostat-source-v1.md) §10-§12.
+
+## Eurostat ACTIVATED (v1 activation increment)
+
+2026-07-15 (owner authorization): eurostat is now the first and ONLY activated
+external intelligence source. Code registry flipped to confirmed/on with the
+four-metric import policy; the DB governance row carries the matching
+confirmed/on/owner_approved_at/import_policy (dual gate). Every OTHER external
+source stays off/unconfirmed. Legal basis + evidence:
+[eurostat-legal-evidence-v1.md](./eurostat-legal-evidence-v1.md). The intelligence
+hub reads real public-aggregate Eurostat observations and renders ready,
+attributed cards; before the first import runs it shows honest unavailable
+cards. Writes remain gated by EUROSTAT_SOURCE_ENABLED + the kill switch.

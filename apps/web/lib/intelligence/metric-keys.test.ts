@@ -106,9 +106,14 @@ describe("real registry policies stay inside the vocabulary (guard)", () => {
     }
   });
 
-  it("every EXTERNAL source has NO recorded policy today — owner decision pending", () => {
+  it("every EXTERNAL source except eurostat has NO recorded policy — owner decision pending", () => {
     for (const profile of INTELLIGENCE_SOURCE_PROFILES) {
       if (profile.sourceKind === "internal_aggregated") continue;
+      if (profile.key === "eurostat") {
+        // eurostat's policy was recorded at activation (four labour metrics).
+        expect(profile.importPolicy, "eurostat").not.toBeNull();
+        continue;
+      }
       expect(profile.importPolicy, profile.key).toBeNull();
     }
   });

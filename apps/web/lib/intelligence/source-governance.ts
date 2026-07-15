@@ -18,6 +18,9 @@
  */
 import type { ObservationSourceKind } from "./observation-contract";
 import type { SourceMetricImportPolicyV1 } from "./metric-keys";
+// Leaf import (eurostat-source-v1 depends only on observation-contract types —
+// no cycle back to this module). Used for the ACTIVATED eurostat policy.
+import { EUROSTAT_METRIC_KEYS } from "./eurostat-source-v1";
 
 export type SourceLegalStatus = "confirmed" | "unconfirmed" | "refused";
 export type SourceActivation = "off" | "owner_review" | "on";
@@ -110,16 +113,25 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       importPolicy: null,
     },
     {
+      // ACTIVATED 2026-07-15 (owner authorization) — the first and ONLY
+      // external source switched on. Legal basis: Commission Decision
+      // 2011/833/EU, commercial reuse with attribution "Source: Eurostat",
+      // EU/EFTA scope only (see docs/intelligence/eurostat-legal-evidence-v1.md
+      // + eurostat-activation-facts.ts). The DB governance row carries the
+      // matching confirmed/on/owner_approved_at/import_policy (dual gate);
+      // the EUROSTAT_SOURCE_ENABLED env flag gates WRITES (kill switch).
       key: "eurostat",
       displayNameCode: "intelligence.sources.eurostat",
       sourceKind: "public_official",
-      legalStatus: "unconfirmed",
-      activation: "off",
+      legalStatus: "confirmed",
+      activation: "on",
       termsNoteCode: "intelligence.sources.terms.eurostat",
       attributionRequired: true,
       homepage: "ec.europa.eu",
-      proposedOnly: true,
-      importPolicy: null,
+      proposedOnly: false,
+      // The recorded metric import policy — exactly the four Eurostat labour
+      // metrics its datasets produce (fail-closed: nothing else permitted).
+      importPolicy: { metricKeys: [...EUROSTAT_METRIC_KEYS] },
     },
     {
       // EURES — the EU job-mobility portal. PROPOSED only: multi-source

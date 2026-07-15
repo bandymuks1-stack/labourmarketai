@@ -32,6 +32,8 @@ import { getSourceProfile } from "./source-governance";
 import { deriveSourceLifecycleState } from "./source-lifecycle";
 import type { SalaryBenchmarkV1, SalaryComparisonResult } from "./salary-model";
 import type { DemandAggregateItem } from "./skills-demand-model";
+import { getEurostatDataset, EUROSTAT_SOURCE_KEY } from "./eurostat-source-v1";
+import { buildExplanation } from "./explainability";
 
 // ── Kinds and statuses ───────────────────────────────────────────────────────
 
@@ -266,25 +268,146 @@ export const EUROSTAT_KIND_DATASET: Record<
   eurostat_labour_cost: "lc_lci_r2_q",
 };
 
+/** Kind → canonical metric key (lock-step with eurostat-source-v1.ts). */
+export const EUROSTAT_KIND_METRIC: Record<
+  (typeof EUROSTAT_TRUST_KINDS)[number],
+  string
+> = {
+  eurostat_employment: "labour.employment_rate",
+  eurostat_unemployment: "labour.unemployment_rate",
+  eurostat_vacancy: "labour.job_vacancy_rate",
+  eurostat_labour_cost: "labour.cost_index_yoy",
+};
+
+/** The i18n headline leaf per kind (params: value, geo, period). */
+const EUROSTAT_KIND_HEADLINE_LEAF: Record<
+  (typeof EUROSTAT_TRUST_KINDS)[number],
+  string
+> = {
+  eurostat_employment: "employmentRate",
+  eurostat_unemployment: "unemploymentRate",
+  eurostat_vacancy: "jobVacancyRate",
+  eurostat_labour_cost: "labourCostIndex",
+};
+
+/** The minimal Eurostat observation shape a ready card needs (structural —
+ *  matches EurostatContextRow from the read layer without importing it). */
+export interface EurostatCardObservation {
+  readonly metricKey: string;
+  readonly subjectId: string;
+  readonly valueNumeric: number;
+  readonly unit: string;
+  readonly windowStart: string;
+  readonly windowEnd: string;
+  readonly capturedAt: string;
+  readonly contentHash: string;
+}
+
+/** SLA (days) per metric cadence — mirrors the dataset freshnessSlaDays. */
+function eurostatSlaDays(kind: (typeof EUROSTAT_TRUST_KINDS)[number]): number {
+  return getEurostatDataset(EUROSTAT_KIND_DATASET[kind])?.freshnessSlaDays ?? 150;
+}
+
 /**
- * The four European labour-market context cards. Until the owner activates
- * the eurostat source (and one bounded import writes public_aggregate rows)
- * there is no deterministic figure, so every card is an HONEST unavailable
- * card: WHY (source not yet activated), WHAT is required (owner activation),
- * WHICH source is off (eurostat), and WHAT changes after activation — never
- * a placeholder number, never "coming soon".
- *
- * This is the smallest useful Eurostat surface and reuses the canonical
- * Trust Card engine (buildUnavailableTrustCard) exactly.
+ * A READY Eurostat context card built from ONE real imported observation.
+ * Reuses the canonical Trust Card engine: a full trust report with a real
+ * observation ref (the content hash), the official source key, derived
+ * confidence + freshness, and the prohibited-claim admission as a
+ * not-known code — never a fabricated or blended figure.
  */
-export function buildEurostatContextCards(): readonly TrustCardV1[] {
-  return EUROSTAT_TRUST_KINDS.map((kind) =>
-    buildUnavailableTrustCard(kind, {
+export function buildEurostatReadyCard(
+  kind: (typeof EUROSTAT_TRUST_KINDS)[number],
+  obs: EurostatCardObservation,
+  nowMs: number,
+): TrustCardV1 {
+  const dataset = getEurostatDataset(EUROSTAT_KIND_DATASET[kind]);
+  const freshness = buildFreshness({ observedAtIso: obs.capturedAt }, nowMs);
+  const report = buildTrustReport({
+    explanation: buildExplanation({
+      meaningCode:
+        dataset?.meaningCode ?? "intelligence.eurostat.meaning.employmentRate",
+      dataBasisCodes: ["intelligence.eurostat.dataBasis"],
+      window: { start: obs.windowStart, end: obs.windowEnd },
+      geoLabel: obs.subjectId,
+      sampleSize: null,
+      // Eurostat is an EXTERNAL official source — never internal, never blended.
+      originKind: "external",
+      uncertaintyCodes: dataset ? [dataset.prohibitedClaimCode] : [],
+    }),
+    whyVisibleCode: "intelligence.eurostat.whyVisible",
+    // A REAL observation reference (the content hash) — the number is traceable.
+    observationRefs: [obs.contentHash],
+    freshness,
+    confidence: deriveConfidence({
+      // Official aggregates carry no per-row sample size — honest null.
+      sampleSize: null,
+      freshness: computeFreshness(obs.capturedAt, nowMs, eurostatSlaDays(kind)),
+      sourceLegalStatus: getSourceProfile(EUROSTAT_SOURCE_KEY)?.legalStatus ?? null,
+      provenanceStepCount: null,
+    }),
+    sourceKeys: [EUROSTAT_SOURCE_KEY],
+    notKnownCodes: dataset ? [dataset.prohibitedClaimCode] : [],
+    conflict: null,
+  });
+  // Real derivation timeline: official publication → rendered now.
+  const nowIso = new Date(nowMs).toISOString();
+  const timeline = buildTimeline([
+    {
+      stage: "observation",
+      timestampIso: obs.capturedAt,
+      actorCode: "intelligence.timeline.actor.system",
+      provenanceRef: obs.contentHash,
+      explanationCode: "intelligence.eurostat.dataBasis",
+    },
+    {
+      stage: "visible",
+      timestampIso: nowIso,
+      actorCode: "intelligence.timeline.actor.system",
+      provenanceRef: `trust-card/${kind}`,
+      explanationCode: "intelligence.eurostat.whyVisible",
+    },
+  ]);
+  return buildTrustCard({
+    id: `${kind}-context`,
+    kind,
+    status: "ready",
+    headlineCode: `intelligence.eurostat.headline.${EUROSTAT_KIND_HEADLINE_LEAF[kind]}`,
+    headlineParams: {
+      value: obs.valueNumeric,
+      geo: obs.subjectId,
+      period: `${obs.windowStart}…${obs.windowEnd}`,
+    },
+    report,
+    // A timeline only renders when it validated — never a broken flow.
+    timeline: timeline.ok ? timeline.timeline : null,
+  });
+}
+
+/**
+ * The four European labour-market context cards. When a real imported
+ * observation exists for a metric (EU-27 headline aggregate), the card is
+ * READY and shows the sourced, dated, attributed figure. Otherwise it is an
+ * HONEST unavailable card: WHY, WHAT is required, WHICH source, WHAT changes —
+ * never a placeholder number, never "coming soon".
+ *
+ * Reuses the canonical Trust Card engine (buildTrustCard) exactly.
+ */
+export function buildEurostatContextCards(
+  observations?: readonly EurostatCardObservation[] | null,
+  nowMs?: number,
+): readonly TrustCardV1[] {
+  return EUROSTAT_TRUST_KINDS.map((kind) => {
+    const metricKey = EUROSTAT_KIND_METRIC[kind];
+    const obs = observations?.find((o) => o.metricKey === metricKey) ?? null;
+    if (obs && typeof nowMs === "number") {
+      return buildEurostatReadyCard(kind, obs, nowMs);
+    }
+    return buildUnavailableTrustCard(kind, {
       id: `${kind}-context`,
       requirementCode:
         "intelligence.trustCard.requirement.eurostatActivation",
-    }),
-  );
+    });
+  });
 }
 
 // ── Worker salary benchmark card ─────────────────────────────────────────────

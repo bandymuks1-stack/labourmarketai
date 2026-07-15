@@ -9,14 +9,16 @@ import {
 } from "./source-governance";
 
 describe("intelligence source governance", () => {
-  it("allExternalSourcesOff() is true today", () => {
-    expect(allExternalSourcesOff()).toBe(true);
-    expect(EXTERNAL_ACTIVATION_ALL_OFF).toBe(true);
+  it("eurostat is the only activated external source; the aggregate flags reflect it", () => {
+    // eurostat activated 2026-07-15 (owner) → not all-off anymore.
+    expect(allExternalSourcesOff()).toBe(false);
+    expect(EXTERNAL_ACTIVATION_ALL_OFF).toBe(false);
+    expect(isExternalSourceActive("eurostat")).toBe(true);
   });
 
-  it("every external profile is inactive, proposed-only and off", () => {
+  it("every external profile EXCEPT eurostat is inactive, proposed-only and off", () => {
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated",
+      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -25,6 +27,15 @@ describe("intelligence source governance", () => {
       expect(p.legalStatus, p.key).toBe("unconfirmed");
       expect(p.proposedOnly, p.key).toBe(true);
     }
+  });
+
+  it("eurostat profile is confirmed, on, not proposed-only, with a recorded policy", () => {
+    const p = getSourceProfile("eurostat");
+    expect(p).not.toBeNull();
+    expect(p!.activation).toBe("on");
+    expect(p!.legalStatus).toBe("confirmed");
+    expect(p!.proposedOnly).toBe(false);
+    expect(p!.importPolicy).not.toBeNull();
   });
 
   it("cvbankas is proposedOnly, off, and never confirmable from code", () => {

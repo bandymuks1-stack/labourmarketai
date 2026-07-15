@@ -113,9 +113,12 @@ describe("validateObservationCandidate — deterministic gate", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("FAIL-CLOSED: every external source is rejected today (none active)", () => {
+  it("FAIL-CLOSED: every external source EXCEPT eurostat is rejected as not-active", () => {
     for (const profile of INTELLIGENCE_SOURCE_PROFILES) {
       if (profile.sourceKind === "internal_aggregated") continue;
+      // eurostat is the one activated external source — its source_approved
+      // check passes (it is covered by the eurostat importer/validation tests).
+      if (profile.key === "eurostat") continue;
       const obs = validObservation({
         sourceKind: profile.sourceKind,
         sourceKey: profile.key,

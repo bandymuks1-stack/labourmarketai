@@ -148,6 +148,81 @@ export async function getIntelligenceObservations(
   return { kind: "ok", rows: (data ?? []) as Record<string, unknown>[] };
 }
 
+// ── Eurostat context read (public aggregates only) ──────────────────────────
+
+export interface EurostatContextRow {
+  readonly metricKey: string;
+  readonly subjectId: string;
+  readonly geoCountry: string | null;
+  readonly valueNumeric: number;
+  readonly unit: string;
+  readonly windowStart: string;
+  readonly windowEnd: string;
+  readonly capturedAt: string;
+  readonly freshnessStatus: string;
+  readonly contentHash: string;
+  readonly sourceUrl: string | null;
+}
+
+export type EurostatContextReadResult =
+  | { readonly kind: "ok"; readonly rows: readonly EurostatContextRow[] }
+  | { readonly kind: "unavailable"; readonly reason: "needs-migration" }
+  | { readonly kind: "error" };
+
+/** Headline aggregate for the Eurostat context cards — the EU-27 figure. */
+export const EUROSTAT_CONTEXT_SUBJECT = "EU27_2020";
+
+/**
+ * Read the latest live public-aggregate Eurostat observation per metric for
+ * the EU-27 headline geography. RLS exposes only public_aggregate rows to an
+ * authenticated session; we additionally scope to source_key='eurostat',
+ * subject_id=EU27_2020 and valid_to IS NULL (current rows), newest window
+ * first, and keep the first per metric. Missing table (gated migration) →
+ * honest needs-migration; before the import runs this simply returns no rows
+ * and the cards stay honestly unavailable.
+ */
+export async function getEurostatContextObservations(): Promise<EurostatContextReadResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase)
+    .from("market_intelligence_observations")
+    .select(
+      "metric_key, subject_id, geo_country, value_numeric, unit, window_start, window_end, captured_at, freshness_status, content_hash, source_url, valid_to",
+    )
+    .eq("source_key", "eurostat")
+    .eq("subject_id", EUROSTAT_CONTEXT_SUBJECT)
+    .eq("privacy_class", "public_aggregate")
+    .is("valid_to", null)
+    .order("window_start", { ascending: false })
+    .limit(OBSERVATIONS_READ_LIMIT);
+  if (error) {
+    if (isMissingTableCode(error.code)) {
+      return { kind: "unavailable", reason: "needs-migration" };
+    }
+    return { kind: "error" };
+  }
+  const seen = new Set<string>();
+  const rows: EurostatContextRow[] = [];
+  for (const r of (data ?? []) as Record<string, unknown>[]) {
+    const metricKey = String(r.metric_key ?? "");
+    if (seen.has(metricKey)) continue; // newest window already kept
+    seen.add(metricKey);
+    rows.push({
+      metricKey,
+      subjectId: String(r.subject_id ?? ""),
+      geoCountry: r.geo_country === null ? null : String(r.geo_country),
+      valueNumeric: Number(r.value_numeric),
+      unit: String(r.unit ?? ""),
+      windowStart: String(r.window_start ?? ""),
+      windowEnd: String(r.window_end ?? ""),
+      capturedAt: String(r.captured_at ?? ""),
+      freshnessStatus: String(r.freshness_status ?? "unverified"),
+      contentHash: String(r.content_hash ?? ""),
+      sourceUrl: r.source_url === null ? null : String(r.source_url),
+    });
+  }
+  return { kind: "ok", rows };
+}
+
 // ── Insight query log (best-effort, NEVER throws) ────────────────────────────
 
 function boundedErrorMessage(err: unknown): string {

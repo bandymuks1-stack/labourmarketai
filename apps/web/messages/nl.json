@@ -9550,7 +9550,7 @@
         "trendNeedsHistory": "Hier staat geen trend omdat een trend een geschiedenis van gedateerde observaties nodig heeft, en de observatie-opslag is voorbereid maar uitgeschakeld. Een trend wordt nooit uit één punt getekend.",
         "salaryBasisNotComparable": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat voor uw beroep en land, maar het niet eerlijk kan worden vergeleken: er is niet vastgelegd of de bedragen bruto of netto zijn. Een onduidelijke vergelijking wordt nooit getoond.",
         "salaryInputsMissing": "Hier staat geen salariscijfer omdat er een gecureerd markttarief bestaat, maar uw eigen verwachte salaris ontbreekt, dus er valt niets te vergelijken.",
-        "eurostatNeedsActivation": "Officiële Eurostat-context is voorbereid, maar de eurostat-bron is nog niet geactiveerd, dus er is geen cijfer geïmporteerd."
+        "eurostatNeedsActivation": "Officiële Eurostat-context is voorbereid; de eerste officiële import is nog niet uitgevoerd, dus er is geen cijfer beschikbaar."
       },
       "requirement": {
         "ownerEnableStore": "De platformeigenaar moet de observatie-opslag inschakelen en ten minste één gegevensbron goedkeuren.",
@@ -9558,7 +9558,7 @@
         "demandOwnRows": "Voeg werkaanvragen toe — deze kaart vult zich met de gegevens van uw eigen organisatie zodra er registraties bestaan.",
         "salaryBasis": "De salarisbasis (bruto of netto) moet zijn vastgelegd voor zowel uw verwachte salaris als het gecureerde markttarief voordat een eerlijke vergelijking kan worden getoond.",
         "salaryInputs": "Voer uw verwachte salaris in uw werknemersprofiel in — de vergelijking verschijnt zodra het er is.",
-        "eurostatActivation": "De eigenaar activeert de eurostat-bron en voert één begrensde officiële import uit."
+        "eurostatActivation": "Een begrensde officiële Eurostat-import wordt uitgevoerd."
       },
       "after": {
         "activation": "Nadat de eigenaar een gegevensbron heeft goedgekeurd en geactiveerd, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
@@ -9709,7 +9709,15 @@
         "labourCostIndex": "Geen salarisaanbod en nooit een basis om het loon van een individu af te leiden."
       },
       "sectionTitle": "Europese arbeidsmarktcontext",
-      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar."
+      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar.",
+      "dataBasis": "Officieel Eurostat-aggregaat (bron: Eurostat)",
+      "whyVisible": "Getoond als officiële Europese arbeidsmarktcontext.",
+      "headline": {
+        "employmentRate": "{value}% werkgelegenheid · {geo} · {period}",
+        "unemploymentRate": "{value}% werkloosheid · {geo} · {period}",
+        "jobVacancyRate": "{value}% vacaturegraad · {geo} · {period}",
+        "labourCostIndex": "{value}% loonkosten (j-o-j) · {geo} · {period}"
+      }
     }
   }
 }
