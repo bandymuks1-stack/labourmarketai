@@ -26,8 +26,16 @@ function readApp(rel: string): string {
   return readFileSync(join(APP_ROOT, rel), "utf-8");
 }
 
-// The complete funnel contract (P0-A scope). Order-independent.
+// The complete funnel contract (P0-A scope + Pre-Advertising Launch
+// Readiness v1 public-acquisition events). Order-independent.
 const EXPECTED_EVENTS = [
+  // ── Public acquisition funnel (Pre-Advertising Launch Readiness v1).
+  "landing_viewed",
+  "cta_clicked",
+  "role_selected",
+  "registration_started",
+  "company_need_started",
+  "company_need_submitted",
   "login_started",
   "login_succeeded",
   "onboarding_started",
@@ -131,6 +139,34 @@ describe("activation funnel — uses the existing RLS-safe pipe (no DB/RLS chang
     // The free-text guard from migration 0020 still holds.
     expect(action).not.toMatch(/"(?:profile_text|journal_text|comment_body|raw_text)"/);
   });
+
+  it("allowlists the public-funnel + first-touch attribution keys (bounded scalars only)", () => {
+    for (const key of [
+      "audience",
+      "cta_id",
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+      "referrer_host",
+      "landing_path",
+    ]) {
+      expect(action).toContain(`"${key}"`);
+    }
+    // Attribution must never widen the allowlist to a raw query string or a
+    // full referrer URL.
+    expect(action).not.toMatch(/"(?:query|query_string|referrer_url|full_url|search)"/);
+  });
+
+  it("first-touch attribution never overwrites the original source and keeps referrer host-only", () => {
+    const attribution = readApp("lib/telemetry/attribution.ts");
+    // Idempotent first-touch: an existing record is returned unchanged.
+    expect(attribution).toMatch(/if \(existing\) return existing/);
+    // Referrer is reduced to a host, never the full URL.
+    expect(attribution).toMatch(/referrerHost/);
+    expect(attribution).not.toMatch(/document\.referrer\s*\)?\s*;?\s*\/\/\s*full/i);
+  });
 });
 
 describe("activation funnel — key surfaces emit their events", () => {
@@ -210,6 +246,27 @@ describe("activation funnel — key surfaces emit their events", () => {
     {
       file: "app/[locale]/dashboard/service-requests/page.tsx",
       mustContain: ["marketplaceOrOpportunitiesViewed"],
+    },
+    // ── Public acquisition funnel (Pre-Advertising Launch Readiness v1).
+    {
+      file: "components/app/marketing-funnel-beacon.tsx",
+      mustContain: ["landingViewed"],
+    },
+    {
+      file: "components/app/tracked-cta.tsx",
+      mustContain: ["ctaClicked"],
+    },
+    {
+      file: "components/app/onboarding-wizard.tsx",
+      mustContain: ["roleSelected"],
+    },
+    {
+      file: "components/app/signup-form.tsx",
+      mustContain: ["registrationStarted"],
+    },
+    {
+      file: "components/app/company-need-form.tsx",
+      mustContain: ["companyNeedStarted", "companyNeedSubmitted"],
     },
   ];
 

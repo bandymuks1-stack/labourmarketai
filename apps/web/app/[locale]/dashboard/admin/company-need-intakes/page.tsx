@@ -124,12 +124,32 @@ export default async function AdminCompanyNeedIntakesPage({
         >
           {t("migrationBlocker")}
         </p>
+      ) : result.kind === "grant-required" ? (
+        // Pre-Advertising Launch Readiness v1 — P0-3: a real OUTAGE, not the
+        // benign "being prepared" state. The intake table exists but the
+        // service-role grant is missing, so every submitted company need is
+        // invisible here. Operator diagnostic (superadmin-only) — deliberately
+        // explicit and actionable, not routed through product i18n.
+        <p
+          className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs font-semibold text-state-warning"
+          data-testid="admin-company-need-intakes-grant-required"
+        >
+          Company needs ARE being submitted but this queue cannot read them:
+          the service-role grant is not applied in this environment. Apply
+          migration 20260713190000_company_need_intake_service_grants.sql to
+          production to restore the owner queue. Until then, new requests are
+          only visible through the owner alert notification.
+        </p>
       ) : result.kind === "error" ? (
         <p
           className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
           data-testid="admin-company-need-intakes-error"
         >
-          {t("migrationBlocker")}
+          {/* Show the real error to the operator instead of masking every
+              failure as "being prepared" (Pre-Advertising Launch Readiness
+              v1 — P0-3). Superadmin-only surface; the message is a Postgres
+              error string, never a secret. */}
+          {result.message}
         </p>
       ) : rows.length === 0 ? (
         <p

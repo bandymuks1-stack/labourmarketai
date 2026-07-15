@@ -78,6 +78,19 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "role_context", // coarse role: 'worker' | 'company' | 'agency' | 'customer'
   "entity_type", // anonymous entity type, e.g. 'company_request'
   "success", // bool — coarse success/failure of an attempted action
+  // ── Public acquisition funnel + first-touch attribution (Pre-Advertising
+  //    Launch Readiness v1). All bounded, sanitized scalars. NEVER a raw
+  //    query string, a full referrer URL, or any user-entered value.
+  //    See lib/telemetry/attribution.ts + funnel-events.ts (FunnelMetadata).
+  "audience", // coarse marketing audience: 'workers' | 'companies' | 'agencies' | 'home'
+  "cta_id", // stable non-PII CTA identifier, e.g. 'hero_signup'
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "referrer_host", // referrer HOST only, never the full URL
+  "landing_path", // first landing path (no query string)
 ]);
 
 const SCALAR_VALUE_MAX = 200;

@@ -63,6 +63,15 @@ export async function setCompanyNeedIntakeStatusAction(
       return { ok: false, code: "not_found" };
     case "needs-migration":
       return { ok: false, code: "needs_migration" };
+    case "grant-required":
+      // Service-role grant not applied (migration 20260713190000). Honest,
+      // actionable operator error — never a silent success.
+      return {
+        ok: false,
+        code: "error",
+        message:
+          "service-role grant not applied (migration 20260713190000_company_need_intake_service_grants.sql)",
+      };
     default:
       return { ok: false, code: "error", message: r.message };
   }

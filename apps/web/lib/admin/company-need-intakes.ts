@@ -48,6 +48,12 @@ export {
  */
 
 const RELATION_ABSENT = "42P01";
+// Table EXISTS but the service-role read/update GRANT is not applied
+// (migration 20260713190000). Postgres raises 42501 insufficient_privilege.
+// This is a real production OUTAGE — every submitted intake is invisible in
+// the owner queue — and MUST NOT be masked as the benign "being prepared"
+// (needs-migration) state. See Pre-Advertising Launch Readiness v1 audit P0-3.
+const INSUFFICIENT_PRIVILEGE = "42501";
 
 // The generated `Database` type does not carry company_need_public_intakes
 // (the table postdates the last `db:types` run) — same service-role
@@ -86,6 +92,7 @@ export type CompanyNeedIntakeListResult =
   | { kind: "ok"; rows: readonly CompanyNeedIntakeRow[] }
   | { kind: "not-admin" }
   | { kind: "needs-migration" }
+  | { kind: "grant-required" }
   | { kind: "error"; message: string };
 
 export type SetIntakeStatusResult =
@@ -94,6 +101,7 @@ export type SetIntakeStatusResult =
   | { kind: "invalid" }
   | { kind: "not-found" }
   | { kind: "needs-migration" }
+  | { kind: "grant-required" }
   | { kind: "error"; message: string };
 
 const SELECT_COLUMNS =
@@ -163,6 +171,7 @@ export async function listCompanyNeedIntakes(): Promise<CompanyNeedIntakeListRes
     .order("created_at", { ascending: false });
   if (error) {
     if (error.code === RELATION_ABSENT) return { kind: "needs-migration" };
+    if (error.code === INSUFFICIENT_PRIVILEGE) return { kind: "grant-required" };
     return { kind: "error", message: error.message };
   }
 
@@ -205,6 +214,7 @@ export async function setCompanyNeedIntakeStatus(
     .select("id");
   if (error) {
     if (error.code === RELATION_ABSENT) return { kind: "needs-migration" };
+    if (error.code === INSUFFICIENT_PRIVILEGE) return { kind: "grant-required" };
     return { kind: "error", message: error.message };
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

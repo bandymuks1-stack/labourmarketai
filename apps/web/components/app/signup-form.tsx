@@ -10,6 +10,12 @@ import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { cn } from "@/lib/utils";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
+import {
+  captureFirstTouchAttribution,
+  getFirstTouchAttribution,
+} from "@/lib/telemetry/attribution";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -71,6 +77,15 @@ export function SignupForm() {
       return;
     }
     setStatus("signing");
+    // Registration-started conversion signal (Pre-Advertising Launch
+    // Readiness v1) with first-touch campaign attribution. Fires only after
+    // client validation passes, so it maps to a genuine signup attempt.
+    // Idempotent capture handles a direct ad landing on /auth/signup.
+    captureFirstTouchAttribution();
+    trackFunnel(FUNNEL_EVENTS.registrationStarted, {
+      surface: "email",
+      ...getFirstTouchAttribution(),
+    });
     try {
       const supabase = createClient();
       const origin =

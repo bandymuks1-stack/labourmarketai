@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { MarketingFunnelBeacon } from "@/components/app/marketing-funnel-beacon";
 import { SiteFooter } from "@/components/layouts/site-footer";
 import { SiteNav } from "@/components/layouts/site-nav";
 
@@ -26,6 +27,7 @@ export default async function MarketingLayout({
         {t("skipToContent")}
       </a>
       <AmbientGlow />
+      <MarketingFunnelBeacon />
       <SiteNav />
       <main id="main-content" className="relative">
         {children}
