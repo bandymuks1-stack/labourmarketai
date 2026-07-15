@@ -86,6 +86,33 @@ describe("runEurostatImport — dry-run is fail-closed while eurostat is OFF", (
     expect(res.persistedInserted).toBe(0);
   });
 
+  it("dedupes a repeated geo (one fetch, one geo's cells — no double work)", async () => {
+    enable();
+    const fetchSpy = vi.fn().mockImplementation((url: string) => {
+      const geo = new URL(url).searchParams.get("geo") ?? "LT";
+      return Promise.resolve(
+        new Response(uneBodyForGeo(geo), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      );
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await runEurostatImport({
+      mode: "dry_run",
+      datasetCodes: ["une_rt_m"],
+      geos: ["LT", "LT", "LT"], // duplicated
+      lastTimePeriod: 2,
+      nowMs: Date.parse("2026-07-10T00:00:00Z"),
+      sessionId: "dedup",
+      startedAtIso: "2026-07-10T00:00:00.000Z",
+      finishedAtIso: "2026-07-10T00:00:01.000Z",
+    });
+    // one distinct geo → one fetch, 2 period cells scanned (not 6)
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(res.session?.itemsScanned).toBe(2);
+  });
+
   it("makes NO network call and persists nothing when the kill switch is engaged", async () => {
     vi.stubEnv("EUROSTAT_SOURCE_ENABLED", "on");
     vi.stubEnv("EUROSTAT_KILL_SWITCH", "on");

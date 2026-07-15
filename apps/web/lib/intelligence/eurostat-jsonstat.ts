@@ -56,6 +56,8 @@ export interface EurostatParsedCellV1 {
 
 export type EurostatDatasetRejectReason =
   | "not_jsonstat_dataset"
+  | "size_category_mismatch"
+  | "unpinned_dimension_multi_category"
   | "missing_dimension"
   | "dimension_drift"
   | "source_update_timestamp_missing"
@@ -175,9 +177,18 @@ export function parseEurostatJsonStat(
     return { ok: false, reason: "missing_dimension" };
   }
 
+  // Structural guard: the category count of EVERY dimension must equal its
+  // declared size. If size and categories disagree the row-major multipliers
+  // (from size) and positions (from category rank) would select the wrong
+  // cell — reject the whole response rather than persist a misindexed value.
+  for (let i = 0; i < dimIds.length; i += 1) {
+    if (categoryCodesInOrder(dims[dimIds[i]]).length !== sizes[i]) {
+      return { ok: false, reason: "size_category_mismatch" };
+    }
+  }
+
   // Pinned-dimension drift check: every pinned dimension must resolve to
-  // EXACTLY the pinned code (freq is implied by the dataset's cadence and
-  // checked when present).
+  // EXACTLY the pinned code.
   for (const [dimId, pinnedCode] of Object.entries(dataset.pinnedDimensions)) {
     const dim = dims[dimId];
     if (!dim) return { ok: false, reason: "missing_dimension" };
@@ -187,8 +198,29 @@ export function parseEurostatJsonStat(
     }
   }
 
+  // Any dimension that is neither geo/time nor pinned (e.g. freq) is read at
+  // category[0]; it MUST be single-category or slice 0 would silently stand
+  // in for a multi-valued dimension not reflected in the observation identity.
+  for (const dimId of dimIds) {
+    if (dimId === "geo" || dimId === "time") continue;
+    if (Object.prototype.hasOwnProperty.call(dataset.pinnedDimensions, dimId)) {
+      continue;
+    }
+    if (categoryCodesInOrder(dims[dimId]).length !== 1) {
+      return { ok: false, reason: "unpinned_dimension_multi_category" };
+    }
+  }
+
   const geoCodes = categoryCodesInOrder(dims.geo);
   const timeCodes = categoryCodesInOrder(dims.time);
+
+  // JSON-stat 2.0 allows `status` as a single string applying to EVERY cell.
+  // Capture that form so a dataset-level suppression flag can never slip past
+  // the per-cell reject check below (fail-closed on suppression).
+  const datasetLevelStatus =
+    typeof body.status === "string" && body.status.trim() !== ""
+      ? body.status.trim()
+      : null;
 
   // Flat-index math: position multipliers per JSON-stat 2.0 row-major order.
   const multipliers: number[] = new Array(dimIds.length).fill(1);
@@ -250,7 +282,7 @@ export function parseEurostatJsonStat(
         continue;
       }
 
-      const statusRaw = readCell(body.status, flatIndex);
+      const statusRaw = datasetLevelStatus ?? readCell(body.status, flatIndex);
       const statusFlag =
         typeof statusRaw === "string" && statusRaw.trim() !== ""
           ? statusRaw.trim()

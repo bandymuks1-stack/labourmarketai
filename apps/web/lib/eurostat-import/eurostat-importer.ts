@@ -133,7 +133,12 @@ export async function runEurostatImport(
   const datasets = EUROSTAT_DATASETS.filter((d) =>
     req.datasetCodes.includes(d.code),
   ).slice(0, EUROSTAT_DATASETS.length);
-  const geos = req.geos.filter((g) => EUROSTAT_GEO_ALLOWLIST.includes(g));
+  // Dedupe geos — a duplicated geo would fetch and accept the same cells
+  // twice (the second pass would dedupe by hash, but the request is wasted
+  // and the accept cap must count real distinct work).
+  const geos = [...new Set(req.geos)].filter((g) =>
+    EUROSTAT_GEO_ALLOWLIST.includes(g),
+  );
   const lastN = Math.min(
     Math.max(1, Math.floor(req.lastTimePeriod)),
     EUROSTAT_IMPORT_BOUNDS.maxPeriodsPerSeries,
@@ -160,6 +165,12 @@ export async function runEurostatImport(
   // at all — report the block honestly and stop. Still emit a zero session.
   const runOverNetwork = switchState.operational;
 
+  // Hard session accept cap (owner bound) — a shared budget across all
+  // dataset/geo passes. Once exhausted, further candidates are rejected with
+  // a stable reason rather than persisted, so the invariant holds even if a
+  // caller passes an unexpectedly large geo list.
+  const capBudget = { remaining: EUROSTAT_IMPORT_BOUNDS.maxAcceptedPerSession };
+
   for (const dataset of datasets) {
     for (const geo of geos) {
       const outcome = await importOneDatasetGeo({
@@ -169,6 +180,7 @@ export async function runEurostatImport(
         context,
         runOverNetwork,
         seenHashes: context.knownContentHashes,
+        capBudget,
         onReason: (code) => tallyReason(reasonCounts, code),
       });
       outcomes.push(outcome.summary);
@@ -252,12 +264,14 @@ async function importOneDatasetGeo(args: {
   context: ObservationValidationContextV1;
   runOverNetwork: boolean;
   seenHashes: ReadonlySet<string>;
+  /** Shared, mutable session accept budget (owner cap). */
+  capBudget: { remaining: number };
   onReason: (code: string) => void;
 }): Promise<{
   summary: EurostatDatasetOutcomeV1;
   accepted: IntelligenceObservationV1[];
 }> {
-  const { dataset, geo, lastN, context, runOverNetwork } = args;
+  const { dataset, geo, lastN, context, runOverNetwork, capBudget } = args;
   const base: EurostatDatasetOutcomeV1 = {
     datasetCode: dataset.code,
     geo,
@@ -334,6 +348,15 @@ async function importOneDatasetGeo(args: {
       context,
     );
     if (result.ok) {
+      // Enforce the shared session accept cap — once exhausted, a
+      // structurally-valid candidate is rejected (never persisted) so the
+      // ≤maxAcceptedPerSession invariant always holds.
+      if (capBudget.remaining <= 0) {
+        rejectedData += 1;
+        args.onReason("session_accept_cap");
+        continue;
+      }
+      capBudget.remaining -= 1;
       acceptedCount += 1;
       accepted.push(result.observation);
       continue;

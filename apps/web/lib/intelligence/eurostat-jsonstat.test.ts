@@ -160,6 +160,65 @@ describe("parseEurostatJsonStat — fail-closed", () => {
     }
   });
 
+  it("rejects EVERY cell when a dataset-level string status is a suppression flag", () => {
+    // JSON-stat 2.0 string-form status applies to all cells — must not slip past.
+    const res = parseEurostatJsonStat({
+      body: uneBody({ status: "c" }),
+      dataset: UNE,
+      requestUrl: "u",
+      responseSha256: "h",
+      nowMs: 0,
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.cells.length).toBe(4);
+    for (const c of res.cells) {
+      expect(c.outcome.kind).toBe("rejected");
+      if (c.outcome.kind === "rejected") {
+        expect(c.outcome.reason).toBe("value_suppressed");
+      }
+    }
+  });
+
+  it("rejects the response when a dimension's category count != its declared size", () => {
+    const body = uneBody() as { size: number[] };
+    const res = parseEurostatJsonStat({
+      body: { ...(uneBody() as object), size: [1, 1, 1, 1, 1, 2, 3] }, // time says 3 but has 2 categories
+      dataset: UNE,
+      requestUrl: "u",
+      responseSha256: "h",
+      nowMs: 0,
+    });
+    void body;
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.reason).toBe("size_category_mismatch");
+  });
+
+  it("rejects an unpinned non-geo/time dimension that carries more than one category", () => {
+    const base = uneBody() as {
+      id: string[];
+      size: number[];
+      dimension: Record<string, unknown>;
+    };
+    // freq is unpinned for une_rt_m; give it two categories (and matching size)
+    const res = parseEurostatJsonStat({
+      body: {
+        ...(uneBody() as object),
+        size: [2, 1, 1, 1, 1, 2, 2],
+        dimension: {
+          ...base.dimension,
+          freq: { category: { index: { M: 0, Q: 1 }, label: { M: "Monthly", Q: "Quarterly" } } },
+        },
+      },
+      dataset: UNE,
+      requestUrl: "u",
+      responseSha256: "h",
+      nowMs: 0,
+    });
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.reason).toBe("unpinned_dimension_multi_category");
+  });
+
   it("rejects a confidential-flagged cell, keeps a provisional flag in provenance", () => {
     const res = parseEurostatJsonStat({
       body: uneBody({ status: { 0: "c", 1: "p" } }),
