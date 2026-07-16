@@ -281,6 +281,10 @@ describe("NO new DB migration in this PR", () => {
     // (20260714230000_market_intelligence_observations_v1 — source registry,
     // observation contract, insight query log; all external sources OFF).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(140);
+    // Bumped 140 -> 142 for the Wagon 1 worker-discovery-consent drafts
+    // (20260716120000_contact_disclosure_requests_v1 +
+    // 20260716121000_request_rate_limits_v3). Both DRAFT / needs-human-gate,
+    // NOT applied; paired rollbacks.
+    expect(count).toBeLessThanOrEqual(142);
   });
 });
