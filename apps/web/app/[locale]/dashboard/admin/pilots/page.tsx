@@ -10,7 +10,7 @@ import { CreatePilotForm } from "@/components/app/admin-pilots-forms";
  *
  * Server-gated via requireSuperadmin (defense-in-depth under the admin
  * layout gate); the SQL SELECT is additionally admin-only via the pilots
- * RLS policies of the DRAFT-GATED migration 20260716120000_pilots_cohort_v1.
+ * RLS policies of the DRAFT-GATED migration 20260716140000_pilots_cohort_v1.
  *
  * Honest degradation: while the owner has NOT applied that migration the
  * probe sees 42P01 and this page shows a plain "not enabled yet" note —

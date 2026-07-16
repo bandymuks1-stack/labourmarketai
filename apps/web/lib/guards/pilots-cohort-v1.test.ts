@@ -26,9 +26,9 @@ const REPO_ROOT = join(process.cwd(), "..", "..");
 const APP_ROOT = process.cwd();
 
 const MIGRATION_REL =
-  "supabase/migrations/20260716120000_pilots_cohort_v1.sql";
+  "supabase/migrations/20260716140000_pilots_cohort_v1.sql";
 const ROLLBACK_REL =
-  "supabase/rollbacks/20260716120000_pilots_cohort_v1.down.sql";
+  "supabase/rollbacks/20260716140000_pilots_cohort_v1.down.sql";
 
 function readRepo(rel: string): string {
   return readFileSync(join(REPO_ROOT, rel), "utf-8");

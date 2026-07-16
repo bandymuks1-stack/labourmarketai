@@ -85,7 +85,7 @@ describe("W5 pilot measurement stays PII-free", () => {
   it("pilot_outcomes' only free text is the 500-char-bounded note", () => {
     const migration = readFileSync(
       join(APP, "..", "..", "supabase", "migrations",
-        "20260716120000_pilots_cohort_v1.sql"),
+        "20260716140000_pilots_cohort_v1.sql"),
       "utf-8",
     );
     expect(migration).toMatch(/char_length\(note\) <= 500/i);

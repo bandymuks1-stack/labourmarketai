@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
  * Pilot cohort read model (Pilot Onboarding and Measurement v1).
  *
  * Reads the three admin-only tables introduced by the DRAFT-GATED migration
- * 20260716120000_pilots_cohort_v1.sql (pilots / pilot_participants /
+ * 20260716140000_pilots_cohort_v1.sql (pilots / pilot_participants /
  * pilot_outcomes). Every read goes through the caller's own superadmin-gated
  * Supabase client — the tables' RLS SELECT policies are `public.is_admin()`
  * so a non-admin session sees zero rows even if the app gate drifted.

@@ -21,7 +21,7 @@ import {
  *
  * Server-gated via requireSuperadmin (defense-in-depth under the admin
  * layout gate); reads are additionally admin-only via the pilots RLS
- * policies of the DRAFT-GATED migration 20260716120000_pilots_cohort_v1.
+ * policies of the DRAFT-GATED migration 20260716140000_pilots_cohort_v1.
  * Honest degradation while the migration is unapplied.
  *
  * HONESTY: every outcome row is recorded BY AN ADMIN and labelled as such —

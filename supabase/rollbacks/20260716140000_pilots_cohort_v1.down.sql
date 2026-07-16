@@ -1,4 +1,4 @@
--- Rollback for 20260716120000_pilots_cohort_v1.sql — restores the prior
+-- Rollback for 20260716140000_pilots_cohort_v1.sql — restores the prior
 -- state exactly. The forward migration created THREE new tables (pilots,
 -- pilot_participants, pilot_outcomes) plus their policies / indexes and
 -- FIVE new RPCs; nothing pre-existing was altered, so dropping those

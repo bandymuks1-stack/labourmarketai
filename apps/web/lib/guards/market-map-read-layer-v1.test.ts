@@ -282,7 +282,7 @@ describe("NO new DB migration in this PR", () => {
     // observation contract, insight query log; all external sources OFF).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
     // Bumped 140 -> 141 for Pilot Onboarding and Measurement v1
-    // (20260716120000_pilots_cohort_v1 — admin-only pilots /
+    // (20260716140000_pilots_cohort_v1 — admin-only pilots /
     // pilot_participants / append-only pilot_outcomes, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
     expect(count).toBeLessThanOrEqual(141);

@@ -5,7 +5,7 @@
 -- via Supabase MCP apply_migration after the owner reviews the PR gate
 -- report. Never `db push`.
 --
--- 20260716120000 — pilots cohort v1.
+-- 20260716140000 — pilots cohort v1.
 --
 -- PROBLEM: pilot measurement today is anonymous event counts in
 -- `pilot_events` (0020). There is no way to define a pilot cohort ("the 6
@@ -53,7 +53,7 @@
 -- exists for pre-apply review and emergency reversal only.
 --
 -- Additive only. Rollback:
---   supabase/rollbacks/20260716120000_pilots_cohort_v1.down.sql
+--   supabase/rollbacks/20260716140000_pilots_cohort_v1.down.sql
 -- ============================================================================
 
 -- ── 1. pilots ────────────────────────────────────────────────────────
@@ -384,4 +384,4 @@ end $$;
 revoke all on function public.record_pilot_outcome_v1(uuid, text, uuid, text) from public;
 grant execute on function public.record_pilot_outcome_v1(uuid, text, uuid, text) to authenticated;
 
--- ROLLBACK: supabase/rollbacks/20260716120000_pilots_cohort_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260716140000_pilots_cohort_v1.down.sql

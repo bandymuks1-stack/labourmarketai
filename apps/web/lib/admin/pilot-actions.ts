@@ -17,7 +17,7 @@ import {
  *
  * Double-gated: requireSuperadmin() here (app layer) AND public.is_admin()
  * inside every SECURITY DEFINER RPC of the DRAFT-GATED migration
- * 20260716120000_pilots_cohort_v1.sql (DB layer). A non-admin is redirected
+ * 20260716140000_pilots_cohort_v1.sql (DB layer). A non-admin is redirected
  * by requireSuperadmin before any RPC is reached; a caller who somehow got
  * past the app gate still receives 'not_authorized' from the RPC.
  *
