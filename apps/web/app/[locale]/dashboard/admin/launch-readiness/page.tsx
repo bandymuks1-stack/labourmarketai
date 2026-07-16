@@ -6,6 +6,7 @@ import {
   CONSENTED_PROFILE_TARGET,
   getLaunchReadiness,
 } from "@/lib/admin/launch-readiness";
+import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
@@ -28,6 +29,7 @@ export default async function AdminLaunchReadinessPage({
 
   const t = await getTranslations("adminLaunchReadiness");
   const result = await getLaunchReadiness();
+  const workerAds = await getWorkerAdsReadiness();
   if (result.kind === "not-admin") {
     // requireSuperadmin already redirected; this is unreachable belt-and-braces.
     return null;
@@ -155,6 +157,62 @@ export default async function AdminLaunchReadinessPage({
         >
           {t("demand.queueLink")} →
         </Link>
+      </section>
+
+      {/* Limited worker ads readiness (Wagon 1) — derived from real probes
+          (consent spine, discoverable supply, contact-request flow) + CI-
+          guarded code seams. NOT_READY items stay honestly red; READY means
+          "the pieces exist and are live", never "spend now". */}
+      <section className="flex flex-col gap-3" data-testid="worker-ads-readiness">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("workerAds.title")}
+          </h2>
+          <span
+            className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${
+              workerAds.status === "READY"
+                ? "border-state-success/40 bg-state-success/10 text-state-success"
+                : "border-state-amber/40 bg-state-amber/10 text-state-amber"
+            }`}
+            data-testid="worker-ads-status"
+            data-status={workerAds.status}
+          >
+            {workerAds.status === "READY"
+              ? t("workerAds.ready")
+              : t("workerAds.notReady")}
+          </span>
+        </div>
+        <ul className="flex flex-col gap-1.5">
+          {workerAds.items.map((item) => (
+            <li
+              key={item.key}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2"
+              data-testid={`worker-ads-item-${item.key}`}
+              data-ok={item.ok ? "true" : "false"}
+            >
+              <span className="text-sm text-text-primary">
+                {t(`workerAds.items.${item.key}` as never)}
+                {item.value !== null ? (
+                  <span className="ml-2 font-mono text-xs text-text-secondary">
+                    {item.value}
+                  </span>
+                ) : null}
+              </span>
+              <span
+                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                  item.ok
+                    ? "border-state-success/40 bg-state-success/10 text-state-success"
+                    : "border-state-amber/40 bg-state-amber/10 text-state-amber"
+                }`}
+              >
+                {item.ok ? t("workerAds.itemOk") : t("workerAds.itemMissing")}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {t("workerAds.note")}
+        </p>
       </section>
 
       <p className="text-[11px] leading-relaxed text-text-muted">

@@ -22,6 +22,7 @@ import {
   companyCandidateReadiness,
   type CompanyCandidateReadiness,
 } from "@/lib/scouting/candidate-readiness";
+import type { LastActiveBucket } from "@/lib/scouting/profile-freshness";
 
 export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
 
@@ -38,6 +39,9 @@ export interface ScoutSafeCandidate {
   /** Safe readiness signal (country/availability fit; docs stay consent-gated). */
   readonly readiness: CompanyCandidateReadiness;
   readonly shortlistStatus: ShortlistStatus | null;
+  /** Honest profile freshness (Wagon 1) — from the worker row's real
+   *  updated_at/created_at, never fabricated. Non-PII. */
+  readonly lastActiveBucket: LastActiveBucket;
 }
 
 /** Real evidence (beyond self-declared) count for the worker's skills. */
@@ -60,6 +64,7 @@ export function toScoutSafeCandidate(input: {
   /** The need's country (for the country-fit signal). Optional. */
   readonly needCountry?: string | null;
   readonly shortlistStatus: ShortlistStatus | null;
+  readonly lastActiveBucket: LastActiveBucket;
 }): ScoutSafeCandidate {
   const preview = toShortlistSafePreview({
     id: input.workerId,
@@ -93,6 +98,7 @@ export function toScoutSafeCandidate(input: {
     match: input.match,
     readiness,
     shortlistStatus: input.shortlistStatus,
+    lastActiveBucket: input.lastActiveBucket,
   };
 }
 

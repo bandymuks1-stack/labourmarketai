@@ -6570,7 +6570,8 @@
       "opening": "Atidaroma…",
       "opened": "Pokalbis pradėtas — laukiama darbuotojo atsakymo.",
       "view": "Atverti pokalbį",
-      "error": "Pokalbio atverti nepavyko. Bandykite dar kartą."
+      "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
+      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj."
     },
     "how": {
       "title": "Kaip veikia atitikimas",
@@ -6638,6 +6639,31 @@
       "reopen": "Atidaryti iš naujo",
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+    },
+    "freshness": {
+      "active": "Neseniai atnaujintas",
+      "recent": "Atnaujintas per 3 mėn.",
+      "dormant": "Seniai neatnaujintas"
+    },
+    "filters": {
+      "title": "Susiaurinti sąrašą",
+      "availableNow": "Laisvas dabar",
+      "clear": "Išvalyti filtrus",
+      "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
+    },
+    "contactRequest": {
+      "button": "Prašyti kontaktinių duomenų",
+      "sending": "Siunčiama…",
+      "pending": "Kontaktų prašymas išsiųstas — sprendžia darbuotojas.",
+      "granted": "Darbuotojas patvirtino kontaktinių duomenų perdavimą.",
+      "declined": "Darbuotojas atmetė ankstesnį prašymą.",
+      "expired": "Ankstesnis prašymas nebegalioja.",
+      "unavailable": "Kontaktų prašymai paruošti, bet dar neįjungti.",
+      "rateLimited": "Pasiektas prašymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau.",
+      "noOrganization": "Pirmiausia sukurkite savo įmonės organizaciją.",
+      "fieldsNote": "Darbuotojo prašoma pasidalinti vardu, telefonu ir el. paštu. Sprendžia darbuotojas — be jo patvirtinimo niekas nerodoma.",
+      "error": "Prašymo išsiųsti nepavyko. Bandykite dar kartą.",
+      "accepted": "Darbuotojas priėmė prašymą — kontaktų perdavimas dar neleistas."
     }
   },
   "planBoundary": {
@@ -6792,7 +6818,8 @@
     "propose": {
       "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
       "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
-      "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti."
+      "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti.",
+      "rateLimited": "Pasiektas rezervacijos pasiūlymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",
@@ -7045,6 +7072,23 @@
       "activePermissions": "Aktyvūs perdavimo leidimai",
       "completedDisclosures": "Įvykdyti perdavimai",
       "note": "Skaičiai tik iš realių sutikimų žurnalo įrašų. Administratorius negali suteikti sutikimo vartotojo vardu — galima tik matyti būseną."
+    },
+    "workerAds": {
+      "title": "Ribotų darbuotojų skelbimų parengtis",
+      "ready": "Parengta",
+      "notReady": "Neparengta",
+      "itemOk": "Gerai",
+      "itemMissing": "Trūksta",
+      "note": "Išvedama tik iš realių patikrų ir įdiegto kodo. „Parengta“ reiškia, kad platformos dalys egzistuoja ir veikia — sprendimą dėl skelbimų priima savininkas.",
+      "items": {
+        "consent_spine": "Sutikimų įrašai veikia (darbuotojų matomumo pasirinkimai)",
+        "discoverable_supply": "Darbuotojai, leidę būti randami (dabartinis skaičius)",
+        "contact_request_flow": "Kontaktinių duomenų prašymų eiga įjungta",
+        "discovery_surface": "Darbdavių paieškos puslapis veikia",
+        "anonymisation_policy": "Užtikrinamos anoniminės kandidatų peržiūros",
+        "rate_limits": "Riboti užklausų limitai aktyvūs",
+        "freshness_demotion": "Seni profiliai reitinguojami žemiau"
+      }
     }
   },
   "billingStatus": {
@@ -8157,6 +8201,33 @@
     "rights": {
       "notice": "Daugiau apie jūsų teises ir duomenų tvarkymą:",
       "noticeLink": "privatumo pranešimas"
+    },
+    "contactRequests": {
+      "section": "Prašymai dėl kontaktinių duomenų",
+      "intro": "Čia įmonės prašo jūsų kontaktinių duomenų dėl vieno konkretaus poreikio. Kiekvieną kartą sprendžiate jūs. Jei nieko nedarysite, niekas nebus perduota.",
+      "empty": "Šiuo metu prašymų nėra.",
+      "unknownCompany": "Įmonė",
+      "unknownNeed": "Darbo poreikis",
+      "requestedFields": "Prašomi duomenys",
+      "showDetails": "Kas tiksliai būtų perduota?",
+      "grant": "Leisti",
+      "decline": "Atmesti",
+      "working": "Saugoma…",
+      "status": {
+        "declined": "Atmesta",
+        "withdrawn": "Įmonė atšaukė",
+        "expired": "Nebegalioja",
+        "created": "Laukia jūsų",
+        "accepted": "Priimta"
+      },
+      "grantedNote": "Leista. Šis leidimas įrašytas sutikimų istorijoje žemiau.",
+      "declinedNote": "Atmesta. Niekas nebuvo perduota.",
+      "error": "Nepavyko išsaugoti jūsų atsakymo. Bandykite dar kartą.",
+      "acceptNote": "Priėmimas tik parodo įmonei, kad esate tam atviras. Priėmus kontaktiniai duomenys NĖRA perduodami — tai atskiras pasirinkimas, kurį galėsite padaryti priėmę.",
+      "accept": "Priimti",
+      "acceptedNote": "Priimta. Kol kas niekas neperduota — leisti kontaktinius duomenis yra atskiras pasirinkimas žemiau.",
+      "grantTitle": "Perduoti kontaktinius duomenis?",
+      "grantIntro": "Tai atskiras sprendimas. Šiai įmonei ir tik šiam poreikiui būtų perduoti tik žemiau išvardyti duomenys."
     }
   },
   "planning": {
