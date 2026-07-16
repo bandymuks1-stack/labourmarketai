@@ -2850,5 +2850,34 @@
         "none": "ingen"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Lad os sætte din profil op",
+    "readyTitle": "Profil klar",
+    "subtitle": "Få trin — og arbejdsgivere ser, hvad du kan. Hvert trin åbner præcis der, hvor du fuldfører det.",
+    "readyBody": "Alle trin fuldført. Din profil er klar — arbejdsgivere ser, hvad du kan.",
+    "progress": "{done} af {total}",
+    "steps": {
+      "goal": {
+        "title": "Hvilket arbejde søger du?",
+        "hint": "Vælg dit fag."
+      },
+      "experience": {
+        "title": "Upload et CV eller svar på et par spørgsmål",
+        "hint": "Fortæl om din erfaring — upload et CV eller skriv den selv ind."
+      },
+      "review": {
+        "title": "Tjek hvad vi fandt",
+        "hint": "Bekræft, ret eller fjern de foreslåede poster."
+      },
+      "location": {
+        "title": "Hvor vil du arbejde?",
+        "hint": "Angiv land og foretrukne lande på arbejdskortet."
+      },
+      "availability": {
+        "title": "Hvornår kan du starte?",
+        "hint": "Markér din tilgængelighed."
+      }
+    }
   }
 }

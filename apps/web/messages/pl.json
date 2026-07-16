@@ -2850,5 +2850,34 @@
         "none": "brak"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Skonfigurujmy Twój profil",
+    "readyTitle": "Profil gotowy",
+    "subtitle": "Kilka kroków — i pracodawcy zobaczą, co potrafisz. Każdy krok otwiera się dokładnie tam, gdzie go ukończysz.",
+    "readyBody": "Wszystkie kroki wykonane. Twój profil jest gotowy — pracodawcy zobaczą, co potrafisz.",
+    "progress": "{done} z {total}",
+    "steps": {
+      "goal": {
+        "title": "Jakiej pracy szukasz?",
+        "hint": "Wybierz swój zawód."
+      },
+      "experience": {
+        "title": "Prześlij CV lub odpowiedz na kilka pytań",
+        "hint": "Opowiedz o swoim doświadczeniu — prześlij CV lub wpisz je samodzielnie."
+      },
+      "review": {
+        "title": "Sprawdź, co znaleźliśmy",
+        "hint": "Potwierdź, popraw lub usuń zaproponowane wpisy."
+      },
+      "location": {
+        "title": "Gdzie chcesz pracować?",
+        "hint": "Ustaw kraj i preferowane kraje na karcie pracy."
+      },
+      "availability": {
+        "title": "Kiedy możesz zacząć?",
+        "hint": "Zaznacz swoją dostępność."
+      }
+    }
   }
 }

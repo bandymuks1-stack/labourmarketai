@@ -2850,5 +2850,34 @@
         "none": "puudub"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Seadistame teie profiili",
+    "readyTitle": "Profiil valmis",
+    "subtitle": "Paar sammu — ja tööandjad näevad, mida oskate. Iga samm avaneb täpselt seal, kus selle lõpetate.",
+    "readyBody": "Kõik sammud tehtud. Teie profiil on valmis — tööandjad näevad, mida oskate.",
+    "progress": "{done} / {total}",
+    "steps": {
+      "goal": {
+        "title": "Millist tööd otsite?",
+        "hint": "Valige oma eriala."
+      },
+      "experience": {
+        "title": "Laadige üles CV või vastake mõnele küsimusele",
+        "hint": "Rääkige oma kogemusest — laadige üles CV või sisestage see ise."
+      },
+      "review": {
+        "title": "Kontrollige, mida leidsime",
+        "hint": "Kinnitage, muutke või eemaldage pakutud kirjed."
+      },
+      "location": {
+        "title": "Kus soovite töötada?",
+        "hint": "Määrake riik ja eelistatud riigid töökaardil."
+      },
+      "availability": {
+        "title": "Millal saate alustada?",
+        "hint": "Märkige oma saadavus."
+      }
+    }
   }
 }

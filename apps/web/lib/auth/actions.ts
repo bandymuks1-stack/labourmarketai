@@ -123,10 +123,13 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   // Role-aware first-login destination. A company/agency/customer who
   // just picked their primary role should land on THEIR workspace, not
   // the generic /dashboard cockpit (which surfaces worker-shaped
-  // prompts like "Profession / Skills / Journal"). Workers stay on
-  // the generic /dashboard which already is the worker cockpit.
+  // prompts like "Profession / Skills / Journal"). A fresh WORKER lands
+  // on the guided setup journey (Wagon 4: registration → work goal →
+  // experience → review → location → availability → profile ready) —
+  // the guide over the canonical profile surface, so their first screen
+  // tells them exactly what to do next.
   const ROLE_DASHBOARD: Record<Role, string> = {
-    worker: `/${locale}/dashboard`,
+    worker: `/${locale}/dashboard/profile#setup-journey`,
     company: `/${locale}/dashboard/company`,
     agency: `/${locale}/dashboard/agency`,
     customer: `/${locale}/dashboard/buyer`,
