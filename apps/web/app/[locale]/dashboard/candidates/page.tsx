@@ -79,7 +79,7 @@ export default async function CandidatesPage({
   };
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {/* Company action framing: this is the "Hire" action under the company
           identity, not a separate system. */}
       <div className="flex flex-col gap-1">

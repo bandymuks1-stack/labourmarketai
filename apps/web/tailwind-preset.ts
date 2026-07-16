@@ -45,7 +45,12 @@ const preset = {
       // timing/easing source; resolves to the CSS vars in globals.css.
       transitionDuration: { ...motion.duration },
       transitionTimingFunction: { ...motion.easing },
-      maxWidth: { container: "1440px" },
+      // `container` is the authenticated shell canvas; `content` is the shared
+      // working width for dashboard pages whose roots previously re-constrained
+      // themselves to max-w-xl…4xl (the production narrow-column defect —
+      // UX Recovery Train Wagon 1). Pages needing full canvas (map, calendar,
+      // dashboard grid) simply omit both and inherit the shell.
+      maxWidth: { container: "1440px", content: "1200px" },
     },
   },
 } satisfies Partial<Config>;

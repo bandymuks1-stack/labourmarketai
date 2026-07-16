@@ -76,7 +76,7 @@ export default async function ProjectOperationsPage({
     const workerView = await getWorkerProjectView(id);
     if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
     return (
-      <div className="flex max-w-2xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-4">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("eyebrow")}
         </h1>
@@ -88,7 +88,7 @@ export default async function ProjectOperationsPage({
   const centre = await getOperationsCentre(id);
   if (!centre) {
     return (
-      <div className="flex max-w-2xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-4">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("eyebrow")}
         </h1>
@@ -242,7 +242,7 @@ export default async function ProjectOperationsPage({
     "font-mono text-[10px] uppercase tracking-label text-text-muted";
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
           pulse — the real gated reviewable count, one tap to confirm. */}
       <ConfirmPulse />

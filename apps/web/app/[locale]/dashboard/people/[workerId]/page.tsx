@@ -125,7 +125,7 @@ export default async function PersonPage({
   };
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6" data-testid="person-page">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="person-page">
       <header className="flex flex-col gap-3">
         <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
           <UserRound className="h-3.5 w-3.5" aria-hidden />
@@ -236,7 +236,7 @@ async function RestrictedState({
 }) {
   return (
     <div
-      className="flex max-w-2xl flex-col gap-4"
+      className="mx-auto flex w-full max-w-content flex-col gap-4"
       data-testid="person-restricted"
     >
       <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">

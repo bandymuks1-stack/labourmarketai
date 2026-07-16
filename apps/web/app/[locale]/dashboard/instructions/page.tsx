@@ -95,7 +95,7 @@ export default async function InstructionsPage({
       teamLevelOption: t("manager.teamLevelOption"),
     };
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-6">
         {Header}
         <ManagerInstructionComposer
           workers={workers}
@@ -127,7 +127,7 @@ export default async function InstructionsPage({
   };
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {Header}
       {read.kind === "needs-migration" ? (
         <p className="card-border p-4 text-sm text-text-secondary">

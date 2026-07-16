@@ -34,7 +34,7 @@ export default async function EvidenceReportPage({
   const cvRes = await buildVerifiedCv();
   if (!cvRes.ok) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-3 px-6 py-10">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-3">
         <h1 className="font-display text-2xl font-bold text-text-primary">{t("title")}</h1>
         <p className="text-sm text-text-secondary" data-testid="evidence-report-not-worker">{t("notWorker")}</p>
         <Link href="/dashboard/profile" className="text-sm font-medium text-brand-blue hover:underline">{t("back")} →</Link>
@@ -62,7 +62,7 @@ export default async function EvidenceReportPage({
   const byKey = Object.fromEntries(report.sections.map((s) => [s.key, s]));
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-8" data-testid="evidence-report">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="evidence-report">
       <header className="flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div className="flex flex-col gap-1">
           <Link href="/dashboard/profile" className="self-start text-xs font-medium text-brand-blue hover:underline">← {t("back")}</Link>
