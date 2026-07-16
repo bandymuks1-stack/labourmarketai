@@ -240,16 +240,37 @@ describe("app surface — reuse of the existing spine, no parallel team system",
   const panel = readWeb("components/app/team-brigades-panel.tsx");
   const page = readWeb("app/[locale]/dashboard/company/page.tsx");
 
-  it("membership writes go through the EXISTING canonical addOrgMember only", () => {
-    expect(panel).toMatch(
-      /import \{ addOrgMember \} from "@\/lib\/operations\/org-membership"/,
-    );
+  it("CONSENT (Trust Connect v1): membership arrives ONLY via a join_team invitation — no direct add remains", () => {
+    // The former direct addOrgMember call was a consent bypass: the owner
+    // could mint an engagement for a worker who never agreed. The panel now
+    // sends a canonical join_team invitation instead; the worker's OWN accept
+    // (accept_invitation_v1) creates the engagement.
+    expect(panel).not.toMatch(/addOrgMember/);
+    expect(panel).toMatch(/inviteWorkerToTeamAction/);
+    const actions = readWeb("lib/company/team-brigade-actions.ts");
+    expect(actions).not.toMatch(/addOrgMember/);
+    expect(actions).toMatch(/invitationType: "join_team"/);
+    expect(actions).toMatch(/createAndSendInvitations/);
     // No direct engagement writes and no bespoke membership RPC app-side.
     expect(lib).not.toMatch(/\.insert\(/);
     expect(lib).not.toMatch(/\.update\(/);
     expect(lib).not.toMatch(/\.delete\(/);
     expect(lib).not.toMatch(/add_team_member/);
     expect(panel).not.toMatch(/add_team_member/);
+    // The invitee's email / invite link never reach the client from this
+    // surface — the action returns only a closed outcome vocabulary.
+    expect(actions).not.toMatch(/inviteLink/);
+    expect(actions).not.toMatch(/first\?\.email/);
+  });
+
+  it("membership provenance is derived from the real invitations ledger, never invented", () => {
+    // 'invited' comes ONLY from an accepted join_team invitation row;
+    // pre-existing members read as 'direct'; a missing invitations model
+    // reads as 'unknown' — no fake consent history for old rows.
+    expect(lib).toMatch(/"invited" \| "direct" \| "unknown"/);
+    expect(lib).toMatch(/\.eq\("invitation_type", "join_team"\)/);
+    expect(lib).toMatch(/accepted_by_profile_id/);
+    expect(lib).not.toMatch(/provenance:\s*"invited",/);
   });
 
   it("reads ride the EXISTING tables — organizations / engagement_contexts / company_workers", () => {
@@ -269,7 +290,12 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).toMatch(/applied: false/);
     expect(page).toMatch(/teamBrigades\.applied \?/);
     expect(page).toMatch(/<TeamRosterEmptyState variant="company" \/>/);
-    expect(page).toMatch(/<TeamBrigadesPanel teams=\{teamBrigades\.teams\} \/>/);
+    expect(page).toMatch(/<TeamBrigadesPanel/);
+    expect(page).toMatch(/teams=\{teamBrigades\.teams\}/);
+    // Trust Connect layers degrade independently and honestly.
+    expect(page).toMatch(/invitationsApplied=\{teamBrigades\.invitationsApplied\}/);
+    expect(page).toMatch(/detailsApplied=\{teamBrigades\.detailsApplied\}/);
+    expect(page).toMatch(/enquiriesApplied=\{teamBrigades\.enquiriesApplied\}/);
   });
 
   it("capability chips are honest counts with the disclaimer, labels from the EXISTING skillNames catalogue", () => {
@@ -284,8 +310,8 @@ describe("app surface — reuse of the existing spine, no parallel team system",
   });
 });
 
-describe("i18n — teamBrigades namespace present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTIVE locale", () => {
+  for (const locale of ["en", "lt", "ru", "nl", "de"]) {
     it(`${locale} carries the full teamBrigades catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.teamBrigades;
@@ -304,6 +330,9 @@ describe("i18n — teamBrigades namespace present in en/lt/ru", () => {
         "noAddable",
         "addLabel",
         "addButton",
+        "consentNote",
+        "inviteNotEnabled",
+        "invitePendingOption",
         "createLabel",
         "createPlaceholder",
         "createButton",
@@ -324,14 +353,101 @@ describe("i18n — teamBrigades namespace present in en/lt/ru", () => {
           `${locale} teamBrigades.outcome.${key}`,
         ).toBeGreaterThan(0);
       }
-      for (const key of ["added", "error"]) {
+      // The direct-add outcome catalogue is GONE with the consent bypass.
+      expect(ns.memberOutcome, `${locale} memberOutcome removed`).toBeUndefined();
+      for (const key of [
+        "sent",
+        "created",
+        "deliveryFailed",
+        "alreadyInvited",
+        "rateLimited",
+        "notAuthorized",
+        "noEmail",
+        "needsMigration",
+        "error",
+      ]) {
         expect(
-          String(ns.memberOutcome?.[key] ?? "").length,
-          `${locale} teamBrigades.memberOutcome.${key}`,
+          String(ns.inviteOutcome?.[key] ?? "").length,
+          `${locale} teamBrigades.inviteOutcome.${key}`,
         ).toBeGreaterThan(0);
       }
+      for (const key of ["invited", "direct"]) {
+        expect(
+          String(ns.provenance?.[key] ?? "").length,
+          `${locale} teamBrigades.provenance.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      for (const key of ["heading", "notSet", "from", "accommodationNeeded", "ownTransport", "maxTripDays"]) {
+        expect(
+          String(ns.availability?.[key] ?? "").length,
+          `${locale} teamBrigades.availability.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      for (const key of ["heading", "empty", "notEnabled", "accept", "decline", "dates"]) {
+        expect(
+          String(ns.enquiries?.[key] ?? "").length,
+          `${locale} teamBrigades.enquiries.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      for (const key of ["created", "accepted", "declined", "withdrawn", "expired", "other"]) {
+        expect(
+          String(ns.enquiries?.status?.[key] ?? "").length,
+          `${locale} teamBrigades.enquiries.status.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      expect(String(ns.details?.heading ?? "").length).toBeGreaterThan(0);
+      expect(String(ns.details?.notEnabled ?? "").length).toBeGreaterThan(0);
       // The roster empty state (pre-apply fallback) stays intact.
       expect(String(messages.teamRosterEmpty?.company?.title ?? "").length).toBeGreaterThan(0);
+    });
+
+    it(`${locale} carries the employer-side teamEnquiries catalogue`, () => {
+      const messages = JSON.parse(readWeb(`messages/${locale}.json`));
+      const ns = messages.teamEnquiries;
+      expect(ns, `${locale} teamEnquiries namespace`).toBeTruthy();
+      for (const key of [
+        "enquireButton",
+        "formIntro",
+        "messageLabel",
+        "startLabel",
+        "endLabel",
+        "submit",
+        "sending",
+        "cancel",
+        "notEnabled",
+        "dates",
+        "withdraw",
+      ]) {
+        expect(String(ns[key] ?? "").length, `${locale} teamEnquiries.${key}`).toBeGreaterThan(0);
+      }
+      for (const key of [
+        "created",
+        "duplicateOpen",
+        "ownTeam",
+        "contactDetails",
+        "messageRequired",
+        "messageTooLong",
+        "invalidDates",
+        "rateLimited",
+        "error",
+      ]) {
+        expect(
+          String(ns.outcome?.[key] ?? "").length,
+          `${locale} teamEnquiries.outcome.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      for (const key of ["created", "accepted", "declined", "withdrawn", "expired", "other"]) {
+        expect(
+          String(ns.status?.[key] ?? "").length,
+          `${locale} teamEnquiries.status.${key}`,
+        ).toBeGreaterThan(0);
+      }
+      expect(String(ns.withdrawOutcome?.withdrawn ?? "").length).toBeGreaterThan(0);
+      expect(String(ns.myList?.empty ?? "").length).toBeGreaterThan(0);
+      expect(
+        String(messages.network?.teamEnquiriesTitle ?? "").length,
+        `${locale} network.teamEnquiriesTitle`,
+      ).toBeGreaterThan(0);
     });
   }
 });

@@ -11,12 +11,17 @@ import {
   listMySentInvitations,
   searchPeopleAndCompanies,
 } from "@/lib/invitations/network";
+import { listMyTeamEnquiries } from "@/lib/company/team-enquiries";
 import { InvitePanel } from "@/components/app/invite-panel";
 import {
   IncomingInvitationList,
   SentInvitationList,
 } from "@/components/app/invitation-list";
 import { MessageButton } from "@/components/app/message-button";
+import {
+  MyTeamEnquiriesList,
+  TeamEnquiryButton,
+} from "@/components/app/team-enquiry-entry";
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -50,13 +55,15 @@ export default async function NetworkPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/network`);
 
-  const [orgsResult, projects, engagements, sent, incoming] = await Promise.all([
-    getOwnedOrganizations(),
-    listManagedProjects(),
-    listMyEngagements(),
-    listMySentInvitations(),
-    listInvitationsForMe(),
-  ]);
+  const [orgsResult, projects, engagements, sent, incoming, myTeamEnquiries] =
+    await Promise.all([
+      getOwnedOrganizations(),
+      listManagedProjects(),
+      listMyEngagements(),
+      listMySentInvitations(),
+      listInvitationsForMe(),
+      listMyTeamEnquiries(),
+    ]);
   const organizations =
     orgsResult.kind === "ok"
       ? orgsResult.organizations.map((o) => ({ id: o.id, name: o.name }))
@@ -180,6 +187,14 @@ export default async function NetworkPage({
                         {c.country && (
                           <span className="text-[11px] text-text-muted">{c.country}</span>
                         )}
+                        {/* Trust Connect Teams v1: where a TEAM is already
+                            legitimately visible (this public-display search),
+                            the structured enquiry replaces off-platform
+                            contact hunting. Not a directory — nothing new is
+                            exposed. */}
+                        {c.organizationType === "team" && (
+                          <TeamEnquiryButton teamOrgId={c.organizationId} locale={locale} />
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -215,6 +230,18 @@ export default async function NetworkPage({
           <p className="text-xs text-text-muted">{t("sent.error")}</p>
         )}
       </section>
+
+      {/* My enquiries to teams (Trust Connect Teams v1) — shown once at
+          least one real enquiry exists; the entry point lives on the team
+          rows in the search above. */}
+      {myTeamEnquiries.status === "ok" && myTeamEnquiries.items.length > 0 && (
+        <section className="flex flex-col gap-2" data-testid="network-team-enquiries">
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+            {t("teamEnquiriesTitle")}
+          </h2>
+          <MyTeamEnquiriesList items={myTeamEnquiries.items} locale={locale} />
+        </section>
+      )}
 
       {/* My organizations. */}
       {organizations.length > 0 && (

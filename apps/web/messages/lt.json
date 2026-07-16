@@ -5705,18 +5705,18 @@
   },
   "teamBrigades": {
     "title": "Komandos / brigados",
-    "intro": "Brigada — tai reali darbo grupė tavo įmonėje. Sukurk brigadą, pridėk jau pakviestus darbuotojus ir matyk, ką grupė deklaruoja mokanti.",
+    "intro": "Brigada — tai reali darbo grupė tavo įmonėje. Sukurk brigadą, pakviesk susietus darbuotojus — kiekvienas prisijungia tik pats priėmęs kvietimą — ir matyk, ką grupė deklaruoja mokanti.",
     "honestNote": "Įgūdžių skaičiai — pačių narių deklaruoti. „Patvirtinta“ reiškia, kad vadovas patvirtino įgūdį per dienyno peržiūrą. Tai nėra komandos sertifikatas ir ne reitingas.",
     "noTeams": "Brigadų dar nėra. Sukurk pirmąją žemiau — išgalvotų komandų nerodome.",
     "memberCount": "Nariai: {count}",
-    "noMembers": "Narių dar nėra. Pridėk darbuotojus iš savo sąrašo žemiau.",
+    "noMembers": "Narių dar nėra. Pakviesk darbuotojus iš savo sąrašo žemiau — kiekvienas prisijungia pats priėmęs kvietimą.",
     "capabilityHeading": "Ką ši brigada deklaruoja",
     "capabilityEmpty": "Nariai dar nedeklaravo įgūdžių — nieko neišgalvojame.",
     "declaredShort": "deklaravo {count}",
     "confirmedShort": "patvirtinta {count}",
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
-    "addLabel": "Pridėti susietą darbuotoją",
-    "addButton": "Į brigadą",
+    "addLabel": "Pakviesti susietą darbuotoją",
+    "addButton": "Siųsti kvietimą",
     "createLabel": "Naujos brigados pavadinimas",
     "createPlaceholder": "pvz., Fasado brigada A",
     "createButton": "Sukurti brigadą",
@@ -5729,9 +5729,138 @@
       "needsMigration": "Brigadų modelis šioje aplinkoje dar neįjungtas.",
       "error": "Brigados sukurti nepavyko. Niekas nebuvo išsaugota."
     },
-    "memberOutcome": {
-      "added": "Darbuotojas pridėtas į brigadą.",
-      "error": "Darbuotojo pridėti nepavyko. Niekas nebuvo pakeista."
+    "consentNote": "Narystė prasideda tik tada, kai darbuotojas pats priima kvietimą — nieko nepridedame be jo sutikimo.",
+    "inviteNotEnabled": "Komandos kvietimai šioje aplinkoje dar neįjungti, todėl narių pakviesti iš čia negalima.",
+    "invitePendingOption": "{name} (kvietimas išsiųstas)",
+    "provenance": {
+      "invited": "prisijungė pats priėmęs kvietimą",
+      "direct": "pridėtas anksčiau, iki kvietimų"
+    },
+    "inviteOutcome": {
+      "sent": "Kvietimas išsiųstas el. paštu. Narystė prasidės, kai darbuotojas jį priims.",
+      "created": "Kvietimas sukurtas. Darbuotojas jį matys skiltyje „Mano tinklas“ ir ten pats nuspręs.",
+      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiško pristatyti nepavyko. Darbuotojas jį vis tiek matys skiltyje „Mano tinklas“.",
+      "alreadyInvited": "Šis darbuotojas jau turi galiojantį kvietimą į šią brigadą.",
+      "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
+      "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
+      "noEmail": "Šis darbuotojas neturi tinkamo el. pašto adreso, todėl kvietimo sukurti negalima.",
+      "needsMigration": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "error": "Kvietimo išsiųsti nepavyko. Niekas nebuvo pakeista."
+    },
+    "details": {
+      "heading": "Redaguoti komandos duomenis",
+      "availabilityLabel": "Ar komanda laisva",
+      "availableFromLabel": "Laisva nuo",
+      "maxTripDaysLabel": "Ilgiausia išvyka (dienomis, nebūtina)",
+      "accommodationLabel": "Komandai reikia apgyvendinimo",
+      "transportLabel": "Komanda turi savo transportą",
+      "noteLabel": "Pastaba (matoma tik jūsų vadovams)",
+      "save": "Išsaugoti duomenis",
+      "saving": "Saugoma…",
+      "notEnabled": "Komandos duomenys paruošti, bet šioje aplinkoje dar neįjungti.",
+      "status": {
+        "availableNow": "Laisva dabar",
+        "availableFrom": "Laisva nuo datos",
+        "notAvailable": "Šiuo metu nelaisva"
+      },
+      "outcome": {
+        "saved": "Komandos duomenys išsaugoti.",
+        "notAllowed": "Duomenis redaguoti gali tik brigados savininkas arba vadovas.",
+        "dateRequired": "Pasirink datą, nuo kada komanda laisva.",
+        "invalidTripDays": "Išvykos trukmė turi būti nuo 1 iki 365 dienų.",
+        "noteTooLong": "Pastaba turi būti ne ilgesnė nei 500 ženklų.",
+        "error": "Duomenų išsaugoti nepavyko. Niekas nebuvo pakeista.",
+        "invalidSize": "Sudėtis turi būti nuo 1 iki 200 žmonių, o didžiausia — ne mažesnė už mažiausią.",
+        "invalidCountries": "Šalis nurodyk trumpais šalių ženklais, pvz., LT, DE — iki 30."
+      },
+      "sizeMinLabel": "Mažiausia sudėtis darbui (nebūtina)",
+      "sizeMaxLabel": "Didžiausia sudėtis darbui (nebūtina)",
+      "countriesLabel": "Šalys, kuriose komanda gali dirbti",
+      "countriesPlaceholder": "pvz., LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Ar komanda laisva",
+      "notSet": "Dar neužpildyta — atsidaryk „Redaguoti komandos duomenis“ žemiau.",
+      "from": "Laisva nuo {date}",
+      "accommodationNeeded": "Reikia apgyvendinimo",
+      "ownTransport": "Savas transportas",
+      "maxTripDays": "Išvykos iki {count} d.",
+      "size": "Žmonių: {size}",
+      "countries": "Šalys: {list}"
+    },
+    "enquiries": {
+      "heading": "Užklausos šiai komandai ({count} laukia)",
+      "empty": "Užklausų dar nėra. Kai darbdavys paklaus apie šią komandą, matysi čia.",
+      "notEnabled": "Komandos užklausos paruoštos, bet šioje aplinkoje dar neįjungtos.",
+      "accept": "Priimti",
+      "decline": "Atmesti",
+      "unknownProposer": "Nežinomas siuntėjas",
+      "dates": "Laikotarpis: {from} – {to}",
+      "status": {
+        "created": "Laukia atsakymo",
+        "accepted": "Priimta",
+        "declined": "Atmesta",
+        "withdrawn": "Atšaukta",
+        "expired": "Nebegalioja",
+        "other": "Kita"
+      },
+      "respondOutcome": {
+        "accepted": "Užklausa priimta. Siuntėjas matys tavo atsakymą.",
+        "declined": "Užklausa atmesta. Siuntėjas matys tavo atsakymą.",
+        "notAllowed": "Atsakyti gali tik komandos savininkas arba vadovas.",
+        "notOpen": "Ši užklausa nebėra atvira.",
+        "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Pateikti užklausą šiai komandai",
+    "formIntro": "Užklausa keliauja komandos vadovui platformos viduje. Nerašyk el. pašto adresų ar telefono numerių — tokia žinutė bus atmesta.",
+    "messageLabel": "Žinutė komandai",
+    "messagePlaceholder": "pvz., Ieškome fasado brigados objektui Vilniuje, maždaug 6 savaitėms.",
+    "startLabel": "Reikia nuo (nebūtina)",
+    "endLabel": "Reikia iki (nebūtina)",
+    "submit": "Siųsti užklausą",
+    "sending": "Siunčiama…",
+    "cancel": "Atšaukti",
+    "notEnabled": "Komandų užklausos paruoštos, bet šioje aplinkoje dar neįjungtos.",
+    "outcome": {
+      "created": "Užklausa išsiųsta. Komandos atsakymą matysi skiltyje „Mano tinklas“.",
+      "duplicateOpen": "Jau turi atvirą užklausą šiai komandai.",
+      "ownTeam": "Tai tavo paties komanda — užklausos sau pateikti negalima.",
+      "contactDetails": "Pašalink el. pašto adresus ir telefono numerius — užklausos keliauja tik platformos viduje.",
+      "messageRequired": "Pirmiausia parašyk trumpą žinutę.",
+      "messageTooLong": "Žinutė turi būti ne ilgesnė nei 500 ženklų.",
+      "invalidDates": "Pabaigos data negali būti ankstesnė už pradžios datą.",
+      "rateLimited": "Kol kas pasiektas užklausų limitas. Pabandyk vėliau.",
+      "error": "Užklausos išsiųsti nepavyko. Niekas nebuvo išsaugota."
+    },
+    "status": {
+      "created": "Laukia atsakymo",
+      "accepted": "Priimta",
+      "declined": "Atmesta",
+      "withdrawn": "Atšaukta",
+      "expired": "Nebegalioja",
+      "other": "Kita"
+    },
+    "dates": "Laikotarpis: {from} – {to}",
+    "withdraw": "Atšaukti užklausą",
+    "withdrawOutcome": {
+      "withdrawn": "Užklausa atšaukta.",
+      "notOpen": "Ši užklausa nebėra atvira.",
+      "error": "Užklausos atšaukti nepavyko. Niekas nebuvo pakeista."
+    },
+    "myList": {
+      "empty": "Užklausų komandoms dar nėra.",
+      "unknownTeam": "Komanda"
+    },
+    "availability": {
+      "availableNow": "Komanda nurodo: laisva dabar",
+      "from": "Komanda nurodo: laisva nuo {date}",
+      "notAvailable": "Komanda nurodo: šiuo metu nelaisva",
+      "accommodationNeeded": "Reikia apgyvendinimo",
+      "ownTransport": "Savas transportas",
+      "maxTripDays": "Išvykos iki {count} d."
     }
   },
   "agentOs": {
@@ -9080,7 +9209,8 @@
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą."
       }
-    }
+    },
+    "teamEnquiriesTitle": "Mano užklausos komandoms"
   },
   "people": {
     "eyebrow": "Asmens profilis",

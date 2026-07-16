@@ -372,6 +372,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260716120000_contact_disclosure_requests_v1 +
     // 20260716121000_request_rate_limits_v3) — DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 142/);
+    // Bumped 142 -> 144 for the Trust Connect Teams v1 drafts
+    // (20260716130000_team_profile_details_v1 +
+    // 20260716131000_team_enquiries_v1) — DRAFT / needs-human-gate, NOT
+    // applied; paired rollbacks in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 144/);
   });
 });
