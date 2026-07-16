@@ -15,7 +15,7 @@ begin;
 
 drop function if exists public.list_team_enquiries_for_my_teams_v1();
 drop function if exists public.list_my_team_enquiries_v1();
-drop function if exists public.expire_stale_team_enquiries_v1(integer);
+drop function if exists public.expire_stale_team_enquiries_v1();
 drop function if exists public.withdraw_team_enquiry_v1(uuid);
 drop function if exists public.respond_team_enquiry_v1(uuid, text);
 drop function if exists public.propose_team_enquiry_v1(uuid, text, date, date, uuid);

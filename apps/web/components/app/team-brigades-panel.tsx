@@ -5,22 +5,46 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
-import { addOrgMember } from "@/lib/operations/org-membership";
-import { createTeamAction } from "@/lib/company/team-brigade-actions";
+import {
+  createTeamAction,
+  inviteWorkerToTeamAction,
+} from "@/lib/company/team-brigade-actions";
 import type { TeamBrigade } from "@/lib/company/team-brigades";
+import { TeamDetailsForm } from "@/components/app/team-details-form";
+import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
 
 /**
- * Teams / brigades minimum surface on the EXISTING company room (§8.3).
+ * Teams / brigades surface on the EXISTING company room (§8.3 + Trust
+ * Connect Teams v1).
  *
  * - A brigade is an organizations row (organization_type='team') — no new
  *   dashboard, no parallel team system.
- * - "Add member" reuses the EXISTING canonical addOrgMember action
- *   (engagement_contexts 'employee'), exactly like the org-members panel.
- * - The capability list shows HONEST counts derived from members' existing
- *   worker_skills (declared vs manager-confirmed). It is not a team rating
- *   and never claims team-level verification.
+ * - CONSENT (gap 1): "add member" is GONE — the owner sends a canonical
+ *   join_team invitation and the worker's own acceptance creates the
+ *   membership. Provenance is shown honestly per member: joined by
+ *   invitation vs added earlier without a recorded acceptance. Nothing is
+ *   invented for pre-existing rows.
+ * - DETAILS (gap 2) + ENQUIRIES (gap 3) are folded sections per team, each
+ *   with an honest "prepared, not enabled" state until the owner applies the
+ *   matching migration.
+ * - The capability list (gap 4, beside availability) shows HONEST counts
+ *   derived from members' existing worker_skills (declared vs
+ *   manager-confirmed). It is not a team rating and never claims team-level
+ *   verification.
  */
-export function TeamBrigadesPanel({ teams }: { teams: readonly TeamBrigade[] }) {
+export function TeamBrigadesPanel({
+  teams,
+  locale,
+  invitationsApplied,
+  detailsApplied,
+  enquiriesApplied,
+}: {
+  teams: readonly TeamBrigade[];
+  locale: string;
+  invitationsApplied: boolean;
+  detailsApplied: boolean;
+  enquiriesApplied: boolean;
+}) {
   const router = useRouter();
   const t = useTranslations("teamBrigades");
   const tSkill = useTranslations("skillNames");
@@ -55,13 +79,26 @@ export function TeamBrigadesPanel({ teams }: { teams: readonly TeamBrigade[] }) 
     });
   }
 
-  function addMember(teamId: string) {
+  function invite(teamId: string) {
     const workerId = selected[teamId] ?? "";
     if (!workerId) return;
     setMsg(null);
     startTransition(async () => {
-      const res = await addOrgMember(teamId, workerId);
-      setMsg(res.ok ? t("memberOutcome.added") : t("memberOutcome.error"));
+      const res = await inviteWorkerToTeamAction({ teamId, workerId, locale });
+      if (res.outcome === "sent") setMsg(t("inviteOutcome.sent"));
+      else if (res.outcome === "created") setMsg(t("inviteOutcome.created"));
+      else if (res.outcome === "delivery_failed")
+        setMsg(t("inviteOutcome.deliveryFailed"));
+      else if (res.outcome === "already_invited")
+        setMsg(t("inviteOutcome.alreadyInvited"));
+      else if (res.outcome === "rate_limited" || res.outcome === "limit_reached")
+        setMsg(t("inviteOutcome.rateLimited"));
+      else if (res.outcome === "not_authorized")
+        setMsg(t("inviteOutcome.notAuthorized"));
+      else if (res.outcome === "no_email") setMsg(t("inviteOutcome.noEmail"));
+      else if (res.outcome === "needs_migration")
+        setMsg(t("inviteOutcome.needsMigration"));
+      else setMsg(t("inviteOutcome.error"));
       router.refresh();
     });
   }
@@ -103,81 +140,224 @@ export function TeamBrigadesPanel({ teams }: { teams: readonly TeamBrigade[] }) 
               </div>
 
               {/* Dead-UI rule B: member names are plain data, not the
-                  tappable-pill language used by real chips elsewhere. */}
+                  tappable-pill language used by real chips elsewhere. The
+                  provenance suffix is honest ledger truth: joined by
+                  invitation vs added earlier (no recorded acceptance). */}
               {team.members.length === 0 ? (
                 <p className="text-xs text-text-muted">{t("noMembers")}</p>
               ) : (
-                <ul className="flex flex-wrap gap-x-2 gap-y-0.5">
+                <ul className="flex flex-col gap-0.5">
                   {team.members.map((m) => (
                     <li key={m.engagementId} className="text-xs text-text-primary">
                       {m.name}
+                      {m.provenance === "invited" && (
+                        <span className="ml-1.5 text-[10px] text-state-success">
+                          {t("provenance.invited")}
+                        </span>
+                      )}
+                      {m.provenance === "direct" && (
+                        <span className="ml-1.5 text-[10px] text-text-muted">
+                          {t("provenance.direct")}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
               )}
 
-              <div className="flex flex-col gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                  {t("capabilityHeading")}
-                </span>
-                {team.capability === null || team.capability.length === 0 ? (
-                  <p className="text-xs text-text-muted">{t("capabilityEmpty")}</p>
-                ) : (
-                  <ul
-                    className="flex flex-wrap gap-1.5"
-                    data-testid={`team-capability-${team.id}`}
-                  >
-                    {team.capability.map((c) => (
-                      <li
-                        key={c.slug}
-                        className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary"
-                      >
-                        <span className="text-text-primary">{skillLabel(c.slug)}</span>{" "}
-                        · {t("declaredShort", { count: c.membersDeclared })}
-                        {c.membersConfirmed > 0
-                          ? ` · ${t("confirmedShort", { count: c.membersConfirmed })}`
-                          : ""}
+              {/* Gap 4: availability + capability composition side by side. */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {t("capabilityHeading")}
+                  </span>
+                  {team.capability === null || team.capability.length === 0 ? (
+                    <p className="text-xs text-text-muted">{t("capabilityEmpty")}</p>
+                  ) : (
+                    <ul
+                      className="flex flex-wrap gap-1.5"
+                      data-testid={`team-capability-${team.id}`}
+                    >
+                      {team.capability.map((c) => (
+                        <li
+                          key={c.slug}
+                          className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary"
+                        >
+                          <span className="text-text-primary">{skillLabel(c.slug)}</span>{" "}
+                          · {t("declaredShort", { count: c.membersDeclared })}
+                          {c.membersConfirmed > 0
+                            ? ` · ${t("confirmedShort", { count: c.membersConfirmed })}`
+                            : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {t("availability.heading")}
+                  </span>
+                  {!detailsApplied ? (
+                    <p
+                      className="text-xs text-text-muted"
+                      data-testid={`team-availability-not-enabled-${team.id}`}
+                    >
+                      {t("details.notEnabled")}
+                    </p>
+                  ) : team.details === null ? (
+                    <p
+                      className="text-xs text-text-muted"
+                      data-testid={`team-availability-empty-${team.id}`}
+                    >
+                      {t("availability.notSet")}
+                    </p>
+                  ) : (
+                    <ul
+                      className="flex flex-wrap gap-1.5"
+                      data-testid={`team-availability-${team.id}`}
+                    >
+                      <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-primary">
+                        {team.details.availabilityStatus === "available_now"
+                          ? t("details.status.availableNow")
+                          : team.details.availabilityStatus === "available_from"
+                            ? t("availability.from", {
+                                date: team.details.availableFrom ?? "—",
+                              })
+                            : t("details.status.notAvailable")}
                       </li>
-                    ))}
-                  </ul>
-                )}
+                      {team.details.accommodationNeeded && (
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                          {t("availability.accommodationNeeded")}
+                        </li>
+                      )}
+                      {team.details.transportOwn && (
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                          {t("availability.ownTransport")}
+                        </li>
+                      )}
+                      {team.details.maxTripDays != null && (
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                          {t("availability.maxTripDays", {
+                            count: team.details.maxTripDays,
+                          })}
+                        </li>
+                      )}
+                      {(team.details.deployableSizeMin != null ||
+                        team.details.deployableSizeMax != null) && (
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                          {t("availability.size", {
+                            size:
+                              team.details.deployableSizeMin != null &&
+                              team.details.deployableSizeMax != null
+                                ? team.details.deployableSizeMin ===
+                                  team.details.deployableSizeMax
+                                  ? String(team.details.deployableSizeMin)
+                                  : `${team.details.deployableSizeMin}–${team.details.deployableSizeMax}`
+                                : String(
+                                    team.details.deployableSizeMin ??
+                                      team.details.deployableSizeMax,
+                                  ),
+                          })}
+                        </li>
+                      )}
+                      {team.details.destinationCountries &&
+                        team.details.destinationCountries.length > 0 && (
+                          <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                            {t("availability.countries", {
+                              list: team.details.destinationCountries.join(", "),
+                            })}
+                          </li>
+                        )}
+                    </ul>
+                  )}
+                </div>
               </div>
 
-              {team.addable.length === 0 ? (
+              {/* Folded: edit team details (gap 2). */}
+              {detailsApplied && (
+                <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3">
+                  <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+                    {t("details.heading")}
+                  </summary>
+                  <div className="pt-3">
+                    <TeamDetailsForm teamId={team.id} details={team.details} />
+                  </div>
+                </details>
+              )}
+
+              {/* Folded: enquiry inbox (gap 3). */}
+              <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3">
+                <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+                  {t("enquiries.heading", {
+                    count: team.enquiries.filter((e) => e.status === "created")
+                      .length,
+                  })}
+                </summary>
+                <div className="pt-3">
+                  {enquiriesApplied ? (
+                    <TeamEnquiryInbox teamId={team.id} enquiries={team.enquiries} />
+                  ) : (
+                    <p
+                      className="text-xs text-text-muted"
+                      data-testid={`team-enquiries-not-enabled-${team.id}`}
+                    >
+                      {t("enquiries.notEnabled")}
+                    </p>
+                  )}
+                </div>
+              </details>
+
+              {/* Gap 1: membership by consent — send a join_team invitation;
+                  the worker's own acceptance creates the membership. */}
+              {!invitationsApplied ? (
+                <p
+                  className="text-[11px] text-text-muted"
+                  data-testid={`team-invite-not-enabled-${team.id}`}
+                >
+                  {t("inviteNotEnabled")}
+                </p>
+              ) : team.addable.length === 0 ? (
                 <p className="text-[11px] text-text-muted">{t("noAddable")}</p>
               ) : (
-                <div className="flex flex-wrap items-center gap-2">
-                  <label
-                    className="text-xs text-text-secondary"
-                    htmlFor={`team-add-${team.id}`}
-                  >
-                    {t("addLabel")}
-                  </label>
-                  <select
-                    id={`team-add-${team.id}`}
-                    className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
-                    value={selected[team.id] ?? ""}
-                    onChange={(e) =>
-                      setSelected((s) => ({ ...s, [team.id]: e.target.value }))
-                    }
-                  >
-                    <option value="">—</option>
-                    {team.addable.map((w) => (
-                      <option key={w.workerId} value={w.workerId}>
-                        {w.name}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    disabled={pending || !(selected[team.id] ?? "")}
-                    onClick={() => addMember(team.id)}
-                    data-testid={`team-add-member-${team.id}`}
-                  >
-                    {t("addButton")}
-                  </Button>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      className="text-xs text-text-secondary"
+                      htmlFor={`team-add-${team.id}`}
+                    >
+                      {t("addLabel")}
+                    </label>
+                    <select
+                      id={`team-add-${team.id}`}
+                      className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                      value={selected[team.id] ?? ""}
+                      onChange={(e) =>
+                        setSelected((s) => ({ ...s, [team.id]: e.target.value }))
+                      }
+                    >
+                      <option value="">—</option>
+                      {team.addable.map((w) => (
+                        <option key={w.workerId} value={w.workerId}>
+                          {w.invitePending
+                            ? t("invitePendingOption", { name: w.name })
+                            : w.name}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={pending || !(selected[team.id] ?? "")}
+                      onClick={() => invite(team.id)}
+                      data-testid={`team-invite-member-${team.id}`}
+                    >
+                      {t("addButton")}
+                    </Button>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-text-muted">
+                    {t("consentNote")}
+                  </p>
                 </div>
               )}
             </li>
@@ -213,7 +393,11 @@ export function TeamBrigadesPanel({ teams }: { teams: readonly TeamBrigade[] }) 
       </div>
 
       {msg && (
-        <p className="text-xs text-text-secondary" data-testid="team-brigades-msg">
+        <p
+          role="status"
+          className="text-xs text-text-secondary"
+          data-testid="team-brigades-msg"
+        >
           {msg}
         </p>
       )}

@@ -13,7 +13,7 @@
 
 begin;
 
-drop function if exists public.save_team_details_v1(uuid, text, date, boolean, boolean, integer, text);
+drop function if exists public.save_team_details_v1(uuid, text, date, boolean, boolean, integer, text, integer, integer, text[]);
 drop policy if exists team_details_select on public.team_details;
 drop table if exists public.team_details;
 

@@ -5705,18 +5705,18 @@
   },
   "teamBrigades": {
     "title": "Teams / Kolonnen",
-    "intro": "Eine Kolonne ist eine echte Arbeitseinheit in Ihrem Unternehmen. Erstellen Sie eine, fügen Sie bereits eingeladene Arbeitskräfte hinzu und sehen Sie, was die Gruppe kann — basierend auf dem, was ihre Mitglieder angegeben haben.",
+    "intro": "Eine Kolonne ist eine echte Arbeitseinheit in Ihrem Unternehmen. Erstellen Sie eine, laden Sie verknüpfte Arbeitskräfte ein — jede Person tritt erst bei, nachdem sie die Einladung selbst angenommen hat — und sehen Sie, was die Gruppe kann, basierend auf dem, was ihre Mitglieder angegeben haben.",
     "honestNote": "Fähigkeitszahlen sind von den Mitgliedern selbst angegeben. „Bestätigt“ bedeutet, dass ein Manager diese Fähigkeit durch Prüfung des Arbeitsjournals bestätigt hat. Dies ist keine Team-Zertifizierung und keine Bewertung.",
     "noTeams": "Noch keine Kolonnen. Erstellen Sie unten die erste — wir zeigen niemals erfundene Teams.",
     "memberCount": "Mitglieder: {count}",
-    "noMembers": "Noch keine Mitglieder. Fügen Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste hinzu.",
+    "noMembers": "Noch keine Mitglieder. Laden Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste ein — jede Person tritt nach eigener Annahme bei.",
     "capabilityHeading": "Was diese Kolonne angibt",
     "capabilityEmpty": "Noch keine angegebenen Fähigkeiten unter den Mitgliedern — nichts wird erfunden.",
     "declaredShort": "angegeben von {count}",
     "confirmedShort": "bestätigt für {count}",
     "noAddable": "Keine verknüpften Arbeitskräfte mehr zum Hinzufügen. Laden Sie zuerst Arbeitskräfte im Bereich Belegschaftsliste ein.",
-    "addLabel": "Verknüpfte Arbeitskraft hinzufügen",
-    "addButton": "Zur Kolonne hinzufügen",
+    "addLabel": "Verknüpfte Arbeitskraft einladen",
+    "addButton": "Einladung senden",
     "createLabel": "Name der neuen Kolonne",
     "createPlaceholder": "z. B. Fassadenkolonne A",
     "createButton": "Kolonne erstellen",
@@ -5729,9 +5729,138 @@
       "needsMigration": "Das Kolonnenmodell ist in dieser Umgebung noch nicht aktiviert.",
       "error": "Die Kolonne konnte nicht erstellt werden. Es wurde nichts gespeichert."
     },
-    "memberOutcome": {
-      "added": "Arbeitskraft zur Kolonne hinzugefügt.",
-      "error": "Die Arbeitskraft konnte nicht hinzugefügt werden. Es wurde nichts geändert."
+    "consentNote": "Die Mitgliedschaft beginnt erst, wenn die Arbeitskraft die Einladung selbst annimmt — niemand wird stillschweigend hinzugefügt.",
+    "inviteNotEnabled": "Kolonnen-Einladungen sind in dieser Umgebung noch nicht aktiviert, daher können hier keine Mitglieder eingeladen werden.",
+    "invitePendingOption": "{name} (Einladung gesendet)",
+    "provenance": {
+      "invited": "beigetreten durch eigene Annahme",
+      "direct": "früher hinzugefügt, vor den Einladungen"
+    },
+    "inviteOutcome": {
+      "sent": "Einladung per E-Mail gesendet. Die Mitgliedschaft beginnt, sobald die Arbeitskraft sie annimmt.",
+      "created": "Einladung erstellt. Die Arbeitskraft sieht sie unter Mein Netzwerk und entscheidet dort selbst.",
+      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Die Arbeitskraft sieht sie dennoch unter Mein Netzwerk.",
+      "alreadyInvited": "Diese Arbeitskraft hat bereits eine offene Einladung in diese Kolonne.",
+      "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
+      "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
+      "noEmail": "Diese Arbeitskraft hat keine nutzbare E-Mail-Adresse, daher kann die Einladung nicht erstellt werden.",
+      "needsMigration": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "error": "Die Einladung konnte nicht gesendet werden. Es wurde nichts geändert."
+    },
+    "details": {
+      "heading": "Kolonnendaten bearbeiten",
+      "availabilityLabel": "Ist die Kolonne verfügbar",
+      "availableFromLabel": "Verfügbar ab",
+      "maxTripDaysLabel": "Längster Einsatz (Tage, optional)",
+      "accommodationLabel": "Die Kolonne braucht eine Unterkunft",
+      "transportLabel": "Die Kolonne hat eigenen Transport",
+      "noteLabel": "Notiz (nur für Ihre Manager sichtbar)",
+      "save": "Daten speichern",
+      "saving": "Wird gespeichert…",
+      "notEnabled": "Kolonnendaten sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "status": {
+        "availableNow": "Jetzt verfügbar",
+        "availableFrom": "Verfügbar ab einem Datum",
+        "notAvailable": "Nicht verfügbar"
+      },
+      "outcome": {
+        "saved": "Kolonnendaten gespeichert.",
+        "notAllowed": "Nur der Kolonneninhaber oder ein Manager kann diese Daten bearbeiten.",
+        "dateRequired": "Wählen Sie das Datum, ab dem die Kolonne verfügbar ist.",
+        "invalidTripDays": "Die Einsatzdauer muss zwischen 1 und 365 Tagen liegen.",
+        "noteTooLong": "Die Notiz darf höchstens 500 Zeichen lang sein.",
+        "error": "Die Daten konnten nicht gespeichert werden. Es wurde nichts geändert.",
+        "invalidSize": "Die Besetzung muss zwischen 1 und 200 liegen, die größte nicht kleiner als die kleinste.",
+        "invalidCountries": "Länder als kurze Länderkennungen angeben, z. B. LT, DE — höchstens 30."
+      },
+      "sizeMinLabel": "Kleinste Besetzung für einen Auftrag (optional)",
+      "sizeMaxLabel": "Größte Besetzung für einen Auftrag (optional)",
+      "countriesLabel": "Länder, in denen die Kolonne arbeiten kann",
+      "countriesPlaceholder": "z. B. LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Verfügbarkeit der Kolonne",
+      "notSet": "Noch nicht ausgefüllt — öffnen Sie unten „Kolonnendaten bearbeiten“.",
+      "from": "Verfügbar ab {date}",
+      "accommodationNeeded": "Braucht Unterkunft",
+      "ownTransport": "Eigener Transport",
+      "maxTripDays": "Einsätze bis {count} Tage",
+      "size": "Personen: {size}",
+      "countries": "Länder: {list}"
+    },
+    "enquiries": {
+      "heading": "Anfragen an diese Kolonne ({count} offen)",
+      "empty": "Noch keine Anfragen. Sobald ein Arbeitgeber nach dieser Kolonne fragt, erscheint es hier.",
+      "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "unknownProposer": "Unbekannter Absender",
+      "dates": "Zeitraum: {from} – {to}",
+      "status": {
+        "created": "Wartet auf Antwort",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "withdrawn": "Zurückgezogen",
+        "expired": "Abgelaufen",
+        "other": "Sonstiges"
+      },
+      "respondOutcome": {
+        "accepted": "Anfrage angenommen. Der Absender sieht Ihre Antwort.",
+        "declined": "Anfrage abgelehnt. Der Absender sieht Ihre Antwort.",
+        "notAllowed": "Nur der Kolonneninhaber oder ein Manager kann antworten.",
+        "notOpen": "Diese Anfrage ist nicht mehr offen.",
+        "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Dieser Kolonne eine Anfrage senden",
+    "formIntro": "Ihre Anfrage geht innerhalb der Plattform an die Kolonnenleitung. Bitte keine E-Mail-Adressen oder Telefonnummern angeben — eine solche Nachricht wird abgelehnt.",
+    "messageLabel": "Nachricht an die Kolonne",
+    "messagePlaceholder": "z. B. Wir suchen eine Fassadenkolonne für eine Baustelle in Vilnius, etwa 6 Wochen.",
+    "startLabel": "Benötigt ab (optional)",
+    "endLabel": "Benötigt bis (optional)",
+    "submit": "Anfrage senden",
+    "sending": "Wird gesendet…",
+    "cancel": "Abbrechen",
+    "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "outcome": {
+      "created": "Anfrage gesendet. Die Antwort der Kolonne sehen Sie unter Mein Netzwerk.",
+      "duplicateOpen": "Sie haben bereits eine offene Anfrage an diese Kolonne.",
+      "ownTeam": "Das ist Ihre eigene Kolonne — eine Anfrage an sich selbst ist nicht möglich.",
+      "contactDetails": "Entfernen Sie E-Mail-Adressen und Telefonnummern — Anfragen laufen nur innerhalb der Plattform.",
+      "messageRequired": "Schreiben Sie zuerst eine kurze Nachricht.",
+      "messageTooLong": "Die Nachricht darf höchstens 500 Zeichen lang sein.",
+      "invalidDates": "Das Enddatum darf nicht vor dem Startdatum liegen.",
+      "rateLimited": "Anfragelimit vorerst erreicht. Versuchen Sie es später erneut.",
+      "error": "Die Anfrage konnte nicht gesendet werden. Es wurde nichts gespeichert."
+    },
+    "status": {
+      "created": "Wartet auf Antwort",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "expired": "Abgelaufen",
+      "other": "Sonstiges"
+    },
+    "dates": "Zeitraum: {from} – {to}",
+    "withdraw": "Anfrage zurückziehen",
+    "withdrawOutcome": {
+      "withdrawn": "Anfrage zurückgezogen.",
+      "notOpen": "Diese Anfrage ist nicht mehr offen.",
+      "error": "Die Anfrage konnte nicht zurückgezogen werden. Es wurde nichts geändert."
+    },
+    "myList": {
+      "empty": "Noch keine Anfragen an Kolonnen.",
+      "unknownTeam": "Kolonne"
+    },
+    "availability": {
+      "availableNow": "Kolonne meldet: jetzt verfügbar",
+      "from": "Kolonne meldet: verfügbar ab {date}",
+      "notAvailable": "Kolonne meldet: nicht verfügbar",
+      "accommodationNeeded": "Braucht Unterkunft",
+      "ownTransport": "Eigener Transport",
+      "maxTripDays": "Einsätze bis {count} Tage"
     }
   },
   "agentOs": {
@@ -9009,7 +9138,8 @@
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
-    }
+    },
+    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen"
   },
   "people": {
     "eyebrow": "Personenprofil",

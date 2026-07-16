@@ -5705,18 +5705,18 @@
   },
   "teamBrigades": {
     "title": "Ploegen / brigades",
-    "intro": "Een brigade is een echte werkeenheid binnen je bedrijf. Maak er een aan, voeg werknemers toe die je al hebt uitgenodigd, en zie wat de groep kan op basis van wat de leden hebben opgegeven.",
+    "intro": "Een brigade is een echte werkeenheid binnen je bedrijf. Maak er een aan, nodig gekoppelde werknemers uit — iedereen treedt pas toe na het zelf accepteren van de uitnodiging — en zie wat de groep kan op basis van wat de leden hebben opgegeven.",
     "honestNote": "Vaardigheidsaantallen zijn door leden opgegeven. “Bevestigd” betekent dat een manager die vaardigheid via journaalbeoordeling heeft bevestigd. Dit is geen teamcertificering en geen beoordeling.",
     "noTeams": "Nog geen brigades. Maak hieronder de eerste aan — we tonen nooit verzonnen ploegen.",
     "memberCount": "Leden: {count}",
-    "noMembers": "Nog geen leden. Voeg hieronder werknemers toe uit je gekoppelde bestand.",
+    "noMembers": "Nog geen leden. Nodig hieronder werknemers uit je gekoppelde bestand uit — iedereen treedt toe na eigen acceptatie.",
     "capabilityHeading": "Wat deze brigade opgeeft",
     "capabilityEmpty": "Nog geen opgegeven vaardigheden onder de leden — er wordt niets verzonnen.",
     "declaredShort": "opgegeven door {count}",
     "confirmedShort": "bevestigd voor {count}",
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",
-    "addLabel": "Een gekoppelde werknemer toevoegen",
-    "addButton": "Toevoegen aan brigade",
+    "addLabel": "Een gekoppelde werknemer uitnodigen",
+    "addButton": "Uitnodiging versturen",
     "createLabel": "Naam nieuwe brigade",
     "createPlaceholder": "bijv. Gevelbrigade A",
     "createButton": "Brigade aanmaken",
@@ -5729,9 +5729,138 @@
       "needsMigration": "Het brigademodel is in deze omgeving nog niet ingeschakeld.",
       "error": "De brigade kon niet worden aangemaakt. Er is niets opgeslagen."
     },
-    "memberOutcome": {
-      "added": "Werknemer toegevoegd aan de brigade.",
-      "error": "De werknemer kon niet worden toegevoegd. Er is niets gewijzigd."
+    "consentNote": "Het lidmaatschap begint pas nadat de werknemer de uitnodiging zelf heeft geaccepteerd — we voegen niemand stilzwijgend toe.",
+    "inviteNotEnabled": "Ploeguitnodigingen zijn in deze omgeving nog niet ingeschakeld, dus leden kunnen hier niet worden uitgenodigd.",
+    "invitePendingOption": "{name} (uitnodiging verstuurd)",
+    "provenance": {
+      "invited": "toegetreden na eigen acceptatie",
+      "direct": "eerder toegevoegd, vóór uitnodigingen"
+    },
+    "inviteOutcome": {
+      "sent": "Uitnodiging per e-mail verstuurd. Het lidmaatschap begint zodra de werknemer die accepteert.",
+      "created": "Uitnodiging aangemaakt. De werknemer ziet die onder Mijn netwerk en beslist daar zelf.",
+      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. De werknemer ziet die alsnog onder Mijn netwerk.",
+      "alreadyInvited": "Deze werknemer heeft al een openstaande uitnodiging voor deze brigade.",
+      "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
+      "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
+      "noEmail": "Deze werknemer heeft geen bruikbaar e-mailadres, dus de uitnodiging kan niet worden aangemaakt.",
+      "needsMigration": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "error": "De uitnodiging kon niet worden verstuurd. Er is niets gewijzigd."
+    },
+    "details": {
+      "heading": "Ploeggegevens bewerken",
+      "availabilityLabel": "Is de ploeg beschikbaar",
+      "availableFromLabel": "Beschikbaar vanaf",
+      "maxTripDaysLabel": "Langste klus op locatie (dagen, optioneel)",
+      "accommodationLabel": "De ploeg heeft huisvesting nodig",
+      "transportLabel": "De ploeg heeft eigen vervoer",
+      "noteLabel": "Notitie (alleen zichtbaar voor je managers)",
+      "save": "Gegevens opslaan",
+      "saving": "Opslaan…",
+      "notEnabled": "Ploeggegevens zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "status": {
+        "availableNow": "Nu beschikbaar",
+        "availableFrom": "Beschikbaar vanaf een datum",
+        "notAvailable": "Niet beschikbaar"
+      },
+      "outcome": {
+        "saved": "Ploeggegevens opgeslagen.",
+        "notAllowed": "Alleen de brigade-eigenaar of een manager kan deze gegevens bewerken.",
+        "dateRequired": "Kies de datum waarop de ploeg beschikbaar wordt.",
+        "invalidTripDays": "De duur moet tussen 1 en 365 dagen liggen.",
+        "noteTooLong": "De notitie mag maximaal 500 tekens bevatten.",
+        "error": "De gegevens konden niet worden opgeslagen. Er is niets gewijzigd.",
+        "invalidSize": "De bezetting moet tussen 1 en 200 liggen, en de grootste niet kleiner dan de kleinste.",
+        "invalidCountries": "Noteer landen met korte landletters, bijv. LT, DE — maximaal 30."
+      },
+      "sizeMinLabel": "Kleinste bezetting voor een klus (optioneel)",
+      "sizeMaxLabel": "Grootste bezetting voor een klus (optioneel)",
+      "countriesLabel": "Landen waar de ploeg kan werken",
+      "countriesPlaceholder": "bijv. LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Beschikbaarheid van de ploeg",
+      "notSet": "Nog niet ingevuld — open hieronder “Ploeggegevens bewerken”.",
+      "from": "Beschikbaar vanaf {date}",
+      "accommodationNeeded": "Huisvesting nodig",
+      "ownTransport": "Eigen vervoer",
+      "maxTripDays": "Klussen tot {count} dagen",
+      "size": "Mensen: {size}",
+      "countries": "Landen: {list}"
+    },
+    "enquiries": {
+      "heading": "Aanvragen voor deze ploeg ({count} open)",
+      "empty": "Nog geen aanvragen. Zodra een werkgever naar deze ploeg vraagt, zie je dat hier.",
+      "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "accept": "Accepteren",
+      "decline": "Afwijzen",
+      "unknownProposer": "Onbekende afzender",
+      "dates": "Periode: {from} – {to}",
+      "status": {
+        "created": "Wacht op antwoord",
+        "accepted": "Geaccepteerd",
+        "declined": "Afgewezen",
+        "withdrawn": "Ingetrokken",
+        "expired": "Verlopen",
+        "other": "Overig"
+      },
+      "respondOutcome": {
+        "accepted": "Aanvraag geaccepteerd. De afzender ziet je antwoord.",
+        "declined": "Aanvraag afgewezen. De afzender ziet je antwoord.",
+        "notAllowed": "Alleen de ploegeigenaar of een manager kan antwoorden.",
+        "notOpen": "Deze aanvraag is niet meer open.",
+        "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Deze ploeg een aanvraag sturen",
+    "formIntro": "Je aanvraag gaat binnen het platform naar de ploegleider. Vermeld geen e-mailadressen of telefoonnummers — zo'n bericht wordt geweigerd.",
+    "messageLabel": "Bericht aan de ploeg",
+    "messagePlaceholder": "bijv. We zoeken een gevelploeg voor een project in Vilnius, ongeveer 6 weken.",
+    "startLabel": "Nodig vanaf (optioneel)",
+    "endLabel": "Nodig tot (optioneel)",
+    "submit": "Aanvraag versturen",
+    "sending": "Versturen…",
+    "cancel": "Annuleren",
+    "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+    "outcome": {
+      "created": "Aanvraag verstuurd. Het antwoord van de ploeg zie je onder Mijn netwerk.",
+      "duplicateOpen": "Je hebt al een openstaande aanvraag voor deze ploeg.",
+      "ownTeam": "Dit is je eigen ploeg — een aanvraag aan jezelf is niet mogelijk.",
+      "contactDetails": "Verwijder e-mailadressen en telefoonnummers — aanvragen reizen alleen binnen het platform.",
+      "messageRequired": "Schrijf eerst een kort bericht.",
+      "messageTooLong": "Het bericht mag maximaal 500 tekens bevatten.",
+      "invalidDates": "De einddatum mag niet vóór de startdatum liggen.",
+      "rateLimited": "Aanvraaglimiet voorlopig bereikt. Probeer het later opnieuw.",
+      "error": "De aanvraag kon niet worden verstuurd. Er is niets opgeslagen."
+    },
+    "status": {
+      "created": "Wacht op antwoord",
+      "accepted": "Geaccepteerd",
+      "declined": "Afgewezen",
+      "withdrawn": "Ingetrokken",
+      "expired": "Verlopen",
+      "other": "Overig"
+    },
+    "dates": "Periode: {from} – {to}",
+    "withdraw": "Aanvraag intrekken",
+    "withdrawOutcome": {
+      "withdrawn": "Aanvraag ingetrokken.",
+      "notOpen": "Deze aanvraag is niet meer open.",
+      "error": "De aanvraag kon niet worden ingetrokken. Er is niets gewijzigd."
+    },
+    "myList": {
+      "empty": "Nog geen aanvragen aan ploegen.",
+      "unknownTeam": "Ploeg"
+    },
+    "availability": {
+      "availableNow": "Ploeg meldt: nu beschikbaar",
+      "from": "Ploeg meldt: beschikbaar vanaf {date}",
+      "notAvailable": "Ploeg meldt: niet beschikbaar",
+      "accommodationNeeded": "Huisvesting nodig",
+      "ownTransport": "Eigen vervoer",
+      "maxTripDays": "Klussen tot {count} dagen"
     }
   },
   "agentOs": {
@@ -9009,7 +9138,8 @@
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw."
       }
-    }
+    },
+    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen"
   },
   "people": {
     "eyebrow": "Persoonsprofiel",

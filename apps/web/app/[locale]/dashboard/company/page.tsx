@@ -985,14 +985,23 @@ export default async function CompanyDashboardPage({
 
       <OrgTier1Warning />
 
-      {/* Teams / brigades minimum (§8.3, branch 13): a brigade is an
-          organizations row (organization_type='team'); membership reuses the
-          canonical engagement_contexts spine; capability = honest read-only
-          counts from members' existing worker_skills. Until the owner applies
-          migration 20260705220000 the probe reports not-applied and the
-          existing honest roster empty state stays — nothing is faked. */}
+      {/* Teams / brigades (§8.3, branch 13 + Trust Connect Teams v1): a
+          brigade is an organizations row (organization_type='team');
+          membership arrives ONLY via an accepted join_team invitation (the
+          accept is the consent); capability = honest read-only counts from
+          members' existing worker_skills; team details + the enquiry inbox
+          degrade honestly until the owner applies 20260716120000 /
+          20260716121000. Until 20260705220000 is applied the probe reports
+          not-applied and the existing honest roster empty state stays —
+          nothing is faked. */}
       {teamBrigades.applied ? (
-        <TeamBrigadesPanel teams={teamBrigades.teams} />
+        <TeamBrigadesPanel
+          teams={teamBrigades.teams}
+          locale={locale}
+          invitationsApplied={teamBrigades.invitationsApplied}
+          detailsApplied={teamBrigades.detailsApplied}
+          enquiriesApplied={teamBrigades.enquiriesApplied}
+        />
       ) : (
         <TeamRosterEmptyState variant="company" />
       )}
