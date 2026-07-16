@@ -26,7 +26,14 @@ const load = (loc: string): Record<string, unknown> =>
   JSON.parse(readFileSync(join(ROOT, "messages", `${loc}.json`), "utf8"));
 
 /** Admin-only / ops namespaces where migration/DB diagnostics are legitimate. */
-const EXCLUDED_NAMESPACES = new Set(["admin", "adminReadiness", "agentOs"]);
+// adminPilots (Pilot Onboarding and Measurement v1) is superadmin-only —
+// its honest needs-migration diagnostics are legitimate operator copy.
+const EXCLUDED_NAMESPACES = new Set([
+  "admin",
+  "adminReadiness",
+  "adminPilots",
+  "agentOs",
+]);
 
 /** Missing-backend phrases that must never reach a product user (LT/EN/RU). */
 const BANNED: RegExp[] = [

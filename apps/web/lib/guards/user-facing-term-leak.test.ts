@@ -24,6 +24,7 @@ const ADMIN_ONLY_NAMESPACES = new Set([
   "telemetry",
   "adminReadiness",
   "adminBilling",
+  "adminPilots",
   "needStructuring",
 ]);
 

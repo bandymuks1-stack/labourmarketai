@@ -1779,7 +1779,12 @@ describe("no migration files added by this sprint", () => {
     // with all external sources OFF, versioned observation contract table,
     // append-only insight query log). DRAFT / needs-human-gate, NOT applied;
     // paired rollback + activation runbook in docs/intelligence/.
-    const SPRINT_BASELINE = 140;
+    // Bumped 140 -> 141 for Pilot Onboarding and Measurement v1
+    // (20260716120000_pilots_cohort_v1 — admin-only pilots /
+    // pilot_participants / append-only pilot_outcomes cohort model,
+    // RPC-only writes, owner-recorded outcomes honestly labelled).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    const SPRINT_BASELINE = 141;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

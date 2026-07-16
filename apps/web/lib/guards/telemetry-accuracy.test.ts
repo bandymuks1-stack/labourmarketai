@@ -60,3 +60,34 @@ describe("view dedup is per (event, surface) (F-T7)", () => {
     expect(src).toMatch(/metadata\?\.surface/);
   });
 });
+
+describe("W5 pilot measurement stays PII-free", () => {
+  it("the onboarding step events carry only step/role_context metadata", () => {
+    const wizard = read("components/app/onboarding-wizard.tsx");
+    const calls = wizard
+      .split("trackFunnel(")
+      .slice(1)
+      .map((s) => s.slice(0, s.indexOf(");") + 1));
+    const stepCalls = calls.filter((c) =>
+      /onboardingStep(Role|Profile)Completed/.test(c),
+    );
+    expect(stepCalls.length).toBe(2);
+    for (const call of stepCalls) {
+      // Only the two bounded, allowlisted keys — never a name / email /
+      // country / free-text value.
+      const metaKeys = [...call.matchAll(/(\w+):/g)].map((m) => m[1]);
+      for (const key of metaKeys) {
+        expect(["step", "role_context"]).toContain(key);
+      }
+    }
+  });
+
+  it("pilot_outcomes' only free text is the 500-char-bounded note", () => {
+    const migration = readFileSync(
+      join(APP, "..", "..", "supabase", "migrations",
+        "20260716120000_pilots_cohort_v1.sql"),
+      "utf-8",
+    );
+    expect(migration).toMatch(/char_length\(note\) <= 500/i);
+  });
+});

@@ -281,6 +281,10 @@ describe("NO new DB migration in this PR", () => {
     // (20260714230000_market_intelligence_observations_v1 — source registry,
     // observation contract, insight query log; all external sources OFF).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(140);
+    // Bumped 140 -> 141 for Pilot Onboarding and Measurement v1
+    // (20260716120000_pilots_cohort_v1 — admin-only pilots /
+    // pilot_participants / append-only pilot_outcomes, RPC-only writes).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    expect(count).toBeLessThanOrEqual(141);
   });
 });

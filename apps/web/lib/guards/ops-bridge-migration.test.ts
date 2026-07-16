@@ -368,6 +368,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260714230000_market_intelligence_observations_v1) — DRAFT /
     // needs-human-gate, NOT applied; this cross-pin follows the
     // product-readiness baseline bump made with that layer.
-    expect(guard).toMatch(/SPRINT_BASELINE = 140/);
+    // Bumped 140 -> 141 for Pilot Onboarding and Measurement v1
+    // (20260716120000_pilots_cohort_v1) — DRAFT / needs-human-gate, NOT
+    // applied; cross-pin follows the product-readiness baseline bump.
+    expect(guard).toMatch(/SPRINT_BASELINE = 141/);
   });
 });
