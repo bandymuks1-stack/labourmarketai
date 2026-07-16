@@ -2,11 +2,14 @@ import "server-only";
 
 import type { WorkCardValues } from "@/lib/worker/work-card";
 import type { WorkCardNext, WorkCardState } from "@/lib/worker/work-card-state";
-import { createClient } from "@/lib/supabase/server";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { getOwnAvailability } from "@/lib/market-map/owner-readiness";
-import { getOwnCompany } from "@/lib/company/company-setup";
+import {
+  getOwnCompany,
+  type CompanyReadResult,
+} from "@/lib/company/company-setup";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import {
   listActiveCompanyWorkers,
   listCompanyWorkerInvitations,
@@ -130,35 +133,26 @@ async function loadPerson(): Promise<PersonVM> {
     completenessPct: 0,
   };
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ...base, status: "unavailable" };
+  // Wagon 2 (nav performance): the profile row comes from the request-cached
+  // session-profile reader shared with the auth-shell layout and the overview
+  // page — this block previously issued the third independent profiles SELECT
+  // of the navigation.
+  const session = await getSessionProfile();
+  if (!session.user) return { ...base, status: "unavailable" };
 
-  const [playerCard, avatar, availability, profileRes] = await Promise.all([
+  const [playerCard, avatar, availability] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
     getOwnAvailability(),
-    supabase
-      .from("profiles")
-      .select("full_name, email, active_role, country")
-      .eq("id", user.id)
-      .maybeSingle(),
   ]);
 
-  const profile = profileRes.data as {
-    full_name: string | null;
-    email: string | null;
-    active_role: string | null;
-    country: string | null;
-  } | null;
+  const profile = session.profile;
 
   const name =
     profile?.full_name?.trim() ||
     playerCard?.displayName?.trim() ||
     (profile?.email ? profile.email.split("@")[0] : "") ||
-    (user.email ? user.email.split("@")[0] : "") ||
+    (session.user.email ? session.user.email.split("@")[0] : "") ||
     null;
 
   const professionSlug = playerCard?.professionSlug ?? null;
@@ -211,7 +205,9 @@ async function loadPerson(): Promise<PersonVM> {
   };
 }
 
-async function loadCompany(): Promise<CompanyVM> {
+async function loadCompany(
+  sharedCompanyRead?: Promise<CompanyReadResult>,
+): Promise<CompanyVM> {
   const base: CompanyVM = {
     status: "empty",
     name: null,
@@ -221,7 +217,11 @@ async function loadCompany(): Promise<CompanyVM> {
     invitations: 0,
   };
 
-  const res = await getOwnCompany();
+  // Wagon 2 (nav performance): when the caller (dashboard overview) already
+  // holds a live company read, reuse THAT promise instead of re-calling
+  // getOwnCompany(). getOwnCompany stays deliberately UNCACHED — this is
+  // promise sharing within one render, not caching.
+  const res = await (sharedCompanyRead ?? getOwnCompany());
   if (res.kind !== "ok") return { ...base, status: "unavailable" };
   if (!res.row) return base; // empty — no company yet
   const row = res.row;
@@ -320,10 +320,13 @@ async function loadProject(): Promise<ProjectVM> {
 }
 
 /** One normalized view model for the whole hub. Blocks load in parallel. */
-export async function getPremiumHubViewModel(): Promise<PremiumHubViewModel> {
+export async function getPremiumHubViewModel(opts?: {
+  /** Reuse the caller's in-flight getOwnCompany() read (Wagon 2). */
+  companyRead?: Promise<CompanyReadResult>;
+}): Promise<PremiumHubViewModel> {
   const [person, company, market, project] = await Promise.all([
     loadPerson(),
-    loadCompany(),
+    loadCompany(opts?.companyRead),
     loadMarket(),
     loadProject(),
   ]);

@@ -27,9 +27,16 @@ describe("Guard: dashboard layout parallelizes profile + profile_roles reads", (
   const layout = read("app/[locale]/dashboard/layout.tsx");
 
   it("uses Promise.all for the two independent reads", () => {
+    // Wagon 2: the profiles row now comes from the request-cached
+    // getSessionProfile() reader (shared with the page and the hub) — it must
+    // still run INSIDE the same Promise.all as profile_roles, and the reader
+    // itself must be the one doing the profiles SELECT.
     expect(layout).toMatch(
-      /Promise\.all\(\s*\[[\s\S]{0,800}from\(["']profiles["']\)[\s\S]{0,400}from\(["']profile_roles["']\)/,
+      /Promise\.all\(\s*\[[\s\S]{0,400}getSessionProfile\(\)[\s\S]{0,600}from\(["']profile_roles["']\)/,
     );
+    const reader = read("lib/auth/session-profile.ts");
+    expect(reader).toMatch(/cache\(/);
+    expect(reader).toMatch(/from\(["']profiles["']\)/);
   });
 
   it("does NOT await profiles before awaiting profile_roles", () => {

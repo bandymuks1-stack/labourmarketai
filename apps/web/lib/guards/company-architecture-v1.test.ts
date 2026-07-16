@@ -209,7 +209,13 @@ describe("server-side dashboard card preferences", () => {
 
   it("the overview passes per-context server prefs to BOTH grid render sites", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/getDashboardCardPreferences\(prefsContext\)/);
+    // Wagon 2: the prefs read is kicked off BEFORE the main batch (overlapped
+    // promise chained off the request-cached session profile) — still strictly
+    // per-(profile, context): worker → person, everything else → company.
+    expect(page).toMatch(
+      /getDashboardCardPreferences\(\s*prefsRole === "worker" \? "person" : "company",?\s*\)/,
+    );
+    expect(page).toMatch(/await cardPrefsPromise/);
     expect(
       (page.match(/serverPrefs=\{serverCardPrefs\}/g) ?? []).length,
     ).toBe(2);
