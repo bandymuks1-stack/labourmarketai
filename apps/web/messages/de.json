@@ -9719,5 +9719,34 @@
         "labourCostIndex": "{value}% Arbeitskosten (JoJ) · {geo} · {period}"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Richten wir Ihr Profil ein",
+    "readyTitle": "Profil bereit",
+    "subtitle": "Ein paar Schritte — und Arbeitgeber sehen, was Sie können. Jeder Schritt öffnet genau dort, wo Sie ihn abschließen.",
+    "readyBody": "Alle Schritte erledigt. Ihr Profil ist bereit — Arbeitgeber sehen, was Sie können.",
+    "progress": "{done} von {total}",
+    "steps": {
+      "goal": {
+        "title": "Welche Arbeit suchen Sie?",
+        "hint": "Wählen Sie Ihren Beruf."
+      },
+      "experience": {
+        "title": "CV hochladen oder ein paar Fragen beantworten",
+        "hint": "Erzählen Sie von Ihrer Erfahrung — laden Sie einen CV hoch oder tragen Sie sie selbst ein."
+      },
+      "review": {
+        "title": "Prüfen Sie, was wir gefunden haben",
+        "hint": "Bestätigen, bearbeiten oder entfernen Sie die vorgeschlagenen Einträge."
+      },
+      "location": {
+        "title": "Wo möchten Sie arbeiten?",
+        "hint": "Land und Wunschländer auf der Arbeitskarte angeben."
+      },
+      "availability": {
+        "title": "Wann können Sie anfangen?",
+        "hint": "Markieren Sie Ihre Verfügbarkeit."
+      }
+    }
   }
 }

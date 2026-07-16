@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
+import { WorkerSetupJourney } from "@/components/app/worker-setup-journey";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { FeatureNote } from "@/components/app/feature-note";
@@ -501,6 +502,12 @@ export default async function ProfilePage({
           { href: "#profile-edit", label: tQuick("skills") },
         ]}
       />
+
+      {/* Wagon 4 — guided setup journey: registration → goal → experience →
+          review → location → availability → ready. A guide over the
+          canonical sections below (self-gates to workers; renders nothing
+          for a pure company identity). */}
+      <WorkerSetupJourney />
 
       <section
         id="profile-identity"

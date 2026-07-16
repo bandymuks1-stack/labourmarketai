@@ -9719,5 +9719,34 @@
         "labourCostIndex": "{value}% labour cost (YoY) · {geo} · {period}"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Let's set up your profile",
+    "readyTitle": "Profile ready",
+    "subtitle": "A few steps and employers will see what you can do. Each step opens exactly where you finish it.",
+    "readyBody": "All steps done. Your profile is ready — employers can see what you can do.",
+    "progress": "{done} of {total}",
+    "steps": {
+      "goal": {
+        "title": "What kind of work are you looking for?",
+        "hint": "Pick your profession."
+      },
+      "experience": {
+        "title": "Upload a CV or answer a few questions",
+        "hint": "Tell us about your experience — upload a CV or type it in yourself."
+      },
+      "review": {
+        "title": "Check what we found",
+        "hint": "Confirm, edit or remove the suggested entries."
+      },
+      "location": {
+        "title": "Where do you want to work?",
+        "hint": "Set your country and preferred countries on the work card."
+      },
+      "availability": {
+        "title": "When can you start?",
+        "hint": "Mark your availability."
+      }
+    }
   }
 }

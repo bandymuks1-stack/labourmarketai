@@ -9719,5 +9719,34 @@
         "labourCostIndex": "{value}% darbo sąnaudos (metinis) · {geo} · {period}"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Parenkime jūsų profilį",
+    "readyTitle": "Profilis paruoštas",
+    "subtitle": "Keli žingsniai — ir darbdaviai matys, ką mokate. Kiekvienas žingsnis atsidaro toje vietoje, kur jį užbaigsite.",
+    "readyBody": "Visi žingsniai atlikti. Jūsų profilis paruoštas — darbdaviai matys, ką mokate.",
+    "progress": "{done} iš {total}",
+    "steps": {
+      "goal": {
+        "title": "Kokio darbo ieškote?",
+        "hint": "Pasirinkite savo profesiją."
+      },
+      "experience": {
+        "title": "Įkelkite CV arba atsakykite į kelis klausimus",
+        "hint": "Papasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys."
+      },
+      "review": {
+        "title": "Patikrinkite, ką radome",
+        "hint": "Patvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus."
+      },
+      "location": {
+        "title": "Kur norite dirbti?",
+        "hint": "Nurodykite šalį ir pageidaujamas šalis darbo kortelėje."
+      },
+      "availability": {
+        "title": "Kada galite pradėti?",
+        "hint": "Pažymėkite savo prieinamumą."
+      }
+    }
   }
 }

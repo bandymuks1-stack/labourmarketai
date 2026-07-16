@@ -9719,5 +9719,34 @@
         "labourCostIndex": "{value}% loonkosten (j-o-j) · {geo} · {period}"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Laten we uw profiel instellen",
+    "readyTitle": "Profiel klaar",
+    "subtitle": "Een paar stappen en werkgevers zien wat u kunt. Elke stap opent precies waar u hem afrondt.",
+    "readyBody": "Alle stappen voltooid. Uw profiel is klaar — werkgevers zien wat u kunt.",
+    "progress": "{done} van {total}",
+    "steps": {
+      "goal": {
+        "title": "Wat voor werk zoekt u?",
+        "hint": "Kies uw beroep."
+      },
+      "experience": {
+        "title": "Upload een CV of beantwoord een paar vragen",
+        "hint": "Vertel over uw ervaring — upload een CV of typ het zelf in."
+      },
+      "review": {
+        "title": "Controleer wat we vonden",
+        "hint": "Bevestig, bewerk of verwijder de voorgestelde items."
+      },
+      "location": {
+        "title": "Waar wilt u werken?",
+        "hint": "Stel uw land en voorkeurslanden in op de werkkaart."
+      },
+      "availability": {
+        "title": "Wanneer kunt u beginnen?",
+        "hint": "Geef uw beschikbaarheid aan."
+      }
+    }
   }
 }

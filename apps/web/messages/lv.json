@@ -2850,5 +2850,34 @@
         "none": "nav"
       }
     }
+  },
+  "setupJourney": {
+    "title": "Iestatīsim jūsu profilu",
+    "readyTitle": "Profils gatavs",
+    "subtitle": "Daži soļi — un darba devēji redzēs, ko protat. Katrs solis atveras tieši tur, kur to pabeigsiet.",
+    "readyBody": "Visi soļi pabeigti. Jūsu profils ir gatavs — darba devēji redzēs, ko protat.",
+    "progress": "{done} no {total}",
+    "steps": {
+      "goal": {
+        "title": "Kādu darbu meklējat?",
+        "hint": "Izvēlieties savu profesiju."
+      },
+      "experience": {
+        "title": "Augšupielādējiet CV vai atbildiet uz dažiem jautājumiem",
+        "hint": "Pastāstiet par savu pieredzi — augšupielādējiet CV vai ierakstiet to paši."
+      },
+      "review": {
+        "title": "Pārbaudiet, ko atradām",
+        "hint": "Apstipriniet, labojiet vai noņemiet piedāvātos ierakstus."
+      },
+      "location": {
+        "title": "Kur vēlaties strādāt?",
+        "hint": "Norādiet valsti un vēlamās valstis darba kartē."
+      },
+      "availability": {
+        "title": "Kad varat sākt?",
+        "hint": "Atzīmējiet savu pieejamību."
+      }
+    }
   }
 }
