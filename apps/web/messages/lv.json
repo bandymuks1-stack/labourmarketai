@@ -1259,19 +1259,31 @@
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
       },
-      "suggestions": {
-        "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
-        "start": "[EN] Start conversation",
-        "reasons": {
-          "country_match": "[EN] In country",
-          "preferred_country_match": "[EN] Prefers country",
-          "available_now": "[EN] Available",
-          "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Confirmed skills",
-          "manager_confirmations": "[EN] Manager confirmations",
-          "journal_evidence": "[EN] Journal evidence"
+      "engine": {
+        "title": "Kandidātu atbilstība (pēc noteikumiem)",
+        "humanRule": "Sakārtots pēc tiem pašiem deterministiskajiem noteikumiem kā uzņēmumu meklēšanā — tiek rādīti iemesli un trūkumi, bez aprēķināta personas vērtējuma; lemj cilvēks.",
+        "start": "Sākt sarunu",
+        "authorMarked": "pasūtītāja noteikts",
+        "status": {
+          "strong": "Spēcīga atbilstība",
+          "possible": "Iespējama atbilstība",
+          "weak": "Vāja atbilstība",
+          "insufficient_data": "Nepietiek datu"
         }
+      },
+      "missing": {
+        "worker": "Darbinieks nav norādījis: {criterion}",
+        "demand": "Pieprasījumā nav norādīts: {criterion}"
+      },
+      "team": {
+        "title": "Komandas atbilstība (tikai skatīšanai)",
+        "notReadable": "Komandu dalībnieku dati šajā sesijā nav pieejami — komandas atbilstību nevar aprēķināt.",
+        "empty": "Komandu vēl nav.",
+        "coverage": "{covered} no {total} vajadzīgajām prasmēm sedz vismaz viens piemērots dalībnieks ({eligible} no {members} dalībniekiem piemēroti)",
+        "blockers": "Komanda nevar izpildīt:",
+        "memberCovers": "sedz {count} vajadzīgās prasmes",
+        "noMatchableMembers": "Nevienam komandas dalībniekam nav piesaistīta darbinieka profila.",
+        "unmatchableMembers": "{count} dalībnieki bez piesaistīta darbinieka profila"
       },
       "filters": {
         "all": "[EN] All countries",
@@ -1783,6 +1795,7 @@
         "demand": "[EN] The company has not stated: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimālā pieredze",
         "skills_coverage": "[EN] Required skills",
         "evidence_tiers": "[EN] Skill evidence",
         "profession": "[EN] Profession",

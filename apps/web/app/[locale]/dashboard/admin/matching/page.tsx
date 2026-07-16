@@ -4,6 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import {
   listWorkbench,
+  listTeamsForMatching,
   type DemandRow,
   type SupplyWorkerRow,
 } from "@/lib/admin/matching-workbench";
@@ -11,11 +12,14 @@ import {
   MatchingWorkbenchReview,
   type MatchingReviewLabels,
 } from "@/components/app/matching-workbench-review";
-import {
-  buildMatchSuggestions,
-  filterSupply,
-} from "@/lib/admin/match-suggestions";
+import { filterSupply } from "@/lib/admin/supply-filter";
 import { computeContextFit } from "@/lib/market/fit";
+import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
+import { matchTeamToNeed } from "@/lib/market/match-team-v1";
+import {
+  MatchTierExplanation,
+  type MatchTierLabels,
+} from "@/components/app/match-tier-explanation";
 import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
@@ -79,12 +83,40 @@ export default async function AdminMatchingWorkbenchPage({
 
   const t = await getTranslations("admin.matching");
   const tProf = await getTranslations("professions");
+  // Contract-v2 criterion vocabulary is localized ONCE, in the shared
+  // opportunities.discovery namespace (same explanation codes as scouting).
+  const tCrit = await getTranslations("opportunities.discovery.criterion");
+  const tDiscTiers = await getTranslations("opportunities.discovery.tiers");
   const result = await listWorkbench(locale);
 
   const demand: readonly DemandRow[] =
     result.kind === "ok" ? result.demand : [];
   const supply: readonly SupplyWorkerRow[] =
     result.kind === "ok" ? result.supply : [];
+  const supplyById = new Map(supply.map((w) => [w.id, w]));
+
+  // Wagon 4: read teams ONLY when a team-target demand is on the board.
+  const hasTeamTargets = demand.some((d) => {
+    const ts = d.matchNeed?.structuredV2?.target_supply;
+    return ts === "team" || ts === "multiple_workers";
+  });
+  const teamsRead = hasTeamTargets ? await listTeamsForMatching() : null;
+
+  const criterionLabel = (c: string): string =>
+    (tCrit.has(c as never) ? tCrit(c as never) : c);
+  const tierLabels: MatchTierLabels = {
+    blockingTitle: tDiscTiers("blocking"),
+    strengthsTitle: tDiscTiers("strengths"),
+    negotiablesTitle: tDiscTiers("negotiables"),
+    missingTitle: tDiscTiers("missing"),
+    criterionLabel,
+    missingLabel: (side, label) =>
+      side === "worker"
+        ? t("missing.worker", { criterion: label })
+        : t("missing.demand", { criterion: label }),
+    // Tier provenance (Wagon 4): author-tiered criteria say so.
+    authorMarkedLabel: t("engine.authorMarked"),
+  };
   const escoLabel = (uri: string): string =>
     (result.kind === "ok" ? result.escoLabelsByUri[uri] : undefined) ??
     uri.split("/").pop() ??
@@ -288,65 +320,223 @@ export default async function AdminMatchingWorkbenchPage({
                       </p>
                     ) : null}
 
-                    {/* Rule-based shortlist — evidence reasons only (§7),
-                        the human decides; "start conversation" reuses the
-                        canonical messaging entry (B entry point). */}
+                    {/* Wagon 4: the ONE deterministic engine (match-v1) —
+                        the same explanation codes company scouting shows.
+                        Rule-based reasons only (§7), the human decides;
+                        "start conversation" reuses the canonical messaging
+                        entry (B entry point). */}
                     {(() => {
-                      const suggestions = buildMatchSuggestions(r, supply);
-                      if (suggestions.length === 0) return null;
+                      if (!r.matchNeed) return null;
+                      const results = supply
+                        .filter(
+                          (w): w is SupplyWorkerRow & { subject: NonNullable<SupplyWorkerRow["subject"]> } =>
+                            w.subject !== null,
+                        )
+                        .map((w) => ({ w, match: matchWorkerToNeed(r.matchNeed!, w.subject) }))
+                        // Need-context ordering via the SHARED comparator
+                        // (§19 d) — never a global person score.
+                        .sort((a, b) => compareMatches(a.match, b.match))
+                        .slice(0, 8);
+                      if (results.length === 0) return null;
                       return (
                         <div
                           className="rounded-md border border-brand-blue/20 bg-brand-blue/5 p-2"
-                          data-testid={`matching-suggestions-${r.id}`}
+                          data-testid={`matching-engine-${r.id}`}
                         >
                           <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                            {t("suggestions.title")}
+                            {t("engine.title")}
                           </p>
                           <p className="text-[11px] text-text-secondary">
-                            {t("suggestions.humanRule")}
+                            {t("engine.humanRule")}
                           </p>
                           <ul className="mt-1 flex flex-col gap-1.5">
-                            {suggestions.map((s) => (
+                            {results.map(({ w, match }) => (
                               <li
-                                key={s.worker.id}
-                                className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-ink-600 bg-ink-800/40 px-2 py-1.5"
+                                key={w.id}
+                                className="flex flex-col gap-1 rounded-sm border border-ink-600 bg-ink-800/40 px-2 py-1.5"
+                                data-testid={`matching-engine-row-${r.id}-${w.id}`}
+                                data-match-status={match.status}
                               >
-                                <span className="flex min-w-0 flex-col">
+                                <span className="flex flex-wrap items-center justify-between gap-2">
                                   <span className="text-xs font-semibold text-text-primary">
-                                    {s.worker.displayName ?? t("supply.unnamed")}
+                                    {w.displayName ?? t("supply.unnamed")}
                                   </span>
-                                  <span className="flex flex-wrap gap-1">
-                                    {s.reasons.map((reason) => (
-                                      <span
-                                        key={reason}
-                                        className="rounded-sm border border-brand-blue/30 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
-                                      >
-                                        {t(`suggestions.reasons.${reason}` as never)}
-                                      </span>
-                                    ))}
+                                  <span className="flex items-center gap-2">
+                                    <span className="rounded-sm border border-brand-blue/30 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue">
+                                      {t(`engine.status.${match.status}` as never)}
+                                    </span>
+                                    {w.profileId ? (
+                                      <form action={openDirectConversationAction}>
+                                        <input type="hidden" name="profileId" value={w.profileId} />
+                                        <input type="hidden" name="locale" value={locale} />
+                                        <input
+                                          type="hidden"
+                                          name="fallback"
+                                          value={`/${locale}/dashboard/admin/matching`}
+                                        />
+                                        <button
+                                          type="submit"
+                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue hover:border-brand-blue"
+                                          data-testid={`matching-start-conversation-${r.id}-${w.id}`}
+                                        >
+                                          {t("engine.start")}
+                                        </button>
+                                      </form>
+                                    ) : null}
                                   </span>
                                 </span>
-                                {s.worker.profileId ? (
-                                  <form action={openDirectConversationAction}>
-                                    <input type="hidden" name="profileId" value={s.worker.profileId} />
-                                    <input type="hidden" name="locale" value={locale} />
-                                    <input
-                                      type="hidden"
-                                      name="fallback"
-                                      value={`/${locale}/dashboard/admin/matching`}
-                                    />
-                                    <button
-                                      type="submit"
-                                      className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue hover:border-brand-blue"
-                                      data-testid={`matching-start-conversation-${r.id}-${s.worker.id}`}
-                                    >
-                                      {t("suggestions.start")}
-                                    </button>
-                                  </form>
+                                {/* §19: the coverage % never without its basis. */}
+                                {match.skillFit ? (
+                                  <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                                    {match.skillFit.pct}% ·{" "}
+                                    {t("fit.basis", {
+                                      matched: match.skillFit.matchedTotal,
+                                      total: match.skillFit.needTotal,
+                                      confirmed: match.skillFit.matchedConfirmed,
+                                    })}
+                                  </span>
                                 ) : null}
+                                <MatchTierExplanation
+                                  blocking={match.blocking}
+                                  strengths={match.strengths}
+                                  negotiables={match.negotiables}
+                                  missingFacts={match.missingFacts}
+                                  labels={tierLabels}
+                                  testId={`matching-engine-tiers-${r.id}-${w.id}`}
+                                />
                               </li>
                             ))}
                           </ul>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Wagon 4: read-only TEAM matching for team-target
+                        demands — set-level coverage with its full basis,
+                        composed from the same engine. Honest states when
+                        teams/members are not readable. */}
+                    {(() => {
+                      const ts = r.matchNeed?.structuredV2?.target_supply;
+                      if (!r.matchNeed || (ts !== "team" && ts !== "multiple_workers")) {
+                        return null;
+                      }
+                      return (
+                        <div
+                          className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
+                          data-testid={`matching-team-${r.id}`}
+                        >
+                          <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                            {t("team.title")}
+                          </p>
+                          {teamsRead === null || teamsRead.kind === "unreadable" ? (
+                            <p
+                              className="mt-1 text-[11px] text-text-muted"
+                              data-testid="team-not-readable"
+                            >
+                              {t("team.notReadable")}
+                            </p>
+                          ) : teamsRead.teams.length === 0 ? (
+                            <p className="mt-1 text-[11px] text-text-muted">
+                              {t("team.empty")}
+                            </p>
+                          ) : (
+                            <ul className="mt-1.5 flex flex-col gap-2">
+                              {teamsRead.teams.map((team) => {
+                                const matchable = team.memberWorkerIds
+                                  .map((id) => supplyById.get(id))
+                                  .filter(
+                                    (w): w is SupplyWorkerRow & { subject: NonNullable<SupplyWorkerRow["subject"]> } =>
+                                      !!w && w.subject !== null,
+                                  );
+                                // Canonical contract input (Wagon 2 shape) +
+                                // member subjects the admin session holds.
+                                const teamMatch = matchTeamToNeed(
+                                  r.matchNeed!,
+                                  team.input,
+                                  matchable.length > 0
+                                    ? {
+                                        subjects: matchable.map((m) => m.subject),
+                                        refs: matchable.map(
+                                          (m) => m.displayName ?? t("supply.unnamed"),
+                                        ),
+                                      }
+                                    : undefined,
+                                );
+                                const unmatchable =
+                                  team.input.activeMemberCount - matchable.length;
+                                return (
+                                  <li
+                                    key={team.input.teamId}
+                                    className="flex flex-col gap-1 rounded-sm border border-ink-600 bg-ink-800/40 px-2 py-1.5"
+                                    data-testid={`team-match-${r.id}-${team.input.teamId}`}
+                                    data-team-status={teamMatch.status}
+                                  >
+                                    <span className="flex flex-wrap items-center justify-between gap-2">
+                                      <span className="text-xs font-semibold text-text-primary">
+                                        {team.name}
+                                      </span>
+                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-cyan">
+                                        {t(`engine.status.${teamMatch.status}` as never)}
+                                      </span>
+                                    </span>
+                                    {matchable.length === 0 ? (
+                                      <span className="text-[11px] text-text-muted">
+                                        {t("team.noMatchableMembers")}
+                                      </span>
+                                    ) : (
+                                      <>
+                                        {/* §19: coverage with its FULL basis. */}
+                                        {teamMatch.coverage ? (
+                                          <span className="text-[11px] text-text-secondary">
+                                            {t("team.coverage", {
+                                              covered: teamMatch.coverage.coveredCount,
+                                              total: teamMatch.coverage.needTotal,
+                                              eligible: teamMatch.eligibleMemberCount ?? 0,
+                                              members: teamMatch.memberCount,
+                                            })}
+                                          </span>
+                                        ) : null}
+                                        {teamMatch.setBlockers.length > 0 ? (
+                                          <span className="text-[11px] text-state-danger">
+                                            {t("team.blockers")}{" "}
+                                            {teamMatch.setBlockers
+                                              .map(
+                                                (b) =>
+                                                  criterionLabel(b.criterion) +
+                                                  (b.authorMarked === true
+                                                    ? ` (${t("engine.authorMarked")})`
+                                                    : ""),
+                                              )
+                                              .join(", ")}
+                                          </span>
+                                        ) : null}
+                                        <ul className="flex flex-col gap-0.5">
+                                          {teamMatch.members.map((m) => (
+                                            <li
+                                              key={m.memberRef}
+                                              className="text-[11px] text-text-secondary"
+                                            >
+                                              {m.memberRef} ·{" "}
+                                              {t(`engine.status.${m.result.status}` as never)}{" "}
+                                              ·{" "}
+                                              {t("team.memberCovers", {
+                                                count: m.coveredSkillIds.length,
+                                              })}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </>
+                                    )}
+                                    {unmatchable > 0 ? (
+                                      <span className="text-[11px] text-text-muted">
+                                        {t("team.unmatchableMembers", { count: unmatchable })}
+                                      </span>
+                                    ) : null}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
                         </div>
                       );
                     })()}

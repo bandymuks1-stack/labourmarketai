@@ -2284,19 +2284,31 @@
         "needsMigration": "Recording is temporarily unavailable while the data is being prepared.",
         "error": "Could not record the decision."
       },
-      "suggestions": {
-        "title": "Rule-based shortlist",
-        "humanRule": "Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
+      "engine": {
+        "title": "Candidate fit (rule-based)",
+        "humanRule": "Ranked by the same deterministic rules as company scouting — reasons and gaps are shown, no computed person score; the human decides.",
         "start": "Start conversation",
-        "reasons": {
-          "country_match": "In country",
-          "preferred_country_match": "Prefers country",
-          "available_now": "Available",
-          "profession_token_match": "Profession fits request text",
-          "verified_skills": "Confirmed skills",
-          "manager_confirmations": "Manager confirmations",
-          "journal_evidence": "Journal evidence"
+        "authorMarked": "set by the requester",
+        "status": {
+          "strong": "Strong fit",
+          "possible": "Possible fit",
+          "weak": "Weak fit",
+          "insufficient_data": "Not enough data"
         }
+      },
+      "missing": {
+        "worker": "The worker has not stated: {criterion}",
+        "demand": "The request does not state: {criterion}"
+      },
+      "team": {
+        "title": "Team match (read-only)",
+        "notReadable": "Team members are not readable in this session — team matching cannot be calculated.",
+        "empty": "No teams exist yet.",
+        "coverage": "{covered} of {total} required skills covered by at least one eligible member ({eligible} of {members} members eligible)",
+        "blockers": "The team cannot meet:",
+        "memberCovers": "covers {count} required skills",
+        "noMatchableMembers": "No team member has a matchable worker profile.",
+        "unmatchableMembers": "{count} member(s) without a matchable worker profile"
       },
       "filters": {
         "all": "All countries",
@@ -7193,6 +7205,7 @@
         "demand": "The company has not stated: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimum experience",
         "skills_coverage": "Required skills",
         "evidence_tiers": "Skill evidence",
         "profession": "Profession",

@@ -1259,19 +1259,31 @@
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
       },
-      "suggestions": {
-        "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
-        "start": "[EN] Start conversation",
-        "reasons": {
-          "country_match": "[EN] In country",
-          "preferred_country_match": "[EN] Prefers country",
-          "available_now": "[EN] Available",
-          "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Confirmed skills",
-          "manager_confirmations": "[EN] Manager confirmations",
-          "journal_evidence": "[EN] Journal evidence"
+      "engine": {
+        "title": "Kandidatmatch (regelbaseret)",
+        "humanRule": "Sorteret efter de samme deterministiske regler som virksomhedsscouting — årsager og mangler vises, ingen beregnet personscore; mennesket beslutter.",
+        "start": "Start samtale",
+        "authorMarked": "fastsat af rekvirenten",
+        "status": {
+          "strong": "Stærkt match",
+          "possible": "Muligt match",
+          "weak": "Svagt match",
+          "insufficient_data": "Ikke nok data"
         }
+      },
+      "missing": {
+        "worker": "Arbejdstageren har ikke angivet: {criterion}",
+        "demand": "Anmodningen angiver ikke: {criterion}"
+      },
+      "team": {
+        "title": "Teammatch (skrivebeskyttet)",
+        "notReadable": "Teammedlemmer kan ikke læses i denne session — teammatch kan ikke beregnes.",
+        "empty": "Der findes endnu ingen teams.",
+        "coverage": "{covered} af {total} nødvendige færdigheder dækkes af mindst ét egnet medlem ({eligible} af {members} medlemmer egnede)",
+        "blockers": "Teamet kan ikke opfylde:",
+        "memberCovers": "dækker {count} nødvendige færdigheder",
+        "noMatchableMembers": "Intet teammedlem har en matchbar arbejdstagerprofil.",
+        "unmatchableMembers": "{count} medlemmer uden matchbar arbejdstagerprofil"
       },
       "filters": {
         "all": "[EN] All countries",
@@ -1783,6 +1795,7 @@
         "demand": "Virksomheden har ikke angivet: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimumserfaring",
         "skills_coverage": "Nødvendige færdigheder",
         "evidence_tiers": "Dokumentation for færdigheder",
         "profession": "Erhverv",

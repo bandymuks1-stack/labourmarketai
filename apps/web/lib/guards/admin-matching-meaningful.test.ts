@@ -34,9 +34,12 @@ describe("admin matching surfaces the meaningful decision sections", () => {
     expect(page).toMatch(/status\.\$\{r\.status\}/);
   });
 
-  it("explains WHY a pairing surfaced via rule-based reasons (no opaque AI score)", () => {
-    expect(page).toMatch(/buildMatchSuggestions/);
-    expect(page).toMatch(/suggestions\.reasons\./);
+  it("explains WHY a pairing surfaced via the canonical engine's rule-based tiers (no opaque AI score)", () => {
+    // Wagon 4 consolidation: the duplicate token shortlist is gone; the page
+    // runs the ONE deterministic engine and renders its explanation tiers.
+    expect(page).toMatch(/matchWorkerToNeed/);
+    expect(page).toMatch(/MatchTierExplanation/);
+    expect(page).toMatch(/compareMatches/);
     // Honesty: no fabricated numeric match score on the page.
     expect(page).not.toMatch(/match\s*score|score:\s*\d|confidence:\s*\d/i);
   });

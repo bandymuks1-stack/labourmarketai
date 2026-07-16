@@ -1259,19 +1259,31 @@
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
       },
-      "suggestions": {
-        "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
-        "start": "[EN] Start conversation",
-        "reasons": {
-          "country_match": "[EN] In country",
-          "preferred_country_match": "[EN] Prefers country",
-          "available_now": "[EN] Available",
-          "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Confirmed skills",
-          "manager_confirmations": "[EN] Manager confirmations",
-          "journal_evidence": "[EN] Journal evidence"
+      "engine": {
+        "title": "Kandidatmatchning (regelbaserad)",
+        "humanRule": "Sorterad enligt samma deterministiska regler som företagsscouting — skäl och luckor visas, ingen beräknad personpoäng; människan beslutar.",
+        "start": "Starta samtal",
+        "authorMarked": "fastställt av beställaren",
+        "status": {
+          "strong": "Stark matchning",
+          "possible": "Möjlig matchning",
+          "weak": "Svag matchning",
+          "insufficient_data": "Otillräckliga data"
         }
+      },
+      "missing": {
+        "worker": "Arbetaren har inte angett: {criterion}",
+        "demand": "Förfrågan anger inte: {criterion}"
+      },
+      "team": {
+        "title": "Teammatchning (skrivskyddad)",
+        "notReadable": "Teammedlemmar kan inte läsas i denna session — teammatchning kan inte beräknas.",
+        "empty": "Det finns inga team ännu.",
+        "coverage": "{covered} av {total} nödvändiga färdigheter täcks av minst en lämplig medlem ({eligible} av {members} medlemmar lämpliga)",
+        "blockers": "Teamet kan inte uppfylla:",
+        "memberCovers": "täcker {count} nödvändiga färdigheter",
+        "noMatchableMembers": "Ingen teammedlem har en matchbar arbetarprofil.",
+        "unmatchableMembers": "{count} medlemmar utan matchbar arbetarprofil"
       },
       "filters": {
         "all": "[EN] All countries",
@@ -1783,6 +1795,7 @@
         "demand": "[EN] The company has not stated: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minsta erfarenhet",
         "skills_coverage": "[EN] Required skills",
         "evidence_tiers": "[EN] Skill evidence",
         "profession": "[EN] Profession",

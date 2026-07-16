@@ -1259,19 +1259,31 @@
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
       },
-      "suggestions": {
-        "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
-        "start": "[EN] Start conversation",
-        "reasons": {
-          "country_match": "[EN] In country",
-          "preferred_country_match": "[EN] Prefers country",
-          "available_now": "[EN] Available",
-          "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Confirmed skills",
-          "manager_confirmations": "[EN] Manager confirmations",
-          "journal_evidence": "[EN] Journal evidence"
+      "engine": {
+        "title": "Dopasowanie kandydatów (na podstawie reguł)",
+        "humanRule": "Uporządkowane według tych samych deterministycznych reguł co scouting firmowy — pokazywane są powody i braki, bez wyliczonego wyniku osoby; decyduje człowiek.",
+        "start": "Rozpocznij rozmowę",
+        "authorMarked": "ustalone przez zamawiającego",
+        "status": {
+          "strong": "Silne dopasowanie",
+          "possible": "Możliwe dopasowanie",
+          "weak": "Słabe dopasowanie",
+          "insufficient_data": "Za mało danych"
         }
+      },
+      "missing": {
+        "worker": "Pracownik nie podał: {criterion}",
+        "demand": "Zapytanie nie określa: {criterion}"
+      },
+      "team": {
+        "title": "Dopasowanie zespołu (tylko podgląd)",
+        "notReadable": "Członkowie zespołów są niedostępni w tej sesji — nie można obliczyć dopasowania zespołu.",
+        "empty": "Nie ma jeszcze zespołów.",
+        "coverage": "{covered} z {total} wymaganych umiejętności pokrywa co najmniej jeden odpowiedni członek ({eligible} z {members} członków odpowiednich)",
+        "blockers": "Zespół nie może spełnić:",
+        "memberCovers": "pokrywa {count} wymaganych umiejętności",
+        "noMatchableMembers": "Żaden członek zespołu nie ma powiązanego profilu pracownika.",
+        "unmatchableMembers": "{count} członków bez powiązanego profilu pracownika"
       },
       "filters": {
         "all": "[EN] All countries",
@@ -1783,6 +1795,7 @@
         "demand": "[EN] The company has not stated: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimalne doświadczenie",
         "skills_coverage": "[EN] Required skills",
         "evidence_tiers": "[EN] Skill evidence",
         "profession": "[EN] Profession",
