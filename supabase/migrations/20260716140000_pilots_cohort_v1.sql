@@ -1,5 +1,8 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + grants + admin-only policies are the
+-- intentional canonical pattern for RPC-only admin cohort tables; reviewed in Train PR D; the DRAFT
+-- header above stays authoritative — apply only via the owner process).
 -- Prepared under WAGON 5 "Pilot Onboarding and Measurement v1" (2026-07-16):
 -- migration prepared FULLY but NOT applied — production apply happens ONLY
 -- via Supabase MCP apply_migration after the owner reviews the PR gate
