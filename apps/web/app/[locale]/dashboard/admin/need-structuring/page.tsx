@@ -25,7 +25,7 @@ export default async function NeedStructuringPage({
   const needs = await loadUnstructuredNeeds();
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8" id="main-content">
+    <main className="mx-auto flex w-full max-w-content flex-col gap-6" id="main-content">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("pageTitle")}

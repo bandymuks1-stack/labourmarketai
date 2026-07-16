@@ -34,7 +34,7 @@ export default async function PersonalGalleryPage({
 
   return (
     <div
-      className="flex max-w-4xl flex-col gap-5"
+      className="mx-auto flex w-full max-w-content flex-col gap-5"
       data-testid="personal-gallery"
     >
       <header className="flex flex-col gap-1">

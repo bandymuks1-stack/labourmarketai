@@ -76,7 +76,7 @@ export default async function OnboardingPage({
           LabourMarket<span className="text-gradient-accent">.ai</span>
         </Link>
       </header>
-      <main className="relative z-10 mx-auto flex max-w-md flex-col px-6 pb-20">
+      <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-6 pb-20 sm:max-w-lg lg:max-w-2xl">
         {pendingInvites.length > 0 && (
           <div
             className="card-border mb-4 bg-brand-blue/5 p-4"

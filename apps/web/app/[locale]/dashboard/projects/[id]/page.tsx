@@ -79,7 +79,7 @@ export default async function ProjectStadiumPage({
       );
     }
     return (
-      <div className="flex max-w-2xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-4">
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("eyebrow")}
         </h1>
@@ -126,7 +126,7 @@ export default async function ProjectStadiumPage({
   };
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6" data-testid="project-stadium">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
       {/* ── Arena header: real project facts only ── */}
       <header className="flex flex-col gap-2">
         <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">

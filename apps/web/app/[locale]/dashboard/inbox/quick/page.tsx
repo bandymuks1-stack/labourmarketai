@@ -56,7 +56,7 @@ export default async function QuickConfirmPage({
   const exceptions = Object.fromEntries(exceptionMap);
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-5">
       <header className="flex flex-col gap-1.5">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("inbox.quick.title")}
