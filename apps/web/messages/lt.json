@@ -2789,7 +2789,7 @@
     "noMatches": "Sistema kol kas nieko aiškaus nerado šiame tekste. Pabandykite parašyti detaliau, arba pridėkite reikšmingus įrašus rankiniu būdu.",
     "buckets": {
       "selfDeclared": "Siūlomi įgūdžiai",
-      "skills": "Rasti įgūdžiai",
+      "skills": "Radome šiuos galimus įgūdžius",
       "directions": "Galimos darbo kryptys",
       "roles": "Galimi vaidmenys",
       "experience": "Patirtis",
@@ -2806,9 +2806,9 @@
       "team": "Vadovauta žmonių: {n}"
     },
     "actions": {
-      "confirm": "Pasirinkti",
+      "confirm": "Pridėti",
       "edit": "Pataisyti",
-      "discard": "Neįtraukti"
+      "discard": "Atmesti"
     },
     "status": {
       "confirmed": "Pasirinkta",

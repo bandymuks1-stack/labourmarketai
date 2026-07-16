@@ -2789,7 +2789,7 @@
     "noMatches": "Nog niets duidelijks in deze tekst. Probeer meer detail toe te voegen, of voeg handmatig zinvolle registraties toe.",
     "buckets": {
       "selfDeclared": "Voorgestelde vaardigheden",
-      "skills": "Gedetecteerde vaardigheden",
+      "skills": "We vonden deze mogelijke vaardigheden",
       "directions": "Mogelijke werkrichtingen",
       "roles": "Mogelijke rollen",
       "experience": "Ervaring",
@@ -2806,9 +2806,9 @@
       "team": "Ploeg geleid: {n}"
     },
     "actions": {
-      "confirm": "Selecteren",
+      "confirm": "Toevoegen",
       "edit": "Bewerken",
-      "discard": "Verwerpen"
+      "discard": "Afwijzen"
     },
     "status": {
       "confirmed": "Geselecteerd",

@@ -2,7 +2,7 @@
   "cvBridge": "{confirmed} av {total} poster bekräftade — bekräftat arbete visas i ditt CV.",
   "cvBridgeLink": "Öppna CV",
   "chooseWorkType": "[EN] Choose work type",
-  "whatDidYouDo": "[EN] What did you do today?",
+  "whatDidYouDo": "Vad arbetade du med i dag?",
   "freeTextLead": "[EN] Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
   "quantitySummaryHint": "[EN] Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "[EN] Work direction (optional)",
@@ -152,5 +152,9 @@
       "undecodable": "Ljudet kunde inte läsas — försök igen."
     },
     "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen."
-  }
+  },
+  "statusExplainer": "Hur används dina poster?",
+  "exampleLine": "Till exempel: jag monterade gipsväggar, läste ritningar och arbetade med laserpass.",
+  "moreOptions": "Fler alternativ",
+  "savedSkillsLine": "Färdigheter: {added} tillagda, {corrected} rättade, {rejected} avvisade."
 }

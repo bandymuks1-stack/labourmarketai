@@ -285,15 +285,20 @@ describe("Guard: misleading 'Patvirtinta/Confirmed/Verified' copy is gone from t
       });
 
       it("per-card action/status no longer say Patvirtinti/Confirmed", () => {
+        // Wagon 5 completion: the accept verb is now „Pridėti"/"Add" — still
+        // doctrine-safe (no CERT_STEM), clearer for a worker than
+        // Pasirinkti/Select on a skill row. The silent-trust rule (never
+        // Patvirtinti/Confirm) stands and is asserted below.
         const actions = structuring.actions as Record<string, string>;
         const status = structuring.status as Record<string, string>;
         if (locale === "lt") {
-          expect(actions.confirm).toBe("Pasirinkti");
+          expect(actions.confirm).toBe("Pridėti");
           expect(status.confirmed).toBe("Pasirinkta");
         } else {
-          expect(actions.confirm).toBe("Select");
+          expect(actions.confirm).toBe("Add");
           expect(status.confirmed).toBe("Selected");
         }
+        expect(actions.confirm).not.toMatch(/tvirtin|confirm/i);
       });
     });
   }

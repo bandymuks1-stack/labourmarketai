@@ -40,9 +40,12 @@ describe("Guard: journal is the canonical entry INPUT", () => {
     expect(journal).toMatch(/href="#journal-composer"/);
   });
 
-  it("entries render first (order-1), composer after (order-2)", () => {
-    expect(journal).toMatch(/order-1[^"]*"\s*data-testid="journal-entries"/);
-    expect(journal).toMatch(/id="journal-composer"\s+className="order-2"/);
+  it("composer renders first (order-1), compact history after (order-2) — Wagon 5", () => {
+    // UX Recovery Train Wagon 5 supersedes the P0-rescue records-first order:
+    // the day starts with ONE large input and ONE main action; the compact
+    // collapsed history follows.
+    expect(journal).toMatch(/id="journal-composer"\s+className="order-1"/);
+    expect(journal).toMatch(/order-2[^"]*"\s*data-testid="journal-entries"/);
   });
 
   it("keeps newest-first ordering", () => {

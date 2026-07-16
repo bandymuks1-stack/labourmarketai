@@ -127,9 +127,16 @@ export async function setJournalEntrySkillLinks(
 export async function autoLinkRecognizedJournalSkills(
   entryId: string,
   notes: string,
+  // Wagon 5: slugs the worker explicitly REJECTED in the review step. A
+  // rejected suggestion must leave no trace — not even an internal evidence
+  // link. Additive, optional — every existing caller keeps its behaviour.
+  excludeSlugs?: readonly string[],
 ): Promise<{ ok: true; linked: number } | { ok: false }> {
   try {
-    const recognized = recognizeSkills(notes, 8);
+    const excluded = new Set(excludeSlugs ?? []);
+    const recognized = recognizeSkills(notes, 8).filter(
+      (r) => !excluded.has(r.slug),
+    );
     if (recognized.length === 0) return { ok: true, linked: 0 };
 
     const supabase = await createClient();

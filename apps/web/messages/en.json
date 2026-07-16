@@ -2789,7 +2789,7 @@
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
       "selfDeclared": "Suggested skills",
-      "skills": "Skills we spotted",
+      "skills": "We found these possible skills",
       "directions": "Possible work directions",
       "roles": "Possible roles",
       "experience": "Experience",
@@ -2806,9 +2806,9 @@
       "team": "Team led: {n}"
     },
     "actions": {
-      "confirm": "Select",
+      "confirm": "Add",
       "edit": "Edit",
-      "discard": "Discard"
+      "discard": "Reject"
     },
     "status": {
       "confirmed": "Selected",
