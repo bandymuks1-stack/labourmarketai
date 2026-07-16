@@ -2518,7 +2518,7 @@
     "directionAdded": "Direction added",
     "reviewBanner": {
       "title": "Some skills need review",
-      "body": "Some entries are not clearly classified yet. Review or add more information so your profile can be matched more accurately.",
+      "body": "Some entries aren't clear yet. Add a bit more detail or review your skills so employers can find you more accurately.",
       "cta": "Review skills"
     },
     "pageTitle": "My profile",
@@ -2576,7 +2576,7 @@
       "promotedToCatalog": "{n} of your selected skills were also added to your catalogued skill list — they now count in matching and on your CV.",
       "promotedSkipped": "{n} were not added to the catalogued list (outside your current work directions) — they stay in your profile as your own notes.",
       "viewUpdatedCv": "View your updated CV",
-      "aiSuggestionHint": "AI suggestion — review before saving"
+      "aiSuggestionHint": "Suggestion — check it before you save"
     }
   },
   "roles": {
@@ -2789,7 +2789,7 @@
     "noMatches": "Nothing clear in this text yet. Try adding more detail, or add meaningful entries manually.",
     "buckets": {
       "selfDeclared": "Suggested skills",
-      "skills": "Detected skills",
+      "skills": "Skills we spotted",
       "directions": "Possible work directions",
       "roles": "Possible roles",
       "experience": "Experience",
@@ -2830,7 +2830,7 @@
       "uploadErrorType": "Unsupported file. Use PDF, DOCX or TXT.",
       "uploadErrorSize": "File too large (max 5 MB).",
       "uploadErrorEmpty": "No text found in the file. Try another file or paste the text instead.",
-      "uploadErrorAuth": "Please log in again to import a CV.",
+      "uploadErrorAuth": "Please log in again to upload a CV.",
       "uploadErrorFailed": "Could not read the file. Try another file or paste the text instead.",
       "pasteLabel": "Paste CV text",
       "pastePlaceholder": "Paste your CV text here.",
@@ -7088,7 +7088,7 @@
     "ctaReadiness": "Check country readiness",
     "ctaTrades": "See trades we work with",
     "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice.",
-    "structuredNote": "Your CV text is structured into a profile automatically — you review every suggestion and decide what is saved."
+    "structuredNote": "We read your CV and turn it into a profile you can review — you check every suggestion and decide what is saved."
   },
   "needStructuring": {
     "pageTitle": "Need structuring",
@@ -7394,7 +7394,7 @@
     "fullName": "Full name",
     "profession": "Sector & work type",
     "targetCountries": "Countries you want to work in",
-    "targetCountriesHelp": "Two-letter codes, comma separated (e.g. NL, DE).",
+    "targetCountriesHelp": "The countries where you want to work, separated by commas (for example: Netherlands, Germany).",
     "availableFrom": "Available from",
     "accommodation": "Accommodation",
     "accNeeds": "I need accommodation",
@@ -7413,7 +7413,7 @@
     "engBrigade": "Brigade / team",
     "engAgency": "Agency-supplied",
     "languages": "Languages",
-    "languagesHelp": "Comma separated (e.g. en, lt).",
+    "languagesHelp": "The languages you speak, separated by commas (for example: English, Lithuanian).",
     "comment": "Anything else",
     "commentHelp": "A few sentences about your experience — the assistant uses this to draft your profile.",
     "submit": "Create draft profile",
@@ -7504,7 +7504,7 @@
     "aiBadge": "AI suggestion",
     "aiNotVerified": "Review before publishing — nothing is published automatically.",
     "aiDisabled": "AI draft not generated yet — the assistant is not enabled. Your details are not saved.",
-    "aiRole": "Normalized role",
+    "aiRole": "Role",
     "aiSkills": "Required skills",
     "aiDocs": "Required documents",
     "aiMissing": "Missing fields",
@@ -8795,7 +8795,7 @@
   },
   "externalProfiles": {
     "title": "External profiles",
-    "hint": "Link profiles you hold on other sites — a portfolio, GitHub, LinkedIn or a certification registry.",
+    "hint": "Link profiles you have on other sites — a portfolio, GitHub, LinkedIn or a certificate listing.",
     "selfManaged": "You add and control these links yourself. The platform never fetches or checks content from these sites.",
     "platform": "Site",
     "url": "Link (https://)",
@@ -8820,7 +8820,7 @@
       "github": "GitHub",
       "behance": "Behance",
       "portfolio": "Portfolio",
-      "certificationRegistry": "Certification registry",
+      "certificationRegistry": "Certificate listing",
       "other": "Other"
     }
   },
@@ -9198,9 +9198,9 @@
     }
   },
   "cvImport": {
-    "reviewTitle": "Detected CV sections",
+    "reviewTitle": "What we found in your CV",
     "reviewHint": "The system only suggests. Save or discard each entry — you decide.",
-    "empty": "No structured entries were detected in the text.",
+    "empty": "We couldn't read any sections from this text — you can add them by hand.",
     "groups": {
       "workHistory": "Work history",
       "education": "Education",

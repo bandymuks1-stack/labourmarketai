@@ -20,6 +20,20 @@ const ROLE_CARDS: { key: Role }[] = [{ key: "worker" }, { key: "company" }];
 // The 9 launch markets, LT first (default).
 const COUNTRIES = ["LT", "LV", "EE", "NL", "DE", "DK", "NO", "SE", "PL"] as const;
 
+/** Show a worker a real country NAME in their own language, never a raw ISO
+ *  code. Uses the browser's built-in localized region names (no new i18n keys,
+ *  stays correct in every locale); falls back to the code only if the runtime
+ *  lacks Intl.DisplayNames. Low cognitive load: the first screen must read like
+ *  plain words, not database codes. */
+function countryName(code: string, locale: string): string {
+  try {
+    const dn = new Intl.DisplayNames([locale], { type: "region" });
+    return dn.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 /** Person-first onboarding. Two steps: (1) pick one OR MORE roles (the same
  *  person can be a worker, run an agency, and buy services), (2) basic profile
  *  (display name + country). Submits the full role set via completeOnboarding;
@@ -237,7 +251,7 @@ export function OnboardingWizard({
         >
           {COUNTRIES.map((c) => (
             <option key={c} value={c}>
-              {c}
+              {countryName(c, locale)}
             </option>
           ))}
         </select>

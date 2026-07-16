@@ -55,6 +55,11 @@ export function JournalAiSuggestions({
   const [result, setResult] = useState<JournalAiSuggestionsResult | null>(null);
   const [statuses, setStatuses] = useState<Record<string, ItemStatus>>({});
   const [usedEngagement, setUsedEngagement] = useState<string | null>(null);
+  // "Correct" affordance (Journal skill recognition: Confirm / Correct /
+  // Reject): a suggested skill is shown in an editable field so the worker can
+  // fix the wording before saving. What they save is what they typed — never
+  // the raw suggestion if they changed it. No auto-confirm; empty is blocked.
+  const [skillEdits, setSkillEdits] = useState<Record<string, string>>({});
 
   function setStatus(key: string, status: ItemStatus) {
     setStatuses((prev) => ({ ...prev, [key]: status }));
@@ -112,6 +117,9 @@ export function JournalAiSuggestions({
     status: ItemStatus,
     onConfirm: () => void,
     confirmLabel: string,
+    // Block confirm when the (edited) value is empty — a cleared skill field
+    // must not present a live-looking button that silently does nothing.
+    confirmDisabled = false,
   ) => {
     if (status === "saved")
       return (
@@ -125,7 +133,7 @@ export function JournalAiSuggestions({
         <button
           type="button"
           onClick={onConfirm}
-          disabled={status === "saving"}
+          disabled={status === "saving" || confirmDisabled}
           data-testid={`journal-ai-confirm-${key}`}
           className="rounded-md border border-brand-blue/50 px-3 py-1 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
         >
@@ -199,19 +207,42 @@ export function JournalAiSuggestions({
                 {result.skillLabels.map((label, i) => {
                   const key = `skill-${i}`;
                   const status = statuses[key] ?? "idle";
+                  const value = skillEdits[key] ?? label;
+                  const locked = status === "saved" || status === "discarded";
                   return (
                     <li key={key} className={itemClass(status)}>
-                      <span className="text-sm font-semibold text-text-primary">
-                        {label}
-                      </span>
+                      {locked ? (
+                        <span className="text-sm font-semibold text-text-primary">
+                          {value}
+                        </span>
+                      ) : (
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) =>
+                            setSkillEdits((prev) => ({
+                              ...prev,
+                              [key]: e.target.value,
+                            }))
+                          }
+                          disabled={status === "saving"}
+                          aria-label={label}
+                          data-testid={`journal-ai-skill-input-${i}`}
+                          className="w-full rounded-md border border-ink-500 bg-surface-1 px-2 py-1 text-sm font-semibold text-text-primary outline-none focus:border-brand-blue disabled:opacity-50"
+                        />
+                      )}
                       {itemControls(
                         key,
                         status,
-                        () =>
+                        () => {
+                          const finalLabel = (skillEdits[key] ?? label).trim();
+                          if (!finalLabel) return;
                           void confirmItem(key, () =>
-                            saveProfileSkillClaimsAction([label]),
-                          ),
+                            saveProfileSkillClaimsAction([finalLabel]),
+                          );
+                        },
                         t("addSkill"),
+                        (skillEdits[key] ?? label).trim().length === 0,
                       )}
                     </li>
                   );
