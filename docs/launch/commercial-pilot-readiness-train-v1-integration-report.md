@@ -155,3 +155,64 @@ re-pinned; C: 3 new + calc-version re-pins; D: 1 new + 4 extended).
 Terminal state upon Draft PRs opening in the order above:
 **COMMERCIAL_PILOT_READINESS_TRAIN_MERGE_READY** (owner merges; agent does
 not auto-merge per train directive).
+
+---
+
+## FINAL MERGED STATE (2026-07-16, owner-directed merge sequence)
+
+The owner subsequently directed the controlled merge (AUTOMODE). Executed in
+the planned order; every merge went in with required CI green and a full
+local battery at HEAD.
+
+| PR | Pre-merge head | Squash-merge commit on main | Required CI | Production deploy |
+|---|---|---|---|---|
+| #774 Worker Discovery & Consent v1 | `c25edea3` | `154f1e3a` | quality ✓ migration-safety ✓ | success (id 5479030119) |
+| #775 Trust Connect Teams v1 | `d1bc2c6e` (merge of main, tree = validated rebase) | `1fdc2d9f` | quality ✓ migration-safety ✓ | success (id 5479203280) |
+| #776 Explainable Matching v1 | `057ede94` (post-integration) | `4a0b34d4` | quality ✓ migration-safety ✓ | success (id 5479351982) |
+| #777 Pilot Onboarding & Measurement v1 | `44f2195a` | `60ec8c17` | quality ✓ migration-safety ✓ | (verified at merge of this doc) |
+
+- **Ratchet guards final value: 145** (140 + 2 W1 + 2 W2 + 1 W5), combined
+  honestly at each merge step.
+- **TeamMatchInputV1 integration is FINAL**: the temporary workbench adapter
+  was REMOVED before #776 merged — `listTeamsForMatching` consumes Wagon 2's
+  canonical `buildTeamMatchInput` (`lib/company/team-match-input.ts`)
+  directly; the honest all-not-stated fallback fires only when the read model
+  returns null. §2's "deferred integration task" and §8 step 5 are therefore
+  DONE (commit `057ede94`); no temporary adapter remains anywhere.
+- **Legacy matching final state**: the duplicate admin engine stays deleted
+  (with the a–h proof pack); the staffing fork (`/match-preview`) remains
+  FROZEN — deprecation headers + import-ban guard — with removal as a later
+  bounded cleanup. Nothing was restored.
+- **Migration order (final, unique timestamps)**: `20260716120000`,
+  `20260716121000`, `20260716130000`, `20260716131000`, `20260716140000` —
+  all still DRAFT/owner-gated at merge time; activation is a separate
+  owner-process step.
+
+### State vocabulary (exact meanings)
+
+- **MERGE_READY** — Draft PRs open, required CI green, integration validated;
+  nothing on main yet.
+- **MERGED_GREEN** — all five PRs merged, main green, migrations applied via
+  the approved owner process, types refreshed, production deployed, and
+  authenticated production smoke + PII analytics (= 0) completed. Declared
+  only after ALL of those hold.
+- **PRODUCTION_ACTIVE** — beyond MERGED_GREEN: the new capabilities are in
+  real use by real users (workers/employers/pilots) with owner-observed
+  outcomes. Not a claim this train makes.
+
+### Remaining owner-only activation steps (post-merge)
+
+1. Wagon 3 production activation: verify + apply `20260714160000`, smoke the
+   education/certificates/achievements import fields.
+2. Optional AI activation (`AI_PROVIDER_MODE` + key + `20260714150000`) —
+   deterministic CV import works without it.
+3. §7.4 human review of AI-seeded ru/nl/de translations.
+
+### Known non-blocking limitations
+
+- `Supabase Preview` CI check fails structurally on migration-file PRs
+  (non-required; documented above).
+- Worker-side withdraw-of-granted-disclosure UI — pre-existing gap, bounded
+  follow-up.
+- Booking expiry sweep scheduler — pre-existing owner gate.
+- Frozen legacy staffing fork cleanup — bounded follow-up.
