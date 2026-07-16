@@ -1,4 +1,7 @@
 -- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + grants + policies + trigger are the
+-- intentional canonical pattern for RPC-only, RLS-default-closed request tables; reviewed in Train PR A;
+-- the DRAFT header above stays authoritative — apply only via the owner process).
 -- Apply ONLY via Supabase MCP apply_migration after owner review. Never `db push`.
 --
 -- 20260716120000 — contact disclosure requests v1 (Wagon 1: worker discovery

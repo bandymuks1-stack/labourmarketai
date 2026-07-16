@@ -1,4 +1,7 @@
 -- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER wrapper + grants are the intentional
+-- pattern for DB-side rate caps on the applied booking RPC; reviewed in Train PR A; the DRAFT header
+-- above stays authoritative — apply only via the owner process).
 -- Apply ONLY via Supabase MCP apply_migration after owner review. Never `db push`.
 --
 -- 20260716121000 — request rate limits v3 (Wagon 1: worker discovery and
