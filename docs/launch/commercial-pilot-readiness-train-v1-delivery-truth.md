@@ -51,7 +51,11 @@ Status vocabulary: `ALREADY_COMPLETE` / `PARTIALLY_COMPLETE` / `MISSING` /
 | No auto-publication | ALREADY_COMPLETE | Confirmed items → owner-only RLS tables; no visibility flip |
 | Canonical profile targets | ALREADY_COMPLETE / gated | Work history RPC (`20260714161000` APPLIED 2026-07-16), languages/salary/availability applied; education/certificates/achievements migration `20260714160000` **NOT applied — owner gate** (UI degrades honestly) |
 
-**Verdict: no Wagon 3 PR — already delivered. Owner gates: apply `20260714160000`; optionally enable AI (`AI_PROVIDER_MODE` + key + apply `20260714150000` ai_runs).**
+**Verdict: `IMPLEMENTATION_COMPLETE_PRODUCTION_ACTIVATION_OWNER_GATED` — no Wagon 3 PR (duplicate-PR ban).**
+Full production completion may NOT be claimed until: (1) migration `20260714160000`
+applicability is verified, (2) it is applied through the approved owner process if
+required, (3) affected profile/import fields are production-smoked, (4) the optional
+AI provider remains clearly optional and never blocks deterministic import.
 
 ## Wagon 4 — Explainable matching
 
@@ -96,3 +100,49 @@ Prod caveat: canonical demands mostly unstructured (0/10 structured_v2 at MP-3) 
 
 All new migrations ship DRAFT / needs-human-gate with honest in-app degradation,
 per repo doctrine. No automatic merges; Draft PRs for owner review.
+
+## Integration Control Addendum (owner directive, 2026-07-16)
+
+Cross-wagon contracts enforced before any Draft PR opens:
+
+1. **Contact/consent contract (W1+W2).** One shared lifecycle for worker and
+   team enquiries: statuses `created → accepted | declined | withdrawn |
+   expired`; `delivered`/`viewed` captured as append-only event rows so the
+   full 7-step lifecycle is auditable. Uniform policies: rate limit 10 open +
+   30/24h per requesting owner; idempotent create (unique partial index on
+   open requests, duplicate returns existing); 14-day expiry via admin-only
+   sweep (no scheduler — owner gate); events + `audit_logs` per state change;
+   no contact fields in request rows; **contact disclosure is a separate
+   auditable grant, never implied by accepting an enquiry**; SECURITY DEFINER
+   RPCs, RLS default-closed, target-only accept/decline.
+2. **Team data contract (W2→W4).** One canonical `TeamMatchInputV1` (team id,
+   active member count, deployable min/max, profession/skill/language
+   composition, certification coverage, availability, destination countries,
+   accommodation, transport, member-consent completeness, data freshness,
+   visibility state). Wagon 2 owns the read model + contract doc
+   (`docs/launch/team-match-input-contract-v1.md`); Wagon 4 consumes the
+   contract and never infers team state from unrelated tables. Null/unknown =
+   NOT STATED → missing fact, never match/mismatch.
+3. **Matching consolidation safety (W4).** No legacy engine deleted/bypassed
+   without: caller inventory, old-vs-new fixtures, documented differences,
+   proof mandatory criteria cannot weaken, proof missing data ≠ match,
+   rollback path, compatibility adapter, separate worker/team tests. Otherwise
+   freeze the fork and record removal as a later bounded cleanup.
+4. **Migration independence.** Every wagon migration applies against current
+   main alone; no references to other unmerged wagons' tables; stable existing
+   FKs; DRAFT/owner-gate headers; rollback/forward-fix guidance; honest
+   unapplied degradation.
+5. **Wagon 3 status truth.** Recorded as
+   `IMPLEMENTATION_COMPLETE_PRODUCTION_ACTIVATION_OWNER_GATED` (see above).
+6. **PR opening gate.** Independent lead-agent inspection per PR: diff scope,
+   cross-wagon edits, migration independence, contract compatibility,
+   RLS/IDOR, public copy, i18n, action-first UX, no long-scroll regression,
+   no PII analytics, no placeholder behaviour.
+7. **Validation/PR order.** A Worker Discovery → B Trust Connect → C
+   Explainable Matching (validated against B's final team contract) → D Pilot
+   (independently reviewable, no dependence on A–C).
+8. **Integration report.** Conflict matrix (shared files, tables/types,
+   migration dependencies, status vocabulary, duplicated helpers, route
+   overlap, test overlap, rebase order) resolved before merge-ready is
+   declared. Completion Telegram only after cross-wagon integration validation
+   and an honest merge sequence — not merely because four Draft PRs exist.
