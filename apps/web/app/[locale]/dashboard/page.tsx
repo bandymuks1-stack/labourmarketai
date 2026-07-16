@@ -520,7 +520,7 @@ export default async function DashboardOverviewPage({
                 className="text-[11px] leading-relaxed text-text-muted"
                 data-testid="journey-progress-helper"
               >
-                {tw("pilot.progressHelper")}
+                {tw("demand.progressHelper")}
               </p>
             </section>
           </>
