@@ -14,7 +14,7 @@
   "personalEntry": "Personal worker entry",
   "reviewNotEnabledNote": "Review is not enabled yet. You can log your work now — but for entries to be reviewed, the organization owner needs to enable journal review for you.",
   "chooseWorkType": "Choose work type",
-  "whatDidYouDo": "What are you showing about your work today?",
+  "whatDidYouDo": "What did you work on today?",
   "textPlaceholder": "e.g. Studied 2 hours and finished a school project. Or knitted 3 pairs of socks and photographed them. Or worked 6 hours, handled 12 customer requests and prepared a report.",
   "analyseSubmit": "Suggest a structure",
   "saveEntry": "Save entry",
@@ -388,5 +388,6 @@
   "proofLoop": {
     "strip": "Entries → skills → CV → opportunities: {entries} entries this month · {evidenced} skills with records · {confirmed} reviewed",
     "cvLink": "CV"
-  }
+  },
+  "statusExplainer": "How are your entries used?"
 }

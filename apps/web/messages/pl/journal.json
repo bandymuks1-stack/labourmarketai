@@ -2,7 +2,7 @@
   "cvBridge": "Potwierdzono {confirmed} z {total} wpisów — potwierdzona praca pojawia się w CV.",
   "cvBridgeLink": "Otwórz CV",
   "chooseWorkType": "[EN] Choose work type",
-  "whatDidYouDo": "[EN] What did you do today?",
+  "whatDidYouDo": "Nad czym dziś pracowałeś?",
   "freeTextLead": "[EN] Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
   "quantitySummaryHint": "[EN] Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "[EN] Work direction (optional)",
@@ -152,5 +152,6 @@
       "undecodable": "Nie udało się odczytać audio — spróbuj ponownie."
     },
     "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie."
-  }
+  },
+  "statusExplainer": "Jak wykorzystywane są Twoje wpisy?"
 }

@@ -14,7 +14,7 @@
   "personalEntry": "Henkilökohtainen työntekijäkirjaus",
   "reviewNotEnabledNote": "Tarkastusta ei ole vielä otettu käyttöön. Voit kirjata työsi nyt — mutta jotta kirjaukset voidaan tarkastaa, organisaation omistajan täytyy ottaa työpäiväkirjan tarkastus käyttöön sinulle.",
   "chooseWorkType": "Valitse työn tyyppi",
-  "whatDidYouDo": "Mitä haluat näyttää työstäsi tänään?",
+  "whatDidYouDo": "Mitä teit tänään töissä?",
   "textPlaceholder": "esim. Opiskelin 2 tuntia ja sain koulutyön valmiiksi. Tai neuloin 3 paria sukkia ja valokuvasin ne. Tai työskentelin 6 tuntia, käsittelin 12 asiakaspyyntöä ja laadin raportin.",
   "analyseSubmit": "Ehdota rakennetta",
   "saveEntry": "Tallenna kirjaus",
@@ -313,5 +313,6 @@
     },
     "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen."
   },
-  "savedOpenCv": "Näytä CV"
+  "savedOpenCv": "Näytä CV",
+  "statusExplainer": "Miten merkintöjäsi käytetään?"
 }

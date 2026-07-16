@@ -14,7 +14,7 @@
   "personalEntry": "Asmeninis darbuotojo įrašas",
   "reviewNotEnabledNote": "Žurnalo peržiūra dar neįjungta. Galite žymėti darbą jau dabar — bet kad įrašai būtų peržiūrimi, organizacijos savininkas turi įjungti jūsų žurnalo peržiūrą.",
   "chooseWorkType": "Pasirinkite darbo tipą",
-  "whatDidYouDo": "Ką šiandien parodote apie savo darbą?",
+  "whatDidYouDo": "Ką šiandien dirbai?",
   "textPlaceholder": "Pvz.: Mokiausi 2 valandas ir baigiau mokyklos projektą. Arba numezgiau 3 poras kojinių ir nufotografavau. Arba dirbau 6 valandas, sutvarkiau 12 klientų užklausų ir paruošiau ataskaitą.",
   "analyseSubmit": "Pasiūlykite struktūrą",
   "saveEntry": "Išsaugoti įrašą",
@@ -388,5 +388,6 @@
   "proofLoop": {
     "strip": "Įrašai → įgūdžiai → CV → pasiūlymai: {entries} įrašai šį mėn. · {evidenced} įgūdžiai su įrašais · {confirmed} peržiūrėti",
     "cvLink": "CV"
-  }
+  },
+  "statusExplainer": "Kaip naudojami jūsų įrašai?"
 }

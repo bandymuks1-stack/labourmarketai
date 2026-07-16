@@ -14,7 +14,7 @@
   "personalEntry": "Persoonlijk werknemersitem",
   "reviewNotEnabledNote": "Beoordeling is nog niet ingeschakeld. Je kunt je werk nu registreren — maar om items te laten beoordelen, moet de eigenaar van de organisatie journaalbeoordeling voor je inschakelen.",
   "chooseWorkType": "Kies werktype",
-  "whatDidYouDo": "Wat laat je vandaag zien over je werk?",
+  "whatDidYouDo": "Waaraan heeft u vandaag gewerkt?",
   "textPlaceholder": "bijv. 2 uur gestudeerd en een schoolproject afgerond. Of 3 paar sokken gebreid en gefotografeerd. Of 6 uur gewerkt, 12 klantverzoeken afgehandeld en een rapport opgesteld.",
   "analyseSubmit": "Stel een structuur voor",
   "saveEntry": "Item opslaan",
@@ -388,5 +388,6 @@
   "proofLoop": {
     "strip": "Vermeldingen → vaardigheden → CV → kansen: {entries} vermeldingen deze maand · {evidenced} vaardigheden met vermeldingen · {confirmed} beoordeeld",
     "cvLink": "CV"
-  }
+  },
+  "statusExplainer": "Hoe worden uw invoeren gebruikt?"
 }

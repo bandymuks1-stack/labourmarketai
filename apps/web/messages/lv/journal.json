@@ -2,7 +2,7 @@
   "cvBridge": "Apstiprināti {confirmed} no {total} ierakstiem — apstiprinātais darbs redzams jūsu CV.",
   "cvBridgeLink": "Atvērt CV",
   "chooseWorkType": "[EN] Choose work type",
-  "whatDidYouDo": "[EN] What did you do today?",
+  "whatDidYouDo": "Ko jūs šodien darījāt?",
   "freeTextLead": "[EN] Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
   "quantitySummaryHint": "[EN] Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "[EN] Work direction (optional)",
@@ -152,5 +152,6 @@
       "undecodable": "Neizdevās nolasīt audio — mēģiniet vēlreiz."
     },
     "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz."
-  }
+  },
+  "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?"
 }

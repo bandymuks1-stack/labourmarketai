@@ -637,7 +637,11 @@ export default async function JournalPage({
           {t("reviewNotEnabledNote")}
         </p>
       )}
-      <div id="journal-composer" className="order-2">
+      {/* Wagon 5 first view (UX Recovery Train, supersedes the P0-rescue
+          records-first order): the day starts with ONE large input and ONE
+          main action — "Ką šiandien dirbai?" leads, the compact history
+          follows. */}
+      <div id="journal-composer" className="order-1">
         <div className="flex flex-col gap-2">
           {/* Benefit-first framing: an entry strengthens the work card. Quiet UI —
             no confirmation/verification disclaimer paragraph. */}
@@ -702,12 +706,12 @@ export default async function JournalPage({
         </div>
       </div>
 
-      {/* Entry list — lifted to the top so a worker who just logged work sees
-          their entries first (P0 UX rescue), not a wall of notices + the form.
-          Visual order is set with `order-*` on these flex-column children. */}
+      {/* Entry list — compact recent history AFTER the composer (Wagon 5
+          first-view order). Newest day open, older days collapsed. Visual
+          order is set with `order-*` on these flex-column children. */}
       <section
         id="journal-entries"
-        className="order-1 flex flex-col gap-3 scroll-mt-4"
+        className="order-2 flex flex-col gap-3 scroll-mt-4"
         data-testid="journal-entries"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -797,6 +801,18 @@ export default async function JournalPage({
             )}
           </nav>
         )}
+        {/* Wagon 5 first view: the status/legend/count lines are REAL and
+            stay word-for-word — but behind ONE deliberate disclosure, so the
+            default view is input + history, not a wall of technical status.
+            (journal-evidence-clarity honesty copy unchanged inside.) */}
+        <details
+          className="group rounded-md border border-border-subtle bg-surface-1/40"
+          data-testid="journal-status-details"
+        >
+          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary">
+            {t("statusExplainer")}
+          </summary>
+          <div className="flex flex-col gap-2 px-3 pb-3">
         {/* Honest "who can confirm" line above the entry list: the status chips
             below show "confirmed / awaiting", so name plainly who can actually
             move an entry to confirmed today — only manager / owner / external
@@ -858,6 +874,8 @@ export default async function JournalPage({
             {t("proofLoop.cvLink")} →
           </Link>
         </p>
+          </div>
+        </details>
         {(entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"

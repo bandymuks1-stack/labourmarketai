@@ -14,7 +14,7 @@
   "personalEntry": "Persönlicher Eintrag der Arbeitskraft",
   "reviewNotEnabledNote": "Die Überprüfung ist noch nicht aktiviert. Sie können Ihre Arbeit jetzt erfassen — damit Einträge überprüft werden, muss der Inhaber der Organisation die Journalüberprüfung für Sie aktivieren.",
   "chooseWorkType": "Arbeitsart wählen",
-  "whatDidYouDo": "Was zeigen Sie heute über Ihre Arbeit?",
+  "whatDidYouDo": "Woran haben Sie heute gearbeitet?",
   "textPlaceholder": "z. B. 2 Stunden gelernt und ein Schulprojekt abgeschlossen. Oder 3 Paar Socken gestrickt und fotografiert. Oder 6 Stunden gearbeitet, 12 Kundenanfragen bearbeitet und einen Bericht erstellt.",
   "analyseSubmit": "Struktur vorschlagen",
   "saveEntry": "Eintrag speichern",
@@ -388,5 +388,6 @@
   "proofLoop": {
     "strip": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge diesen Monat · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
     "cvLink": "CV"
-  }
+  },
+  "statusExplainer": "Wie werden Ihre Einträge verwendet?"
 }
