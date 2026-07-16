@@ -3,17 +3,18 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Mobile dashboard hierarchy guard (audit PR6, updated by the control-room
- * foundation PR B).
+ * Mobile dashboard hierarchy guard (audit PR6 → control-room PR B →
+ * compact home v1, owner directive 2026-07-16).
  *
- * The dashboard must be understandable visually, not through explanatory
- * text: exactly one state-driven primary next action above the fold, the
- * compact spine-driven status strip right under it, the registry-driven
- * control-room grid within one swipe, real pending-state cards always
- * above the explainers, and every help/explainer block BELOW everything
- * actionable. This guard freezes that source order in BOTH branch layouts
- * so a refactor cannot quietly push an accepted request or a booking
- * response back under help text.
+ * The dashboard must be understandable in seconds, visually, not through
+ * explanatory text. Compact home v1 hardens that: the first screen carries
+ * ONLY the state-driven next action(s), the compact spine status strip and
+ * the registry-driven "Veiksmai" module grid; every informational surface
+ * (hub snapshot, demand readback, market context, secondary entry points)
+ * folds into the ONE collapsed DashboardMoreSection. Anchored deep-link
+ * targets (#work-card, #demand-intake) stay OUTSIDE the fold. This guard
+ * freezes that source order in BOTH branch layouts so a refactor cannot
+ * quietly rebuild the long scroll.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -64,18 +65,20 @@ describe("worker branch: state-driven top slot leads", () => {
     }
   });
 
-  it("premium hub → top slot → status strip → readiness → card workspace → pending states → finder → space chip", () => {
-    // Owner UX recovery v1: the "Kas ką gerina" explainer block is retired
-    // from the home (explanation noise out); the finder and the compact
-    // space chip close the page below every actionable surface.
+  it("top slot → status strip → readiness → card workspace → hub → pending states → fold → finder → space chip", () => {
+    // Compact home v1: action first — the grid ("Veiksmai") is on the first
+    // screen; the hub (anchored #work-card) follows it; everything
+    // informational folds into the collapsed more-section; the finder and
+    // the compact space chip close the page.
     expectOrder(
       WORKER,
       [
-        "<PremiumHubScreen",
         'data-testid="dashboard-top-slot"',
         "<DashboardStatusStrip",
         "<MyZone",
         "<DashboardModuleGrid",
+        "<PremiumHubScreen",
+        "<DashboardMoreSection",
         "<CommandFinder",
         "<CurrentSpaceHeader",
       ],
@@ -113,25 +116,29 @@ describe("worker branch: state-driven top slot leads", () => {
   });
 });
 
-describe("org branch: owner task order (Wagon 3), explainers last", () => {
-  // UX Recovery Train Wagon 3 supersedes the audit-PR6 next-action-first
-  // order: an org owner reads their space as current workforce need → new
-  // responses → next action → compact planning status, market context after.
-  it("need readback → pending states → next action → status strip → chain actions → identity → intake → grid → finder → space chip", () => {
+describe("org branch: compact home v1 order, informational surfaces folded", () => {
+  // Compact home v1 (owner directive 2026-07-16) supersedes the Wagon 3
+  // readback-first order: an org owner reads pending states → the one next
+  // action → compact planning status → the "Veiksmai" grid → the anchored
+  // intake; the hub snapshot, readback and secondary entries sit inside the
+  // collapsed more-section.
+  it("pending states → next action → status strip → grid → intake → fold (hub, readback, chain, identity) → finder → space chip", () => {
     expectOrder(
       ORG,
       [
-        "<DemandRequestsReadback",
         "{serviceRequestsNextAction}",
         "{outgoingRequestsNextAction}",
         "{bookingResponsesNextAction}",
         "<DashboardNextAction",
         "<DashboardStatusStrip",
+        "<DashboardModuleGrid",
+        'data-testid="demand-intake-section"',
+        "<DashboardMoreSection",
+        "<PremiumHubScreen",
+        "<DemandRequestsReadback",
         "<DashboardChainActions",
         "<IdentityActions",
-        'data-testid="demand-intake-section"',
         "<WorkerInvitationsCard",
-        "<DashboardModuleGrid",
         "<CommandFinder",
         "<CurrentSpaceHeader",
       ],

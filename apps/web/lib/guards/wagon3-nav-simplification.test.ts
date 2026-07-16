@@ -11,9 +11,12 @@ import { join } from "node:path";
  *      system/network jargon) in ANY active locale;
  *   2. the route-consolidation redirects stay in place (one canonical
  *      surface per capability — no second dashboard, no duplicate entries);
- *   3. the org (company/agency) overview keeps the task order the owner set:
- *      current workforce need → new responses → next action → compact
- *      planning status → optional market context.
+ *   3. the org (company/agency) overview keeps the owner's task order.
+ *      Compact home v1 (owner directive 2026-07-16) superseded the Wagon 3
+ *      readback-first order: new responses → next action → compact planning
+ *      status lead the first screen; the workforce-need readback and the
+ *      market context still render, folded into the collapsed more-section
+ *      (the full order lives in dashboard-hierarchy.test.ts).
  */
 
 const APP = process.cwd();
@@ -79,32 +82,36 @@ describe("Wagon 3 — route consolidation redirects stay canonical", () => {
   }
 });
 
-describe("Wagon 3 — org overview keeps the owner's task order", () => {
-  it("need → responses → next action → planning status → market context", () => {
+describe("Wagon 3 — org overview keeps the owner's task order (compact home v1)", () => {
+  it("responses → next action → planning status lead; readback + market context stay in the fold", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    // Work inside the org branch only (starts at the role !== "worker" return).
-    const orgBranch = page.slice(page.indexOf("Wagon 3 org-branch order"));
+    // Work inside the org branch only (starts at the compact-home-v1 order note).
+    const orgBranch = page.slice(page.indexOf("Compact home v1 (owner directive"));
     expect(orgBranch.length).toBeGreaterThan(100);
 
-    const need = orgBranch.indexOf("<DemandRequestsReadback");
     const responses = orgBranch.indexOf("{serviceRequestsNextAction}");
     const nextAction = orgBranch.indexOf("<DashboardNextAction");
     const planning = orgBranch.indexOf("<DashboardStatusStrip");
+    const fold = orgBranch.indexOf("<DashboardMoreSection");
+    const need = orgBranch.indexOf("<DemandRequestsReadback");
     const market = orgBranch.indexOf("<HubCompanyIntelligence");
 
     for (const [name, idx] of Object.entries({
-      need,
       responses,
       nextAction,
       planning,
+      fold,
+      need,
       market,
     })) {
       expect(idx, `${name} section missing from the org branch`).toBeGreaterThan(-1);
     }
-    expect(need).toBeLessThan(responses);
     expect(responses).toBeLessThan(nextAction);
     expect(nextAction).toBeLessThan(planning);
-    expect(planning).toBeLessThan(market);
+    expect(planning).toBeLessThan(fold);
+    // Nothing removed: the readback and the market context render inside the fold.
+    expect(need).toBeGreaterThan(fold);
+    expect(market).toBeGreaterThan(fold);
   });
 
   it("the workforce-need readback renders exactly once on the overview", () => {

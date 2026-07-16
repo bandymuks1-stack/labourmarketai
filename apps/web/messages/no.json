@@ -273,6 +273,10 @@
         "profile": "Profil",
         "journal": "Min CV",
         "search": "[EN] Search"
+      },
+      "moreSection": {
+        "title": "Detaljert oversikt",
+        "hint": "Status, forespørsler og ekstra kort"
       }
     },
     "errors": {

@@ -3753,6 +3753,10 @@
         "instructions": "Anleitungen",
         "bookings": "Buchungen",
         "skills": "Meine Fähigkeiten"
+      },
+      "moreSection": {
+        "title": "Ausführliche Übersicht",
+        "hint": "Status, Anfragen und weitere Karten"
       }
     },
     "middleware": {

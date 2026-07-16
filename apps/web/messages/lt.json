@@ -3753,6 +3753,10 @@
         "instructions": "Nurodymai",
         "bookings": "Rezervacijos",
         "skills": "Mano įgūdžiai"
+      },
+      "moreSection": {
+        "title": "Išsami apžvalga",
+        "hint": "Būsena, poreikiai ir papildomos kortelės"
       }
     },
     "middleware": {
