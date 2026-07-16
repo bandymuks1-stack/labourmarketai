@@ -45,7 +45,7 @@ export async function WorkerProjectPanel({
 
   return (
     <div
-      className="flex max-w-3xl flex-col gap-6"
+      className="mx-auto flex w-full max-w-content flex-col gap-6"
       data-testid="worker-project-view"
     >
       <header className="flex flex-col gap-2">
