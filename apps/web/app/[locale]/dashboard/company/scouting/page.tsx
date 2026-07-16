@@ -4,6 +4,13 @@ import Link from "next/link";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
+import {
+  hasActiveScoutFilters,
+  parseScoutFilterParams,
+  type ScoutFilters,
+} from "@/lib/scouting/scout-filters";
+import { getScoutingContactRequestStates } from "@/lib/privacy/contact-disclosure-actions";
+import { RequestContactDetailsButton } from "@/components/app/request-contact-details-button";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
@@ -35,6 +42,14 @@ const PIPELINE_TONE: Record<CandidatePipelineStage, string> = {
   rejected: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
+/** Honest freshness badge tone (Wagon 1) — same buckets as the visual
+ *  worker-card activity dot. Dormant is demoted in ranking, never hidden. */
+const FRESHNESS_TONE: Record<"active" | "recent" | "dormant", string> = {
+  active: "border-state-success/40 bg-state-success/10 text-state-success",
+  recent: "border-state-amber/40 bg-state-amber/10 text-state-amber",
+  dormant: "border-ink-500 bg-ink-800/40 text-text-muted",
+};
+
 /**
  * Company scouting (Step 3B). The company picks one of its OWN structured
  * demands; the deterministic match-v1 engine runs over the employer-discoverable
@@ -54,10 +69,18 @@ export default async function CompanyScoutingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ request?: string }>;
+  searchParams: Promise<{
+    request?: string;
+    skill?: string;
+    country?: string;
+    available?: string;
+  }>;
 }) {
   const { locale } = await params;
-  const { request } = await searchParams;
+  const { request, ...rawFilterParams } = await searchParams;
+  // Bounded facet filters (Wagon 1): syntax-validated here, allowlisted
+  // against the visible supply inside runScouting — never widening.
+  const requestedFilters = parseScoutFilterParams(rawFilterParams);
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -68,11 +91,32 @@ export default async function CompanyScoutingPage({
   const criterionLabel = (c: string) => (tCrit.has(c) ? tCrit(c as never) : c);
   // Canonical pipeline labels (P4) — derived stage chips + one next action.
   const tPipe = await getTranslations("candidatePipeline");
+  // Localized skill names for the bounded facet chips (Wagon 1).
+  const tSkill = await getTranslations("skillNames");
   const demands = await listCompanyDemands();
   // Human-structured demands first; since PR4 an unstructured demand can
   // still match via offline text recognition (honestly labeled below).
   const selected = request ?? demands.find((d) => d.structured)?.id ?? demands[0]?.id ?? null;
-  const result = selected ? await runScouting(selected) : null;
+  const result = selected ? await runScouting(selected, requestedFilters) : null;
+
+  // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
+  // applied:false while the draft-gated model is not applied (honest note,
+  // no dead button).
+  const contactRequests = selected
+    ? await getScoutingContactRequestStates(selected)
+    : { applied: false as const, byWorker: {} };
+
+  // Shareable filter links: preserve the selected demand, toggle one facet.
+  const filterHref = (next: Partial<ScoutFilters>): string => {
+    if (!selected) return `/${locale}/dashboard/company/scouting`;
+    const active = result?.kind === "ok" ? result.filters : requestedFilters;
+    const merged = { ...active, ...next };
+    const params = new URLSearchParams({ request: selected });
+    if (merged.skill) params.set("skill", merged.skill);
+    if (merged.country) params.set("country", merged.country);
+    if (merged.availableNow) params.set("available", "1");
+    return `/${locale}/dashboard/company/scouting?${params.toString()}`;
+  };
 
   // The two pipeline facts the scouting result does not already carry:
   // booking status per pair + direct-conversation existence (both real,
@@ -206,6 +250,78 @@ export default async function CompanyScoutingPage({
         </nav>
       )}
 
+      {/* Bounded facet filters (Wagon 1): chips from the VISIBLE supply only
+          (server-validated allowlist), URL-param driven (shareable), strictly
+          narrowing — never widening beyond can_view_worker. */}
+      {result?.kind === "ok" &&
+      (result.facets.skills.length > 0 ||
+        result.facets.countries.length > 0 ||
+        hasActiveScoutFilters(result.filters)) ? (
+        <section
+          className="flex flex-col gap-2"
+          data-testid="scouting-filters"
+          aria-label={t("filters.title")}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {t("filters.title")}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <Link
+              href={filterHref({ availableNow: !result.filters.availableNow })}
+              data-testid="scout-filter-available"
+              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                result.filters.availableNow
+                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              }`}
+            >
+              {t("filters.availableNow")}
+            </Link>
+            {result.facets.countries.map((cc) => (
+              <Link
+                key={`country-${cc}`}
+                href={filterHref({
+                  country: result.filters.country === cc ? null : cc,
+                })}
+                data-testid={`scout-filter-country-${cc}`}
+                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  result.filters.country === cc
+                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                }`}
+              >
+                {cc}
+              </Link>
+            ))}
+            {result.facets.skills.map((s) => (
+              <Link
+                key={`skill-${s}`}
+                href={filterHref({
+                  skill: result.filters.skill === s ? null : s,
+                })}
+                data-testid={`scout-filter-skill-${s}`}
+                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  result.filters.skill === s
+                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                }`}
+              >
+                {tSkill.has(s as never) ? tSkill(s as never) : s.replace(/-/g, " ")}
+              </Link>
+            ))}
+            {hasActiveScoutFilters(result.filters) ? (
+              <Link
+                href={filterHref({ skill: null, country: null, availableNow: false })}
+                data-testid="scout-filter-clear"
+                className="rounded-full border border-transparent px-3 py-1.5 text-xs font-medium text-brand-blue hover:text-brand-cyan"
+              >
+                {t("filters.clear")}
+              </Link>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       {/* Recognized-need honesty banner (PR4): the requirement set below was
           derived from the demand's own text by the offline recognizer — a
           labeled SUGGESTION, not a human-confirmed structure. Matches remain
@@ -262,12 +378,24 @@ export default async function CompanyScoutingPage({
         </p>
       ) : null}
       {result?.kind === "ok" && result.candidates.length === 0 ? (
-        <p
-          className="rounded-md border border-dashed border-ink-500 px-4 py-6 text-sm text-text-secondary"
+        <div
+          className="flex flex-col items-start gap-2 rounded-md border border-dashed border-ink-500 px-4 py-6"
           data-testid="scouting-empty"
         >
-          {t("noCandidates")}
-        </p>
+          <p className="text-sm text-text-secondary">
+            {hasActiveScoutFilters(result.filters)
+              ? t("filters.noMatches")
+              : t("noCandidates")}
+          </p>
+          {hasActiveScoutFilters(result.filters) ? (
+            <Link
+              href={filterHref({ skill: null, country: null, availableNow: false })}
+              className="text-xs font-medium text-brand-blue hover:text-brand-cyan"
+            >
+              {t("filters.clear")} →
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (
@@ -322,6 +450,15 @@ export default async function CompanyScoutingPage({
                         {t("interestBadge")}
                       </span>
                     ) : null}
+                    {/* Honest profile freshness (Wagon 1) — real updated_at
+                        bucket; dormant is ranked lower, never hidden. */}
+                    <span
+                      className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
+                      data-testid={`scout-freshness-${c.workerId}`}
+                      data-freshness={c.lastActiveBucket}
+                    >
+                      {t(`freshness.${c.lastActiveBucket}` as never)}
+                    </span>
                     <span
                       className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
                       data-testid={`scout-status-${c.workerId}`}
@@ -554,6 +691,7 @@ export default async function CompanyScoutingPage({
                           opened: t("request.opened"),
                           view: t("request.view"),
                           error: t("request.error"),
+                          limitReached: t("request.limitReached"),
                         }}
                       />
                       <ProposeBookingButton
@@ -572,6 +710,36 @@ export default async function CompanyScoutingPage({
                           notEntitled: t("booking.notEntitled"),
                           error: t("booking.error"),
                           cancel: t("booking.cancel"),
+                        }}
+                      />
+                      {/* Contact-detail ASK (Wagon 1): the worker alone
+                          answers on their privacy screen; a grant never
+                          shows contact data here — server-enforced. */}
+                      <RequestContactDetailsButton
+                        locale={locale}
+                        requestId={result.demand.id}
+                        workerId={c.workerId}
+                        currentStatus={
+                          contactRequests.byWorker[c.workerId]?.status ?? null
+                        }
+                        disclosureGranted={
+                          contactRequests.byWorker[c.workerId]?.disclosureGranted ??
+                          false
+                        }
+                        modelApplied={contactRequests.applied}
+                        labels={{
+                          button: t("contactRequest.button"),
+                          sending: t("contactRequest.sending"),
+                          pending: t("contactRequest.pending"),
+                          accepted: t("contactRequest.accepted"),
+                          granted: t("contactRequest.granted"),
+                          declined: t("contactRequest.declined"),
+                          expired: t("contactRequest.expired"),
+                          unavailable: t("contactRequest.unavailable"),
+                          rateLimited: t("contactRequest.rateLimited"),
+                          noOrganization: t("contactRequest.noOrganization"),
+                          fieldsNote: t("contactRequest.fieldsNote"),
+                          error: t("contactRequest.error"),
                         }}
                       />
                     </div>

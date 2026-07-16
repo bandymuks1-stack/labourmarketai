@@ -16,6 +16,15 @@ import {
   type ScoutSafeCandidate,
   type ShortlistStatus as SafeShortlistStatus,
 } from "@/lib/scouting/scout-safe-view";
+import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
+import {
+  allowlistScoutFilters,
+  applyScoutFilters,
+  buildScoutFacets,
+  EMPTY_SCOUT_FILTERS,
+  type ScoutFacets,
+  type ScoutFilters,
+} from "@/lib/scouting/scout-filters";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -153,14 +162,24 @@ export type ScoutResult =
        *  internal-only signals; empty until the owner-gated interest table
        *  is applied). Withdrawn signals are never shown. */
       interestByWorker: Record<string, string>;
+      /** The facet allowlists derived from the visible (RLS-scoped, bounded)
+       *  supply — the ONLY values the filter chips offer (Wagon 1). */
+      facets: ScoutFacets;
+      /** The filters actually applied after allowlisting (an out-of-supply
+       *  probe value is dropped, honestly reflected here). */
+      filters: ScoutFilters;
     }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
-/** Run scouting for ONE of the company's own demands. */
-export async function runScouting(requestId: string): Promise<ScoutResult> {
+/** Run scouting for ONE of the company's own demands. Optional bounded
+ *  facet filters (Wagon 1) only ever NARROW the RLS-scoped supply. */
+export async function runScouting(
+  requestId: string,
+  requestedFilters: ScoutFilters = EMPTY_SCOUT_FILTERS,
+): Promise<ScoutResult> {
   if (!requestId) return { kind: "not-found" };
   const supabase = await createClient();
   const {
@@ -266,7 +285,14 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // table absent (pre-apply) → no shortlist statuses yet
   }
 
-  const candidates: ScoutSafeCandidate[] = supply
+  // Facet allowlists come from the visible supply itself; the requested
+  // filters are clamped to them (a probe value matching nothing is dropped)
+  // and can only NARROW the already-bounded, can_view_worker-scoped list.
+  const facets = buildScoutFacets(supply);
+  const filters = allowlistScoutFilters(requestedFilters, facets);
+  const filteredSupply = applyScoutFilters(supply, filters);
+
+  const candidates: ScoutSafeCandidate[] = filteredSupply
     .map((c) =>
       toScoutSafeCandidate({
         workerId: c.workerId,
@@ -275,13 +301,21 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
         match: matchWorkerToNeed(need, c.subject),
         needCountry: need.country,
         shortlistStatus: shortlist.get(c.workerId) ?? null,
+        lastActiveBucket: c.lastActiveBucket,
       }),
     )
     // Rank via the SHARED need-context comparator (§19 — strength, coverage,
     // confirmed share, explicit availability; never a global person score).
-    .sort((a, b) => compareMatches(a.match, b.match));
+    // Wagon 1: DORMANT profiles are DEMOTED below the rest first — shown
+    // honestly with their freshness badge, never silently excluded.
+    .sort(
+      (a, b) =>
+        freshnessDemotionRank(a.lastActiveBucket) -
+          freshnessDemotionRank(b.lastActiveBucket) ||
+        compareMatches(a.match, b.match),
+    );
 
-  return { kind: "ok", demand, candidates, interestByWorker };
+  return { kind: "ok", demand, candidates, interestByWorker, facets, filters };
 }
 
 export type ShortlistWriteResult =

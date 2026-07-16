@@ -6558,7 +6558,8 @@
       "opening": "Wird geöffnet…",
       "opened": "Unterhaltung eröffnet — Antwort der Arbeitskraft wird erwartet.",
       "view": "Unterhaltung öffnen",
-      "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+      "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
+      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
     },
     "how": {
       "title": "So funktioniert das Matching",
@@ -6626,6 +6627,31 @@
       "reopen": "Diesen Bedarf wieder öffnen",
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut."
+    },
+    "freshness": {
+      "active": "Kürzlich aktualisiert",
+      "recent": "In 3 Monaten aktualisiert",
+      "dormant": "Lange nicht aktualisiert"
+    },
+    "filters": {
+      "title": "Liste eingrenzen",
+      "availableNow": "Jetzt verfügbar",
+      "clear": "Filter zurücksetzen",
+      "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern."
+    },
+    "contactRequest": {
+      "button": "Kontaktdaten anfragen",
+      "sending": "Wird gesendet…",
+      "pending": "Kontaktdaten angefragt — die Arbeitskraft entscheidet.",
+      "granted": "Die Arbeitskraft hat die Weitergabe der Kontaktdaten genehmigt.",
+      "declined": "Die Arbeitskraft hat die vorherige Anfrage abgelehnt.",
+      "expired": "Die vorherige Anfrage ist abgelaufen.",
+      "unavailable": "Kontaktanfragen sind vorbereitet, aber noch nicht aktiviert.",
+      "rateLimited": "Anfragelimit erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut.",
+      "noOrganization": "Legen Sie zuerst die Organisation Ihres Unternehmens an.",
+      "fieldsNote": "Bittet die Arbeitskraft, Name, Telefon und E-Mail zu teilen. Die Arbeitskraft entscheidet — ohne Zustimmung wird nichts angezeigt.",
+      "error": "Die Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
+      "accepted": "Die Arbeitskraft hat die Anfrage angenommen — Kontaktfreigabe noch nicht erteilt."
     }
   },
   "planBoundary": {
@@ -6780,7 +6806,8 @@
     "propose": {
       "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
-      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
+      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen.",
+      "rateLimited": "Limit für Buchungsvorschläge erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -7033,6 +7060,23 @@
       "activePermissions": "Aktive Übermittlungserlaubnisse",
       "completedDisclosures": "Durchgeführte Übermittlungen",
       "note": "Zahlen stammen nur aus echten Einträgen des Einwilligungsregisters. Ein Admin kann keine Einwilligung im Namen eines Nutzers erteilen — nur Ansicht."
+    },
+    "workerAds": {
+      "title": "Bereitschaft für begrenzte Arbeitskräfte-Anzeigen",
+      "ready": "Bereit",
+      "notReady": "Nicht bereit",
+      "itemOk": "OK",
+      "itemMissing": "Fehlt",
+      "note": "Nur aus Live-Prüfungen und ausgeliefertem Code abgeleitet. „Bereit“ heißt, die Plattformteile existieren und funktionieren — die Anzeigenentscheidung bleibt beim Eigentümer.",
+      "items": {
+        "consent_spine": "Einwilligungsregister live (Sichtbarkeitsentscheidungen der Arbeitskräfte)",
+        "discoverable_supply": "Arbeitskräfte mit erlaubter Auffindbarkeit (aktuelle Anzahl)",
+        "contact_request_flow": "Ablauf für Kontaktdaten-Anfragen aktiviert",
+        "discovery_surface": "Suchseite für Arbeitgeber live",
+        "anonymisation_policy": "Anonyme Kandidatenvorschauen erzwungen",
+        "rate_limits": "Begrenzte Anfragelimits aktiv",
+        "freshness_demotion": "Veraltete Profile niedriger eingestuft"
+      }
     }
   },
   "billingStatus": {
@@ -8144,6 +8188,33 @@
     "rights": {
       "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
       "noticeLink": "Datenschutzhinweis"
+    },
+    "contactRequests": {
+      "section": "Anfragen zu Kontaktdaten",
+      "intro": "Hier bitten Unternehmen um Ihre Kontaktdaten für einen konkreten Bedarf. Sie entscheiden jedes Mal. Wenn Sie nichts tun, wird nichts weitergegeben.",
+      "empty": "Derzeit keine Anfragen.",
+      "unknownCompany": "Unternehmen",
+      "unknownNeed": "Arbeitsbedarf",
+      "requestedFields": "Angefragte Daten",
+      "showDetails": "Was genau würde weitergegeben?",
+      "grant": "Erlauben",
+      "decline": "Ablehnen",
+      "working": "Wird gespeichert…",
+      "status": {
+        "declined": "Abgelehnt",
+        "withdrawn": "Vom Unternehmen zurückgezogen",
+        "expired": "Abgelaufen",
+        "created": "Wartet auf Sie",
+        "accepted": "Angenommen"
+      },
+      "grantedNote": "Erlaubt. Diese Erlaubnis steht unten in Ihrer Einwilligungshistorie.",
+      "declinedNote": "Abgelehnt. Es wurde nichts weitergegeben.",
+      "error": "Ihre Antwort konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "acceptNote": "Das Annehmen zeigt dem Unternehmen nur, dass Sie offen dafür sind. Ihre Kontaktdaten werden durch das Annehmen NICHT weitergegeben — das ist eine separate Entscheidung danach.",
+      "accept": "Annehmen",
+      "acceptedNote": "Angenommen. Es wurde noch nichts weitergegeben — Kontaktdaten zu erlauben ist eine separate Entscheidung unten.",
+      "grantTitle": "Kontaktdaten weitergeben?",
+      "grantIntro": "Dies ist eine separate Entscheidung. Nur die unten aufgeführten Daten würden an dieses Unternehmen weitergegeben, und nur für diesen Bedarf."
     }
   },
   "planning": {
