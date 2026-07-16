@@ -6687,7 +6687,8 @@
       "opening": "Opening…",
       "opened": "Conversation opened — waiting for the worker's reply.",
       "view": "Open conversation",
-      "error": "Couldn't open the conversation. Please try again."
+      "error": "Couldn't open the conversation. Please try again.",
+      "limitReached": "Daily limit for new conversations reached. Try again tomorrow."
     },
     "how": {
       "title": "How matching works",
@@ -6755,6 +6756,31 @@
       "reopen": "Reopen this need",
       "closedNote": "Closed — hidden from workers.",
       "error": "Could not save. Try again."
+    },
+    "freshness": {
+      "active": "Recently updated",
+      "recent": "Updated within 3 months",
+      "dormant": "No recent updates"
+    },
+    "filters": {
+      "title": "Narrow the list",
+      "availableNow": "Available now",
+      "clear": "Clear filters",
+      "noMatches": "No candidates match the selected filters."
+    },
+    "contactRequest": {
+      "button": "Request contact details",
+      "sending": "Sending…",
+      "pending": "Contact details requested — the worker decides.",
+      "granted": "The worker approved sharing contact details.",
+      "declined": "The worker declined the previous request.",
+      "expired": "The previous request expired.",
+      "unavailable": "Contact requests are prepared but not enabled yet.",
+      "rateLimited": "Request limit reached (10 open, 30 per day). Try again later.",
+      "noOrganization": "Create your company organization first.",
+      "fieldsNote": "Asks the worker to share their name, phone and email. The worker decides — nothing is shown without their approval.",
+      "error": "The request could not be sent. Please try again.",
+      "accepted": "The worker accepted the request — contact sharing not yet allowed."
     }
   },
   "planBoundary": {
@@ -6909,7 +6935,8 @@
     "propose": {
       "modeNote": "This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
-      "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+      "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
+      "rateLimited": "Booking proposal limit reached (10 open, 30 per day). Try again later."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
@@ -7162,6 +7189,23 @@
       "activePermissions": "Active transfer permissions",
       "completedDisclosures": "Completed disclosures",
       "note": "Counts come only from real consent-ledger rows. An admin cannot grant consent on a user's behalf — state is view-only."
+    },
+    "workerAds": {
+      "title": "Limited worker ads readiness",
+      "ready": "Ready",
+      "notReady": "Not ready",
+      "itemOk": "OK",
+      "itemMissing": "Missing",
+      "note": "Derived from live checks and shipped code only. 'Ready' means the platform pieces exist and work — the ads decision itself stays with the owner.",
+      "items": {
+        "consent_spine": "Consent records live (worker visibility choices)",
+        "discoverable_supply": "Workers who allowed discovery (current count)",
+        "contact_request_flow": "Contact-detail request flow enabled",
+        "discovery_surface": "Employer discovery page live",
+        "anonymisation_policy": "Anonymous candidate previews enforced",
+        "rate_limits": "Bounded request limits active",
+        "freshness_demotion": "Stale profiles ranked lower"
+      }
     }
   },
   "billingStatus": {
@@ -8273,6 +8317,33 @@
     "rights": {
       "notice": "More about your rights and how data is handled:",
       "noticeLink": "privacy notice"
+    },
+    "contactRequests": {
+      "section": "Contact detail requests",
+      "intro": "Here companies ask to see your contact details for one specific need. You decide each time. If you do nothing, nothing is shared.",
+      "empty": "No requests right now.",
+      "unknownCompany": "Company",
+      "unknownNeed": "Work need",
+      "requestedFields": "Requested details",
+      "showDetails": "What exactly would be shared?",
+      "grant": "Allow",
+      "decline": "Decline",
+      "working": "Saving…",
+      "status": {
+        "declined": "Declined",
+        "withdrawn": "Withdrawn by the company",
+        "expired": "Expired",
+        "created": "Waiting for you",
+        "accepted": "Accepted"
+      },
+      "grantedNote": "Allowed. This permission is recorded in your consent history below.",
+      "declinedNote": "Declined. Nothing was shared.",
+      "error": "Could not save your answer. Please try again.",
+      "acceptNote": "Accepting only tells the company you are open to it. Your contact details are NOT shared by accepting — that is a separate choice you can make after accepting.",
+      "accept": "Accept",
+      "acceptedNote": "Accepted. Nothing was shared yet — allowing contact details is a separate choice below.",
+      "grantTitle": "Share contact details?",
+      "grantIntro": "This is a separate decision. Only the details listed below would be passed to this company, and only for this need."
     }
   },
   "planning": {

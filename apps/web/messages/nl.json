@@ -6687,7 +6687,8 @@
       "opening": "Openen…",
       "opened": "Gesprek geopend — wachten op het antwoord van de werknemer.",
       "view": "Gesprek openen",
-      "error": "Kon het gesprek niet openen. Probeer het opnieuw."
+      "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
+      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."
     },
     "how": {
       "title": "Hoe matching werkt",
@@ -6755,6 +6756,31 @@
       "reopen": "Deze behoefte heropenen",
       "closedNote": "Gesloten — verborgen voor werknemers.",
       "error": "Kon niet opslaan. Probeer het opnieuw."
+    },
+    "freshness": {
+      "active": "Onlangs bijgewerkt",
+      "recent": "Bijgewerkt binnen 3 maanden",
+      "dormant": "Lang niet bijgewerkt"
+    },
+    "filters": {
+      "title": "Lijst verfijnen",
+      "availableNow": "Nu beschikbaar",
+      "clear": "Filters wissen",
+      "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
+    },
+    "contactRequest": {
+      "button": "Contactgegevens aanvragen",
+      "sending": "Versturen…",
+      "pending": "Contactgegevens aangevraagd — de werker beslist.",
+      "granted": "De werker heeft het delen van contactgegevens goedgekeurd.",
+      "declined": "De werker heeft het vorige verzoek afgewezen.",
+      "expired": "Het vorige verzoek is verlopen.",
+      "unavailable": "Contactverzoeken zijn voorbereid maar nog niet ingeschakeld.",
+      "rateLimited": "Verzoeklimiet bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
+      "noOrganization": "Maak eerst de organisatie van uw bedrijf aan.",
+      "fieldsNote": "Vraagt de werker om naam, telefoon en e-mail te delen. De werker beslist — zonder goedkeuring wordt niets getoond.",
+      "error": "Het verzoek kon niet worden verstuurd. Probeer het opnieuw.",
+      "accepted": "De werker heeft het verzoek geaccepteerd — contact delen nog niet toegestaan."
     }
   },
   "planBoundary": {
@@ -6909,7 +6935,8 @@
     "propose": {
       "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
-      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
+      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken.",
+      "rateLimited": "Limiet voor boekingsvoorstellen bereikt (10 open, 30 per dag). Probeer het later opnieuw."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
@@ -7162,6 +7189,23 @@
       "activePermissions": "Actieve overdrachtstoestemmingen",
       "completedDisclosures": "Uitgevoerde overdrachten",
       "note": "Aantallen komen alleen uit echte grootboekregels. Een beheerder kan geen toestemming namens een gebruiker geven — alleen inzien."
+    },
+    "workerAds": {
+      "title": "Gereedheid beperkte werkeradvertenties",
+      "ready": "Gereed",
+      "notReady": "Niet gereed",
+      "itemOk": "OK",
+      "itemMissing": "Ontbreekt",
+      "note": "Alleen afgeleid uit live controles en geleverde code. 'Gereed' betekent dat de platformonderdelen bestaan en werken — het advertentiebesluit blijft bij de eigenaar.",
+      "items": {
+        "consent_spine": "Toestemmingsregistratie live (zichtbaarheidskeuzes van werkers)",
+        "discoverable_supply": "Werkers die vindbaarheid toestaan (huidig aantal)",
+        "contact_request_flow": "Aanvraagstroom voor contactgegevens ingeschakeld",
+        "discovery_surface": "Zoekpagina voor werkgevers live",
+        "anonymisation_policy": "Anonieme kandidaatweergaven afgedwongen",
+        "rate_limits": "Begrensde verzoeklimieten actief",
+        "freshness_demotion": "Verouderde profielen lager gerangschikt"
+      }
     }
   },
   "billingStatus": {
@@ -8273,6 +8317,33 @@
     "rights": {
       "notice": "Meer over uw rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
+    },
+    "contactRequests": {
+      "section": "Verzoeken om contactgegevens",
+      "intro": "Hier vragen bedrijven om uw contactgegevens voor één specifieke behoefte. U beslist elke keer. Doet u niets, dan wordt er niets gedeeld.",
+      "empty": "Op dit moment geen verzoeken.",
+      "unknownCompany": "Bedrijf",
+      "unknownNeed": "Werkbehoefte",
+      "requestedFields": "Gevraagde gegevens",
+      "showDetails": "Wat wordt er precies gedeeld?",
+      "grant": "Toestaan",
+      "decline": "Afwijzen",
+      "working": "Opslaan…",
+      "status": {
+        "declined": "Afgewezen",
+        "withdrawn": "Ingetrokken door het bedrijf",
+        "expired": "Verlopen",
+        "created": "Wacht op u",
+        "accepted": "Geaccepteerd"
+      },
+      "grantedNote": "Toegestaan. Deze toestemming staat in uw toestemmingsgeschiedenis hieronder.",
+      "declinedNote": "Afgewezen. Er is niets gedeeld.",
+      "error": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
+      "acceptNote": "Accepteren laat het bedrijf alleen weten dat u ervoor openstaat. Uw contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die u daarna kunt maken.",
+      "accept": "Accepteren",
+      "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
+      "grantTitle": "Contactgegevens delen?",
+      "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     }
   },
   "planning": {
