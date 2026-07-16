@@ -113,16 +113,20 @@ describe("worker branch: state-driven top slot leads", () => {
   });
 });
 
-describe("org branch: primary action first, demand intake promoted, explainers last", () => {
-  it("next action → status strip → pending states → chain actions → identity → intake → grid → finder → space chip", () => {
+describe("org branch: owner task order (Wagon 3), explainers last", () => {
+  // UX Recovery Train Wagon 3 supersedes the audit-PR6 next-action-first
+  // order: an org owner reads their space as current workforce need → new
+  // responses → next action → compact planning status, market context after.
+  it("need readback → pending states → next action → status strip → chain actions → identity → intake → grid → finder → space chip", () => {
     expectOrder(
       ORG,
       [
-        "<DashboardNextAction",
-        "<DashboardStatusStrip",
+        "<DemandRequestsReadback",
         "{serviceRequestsNextAction}",
         "{outgoingRequestsNextAction}",
         "{bookingResponsesNextAction}",
+        "<DashboardNextAction",
+        "<DashboardStatusStrip",
         "<DashboardChainActions",
         "<IdentityActions",
         'data-testid="demand-intake-section"',

@@ -469,11 +469,26 @@ export default async function DashboardOverviewPage({
             content below keeps its audited order. */}
         <PremiumHubScreen vm={hubVm} embedded />
 
-        {/* Audit PR6 org-branch order: the single data-driven primary action
-            FIRST (entries waiting → review; nothing waiting → invite/open
-            team; a buyer → their requests room), then real pending-state
-            alerts, then chain actions / identity, then the demand intake
-            (previously position 11), explainers last. */}
+        {/* Wagon 3 org-branch order (UX Recovery Train, supersedes the
+            audit-PR6 next-action-first order): a company/agency owner reads
+            their space in the doc's task order —
+              1. current workforce need (the honest readback of what they
+                 already asked for),
+              2. new responses or contacts (count-gated pending cards),
+              3. the single data-driven next action,
+              4. compact planning status (spine strip chips),
+              5. optional market context (trust card, streamed).
+            Nothing was removed — sections only moved. */}
+        {demandReadback && (
+          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
+        )}
+
+        {/* Real pending states — provider inbox, own outgoing requests,
+            booking responses. Count-gated, never fake. */}
+        {serviceRequestsNextAction}
+        {outgoingRequestsNextAction}
+        {bookingResponsesNextAction}
+
         <DashboardNextAction
           action={nextAction}
           counts={{ pending: pendingReview }}
@@ -484,11 +499,11 @@ export default async function DashboardOverviewPage({
         <DashboardStatusStrip entries={controlRoom.statusEntries} />
 
         {/* Market context (Contextual Intelligence UI v1): the org's own
-            demand trust card — company/agency workspaces only. */}
+            demand trust card — company/agency workspaces only. Kept AFTER
+            the need/response/action core (doc: "optional market context").
+            Suspense so the RLS-scoped intelligence read actually STREAMS
+            (Wagon 2). */}
         {role === "company" || role === "agency" ? (
-          // Suspense so the RLS-scoped intelligence read actually STREAMS
-          // instead of blocking the whole overview flush (Wagon 2 — the
-          // prior comment claimed streaming but there was no boundary).
           <Suspense
             fallback={
               <div
@@ -501,12 +516,6 @@ export default async function DashboardOverviewPage({
             <HubCompanyIntelligence locale={locale} />
           </Suspense>
         ) : null}
-
-        {/* Real pending states — provider inbox, own outgoing requests,
-            booking responses. Count-gated, never fake. */}
-        {serviceRequestsNextAction}
-        {outgoingRequestsNextAction}
-        {bookingResponsesNextAction}
 
         {/* Secondary — the role's chain entry points. */}
         <DashboardChainActions role={role} />
@@ -557,10 +566,6 @@ export default async function DashboardOverviewPage({
               </p>
             </section>
           </>
-        )}
-
-        {demandReadback && (
-          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
         )}
 
         <WorkerInvitationsCard preloaded={invitations} />
