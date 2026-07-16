@@ -93,7 +93,7 @@ describe("stepper + future modules clarity", () => {
     expect(en.auth.dashboard.wow.demand.progressHelper).toMatch(/show progress/);
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/journey-progress-helper/);
-    expect(page).toMatch(/pilot\.progressHelper/);
+    expect(page).toMatch(/demand\.progressHelper/);
   });
   it("future-modules copy marks them as non-active modules", () => {
     expect(lt.dashboard.comingLater.title).toBe("Vėliau įjungiami moduliai");

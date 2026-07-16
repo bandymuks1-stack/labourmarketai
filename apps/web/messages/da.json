@@ -205,7 +205,8 @@
           "cta": "[EN] Submit your need",
           "sending": "[EN] Sending...",
           "done": "[EN] Saved. Your need is now visible in your space.",
-          "error": "[EN] Couldn't send. Please try again."
+          "error": "[EN] Couldn't send. Please try again.",
+          "progressHelper": "[EN] These steps show progress. Active actions are shown below."
         }
       },
       "account": {
