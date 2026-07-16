@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+        }
+        Relationships: []
+      }
       agencies: {
         Row: {
           country: string | null
@@ -303,6 +324,8 @@ export type Database = {
           event_type: string
           from_status: string | null
           id: string
+          reason_kind: string | null
+          reason_note: string | null
           to_status: string
         }
         Insert: {
@@ -312,6 +335,8 @@ export type Database = {
           event_type: string
           from_status?: string | null
           id?: string
+          reason_kind?: string | null
+          reason_note?: string | null
           to_status: string
         }
         Update: {
@@ -321,6 +346,8 @@ export type Database = {
           event_type?: string
           from_status?: string | null
           id?: string
+          reason_kind?: string | null
+          reason_note?: string | null
           to_status?: string
         }
         Relationships: [
@@ -350,6 +377,7 @@ export type Database = {
           owner_id: string
           readiness_snapshot: Json
           request_id: string
+          response_deadline_date: string | null
           role_text: string | null
           start_date: string | null
           status: string
@@ -365,6 +393,7 @@ export type Database = {
           owner_id: string
           readiness_snapshot?: Json
           request_id: string
+          response_deadline_date?: string | null
           role_text?: string | null
           start_date?: string | null
           status?: string
@@ -380,6 +409,7 @@ export type Database = {
           owner_id?: string
           readiness_snapshot?: Json
           request_id?: string
+          response_deadline_date?: string | null
           role_text?: string | null
           start_date?: string | null
           status?: string
@@ -406,6 +436,29 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_requests_seen: {
+        Row: {
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_seen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -709,6 +762,78 @@ export type Database = {
           },
         ]
       }
+      company_need_public_intakes: {
+        Row: {
+          accommodation: string | null
+          city_or_region: string | null
+          company_name: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country: string
+          created_at: string
+          description: string
+          engagement_type: string | null
+          expected_duration: string | null
+          headcount: number | null
+          id: string
+          languages: string | null
+          locale: string | null
+          sector: string | null
+          source_path: string | null
+          start_window: string | null
+          status: string
+          transport_needed: boolean | null
+          urgency: string | null
+        }
+        Insert: {
+          accommodation?: string | null
+          city_or_region?: string | null
+          company_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country: string
+          created_at?: string
+          description: string
+          engagement_type?: string | null
+          expected_duration?: string | null
+          headcount?: number | null
+          id?: string
+          languages?: string | null
+          locale?: string | null
+          sector?: string | null
+          source_path?: string | null
+          start_window?: string | null
+          status?: string
+          transport_needed?: boolean | null
+          urgency?: string | null
+        }
+        Update: {
+          accommodation?: string | null
+          city_or_region?: string | null
+          company_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          description?: string
+          engagement_type?: string | null
+          expected_duration?: string | null
+          headcount?: number | null
+          id?: string
+          languages?: string | null
+          locale?: string | null
+          sector?: string | null
+          source_path?: string | null
+          start_window?: string | null
+          status?: string
+          transport_needed?: boolean | null
+          urgency?: string | null
+        }
+        Relationships: []
+      }
       company_worker_invitations: {
         Row: {
           accepted_at: string | null
@@ -911,6 +1036,183 @@ export type Database = {
           },
         ]
       }
+      contact_disclosure_request_events: {
+        Row: {
+          actor_profile_id: string
+          contact_disclosure_request_id: string
+          created_at: string
+          event_type: string
+          from_status: string | null
+          id: string
+          to_status: string
+        }
+        Insert: {
+          actor_profile_id: string
+          contact_disclosure_request_id: string
+          created_at?: string
+          event_type: string
+          from_status?: string | null
+          id?: string
+          to_status: string
+        }
+        Update: {
+          actor_profile_id?: string
+          contact_disclosure_request_id?: string
+          created_at?: string
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_disclosure_request_ev_contact_disclosure_request_i_fkey"
+            columns: ["contact_disclosure_request_id"]
+            isOneToOne: false
+            referencedRelation: "contact_disclosure_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_request_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_disclosure_requests: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          note: string | null
+          organization_id: string
+          owner_id: string
+          request_id: string
+          requested_fields: Json
+          responded_at: string | null
+          status: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          owner_id: string
+          request_id: string
+          requested_fields: Json
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          owner_id?: string
+          request_id?: string
+          requested_fields?: Json
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_disclosure_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_requests_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "customer_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_requests_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_message_attachments: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          file_name: string
+          file_size_bytes: number
+          id: string
+          message_id: string
+          mime_type: string
+          storage_path: string
+          uploader_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          file_name: string
+          file_size_bytes: number
+          id?: string
+          message_id: string
+          mime_type: string
+          storage_path: string
+          uploader_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          file_name?: string
+          file_size_bytes?: number
+          id?: string
+          message_id?: string
+          mime_type?: string
+          storage_path?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_message_attachments_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_message_attachments_uploader_id_fkey"
+            columns: ["uploader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_messages: {
         Row: {
           author_id: string
@@ -1043,6 +1345,8 @@ export type Database = {
           created_by: string
           id: string
           kind: string
+          source_id: string | null
+          source_type: string | null
           subject: string | null
           updated_at: string
         }
@@ -1051,6 +1355,8 @@ export type Database = {
           created_by: string
           id?: string
           kind?: string
+          source_id?: string | null
+          source_type?: string | null
           subject?: string | null
           updated_at?: string
         }
@@ -1059,6 +1365,8 @@ export type Database = {
           created_by?: string
           id?: string
           kind?: string
+          source_id?: string | null
+          source_type?: string | null
           subject?: string | null
           updated_at?: string
         }
@@ -1346,6 +1654,54 @@ export type Database = {
           },
         ]
       }
+      demand_interest_signals: {
+        Row: {
+          created_at: string
+          id: string
+          match_snapshot: Json
+          note: string | null
+          request_id: string
+          status: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_snapshot?: Json
+          note?: string | null
+          request_id: string
+          status?: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_snapshot?: Json
+          note?: string | null
+          request_id?: string
+          status?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_interest_signals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "customer_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demand_interest_signals_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demand_shortlist: {
         Row: {
           created_at: string
@@ -1425,6 +1781,27 @@ export type Database = {
           is_active?: boolean
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      education_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
         }
         Relationships: []
       }
@@ -1655,6 +2032,238 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      finance_records: {
+        Row: {
+          amount_cents: number
+          company_id: string | null
+          counterparty_name: string
+          created_at: string
+          created_by: string
+          currency: string
+          due_date: string | null
+          id: string
+          note: string | null
+          paid_at: string | null
+          project_id: string | null
+          record_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          company_id?: string | null
+          counterparty_name: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          project_id?: string | null
+          record_type: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string | null
+          counterparty_name?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          project_id?: string | null
+          record_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follow_up_tasks: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          note: string
+          resolved_at: string | null
+          status: string
+          subject_company_id: string | null
+          subject_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          note: string
+          resolved_at?: string | null
+          status?: string
+          subject_company_id?: string | null
+          subject_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string
+          resolved_at?: string | null
+          status?: string
+          subject_company_id?: string | null
+          subject_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_up_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_tasks_subject_company_id_fkey"
+            columns: ["subject_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_tasks_subject_profile_id_fkey"
+            columns: ["subject_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by_profile_id: string | null
+          created_at: string
+          declined_at: string | null
+          delivery_status: string
+          expires_at: string
+          id: string
+          invitation_type: string
+          invited_email: string
+          invited_name: string | null
+          inviter_profile_id: string
+          last_sent_at: string | null
+          locale: string | null
+          organization_id: string | null
+          personal_message: string | null
+          project_id: string | null
+          proposed_role: string | null
+          resend_count: number
+          revoked_at: string | null
+          status: string
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by_profile_id?: string | null
+          created_at?: string
+          declined_at?: string | null
+          delivery_status?: string
+          expires_at?: string
+          id?: string
+          invitation_type: string
+          invited_email: string
+          invited_name?: string | null
+          inviter_profile_id: string
+          last_sent_at?: string | null
+          locale?: string | null
+          organization_id?: string | null
+          personal_message?: string | null
+          project_id?: string | null
+          proposed_role?: string | null
+          resend_count?: number
+          revoked_at?: string | null
+          status?: string
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by_profile_id?: string | null
+          created_at?: string
+          declined_at?: string | null
+          delivery_status?: string
+          expires_at?: string
+          id?: string
+          invitation_type?: string
+          invited_email?: string
+          invited_name?: string | null
+          inviter_profile_id?: string
+          last_sent_at?: string | null
+          locale?: string | null
+          organization_id?: string | null
+          personal_message?: string | null
+          project_id?: string | null
+          proposed_role?: string | null
+          resend_count?: number
+          revoked_at?: string | null
+          status?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_accepted_by_profile_id_fkey"
+            columns: ["accepted_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_inviter_profile_id_fkey"
+            columns: ["inviter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_demands: {
         Row: {
@@ -2223,6 +2832,454 @@ export type Database = {
           },
         ]
       }
+      learning_policy_settings: {
+        Row: {
+          created_at: string
+          disabled_at: string | null
+          disabled_by: string | null
+          enabled: boolean
+          enabled_at: string | null
+          enabled_by: string | null
+          id: string
+          organization_id: string
+          policy_kind: string
+          rule: Json
+          scope: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          enabled?: boolean
+          enabled_at?: string | null
+          enabled_by?: string | null
+          id?: string
+          organization_id: string
+          policy_kind: string
+          rule?: Json
+          scope?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          enabled?: boolean
+          enabled_at?: string | null
+          enabled_by?: string | null
+          id?: string
+          organization_id?: string
+          policy_kind?: string
+          rule?: Json
+          scope?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_policy_settings_disabled_by_fkey"
+            columns: ["disabled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_policy_settings_enabled_by_fkey"
+            columns: ["enabled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_policy_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_review_queue: {
+        Row: {
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          organization_id: string
+          policy_id: string | null
+          produced_confirmation_id: string | null
+          proposed_action: Json | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          signal_id: string | null
+          status: string
+          subject_skill_id: string | null
+          subject_worker_id: string
+          suggestion_kind: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          organization_id: string
+          policy_id?: string | null
+          produced_confirmation_id?: string | null
+          proposed_action?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signal_id?: string | null
+          status?: string
+          subject_skill_id?: string | null
+          subject_worker_id: string
+          suggestion_kind: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          organization_id?: string
+          policy_id?: string | null
+          produced_confirmation_id?: string | null
+          proposed_action?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signal_id?: string | null
+          status?: string
+          subject_skill_id?: string | null
+          subject_worker_id?: string
+          suggestion_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_review_queue_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "learning_policy_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_produced_confirmation_id_fkey"
+            columns: ["produced_confirmation_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entry_confirmations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "learning_signals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_subject_skill_id_fkey"
+            columns: ["subject_skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_review_queue_subject_worker_id_fkey"
+            columns: ["subject_worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_signals: {
+        Row: {
+          actor_id: string | null
+          confidence_bin: string
+          confidence_score: number
+          created_at: string
+          id: string
+          organization_id: string | null
+          proposed_outcome: Json | null
+          signal_kind: string
+          source: string
+          source_object_id: string | null
+          source_object_type: string | null
+          subject_skill_id: string | null
+          subject_worker_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          confidence_bin?: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          proposed_outcome?: Json | null
+          signal_kind: string
+          source: string
+          source_object_id?: string | null
+          source_object_type?: string | null
+          subject_skill_id?: string | null
+          subject_worker_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          confidence_bin?: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          proposed_outcome?: Json | null
+          signal_kind?: string
+          source?: string
+          source_object_id?: string | null
+          source_object_type?: string | null
+          subject_skill_id?: string | null
+          subject_worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_signals_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_signals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_signals_subject_skill_id_fkey"
+            columns: ["subject_skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_signals_subject_worker_id_fkey"
+            columns: ["subject_worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_intelligence_insight_queries: {
+        Row: {
+          computation_version: string
+          id: string
+          insight_key: string
+          observation_ids: string[]
+          params_summary: Json
+          profile_id: string | null
+          queried_at: string
+          viewer_role: string
+        }
+        Insert: {
+          computation_version: string
+          id?: string
+          insight_key: string
+          observation_ids?: string[]
+          params_summary?: Json
+          profile_id?: string | null
+          queried_at?: string
+          viewer_role: string
+        }
+        Update: {
+          computation_version?: string
+          id?: string
+          insight_key?: string
+          observation_ids?: string[]
+          params_summary?: Json
+          profile_id?: string | null
+          queried_at?: string
+          viewer_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_intelligence_insight_queries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_intelligence_observations: {
+        Row: {
+          captured_at: string
+          confidence: number | null
+          content_hash: string
+          created_at: string
+          derivation_ids: string[]
+          freshness_status: string
+          geo_city: string | null
+          geo_country: string | null
+          geo_region: string | null
+          id: string
+          metric_key: string
+          privacy_class: string
+          provenance: Json
+          sample_size: number | null
+          source_key: string
+          source_kind: string
+          source_url: string | null
+          stat_method: string
+          subject_id: string
+          subject_kind: string
+          transform_version: string
+          unit: string
+          valid_from: string
+          valid_to: string | null
+          value_numeric: number
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          captured_at: string
+          confidence?: number | null
+          content_hash: string
+          created_at?: string
+          derivation_ids?: string[]
+          freshness_status?: string
+          geo_city?: string | null
+          geo_country?: string | null
+          geo_region?: string | null
+          id?: string
+          metric_key: string
+          privacy_class: string
+          provenance?: Json
+          sample_size?: number | null
+          source_key: string
+          source_kind: string
+          source_url?: string | null
+          stat_method: string
+          subject_id: string
+          subject_kind: string
+          transform_version: string
+          unit: string
+          valid_from: string
+          valid_to?: string | null
+          value_numeric: number
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          captured_at?: string
+          confidence?: number | null
+          content_hash?: string
+          created_at?: string
+          derivation_ids?: string[]
+          freshness_status?: string
+          geo_city?: string | null
+          geo_country?: string | null
+          geo_region?: string | null
+          id?: string
+          metric_key?: string
+          privacy_class?: string
+          provenance?: Json
+          sample_size?: number | null
+          source_key?: string
+          source_kind?: string
+          source_url?: string | null
+          stat_method?: string
+          subject_id?: string
+          subject_kind?: string
+          transform_version?: string
+          unit?: string
+          valid_from?: string
+          valid_to?: string | null
+          value_numeric?: number
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_intelligence_observations_source_key_fkey"
+            columns: ["source_key"]
+            isOneToOne: false
+            referencedRelation: "market_intelligence_sources"
+            referencedColumns: ["source_key"]
+          },
+        ]
+      }
+      market_intelligence_sources: {
+        Row: {
+          activation: string
+          attribution_text: string | null
+          created_at: string
+          display_name: string
+          id: string
+          import_policy: Json | null
+          legal_status: string
+          owner_approval_note: string | null
+          owner_approved_at: string | null
+          rate_limit_note: string | null
+          robots_status: string | null
+          source_key: string
+          source_kind: string
+          terms_url: string | null
+        }
+        Insert: {
+          activation?: string
+          attribution_text?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          import_policy?: Json | null
+          legal_status?: string
+          owner_approval_note?: string | null
+          owner_approved_at?: string | null
+          rate_limit_note?: string | null
+          robots_status?: string | null
+          source_key: string
+          source_kind: string
+          terms_url?: string | null
+        }
+        Update: {
+          activation?: string
+          attribution_text?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          import_policy?: Json | null
+          legal_status?: string
+          owner_approval_note?: string | null
+          owner_approved_at?: string | null
+          rate_limit_note?: string | null
+          robots_status?: string | null
+          source_key?: string
+          source_kind?: string
+          terms_url?: string | null
+        }
+        Relationships: []
+      }
       market_rate_averages: {
         Row: {
           avg_rate_eur: number
@@ -2495,6 +3552,83 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_data_disclosures: {
+        Row: {
+          consent_event_id: string
+          context_id: string
+          context_type: string
+          data_categories: string[]
+          delivery_method: string
+          disclosed_at: string
+          disclosed_by: string
+          document_ids: string[] | null
+          id: string
+          metadata: Json | null
+          recipient_organization_id: string
+          revoked_access_at: string | null
+          worker_user_id: string
+        }
+        Insert: {
+          consent_event_id: string
+          context_id: string
+          context_type: string
+          data_categories: string[]
+          delivery_method: string
+          disclosed_at?: string
+          disclosed_by: string
+          document_ids?: string[] | null
+          id?: string
+          metadata?: Json | null
+          recipient_organization_id: string
+          revoked_access_at?: string | null
+          worker_user_id: string
+        }
+        Update: {
+          consent_event_id?: string
+          context_id?: string
+          context_type?: string
+          data_categories?: string[]
+          delivery_method?: string
+          disclosed_at?: string
+          disclosed_by?: string
+          document_ids?: string[] | null
+          id?: string
+          metadata?: Json | null
+          recipient_organization_id?: string
+          revoked_access_at?: string | null
+          worker_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_data_disclosures_consent_event_id_fkey"
+            columns: ["consent_event_id"]
+            isOneToOne: false
+            referencedRelation: "privacy_consent_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_data_disclosures_disclosed_by_fkey"
+            columns: ["disclosed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_data_disclosures_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_data_disclosures_worker_user_id_fkey"
+            columns: ["worker_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pilot_drafts: {
         Row: {
           created_at: string
@@ -2586,6 +3720,144 @@ export type Database = {
           {
             foreignKeyName: "pilot_events_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilot_outcomes: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          noted_by: string
+          outcome: string
+          participant_profile_id: string | null
+          pilot_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          noted_by: string
+          outcome: string
+          participant_profile_id?: string | null
+          pilot_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          noted_by?: string
+          outcome?: string
+          participant_profile_id?: string | null
+          pilot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilot_outcomes_noted_by_fkey"
+            columns: ["noted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pilot_outcomes_participant_profile_id_fkey"
+            columns: ["participant_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pilot_outcomes_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilot_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          joined_via: string
+          left_at: string | null
+          pilot_id: string
+          profile_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          joined_via?: string
+          left_at?: string | null
+          pilot_id: string
+          profile_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          joined_via?: string
+          left_at?: string | null
+          pilot_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilot_participants_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pilot_participants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilots: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_on: string | null
+          id: string
+          name: string
+          organisation_kind: string
+          starts_on: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ends_on?: string | null
+          id?: string
+          name: string
+          organisation_kind?: string
+          starts_on?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_on?: string | null
+          id?: string
+          name?: string
+          organisation_kind?: string
+          starts_on?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pilots_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2730,6 +4002,106 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      privacy_consent_events: {
+        Row: {
+          action: string
+          consent_text_hash: string
+          consent_text_version: string
+          context_id: string | null
+          context_type: string | null
+          created_at: string
+          id: string
+          locale: string
+          metadata: Json | null
+          purpose: string
+          recipient_organization_id: string | null
+          request_id: string | null
+          selected_fields: Json | null
+          seq: number
+          source: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          consent_text_hash: string
+          consent_text_version: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          id?: string
+          locale: string
+          metadata?: Json | null
+          purpose: string
+          recipient_organization_id?: string | null
+          request_id?: string | null
+          selected_fields?: Json | null
+          seq?: never
+          source: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          consent_text_hash?: string
+          consent_text_version?: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          id?: string
+          locale?: string
+          metadata?: Json | null
+          purpose?: string
+          recipient_organization_id?: string | null
+          request_id?: string | null
+          selected_fields?: Json | null
+          seq?: never
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_consent_events_purpose_fkey"
+            columns: ["purpose"]
+            isOneToOne: false
+            referencedRelation: "privacy_consent_purposes"
+            referencedColumns: ["purpose"]
+          },
+          {
+            foreignKeyName: "privacy_consent_events_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_consent_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_consent_purposes: {
+        Row: {
+          current_text_hash: string
+          current_version: string
+          purpose: string
+          updated_at: string
+        }
+        Insert: {
+          current_text_hash: string
+          current_version: string
+          purpose: string
+          updated_at?: string
+        }
+        Update: {
+          current_text_hash?: string
+          current_version?: string
+          purpose?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       productivity_units: {
         Row: {
@@ -3081,6 +4453,51 @@ export type Database = {
           },
         ]
       }
+      project_handover_entries: {
+        Row: {
+          body: string | null
+          created_at: string
+          created_by: string
+          entry_type: string
+          id: string
+          project_id: string
+          status_value: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          created_by: string
+          entry_type: string
+          id?: string
+          project_id: string
+          status_value?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          created_by?: string
+          entry_type?: string
+          id?: string
+          project_id?: string
+          status_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_handover_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_handover_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_members: {
         Row: {
           created_at: string
@@ -3368,6 +4785,140 @@ export type Database = {
         }
         Relationships: []
       }
+      service_offering_requests: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          message: string | null
+          offering_id: string
+          provider_id: string
+          responded_at: string | null
+          response_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          offering_id: string
+          provider_id: string
+          responded_at?: string | null
+          response_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          offering_id?: string
+          provider_id?: string
+          responded_at?: string | null
+          response_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_offering_requests_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_offering_requests_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "service_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_offering_requests_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_offering_requests_seen: {
+        Row: {
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_offering_requests_seen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_offerings: {
+        Row: {
+          category_slug: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location_country: string | null
+          provider_id: string
+          rate_text: string | null
+          remote: boolean
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_slug?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_country?: string | null
+          provider_id: string
+          rate_text?: string | null
+          remote?: boolean
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_slug?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_country?: string | null
+          provider_id?: string
+          rate_text?: string | null
+          remote?: boolean
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_offerings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skill_candidate_clarifications: {
         Row: {
           created_at: string
@@ -3561,6 +5112,165 @@ export type Database = {
           },
         ]
       }
+      team_details: {
+        Row: {
+          accommodation_needed: boolean
+          availability_status: string
+          available_from: string | null
+          deployable_size_max: number | null
+          deployable_size_min: number | null
+          destination_countries: string[] | null
+          max_trip_days: number | null
+          note: string | null
+          org_id: string
+          transport_own: boolean
+          updated_at: string
+        }
+        Insert: {
+          accommodation_needed?: boolean
+          availability_status?: string
+          available_from?: string | null
+          deployable_size_max?: number | null
+          deployable_size_min?: number | null
+          destination_countries?: string[] | null
+          max_trip_days?: number | null
+          note?: string | null
+          org_id: string
+          transport_own?: boolean
+          updated_at?: string
+        }
+        Update: {
+          accommodation_needed?: boolean
+          availability_status?: string
+          available_from?: string | null
+          deployable_size_max?: number | null
+          deployable_size_min?: number | null
+          destination_countries?: string[] | null
+          max_trip_days?: number | null
+          note?: string | null
+          org_id?: string
+          transport_own?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_details_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_enquiries: {
+        Row: {
+          company_organization_id: string | null
+          created_at: string
+          expected_end_date: string | null
+          expires_at: string
+          id: string
+          message: string
+          owner_id: string
+          start_date: string | null
+          status: string
+          team_org_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_organization_id?: string | null
+          created_at?: string
+          expected_end_date?: string | null
+          expires_at?: string
+          id?: string
+          message: string
+          owner_id: string
+          start_date?: string | null
+          status?: string
+          team_org_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_organization_id?: string | null
+          created_at?: string
+          expected_end_date?: string | null
+          expires_at?: string
+          id?: string
+          message?: string
+          owner_id?: string
+          start_date?: string | null
+          status?: string
+          team_org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_enquiries_company_organization_id_fkey"
+            columns: ["company_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_enquiries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_enquiries_team_org_id_fkey"
+            columns: ["team_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_enquiry_events: {
+        Row: {
+          actor_profile_id: string
+          created_at: string
+          enquiry_id: string
+          event_type: string
+          from_status: string | null
+          id: string
+          to_status: string
+        }
+        Insert: {
+          actor_profile_id: string
+          created_at?: string
+          enquiry_id: string
+          event_type: string
+          from_status?: string | null
+          id?: string
+          to_status: string
+        }
+        Update: {
+          actor_profile_id?: string
+          created_at?: string
+          enquiry_id?: string
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_enquiry_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_enquiry_events_enquiry_id_fkey"
+            columns: ["enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "team_enquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist: {
         Row: {
           created_at: string
@@ -3584,6 +5294,137 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      work_tasks: {
+        Row: {
+          assignee_profile_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_at: string | null
+          id: string
+          priority: string
+          project_id: string | null
+          resolved_at: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_profile_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          priority?: string
+          project_id?: string | null
+          resolved_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_profile_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          priority?: string
+          project_id?: string | null
+          resolved_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_tasks_assignee_profile_id_fkey"
+            columns: ["assignee_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_achievements: {
+        Row: {
+          achieved_at: string | null
+          achievement_type_slug: string
+          confirmed_by_manager: boolean
+          created_at: string
+          description: string | null
+          id: string
+          profile_id: string
+          source_journal_entry_id: string | null
+          title: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          achievement_type_slug?: string
+          confirmed_by_manager?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id: string
+          source_journal_entry_id?: string | null
+          title: string
+        }
+        Update: {
+          achieved_at?: string | null
+          achievement_type_slug?: string
+          confirmed_by_manager?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id?: string
+          source_journal_entry_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_achievements_achievement_type_slug_fkey"
+            columns: ["achievement_type_slug"]
+            isOneToOne: false
+            referencedRelation: "achievement_types"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "worker_achievements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_achievements_source_journal_entry_id_fkey"
+            columns: ["source_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       worker_document_events: {
         Row: {
@@ -3716,6 +5557,98 @@ export type Database = {
           },
         ]
       }
+      worker_education: {
+        Row: {
+          created_at: string
+          education_type_slug: string
+          end_year: number | null
+          id: string
+          institution_name: string
+          is_current: boolean
+          note: string | null
+          profile_id: string
+          program_or_field: string | null
+          start_year: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          education_type_slug: string
+          end_year?: number | null
+          id?: string
+          institution_name: string
+          is_current?: boolean
+          note?: string | null
+          profile_id: string
+          program_or_field?: string | null
+          start_year?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          education_type_slug?: string
+          end_year?: number | null
+          id?: string
+          institution_name?: string
+          is_current?: boolean
+          note?: string | null
+          profile_id?: string
+          program_or_field?: string | null
+          start_year?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_education_education_type_slug_fkey"
+            columns: ["education_type_slug"]
+            isOneToOne: false
+            referencedRelation: "education_types"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "worker_education_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_languages: {
+        Row: {
+          created_at: string
+          id: string
+          lang: string
+          level: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lang: string
+          level: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lang?: string
+          level?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_languages_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worker_professions: {
         Row: {
           created_at: string
@@ -3751,6 +5684,45 @@ export type Database = {
           },
           {
             foreignKeyName: "worker_professions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_saved_opportunities: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          request_id: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          request_id: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          request_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_saved_opportunities_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "customer_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_saved_opportunities_worker_id_fkey"
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "workers"
@@ -3851,12 +5823,18 @@ export type Database = {
           current_location_country: string | null
           display_name: string | null
           docs_aggregate_consent: boolean
+          driving_licence_categories: string[] | null
           experience_years: number | null
           has_transport: boolean | null
           headline: string | null
           id: string
           max_trip_days: number | null
           needs_accommodation: boolean | null
+          night_shifts_ok: boolean | null
+          overtime_ok: boolean | null
+          own_tools: boolean | null
+          own_vehicle: boolean | null
+          pay_basis_preference: string | null
           preferred_contract_type: string | null
           preferred_countries: string[] | null
           profile_completeness: number
@@ -3867,6 +5845,7 @@ export type Database = {
           team_available: boolean | null
           trust_score: number
           updated_at: string
+          weekend_shifts_ok: boolean | null
           willing_to_relocate: boolean | null
           work_card_confirmed_at: string | null
         }
@@ -3879,12 +5858,18 @@ export type Database = {
           current_location_country?: string | null
           display_name?: string | null
           docs_aggregate_consent?: boolean
+          driving_licence_categories?: string[] | null
           experience_years?: number | null
           has_transport?: boolean | null
           headline?: string | null
           id?: string
           max_trip_days?: number | null
           needs_accommodation?: boolean | null
+          night_shifts_ok?: boolean | null
+          overtime_ok?: boolean | null
+          own_tools?: boolean | null
+          own_vehicle?: boolean | null
+          pay_basis_preference?: string | null
           preferred_contract_type?: string | null
           preferred_countries?: string[] | null
           profile_completeness?: number
@@ -3895,6 +5880,7 @@ export type Database = {
           team_available?: boolean | null
           trust_score?: number
           updated_at?: string
+          weekend_shifts_ok?: boolean | null
           willing_to_relocate?: boolean | null
           work_card_confirmed_at?: string | null
         }
@@ -3907,12 +5893,18 @@ export type Database = {
           current_location_country?: string | null
           display_name?: string | null
           docs_aggregate_consent?: boolean
+          driving_licence_categories?: string[] | null
           experience_years?: number | null
           has_transport?: boolean | null
           headline?: string | null
           id?: string
           max_trip_days?: number | null
           needs_accommodation?: boolean | null
+          night_shifts_ok?: boolean | null
+          overtime_ok?: boolean | null
+          own_tools?: boolean | null
+          own_vehicle?: boolean | null
+          pay_basis_preference?: string | null
           preferred_contract_type?: string | null
           preferred_countries?: string[] | null
           profile_completeness?: number
@@ -3923,6 +5915,7 @@ export type Database = {
           team_available?: boolean | null
           trust_score?: number
           updated_at?: string
+          weekend_shifts_ok?: boolean | null
           willing_to_relocate?: boolean | null
           work_card_confirmed_at?: string | null
         }
@@ -3949,14 +5942,48 @@ export type Database = {
         Args: { p_company_id: string }
         Returns: string
       }
+      accept_invitation_by_id_v1: {
+        Args: { p_invitation_id: string }
+        Returns: Json
+      }
+      accept_invitation_v1: { Args: { p_token: string }; Returns: Json }
+      acknowledge_demand_interest: {
+        Args: { p_request_id: string; p_status: string; p_worker_id: string }
+        Returns: boolean
+      }
       add_org_member: {
         Args: { p_org_id: string; p_worker_id: string }
+        Returns: string
+      }
+      add_pilot_participant_v1: {
+        Args: {
+          p_joined_via?: string
+          p_pilot_id: string
+          p_profile_id: string
+        }
+        Returns: Json
+      }
+      add_project_handover_entry_v1: {
+        Args: {
+          p_body: string
+          p_entry_type: string
+          p_project_id: string
+          p_status_value: string
+        }
         Returns: string
       }
       add_role: {
         Args: { p_role: string; p_role_data: Json }
         Returns: undefined
       }
+      admin_list_worker_privacy_states: {
+        Args: never
+        Returns: {
+          discoverability: string
+          profile_id: string
+        }[]
+      }
+      admin_privacy_readiness_counts: { Args: never; Returns: Json }
       admin_set_company_verification: {
         Args: { p_company_id: string; p_note?: string; p_status: string }
         Returns: string
@@ -3988,6 +6015,10 @@ export type Database = {
       agency_worker_engagement_links: {
         Args: { p_agency_id: string }
         Returns: string[]
+      }
+      apply_learning_auto_confirmation: {
+        Args: { p_review_item_id: string }
+        Returns: string
       }
       assign_agency_worker_role: {
         Args: {
@@ -4023,6 +6054,7 @@ export type Database = {
       caller_manages_worker: { Args: { p_worker_id: string }; Returns: boolean }
       can_access_match: { Args: { m: string }; Returns: boolean }
       can_manage_project: { Args: { p_project_id: string }; Returns: boolean }
+      can_view_worker: { Args: { w: string }; Returns: boolean }
       company_worker_engagement_links: {
         Args: { p_company_id: string }
         Returns: string[]
@@ -4042,6 +6074,69 @@ export type Database = {
         Returns: string
       }
       confirm_worker_card: { Args: never; Returns: string }
+      contact_disclosure_log_change: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_event_type: string
+          p_from_status: string
+          p_request_id: string
+          p_to_status: string
+        }
+        Returns: undefined
+      }
+      conversation_counterpart_identities: {
+        Args: { p_conversation_ids: string[] }
+        Returns: {
+          conversation_id: string
+          display_name: string
+        }[]
+      }
+      conversation_source_context: {
+        Args: { p_conversation_ids: string[] }
+        Returns: {
+          conversation_id: string
+          source_route_hint: string
+          source_title: string
+          source_type: string
+        }[]
+      }
+      create_finance_record_v1: {
+        Args: {
+          p_amount_cents: string
+          p_company_id: string
+          p_counterparty: string
+          p_due_date: string
+          p_note: string
+          p_project_id: string
+          p_record_type: string
+          p_status: string
+          p_title: string
+        }
+        Returns: string
+      }
+      create_follow_up_task_v1: {
+        Args: {
+          p_note: string
+          p_subject_company_id: string
+          p_subject_profile_id: string
+        }
+        Returns: string
+      }
+      create_invitation_v1: {
+        Args: {
+          p_invitation_type: string
+          p_invited_email: string
+          p_invited_name?: string
+          p_locale?: string
+          p_organization_id?: string
+          p_personal_message?: string
+          p_project_id?: string
+          p_proposed_role?: string
+          p_token_hash: string
+        }
+        Returns: Json
+      }
       create_journal_entry_full: {
         Args: {
           p_engagement_context_id: string
@@ -4057,9 +6152,61 @@ export type Database = {
         }
         Returns: string
       }
+      create_pilot_v1: {
+        Args: {
+          p_ends_on?: string
+          p_name: string
+          p_organisation_kind?: string
+          p_starts_on?: string
+        }
+        Returns: Json
+      }
+      create_team_v1: { Args: { p_team_name: string }; Returns: string }
+      create_work_task_v1: {
+        Args: {
+          p_assign_to_self: boolean
+          p_description: string
+          p_due_date: string
+          p_priority: string
+          p_project_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      current_profile_discoverability_consent: { Args: never; Returns: Json }
+      decline_invitation_v1: { Args: { p_token: string }; Returns: string }
+      demand_structured_v2_public: { Args: { p: Json }; Returns: Json }
       end_worker_project_assignment: {
         Args: { p_project_id: string; p_worker_profile_id: string }
         Returns: undefined
+      }
+      expire_contact_disclosure_requests_v1: { Args: never; Returns: Json }
+      expire_stale_booking_requests_v1: {
+        Args: { p_stale_days?: number }
+        Returns: number
+      }
+      expire_stale_team_enquiries_v1: { Args: never; Returns: number }
+      get_invitation_preview_v1: { Args: { p_token: string }; Returns: Json }
+      get_team_capability_summary_v1: {
+        Args: { p_org_id: string }
+        Returns: {
+          members_confirmed: number
+          members_declared: number
+          skill_slug: string
+        }[]
+      }
+      grant_employer_data_disclosure: {
+        Args: {
+          p_context_id: string
+          p_context_type: string
+          p_hash: string
+          p_locale: string
+          p_recipient_organization_id: string
+          p_selected_fields: Json
+          p_source: string
+          p_version: string
+        }
+        Returns: Json
       }
       grant_org_manager: {
         Args: {
@@ -4068,6 +6215,24 @@ export type Database = {
           p_profile_id: string
         }
         Returns: string
+      }
+      grant_profile_discoverability_consent: {
+        Args: {
+          p_hash: string
+          p_locale: string
+          p_source: string
+          p_version: string
+        }
+        Returns: Json
+      }
+      has_employer_data_disclosure: {
+        Args: {
+          p_context_id: string
+          p_context_type: string
+          p_recipient_organization_id: string
+          p_worker_profile: string
+        }
+        Returns: boolean
       }
       invite_agency_worker: {
         Args: { p_agency_id: string; p_email: string; p_note?: string }
@@ -4082,7 +6247,15 @@ export type Database = {
         Args: { p_conversation_id: string }
         Returns: boolean
       }
+      is_conversation_participant_path: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
       is_employer: { Args: never; Returns: boolean }
+      journal_entry_restore: {
+        Args: { p_entry_id: string }
+        Returns: undefined
+      }
       journal_entry_soft_delete: {
         Args: { p_entry_id: string }
         Returns: undefined
@@ -4101,6 +6274,9 @@ export type Database = {
         }
         Returns: string
       }
+      list_invitations_for_me_v1: { Args: never; Returns: Json }
+      list_my_contact_disclosure_requests_v1: { Args: never; Returns: Json }
+      list_my_team_enquiries_v1: { Args: never; Returns: Json }
       list_open_demand_for_agencies: {
         Args: never
         Returns: {
@@ -4118,18 +6294,58 @@ export type Database = {
         Args: never
         Returns: {
           accommodation: string
+          company_name: string
           country: string
           created_at: string
           id: string
+          location_label: string
+          required_tools: string[]
           role_text: string
+          route_status: string
           start_period: string
+          structured: Json
           team_size: number
+          transport: string
         }[]
       }
+      list_team_enquiries_for_my_teams_v1: { Args: never; Returns: Json }
       manages_organization: { Args: { org: string }; Returns: boolean }
       mark_agency_can_offer: {
         Args: { p_note?: string; p_request_id: string }
         Returns: string
+      }
+      mark_booking_requests_seen: { Args: never; Returns: undefined }
+      mark_invitation_delivery_v1: {
+        Args: { p_invitation_id: string; p_outcome: string }
+        Returns: string
+      }
+      mark_service_requests_seen: { Args: never; Returns: undefined }
+      my_privacy_consent_history: {
+        Args: never
+        Returns: {
+          action: string
+          consent_text_hash: string
+          consent_text_version: string
+          context_id: string | null
+          context_type: string | null
+          created_at: string
+          id: string
+          locale: string
+          metadata: Json | null
+          purpose: string
+          recipient_organization_id: string | null
+          request_id: string | null
+          selected_fields: Json | null
+          seq: number
+          source: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "privacy_consent_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       owns_agency: { Args: { a: string }; Returns: boolean }
       owns_company: { Args: { c: string }; Returns: boolean }
@@ -4155,12 +6371,76 @@ export type Database = {
         }
         Returns: string
       }
+      propose_booking_request_v3: {
+        Args: {
+          p_expected_end_date: string
+          p_location_country: string
+          p_note: string
+          p_request_id: string
+          p_role_text: string
+          p_start_date: string
+          p_worker_id: string
+        }
+        Returns: string
+      }
+      propose_contact_disclosure_request_v1: {
+        Args: {
+          p_note?: string
+          p_organization_id: string
+          p_request_id: string
+          p_requested_fields: Json
+          p_worker_id: string
+        }
+        Returns: Json
+      }
+      propose_team_enquiry_v1: {
+        Args: {
+          p_company_organization_id?: string
+          p_expected_end_date: string
+          p_message: string
+          p_start_date: string
+          p_team_org_id: string
+        }
+        Returns: Json
+      }
       provision_agency_worker_engagement_context: {
         Args: { p_agency_id: string; p_worker_id: string }
         Returns: string
       }
       provision_company_worker_engagement_context: {
         Args: { p_company_id: string; p_worker_id: string }
+        Returns: string
+      }
+      record_personal_data_disclosure: {
+        Args: {
+          p_context_id: string
+          p_context_type: string
+          p_data_categories: string[]
+          p_delivery_method: string
+          p_document_ids: string[]
+          p_recipient_organization_id: string
+          p_worker_profile: string
+        }
+        Returns: Json
+      }
+      record_pilot_outcome_v1: {
+        Args: {
+          p_note?: string
+          p_outcome: string
+          p_participant_profile_id?: string
+          p_pilot_id: string
+        }
+        Returns: Json
+      }
+      register_conversation_message_attachment: {
+        Args: {
+          p_attachment_id: string
+          p_file_name: string
+          p_file_size: number
+          p_message_id: string
+          p_mime_type: string
+          p_storage_path: string
+        }
         Returns: string
       }
       register_customer_request_attachment: {
@@ -4185,12 +6465,66 @@ export type Database = {
         }
         Returns: string
       }
+      remove_pilot_participant_v1: {
+        Args: { p_pilot_id: string; p_profile_id: string }
+        Returns: string
+      }
+      remove_self_declared_work_history_v1: {
+        Args: { p_id: string }
+        Returns: string
+      }
+      remove_worker_language_v1: { Args: { p_lang: string }; Returns: boolean }
+      request_service_offering: {
+        Args: { p_message?: string; p_offering_id: string }
+        Returns: string
+      }
       request_worker_document_verification: {
         Args: { p_document_id: string }
         Returns: string
       }
+      requester_identities_for_provider: {
+        Args: { p_request_ids: string[] }
+        Returns: {
+          display_name: string
+          request_id: string
+        }[]
+      }
+      reschedule_booking_proposal_v1: {
+        Args: {
+          p_booking_id: string
+          p_end_date: string
+          p_note: string
+          p_start_date: string
+        }
+        Returns: string
+      }
+      resend_invitation_v1: {
+        Args: { p_invitation_id: string; p_new_token_hash: string }
+        Returns: string
+      }
       respond_booking_request: {
         Args: { p_booking_id: string; p_decision: string }
+        Returns: string
+      }
+      respond_booking_request_v2: {
+        Args: {
+          p_booking_id: string
+          p_decision: string
+          p_reason_kind: string
+          p_reason_note: string
+        }
+        Returns: string
+      }
+      respond_contact_disclosure_request_v1: {
+        Args: { p_decision: string; p_id: string }
+        Returns: Json
+      }
+      respond_service_offering_request: {
+        Args: { p_decision: string; p_id: string; p_note?: string }
+        Returns: string
+      }
+      respond_team_enquiry_v1: {
+        Args: { p_decision: string; p_enquiry_id: string }
         Returns: string
       }
       review_journal_entries_batch: {
@@ -4212,6 +6546,10 @@ export type Database = {
       reviewable_journal_entry_ids: { Args: never; Returns: string[] }
       revoke_conversation_participant: {
         Args: { p_conversation_id: string; p_profile_id: string }
+        Returns: string
+      }
+      revoke_invitation_v1: {
+        Args: { p_invitation_id: string }
         Returns: string
       }
       save_company_setup: {
@@ -4281,6 +6619,30 @@ export type Database = {
         }
         Returns: string
       }
+      save_self_declared_work_history_v1: {
+        Args: {
+          p_ended_at?: string
+          p_relationship_slug: string
+          p_started_at?: string
+          p_title: string
+        }
+        Returns: string
+      }
+      save_team_details_v1: {
+        Args: {
+          p_accommodation_needed: boolean
+          p_availability_status: string
+          p_available_from: string
+          p_deployable_size_max?: number
+          p_deployable_size_min?: number
+          p_destination_countries?: string[]
+          p_max_trip_days: number
+          p_note: string
+          p_org_id: string
+          p_transport_own: boolean
+        }
+        Returns: string
+      }
       save_worker_availability_prefs: {
         Args: {
           p_availability_note: string
@@ -4294,6 +6656,26 @@ export type Database = {
         }
         Returns: string
       }
+      save_worker_availability_prefs_v2: {
+        Args: {
+          p_availability_note: string
+          p_driving_licence_categories: string[]
+          p_has_transport: boolean
+          p_max_trip_days: number
+          p_needs_accommodation: boolean
+          p_night_shifts_ok: boolean
+          p_overtime_ok: boolean
+          p_own_tools: boolean
+          p_own_vehicle: boolean
+          p_pay_basis_preference: string
+          p_preferred_contract_type: string
+          p_solo_available: boolean
+          p_team_available: boolean
+          p_weekend_shifts_ok: boolean
+          p_willing_to_relocate: boolean
+        }
+        Returns: string
+      }
       save_worker_card: {
         Args: {
           p_availability_status?: string
@@ -4303,6 +6685,14 @@ export type Database = {
           p_salary_max?: number
           p_salary_min?: number
         }
+        Returns: string
+      }
+      save_worker_language_v1: {
+        Args: { p_lang: string; p_level: string }
+        Returns: string
+      }
+      save_worker_opportunity_v1: {
+        Args: { p_note: string; p_request_id: string }
         Returns: string
       }
       send_work_instruction: {
@@ -4326,6 +6716,10 @@ export type Database = {
         Args: { p_agency_id: string; p_enabled: boolean; p_worker_id: string }
         Returns: string
       }
+      set_booking_response_deadline_v1: {
+        Args: { p_booking_id: string; p_deadline: string }
+        Returns: string
+      }
       set_company_worker_journal_review: {
         Args: { p_company_id: string; p_enabled: boolean; p_worker_id: string }
         Returns: string
@@ -4338,6 +6732,22 @@ export type Database = {
         Args: { p_enabled: boolean; p_engagement_id: string }
         Returns: string
       }
+      set_finance_record_status_v1: {
+        Args: { p_record_id: string; p_status: string }
+        Returns: string
+      }
+      set_follow_up_task_status_v1: {
+        Args: { p_status: string; p_task_id: string }
+        Returns: string
+      }
+      set_pilot_status_v1: {
+        Args: { p_pilot_id: string; p_status: string }
+        Returns: string
+      }
+      set_work_task_status_v1: {
+        Args: { p_status: string; p_task_id: string }
+        Returns: string
+      }
       set_worker_operational_status: {
         Args: {
           p_note: string
@@ -4347,12 +6757,72 @@ export type Database = {
         }
         Returns: string
       }
+      submit_company_need_public_v1: {
+        Args: {
+          p_accommodation?: string
+          p_city_region?: string
+          p_company_name: string
+          p_contact_email?: string
+          p_contact_name?: string
+          p_contact_phone?: string
+          p_country?: string
+          p_description?: string
+          p_engagement_type?: string
+          p_expected_duration?: string
+          p_headcount?: number
+          p_languages?: string
+          p_locale: string
+          p_sector?: string
+          p_source_path?: string
+          p_start_window?: string
+          p_transport_needed?: boolean
+          p_urgency?: string
+        }
+        Returns: string
+      }
       submit_demand_request: {
         Args: {
           p_kind: string
           p_need_summary?: string
           p_original_language?: string
           p_payload?: Json
+          p_title: string
+        }
+        Returns: string
+      }
+      submit_help_request_v1: {
+        Args: {
+          p_demand_request_id?: string
+          p_help_type: string
+          p_note?: string
+        }
+        Returns: string
+      }
+      submit_privacy_request_v1: {
+        Args: { p_note?: string; p_request_type: string }
+        Returns: string
+      }
+      unsave_worker_opportunity_v1: {
+        Args: { p_request_id: string }
+        Returns: boolean
+      }
+      update_finance_record_v1: {
+        Args: {
+          p_amount_cents: string
+          p_counterparty: string
+          p_due_date: string
+          p_note: string
+          p_record_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      update_work_task_v1: {
+        Args: {
+          p_description: string
+          p_due_date: string
+          p_priority: string
+          p_task_id: string
           p_title: string
         }
         Returns: string
@@ -4382,6 +6852,43 @@ export type Database = {
       withdraw_booking_request: {
         Args: { p_booking_id: string }
         Returns: string
+      }
+      withdraw_booking_request_v2: {
+        Args: {
+          p_booking_id: string
+          p_reason_kind: string
+          p_reason_note: string
+        }
+        Returns: string
+      }
+      withdraw_contact_disclosure_request_v1: {
+        Args: { p_id: string }
+        Returns: Json
+      }
+      withdraw_employer_data_disclosure: {
+        Args: {
+          p_context_id: string
+          p_context_type: string
+          p_recipient_organization_id: string
+          p_source: string
+        }
+        Returns: Json
+      }
+      withdraw_profile_discoverability_consent: {
+        Args: { p_source: string }
+        Returns: Json
+      }
+      withdraw_service_offering_request: {
+        Args: { p_id: string }
+        Returns: string
+      }
+      withdraw_team_enquiry_v1: {
+        Args: { p_enquiry_id: string }
+        Returns: string
+      }
+      worker_profile_discoverable: {
+        Args: { p_profile: string }
+        Returns: boolean
       }
     }
     Enums: {
