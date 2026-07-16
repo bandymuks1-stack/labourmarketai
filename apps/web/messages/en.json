@@ -8549,6 +8549,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Required",
+      "preferred": "Preferred",
+      "hint": "“Required” filters out candidates who do not meet it; “Preferred” keeps them and shows the difference as a discussion point.",
+      "secondaryLanguages": "Additional languages (beyond the first)",
+      "accommodationSelf": "Worker has own accommodation"
+    },
     "advancedTitle": "Advanced details (optional)",
     "advancedHint": "Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
     "notStated": "Not stated",

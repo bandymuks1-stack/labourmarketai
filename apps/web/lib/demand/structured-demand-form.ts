@@ -17,8 +17,28 @@
 import {
   parseAmountToCents,
   formatCents,
+  REQUIREMENT_PRIORITY_KEYS,
+  type RequirementPriorityKey,
+  type RequirementTier,
   type StructuredDemandV2,
 } from "./structured-demand-v2";
+
+/** Wagon 4 tier-picker state: "" = not set (engine default stays). */
+export type RequirementPriorityState = Record<
+  RequirementPriorityKey,
+  "" | RequirementTier
+>;
+
+const EMPTY_REQUIREMENT_PRIORITIES: RequirementPriorityState = {
+  own_vehicle: "",
+  own_tools: "",
+  secondary_languages: "",
+  licence_categories: "",
+  min_experience: "",
+  night_shifts: "",
+  weekend_shifts: "",
+  accommodation: "",
+};
 
 export type DeductionRow = {
   kind: "accommodation" | "transport" | "insurance" | "other";
@@ -88,6 +108,8 @@ export type AdvancedDemandFormState = {
   drawingsReading: boolean;
   independentWork: boolean;
   leadership: boolean;
+  // requirement tiers (Wagon 4) — "" = engine default for that criterion
+  requirementPriorities: RequirementPriorityState;
   // process
   applicationMethod: string;
   interviewStages: string;
@@ -148,6 +170,7 @@ export const EMPTY_ADVANCED_DEMAND_STATE: AdvancedDemandFormState = {
   drawingsReading: false,
   independentWork: false,
   leadership: false,
+  requirementPriorities: { ...EMPTY_REQUIREMENT_PRIORITIES },
   applicationMethod: "",
   interviewStages: "",
   practicalTest: false,
@@ -284,6 +307,13 @@ export function buildStructuredV2Input(
       independent_work: flag(s.independentWork),
       leadership: flag(s.leadership),
     }),
+    // Wagon 4 tiers — only explicitly picked values ship; "" (default) is
+    // omitted so the engine's hardcoded behaviour stays untouched.
+    requirement_priorities: compact(
+      Object.fromEntries(
+        REQUIREMENT_PRIORITY_KEYS.map((k) => [k, str(s.requirementPriorities[k])]),
+      ),
+    ),
     process: compact({
       application_method: str(s.applicationMethod),
       interview_stages: int(s.interviewStages),
@@ -371,6 +401,12 @@ export function storedV2ToFormState(
     drawingsReading: r?.drawings_reading === true,
     independentWork: r?.independent_work === true,
     leadership: r?.leadership === true,
+    requirementPriorities: Object.fromEntries(
+      REQUIREMENT_PRIORITY_KEYS.map((k) => [
+        k,
+        v2.requirement_priorities?.[k] ?? "",
+      ]),
+    ) as RequirementPriorityState,
     applicationMethod: p?.application_method ?? "",
     interviewStages: p?.interview_stages != null ? String(p.interview_stages) : "",
     practicalTest: p?.practical_test === true,

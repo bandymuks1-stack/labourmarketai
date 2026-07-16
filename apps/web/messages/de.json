@@ -8549,6 +8549,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Erforderlich",
+      "preferred": "Bevorzugt",
+      "hint": "„Erforderlich“ schließt Kandidaten aus, die es nicht erfüllen; „Bevorzugt“ behält sie und zeigt den Unterschied als Gesprächspunkt.",
+      "secondaryLanguages": "Weitere Sprachen (außer der ersten)",
+      "accommodationSelf": "Arbeitskraft hat eigene Unterkunft"
+    },
     "advancedTitle": "Erweiterte Angaben (optional)",
     "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
     "notStated": "Nicht angegeben",

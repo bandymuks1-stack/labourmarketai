@@ -1943,6 +1943,13 @@
     "open": "Ava Waze'is"
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Kohustuslik",
+      "preferred": "Soovituslik",
+      "hint": "„Kohustuslik“ välistab kandidaadid, kes nõuet ei täida; „Soovituslik“ jätab nad alles aruteluteemana.",
+      "secondaryLanguages": "Lisakeeled (peale esimese)",
+      "accommodationSelf": "Töötajal on oma majutus"
+    },
     "advancedTitle": "[EN] Advanced details (optional)",
     "advancedHint": "[EN] Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
     "notStated": "[EN] Not stated",

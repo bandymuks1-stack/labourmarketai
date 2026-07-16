@@ -1943,6 +1943,13 @@
     "open": "Åbn i Waze"
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Påkrævet",
+      "preferred": "Foretrukket",
+      "hint": "”Påkrævet” frasorterer kandidater, der ikke opfylder kravet; ”Foretrukket” beholder dem som et samtalepunkt.",
+      "secondaryLanguages": "Yderligere sprog (ud over det første)",
+      "accommodationSelf": "Arbejdstageren har egen bolig"
+    },
     "advancedTitle": "Udvidede oplysninger (valgfrit)",
     "advancedHint": "Strukturerede fakta, som arbejdstagere kan filtrere og sammenligne efter. Alt er valgfrit — det, du springer over, vises som ”ikke oplyst”, aldrig opdigtet.",
     "notStated": "Ikke oplyst",

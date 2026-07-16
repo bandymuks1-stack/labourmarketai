@@ -1943,6 +1943,13 @@
     "open": "Öppna i Waze"
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Krävs",
+      "preferred": "Önskvärt",
+      "hint": "”Krävs” filtrerar bort kandidater som inte uppfyller kravet; ”Önskvärt” behåller dem som en diskussionspunkt.",
+      "secondaryLanguages": "Ytterligare språk (utöver det första)",
+      "accommodationSelf": "Arbetaren har eget boende"
+    },
     "advancedTitle": "[EN] Advanced details (optional)",
     "advancedHint": "[EN] Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
     "notStated": "[EN] Not stated",

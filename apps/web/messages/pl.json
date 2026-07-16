@@ -1943,6 +1943,13 @@
     "open": "Otwórz w Waze"
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Wymagane",
+      "preferred": "Preferowane",
+      "hint": "„Wymagane” odrzuca kandydatów, którzy tego nie spełniają; „Preferowane” zachowuje ich jako temat do omówienia.",
+      "secondaryLanguages": "Dodatkowe języki (poza pierwszym)",
+      "accommodationSelf": "Pracownik ma własne zakwaterowanie"
+    },
     "advancedTitle": "[EN] Advanced details (optional)",
     "advancedHint": "[EN] Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
     "notStated": "[EN] Not stated",

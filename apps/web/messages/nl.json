@@ -8549,6 +8549,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Vereist",
+      "preferred": "Gewenst",
+      "hint": "“Vereist” sluit kandidaten uit die er niet aan voldoen; “Gewenst” houdt ze erbij en toont het verschil als gesprekspunt.",
+      "secondaryLanguages": "Extra talen (naast de eerste)",
+      "accommodationSelf": "Werknemer heeft eigen huisvesting"
+    },
     "advancedTitle": "Uitgebreide gegevens (optioneel)",
     "advancedHint": "Gestructureerde feiten waarop werknemers filteren en vergelijken. Alles is optioneel — wat u overslaat wordt getoond als “niet vermeld”, nooit verzonnen.",
     "notStated": "Niet vermeld",
