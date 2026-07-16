@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Employer-side team-enquiry read layer (Trust Connect Teams v1, gap 3).
  *
- * The gated read model list_my_team_enquiries_v1 (20260716121000) is the ONLY
+ * The gated read model list_my_team_enquiries_v1 (20260716131000) is the ONLY
  * place an employer sees team details — a bounded availability snapshot for
  * teams the employer has a real enquiry with, never the raw team_details
  * table and never the manager note. No emails, no phones anywhere.

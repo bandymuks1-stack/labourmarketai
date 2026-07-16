@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Employer-side team-enquiry server actions (Trust Connect Teams v1, gap 3).
  *
- * Writes go ONLY through the gated state-machine RPCs of 20260716121000:
+ * Writes go ONLY through the gated state-machine RPCs of 20260716131000:
  * propose (rate-limited, contact-detail-refusing, self-enquiry-blocking) and
  * withdraw (proposer-only, open-only). Accept/decline belongs to the team
  * side (team-brigade-actions.ts) — the proposer can never accept their own

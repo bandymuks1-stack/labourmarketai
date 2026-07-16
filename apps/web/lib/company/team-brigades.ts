@@ -27,8 +27,8 @@ import { createClient } from "@/lib/supabase/server";
  * "prepared, not enabled" state — nothing is faked:
  *   - 20260705220000 missing → { applied: false } (no team surface at all);
  *   - 20260712200000 missing → invitations/provenance report not-enabled;
- *   - 20260716120000 missing → team details report not-enabled;
- *   - 20260716121000 missing → enquiry inbox reports not-enabled.
+ *   - 20260716130000 missing → team details report not-enabled;
+ *   - 20260716131000 missing → enquiry inbox reports not-enabled.
  */
 
 const RPC_NOT_FOUND_CODE = "42883";
@@ -116,10 +116,10 @@ export type TeamBrigade = {
   readonly capability: readonly TeamCapabilitySkill[] | null;
   /** Company-linked workers not yet members of THIS team. */
   readonly addable: readonly AddableTeamWorker[];
-  /** Team-scoped details (20260716120000); null = not saved yet OR the
+  /** Team-scoped details (20260716130000); null = not saved yet OR the
    *  migration is not applied (see detailsApplied on the parent). */
   readonly details: TeamDetails | null;
-  /** Enquiries addressed to this team (20260716121000); empty when none or
+  /** Enquiries addressed to this team (20260716131000); empty when none or
    *  when the migration is not applied (see enquiriesApplied). */
   readonly enquiries: readonly TeamEnquiry[];
 };
@@ -141,9 +141,9 @@ export type TeamBrigadesData =
       /** Canonical invitations model (20260712200000) readable — consent
        *  invitations + provenance are only shown when this is true. */
       readonly invitationsApplied: boolean;
-      /** team_details (20260716120000) readable. */
+      /** team_details (20260716130000) readable. */
       readonly detailsApplied: boolean;
-      /** team_enquiries (20260716121000) readable. */
+      /** team_enquiries (20260716131000) readable. */
       readonly enquiriesApplied: boolean;
     };
 

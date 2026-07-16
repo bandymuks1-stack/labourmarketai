@@ -8,11 +8,11 @@ import { join } from "node:path";
  * Three pinned invariants on top of the team org spine (see
  * team-brigades-layer.test.ts):
  *
- *   1. TEAM DETAILS (20260716120000): 1:1 team-scoped
+ *   1. TEAM DETAILS (20260716130000): 1:1 team-scoped
  *      availability/accommodation/transport rows, RLS default-closed to
  *      admin/owner/manager, ONE gated SECURITY DEFINER writer with bounded
  *      inputs. Employers never read the table raw.
- *   2. TEAM ENQUIRIES (20260716121000): the booking_requests state-machine
+ *   2. TEAM ENQUIRIES (20260716131000): the booking_requests state-machine
  *      clone at team granularity — proposed → accepted|declined|withdrawn|
  *      expired, append-only events, proposer can NEVER self-accept,
  *      rate-limited propose, NO contact leakage (no email/phone columns; the
@@ -26,12 +26,12 @@ const APP = join(process.cwd());
 const REPO = join(APP, "..", "..");
 const MIGRATIONS_DIR = join(REPO, "supabase", "migrations");
 
-const DETAILS_FILE = "20260716120000_team_profile_details_v1.sql";
-const ENQUIRIES_FILE = "20260716121000_team_enquiries_v1.sql";
+const DETAILS_FILE = "20260716130000_team_profile_details_v1.sql";
+const ENQUIRIES_FILE = "20260716131000_team_enquiries_v1.sql";
 const DETAILS_ROLLBACK =
-  "supabase/rollbacks/20260716120000_team_profile_details_v1.down.sql";
+  "supabase/rollbacks/20260716130000_team_profile_details_v1.down.sql";
 const ENQUIRIES_ROLLBACK =
-  "supabase/rollbacks/20260716121000_team_enquiries_v1.down.sql";
+  "supabase/rollbacks/20260716131000_team_enquiries_v1.down.sql";
 
 const NEW_FUNCTIONS_DETAILS = ["save_team_details_v1"];
 const NEW_FUNCTIONS_ENQUIRIES = [
@@ -53,7 +53,7 @@ const stripSql = (src: string) =>
     .map((l) => l.replace(/--.*$/, ""))
     .join("\n");
 
-describe("team details migration (20260716120000) — bounded 1:1 rows, one gated writer", () => {
+describe("team details migration (20260716130000) — bounded 1:1 rows, one gated writer", () => {
   const migration = read(`supabase/migrations/${DETAILS_FILE}`);
   const code = stripSql(migration);
 
@@ -125,7 +125,7 @@ describe("team details migration (20260716120000) — bounded 1:1 rows, one gate
   });
 });
 
-describe("team enquiries migration (20260716121000) — booking-pattern clone, no contact leakage", () => {
+describe("team enquiries migration (20260716131000) — booking-pattern clone, no contact leakage", () => {
   const migration = read(`supabase/migrations/${ENQUIRIES_FILE}`);
   const code = stripSql(migration);
 
@@ -133,7 +133,7 @@ describe("team enquiries migration (20260716121000) — booking-pattern clone, n
     expect(migration).toMatch(/DRAFT — needs-human-gate/);
     expect(migration).toMatch(/DO NOT APPLY without explicit owner OK/);
     expect(migration).toMatch(/--\s*@human-gate-approved/);
-    expect(migration).toMatch(/20260716120000_team_profile_details_v1\.sql FIRST/);
+    expect(migration).toMatch(/20260716130000_team_profile_details_v1\.sql FIRST/);
   });
 
   it("carries the SHARED CONTRACT state machine: created-status vocabulary + full 7-event lifecycle", () => {

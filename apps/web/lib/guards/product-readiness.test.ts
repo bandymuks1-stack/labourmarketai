@@ -1780,7 +1780,7 @@ describe("no migration files added by this sprint", () => {
     // append-only insight query log). DRAFT / needs-human-gate, NOT applied;
     // paired rollback + activation runbook in docs/intelligence/.
     // Bumped 140 -> 142 for the Trust Connect Teams v1 drafts
-    // (20260716120000_team_profile_details_v1 + 20260716121000_
+    // (20260716130000_team_profile_details_v1 + 20260716131000_
     // team_enquiries_v1 — team-scoped details + the employer→team enquiry
     // state machine on the shared contact/consent contract). Both DRAFT /
     // needs-human-gate, NOT applied; paired rollbacks.

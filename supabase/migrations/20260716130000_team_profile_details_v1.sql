@@ -2,12 +2,12 @@
 -- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
 -- DO NOT APPLY automatically. Apply ONLY via Supabase MCP apply_migration
 -- after explicit owner approval. Never `db push`.
--- APPLY ORDER: this file BEFORE 20260716121000_team_enquiries_v1.sql (the
+-- APPLY ORDER: this file BEFORE 20260716131000_team_enquiries_v1.sql (the
 -- enquiry read model there projects the availability snapshot stored here).
 -- INDEPENDENCE: applies cleanly against current main alone — FKs reference
 -- ONLY the applied organizations table; no wagon-1/4/5 tables are touched.
 --
--- 20260716120000 — team profile details v1 (Trust Connect Teams wagon, gap 2
+-- 20260716130000 — team profile details v1 (Trust Connect Teams wagon, gap 2
 -- + the canonical team-match-input contract fields, integration addendum).
 --
 -- PROBLEM: a team/brigade (organizations row, organization_type='team',
@@ -31,7 +31,7 @@
 --     organization managers (manages_organization). Employers NEVER read this
 --     table raw — the only employer-visible projection is the bounded
 --     availability snapshot inside the enquiry read model
---     (20260716121000, list_my_team_enquiries_v1), and only for teams the
+--     (20260716131000, list_my_team_enquiries_v1), and only for teams the
 --     employer has a real enquiry with. The free-text note stays
 --     manager-only and is never projected.
 --   * Writes are RPC-only (no INSERT/UPDATE/DELETE policies):
@@ -41,7 +41,7 @@
 --   * Every save appends an audit_logs row.
 --   * Grants: authenticated only — never anon.
 --
--- ROLLBACK: supabase/rollbacks/20260716120000_team_profile_details_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260716130000_team_profile_details_v1.down.sql
 --
 -- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + grants =
 -- RED-class; the annotation downgrades the CI finding only — the OWNER still
@@ -210,4 +210,4 @@ grant execute on function public.save_team_details_v1(uuid, text, date, boolean,
 
 commit;
 
--- ROLLBACK: supabase/rollbacks/20260716120000_team_profile_details_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260716130000_team_profile_details_v1.down.sql

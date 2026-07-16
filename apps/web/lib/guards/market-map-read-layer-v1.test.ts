@@ -282,9 +282,9 @@ describe("NO new DB migration in this PR", () => {
     // observation contract, insight query log; all external sources OFF).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
     // Bumped 140 -> 142 for the Trust Connect Teams v1 drafts
-    // (20260716120000_team_profile_details_v1 — 1:1 team-scoped
+    // (20260716130000_team_profile_details_v1 — 1:1 team-scoped
     // availability/deployable-size/destinations details, RPC-only writes;
-    // 20260716121000_team_enquiries_v1 — employer→team enquiry state
+    // 20260716131000_team_enquiries_v1 — employer→team enquiry state
     // machine on the shared contact/consent contract, append-only events).
     // Both DRAFT / needs-human-gate, NOT applied; paired rollbacks.
     expect(count).toBeLessThanOrEqual(142);

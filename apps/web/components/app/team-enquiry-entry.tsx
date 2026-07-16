@@ -24,7 +24,7 @@ import type { MyTeamEnquiry } from "@/lib/company/team-enquiries";
  *  - platform messages only; the server refuses embedded emails/phone-like
  *    numbers and the form says so up front;
  *  - every outcome is reported truthfully, including the "prepared, not
- *    enabled" state before the owner applies 20260716121000;
+ *    enabled" state before the owner applies 20260716131000;
  *  - statuses render as translated labels, never raw database words.
  */
 export function TeamEnquiryButton({

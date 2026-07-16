@@ -6,7 +6,7 @@ and of the type name.
 
 - Implementation: `apps/web/lib/company/team-match-input.ts`
   (`buildTeamMatchInput(teamId)`).
-- Related migrations: `supabase/migrations/20260716120000_team_profile_details_v1.sql`
+- Related migrations: `supabase/migrations/20260716130000_team_profile_details_v1.sql`
   (DRAFT, owner-gated), plus the applied team org spine `20260705220000`.
 
 ## Shape (exact field names)
@@ -42,7 +42,7 @@ type TeamMatchInputV1 = {
 |---|---|---|
 | `teamId` | `organizations.id` where `organization_type='team'` | function returns `null` (not a readable team) |
 | `activeMemberCount` | `engagement_contexts` rows: `relationship_slug='employee'`, `status='active'` (applied spine 20260705220000 / 20260530140000) | `0` |
-| `deployableSize.min/max` | `team_details.deployable_size_min/max` (DRAFT 20260716120000) | `null` = not stated / migration unapplied |
+| `deployableSize.min/max` | `team_details.deployable_size_min/max` (DRAFT 20260716130000) | `null` = not stated / migration unapplied |
 | `professionComposition` | `worker_professions` → `professions.slug` for member workers (applied 0008); `memberCount` = distinct workers | `[]` |
 | `skillComposition` | `get_team_capability_summary_v1` (applied 20260705220000) — member-declared vs manager-confirmed counts over real `worker_skills` | `[]` |
 | `languageComposition` | `worker_languages.lang/level` for member workers (20260711250000), `code` = the `lang` value, `memberCount` = distinct workers per (code, level) | `[]` when the table is unreadable/unapplied |
@@ -79,7 +79,7 @@ type TeamMatchInputV1 = {
 
 ## Shared contact/consent contract cross-reference
 
-Team enquiries (`supabase/migrations/20260716121000_team_enquiries_v1.sql`)
+Team enquiries (`supabase/migrations/20260716131000_team_enquiries_v1.sql`)
 follow the shared request contract: status vocabulary
 `created → accepted | declined | withdrawn | expired`; `delivered`/`viewed`
 recorded only as append-only `team_enquiry_events` rows; 10 open + 30/24h

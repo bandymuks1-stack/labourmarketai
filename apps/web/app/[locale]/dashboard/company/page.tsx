@@ -990,8 +990,8 @@ export default async function CompanyDashboardPage({
           membership arrives ONLY via an accepted join_team invitation (the
           accept is the consent); capability = honest read-only counts from
           members' existing worker_skills; team details + the enquiry inbox
-          degrade honestly until the owner applies 20260716120000 /
-          20260716121000. Until 20260705220000 is applied the probe reports
+          degrade honestly until the owner applies 20260716130000 /
+          20260716131000. Until 20260705220000 is applied the probe reports
           not-applied and the existing honest roster empty state stays —
           nothing is faked. */}
       {teamBrigades.applied ? (

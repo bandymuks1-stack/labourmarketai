@@ -1,10 +1,10 @@
--- Rollback for 20260716120000_team_profile_details_v1.sql — drops ONLY what
+-- Rollback for 20260716130000_team_profile_details_v1.sql — drops ONLY what
 -- that migration created. ROLLBACK-CHAIN RULE: the migration recreated NO
 -- existing function/trigger, so nothing is restored here — only the new
 -- objects are removed. Apply manually via Supabase MCP after owner approval,
 -- never `db push`.
 --
--- ORDER: if 20260716121000_team_enquiries_v1 was applied, roll THAT back
+-- ORDER: if 20260716131000_team_enquiries_v1 was applied, roll THAT back
 -- first (its read model projects this table at call time).
 --
 -- NOTE: dropping the table removes any saved team details rows. This is a

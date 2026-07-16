@@ -2,13 +2,13 @@
 -- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
 -- DO NOT APPLY automatically. Apply ONLY via Supabase MCP apply_migration
 -- after explicit owner approval. Never `db push`.
--- APPLY ORDER: 20260716120000_team_profile_details_v1.sql FIRST — the
+-- APPLY ORDER: 20260716130000_team_profile_details_v1.sql FIRST — the
 -- employer read model below projects the availability snapshot from
 -- team_details at call time.
 -- INDEPENDENCE: applies cleanly against current main alone — FKs reference
 -- ONLY the applied organizations + profiles tables; no wagon-1/4/5 tables.
 --
--- 20260716121000 — team enquiries v1 (Trust Connect Teams wagon, gap 3;
+-- 20260716131000 — team enquiries v1 (Trust Connect Teams wagon, gap 3;
 -- SHARED CONTACT/CONSENT CONTRACT per the integration addendum — the same
 -- policy shape as the worker-side contact requests, never a second
 -- incompatible system).
@@ -53,7 +53,7 @@
 --     actor_profile_id / event_type / from_status / to_status / created_at.
 --   * Grants: authenticated only — never anon.
 --
--- ROLLBACK: supabase/rollbacks/20260716121000_team_enquiries_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260716131000_team_enquiries_v1.down.sql
 --
 -- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER + grants +
 -- in-function UPDATEs = RED-class; the annotation downgrades the CI finding
@@ -559,4 +559,4 @@ grant execute on function public.list_team_enquiries_for_my_teams_v1() to authen
 
 commit;
 
--- ROLLBACK: supabase/rollbacks/20260716121000_team_enquiries_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260716131000_team_enquiries_v1.down.sql
