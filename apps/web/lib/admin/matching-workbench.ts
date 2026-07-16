@@ -10,6 +10,7 @@ import {
   type StructuredNeed,
 } from "@/lib/market/fit";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
+import { buildTeamMatchInput } from "@/lib/company/team-match-input";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
 import type { MatchNeed, MatchSubject } from "@/lib/market/match-v1";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
@@ -560,15 +561,15 @@ export async function recordHumanMatch(input: {
 
 // ── Wagon 4: team read for team-target demands ──────────────────────────────
 //
-// TEMPORARY ADAPTER (integration control addendum 2026-07-16): the CANONICAL
-// team read model returning TeamMatchInputV1 belongs to Wagon 2 (separate
-// branch). Until that lands and this PR is rebased onto it, this thin adapter
-// fills the FROZEN contract shape (lib/market/team-match-contract.ts) with
-// what the existing rails legitimately expose — identity + active member
-// count — and leaves every other contract field an honest "not stated". The
-// matching layer itself NEVER reads these tables; it consumes the contract
-// (plus member subjects from the canonical supply read layer, which the
-// superadmin workbench may legitimately hold).
+// CANONICAL READ MODEL (integration control addendum 2026-07-16): the team
+// side of each row is filled by Wagon 2's `buildTeamMatchInput`
+// (lib/company/team-match-input.ts) — the ONE canonical producer of the
+// FROZEN TeamMatchInputV1 contract (lib/market/team-match-contract.ts).
+// Only when that read model returns null (org unreadable / not a team) does
+// the row fall back to the honest all-"not stated" contract value with the
+// locally-derived member count. The matching layer itself NEVER reads these
+// tables; it consumes the contract (plus member subjects from the canonical
+// supply read layer, which the superadmin workbench may legitimately hold).
 
 export interface TeamForMatching {
   readonly name: string;
@@ -648,21 +649,22 @@ export async function listTeamsForMatching(): Promise<TeamMatchingRead> {
     }
   }
 
-  return {
-    kind: "ok",
-    teams: teams.map((t) => {
+  const mapped = await Promise.all(
+    teams.map(async (t) => {
       const profiles = memberProfilesByTeam.get(t.id) ?? [];
+      // Canonical Wagon-2 read model; null → honest all-"not stated" fallback
+      // (never fabricated aggregates).
+      const canonical = await buildTeamMatchInput(t.id);
       return {
         name:
           (t.display_name ?? "").trim() || (t.legal_name ?? "").trim() || "—",
-        // Everything this adapter cannot honestly derive stays "not stated"
-        // per the contract — Wagon 2's read model fills the rest.
-        input: emptyTeamMatchInput(t.id, profiles.length),
+        input: canonical ?? emptyTeamMatchInput(t.id, profiles.length),
         memberWorkerIds: profiles
           .map((p) => workerByProfile.get(p))
           .filter((w): w is string => !!w)
           .sort(),
       };
     }),
-  };
+  );
+  return { kind: "ok", teams: mapped };
 }
