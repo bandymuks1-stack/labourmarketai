@@ -37,6 +37,7 @@ describe("toScoutSafeCandidate — anonymized + profile-safe", () => {
     subject,
     match: fakeMatch,
     shortlistStatus: null,
+    lastActiveBucket: "active",
   });
 
   it("exposes only the profile-safe preview (no name/contact/private key)", () => {
@@ -67,6 +68,10 @@ describe("toScoutSafeCandidate — anonymized + profile-safe", () => {
   it("passes the deterministic match through untouched", () => {
     expect(c.match).toBe(fakeMatch);
   });
+
+  it("carries the honest freshness bucket (non-PII) through", () => {
+    expect(c.lastActiveBucket).toBe("active");
+  });
 });
 
 describe("communication/booking eligibility (rule 6)", () => {
@@ -77,6 +82,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       subject: { ...subject, availabilityStatus: "available", availableFrom: null },
       match: fakeMatch,
       shortlistStatus: null,
+    lastActiveBucket: "active",
     });
     expect(c.canContact).toBe(true);
   });
@@ -88,6 +94,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       subject: { ...subject, availabilityStatus: "busy", availableFrom: "2026-09-01" },
       match: fakeMatch,
       shortlistStatus: null,
+    lastActiveBucket: "active",
     });
     expect(c.canContact).toBe(true);
   });
@@ -99,6 +106,7 @@ describe("communication/booking eligibility (rule 6)", () => {
       subject: { ...subject, availabilityStatus: "busy", availableFrom: null },
       match: fakeMatch,
       shortlistStatus: null,
+    lastActiveBucket: "active",
     });
     expect(c.canContact).toBe(false);
   });
