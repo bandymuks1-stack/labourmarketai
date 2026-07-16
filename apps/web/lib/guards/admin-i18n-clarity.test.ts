@@ -61,6 +61,7 @@ function flatten(
 const ADMIN_NAMESPACES = [
   "admin",
   "agentOs",
+  "adminPilots",
   "languageFeedback.admin",
   "telemetry",
   "communication.adminSupport",
@@ -75,6 +76,8 @@ const I18N_DRIVEN_ADMIN_PAGES = [
   "telemetry/page.tsx",
   "support/page.tsx",
   "users/[id]/page.tsx",
+  "pilots/page.tsx",
+  "pilots/[id]/page.tsx",
 ] as const;
 
 // Every Link in the admin tools hub must resolve a label key here.

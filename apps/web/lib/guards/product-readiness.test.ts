@@ -1779,7 +1779,23 @@ describe("no migration files added by this sprint", () => {
     // with all external sources OFF, versioned observation contract table,
     // append-only insight query log). DRAFT / needs-human-gate, NOT applied;
     // paired rollback + activation runbook in docs/intelligence/.
-    const SPRINT_BASELINE = 140;
+    // Bumped 140 -> 142 for the Wagon 1 worker-discovery-consent drafts
+    // (20260716120000_contact_disclosure_requests_v1 — employer→worker
+    // contact-detail ask on the shared contract vocabulary, RPC-only writes,
+    // append-only events; 20260716121000_request_rate_limits_v3 — booking
+    // propose rate-limit wrapper). Both DRAFT / needs-human-gate, NOT
+    // applied; paired rollbacks.
+    // Bumped 142 -> 144 for the Trust Connect Teams v1 drafts
+    // (20260716130000_team_profile_details_v1 + 20260716131000_
+    // team_enquiries_v1 — team-scoped details + the employer→team enquiry
+    // state machine on the shared contact/consent contract). Both DRAFT /
+    // needs-human-gate, NOT applied; paired rollbacks.
+    // Bumped 144 -> 145 for Pilot Onboarding and Measurement v1
+    // (20260716140000_pilots_cohort_v1 — admin-only pilots /
+    // pilot_participants / append-only pilot_outcomes cohort model,
+    // RPC-only writes, owner-recorded outcomes honestly labelled).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    const SPRINT_BASELINE = 145;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

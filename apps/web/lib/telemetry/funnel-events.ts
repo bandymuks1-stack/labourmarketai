@@ -36,6 +36,14 @@ export const FUNNEL_EVENTS = {
   loginStarted: "login_started",
   loginSucceeded: "login_succeeded",
   onboardingStarted: "onboarding_started",
+  // ── Per-step onboarding progress (Pilot Onboarding and Measurement v1).
+  //    The wizard has exactly two steps; these bounded names make per-step
+  //    drop-off queryable from pilot_events without any schema change.
+  //    step_role_completed fires when the user confirms the role step;
+  //    step_profile_completed fires when the profile step is submitted with
+  //    valid inputs (server confirmation is onboarding_completed).
+  onboardingStepRoleCompleted: "onboarding_step_role_completed",
+  onboardingStepProfileCompleted: "onboarding_step_profile_completed",
   onboardingCompleted: "onboarding_completed",
   dashboardViewed: "dashboard_viewed",
   firstActionCardViewed: "first_action_card_viewed",

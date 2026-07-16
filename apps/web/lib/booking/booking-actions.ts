@@ -14,6 +14,11 @@ import {
   type BookingStatus,
 } from "@/lib/booking/booking-state";
 import { hasFeature } from "@/lib/billing/effective-entitlements";
+import {
+  COMPANY_REQUEST_LIMITS,
+  evaluateRequestBudget,
+  rollingDayFloorIso,
+} from "@/lib/limits/request-rate-limits";
 
 /**
  * Booking server actions (Stage 6) — the live wiring of the booking-state
@@ -59,6 +64,7 @@ export type BookingActionResult =
   | { kind: "conflict" }
   | { kind: "not-authed" }
   | { kind: "not-entitled" }
+  | { kind: "rate-limited" }
   | { kind: "error"; message: string };
 
 function classify(error: { code?: string; message?: string }): BookingActionResult {
@@ -93,7 +99,42 @@ export async function proposeBookingAction(
   // preserved); enforced once test mode is active + no active Company Pilot.
   if (!(await hasFeature("booking_requests"))) return { kind: "not-entitled" };
 
-  const { error } = await asAny(supabase).rpc("propose_booking_request", {
+  // Bounded request budget (Wagon 1): 10 open proposals + 30/24h per company,
+  // counted over the caller's own RLS-visible booking rows. FAILS CLOSED on
+  // unreadable counts — except while the booking model itself is unapplied,
+  // where the RPC below reports the honest needs-migration state instead.
+  const countOwn = async (
+    filter: (q: unknown) => unknown,
+  ): Promise<{ n: number | null; absent: boolean }> => {
+    try {
+      let q = asAny(supabase)
+        .from("booking_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+      q = filter(q);
+      const { count, error } = await q;
+      if (error) {
+        return { n: null, absent: !!(error.code && ABSENT.has(error.code)) };
+      }
+      return { n: typeof count === "number" ? count : null, absent: false };
+    } catch {
+      return { n: null, absent: false };
+    }
+  };
+  const [open, day] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    countOwn((q) => (q as any).eq("status", "proposed")),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    countOwn((q) => (q as any).gt("created_at", rollingDayFloorIso())),
+  ]);
+  if (open.absent || day.absent) return { kind: "needs-migration" };
+  const budget = evaluateRequestBudget(
+    { openCount: open.n, last24hCount: day.n },
+    COMPANY_REQUEST_LIMITS,
+  );
+  if (!budget.allowed) return { kind: "rate-limited" };
+
+  const args = {
     p_request_id: input.requestId,
     p_worker_id: input.workerId,
     p_start_date: input.startDate ?? "",
@@ -101,8 +142,20 @@ export async function proposeBookingAction(
     p_location_country: input.locationCountry ?? "",
     p_role_text: input.role ?? "",
     p_note: input.note ?? "",
-  });
-  if (error) return classify(error);
+  };
+  // Defense-in-depth: the v3 wrapper (draft migration 20260716121000) also
+  // enforces the caps in the DB. Until the owner applies it, fall back to the
+  // UNCHANGED applied v1 RPC — the app-layer budget above stays active.
+  let { error } = await asAny(supabase).rpc("propose_booking_request_v3", args);
+  if (error && isAbsentFunction(error)) {
+    ({ error } = await asAny(supabase).rpc("propose_booking_request", args));
+  }
+  if (error) {
+    if (error.code === "P0004" || /limit reached|too many open/i.test(error.message ?? "")) {
+      return { kind: "rate-limited" };
+    }
+    return classify(error);
+  }
   revalidatePath(`/${input.locale}/dashboard/bookings`);
   return { kind: "ok", status: "proposed" };
 }

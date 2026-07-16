@@ -101,6 +101,15 @@ export function OnboardingWizard({
     const primaryRole = ROLE_CARDS.map((c) => c.key).find((k) =>
       roles.has(k),
     );
+    // Per-step drop-off signal (Pilot Onboarding and Measurement v1): the
+    // profile step was filled in and SUBMITTED with valid inputs. Server
+    // confirmation stays a separate event (onboarding_completed), so
+    // "submitted but failed server-side" remains distinguishable from
+    // "abandoned the form". Bounded metadata only — never PII.
+    trackFunnel(FUNNEL_EVENTS.onboardingStepProfileCompleted, {
+      step: "profile",
+      role_context: primaryRole,
+    });
     start(async () => {
       try {
         await completeOnboarding(form);
@@ -205,7 +214,15 @@ export function OnboardingWizard({
         <Button
           type="button"
           disabled={roles.size === 0}
-          onClick={() => setStep(2)}
+          onClick={() => {
+            // Per-step drop-off signal (Pilot Onboarding and Measurement
+            // v1): the role step is DONE the moment the user advances.
+            // Bounded metadata only — a coarse step label, never PII.
+            trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
+              step: "role",
+            });
+            setStep(2);
+          }}
           className="w-full rounded-xl sm:w-auto sm:self-start"
         >
           {t("rolePicker.continue")}

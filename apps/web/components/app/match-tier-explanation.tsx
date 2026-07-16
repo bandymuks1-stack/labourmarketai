@@ -21,6 +21,10 @@ export interface MatchTierLabels {
   readonly missingTitle: string;
   readonly criterionLabel: (criterion: string) => string;
   readonly missingLabel: (side: "worker" | "demand", criterionLabel: string) => string;
+  /** Wagon 4 tier provenance: shown on criterion results the demand AUTHOR
+   *  tiered via requirement_priorities (e.g. "set by the requester"). Optional
+   *  — surfaces that do not pass it render exactly as before. */
+  readonly authorMarkedLabel?: string;
 }
 
 const CHIP =
@@ -31,12 +35,14 @@ function TierGroup({
   chipTone,
   items,
   criterionLabel,
+  authorMarkedLabel,
   testId,
 }: {
   title: string;
   chipTone: string;
   items: readonly MatchCriterionResult[];
   criterionLabel: (criterion: string) => string;
+  authorMarkedLabel?: string;
   testId: string;
 }) {
   if (items.length === 0) return null;
@@ -53,9 +59,13 @@ function TierGroup({
             data-criterion={c.criterion}
             data-class={c.class}
             data-outcome={c.outcome}
+            data-author-marked={c.authorMarked === true ? "true" : undefined}
             title={c.source}
           >
             {criterionLabel(c.criterion)}
+            {c.authorMarked === true && authorMarkedLabel ? (
+              <span className="ml-1 opacity-75">· {authorMarkedLabel}</span>
+            ) : null}
           </span>
         ))}
       </div>
@@ -92,6 +102,7 @@ export function MatchTierExplanation({
         chipTone="border-state-danger/40 bg-state-danger/10 text-state-danger"
         items={blocking}
         criterionLabel={labels.criterionLabel}
+        authorMarkedLabel={labels.authorMarkedLabel}
         testId={`${testId ?? "match-tiers"}-blocking`}
       />
       <TierGroup
@@ -99,6 +110,7 @@ export function MatchTierExplanation({
         chipTone="border-state-success/30 bg-state-success/10 text-state-success"
         items={strengths}
         criterionLabel={labels.criterionLabel}
+        authorMarkedLabel={labels.authorMarkedLabel}
         testId={`${testId ?? "match-tiers"}-strengths`}
       />
       <TierGroup
@@ -106,6 +118,7 @@ export function MatchTierExplanation({
         chipTone="border-brand-blue/30 bg-brand-blue/5 text-brand-blue"
         items={negotiables}
         criterionLabel={labels.criterionLabel}
+        authorMarkedLabel={labels.authorMarkedLabel}
         testId={`${testId ?? "match-tiers"}-negotiables`}
       />
       {missingFacts.length > 0 ? (

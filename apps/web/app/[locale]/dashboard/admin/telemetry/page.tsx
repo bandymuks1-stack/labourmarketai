@@ -3,6 +3,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getAcquisitionFunnel } from "@/lib/admin/conversion-funnel";
+import {
+  formatDurationMs,
+  getTimeToValueSummary,
+} from "@/lib/admin/pilot-metrics";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -71,6 +75,12 @@ export default async function AdminTelemetryPage({
   // Owner acquisition-funnel summary (Pre-Advertising Launch Readiness v1) —
   // first-party counts + conversion rates + first-touch campaign breakdown.
   const funnel = await getAcquisitionFunnel(supabase);
+
+  // Time-to-first-value summary (Pilot Onboarding and Measurement v1) —
+  // GLOBAL per-session timing from the same first-party event store. Honest
+  // limits (per-tab sessions, no unique-visitor claims, no cohort slicing
+  // without the pilots migration) are stated in the section copy.
+  const ttv = await getTimeToValueSummary(supabase);
 
   const { data, error } = await fromAny("pilot_events")
     .select(
@@ -263,6 +273,85 @@ export default async function AdminTelemetryPage({
           </div>
         )}
       </section>
+
+      {/* Folded per PR #773 doctrine: time-to-value is secondary detail
+          behind the funnel. */}
+      <details
+        className="card-border p-4"
+        data-testid="telemetry-time-to-value"
+      >
+        <summary className="cursor-pointer font-display text-base font-semibold text-text-primary">
+          {t("ttv.title")}
+        </summary>
+        <div className="flex flex-col gap-3 pt-3">
+          <p className="text-[11px] text-text-muted">
+            {t("ttv.help")}
+            {ttv.excludedPreview > 0
+              ? ` ${t("ttv.excludedNote", { n: ttv.excludedPreview })}`
+              : ""}
+          </p>
+          {!ttv.available ? (
+            <p className="text-sm text-text-secondary">{t("ttv.unavailable")}</p>
+          ) : ttv.sessionsReachedValue === 0 ? (
+            <p className="text-sm text-text-secondary">{t("ttv.empty")}</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="rounded-md border border-ink-600/60 px-3 py-2">
+                  <div className="font-mono text-lg text-text-primary">
+                    {formatDurationMs(ttv.medianMs)}
+                  </div>
+                  <div className="text-[11px] text-text-muted">
+                    {t("ttv.median")}
+                  </div>
+                </div>
+                <div className="rounded-md border border-ink-600/60 px-3 py-2">
+                  <div className="font-mono text-lg text-text-primary">
+                    {formatDurationMs(ttv.p75Ms)}
+                  </div>
+                  <div className="text-[11px] text-text-muted">
+                    {t("ttv.p75")}
+                  </div>
+                </div>
+                <div className="rounded-md border border-ink-600/60 px-3 py-2">
+                  <div className="font-mono text-lg text-text-primary">
+                    {ttv.sessionsWithStart}
+                  </div>
+                  <div className="text-[11px] text-text-muted">
+                    {t("ttv.sessionsWithStart")}
+                  </div>
+                </div>
+                <div className="rounded-md border border-ink-600/60 px-3 py-2">
+                  <div className="font-mono text-lg text-text-primary">
+                    {ttv.sessionsReachedValue}
+                  </div>
+                  <div className="text-[11px] text-text-muted">
+                    {t("ttv.sessionsReachedValue")}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {t("ttv.firstValueEvent")}
+                </h3>
+                {ttv.byFirstValueEvent.map((v) => (
+                  <div
+                    key={v.event}
+                    className="flex items-center justify-between gap-3 text-xs"
+                  >
+                    <span className="font-mono text-text-secondary">
+                      {v.event}
+                    </span>
+                    <span className="font-mono text-text-primary">
+                      {v.sessions}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </details>
 
       <div
         className="flex flex-wrap items-center gap-3"

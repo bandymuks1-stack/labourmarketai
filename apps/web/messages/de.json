@@ -2284,19 +2284,31 @@
         "needsMigration": "Die Erfassung ist vorübergehend nicht verfügbar, während die Daten vorbereitet werden.",
         "error": "Die Entscheidung konnte nicht erfasst werden."
       },
-      "suggestions": {
-        "title": "Regelbasierte Shortlist",
-        "humanRule": "Geordnet nach echten Belegen (passende Filter, bestätigte Fähigkeiten, Bestätigungen durch Vorgesetzte) — kein berechneter Score; der Mensch entscheidet.",
-        "start": "Gespräch starten",
-        "reasons": {
-          "country_match": "Im Land",
-          "preferred_country_match": "Bevorzugt das Land",
-          "available_now": "Verfügbar",
-          "profession_token_match": "Beruf passt zum Anfragetext",
-          "verified_skills": "Bestätigte Fähigkeiten",
-          "manager_confirmations": "Bestätigungen durch Vorgesetzte",
-          "journal_evidence": "Journalbelege"
+      "engine": {
+        "title": "Kandidatenpassung (regelbasiert)",
+        "humanRule": "Geordnet nach denselben deterministischen Regeln wie das Firmen-Scouting — Gründe und Lücken werden gezeigt, kein berechneter Personenwert; der Mensch entscheidet.",
+        "start": "Gespräch beginnen",
+        "authorMarked": "vom Auftraggeber festgelegt",
+        "status": {
+          "strong": "Starke Passung",
+          "possible": "Mögliche Passung",
+          "weak": "Schwache Passung",
+          "insufficient_data": "Zu wenig Daten"
         }
+      },
+      "missing": {
+        "worker": "Die Arbeitskraft hat nicht angegeben: {criterion}",
+        "demand": "Die Anfrage gibt nicht an: {criterion}"
+      },
+      "team": {
+        "title": "Team-Passung (nur Ansicht)",
+        "notReadable": "Teammitglieder sind in dieser Sitzung nicht lesbar — die Team-Passung kann nicht berechnet werden.",
+        "empty": "Es gibt noch keine Teams.",
+        "coverage": "{covered} von {total} benötigten Fähigkeiten durch mindestens ein geeignetes Mitglied abgedeckt ({eligible} von {members} Mitgliedern geeignet)",
+        "blockers": "Das Team kann nicht erfüllen:",
+        "memberCovers": "deckt {count} benötigte Fähigkeiten ab",
+        "noMatchableMembers": "Kein Teammitglied hat ein zuordenbares Arbeitskraft-Profil.",
+        "unmatchableMembers": "{count} Mitglied(er) ohne zuordenbares Arbeitskraft-Profil"
       },
       "filters": {
         "all": "Alle Länder",
@@ -5705,18 +5717,18 @@
   },
   "teamBrigades": {
     "title": "Teams / Kolonnen",
-    "intro": "Eine Kolonne ist eine echte Arbeitseinheit in Ihrem Unternehmen. Erstellen Sie eine, fügen Sie bereits eingeladene Arbeitskräfte hinzu und sehen Sie, was die Gruppe kann — basierend auf dem, was ihre Mitglieder angegeben haben.",
+    "intro": "Eine Kolonne ist eine echte Arbeitseinheit in Ihrem Unternehmen. Erstellen Sie eine, laden Sie verknüpfte Arbeitskräfte ein — jede Person tritt erst bei, nachdem sie die Einladung selbst angenommen hat — und sehen Sie, was die Gruppe kann, basierend auf dem, was ihre Mitglieder angegeben haben.",
     "honestNote": "Fähigkeitszahlen sind von den Mitgliedern selbst angegeben. „Bestätigt“ bedeutet, dass ein Manager diese Fähigkeit durch Prüfung des Arbeitsjournals bestätigt hat. Dies ist keine Team-Zertifizierung und keine Bewertung.",
     "noTeams": "Noch keine Kolonnen. Erstellen Sie unten die erste — wir zeigen niemals erfundene Teams.",
     "memberCount": "Mitglieder: {count}",
-    "noMembers": "Noch keine Mitglieder. Fügen Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste hinzu.",
+    "noMembers": "Noch keine Mitglieder. Laden Sie unten Arbeitskräfte aus Ihrer verknüpften Belegschaftsliste ein — jede Person tritt nach eigener Annahme bei.",
     "capabilityHeading": "Was diese Kolonne angibt",
     "capabilityEmpty": "Noch keine angegebenen Fähigkeiten unter den Mitgliedern — nichts wird erfunden.",
     "declaredShort": "angegeben von {count}",
     "confirmedShort": "bestätigt für {count}",
     "noAddable": "Keine verknüpften Arbeitskräfte mehr zum Hinzufügen. Laden Sie zuerst Arbeitskräfte im Bereich Belegschaftsliste ein.",
-    "addLabel": "Verknüpfte Arbeitskraft hinzufügen",
-    "addButton": "Zur Kolonne hinzufügen",
+    "addLabel": "Verknüpfte Arbeitskraft einladen",
+    "addButton": "Einladung senden",
     "createLabel": "Name der neuen Kolonne",
     "createPlaceholder": "z. B. Fassadenkolonne A",
     "createButton": "Kolonne erstellen",
@@ -5729,9 +5741,138 @@
       "needsMigration": "Das Kolonnenmodell ist in dieser Umgebung noch nicht aktiviert.",
       "error": "Die Kolonne konnte nicht erstellt werden. Es wurde nichts gespeichert."
     },
-    "memberOutcome": {
-      "added": "Arbeitskraft zur Kolonne hinzugefügt.",
-      "error": "Die Arbeitskraft konnte nicht hinzugefügt werden. Es wurde nichts geändert."
+    "consentNote": "Die Mitgliedschaft beginnt erst, wenn die Arbeitskraft die Einladung selbst annimmt — niemand wird stillschweigend hinzugefügt.",
+    "inviteNotEnabled": "Kolonnen-Einladungen sind in dieser Umgebung noch nicht aktiviert, daher können hier keine Mitglieder eingeladen werden.",
+    "invitePendingOption": "{name} (Einladung gesendet)",
+    "provenance": {
+      "invited": "beigetreten durch eigene Annahme",
+      "direct": "früher hinzugefügt, vor den Einladungen"
+    },
+    "inviteOutcome": {
+      "sent": "Einladung per E-Mail gesendet. Die Mitgliedschaft beginnt, sobald die Arbeitskraft sie annimmt.",
+      "created": "Einladung erstellt. Die Arbeitskraft sieht sie unter Mein Netzwerk und entscheidet dort selbst.",
+      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Die Arbeitskraft sieht sie dennoch unter Mein Netzwerk.",
+      "alreadyInvited": "Diese Arbeitskraft hat bereits eine offene Einladung in diese Kolonne.",
+      "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
+      "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
+      "noEmail": "Diese Arbeitskraft hat keine nutzbare E-Mail-Adresse, daher kann die Einladung nicht erstellt werden.",
+      "needsMigration": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "error": "Die Einladung konnte nicht gesendet werden. Es wurde nichts geändert."
+    },
+    "details": {
+      "heading": "Kolonnendaten bearbeiten",
+      "availabilityLabel": "Ist die Kolonne verfügbar",
+      "availableFromLabel": "Verfügbar ab",
+      "maxTripDaysLabel": "Längster Einsatz (Tage, optional)",
+      "accommodationLabel": "Die Kolonne braucht eine Unterkunft",
+      "transportLabel": "Die Kolonne hat eigenen Transport",
+      "noteLabel": "Notiz (nur für Ihre Manager sichtbar)",
+      "save": "Daten speichern",
+      "saving": "Wird gespeichert…",
+      "notEnabled": "Kolonnendaten sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "status": {
+        "availableNow": "Jetzt verfügbar",
+        "availableFrom": "Verfügbar ab einem Datum",
+        "notAvailable": "Nicht verfügbar"
+      },
+      "outcome": {
+        "saved": "Kolonnendaten gespeichert.",
+        "notAllowed": "Nur der Kolonneninhaber oder ein Manager kann diese Daten bearbeiten.",
+        "dateRequired": "Wählen Sie das Datum, ab dem die Kolonne verfügbar ist.",
+        "invalidTripDays": "Die Einsatzdauer muss zwischen 1 und 365 Tagen liegen.",
+        "noteTooLong": "Die Notiz darf höchstens 500 Zeichen lang sein.",
+        "error": "Die Daten konnten nicht gespeichert werden. Es wurde nichts geändert.",
+        "invalidSize": "Die Besetzung muss zwischen 1 und 200 liegen, die größte nicht kleiner als die kleinste.",
+        "invalidCountries": "Länder als kurze Länderkennungen angeben, z. B. LT, DE — höchstens 30."
+      },
+      "sizeMinLabel": "Kleinste Besetzung für einen Auftrag (optional)",
+      "sizeMaxLabel": "Größte Besetzung für einen Auftrag (optional)",
+      "countriesLabel": "Länder, in denen die Kolonne arbeiten kann",
+      "countriesPlaceholder": "z. B. LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Verfügbarkeit der Kolonne",
+      "notSet": "Noch nicht ausgefüllt — öffnen Sie unten „Kolonnendaten bearbeiten“.",
+      "from": "Verfügbar ab {date}",
+      "accommodationNeeded": "Braucht Unterkunft",
+      "ownTransport": "Eigener Transport",
+      "maxTripDays": "Einsätze bis {count} Tage",
+      "size": "Personen: {size}",
+      "countries": "Länder: {list}"
+    },
+    "enquiries": {
+      "heading": "Anfragen an diese Kolonne ({count} offen)",
+      "empty": "Noch keine Anfragen. Sobald ein Arbeitgeber nach dieser Kolonne fragt, erscheint es hier.",
+      "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "unknownProposer": "Unbekannter Absender",
+      "dates": "Zeitraum: {from} – {to}",
+      "status": {
+        "created": "Wartet auf Antwort",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "withdrawn": "Zurückgezogen",
+        "expired": "Abgelaufen",
+        "other": "Sonstiges"
+      },
+      "respondOutcome": {
+        "accepted": "Anfrage angenommen. Der Absender sieht Ihre Antwort.",
+        "declined": "Anfrage abgelehnt. Der Absender sieht Ihre Antwort.",
+        "notAllowed": "Nur der Kolonneninhaber oder ein Manager kann antworten.",
+        "notOpen": "Diese Anfrage ist nicht mehr offen.",
+        "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Dieser Kolonne eine Anfrage senden",
+    "formIntro": "Ihre Anfrage geht innerhalb der Plattform an die Kolonnenleitung. Bitte keine E-Mail-Adressen oder Telefonnummern angeben — eine solche Nachricht wird abgelehnt.",
+    "messageLabel": "Nachricht an die Kolonne",
+    "messagePlaceholder": "z. B. Wir suchen eine Fassadenkolonne für eine Baustelle in Vilnius, etwa 6 Wochen.",
+    "startLabel": "Benötigt ab (optional)",
+    "endLabel": "Benötigt bis (optional)",
+    "submit": "Anfrage senden",
+    "sending": "Wird gesendet…",
+    "cancel": "Abbrechen",
+    "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "outcome": {
+      "created": "Anfrage gesendet. Die Antwort der Kolonne sehen Sie unter Mein Netzwerk.",
+      "duplicateOpen": "Sie haben bereits eine offene Anfrage an diese Kolonne.",
+      "ownTeam": "Das ist Ihre eigene Kolonne — eine Anfrage an sich selbst ist nicht möglich.",
+      "contactDetails": "Entfernen Sie E-Mail-Adressen und Telefonnummern — Anfragen laufen nur innerhalb der Plattform.",
+      "messageRequired": "Schreiben Sie zuerst eine kurze Nachricht.",
+      "messageTooLong": "Die Nachricht darf höchstens 500 Zeichen lang sein.",
+      "invalidDates": "Das Enddatum darf nicht vor dem Startdatum liegen.",
+      "rateLimited": "Anfragelimit vorerst erreicht. Versuchen Sie es später erneut.",
+      "error": "Die Anfrage konnte nicht gesendet werden. Es wurde nichts gespeichert."
+    },
+    "status": {
+      "created": "Wartet auf Antwort",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "expired": "Abgelaufen",
+      "other": "Sonstiges"
+    },
+    "dates": "Zeitraum: {from} – {to}",
+    "withdraw": "Anfrage zurückziehen",
+    "withdrawOutcome": {
+      "withdrawn": "Anfrage zurückgezogen.",
+      "notOpen": "Diese Anfrage ist nicht mehr offen.",
+      "error": "Die Anfrage konnte nicht zurückgezogen werden. Es wurde nichts geändert."
+    },
+    "myList": {
+      "empty": "Noch keine Anfragen an Kolonnen.",
+      "unknownTeam": "Kolonne"
+    },
+    "availability": {
+      "availableNow": "Kolonne meldet: jetzt verfügbar",
+      "from": "Kolonne meldet: verfügbar ab {date}",
+      "notAvailable": "Kolonne meldet: nicht verfügbar",
+      "accommodationNeeded": "Braucht Unterkunft",
+      "ownTransport": "Eigener Transport",
+      "maxTripDays": "Einsätze bis {count} Tage"
     }
   },
   "agentOs": {
@@ -5867,7 +6008,19 @@
       "agentOs": "→ Agent OS",
       "languageFeedback": "→ Sprachberichte"
     },
-    "footnote": "Sortiert nach Ereigniszeit (neueste zuerst). Angezeigt werden die letzten 200. RLS beschränkt SELECT auf Admins."
+    "footnote": "Sortiert nach Ereigniszeit (neueste zuerst). Angezeigt werden die letzten 200. RLS beschränkt SELECT auf Admins.",
+    "ttv": {
+      "title": "Zeit bis zum ersten Nutzen",
+      "help": "Median / 75. Perzentil vom ersten Registrierungs- oder Onboarding-Ereignis bis zum ersten Nutzen-Ereignis (Firmenbedarf eingereicht, Bedarf gespeichert, Dienstanfrage gesendet, Journaleintrag gespeichert) innerhalb derselben pseudonymen Sitzung. Ereigniszählungen über das jüngste Fenster — Sitzungen gelten pro Browser-Tab, keine eindeutigen Besucher; keine Umsatzattribution.",
+      "excludedNote": "{n} Nicht-Produktions-Ereignis(se) (localhost/Preview) ausgeschlossen.",
+      "unavailable": "Noch keine Nutzen-Zeit-Ereignisse, oder der Ereignisspeicher ist nicht verfügbar.",
+      "empty": "Noch keine Sitzung im Fenster mit Start- und Nutzen-Ereignis.",
+      "median": "Median",
+      "p75": "75. Perzentil",
+      "sessionsWithStart": "Sitzungen mit Start-Ereignis",
+      "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen",
+      "firstValueEvent": "Erstes Nutzen-Ereignis (konvertierende Sitzungen)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Text melden",
@@ -6558,7 +6711,8 @@
       "opening": "Wird geöffnet…",
       "opened": "Unterhaltung eröffnet — Antwort der Arbeitskraft wird erwartet.",
       "view": "Unterhaltung öffnen",
-      "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
+      "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
+      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
     },
     "how": {
       "title": "So funktioniert das Matching",
@@ -6626,6 +6780,31 @@
       "reopen": "Diesen Bedarf wieder öffnen",
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut."
+    },
+    "freshness": {
+      "active": "Kürzlich aktualisiert",
+      "recent": "In 3 Monaten aktualisiert",
+      "dormant": "Lange nicht aktualisiert"
+    },
+    "filters": {
+      "title": "Liste eingrenzen",
+      "availableNow": "Jetzt verfügbar",
+      "clear": "Filter zurücksetzen",
+      "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern."
+    },
+    "contactRequest": {
+      "button": "Kontaktdaten anfragen",
+      "sending": "Wird gesendet…",
+      "pending": "Kontaktdaten angefragt — die Arbeitskraft entscheidet.",
+      "granted": "Die Arbeitskraft hat die Weitergabe der Kontaktdaten genehmigt.",
+      "declined": "Die Arbeitskraft hat die vorherige Anfrage abgelehnt.",
+      "expired": "Die vorherige Anfrage ist abgelaufen.",
+      "unavailable": "Kontaktanfragen sind vorbereitet, aber noch nicht aktiviert.",
+      "rateLimited": "Anfragelimit erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut.",
+      "noOrganization": "Legen Sie zuerst die Organisation Ihres Unternehmens an.",
+      "fieldsNote": "Bittet die Arbeitskraft, Name, Telefon und E-Mail zu teilen. Die Arbeitskraft entscheidet — ohne Zustimmung wird nichts angezeigt.",
+      "error": "Die Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
+      "accepted": "Die Arbeitskraft hat die Anfrage angenommen — Kontaktfreigabe noch nicht erteilt."
     }
   },
   "planBoundary": {
@@ -6780,7 +6959,8 @@
     "propose": {
       "modeNote": "Dies ist ein Buchungsvorschlag mit Terminen — die Arbeitskraft bestätigt ihn oder lehnt ihn ab. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
-      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen."
+      "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen.",
+      "rateLimited": "Limit für Buchungsvorschläge erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -7033,6 +7213,23 @@
       "activePermissions": "Aktive Übermittlungserlaubnisse",
       "completedDisclosures": "Durchgeführte Übermittlungen",
       "note": "Zahlen stammen nur aus echten Einträgen des Einwilligungsregisters. Ein Admin kann keine Einwilligung im Namen eines Nutzers erteilen — nur Ansicht."
+    },
+    "workerAds": {
+      "title": "Bereitschaft für begrenzte Arbeitskräfte-Anzeigen",
+      "ready": "Bereit",
+      "notReady": "Nicht bereit",
+      "itemOk": "OK",
+      "itemMissing": "Fehlt",
+      "note": "Nur aus Live-Prüfungen und ausgeliefertem Code abgeleitet. „Bereit“ heißt, die Plattformteile existieren und funktionieren — die Anzeigenentscheidung bleibt beim Eigentümer.",
+      "items": {
+        "consent_spine": "Einwilligungsregister live (Sichtbarkeitsentscheidungen der Arbeitskräfte)",
+        "discoverable_supply": "Arbeitskräfte mit erlaubter Auffindbarkeit (aktuelle Anzahl)",
+        "contact_request_flow": "Ablauf für Kontaktdaten-Anfragen aktiviert",
+        "discovery_surface": "Suchseite für Arbeitgeber live",
+        "anonymisation_policy": "Anonyme Kandidatenvorschauen erzwungen",
+        "rate_limits": "Begrenzte Anfragelimits aktiv",
+        "freshness_demotion": "Veraltete Profile niedriger eingestuft"
+      }
     }
   },
   "billingStatus": {
@@ -7193,6 +7390,7 @@
         "demand": "Das Unternehmen hat nicht angegeben: {criterion}"
       },
       "criterion": {
+        "min_experience": "Mindesterfahrung",
         "skills_coverage": "Erforderliche Fähigkeiten",
         "evidence_tiers": "Nachweis der Fähigkeiten",
         "profession": "Beruf",
@@ -8144,6 +8342,33 @@
     "rights": {
       "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
       "noticeLink": "Datenschutzhinweis"
+    },
+    "contactRequests": {
+      "section": "Anfragen zu Kontaktdaten",
+      "intro": "Hier bitten Unternehmen um Ihre Kontaktdaten für einen konkreten Bedarf. Sie entscheiden jedes Mal. Wenn Sie nichts tun, wird nichts weitergegeben.",
+      "empty": "Derzeit keine Anfragen.",
+      "unknownCompany": "Unternehmen",
+      "unknownNeed": "Arbeitsbedarf",
+      "requestedFields": "Angefragte Daten",
+      "showDetails": "Was genau würde weitergegeben?",
+      "grant": "Erlauben",
+      "decline": "Ablehnen",
+      "working": "Wird gespeichert…",
+      "status": {
+        "declined": "Abgelehnt",
+        "withdrawn": "Vom Unternehmen zurückgezogen",
+        "expired": "Abgelaufen",
+        "created": "Wartet auf Sie",
+        "accepted": "Angenommen"
+      },
+      "grantedNote": "Erlaubt. Diese Erlaubnis steht unten in Ihrer Einwilligungshistorie.",
+      "declinedNote": "Abgelehnt. Es wurde nichts weitergegeben.",
+      "error": "Ihre Antwort konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "acceptNote": "Das Annehmen zeigt dem Unternehmen nur, dass Sie offen dafür sind. Ihre Kontaktdaten werden durch das Annehmen NICHT weitergegeben — das ist eine separate Entscheidung danach.",
+      "accept": "Annehmen",
+      "acceptedNote": "Angenommen. Es wurde noch nichts weitergegeben — Kontaktdaten zu erlauben ist eine separate Entscheidung unten.",
+      "grantTitle": "Kontaktdaten weitergeben?",
+      "grantIntro": "Dies ist eine separate Entscheidung. Nur die unten aufgeführten Daten würden an dieses Unternehmen weitergegeben, und nur für diesen Bedarf."
     }
   },
   "planning": {
@@ -8549,6 +8774,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Erforderlich",
+      "preferred": "Bevorzugt",
+      "hint": "„Erforderlich“ schließt Kandidaten aus, die es nicht erfüllen; „Bevorzugt“ behält sie und zeigt den Unterschied als Gesprächspunkt.",
+      "secondaryLanguages": "Weitere Sprachen (außer der ersten)",
+      "accommodationSelf": "Arbeitskraft hat eigene Unterkunft"
+    },
     "advancedTitle": "Erweiterte Angaben (optional)",
     "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
     "notStated": "Nicht angegeben",
@@ -9009,7 +9241,8 @@
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
-    }
+    },
+    "teamEnquiriesTitle": "Meine Anfragen an Kolonnen"
   },
   "people": {
     "eyebrow": "Personenprofil",
@@ -9751,6 +9984,108 @@
         "title": "Wann können Sie anfangen?",
         "hint": "Markieren Sie Ihre Verfügbarkeit."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Piloten",
+    "title": "Pilot-Kohorten",
+    "subtitle": "Pilot-Kohorten anlegen, Teilnehmende verwalten und vom Inhaber beobachtete Ergebnisse erfassen.",
+    "back": "Admin-Kontrollraum",
+    "needsMigration": "Das Datenmodell für Pilot-Kohorten ist noch nicht aktiviert — die vorbereitete Migration (pilots_cohort_v1) wartet auf die ausdrückliche Freigabe des Inhabers. Nichts auf dieser Seite wird simuliert.",
+    "loadError": "Pilotdaten konnten nicht gelesen werden: {msg}",
+    "saved": "Gespeichert.",
+    "saving": "Speichern…",
+    "errors": {
+      "needs_migration": "Noch nicht aktiviert — die Pilot-Kohorten-Migration wurde nicht angewendet.",
+      "not_authorized": "Ihr Konto ist für diese Aktion nicht berechtigt.",
+      "invalid": "Prüfen Sie die Eingaben — etwas fehlt oder überschreitet die Grenzen.",
+      "not_found": "Pilot oder Teilnehmer wurde nicht gefunden.",
+      "already_participant": "Diese Person nimmt bereits aktiv am Piloten teil.",
+      "profile_not_found": "Kein bestehendes Profil zu dieser E-Mail oder ID gefunden.",
+      "note_too_long": "Die Notiz überschreitet 500 Zeichen.",
+      "error": "Aktion fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "status": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "closed": "Geschlossen"
+    },
+    "kind": {
+      "construction": "Bau",
+      "staffing_agency": "Personalagentur",
+      "subcontractor": "Nachunternehmer",
+      "manufacturing": "Fertigung",
+      "services": "Dienstleistungen",
+      "client_customer": "Kunde / Auftraggeber",
+      "other": "Sonstiges",
+      "mixed": "Gemischt"
+    },
+    "list": {
+      "title": "Piloten",
+      "empty": "Noch keine Piloten. Legen Sie unten den ersten an.",
+      "noDates": "Keine Daten gesetzt",
+      "participants": "Teilnehmende: {n}",
+      "outcomes": "Ergebnisse: {n}"
+    },
+    "create": {
+      "title": "Pilot anlegen",
+      "name": "Pilotname",
+      "kind": "Organisationsart",
+      "startsOn": "Beginn",
+      "endsOn": "Ende",
+      "submit": "Pilot anlegen"
+    },
+    "detail": {
+      "back": "Alle Piloten",
+      "statusTitle": "Pilotstatus",
+      "statusLabel": "Status",
+      "setStatus": "Status setzen"
+    },
+    "participants": {
+      "title": "Teilnehmende",
+      "empty": "Noch keine Teilnehmenden. Fügen Sie ein bestehendes Profil über die exakte E-Mail oder Profil-ID hinzu.",
+      "addTitle": "Teilnehmer hinzufügen",
+      "add": "Teilnehmer hinzufügen",
+      "queryLabel": "Profil-E-Mail oder ID",
+      "queryPlaceholder": "name@firma.de oder Profil-ID",
+      "joinedViaLabel": "Beigetreten über",
+      "remove": "Entfernen",
+      "left": "Ausgetreten {date}",
+      "joinedVia": {
+        "manual": "Manuell",
+        "invitation": "Einladung"
+      }
+    },
+    "outcomes": {
+      "title": "Ergebnisse",
+      "honesty": "Vom Inhaber erfasstes Ergebnis — von einem Administrator notiert, nicht von der Plattform geprüft. Keine Kontaktdaten in die Notiz schreiben.",
+      "outcomeLabel": "Ergebnis",
+      "outcomePlaceholder": "Ergebnis wählen",
+      "participantLabel": "Teilnehmer (optional)",
+      "wholePilot": "Gesamter Pilot",
+      "noteLabel": "Notiz (optional, max. 500 Zeichen)",
+      "notePlaceholder": "Kurzer Kontext — keine Kontaktdaten",
+      "submit": "Ergebnis erfassen",
+      "ledger": "Ergebnisprotokoll (nur anfügen)",
+      "empty": "Noch keine Ergebnisse erfasst.",
+      "values": {
+        "contact_made": "Kontakt hergestellt",
+        "enquiry_made": "Anfrage erhalten",
+        "booking_accepted": "Buchung angenommen",
+        "hire_reported": "Einstellung gemeldet",
+        "no_outcome": "Kein Ergebnis"
+      }
+    },
+    "ttv": {
+      "title": "Zeit bis zum ersten Nutzen",
+      "help": "Median und 75. Perzentil vom ersten Registrierungs- oder Onboarding-Ereignis bis zum ersten Nutzen-Ereignis innerhalb derselben pseudonymen Sitzung. Sitzungen gelten pro Browser-Tab — keine eindeutigen Besucher.",
+      "cohortLimitation": "Kohortenbezogene Messung ist nicht verfügbar: Sitzungen mit Teilnehmenden zu verknüpfen würde identifizierende Daten erfordern. Die Zahlen unten sind global. Kohortenmessung erfordert die Pilot-Migration plus Teilnehmer-Ereignisse.",
+      "unavailable": "Der Ereignisspeicher ist nicht verfügbar oder leer.",
+      "empty": "Noch keine Sitzung im Fenster mit Start- und Nutzen-Ereignis.",
+      "median": "Median",
+      "p75": "75. Perzentil",
+      "sessionsWithStart": "Sitzungen mit Start-Ereignis",
+      "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen"
     }
   }
 }

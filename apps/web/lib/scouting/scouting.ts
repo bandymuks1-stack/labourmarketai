@@ -3,19 +3,24 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { parseStructuredNeed } from "@/lib/market/fit";
-import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
-import { deriveNeedSkills, type NeedSkillSource } from "@/lib/market/need-skills";
-import {
-  matchWorkerToNeed,
-  compareMatches,
-  type MatchNeed,
-} from "@/lib/market/match-v1";
+import type { NeedSkillSource } from "@/lib/market/need-skills";
+import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
+import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
 import {
   toScoutSafeCandidate,
   type ScoutSafeCandidate,
   type ShortlistStatus as SafeShortlistStatus,
 } from "@/lib/scouting/scout-safe-view";
+import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
+import {
+  allowlistScoutFilters,
+  applyScoutFilters,
+  buildScoutFacets,
+  EMPTY_SCOUT_FILTERS,
+  type ScoutFacets,
+  type ScoutFilters,
+} from "@/lib/scouting/scout-filters";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -61,53 +66,9 @@ export interface CompanyDemand {
   readonly createdAt: string;
 }
 
-/** Canonical demand → MatchNeed (PR4). The requirement set comes from
- *  deriveNeedSkills (human slugs > bridged ESCO > offline text recognition >
- *  profession expansion) — one contract, no second matching input path. */
-function buildNeed(
-  row: {
-    title: string | null;
-    need_summary: string | null;
-    role_or_work_type: string | null;
-    notes: string | null;
-    country: string | null;
-    location: string | null;
-    language_requirement: string | null;
-    payload: unknown;
-  },
-  escoUriToSlug: ReadonlyMap<string, string>,
-): { need: MatchNeed; source: NeedSkillSource | null } {
-  const derived = deriveNeedSkills({
-    title: row.title,
-    needSummary: row.need_summary,
-    roleOrWorkType: row.role_or_work_type,
-    notes: row.notes,
-    payload: row.payload,
-    escoUriToSlug,
-  });
-  const languages = (row.language_requirement ?? "")
-    .split(/[,;/]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-  return {
-    need: {
-      skillIds: derived.skillSlugs,
-      // Unbridged human-picked ESCO URIs stay in the need so a legacy
-      // URI-keyed subject skill can still match them (never dropped).
-      escoSkillUris: derived.escoUnmappedUris,
-      needSource: derived.source,
-      professionSlug: derived.professionSlug,
-      country: row.country,
-      city: row.location,
-      languages: languages.length > 0 ? languages : undefined,
-      // Contract v2 (PR 4): the demand's typed structured_v2 cluster feeds the
-      // compensation / start-date / engagement-form / licence criteria. Old
-      // records without it stay on the exact pre-v2 checks (honest null).
-      structuredV2: readStructuredDemandV2(row.payload),
-    },
-    source: derived.source,
-  };
-}
+// Canonical demand → MatchNeed derivation now lives in
+// lib/market/need-from-request.ts (Wagon 4) so scouting AND the admin
+// workbench share the ONE need-assembly path.
 
 /** The company's own demands (most recent first). */
 export async function listCompanyDemands(): Promise<CompanyDemand[]> {
@@ -153,14 +114,24 @@ export type ScoutResult =
        *  internal-only signals; empty until the owner-gated interest table
        *  is applied). Withdrawn signals are never shown. */
       interestByWorker: Record<string, string>;
+      /** The facet allowlists derived from the visible (RLS-scoped, bounded)
+       *  supply — the ONLY values the filter chips offer (Wagon 1). */
+      facets: ScoutFacets;
+      /** The filters actually applied after allowlisting (an out-of-supply
+       *  probe value is dropped, honestly reflected here). */
+      filters: ScoutFilters;
     }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
-/** Run scouting for ONE of the company's own demands. */
-export async function runScouting(requestId: string): Promise<ScoutResult> {
+/** Run scouting for ONE of the company's own demands. Optional bounded
+ *  facet filters (Wagon 1) only ever NARROW the RLS-scoped supply. */
+export async function runScouting(
+  requestId: string,
+  requestedFilters: ScoutFilters = EMPTY_SCOUT_FILTERS,
+): Promise<ScoutResult> {
   if (!requestId) return { kind: "not-found" };
   const supabase = await createClient();
   const {
@@ -218,7 +189,7 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // table absent in this environment → free-text fallback below
   }
 
-  const { need, source } = buildNeed(
+  const { need, source } = buildNeedFromRequestRow(
     structuredCity ? { ...req, location: structuredCity } : req,
     escoUriToSlug,
   );
@@ -266,7 +237,14 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
     // table absent (pre-apply) → no shortlist statuses yet
   }
 
-  const candidates: ScoutSafeCandidate[] = supply
+  // Facet allowlists come from the visible supply itself; the requested
+  // filters are clamped to them (a probe value matching nothing is dropped)
+  // and can only NARROW the already-bounded, can_view_worker-scoped list.
+  const facets = buildScoutFacets(supply);
+  const filters = allowlistScoutFilters(requestedFilters, facets);
+  const filteredSupply = applyScoutFilters(supply, filters);
+
+  const candidates: ScoutSafeCandidate[] = filteredSupply
     .map((c) =>
       toScoutSafeCandidate({
         workerId: c.workerId,
@@ -275,13 +253,21 @@ export async function runScouting(requestId: string): Promise<ScoutResult> {
         match: matchWorkerToNeed(need, c.subject),
         needCountry: need.country,
         shortlistStatus: shortlist.get(c.workerId) ?? null,
+        lastActiveBucket: c.lastActiveBucket,
       }),
     )
     // Rank via the SHARED need-context comparator (§19 — strength, coverage,
     // confirmed share, explicit availability; never a global person score).
-    .sort((a, b) => compareMatches(a.match, b.match));
+    // Wagon 1: DORMANT profiles are DEMOTED below the rest first — shown
+    // honestly with their freshness badge, never silently excluded.
+    .sort(
+      (a, b) =>
+        freshnessDemotionRank(a.lastActiveBucket) -
+          freshnessDemotionRank(b.lastActiveBucket) ||
+        compareMatches(a.match, b.match),
+    );
 
-  return { kind: "ok", demand, candidates, interestByWorker };
+  return { kind: "ok", demand, candidates, interestByWorker, facets, filters };
 }
 
 export type ShortlistWriteResult =

@@ -112,6 +112,54 @@ export const REQUIREMENT_LANGUAGES = [
 
 export const LISTING_KINDS = ["active_vacancy", "talent_pool"] as const;
 
+/** Author-selectable requirement tiers (Explainable Matching v1, Wagon 4).
+ *  `mandatory` ⇒ the matching engine treats the stated requirement as HARD
+ *  (blocking); `preferred` ⇒ weighted/negotiable. ABSENCE keeps the engine's
+ *  existing hardcoded default for that criterion — fully backward compatible
+ *  (guard-tested: an absent map produces byte-identical match results). */
+export const REQUIREMENT_TIERS = ["mandatory", "preferred"] as const;
+export type RequirementTier = (typeof REQUIREMENT_TIERS)[number];
+
+/** The tunable criteria. Each key only has an effect when the corresponding
+ *  requirement is actually STATED elsewhere in the cluster (a tier alone
+ *  never invents a requirement):
+ *   - own_vehicle       → transport.own_vehicle_required / requirements.own_vehicle
+ *   - own_tools         → requirements.own_tools
+ *   - secondary_languages → requirements.languages beyond the FIRST entry
+ *                           (the first stated language keeps its default)
+ *   - licence_categories → transport.licence_categories
+ *   - min_experience    → requirements.min_experience_years (default: the
+ *                          engine does not evaluate it — informational only)
+ *   - night_shifts / weekend_shifts → time.shifts entries
+ *   - accommodation     → the worker-needs-accommodation vs not-offered check */
+export const REQUIREMENT_PRIORITY_KEYS = [
+  "own_vehicle",
+  "own_tools",
+  "secondary_languages",
+  "licence_categories",
+  "min_experience",
+  "night_shifts",
+  "weekend_shifts",
+  "accommodation",
+] as const;
+export type RequirementPriorityKey = (typeof REQUIREMENT_PRIORITY_KEYS)[number];
+
+const requirementTierEnum = z.enum(REQUIREMENT_TIERS);
+const requirementPrioritiesSchema = z
+  .object({
+    own_vehicle: requirementTierEnum.optional(),
+    own_tools: requirementTierEnum.optional(),
+    secondary_languages: requirementTierEnum.optional(),
+    licence_categories: requirementTierEnum.optional(),
+    min_experience: requirementTierEnum.optional(),
+    night_shifts: requirementTierEnum.optional(),
+    weekend_shifts: requirementTierEnum.optional(),
+    accommodation: requirementTierEnum.optional(),
+  })
+  .strict();
+
+export type RequirementPriorities = z.infer<typeof requirementPrioritiesSchema>;
+
 export const APPLICATION_METHODS = [
   "interest_signal",
   "conversation",
@@ -254,6 +302,9 @@ export const structuredDemandV2Schema = z
     accommodation: accommodationSchema.optional(),
     transport: transportSchema.optional(),
     requirements: requirementsSchema.optional(),
+    /** Author-selected mandatory/preferred tiers for the tunable criteria.
+     *  Optional + additive: absence keeps every engine default untouched. */
+    requirement_priorities: requirementPrioritiesSchema.optional(),
     process: processSchema.optional(),
     meta: z
       .object({ contract_version: z.literal(STRUCTURED_DEMAND_CONTRACT_VERSION) })

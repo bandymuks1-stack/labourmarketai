@@ -27,6 +27,9 @@ export function RequestCommunicationButton({
     opened: string;
     view: string;
     error: string;
+    /** Honest bounded-budget note (Wagon 1) — shown when the daily
+     *  conversation-request limit is reached, instead of a generic error. */
+    limitReached: string;
   };
 }) {
   const router = useRouter();
@@ -34,6 +37,7 @@ export function RequestCommunicationButton({
   const [state, setState] = useState<
     | { kind: "idle" }
     | { kind: "opened"; conversationId: string }
+    | { kind: "rate_limited" }
     | { kind: "error" }
   >({ kind: "idle" });
 
@@ -43,6 +47,8 @@ export function RequestCommunicationButton({
       const res = await requestWorkerConversationAction({ locale, requestId, workerId });
       if (res.ok) {
         setState({ kind: "opened", conversationId: res.conversationId });
+      } else if (res.reason === "rate_limited") {
+        setState({ kind: "rate_limited" });
       } else {
         setState({ kind: "error" });
       }
@@ -75,6 +81,11 @@ export function RequestCommunicationButton({
       >
         {pending ? labels.opening : labels.button}
       </button>
+      {state.kind === "rate_limited" ? (
+        <span className="text-[11px] text-state-warning" data-testid="request-communication-limit">
+          {labels.limitReached}
+        </span>
+      ) : null}
       {state.kind === "error" ? (
         <span className="text-[11px] text-state-danger">{labels.error}</span>
       ) : null}

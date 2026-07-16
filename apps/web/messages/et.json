@@ -1259,19 +1259,31 @@
         "needsMigration": "[EN] Consolidation migration not applied — recording is blocked.",
         "error": "[EN] Could not record the decision."
       },
-      "suggestions": {
-        "title": "[EN] Rule-based shortlist",
-        "humanRule": "[EN] Ordered by real evidence (filters matched, confirmed skills, manager confirmations) — no computed score; the human decides.",
-        "start": "[EN] Start conversation",
-        "reasons": {
-          "country_match": "[EN] In country",
-          "preferred_country_match": "[EN] Prefers country",
-          "available_now": "[EN] Available",
-          "profession_token_match": "[EN] Profession fits request text",
-          "verified_skills": "[EN] Confirmed skills",
-          "manager_confirmations": "[EN] Manager confirmations",
-          "journal_evidence": "[EN] Journal evidence"
+      "engine": {
+        "title": "Kandidaatide sobivus (reeglipõhine)",
+        "humanRule": "Järjestatud samade deterministlike reeglite järgi nagu ettevõtte otsing — näidatakse põhjused ja puudujäägid, ilma arvutatud isikuskoorita; otsustab inimene.",
+        "start": "Alusta vestlust",
+        "authorMarked": "tellija määratud",
+        "status": {
+          "strong": "Tugev sobivus",
+          "possible": "Võimalik sobivus",
+          "weak": "Nõrk sobivus",
+          "insufficient_data": "Andmeid pole piisavalt"
         }
+      },
+      "missing": {
+        "worker": "Töötaja ei ole märkinud: {criterion}",
+        "demand": "Päring ei märgi: {criterion}"
+      },
+      "team": {
+        "title": "Meeskonna sobivus (ainult vaatamiseks)",
+        "notReadable": "Meeskonnaliikmete andmed pole selles sessioonis loetavad — meeskonna sobivust ei saa arvutada.",
+        "empty": "Meeskondi veel pole.",
+        "coverage": "{covered} / {total} vajalikest oskustest katab vähemalt üks sobiv liige ({eligible} / {members} liikmest sobivad)",
+        "blockers": "Meeskond ei suuda täita:",
+        "memberCovers": "katab {count} vajalikku oskust",
+        "noMatchableMembers": "Ühelgi meeskonnaliikmel pole seotud töötajaprofiili.",
+        "unmatchableMembers": "{count} liiget ilma seotud töötajaprofiilita"
       },
       "filters": {
         "all": "[EN] All countries",
@@ -1783,6 +1795,7 @@
         "demand": "[EN] The company has not stated: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimaalne kogemus",
         "skills_coverage": "[EN] Required skills",
         "evidence_tiers": "[EN] Skill evidence",
         "profession": "[EN] Profession",
@@ -1943,6 +1956,13 @@
     "open": "Ava Waze'is"
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Kohustuslik",
+      "preferred": "Soovituslik",
+      "hint": "„Kohustuslik“ välistab kandidaadid, kes nõuet ei täida; „Soovituslik“ jätab nad alles aruteluteemana.",
+      "secondaryLanguages": "Lisakeeled (peale esimese)",
+      "accommodationSelf": "Töötajal on oma majutus"
+    },
     "advancedTitle": "[EN] Advanced details (optional)",
     "advancedHint": "[EN] Structured facts workers can filter and compare. Everything is optional — anything you skip is shown as “not stated”, never invented.",
     "notStated": "[EN] Not stated",

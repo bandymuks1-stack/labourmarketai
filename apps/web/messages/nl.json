@@ -2284,19 +2284,31 @@
         "needsMigration": "Vastleggen is tijdelijk niet beschikbaar terwijl de gegevens worden voorbereid.",
         "error": "Kon de beslissing niet vastleggen."
       },
-      "suggestions": {
-        "title": "Op regels gebaseerde shortlist",
-        "humanRule": "Gesorteerd op echt bewijs (overeenkomende filters, bevestigde vaardigheden, managerbevestigingen) — geen berekende score; de mens beslist.",
+      "engine": {
+        "title": "Kandidaat-match (regelgebaseerd)",
+        "humanRule": "Gerangschikt volgens dezelfde deterministische regels als bedrijfsscouting — redenen en hiaten worden getoond, geen berekende persoonsscore; de mens beslist.",
         "start": "Gesprek starten",
-        "reasons": {
-          "country_match": "In het land",
-          "preferred_country_match": "Voorkeur voor land",
-          "available_now": "Beschikbaar",
-          "profession_token_match": "Beroep past bij aanvraagtekst",
-          "verified_skills": "Bevestigde vaardigheden",
-          "manager_confirmations": "Managerbevestigingen",
-          "journal_evidence": "Journaalbewijs"
+        "authorMarked": "door de aanvrager bepaald",
+        "status": {
+          "strong": "Sterke match",
+          "possible": "Mogelijke match",
+          "weak": "Zwakke match",
+          "insufficient_data": "Onvoldoende gegevens"
         }
+      },
+      "missing": {
+        "worker": "De werknemer heeft niet opgegeven: {criterion}",
+        "demand": "De aanvraag vermeldt niet: {criterion}"
+      },
+      "team": {
+        "title": "Teammatch (alleen-lezen)",
+        "notReadable": "Teamleden zijn in deze sessie niet leesbaar — de teammatch kan niet worden berekend.",
+        "empty": "Er zijn nog geen teams.",
+        "coverage": "{covered} van {total} vereiste vaardigheden gedekt door minstens één geschikt lid ({eligible} van {members} leden geschikt)",
+        "blockers": "Het team kan niet voldoen aan:",
+        "memberCovers": "dekt {count} vereiste vaardigheden",
+        "noMatchableMembers": "Geen enkel teamlid heeft een koppelbaar werknemersprofiel.",
+        "unmatchableMembers": "{count} leden zonder koppelbaar werknemersprofiel"
       },
       "filters": {
         "all": "Alle landen",
@@ -5705,18 +5717,18 @@
   },
   "teamBrigades": {
     "title": "Ploegen / brigades",
-    "intro": "Een brigade is een echte werkeenheid binnen je bedrijf. Maak er een aan, voeg werknemers toe die je al hebt uitgenodigd, en zie wat de groep kan op basis van wat de leden hebben opgegeven.",
+    "intro": "Een brigade is een echte werkeenheid binnen je bedrijf. Maak er een aan, nodig gekoppelde werknemers uit — iedereen treedt pas toe na het zelf accepteren van de uitnodiging — en zie wat de groep kan op basis van wat de leden hebben opgegeven.",
     "honestNote": "Vaardigheidsaantallen zijn door leden opgegeven. “Bevestigd” betekent dat een manager die vaardigheid via journaalbeoordeling heeft bevestigd. Dit is geen teamcertificering en geen beoordeling.",
     "noTeams": "Nog geen brigades. Maak hieronder de eerste aan — we tonen nooit verzonnen ploegen.",
     "memberCount": "Leden: {count}",
-    "noMembers": "Nog geen leden. Voeg hieronder werknemers toe uit je gekoppelde bestand.",
+    "noMembers": "Nog geen leden. Nodig hieronder werknemers uit je gekoppelde bestand uit — iedereen treedt toe na eigen acceptatie.",
     "capabilityHeading": "Wat deze brigade opgeeft",
     "capabilityEmpty": "Nog geen opgegeven vaardigheden onder de leden — er wordt niets verzonnen.",
     "declaredShort": "opgegeven door {count}",
     "confirmedShort": "bevestigd voor {count}",
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",
-    "addLabel": "Een gekoppelde werknemer toevoegen",
-    "addButton": "Toevoegen aan brigade",
+    "addLabel": "Een gekoppelde werknemer uitnodigen",
+    "addButton": "Uitnodiging versturen",
     "createLabel": "Naam nieuwe brigade",
     "createPlaceholder": "bijv. Gevelbrigade A",
     "createButton": "Brigade aanmaken",
@@ -5729,9 +5741,138 @@
       "needsMigration": "Het brigademodel is in deze omgeving nog niet ingeschakeld.",
       "error": "De brigade kon niet worden aangemaakt. Er is niets opgeslagen."
     },
-    "memberOutcome": {
-      "added": "Werknemer toegevoegd aan de brigade.",
-      "error": "De werknemer kon niet worden toegevoegd. Er is niets gewijzigd."
+    "consentNote": "Het lidmaatschap begint pas nadat de werknemer de uitnodiging zelf heeft geaccepteerd — we voegen niemand stilzwijgend toe.",
+    "inviteNotEnabled": "Ploeguitnodigingen zijn in deze omgeving nog niet ingeschakeld, dus leden kunnen hier niet worden uitgenodigd.",
+    "invitePendingOption": "{name} (uitnodiging verstuurd)",
+    "provenance": {
+      "invited": "toegetreden na eigen acceptatie",
+      "direct": "eerder toegevoegd, vóór uitnodigingen"
+    },
+    "inviteOutcome": {
+      "sent": "Uitnodiging per e-mail verstuurd. Het lidmaatschap begint zodra de werknemer die accepteert.",
+      "created": "Uitnodiging aangemaakt. De werknemer ziet die onder Mijn netwerk en beslist daar zelf.",
+      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. De werknemer ziet die alsnog onder Mijn netwerk.",
+      "alreadyInvited": "Deze werknemer heeft al een openstaande uitnodiging voor deze brigade.",
+      "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
+      "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
+      "noEmail": "Deze werknemer heeft geen bruikbaar e-mailadres, dus de uitnodiging kan niet worden aangemaakt.",
+      "needsMigration": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "error": "De uitnodiging kon niet worden verstuurd. Er is niets gewijzigd."
+    },
+    "details": {
+      "heading": "Ploeggegevens bewerken",
+      "availabilityLabel": "Is de ploeg beschikbaar",
+      "availableFromLabel": "Beschikbaar vanaf",
+      "maxTripDaysLabel": "Langste klus op locatie (dagen, optioneel)",
+      "accommodationLabel": "De ploeg heeft huisvesting nodig",
+      "transportLabel": "De ploeg heeft eigen vervoer",
+      "noteLabel": "Notitie (alleen zichtbaar voor je managers)",
+      "save": "Gegevens opslaan",
+      "saving": "Opslaan…",
+      "notEnabled": "Ploeggegevens zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "status": {
+        "availableNow": "Nu beschikbaar",
+        "availableFrom": "Beschikbaar vanaf een datum",
+        "notAvailable": "Niet beschikbaar"
+      },
+      "outcome": {
+        "saved": "Ploeggegevens opgeslagen.",
+        "notAllowed": "Alleen de brigade-eigenaar of een manager kan deze gegevens bewerken.",
+        "dateRequired": "Kies de datum waarop de ploeg beschikbaar wordt.",
+        "invalidTripDays": "De duur moet tussen 1 en 365 dagen liggen.",
+        "noteTooLong": "De notitie mag maximaal 500 tekens bevatten.",
+        "error": "De gegevens konden niet worden opgeslagen. Er is niets gewijzigd.",
+        "invalidSize": "De bezetting moet tussen 1 en 200 liggen, en de grootste niet kleiner dan de kleinste.",
+        "invalidCountries": "Noteer landen met korte landletters, bijv. LT, DE — maximaal 30."
+      },
+      "sizeMinLabel": "Kleinste bezetting voor een klus (optioneel)",
+      "sizeMaxLabel": "Grootste bezetting voor een klus (optioneel)",
+      "countriesLabel": "Landen waar de ploeg kan werken",
+      "countriesPlaceholder": "bijv. LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Beschikbaarheid van de ploeg",
+      "notSet": "Nog niet ingevuld — open hieronder “Ploeggegevens bewerken”.",
+      "from": "Beschikbaar vanaf {date}",
+      "accommodationNeeded": "Huisvesting nodig",
+      "ownTransport": "Eigen vervoer",
+      "maxTripDays": "Klussen tot {count} dagen",
+      "size": "Mensen: {size}",
+      "countries": "Landen: {list}"
+    },
+    "enquiries": {
+      "heading": "Aanvragen voor deze ploeg ({count} open)",
+      "empty": "Nog geen aanvragen. Zodra een werkgever naar deze ploeg vraagt, zie je dat hier.",
+      "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "accept": "Accepteren",
+      "decline": "Afwijzen",
+      "unknownProposer": "Onbekende afzender",
+      "dates": "Periode: {from} – {to}",
+      "status": {
+        "created": "Wacht op antwoord",
+        "accepted": "Geaccepteerd",
+        "declined": "Afgewezen",
+        "withdrawn": "Ingetrokken",
+        "expired": "Verlopen",
+        "other": "Overig"
+      },
+      "respondOutcome": {
+        "accepted": "Aanvraag geaccepteerd. De afzender ziet je antwoord.",
+        "declined": "Aanvraag afgewezen. De afzender ziet je antwoord.",
+        "notAllowed": "Alleen de ploegeigenaar of een manager kan antwoorden.",
+        "notOpen": "Deze aanvraag is niet meer open.",
+        "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Deze ploeg een aanvraag sturen",
+    "formIntro": "Je aanvraag gaat binnen het platform naar de ploegleider. Vermeld geen e-mailadressen of telefoonnummers — zo'n bericht wordt geweigerd.",
+    "messageLabel": "Bericht aan de ploeg",
+    "messagePlaceholder": "bijv. We zoeken een gevelploeg voor een project in Vilnius, ongeveer 6 weken.",
+    "startLabel": "Nodig vanaf (optioneel)",
+    "endLabel": "Nodig tot (optioneel)",
+    "submit": "Aanvraag versturen",
+    "sending": "Versturen…",
+    "cancel": "Annuleren",
+    "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+    "outcome": {
+      "created": "Aanvraag verstuurd. Het antwoord van de ploeg zie je onder Mijn netwerk.",
+      "duplicateOpen": "Je hebt al een openstaande aanvraag voor deze ploeg.",
+      "ownTeam": "Dit is je eigen ploeg — een aanvraag aan jezelf is niet mogelijk.",
+      "contactDetails": "Verwijder e-mailadressen en telefoonnummers — aanvragen reizen alleen binnen het platform.",
+      "messageRequired": "Schrijf eerst een kort bericht.",
+      "messageTooLong": "Het bericht mag maximaal 500 tekens bevatten.",
+      "invalidDates": "De einddatum mag niet vóór de startdatum liggen.",
+      "rateLimited": "Aanvraaglimiet voorlopig bereikt. Probeer het later opnieuw.",
+      "error": "De aanvraag kon niet worden verstuurd. Er is niets opgeslagen."
+    },
+    "status": {
+      "created": "Wacht op antwoord",
+      "accepted": "Geaccepteerd",
+      "declined": "Afgewezen",
+      "withdrawn": "Ingetrokken",
+      "expired": "Verlopen",
+      "other": "Overig"
+    },
+    "dates": "Periode: {from} – {to}",
+    "withdraw": "Aanvraag intrekken",
+    "withdrawOutcome": {
+      "withdrawn": "Aanvraag ingetrokken.",
+      "notOpen": "Deze aanvraag is niet meer open.",
+      "error": "De aanvraag kon niet worden ingetrokken. Er is niets gewijzigd."
+    },
+    "myList": {
+      "empty": "Nog geen aanvragen aan ploegen.",
+      "unknownTeam": "Ploeg"
+    },
+    "availability": {
+      "availableNow": "Ploeg meldt: nu beschikbaar",
+      "from": "Ploeg meldt: beschikbaar vanaf {date}",
+      "notAvailable": "Ploeg meldt: niet beschikbaar",
+      "accommodationNeeded": "Huisvesting nodig",
+      "ownTransport": "Eigen vervoer",
+      "maxTripDays": "Klussen tot {count} dagen"
     }
   },
   "agentOs": {
@@ -5867,7 +6008,19 @@
       "agentOs": "→ Agent OS",
       "languageFeedback": "→ Taalrapporten"
     },
-    "footnote": "Gesorteerd op eventtijd (nieuwste eerst). Toont de laatste 200. RLS beperkt SELECT tot admins."
+    "footnote": "Gesorteerd op eventtijd (nieuwste eerst). Toont de laatste 200. RLS beperkt SELECT tot admins.",
+    "ttv": {
+      "title": "Tijd tot eerste waarde",
+      "help": "Mediaan / 75e percentiel van het eerste registratie- of onboardingevent tot het eerste waarde-event (bedrijfsbehoefte ingediend, behoefte opgeslagen, dienstverzoek verzonden, dagboekitem opgeslagen) binnen dezelfde pseudonieme sessie. Eventtellingen over het recente venster — sessies gelden per browsertabblad, geen unieke bezoekers; geen omzetattributie.",
+      "excludedNote": "{n} niet-productie-event(s) (localhost/preview) uitgesloten.",
+      "unavailable": "Nog geen waarde-timing-events, of de eventopslag is niet beschikbaar.",
+      "empty": "Nog geen sessie in het venster met zowel een start- als een waarde-event.",
+      "median": "Mediaan",
+      "p75": "75e percentiel",
+      "sessionsWithStart": "Sessies met een startevent",
+      "sessionsReachedValue": "Sessies die waarde bereikten",
+      "firstValueEvent": "Eerste waarde-event (converterende sessies)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Tekst melden",
@@ -6558,7 +6711,8 @@
       "opening": "Openen…",
       "opened": "Gesprek geopend — wachten op het antwoord van de werknemer.",
       "view": "Gesprek openen",
-      "error": "Kon het gesprek niet openen. Probeer het opnieuw."
+      "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
+      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."
     },
     "how": {
       "title": "Hoe matching werkt",
@@ -6626,6 +6780,31 @@
       "reopen": "Deze behoefte heropenen",
       "closedNote": "Gesloten — verborgen voor werknemers.",
       "error": "Kon niet opslaan. Probeer het opnieuw."
+    },
+    "freshness": {
+      "active": "Onlangs bijgewerkt",
+      "recent": "Bijgewerkt binnen 3 maanden",
+      "dormant": "Lang niet bijgewerkt"
+    },
+    "filters": {
+      "title": "Lijst verfijnen",
+      "availableNow": "Nu beschikbaar",
+      "clear": "Filters wissen",
+      "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
+    },
+    "contactRequest": {
+      "button": "Contactgegevens aanvragen",
+      "sending": "Versturen…",
+      "pending": "Contactgegevens aangevraagd — de werker beslist.",
+      "granted": "De werker heeft het delen van contactgegevens goedgekeurd.",
+      "declined": "De werker heeft het vorige verzoek afgewezen.",
+      "expired": "Het vorige verzoek is verlopen.",
+      "unavailable": "Contactverzoeken zijn voorbereid maar nog niet ingeschakeld.",
+      "rateLimited": "Verzoeklimiet bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
+      "noOrganization": "Maak eerst de organisatie van uw bedrijf aan.",
+      "fieldsNote": "Vraagt de werker om naam, telefoon en e-mail te delen. De werker beslist — zonder goedkeuring wordt niets getoond.",
+      "error": "Het verzoek kon niet worden verstuurd. Probeer het opnieuw.",
+      "accepted": "De werker heeft het verzoek geaccepteerd — contact delen nog niet toegestaan."
     }
   },
   "planBoundary": {
@@ -6780,7 +6959,8 @@
     "propose": {
       "modeNote": "Dit is een boekingsvoorstel met datums — de werknemer bevestigt of weigert het. Er is niets geboekt totdat de werknemer accepteert.",
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
-      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken."
+      "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken.",
+      "rateLimited": "Limiet voor boekingsvoorstellen bereikt (10 open, 30 per dag). Probeer het later opnieuw."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
@@ -7033,6 +7213,23 @@
       "activePermissions": "Actieve overdrachtstoestemmingen",
       "completedDisclosures": "Uitgevoerde overdrachten",
       "note": "Aantallen komen alleen uit echte grootboekregels. Een beheerder kan geen toestemming namens een gebruiker geven — alleen inzien."
+    },
+    "workerAds": {
+      "title": "Gereedheid beperkte werkeradvertenties",
+      "ready": "Gereed",
+      "notReady": "Niet gereed",
+      "itemOk": "OK",
+      "itemMissing": "Ontbreekt",
+      "note": "Alleen afgeleid uit live controles en geleverde code. 'Gereed' betekent dat de platformonderdelen bestaan en werken — het advertentiebesluit blijft bij de eigenaar.",
+      "items": {
+        "consent_spine": "Toestemmingsregistratie live (zichtbaarheidskeuzes van werkers)",
+        "discoverable_supply": "Werkers die vindbaarheid toestaan (huidig aantal)",
+        "contact_request_flow": "Aanvraagstroom voor contactgegevens ingeschakeld",
+        "discovery_surface": "Zoekpagina voor werkgevers live",
+        "anonymisation_policy": "Anonieme kandidaatweergaven afgedwongen",
+        "rate_limits": "Begrensde verzoeklimieten actief",
+        "freshness_demotion": "Verouderde profielen lager gerangschikt"
+      }
     }
   },
   "billingStatus": {
@@ -7193,6 +7390,7 @@
         "demand": "Het bedrijf heeft niet opgegeven: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimale ervaring",
         "skills_coverage": "Vereiste vaardigheden",
         "evidence_tiers": "Bewijs van vaardigheden",
         "profession": "Beroep",
@@ -8144,6 +8342,33 @@
     "rights": {
       "notice": "Meer over uw rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
+    },
+    "contactRequests": {
+      "section": "Verzoeken om contactgegevens",
+      "intro": "Hier vragen bedrijven om uw contactgegevens voor één specifieke behoefte. U beslist elke keer. Doet u niets, dan wordt er niets gedeeld.",
+      "empty": "Op dit moment geen verzoeken.",
+      "unknownCompany": "Bedrijf",
+      "unknownNeed": "Werkbehoefte",
+      "requestedFields": "Gevraagde gegevens",
+      "showDetails": "Wat wordt er precies gedeeld?",
+      "grant": "Toestaan",
+      "decline": "Afwijzen",
+      "working": "Opslaan…",
+      "status": {
+        "declined": "Afgewezen",
+        "withdrawn": "Ingetrokken door het bedrijf",
+        "expired": "Verlopen",
+        "created": "Wacht op u",
+        "accepted": "Geaccepteerd"
+      },
+      "grantedNote": "Toegestaan. Deze toestemming staat in uw toestemmingsgeschiedenis hieronder.",
+      "declinedNote": "Afgewezen. Er is niets gedeeld.",
+      "error": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
+      "acceptNote": "Accepteren laat het bedrijf alleen weten dat u ervoor openstaat. Uw contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die u daarna kunt maken.",
+      "accept": "Accepteren",
+      "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
+      "grantTitle": "Contactgegevens delen?",
+      "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     }
   },
   "planning": {
@@ -8549,6 +8774,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Vereist",
+      "preferred": "Gewenst",
+      "hint": "“Vereist” sluit kandidaten uit die er niet aan voldoen; “Gewenst” houdt ze erbij en toont het verschil als gesprekspunt.",
+      "secondaryLanguages": "Extra talen (naast de eerste)",
+      "accommodationSelf": "Werknemer heeft eigen huisvesting"
+    },
     "advancedTitle": "Uitgebreide gegevens (optioneel)",
     "advancedHint": "Gestructureerde feiten waarop werknemers filteren en vergelijken. Alles is optioneel — wat u overslaat wordt getoond als “niet vermeld”, nooit verzonnen.",
     "notStated": "Niet vermeld",
@@ -9009,7 +9241,8 @@
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw."
       }
-    }
+    },
+    "teamEnquiriesTitle": "Mijn aanvragen aan ploegen"
   },
   "people": {
     "eyebrow": "Persoonsprofiel",
@@ -9751,6 +9984,108 @@
         "title": "Wanneer kunt u beginnen?",
         "hint": "Geef uw beschikbaarheid aan."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Pilots",
+    "title": "Pilotcohorten",
+    "subtitle": "Maak pilotcohorten aan, beheer deelnemers en leg door de eigenaar waargenomen resultaten vast.",
+    "back": "Beheerdersruimte",
+    "needsMigration": "Het datamodel voor pilotcohorten is nog niet ingeschakeld — de voorbereide migratie (pilots_cohort_v1) wacht op een expliciete beslissing van de eigenaar. Niets op deze pagina wordt gesimuleerd.",
+    "loadError": "Kon pilotgegevens niet lezen: {msg}",
+    "saved": "Opgeslagen.",
+    "saving": "Opslaan…",
+    "errors": {
+      "needs_migration": "Nog niet ingeschakeld — de pilotcohort-migratie is niet toegepast.",
+      "not_authorized": "Uw account is niet gemachtigd voor deze actie.",
+      "invalid": "Controleer de ingevoerde waarden — er ontbreekt iets of een limiet is overschreden.",
+      "not_found": "De pilot of deelnemer is niet gevonden.",
+      "already_participant": "Deze persoon is al een actieve deelnemer van de pilot.",
+      "profile_not_found": "Geen bestaand profiel gevonden voor dat e-mailadres of ID.",
+      "note_too_long": "De notitie is langer dan 500 tekens.",
+      "error": "De actie is mislukt. Probeer het opnieuw."
+    },
+    "status": {
+      "draft": "Concept",
+      "active": "Actief",
+      "closed": "Gesloten"
+    },
+    "kind": {
+      "construction": "Bouw",
+      "staffing_agency": "Uitzendbureau",
+      "subcontractor": "Onderaannemer",
+      "manufacturing": "Productie",
+      "services": "Diensten",
+      "client_customer": "Klant / opdrachtgever",
+      "other": "Overig",
+      "mixed": "Gemengd"
+    },
+    "list": {
+      "title": "Pilots",
+      "empty": "Nog geen pilots. Maak hieronder de eerste aan.",
+      "noDates": "Geen datums ingesteld",
+      "participants": "Deelnemers: {n}",
+      "outcomes": "Resultaten: {n}"
+    },
+    "create": {
+      "title": "Pilot aanmaken",
+      "name": "Pilotnaam",
+      "kind": "Organisatietype",
+      "startsOn": "Startdatum",
+      "endsOn": "Einddatum",
+      "submit": "Pilot aanmaken"
+    },
+    "detail": {
+      "back": "Alle pilots",
+      "statusTitle": "Pilotstatus",
+      "statusLabel": "Status",
+      "setStatus": "Status instellen"
+    },
+    "participants": {
+      "title": "Deelnemers",
+      "empty": "Nog geen deelnemers. Voeg een bestaand profiel toe via het exacte e-mailadres of profiel-ID.",
+      "addTitle": "Deelnemer toevoegen",
+      "add": "Deelnemer toevoegen",
+      "queryLabel": "E-mailadres of profiel-ID",
+      "queryPlaceholder": "naam@bedrijf.nl of profiel-ID",
+      "joinedViaLabel": "Toegetreden via",
+      "remove": "Verwijderen",
+      "left": "Vertrokken {date}",
+      "joinedVia": {
+        "manual": "Handmatig",
+        "invitation": "Uitnodiging"
+      }
+    },
+    "outcomes": {
+      "title": "Resultaten",
+      "honesty": "Door de eigenaar vastgelegd resultaat — genoteerd door een beheerder, niet door het platform geverifieerd. Zet geen contactgegevens in de notitie.",
+      "outcomeLabel": "Resultaat",
+      "outcomePlaceholder": "Kies een resultaat",
+      "participantLabel": "Deelnemer (optioneel)",
+      "wholePilot": "Hele pilot",
+      "noteLabel": "Notitie (optioneel, max. 500 tekens)",
+      "notePlaceholder": "Korte context — geen contactgegevens",
+      "submit": "Resultaat vastleggen",
+      "ledger": "Resultatenlogboek (alleen toevoegen)",
+      "empty": "Nog geen resultaten vastgelegd.",
+      "values": {
+        "contact_made": "Contact gelegd",
+        "enquiry_made": "Aanvraag ontvangen",
+        "booking_accepted": "Boeking geaccepteerd",
+        "hire_reported": "Aanstelling gemeld",
+        "no_outcome": "Geen resultaat"
+      }
+    },
+    "ttv": {
+      "title": "Tijd tot eerste waarde",
+      "help": "Mediaan en 75e percentiel van het eerste registratie- of onboardingevent tot het eerste waarde-event binnen dezelfde pseudonieme sessie. Sessies gelden per browsertabblad — geen unieke bezoekers.",
+      "cohortLimitation": "Meting per cohort is niet beschikbaar: sessies aan deelnemers koppelen zou identificerende gegevens vereisen. Onderstaande cijfers zijn globaal. Cohortmeting vereist de pilotmigratie plus deelnemer-events.",
+      "unavailable": "De eventopslag is niet beschikbaar of leeg.",
+      "empty": "Nog geen sessie in het venster met zowel een start- als een waarde-event.",
+      "median": "Mediaan",
+      "p75": "75e percentiel",
+      "sessionsWithStart": "Sessies met een startevent",
+      "sessionsReachedValue": "Sessies die waarde bereikten"
     }
   }
 }

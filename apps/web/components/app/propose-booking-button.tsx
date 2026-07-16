@@ -56,7 +56,7 @@ export function ProposeBookingButton({
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<
-    "idle" | "sent" | "unavailable" | "not_entitled" | "error"
+    "idle" | "sent" | "unavailable" | "not_entitled" | "rate_limited" | "error"
   >("idle");
 
   function send() {
@@ -72,6 +72,7 @@ export function ProposeBookingButton({
       if (res.kind === "ok") setState("sent");
       else if (res.kind === "needs-migration") setState("unavailable");
       else if (res.kind === "not-entitled") setState("not_entitled");
+      else if (res.kind === "rate-limited") setState("rate_limited");
       else setState("error");
     });
   }
@@ -149,6 +150,11 @@ export function ProposeBookingButton({
         <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
       ) : state === "not_entitled" ? (
         <span className="text-[11px] text-state-amber">{labels.notEntitled}</span>
+      ) : state === "rate_limited" ? (
+        // Bounded request budget reached (Wagon 1) — honest limit note.
+        <span className="text-[11px] text-state-warning" data-testid="propose-booking-limit">
+          {tPropose("rateLimited")}
+        </span>
       ) : state === "error" ? (
         <span className="text-[11px] text-state-danger">{labels.error}</span>
       ) : null}
