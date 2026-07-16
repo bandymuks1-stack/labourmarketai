@@ -5867,7 +5867,19 @@
       "agentOs": "→ Agent OS",
       "languageFeedback": "→ Language reports"
     },
-    "footnote": "Sorted by event time (newest first). Showing the last 200. RLS scopes SELECT to admins."
+    "footnote": "Sorted by event time (newest first). Showing the last 200. RLS scopes SELECT to admins.",
+    "ttv": {
+      "title": "Time to first value",
+      "help": "Median / 75th-percentile time from the first registration or onboarding event to the first value event (company need submitted, demand saved, service request sent, journal entry saved) within the same pseudonymous session. Event counts over the recent window — sessions are per browser tab, not unique visitors; no revenue attribution.",
+      "excludedNote": "{n} non-production (localhost/preview) event(s) excluded.",
+      "unavailable": "No value-timing events yet, or the event store is unavailable.",
+      "empty": "No session in the window has both a start and a value event yet.",
+      "median": "Median",
+      "p75": "75th percentile",
+      "sessionsWithStart": "Sessions with a start event",
+      "sessionsReachedValue": "Sessions that reached value",
+      "firstValueEvent": "First value event (converting sessions)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Report copy",
@@ -9751,6 +9763,108 @@
         "title": "When can you start?",
         "hint": "Mark your availability."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Pilots",
+    "title": "Pilot cohorts",
+    "subtitle": "Create pilot cohorts, manage participants and record owner-observed outcomes.",
+    "back": "Admin control room",
+    "needsMigration": "The pilot cohort data model is not enabled yet — the prepared migration (pilots_cohort_v1) waits for the owner's explicit apply decision. Nothing on this page is simulated.",
+    "loadError": "Could not read pilot data: {msg}",
+    "saved": "Saved.",
+    "saving": "Saving…",
+    "errors": {
+      "needs_migration": "Not enabled yet — the pilot cohort migration has not been applied.",
+      "not_authorized": "Your account is not authorised for this action.",
+      "invalid": "Check the entered values — something is missing or out of bounds.",
+      "not_found": "The pilot or participant was not found.",
+      "already_participant": "This person is already an active participant of the pilot.",
+      "profile_not_found": "No existing profile matches that e-mail or ID.",
+      "note_too_long": "The note exceeds 500 characters.",
+      "error": "The action failed. Try again."
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "kind": {
+      "construction": "Construction",
+      "staffing_agency": "Staffing agency",
+      "subcontractor": "Subcontractor",
+      "manufacturing": "Manufacturing",
+      "services": "Services",
+      "client_customer": "Client / customer",
+      "other": "Other",
+      "mixed": "Mixed"
+    },
+    "list": {
+      "title": "Pilots",
+      "empty": "No pilots yet. Create the first one below.",
+      "noDates": "No dates set",
+      "participants": "Participants: {n}",
+      "outcomes": "Outcomes: {n}"
+    },
+    "create": {
+      "title": "Create pilot",
+      "name": "Pilot name",
+      "kind": "Organisation kind",
+      "startsOn": "Starts on",
+      "endsOn": "Ends on",
+      "submit": "Create pilot"
+    },
+    "detail": {
+      "back": "All pilots",
+      "statusTitle": "Pilot status",
+      "statusLabel": "Status",
+      "setStatus": "Set status"
+    },
+    "participants": {
+      "title": "Participants",
+      "empty": "No participants yet. Add an existing profile by exact e-mail or profile ID.",
+      "addTitle": "Add participant",
+      "add": "Add participant",
+      "queryLabel": "Profile e-mail or ID",
+      "queryPlaceholder": "name@company.com or profile ID",
+      "joinedViaLabel": "Joined via",
+      "remove": "Remove",
+      "left": "Left {date}",
+      "joinedVia": {
+        "manual": "Manual",
+        "invitation": "Invitation"
+      }
+    },
+    "outcomes": {
+      "title": "Outcomes",
+      "honesty": "Owner-recorded outcome — noted by an administrator, not platform-verified. Keep contact data out of the note.",
+      "outcomeLabel": "Outcome",
+      "outcomePlaceholder": "Choose an outcome",
+      "participantLabel": "Participant (optional)",
+      "wholePilot": "Whole pilot",
+      "noteLabel": "Note (optional, max 500 characters)",
+      "notePlaceholder": "Short context — no contact data",
+      "submit": "Record outcome",
+      "ledger": "Outcome ledger (append-only)",
+      "empty": "No outcomes recorded yet.",
+      "values": {
+        "contact_made": "Contact made",
+        "enquiry_made": "Enquiry made",
+        "booking_accepted": "Booking accepted",
+        "hire_reported": "Hire reported",
+        "no_outcome": "No outcome"
+      }
+    },
+    "ttv": {
+      "title": "Time to first value",
+      "help": "Median and 75th-percentile time from the first registration or onboarding event to the first value event within the same pseudonymous session. Sessions are per browser tab — not unique visitors.",
+      "cohortLimitation": "Cohort-scoped timing is not available: linking sessions to participants would require identifying data. The figures below are global. Cohort timing needs the pilots migration plus participant-scoped events.",
+      "unavailable": "The event store is unavailable or empty.",
+      "empty": "No session in the window has both a start and a value event yet.",
+      "median": "Median",
+      "p75": "75th percentile",
+      "sessionsWithStart": "Sessions with a start event",
+      "sessionsReachedValue": "Sessions that reached value"
     }
   }
 }

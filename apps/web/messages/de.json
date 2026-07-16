@@ -5867,7 +5867,19 @@
       "agentOs": "→ Agent OS",
       "languageFeedback": "→ Sprachberichte"
     },
-    "footnote": "Sortiert nach Ereigniszeit (neueste zuerst). Angezeigt werden die letzten 200. RLS beschränkt SELECT auf Admins."
+    "footnote": "Sortiert nach Ereigniszeit (neueste zuerst). Angezeigt werden die letzten 200. RLS beschränkt SELECT auf Admins.",
+    "ttv": {
+      "title": "Zeit bis zum ersten Nutzen",
+      "help": "Median / 75. Perzentil vom ersten Registrierungs- oder Onboarding-Ereignis bis zum ersten Nutzen-Ereignis (Firmenbedarf eingereicht, Bedarf gespeichert, Dienstanfrage gesendet, Journaleintrag gespeichert) innerhalb derselben pseudonymen Sitzung. Ereigniszählungen über das jüngste Fenster — Sitzungen gelten pro Browser-Tab, keine eindeutigen Besucher; keine Umsatzattribution.",
+      "excludedNote": "{n} Nicht-Produktions-Ereignis(se) (localhost/Preview) ausgeschlossen.",
+      "unavailable": "Noch keine Nutzen-Zeit-Ereignisse, oder der Ereignisspeicher ist nicht verfügbar.",
+      "empty": "Noch keine Sitzung im Fenster mit Start- und Nutzen-Ereignis.",
+      "median": "Median",
+      "p75": "75. Perzentil",
+      "sessionsWithStart": "Sitzungen mit Start-Ereignis",
+      "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen",
+      "firstValueEvent": "Erstes Nutzen-Ereignis (konvertierende Sitzungen)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Text melden",
@@ -9751,6 +9763,108 @@
         "title": "Wann können Sie anfangen?",
         "hint": "Markieren Sie Ihre Verfügbarkeit."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Piloten",
+    "title": "Pilot-Kohorten",
+    "subtitle": "Pilot-Kohorten anlegen, Teilnehmende verwalten und vom Inhaber beobachtete Ergebnisse erfassen.",
+    "back": "Admin-Kontrollraum",
+    "needsMigration": "Das Datenmodell für Pilot-Kohorten ist noch nicht aktiviert — die vorbereitete Migration (pilots_cohort_v1) wartet auf die ausdrückliche Freigabe des Inhabers. Nichts auf dieser Seite wird simuliert.",
+    "loadError": "Pilotdaten konnten nicht gelesen werden: {msg}",
+    "saved": "Gespeichert.",
+    "saving": "Speichern…",
+    "errors": {
+      "needs_migration": "Noch nicht aktiviert — die Pilot-Kohorten-Migration wurde nicht angewendet.",
+      "not_authorized": "Ihr Konto ist für diese Aktion nicht berechtigt.",
+      "invalid": "Prüfen Sie die Eingaben — etwas fehlt oder überschreitet die Grenzen.",
+      "not_found": "Pilot oder Teilnehmer wurde nicht gefunden.",
+      "already_participant": "Diese Person nimmt bereits aktiv am Piloten teil.",
+      "profile_not_found": "Kein bestehendes Profil zu dieser E-Mail oder ID gefunden.",
+      "note_too_long": "Die Notiz überschreitet 500 Zeichen.",
+      "error": "Aktion fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "status": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "closed": "Geschlossen"
+    },
+    "kind": {
+      "construction": "Bau",
+      "staffing_agency": "Personalagentur",
+      "subcontractor": "Nachunternehmer",
+      "manufacturing": "Fertigung",
+      "services": "Dienstleistungen",
+      "client_customer": "Kunde / Auftraggeber",
+      "other": "Sonstiges",
+      "mixed": "Gemischt"
+    },
+    "list": {
+      "title": "Piloten",
+      "empty": "Noch keine Piloten. Legen Sie unten den ersten an.",
+      "noDates": "Keine Daten gesetzt",
+      "participants": "Teilnehmende: {n}",
+      "outcomes": "Ergebnisse: {n}"
+    },
+    "create": {
+      "title": "Pilot anlegen",
+      "name": "Pilotname",
+      "kind": "Organisationsart",
+      "startsOn": "Beginn",
+      "endsOn": "Ende",
+      "submit": "Pilot anlegen"
+    },
+    "detail": {
+      "back": "Alle Piloten",
+      "statusTitle": "Pilotstatus",
+      "statusLabel": "Status",
+      "setStatus": "Status setzen"
+    },
+    "participants": {
+      "title": "Teilnehmende",
+      "empty": "Noch keine Teilnehmenden. Fügen Sie ein bestehendes Profil über die exakte E-Mail oder Profil-ID hinzu.",
+      "addTitle": "Teilnehmer hinzufügen",
+      "add": "Teilnehmer hinzufügen",
+      "queryLabel": "Profil-E-Mail oder ID",
+      "queryPlaceholder": "name@firma.de oder Profil-ID",
+      "joinedViaLabel": "Beigetreten über",
+      "remove": "Entfernen",
+      "left": "Ausgetreten {date}",
+      "joinedVia": {
+        "manual": "Manuell",
+        "invitation": "Einladung"
+      }
+    },
+    "outcomes": {
+      "title": "Ergebnisse",
+      "honesty": "Vom Inhaber erfasstes Ergebnis — von einem Administrator notiert, nicht von der Plattform geprüft. Keine Kontaktdaten in die Notiz schreiben.",
+      "outcomeLabel": "Ergebnis",
+      "outcomePlaceholder": "Ergebnis wählen",
+      "participantLabel": "Teilnehmer (optional)",
+      "wholePilot": "Gesamter Pilot",
+      "noteLabel": "Notiz (optional, max. 500 Zeichen)",
+      "notePlaceholder": "Kurzer Kontext — keine Kontaktdaten",
+      "submit": "Ergebnis erfassen",
+      "ledger": "Ergebnisprotokoll (nur anfügen)",
+      "empty": "Noch keine Ergebnisse erfasst.",
+      "values": {
+        "contact_made": "Kontakt hergestellt",
+        "enquiry_made": "Anfrage erhalten",
+        "booking_accepted": "Buchung angenommen",
+        "hire_reported": "Einstellung gemeldet",
+        "no_outcome": "Kein Ergebnis"
+      }
+    },
+    "ttv": {
+      "title": "Zeit bis zum ersten Nutzen",
+      "help": "Median und 75. Perzentil vom ersten Registrierungs- oder Onboarding-Ereignis bis zum ersten Nutzen-Ereignis innerhalb derselben pseudonymen Sitzung. Sitzungen gelten pro Browser-Tab — keine eindeutigen Besucher.",
+      "cohortLimitation": "Kohortenbezogene Messung ist nicht verfügbar: Sitzungen mit Teilnehmenden zu verknüpfen würde identifizierende Daten erfordern. Die Zahlen unten sind global. Kohortenmessung erfordert die Pilot-Migration plus Teilnehmer-Ereignisse.",
+      "unavailable": "Der Ereignisspeicher ist nicht verfügbar oder leer.",
+      "empty": "Noch keine Sitzung im Fenster mit Start- und Nutzen-Ereignis.",
+      "median": "Median",
+      "p75": "75. Perzentil",
+      "sessionsWithStart": "Sitzungen mit Start-Ereignis",
+      "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen"
     }
   }
 }

@@ -79,6 +79,7 @@ export default async function AdminDashboardPage({
   const tPool = await getTranslations("candidatePool");
   const tLaunchReadiness = await getTranslations("adminLaunchReadiness");
   const tPipeline = await getTranslations("crmPipeline");
+  const tPilots = await getTranslations("adminPilots");
   const supabase = await createClient();
 
   // Aggregate counts. Single head queries; admin RLS allows broad SELECT.
@@ -305,6 +306,12 @@ export default async function AdminDashboardPage({
         {
           href: "/dashboard/admin/telemetry",
           label: t("hub.telemetry"),
+          internal: true,
+        },
+        {
+          href: "/dashboard/admin/pilots",
+          label: tPilots("title"),
+          testId: "admin-tools-hub-pilots",
           internal: true,
         },
         {

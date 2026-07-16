@@ -5867,7 +5867,19 @@
       "agentOs": "→ Agentų OS",
       "languageFeedback": "→ Kalbos pranešimai"
     },
-    "footnote": "Rūšiuojama pagal įvykio laiką (naujausi viršuje). Rodomi paskutiniai 200. RLS leidžia matyti tik administratoriams."
+    "footnote": "Rūšiuojama pagal įvykio laiką (naujausi viršuje). Rodomi paskutiniai 200. RLS leidžia matyti tik administratoriams.",
+    "ttv": {
+      "title": "Laikas iki pirmos naudos",
+      "help": "Mediana / 75-oji procentilė nuo pirmo registracijos ar įvadinio žingsnio įvykio iki pirmo naudos įvykio (pateiktas įmonės poreikis, išsaugotas poreikis, išsiųsta paslaugos užklausa, išsaugotas žurnalo įrašas) toje pačioje pseudoniminėje sesijoje. Įvykių skaičiai per paskutinį langą — sesijos skaičiuojamos pagal naršyklės kortelę, tai ne unikalūs lankytojai; pajamų priskyrimo nėra.",
+      "excludedNote": "Neįtraukta ne produkcijos (localhost/peržiūros) įvykių: {n}.",
+      "unavailable": "Naudos laiko įvykių dar nėra arba įvykių saugykla nepasiekiama.",
+      "empty": "Lange dar nėra sesijos, turinčios ir pradžios, ir naudos įvykį.",
+      "median": "Mediana",
+      "p75": "75-oji procentilė",
+      "sessionsWithStart": "Sesijos su pradžios įvykiu",
+      "sessionsReachedValue": "Sesijos, pasiekusios naudą",
+      "firstValueEvent": "Pirmas naudos įvykis (konvertavusios sesijos)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Pranešti apie tekstą",
@@ -9751,6 +9763,108 @@
         "title": "Kada galite pradėti?",
         "hint": "Pažymėkite savo prieinamumą."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Pilotai",
+    "title": "Pilotų kohortos",
+    "subtitle": "Kurkite pilotų kohortas, valdykite dalyvius ir fiksuokite savininko pastebėtus rezultatus.",
+    "back": "Administratoriaus valdymo kambarys",
+    "needsMigration": "Pilotų kohortų duomenų modelis dar neįjungtas — paruošta migracija (pilots_cohort_v1) laukia aiškaus savininko sprendimo ją pritaikyti. Šiame puslapyje niekas nesimuliuojama.",
+    "loadError": "Nepavyko nuskaityti pilotų duomenų: {msg}",
+    "saved": "Išsaugota.",
+    "saving": "Saugoma…",
+    "errors": {
+      "needs_migration": "Dar neįjungta — pilotų kohortų migracija nepritaikyta.",
+      "not_authorized": "Jūsų paskyra neturi teisės atlikti šio veiksmo.",
+      "invalid": "Patikrinkite įvestas reikšmes — kažko trūksta arba viršytos ribos.",
+      "not_found": "Pilotas arba dalyvis nerastas.",
+      "already_participant": "Šis asmuo jau yra aktyvus piloto dalyvis.",
+      "profile_not_found": "Pagal šį el. paštą ar ID esamo profilio nerasta.",
+      "note_too_long": "Pastaba viršija 500 ženklų.",
+      "error": "Veiksmas nepavyko. Bandykite dar kartą."
+    },
+    "status": {
+      "draft": "Ruošiamas",
+      "active": "Aktyvus",
+      "closed": "Uždarytas"
+    },
+    "kind": {
+      "construction": "Statyba",
+      "staffing_agency": "Įdarbinimo agentūra",
+      "subcontractor": "Subrangovas",
+      "manufacturing": "Gamyba",
+      "services": "Paslaugos",
+      "client_customer": "Klientas / užsakovas",
+      "other": "Kita",
+      "mixed": "Mišri"
+    },
+    "list": {
+      "title": "Pilotai",
+      "empty": "Pilotų dar nėra. Sukurkite pirmąjį žemiau.",
+      "noDates": "Datos nenustatytos",
+      "participants": "Dalyvių: {n}",
+      "outcomes": "Rezultatų: {n}"
+    },
+    "create": {
+      "title": "Sukurti pilotą",
+      "name": "Piloto pavadinimas",
+      "kind": "Organizacijos tipas",
+      "startsOn": "Pradžia",
+      "endsOn": "Pabaiga",
+      "submit": "Sukurti pilotą"
+    },
+    "detail": {
+      "back": "Visi pilotai",
+      "statusTitle": "Piloto būsena",
+      "statusLabel": "Būsena",
+      "setStatus": "Nustatyti būseną"
+    },
+    "participants": {
+      "title": "Dalyviai",
+      "empty": "Dalyvių dar nėra. Pridėkite esamą profilį pagal tikslų el. paštą arba profilio ID.",
+      "addTitle": "Pridėti dalyvį",
+      "add": "Pridėti dalyvį",
+      "queryLabel": "Profilio el. paštas arba ID",
+      "queryPlaceholder": "vardas@imone.lt arba profilio ID",
+      "joinedViaLabel": "Prisijungė per",
+      "remove": "Pašalinti",
+      "left": "Paliko {date}",
+      "joinedVia": {
+        "manual": "Rankiniu būdu",
+        "invitation": "Pakvietimą"
+      }
+    },
+    "outcomes": {
+      "title": "Rezultatai",
+      "honesty": "Savininko užfiksuotas rezultatas — jį pažymėjo administratorius, platforma jo netikrino. Pastaboje nenurodykite kontaktinių duomenų.",
+      "outcomeLabel": "Rezultatas",
+      "outcomePlaceholder": "Pasirinkite rezultatą",
+      "participantLabel": "Dalyvis (nebūtina)",
+      "wholePilot": "Visas pilotas",
+      "noteLabel": "Pastaba (nebūtina, iki 500 ženklų)",
+      "notePlaceholder": "Trumpas kontekstas — be kontaktinių duomenų",
+      "submit": "Užfiksuoti rezultatą",
+      "ledger": "Rezultatų žurnalas (tik papildomas)",
+      "empty": "Rezultatų dar neužfiksuota.",
+      "values": {
+        "contact_made": "Užmegztas kontaktas",
+        "enquiry_made": "Gauta užklausa",
+        "booking_accepted": "Priimta rezervacija",
+        "hire_reported": "Praneštas įdarbinimas",
+        "no_outcome": "Rezultato nėra"
+      }
+    },
+    "ttv": {
+      "title": "Laikas iki pirmos naudos",
+      "help": "Mediana ir 75-oji procentilė nuo pirmo registracijos ar įvadinio žingsnio įvykio iki pirmo naudos įvykio toje pačioje pseudoniminėje sesijoje. Sesijos skaičiuojamos pagal naršyklės kortelę — tai ne unikalūs lankytojai.",
+      "cohortLimitation": "Kohortos lygio laiko matavimas negalimas: sesijų susiejimas su dalyviais pareikalautų identifikuojančių duomenų. Žemiau pateikti skaičiai yra bendri. Kohortos matavimui reikia pilotų migracijos ir dalyvių lygmens įvykių.",
+      "unavailable": "Įvykių saugykla nepasiekiama arba tuščia.",
+      "empty": "Lange dar nėra sesijos, turinčios ir pradžios, ir naudos įvykį.",
+      "median": "Mediana",
+      "p75": "75-oji procentilė",
+      "sessionsWithStart": "Sesijos su pradžios įvykiu",
+      "sessionsReachedValue": "Sesijos, pasiekusios naudą"
     }
   }
 }
