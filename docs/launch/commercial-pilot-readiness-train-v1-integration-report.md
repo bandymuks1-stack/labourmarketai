@@ -134,6 +134,24 @@ re-pinned; C: 3 new + calc-version re-pins; D: 1 new + 4 extended).
 - Cohort-scoped time-to-value requires the pilots migration + participant
   events; global TTV shipped with the limitation stated in-UI.
 
+## CI facts (recorded 2026-07-16 after PRs opened)
+
+- Required checks on `main`: `quality` + `migration-safety` only.
+- `migration-safety` initially RED on PRs A and D: the gate requires an
+  explicit `-- @human-gate-approved` marker for intentional RED patterns
+  (SECURITY DEFINER / grants / policies / triggers) plus the
+  `needs-human-gate` label on a draft PR. Markers added to the three affected
+  migrations (A ×2, D ×1), labels added to #774/#775/#777, script re-run
+  GREEN locally in both worktrees. The `DRAFT — DO NOT APPLY` header remains
+  authoritative in every file.
+- `Supabase Preview` is NOT a required check and fails structurally on any PR
+  that adds migration files: the preview-branch integration cannot reconcile
+  this repo's migration history (the production ledger records apply-time
+  version ids that differ from repo filenames — pre-existing, repo-wide).
+  Recently merged migration-bearing work shows `skipped` because migrations
+  were applied via the owner MCP process, never via CI. No train action
+  possible; owner-level infra topic if preview branching is ever wanted.
+
 Terminal state upon Draft PRs opening in the order above:
 **COMMERCIAL_PILOT_READINESS_TRAIN_MERGE_READY** (owner merges; agent does
 not auto-merge per train directive).
