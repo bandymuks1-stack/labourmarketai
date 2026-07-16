@@ -5717,18 +5717,18 @@
   },
   "teamBrigades": {
     "title": "Teams / brigades",
-    "intro": "A brigade is a real work unit inside your company. Create one, add workers you already invited, and see what the group can do based on what its members have declared.",
+    "intro": "A brigade is a real work unit inside your company. Create one, invite linked workers — each person joins only after accepting the invitation — and see what the group can do based on what its members have declared.",
     "honestNote": "Skill counts are member-declared. “Confirmed” means a manager confirmed that skill through journal review. This is not a team certification and not a rating.",
     "noTeams": "No brigades yet. Create the first one below — we never show made-up teams.",
     "memberCount": "Members: {count}",
-    "noMembers": "No members yet. Add workers from your linked roster below.",
+    "noMembers": "No members yet. Invite workers from your linked roster below — each joins after accepting the invitation.",
     "capabilityHeading": "What this brigade declares",
     "capabilityEmpty": "No declared skills among members yet — nothing is invented.",
     "declaredShort": "declared by {count}",
     "confirmedShort": "confirmed for {count}",
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
-    "addLabel": "Add a linked worker",
-    "addButton": "Add to brigade",
+    "addLabel": "Invite a linked worker",
+    "addButton": "Send invitation",
     "createLabel": "New brigade name",
     "createPlaceholder": "e.g. Facade brigade A",
     "createButton": "Create brigade",
@@ -5741,9 +5741,138 @@
       "needsMigration": "The brigade model is not enabled in this environment yet.",
       "error": "Could not create the brigade. Nothing was saved."
     },
-    "memberOutcome": {
-      "added": "Worker added to the brigade.",
-      "error": "Could not add the worker. Nothing was changed."
+    "consentNote": "Membership starts only after the worker accepts the invitation themselves — we never add anyone silently.",
+    "inviteNotEnabled": "Team invitations are not enabled in this environment yet, so members cannot be invited from here.",
+    "invitePendingOption": "{name} (invitation sent)",
+    "provenance": {
+      "invited": "joined by own acceptance",
+      "direct": "added earlier, before invitations"
+    },
+    "inviteOutcome": {
+      "sent": "Invitation emailed. Membership starts when the worker accepts it.",
+      "created": "Invitation created. The worker will see it under My network and decides there.",
+      "deliveryFailed": "Invitation saved, but the email could not be delivered. The worker can still see it under My network.",
+      "alreadyInvited": "This worker already has an open invitation to this brigade.",
+      "rateLimited": "Invitation limit reached for now. Try again later.",
+      "notAuthorized": "Only the brigade owner can send invitations.",
+      "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
+      "needsMigration": "Invitations are not enabled in this environment yet.",
+      "error": "Could not send the invitation. Nothing was changed."
+    },
+    "details": {
+      "heading": "Edit team details",
+      "availabilityLabel": "Is the team available",
+      "availableFromLabel": "Available from",
+      "maxTripDaysLabel": "Longest trip (days, optional)",
+      "accommodationLabel": "The team needs accommodation",
+      "transportLabel": "The team has its own transport",
+      "noteLabel": "Note (visible to your managers only)",
+      "save": "Save details",
+      "saving": "Saving…",
+      "notEnabled": "Team details are prepared but not enabled in this environment yet.",
+      "status": {
+        "availableNow": "Available now",
+        "availableFrom": "Available from a date",
+        "notAvailable": "Not available"
+      },
+      "outcome": {
+        "saved": "Team details saved.",
+        "notAllowed": "Only the brigade owner or a manager can edit these details.",
+        "dateRequired": "Pick the date the team becomes available.",
+        "invalidTripDays": "Trip length must be between 1 and 365 days.",
+        "noteTooLong": "The note must be 500 characters or fewer.",
+        "error": "Could not save the details. Nothing was changed.",
+        "invalidSize": "Crew size must be between 1 and 200, and the largest not below the smallest.",
+        "invalidCountries": "List countries as short country letters, e.g. LT, DE — up to 30."
+      },
+      "sizeMinLabel": "Smallest crew for a job (optional)",
+      "sizeMaxLabel": "Largest crew for a job (optional)",
+      "countriesLabel": "Countries the team can work in",
+      "countriesPlaceholder": "e.g. LT, DE, NO"
+    },
+    "availability": {
+      "heading": "Team availability",
+      "notSet": "Not filled in yet — open “Edit team details” below.",
+      "from": "Available from {date}",
+      "accommodationNeeded": "Needs accommodation",
+      "ownTransport": "Own transport",
+      "maxTripDays": "Trips up to {count} days",
+      "size": "People: {size}",
+      "countries": "Countries: {list}"
+    },
+    "enquiries": {
+      "heading": "Enquiries to this team ({count} open)",
+      "empty": "No enquiries yet. When an employer asks about this team, it appears here.",
+      "notEnabled": "Team enquiries are prepared but not enabled in this environment yet.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "unknownProposer": "Unknown sender",
+      "dates": "Period: {from} – {to}",
+      "status": {
+        "created": "Awaiting answer",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "withdrawn": "Withdrawn",
+        "expired": "Expired",
+        "other": "Other"
+      },
+      "respondOutcome": {
+        "accepted": "Enquiry accepted. The sender sees your answer.",
+        "declined": "Enquiry declined. The sender sees your answer.",
+        "notAllowed": "Only the team owner or a manager can answer.",
+        "notOpen": "This enquiry is no longer open.",
+        "error": "Could not save the answer. Nothing was changed."
+      }
+    }
+  },
+  "teamEnquiries": {
+    "enquireButton": "Ask this team about work",
+    "formIntro": "Your enquiry goes to the team leader inside the platform. Please do not include email addresses or phone numbers — such a message is refused.",
+    "messageLabel": "Message to the team",
+    "messagePlaceholder": "e.g. We are looking for a facade team for a site in Vilnius, roughly 6 weeks.",
+    "startLabel": "Needed from (optional)",
+    "endLabel": "Needed until (optional)",
+    "submit": "Send enquiry",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "notEnabled": "Team enquiries are prepared but not enabled in this environment yet.",
+    "outcome": {
+      "created": "Enquiry sent. You will see the team's answer under My network.",
+      "duplicateOpen": "You already have an open enquiry to this team.",
+      "ownTeam": "This is your own team — an enquiry to yourself is not possible.",
+      "contactDetails": "Please remove email addresses and phone numbers — enquiries travel inside the platform only.",
+      "messageRequired": "Write a short message first.",
+      "messageTooLong": "The message must be 500 characters or fewer.",
+      "invalidDates": "The end date must not be earlier than the start date.",
+      "rateLimited": "Enquiry limit reached for now. Try again later.",
+      "error": "Could not send the enquiry. Nothing was saved."
+    },
+    "status": {
+      "created": "Awaiting answer",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn",
+      "expired": "Expired",
+      "other": "Other"
+    },
+    "dates": "Period: {from} – {to}",
+    "withdraw": "Withdraw enquiry",
+    "withdrawOutcome": {
+      "withdrawn": "Enquiry withdrawn.",
+      "notOpen": "This enquiry is no longer open.",
+      "error": "Could not withdraw the enquiry. Nothing was changed."
+    },
+    "myList": {
+      "empty": "No enquiries to teams yet.",
+      "unknownTeam": "Team"
+    },
+    "availability": {
+      "availableNow": "Team says: available now",
+      "from": "Team says: available from {date}",
+      "notAvailable": "Team says: not available",
+      "accommodationNeeded": "Needs accommodation",
+      "ownTransport": "Own transport",
+      "maxTripDays": "Trips up to {count} days"
     }
   },
   "agentOs": {
@@ -9100,7 +9229,8 @@
         "not_found": "Invitation not found.",
         "error": "Something went wrong. Please try again."
       }
-    }
+    },
+    "teamEnquiriesTitle": "My enquiries to teams"
   },
   "people": {
     "eyebrow": "Person profile",

@@ -285,6 +285,12 @@ describe("NO new DB migration in this PR", () => {
     // (20260716120000_contact_disclosure_requests_v1 +
     // 20260716121000_request_rate_limits_v3). Both DRAFT / needs-human-gate,
     // NOT applied; paired rollbacks.
-    expect(count).toBeLessThanOrEqual(142);
+    // Bumped 142 -> 144 for the Trust Connect Teams v1 drafts
+    // (20260716130000_team_profile_details_v1 — 1:1 team-scoped
+    // availability/deployable-size/destinations details, RPC-only writes;
+    // 20260716131000_team_enquiries_v1 — employer→team enquiry state
+    // machine on the shared contact/consent contract, append-only events).
+    // Both DRAFT / needs-human-gate, NOT applied; paired rollbacks.
+    expect(count).toBeLessThanOrEqual(144);
   });
 });
