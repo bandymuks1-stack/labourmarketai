@@ -2284,19 +2284,31 @@
         "needsMigration": "Fiksavimas laikinai nepasiekiamas, kol ruošiami duomenys.",
         "error": "Nepavyko užfiksuoti sprendimo."
       },
-      "suggestions": {
-        "title": "Taisyklėmis paremtas sąrašas",
-        "humanRule": "Rikiuota pagal realius įrodymus (atitikę filtrai, patvirtinti įgūdžiai, patvirtinimai) — jokio skaičiuojamo balo; sprendžia žmogus.",
+      "engine": {
+        "title": "Kandidatų atitiktis (pagal taisykles)",
+        "humanRule": "Rikiuojama pagal tas pačias aiškias taisykles kaip įmonės paieškoje — rodomos priežastys ir spragos, jokio apskaičiuoto asmens balo; sprendžia žmogus.",
         "start": "Pradėti pokalbį",
-        "reasons": {
-          "country_match": "Šalyje",
-          "preferred_country_match": "Nori dirbti šalyje",
-          "available_now": "Laisvas",
-          "profession_token_match": "Profesija atitinka užklausos tekstą",
-          "verified_skills": "Patvirtinti įgūdžiai",
-          "manager_confirmations": "Vadovo patvirtinimai",
-          "journal_evidence": "Žurnalo įrodymai"
+        "authorMarked": "užsakovo nustatyta",
+        "status": {
+          "strong": "Stipri atitiktis",
+          "possible": "Galima atitiktis",
+          "weak": "Silpna atitiktis",
+          "insufficient_data": "Trūksta duomenų"
         }
+      },
+      "missing": {
+        "worker": "Darbuotojas nenurodė: {criterion}",
+        "demand": "Užklausoje nenurodyta: {criterion}"
+      },
+      "team": {
+        "title": "Komandos atitiktis (tik peržiūra)",
+        "notReadable": "Komandų narių duomenys šioje sesijoje neprieinami — komandos atitikties apskaičiuoti negalima.",
+        "empty": "Komandų kol kas nėra.",
+        "coverage": "{covered} iš {total} reikalingų įgūdžių padengia bent vienas tinkamas narys ({eligible} iš {members} narių tinkami)",
+        "blockers": "Komanda negali įvykdyti:",
+        "memberCovers": "padengia {count} reikalingų įgūdžių",
+        "noMatchableMembers": "Nė vienas komandos narys neturi susieto darbuotojo profilio.",
+        "unmatchableMembers": "{count} nariai be susieto darbuotojo profilio"
       },
       "filters": {
         "all": "Visos šalys",
@@ -7378,6 +7390,7 @@
         "demand": "Įmonė nenurodė: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimali patirtis",
         "skills_coverage": "Reikalingi įgūdžiai",
         "evidence_tiers": "Įgūdžių įrodymai",
         "profession": "Profesija",
@@ -8761,6 +8774,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Būtina",
+      "preferred": "Pageidautina",
+      "hint": "„Būtina“ – neatitinkantys kandidatai atmetami; „Pageidautina“ – jie lieka, o skirtumas rodomas kaip aptarimo klausimas.",
+      "secondaryLanguages": "Papildomos kalbos (be pirmosios)",
+      "accommodationSelf": "Darbuotojas turi savo apgyvendinimą"
+    },
     "advancedTitle": "Išsamūs duomenys (nebūtina)",
     "advancedHint": "Struktūruoti faktai, pagal kuriuos darbuotojai filtruoja ir lygina. Viskas neprivaloma — ką praleisite, bus rodoma kaip „nenurodyta“, niekada neišgalvojama.",
     "notStated": "Nenurodyta",

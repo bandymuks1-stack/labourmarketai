@@ -34,7 +34,8 @@ import {
  *   5. one_per_team_sufficient demotes a failed language to negotiable ONLY
  *      for team-target demands (target_supply team | multiple_workers);
  *   6. determinism — same inputs twice → deep-equal output;
- *   7. calcVersion is "2.1".
+ *   7. calcVersion is "2.2" (Wagon 4 author tiers; ≡ "2.1" without a
+ *      requirement_priorities map).
  */
 
 const v2 = (input: Record<string, unknown>): StructuredDemandV2 => {
@@ -622,12 +623,12 @@ describe("cross-dimension invariants", () => {
     const a = matchWorkerToNeed(need, subject);
     const b = matchWorkerToNeed(need, subject);
     expect(a).toEqual(b);
-    expect(a.calcVersion).toBe("2.1");
+    expect(a.calcVersion).toBe("2.2");
   });
 
-  it("calcVersion '2.1' is stamped on results with and without v2 dimensions", () => {
-    expect(MATCH_CALC_VERSION).toBe("2.1");
-    expect(matchWorkerToNeed(baseNeed, strongSubject).calcVersion).toBe("2.1");
-    expect(matchWorkerToNeed({}, strongSubject).calcVersion).toBe("2.1");
+  it("calcVersion '2.2' is stamped on results with and without v2 dimensions", () => {
+    expect(MATCH_CALC_VERSION).toBe("2.2");
+    expect(matchWorkerToNeed(baseNeed, strongSubject).calcVersion).toBe("2.2");
+    expect(matchWorkerToNeed({}, strongSubject).calcVersion).toBe("2.2");
   });
 });

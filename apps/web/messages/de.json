@@ -2284,19 +2284,31 @@
         "needsMigration": "Die Erfassung ist vorübergehend nicht verfügbar, während die Daten vorbereitet werden.",
         "error": "Die Entscheidung konnte nicht erfasst werden."
       },
-      "suggestions": {
-        "title": "Regelbasierte Shortlist",
-        "humanRule": "Geordnet nach echten Belegen (passende Filter, bestätigte Fähigkeiten, Bestätigungen durch Vorgesetzte) — kein berechneter Score; der Mensch entscheidet.",
-        "start": "Gespräch starten",
-        "reasons": {
-          "country_match": "Im Land",
-          "preferred_country_match": "Bevorzugt das Land",
-          "available_now": "Verfügbar",
-          "profession_token_match": "Beruf passt zum Anfragetext",
-          "verified_skills": "Bestätigte Fähigkeiten",
-          "manager_confirmations": "Bestätigungen durch Vorgesetzte",
-          "journal_evidence": "Journalbelege"
+      "engine": {
+        "title": "Kandidatenpassung (regelbasiert)",
+        "humanRule": "Geordnet nach denselben deterministischen Regeln wie das Firmen-Scouting — Gründe und Lücken werden gezeigt, kein berechneter Personenwert; der Mensch entscheidet.",
+        "start": "Gespräch beginnen",
+        "authorMarked": "vom Auftraggeber festgelegt",
+        "status": {
+          "strong": "Starke Passung",
+          "possible": "Mögliche Passung",
+          "weak": "Schwache Passung",
+          "insufficient_data": "Zu wenig Daten"
         }
+      },
+      "missing": {
+        "worker": "Die Arbeitskraft hat nicht angegeben: {criterion}",
+        "demand": "Die Anfrage gibt nicht an: {criterion}"
+      },
+      "team": {
+        "title": "Team-Passung (nur Ansicht)",
+        "notReadable": "Teammitglieder sind in dieser Sitzung nicht lesbar — die Team-Passung kann nicht berechnet werden.",
+        "empty": "Es gibt noch keine Teams.",
+        "coverage": "{covered} von {total} benötigten Fähigkeiten durch mindestens ein geeignetes Mitglied abgedeckt ({eligible} von {members} Mitgliedern geeignet)",
+        "blockers": "Das Team kann nicht erfüllen:",
+        "memberCovers": "deckt {count} benötigte Fähigkeiten ab",
+        "noMatchableMembers": "Kein Teammitglied hat ein zuordenbares Arbeitskraft-Profil.",
+        "unmatchableMembers": "{count} Mitglied(er) ohne zuordenbares Arbeitskraft-Profil"
       },
       "filters": {
         "all": "Alle Länder",
@@ -7378,6 +7390,7 @@
         "demand": "Das Unternehmen hat nicht angegeben: {criterion}"
       },
       "criterion": {
+        "min_experience": "Mindesterfahrung",
         "skills_coverage": "Erforderliche Fähigkeiten",
         "evidence_tiers": "Nachweis der Fähigkeiten",
         "profession": "Beruf",
@@ -8761,6 +8774,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Erforderlich",
+      "preferred": "Bevorzugt",
+      "hint": "„Erforderlich“ schließt Kandidaten aus, die es nicht erfüllen; „Bevorzugt“ behält sie und zeigt den Unterschied als Gesprächspunkt.",
+      "secondaryLanguages": "Weitere Sprachen (außer der ersten)",
+      "accommodationSelf": "Arbeitskraft hat eigene Unterkunft"
+    },
     "advancedTitle": "Erweiterte Angaben (optional)",
     "advancedHint": "Strukturierte Fakten, nach denen Arbeitskräfte filtern und vergleichen. Alles ist optional — Ausgelassenes wird als „nicht angegeben“ angezeigt, nie erfunden.",
     "notStated": "Nicht angegeben",

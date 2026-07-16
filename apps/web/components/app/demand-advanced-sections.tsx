@@ -45,6 +45,7 @@ import {
   TARGET_SUPPLIES,
   TRANSPORT_LEVELS,
 } from "@/lib/demand/structured-demand-v2";
+import type { RequirementPriorityKey, RequirementTier } from "@/lib/demand/structured-demand-v2";
 import type {
   AdvancedDemandFormState,
   DeductionRow,
@@ -275,6 +276,58 @@ export function DemandAdvancedSections({
   const toggleIn = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
+  // ── Requirement tier picker (Wagon 4) — a compact two-state chip pair for
+  //    a STATED requirement: "Būtina" (mandatory, engine blocks on a miss) /
+  //    "Pageidautina" (preferred, a miss stays a discussion point). Clicking
+  //    the active chip clears it back to the engine default — nothing is
+  //    ever silently pre-picked. ───────────────────────────────────────────
+  function setPriority(key: RequirementPriorityKey, value: "" | RequirementTier) {
+    onChange({
+      requirementPriorities: { ...state.requirementPriorities, [key]: value },
+    });
+  }
+
+  function TierPicker({
+    label,
+    priorityKey,
+  }: {
+    label: string;
+    priorityKey: RequirementPriorityKey;
+  }) {
+    const value = state.requirementPriorities[priorityKey];
+    return (
+      <div
+        className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-2.5 py-1.5"
+        data-testid={`sdv2-tier-${priorityKey}`}
+        title={t("requirementTier.hint")}
+      >
+        <span className="text-xs text-text-secondary">{label}</span>
+        {(["mandatory", "preferred"] as const).map((tier) => {
+          const active = value === tier;
+          return (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => setPriority(priorityKey, active ? "" : tier)}
+              aria-pressed={active}
+              data-tier={tier}
+              className={cn(
+                "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
+                active
+                  ? tier === "mandatory"
+                    ? "border-brand-orange bg-brand-orange text-ink-900"
+                    : "border-brand-blue bg-brand-blue/15 text-brand-blue"
+                  : "border-ink-500 text-text-secondary hover:border-text-muted",
+              )}
+            >
+              {t(`requirementTier.${tier}`)}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   const langLabel = (code: string) => LANGUAGE_NATIVE_NAMES[code] ?? code.toUpperCase();
 
   // ── Deduction rows ─────────────────────────────────────────────────────────
@@ -383,6 +436,12 @@ export function DemandAdvancedSections({
           render={(v) => t(`shift.${v}`)}
           testId="sdv2-shifts"
         />
+        {state.shifts.includes("night") && (
+          <TierPicker label={t("shift.night")} priorityKey="night_shifts" />
+        )}
+        {state.shifts.includes("weekend") && (
+          <TierPicker label={t("shift.weekend")} priorityKey="weekend_shifts" />
+        )}
         <CheckRow
           label={t("overtimeExpectedLabel")}
           checked={state.overtimeExpected}
@@ -526,6 +585,12 @@ export function DemandAdvancedSections({
           options={enumOptions("accommodationState", ACCOMMODATION_STATES)}
           testId="sdv2-accommodation-state"
         />
+        {state.accommodationState === "not_offered" && (
+          <TierPicker
+            label={t("requirementTier.accommodationSelf")}
+            priorityKey="accommodation"
+          />
+        )}
         {state.accommodationState === "offered" && (
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -640,6 +705,9 @@ export function DemandAdvancedSections({
             onChecked={(v) => onChange({ returnTravel: v })}
           />
         </div>
+        {state.ownVehicleRequired && (
+          <TierPicker label={t("ownVehicleLabel")} priorityKey="own_vehicle" />
+        )}
         <Chips
           label={t("licenceCategoriesLabel")}
           values={LICENCE_CATEGORIES}
@@ -650,6 +718,12 @@ export function DemandAdvancedSections({
           render={(v) => v}
           testId="sdv2-licence-categories"
         />
+        {state.licenceCategories.length > 0 && (
+          <TierPicker
+            label={t("licenceCategoriesLabel")}
+            priorityKey="licence_categories"
+          />
+        )}
       </Section>
 
       {/* ── Candidate requirements ─────────────────────────────────────────── */}
@@ -663,6 +737,12 @@ export function DemandAdvancedSections({
             testId="sdv2-min-experience"
           />
         </div>
+        {state.minExperienceYears.trim().length > 0 && (
+          <TierPicker
+            label={t("minExperienceYearsLabel")}
+            priorityKey="min_experience"
+          />
+        )}
 
         {/* Languages — closed lang + CEFR level rows. */}
         <div className="flex flex-col gap-2">
@@ -721,6 +801,12 @@ export function DemandAdvancedSections({
           >
             + {t("addLanguageLabel")}
           </Button>
+          {state.languages.length >= 2 && (
+            <TierPicker
+              label={t("requirementTier.secondaryLanguages")}
+              priorityKey="secondary_languages"
+            />
+          )}
         </div>
 
         {/* Certificates — bounded owner-side text; never worker-exposed as
@@ -801,6 +887,12 @@ export function DemandAdvancedSections({
             onChecked={(v) => onChange({ leadership: v })}
           />
         </div>
+        {state.ownTools && (
+          <TierPicker label={t("ownToolsLabel")} priorityKey="own_tools" />
+        )}
+        {state.ownVehicle && !state.ownVehicleRequired && (
+          <TierPicker label={t("ownVehicleLabel")} priorityKey="own_vehicle" />
+        )}
       </Section>
 
       {/* ── Application process ────────────────────────────────────────────── */}

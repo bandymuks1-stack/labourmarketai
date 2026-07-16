@@ -3,13 +3,9 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { parseStructuredNeed } from "@/lib/market/fit";
-import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
-import { deriveNeedSkills, type NeedSkillSource } from "@/lib/market/need-skills";
-import {
-  matchWorkerToNeed,
-  compareMatches,
-  type MatchNeed,
-} from "@/lib/market/match-v1";
+import type { NeedSkillSource } from "@/lib/market/need-skills";
+import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
+import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
 import {
   toScoutSafeCandidate,
@@ -70,53 +66,9 @@ export interface CompanyDemand {
   readonly createdAt: string;
 }
 
-/** Canonical demand → MatchNeed (PR4). The requirement set comes from
- *  deriveNeedSkills (human slugs > bridged ESCO > offline text recognition >
- *  profession expansion) — one contract, no second matching input path. */
-function buildNeed(
-  row: {
-    title: string | null;
-    need_summary: string | null;
-    role_or_work_type: string | null;
-    notes: string | null;
-    country: string | null;
-    location: string | null;
-    language_requirement: string | null;
-    payload: unknown;
-  },
-  escoUriToSlug: ReadonlyMap<string, string>,
-): { need: MatchNeed; source: NeedSkillSource | null } {
-  const derived = deriveNeedSkills({
-    title: row.title,
-    needSummary: row.need_summary,
-    roleOrWorkType: row.role_or_work_type,
-    notes: row.notes,
-    payload: row.payload,
-    escoUriToSlug,
-  });
-  const languages = (row.language_requirement ?? "")
-    .split(/[,;/]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-  return {
-    need: {
-      skillIds: derived.skillSlugs,
-      // Unbridged human-picked ESCO URIs stay in the need so a legacy
-      // URI-keyed subject skill can still match them (never dropped).
-      escoSkillUris: derived.escoUnmappedUris,
-      needSource: derived.source,
-      professionSlug: derived.professionSlug,
-      country: row.country,
-      city: row.location,
-      languages: languages.length > 0 ? languages : undefined,
-      // Contract v2 (PR 4): the demand's typed structured_v2 cluster feeds the
-      // compensation / start-date / engagement-form / licence criteria. Old
-      // records without it stay on the exact pre-v2 checks (honest null).
-      structuredV2: readStructuredDemandV2(row.payload),
-    },
-    source: derived.source,
-  };
-}
+// Canonical demand → MatchNeed derivation now lives in
+// lib/market/need-from-request.ts (Wagon 4) so scouting AND the admin
+// workbench share the ONE need-assembly path.
 
 /** The company's own demands (most recent first). */
 export async function listCompanyDemands(): Promise<CompanyDemand[]> {
@@ -237,7 +189,7 @@ export async function runScouting(
     // table absent in this environment → free-text fallback below
   }
 
-  const { need, source } = buildNeed(
+  const { need, source } = buildNeedFromRequestRow(
     structuredCity ? { ...req, location: structuredCity } : req,
     escoUriToSlug,
   );

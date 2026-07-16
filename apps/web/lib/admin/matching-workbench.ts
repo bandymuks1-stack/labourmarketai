@@ -9,6 +9,15 @@ import {
   type AgencyOfferMark,
   type StructuredNeed,
 } from "@/lib/market/fit";
+import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
+import { buildTeamMatchInput } from "@/lib/company/team-match-input";
+import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import type { MatchNeed, MatchSubject } from "@/lib/market/match-v1";
+import type { NeedSkillSource } from "@/lib/market/need-skills";
+import {
+  emptyTeamMatchInput,
+  type TeamMatchInputV1,
+} from "@/lib/market/team-match-contract";
 
 /**
  * Phase 3.2 Human-Run Matching Workbench — data layer.
@@ -94,6 +103,12 @@ export interface DemandRow {
   readonly structuredNeed: StructuredNeed | null;
   /** S5 "galim pasiūlyti" agency proposal marks (payload.agency_offers). */
   readonly agencyOffers: readonly AgencyOfferMark[];
+  /** Wagon 4: the canonical MatchNeed derived by the SAME path scouting uses
+   *  (buildNeedFromRequestRow). Null when nothing is derivable — the page
+   *  then keeps its honest unstructured state, nothing invented. */
+  readonly matchNeed: MatchNeed | null;
+  /** How the requirement set was derived (human/bridged/recognized/expanded). */
+  readonly needSource: NeedSkillSource | null;
 }
 
 export interface SupplyWorkerRow {
@@ -119,6 +134,10 @@ export interface SupplyWorkerRow {
    *  (verified flag = manager-confirmed) + approved candidate_skills
    *  mappings (always declared, never verified). */
   readonly escoSkills: ReadonlyArray<{ uri: string; verified: boolean }>;
+  /** Wagon 4: the canonical match-v1 subject assembled by the SAME read
+   *  layer scouting uses (buildSupplyCandidates). Null when the worker was
+   *  not in the assembled supply window — honest, never fabricated. */
+  readonly subject: MatchSubject | null;
 }
 
 export type WorkbenchListResult =
@@ -193,8 +212,37 @@ export async function listWorkbench(
     return { kind: "error", message: error.message };
   }
 
+  // Curated esco_uri → slug bridge — the SAME derivation input scouting
+  // uses, so the workbench engine results cannot drift from scouting's.
+  const escoUriToSlug = new Map<string, string>();
+  try {
+    const { data: bridge } = await asAny(supabase)
+      .from("skills")
+      .select("slug, esco_uri")
+      .not("esco_uri", "is", null);
+    for (const b of (bridge ?? []) as { slug: string | null; esco_uri: string | null }[]) {
+      if (b.slug && b.esco_uri) escoUriToSlug.set(b.esco_uri, b.slug);
+    }
+  } catch {
+    // bridge unavailable → slugs-only (still fully functional)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const demand: DemandRow[] = ((requests ?? []) as any[]).map((r) => ({
+  const demand: DemandRow[] = ((requests ?? []) as any[]).map((r) => {
+    const derived = buildNeedFromRequestRow(
+      {
+        title: (r.title as string | null) ?? null,
+        need_summary: (r.need_summary as string | null) ?? null,
+        role_or_work_type: (r.role_or_work_type as string | null) ?? null,
+        notes: (r.notes as string | null) ?? null,
+        country: (r.country as string | null) ?? null,
+        location: (r.location as string | null) ?? null,
+        language_requirement: (r.language_requirement as string | null) ?? null,
+        payload: r.payload,
+      },
+      escoUriToSlug,
+    );
+    return {
     id: r.id as string,
     profileId: (r.profile_id as string | null) ?? null,
     title: (r.title as string) ?? "—",
@@ -215,7 +263,10 @@ export async function listWorkbench(
     createdAt: r.created_at as string,
     structuredNeed: parseStructuredNeed(r.payload),
     agencyOffers: parseAgencyOffers(r.payload),
-  }));
+    matchNeed: derived.source !== null ? derived.need : null,
+    needSource: derived.source,
+    };
+  });
 
   // ── Supply: workers + honest signal counts (recency order, NO ranking) ──
   const { data: workers, error: wErr } = await asAny(supabase)
@@ -347,6 +398,19 @@ export async function listWorkbench(
     }
   }
 
+  // Wagon 4: canonical match-v1 subjects from the ONE supply read layer
+  // (lib/market/match-subject.ts — the same assembler scouting uses), so the
+  // workbench engine results carry identical explanation codes. A worker
+  // outside the assembled window keeps subject=null (honest, no engine row).
+  const subjectByWorker = new Map<string, MatchSubject>();
+  try {
+    for (const c of await buildSupplyCandidates(supabase)) {
+      subjectByWorker.set(c.workerId, c.subject);
+    }
+  } catch {
+    // supply assembler unavailable → engine section degrades honestly
+  }
+
   const supply: SupplyWorkerRow[] = workerRows.map((w) => ({
     id: w.id as string,
     profileId: (w.profile_id as string | null) ?? null,
@@ -365,6 +429,7 @@ export async function listWorkbench(
     escoSkills: [...(escoByWorker.get(w.id as string) ?? new Map()).entries()]
       .map(([uri, verified]) => ({ uri, verified: Boolean(verified) }))
       .sort((a, b) => a.uri.localeCompare(b.uri)),
+    subject: subjectByWorker.get(w.id as string) ?? null,
   }));
 
   // Viewer-locale labels for every structured-need URI (EN fallback) so the
@@ -492,4 +557,114 @@ export async function recordHumanMatch(input: {
   // caller is not the owner/admin for this request.
   if (!updated || updated.length === 0) return { kind: "not-admin" };
   return { kind: "ok" };
+}
+
+// ── Wagon 4: team read for team-target demands ──────────────────────────────
+//
+// CANONICAL READ MODEL (integration control addendum 2026-07-16): the team
+// side of each row is filled by Wagon 2's `buildTeamMatchInput`
+// (lib/company/team-match-input.ts) — the ONE canonical producer of the
+// FROZEN TeamMatchInputV1 contract (lib/market/team-match-contract.ts).
+// Only when that read model returns null (org unreadable / not a team) does
+// the row fall back to the honest all-"not stated" contract value with the
+// locally-derived member count. The matching layer itself NEVER reads these
+// tables; it consumes the contract (plus member subjects from the canonical
+// supply read layer, which the superadmin workbench may legitimately hold).
+
+export interface TeamForMatching {
+  readonly name: string;
+  /** The frozen Wagon-2 contract value this adapter could honestly fill. */
+  readonly input: TeamMatchInputV1;
+  /** Member workers.id list (engagement_contexts 'employee' → workers by
+   *  profile_id). Members without a worker row are counted but unmatchable. */
+  readonly memberWorkerIds: readonly string[];
+}
+
+export type TeamMatchingRead =
+  | { kind: "ok"; teams: readonly TeamForMatching[] }
+  /** The admin session cannot read team membership server-side (RLS) — the
+   *  page shows the honest "team members not readable" state. */
+  | { kind: "unreadable" };
+
+/**
+ * Read team/brigade orgs + their members for the matching workbench —
+ * READ-ONLY, over the EXISTING rails (organizations organization_type='team',
+ * engagement_contexts 'employee' — the same paths lib/company/team-brigades.ts
+ * uses, without the owner filter; the caller's RLS is the authority). Any
+ * error → "unreadable" (never a fabricated roster).
+ */
+export async function listTeamsForMatching(): Promise<TeamMatchingRead> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "unreadable" };
+
+  const { data: orgRows, error: orgError } = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, created_at")
+    .eq("organization_type", "team")
+    .order("created_at", { ascending: true })
+    .limit(50);
+  if (orgError) return { kind: "unreadable" };
+  const teams = (orgRows ?? []) as {
+    id: string;
+    display_name: string | null;
+    legal_name: string | null;
+  }[];
+  if (teams.length === 0) return { kind: "ok", teams: [] };
+
+  const { data: ecRows, error: ecError } = await asAny(supabase)
+    .from("engagement_contexts")
+    .select("organization_id, profile_id")
+    .in("organization_id", teams.map((t) => t.id))
+    .eq("relationship_slug", "employee")
+    .eq("status", "active");
+  if (ecError) return { kind: "unreadable" };
+  const memberProfilesByTeam = new Map<string, string[]>();
+  const allProfileIds = new Set<string>();
+  for (const r of (ecRows ?? []) as {
+    organization_id: string | null;
+    profile_id: string | null;
+  }[]) {
+    if (!r.organization_id || !r.profile_id) continue;
+    const list = memberProfilesByTeam.get(r.organization_id) ?? [];
+    list.push(r.profile_id);
+    memberProfilesByTeam.set(r.organization_id, list);
+    allProfileIds.add(r.profile_id);
+  }
+
+  const workerByProfile = new Map<string, string>();
+  if (allProfileIds.size > 0) {
+    const { data: workerRows, error: wError } = await asAny(supabase)
+      .from("workers")
+      .select("id, profile_id")
+      .in("profile_id", [...allProfileIds]);
+    if (wError) return { kind: "unreadable" };
+    for (const w of (workerRows ?? []) as {
+      id: string;
+      profile_id: string | null;
+    }[]) {
+      if (w.profile_id) workerByProfile.set(w.profile_id, w.id);
+    }
+  }
+
+  const mapped = await Promise.all(
+    teams.map(async (t) => {
+      const profiles = memberProfilesByTeam.get(t.id) ?? [];
+      // Canonical Wagon-2 read model; null → honest all-"not stated" fallback
+      // (never fabricated aggregates).
+      const canonical = await buildTeamMatchInput(t.id);
+      return {
+        name:
+          (t.display_name ?? "").trim() || (t.legal_name ?? "").trim() || "—",
+        input: canonical ?? emptyTeamMatchInput(t.id, profiles.length),
+        memberWorkerIds: profiles
+          .map((p) => workerByProfile.get(p))
+          .filter((w): w is string => !!w)
+          .sort(),
+      };
+    }),
+  );
+  return { kind: "ok", teams: mapped };
 }
