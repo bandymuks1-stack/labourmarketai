@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
+import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
 import {
   getMyConsentHistory,
   getMyDiscoverabilityState,
@@ -11,6 +13,7 @@ import {
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
 import {
   CONSENT_LOCALES,
+  EMPLOYER_DATA_DISCLOSURE_V1,
   PROFILE_DISCOVERABILITY_V1,
   type ConsentLocale,
 } from "@/lib/privacy/consent-definitions";
@@ -57,12 +60,14 @@ export default async function PrivacyPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const [state, history, preview, myRequests] = await Promise.all([
-    getMyDiscoverabilityState(),
-    getMyConsentHistory(),
-    buildOwnDiscoverabilityPreview(),
-    listMyPrivacyRequests(),
-  ]);
+  const [state, history, preview, myRequests, contactRequestsResult] =
+    await Promise.all([
+      getMyDiscoverabilityState(),
+      getMyConsentHistory(),
+      buildOwnDiscoverabilityPreview(),
+      listMyPrivacyRequests(),
+      listMyContactDisclosureRequests(),
+    ]);
 
   const consentLocale: ConsentLocale = (
     CONSENT_LOCALES as readonly string[]
@@ -82,6 +87,46 @@ export default async function PrivacyPage({
   const discoverabilityRows = history.filter(
     (h) => h.purpose === "profile_discoverability",
   );
+
+  // Contact-detail asks from companies (Wagon 1). Rendered only when the
+  // draft-gated ask model is applied AND real asks exist — an unapplied or
+  // empty model shows nothing (no inert section, no fake controls). The
+  // versioned legal wording is interpolated per ask with the REAL company
+  // name + need title, server-side, so the worker sees exactly what a grant
+  // covers before acting.
+  const disclosureLegal = EMPLOYER_DATA_DISCLOSURE_V1.texts[consentLocale];
+  const fieldLabel = (f: string): string =>
+    tc.has(`fields.${f}` as never) ? tc(`fields.${f}` as never) : humanizeCode(f);
+  const contactRequestCards =
+    contactRequestsResult.kind === "ok"
+      ? contactRequestsResult.requests.map((r) => {
+          const companyName = r.organizationName ?? tc("contactRequests.unknownCompany");
+          const contextTitle = r.needTitle ?? tc("contactRequests.unknownNeed");
+          const fill = (s: string) =>
+            s.replaceAll("{companyName}", companyName).replaceAll(
+              "{contextTitle}",
+              contextTitle,
+            );
+          return {
+            id: r.id,
+            status: r.status,
+            organizationName: companyName,
+            needTitle: contextTitle,
+            createdAtDate: r.createdAt.slice(0, 10),
+            fieldLabels: r.requestedFields.map(fieldLabel),
+            disclosureGranted: r.disclosureGranted,
+            legal: {
+              title: fill(disclosureLegal.title),
+              summary: fill(disclosureLegal.summary),
+              visibleData: fill(disclosureLegal.visibleData),
+              invisibleData: fill(disclosureLegal.invisibleData),
+              freedom: fill(disclosureLegal.freedom),
+              withdrawal: fill(disclosureLegal.withdrawal),
+              controller: fill(disclosureLegal.controller),
+            },
+          };
+        })
+      : [];
 
   return (
     <div className="flex flex-col gap-5" data-testid="privacy-page">
@@ -124,6 +169,50 @@ export default async function PrivacyPage({
           />
         </div>
       </section>
+
+      {/* 1b. Contact-detail requests from companies (Wagon 1) — the worker
+          answers each ask individually; grant writes the append-only consent
+          ledger, decline writes no consent. Hidden entirely while the
+          draft-gated ask model is unapplied or no ask exists. */}
+      {contactRequestCards.length > 0 ? (
+        <section
+          className="card-border p-5"
+          data-testid="privacy-contact-requests"
+          id="contact-requests"
+        >
+          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {tc("contactRequests.section")}
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-text-primary">
+            {tc("contactRequests.intro")}
+          </p>
+          <ContactDisclosureRequests
+            locale={locale}
+            requests={contactRequestCards}
+            labels={{
+              empty: tc("contactRequests.empty"),
+              requestedFields: tc("contactRequests.requestedFields"),
+              acceptNote: tc("contactRequests.acceptNote"),
+              accept: tc("contactRequests.accept"),
+              decline: tc("contactRequests.decline"),
+              working: tc("contactRequests.working"),
+              statusCreated: tc("contactRequests.status.created"),
+              statusAccepted: tc("contactRequests.status.accepted"),
+              statusDeclined: tc("contactRequests.status.declined"),
+              statusWithdrawn: tc("contactRequests.status.withdrawn"),
+              statusExpired: tc("contactRequests.status.expired"),
+              acceptedNote: tc("contactRequests.acceptedNote"),
+              declinedNote: tc("contactRequests.declinedNote"),
+              grantTitle: tc("contactRequests.grantTitle"),
+              grantIntro: tc("contactRequests.grantIntro"),
+              showDetails: tc("contactRequests.showDetails"),
+              grant: tc("contactRequests.grant"),
+              grantedNote: tc("contactRequests.grantedNote"),
+              error: tc("contactRequests.error"),
+            }}
+          />
+        </section>
+      ) : null}
 
       {/* 2. Data transfers to companies — individual disclosure permissions. */}
       <section className="card-border p-5" data-testid="privacy-disclosures" id="disclosures">
