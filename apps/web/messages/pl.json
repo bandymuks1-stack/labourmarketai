@@ -273,6 +273,10 @@
         "profile": "Profil",
         "journal": "Moje CV",
         "search": "[EN] Search"
+      },
+      "moreSection": {
+        "title": "Szczegółowy przegląd",
+        "hint": "Status, zapotrzebowania i dodatkowe karty"
       }
     },
     "errors": {

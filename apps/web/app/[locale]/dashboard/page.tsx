@@ -10,6 +10,7 @@ import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
 import { IdentityActions } from "@/components/app/identity-actions";
 import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
+import { DashboardMoreSection } from "@/components/app/dashboard/dashboard-more-section";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
 import { JobRecommendationsCard } from "@/components/app/dashboard/job-recommendations-card";
 import { MyZone } from "@/components/app/my-zone";
@@ -463,28 +464,15 @@ export default async function DashboardOverviewPage({
         {RoleNoticeBanner}
         {Header}
 
-        {/* Canonical premium hub — the real-data snapshot leads the one
-            dashboard (consolidation v1). Embedded = no competing page title;
-            the greeting Header above is the page heading. The action-first
-            content below keeps its audited order. */}
-        <PremiumHubScreen vm={hubVm} embedded />
-
-        {/* Wagon 3 org-branch order (UX Recovery Train, supersedes the
-            audit-PR6 next-action-first order): a company/agency owner reads
-            their space in the doc's task order —
-              1. current workforce need (the honest readback of what they
-                 already asked for),
-              2. new responses or contacts (count-gated pending cards),
-              3. the single data-driven next action,
-              4. compact planning status (spine strip chips),
-              5. optional market context (trust card, streamed).
-            Nothing was removed — sections only moved. */}
-        {demandReadback && (
-          <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
-        )}
-
-        {/* Real pending states — provider inbox, own outgoing requests,
-            booking responses. Count-gated, never fake. */}
+        {/* Compact home v1 (owner directive 2026-07-16, supersedes the
+            Wagon 3 readback-first order): the first screen carries ONLY
+            what the owner acts on in a second —
+              1. real pending states (count-gated, never fake),
+              2. the single data-driven next action,
+              3. compact planning status (spine strip chips),
+              4. the "Veiksmai" module grid (the one workspace).
+            Everything informational folds into the collapsed "more"
+            section below. Nothing was removed — sections only moved. */}
         {serviceRequestsNextAction}
         {outgoingRequestsNextAction}
         {bookingResponsesNextAction}
@@ -498,34 +486,14 @@ export default async function DashboardOverviewPage({
             counts as the bell, each chip linking its clearing surface. */}
         <DashboardStatusStrip entries={controlRoom.statusEntries} />
 
-        {/* Market context (Contextual Intelligence UI v1): the org's own
-            demand trust card — company/agency workspaces only. Kept AFTER
-            the need/response/action core (doc: "optional market context").
-            Suspense so the RLS-scoped intelligence read actually STREAMS
-            (Wagon 2). */}
-        {role === "company" || role === "agency" ? (
-          <Suspense
-            fallback={
-              <div
-                className="card-border h-36 animate-pulse"
-                data-testid="hub-intelligence-loading"
-                aria-hidden
-              />
-            }
-          >
-            <HubCompanyIntelligence locale={locale} />
-          </Suspense>
-        ) : null}
-
-        {/* Secondary — the role's chain entry points. */}
-        <DashboardChainActions role={role} />
-        {/* Active-role focus: only this role's identity actions on the first
-            screen; the other identity stays reachable via Manage spaces. */}
-        <IdentityActions
-          hasCompany={hasCompany}
-          companyName={companyName}
-          compact
-          focusRole={role}
+        {/* The role's configurable card workspace (registry-driven): always-on
+            access to the service loop, planning, map, messages, documents and
+            the company workspace — real destinations only, badges from the
+            spine. Reorder / hide / restore is device-local display state. */}
+        <DashboardModuleGrid
+          modules={controlRoom.modules}
+          context={prefsContext}
+          serverPrefs={serverCardPrefs}
         />
 
         {/* Company / agency: create a structured work need (hire / partner).
@@ -568,17 +536,50 @@ export default async function DashboardOverviewPage({
           </>
         )}
 
-        <WorkerInvitationsCard preloaded={invitations} />
+        {/* Everything informational, collapsed by default (compact home v1).
+            All sections still server-render with real data — the fold is
+            presentation only. The anchored #demand-intake section stays
+            OUTSIDE (fragment deep-links cannot open a closed details). */}
+        <DashboardMoreSection>
+          {/* Canonical premium hub — the real-data snapshot (consolidation
+              v1). Embedded = no competing page title. */}
+          <PremiumHubScreen vm={hubVm} embedded />
 
-        {/* The role's configurable card workspace (registry-driven): always-on
-            access to the service loop, planning, map, messages, documents and
-            the company workspace — real destinations only, badges from the
-            spine. Reorder / hide / restore is device-local display state. */}
-        <DashboardModuleGrid
-        modules={controlRoom.modules}
-        context={prefsContext}
-        serverPrefs={serverCardPrefs}
-      />
+          {/* The honest readback of what the org already asked for. */}
+          {demandReadback && (
+            <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
+          )}
+
+          {/* Market context (Contextual Intelligence UI v1): the org's own
+              demand trust card — company/agency workspaces only. Suspense so
+              the RLS-scoped intelligence read actually STREAMS (Wagon 2). */}
+          {role === "company" || role === "agency" ? (
+            <Suspense
+              fallback={
+                <div
+                  className="card-border h-36 animate-pulse"
+                  data-testid="hub-intelligence-loading"
+                  aria-hidden
+                />
+              }
+            >
+              <HubCompanyIntelligence locale={locale} />
+            </Suspense>
+          ) : null}
+
+          {/* Secondary — the role's chain entry points. */}
+          <DashboardChainActions role={role} />
+          {/* Active-role focus: only this role's identity actions; the other
+              identity stays reachable via Manage spaces. */}
+          <IdentityActions
+            hasCompany={hasCompany}
+            companyName={companyName}
+            compact
+            focusRole={role}
+          />
+
+          <WorkerInvitationsCard preloaded={invitations} />
+        </DashboardMoreSection>
 
         {/* Universal command finder (WAGON 3) — type a normal term, get the
             right EXISTING page. Registry-only results, audience-filtered. */}
@@ -726,16 +727,6 @@ export default async function DashboardOverviewPage({
       />
       {RoleNoticeBanner}
 
-      {/* Canonical premium hub — the real-data snapshot leads the one dashboard.
-          Its person block ("Asmens kortelė") now carries the worker's ONE
-          state-aware next action + inline availability/location/pay editor
-          (folded from the former WorkCard — no duplicate identity card).
-          Anchored id="work-card" so the profile hub's availability pillar
-          deep-links the ONE canonical editor. Embedded = no competing title. */}
-      <div id="work-card">
-        <PremiumHubScreen vm={hubVm} embedded workEditor={workEditor} />
-      </div>
-
       {/* The single most important next action for THIS user state. */}
       {topSlotCard && (
         <section
@@ -782,41 +773,58 @@ export default async function DashboardOverviewPage({
         serverPrefs={serverCardPrefs}
       />
 
-      {/* "Man tinkantys darbai" — top 3 recommendations from the ONE
-          request-cached read model (same PR4 engine as the board). §19 basis
-          form on every row; honest empty state; renders nothing while the
-          gated worker-visibility RPC is unapplied. The module grid above
-          carries the matching new-job-matches badge from the spine. */}
-      <JobRecommendationsCard locale={locale} />
-
-      {/* Market context (Contextual Intelligence UI v1): the worker's own
-          salary-vs-benchmark trust card, or its honest unavailable state.
-          Suspense so the intelligence read STREAMS instead of blocking the
-          whole overview flush (Wagon 2). */}
-      <Suspense
-        fallback={
-          <div
-            className="card-border h-36 animate-pulse"
-            data-testid="hub-intelligence-loading"
-            aria-hidden
-          />
-        }
-      >
-        <HubWorkerIntelligence locale={locale} />
-      </Suspense>
+      {/* Canonical premium hub — the real-data person snapshot. Its person
+          block ("Asmens kortelė") carries the worker's ONE state-aware next
+          action + inline availability/location/pay editor (folded from the
+          former WorkCard). Anchored id="work-card" so the profile hub's
+          availability pillar deep-links the ONE canonical editor — kept
+          OUTSIDE the collapsed section (fragment deep-links cannot open a
+          closed details). Embedded = no competing title. */}
+      <div id="work-card">
+        <PremiumHubScreen vm={hubVm} embedded workEditor={workEditor} />
+      </div>
 
       {/* Remaining real pending states — everything the top slot did NOT
-          promote, same honest count-gated cards as before. */}
+          promote, same honest count-gated cards as before. Kept ABOVE the
+          fold-away section: a real pending state is action, not archive. */}
       {topSlot !== "invitation" && <WorkerInvitationsCard preloaded={invitations} />}
       {topSlot !== "incoming_booking" && bookingsPendingNextAction}
       {topSlot !== "incoming_service_request" && serviceRequestsNextAction}
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
       {topSlot !== "booking_response" && bookingResponsesNextAction}
 
-      {/* Privacy status — always visible, never blocking (consent v1):
-          shows whether employers can find this profile + the one link to
-          the canonical privacy screen. Default state = not visible. */}
-      <PrivacyStatusCard />
+      {/* Everything informational, collapsed by default (compact home v1).
+          All sections still server-render with real data — the fold is
+          presentation only. */}
+      <DashboardMoreSection>
+        {/* "Man tinkantys darbai" — top 3 recommendations from the ONE
+            request-cached read model (same PR4 engine as the board). §19
+            basis form on every row; honest empty state; renders nothing
+            while the gated worker-visibility RPC is unapplied. The module
+            grid above carries the new-job-matches badge from the spine. */}
+        <JobRecommendationsCard locale={locale} />
+
+        {/* Market context (Contextual Intelligence UI v1): the worker's own
+            salary-vs-benchmark trust card, or its honest unavailable state.
+            Suspense so the intelligence read STREAMS instead of blocking the
+            whole overview flush (Wagon 2). */}
+        <Suspense
+          fallback={
+            <div
+              className="card-border h-36 animate-pulse"
+              data-testid="hub-intelligence-loading"
+              aria-hidden
+            />
+          }
+        >
+          <HubWorkerIntelligence locale={locale} />
+        </Suspense>
+
+        {/* Privacy status — always rendered, never blocking (consent v1):
+            shows whether employers can find this profile + the one link to
+            the canonical privacy screen. Default state = not visible. */}
+        <PrivacyStatusCard />
+      </DashboardMoreSection>
 
       {/* Universal command finder (WAGON 3) — type a normal term ("cv",
           "žurnalas", "kainos"), get the right EXISTING page. Registry-only

@@ -3753,6 +3753,10 @@
         "instructions": "Instructies",
         "bookings": "Boekingen",
         "skills": "Mijn vaardigheden"
+      },
+      "moreSection": {
+        "title": "Uitgebreid overzicht",
+        "hint": "Status, aanvragen en extra kaarten"
       }
     },
     "middleware": {

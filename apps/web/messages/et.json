@@ -273,6 +273,10 @@
         "profile": "Profiil",
         "journal": "Minu CV",
         "search": "[EN] Search"
+      },
+      "moreSection": {
+        "title": "Üksikasjalik ülevaade",
+        "hint": "Staatus, päringud ja lisakaardid"
       }
     },
     "errors": {

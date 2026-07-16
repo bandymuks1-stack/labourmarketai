@@ -273,6 +273,10 @@
         "profile": "Profils",
         "journal": "Mans CV",
         "search": "[EN] Search"
+      },
+      "moreSection": {
+        "title": "Detalizēts pārskats",
+        "hint": "Statuss, pieprasījumi un papildu kartītes"
       }
     },
     "errors": {

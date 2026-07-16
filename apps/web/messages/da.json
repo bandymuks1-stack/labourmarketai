@@ -273,6 +273,10 @@
         "profile": "Profil",
         "journal": "Mit CV",
         "search": "[EN] Search"
+      },
+      "moreSection": {
+        "title": "Detaljeret overblik",
+        "hint": "Status, forespørgsler og ekstra kort"
       }
     },
     "errors": {
