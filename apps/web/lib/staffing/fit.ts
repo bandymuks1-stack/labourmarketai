@@ -1,4 +1,21 @@
 /**
+ * ⛔ DEPRECATED — FROZEN LEGACY FORK (Explainable Matching v1, Wagon 4;
+ * consolidation safety directive 2026-07-16).
+ *
+ * This 5-dimension fit is a PARALLEL engine to the canonical
+ * `lib/market/match-v1.ts` (matchWorkerToNeed). It survives ONLY because the
+ * marketing-preview page `/match-preview` uses its own standalone intake
+ * schema (workerIntakeSchema / companyNeedSchema) that does not map onto the
+ * canonical MatchNeed/MatchSubject shapes, so re-pointing was judged
+ * disproportionate. The fork is FROZEN:
+ *   - NO new imports of this module are allowed anywhere
+ *     (guard: lib/guards/staffing-fit-frozen.test.ts — allowlist is the
+ *     existing callers only);
+ *   - NO new dimensions/behaviour may be added here — extend
+ *     lib/market/match-v1.ts instead;
+ *   - removal is a recorded bounded cleanup (retire /match-preview or
+ *     re-point it to the canonical engine shape).
+ *
  * Staffing fit engine (Staffing Operating Model v1, PR6).
  *
  * Deterministic, honest fit between a worker intake and a company need across the

@@ -1,4 +1,9 @@
 /**
+ * ⛔ DEPRECATED — FROZEN LEGACY FORK (Wagon 4). Part of the frozen
+ * lib/staffing/fit.ts preview path — see the header there. No new imports
+ * (guard: lib/guards/staffing-fit-frozen.test.ts); new matching work goes to
+ * lib/market/match-v1.ts.
+ *
  * Match preview — PURE core (Staffing Operating Model v1, PR8).
  *
  * Turns a worker intake + a company need into a NON-PERSISTED preview: the
