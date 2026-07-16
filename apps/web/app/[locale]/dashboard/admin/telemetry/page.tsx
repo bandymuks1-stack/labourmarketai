@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
+import { getAcquisitionFunnel } from "@/lib/admin/conversion-funnel";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -66,6 +67,10 @@ export default async function AdminTelemetryPage({
       };
     };
   };
+
+  // Owner acquisition-funnel summary (Pre-Advertising Launch Readiness v1) —
+  // first-party counts + conversion rates + first-touch campaign breakdown.
+  const funnel = await getAcquisitionFunnel(supabase);
 
   const { data, error } = await fromAny("pilot_events")
     .select(
@@ -179,6 +184,85 @@ export default async function AdminTelemetryPage({
           {t("loadError", { msg: error.message ?? "unknown" })}
         </p>
       )}
+
+      <section
+        className="card-border flex flex-col gap-3 p-4"
+        data-testid="telemetry-acquisition-funnel"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            Acquisition funnel
+          </h2>
+          <p className="text-[11px] text-text-muted">
+            First-party conversion counts for paid-ad readiness — landing →
+            CTA → registration, and company-need submissions. Event
+            occurrences over the recent window, not unique visitors; no
+            revenue attribution. Use the &ldquo;exclude admins&rdquo; filter
+            below to remove owner/test navigation.
+            {funnel.excludedPreview > 0
+              ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
+              : ""}
+          </p>
+        </div>
+        {!funnel.available ? (
+          <p className="text-sm text-text-secondary">
+            No funnel events yet, or the event store is unavailable.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {funnel.counts.map((s) => (
+                <div
+                  key={s.key}
+                  className="rounded-md border border-ink-600/60 px-3 py-2"
+                >
+                  <div className="font-mono text-lg text-text-primary">
+                    {s.count}
+                  </div>
+                  <div className="text-[11px] text-text-muted">{s.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col gap-1">
+              {funnel.rates.map((r) => (
+                <div
+                  key={r.label}
+                  className="flex items-center justify-between gap-3 text-xs"
+                >
+                  <span className="text-text-secondary">{r.label}</span>
+                  <span className="font-mono text-text-primary">
+                    {r.pct === null ? "—" : `${r.pct}%`}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                First-touch source (conversions)
+              </h3>
+              {funnel.sources.length === 0 ? (
+                <p className="text-xs text-text-secondary">
+                  No attributed conversions yet.
+                </p>
+              ) : (
+                funnel.sources.map((s) => (
+                  <div
+                    key={s.source}
+                    className="flex items-center justify-between gap-3 text-xs"
+                  >
+                    <span className="font-mono text-text-secondary">
+                      {s.source}
+                    </span>
+                    <span className="font-mono text-text-primary">
+                      {s.count}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </section>
 
       <div
         className="flex flex-wrap items-center gap-3"

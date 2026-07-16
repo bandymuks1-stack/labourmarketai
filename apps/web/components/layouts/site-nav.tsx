@@ -80,7 +80,11 @@ export async function SiteNav() {
           <ThemeToggleIcon
             labels={{ toDark: t("themeToDark"), toLight: t("themeToLight") }}
           />
-          <LocaleSwitcher className="hidden sm:flex" />
+          {/* Pre-Advertising Launch Readiness v1: the language switcher must
+              be reachable on mobile too. A LT/PL/RU worker arriving from a paid
+              ad on the wrong locale had no way to change language below 640px
+              (there is no mobile nav menu). Now visible on every viewport. */}
+          <LocaleSwitcher className="flex" />
         </div>
       </div>
     </header>

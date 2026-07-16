@@ -22,6 +22,17 @@
  */
 
 export const FUNNEL_EVENTS = {
+  // ── Public acquisition funnel (Pre-Advertising Launch Readiness v1).
+  //    These are the TOP of the funnel — the surfaces a paid-ad visitor
+  //    reaches BEFORE the login wall. They fire for anonymous users through
+  //    the same RLS-safe insert path (profile_id = NULL for anon). This is
+  //    what makes a paid campaign measurable. No migration, no schema change.
+  landingViewed: "landing_viewed",
+  ctaClicked: "cta_clicked",
+  roleSelected: "role_selected",
+  registrationStarted: "registration_started",
+  companyNeedStarted: "company_need_started",
+  companyNeedSubmitted: "company_need_submitted",
   loginStarted: "login_started",
   loginSucceeded: "login_succeeded",
   onboardingStarted: "onboarding_started",
@@ -72,4 +83,26 @@ export type FunnelMetadata = {
   entity_type?: string;
   /** Coarse success/failure flag for an attempted action. */
   success?: boolean;
+  /** True when the event was fired from a non-production origin (localhost /
+   *  Vercel preview). Stamped automatically by `trackFunnel` so dev/preview
+   *  traffic can be excluded from the owner's real acquisition funnel. */
+  preview_host?: boolean;
+  /** Coarse audience of a public marketing surface: 'workers' | 'companies' | 'agencies' | 'home'. */
+  audience?: string;
+  /** Stable, non-PII identifier of a CTA button, e.g. 'hero_signup' | 'company_need'. */
+  cta_id?: string;
+  // ── First-touch campaign attribution (Pre-Advertising Launch Readiness v1).
+  //    Bounded, sanitized ad-campaign dimensions ONLY — never a raw query
+  //    string, never a full referrer URL, never any user-entered value.
+  //    Captured once on the first landing and attached to conversion events
+  //    (see lib/telemetry/attribution.ts). Mirrors the server allowlist.
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
+  /** Referrer HOST only (e.g. 'google.com') — never the full referrer URL. */
+  referrer_host?: string;
+  /** The path (no query) the visitor first landed on, e.g. '/for-workers'. */
+  landing_path?: string;
 };

@@ -1,6 +1,6 @@
-import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
+import { TrackedCta } from "@/components/app/tracked-cta";
 
 /** Shared sub-page hero: small-caps chip → two-line headline with the accent
  *  word in the brand gradient → honest sub-copy → one CTA. CTA is a real
@@ -38,13 +38,17 @@ export function PageHero({
       </p>
       <div className="mt-8">
         {ctaKind === "signup" ? (
-          <Link href="/auth/signup">
+          <TrackedCta href="/auth/signup" ctaId={ctaSource} audience="workers">
             <Button>{ctaLabel} →</Button>
-          </Link>
+          </TrackedCta>
         ) : ctaKind === "companyNeed" ? (
-          <Link href="/company-need">
+          <TrackedCta
+            href="/company-need"
+            ctaId={ctaSource}
+            audience="companies"
+          >
             <Button>{ctaLabel} →</Button>
-          </Link>
+          </TrackedCta>
         ) : (
           <WaitlistModal
             trigger={ctaLabel}

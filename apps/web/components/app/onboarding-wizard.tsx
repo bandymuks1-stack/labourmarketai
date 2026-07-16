@@ -54,7 +54,13 @@ export function OnboardingWizard({
     setRoles((prev) => {
       const next = new Set(prev);
       if (next.has(r)) next.delete(r);
-      else next.add(r);
+      else {
+        next.add(r);
+        // Identity-selection funnel signal (Pre-Advertising Launch
+        // Readiness v1): fire only when a role is ADDED, carrying the coarse
+        // role context — never any identifying value.
+        trackFunnel(FUNNEL_EVENTS.roleSelected, { role_context: r });
+      }
       return next;
     });
   }

@@ -194,15 +194,32 @@ export function recordEvent(
   fire(eventName, "info", { metadata });
 }
 
+/** Production hosts. Anything else (localhost, 127.0.0.1, *.vercel.app
+ *  preview deploys) is a non-production origin whose funnel events must not
+ *  pollute the owner's real acquisition metrics. */
+function isNonProductionHost(): boolean {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname.toLowerCase();
+  if (host === "labourmarket-ai.vercel.app") return false; // managed prod alias
+  if (host === "labourmarket.ai" || host.endsWith(".labourmarket.ai")) {
+    return false;
+  }
+  return true;
+}
+
 /** Record an activation-funnel event (P0-A). Thin, type-safe wrapper over
  *  `recordEvent`: the event name is constrained to the funnel registry and
  *  metadata to the bounded, non-PII `FunnelMetadata` shape. Same
- *  fire-and-forget guarantees — never throws, never blocks the UI. */
+ *  fire-and-forget guarantees — never throws, never blocks the UI.
+ *
+ *  Stamps `preview_host: true` on non-production origins (Pre-Advertising
+ *  Launch Readiness v1) so dev/preview traffic is excluded from the owner's
+ *  real funnel (see lib/admin/conversion-funnel.ts). */
 export function trackFunnel(
   eventName: FunnelEventName,
   metadata?: FunnelMetadata,
 ): void {
-  fire(eventName, "info", {
-    metadata: metadata as Record<string, unknown> | undefined,
-  });
+  const enriched: Record<string, unknown> = { ...(metadata ?? {}) };
+  if (isNonProductionHost()) enriched.preview_host = true;
+  fire(eventName, "info", { metadata: enriched });
 }

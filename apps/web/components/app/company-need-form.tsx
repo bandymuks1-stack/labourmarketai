@@ -1,11 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   submitCompanyNeedAction,
   type CompanyNeedFormState,
 } from "@/lib/staffing/company-need-form-actions";
 import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
+import {
+  captureFirstTouchAttribution,
+  getFirstTouchAttribution,
+} from "@/lib/telemetry/attribution";
 
 /**
  * Company need / vacancy form (Staffing Operating Model v1, PR4 UI / PR10).
@@ -90,9 +96,46 @@ export function CompanyNeedForm({
     FormData
   >(submitCompanyNeedAction, null);
 
+  // Funnel instrumentation (Pre-Advertising Launch Readiness v1). Fires the
+  // public "company_need_started" once the visitor first interacts, and the
+  // "company_need_submitted" conversion (with first-touch campaign
+  // attribution) only when the need was really persisted. All PII-safe:
+  // no field values are captured, only bounded funnel dimensions.
+  const startedRef = useRef(false);
+  const submittedRef = useRef(false);
+
+  function handleFirstInteraction() {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    captureFirstTouchAttribution();
+    trackFunnel(FUNNEL_EVENTS.companyNeedStarted, {
+      audience: "companies",
+      role_context: "company",
+    });
+  }
+
+  useEffect(() => {
+    if (submittedRef.current) return;
+    if (state?.ok && state.persisted) {
+      submittedRef.current = true;
+      trackFunnel(FUNNEL_EVENTS.companyNeedSubmitted, {
+        audience: "companies",
+        role_context: "company",
+        entity_type: "company_request",
+        success: true,
+        ...getFirstTouchAttribution(),
+      });
+    }
+  }, [state]);
+
   return (
     <div className="flex flex-col gap-6">
-      <form action={formAction} className="flex flex-col gap-4" data-testid="company-need-form">
+      <form
+        action={formAction}
+        className="flex flex-col gap-4"
+        data-testid="company-need-form"
+        onFocusCapture={handleFirstInteraction}
+      >
         <header className="flex flex-col gap-1">
           <h2 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h2>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
@@ -111,7 +154,7 @@ export function CompanyNeedForm({
           </label>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.contactEmail}</span>
-            <input type="email" name="contact_email" maxLength={254} className={FIELD} />
+            <input type="email" name="contact_email" required maxLength={254} className={FIELD} />
             <span className={HELP}>{labels.contactEmailHelp}</span>
           </label>
         </div>
