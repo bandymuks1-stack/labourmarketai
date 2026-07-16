@@ -19,6 +19,7 @@ import { getActiveOrganizationContext } from "@/lib/company/active-organization"
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { buildNavBadges, getSpineCounts } from "@/lib/notifications/spine";
 import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
@@ -45,19 +46,19 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // The profile row and the profile_roles catalogue are independent reads;
-  // running them in parallel halves the auth-shell SSR latency. Every
-  // route under the dashboard tree pays this layout cost, so the saving
-  // compounds. (Avoid writing the literal slash-star sequence in this
-  // comment: the project's source-level guards run a comment-stripping
-  // regex that treats it as a block comment opener and would consume
-  // past this Promise.all into the JSX below.)
-  const [profileRes, rolesRes, spineCounts] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, email, active_role, onboarded_at")
-      .eq("id", user.id)
-      .single(),
+  // Wagon 2 (nav performance): the profile row comes from the ONE
+  // request-cached session-profile reader shared with the overview page and
+  // the premium hub — previously three independent `profiles` SELECTs per
+  // navigation. It runs in parallel with the independent profile_roles and
+  // notification-spine reads (getUser above is memoized on the shared client,
+  // so the reader adds no extra auth round-trip). Every route under the
+  // dashboard tree pays this layout cost, so the saving compounds. (Avoid
+  // writing the literal slash-star sequence in this comment: the project's
+  // source-level guards run a comment-stripping regex that treats it as a
+  // block comment opener and would consume past this Promise.all into the
+  // JSX below.)
+  const [session, rolesRes, spineCounts] = await Promise.all([
+    getSessionProfile(),
     supabase
       .from("profile_roles")
       .select("role")
@@ -71,7 +72,7 @@ export default async function DashboardLayout({
     // state, so a signal read never breaks the auth shell.
     getSpineCounts(),
   ]);
-  const profile = profileRes.data;
+  const profile = session.profile;
   const rolesRows = rolesRes.data;
   const navBadges = buildNavBadges(spineCounts);
 

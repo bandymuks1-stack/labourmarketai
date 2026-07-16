@@ -2,6 +2,7 @@
 
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -306,17 +307,24 @@ export async function getServiceRequestsSeenAt(): Promise<string | null> {
  *   buyerNew    = outgoing requests a provider RESPONDED to (accepted/declined)
  *                 after my last visit — never my own request.
  * seen_at null (never opened) → { 0, 0 }. Rollout-safe end to end.
+ *
+ * `cache()`-wrapped (Wagon 2 — nav performance): getSpineCounts() AND the
+ * dashboard overview both call this per navigation; request-scoped dedup
+ * halves the read. Dedup only, never time-based caching — a new navigation
+ * always recomputes.
  */
-export async function getServiceRequestsNewCounts(): Promise<ServiceRequestsNewCounts> {
-  const seenAt = await getServiceRequestsSeenAt();
-  if (!seenAt) return { providerNew: 0, buyerNew: 0 };
-  const [inc, out] = await Promise.all([listIncomingRequests(), listOutgoingRequests()]);
-  return computeNewCounts(
-    seenAt,
-    inc.kind === "ok" ? inc.rows : [],
-    out.kind === "ok" ? out.rows : [],
-  );
-}
+export const getServiceRequestsNewCounts = cache(
+  async (): Promise<ServiceRequestsNewCounts> => {
+    const seenAt = await getServiceRequestsSeenAt();
+    if (!seenAt) return { providerNew: 0, buyerNew: 0 };
+    const [inc, out] = await Promise.all([listIncomingRequests(), listOutgoingRequests()]);
+    return computeNewCounts(
+      seenAt,
+      inc.kind === "ok" ? inc.rows : [],
+      out.kind === "ok" ? out.rows : [],
+    );
+  },
+);
 
 /**
  * Mark the request loop as seen for the caller (upsert their single seen row via

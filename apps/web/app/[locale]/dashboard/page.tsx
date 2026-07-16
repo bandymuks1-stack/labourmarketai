@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CommandFinder } from "@/components/app/command-finder";
@@ -33,12 +34,10 @@ import {
 import { decideTopSlot } from "@/lib/dashboard/top-slot";
 import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-model";
 import { getDashboardCardPreferences } from "@/lib/dashboard/preferences";
-import {
-  EMPTY_CARD_PREFS,
-  type DashboardPreferencesContext,
-} from "@/lib/dashboard/dashboard-preferences-shared";
+import { EMPTY_CARD_PREFS } from "@/lib/dashboard/dashboard-preferences-shared";
 import { getSpineCounts } from "@/lib/notifications/spine";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
 import { getPremiumHubViewModel } from "@/components/app/premium-hub/premium-hub-data";
@@ -134,36 +133,56 @@ export default async function DashboardOverviewPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
+  // Wagon 2 (nav performance): ONE live company read for the whole page
+  // render — the hub view model consumes this same promise instead of
+  // re-calling getOwnCompany() (which stays deliberately UNCACHED; sharing
+  // the promise dedupes within this render without adding any caching).
+  const companyReadPromise = getOwnCompany();
+
   // Consolidation v1: /dashboard now LEADS with the premium hub (the canonical
   // visual surface — the former /dashboard/hub is removed). Kick the hub's own
   // RLS-scoped reads off in parallel with the overview's reads so it adds no
   // serial latency; it is awaited once, just before the role branch.
-  const hubVmPromise = getPremiumHubViewModel();
+  const hubVmPromise = getPremiumHubViewModel({
+    companyRead: companyReadPromise,
+  });
+
+  // Server-side card layout (company architecture v1) — needs the role, which
+  // needs the profile; chain off the request-cached session-profile reader so
+  // the prefs round-trip OVERLAPS the main batch below instead of blocking
+  // serially after it (Wagon 2).
+  const cardPrefsPromise = getSessionProfile().then((s) => {
+    const prefsRole: Role = ROLES.has(s.profile?.active_role as Role)
+      ? (s.profile!.active_role as Role)
+      : "worker";
+    return getDashboardCardPreferences(
+      prefsRole === "worker" ? "person" : "company",
+    );
+  });
 
   // ONE parallel read batch (P0 latency audit). These reads are mutually
   // independent; the prior sequential awaits stacked ~8 network round-trips
   // into the overview's TTFB. getSpineCounts() is request-cached and shared
   // with the auth-shell layout, and it already carries the pending-service-
-  // request / booking counts, so those helpers are not re-queried here.
+  // request / booking counts, so those helpers are not re-queried here. The
+  // profile row comes from the request-cached session-profile reader shared
+  // with the layout and the hub (was: a third independent profiles SELECT).
   const [
-    { data: profile },
+    session,
     companyRead,
     invitations,
     { providerNew, buyerNew },
     outgoingSummary,
     spineCounts,
   ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("active_role, full_name, email")
-      .eq("id", user.id)
-      .single(),
-    getOwnCompany(),
+    getSessionProfile(),
+    companyReadPromise,
     listMyPendingWorkerInvitations(),
     getServiceRequestsNewCounts(),
     getOutgoingRequestSummary(),
     getSpineCounts(),
   ]);
+  const profile = session.profile;
   const pendingServiceRequests = spineCounts.pendingIncomingServiceRequests;
   const bookingResponsesNew = spineCounts.bookingResponsesNew;
 
@@ -181,9 +200,10 @@ export default async function DashboardOverviewPage({
   // per-(profile, context) preference — the person and the company workspace
   // keep separate layouts (§20). "unavailable" (owner-gated migration not
   // applied) → null → the grid keeps the device-local behaviour honestly.
-  const prefsContext: DashboardPreferencesContext =
-    role === "worker" ? "person" : "company";
-  const cardPrefsRead = await getDashboardCardPreferences(prefsContext);
+  // The read itself was started before the main batch (Wagon 2) — this only
+  // awaits the already-in-flight promise.
+  const prefsContext = role === "worker" ? ("person" as const) : ("company" as const);
+  const cardPrefsRead = await cardPrefsPromise;
   const serverCardPrefs =
     cardPrefsRead.kind === "ok" ? (cardPrefsRead.prefs ?? EMPTY_CARD_PREFS) : null;
 
@@ -466,7 +486,20 @@ export default async function DashboardOverviewPage({
         {/* Market context (Contextual Intelligence UI v1): the org's own
             demand trust card — company/agency workspaces only. */}
         {role === "company" || role === "agency" ? (
-          <HubCompanyIntelligence locale={locale} />
+          // Suspense so the RLS-scoped intelligence read actually STREAMS
+          // instead of blocking the whole overview flush (Wagon 2 — the
+          // prior comment claimed streaming but there was no boundary).
+          <Suspense
+            fallback={
+              <div
+                className="card-border h-36 animate-pulse"
+                data-testid="hub-intelligence-loading"
+                aria-hidden
+              />
+            }
+          >
+            <HubCompanyIntelligence locale={locale} />
+          </Suspense>
         ) : null}
 
         {/* Real pending states — provider inbox, own outgoing requests,
@@ -752,8 +785,20 @@ export default async function DashboardOverviewPage({
       <JobRecommendationsCard locale={locale} />
 
       {/* Market context (Contextual Intelligence UI v1): the worker's own
-          salary-vs-benchmark trust card, or its honest unavailable state. */}
-      <HubWorkerIntelligence locale={locale} />
+          salary-vs-benchmark trust card, or its honest unavailable state.
+          Suspense so the intelligence read STREAMS instead of blocking the
+          whole overview flush (Wagon 2). */}
+      <Suspense
+        fallback={
+          <div
+            className="card-border h-36 animate-pulse"
+            data-testid="hub-intelligence-loading"
+            aria-hidden
+          />
+        }
+      >
+        <HubWorkerIntelligence locale={locale} />
+      </Suspense>
 
       {/* Remaining real pending states — everything the top slot did NOT
           promote, same honest count-gated cards as before. */}
