@@ -39,6 +39,9 @@ const EXPECTED_EVENTS = [
   "login_started",
   "login_succeeded",
   "onboarding_started",
+  // Per-step onboarding progress (Pilot Onboarding and Measurement v1).
+  "onboarding_step_role_completed",
+  "onboarding_step_profile_completed",
   "onboarding_completed",
   "dashboard_viewed",
   "first_action_card_viewed",
@@ -187,7 +190,12 @@ describe("activation funnel — key surfaces emit their events", () => {
     },
     {
       file: "components/app/onboarding-wizard.tsx",
-      mustContain: ["onboardingStarted", "onboardingCompleted"],
+      mustContain: [
+        "onboardingStarted",
+        "onboardingStepRoleCompleted",
+        "onboardingStepProfileCompleted",
+        "onboardingCompleted",
+      ],
     },
     {
       file: "components/app/profile-text-first-flow.tsx",

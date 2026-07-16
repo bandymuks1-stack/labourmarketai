@@ -291,6 +291,10 @@ describe("NO new DB migration in this PR", () => {
     // 20260716131000_team_enquiries_v1 — employer→team enquiry state
     // machine on the shared contact/consent contract, append-only events).
     // Both DRAFT / needs-human-gate, NOT applied; paired rollbacks.
-    expect(count).toBeLessThanOrEqual(144);
+    // Bumped 144 -> 145 for Pilot Onboarding and Measurement v1
+    // (20260716140000_pilots_cohort_v1 — admin-only pilots /
+    // pilot_participants / append-only pilot_outcomes, RPC-only writes).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    expect(count).toBeLessThanOrEqual(145);
   });
 });

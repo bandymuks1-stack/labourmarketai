@@ -37,6 +37,7 @@ const EXCLUDED_NAMESPACES = new Set<string>([
   "adminReadiness",
   "adminBilling",
   "adminLaunchReadiness",
+  "adminPilots",
   "intelligence",
   "telemetry",
   "agentOs",

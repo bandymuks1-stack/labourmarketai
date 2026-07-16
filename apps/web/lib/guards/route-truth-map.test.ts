@@ -123,6 +123,11 @@ const CLASSIFICATION: Record<string, string> = {
   // CRM / demand pipeline (control room PR F) — read consolidation over the
   // existing demand sources; no second funnel, no mutation.
   "dashboard/admin/pipeline": "INTERNAL_ADMIN",
+  // Pilot cohort administration (Pilot Onboarding and Measurement v1) —
+  // superadmin-gated pilots list/detail over the DRAFT-GATED pilots_cohort_v1
+  // migration; honest needs-migration state until the owner applies it.
+  "dashboard/admin/pilots": "INTERNAL_ADMIN",
+  "dashboard/admin/pilots/[id]": "INTERNAL_ADMIN",
   "dashboard/admin/project-truth": "INTERNAL_ADMIN",
   "dashboard/admin/readiness": "INTERNAL_ADMIN",
   "dashboard/admin/support": "INTERNAL_ADMIN",

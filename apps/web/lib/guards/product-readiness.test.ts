@@ -1790,7 +1790,12 @@ describe("no migration files added by this sprint", () => {
     // team_enquiries_v1 — team-scoped details + the employer→team enquiry
     // state machine on the shared contact/consent contract). Both DRAFT /
     // needs-human-gate, NOT applied; paired rollbacks.
-    const SPRINT_BASELINE = 144;
+    // Bumped 144 -> 145 for Pilot Onboarding and Measurement v1
+    // (20260716140000_pilots_cohort_v1 — admin-only pilots /
+    // pilot_participants / append-only pilot_outcomes cohort model,
+    // RPC-only writes, owner-recorded outcomes honestly labelled).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    const SPRINT_BASELINE = 145;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

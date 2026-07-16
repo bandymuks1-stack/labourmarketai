@@ -376,6 +376,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260716130000_team_profile_details_v1 +
     // 20260716131000_team_enquiries_v1) — DRAFT / needs-human-gate, NOT
     // applied; paired rollbacks in the PR.
-    expect(guard).toMatch(/SPRINT_BASELINE = 144/);
+    // Bumped 144 -> 145 for Pilot Onboarding and Measurement v1
+    // (20260716140000_pilots_cohort_v1) — DRAFT / needs-human-gate, NOT
+    // applied; cross-pin follows the product-readiness baseline bump.
+    expect(guard).toMatch(/SPRINT_BASELINE = 145/);
   });
 });

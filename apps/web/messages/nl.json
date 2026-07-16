@@ -6008,7 +6008,19 @@
       "agentOs": "→ Agent OS",
       "languageFeedback": "→ Taalrapporten"
     },
-    "footnote": "Gesorteerd op eventtijd (nieuwste eerst). Toont de laatste 200. RLS beperkt SELECT tot admins."
+    "footnote": "Gesorteerd op eventtijd (nieuwste eerst). Toont de laatste 200. RLS beperkt SELECT tot admins.",
+    "ttv": {
+      "title": "Tijd tot eerste waarde",
+      "help": "Mediaan / 75e percentiel van het eerste registratie- of onboardingevent tot het eerste waarde-event (bedrijfsbehoefte ingediend, behoefte opgeslagen, dienstverzoek verzonden, dagboekitem opgeslagen) binnen dezelfde pseudonieme sessie. Eventtellingen over het recente venster — sessies gelden per browsertabblad, geen unieke bezoekers; geen omzetattributie.",
+      "excludedNote": "{n} niet-productie-event(s) (localhost/preview) uitgesloten.",
+      "unavailable": "Nog geen waarde-timing-events, of de eventopslag is niet beschikbaar.",
+      "empty": "Nog geen sessie in het venster met zowel een start- als een waarde-event.",
+      "median": "Mediaan",
+      "p75": "75e percentiel",
+      "sessionsWithStart": "Sessies met een startevent",
+      "sessionsReachedValue": "Sessies die waarde bereikten",
+      "firstValueEvent": "Eerste waarde-event (converterende sessies)"
+    }
   },
   "languageFeedback": {
     "openLabel": "Tekst melden",
@@ -9972,6 +9984,108 @@
         "title": "Wanneer kunt u beginnen?",
         "hint": "Geef uw beschikbaarheid aan."
       }
+    }
+  },
+  "adminPilots": {
+    "eyebrow": "Pilots",
+    "title": "Pilotcohorten",
+    "subtitle": "Maak pilotcohorten aan, beheer deelnemers en leg door de eigenaar waargenomen resultaten vast.",
+    "back": "Beheerdersruimte",
+    "needsMigration": "Het datamodel voor pilotcohorten is nog niet ingeschakeld — de voorbereide migratie (pilots_cohort_v1) wacht op een expliciete beslissing van de eigenaar. Niets op deze pagina wordt gesimuleerd.",
+    "loadError": "Kon pilotgegevens niet lezen: {msg}",
+    "saved": "Opgeslagen.",
+    "saving": "Opslaan…",
+    "errors": {
+      "needs_migration": "Nog niet ingeschakeld — de pilotcohort-migratie is niet toegepast.",
+      "not_authorized": "Uw account is niet gemachtigd voor deze actie.",
+      "invalid": "Controleer de ingevoerde waarden — er ontbreekt iets of een limiet is overschreden.",
+      "not_found": "De pilot of deelnemer is niet gevonden.",
+      "already_participant": "Deze persoon is al een actieve deelnemer van de pilot.",
+      "profile_not_found": "Geen bestaand profiel gevonden voor dat e-mailadres of ID.",
+      "note_too_long": "De notitie is langer dan 500 tekens.",
+      "error": "De actie is mislukt. Probeer het opnieuw."
+    },
+    "status": {
+      "draft": "Concept",
+      "active": "Actief",
+      "closed": "Gesloten"
+    },
+    "kind": {
+      "construction": "Bouw",
+      "staffing_agency": "Uitzendbureau",
+      "subcontractor": "Onderaannemer",
+      "manufacturing": "Productie",
+      "services": "Diensten",
+      "client_customer": "Klant / opdrachtgever",
+      "other": "Overig",
+      "mixed": "Gemengd"
+    },
+    "list": {
+      "title": "Pilots",
+      "empty": "Nog geen pilots. Maak hieronder de eerste aan.",
+      "noDates": "Geen datums ingesteld",
+      "participants": "Deelnemers: {n}",
+      "outcomes": "Resultaten: {n}"
+    },
+    "create": {
+      "title": "Pilot aanmaken",
+      "name": "Pilotnaam",
+      "kind": "Organisatietype",
+      "startsOn": "Startdatum",
+      "endsOn": "Einddatum",
+      "submit": "Pilot aanmaken"
+    },
+    "detail": {
+      "back": "Alle pilots",
+      "statusTitle": "Pilotstatus",
+      "statusLabel": "Status",
+      "setStatus": "Status instellen"
+    },
+    "participants": {
+      "title": "Deelnemers",
+      "empty": "Nog geen deelnemers. Voeg een bestaand profiel toe via het exacte e-mailadres of profiel-ID.",
+      "addTitle": "Deelnemer toevoegen",
+      "add": "Deelnemer toevoegen",
+      "queryLabel": "E-mailadres of profiel-ID",
+      "queryPlaceholder": "naam@bedrijf.nl of profiel-ID",
+      "joinedViaLabel": "Toegetreden via",
+      "remove": "Verwijderen",
+      "left": "Vertrokken {date}",
+      "joinedVia": {
+        "manual": "Handmatig",
+        "invitation": "Uitnodiging"
+      }
+    },
+    "outcomes": {
+      "title": "Resultaten",
+      "honesty": "Door de eigenaar vastgelegd resultaat — genoteerd door een beheerder, niet door het platform geverifieerd. Zet geen contactgegevens in de notitie.",
+      "outcomeLabel": "Resultaat",
+      "outcomePlaceholder": "Kies een resultaat",
+      "participantLabel": "Deelnemer (optioneel)",
+      "wholePilot": "Hele pilot",
+      "noteLabel": "Notitie (optioneel, max. 500 tekens)",
+      "notePlaceholder": "Korte context — geen contactgegevens",
+      "submit": "Resultaat vastleggen",
+      "ledger": "Resultatenlogboek (alleen toevoegen)",
+      "empty": "Nog geen resultaten vastgelegd.",
+      "values": {
+        "contact_made": "Contact gelegd",
+        "enquiry_made": "Aanvraag ontvangen",
+        "booking_accepted": "Boeking geaccepteerd",
+        "hire_reported": "Aanstelling gemeld",
+        "no_outcome": "Geen resultaat"
+      }
+    },
+    "ttv": {
+      "title": "Tijd tot eerste waarde",
+      "help": "Mediaan en 75e percentiel van het eerste registratie- of onboardingevent tot het eerste waarde-event binnen dezelfde pseudonieme sessie. Sessies gelden per browsertabblad — geen unieke bezoekers.",
+      "cohortLimitation": "Meting per cohort is niet beschikbaar: sessies aan deelnemers koppelen zou identificerende gegevens vereisen. Onderstaande cijfers zijn globaal. Cohortmeting vereist de pilotmigratie plus deelnemer-events.",
+      "unavailable": "De eventopslag is niet beschikbaar of leeg.",
+      "empty": "Nog geen sessie in het venster met zowel een start- als een waarde-event.",
+      "median": "Mediaan",
+      "p75": "75e percentiel",
+      "sessionsWithStart": "Sessies met een startevent",
+      "sessionsReachedValue": "Sessies die waarde bereikten"
     }
   }
 }
