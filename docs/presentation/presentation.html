@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LabourMarket.ai — Europos darbo rinkos operacinė sistema</title>
+<style>
+  :root{
+    --ink:#0F1319; --paper:#F6F8FB; --panel:#FFFFFF; --panel2:#EEF2F7;
+    --line:#D5DCE6; --muted:#5A6676; --accent:#2F55E6; --accent-deep:#1E3CC2;
+    --steel:#41506A; --verify:#1C9A6A; --warn:#B7791F; --alert:#B0472F;
+    --mono:ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --ink:#EAEEF5; --paper:#0A0E14; --panel:#111722; --panel2:#161E2B;
+    --line:#232E3E; --muted:#8894A6; --accent:#5E82FF; --accent-deep:#7E9BFF;
+    --steel:#7286A6; --verify:#3FBE8B; --warn:#D8A24A; --alert:#D06A52;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--panel2:#161E2B;--line:#232E3E;
+    --muted:#8894A6;--accent:#5E82FF;--accent-deep:#7E9BFF;--steel:#7286A6;
+    --verify:#3FBE8B;--warn:#D8A24A;--alert:#D06A52;}}
+
+  .stage{position:fixed;inset:0;display:grid;place-items:center}
+  .slide{position:absolute;width:1280px;height:720px;background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    padding:64px;display:none;flex-direction:column;
+    box-shadow:0 30px 80px -40px rgba(10,14,20,.5)}
+  .slide.active{display:flex}
+  @media (prefers-reduced-motion:no-preference){
+    .slide.active{animation:in .32s ease-out}
+    @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  }
+  .slide::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--accent),var(--steel))}
+
+  .kick{font-family:var(--mono);font-size:13px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted)}
+  h1,h2,h3{margin:0;letter-spacing:-.02em;text-wrap:balance}
+  .title{font-size:62px;font-weight:800;line-height:1.02}
+  .stmt{font-size:56px;font-weight:800;line-height:1.05;max-width:20ch}
+  h2.head{font-size:44px;font-weight:800;line-height:1.05;margin-top:6px}
+  .sub{font-size:22px;color:var(--muted);max-width:60ch;margin-top:14px;line-height:1.5}
+  .lead{font-size:20px;line-height:1.55;max-width:62ch}
+  .accent{color:var(--accent-deep)}
+  .grow{flex:1}
+  .foot{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:auto;
+    display:flex;justify-content:space-between;gap:16px;padding-top:18px;
+    border-top:1px solid var(--line)}
+  .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+    border-radius:20px;padding:3px 10px;display:inline-block}
+  .tag.dir{color:var(--muted);border-color:var(--line)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:36px;flex:1;align-items:center}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .cards{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:20px 22px}
+  .card h3{font-size:19px;font-weight:700}
+  .card p{margin:6px 0 0;font-size:15px;color:var(--muted);line-height:1.5}
+  ul.clean{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  ul.clean li{font-size:19px;padding-left:26px;position:relative;line-height:1.45}
+  ul.clean li::before{content:"";position:absolute;left:0;top:9px;width:9px;height:9px;
+    border-radius:2px;background:var(--accent)}
+  ul.clean.v li::before{background:var(--verify);border-radius:50%}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:8px 0 4px}
+  .metric{border:1px solid var(--line);border-radius:12px;padding:22px;background:var(--panel2)}
+  .metric .n{font-family:var(--mono);font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;
+    color:var(--verify);line-height:1}
+  .metric .l{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.4}
+
+  .journey{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;align-items:start;flex:1;align-content:center}
+  .step{position:relative;padding:0 18px}
+  .step .dot{width:14px;height:14px;border-radius:50%;background:var(--accent);margin-bottom:16px}
+  .step .st{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .step h3{font-size:19px;font-weight:700;margin:6px 0 8px}
+  .step p{font-size:14.5px;color:var(--muted);margin:0;line-height:1.5}
+  .step::after{content:"";position:absolute;top:6px;left:calc(50% + 26px);right:calc(-50% + 26px);
+    height:2px;background:var(--line)}
+  .step:last-child::after{display:none}
+
+  table{border-collapse:collapse;width:100%;font-size:17px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);border-bottom:1px solid var(--muted)}
+  td.p{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums}
+  .callout{border-left:3px solid var(--accent);background:var(--panel2);padding:16px 20px;
+    border-radius:0 12px 12px 0;font-size:16px;line-height:1.5;margin-top:18px}
+  .callout b{color:var(--accent-deep)}
+
+  .scn{border:1px solid var(--line);border-radius:12px;padding:22px;background:var(--panel2)}
+  .scn .amt{font-family:var(--mono);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums}
+  .scn.a .amt{color:var(--verify)}.scn.b .amt{color:var(--accent-deep)}.scn.c .amt{color:var(--warn)}
+  .scn .nm{font-weight:700;font-size:17px;margin-bottom:4px}
+  .scn p{font-size:14px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+
+  .tl{display:grid;gap:14px;flex:1;align-content:center}
+  .tl .ph{display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:center;
+    border:1px solid var(--line);border-radius:12px;padding:16px 20px;background:var(--panel2)}
+  .tl .ph .w{font-family:var(--mono);font-size:14px;color:var(--accent-deep);letter-spacing:.04em}
+  .tl .ph .d{font-size:16px;line-height:1.45}
+  .tl .ph .d b{font-weight:700}
+
+  .diagram{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0}
+  .diagram img{max-width:100%;max-height:100%;height:auto}
+
+  .acts{display:grid;gap:12px;flex:1;align-content:center}
+  .act{display:grid;grid-template-columns:auto 1fr;gap:18px;border:1px solid var(--line);
+    border-left:3px solid var(--accent);border-radius:0 12px 12px 0;padding:15px 20px;background:var(--panel2)}
+  .act .n{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--accent-deep)}
+  .act h3{font-size:18px;font-weight:700}.act p{margin:2px 0 0;font-size:15px;color:var(--muted)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .chip{font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:8px;
+    padding:8px 12px;background:var(--panel2);color:var(--ink)}
+  .status{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:20px}
+  .status::before{content:"";width:6px;height:6px;border-radius:50%}
+  .s-live{color:var(--verify);background:color-mix(in srgb,var(--verify) 12%,transparent)}
+  .s-live::before{background:var(--verify)}
+  .s-prod{color:var(--steel);background:color-mix(in srgb,var(--steel) 14%,transparent)}
+  .s-prod::before{background:var(--steel)}
+
+  /* chrome */
+  .hud{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;
+    display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12px;
+    color:var(--muted);background:color-mix(in srgb,var(--panel) 86%,transparent);
+    border:1px solid var(--line);border-radius:30px;padding:8px 16px;backdrop-filter:blur(8px)}
+  .hud button{font-family:var(--mono);font-size:12px;background:none;border:1px solid var(--line);
+    color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+  .hud button:hover{border-color:var(--accent);color:var(--accent-deep)}
+  .hud .count{font-variant-numeric:tabular-nums}
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:20;transition:width .25s}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .hint{position:fixed;top:14px;right:16px;font-family:var(--mono);font-size:11px;color:var(--muted);z-index:20}
+
+  @media (max-width:1360px){.stage{transform:scale(var(--fit,1));transform-origin:center}}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="hint">← → skaidrės · F visas ekranas · D tema</div>
+<div class="stage" id="stage">
+
+  <!-- 0 · title -->
+  <section class="slide active">
+    <img src="assets/logo-lockup.svg" alt="LabourMarket.ai" style="height:56px;width:auto"/>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="kick">PLATFORMOS MASTAS: EUROPA · DAUGIASEKTORĖ</div>
+      <h1 class="title" style="margin-top:16px;max-width:24ch">Europos darbo rinkos operacinė sistema</h1>
+      <p class="sub" style="max-width:66ch">Gyva, universali sistema, jungianti žmones, įgūdžius, darbo įrodymus, įmonių poreikius, projektus, komandas, įdarbinimą ir AI pagalbą — kad bet kuris verslas bet kuriame sektoriuje greičiau, tiksliau ir saugiau rastų, patikrintų ir augintų reikalingą darbo jėgą.</p>
+      <div class="chips" style="margin-top:22px">
+        <span class="chip">Daugiasektorė</span><span class="chip">Daugiarinkė</span>
+        <span class="chip">Pasitikėjimas iš „kodėl"</span><span class="chip">Pirmasis pilotas: konkretus sektorius ir rinka</span>
+      </div>
+    </div>
+    <div class="foot"><span>LabourMarket.ai</span><span>Vykdomoji prezentacija · v1</span></div>
+  </section>
+
+  <!-- 1 · problem -->
+  <section class="slide">
+    <div class="kick">01 · PROBLEMA</div>
+    <h2 class="head" style="max-width:22ch">Europos darbo rinka yra fragmentuota</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>Įgūdžiai, patirtis ir darbo istorija nėra patikimai perkeliami tarp įmonių, sektorių ir šalių</li>
+        <li>Įmonėms sunku rasti tinkamus žmones ir komandas</li>
+        <li>Darbuotojams sunku įrodyti realius gebėjimus ir patikimumą</li>
+        <li>Mokymo įstaigos, agentūros, darbdaviai ir valstybė veikia atskirose sistemose</li>
+      </ul>
+      <div class="card"><div class="kick">CENTRINIS KLAUSIMAS</div>
+        <h3 style="font-size:26px;margin-top:12px;line-height:1.2">„Kas yra tinkamas žmogus tinkamam darbui tinkamu laiku — ir <span class="accent">kodėl</span>?"</h3>
+        <p style="font-size:16px">Šiandien atsakymas remiasi CV, žodžiais ir subjektyviais reitingais. To nepakanka.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Europos mastas · sektoriams neutralu</span><span>01 / 24</span></div>
+  </section>
+
+  <!-- 2 · why fail -->
+  <section class="slide">
+    <div class="kick">02 · KODĖL ESAMOS SISTEMOS NEVEIKIA</div>
+    <h2 class="head">Atskiros sistemos, jokio bendro sluoksnio</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>CV ir savideklaracijos nepatikrinamos — ta pati „LinkedIn problema"</li>
+        <li>Žvaigždutės ir reitingai — perkami arba subjektyvūs</li>
+        <li>Įdarbinimas, mokymas, valdymas ir žvalgyba gyvena atskirai</li>
+        <li>Sprendimai daromi be „kodėl" — be atsekamo įrodymo</li>
+      </ul>
+      <div class="card">
+        <div class="kick">MŪSŲ POZICIJA</div>
+        <p style="font-size:19px;color:var(--ink);margin-top:12px;line-height:1.5">Įdarbinimas yra <b>pamatinė</b> funkcija — ne priešas. LabourMarket.ai prideda tai, ko trūksta: <span class="accent">bendrą operacinį sluoksnį</span> su patikrinamu pasitikėjimu.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Recruitment IS core — plius daugiau</span><span>02 / 24</span></div>
+  </section>
+
+  <!-- 3 · vision -->
+  <section class="slide">
+    <div class="kick">03 · VIZIJA</div>
+    <h2 class="head" style="max-width:24ch">Vienas operacinis sluoksnis visai darbo rinkai</h2>
+    <p class="sub" style="max-width:70ch">Profiliai + Įgūdžiai + Darbo įrodymai + Dokumentai + Prieinamumas + Įmonių poreikiai + Projektai + Komandos + Atitikimas + Komunikacija + AI pagalba + Auditas.</p>
+    <div class="chips" style="margin-top:26px">
+      <span class="chip">Žmonės</span><span class="chip">Įgūdžiai</span><span class="chip">Darbo įrodymai</span>
+      <span class="chip">Poreikiai</span><span class="chip">Projektai</span><span class="chip">Komandos</span>
+      <span class="chip">Atitikimas</span><span class="chip">AI pagalba</span><span class="chip">Auditas</span>
+    </div>
+    <div class="callout"><b>Pasitikėjimas ateina iš „kodėl".</b> Sistema turi paaiškinti sprendimus, ne tik juos rodyti — ir niekada nepatvirtina žmogaus vardu.</div>
+    <div class="foot"><span>Universalu · sektoriams neutralu</span><span>03 / 24</span></div>
+  </section>
+
+  <!-- 4 · how it works -->
+  <section class="slide">
+    <div class="kick">04 · KAIP VEIKIA PLATFORMA</div>
+    <h2 class="head">Tas pats branduolys · daug sektorių, daug rinkų</h2>
+    <div class="diagram"><img src="svg/platform-architecture.svg" alt="Platformos architektūra"/></div>
+    <div class="foot"><span>Statyba pažymėta kaip pirmasis pilotas</span><span>04 / 24</span></div>
+  </section>
+
+  <!-- 5 · worker journey -->
+  <section class="slide">
+    <div class="kick">05 · DARBUOTOJO KELIAS</div>
+    <h2 class="head">Realus darbas tampa perkeliamu įrodymu</h2>
+    <div class="journey">
+      <div class="step"><div class="dot"></div><div class="st">1 · Profilis</div><h3>Pradeda be įmonės</h3><p>Asmeninis profilis, daug profesijos kontekstų — bet kuriame sektoriuje.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">2 · Dienoraštis</div><h3>Fiksuoja darbą</h3><p>Trumpai, vietoje, savo kalba — realus užfiksuotas darbas.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">3 · Patvirtinimas</div><h3>Vadovas patvirtina</h3><p>Įgūdis tampa „✓ verifikuotas" — su „kodėl".</p></div>
+      <div class="step"><div class="dot"></div><div class="st">4 · Gyvas CV</div><h3>Įrodymas auga</h3><p>Perkeliamas tarp įmonių, sektorių ir šalių.</p></div>
+    </div>
+    <div class="foot"><span>Pavyzdys: statybų brigada — pirmasis pilotas</span><span>05 / 24</span></div>
+  </section>
+
+  <!-- 6 · employer journey -->
+  <section class="slide">
+    <div class="kick">06 · DARBDAVIO KELIAS</div>
+    <h2 class="head">Nuo poreikio iki paaiškinto sprendimo</h2>
+    <div class="journey">
+      <div class="step"><div class="dot"></div><div class="st">1 · Poreikis</div><h3>Aprašo poreikį</h3><p>Įgūdžiai, prieinamumas, vieta, sąlygos — bet kuriame sektoriuje.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">2 · Atradimas</div><h3>Randa žmones/komandas</h3><p>Riboti filtrai, anoniminės kortelės, sutikimu grįsta.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">3 · Atitikimas</div><h3>Mato „kodėl"</h3><p>Priežastys, trūkstami faktai, kietas ir minkštas atitikimas.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">4 · Kontaktas</div><h3>Susisiekia po sutikimo</h3><p>Kontaktų atskleidimas — tik po atskiro sutikimo.</p></div>
+    </div>
+    <div class="foot"><span>Pavyzdys: statybų įmonė — pirmasis pilotas</span><span>06 / 24</span></div>
+  </section>
+
+  <!-- 7 · agency journey -->
+  <section class="slide">
+    <div class="kick">07 · ĮDARBINIMO AGENTŪROS KELIAS</div>
+    <h2 class="head">Operacinis sluoksnis kandidatų srautui</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>Valdo kandidatų srautą, komandas ir įmonių poreikius vienoje vietoje</li>
+        <li>Paaiškinamas atitikimas pagreitina kokybišką atranką</li>
+        <li>Auditojami veiksmai · sutikimu grįstas kontaktas</li>
+        <li>Viena agentūra = daug darbuotojų — natūralus multiplikatorius</li>
+      </ul>
+      <div class="card"><div class="kick">VERTĖ</div>
+        <h3 style="font-size:24px;margin-top:12px">Ne prieš įdarbinimą — už jį</h3>
+        <p style="font-size:16px">Agentūros yra pagrindinis kanalas ir pasiūlos šaltinis, ne konkurentas platformai.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Sektoriams neutralu</span><span>07 / 24</span></div>
+  </section>
+
+  <!-- 8 · school -->
+  <section class="slide">
+    <div class="kick">08 · PROFESINĖ MOKYKLA / UNIVERSITETAS</div>
+    <h2 class="head">Tiltas tarp mokymo ir darbo</h2>
+    <div class="row">
+      <ul class="clean v">
+        <li>Mokinių ir absolventų realūs gebėjimai — perkeliamas įrodymas</li>
+        <li>Kvalifikacijų matomumas darbdaviams ir agentūroms</li>
+        <li>Grįžtamasis ryšys apie įgūdžių paklausą rinkoje</li>
+      </ul>
+      <div class="card"><div class="kick">REZULTATAS</div>
+        <h3 style="font-size:24px;margin-top:12px">Nuo pažymėjimo prie įrodymo</h3>
+        <p style="font-size:16px">Mokymo įstaiga tampa pripažįstamos kvalifikacijos šaltiniu bendroje sistemoje.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Sektoriams neutralu</span><span>08 / 24</span></div>
+  </section>
+
+  <!-- 9 · government -->
+  <section class="slide">
+    <div class="kick">09 · VERTĖ VALSTYBEI / MINISTERIJOMS</div>
+    <h2 class="head">Skaidri, privatumą sauganti darbo rinkos infrastruktūra</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>Ne-PII darbo rinkos įžvalgos — įgūdžių paklausos ir trūkumo signalai</li>
+        <li>Auditojamas, numatytai uždaras (default-closed) duomenų sluoksnis</li>
+        <li>Bendras standartas mokymui, agentūroms, darbdaviams ir valstybei</li>
+      </ul>
+      <div class="card"><div class="kick">PRINCIPAS</div>
+        <h3 style="font-size:24px;margin-top:12px">Privatumas pagal dizainą</h3>
+        <p style="font-size:16px">Įžvalgos be asmens duomenų. Verifikuota produkcijoje: PII analitika = 0.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Europos mastas</span><span>09 / 24</span></div>
+  </section>
+
+  <!-- 10 · trust architecture -->
+  <section class="slide">
+    <div class="kick">10 · PASITIKĖJIMO ARCHITEKTŪRA</div>
+    <h2 class="head">Pasitikėjimas įrodytas, ne pažadėtas</h2>
+    <div class="metrics">
+      <div class="metric"><div class="n">26/26</div><div class="l">autentifikuoti produkcijos testai praėjo</div></div>
+      <div class="metric"><div class="n">0</div><div class="l">PII analitikoje (nulis asmens duomenų)</div></div>
+      <div class="metric"><div class="n" style="color:var(--accent-deep)">RLS</div><div class="l">numatytai uždara · rašymai tik per saugias procedūras</div></div>
+      <div class="metric"><div class="n" style="color:var(--steel)">∞</div><div class="l">append-only auditas · neperrašoma istorija</div></div>
+    </div>
+    <div class="callout"><b>Priėmimas ≠ atskleidimas.</b> Kontaktų atskleidimas — visada atskiras, auditojamas sutikimas. Žmogus visada patvirtina; AI niekada nesiunčia jo vardu.</div>
+    <div class="foot"><span>Patvirtinta produkcijoje · main 3d1e6f00</span><span>10 / 24</span></div>
+  </section>
+
+  <!-- 11 · verified skills -->
+  <section class="slide">
+    <div class="kick">11 · VERIFIKUOTI ĮGŪDŽIAI</div>
+    <h2 class="head">Nuo žodžio prie įrodymo</h2>
+    <div class="diagram"><img src="svg/verification-model.svg" alt="Verifikacijos modelis"/></div>
+    <div class="foot"><span>Deklaruota → dienoraštis → vadovas → ✓ verifikuota</span><span>11 / 24</span></div>
+  </section>
+
+  <!-- 12 · work journal -->
+  <section class="slide">
+    <div class="kick">12 · DARBO DIENORAŠTIS</div>
+    <h2 class="head">Gyvas ciklas, kuris auga pats</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>Darbuotojas fiksuoja, ką realiai padarė — vietoje, savo kalba</li>
+        <li>Vadovas patvirtina įrašą ir įgūdžius, kuriuos jis įrodo</li>
+        <li>Įgūdis tampa verifikuotas · CV atsinaujina realiu laiku</li>
+        <li>Įmonė gauna savaime augantį, patikimą brigados gebėjimų įrašą</li>
+      </ul>
+      <div class="card"><div class="kick">SVARBU</div>
+        <h3 style="font-size:23px;margin-top:12px">Be papildomo administravimo</h3>
+        <p style="font-size:16px">Įrodymas kaupiasi vykstant darbui. 11–12 kalbų — kiekvienas savo kalba.</p>
+        <div style="margin-top:14px"><span class="status s-live">Gyva</span></div>
+      </div>
+    </div>
+    <div class="foot"><span>Sektoriams neutralu</span><span>12 / 24</span></div>
+  </section>
+
+  <!-- 13 · matching -->
+  <section class="slide">
+    <div class="kick">13 · PAAIŠKINAMAS ATITIKIMAS</div>
+    <h2 class="head">Sprendimas su „kodėl", ne su nežinia</h2>
+    <div class="diagram"><img src="svg/matching-engine.svg" alt="Paaiškinamas atitikimas"/></div>
+    <div class="foot"><span>Jokio „juodos dėžės" balo · jokių diskriminacinių laukų</span><span>13 / 24</span></div>
+  </section>
+
+  <!-- 14 · trust connect -->
+  <section class="slide">
+    <div class="kick">14 · TRUST CONNECT — KOMANDOS</div>
+    <h2 class="head">Ne tik žmonės — komandos ir brigados</h2>
+    <div class="cards g4" style="flex:1;align-content:center">
+      <div class="card"><h3>Narystė per kvietimą</h3><p>Sutikimas priimant — jokio automatinio pridėjimo.</p><div style="margin-top:12px"><span class="status s-prod">Prod</span></div></div>
+      <div class="card"><h3>Komandos profilis</h3><p>Prieinamumas, apgyvendinimas, transportas, sudėtis.</p><div style="margin-top:12px"><span class="status s-prod">Prod</span></div></div>
+      <div class="card"><h3>Darbdavio užklausos</h3><p>Auditojama būsenų mašina · jokio kontaktų nutekėjimo.</p><div style="margin-top:12px"><span class="status s-prod">Prod</span></div></div>
+      <div class="card"><h3>Komandų atitikimas</h3><p>Tie patys „kodėl" principai — komandos lygiu.</p><div style="margin-top:12px"><span class="status s-prod">Prod</span></div></div>
+    </div>
+    <div class="foot"><span>Pavyzdys: statybų brigada — pirmasis pilotas</span><span>14 / 24</span></div>
+  </section>
+
+  <!-- 15 · AI -->
+  <section class="slide">
+    <div class="kick">15 · AI ŽVALGYBOS SLUOKSNIS</div>
+    <h2 class="head">AI pagalba — žmogus visada patvirtina</h2>
+    <div class="row">
+      <ul class="clean">
+        <li>AI padeda struktūruoti profilius, CV ir įžvalgas — bet niekada nepatvirtina ir nesiunčia žmogaus vardu</li>
+        <li>Rinkos žvalgyba: ne-PII atlyginimų ir įgūdžių paklausos signalai su pasitikėjimo ir šviežumo ženklais</li>
+        <li>Išoriniai šaltiniai numatytai išjungti — įjungiami tik su aiškiu leidimu</li>
+      </ul>
+      <div class="card"><div class="kick">PRINCIPAS</div>
+        <h3 style="font-size:24px;margin-top:12px">Jokio netikro AI</h3>
+        <p style="font-size:16px">Nėra netikros verifikacijos ir nepažymėtų netikrų duomenų. Sąžiningumas virš blizgesio.</p>
+      </div>
+    </div>
+    <div class="foot"><span>Human-in-the-loop pagal dizainą</span><span>15 / 24</span></div>
+  </section>
+
+  <!-- 16 · pilot -->
+  <section class="slide">
+    <div class="kick">16 · PILOTO SISTEMA</div>
+    <h2 class="head">Realūs pilotai · išmatuoti rezultatai</h2>
+    <div class="journey">
+      <div class="step"><div class="dot"></div><div class="st">Kvietimas</div><h3>Piloto sukūrimas</h3><p>Dalyviai, organizacijų tipai, kohortos.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">Onboarding</div><h3>Žingsnių įvykiai</h3><p>Konversijos piltuvas · ne-PII analitika.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">Aktyvacija</div><h3>Pirma vertė</h3><p>Laikas-iki-vertės matavimas.</p></div>
+      <div class="step"><div class="dot"></div><div class="st">Rezultatas</div><h3>Auditojamas įrašas</h3><p>Kontaktai · samdos · rezultatų žurnalas.</p></div>
+    </div>
+    <div class="foot"><span>Kontroliuojamo realių vartotojų piloto parengtis</span><span>16 / 24</span></div>
+  </section>
+
+  <!-- 17 · operational dashboard -->
+  <section class="slide">
+    <div class="kick">17 · OPERACINIS VALDYMO KAMBARYS</div>
+    <h2 class="head">Viena vieta operacijoms</h2>
+    <div class="cards g3" style="flex:1;align-content:center">
+      <div class="card"><h3>Veikla · užduotys</h3><p>Planavimas ir kasdienės operacijos.</p></div>
+      <div class="card"><h3>CRM · poreikiai</h3><p>Įmonių poreikiai ir ryšiai.</p></div>
+      <div class="card"><h3>Projektų operacijos</h3><p>Priskyrimai, komandos, eiga.</p></div>
+      <div class="card"><h3>Dokumentai</h3><p>Kvalifikacijos ir statusai.</p></div>
+      <div class="card"><h3>Finansai</h3><p>Operaciniai įrašai.</p></div>
+      <div class="card"><h3>Žvalgyba</h3><p>Ne-PII rinkos įžvalgos.</p></div>
+    </div>
+    <div class="foot"><span>Gyva · 11–12 kalbų</span><span>17 / 24</span></div>
+  </section>
+
+  <!-- 18 · commercial -->
+  <section class="slide">
+    <div class="kick">18 · KOMERCINIS MODELIS</div>
+    <h2 class="head">Kelios auditorijos · kelios pajamų linijos</h2>
+    <table>
+      <thead><tr><th>Auditorija</th><th>Planas</th><th>€/mėn</th><th>Kam</th></tr></thead>
+      <tbody>
+        <tr><td>Asmenys</td><td>FREE · AI PLUS · VIP MEDIA</td><td class="p">0 · 9,99 · 24,99</td><td>Profilis, AI pagalba, matomumas</td></tr>
+        <tr><td>Įmonės</td><td>FREE · PROJECT LAUNCH</td><td class="p">0 · 99</td><td>Startinis pasiūlymas (matomas iki 2026-10-31)</td></tr>
+        <tr><td>Agentūros</td><td>START · GROWTH · SCALE</td><td class="p">99,99 · 249,99 · 499,99</td><td>Didžiausias vidutinis čekis</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Sąžininga riba:</b> self-serve mokėjimai dar neįjungti. Greičiausias kelias uždirbti — rankinės sąskaitos founding-pilotams pagal tas pačias kainas.</div>
+    <div class="foot"><span>Kainos nustatytos · mokėjimai owner-gated</span><span>18 / 24</span></div>
+  </section>
+
+  <!-- 19 · revenue -->
+  <section class="slide">
+    <div class="kick">19 · PAJAMŲ STRATEGIJA</div>
+    <h2 class="head">Pirmi pinigai be mokėjimų infrastruktūros</h2>
+    <div class="cols3" style="margin-top:12px">
+      <div class="scn a"><div class="nm">Konservatyvus</div><div class="amt">~€400/mėn</div><p>3 įmonių pilotai + 1 agentūra. Vien rankinės sąskaitos.</p></div>
+      <div class="scn b"><div class="nm">Bazinis</div><div class="amt">~€1 800/mėn</div><p>10 įmonių + 3 agentūros + keli AI Plus. Aktyvus pardavimas.</p></div>
+      <div class="scn c"><div class="nm">Agresyvus</div><div class="amt">~€5 500/mėn</div><p>25 įmonės + 8 agentūros + VIP + prenumeratos. Self-serve + referral.</p></div>
+    </div>
+    <div class="callout"><span class="tag">Prielaidos, ne prognozė</span> &nbsp;Skaičiai ~3 mėn., priklauso nuo mokėjimų įjungimo, pardavimo pastangų ir pasiūlos likvidumo. Planavimo orientyras.</div>
+    <div class="foot"><span>Iliustracija</span><span>19 / 24</span></div>
+  </section>
+
+  <!-- 20 · expansion -->
+  <section class="slide">
+    <div class="kick">20 · RINKŲ IR SEKTORIŲ PLĖTRA</div>
+    <h2 class="head">Nuo pirmojo piloto iki Europos infrastruktūros</h2>
+    <div class="diagram"><img src="svg/expansion-roadmap.svg" alt="Plėtros modelis"/></div>
+    <div class="foot"><span class="tag dir">Strateginė kryptis, ne patvirtinta prognozė</span><span>20 / 24</span></div>
+  </section>
+
+  <!-- 21 · roadmap -->
+  <section class="slide">
+    <div class="kick">21 · KELIO ŽEMĖLAPIS</div>
+    <h2 class="head">Fazės, ne pažadai</h2>
+    <div class="tl">
+      <div class="ph"><div class="w">DABAR</div><div class="d"><b>Kontroliuojamas pilotas.</b> Produktas gyvas produkcijoje; parengtis pirmiems realiems vartotojams.</div></div>
+      <div class="ph"><div class="w">TOLIAU</div><div class="d"><b>Pirmi pajamų pilotai + pasiūlos likvidumas.</b> Rankinės sąskaitos, pirmi verifikuoti profiliai, case study.</div></div>
+      <div class="ph"><div class="w">PO SRAUTO</div><div class="d"><b>Self-serve mokėjimai, vieša reklama, agentūrų kanalas.</b> Mastelis su mažesniu rankiniu darbu.</div></div>
+      <div class="ph"><div class="w">KRYPTIS</div><div class="d"><b>Plėtra į kitus sektorius ir EU rinkas</b> ta pačia platforma. <span class="tag dir">strateginė kryptis</span></div></div>
+    </div>
+    <div class="foot"><span>Sektoriams neutralu</span><span>21 / 24</span></div>
+  </section>
+
+  <!-- 22 · readiness -->
+  <section class="slide">
+    <div class="kick">22 · DABARTINĖ PARENGTIS</div>
+    <h2 class="head">Produktas brandus · pinigų srautas dar ne</h2>
+    <div class="diagram"><img src="svg/readiness-dashboard.svg" alt="Parengties suvestinė"/></div>
+    <div class="foot"><span>Kokybinis vertinimas · jokios išgalvotos statistikos</span><span>22 / 24</span></div>
+  </section>
+
+  <!-- 23 · next milestones -->
+  <section class="slide">
+    <div class="kick">23 · ARTIMIAUSI ŽINGSNIAI</div>
+    <h2 class="head">Didžiausias efektas · mažiausios pastangos</h2>
+    <div class="acts">
+      <div class="act"><div class="n">01</div><div><h3>Įjungti kontroliuojamą pilotą</h3><p>Pakviesti pirmus realius vartotojus — parengtis jau yra.</p></div></div>
+      <div class="act"><div class="n">02</div><div><h3>Imti pajamas rankine sąskaita</h3><p>Startinis pasiūlymas founding-pilotams — neblokuoti pajamų laukiant self-serve.</p></div></div>
+      <div class="act"><div class="n">03</div><div><h3>Užpildyti pasiūlą + 1 case study</h3><p>Pirmi verifikuoti profiliai; vienas išmatuotas rezultatas tampa pardavimo varikliu.</p></div></div>
+      <div class="act"><div class="n">04</div><div><h3>Po srauto — mastelis</h3><p>Self-serve mokėjimai, vieša reklama, agentūrų kanalas, plėtra į 2-ą sektorių/rinką.</p></div></div>
+    </div>
+    <div class="foot"><span>Sektoriams neutralu</span><span>23 / 24</span></div>
+  </section>
+
+  <!-- 24 · CTA -->
+  <section class="slide">
+    <div class="kick">24 · KVIETIMAS VEIKTI</div>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+      <h2 class="stmt">Bendra Europos darbo rinkos infrastruktūra prasideda nuo vieno piloto.</h2>
+      <p class="sub" style="max-width:64ch">Ministerijoms, mokykloms, darbdaviams, agentūroms, partneriams ir investuotojams — kvietimas paleisti pilotą pasirinktame sektoriuje ir rinkoje, ir kartu sukurti standartą.</p>
+      <div class="chips" style="margin-top:24px">
+        <span class="chip">Europa · daugiasektorė</span>
+        <span class="chip">Pirmasis pilotas: konkretus sektorius ir rinka</span>
+        <span class="chip">Pasitikėjimas iš „kodėl"</span>
+      </div>
+    </div>
+    <div class="foot"><span>LabourMarket.ai · Europos darbo rinkos operacinė sistema</span><span>24 / 24</span></div>
+  </section>
+
+</div>
+
+<div class="hud">
+  <button id="prev" aria-label="Ankstesnė">←</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot">25</span></span>
+  <button id="next" aria-label="Kita">→</button>
+  <button id="theme" aria-label="Tema">Tema</button>
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, tot=slides.length;
+  document.getElementById('tot').textContent=tot;
+  function fit(){
+    var s=Math.min(window.innerWidth/1320, window.innerHeight/780, 1);
+    document.documentElement.style.setProperty('--fit', s);
+  }
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach(function(s,x){s.classList.toggle('active',x===i)});
+    document.getElementById('cur').textContent=i+1;
+    document.getElementById('prog').style.width=((i+1)/tot*100)+'%';
+  }
+  document.getElementById('next').onclick=function(){show(i+1)};
+  document.getElementById('prev').onclick=function(){show(i-1)};
+  document.getElementById('theme').onclick=function(){
+    var r=document.documentElement, cur=r.getAttribute('data-theme');
+    var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+    var next = cur? (cur==='dark'?'light':'dark') : (dark?'light':'dark');
+    r.setAttribute('data-theme',next);
+  };
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){show(i+1);e.preventDefault();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);e.preventDefault();}
+    else if(e.key==='Home'){show(0);}
+    else if(e.key==='End'){show(tot-1);}
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();} else {document.exitFullscreen&&document.exitFullscreen();} }
+    else if(e.key==='d'||e.key==='D'){document.getElementById('theme').click();}
+  });
+  window.addEventListener('resize',fit); fit(); show(0);
+})();
+</script>
+</body>
+</html>

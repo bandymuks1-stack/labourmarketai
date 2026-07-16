@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-label="LabourMarket.ai logotipas">
+  <style>
+    :root{--ink:#0F1319;--accent:#2F55E6;--verify:#1C9A6A;--muted:#5A6676;--paper:#FFFFFF;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--accent:#5E82FF;--verify:#3FBE8B;--muted:#8894A6;--paper:#0A0E14;}}
+    .wm{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:800;letter-spacing:-0.02em;fill:var(--ink);}
+    .tld{fill:var(--accent);}
+    .sub{font-family:ui-monospace,"SF Mono",Consolas,monospace;letter-spacing:.16em;fill:var(--muted);}
+  </style>
+  <rect width="520" height="120" fill="none"/>
+  <!-- mark: connected nodes + verification tick -->
+  <g transform="translate(20,20)">
+    <rect x="0" y="0" width="80" height="80" rx="18" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <circle cx="26" cy="30" r="7" fill="var(--accent)"/>
+    <circle cx="54" cy="26" r="7" fill="none" stroke="var(--muted)" stroke-width="2.5"/>
+    <line x1="32" y1="31" x2="48" y2="27" stroke="var(--muted)" stroke-width="2.5"/>
+    <circle cx="30" cy="56" r="7" fill="none" stroke="var(--muted)" stroke-width="2.5"/>
+    <line x1="27" y1="37" x2="29" y2="49" stroke="var(--muted)" stroke-width="2.5"/>
+    <!-- verify tick -->
+    <circle cx="56" cy="56" r="13" fill="var(--verify)"/>
+    <path d="M50 56 l4 4 l8 -9" fill="none" stroke="var(--paper)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text class="wm" x="124" y="58" font-size="34">LabourMarket<tspan class="tld">.ai</tspan></text>
+  <text class="sub" x="126" y="86" font-size="12">EUROPOS DARBO RINKOS OPERACINĖ SISTEMA</text>
+</svg>

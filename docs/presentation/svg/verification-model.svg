@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-label="Verifikacijos modelis — deklaruota iki verifikuota">
+  <style>
+    :root{--ink:#0F1319;--paper:#FFFFFF;--panel:#F6F8FB;--line:#D5DCE6;--muted:#5A6676;--accent:#2F55E6;--steel:#41506A;--verify:#1C9A6A;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--line:#232E3E;--muted:#8894A6;--accent:#5E82FF;--steel:#7286A6;--verify:#3FBE8B;}}
+    .t{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+    .m{font-family:ui-monospace,"SF Mono",Consolas,monospace;}
+    .k{fill:var(--muted);letter-spacing:.14em;}
+    .h{fill:var(--ink);font-weight:700;}
+    .lbl{fill:var(--ink);} .mut{fill:var(--muted);}
+    .card{fill:var(--panel);stroke:var(--line);stroke-width:1.5;}
+    .verc{fill:var(--panel);stroke:var(--verify);stroke-width:2;}
+    .ln{stroke:var(--line);stroke-width:1.5;fill:none;}
+    .arw{stroke:var(--accent);stroke-width:2;fill:none;}
+    .verf{fill:var(--verify);}
+  </style>
+  <rect width="1200" height="500" fill="var(--paper)"/>
+  <text class="m k" x="64" y="60" font-size="13">VERIFIKACIJOS MODELIS · KODĖL PASITIKĖTI</text>
+  <text class="t h" x="64" y="98" font-size="30">Nuo žodžio prie įrodymo</text>
+
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3.2" orient="auto">
+      <path d="M0 0 L7 3.2 L0 6.4" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    </marker>
+  </defs>
+
+  <!-- step 1 -->
+  <g class="t">
+    <rect class="card" x="64" y="170" width="230" height="130" rx="12"/>
+    <text class="m k" x="86" y="200" font-size="11">1 · SAVIDEKLARACIJA</text>
+    <text class="h" x="86" y="234" font-size="19">Deklaruota</text>
+    <text class="mut" x="86" y="262" font-size="14">„Moku X"</text>
+    <text class="m mut" x="86" y="286" font-size="11">dar ne įrodymas</text>
+  </g>
+  <line class="arw" x1="294" y1="235" x2="352" y2="235" marker-end="url(#ah)"/>
+
+  <!-- step 2 -->
+  <g class="t">
+    <rect class="card" x="356" y="170" width="230" height="130" rx="12"/>
+    <text class="m k" x="378" y="200" font-size="11">2 · ĮRODYMAS</text>
+    <text class="h" x="378" y="234" font-size="19">Darbo dienoraštis</text>
+    <text class="mut" x="378" y="262" font-size="14">realus užfiksuotas darbas</text>
+    <text class="m mut" x="378" y="286" font-size="11">vietoje · savo kalba</text>
+  </g>
+  <line class="arw" x1="586" y1="235" x2="644" y2="235" marker-end="url(#ah)"/>
+
+  <!-- step 3 -->
+  <g class="t">
+    <rect class="card" x="648" y="170" width="230" height="130" rx="12"/>
+    <text class="m k" x="670" y="200" font-size="11">3 · PATVIRTINIMAS</text>
+    <text class="h" x="670" y="234" font-size="19">Vadovas patvirtina</text>
+    <text class="mut" x="670" y="262" font-size="14">buvęs objekte</text>
+    <text class="m mut" x="670" y="286" font-size="11">ne AI · žmogus</text>
+  </g>
+  <line class="arw" x1="878" y1="235" x2="936" y2="235" marker-end="url(#ah)"/>
+
+  <!-- step 4 verified -->
+  <g class="t">
+    <rect class="verc" x="940" y="170" width="196" height="130" rx="12"/>
+    <text class="m k" x="962" y="200" font-size="11" fill="var(--verify)">4 · REZULTATAS</text>
+    <circle class="verf" cx="972" cy="230" r="9"/>
+    <path d="M967 230 l3.5 3.5 l6 -7" stroke="var(--paper)" stroke-width="2" fill="none"/>
+    <text class="h" x="990" y="236" font-size="19">Verifikuota</text>
+    <text class="mut" x="962" y="264" font-size="14">įgūdis su „kodėl"</text>
+    <text class="m mut" x="962" y="288" font-size="11">gyvame CV</text>
+  </g>
+
+  <!-- audit rail -->
+  <rect x="64" y="352" width="1072" height="56" rx="10" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <text class="m" x="86" y="378" font-size="12" fill="var(--verify)">APPEND-ONLY AUDITAS</text>
+  <text class="m mut" x="86" y="396" font-size="11">kiekvienas žingsnis neperrašomas · auditojamas · numatytasis matomumas uždaras (default-closed)</text>
+  <text class="m mut" x="64" y="446" font-size="11">Ne savideklaracija · ne pirktas reitingas · pirmą kartą įgūdis turi „kodėl"</text>
+</svg>

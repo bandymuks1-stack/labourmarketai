@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" role="img" aria-label="Parengties suvestinė">
+  <style>
+    :root{--ink:#0F1319;--paper:#FFFFFF;--panel:#F6F8FB;--line:#D5DCE6;--muted:#5A6676;--accent:#2F55E6;--verify:#1C9A6A;--warn:#B7791F;--alert:#B0472F;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--line:#232E3E;--muted:#8894A6;--accent:#5E82FF;--verify:#3FBE8B;--warn:#D8A24A;--alert:#D06A52;}}
+    .t{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+    .m{font-family:ui-monospace,"SF Mono",Consolas,monospace;}
+    .k{fill:var(--muted);letter-spacing:.14em;} .h{fill:var(--ink);font-weight:700;}
+    .lbl{fill:var(--ink);} .mut{fill:var(--muted);}
+    .card{fill:var(--panel);stroke:var(--line);stroke-width:1.5;}
+    .track{fill:none;stroke:var(--line);stroke-width:8;}
+  </style>
+  <rect width="1200" height="470" fill="var(--paper)"/>
+  <text class="m k" x="64" y="60" font-size="13">PARENGTIES SUVESTINĖ · KOKYBINIS VERTINIMAS (NE IŠGALVOTA STATISTIKA)</text>
+  <text class="t h" x="64" y="98" font-size="30">Produktas brandus · pinigų srautas dar ne</text>
+
+  <!-- five arc gauges -->
+  <g class="t" transform="translate(0,150)">
+    <!-- gauge template: arc 3/4, colored fill -->
+    <!-- 1 aukšta -->
+    <g transform="translate(120,0)">
+      <path class="track" d="M-52 34 A 60 60 0 1 1 52 34"/>
+      <path d="M-52 34 A 60 60 0 1 1 52 34" fill="none" stroke="var(--verify)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="40"/>
+      <text class="m" x="0" y="8" font-size="13" text-anchor="middle" fill="var(--verify)">AUKŠTA</text>
+      <text class="t lbl" x="0" y="72" font-size="13" text-anchor="middle">Produkto funkcijos</text>
+    </g>
+    <!-- 2 aukšta -->
+    <g transform="translate(340,0)">
+      <path class="track" d="M-52 34 A 60 60 0 1 1 52 34"/>
+      <path d="M-52 34 A 60 60 0 1 1 52 34" fill="none" stroke="var(--verify)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="28"/>
+      <text class="m" x="0" y="8" font-size="13" text-anchor="middle" fill="var(--verify)">AUKŠTA</text>
+      <text class="t lbl" x="0" y="72" font-size="13" text-anchor="middle">Pasitikėjimas / atitiktis</text>
+    </g>
+    <!-- 3 ankstyva -->
+    <g transform="translate(560,0)">
+      <path class="track" d="M-52 34 A 60 60 0 1 1 52 34"/>
+      <path d="M-52 34 A 60 60 0 1 1 52 34" fill="none" stroke="var(--alert)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="205"/>
+      <text class="m" x="0" y="8" font-size="12" text-anchor="middle" fill="var(--alert)">ANKSTYVA</text>
+      <text class="t lbl" x="0" y="72" font-size="13" text-anchor="middle">Monetizacijos infra</text>
+    </g>
+    <!-- 4 ankstyva -->
+    <g transform="translate(780,0)">
+      <path class="track" d="M-52 34 A 60 60 0 1 1 52 34"/>
+      <path d="M-52 34 A 60 60 0 1 1 52 34" fill="none" stroke="var(--alert)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="215"/>
+      <text class="m" x="0" y="8" font-size="12" text-anchor="middle" fill="var(--alert)">ANKSTYVA</text>
+      <text class="t lbl" x="0" y="72" font-size="13" text-anchor="middle">Paklausa / pasiūla</text>
+    </g>
+    <!-- 5 vidutine -->
+    <g transform="translate(1000,0)">
+      <path class="track" d="M-52 34 A 60 60 0 1 1 52 34"/>
+      <path d="M-52 34 A 60 60 0 1 1 52 34" fill="none" stroke="var(--warn)" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="180"/>
+      <text class="m" x="0" y="8" font-size="12" text-anchor="middle" fill="var(--warn)">VIDUTINĖ</text>
+      <text class="t lbl" x="0" y="72" font-size="13" text-anchor="middle">Go-to-market</text>
+    </g>
+  </g>
+
+  <line x1="64" y1="330" x2="1136" y2="330" stroke="var(--line)" stroke-width="1.5"/>
+  <text class="m k" x="64" y="366" font-size="12">ĮRODYMAI (PATVIRTINTA PRODUKCIJOJE)</text>
+  <g class="m" font-size="13" fill="var(--ink)">
+    <text x="64" y="398">26/26 autentifikuoti testai</text>
+    <text x="330" y="398">PII analitika = 0</text>
+    <text x="560" y="398">RLS numatytai uždara</text>
+    <text x="820" y="398">11–12 kalbų · main 3d1e6f00</text>
+  </g>
+  <text class="m mut" x="64" y="440" font-size="11">Kokybinės etiketės (Aukšta/Vidutinė/Ankstyva) — ne procentai · jokios išgalvotos statistikos</text>
+</svg>

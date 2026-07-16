@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="Plėtros modelis — sektoriai ir rinkos">
+  <style>
+    :root{--ink:#0F1319;--paper:#FFFFFF;--panel:#F6F8FB;--panel2:#EEF2F7;--line:#D5DCE6;--muted:#5A6676;--accent:#2F55E6;--steel:#41506A;--verify:#1C9A6A;--warn:#B7791F;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--panel2:#161E2B;--line:#232E3E;--muted:#8894A6;--accent:#5E82FF;--steel:#7286A6;--verify:#3FBE8B;--warn:#D8A24A;}}
+    .t{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+    .m{font-family:ui-monospace,"SF Mono",Consolas,monospace;}
+    .k{fill:var(--muted);letter-spacing:.14em;} .h{fill:var(--ink);font-weight:700;}
+    .lbl{fill:var(--ink);} .mut{fill:var(--muted);}
+    .card{fill:var(--panel);stroke:var(--line);stroke-width:1.5;}
+    .step{fill:var(--panel2);stroke:var(--line);stroke-width:1.5;}
+  </style>
+  <rect width="1200" height="520" fill="var(--paper)"/>
+  <text class="m k" x="64" y="60" font-size="13">PLĖTROS MODELIS · STRATEGINĖ KRYPTIS, NE PATVIRTINTA PROGNOZĖ</text>
+  <text class="t h" x="64" y="98" font-size="30">Nuo pirmojo piloto iki Europos infrastruktūros</text>
+
+  <defs>
+    <marker id="ea" markerWidth="11" markerHeight="11" refX="7" refY="3.4" orient="auto">
+      <path d="M0 0 L7 3.4 L0 6.8" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    </marker>
+  </defs>
+
+  <!-- market track -->
+  <text class="m k" x="64" y="150" font-size="12">RINKOS</text>
+  <g class="t">
+    <rect class="card" x="64"  y="164" width="232" height="86" rx="12"/>
+    <text class="h" x="84" y="198" font-size="16">Pirmasis pilotas</text>
+    <text class="m mut" x="84" y="222" font-size="11">viena startinė rinka (pvz., LT)</text>
+    <text class="m mut" x="84" y="240" font-size="11">pilotavimo vieta</text>
+
+    <rect class="card" x="360" y="164" width="232" height="86" rx="12"/>
+    <text class="h" x="380" y="198" font-size="16">Baltijos + Beniliuksas</text>
+    <text class="m mut" x="380" y="222" font-size="11">gretimos EU rinkos</text>
+
+    <rect class="card" x="656" y="164" width="232" height="86" rx="12"/>
+    <text class="h" x="676" y="198" font-size="16">Vokietija + Š. Europa</text>
+    <text class="m mut" x="676" y="222" font-size="11">didesnės rinkos</text>
+
+    <rect class="card" x="952" y="164" width="184" height="86" rx="12"/>
+    <text class="h" x="972" y="198" font-size="16">Europa</text>
+    <text class="m mut" x="972" y="222" font-size="11">bendra infrastruktūra</text>
+  </g>
+  <g stroke="var(--accent)" stroke-width="2" fill="none">
+    <line x1="296" y1="207" x2="356" y2="207" marker-end="url(#ea)"/>
+    <line x1="592" y1="207" x2="652" y2="207" marker-end="url(#ea)"/>
+    <line x1="888" y1="207" x2="948" y2="207" marker-end="url(#ea)"/>
+  </g>
+
+  <!-- sector track -->
+  <text class="m k" x="64" y="316" font-size="12">SEKTORIAI</text>
+  <g class="t m" font-size="13" fill="var(--ink)">
+    <g>
+      <rect class="step" x="64" y="330" width="150" height="66" rx="10"/>
+      <text x="80" y="360">Statyba</text><text class="mut" x="80" y="380" font-size="10">pirmasis pilotas</text>
+    </g>
+    <rect class="step" x="238" y="330" width="140" height="66" rx="10"/><text x="254" y="368">Gamyba</text>
+    <rect class="step" x="402" y="330" width="150" height="66" rx="10"/><text x="418" y="368">Logistika</text>
+    <rect class="step" x="576" y="330" width="180" height="66" rx="10"/><text x="592" y="368">Tech. profesijos</text>
+    <rect class="step" x="780" y="330" width="200" height="66" rx="10"/><text x="796" y="368">Priežiūra · paslaugos</text>
+    <rect class="step" x="1004" y="330" width="132" height="66" rx="10"/><text x="1020" y="368">Kiti…</text>
+  </g>
+  <g stroke="var(--accent)" stroke-width="2" fill="none">
+    <line x1="214" y1="363" x2="234" y2="363" marker-end="url(#ea)"/>
+    <line x1="378" y1="363" x2="398" y2="363" marker-end="url(#ea)"/>
+    <line x1="552" y1="363" x2="572" y2="363" marker-end="url(#ea)"/>
+    <line x1="756" y1="363" x2="776" y2="363" marker-end="url(#ea)"/>
+    <line x1="980" y1="363" x2="1000" y2="363" marker-end="url(#ea)"/>
+  </g>
+
+  <text class="m mut" x="64" y="452" font-size="11">Tas pats branduolys · pirmasis vertikalas → keli sektoriai → kelios rinkos → bendra EU darbo rinkos infrastruktūra</text>
+  <text class="m" x="64" y="478" font-size="11" fill="var(--warn)">Schema rodo kryptį ir logiką, ne patvirtintą laiką ar rezultatą</text>
+</svg>

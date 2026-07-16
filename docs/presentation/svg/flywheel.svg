@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" role="img" aria-label="Pasitikėjimo duomenų flywheel">
+  <style>
+    :root{--ink:#0F1319;--paper:#FFFFFF;--panel:#F6F8FB;--line:#D5DCE6;--muted:#5A6676;--accent:#2F55E6;--steel:#41506A;--verify:#1C9A6A;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--line:#232E3E;--muted:#8894A6;--accent:#5E82FF;--steel:#7286A6;--verify:#3FBE8B;}}
+    .t{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+    .m{font-family:ui-monospace,"SF Mono",Consolas,monospace;}
+    .k{fill:var(--muted);letter-spacing:.14em;} .h{fill:var(--ink);font-weight:700;}
+    .lbl{fill:var(--ink);} .mut{fill:var(--muted);}
+    .node{fill:var(--panel);stroke:var(--line);stroke-width:1.5;}
+    .ring{stroke:var(--accent);stroke-width:2.5;fill:none;}
+  </style>
+  <rect width="900" height="620" fill="var(--paper)"/>
+  <text class="m k" x="64" y="60" font-size="13">PASITIKĖJIMO DUOMENŲ FLYWHEEL</text>
+  <text class="t h" x="64" y="98" font-size="30">Kiekvienas ciklas stiprina kitą</text>
+
+  <!-- ring arc with arrow -->
+  <defs>
+    <marker id="fa" markerWidth="12" markerHeight="12" refX="6" refY="4" orient="auto">
+      <path d="M0 0 L8 4 L0 8" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    </marker>
+  </defs>
+  <circle class="ring" cx="450" cy="380" r="180" stroke-dasharray="1055" stroke-dashoffset="60" marker-end="url(#fa)" transform="rotate(-8 450 380)"/>
+
+  <!-- 4 nodes -->
+  <g class="t">
+    <!-- top -->
+    <rect class="node" x="330" y="150" width="240" height="80" rx="12"/>
+    <text class="h" x="450" y="184" font-size="16" text-anchor="middle">Daugiau verifikuotų įrodymų</text>
+    <text class="m mut" x="450" y="208" font-size="11" text-anchor="middle">darbo dienoraštis + patvirtinimas</text>
+
+    <!-- right -->
+    <rect class="node" x="640" y="330" width="220" height="90" rx="12"/>
+    <text class="h" x="750" y="366" font-size="16" text-anchor="middle">Geresnis atitikimas</text>
+    <text class="m mut" x="750" y="390" font-size="11" text-anchor="middle">tikslesnis · su „kodėl"</text>
+
+    <!-- bottom -->
+    <rect class="node" x="330" y="530" width="240" height="80" rx="12"/>
+    <text class="h" x="450" y="564" font-size="16" text-anchor="middle">Daugiau darbo ir vertės</text>
+    <text class="m mut" x="450" y="588" font-size="11" text-anchor="middle">įmonėms · agentūroms · žmonėms</text>
+
+    <!-- left -->
+    <rect class="node" x="40" y="330" width="220" height="90" rx="12"/>
+    <text class="h" x="150" y="366" font-size="16" text-anchor="middle">Daugiau dalyvių</text>
+    <text class="m mut" x="150" y="390" font-size="11" text-anchor="middle">darbdaviai · agentūros · mokyklos</text>
+  </g>
+
+  <!-- center -->
+  <circle cx="450" cy="380" r="70" fill="var(--panel)" stroke="var(--verify)" stroke-width="2"/>
+  <text class="m k" x="450" y="368" font-size="11" text-anchor="middle" fill="var(--verify)">BRANDUOLYS</text>
+  <text class="t h" x="450" y="392" font-size="15" text-anchor="middle">Pasitikėjimas</text>
+  <text class="t mut" x="450" y="412" font-size="12" text-anchor="middle">iš „kodėl"</text>
+</svg>

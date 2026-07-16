@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-label="Paaiškinamas atitikimas">
+  <style>
+    :root{--ink:#0F1319;--paper:#FFFFFF;--panel:#F6F8FB;--panel2:#EEF2F7;--line:#D5DCE6;--muted:#5A6676;--accent:#2F55E6;--steel:#41506A;--verify:#1C9A6A;--warn:#B7791F;--alert:#B0472F;}
+    @media (prefers-color-scheme:dark){:root{--ink:#EAEEF5;--paper:#0A0E14;--panel:#111722;--panel2:#161E2B;--line:#232E3E;--muted:#8894A6;--accent:#5E82FF;--steel:#7286A6;--verify:#3FBE8B;--warn:#D8A24A;--alert:#D06A52;}}
+    .t{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+    .m{font-family:ui-monospace,"SF Mono",Consolas,monospace;}
+    .k{fill:var(--muted);letter-spacing:.14em;} .h{fill:var(--ink);font-weight:700;}
+    .lbl{fill:var(--ink);} .mut{fill:var(--muted);}
+    .card{fill:var(--panel);stroke:var(--line);stroke-width:1.5;}
+    .ln{stroke:var(--line);stroke-width:1.5;fill:none;}
+  </style>
+  <rect width="1200" height="560" fill="var(--paper)"/>
+  <text class="m k" x="64" y="60" font-size="13">PAAIŠKINAMAS ATITIKIMAS · JOKIO „JUODOS DĖŽĖS" BALO</text>
+  <text class="t h" x="64" y="98" font-size="30">Sprendimas su „kodėl", ne su nežinia</text>
+
+  <!-- inputs -->
+  <g class="t">
+    <rect class="card" x="64" y="150" width="250" height="120" rx="12"/>
+    <text class="m k" x="86" y="180" font-size="11">POREIKIS</text>
+    <text class="h" x="86" y="212" font-size="17">Darbdavio reikalavimai</text>
+    <text class="m mut" x="86" y="238" font-size="11">įgūdžiai · prieinamumas</text>
+    <text class="m mut" x="86" y="256" font-size="11">vieta · kalbos · sąlygos</text>
+
+    <rect class="card" x="64" y="296" width="250" height="120" rx="12"/>
+    <text class="m k" x="86" y="326" font-size="11">PASIŪLA</text>
+    <text class="h" x="86" y="358" font-size="17">Žmogus arba komanda</text>
+    <text class="m mut" x="86" y="384" font-size="11">verifikuoti įgūdžiai</text>
+    <text class="m mut" x="86" y="402" font-size="11">įrodymai · statusas</text>
+  </g>
+  <path class="ln" d="M314 210 C 360 210 360 283 404 283"/>
+  <path class="ln" d="M314 356 C 360 356 360 283 404 283"/>
+
+  <!-- engine -->
+  <rect class="card" x="404" y="196" width="300" height="174" rx="14"/>
+  <text class="m k" x="428" y="226" font-size="11">DETERMINISTINIS VARIKLIS</text>
+  <g class="t m" font-size="13">
+    <circle cx="440" cy="252" r="5" fill="var(--alert)"/><text class="lbl" x="456" y="257">Privaloma — kietas blokas</text>
+    <circle cx="440" cy="284" r="5" fill="var(--accent)"/><text class="lbl" x="456" y="289">Pageidautina — stiprumas</text>
+    <circle cx="440" cy="316" r="5" fill="var(--warn)"/><text class="lbl" x="456" y="321">Nežinoma — trūkstamas faktas</text>
+    <circle cx="440" cy="348" r="5" fill="var(--muted)"/><text class="lbl" x="456" y="353">Konfliktas — aiškiai parodytas</text>
+  </g>
+  <path class="ln" d="M704 283 H 748"/>
+
+  <!-- output -->
+  <rect class="card" x="748" y="150" width="388" height="266" rx="14"/>
+  <text class="m k" x="772" y="180" font-size="11">PAAIŠKINTAS REZULTATAS</text>
+  <text class="t h" x="772" y="212" font-size="18">Kodėl tinka · kodėl ne</text>
+  <g class="t" font-size="14" fill="var(--ink)">
+    <text x="772" y="248">· Atitikimo priežastys — įvardytos</text>
+    <text x="772" y="276">· Trūkstami faktai — kuri pusė ką turi pateikti</text>
+    <text x="772" y="304">· Kietas trūkumas negali tapti stipriu atitikimu</text>
+    <text x="772" y="332">· „Nėra duomenų" ≠ „netinka"</text>
+    <text x="772" y="360">· Jokių diskriminacinių laukų (amžius/lytis/tautybė)</text>
+  </g>
+  <text class="m mut" x="772" y="392" font-size="11">Kitas žingsnis visada aiškus</text>
+
+  <text class="m mut" x="64" y="452" font-size="11">Tie patys principai — žmogui ir komandai · sektoriams neutralu</text>
+  <line class="ln" x1="64" y1="472" x2="1136" y2="472"/>
+  <text class="m mut" x="64" y="502" font-size="11">Verifikuota produkcijoje: sutikimu grįstas matomumas · PII analitika = 0 · RLS numatytai uždara</text>
+</svg>
