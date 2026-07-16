@@ -9,6 +9,11 @@ import {
   isShortlistedForContact,
   type CommunicationRequestDecision,
 } from "@/lib/communication/communication-eligibility";
+import {
+  CONVERSATION_REQUEST_LIMITS,
+  evaluateRequestBudget,
+  rollingDayFloorIso,
+} from "@/lib/limits/request-rate-limits";
 
 /**
  * Step 4A — company → worker "request to communicate" from the scouting surface.
@@ -37,7 +42,7 @@ function asAny<T>(c: T): any {
 
 export type RequestWorkerConversationResult =
   | { ok: true; conversationId: string }
-  | { ok: false; reason: CommunicationRequestDecision | "not_authenticated" | "worker_unavailable" | "needs_migration" | "error" };
+  | { ok: false; reason: CommunicationRequestDecision | "not_authenticated" | "worker_unavailable" | "needs_migration" | "rate_limited" | "error" };
 
 export async function requestWorkerConversationAction(input: {
   locale: string;
@@ -52,6 +57,32 @@ export async function requestWorkerConversationAction(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, reason: "not_authenticated" };
+
+  // 0) Bounded request budget (Wagon 1): max 30 conversations opened by this
+  //    account in the rolling last 24h, counted over the caller's own
+  //    RLS-visible conversations. FAILS CLOSED on an unreadable count. The
+  //    conversation path has no RPC seam, so this cap is app-layer only
+  //    (stated honestly in the 20260716121000 draft migration).
+  let recentConversations: number | null = null;
+  try {
+    const { count, error: countError } = await asAny(supabase)
+      .from("conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", user.id)
+      .gt("created_at", rollingDayFloorIso());
+    recentConversations = countError
+      ? null
+      : typeof count === "number"
+        ? count
+        : null;
+  } catch {
+    recentConversations = null;
+  }
+  const budget = evaluateRequestBudget(
+    { openCount: null, last24hCount: recentConversations },
+    CONVERSATION_REQUEST_LIMITS,
+  );
+  if (!budget.allowed) return { ok: false, reason: "rate_limited" };
 
   // 1) Own demand (RLS also enforces profile_id = auth.uid()).
   const { data: demand } = await asAny(supabase)
