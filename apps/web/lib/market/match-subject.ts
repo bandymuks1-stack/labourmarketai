@@ -55,7 +55,7 @@ export async function buildSupplyCandidates(
   const { data: workers, error } = await asAny(supabase)
     .from("workers")
     .select(
-      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type, created_at, updated_at",
+      "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type, experience_years, created_at, updated_at",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -225,6 +225,9 @@ export async function buildSupplyCandidates(
         // stated their form (workers.preferred_contract_type is applied prod
         // schema — see gap map Capability B).
         preferredContractType: (w.preferred_contract_type as string | null) ?? null,
+        // Wagon 4: evaluated only when the demand author set a
+        // requirement_priorities.min_experience tier.
+        experienceYears: (w.experience_years as number | null) ?? null,
         // Contract v2.1 mirrored facts (human-gated MP-1/MP-2 stores;
         // pre-apply they read back undefined/null = honest "not stated").
         languageLevels: languagesByWorker.get(w.id as string) ?? null,

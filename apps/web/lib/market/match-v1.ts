@@ -184,6 +184,9 @@ export interface MatchSubject {
   readonly weekendShiftsOk?: boolean | null;
   /** workers.overtime_ok — tri-state; null = not stated. */
   readonly overtimeOk?: boolean | null;
+  /** workers.experience_years — evaluated ONLY when the demand author set a
+   *  requirement_priorities.min_experience tier (Wagon 4); null = not stated. */
+  readonly experienceYears?: number | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -664,6 +667,12 @@ export function matchWorkerToNeed(
   //    absence stays lenient: unknown, never a block). ──────────────────────
   const v2 = need.structuredV2 ?? null;
 
+  // Wagon 4: author-selected mandatory/preferred tiers. An ABSENT map keeps
+  // every hardcoded default below exactly as-is (calc "2.2" ≡ "2.1" then —
+  // guard-tested). A tier only ever RECLASSIFIES a requirement the author
+  // actually stated; it never invents one.
+  const priorities = v2?.requirement_priorities ?? null;
+
   // Compensation vs the worker's stated minimum. Hard block ONLY when both
   // sides state comparable numbers and the gap exceeds the 15% window.
   const comp = compareCompensationV2(v2, subject.salaryMinEur);
@@ -823,6 +832,16 @@ export function matchWorkerToNeed(
         outcome: "negotiable",
         source: langDemandSource,
       });
+    } else if (langCmp.kind === "negotiable_preferred_gap") {
+      // Author marked secondary languages "preferred" — the failed extra
+      // language is a discussion point, never a block (tier provenance kept).
+      negotiables.push({
+        criterion: "language",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: langDemandSource,
+        authorMarked: true,
+      });
     } else if (langCmp.kind === "hard_not_met") {
       hardBlock = true;
       blocking.push({
@@ -840,12 +859,17 @@ export function matchWorkerToNeed(
     }
   }
 
-  // 2) Driving-licence categories — hard when both sides stated: every
-  //    required category must be held. Unstated worker licences (store
+  // 2) Driving-licence categories — hard when both sides stated (default):
+  //    every required category must be held. Unstated worker licences (store
   //    unapplied, or an empty array) stay a worker-side missing fact.
+  //    Wagon 4: an author-set "preferred" tier demotes a miss to a discussion
+  //    point (and a hold to a weighted strength).
   const requiredLicences = v2?.transport?.licence_categories ?? [];
   if (requiredLicences.length > 0) {
     const licenceSource = "customer_requests.payload.structured_v2.transport.licence_categories";
+    const licenceTier = priorities?.licence_categories ?? null;
+    const licenceIsHard = licenceTier === null || licenceTier === "mandatory";
+    const licenceAuthorMarked = licenceTier !== null;
     const held = subject.drivingLicenceCategories;
     if (held == null || held.length === 0) {
       missingFacts.push({
@@ -857,19 +881,39 @@ export function matchWorkerToNeed(
       const heldSet = new Set(held.map((c) => c.trim().toUpperCase()));
       const missingCats = requiredLicences.filter((c) => !heldSet.has(c));
       if (missingCats.length === 0) {
-        matchedHard.push({
-          criterion: "licence_categories",
-          class: "hard",
-          outcome: "met",
-          source: licenceSource,
-        });
-      } else {
+        if (licenceIsHard) {
+          matchedHard.push({
+            criterion: "licence_categories",
+            class: "hard",
+            outcome: "met",
+            source: licenceSource,
+            ...(licenceAuthorMarked ? { authorMarked: true } : {}),
+          });
+        } else {
+          strengths.push({
+            criterion: "licence_categories",
+            class: "weighted",
+            outcome: "met",
+            source: licenceSource,
+            authorMarked: true,
+          });
+        }
+      } else if (licenceIsHard) {
         hardBlock = true;
         blocking.push({
           criterion: "licence_categories",
           class: "hard",
           outcome: "not_met",
           source: licenceSource,
+          ...(licenceAuthorMarked ? { authorMarked: true } : {}),
+        });
+      } else {
+        negotiables.push({
+          criterion: "licence_categories",
+          class: "negotiable",
+          outcome: "negotiable",
+          source: licenceSource,
+          authorMarked: true,
         });
       }
     }
@@ -877,26 +921,33 @@ export function matchWorkerToNeed(
 
   // 3) Own vehicle — transport.own_vehicle_required is the HARD form;
   //    requirements.own_vehicle is "merely preferred" (strength when held,
-  //    discussion point when not).
+  //    discussion point when not). Wagon 4: an author-set tier OVERRIDES the
+  //    field-derived default (mandatory ⇒ hard, preferred ⇒ weighted) —
+  //    provenance is kept on the criterion result.
   const vehicleRequired = v2?.transport?.own_vehicle_required === true;
   const vehiclePreferred = v2?.requirements?.own_vehicle === true;
   if (vehicleRequired || vehiclePreferred) {
     const vehicleSource = vehicleRequired
       ? "customer_requests.payload.structured_v2.transport.own_vehicle_required"
       : "customer_requests.payload.structured_v2.requirements.own_vehicle";
+    const vehicleTier = priorities?.own_vehicle ?? null;
+    const vehicleIsHard =
+      vehicleTier !== null ? vehicleTier === "mandatory" : vehicleRequired;
+    const vehicleAuthorMarked = vehicleTier !== null;
     if (subject.ownVehicle == null) {
       missingFacts.push({
         criterion: "own_vehicle",
         side: "worker",
         source: "workers.own_vehicle",
       });
-    } else if (vehicleRequired) {
+    } else if (vehicleIsHard) {
       if (subject.ownVehicle === true) {
         matchedHard.push({
           criterion: "own_vehicle",
           class: "hard",
           outcome: "met",
           source: vehicleSource,
+          ...(vehicleAuthorMarked ? { authorMarked: true } : {}),
         });
       } else {
         hardBlock = true;
@@ -905,6 +956,7 @@ export function matchWorkerToNeed(
           class: "hard",
           outcome: "not_met",
           source: vehicleSource,
+          ...(vehicleAuthorMarked ? { authorMarked: true } : {}),
         });
       }
     } else if (subject.ownVehicle === true) {
@@ -913,6 +965,7 @@ export function matchWorkerToNeed(
         class: "weighted",
         outcome: "met",
         source: vehicleSource,
+        ...(vehicleAuthorMarked ? { authorMarked: true } : {}),
       });
     } else {
       negotiables.push({
@@ -920,14 +973,20 @@ export function matchWorkerToNeed(
         class: "negotiable",
         outcome: "negotiable",
         source: vehicleSource,
+        ...(vehicleAuthorMarked ? { authorMarked: true } : {}),
       });
     }
   }
 
   // 4) Own tools — requirements.own_tools with a stated worker "no" is a
-  //    hard conflict (the demand REQUIRES them).
+  //    hard conflict by default (the demand REQUIRES them). Wagon 4: the
+  //    author can demote the requirement to "preferred" (strength when held,
+  //    discussion point when not).
   if (v2?.requirements?.own_tools === true) {
     const toolsSource = "customer_requests.payload.structured_v2.requirements.own_tools";
+    const toolsTier = priorities?.own_tools ?? null;
+    const toolsIsHard = toolsTier === null || toolsTier === "mandatory";
+    const toolsAuthorMarked = toolsTier !== null;
     if (subject.ownTools == null) {
       missingFacts.push({
         criterion: "own_tools",
@@ -935,19 +994,39 @@ export function matchWorkerToNeed(
         source: "workers.own_tools",
       });
     } else if (subject.ownTools === true) {
-      matchedHard.push({
-        criterion: "own_tools",
-        class: "hard",
-        outcome: "met",
-        source: toolsSource,
-      });
-    } else {
+      if (toolsIsHard) {
+        matchedHard.push({
+          criterion: "own_tools",
+          class: "hard",
+          outcome: "met",
+          source: toolsSource,
+          ...(toolsAuthorMarked ? { authorMarked: true } : {}),
+        });
+      } else {
+        strengths.push({
+          criterion: "own_tools",
+          class: "weighted",
+          outcome: "met",
+          source: toolsSource,
+          authorMarked: true,
+        });
+      }
+    } else if (toolsIsHard) {
       hardBlock = true;
       blocking.push({
         criterion: "own_tools",
         class: "hard",
         outcome: "not_met",
         source: toolsSource,
+        ...(toolsAuthorMarked ? { authorMarked: true } : {}),
+      });
+    } else {
+      negotiables.push({
+        criterion: "own_tools",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: toolsSource,
+        authorMarked: true,
       });
     }
   }
@@ -1013,6 +1092,11 @@ export function matchWorkerToNeed(
     },
   ];
   for (const dim of shiftDims) {
+    // Wagon 4: an author-set "preferred" tier demotes a stated shift the
+    // worker declines to a discussion point (default stays hard).
+    const shiftTier = priorities?.[dim.criterion] ?? null;
+    const shiftIsHard = shiftTier === null || shiftTier === "mandatory";
+    const shiftAuthorMarked = shiftTier !== null;
     if (shiftsStated && demandShifts.includes(dim.shift)) {
       if (dim.workerOk == null) {
         missingFacts.push({
@@ -1021,19 +1105,39 @@ export function matchWorkerToNeed(
           source: dim.workerSource,
         });
       } else if (dim.workerOk === false) {
-        hardBlock = true;
-        blocking.push({
-          criterion: dim.criterion,
-          class: "hard",
-          outcome: "not_met",
-          source: shiftsSource,
-        });
-      } else {
+        if (shiftIsHard) {
+          hardBlock = true;
+          blocking.push({
+            criterion: dim.criterion,
+            class: "hard",
+            outcome: "not_met",
+            source: shiftsSource,
+            ...(shiftAuthorMarked ? { authorMarked: true } : {}),
+          });
+        } else {
+          negotiables.push({
+            criterion: dim.criterion,
+            class: "negotiable",
+            outcome: "negotiable",
+            source: shiftsSource,
+            authorMarked: true,
+          });
+        }
+      } else if (shiftIsHard) {
         matchedHard.push({
           criterion: dim.criterion,
           class: "hard",
           outcome: "met",
           source: shiftsSource,
+          ...(shiftAuthorMarked ? { authorMarked: true } : {}),
+        });
+      } else {
+        strengths.push({
+          criterion: dim.criterion,
+          class: "weighted",
+          outcome: "met",
+          source: shiftsSource,
+          authorMarked: true,
         });
       }
     } else if (!shiftsStated && dim.workerOk != null) {
@@ -1080,6 +1184,133 @@ export function matchWorkerToNeed(
       side: "demand",
       source: overtimeSource,
     });
+  }
+
+  // ── Wagon 4 author-tiered criteria that have NO default evaluation ────────
+
+  // Minimum experience — the engine historically did NOT evaluate
+  // requirements.min_experience_years (no worker mirror was wired). It is
+  // evaluated ONLY when the author set a requirement_priorities.min_experience
+  // tier, so absent-map results stay byte-identical to calc "2.1".
+  const minExpYears = v2?.requirements?.min_experience_years ?? null;
+  const minExpTier = priorities?.min_experience ?? null;
+  if (minExpYears != null && minExpTier != null) {
+    const expSource =
+      "customer_requests.payload.structured_v2.requirements.min_experience_years";
+    if (subject.experienceYears == null) {
+      missingFacts.push({
+        criterion: "min_experience",
+        side: "worker",
+        source: "workers.experience_years",
+      });
+    } else if (subject.experienceYears >= minExpYears) {
+      if (minExpTier === "mandatory") {
+        matchedHard.push({
+          criterion: "min_experience",
+          class: "hard",
+          outcome: "met",
+          source: expSource,
+          authorMarked: true,
+        });
+      } else {
+        strengths.push({
+          criterion: "min_experience",
+          class: "weighted",
+          outcome: "met",
+          source: expSource,
+          authorMarked: true,
+        });
+      }
+    } else if (minExpTier === "mandatory") {
+      hardBlock = true;
+      blocking.push({
+        criterion: "min_experience",
+        class: "hard",
+        outcome: "not_met",
+        source: expSource,
+        authorMarked: true,
+      });
+    } else {
+      negotiables.push({
+        criterion: "min_experience",
+        class: "negotiable",
+        outcome: "negotiable",
+        source: expSource,
+        authorMarked: true,
+      });
+    }
+  }
+
+  // Accommodation tier — by default a needs-vs-not-provided mismatch is a
+  // SOFT cap (handled above, untouched). An author-set tier adds an explicit
+  // criterion record; "mandatory" upgrades the mismatch to a hard block.
+  // Provision falls back to structured_v2.accommodation.state when the legacy
+  // flag was not assembled — only inside this author-tier path.
+  const accommodationTier = priorities?.accommodation ?? null;
+  if (accommodationTier !== null) {
+    const accSource = "customer_requests.payload.structured_v2.accommodation.state";
+    const v2State = v2?.accommodation?.state ?? null;
+    const provided =
+      need.accommodationProvided ??
+      (v2State === "offered" ? true : v2State === "not_offered" ? false : null);
+    if (subject.accommodationNeeded == null) {
+      missingFacts.push({
+        criterion: "accommodation",
+        side: "worker",
+        source: "workers.accommodation_needed",
+      });
+    } else if (subject.accommodationNeeded === false || provided === true) {
+      // No conflict possible — the worker does not need it, or it is offered.
+      if (accommodationTier === "mandatory") {
+        matchedHard.push({
+          criterion: "accommodation",
+          class: "hard",
+          outcome: "met",
+          source: accSource,
+          authorMarked: true,
+        });
+      } else {
+        strengths.push({
+          criterion: "accommodation",
+          class: "weighted",
+          outcome: "met",
+          source: accSource,
+          authorMarked: true,
+        });
+      }
+    } else if (provided === false) {
+      // Worker needs accommodation; the demand states it is not offered.
+      if (need.accommodationProvided !== false) {
+        // The legacy check did not fire (flag unassembled) — surface the gap.
+        gaps.push({ code: "accommodation_needed_not_provided" });
+      }
+      if (accommodationTier === "mandatory") {
+        hardBlock = true;
+        blocking.push({
+          criterion: "accommodation",
+          class: "hard",
+          outcome: "not_met",
+          source: accSource,
+          authorMarked: true,
+        });
+      } else {
+        softCap = true;
+        negotiables.push({
+          criterion: "accommodation",
+          class: "negotiable",
+          outcome: "negotiable",
+          source: accSource,
+          authorMarked: true,
+        });
+      }
+    } else {
+      // Provision unstated on the demand side — the demand owes the fact.
+      missingFacts.push({
+        criterion: "accommodation",
+        side: "demand",
+        source: accSource,
+      });
+    }
   }
 
   // ── Deterministic status from evidence-weighted coverage, then caps. ──

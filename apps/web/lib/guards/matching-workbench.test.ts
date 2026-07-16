@@ -52,6 +52,13 @@ describe("matching workbench — admin gate + canonical model", () => {
       "candidate_skills",
       "esco_skills",
       "esco_labels",
+      // Wagon 4: the esco_uri→slug bridge (same derivation input scouting
+      // uses) + the READ-ONLY temporary team adapter over the existing org
+      // spine (organizations organization_type='team', engagement_contexts
+      // 'employee') — replaced by Wagon 2's canonical read model on rebase.
+      "skills",
+      "organizations",
+      "engagement_contexts",
     ]);
     expect(fromCalls.length).toBeGreaterThan(0);
     for (const t of fromCalls) expect(allowed.has(t), `table ${t}`).toBe(true);
@@ -135,31 +142,23 @@ describe("matching workbench — copy honesty in all 10 locales", () => {
   });
 });
 
-describe("matching MVP — rule-based shortlist stays §7-honest", () => {
-  const SUGGEST = "lib/admin/match-suggestions.ts";
-
-  it("suggestions module is pure (no supabase, no rpc, no fetch)", () => {
-    const code = stripComments(read(SUGGEST));
-    expect(code).not.toMatch(/supabase|\.rpc\(|fetch\(|createClient/);
+describe("canonical engine on the workbench — stays §7/§19-honest (Wagon 4)", () => {
+  it("the duplicate shortlist engine is deleted and the ONE engine runs instead", () => {
+    // Deletion evidence + old-vs-new proofs live in
+    // lib/guards/matching-consolidation.test.ts; this pins the page wiring.
+    const page = read(PAGE);
+    expect(page).toMatch(/from "@\/lib\/market\/match-v1"/);
+    expect(page).toMatch(/matchWorkerToNeed\(/);
+    expect(page).toMatch(/compareMatches\(/);
+    expect(page).not.toMatch(/match-suggestions|buildMatchSuggestions/);
   });
 
-  it("reasons come from the fixed evidence enum only", () => {
-    const code = read(SUGGEST);
-    for (const reason of [
-      "country_match",
-      "preferred_country_match",
-      "available_now",
-      "profession_token_match",
-      "verified_skills",
-      "manager_confirmations",
-      "journal_evidence",
-    ]) {
-      expect(code).toContain(`"${reason}"`);
-    }
-    // No composite numeric score is exported or rendered as a fact.
-    expect(stripComments(code)).not.toMatch(/score\s*[:=]/i);
+  it("no composite numeric score is rendered as a fact; % only with its basis", () => {
     const page = read(PAGE);
     expect(page).not.toMatch(/\{\s*s\.score|matchScore|fitScore/);
+    // The engine's skill-fit % always renders with the fit.basis line.
+    expect(page).toMatch(/match\.skillFit\.pct/);
+    expect(page).toMatch(/matched: match\.skillFit\.matchedTotal/);
   });
 
   it("start-conversation reuses the canonical messaging entry", () => {
@@ -169,18 +168,54 @@ describe("matching MVP — rule-based shortlist stays §7-honest", () => {
     );
     expect(page).toMatch(/action=\{openDirectConversationAction\}/);
     // The transparent-ordering statement is shown to the human.
-    expect(page).toMatch(/suggestions\.humanRule/);
+    expect(page).toMatch(/engine\.humanRule/);
   });
 
-  it("suggestion copy exists in all 10 locales", () => {
+  it("engine + team copy exists in all locales", () => {
     for (const locale of LOCALES) {
       const json = JSON.parse(read(`messages/${locale}.json`)) as {
-        admin?: { matching?: { suggestions?: { humanRule?: string } } };
+        admin?: {
+          matching?: {
+            engine?: { humanRule?: string; authorMarked?: string; status?: Record<string, string> };
+            team?: { notReadable?: string; coverage?: string };
+            missing?: { worker?: string; demand?: string };
+          };
+        };
       };
-      expect(
-        json.admin?.matching?.suggestions?.humanRule,
-        `${locale} suggestions.humanRule`,
-      ).toBeTruthy();
+      const m = json.admin?.matching;
+      expect(m?.engine?.humanRule, `${locale} engine.humanRule`).toBeTruthy();
+      expect(m?.engine?.authorMarked, `${locale} engine.authorMarked`).toBeTruthy();
+      expect(m?.engine?.status?.insufficient_data, `${locale} engine.status`).toBeTruthy();
+      expect(m?.team?.notReadable, `${locale} team.notReadable`).toBeTruthy();
+      expect(m?.team?.coverage, `${locale} team.coverage`).toBeTruthy();
+      expect(m?.missing?.worker, `${locale} missing.worker`).toBeTruthy();
+    }
+  });
+
+  it("team matching consumes the FROZEN Wagon-2 contract, read-only, with honest states", () => {
+    const page = read(PAGE);
+    expect(page).toMatch(/matchTeamToNeed\(/);
+    expect(page).toMatch(/team\.notReadable/);
+    // The matching layer itself never reads org tables — the engine takes
+    // the TeamMatchInputV1 contract (temporary adapter fills it in the lib).
+    const engine = stripComments(read("lib/market/match-team-v1.ts"));
+    expect(engine).not.toMatch(/supabase|\.from\(|\.rpc\(|fetch\(|createClient/);
+    const contract = read("lib/market/team-match-contract.ts");
+    for (const field of [
+      "teamId",
+      "activeMemberCount",
+      "deployableSize",
+      "professionComposition",
+      "skillComposition",
+      "languageComposition",
+      "certificationCoverage",
+      "destinationCountries",
+      "accommodationNeeded",
+      "memberConsentCompleteness",
+      "dataFreshness",
+      "visibilityState",
+    ]) {
+      expect(contract, `contract field ${field}`).toContain(field);
     }
   });
 });

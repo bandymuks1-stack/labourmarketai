@@ -2284,19 +2284,31 @@
         "needsMigration": "Vastleggen is tijdelijk niet beschikbaar terwijl de gegevens worden voorbereid.",
         "error": "Kon de beslissing niet vastleggen."
       },
-      "suggestions": {
-        "title": "Op regels gebaseerde shortlist",
-        "humanRule": "Gesorteerd op echt bewijs (overeenkomende filters, bevestigde vaardigheden, managerbevestigingen) — geen berekende score; de mens beslist.",
+      "engine": {
+        "title": "Kandidaat-match (regelgebaseerd)",
+        "humanRule": "Gerangschikt volgens dezelfde deterministische regels als bedrijfsscouting — redenen en hiaten worden getoond, geen berekende persoonsscore; de mens beslist.",
         "start": "Gesprek starten",
-        "reasons": {
-          "country_match": "In het land",
-          "preferred_country_match": "Voorkeur voor land",
-          "available_now": "Beschikbaar",
-          "profession_token_match": "Beroep past bij aanvraagtekst",
-          "verified_skills": "Bevestigde vaardigheden",
-          "manager_confirmations": "Managerbevestigingen",
-          "journal_evidence": "Journaalbewijs"
+        "authorMarked": "door de aanvrager bepaald",
+        "status": {
+          "strong": "Sterke match",
+          "possible": "Mogelijke match",
+          "weak": "Zwakke match",
+          "insufficient_data": "Onvoldoende gegevens"
         }
+      },
+      "missing": {
+        "worker": "De werknemer heeft niet opgegeven: {criterion}",
+        "demand": "De aanvraag vermeldt niet: {criterion}"
+      },
+      "team": {
+        "title": "Teammatch (alleen-lezen)",
+        "notReadable": "Teamleden zijn in deze sessie niet leesbaar — de teammatch kan niet worden berekend.",
+        "empty": "Er zijn nog geen teams.",
+        "coverage": "{covered} van {total} vereiste vaardigheden gedekt door minstens één geschikt lid ({eligible} van {members} leden geschikt)",
+        "blockers": "Het team kan niet voldoen aan:",
+        "memberCovers": "dekt {count} vereiste vaardigheden",
+        "noMatchableMembers": "Geen enkel teamlid heeft een koppelbaar werknemersprofiel.",
+        "unmatchableMembers": "{count} leden zonder koppelbaar werknemersprofiel"
       },
       "filters": {
         "all": "Alle landen",
@@ -7366,6 +7378,7 @@
         "demand": "Het bedrijf heeft niet opgegeven: {criterion}"
       },
       "criterion": {
+        "min_experience": "Minimale ervaring",
         "skills_coverage": "Vereiste vaardigheden",
         "evidence_tiers": "Bewijs van vaardigheden",
         "profession": "Beroep",
@@ -8749,6 +8762,13 @@
     }
   },
   "structuredDemand": {
+    "requirementTier": {
+      "mandatory": "Vereist",
+      "preferred": "Gewenst",
+      "hint": "“Vereist” sluit kandidaten uit die er niet aan voldoen; “Gewenst” houdt ze erbij en toont het verschil als gesprekspunt.",
+      "secondaryLanguages": "Extra talen (naast de eerste)",
+      "accommodationSelf": "Werknemer heeft eigen huisvesting"
+    },
     "advancedTitle": "Uitgebreide gegevens (optioneel)",
     "advancedHint": "Gestructureerde feiten waarop werknemers filteren en vergelijken. Alles is optioneel — wat u overslaat wordt getoond als “niet vermeld”, nooit verzonnen.",
     "notStated": "Niet vermeld",

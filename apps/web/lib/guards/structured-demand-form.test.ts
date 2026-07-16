@@ -106,6 +106,38 @@ describe("buildStructuredV2Input", () => {
     expect(storedV2ToFormState(null)).toEqual(EMPTY_ADVANCED_DEMAND_STATE);
   });
 
+  it("requirement tiers (Wagon 4) round-trip; untouched pickers ship nothing", () => {
+    // Untouched tier pickers → the wire carries NO requirement_priorities key
+    // (the engine default stays; absence is honest).
+    const noTiers = buildStructuredV2Input({
+      ...EMPTY_ADVANCED_DEMAND_STATE,
+      ownTools: true,
+    });
+    expect(noTiers).toEqual({ requirements: { own_tools: true } });
+
+    const withTiers = buildStructuredV2Input({
+      ...EMPTY_ADVANCED_DEMAND_STATE,
+      ownTools: true,
+      licenceCategories: ["B", "C"],
+      requirementPriorities: {
+        ...EMPTY_ADVANCED_DEMAND_STATE.requirementPriorities,
+        own_tools: "preferred",
+        licence_categories: "mandatory",
+      },
+    });
+    const v2 = sanitizeStructuredDemandV2(withTiers);
+    expect(v2?.requirement_priorities).toEqual({
+      own_tools: "preferred",
+      licence_categories: "mandatory",
+    });
+    const back = storedV2ToFormState(v2);
+    expect(back.requirementPriorities.own_tools).toBe("preferred");
+    expect(back.requirementPriorities.licence_categories).toBe("mandatory");
+    expect(back.requirementPriorities.own_vehicle).toBe("");
+    // Loss-free second pass.
+    expect(sanitizeStructuredDemandV2(buildStructuredV2Input(back))).toEqual(v2);
+  });
+
   it("garbage numeric input is dropped, not stored", () => {
     const wire = buildStructuredV2Input({
       ...EMPTY_ADVANCED_DEMAND_STATE,

@@ -1,6 +1,11 @@
 "use server";
 
 /**
+ * ⛔ DEPRECATED — FROZEN LEGACY FORK (Wagon 4). The /match-preview marketing
+ * page rides the frozen lib/staffing/fit.ts engine — see the header there.
+ * No new imports (guard: lib/guards/staffing-fit-frozen.test.ts); new
+ * matching work goes to lib/market/match-v1.ts.
+ *
  * Match preview — server action (Staffing Operating Model v1, PR8).
  *
  * PREVIEW ONLY. Given a worker's facts + a company need, it computes the

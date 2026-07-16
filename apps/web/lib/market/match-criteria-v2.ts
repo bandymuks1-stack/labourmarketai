@@ -24,8 +24,13 @@ import { ENGAGEMENT_FORMS } from "@/lib/demand/structured-demand-v2";
 /** Deterministic-rules calculation version exposed on every match result.
  *  "2.1" = P2-PR4 eight mirrored dimensions (languages incl. CEFR levels,
  *  licence categories, own vehicle, own tools, pay basis, night/weekend
- *  shifts, overtime). */
-export const MATCH_CALC_VERSION = "2.1" as const;
+ *  shifts, overtime).
+ *  "2.2" = Explainable Matching v1 (Wagon 4): author-selectable
+ *  mandatory/preferred requirement tiers (structured_v2.requirement_priorities)
+ *  + the min_experience criterion (evaluated ONLY when the author set a tier
+ *  for it). With NO requirement_priorities present, "2.2" results are
+ *  identical to "2.1" results (guard-tested). */
+export const MATCH_CALC_VERSION = "2.2" as const;
 export type MatchCalcVersion = typeof MATCH_CALC_VERSION;
 
 export type MatchCriterionClass = "hard" | "weighted" | "negotiable";
@@ -52,7 +57,8 @@ export type MatchCriterionId =
   | "pay_basis"
   | "night_shifts"
   | "weekend_shifts"
-  | "overtime";
+  | "overtime"
+  | "min_experience";
 
 export interface MatchCriterionResult {
   readonly criterion: MatchCriterionId;
@@ -61,6 +67,11 @@ export interface MatchCriterionResult {
   /** Table/field the deciding fact came from (e.g. "workers.preferred_countries",
    *  "customer_requests.payload.structured_v2.compensation"). */
   readonly source: string;
+  /** Tier provenance (Wagon 4): true when the demand AUTHOR set the
+   *  mandatory/preferred tier for this criterion via
+   *  structured_v2.requirement_priorities — so a blocking reason can honestly
+   *  say "the author marked this mandatory". Absent = engine default tier. */
+  readonly authorMarked?: boolean;
 }
 
 /** An honest "we don't know" — the criterion could not be evaluated because a
@@ -250,6 +261,9 @@ export type LanguagesComparisonV2 =
   /** Every failed requirement is one_per_team_sufficient on a team-target
    *  demand → a staffing conversation, not a block. */
   | { readonly kind: "negotiable_team_gap"; readonly failedLangs: readonly string[] }
+  /** Every failed requirement was demoted by the AUTHOR-SET preferred tier
+   *  for secondary languages (Wagon 4) — a discussion point, not a block. */
+  | { readonly kind: "negotiable_preferred_gap"; readonly failedLangs: readonly string[] }
   /** The worker has no stated language facts (store unapplied or empty). */
   | { readonly kind: "worker_unstated" };
 
@@ -263,6 +277,11 @@ export type LanguagesComparisonV2 =
  * team-target demands (target_supply team | multiple_workers) — one team
  * member covering the language is a plausible arrangement there. For an
  * individual target the requirement stays hard.
+ *
+ * Wagon 4: requirement_priorities.secondary_languages === "preferred"
+ * additionally demotes a FAILED language BEYOND THE FIRST stated requirement
+ * to negotiable (the first stated language always keeps its default tier).
+ * "mandatory" (or absence) keeps today's behaviour exactly.
  */
 export function compareLanguagesV2(
   v2: StructuredDemandV2 | null | undefined,
@@ -270,6 +289,8 @@ export function compareLanguagesV2(
 ): LanguagesComparisonV2 | null {
   const required = v2?.requirements?.languages ?? [];
   if (required.length === 0) return null;
+  const secondaryPreferred =
+    v2?.requirement_priorities?.secondary_languages === "preferred";
   if (workerLanguages == null || workerLanguages.length === 0) {
     return { kind: "worker_unstated" };
   }
@@ -290,17 +311,30 @@ export function compareLanguagesV2(
     v2?.target_supply === "team" || v2?.target_supply === "multiple_workers";
   const hardFailed: string[] = [];
   const teamDemoted: string[] = [];
-  for (const req of required) {
+  const preferredDemoted: string[] = [];
+  required.forEach((req, index) => {
     const held = levelByLang.get(req.lang.trim().toLowerCase());
     // Not held at all, level below required, or level unknowable → failed.
     // (An unknowable stated level cannot PROVE the requirement — the
     // requirement is unmet on the stated facts; nothing is guessed.)
     const ok = held != null && languageLevelSatisfies(held, req.level) === true;
-    if (ok) continue;
+    if (ok) return;
     if (req.one_per_team_sufficient === true && teamTarget) teamDemoted.push(req.lang);
+    // Author-preferred tier applies ONLY to languages beyond the first
+    // stated requirement — the first keeps its default (hard) tier.
+    else if (secondaryPreferred && index > 0) preferredDemoted.push(req.lang);
     else hardFailed.push(req.lang);
-  }
+  });
   if (hardFailed.length > 0) return { kind: "hard_not_met", failedLangs: hardFailed };
+  // Author-set demotion is reported with its own kind so the explanation can
+  // carry tier provenance; mixed team+preferred demotions surface as the
+  // author-set kind (both are negotiable — the class never differs).
+  if (preferredDemoted.length > 0) {
+    return {
+      kind: "negotiable_preferred_gap",
+      failedLangs: [...preferredDemoted, ...teamDemoted],
+    };
+  }
   if (teamDemoted.length > 0) {
     return { kind: "negotiable_team_gap", failedLangs: teamDemoted };
   }
