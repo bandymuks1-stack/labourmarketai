@@ -281,6 +281,12 @@ describe("NO new DB migration in this PR", () => {
     // (20260714230000_market_intelligence_observations_v1 — source registry,
     // observation contract, insight query log; all external sources OFF).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(140);
+    // Bumped 140 -> 142 for the Trust Connect Teams v1 drafts
+    // (20260716120000_team_profile_details_v1 — 1:1 team-scoped
+    // availability/deployable-size/destinations details, RPC-only writes;
+    // 20260716121000_team_enquiries_v1 — employer→team enquiry state
+    // machine on the shared contact/consent contract, append-only events).
+    // Both DRAFT / needs-human-gate, NOT applied; paired rollbacks.
+    expect(count).toBeLessThanOrEqual(142);
   });
 });

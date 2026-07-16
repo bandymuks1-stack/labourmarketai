@@ -368,6 +368,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260714230000_market_intelligence_observations_v1) — DRAFT /
     // needs-human-gate, NOT applied; this cross-pin follows the
     // product-readiness baseline bump made with that layer.
-    expect(guard).toMatch(/SPRINT_BASELINE = 140/);
+    // Bumped 140 -> 142 for the Trust Connect Teams v1 drafts
+    // (20260716120000_team_profile_details_v1 +
+    // 20260716121000_team_enquiries_v1) — DRAFT / needs-human-gate, NOT
+    // applied; paired rollbacks in the PR.
+    expect(guard).toMatch(/SPRINT_BASELINE = 142/);
   });
 });
