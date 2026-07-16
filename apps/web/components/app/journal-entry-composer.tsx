@@ -279,6 +279,16 @@ export function JournalEntryComposer({
   const [skillStatuses, setSkillStatuses] = useState<
     Record<string, SuggestionStatus>
   >(Object.fromEntries(editSkillSuggestions.map((s) => [s.slug, "confirmed"])));
+  // Wagon 5: per-row corrected labels ("Pataisyti") + the honest save-result
+  // summary counts shown in the saved banner.
+  const [skillEditedLabels, setSkillEditedLabels] = useState<
+    Record<string, string>
+  >({});
+  const [savedSkillsSummary, setSavedSkillsSummary] = useState<{
+    added: number;
+    corrected: number;
+    rejected: number;
+  } | null>(null);
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
   >(editSkillSuggestions);
@@ -499,6 +509,15 @@ export function JournalEntryComposer({
     setSkillStatuses((prev) => ({ ...prev, [slug]: next }));
   }
 
+  /** Wagon 5: direct correction of a suggested skill row. The corrected text
+   *  becomes a SELF-DECLARED claim on save (same path as addNewSkill — never
+   *  verified, never linked as evidence without the worker). An empty
+   *  correction can never be saved (filtered at submit). */
+  function editSkillLabel(slug: string, next: string) {
+    setSkillEditedLabels((prev) => ({ ...prev, [slug]: next }));
+    setSkillStatuses((prev) => ({ ...prev, [slug]: "edited" }));
+  }
+
   /** Add an undeclared skill to the worker's profile as a SELF-DECLARED claim
    *  only (profile_skill_claims). This never sets verified / manager_confirmed
    *  and never creates Work-Journal evidence — the entry is not linked here. */
@@ -621,7 +640,34 @@ export function JournalEntryComposer({
       // recognised skills the worker already declared to this entry (real
       // journal-supported evidence). Best-effort + additive: never invents a
       // skill, never verifies, and a failure here never loses the saved entry.
-      void autoLinkRecognizedJournalSkills(result.entryId, text);
+      // Wagon 5: rows the worker explicitly REJECTED in review are excluded —
+      // a rejected suggestion leaves no trace, not even an evidence link.
+      const rejectedSlugs = Object.entries(skillStatuses)
+        .filter(([, s]) => s === "discarded")
+        .map(([slug]) => slug);
+      void autoLinkRecognizedJournalSkills(result.entryId, text, rejectedSlugs);
+      // Wagon 5: persist corrected rows ("Pataisyti") as SELF-DECLARED claims.
+      // The action dedups by normalized label; EMPTY corrections are filtered
+      // here so an empty value can never be saved. Never verified, never
+      // linked as evidence without the worker's own action.
+      const correctedLabels = Object.entries(skillStatuses)
+        .filter(([, s]) => s === "edited")
+        .map(([slug]) => (skillEditedLabels[slug] ?? "").trim())
+        .filter((v) => v.length > 0);
+      if (correctedLabels.length > 0) {
+        try {
+          await saveProfileSkillClaimsAction(correctedLabels);
+        } catch (e) {
+          console.error("[journal-composer] corrected skill save failed:", e);
+        }
+      }
+      setSavedSkillsSummary({
+        added:
+          Object.values(skillStatuses).filter((s) => s === "confirmed").length +
+          Object.values(newSkillStatus).filter((s) => s === "added").length,
+        corrected: correctedLabels.length,
+        rejected: rejectedSlugs.length,
+      });
       recordEvent("journal_save_success", {
         fragment_count: confirmedFragments.length,
       });
@@ -830,6 +876,22 @@ export function JournalEntryComposer({
                 ? t("savedBodyWithDetails", { count: savedDetailCount })
                 : t("savedBody")}
             </p>
+            {/* Wagon 5 save result: honest per-save skill summary — how many
+                suggestions the worker added / corrected / rejected. Rendered
+                only when the review step was actually used (all zeros → no
+                inflated line). */}
+            {savedSkillsSummary !== null &&
+              savedSkillsSummary.added +
+                savedSkillsSummary.corrected +
+                savedSkillsSummary.rejected >
+                0 && (
+                <p
+                  className="text-xs leading-relaxed text-text-secondary"
+                  data-testid="journal-saved-skills-line"
+                >
+                  {t("savedSkillsLine", savedSkillsSummary)}
+                </p>
+              )}
             {/* Honest "what's next + who confirms" — saving is never a dead end:
                 the entry is below, skills surface in the profile, and it stays
                 private until a real human confirms it. */}
@@ -885,9 +947,11 @@ export function JournalEntryComposer({
             </div>
           </div>
         )}
-        <h3 className="font-display text-lg font-semibold text-text-primary">
-          {editingEntry ? t("editEntryTitle") : t("newEntry")}
-        </h3>
+        {editingEntry ? (
+          <h3 className="font-display text-lg font-semibold text-text-primary">
+            {t("editEntryTitle")}
+          </h3>
+        ) : null}
         {editingEntry && (
           // v4 — explicit edit-mode banner so the worker knows their save
           // will REPLACE an earlier entry rather than create a new one.
@@ -972,6 +1036,98 @@ export function JournalEntryComposer({
           </div>
         )}
 
+        {/* Wagon 5 first view: the question leads, then ONE large input, ONE
+            plain example and ONE primary action. Every advanced control
+            (modes, templates, engagement, photo, more examples) lives behind
+            the single "more options" disclosure below — same fields, same
+            ONE save path, nothing removed. */}
+        <label className="flex flex-col gap-2">
+          <span className="font-display text-xl font-semibold tracking-tightest text-text-primary sm:text-2xl">
+            {t("whatDidYouDo")}
+          </span>
+          <textarea
+            value={text}
+            onChange={(e) => {
+              noteJournalEntryStarted(e.target.value);
+              setText(e.target.value);
+            }}
+            rows={5}
+            required
+            placeholder={t("textPlaceholder")}
+            className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-base text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue sm:text-sm"
+          />
+        </label>
+        <p
+          className="text-xs leading-relaxed text-text-muted"
+          data-testid="journal-example-line"
+        >
+          {t("exampleLine")}
+        </p>
+
+        {mode === "structured" && !editingEntry ? (
+          // STRUCTURED preset: the primary action tidies the text into
+          // reviewable fields first (same analyse → review → submit chain);
+          // direct save stays one tap away. Same spine, different emphasis.
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              onClick={() => {
+                setSavedAt(null);
+                analyse(text);
+              }}
+              disabled={text.trim().length === 0 || submitting}
+              data-testid="journal-organize-text"
+            >
+              {t("organizeText")}
+            </Button>
+            <button
+              type="submit"
+              disabled={text.trim().length === 0 || submitting}
+              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              data-testid="journal-save-entry"
+            >
+              {submitting ? t("saving") : t("saveEntry")}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3">
+            {/* PRIMARY: save the entry directly — one obvious step. */}
+            <Button
+              type="submit"
+              disabled={text.trim().length === 0 || submitting}
+              data-testid="journal-save-entry"
+            >
+              {submitting
+                ? t("saving")
+                : editingEntry
+                  ? t("updateEntry")
+                  : t("saveEntry")}
+            </Button>
+            {/* SECONDARY (optional): tidy the text into structured fields first.
+                Not a primary action and makes no AI/auto claim. */}
+            <button
+              type="button"
+              onClick={() => {
+                setSavedAt(null);
+                analyse(text);
+              }}
+              disabled={text.trim().length === 0 || submitting}
+              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              data-testid="journal-organize-text"
+            >
+              {t("organizeText")}
+            </button>
+          </div>
+        )}
+
+        <details
+          className="rounded-md border border-ink-600 bg-ink-800/40"
+          data-testid="journal-more-options"
+        >
+          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary">
+            {t("moreOptions")}
+          </summary>
+          <div className="flex flex-col gap-4 p-3">
         {!editingEntry && (
           // WAGON 8 (area 14): entry-mode presets over the ONE composer.
           // Selecting a mode only re-emphasises the same fields — no second
@@ -1056,21 +1212,6 @@ export function JournalEntryComposer({
 
         {mode === "photo" && !editingEntry && photoField}
 
-        <label className="flex flex-col gap-1.5">
-          <Label>{t("whatDidYouDo")}</Label>
-          <textarea
-            value={text}
-            onChange={(e) => {
-              noteJournalEntryStarted(e.target.value);
-              setText(e.target.value);
-            }}
-            rows={4}
-            required
-            placeholder={t("textPlaceholder")}
-            className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
-          />
-        </label>
-
         {/* Photo evidence — free tier: ONE photo per entry, enforced
             server-side; more photos are an honestly-labelled future
             VIP feature (no fake tier, no fake upload). In photo-first
@@ -1089,61 +1230,8 @@ export function JournalEntryComposer({
           </ul>
         </details>
 
-        {mode === "structured" && !editingEntry ? (
-          // STRUCTURED preset: the primary action tidies the text into
-          // reviewable fields first (same analyse → review → submit chain);
-          // direct save stays one tap away. Same spine, different emphasis.
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              type="button"
-              onClick={() => {
-                setSavedAt(null);
-                analyse(text);
-              }}
-              disabled={text.trim().length === 0 || submitting}
-              data-testid="journal-organize-text"
-            >
-              {t("organizeText")}
-            </Button>
-            <button
-              type="submit"
-              disabled={text.trim().length === 0 || submitting}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
-              data-testid="journal-save-entry"
-            >
-              {submitting ? t("saving") : t("saveEntry")}
-            </button>
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-3">
-            {/* PRIMARY: save the entry directly — one obvious step. */}
-            <Button
-              type="submit"
-              disabled={text.trim().length === 0 || submitting}
-              data-testid="journal-save-entry"
-            >
-              {submitting
-                ? t("saving")
-                : editingEntry
-                  ? t("updateEntry")
-                  : t("saveEntry")}
-            </Button>
-            {/* SECONDARY (optional): tidy the text into structured fields first.
-                Not a primary action and makes no AI/auto claim. */}
-            <button
-              type="button"
-              onClick={() => {
-                setSavedAt(null);
-                analyse(text);
-              }}
-              disabled={text.trim().length === 0 || submitting}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
-              data-testid="journal-organize-text"
-            >
-              {t("organizeText")}
-            </button>
-          </div>
-        )}
+        </details>
       </form>
     );
   }
@@ -1485,6 +1573,12 @@ export function JournalEntryComposer({
                 // Reason: WHY this skill was suggested (the word we found).
                 hint={t("reasonFound", { word: row.matchedText })}
                 status={skillStatuses[row.slug] ?? "pending"}
+                // Wagon 5: direct correction on the row — the corrected text
+                // saves as a self-declared claim; empty corrections are
+                // filtered at submit and can never be saved.
+                editable
+                editValue={skillEditedLabels[row.slug] ?? row.name}
+                onEdit={(next) => editSkillLabel(row.slug, next)}
                 onConfirm={() => setSkillStatus(row.slug, "confirmed")}
                 onDiscard={() => setSkillStatus(row.slug, "discarded")}
               >

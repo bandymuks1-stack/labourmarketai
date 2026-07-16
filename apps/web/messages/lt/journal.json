@@ -389,5 +389,8 @@
     "strip": "Įrašai → įgūdžiai → CV → pasiūlymai: {entries} įrašai šį mėn. · {evidenced} įgūdžiai su įrašais · {confirmed} peržiūrėti",
     "cvLink": "CV"
   },
-  "statusExplainer": "Kaip naudojami jūsų įrašai?"
+  "statusExplainer": "Kaip naudojami jūsų įrašai?",
+  "exampleLine": "Pavyzdžiui: montavau gipso pertvaras, skaičiau brėžinius ir dirbau su lazeriniu nivelyru.",
+  "moreOptions": "Daugiau parinkčių",
+  "savedSkillsLine": "Įgūdžiai: pridėta {added}, pataisyta {corrected}, atmesta {rejected}."
 }

@@ -643,23 +643,6 @@ export default async function JournalPage({
           follows. */}
       <div id="journal-composer" className="order-1">
         <div className="flex flex-col gap-2">
-          {/* Benefit-first framing: an entry strengthens the work card. Quiet UI —
-            no confirmation/verification disclaimer paragraph. */}
-          <p
-            className="text-sm leading-relaxed text-text-secondary"
-            data-testid="journal-composer-benefit"
-          >
-            {t("composerBenefit")}
-          </p>
-          {/* Voice input method — same ONE composer/save path; the nested
-              voice surface only produces reviewed text (gap map §3/§4). */}
-          <Link
-            href="/dashboard/journal/voice"
-            className="inline-flex min-h-[2.75rem] w-fit items-center rounded-lg border border-border bg-surface-1 px-4 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
-            data-testid="voice-entry-link"
-          >
-            {t("voice.entryCta")}
-          </Link>
           <JournalEntryComposer
             // Remount the composer whenever the edit target changes. The
             // composer derives its textarea state from `editingEntry` with
@@ -677,6 +660,22 @@ export default async function JournalPage({
             editingEntry={editingEntry}
             templates={journalTemplates}
           />
+          {/* Wagon 5 first view: the benefit line and the voice input method
+              moved BELOW the composer — the question + input + one action
+              lead; everything else follows. Same ONE composer/save path. */}
+          <p
+            className="text-sm leading-relaxed text-text-secondary"
+            data-testid="journal-composer-benefit"
+          >
+            {t("composerBenefit")}
+          </p>
+          <Link
+            href="/dashboard/journal/voice"
+            className="inline-flex min-h-[2.75rem] w-fit items-center rounded-lg border border-border bg-surface-1 px-4 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+            data-testid="voice-entry-link"
+          >
+            {t("voice.entryCta")}
+          </Link>
           {/* Spreadsheet mode (Journal Proof Engine v1 §1): fast MULTI-ROW
               bulk entry. Each grid row saves through the SAME
               createJournalEntry action — a bulk surface, not a second

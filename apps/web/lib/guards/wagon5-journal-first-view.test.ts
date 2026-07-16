@@ -47,6 +47,83 @@ describe("Wagon 5 — journal first view", () => {
   });
 });
 
+describe("Wagon 5 completion — composer first view contract", () => {
+  const COMPOSER = read("components/app/journal-entry-composer.tsx");
+
+  it("question heading → textarea → example → primary action → ONE more-options disclosure", () => {
+    const question = COMPOSER.indexOf('{t("whatDidYouDo")}');
+    const example = COMPOSER.indexOf('data-testid="journal-example-line"');
+    const save = COMPOSER.indexOf('data-testid="journal-save-entry"');
+    const more = COMPOSER.indexOf('data-testid="journal-more-options"');
+    for (const [name, idx] of Object.entries({ question, example, save, more })) {
+      expect(idx, `${name} missing`).toBeGreaterThan(-1);
+    }
+    expect(question).toBeLessThan(example);
+    expect(example).toBeLessThan(save);
+    expect(save).toBeLessThan(more);
+  });
+
+  it("advanced controls live INSIDE the disclosure (moved, not deleted)", () => {
+    const details = COMPOSER.slice(
+      COMPOSER.indexOf('data-testid="journal-more-options"'),
+    );
+    expect(details).toMatch(/journal-mode-picker/);
+    expect(details).toMatch(/journal-template-picker/);
+    expect(details).toMatch(/journal-engagement-switcher/);
+    expect(details).toMatch(/&& photoField\}/); // render sites of the ONE photo field
+    expect(details).toMatch(/examplesTitle/);
+  });
+
+  it("rejected suggestions leave no trace — excluded from evidence auto-link", () => {
+    expect(COMPOSER).toMatch(
+      /autoLinkRecognizedJournalSkills\(result\.entryId,\s*text,\s*rejectedSlugs\)/,
+    );
+    const actions = read("lib/journal/journal-entry-skills-actions.ts");
+    expect(actions).toMatch(/excludeSlugs\?/);
+    expect(actions).toMatch(/!excluded\.has\(r\.slug\)/);
+  });
+
+  it("empty corrections can never be saved; corrected rows stay self-declared claims", () => {
+    expect(COMPOSER).toMatch(/\.filter\(\(v\) => v\.length > 0\)/);
+    expect(COMPOSER).toMatch(/saveProfileSkillClaimsAction\(correctedLabels\)/);
+    // never verified / never manager path from the composer (code, not the
+    // honesty comments that explain the rule)
+    expect(COMPOSER).not.toMatch(/status:\s*["']verified["']/);
+    expect(COMPOSER).not.toMatch(/manager_confirmed\s*[:=]\s*true/);
+  });
+
+  it("save result shows the honest skills summary", () => {
+    expect(COMPOSER).toMatch(/data-testid="journal-saved-skills-line"/);
+    expect(COMPOSER).toMatch(/savedSkillsSummary/);
+  });
+
+  it("skill rows carry direct correction (editable) + add + reject", () => {
+    const skillsBlock = COMPOSER.slice(
+      COMPOSER.indexOf("{skillSuggestions.map((row) => ("),
+    );
+    expect(skillsBlock).toMatch(/editable/);
+    expect(skillsBlock).toMatch(/onEdit=\{\(next\) => editSkillLabel\(row\.slug, next\)\}/);
+    expect(skillsBlock).toMatch(/onConfirm/);
+    expect(skillsBlock).toMatch(/onDiscard/);
+  });
+
+  it("skills bucket announces plainly in the 5 required languages", () => {
+    const expected: Record<string, string> = {
+      lt: "Radome šiuos galimus įgūdžius",
+      en: "We found these possible skills",
+      ru: "Мы нашли эти возможные навыки",
+      de: "Wir haben diese möglichen Fähigkeiten gefunden",
+      nl: "We vonden deze mogelijke vaardigheden",
+    };
+    for (const [loc, value] of Object.entries(expected)) {
+      const base = JSON.parse(read(`messages/${loc}.json`)) as {
+        structuring?: { buckets?: { skills?: string } };
+      };
+      expect(base.structuring?.buckets?.skills, loc).toBe(value);
+    }
+  });
+});
+
 describe("Wagon 5 — the daily question exists in every journal locale", () => {
   const messagesDir = join(APP, "messages");
   const locales = readdirSync(messagesDir).filter((entry) => {

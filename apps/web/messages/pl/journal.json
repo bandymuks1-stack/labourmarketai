@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie."
   },
-  "statusExplainer": "Jak wykorzystywane są Twoje wpisy?"
+  "statusExplainer": "Jak wykorzystywane są Twoje wpisy?",
+  "exampleLine": "Na przykład: montowałem ścianki gipsowe, czytałem rysunki i pracowałem z niwelatorem laserowym.",
+  "moreOptions": "Więcej opcji",
+  "savedSkillsLine": "Umiejętności: dodano {added}, poprawiono {corrected}, odrzucono {rejected}."
 }

@@ -389,5 +389,8 @@
     "strip": "Entries → skills → CV → opportunities: {entries} entries this month · {evidenced} skills with records · {confirmed} reviewed",
     "cvLink": "CV"
   },
-  "statusExplainer": "How are your entries used?"
+  "statusExplainer": "How are your entries used?",
+  "exampleLine": "For example: I installed drywall partitions, read blueprints and worked with a laser level.",
+  "moreOptions": "More options",
+  "savedSkillsLine": "Skills: added {added}, corrected {corrected}, dismissed {rejected}."
 }

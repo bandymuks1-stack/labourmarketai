@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz."
   },
-  "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?"
+  "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?",
+  "exampleLine": "Piemēram: montēju ģipša starpsienas, lasīju rasējumus un strādāju ar lāzera līmeņrādi.",
+  "moreOptions": "Vairāk iespēju",
+  "savedSkillsLine": "Prasmes: pievienotas {added}, izlabotas {corrected}, noraidītas {rejected}."
 }

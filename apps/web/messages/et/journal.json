@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Mikrofoni juurdepääs blokeeriti. Lubage mikrofon brauseri seadetes ja proovige uuesti."
   },
-  "statusExplainer": "Kuidas teie sissekandeid kasutatakse?"
+  "statusExplainer": "Kuidas teie sissekandeid kasutatakse?",
+  "exampleLine": "Näiteks: paigaldasin kipsseinu, lugesin jooniseid ja töötasin laserloodiga.",
+  "moreOptions": "Rohkem valikuid",
+  "savedSkillsLine": "Oskused: lisatud {added}, parandatud {corrected}, tagasi lükatud {rejected}."
 }

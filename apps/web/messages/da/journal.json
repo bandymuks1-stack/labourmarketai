@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Mikrofonadgang blev blokeret. Tillad mikrofonen i browserindstillingerne, og prøv igen."
   },
-  "statusExplainer": "Hvordan bruges dine poster?"
+  "statusExplainer": "Hvordan bruges dine poster?",
+  "exampleLine": "For eksempel: jeg monterede gipsvægge, læste tegninger og arbejdede med et laserniveau.",
+  "moreOptions": "Flere valg",
+  "savedSkillsLine": "Færdigheder: {added} tilføjet, {corrected} rettet, {rejected} afvist."
 }

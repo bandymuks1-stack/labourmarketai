@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Mikrofontilgang ble blokkert. Tillat mikrofonen i nettleserinnstillingene og prøv igjen."
   },
-  "statusExplainer": "Hvordan brukes oppføringene dine?"
+  "statusExplainer": "Hvordan brukes oppføringene dine?",
+  "exampleLine": "For eksempel: jeg monterte gipsvegger, leste tegninger og jobbet med laser-nivellér.",
+  "moreOptions": "Flere valg",
+  "savedSkillsLine": "Ferdigheter: {added} lagt til, {corrected} rettet, {rejected} avvist."
 }

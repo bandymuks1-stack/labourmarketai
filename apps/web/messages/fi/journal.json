@@ -314,5 +314,8 @@
     "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen."
   },
   "savedOpenCv": "Näytä CV",
-  "statusExplainer": "Miten merkintöjäsi käytetään?"
+  "statusExplainer": "Miten merkintöjäsi käytetään?",
+  "exampleLine": "Esimerkiksi: asensin kipsiväliseiniä, luin piirustuksia ja työskentelin laservaaituslaitteella.",
+  "moreOptions": "Lisää valintoja",
+  "savedSkillsLine": "Taidot: lisätty {added}, korjattu {corrected}, hylätty {rejected}."
 }

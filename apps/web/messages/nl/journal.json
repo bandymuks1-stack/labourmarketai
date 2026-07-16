@@ -389,5 +389,8 @@
     "strip": "Vermeldingen → vaardigheden → CV → kansen: {entries} vermeldingen deze maand · {evidenced} vaardigheden met vermeldingen · {confirmed} beoordeeld",
     "cvLink": "CV"
   },
-  "statusExplainer": "Hoe worden uw invoeren gebruikt?"
+  "statusExplainer": "Hoe worden uw invoeren gebruikt?",
+  "exampleLine": "Bijvoorbeeld: ik plaatste gipswanden, las tekeningen en werkte met een laserwaterpas.",
+  "moreOptions": "Meer opties",
+  "savedSkillsLine": "Vaardigheden: {added} toegevoegd, {corrected} gecorrigeerd, {rejected} afgewezen."
 }

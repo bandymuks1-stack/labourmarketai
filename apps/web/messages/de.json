@@ -2789,7 +2789,7 @@
     "noMatches": "In diesem Text ist noch nichts Eindeutiges. Fügen Sie mehr Details hinzu oder tragen Sie aussagekräftige Einträge manuell ein.",
     "buckets": {
       "selfDeclared": "Vorgeschlagene Fähigkeiten",
-      "skills": "Erkannte Fähigkeiten",
+      "skills": "Wir haben diese möglichen Fähigkeiten gefunden",
       "directions": "Mögliche Arbeitsrichtungen",
       "roles": "Mögliche Rollen",
       "experience": "Erfahrung",
@@ -2806,9 +2806,9 @@
       "team": "Geführtes Team: {n}"
     },
     "actions": {
-      "confirm": "Auswählen",
+      "confirm": "Hinzufügen",
       "edit": "Bearbeiten",
-      "discard": "Verwerfen"
+      "discard": "Ablehnen"
     },
     "status": {
       "confirmed": "Ausgewählt",

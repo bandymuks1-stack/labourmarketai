@@ -38,6 +38,36 @@ Branch `feat/daily-work-journal-simplification-v2` from main `a687d3ae`.
   **1 input + 1 tap to save**, zero scrolling on desktop; history and status
   details reachable below/one tap.
 
+## Completion pass (same day, owner task file wagon5-completion)
+
+4. **Composer first-view contract**: question heading ("Ką šiandien dirbai?",
+   display-size) → ONE large textarea (rows 5, `text-base` on mobile — no iOS
+   zoom) → ONE plain example line (`exampleLine`, the doc's gips-pertvaros
+   example) → ONE primary Save. EVERY advanced control (mode presets,
+   templates, engagement, photo, extra examples) moved — not deleted — into a
+   single `journal-more-options` disclosure below the action. The benefit
+   line + voice CTA moved below the composer on the page.
+5. **Skill rows**: direct correction added (`editable` field on the matched-
+   skill cards); corrected text saves as a SELF-DECLARED claim (dedup by
+   normalized label; **empty corrections filtered — can never be saved**).
+   Action labels: „Pridėti / Pataisyti(inline laukas) / Atmesti".
+   *Deliberate deviation*: the task file asked for „Patvirtinti", but the
+   owner's standing silent-trust guard (CERT_STEM bans the „tvirtin" stem in
+   `structuring` + journal namespaces — installed after the owner removed
+   "Patvirtinta" labels) forbids it; „Pridėti" is the doctrine-safe verb.
+6. **Rejected leaves no trace**: review-rejected slugs are now EXCLUDED from
+   the post-save evidence auto-link (`autoLinkRecognizedJournalSkills`
+   gained an optional `excludeSlugs` param — additive, all callers keep
+   their behaviour).
+7. **Save result**: banner now adds an honest per-save summary line
+   („Įgūdžiai: pridėta X, pataisyta Y, atmesta Z" — rendered only when the
+   review step was used) + existing next-action links (entries/profile/CV).
+8. **Skills bucket heading** → „Radome šiuos galimus įgūdžius" (lt/en/ru/de/nl
+   — the 5 base locales that carry the structuring namespace).
+9. Guard `wagon5-journal-first-view` extended (24 tests): first-view order,
+   disclosure contents, reject-no-trace, empty-correction filter, saved
+   summary, editable rows, bucket headings ×5.
+
 ## Explicitly NOT done (with reasons)
 - No new persisted "outdated"/"repeatedly observed" skill states — requires an
   owner data-model decision (new statuses on canonical tables); current honest

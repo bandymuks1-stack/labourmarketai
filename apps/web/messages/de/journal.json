@@ -389,5 +389,8 @@
     "strip": "Einträge → Fähigkeiten → CV → Angebote: {entries} Einträge diesen Monat · {evidenced} Fähigkeiten mit Einträgen · {confirmed} geprüft",
     "cvLink": "CV"
   },
-  "statusExplainer": "Wie werden Ihre Einträge verwendet?"
+  "statusExplainer": "Wie werden Ihre Einträge verwendet?",
+  "exampleLine": "Zum Beispiel: Ich habe Gipswände montiert, Zeichnungen gelesen und mit einem Lasernivellier gearbeitet.",
+  "moreOptions": "Mehr Optionen",
+  "savedSkillsLine": "Fähigkeiten: {added} hinzugefügt, {corrected} korrigiert, {rejected} abgelehnt."
 }

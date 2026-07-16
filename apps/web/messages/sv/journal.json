@@ -153,5 +153,8 @@
     },
     "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen."
   },
-  "statusExplainer": "Hur används dina poster?"
+  "statusExplainer": "Hur används dina poster?",
+  "exampleLine": "Till exempel: jag monterade gipsväggar, läste ritningar och arbetade med laserpass.",
+  "moreOptions": "Fler alternativ",
+  "savedSkillsLine": "Färdigheter: {added} tillagda, {corrected} rättade, {rejected} avvisade."
 }
