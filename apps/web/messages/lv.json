@@ -1517,7 +1517,7 @@
   },
   "trust": {
     "title": "[EN] Trust signals",
-    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
@@ -2899,6 +2899,26 @@
         "title": "Kad varat sākt?",
         "hint": "Atzīmējiet savu pieejamību."
       }
+    }
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profila gatavība",
+      "ready": "Gatavs",
+      "building": "Vēl tiek aizpildīts",
+      "start": "Tikko sākts"
+    },
+    "freshness": {
+      "label": "Aktualitāte",
+      "today": "Pēdējais ieraksts — šodien",
+      "yesterday": "Pēdējais ieraksts — vakar",
+      "onDate": "Pēdējais ieraksts — {date}",
+      "none": "Ierakstu vēl nav"
+    },
+    "activity": {
+      "label": "Šodienas aktivitāte",
+      "count": "Ieraksti šodien: {n}",
+      "none": "Šodien vēl nekas nav ierakstīts"
     }
   }
 }

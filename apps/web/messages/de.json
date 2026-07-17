@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "Quelle meiner Arbeitskarte",
     "lead": "Das wissen wir bereits über Sie.",
-    "explainer": "Diese Daten speisen Ihre Arbeitskarte. Sie helfen einem Arbeitgeber, schnell zu verstehen, welche Arbeit zu Ihnen passt.",
+    "explainer": "Danach beurteilt ein Arbeitgeber, welche Arbeit zu Ihnen passt.",
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Passende Möglichkeiten ansehen"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profil-Bereitschaft",
+      "ready": "Bereit",
+      "building": "Wird noch ausgefüllt",
+      "start": "Gerade begonnen"
+    },
+    "freshness": {
+      "label": "Aktualität",
+      "today": "Letzter Eintrag — heute",
+      "yesterday": "Letzter Eintrag — gestern",
+      "onDate": "Letzter Eintrag — {date}",
+      "none": "Noch keine Einträge"
+    },
+    "activity": {
+      "label": "Aktivität heute",
+      "count": "Einträge heute: {n}",
+      "none": "Heute noch nichts erfasst"
+    }
   },
   "processAssistant": {
     "title": "Interner Prozessassistent",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Wartet auf Prüfung",
     "notExternallyVerified": "Noch nicht durch Arbeitsnachweise belegt",
     "sourceProfileText": "Quelle: Profiltext",
-    "disclaimer": "Diese Fähigkeiten stammen aus Ihrer eigenen Beschreibung. Sie sind noch nicht geprüft.",
+    "disclaimer": "Diese Fähigkeiten haben Sie selbst angegeben. Stärken Sie sie mit Einträgen im Arbeitsjournal.",
     "experienceTitle": "Arbeitsverlauf",
     "removeLabel": "Fähigkeit entfernen",
     "deleteError": "Konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
@@ -2534,7 +2553,7 @@
       "cta": "Fähigkeiten prüfen"
     },
     "pageTitle": "Mein Profil",
-    "pageSubtitle": "Alles, was Ihre Arbeitskarte ausmacht, lebt hier: was Sie tun, was Sie können und was es belegt. Ihr gewählter Bereich ist Kontext, keine Grenze.",
+    "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
     "professionSaved": "Beruf gespeichert",
@@ -3163,7 +3182,9 @@
         "moveUp": "Nach oben",
         "moveDown": "Nach unten",
         "hide": "Ausblenden",
-        "hiddenTitle": "Ausgeblendete Karten"
+        "hiddenTitle": "Ausgeblendete Karten",
+        "showAll": "Alle Aktionen anzeigen ({count})",
+        "showLess": "Weniger anzeigen"
       },
       "jobsCard": {
         "title": "Passende Jobs für mich",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Vertrauenssignale",
-    "caption": "Die Zahlen stammen direkt aus echten Einträgen. Nichts hier ist gewichtet oder erfunden.",
+    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
     "verifiedSkills": "Verknüpfte Fähigkeiten",
     "managerConfirmations": "Geprüfte Einträge",
     "journalEntries": "Journaleinträge",
@@ -8200,7 +8221,6 @@
     "person": {
       "title": "Persönliche Karte",
       "openProfile": "Profil öffnen",
-      "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
         "busy": "Beschäftigt",

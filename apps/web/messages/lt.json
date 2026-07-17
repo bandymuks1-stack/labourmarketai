@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "Mano darbo kortelės šaltinis",
     "lead": "Štai ką apie jus jau žinome.",
-    "explainer": "Šie duomenys maitina jūsų darbo kortelę. Tai padeda darbdaviui greičiau suprasti, kokiam darbui tinkate.",
+    "explainer": "Pagal tai darbdavys sprendžia, kokiam darbui tinkate.",
     "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
     "primaryAction": "Pridėti, ko trūksta",
     "primaryActionJournal": "Pridėti darbo įrašą",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Peržiūrėti atitinkančias galimybes"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profilio parengtis",
+      "ready": "Paruoštas",
+      "building": "Dar pildomas",
+      "start": "Tik pradėtas"
+    },
+    "freshness": {
+      "label": "Aktualumas",
+      "today": "Paskutinis įrašas — šiandien",
+      "yesterday": "Paskutinis įrašas — vakar",
+      "onDate": "Paskutinis įrašas — {date}",
+      "none": "Įrašų dar nėra"
+    },
+    "activity": {
+      "label": "Šiandienos aktyvumas",
+      "count": "Įrašų šiandien: {n}",
+      "none": "Šiandien dar nieko neįrašėte"
+    }
   },
   "processAssistant": {
     "title": "Vidinis proceso asistentas",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Laukia peržiūros",
     "notExternallyVerified": "Dar nepagrįsta darbo įrašais",
     "sourceProfileText": "Šaltinis: profilio tekstas",
-    "disclaimer": "Šie įgūdžiai paimti iš jūsų pačių aprašymo. Jie dar neperžiūrėti darbų žurnalu, dokumentais ar kito žmogaus peržiūra — bet jie yra jūsų bendros gebėjimų savybės dalis.",
+    "disclaimer": "Šiuos įgūdžius nurodėte patys. Sustiprinkite juos darbo žurnalo įrašais.",
     "experienceTitle": "Darbo istorija",
     "removeLabel": "Pašalinti įgūdį",
     "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą.",
@@ -2534,7 +2553,7 @@
       "cta": "Peržiūrėti įgūdžius"
     },
     "pageTitle": "Mano profilis",
-    "pageSubtitle": "Čia gyvena viskas, kas sudaro jūsų darbo kortelę: ką dirbate, ką mokate ir kuo galite tai įrodyti. Pasirinkta sritis — tik kontekstas, ne apribojimas.",
+    "pageSubtitle": "Ką dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.",
     "professionLabel": "Tavo profesija",
     "professionPlaceholder": "Pasirink profesiją",
     "professionSaved": "Profesija išsaugota",
@@ -2542,7 +2561,7 @@
     "pickerTitle": "Tavo įgūdžiai",
     "pickerHelp": "Pasirink įgūdžius, kuriuos turi. Vėliau juos peržiūrės darbų vadovas.",
     "coreBadge": "Pagrindinis",
-    "selfDeclared": "Tavo jūsų nurodyta",
+    "selfDeclared": "Jūsų nurodyta",
     "verified": "Peržiūrėta",
     "saveButton": "Išsaugoti įgūdžius",
     "saving": "Saugoma...",
@@ -3163,7 +3182,9 @@
         "moveUp": "Perkelti aukščiau",
         "moveDown": "Perkelti žemiau",
         "hide": "Slėpti",
-        "hiddenTitle": "Paslėptos kortelės"
+        "hiddenTitle": "Paslėptos kortelės",
+        "showAll": "Rodyti visus veiksmus ({count})",
+        "showLess": "Rodyti mažiau"
       },
       "jobsCard": {
         "title": "Man tinkantys darbai",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Pasitikėjimo signalai",
-    "caption": "Skaičiai imami tiesiai iš realių įrašų. Niekas čia nesveriama ir neišgalvojama.",
+    "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
     "verifiedSkills": "Susieti įgūdžiai",
     "managerConfirmations": "Peržiūrėti įrašai",
     "journalEntries": "Žurnalo įrašai",
@@ -8200,7 +8221,6 @@
     "person": {
       "title": "Asmens kortelė",
       "openProfile": "Atidaryti profilį",
-      "completeness": "Profilio pilnumas",
       "availability": {
         "available": "Laisvas darbui",
         "busy": "Užimtas",

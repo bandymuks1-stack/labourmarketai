@@ -41,10 +41,11 @@ import {
  *   3. Worker skill dots (worker_skills, confidence-binned) render
  *      inside the primary engagement card as before.
  *
- *   4. Every self-declared chip carries an explicit unverified status
- *      label so the user (and any future readers) cannot mistake them
- *      for externally confirmed claims. No "verified" / "confirmed" /
- *      "patvirtinta" wording for these chips, ever.
+ *   4. The chip list carries ONE plain-language honesty line (the
+ *      disclaimer) so the user cannot mistake these for externally
+ *      confirmed claims. No "verified" / "confirmed" / "patvirtinta"
+ *      wording for these chips, ever — and no system-internal status
+ *      fragments ("source: …") either.
  */
 export function CapabilityProfileSection({
   claims,
@@ -197,9 +198,11 @@ export function CapabilityProfileSection({
             <h3 className="font-display text-sm font-semibold text-text-primary">
               {t("skillsTitle")}
             </h3>
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-              {t("selfDeclaredStatus")} · {t("notExternallyVerified")} · {t("sourceProfileText")}
-            </p>
+            {/* ONE plain-language honesty line (human-first profile pass).
+                The old triple status chain ("Laukia peržiūros · Dar
+                nepagrįsta darbo įrašais · Šaltinis: profilio tekstas") read
+                like system internals; the single disclaimer sentence carries
+                the same honest meaning in human words. */}
             <p className="text-xs text-text-secondary">{t("disclaimer")}</p>
           </header>
           <ul

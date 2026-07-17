@@ -7,6 +7,7 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
 import {
   EvidenceStatusStrip,
   type EvidenceStatus,
@@ -961,6 +962,21 @@ export default async function JournalPage({
                       // rule server-side, so a stale client can't escalate.
                       const canDelete =
                         (e.journal_entry_confirmations ?? []).length === 0;
+                      // Edit-in-place (journal compact UX v1): the same full
+                      // editable state the `?editing=` flow reconstructs, built
+                      // per unconfirmed entry so the row's drawer-based editor
+                      // opens over the list — no navigation, the worker's
+                      // scroll position / selected day stay exactly as-is.
+                      const rowEditingEntry = canDelete
+                        ? buildEditingEntry({
+                            id: e.id,
+                            originalText: e.original_text,
+                            metrics: e.journal_entry_metrics,
+                            linkedSkillSlugs: (linksByEntry.get(e.id) ?? [])
+                              .map((sid) => skillIdToSlug.get(sid))
+                              .filter((s): s is string => !!s),
+                          })
+                        : null;
                       // Per-entry chip SOURCE (PR B). Recognize skills from THIS entry's
                       // real text, then classify each linked chip honestly. An unsupported
                       // old link (e.g. a construction chip on a dog-walking entry) becomes
@@ -999,6 +1015,16 @@ export default async function JournalPage({
                           key={e.id}
                           entryId={e.id}
                           canDelete={canDelete}
+                          editSlot={
+                            rowEditingEntry ? (
+                              <JournalEntryEditLauncher
+                                entry={rowEditingEntry}
+                                engagements={engagements}
+                                directions={directions}
+                                workerSkills={workerSkills}
+                              />
+                            ) : undefined
+                          }
                           skillLinks={
                             skillLinksReady
                               ? {

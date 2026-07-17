@@ -1517,7 +1517,7 @@
   },
   "trust": {
     "title": "[EN] Trust signals",
-    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
@@ -2899,6 +2899,26 @@
         "title": "Når kan du begynne?",
         "hint": "Merk tilgjengeligheten din."
       }
+    }
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profilens beredskap",
+      "ready": "Klar",
+      "building": "Fylles fortsatt ut",
+      "start": "Nettopp startet"
+    },
+    "freshness": {
+      "label": "Aktualitet",
+      "today": "Siste registrering — i dag",
+      "yesterday": "Siste registrering — i går",
+      "onDate": "Siste registrering — {date}",
+      "none": "Ingen registreringer ennå"
+    },
+    "activity": {
+      "label": "Aktivitet i dag",
+      "count": "Registreringer i dag: {n}",
+      "none": "Ingenting registrert i dag ennå"
     }
   }
 }

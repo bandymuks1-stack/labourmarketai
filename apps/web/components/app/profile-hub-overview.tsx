@@ -135,9 +135,6 @@ export async function ProfileHubOverview({
       data-testid="profile-hub-overview"
     >
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-          {t("eyebrow")}
-        </span>
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("lead")}
         </h2>
