@@ -39,6 +39,35 @@ STOP įrašo formatas:
 
 ---
 
+## ⚠️ PATIKRINIMAS PO AUDITO (2026-07-17) — produkcijos verifikacija
+
+Po audito atliktas nepriklausomas patikrinimas prieš **realią produkcijos DB**
+(gorgitwvdzxbnaxhrsrw, deploy = main `4e51d8f5`) ir pilną kodo trace.
+Dalis šio audito išvadų — ypač visos trys KRITINĖS — **negalioja produkcijai**,
+nes auditas rėmėsi kodo peržiūra be autentifikacijos ir pasenusiais
+migracijų antraščių komentarais („NOT applied") bei honest-degradation
+(sąžiningo degradavimo) būsenų tekstais, kurie produkcijoje nerodomi.
+
+| # (top-10) | Audito teiginys | Verdiktas | Įrodymai |
+|---|---|---|---|
+| 1 | Darbuotojas negali „aplikuoti" — galimybės tuščios, tik vidinis signalas | **AUDIT_FALSE_POSITIVE** | Prod: `list_open_demand_for_workers` RPC yra; grąžina 9 `submitted` paklausas iš verifikuotų įmonių; `demand_interest_signals` — 4 realūs `interested` įrašai; „Parašyti darbdaviui" atidaro realią konversaciją (prod: 2 pokalbiai / 16 žinučių). „Galimybių sąrašas ruošiamas" rodomas tik kai RPC nepritaikyta — produkcijoje pritaikyta. |
+| 2 | Darbdavys negali susisiekti — kontaktų prašymai „paruošti, bet dar neįjungti" | **AUDIT_FALSE_POSITIVE** | Ta frazė (`scouting.contactRequest.unavailable`) renderinama TIK kai `contact_disclosure_requests` lentelės nėra. Prod: lentelė + visos 5 RPC (`propose/respond/withdraw/list` + `grant_employer_data_disclosure`) YRA → realus mygtukas renderinamas. (0 panaudojimų — kelias atviras, bet dar nenaudotas.) |
+| 3 | Naujo darbuotojo žurnalas užrakintas be aktyvaus darbo konteksto | **AUDIT_FALSE_POSITIVE** | Prod: trigger `on_worker_personal_engagement` YRA; 25/25 workers turi aktyvų kontekstą (24 asmeniniai be org). Migracijos antraštės pastaba „NOT applied to production" — pasenusi. |
+| 4 | Kvietimo nuoroda neprisijungusiam = plikas login be konteksto | **PATVIRTINTA (by design)** | `invite/[token]/page.tsx:56-64` — redirect į login su `?next=`; preview RPC sąmoningai authenticated-only (kad neatskleistų, ar el. paštas turi paskyrą). Trūkumas realus, bet sprendimas — savininko privatumo/dizaino sprendimas, ne wiring klaida. |
+| 5 | „Siųsti kvietimą" — siuntėjas mano, kad laiškas išsiųstas | **AUDIT_FALSE_POSITIVE (antra pusė)** | UI jau atskiria tris būsenas: „Nuoroda paruošta" (link mode + `linkModeNote`), „Išsiųsta" (tik po realaus provider 2xx), „Nepavyko išsiųsti". „Išsiųsta" link-mode niekada nerodoma. Pirma pusė (be `INVITE_EMAIL_*` env laiškas nesiunčiamas) — teisinga ir sąžiningai parodyta UI. |
+| 2 (booking) | Booking reikalauja mokamo plano, kai mokėjimai „ruošiami" | **AUDIT_FALSE_POSITIVE** | `entitlementAllows` → `if (!enforced) return true`; enforced tik `stripe_test` režime. Default `PAYMENTS_ENABLED=false`; prod: `billing_customers=0`, `payment_webhook_events=0` → gate permisyvus, aklavietės nėra. |
+
+**Kas lieka galiojančio iš top-10:** #4 (kvietimo kontekstas prieš login — owner
+sprendimas), #6 (vieša `/lt/work-opportunities` be realių skelbimų + iliustraciniai
+skaičiai — galioja), #7–#10 (žurnalo dual CTA, terminų chaosas, dev-kalba,
+tu/Jūs — copy lygio pastabos, galioja).
+
+**Pamoka auditams:** kodo peržiūra be produkcijos DB patikrinimo negali skirti
+„funkcijos nėra" nuo „funkcija yra, o aš žiūriu į jos honest-degradation tekstą".
+Visi trys KRITINIAI buvo antrasis atvejis.
+
+---
+
 ## Scenarijus 1 — „Ieškau darbo"
 
 *Metodas: gyvas dev serveris (viešos dalys) + kodo peržiūra (`/dashboard/opportunities`).*
