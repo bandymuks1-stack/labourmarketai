@@ -3157,7 +3157,8 @@
       "statusStrip": {
         "title": "Wat nu op u wacht",
         "allClear": "Er wacht op dit moment niets op uw aandacht.",
-        "viewAll": "Alle activiteit"
+        "viewAll": "Alle activiteit",
+        "calendar": "Kalender"
       },
       "moduleGrid": {
         "manage": "Kaarten aanpassen",

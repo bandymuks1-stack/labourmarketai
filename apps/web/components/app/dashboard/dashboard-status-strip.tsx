@@ -29,15 +29,27 @@ export async function DashboardStatusStrip({
         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
           {t("title")}
         </span>
-        {/* Control room PR C: the strip's full view — the unified activity
-            centre, same spine, per-signal read semantics + filters. */}
-        <Link
-          href={"/dashboard/activity" as "/dashboard"}
-          data-testid="status-strip-view-all"
-          className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-        >
-          {t("viewAll")} →
-        </Link>
+        <span className="flex items-center gap-3">
+          {/* Primary-action hierarchy v1: the ONE clear time-surface door —
+              every dated commitment lives on the canonical calendar; the
+              dashboard never grows its own time projection. */}
+          <Link
+            href={"/dashboard/planning" as "/dashboard"}
+            data-testid="status-strip-calendar"
+            className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
+            {t("calendar")} →
+          </Link>
+          {/* Control room PR C: the strip's full view — the unified activity
+              centre, same spine, per-signal read semantics + filters. */}
+          <Link
+            href={"/dashboard/activity" as "/dashboard"}
+            data-testid="status-strip-view-all"
+            className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
+            {t("viewAll")} →
+          </Link>
+        </span>
       </div>
       {entries.length === 0 ? (
         <p

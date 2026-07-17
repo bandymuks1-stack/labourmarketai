@@ -41,6 +41,9 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
+import { PremiumHubCompanyCard } from "@/components/app/premium-hub/premium-hub-company-card";
+import { PremiumHubMarketMap } from "@/components/app/premium-hub/premium-hub-market-map";
+import { PremiumHubProjectCard } from "@/components/app/premium-hub/premium-hub-project-card";
 import { getPremiumHubViewModel } from "@/components/app/premium-hub/premium-hub-data";
 import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
 import {
@@ -781,7 +784,7 @@ export default async function DashboardOverviewPage({
           OUTSIDE the collapsed section (fragment deep-links cannot open a
           closed details). Embedded = no competing title. */}
       <div id="work-card">
-        <PremiumHubScreen vm={hubVm} embedded workEditor={workEditor} />
+        <PremiumHubScreen vm={hubVm} embedded contextual workEditor={workEditor} />
       </div>
 
       {/* D-01 duplicate removal (Wave 3, owner-approved): the repeated
@@ -828,6 +831,20 @@ export default async function DashboardOverviewPage({
             shows whether employers can find this profile + the one link to
             the canonical privacy screen. Default state = not visible. */}
         <PrivacyStatusCard />
+
+        {/* Secondary hub cards (primary-action hierarchy v1): the SAME card
+            components the hub renders, moved here by REAL state — a company
+            or project card without real data (status !== "ready") and the
+            market-map preview (three other doors exist: nav Žemėlapis, the
+            grid tile, the map page itself). Every door and honest empty
+            state survives, one tap away — nothing is deleted. */}
+        {hubVm.company.status !== "ready" ? (
+          <PremiumHubCompanyCard company={hubVm.company} />
+        ) : null}
+        {hubVm.project.status !== "ready" ? (
+          <PremiumHubProjectCard project={hubVm.project} />
+        ) : null}
+        <PremiumHubMarketMap market={hubVm.market} />
       </DashboardMoreSection>
 
       {/* Universal command finder (WAGON 3) — type a normal term ("cv",
