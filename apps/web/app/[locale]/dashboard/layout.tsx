@@ -1,5 +1,11 @@
 import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
+import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { DashboardTabs } from "@/components/app/dashboard-tabs";
@@ -130,7 +136,8 @@ export default async function DashboardLayout({
     } else {
       const company = await getOwnCompany();
       if (company.kind === "ok" && company.row) {
-        activeOrgName = company.row.displayName ?? company.row.legalName ?? null;
+        activeOrgName =
+          company.row.displayName ?? company.row.legalName ?? null;
       }
     }
   }
@@ -146,82 +153,89 @@ export default async function DashboardLayout({
   );
 
   return (
-    <AuthProvider
-      initial={{
-        user: { id: user.id, email: user.email ?? null },
-        profile: {
-          full_name: profile.full_name,
-          email: profile.email,
-        },
-        activeRole,
-        roles,
-        isAdmin,
-        adminUiHidden,
-        activeOrgName,
-        organizations,
-        activeOrganizationId,
-        notifications,
-      }}
-    >
-      <div className="relative min-h-screen">
-        <SessionTelemetry />
-        <AmbientGlow />
-        <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-          <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
-            {/* App-shell logo links to the dashboard, NOT the public home —
+    /* Performance Reality Audit v2 (route-group provider subsetting): the
+       dashboard tree renders the dynamic whole-tree useTranslations()
+       consumers (bottom nav, module grid, tabs), so it ships the FULL union
+       client pick — exactly what the root layout shipped before v2, i.e. no
+       change for authenticated documents; public routes no longer pay it. */
+    <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
+      <AuthProvider
+        initial={{
+          user: { id: user.id, email: user.email ?? null },
+          profile: {
+            full_name: profile.full_name,
+            email: profile.email,
+          },
+          activeRole,
+          roles,
+          isAdmin,
+          adminUiHidden,
+          activeOrgName,
+          organizations,
+          activeOrganizationId,
+          notifications,
+        }}
+      >
+        <div className="relative min-h-screen">
+          <SessionTelemetry />
+          <AmbientGlow />
+          <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
+            <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
+              {/* App-shell logo links to the dashboard, NOT the public home —
                 clicking it inside the authenticated app keeps the user in
                 their workspace (never bounce to the marketing site / out of
                 the session). The public marketing logo still points to "/". */}
-            <Link
-              href="/dashboard"
-              className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
-            >
-              LabourMarket<span className="text-gradient-accent">.ai</span>
-            </Link>
-            <DashboardTabs className="hidden md:flex" badges={navBadges} />
-            <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
-              {/* Universal OS search (owner UX recovery v1) — the ONE
+              <Link
+                href="/dashboard"
+                className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
+              >
+                LabourMarket<span className="text-gradient-accent">.ai</span>
+              </Link>
+              <DashboardTabs className="hidden md:flex" badges={navBadges} />
+              <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+                {/* Universal OS search (owner UX recovery v1) — the ONE
                   CommandFinder, reachable from every dashboard page. */}
-              <HeaderSearch />
-              <LocaleSwitcher className="hidden md:flex" />
-              <NotificationPanel />
-              <RoleSwitcher />
-              <AccountMenu />
+                <HeaderSearch />
+                <LocaleSwitcher className="hidden md:flex" />
+                <NotificationPanel />
+                <RoleSwitcher />
+                <AccountMenu />
+              </div>
             </div>
-          </div>
-        </header>
-        {/* Mobile safe bottom — clears the fixed bottom nav (h-16) PLUS an
+          </header>
+          {/* Mobile safe bottom — clears the fixed bottom nav (h-16) PLUS an
             extra rem for breathing room so form CTAs (Patvirtinti įrašą /
             Pridėti) never sit flush against the nav (Mobile UX §3-§4). */}
-        {/* Owner UX recovery v1: tighter shell padding (py-10 → py-6,
+          {/* Owner UX recovery v1: tighter shell padding (py-10 → py-6,
             px-6 → px-4) — less empty frame, more content per screen. The
             mobile safe bottom (fixed nav clearance) is unchanged. */}
-        <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-          {children}
-          {/* Created by Rexora — quiet product credit (owner directive,
+          <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+            {children}
+            {/* Created by Rexora — quiet product credit (owner directive,
               2026-07-14, URL approved: https://aiprocessautomation.eu).
               Lives INSIDE <main> so it scrolls with content and inherits the
               mobile bottom-nav clearance padding above — it can never sit
               under or collide with the fixed BottomNav. Deliberately the
               subtlest text tier (text-xs, muted). Pinned by
               legal-entity-truth.test.ts. */}
-          <div className="mt-10 text-center">
-            <a
-              href="https://aiprocessautomation.eu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-            >
-              {footerT("rexora")}
-            </a>
-          </div>
-        </main>
-        <BottomNav badges={navBadges} />
-        {/* v1 tester language-feedback widget. Mounted INSIDE the auth
+            <div className="mt-10 text-center">
+              <a
+                href="https://aiprocessautomation.eu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+              >
+                {footerT("rexora")}
+              </a>
+            </div>
+          </main>
+          <BottomNav badges={navBadges} />
+          {/* v1 tester language-feedback widget. Mounted INSIDE the auth
             shell so it's only visible to authenticated sessions — the
             inbox is also admin-only via RLS, so this is double-gated. */}
-        <LanguageFeedbackWidget />
-      </div>
-    </AuthProvider>
+          <LanguageFeedbackWidget />
+        </div>
+      </AuthProvider>
+    </NextIntlClientProvider>
   );
 }
