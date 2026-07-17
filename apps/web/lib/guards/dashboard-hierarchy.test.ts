@@ -97,21 +97,41 @@ describe("worker branch: state-driven top slot leads", () => {
     expect(WORKER).toContain("improves={false}");
   });
 
-  it("every real pending-state card renders above the finder + space chip", () => {
+  it("pending states render ONCE — top slot + chips, no repeated card set (D-01)", () => {
+    // Wave 3 duplicate removal (owner-approved): the block that re-rendered
+    // every non-promoted pending card below the hub is gone. The top slot
+    // still promotes the single most important card; the status strip
+    // carries every other pending state as a chip built from the SAME
+    // spineCounts numbers, linking its clearing surface. A refactor may not
+    // quietly reintroduce the repeat.
+    for (const repeat of [
+      'topSlot !== "invitation"',
+      'topSlot !== "incoming_booking"',
+      'topSlot !== "incoming_service_request"',
+      'topSlot !== "booking_response"',
+    ]) {
+      expect(WORKER, `repeat gate "${repeat}" must stay removed`).not.toContain(
+        repeat,
+      );
+    }
+    // The one NON-duplicate survives above the finder: outgoing
+    // service-request states (waiting/declined — and accepted when an
+    // invitation holds the slot) have no chip equivalent.
     const help = WORKER.indexOf("<CommandFinder");
     expect(help).toBeGreaterThan(0);
+    const outgoing = WORKER.lastIndexOf(
+      'topSlot !== "accepted_request" && outgoingRequestsNextAction',
+    );
+    expect(outgoing).toBeGreaterThan(0);
+    expect(outgoing).toBeLessThan(help);
+    // Every pending card still exists exactly once as a top-slot candidate.
     for (const card of [
-      "<WorkerInvitationsCard",
-      "bookingsPendingNextAction}",
-      "serviceRequestsNextAction}",
-      "outgoingRequestsNextAction}",
-      "bookingResponsesNextAction}",
+      "<WorkerInvitationsCard preloaded={invitations} />",
+      "bookingsPendingNextAction",
+      "serviceRequestsNextAction",
+      "bookingResponsesNextAction",
     ]) {
-      const last = WORKER.lastIndexOf(card);
-      expect(last, `${card} present`).toBeGreaterThan(0);
-      expect(last, `${card} must render above the explainers`).toBeLessThan(
-        help,
-      );
+      expect(WORKER, `${card} present as slot candidate`).toContain(card);
     }
   });
 });
