@@ -10155,5 +10155,89 @@
       "sessionsWithStart": "Sessions with a start event",
       "sessionsReachedValue": "Sessions that reached value"
     }
+  },
+  "calculators": {
+    "projectCost": {
+      "title": "Work and project cost calculator",
+      "lede": "Estimate the cost of a job or project from your own numbers — workers, hours, rates, materials and extra costs. Works for construction, logistics, cleaning, hospitality, manufacturing, care, administration, IT services and more. Free, no account, nothing is saved.",
+      "honesty": {
+        "title": "How this calculator works",
+        "body": "Every figure is calculated only from the numbers you enter, with transparent arithmetic. The result is a preliminary estimate to help you plan — it is not an offer, and no market prices are assumed.",
+        "userNumbers": "We never invent rates, taxes or market averages. If you leave a price out, the result is marked incomplete instead of pretending to be complete."
+      },
+      "steps": {
+        "context": "Work context",
+        "quantities": "Scope and hours",
+        "rates": "Prices and rates",
+        "result": "Result",
+        "back": "Back",
+        "next": "Continue",
+        "startOver": "Start over"
+      },
+      "totalHoursHelp": "When set above 0, this replaces workers × hours per worker.",
+      "countryNone": "— not selected —",
+      "vat": {
+        "label": "VAT % (optional)",
+        "help": "Added only when you enter it — we never assume a VAT rate for you.",
+        "invalid": "VAT must be a number between 0 and 100.",
+        "net": "Sub-total excluding VAT",
+        "amount": "VAT",
+        "gross": "Total including VAT"
+      },
+      "acc": {
+        "title": "Accommodation helper (optional)",
+        "note": "Multiplies workers × days × price per worker per day and writes the sum into the transport / accommodation field. Your own numbers only.",
+        "workers": "Workers",
+        "days": "Days",
+        "perWorkerDay": "Price per worker per day",
+        "computed": "Computed sum",
+        "apply": "Use in transport / accommodation"
+      },
+      "pack": {
+        "toggle": "Insulation / area quantity helper (m²)",
+        "note": "A quantity helper for area-based materials (e.g. insulation): enter the surface, layers and package coverage to get areas, package count and material cost. A quantity estimate only — not structural design advice.",
+        "netArea": "Net area (m²)",
+        "dimensionsHint": "…or enter length × height and openings below.",
+        "lengthM": "Length (m)",
+        "heightM": "Height / width (m)",
+        "openings": "Openings — windows, doors (m²)",
+        "layers": "Layers",
+        "thickness": "Layer thickness (mm)",
+        "waste": "Waste %",
+        "coverage": "Coverage per package (m²)",
+        "price": "Price per package",
+        "labourPerM2": "Labour hours per m²",
+        "crewSize": "Crew size",
+        "outNet": "Net area",
+        "outCoverage": "Installed coverage (area × layers)",
+        "outWithWaste": "Coverage incl. waste",
+        "outPackages": "Packages to buy (rounded up)",
+        "outMaterialCost": "Material cost",
+        "outLabourHours": "Labour hours",
+        "outDuration": "Crew duration (hours)",
+        "outVolume": "Material volume (m³)",
+        "apply": "Fill quantity, hours and materials",
+        "applied": "Applied to the estimate — you can still edit every field.",
+        "errors": {
+          "no_area": "Enter a net area or length × height.",
+          "waste_out_of_range": "Waste % must be between 0 and 100.",
+          "layers_out_of_range": "Layers must be between 1 and 20."
+        }
+      },
+      "result": {
+        "incompleteTitle": "Estimate incomplete — labour cost missing",
+        "incompleteBody": "You entered quantities but no hours or rate yet, so labour cost is not included. Add hours and a rate in the previous steps to complete the estimate.",
+        "emptyTitle": "No numbers yet",
+        "emptyBody": "Enter workers, hours, a rate or costs in the previous steps and the estimate will appear here. Nothing is ever pre-filled for you.",
+        "csv": "Download CSV",
+        "print": "Print / save as PDF",
+        "ctaTitle": "Turn this estimate into a real worker request",
+        "ctaBody": "The same estimate builder lives inside the LabourMarket.ai demand form. With an account you can attach an estimate to a structured worker request; without one, you can describe your need on the public form.",
+        "ctaDashboard": "Create a work need (with account)",
+        "ctaDashboardHelp": "The account route opens the demand form on your dashboard — the calculator does not transfer these numbers.",
+        "ctaCompanyNeed": "Describe a need without an account",
+        "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."
+      }
+    }
   }
 }
