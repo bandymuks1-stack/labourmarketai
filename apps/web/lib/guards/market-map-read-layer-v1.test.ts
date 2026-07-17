@@ -295,6 +295,14 @@ describe("NO new DB migration in this PR", () => {
     // (20260716140000_pilots_cohort_v1 — admin-only pilots /
     // pilot_participants / append-only pilot_outcomes, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(145);
+    // Bumped 145 -> 146 for Open Markets Update v1
+    // (20260717130000_open_markets_countries_draft_v1 — six additive
+    // `countries` reference rows GE/BE/FR/ES/AT/CH, on conflict do nothing).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    // Bumped 146 -> 147 for Canonical Ideas Integration v1
+    // (20260717150000_demand_interest_seen_v1 — worker-only seen-model for
+    // demand_interest_signals ack notifications, RPC-only writes).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    expect(count).toBeLessThanOrEqual(147);
   });
 });

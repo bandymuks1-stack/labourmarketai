@@ -22,7 +22,10 @@
  *    the page's own filter params) — never an invented page.
  */
 
-import { normalizeForSearch } from "@/lib/navigation/command-registry";
+import {
+  normalizeForSearch,
+  queryMatchesText,
+} from "@/lib/navigation/command-registry";
 
 export const DASHBOARD_SEARCH_MIN_QUERY_CHARS = 2;
 export const DASHBOARD_SEARCH_MAX_QUERY_CHARS = 80;
@@ -74,7 +77,9 @@ export function normalizeSearchQuery(raw: string): string | null {
   return q.length >= DASHBOARD_SEARCH_MIN_QUERY_CHARS ? q : null;
 }
 
-/** Plain normalized substring match — same semantics as the command registry. */
+/** ONE matching truth with the command registry (`queryMatchesText`):
+ *  normalized substring first, then all-tokens prefix / bounded typo
+ *  tolerance — a typo finds the same object it finds the same command. */
 export function candidateMatches(
   candidate: DashboardSearchCandidate,
   normalizedQuery: string,
@@ -83,7 +88,7 @@ export function candidateMatches(
     (h) =>
       typeof h === "string" &&
       h.length > 0 &&
-      normalizeForSearch(h).includes(normalizedQuery),
+      queryMatchesText(h, normalizedQuery),
   );
 }
 

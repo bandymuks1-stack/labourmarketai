@@ -43,7 +43,10 @@
       "bookings": "Jūsų rezervacijos",
       "documents": "Jūsų dokumentų įrašai"
     },
-    "closeLabel": "Užverti paiešką"
+    "closeLabel": "Užverti paiešką",
+    "voiceStart": "Ieškoti balsu",
+    "voiceStop": "Sustabdyti balso įvestį",
+    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke."
   },
   "reports": {
     "eyebrow": "Ataskaitos",
@@ -6824,6 +6827,18 @@
       "fieldsNote": "Darbuotojo prašoma pasidalinti vardu, telefonu ir el. paštu. Sprendžia darbuotojas — be jo patvirtinimo niekas nerodoma.",
       "error": "Prašymo išsiųsti nepavyko. Bandykite dar kartą.",
       "accepted": "Darbuotojas priėmė prašymą — kontaktų perdavimas dar neleistas."
+    },
+    "shortlistNote": {
+      "label": "Pastaba",
+      "internalHint": "matoma tik jūsų įmonei",
+      "add": "Pridėti pastabą",
+      "edit": "Redaguoti pastabą",
+      "placeholder": "Trumpa pastaba apie šį kandidatą jūsų komandai.",
+      "reasonTitle": "Kodėl netinka?",
+      "reasonPlaceholder": "Trumpai įrašykite priežastį, pvz.: trūksta patirties su šiuo darbu.",
+      "reasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
+      "save": "Išsaugoti",
+      "cancel": "Atšaukti"
     }
   },
   "planBoundary": {
@@ -7607,6 +7622,20 @@
         "onsite": "Objekte",
         "remote": "Nuotolinis",
         "hybrid": "Mišrus"
+      }
+    },
+    "myInterest": {
+      "title": "Mano susidomėjimai",
+      "summary": "Iš viso: {count}",
+      "intro": "Poreikiai, kuriems parodėte susidomėjimą, ir jų būsena. Įrašas lieka ir tada, kai poreikis uždaromas.",
+      "closed": "Poreikis nebeaktyvus",
+      "viewDemand": "Peržiūrėti poreikį",
+      "cvLink": "Peržiūrėti pritaikytą CV",
+      "status": {
+        "interested": "Išsiųsta",
+        "reviewed": "Įmonė peržiūrėjo",
+        "contacted": "Įmonė susisiekė",
+        "withdrawn": "Atšaukta"
       }
     }
   },

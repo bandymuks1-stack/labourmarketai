@@ -43,7 +43,10 @@
       "bookings": "Ihre Buchungen",
       "documents": "Ihre Dokumenteinträge"
     },
-    "closeLabel": "Suche schließen"
+    "closeLabel": "Suche schließen",
+    "voiceStart": "Sprachsuche",
+    "voiceStop": "Spracheingabe stoppen",
+    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld."
   },
   "reports": {
     "eyebrow": "Berichte",
@@ -6824,6 +6827,18 @@
       "fieldsNote": "Bittet die Arbeitskraft, Name, Telefon und E-Mail zu teilen. Die Arbeitskraft entscheidet — ohne Zustimmung wird nichts angezeigt.",
       "error": "Die Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
       "accepted": "Die Arbeitskraft hat die Anfrage angenommen — Kontaktfreigabe noch nicht erteilt."
+    },
+    "shortlistNote": {
+      "label": "Notiz",
+      "internalHint": "nur für Ihr Unternehmen sichtbar",
+      "add": "Notiz hinzufügen",
+      "edit": "Notiz bearbeiten",
+      "placeholder": "Eine kurze Notiz zu diesem Kandidaten für Ihr Team.",
+      "reasonTitle": "Warum passt es nicht?",
+      "reasonPlaceholder": "Kurze Begründung, z. B.: fehlende Erfahrung mit dieser Arbeit.",
+      "reasonRequired": "Für „Passt nicht“ ist eine kurze Begründung nötig.",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
     }
   },
   "planBoundary": {
@@ -7607,6 +7622,20 @@
         "onsite": "Vor Ort",
         "remote": "Remote",
         "hybrid": "Hybrid"
+      }
+    },
+    "myInterest": {
+      "title": "Meine Interessen",
+      "summary": "Gesamt: {count}",
+      "intro": "Bedarfe, für die Sie Interesse bekundet haben, mit ihrem aktuellen Stand. Der Eintrag bleibt auch nach dem Schließen eines Bedarfs erhalten.",
+      "closed": "Dieser Bedarf ist nicht mehr aktiv",
+      "viewDemand": "Bedarf ansehen",
+      "cvLink": "Angepassten Lebenslauf ansehen",
+      "status": {
+        "interested": "Gesendet",
+        "reviewed": "Unternehmen hat geprüft",
+        "contacted": "Unternehmen hat Kontakt aufgenommen",
+        "withdrawn": "Zurückgezogen"
       }
     }
   },
