@@ -10114,5 +10114,89 @@
       "sessionsWithStart": "Sesijos su pradžios įvykiu",
       "sessionsReachedValue": "Sesijos, pasiekusios naudą"
     }
+  },
+  "calculators": {
+    "projectCost": {
+      "title": "Darbų ir projekto skaičiuoklė",
+      "lede": "Apskaičiuok darbo ar projekto kainą iš savo skaičių — darbuotojai, valandos, įkainiai, medžiagos ir papildomos išlaidos. Tinka statybai, logistikai, valymui, svetingumui, gamybai, priežiūrai, administravimui, IT paslaugoms ir kt. Nemokama, be paskyros, niekas neišsaugoma.",
+      "honesty": {
+        "title": "Kaip veikia ši skaičiuoklė",
+        "body": "Kiekvienas skaičius apskaičiuojamas tik iš tavo įvestų duomenų, skaidria aritmetika. Rezultatas — preliminari sąmata planavimui, o ne pasiūlymas; jokių rinkos kainų nenumatome.",
+        "userNumbers": "Niekada neišgalvojame įkainių, mokesčių ar rinkos vidurkių. Jei kainos neįvedei, rezultatas pažymimas kaip nepilnas — neapsimetame, kad jis pilnas."
+      },
+      "steps": {
+        "context": "Darbo kontekstas",
+        "quantities": "Apimtis ir valandos",
+        "rates": "Kainos ir įkainiai",
+        "result": "Rezultatas",
+        "back": "Atgal",
+        "next": "Toliau",
+        "startOver": "Pradėti iš naujo"
+      },
+      "totalHoursHelp": "Jei didesnis už 0, pakeičia „darbuotojai × valandos vienam“.",
+      "countryNone": "— nepasirinkta —",
+      "vat": {
+        "label": "PVM % (nebūtina)",
+        "help": "Pridedamas tik tada, kai pats įvedi — PVM tarifo už tave nenumatome.",
+        "invalid": "PVM turi būti skaičius nuo 0 iki 100.",
+        "net": "Tarpinė suma be PVM",
+        "amount": "PVM",
+        "gross": "Iš viso su PVM"
+      },
+      "acc": {
+        "title": "Apgyvendinimo pagalbininkas (nebūtina)",
+        "note": "Padaugina darbuotojus × dienas × kainą darbuotojui per dieną ir įrašo sumą į transporto / apgyvendinimo lauką. Tik tavo skaičiai.",
+        "workers": "Darbuotojai",
+        "days": "Dienos",
+        "perWorkerDay": "Kaina darbuotojui per dieną",
+        "computed": "Apskaičiuota suma",
+        "apply": "Įrašyti į transportą / apgyvendinimą"
+      },
+      "pack": {
+        "toggle": "Šiltinimo / ploto kiekių pagalbininkas (m²)",
+        "note": "Kiekių pagalbininkas plotu skaičiuojamoms medžiagoms (pvz., šiltinimui): įvesk plotą, sluoksnius ir pakuotės dengiamumą — gausi plotus, pakuočių kiekį ir medžiagų kainą. Tai tik kiekių įvertis, ne konstrukcinis projektavimas.",
+        "netArea": "Grynasis plotas (m²)",
+        "dimensionsHint": "…arba žemiau įvesk ilgį × aukštį ir angas.",
+        "lengthM": "Ilgis (m)",
+        "heightM": "Aukštis / plotis (m)",
+        "openings": "Angos — langai, durys (m²)",
+        "layers": "Sluoksniai",
+        "thickness": "Sluoksnio storis (mm)",
+        "waste": "Atliekos %",
+        "coverage": "Pakuotės dengiamumas (m²)",
+        "price": "Pakuotės kaina",
+        "labourPerM2": "Darbo valandos vienam m²",
+        "crewSize": "Brigados dydis",
+        "outNet": "Grynasis plotas",
+        "outCoverage": "Įrengiamas plotas (plotas × sluoksniai)",
+        "outWithWaste": "Plotas su atliekomis",
+        "outPackages": "Pakuočių pirkti (apvalinta į viršų)",
+        "outMaterialCost": "Medžiagų kaina",
+        "outLabourHours": "Darbo valandos",
+        "outDuration": "Brigados trukmė (val.)",
+        "outVolume": "Medžiagos tūris (m³)",
+        "apply": "Užpildyti kiekį, valandas ir medžiagas",
+        "applied": "Pritaikyta sąmatai — visus laukus dar gali koreguoti.",
+        "errors": {
+          "no_area": "Įvesk grynąjį plotą arba ilgį × aukštį.",
+          "waste_out_of_range": "Atliekų % turi būti nuo 0 iki 100.",
+          "layers_out_of_range": "Sluoksnių skaičius turi būti nuo 1 iki 20."
+        }
+      },
+      "result": {
+        "incompleteTitle": "Sąmata nepilna — trūksta darbo kainos",
+        "incompleteBody": "Įvedei kiekius, bet dar nėra valandų arba įkainio, todėl darbo kaina neįtraukta. Grįžk į ankstesnius žingsnius ir pridėk valandas bei įkainį.",
+        "emptyTitle": "Skaičių dar nėra",
+        "emptyBody": "Ankstesniuose žingsniuose įvesk darbuotojus, valandas, įkainį ar išlaidas — sąmata atsiras čia. Nieko už tave neužpildome.",
+        "csv": "Atsisiųsti CSV",
+        "print": "Spausdinti / išsaugoti PDF",
+        "ctaTitle": "Paversk šią sąmatą tikru darbuotojų poreikiu",
+        "ctaBody": "Ta pati sąmatos skaičiuoklė veikia LabourMarket.ai poreikio formoje. Su paskyra sąmatą gali pridėti prie struktūruoto darbuotojų poreikio; be paskyros — aprašyk poreikį viešoje formoje.",
+        "ctaDashboard": "Sukurti darbo poreikį (su paskyra)",
+        "ctaDashboardHelp": "Paskyros kelias atidaro poreikio formą tavo valdymo skydelyje — skaičiuoklė šių skaičių neperduoda.",
+        "ctaCompanyNeed": "Aprašyti poreikį be paskyros",
+        "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."
+      }
+    }
   }
 }
