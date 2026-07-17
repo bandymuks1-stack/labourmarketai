@@ -3,11 +3,13 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
-import { isApprovedRouteRow } from "./opportunity-fit";
+import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromRoleText } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import {
+  buildInterestCvStash,
   buildMatchSnapshot,
+  buildSnapshotContext,
   cleanInterestNote,
   type InterestStatus,
 } from "./interest-snapshot";
@@ -50,6 +52,9 @@ export type InterestWriteResult =
 export async function expressInterest(input: {
   requestId: string;
   note?: string | null;
+  /** Optional registered CV template id for the tailored-CV stash (extension
+   *  C). Unknown/absent → the default registry template. */
+  cvTemplate?: string | null;
 }): Promise<InterestWriteResult> {
   if (!input.requestId) return { kind: "invalid" };
   const supabase = await createClient();
@@ -82,7 +87,30 @@ export async function expressInterest(input: {
     (visibleRow.location_label as string | null) ?? null,
   );
   const match = matchWorkerToNeed(need, ctx.subject);
-  const snapshot = buildMatchSnapshot(match, source);
+  const nowIso = new Date().toISOString();
+  // Canonical Ideas Integration v1: the snapshot additionally stashes
+  //   context — the demand facts the worker SAW (already worker-visible
+  //     through the gated board RPC; lets "Mano susidomėjimai" honestly name
+  //     a demand after it closes), and
+  //   cv — the tailored-CV reference {template, need_id, tailored_at}
+  //     (extension C: application package v1 — a reference only; the CV
+  //     itself stays the read-time deterministic /cv?need= render).
+  // Both live INSIDE the existing worker-writable match_snapshot jsonb — no
+  // schema change, no new disclosure.
+  const snapshot = {
+    ...buildMatchSnapshot(match, source),
+    context: buildSnapshotContext({
+      roleText: (visibleRow.role_text as string | null) ?? null,
+      country: (visibleRow.country as string | null) ?? null,
+      locationLabel: (visibleRow.location_label as string | null) ?? null,
+      companyName: safeApprovedCompanyName(visibleRow),
+    }),
+    cv: buildInterestCvStash({
+      cvTemplate: input.cvTemplate,
+      needId: input.requestId,
+      nowIso,
+    }),
+  };
 
   const { error } = await asAny(supabase)
     .from("demand_interest_signals")
@@ -129,14 +157,30 @@ export async function withdrawInterest(input: {
   return { kind: "ok", status: "withdrawn" };
 }
 
+/** One of the worker's OWN interest rows (RLS: own worker_id only) with the
+ *  stored snapshot — the raw material for the "Mano susidomėjimai" list. */
+export interface MyInterestRow {
+  readonly requestId: string;
+  readonly status: InterestStatus;
+  /** The stored match_snapshot jsonb (context/cv parsed by pure readers). */
+  readonly matchSnapshot: unknown;
+  readonly createdAt: string | null;
+  readonly updatedAt: string | null;
+}
+
 export interface MyInterestSignals {
   /** request_id → status. Empty when the table is not applied yet. */
   readonly byRequest: ReadonlyMap<string, InterestStatus>;
+  /** The worker's own rows, newest activity first — INDEPENDENT of current
+   *  board visibility (a signal on a closed demand still appears; the view
+   *  layer labels it honestly). Empty when the table is not applied yet. */
+  readonly rows: readonly MyInterestRow[];
   /** False until the owner-gated migration is applied. */
   readonly available: boolean;
 }
 
-/** The worker's own interest map (for the board's button states). */
+/** The worker's own interest signals (board button states + the aggregated
+ *  own-signals list). ONE query, own rows only (worker_id filter + RLS). */
 export async function listMyInterestSignals(
   supabase: SupabaseClient,
   workerId: string,
@@ -144,16 +188,31 @@ export async function listMyInterestSignals(
   try {
     const { data, error } = await asAny(supabase)
       .from("demand_interest_signals")
-      .select("request_id, status")
-      .eq("worker_id", workerId);
-    if (error) return { byRequest: new Map(), available: false };
+      .select("request_id, status, match_snapshot, created_at, updated_at")
+      .eq("worker_id", workerId)
+      .order("updated_at", { ascending: false });
+    if (error) return { byRequest: new Map(), rows: [], available: false };
     const byRequest = new Map<string, InterestStatus>();
-    for (const r of (data ?? []) as { request_id: string; status: InterestStatus }[]) {
+    const rows: MyInterestRow[] = [];
+    for (const r of (data ?? []) as {
+      request_id: string;
+      status: InterestStatus;
+      match_snapshot: unknown;
+      created_at: string | null;
+      updated_at: string | null;
+    }[]) {
       byRequest.set(r.request_id, r.status);
+      rows.push({
+        requestId: r.request_id,
+        status: r.status,
+        matchSnapshot: r.match_snapshot ?? null,
+        createdAt: r.created_at ?? null,
+        updatedAt: r.updated_at ?? null,
+      });
     }
-    return { byRequest, available: true };
+    return { byRequest, rows, available: true };
   } catch {
-    return { byRequest: new Map(), available: false };
+    return { byRequest: new Map(), rows: [], available: false };
   }
 }
 

@@ -772,7 +772,26 @@ export default async function CompanyScoutingPage({
                   requestId={result.demand.id}
                   workerId={c.workerId}
                   current={c.shortlistStatus}
-                  labels={{ statuses: shortlistLabels, error: t("shortlistError") }}
+                  currentNote={c.shortlistNote}
+                  labels={{
+                    statuses: shortlistLabels,
+                    error: t("shortlistError"),
+                    /* Extension B — the existing note column becomes usable:
+                       optional internal note, REQUIRED reason on not_fit.
+                       Internal to this company (worker never reads it). */
+                    note: {
+                      label: t("shortlistNote.label"),
+                      internalHint: t("shortlistNote.internalHint"),
+                      add: t("shortlistNote.add"),
+                      edit: t("shortlistNote.edit"),
+                      placeholder: t("shortlistNote.placeholder"),
+                      reasonTitle: t("shortlistNote.reasonTitle"),
+                      reasonPlaceholder: t("shortlistNote.reasonPlaceholder"),
+                      reasonRequired: t("shortlistNote.reasonRequired"),
+                      save: t("shortlistNote.save"),
+                      cancel: t("shortlistNote.cancel"),
+                    },
+                  }}
                 />
               </li>
             );
