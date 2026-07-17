@@ -203,3 +203,20 @@ route smoke — `/lt/dashboard` + `/lt/dashboard/planning` + `/lt/onboarding`
 Revert the v2 commit: root layout line back to `pickClientMessages`, remove
 the two new layouts (`onboarding`, `design`), unwrap the three group layouts.
 No data, schema or service impact.
+
+## 8. Remaining candidates — measured composition + explicit skip decisions
+
+Post-v2 landing document composition (252.9 KB raw / 40.8 KB wire):
+inline scripts (RSC flight of the page itself) 100.7 KB, 25 inline SVGs
+64.7 KB, other markup 87.4 KB, inline styles 0 KB.
+
+Skipped, with reasons (owner rule: no unmeasured optimisations):
+
+| Candidate | Why skipped |
+|---|---|
+| Lazy admin-only namespaces inside the dashboard pick (`admin` 18 KB + `adminPilots` 3.6 KB of the 264 KB pick) | the affected documents are auth-gated — no credentialed end-to-end measurement is possible from this environment; a serialized-pick-only claim would not prove document behaviour. Deterministic follow-up needs owner-provided test credentials. |
+| Inline SVG dedup / sprite on landing (64.7 KB raw) | visual surface — forbidden scope this wave (no layout/visual changes); gzip already collapses repeated SVG markup (wire is 40.8 KB total). |
+| Hydration profiling | needs browser-level timing; this machine runs 8 concurrent agents — measurements would not be deterministic. Candidate for a quiet-machine session. |
+| HTML↔flight duplication (RSC serializes page markup twice) | framework-inherent to Next App Router streaming; no app-level fix that isn't a rearchitecture. |
+| Fonts | already `next/font` with locked subsets (latin-ext + cyrillic where needed, TASK 07); nothing measurable to remove without a visual change. |
+| Cache headers on documents | pages are auth/locale-dependent; caching private user data is banned for this PR; static marketing pages are already prerendered (SSG). |
