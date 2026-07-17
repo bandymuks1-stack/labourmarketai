@@ -81,6 +81,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "needStructuring",
   "network",
   "opportunities",
+  "opportunityDirections",
   "playercards",
   "productivityUnits",
   "professions",

@@ -1,4 +1,17 @@
 {
+  "opportunityDirections": {
+    "heading": "Kur dar gali pritaikyti savo įgūdžius",
+    "intro": "Pagal tavo profilį ir turimus įgūdžius radome artimas profesines kryptis, kuriose gali turėti daugiau galimybių.",
+    "fitBecause": "Tinka dėl:",
+    "couldStrengthen": "Kad atitikimas būtų stipresnis, gali reikėti:",
+    "viewOpportunities": "Peržiūrėti galimybes",
+    "addSkills": "Papildyti įgūdžius",
+    "addProfileCta": "Papildyti profilį",
+    "showMore": "Rodyti daugiau",
+    "showLess": "Rodyti mažiau",
+    "insufficientBody": "Papildyk savo įgūdžius, kad galėtume parodyti daugiau profesinių krypčių.",
+    "noneBody": "Kol kas neradome pakankamai patikimų gretimų krypčių pagal tavo įgūdžius. Papildyk profilį, kad pamatytum daugiau."
+  },
   "activityCentre": {
     "eyebrow": "Veiklos centras",
     "title": "Veikla",

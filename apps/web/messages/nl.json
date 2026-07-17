@@ -1,4 +1,17 @@
 {
+  "opportunityDirections": {
+    "heading": "Waar je vaardigheden nog meer passen",
+    "intro": "Op basis van je profiel en de vaardigheden die je al hebt, vonden we verwante professionele richtingen waar je meer mogelijkheden kunt hebben.",
+    "fitBecause": "Past vanwege:",
+    "couldStrengthen": "Om de match sterker te maken, heb je mogelijk nodig:",
+    "viewOpportunities": "Kansen bekijken",
+    "addSkills": "Vaardigheden toevoegen",
+    "addProfileCta": "Profiel aanvullen",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
+    "insufficientBody": "Voeg meer vaardigheden toe zodat we je meer professionele richtingen kunnen tonen.",
+    "noneBody": "We hebben nog niet genoeg betrouwbare verwante richtingen op basis van je vaardigheden gevonden. Vul je profiel aan om meer te zien."
+  },
   "activityCentre": {
     "eyebrow": "Activiteitencentrum",
     "title": "Activiteit",
