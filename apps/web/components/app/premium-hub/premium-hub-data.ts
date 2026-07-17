@@ -40,8 +40,8 @@ import { getHandoverPassport } from "@/lib/projects/handover-passport";
  *                 error dump).
  *
  * The skill model is status-based (self_declared → journal-supported →
- * manager-confirmed), so the person block shows real COUNTS + a transparent
- * profile-completeness ratio, never a fabricated 0–100 competence score.
+ * manager-confirmed), so the person block shows real COUNTS only — never a
+ * fabricated 0–100 competence score and no percentage meter of any kind.
  */
 
 export type BlockStatus = "ready" | "empty" | "unavailable";
@@ -75,8 +75,6 @@ export interface PersonVM {
   skillsDeclared: number;
   journalSupportedSkills: number;
   evidenceEntries: number;
-  /** Transparent met/total ratio over real profile fields (not a skill score). */
-  completenessPct: number;
 }
 
 export interface CompanyVM {
@@ -130,7 +128,6 @@ async function loadPerson(): Promise<PersonVM> {
     skillsDeclared: 0,
     journalSupportedSkills: 0,
     evidenceEntries: 0,
-    completenessPct: 0,
   };
 
   // Wagon 2 (nav performance): the profile row comes from the request-cached
@@ -168,19 +165,6 @@ async function loadPerson(): Promise<PersonVM> {
       ? availability.state
       : null;
 
-  // Transparent completeness: fraction of real profile fields present.
-  const checks = [
-    !!name,
-    !!professionSlug,
-    skillsDeclared + journalSupportedSkills > 0,
-    evidenceEntries > 0,
-    !!avatarUrl,
-    availabilityState !== null,
-  ];
-  const completenessPct = Math.round(
-    (checks.filter(Boolean).length / checks.length) * 100,
-  );
-
   // "Empty" only when the account has nothing meaningful yet (brand-new).
   const hasAny =
     !!profile?.full_name ||
@@ -201,7 +185,6 @@ async function loadPerson(): Promise<PersonVM> {
     skillsDeclared,
     journalSupportedSkills,
     evidenceEntries,
-    completenessPct,
   };
 }
 

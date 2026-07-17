@@ -68,8 +68,9 @@ describe("person card — every visible number opens its exact section", () => {
       expect(person, id).toContain(id);
     }
   });
-  it("completeness stays an informational meter (no href on HubProgress)", () => {
-    expect(person).toMatch(/<HubProgress label=\{t\("person\.completeness"\)\} value=\{person\.completenessPct\} \/>/);
+  it("person card shows no completeness percentage meter (human-first v1)", () => {
+    // The user-visible completenessPct meter was removed — real counts only.
+    expect(person).not.toMatch(/completenessPct|person\.completeness/);
     expect(primitives).not.toMatch(/HubProgress[\s\S]{0,400}href/);
   });
 });

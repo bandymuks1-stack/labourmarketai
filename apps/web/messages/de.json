@@ -8201,7 +8201,6 @@
     "person": {
       "title": "Persönliche Karte",
       "openProfile": "Profil öffnen",
-      "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
         "busy": "Beschäftigt",

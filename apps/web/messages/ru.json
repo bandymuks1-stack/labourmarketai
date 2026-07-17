@@ -8201,7 +8201,6 @@
     "person": {
       "title": "Личная карточка",
       "openProfile": "Открыть профиль",
-      "completeness": "Заполненность профиля",
       "availability": {
         "available": "Готов к работе",
         "busy": "Занят",
