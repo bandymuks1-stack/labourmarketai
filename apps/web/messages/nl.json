@@ -8384,7 +8384,9 @@
       "booking": "Boeking",
       "project": "Project",
       "task": "Taak",
-      "journal": "Journaal"
+      "journal": "Journaal",
+      "finance": "Financiën",
+      "invitation": "Uitnodiging"
     },
     "sourceNotes": {
       "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
@@ -8392,7 +8394,11 @@
       "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
       "projectManagersOnly": "Projectdatabanden zijn zichtbaar voor projectmanagers. Een projectplanning voor werknemers volgt zodra die weergave bestaat.",
       "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
-      "journalError": "Journaalregistraties konden nu niet worden geladen. De rest van de planning wordt normaal getoond."
+      "journalError": "Journaalregistraties konden nu niet worden geladen. De rest van de planning wordt normaal getoond.",
+      "financeUnavailable": "Financiële records zijn nog niet ingeschakeld — betaaltermijnen sluiten aan bij het plan zodra de financiële laag is ingeschakeld.",
+      "financeError": "Financiële records konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven.",
+      "invitationUnavailable": "Uitnodigingen zijn nog niet ingeschakeld — uitnodigingstermijnen sluiten aan bij het plan zodra de uitnodigingenlaag is ingeschakeld.",
+      "invitationError": "Uitnodigingen konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven."
     },
     "week": {
       "label": "Komende 7 dagen"
@@ -8421,7 +8427,9 @@
       "booking": "Boeking",
       "project": "Project",
       "task": "Taak",
-      "journal": "Werkregistratie"
+      "journal": "Werkregistratie",
+      "finance": "Financieel record",
+      "invitation": "Uitnodiging"
     },
     "projectStatus": {
       "draft": "Concept",

@@ -8384,7 +8384,9 @@
       "booking": "Booking",
       "project": "Project",
       "task": "Task",
-      "journal": "Journal"
+      "journal": "Journal",
+      "finance": "Finance",
+      "invitation": "Invitation"
     },
     "sourceNotes": {
       "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
@@ -8392,7 +8394,11 @@
       "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
       "projectManagersOnly": "Project date bands are shown to project managers. A worker-side project schedule joins once that view exists.",
       "projectError": "Projects could not be loaded right now. The rest of the plan is unaffected.",
-      "journalError": "Journal entries could not be loaded right now. The rest of the plan renders as usual."
+      "journalError": "Journal entries could not be loaded right now. The rest of the plan renders as usual.",
+      "financeUnavailable": "Finance records are not enabled yet — payment deadlines will join the plan once the finance layer is enabled.",
+      "financeError": "Finance records could not be loaded right now. The rest of the plan renders as usual.",
+      "invitationUnavailable": "Invitations are not enabled yet — invitation deadlines will join the plan once the invitations layer is enabled.",
+      "invitationError": "Invitations could not be loaded right now. The rest of the plan renders as usual."
     },
     "week": {
       "label": "Next 7 days"
@@ -8421,7 +8427,9 @@
       "booking": "Booking",
       "project": "Project",
       "task": "Task",
-      "journal": "Work entry"
+      "journal": "Work entry",
+      "finance": "Finance record",
+      "invitation": "Invitation"
     },
     "projectStatus": {
       "draft": "Draft",

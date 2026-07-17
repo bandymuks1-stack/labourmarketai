@@ -26,6 +26,11 @@ export type SentInvitationRow = {
   deliveryStatus: string;
   createdAt: string;
   expiresAt: string;
+  /** Real decision timestamps — the calendar projects lifecycle events at
+   *  the day they actually happened (Timeline Source Expansion v1). */
+  acceptedAt: string | null;
+  declinedAt: string | null;
+  revokedAt: string | null;
   resendCount: number;
   organizationId: string | null;
   projectId: string | null;
@@ -43,7 +48,7 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
   const { data, error } = await asAny(supabase)
     .from("invitations")
     .select(
-      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, resend_count, organization_id, project_id, personal_message",
+      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message",
     )
     .order("created_at", { ascending: false })
     .limit(100);
@@ -60,6 +65,9 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     delivery_status: string;
     created_at: string;
     expires_at: string;
+    accepted_at: string | null;
+    declined_at: string | null;
+    revoked_at: string | null;
     resend_count: number;
     organization_id: string | null;
     project_id: string | null;
@@ -76,6 +84,9 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
       deliveryStatus: r.delivery_status,
       createdAt: r.created_at,
       expiresAt: r.expires_at,
+      acceptedAt: r.accepted_at,
+      declinedAt: r.declined_at,
+      revokedAt: r.revoked_at,
       resendCount: r.resend_count,
       organizationId: r.organization_id,
       projectId: r.project_id,

@@ -107,6 +107,10 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
       /import \{ callerCompanyId \} from "@\/lib\/projects\/projects"/,
     );
     expect(COMPOSE).toMatch(/import \{ listMyTasks \} from "@\/lib\/tasks\/tasks"/);
+    expect(COMPOSE).toMatch(
+      /import \{ listMyFinanceRecords \} from "@\/lib\/finance\/finance"/,
+    );
+    expect(COMPOSE).toMatch(/from "@\/lib\/invitations\/network"/);
   });
 
   it("direct table reads are the known bounded set (projects/orgs/workers/journal)", () => {
@@ -322,12 +326,14 @@ describe("4. the agenda is pure, forward-looking date math", () => {
 });
 
 describe("5. real sources only — nothing that does not exist is simulated", () => {
-  it("exactly booking / project / task / journal (plan sources + the fact source)", () => {
+  it("exactly booking / project / task / journal / finance / invitation (plan + fact sources)", () => {
     expect([...PLANNING_SOURCE_TYPES]).toEqual([
       "booking",
       "project",
       "task",
       "journal",
+      "finance",
+      "invitation",
     ]);
   });
 
@@ -617,12 +623,18 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.source.project",
     "planning.source.task",
     "planning.source.journal",
+    "planning.source.finance",
+    "planning.source.invitation",
     "planning.sourceNotes.bookingUnavailable",
     "planning.sourceNotes.taskUnavailable",
     "planning.sourceNotes.taskError",
     "planning.sourceNotes.projectManagersOnly",
     "planning.sourceNotes.projectError",
     "planning.sourceNotes.journalError",
+    "planning.sourceNotes.financeUnavailable",
+    "planning.sourceNotes.financeError",
+    "planning.sourceNotes.invitationUnavailable",
+    "planning.sourceNotes.invitationError",
     "planning.week.label",
     "planning.today",
     "planning.later.title",
@@ -644,6 +656,8 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.fallback.project",
     "planning.fallback.task",
     "planning.fallback.journal",
+    "planning.fallback.finance",
+    "planning.fallback.invitation",
     "planning.projectStatus.draft",
     "planning.projectStatus.live",
     "planning.projectStatus.paused",

@@ -60,6 +60,8 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   project: "border-brand-orange/40 text-brand-orange",
   task: "border-state-success/40 text-state-success",
   journal: "border-brand-cyan/40 text-brand-cyan",
+  finance: "border-state-warning/40 text-state-warning",
+  invitation: "border-brand-purple/40 text-brand-purple",
 };
 
 /** Canonical href — omits defaults so the clean URL stays canonical. */
@@ -154,7 +156,9 @@ export default async function PlanningPage({
   function ItemRow({ item }: { item: PlanningItem }) {
     const conflict = conflictIds.has(item.id);
     const contextKey =
-      item.sourceType === "booking" ? `context.${item.roleContext}` : null;
+      item.sourceType === "booking" || item.sourceType === "invitation"
+        ? `context.${item.roleContext}`
+        : null;
     return (
       <li>
         {/* The whole row links the REAL source object — planning duplicates
@@ -674,6 +678,30 @@ function SourceNotes({
     notes.push({
       key: "sourceNotes.journalError",
       testid: "planning-source-note-journal-error",
+    });
+  }
+  if (sources.finance.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.financeUnavailable",
+      testid: "planning-source-note-finance",
+    });
+  }
+  if (sources.finance.status === "error") {
+    notes.push({
+      key: "sourceNotes.financeError",
+      testid: "planning-source-note-finance-error",
+    });
+  }
+  if (sources.invitation.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.invitationUnavailable",
+      testid: "planning-source-note-invitation",
+    });
+  }
+  if (sources.invitation.status === "error") {
+    notes.push({
+      key: "sourceNotes.invitationError",
+      testid: "planning-source-note-invitation-error",
     });
   }
   // journal "workers-only" is silent by design: a company owner without a
