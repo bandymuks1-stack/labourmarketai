@@ -66,9 +66,54 @@ visually match the landing direction.
 
 ## 7. Universal labour-market scope
 
+### 7.1 Canonical product definition (binding; owner text 2026-07-17, įrašyta 1:1)
+
+> **LabourMarket.ai — universali Europos darbo rinkos ir profesinių galimybių
+> erdvė, skirta visų profesijų, išsilavinimo lygių, patirties ir gyvenimo etapų
+> žmonėms. Ji padeda kiekvienam atrasti didesnes savo galimybes, parodyti
+> realius gebėjimus, rasti darbą, darbuotojus, komandą, mokymąsi, projektus ir
+> partnerius, kurti naujas idėjas bei greičiau persikvalifikuoti.**
+
+**English (reference translation):** LabourMarket.ai is a universal European
+labour-market and professional-opportunity space for people of every profession,
+education level, experience and life stage. It helps everyone discover more of
+their opportunities, show real abilities, find work, workers, a team, learning,
+projects and partners, create new ideas, and reskill faster.
+
+This definition is a **product-architecture rule, not marketing text.** Every
+surface — schema, search, matching, onboarding, profiles, learning/reskilling,
+copy, and metadata — must serve all professions, all education levels, all
+experience and all life stages, across the whole of Europe (not one country).
+
+**Public-identity constraints (binding):**
+
+- Public product identity is stated **positively and universally**. It is never
+  defined through a single sector — **not even by negation** (no "not just X",
+  no "not a Y platform").
+- The platform never defines *itself* as construction / a trade / "work abroad" /
+  a "labour-force agency" / a job board / a CV app. A concrete sector, profession
+  or opportunity type appears in the product **only where a user themselves**
+  selects it (a chosen profession, sector, vacancy, learning path, or
+  market-data filter). Legitimate profession/sector taxonomy data is never
+  removed — it is surfaced on user choice, not as the platform's identity.
+- No sector may be given priority in the definition or architecture. The phrases
+  **"primary vertical", "initial vertical", "construction-first", "default
+  industry", "preferred sector", "pilot sector", "sector boost", "industry
+  boost", "ranking boost"** and any analogous priority construct are forbidden
+  in this canonical definition (guarded by
+  `apps/web/lib/guards/universal-canonical-definition.test.ts`).
+
+### 7.2 Architectural consequence
+
 labourmarket.ai is a labour-market **opportunity OS** — not a CV app, not a job
-board, not construction-only. Construction is an early example, never a boundary
-(ADR 0008). Architecture, schema, and copy stay sector-agnostic.
+board. Architecture, schema, and copy stay sector-agnostic; any sector-specific
+attribute exists only as an **optional extension attribute** over the neutral
+core (doctrine §5, §10), never as the core profile schema. Seed data and first
+templates are not hardcoded assumptions (ADR 0008 — recruitment is a core
+function, and the universal core is never boundaried to one sector). Learning,
+reskilling and career-mobility are first-class architectural directions of the
+model, surfaced in the product only where the corresponding function actually
+exists (§5 "No fake anything").
 
 ## 8. WOW beta scope discipline
 
