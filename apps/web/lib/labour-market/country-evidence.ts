@@ -31,7 +31,10 @@ export const SUPPORTED_COUNTRIES: readonly CountryCode[] = [
   "NL",
 ];
 
-/** The full priority-market list shown on the index (others are "coming"). */
+/** The full priority-market list shown on the index (others are "coming").
+ *  Open-markets update 2026-07-17: GE/BE/FR/ES/AT/CH added as open markets.
+ *  They are NOT in SUPPORTED_COUNTRIES (no evidence page yet), so the index
+ *  honestly renders them as "coming soon" cards — no data is claimed. */
 export const PRIORITY_MARKETS: readonly string[] = [
   "LT",
   "LV",
@@ -43,6 +46,12 @@ export const PRIORITY_MARKETS: readonly string[] = [
   "NO",
   "SE",
   "FI",
+  "GE",
+  "BE",
+  "FR",
+  "ES",
+  "AT",
+  "CH",
 ];
 
 export interface CountrySignal {

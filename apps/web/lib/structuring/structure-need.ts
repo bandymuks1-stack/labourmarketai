@@ -96,6 +96,13 @@ const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "bergen", "trondheim"] },
   { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "gothenburg", "göteborg", "malmö", "malmo"] },
   { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
+  // Open-markets update 2026-07-17 — the six newly opened markets.
+  { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis"] },
+  { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp"] },
+  { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille"] },
+  { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia"] },
+  { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz"] },
+  { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel"] },
 ];
 
 const KNOWN_COUNTRIES = new Set<string>(MARKET_COUNTRIES);
