@@ -2872,9 +2872,6 @@
       "matchesToday": "New actions",
       "previewNote": "Illustrative figures — not current totals.",
       "avgOvr": "Profile completion"
-    },
-    "activity": {
-      "label": "Activity feed"
     }
   },
   "map": {

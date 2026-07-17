@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 /**
@@ -17,13 +17,15 @@ import { join, relative } from "node:path";
  *  2. NO PARALLEL TIMELINE ROUTE — no dashboard route directory named
  *     "calendar" or "timeline" exists; the planning route is the only
  *     calendar-shaped surface.
- *  3. DEAD FABRICATED FEED STAYS CONTAINED — MicroActivityFeed (a
- *     placeholder-fed "live activity" ticker) is imported by NOTHING, so
- *     its fabricated activity.feed.* rows cannot reach any production
- *     surface. Its removal is a separate owner-sequenced PR (Dead Surface
- *     Code Removal v1); until then this pin proves containment.
- *  4. The fabricated activity.feed.* placeholder pool has no OTHER
- *     consumer either — nothing new may start streaming fake activity.
+ *  3. DEAD FABRICATED FEED IS GONE (Dead Surface Code Removal v1,
+ *     owner-approved OD-6) — the MicroActivityFeed component file no
+ *     longer exists, nothing references its symbol, and the fabricated
+ *     activity.feed.* placeholder pool it exclusively owned is deleted.
+ *     This ABSENCE contract replaces the former containment pin so no
+ *     fake live-activity ticker can quietly return.
+ *  4. Canonical surfaces stay canonical — /dashboard/activity remains the
+ *     one cross-module attention surface (spine-driven), and the calendar
+ *     remains /dashboard/planning.
  *
  * planning.test.ts already pins the source-type registry, the projection
  * (read-only) contract and the view math; this guard only adds the
@@ -92,21 +94,45 @@ describe("one canonical calendar — the view builders have exactly one consumer
   });
 });
 
-describe("fabricated activity feed stays contained until its removal PR", () => {
-  it("MicroActivityFeed is imported by nothing (dead, therefore unreachable)", () => {
-    const importers = allSourceFiles()
-      .filter((p) => !p.endsWith("micro-activity-feed.tsx"))
-      .filter((p) => /micro-activity-feed|MicroActivityFeed/.test(readFileSync(p, "utf8")))
-      .map(rel);
-    expect(importers).toEqual([]);
+describe("fabricated activity feed is ABSENT (Dead Surface Code Removal v1)", () => {
+  it("the MicroActivityFeed file no longer exists", () => {
+    expect(
+      existsSync(join(ROOT, "components", "app", "micro-activity-feed.tsx")),
+    ).toBe(false);
   });
 
-  it("no other component consumes the fabricated activity.feed.* placeholder pool", () => {
-    const consumers = allSourceFiles()
-      .filter((p) => !p.endsWith("micro-activity-feed.tsx"))
-      .filter((p) => !p.endsWith(join("content", "placeholders.ts")))
+  it("no source references the removed symbol or its kebab-case name", () => {
+    const refs = allSourceFiles()
+      .filter((p) => /micro-activity-feed|MicroActivityFeed/.test(readFileSync(p, "utf8")))
+      .map(rel);
+    expect(refs).toEqual([]);
+  });
+
+  it("the fabricated activity.feed.* placeholder pool is gone from ALL source (incl. placeholders.ts)", () => {
+    const refs = allSourceFiles()
       .filter((p) => readFileSync(p, "utf8").includes("activity.feed."))
       .map(rel);
-    expect(consumers).toEqual([]);
+    expect(refs).toEqual([]);
+  });
+
+  it("the exclusively-owned live.activity i18n key is gone from every locale file", () => {
+    const files = walk(join(ROOT, "messages"), (p) => p.endsWith(".json"));
+    for (const p of files) {
+      const msgs = JSON.parse(readFileSync(p, "utf8"));
+      expect(msgs?.live?.activity, rel(p)).toBeUndefined();
+    }
+  });
+
+  it("canonical activity surface survives untouched (spine-driven, no fake feed replacement)", () => {
+    const activityPage = join(
+      ROOT,
+      "app",
+      "[locale]",
+      "dashboard",
+      "activity",
+      "page.tsx",
+    );
+    expect(existsSync(activityPage)).toBe(true);
+    expect(readFileSync(activityPage, "utf8")).toMatch(/buildActivityRows|activity-centre/);
   });
 });
