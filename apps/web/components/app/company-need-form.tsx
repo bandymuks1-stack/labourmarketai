@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { parseCompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import {
   submitCompanyNeedAction,
   type CompanyNeedFormState,
@@ -103,6 +104,40 @@ export function CompanyNeedForm({
   // no field values are captured, only bounded funnel dimensions.
   const startedRef = useRef(false);
   const submittedRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Optional bounded prefill from query params (calculator bridge v1) — only
+  // fields the server action already accepts, validated by the adapter and
+  // applied AFTER hydration so the static page markup stays untouched. The
+  // user still reviews and submits every value; nothing is auto-submitted.
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    const prefill = parseCompanyNeedPrefill(
+      new URLSearchParams(window.location.search),
+    );
+    const setIf = (name: string, value: string | undefined, emptyValues: string[]) => {
+      if (value == null) return;
+      const el = form.elements.namedItem(name);
+      if (
+        (el instanceof HTMLInputElement ||
+          el instanceof HTMLSelectElement ||
+          el instanceof HTMLTextAreaElement) &&
+        emptyValues.includes(el.value)
+      ) {
+        el.value = value;
+      }
+    };
+    setIf(
+      "number_of_workers",
+      prefill.numberOfWorkers != null ? String(prefill.numberOfWorkers) : undefined,
+      ["", "1"], // 1 is the untouched default
+    );
+    setIf("country", prefill.country, [""]);
+    setIf("profession", prefill.profession, [""]);
+    setIf("expected_duration", prefill.expectedDuration, [""]);
+    setIf("description", prefill.description, [""]);
+  }, []);
 
   function handleFirstInteraction() {
     if (startedRef.current) return;
@@ -131,6 +166,7 @@ export function CompanyNeedForm({
   return (
     <div className="flex flex-col gap-6">
       <form
+        ref={formRef}
         action={formAction}
         className="flex flex-col gap-4"
         data-testid="company-need-form"

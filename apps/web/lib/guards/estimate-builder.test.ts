@@ -18,7 +18,11 @@ const code = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
 
 const builder = read("components/app/estimate-builder.tsx");
-const summary = read("components/app/estimate-summary.tsx");
+// The summary is a wrapper (i18n) + view (markup) since the public calculator
+// reuse refactor — the guard checks the pair as one logical surface.
+const summary =
+  read("components/app/estimate-summary.tsx") +
+  read("components/app/estimate-summary-view.tsx");
 const form = read("components/app/demand-request-button.tsx");
 const helper = read("lib/demand/demand-request.ts");
 const readback = read("components/app/demand-requests-readback.tsx");

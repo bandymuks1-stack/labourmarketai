@@ -10143,5 +10143,89 @@
       "sessionsWithStart": "Sessies met een startevent",
       "sessionsReachedValue": "Sessies die waarde bereikten"
     }
+  },
+  "calculators": {
+    "projectCost": {
+      "title": "Werk- en projectkostencalculator",
+      "lede": "Bereken de kosten van een klus of project met je eigen cijfers — werknemers, uren, tarieven, materialen en extra kosten. Geschikt voor bouw, logistiek, schoonmaak, horeca, productie, zorg, administratie, IT-diensten en meer. Gratis, zonder account, er wordt niets opgeslagen.",
+      "honesty": {
+        "title": "Hoe deze calculator werkt",
+        "body": "Elk bedrag wordt uitsluitend berekend uit de cijfers die jij invoert, met transparante rekenkunde. Het resultaat is een voorlopige raming om te plannen — geen offerte, en er worden geen marktprijzen aangenomen.",
+        "userNumbers": "We verzinnen nooit tarieven, belastingen of marktgemiddelden. Laat je een prijs weg, dan wordt het resultaat als onvolledig gemarkeerd in plaats van volledig te lijken."
+      },
+      "steps": {
+        "context": "Werkcontext",
+        "quantities": "Omvang en uren",
+        "rates": "Prijzen en tarieven",
+        "result": "Resultaat",
+        "back": "Terug",
+        "next": "Verder",
+        "startOver": "Opnieuw beginnen"
+      },
+      "totalHoursHelp": "Bij een waarde boven 0 vervangt dit werknemers × uren per werknemer.",
+      "countryNone": "— niet gekozen —",
+      "vat": {
+        "label": "Btw % (optioneel)",
+        "help": "Wordt alleen toegevoegd wanneer je het zelf invoert — we nemen nooit een btw-tarief aan.",
+        "invalid": "Btw moet een getal tussen 0 en 100 zijn.",
+        "net": "Subtotaal exclusief btw",
+        "amount": "Btw",
+        "gross": "Totaal inclusief btw"
+      },
+      "acc": {
+        "title": "Huisvestingshulp (optioneel)",
+        "note": "Vermenigvuldigt werknemers × dagen × prijs per werknemer per dag en zet de som in het veld vervoer / huisvesting. Alleen jouw eigen cijfers.",
+        "workers": "Werknemers",
+        "days": "Dagen",
+        "perWorkerDay": "Prijs per werknemer per dag",
+        "computed": "Berekende som",
+        "apply": "Gebruiken in vervoer / huisvesting"
+      },
+      "pack": {
+        "toggle": "Isolatie- / oppervlaktehulp (m²)",
+        "note": "Een hoeveelhedenhulp voor materialen per oppervlakte (bijv. isolatie): voer het oppervlak, de lagen en de dekking per pak in en krijg oppervlaktes, aantal pakken en materiaalkosten. Alleen een hoeveelheidsraming — geen constructief ontwerpadvies.",
+        "netArea": "Netto-oppervlak (m²)",
+        "dimensionsHint": "…of voer hieronder lengte × hoogte en openingen in.",
+        "lengthM": "Lengte (m)",
+        "heightM": "Hoogte / breedte (m)",
+        "openings": "Openingen — ramen, deuren (m²)",
+        "layers": "Lagen",
+        "thickness": "Laagdikte (mm)",
+        "waste": "Snijverlies %",
+        "coverage": "Dekking per pak (m²)",
+        "price": "Prijs per pak",
+        "labourPerM2": "Arbeidsuren per m²",
+        "crewSize": "Ploeggrootte",
+        "outNet": "Netto-oppervlak",
+        "outCoverage": "Te plaatsen oppervlak (oppervlak × lagen)",
+        "outWithWaste": "Oppervlak incl. snijverlies",
+        "outPackages": "Pakken te kopen (naar boven afgerond)",
+        "outMaterialCost": "Materiaalkosten",
+        "outLabourHours": "Arbeidsuren",
+        "outDuration": "Duur voor de ploeg (uren)",
+        "outVolume": "Materiaalvolume (m³)",
+        "apply": "Hoeveelheid, uren en materialen invullen",
+        "applied": "Toegepast op de raming — je kunt elk veld nog aanpassen.",
+        "errors": {
+          "no_area": "Voer een netto-oppervlak of lengte × hoogte in.",
+          "waste_out_of_range": "Snijverlies % moet tussen 0 en 100 liggen.",
+          "layers_out_of_range": "Het aantal lagen moet tussen 1 en 20 liggen."
+        }
+      },
+      "result": {
+        "incompleteTitle": "Raming onvolledig — arbeidskosten ontbreken",
+        "incompleteBody": "Je hebt hoeveelheden ingevoerd maar nog geen uren of tarief, dus arbeidskosten zijn niet meegenomen. Vul in de vorige stappen uren en een tarief in om de raming compleet te maken.",
+        "emptyTitle": "Nog geen cijfers",
+        "emptyBody": "Voer in de vorige stappen werknemers, uren, een tarief of kosten in en de raming verschijnt hier. Er wordt nooit iets voor je ingevuld.",
+        "csv": "CSV downloaden",
+        "print": "Afdrukken / opslaan als pdf",
+        "ctaTitle": "Maak van deze raming een echte personeelsaanvraag",
+        "ctaBody": "Dezelfde ramingsbouwer zit in het behoefteformulier van LabourMarket.ai. Met een account kun je een raming aan een gestructureerde personeelsaanvraag koppelen; zonder account beschrijf je je behoefte via het publieke formulier.",
+        "ctaDashboard": "Personeelsbehoefte aanmaken (met account)",
+        "ctaDashboardHelp": "De accountroute opent het behoefteformulier op je dashboard — de calculator draagt deze cijfers niet over.",
+        "ctaCompanyNeed": "Behoefte beschrijven zonder account",
+        "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen je aantal werknemers en land — geen prijzen en geen beschrijvingen."
+      }
+    }
   }
 }

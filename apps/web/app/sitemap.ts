@@ -27,6 +27,8 @@ const STATIC_PATHS: readonly string[] = [
   "/labour-market",
   "/match-preview",
   "/pricing",
+  // Public work & project cost calculator (European Calculator v1).
+  "/calculators/project-cost",
   // Project explanation page (CR train WAGON 2).
   "/about",
   "/legal/privacy",

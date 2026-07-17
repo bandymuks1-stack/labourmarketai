@@ -116,7 +116,8 @@ export type PageKey =
   | "pricing"
   | "workOpportunities"
   | "skills"
-  | "professions";
+  | "professions"
+  | "projectCostCalculator";
 
 /**
  * Curated, honest per-page SEO copy (active locales). No fabricated
@@ -420,6 +421,33 @@ export const PAGE_SEO: Readonly<
       title: "Berufe und Branchen — Für wen LabourMarket.ai gedacht ist",
       description:
         "Von Bauarbeitern, Schweißern und Fahrern bis zu Lager-, Produktions-, Reinigungs-, Gastgewerbe-, Pflege- und Verwaltungsrollen — LabourMarket.ai deckt Berufe und Branchen in ganz Europa ab, dazu Kolonnen, Personalagenturen und Arbeitgeber.",
+    },
+  },
+  projectCostCalculator: {
+    en: {
+      title: "Project Calculator — Estimate work and project costs",
+      description:
+        "Free work and project cost calculator: enter your own workers, hours, rates, materials and extras and get a transparent preliminary estimate. Cross-sector — logistics, cleaning, manufacturing, hospitality, care, construction and more. No account needed; your numbers are not stored.",
+    },
+    lt: {
+      title: "Darbų ir projekto skaičiuoklė — apskaičiuok darbų kainą",
+      description:
+        "Nemokama darbų ir projekto kainos skaičiuoklė: įvesk savo darbuotojus, valandas, įkainius, medžiagas ir papildomas išlaidas — gauk skaidrią preliminarią sąmatą. Įvairiems sektoriams — logistikai, valymui, gamybai, svetingumui, priežiūrai, statybai ir kt. Nereikia paskyros; tavo skaičiai nesaugomi.",
+    },
+    ru: {
+      title: "Калькулятор проекта — оцените стоимость работ",
+      description:
+        "Бесплатный калькулятор стоимости работ и проектов: введите своих работников, часы, ставки, материалы и дополнительные расходы — получите прозрачную предварительную смету. Для разных секторов — логистика, уборка, производство, гостеприимство, уход, строительство и др. Без аккаунта; ваши цифры не сохраняются.",
+    },
+    nl: {
+      title: "Projectcalculator — Bereken werk- en projectkosten",
+      description:
+        "Gratis calculator voor werk- en projectkosten: voer je eigen werknemers, uren, tarieven, materialen en extra's in en krijg een transparante voorlopige raming. Voor allerlei sectoren — logistiek, schoonmaak, productie, horeca, zorg, bouw en meer. Geen account nodig; je cijfers worden niet opgeslagen.",
+    },
+    de: {
+      title: "Projektrechner — Arbeits- und Projektkosten kalkulieren",
+      description:
+        "Kostenloser Arbeits- und Projektkostenrechner: Geben Sie Ihre eigenen Arbeitskräfte, Stunden, Sätze, Material- und Zusatzkosten ein und erhalten Sie eine transparente vorläufige Schätzung. Branchenübergreifend — Logistik, Reinigung, Produktion, Gastgewerbe, Pflege, Bau und mehr. Ohne Konto; Ihre Zahlen werden nicht gespeichert.",
     },
   },
 };

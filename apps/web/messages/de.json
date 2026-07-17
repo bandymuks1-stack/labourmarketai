@@ -10143,5 +10143,89 @@
       "sessionsWithStart": "Sitzungen mit Start-Ereignis",
       "sessionsReachedValue": "Sitzungen mit erreichtem Nutzen"
     }
+  },
+  "calculators": {
+    "projectCost": {
+      "title": "Arbeits- und Projektkostenrechner",
+      "lede": "Berechnen Sie die Kosten einer Arbeit oder eines Projekts aus Ihren eigenen Zahlen — Arbeitskräfte, Stunden, Sätze, Material und Zusatzkosten. Geeignet für Bau, Logistik, Reinigung, Gastgewerbe, Produktion, Pflege, Verwaltung, IT-Dienstleistungen und mehr. Kostenlos, ohne Konto, nichts wird gespeichert.",
+      "honesty": {
+        "title": "So funktioniert dieser Rechner",
+        "body": "Jede Zahl wird ausschließlich aus Ihren eigenen Eingaben berechnet, mit transparenter Arithmetik. Das Ergebnis ist eine vorläufige Schätzung zur Planung — kein Angebot, und es werden keine Marktpreise angenommen.",
+        "userNumbers": "Wir erfinden niemals Sätze, Steuern oder Marktdurchschnitte. Lassen Sie einen Preis weg, wird das Ergebnis als unvollständig markiert, statt vollständig zu wirken."
+      },
+      "steps": {
+        "context": "Arbeitskontext",
+        "quantities": "Umfang und Stunden",
+        "rates": "Preise und Sätze",
+        "result": "Ergebnis",
+        "back": "Zurück",
+        "next": "Weiter",
+        "startOver": "Neu beginnen"
+      },
+      "totalHoursHelp": "Bei einem Wert über 0 ersetzt dies Arbeitskräfte × Stunden pro Person.",
+      "countryNone": "— nicht gewählt —",
+      "vat": {
+        "label": "MwSt. % (optional)",
+        "help": "Wird nur hinzugefügt, wenn Sie sie selbst eingeben — wir nehmen niemals einen MwSt.-Satz an.",
+        "invalid": "MwSt. muss eine Zahl zwischen 0 und 100 sein.",
+        "net": "Zwischensumme ohne MwSt.",
+        "amount": "MwSt.",
+        "gross": "Gesamt inkl. MwSt."
+      },
+      "acc": {
+        "title": "Unterkunftshelfer (optional)",
+        "note": "Multipliziert Arbeitskräfte × Tage × Preis pro Person und Tag und trägt die Summe in das Feld Transport / Unterkunft ein. Nur Ihre eigenen Zahlen.",
+        "workers": "Arbeitskräfte",
+        "days": "Tage",
+        "perWorkerDay": "Preis pro Person und Tag",
+        "computed": "Berechnete Summe",
+        "apply": "In Transport / Unterkunft übernehmen"
+      },
+      "pack": {
+        "toggle": "Dämmungs- / Flächenmengen-Helfer (m²)",
+        "note": "Ein Mengenhelfer für flächenbasierte Materialien (z. B. Dämmung): Geben Sie Fläche, Lagen und Paketabdeckung ein und erhalten Sie Flächen, Paketanzahl und Materialkosten. Nur eine Mengenschätzung — keine statische Planungsberatung.",
+        "netArea": "Nettofläche (m²)",
+        "dimensionsHint": "…oder geben Sie unten Länge × Höhe und Öffnungen ein.",
+        "lengthM": "Länge (m)",
+        "heightM": "Höhe / Breite (m)",
+        "openings": "Öffnungen — Fenster, Türen (m²)",
+        "layers": "Lagen",
+        "thickness": "Lagendicke (mm)",
+        "waste": "Verschnitt %",
+        "coverage": "Abdeckung pro Paket (m²)",
+        "price": "Preis pro Paket",
+        "labourPerM2": "Arbeitsstunden pro m²",
+        "crewSize": "Kolonnengröße",
+        "outNet": "Nettofläche",
+        "outCoverage": "Zu verlegende Fläche (Fläche × Lagen)",
+        "outWithWaste": "Fläche inkl. Verschnitt",
+        "outPackages": "Zu kaufende Pakete (aufgerundet)",
+        "outMaterialCost": "Materialkosten",
+        "outLabourHours": "Arbeitsstunden",
+        "outDuration": "Dauer für die Kolonne (Stunden)",
+        "outVolume": "Materialvolumen (m³)",
+        "apply": "Menge, Stunden und Material übernehmen",
+        "applied": "Auf die Schätzung angewendet — jedes Feld bleibt änderbar.",
+        "errors": {
+          "no_area": "Geben Sie eine Nettofläche oder Länge × Höhe ein.",
+          "waste_out_of_range": "Verschnitt % muss zwischen 0 und 100 liegen.",
+          "layers_out_of_range": "Die Anzahl der Lagen muss zwischen 1 und 20 liegen."
+        }
+      },
+      "result": {
+        "incompleteTitle": "Schätzung unvollständig — Arbeitskosten fehlen",
+        "incompleteBody": "Sie haben Mengen eingegeben, aber noch keine Stunden oder keinen Satz — die Arbeitskosten sind daher nicht enthalten. Ergänzen Sie in den vorherigen Schritten Stunden und einen Satz.",
+        "emptyTitle": "Noch keine Zahlen",
+        "emptyBody": "Geben Sie in den vorherigen Schritten Arbeitskräfte, Stunden, einen Satz oder Kosten ein — die Schätzung erscheint hier. Es wird niemals etwas für Sie vorausgefüllt.",
+        "csv": "CSV herunterladen",
+        "print": "Drucken / als PDF speichern",
+        "ctaTitle": "Machen Sie aus dieser Schätzung eine echte Personalanfrage",
+        "ctaBody": "Derselbe Schätzungs-Baustein steckt im Bedarfsformular von LabourMarket.ai. Mit Konto können Sie eine Schätzung an eine strukturierte Personalanfrage anhängen; ohne Konto beschreiben Sie Ihren Bedarf im öffentlichen Formular.",
+        "ctaDashboard": "Personalbedarf anlegen (mit Konto)",
+        "ctaDashboardHelp": "Die Konto-Route öffnet das Bedarfsformular in Ihrem Dashboard — der Rechner überträgt diese Zahlen nicht.",
+        "ctaCompanyNeed": "Bedarf ohne Konto beschreiben",
+        "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."
+      }
+    }
   }
 }
