@@ -7283,11 +7283,11 @@
     "eyebrow": "Arbeiten im Ausland",
     "title": "Ihr Weg zur Arbeit im Ausland,",
     "titleAccent": "Schritt für Schritt",
-    "subcopy": "Labourmarket.ai ist eine digitale internationale Arbeitskräfte-Agentur. Erstellen Sie ein Arbeitskraft-Profil, sehen Sie, was jedes Land braucht, und lassen Sie Arbeitgeber Sie erreichen, wenn Sie bereit sind. Wir versprechen niemals einen Job oder einen Lohn — wir helfen Ihnen, sich vorzubereiten und gematcht zu werden.",
+    "subcopy": "In ganz Europa zu arbeiten ist einer der Wege, die LabourMarket.ai eröffnet. Erstellen Sie ein Arbeitsprofil, sehen Sie, was jedes Land braucht, und lassen Sie Arbeitgeber Sie erreichen, wenn Sie bereit sind. Wir versprechen niemals einen Job oder einen Lohn — wir helfen Ihnen, sich vorzubereiten und gematcht zu werden.",
     "stepsTitle": "So funktioniert es",
     "steps": [
       {
-        "title": "1. Nennen Sie uns Ihr Gewerk",
+        "title": "1. Nennen Sie uns Ihren Beruf",
         "body": "Geben Sie Ihren Beruf, Ihre Erfahrung und Ihre Verfügbarkeit an. Das dauert nur wenige Minuten."
       },
       {
@@ -7300,7 +7300,7 @@
       },
       {
         "title": "4. Gematcht werden",
-        "body": "Wenn der Bedarf eines Arbeitgebers zu Ihrem Gewerk, Ihrer Verfügbarkeit, Unterkunft, Ihrem Transport und Ihrer Sprache passt, erscheint er auf Ihrer Chancen-Übersicht mit einer ehrlichen Erklärung der Passung."
+        "body": "Wenn der Bedarf eines Arbeitgebers zu Ihrem Beruf, Ihrer Verfügbarkeit, Unterkunft, Ihrem Transport und Ihrer Sprache passt, erscheint er auf Ihrer Chancen-Übersicht mit einer ehrlichen Erklärung der Passung."
       },
       {
         "title": "5. Interesse und Kontakt",
@@ -7309,7 +7309,7 @@
     ],
     "needTitle": "Was Sie möglicherweise brauchen",
     "needItems": [
-      "Einen Beruf oder ein Gewerk, in dem Sie arbeiten",
+      "Einen Beruf, in dem Sie arbeiten",
       "Ihre Verfügbarkeit ab einem Datum",
       "Ob Sie eine Unterkunft benötigen oder eine eigene haben",
       "Transport: eigener, ein Führerschein oder eine Abholung",
@@ -7321,7 +7321,7 @@
     "aiNote": "KI hilft bei der Vorbereitung Ihres Lebenslaufs und Profils. Sie prüft Ihre Fähigkeiten oder Dokumente nicht selbst — das tun ein Mensch und Ihre Dokumente.",
     "ctaProfile": "Arbeitskraft-Profil erstellen",
     "ctaReadiness": "Länderbereitschaft prüfen",
-    "ctaTrades": "Gewerke ansehen, mit denen wir arbeiten",
+    "ctaTrades": "Berufe ansehen, mit denen wir arbeiten",
     "disclaimer": "Wir versprechen keine Arbeit und keinen Verdienst, und Informationen zur Bereitschaft sind keine Rechtsberatung.",
     "structuredNote": "Ihr CV-Text wird automatisch in ein Profil strukturiert — Sie prüfen jeden Vorschlag und entscheiden, was gespeichert wird."
   },

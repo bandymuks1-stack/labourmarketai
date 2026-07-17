@@ -7283,11 +7283,11 @@
     "eyebrow": "Work abroad",
     "title": "Your path to working abroad,",
     "titleAccent": "step by step",
-    "subcopy": "Labourmarket.ai is a digital international labour-force agency. Build one worker profile, see what each country needs, and let employers reach you when you are ready. We never promise a job or a wage — we help you get ready and get matched.",
+    "subcopy": "Working across Europe is one of the paths LabourMarket.ai opens up. Build one work profile, see what each country needs, and let employers reach you when you are ready. We never promise a job or a wage — we help you get ready and get matched.",
     "stepsTitle": "How it works",
     "steps": [
       {
-        "title": "1. Tell us your trade",
+        "title": "1. Tell us your profession",
         "body": "Add your profession, experience and availability. It takes a few minutes."
       },
       {
@@ -7300,7 +7300,7 @@
       },
       {
         "title": "4. Get matched",
-        "body": "When an employer's need fits your trade, availability, accommodation, transport and language, it appears on your opportunity board with an honest fit explanation."
+        "body": "When an employer's need fits your profession, availability, accommodation, transport and language, it appears on your opportunity board with an honest fit explanation."
       },
       {
         "title": "5. Interest and contact",
@@ -7309,7 +7309,7 @@
     ],
     "needTitle": "What you may need",
     "needItems": [
-      "A profession or trade you work in",
+      "A profession you work in",
       "Your availability from a date",
       "Whether you need accommodation or have your own",
       "Transport: your own, a licence, or a pickup",
@@ -7321,7 +7321,7 @@
     "aiNote": "AI helps prepare your CV and profile. It does not check your skills or documents on its own — a person and your documents do.",
     "ctaProfile": "Create worker profile",
     "ctaReadiness": "Check country readiness",
-    "ctaTrades": "See trades we work with",
+    "ctaTrades": "See professions we work with",
     "disclaimer": "We do not promise work or earnings, and readiness information is not legal advice.",
     "structuredNote": "We read your CV and turn it into a profile you can review — you check every suggestion and decide what is saved."
   },
