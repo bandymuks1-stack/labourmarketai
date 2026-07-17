@@ -94,11 +94,15 @@ describe("4. booking responses are visible, never silent", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/data-testid="dashboard-booking-responses-next-action"/);
     expect(page).toMatch(/"\/dashboard\/bookings"/);
-    // Org branch: mounted directly. Worker branch (audit PR6): either promoted
-    // into the state-driven top slot or rendered in the remaining-states list.
+    // Org branch: mounted directly. Worker branch (D-01 duplicate removal,
+    // Wave 3): promoted into the state-driven top slot when it wins the
+    // ladder; otherwise the status-strip chip (same spineCounts number,
+    // booking-responses signal → /dashboard/bookings) carries it — the
+    // repeated card below the hub is deliberately gone. Responses stay
+    // visible either way, never silent.
     expect(page).toMatch(/\{bookingResponsesNextAction\}/);
-    expect(page).toMatch(/topSlot !== "booking_response" && bookingResponsesNextAction/);
     expect(page).toMatch(/"booking_response" \? \(\s*bookingResponsesNextAction/);
+    expect(page).toMatch(/const bookingResponsesNew = spineCounts\.bookingResponsesNew/);
   });
   it("opening the bookings page IS the read event", () => {
     const bookings = read("app/[locale]/dashboard/bookings/page.tsx");

@@ -59,13 +59,16 @@ describe("the dashboard surfaces the request loop as a count-gated next action",
   });
 
   it("is rendered in BOTH the org and worker overview branches", () => {
-    // Org branch: mounted directly. Worker branch (audit PR6): either promoted
-    // into the state-driven top slot or rendered in the remaining-states list.
+    // Org branch: mounted directly. Worker branch (D-01 duplicate removal,
+    // Wave 3): promoted into the state-driven top slot when it is the most
+    // important state; otherwise the status-strip chip (same spineCounts
+    // number, incoming-service-requests signal) carries it — the repeated
+    // card below the hub is deliberately gone.
     expect(page).toMatch(/\{serviceRequestsNextAction\}/);
-    expect(page).toMatch(
-      /topSlot !== "incoming_service_request" && serviceRequestsNextAction/,
-    );
     expect(page).toMatch(/"incoming_service_request" \? \(\s*serviceRequestsNextAction/);
+    expect(page).toMatch(
+      /const pendingServiceRequests = spineCounts\.pendingIncomingServiceRequests/,
+    );
   });
 
   it("uses the real count in the badge (no hardcoded number)", () => {

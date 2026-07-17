@@ -784,14 +784,18 @@ export default async function DashboardOverviewPage({
         <PremiumHubScreen vm={hubVm} embedded workEditor={workEditor} />
       </div>
 
-      {/* Remaining real pending states — everything the top slot did NOT
-          promote, same honest count-gated cards as before. Kept ABOVE the
-          fold-away section: a real pending state is action, not archive. */}
-      {topSlot !== "invitation" && <WorkerInvitationsCard preloaded={invitations} />}
-      {topSlot !== "incoming_booking" && bookingsPendingNextAction}
-      {topSlot !== "incoming_service_request" && serviceRequestsNextAction}
+      {/* D-01 duplicate removal (Wave 3, owner-approved): the repeated
+          pending-card set is gone. Every non-promoted pending state keeps
+          its canonical presentation on the status strip above — the SAME
+          spineCounts numbers as these cards used, each chip linking the
+          surface where the action really lives (bookings, service
+          requests). The invitations repeat was provably dead: a pending
+          invitation always wins the top slot, and the card renders null
+          when the list is empty. The ONE non-duplicate stays below —
+          outgoing service-request states (waiting / declined, and accepted
+          whenever an invitation occupies the slot) have no chip equivalent,
+          so this card is their only dashboard presentation. */}
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
-      {topSlot !== "booking_response" && bookingResponsesNextAction}
 
       {/* Everything informational, collapsed by default (compact home v1).
           All sections still server-render with real data — the fold is
