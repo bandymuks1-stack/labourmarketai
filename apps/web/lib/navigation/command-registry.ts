@@ -1191,6 +1191,39 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: ["pipeline", "crm", "vertriebspipeline"],
     },
   },
+  {
+    // Public project-cost calculator (ships together with its page in this
+    // PR) — deterministic estimate over the shared lib/estimate engine;
+    // public route, no account required. Resolved via the (marketing)
+    // fallback in routeExists.
+    id: "project_cost_calculator",
+    route: "/calculators/project-cost",
+    audience: "public",
+    labels: {
+      en: "Project cost calculator",
+      lt: "Projekto kainos skaičiuoklė",
+      ru: "Калькулятор стоимости проекта",
+      nl: "Projectkosten-calculator",
+      de: "Projektkosten-Rechner",
+    },
+    synonyms: {
+      en: [
+        "calculator",
+        "estimate project cost",
+        "cost estimate",
+        "workforce cost",
+      ],
+      lt: [
+        "skaičiuoklė",
+        "projekto kainos skaičiuoklė",
+        "apskaičiuoti projekto kainą",
+        "sąmata",
+      ],
+      ru: ["калькулятор", "рассчитать стоимость проекта", "смета"],
+      nl: ["calculator", "projectkosten berekenen", "kostenraming"],
+      de: ["rechner", "projektkosten berechnen", "kostenschätzung"],
+    },
+  },
 ] as const;
 
 /** Max results the finder shows — owner rule "max 5 best" (unified-text-

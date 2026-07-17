@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -327,15 +327,48 @@ describe("5. object search shares the command matching truth", () => {
 /* ────────────────────────────────────────────────────────────────────── */
 
 describe("6. the calculator entry ships WITH the calculator page, not before", () => {
-  it("no registry entry points at a calculator route that does not exist on this branch", () => {
+  it("exactly one calculator entry exists and its real page ships in this branch", () => {
     const calculatorish = COMMAND_REGISTRY.filter(
       (e) =>
         /calculator|skaiciuokle/i.test(e.id) ||
         /calculator|skaiciuokle/i.test(normalizeForSearch(e.route)),
     );
-    // The project-price calculator PR must add its own registry entry
-    // together with the real page — a dead route here would break the
-    // route-existence guard and lie to the user.
-    expect(calculatorish).toEqual([]);
+    // The project-cost calculator page ships in this PR, so its registry
+    // entry lands here TOGETHER with the real page (never a dead link, and
+    // never a second calculator surface).
+    expect(calculatorish.map((e) => e.id)).toEqual(["project_cost_calculator"]);
+    expect(calculatorish[0]?.route).toBe("/calculators/project-cost");
+    expect(
+      existsSync(
+        join(
+          ROOT,
+          "app",
+          "[locale]",
+          "(marketing)",
+          "calculators",
+          "project-cost",
+          "page.tsx",
+        ),
+      ),
+      "registry entry has no real page — dead link",
+    ).toBe(true);
+  });
+
+  it("the owner's calculator phrases resolve to the entry (lt + en)", () => {
+    const AUD = new Set<CommandAudience>(["public", "worker", "company"]);
+    for (const q of [
+      "skaičiuoklė",
+      "projekto kainos skaičiuoklė",
+      "apskaičiuoti projekto kainą",
+      "sąmata",
+    ]) {
+      expect(
+        matchCommands(q, "lt", AUD).map((e) => e.id),
+        `lt phrase "${q}"`,
+      ).toContain("project_cost_calculator");
+    }
+    expect(matchCommands("calculator", "en", AUD).map((e) => e.id)).toContain(
+      "project_cost_calculator",
+    );
   });
 });
