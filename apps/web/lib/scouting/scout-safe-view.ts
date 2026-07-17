@@ -39,6 +39,11 @@ export interface ScoutSafeCandidate {
   /** Safe readiness signal (country/availability fit; docs stay consent-gated). */
   readonly readiness: CompanyCandidateReadiness;
   readonly shortlistStatus: ShortlistStatus | null;
+  /** The company's OWN internal shortlist note (extension B — the
+   *  demand_shortlist.note column, owner-scoped by RLS; a worker can never
+   *  read it). Company-authored text about its own decision, not worker
+   *  data — null until the company writes one. */
+  readonly shortlistNote: string | null;
   /** Honest profile freshness (Wagon 1) — from the worker row's real
    *  updated_at/created_at, never fabricated. Non-PII. */
   readonly lastActiveBucket: LastActiveBucket;
@@ -64,6 +69,8 @@ export function toScoutSafeCandidate(input: {
   /** The need's country (for the country-fit signal). Optional. */
   readonly needCountry?: string | null;
   readonly shortlistStatus: ShortlistStatus | null;
+  /** The company's own stored note for this pair (optional; default null). */
+  readonly shortlistNote?: string | null;
   readonly lastActiveBucket: LastActiveBucket;
 }): ScoutSafeCandidate {
   const preview = toShortlistSafePreview({
@@ -98,6 +105,7 @@ export function toScoutSafeCandidate(input: {
     match: input.match,
     readiness,
     shortlistStatus: input.shortlistStatus,
+    shortlistNote: input.shortlistNote ?? null,
     lastActiveBucket: input.lastActiveBucket,
   };
 }

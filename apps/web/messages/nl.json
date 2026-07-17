@@ -6824,6 +6824,18 @@
       "fieldsNote": "Vraagt de werker om naam, telefoon en e-mail te delen. De werker beslist — zonder goedkeuring wordt niets getoond.",
       "error": "Het verzoek kon niet worden verstuurd. Probeer het opnieuw.",
       "accepted": "De werker heeft het verzoek geaccepteerd — contact delen nog niet toegestaan."
+    },
+    "shortlistNote": {
+      "label": "Notitie",
+      "internalHint": "alleen zichtbaar voor jouw bedrijf",
+      "add": "Notitie toevoegen",
+      "edit": "Notitie bewerken",
+      "placeholder": "Een korte notitie over deze kandidaat voor je team.",
+      "reasonTitle": "Waarom geen fit?",
+      "reasonPlaceholder": "Schrijf een korte reden, bijv.: mist ervaring met dit soort werk.",
+      "reasonRequired": "Voor “Geen fit” is een korte reden nodig.",
+      "save": "Opslaan",
+      "cancel": "Annuleren"
     }
   },
   "planBoundary": {
@@ -7607,6 +7619,20 @@
         "onsite": "Op locatie",
         "remote": "Op afstand",
         "hybrid": "Hybride"
+      }
+    },
+    "myInterest": {
+      "title": "Mijn interesses",
+      "summary": "Totaal: {count}",
+      "intro": "Vragen waarvoor je interesse hebt getoond, met hun huidige status. De vermelding blijft staan, ook nadat een vraag is gesloten.",
+      "closed": "Deze vraag is niet meer actief",
+      "viewDemand": "Vraag bekijken",
+      "cvLink": "Aangepast cv bekijken",
+      "status": {
+        "interested": "Verzonden",
+        "reviewed": "Bedrijf heeft bekeken",
+        "contacted": "Bedrijf nam contact op",
+        "withdrawn": "Ingetrokken"
       }
     }
   },

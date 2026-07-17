@@ -18,6 +18,11 @@ import { listMyInterestSignals } from "./interest";
 import { listMySavedOpportunities } from "./saved-opportunities";
 import type { InterestStatus } from "./interest-snapshot";
 import {
+  buildMyInterestView,
+  type LiveNeedFacts,
+  type MyInterestViewRow,
+} from "./my-interest-view";
+import {
   matchWorkerToNeed,
   compareMatches,
   type MatchResultV1,
@@ -93,6 +98,11 @@ export type WorkerOpportunitiesResult =
        *  joins these against live rows; a saved id with no live row renders
        *  one honest "no longer open" line — facts are never copied. */
       readonly savedRequestIds: readonly string[];
+      /** "Mano susidomėjimai" (extension A): the worker's OWN interest
+       *  signals as display rows, INDEPENDENT of board visibility — a signal
+       *  on a closed demand stays, honestly labelled. Empty while the
+       *  owner-gated interest table is absent. */
+      readonly myInterestRows: readonly MyInterestViewRow[];
       readonly opportunities: readonly OpportunityCard[];
     };
 
@@ -200,6 +210,22 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     // RPC absent (not yet applied) → needsDataAccess stays true. Never fake.
   }
 
+  // Extension A: join the worker's own signals against the live board rows —
+  // live facts win; a missing live row marks the demand honestly as closed
+  // and the snapshot context (what the worker saw at click time) fills in.
+  const liveNeedById = new Map<string, LiveNeedFacts>(
+    opportunities.map((o) => [
+      o.need.id,
+      {
+        roleText: o.need.roleText,
+        companyName: o.need.companyName ?? null,
+        locationLabel: o.need.locationLabel ?? null,
+        country: o.need.country,
+      },
+    ]),
+  );
+  const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
+
   return {
     kind: "ready",
     readiness,
@@ -207,6 +233,7 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     interestAvailable: myInterest.available,
     savedAvailable: mySaved.available,
     savedRequestIds: [...mySaved.requestIds],
+    myInterestRows,
     opportunities,
   };
 }
