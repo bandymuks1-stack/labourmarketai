@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "My work card source",
     "lead": "Here's what we already know about you.",
-    "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
+    "explainer": "This is what an employer sees when deciding what work you fit.",
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Review matched opportunities"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profile readiness",
+      "ready": "Ready",
+      "building": "Still filling up",
+      "start": "Just started"
+    },
+    "freshness": {
+      "label": "Up to date",
+      "today": "Last entry — today",
+      "yesterday": "Last entry — yesterday",
+      "onDate": "Last entry — {date}",
+      "none": "No entries yet"
+    },
+    "activity": {
+      "label": "Today's activity",
+      "count": "Entries today: {n}",
+      "none": "Nothing recorded today yet"
+    }
   },
   "processAssistant": {
     "title": "Internal process assistant",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Waiting for review",
     "notExternallyVerified": "Not yet backed by work records",
     "sourceProfileText": "Source: profile text",
-    "disclaimer": "These skills are taken from your own description. They are not yet reviewed.",
+    "disclaimer": "You added these skills yourself. Strengthen them with work journal entries.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
     "deleteError": "Could not remove. Please try again.",
@@ -2534,7 +2553,7 @@
       "cta": "Review skills"
     },
     "pageTitle": "My profile",
-    "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
+    "pageSubtitle": "What you do, what you can do, and what shows it — all in one place.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
     "professionSaved": "Profession saved",
@@ -3010,7 +3029,7 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
@@ -3163,7 +3182,9 @@
         "moveUp": "Move up",
         "moveDown": "Move down",
         "hide": "Hide",
-        "hiddenTitle": "Hidden cards"
+        "hiddenTitle": "Hidden cards",
+        "showAll": "Show all actions ({count})",
+        "showLess": "Show fewer"
       },
       "jobsCard": {
         "title": "Jobs that fit me",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Trust signals",
-    "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
+    "caption": "These counts come straight from your work records.",
     "verifiedSkills": "Linked skills",
     "managerConfirmations": "Reviewed records",
     "journalEntries": "Journal entries",
@@ -6893,12 +6914,12 @@
     "incoming": {
       "title": "Proposals for you",
       "help": "A company proposed working with you. You decide.",
-      "empty": "No proposals yet."
+      "empty": "No proposals yet. When a company proposes work to you, it appears here — you decide whether to accept."
     },
     "outgoing": {
       "title": "Proposals you sent",
       "help": "Workers you proposed to. They accept or decline.",
-      "empty": "You haven't sent any proposals yet."
+      "empty": "No proposals sent yet. When you propose a booking to a worker, it appears here together with their answer."
     },
     "status": {
       "proposed": "Proposed",
@@ -7458,6 +7479,7 @@
     "trustNote": "Workers first see only approved or safely managed opportunities. This helps reduce risk and build a more reliable labour market.",
     "approvedEmptyTitle": "No approved opportunities yet.",
     "approvedEmptyBody": "Complete your profile so we can better match you with suitable opportunities once they are approved.",
+    "approvedEmptyCta": "Complete your profile",
     "fieldCompany": "Company / partner",
     "status": {
       "possible_match": "Possible match",
@@ -8199,7 +8221,6 @@
     "person": {
       "title": "Personal card",
       "openProfile": "Open profile",
-      "completeness": "Profile completeness",
       "availability": {
         "available": "Available for work",
         "busy": "Busy",
@@ -9144,7 +9165,7 @@
     },
     "relationships": {
       "title": "Active relationships",
-      "empty": "No active relationships yet.",
+      "empty": "No active work relationships yet. Accepted invitations and confirmed work relationships appear here.",
       "noOrg": "Personal relationship — not linked to a company",
       "slug": {
         "employee": "Employee",

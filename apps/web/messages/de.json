@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "Quelle meiner Arbeitskarte",
     "lead": "Das wissen wir bereits über Sie.",
-    "explainer": "Diese Daten speisen Ihre Arbeitskarte. Sie helfen einem Arbeitgeber, schnell zu verstehen, welche Arbeit zu Ihnen passt.",
+    "explainer": "Danach beurteilt ein Arbeitgeber, welche Arbeit zu Ihnen passt.",
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Passende Möglichkeiten ansehen"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profil-Bereitschaft",
+      "ready": "Bereit",
+      "building": "Wird noch ausgefüllt",
+      "start": "Gerade begonnen"
+    },
+    "freshness": {
+      "label": "Aktualität",
+      "today": "Letzter Eintrag — heute",
+      "yesterday": "Letzter Eintrag — gestern",
+      "onDate": "Letzter Eintrag — {date}",
+      "none": "Noch keine Einträge"
+    },
+    "activity": {
+      "label": "Aktivität heute",
+      "count": "Einträge heute: {n}",
+      "none": "Heute noch nichts erfasst"
+    }
   },
   "processAssistant": {
     "title": "Interner Prozessassistent",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Wartet auf Prüfung",
     "notExternallyVerified": "Noch nicht durch Arbeitsnachweise belegt",
     "sourceProfileText": "Quelle: Profiltext",
-    "disclaimer": "Diese Fähigkeiten stammen aus Ihrer eigenen Beschreibung. Sie sind noch nicht geprüft.",
+    "disclaimer": "Diese Fähigkeiten haben Sie selbst angegeben. Stärken Sie sie mit Einträgen im Arbeitsjournal.",
     "experienceTitle": "Arbeitsverlauf",
     "removeLabel": "Fähigkeit entfernen",
     "deleteError": "Konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
@@ -2534,7 +2553,7 @@
       "cta": "Fähigkeiten prüfen"
     },
     "pageTitle": "Mein Profil",
-    "pageSubtitle": "Alles, was Ihre Arbeitskarte ausmacht, lebt hier: was Sie tun, was Sie können und was es belegt. Ihr gewählter Bereich ist Kontext, keine Grenze.",
+    "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
     "professionSaved": "Beruf gespeichert",
@@ -3010,7 +3029,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort. Ihre Rolle wählen Sie im nächsten Schritt.",
+      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; Ihre Rolle wählen Sie im nächsten Schritt.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -3163,7 +3182,9 @@
         "moveUp": "Nach oben",
         "moveDown": "Nach unten",
         "hide": "Ausblenden",
-        "hiddenTitle": "Ausgeblendete Karten"
+        "hiddenTitle": "Ausgeblendete Karten",
+        "showAll": "Alle Aktionen anzeigen ({count})",
+        "showLess": "Weniger anzeigen"
       },
       "jobsCard": {
         "title": "Passende Jobs für mich",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Vertrauenssignale",
-    "caption": "Die Zahlen stammen direkt aus echten Einträgen. Nichts hier ist gewichtet oder erfunden.",
+    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
     "verifiedSkills": "Verknüpfte Fähigkeiten",
     "managerConfirmations": "Geprüfte Einträge",
     "journalEntries": "Journaleinträge",
@@ -6893,12 +6914,12 @@
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
-      "empty": "Noch keine Vorschläge."
+      "empty": "Noch keine Vorschläge. Wenn ein Unternehmen Ihnen Arbeit vorschlägt, erscheint der Vorschlag hier — Sie entscheiden, ob Sie annehmen."
     },
     "outgoing": {
       "title": "Von Ihnen gesendete Vorschläge",
       "help": "Arbeitskräfte, denen Sie einen Vorschlag gemacht haben. Sie nehmen an oder lehnen ab.",
-      "empty": "Sie haben noch keine Vorschläge gesendet."
+      "empty": "Sie haben noch keine Vorschläge gesendet. Wenn Sie einer Arbeitskraft eine Buchung vorschlagen, erscheint sie hier zusammen mit der Antwort."
     },
     "status": {
       "proposed": "Vorgeschlagen",
@@ -7458,6 +7479,7 @@
     "trustNote": "Arbeitskräfte sehen zuerst nur freigegebene oder sicher verwaltete Chancen. Das hilft, Risiken zu verringern und einen verlässlicheren Arbeitsmarkt aufzubauen.",
     "approvedEmptyTitle": "Noch keine freigegebenen Chancen.",
     "approvedEmptyBody": "Vervollständigen Sie Ihr Profil, damit wir Sie besser mit passenden Chancen matchen können, sobald diese freigegeben sind.",
+    "approvedEmptyCta": "Profil vervollständigen",
     "fieldCompany": "Unternehmen / Partner",
     "status": {
       "possible_match": "Mögliches Match",
@@ -8199,7 +8221,6 @@
     "person": {
       "title": "Persönliche Karte",
       "openProfile": "Profil öffnen",
-      "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
         "busy": "Beschäftigt",
@@ -9144,7 +9165,7 @@
     },
     "relationships": {
       "title": "Aktive Beziehungen",
-      "empty": "Noch keine aktiven Beziehungen.",
+      "empty": "Noch keine aktiven Arbeitsbeziehungen. Angenommene Einladungen und bestätigte Arbeitsbeziehungen erscheinen hier.",
       "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {
         "employee": "Mitarbeiter",

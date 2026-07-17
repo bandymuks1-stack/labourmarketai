@@ -25,17 +25,22 @@ const skills = (j: Record<string, unknown>) =>
   j.skills as Record<string, string>;
 
 describe("profile is framed as the work-card source, benefit-first", () => {
-  it("LT hub + subtitle name the work card and lead with what we already know", () => {
-    expect(hub(lt).eyebrow).toMatch(/darbo kortel/i);
+  it("LT hub + subtitle lead with what we already know, evidence- and employer-first", () => {
+    // Human-first profile v1: the jargon eyebrow ("Mano darbo kortelės
+    // šaltinis") and the literal work-card naming in the subtitle were
+    // replaced with plain language. The source-behind-what-employers-see
+    // framing now lives in lead (what we know) + explainer (employer
+    // benefit) + subtitle (evidence).
+    expect(hub(lt).eyebrow).toBeUndefined();
     expect(hub(lt).lead).toMatch(/jau žinome/i);
     expect(hub(lt).explainer).toMatch(/darbdav/i); // employer benefit
-    expect(skills(lt).pageSubtitle).toMatch(/darbo kortel/i);
+    expect(skills(lt).pageSubtitle).toMatch(/parody|įrody/i); // evidence framing
   });
-  it("EN hub + subtitle mirror the work-card-source framing", () => {
-    expect(hub(en).eyebrow).toMatch(/work card/i);
+  it("EN hub + subtitle mirror the same framing", () => {
+    expect(hub(en).eyebrow).toBeUndefined();
     expect(hub(en).lead).toMatch(/already know/i);
     expect(hub(en).explainer).toMatch(/employer/i);
-    expect(skills(en).pageSubtitle).toMatch(/work card/i);
+    expect(skills(en).pageSubtitle).toMatch(/prov|show/i); // evidence framing
   });
 });
 

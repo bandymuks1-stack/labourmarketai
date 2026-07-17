@@ -105,6 +105,14 @@ export type DashboardModule = {
   /** Which active roles see the module on their control room grid. The
    *  worker-with-company shortcut is handled by the view model. */
   readonly roles: readonly Role[];
+  /** Human-first launch v1: roles for whom this module belongs to the SMALL
+   *  first-screen set. The grid collapses to primary modules by default (a
+   *  first-time viewer must understand the screen in seconds); every other
+   *  module stays one honest tap away behind "show all" and is NEVER hidden
+   *  while it carries a real attention badge. Must be a subset of `roles`
+   *  (guard-pinned) — primary is a presentation priority, never a new
+   *  visibility rule. */
+  readonly primaryRoles?: readonly Role[];
   readonly surfaces: readonly ModuleSurface[];
   /** SPINE_SIGNALS ids whose counts badge this module's card. A signal id
    *  here must exist in the spine catalogue (guard-pinned) — attention can
@@ -135,6 +143,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.recordWork.desc",
     iconKey: "journal",
     roles: ["worker"],
+    primaryRoles: ["worker"],
     surfaces: ["grid", "nav", "command"],
   },
   {
@@ -144,6 +153,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.improveProfile.desc",
     iconKey: "idCard",
     roles: ["worker"],
+    primaryRoles: ["worker"],
     surfaces: ["grid", "command"],
   },
   {
@@ -155,6 +165,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.findOpportunities.desc",
     iconKey: "compass",
     roles: ["worker"],
+    primaryRoles: ["worker"],
     surfaces: ["grid", "command"],
     // Job Recommendation Engine surfacing: the aggregate unseen-matches
     // count badges the board's own card — the board renders every open
@@ -174,6 +185,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "tasks.intro",
     iconKey: "checklist",
     roles: ALL_ROLES,
+    primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
     attentionSignalIds: ["open-task-attention"],
   },
@@ -187,6 +199,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.bookings.desc",
     iconKey: "handshake",
     roles: ALL_ROLES,
+    primaryRoles: ["customer"],
     surfaces: ["grid", "command"],
     attentionSignalIds: ["pending-bookings", "booking-responses"],
   },
@@ -201,6 +214,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "features.planning.description",
     iconKey: "calendar",
     roles: ALL_ROLES,
+    primaryRoles: ALL_ROLES,
     surfaces: ["grid", "nav", "command"],
   },
   {
@@ -222,6 +236,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "features.market_map.description",
     iconKey: "map",
     roles: ALL_ROLES,
+    primaryRoles: ["worker"],
     surfaces: ["grid", "nav", "command"],
   },
   {
@@ -231,6 +246,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "features.communication.description",
     iconKey: "messages",
     roles: ALL_ROLES,
+    primaryRoles: ALL_ROLES,
     surfaces: ["grid", "nav", "command"],
     attentionSignalIds: ["unread-messages"],
   },
@@ -241,6 +257,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.documents.desc",
     iconKey: "documents",
     roles: ALL_ROLES,
+    primaryRoles: ["customer"],
     surfaces: ["grid", "command"],
   },
 
@@ -261,6 +278,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "marketplace.hubFindNote",
     iconKey: "search",
     roles: ALL_ROLES,
+    primaryRoles: ["company", "agency", "customer"],
     surfaces: ["grid", "command"],
     attentionSignalIds: [
       "incoming-service-requests",
@@ -281,6 +299,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "projects.intro",
     iconKey: "briefcase",
     roles: ORG_ROLES,
+    primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
   },
 
@@ -314,6 +333,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "auth.dashboard.myZone.actions.companyActions.desc",
     iconKey: "building",
     roles: ORG_ROLES,
+    primaryRoles: ORG_ROLES,
     surfaces: ["grid", "command"],
   },
 
@@ -446,4 +466,11 @@ const SPINE_SIGNAL_IDS = new Set(SPINE_SIGNALS.map((s) => s.id));
  *  consumed by the guard test so a typo cannot silently drop a badge. */
 export function moduleAttentionSignalsAreValid(m: DashboardModule): boolean {
   return (m.attentionSignalIds ?? []).every((id) => SPINE_SIGNAL_IDS.has(id));
+}
+
+/** True when the first-screen priority stays a PRESENTATION rule: a module
+ *  may only be primary for roles that already see it on the grid. Consumed
+ *  by the guard test so `primaryRoles` can never widen visibility. */
+export function modulePrimaryRolesAreValid(m: DashboardModule): boolean {
+  return (m.primaryRoles ?? []).every((r) => m.roles.includes(r));
 }
