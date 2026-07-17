@@ -3029,7 +3029,7 @@
         "service_provider": "Paslaugų teikėjas",
         "admin": "Administratorius"
       },
-      "subcopy": "Prisiregistruok su Google arba el. paštu ir slaptažodžiu. Vaidmenį pasirinksi kitame žingsnyje.",
+      "subcopy": "Vienas profilis tavo tikriems įgūdžiams, prieinamumui ir darbo patirčiai — kad žmonės ir įmonės matytų, kur tinki tikriems darbo poreikiams. Prisiregistruok su Google arba el. paštu ir slaptažodžiu — vaidmenį pasirinksi kitame žingsnyje.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -6914,12 +6914,12 @@
     "incoming": {
       "title": "Pasiūlymai tau",
       "help": "Įmonė pasiūlė dirbti su tavimi. Tu sprendi.",
-      "empty": "Kol kas pasiūlymų nėra."
+      "empty": "Kol kas pasiūlymų nėra. Kai įmonė pasiūlys tau darbą, pasiūlymas atsiras čia — tu nusprendi, ar priimti."
     },
     "outgoing": {
       "title": "Tavo išsiųsti pasiūlymai",
       "help": "Darbuotojai, kuriems pasiūlei. Jie priima arba atmeta.",
-      "empty": "Dar neišsiuntei pasiūlymų."
+      "empty": "Dar neišsiuntei pasiūlymų. Kai pasiūlysi rezervaciją darbuotojui, ji atsiras čia kartu su jo atsakymu."
     },
     "status": {
       "proposed": "Pasiūlyta",
@@ -7479,6 +7479,7 @@
     "trustNote": "Darbuotojams pirmiausia rodome tik patvirtintas arba saugiai administruojamas galimybes. Taip mažiname riziką ir padedame kurti patikimesnę darbo rinką.",
     "approvedEmptyTitle": "Patvirtintų galimybių dar nėra.",
     "approvedEmptyBody": "Papildykite savo profilį — taip galėsime geriau parinkti jums tinkamas galimybes, kai jos bus patvirtintos.",
+    "approvedEmptyCta": "Papildyti profilį",
     "fieldCompany": "Įmonė / partneris",
     "status": {
       "possible_match": "Galimas atitikimas",
@@ -9164,7 +9165,7 @@
     },
     "relationships": {
       "title": "Aktyvūs ryšiai",
-      "empty": "Aktyvių ryšių kol kas nėra.",
+      "empty": "Aktyvių darbo ryšių kol kas nėra. Čia atsiras priimti pakvietimai ir patvirtinti darbo ryšiai.",
       "noOrg": "Asmeninis ryšys — nesusietas su įmone",
       "slug": {
         "employee": "Darbuotojas",

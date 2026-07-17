@@ -3029,7 +3029,7 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
@@ -6914,12 +6914,12 @@
     "incoming": {
       "title": "Proposals for you",
       "help": "A company proposed working with you. You decide.",
-      "empty": "No proposals yet."
+      "empty": "No proposals yet. When a company proposes work to you, it appears here — you decide whether to accept."
     },
     "outgoing": {
       "title": "Proposals you sent",
       "help": "Workers you proposed to. They accept or decline.",
-      "empty": "You haven't sent any proposals yet."
+      "empty": "No proposals sent yet. When you propose a booking to a worker, it appears here together with their answer."
     },
     "status": {
       "proposed": "Proposed",
@@ -7479,6 +7479,7 @@
     "trustNote": "Workers first see only approved or safely managed opportunities. This helps reduce risk and build a more reliable labour market.",
     "approvedEmptyTitle": "No approved opportunities yet.",
     "approvedEmptyBody": "Complete your profile so we can better match you with suitable opportunities once they are approved.",
+    "approvedEmptyCta": "Complete your profile",
     "fieldCompany": "Company / partner",
     "status": {
       "possible_match": "Possible match",
@@ -9164,7 +9165,7 @@
     },
     "relationships": {
       "title": "Active relationships",
-      "empty": "No active relationships yet.",
+      "empty": "No active work relationships yet. Accepted invitations and confirmed work relationships appear here.",
       "noOrg": "Personal relationship — not linked to a company",
       "slug": {
         "employee": "Employee",
