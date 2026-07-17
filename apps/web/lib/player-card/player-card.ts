@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { listAttentionInstructions } from "@/lib/instructions/instructions";
@@ -191,7 +192,9 @@ async function ownConfirmationsCount(
   }
 }
 
-export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
+/** Request-deduped (React cache): several profile-page sections read the same
+ *  card in one render pass; the queries run once per request. */
+export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -299,4 +302,4 @@ export async function getWorkerPlayerCard(): Promise<WorkerPlayerCard | null> {
       null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
   };
-}
+});

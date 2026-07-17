@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "Bron van mijn werkkaart",
     "lead": "Dit is wat we al over je weten.",
-    "explainer": "Deze gegevens voeden je werkkaart. Ze helpen een werkgever snel te begrijpen welk werk bij je past.",
+    "explainer": "Hierop beoordeelt een werkgever welk werk bij je past.",
     "notVerified": "Dit is informatie die je zelf hebt opgegeven — nog niet beoordeeld. Registraties bouwen vertrouwen op, maar je kunt dat later toevoegen.",
     "primaryAction": "Vul aan wat ontbreekt",
     "primaryActionJournal": "Werkregistratie toevoegen",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Bekijk gematchte kansen"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profielgereedheid",
+      "ready": "Klaar",
+      "building": "Nog in opbouw",
+      "start": "Net begonnen"
+    },
+    "freshness": {
+      "label": "Actueel",
+      "today": "Laatste registratie — vandaag",
+      "yesterday": "Laatste registratie — gisteren",
+      "onDate": "Laatste registratie — {date}",
+      "none": "Nog geen registraties"
+    },
+    "activity": {
+      "label": "Activiteit vandaag",
+      "count": "Registraties vandaag: {n}",
+      "none": "Vandaag nog niets vastgelegd"
+    }
   },
   "processAssistant": {
     "title": "Interne procesassistent",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Wacht op beoordeling",
     "notExternallyVerified": "Nog niet onderbouwd door werkregistraties",
     "sourceProfileText": "Bron: profieltekst",
-    "disclaimer": "Deze vaardigheden komen uit je eigen beschrijving. Ze zijn nog niet beoordeeld.",
+    "disclaimer": "Deze vaardigheden heb je zelf opgegeven. Versterk ze met registraties in je werkjournaal.",
     "experienceTitle": "Werkgeschiedenis",
     "removeLabel": "Vaardigheid verwijderen",
     "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw.",
@@ -2534,7 +2553,7 @@
       "cta": "Vaardigheden beoordelen"
     },
     "pageTitle": "Mijn profiel",
-    "pageSubtitle": "Alles wat je werkkaart vormt staat hier: wat je doet, wat je kunt en wat dat aantoont. Je gekozen vakgebied is context, geen beperking.",
+    "pageSubtitle": "Wat je doet, wat je kunt en wat dat laat zien — alles op één plek.",
     "professionLabel": "Je beroep",
     "professionPlaceholder": "Selecteer een beroep",
     "professionSaved": "Beroep opgeslagen",
@@ -6433,7 +6452,7 @@
   },
   "trust": {
     "title": "Vertrouwenssignalen",
-    "caption": "De aantallen komen rechtstreeks uit echte registraties. Niets hier is gewogen of verzonnen.",
+    "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
     "verifiedSkills": "Gekoppelde vaardigheden",
     "managerConfirmations": "Beoordeelde registraties",
     "journalEntries": "Journaalitems",

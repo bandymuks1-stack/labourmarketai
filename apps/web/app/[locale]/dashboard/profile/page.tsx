@@ -6,6 +6,7 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { WorkerSetupJourney } from "@/components/app/worker-setup-journey";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
+import { ProfileStateStrip } from "@/components/app/profile-state-strip";
 import { FeatureNote } from "@/components/app/feature-note";
 import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
@@ -503,6 +504,12 @@ export default async function ProfilePage({
         ]}
       />
 
+      {/* Three plain state concepts, separated on purpose (human-first
+          profile pass): parengtis (readiness — same canonical model the
+          setup journey uses), aktualumas (newest journal-entry date) and
+          šiandienos aktyvumas (today's real entry count). Workers only. */}
+      {workerId ? <ProfileStateStrip workerId={workerId} /> : null}
+
       {/* Wagon 4 — guided setup journey: registration → goal → experience →
           review → location → availability → ready. A guide over the
           canonical sections below (self-gates to workers; renders nothing
@@ -941,9 +948,8 @@ export default async function ProfilePage({
       {/* Unified CAPABILITY surface — the canonical home for self-declared
           skills (`profile_skill_claims`) and worker work history. Always
           renders when the user has any saved chips OR any worker
-          engagements. Self-declared chips are clearly labelled
-          "Paties nurodyta · Nepatvirtinta išoriškai · source = profile_text"
-          so they cannot be mistaken for externally verified claims, and
+          engagements. The chip list carries one plain-language honesty line
+          so the chips cannot be mistaken for externally verified claims, and
           they remain visible regardless of the user's currently-selected
           work category (PLATFORM_DOCTRINE §1: a person is not locked into
           one category). */}

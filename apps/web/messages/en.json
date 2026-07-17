@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "My work card source",
     "lead": "Here's what we already know about you.",
-    "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
+    "explainer": "This is what an employer sees when deciding what work you fit.",
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Review matched opportunities"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profile readiness",
+      "ready": "Ready",
+      "building": "Still filling up",
+      "start": "Just started"
+    },
+    "freshness": {
+      "label": "Up to date",
+      "today": "Last entry — today",
+      "yesterday": "Last entry — yesterday",
+      "onDate": "Last entry — {date}",
+      "none": "No entries yet"
+    },
+    "activity": {
+      "label": "Today's activity",
+      "count": "Entries today: {n}",
+      "none": "Nothing recorded today yet"
+    }
   },
   "processAssistant": {
     "title": "Internal process assistant",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Waiting for review",
     "notExternallyVerified": "Not yet backed by work records",
     "sourceProfileText": "Source: profile text",
-    "disclaimer": "These skills are taken from your own description. They are not yet reviewed.",
+    "disclaimer": "You added these skills yourself. Strengthen them with work journal entries.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
     "deleteError": "Could not remove. Please try again.",
@@ -2534,7 +2553,7 @@
       "cta": "Review skills"
     },
     "pageTitle": "My profile",
-    "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
+    "pageSubtitle": "What you do, what you can do, and what shows it — all in one place.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
     "professionSaved": "Profession saved",
@@ -6433,7 +6452,7 @@
   },
   "trust": {
     "title": "Trust signals",
-    "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
+    "caption": "These counts come straight from your work records.",
     "verifiedSkills": "Linked skills",
     "managerConfirmations": "Reviewed records",
     "journalEntries": "Journal entries",
