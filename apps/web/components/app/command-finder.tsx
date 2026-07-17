@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { Mic, MicOff, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -54,6 +54,53 @@ const OBJECT_SEARCH_TIMEOUT_MS = 8000;
 
 type ObjectSearchState = "idle" | "loading" | "ok" | "error";
 
+/* ── Voice adapter (unified-text-navigation v1, Phase 3 rules) ──────────
+ * Browser-native Web Speech API only — no external AI service, no separate
+ * command model. The transcript feeds the SAME setQuery state as typing,
+ * so voice → text → the one search → the user clicks a result. Nothing is
+ * auto-executed and no transcript is persisted (local component state only).
+ * When the API is unsupported the mic button is NOT rendered at all —
+ * honest absence, no dead button, no "coming soon". */
+
+/** Minimal structural typing for the browser SpeechRecognition object —
+ *  lib.dom carries no types for the prefixed webkit implementation. */
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult:
+    | ((event: {
+        results: ArrayLike<ArrayLike<{ transcript: string }>>;
+      }) => void)
+    | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
+
+/** Capability check — returns the constructor when the browser really has
+ *  one (Chrome/Edge/Safari expose webkitSpeechRecognition), else null. */
+function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** BCP-47 recognition language per ACTIVE locale. */
+const SPEECH_LANG: Record<ActiveLocale, string> = {
+  lt: "lt-LT",
+  en: "en-US",
+  ru: "ru-RU",
+  nl: "nl-NL",
+  de: "de-DE",
+};
+
 /** Parse the stored recent-command ids — ids only, anything else discarded. */
 function parseRecentIds(rawJson: string | null): string[] {
   if (!rawJson) return [];
@@ -84,6 +131,54 @@ export function CommandFinder() {
   >([]);
   const [objectState, setObjectState] = useState<ObjectSearchState>("idle");
   const inputRef = useRef<HTMLInputElement>(null);
+  // Voice adapter state — capability-gated; the button renders ONLY when the
+  // browser really supports the Web Speech API (client effect, SSR-safe).
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+
+  useEffect(() => {
+    setVoiceSupported(getSpeechRecognitionCtor() !== null);
+    return () => {
+      // Unmount safety: never leave the microphone open.
+      recognitionRef.current?.abort();
+      recognitionRef.current = null;
+    };
+  }, []);
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+  };
+
+  const startListening = () => {
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) return; // capability vanished — button was never rendered
+    const recognition = new Ctor();
+    recognition.lang = SPEECH_LANG[locale];
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => {
+      const transcript = Array.from(
+        { length: event.results.length },
+        (_, i) => event.results[i][0]?.transcript ?? "",
+      )
+        .join(" ")
+        .trim();
+      // The ONE pipeline: the transcript feeds the same setQuery state as
+      // typing — registry match + object search run exactly as if typed.
+      if (transcript.length > 0) setQuery(transcript);
+    };
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      setListening(false);
+    };
+    recognition.onerror = () => {
+      // onend fires after onerror — state clears there; nothing to persist.
+    };
+    recognitionRef.current = recognition;
+    setListening(true);
+    recognition.start();
+  };
 
   // Ctrl/Cmd+K focuses the finder input (progressive enhancement — the
   // finder stays a plain labelled input either way, no modal).
@@ -256,9 +351,42 @@ export function CommandFinder() {
           placeholder={t("placeholder")}
           aria-label={t("inputLabel")}
           data-testid="command-finder-input"
-          className="w-full rounded-md border border-ink-500 bg-ink-800/60 py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
+          className={`w-full rounded-md border border-ink-500 bg-ink-800/60 py-2 pl-9 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none ${
+            voiceSupported ? "pr-10" : "pr-3"
+          }`}
         />
+        {/* Mic renders ONLY when the browser really supports speech input —
+            honest absence otherwise (no dead button, no "coming soon"). */}
+        {voiceSupported && (
+          <button
+            type="button"
+            onClick={listening ? stopListening : startListening}
+            aria-label={listening ? t("voiceStop") : t("voiceStart")}
+            aria-pressed={listening}
+            data-testid="command-finder-voice"
+            className={`absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+              listening
+                ? "text-brand-blue"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            {listening ? (
+              <MicOff aria-hidden className="h-4 w-4" />
+            ) : (
+              <Mic aria-hidden className="h-4 w-4" />
+            )}
+          </button>
+        )}
       </div>
+      {listening && (
+        <p
+          data-testid="command-finder-voice-listening"
+          className="text-xs leading-relaxed text-text-muted"
+          aria-live="polite"
+        >
+          {t("voiceListening")}
+        </p>
+      )}
 
       {/* Recent commands — shown only while the input is empty. Ids only. */}
       {recentEntries.length > 0 && (

@@ -43,7 +43,10 @@
       "bookings": "Your bookings",
       "documents": "Your document records"
     },
-    "closeLabel": "Close search"
+    "closeLabel": "Close search",
+    "voiceStart": "Search by voice",
+    "voiceStop": "Stop voice input",
+    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field."
   },
   "reports": {
     "eyebrow": "Reports",
