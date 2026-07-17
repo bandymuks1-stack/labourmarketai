@@ -43,7 +43,10 @@
       "bookings": "Je boekingen",
       "documents": "Je documentregistraties"
     },
-    "closeLabel": "Zoeken sluiten"
+    "closeLabel": "Zoeken sluiten",
+    "voiceStart": "Zoeken met spraak",
+    "voiceStop": "Spraakinvoer stoppen",
+    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld."
   },
   "reports": {
     "eyebrow": "Rapporten",

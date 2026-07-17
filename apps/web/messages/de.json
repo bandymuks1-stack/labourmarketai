@@ -43,7 +43,10 @@
       "bookings": "Ihre Buchungen",
       "documents": "Ihre Dokumenteinträge"
     },
-    "closeLabel": "Suche schließen"
+    "closeLabel": "Suche schließen",
+    "voiceStart": "Sprachsuche",
+    "voiceStop": "Spracheingabe stoppen",
+    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld."
   },
   "reports": {
     "eyebrow": "Berichte",

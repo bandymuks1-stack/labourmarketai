@@ -7,8 +7,14 @@
  * right EXISTING surface. Design contract:
  *
  *  - Pure data + pure matching. No AI, no external search provider, no
- *    fuzzy-search dependency — plain normalized substring matching over
- *    labels + synonyms in the viewer's active locale, with an EN fallback.
+ *    fuzzy-search dependency — deterministic in-house scoring over labels +
+ *    synonyms in the viewer's active locale, with an EN fallback. Ranking
+ *    (unified-text-navigation v1): exact label > label prefix > synonym
+ *    exact > synonym prefix > substring > all-tokens-prefix > bounded
+ *    typo tolerance (in-house Damerau-Levenshtein, distance ≤1 for tokens
+ *    ≥5 chars, ≤2 for tokens ≥8 chars). Same order every time — ties keep
+ *    catalogue order. Object search (dashboard-search-model) reuses the
+ *    SAME text-matching truth via `queryMatchesText`.
  *  - Every route points at a REAL page that exists today. Dashboard routes
  *    are REAL_LAUNCH_SURFACE in the route truth map (or INTERNAL_ADMIN for
  *    the single audience:"admin" entry). No GATED_PREVIEW, no
@@ -117,11 +123,33 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Lebenslauf (drucken / exportieren)",
     },
     synonyms: {
-      en: ["cv", "resume", "curriculum vitae", "print cv"],
-      lt: ["cv", "gyvenimo aprašymas", "spausdinti cv"],
-      ru: ["резюме", "cv", "печать резюме"],
-      nl: ["cv", "curriculum vitae", "cv afdrukken"],
-      de: ["lebenslauf", "cv", "lebenslauf drucken"],
+      en: ["cv", "resume", "curriculum vitae", "print cv", "create cv"],
+      lt: ["cv", "gyvenimo aprašymas", "spausdinti cv", "sukurti cv"],
+      ru: ["резюме", "cv", "печать резюме", "создать резюме"],
+      nl: ["cv", "curriculum vitae", "cv afdrukken", "cv maken"],
+      de: ["lebenslauf", "cv", "lebenslauf drucken", "lebenslauf erstellen"],
+    },
+  },
+  // "Pridėti patirtį" — experience lives on the profile (the journal feeds
+  // it with evidence). The finder answers the owner phrase with the surface
+  // where experience is actually edited — no new page invented.
+  {
+    id: "add_experience",
+    route: getModuleRoute("profile"),
+    audience: "worker",
+    labels: {
+      en: "Add experience (profile)",
+      lt: "Pridėti patirtį (profilyje)",
+      ru: "Добавить опыт (в профиле)",
+      nl: "Ervaring toevoegen (profiel)",
+      de: "Erfahrung hinzufügen (Profil)",
+    },
+    synonyms: {
+      en: ["add experience", "experience", "work history"],
+      lt: ["pridėti patirtį", "patirtis", "darbo patirtis"],
+      ru: ["добавить опыт", "опыт", "опыт работы"],
+      nl: ["ervaring toevoegen", "ervaring", "werkervaring"],
+      de: ["erfahrung hinzufügen", "erfahrung", "berufserfahrung"],
     },
   },
   {
@@ -221,11 +249,34 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Arbeit finden (Angebote)",
     },
     synonyms: {
-      en: ["job", "work", "find work", "vacancies", "opportunities"],
-      lt: ["darbas", "darbo paieška", "pasiūlymai", "galimybės"],
-      ru: ["работа", "вакансии", "поиск работы"],
-      nl: ["werk", "baan", "vacatures", "werk zoeken", "kansen"],
-      de: ["arbeit", "job", "stellenangebote", "arbeit suchen"],
+      en: ["job", "work", "find work", "vacancies", "opportunities", "job opportunities"],
+      lt: ["darbas", "darbo paieška", "pasiūlymai", "galimybės", "darbo galimybės"],
+      ru: ["работа", "вакансии", "поиск работы", "возможности работы"],
+      nl: ["werk", "baan", "vacatures", "werk zoeken", "kansen", "werkkansen"],
+      de: ["arbeit", "job", "stellenangebote", "arbeit suchen", "jobangebote"],
+    },
+  },
+  // "Paraiškos / susidomėjimai" — the worker's expressions of interest live
+  // on the opportunities board (express / withdraw / honest company-response
+  // status). Links the list surface where the user picks the object —
+  // object-specific actions stay on the page itself.
+  {
+    id: "interests",
+    route: getModuleRoute("opportunities"),
+    audience: "worker",
+    labels: {
+      en: "Applications & interests",
+      lt: "Paraiškos ir susidomėjimai",
+      ru: "Заявки и отклики",
+      nl: "Aanmeldingen en interesses",
+      de: "Bewerbungen und Interessen",
+    },
+    synonyms: {
+      en: ["applications", "interests", "expressed interest", "my applications"],
+      lt: ["paraiškos", "susidomėjimai", "pareikšti susidomėjimą", "mano paraiškos"],
+      ru: ["заявки", "отклики", "интерес", "мои заявки"],
+      nl: ["aanmeldingen", "interesses", "interesse tonen", "mijn aanmeldingen"],
+      de: ["bewerbungen", "interessen", "interesse zeigen", "meine bewerbungen"],
     },
   },
   // Transport / tools / accommodation are honest work-condition fields on
@@ -342,11 +393,33 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Objekte und Projekte",
     },
     synonyms: {
-      en: ["object", "project", "site", "construction site"],
-      lt: ["objektas", "projektas", "statybvietė", "aikštelė"],
-      ru: ["объект", "проект", "стройка"],
-      nl: ["object", "project", "bouwplaats", "werf"],
-      de: ["objekt", "projekt", "baustelle"],
+      en: ["object", "project", "projects", "site", "construction site"],
+      lt: ["objektas", "projektas", "projektai", "statybvietė", "aikštelė"],
+      ru: ["объект", "проект", "проекты", "стройка"],
+      nl: ["object", "project", "projecten", "bouwplaats", "werf"],
+      de: ["objekt", "projekt", "projekte", "baustelle"],
+    },
+  },
+  // Manager journal-review inbox — the dashboard chain-actions card links it
+  // (components/app/dashboard-chain-actions.tsx); folded here so the ONE
+  // search also finds it (destinations folded, the card stays).
+  {
+    id: "review_inbox",
+    route: "/dashboard/inbox",
+    audience: "company",
+    labels: {
+      en: "Review worker entries (inbox)",
+      lt: "Peržiūrėti darbuotojų įrašus (gauta)",
+      ru: "Проверка записей работников (входящие)",
+      nl: "Werknemersinvoer beoordelen (inbox)",
+      de: "Mitarbeitereinträge prüfen (Eingang)",
+    },
+    synonyms: {
+      en: ["inbox", "review entries", "journal review", "approve entries"],
+      lt: ["gauta", "peržiūrėti įrašus", "žurnalo peržiūra", "patvirtinti įrašus"],
+      ru: ["входящие", "проверить записи", "проверка журнала"],
+      nl: ["inbox", "invoer beoordelen", "dagboek beoordelen"],
+      de: ["eingang", "einträge prüfen", "journalprüfung"],
     },
   },
   {
@@ -384,11 +457,44 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Personalbedarf veröffentlichen (Nachfrage)",
     },
     synonyms: {
-      en: ["demand", "work need", "need workers", "hiring request"],
-      lt: ["paklausa", "poreikis", "darbo poreikis"],
-      ru: ["спрос", "потребность", "заявка на работников"],
-      nl: ["vraag", "behoefte", "werkbehoefte", "personeel nodig"],
-      de: ["nachfrage", "bedarf", "personalbedarf", "arbeiter gesucht"],
+      en: [
+        "demand",
+        "work need",
+        "need workers",
+        "hiring request",
+        "company needs",
+        "create a work need",
+      ],
+      lt: [
+        "paklausa",
+        "poreikis",
+        "darbo poreikis",
+        "įmonės poreikiai",
+        "sukurti darbo poreikį",
+      ],
+      ru: [
+        "спрос",
+        "потребность",
+        "заявка на работников",
+        "потребности компании",
+        "создать потребность",
+      ],
+      nl: [
+        "vraag",
+        "behoefte",
+        "werkbehoefte",
+        "personeel nodig",
+        "bedrijfsbehoeften",
+        "werkbehoefte aanmaken",
+      ],
+      de: [
+        "nachfrage",
+        "bedarf",
+        "personalbedarf",
+        "arbeiter gesucht",
+        "unternehmensbedarf",
+        "personalbedarf erstellen",
+      ],
     },
   },
   {
@@ -403,11 +509,11 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: "Arbeitskräfte finden (Scouting)",
     },
     synonyms: {
-      en: ["find workers", "scouting", "staff", "hire"],
-      lt: ["darbuotojai", "rasti darbuotojų", "atranka", "samdyti"],
-      ru: ["работники", "найти работников", "подбор", "нанять"],
-      nl: ["werknemers", "personeel", "werknemers vinden", "werven"],
-      de: ["arbeiter", "arbeitskräfte", "personal finden", "einstellen"],
+      en: ["find workers", "scouting", "staff", "hire", "worker search", "find a team"],
+      lt: ["darbuotojai", "rasti darbuotojų", "atranka", "samdyti", "darbuotojų paieška", "rasti komandą"],
+      ru: ["работники", "найти работников", "подбор", "нанять", "поиск работников", "найти команду"],
+      nl: ["werknemers", "personeel", "werknemers vinden", "werven", "personeel zoeken", "team vinden"],
+      de: ["arbeiter", "arbeitskräfte", "personal finden", "einstellen", "personalsuche", "team finden"],
     },
   },
   {
@@ -552,6 +658,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       // language must land here too.
       en: [
         "documents",
+        "my documents",
         "document records",
         "certificates",
         "work proof",
@@ -561,6 +668,7 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ],
       lt: [
         "dokumentai",
+        "mano dokumentai",
         "pažymos",
         "sertifikatai",
         "darbo įrodymai",
@@ -831,6 +939,134 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       de: ["konto", "einstellungen", "rollen", "sprache"],
     },
   },
+  // Canonical privacy CONTROL screen (consent-and-disclosure v1) — consents,
+  // discoverability, disclosure ledger, export & deletion. Distinct from the
+  // public /legal/privacy POLICY text below.
+  {
+    id: "privacy_controls",
+    route: "/dashboard/privacy",
+    audience: "public",
+    labels: {
+      en: "Privacy controls (my consents)",
+      lt: "Privatumo valdymas (mano sutikimai)",
+      ru: "Управление приватностью (мои согласия)",
+      nl: "Privacybeheer (mijn toestemmingen)",
+      de: "Datenschutz-Verwaltung (meine Einwilligungen)",
+    },
+    synonyms: {
+      en: ["privacy controls", "consents", "visibility", "data export", "delete account"],
+      lt: ["privatumo valdymas", "sutikimai", "matomumas", "duomenų eksportas", "ištrinti paskyrą"],
+      ru: ["управление приватностью", "согласия", "видимость", "экспорт данных"],
+      nl: ["privacybeheer", "toestemmingen", "zichtbaarheid", "gegevensexport"],
+      de: ["datenschutzverwaltung", "einwilligungen", "sichtbarkeit", "datenexport"],
+    },
+  },
+  // "Kontakto prašymai" — employer contact-disclosure requests live on the
+  // SAME canonical privacy screen (ContactDisclosureRequests section). Links
+  // the list; the user acts on each request on the page itself.
+  {
+    id: "contact_requests",
+    route: "/dashboard/privacy",
+    audience: "worker",
+    labels: {
+      en: "Contact requests (privacy)",
+      lt: "Kontakto prašymai (privatumas)",
+      ru: "Запросы контактов (приватность)",
+      nl: "Contactverzoeken (privacy)",
+      de: "Kontaktanfragen (Datenschutz)",
+    },
+    synonyms: {
+      en: ["contact requests", "disclosure requests", "who asked for my contact"],
+      lt: ["kontakto prašymai", "atskleidimo prašymai", "kas prašė kontakto"],
+      ru: ["запросы контактов", "запросы на раскрытие"],
+      nl: ["contactverzoeken", "wie vroeg mijn contact"],
+      de: ["kontaktanfragen", "offenlegungsanfragen"],
+    },
+  },
+  // Market intelligence workspace — the ONLY command-surface module that had
+  // no registry entry (bidirectional coverage guard closes this class of gap).
+  {
+    id: "market_intelligence",
+    route: getModuleRoute("market_intelligence"),
+    audience: "public",
+    labels: {
+      en: "Market intelligence (salary & demand signals)",
+      lt: "Rinkos įžvalgos (atlyginimų ir paklausos signalai)",
+      ru: "Рыночная аналитика (сигналы зарплат и спроса)",
+      nl: "Marktinzichten (loon- en vraagsignalen)",
+      de: "Markteinblicke (Lohn- und Nachfragesignale)",
+    },
+    synonyms: {
+      en: ["intelligence", "market signals", "salary data", "demand data"],
+      lt: ["įžvalgos", "rinkos signalai", "atlyginimų duomenys", "paklausos duomenys"],
+      ru: ["аналитика", "рыночные сигналы", "данные о зарплатах"],
+      nl: ["inzichten", "marktsignalen", "loongegevens"],
+      de: ["einblicke", "marktsignale", "lohndaten"],
+    },
+  },
+  // Spaces / role hub — the "Manage spaces" destination the identity card
+  // links (components/app/identity-actions.tsx); folded so the ONE search
+  // finds it too.
+  {
+    id: "spaces_start",
+    route: "/dashboard/start",
+    audience: "public",
+    labels: {
+      en: "Spaces & roles (start hub)",
+      lt: "Erdvės ir rolės (pradžios centras)",
+      ru: "Пространства и роли (стартовый центр)",
+      nl: "Ruimtes en rollen (starthub)",
+      de: "Bereiche und Rollen (Start-Hub)",
+    },
+    synonyms: {
+      en: ["spaces", "manage spaces", "switch role", "start"],
+      lt: ["erdvės", "valdyti erdves", "perjungti rolę", "pradžia"],
+      ru: ["пространства", "управление пространствами", "сменить роль"],
+      nl: ["ruimtes", "ruimtes beheren", "rol wisselen"],
+      de: ["bereiche", "bereiche verwalten", "rolle wechseln"],
+    },
+  },
+  // Create-company lane — the identity card's honest empty-state CTA
+  // (identity-actions.tsx); a real page under /dashboard/start/company.
+  {
+    id: "create_company",
+    route: "/dashboard/start/company",
+    audience: "public",
+    labels: {
+      en: "Create a company",
+      lt: "Sukurti įmonę",
+      ru: "Создать компанию",
+      nl: "Bedrijf aanmaken",
+      de: "Firma erstellen",
+    },
+    synonyms: {
+      en: ["create company", "new company", "register company"],
+      lt: ["sukurti įmonę", "nauja įmonė", "registruoti įmonę"],
+      ru: ["создать компанию", "новая компания", "зарегистрировать компанию"],
+      nl: ["bedrijf aanmaken", "nieuw bedrijf", "bedrijf registreren"],
+      de: ["firma erstellen", "neue firma", "firma registrieren"],
+    },
+  },
+  // Dashboard overview itself — the primary-nav home tab, findable by name.
+  {
+    id: "overview_home",
+    route: "/dashboard",
+    audience: "public",
+    labels: {
+      en: "Overview (home)",
+      lt: "Apžvalga (pradžios puslapis)",
+      ru: "Обзор (главная)",
+      nl: "Overzicht (home)",
+      de: "Übersicht (Startseite)",
+    },
+    synonyms: {
+      en: ["overview", "home", "dashboard"],
+      lt: ["apžvalga", "pagrindinis", "skydelis"],
+      ru: ["обзор", "главная", "панель"],
+      nl: ["overzicht", "home", "dashboard"],
+      de: ["übersicht", "startseite", "dashboard"],
+    },
+  },
 
   // ── Public marketing / legal explanations ─────────────────────────────
   {
@@ -957,13 +1193,14 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
 ] as const;
 
-/** Max results the finder shows — keeps the list scannable on mobile. */
-export const MAX_COMMAND_RESULTS = 8;
+/** Max results the finder shows — owner rule "max 5 best" (unified-text-
+ *  navigation v1). Keeps the list scannable on mobile. */
+export const MAX_COMMAND_RESULTS = 5;
 
 /**
  * Normalize for matching: lowercase + strip diacritics so "kortele" finds
- * "kortelė" and "zurnalas" finds "žurnalas". Pure string work — no fuzzy
- * scoring, no external library.
+ * "kortelė" and "zurnalas" finds "žurnalas". Pure string work — no external
+ * library.
  */
 export function normalizeForSearch(s: string): string {
   return s
@@ -973,23 +1210,160 @@ export function normalizeForSearch(s: string): string {
     .trim();
 }
 
-function entryMatches(
-  entry: CommandEntry,
-  q: string,
-  locale: ActiveLocale,
-): boolean {
-  const haystacks: string[] = [entry.labels[locale], ...entry.synonyms[locale]];
-  // EN fallback — a viewer on lt/ru can always type the English term.
-  if (locale !== "en") {
-    haystacks.push(entry.labels.en, ...entry.synonyms.en);
-  }
-  return haystacks.some((h) => normalizeForSearch(h).includes(q));
+/* ── ONE text-matching truth (commands + object search) ────────────────── */
+
+/** Split an already-normalized string into word tokens (any script). */
+export function tokenizeForSearch(normalized: string): readonly string[] {
+  return normalized.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0);
+}
+
+/** Typo budget per owner rule: distance ≤1 for tokens ≥5 chars, ≤2 for
+ *  tokens ≥8 chars, 0 below (short tokens must match exactly / by prefix). */
+export function typoBudget(tokenLength: number): 0 | 1 | 2 {
+  if (tokenLength >= 8) return 2;
+  if (tokenLength >= 5) return 1;
+  return 0;
 }
 
 /**
- * Plain substring match over the registry in the viewer's locale (+ EN
+ * Bounded Damerau-Levenshtein (optimal string alignment) edit distance.
+ * In-house, deterministic, no dependency (the guard bans fuzzy libraries).
+ * Returns `max + 1` as soon as the distance provably exceeds `max`.
+ */
+export function boundedEditDistance(a: string, b: string, max: number): number {
+  if (a === b) return 0;
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > max) return max + 1;
+  if (la === 0 || lb === 0) {
+    return Math.max(la, lb) <= max ? Math.max(la, lb) : max + 1;
+  }
+  let prev2: number[] | null = null;
+  let prev: number[] = Array.from({ length: lb + 1 }, (_, j) => j);
+  for (let i = 1; i <= la; i++) {
+    const cur: number[] = [i];
+    let rowMin = i;
+    for (let j = 1; j <= lb; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      if (
+        i > 1 &&
+        j > 1 &&
+        a[i - 1] === b[j - 2] &&
+        a[i - 2] === b[j - 1] &&
+        prev2 !== null
+      ) {
+        v = Math.min(v, prev2[j - 2] + 1); // transposition
+      }
+      cur.push(v);
+      if (v < rowMin) rowMin = v;
+    }
+    if (rowMin > max) return max + 1;
+    prev2 = prev;
+    prev = cur;
+  }
+  return prev[lb] <= max ? prev[lb] : max + 1;
+}
+
+/** True when a query token matches a haystack token within the typo budget. */
+function tokenWithinTypoBudget(
+  queryToken: string,
+  haystackToken: string,
+): boolean {
+  const budget = typoBudget(queryToken.length);
+  if (budget === 0) return false;
+  if (Math.abs(queryToken.length - haystackToken.length) > budget) return false;
+  return boundedEditDistance(queryToken, haystackToken, budget) <= budget;
+}
+
+/**
+ * The ONE text-matching truth shared by commands AND the object search
+ * (lib/search/dashboard-search-model.ts `candidateMatches` calls this):
+ * normalized substring first, then all-query-tokens matching haystack tokens
+ * by prefix or bounded typo distance. Deterministic, no external library.
+ */
+export function queryMatchesText(
+  text: string,
+  normalizedQuery: string,
+): boolean {
+  const h = normalizeForSearch(text);
+  if (h.includes(normalizedQuery)) return true;
+  const queryTokens = tokenizeForSearch(normalizedQuery);
+  if (queryTokens.length === 0) return false;
+  const haystackTokens = tokenizeForSearch(h);
+  return queryTokens.every((qt) =>
+    haystackTokens.some(
+      (ht) => ht.startsWith(qt) || tokenWithinTypoBudget(qt, ht),
+    ),
+  );
+}
+
+/* ── Deterministic ranking (unified-text-navigation v1) ────────────────── */
+
+const SCORE_LABEL_EXACT = 100;
+const SCORE_LABEL_PREFIX = 80;
+const SCORE_SYNONYM_EXACT = 70;
+const SCORE_SYNONYM_PREFIX = 60;
+const SCORE_SUBSTRING = 40;
+const SCORE_TOKEN_PREFIX = 30;
+const SCORE_TOKEN_FUZZY = 20;
+
+/**
+ * Score one entry against a normalized query — the single ranking
+ * choke-point. 0 = no match. Higher = shown first. Exact label > label
+ * prefix > synonym exact > synonym prefix > substring > all-tokens-prefix >
+ * bounded typo tolerance. EN label/synonyms participate at synonym rank
+ * when the viewer locale is not EN (the EN fallback).
+ */
+export function scoreCommandEntry(
+  entry: CommandEntry,
+  normalizedQuery: string,
+  locale: ActiveLocale,
+): number {
+  const q = normalizedQuery;
+  const label = normalizeForSearch(entry.labels[locale]);
+  const synonyms: string[] = entry.synonyms[locale].map(normalizeForSearch);
+  if (locale !== "en") {
+    // EN fallback — a viewer on lt/ru/nl/de can always type the English term.
+    synonyms.push(
+      normalizeForSearch(entry.labels.en),
+      ...entry.synonyms.en.map(normalizeForSearch),
+    );
+  }
+  if (label === q) return SCORE_LABEL_EXACT;
+  if (label.startsWith(q)) return SCORE_LABEL_PREFIX;
+  if (synonyms.some((s) => s === q)) return SCORE_SYNONYM_EXACT;
+  if (synonyms.some((s) => s.startsWith(q))) return SCORE_SYNONYM_PREFIX;
+  const haystacks = [label, ...synonyms];
+  if (haystacks.some((h) => h.includes(q))) return SCORE_SUBSTRING;
+  const queryTokens = tokenizeForSearch(q);
+  if (queryTokens.length === 0) return 0;
+  const haystackTokens = Array.from(
+    new Set(haystacks.flatMap((h) => tokenizeForSearch(h))),
+  );
+  if (
+    queryTokens.every((qt) => haystackTokens.some((ht) => ht.startsWith(qt)))
+  ) {
+    return SCORE_TOKEN_PREFIX;
+  }
+  if (
+    queryTokens.every((qt) =>
+      haystackTokens.some(
+        (ht) => ht.startsWith(qt) || tokenWithinTypoBudget(qt, ht),
+      ),
+    )
+  ) {
+    return SCORE_TOKEN_FUZZY;
+  }
+  return 0;
+}
+
+/**
+ * Deterministic scored match over the registry in the viewer's locale (+ EN
  * fallback), restricted to the allowed audiences. Empty / whitespace query
- * → no results (the finder shows nothing until the user types).
+ * → no results (the finder shows nothing until the user types). Ties keep
+ * catalogue order (stable explicit-index sort), capped at
+ * MAX_COMMAND_RESULTS — the "max 5 best" owner rule.
  */
 export function matchCommands(
   query: string,
@@ -998,7 +1372,12 @@ export function matchCommands(
 ): readonly CommandEntry[] {
   const q = normalizeForSearch(query);
   if (q.length === 0) return [];
-  return COMMAND_REGISTRY.filter(
-    (e) => allowedAudiences.has(e.audience) && entryMatches(e, q, locale),
-  ).slice(0, MAX_COMMAND_RESULTS);
+  const scored: { entry: CommandEntry; score: number; index: number }[] = [];
+  COMMAND_REGISTRY.forEach((entry, index) => {
+    if (!allowedAudiences.has(entry.audience)) return;
+    const score = scoreCommandEntry(entry, q, locale);
+    if (score > 0) scored.push({ entry, score, index });
+  });
+  scored.sort((a, b) => b.score - a.score || a.index - b.index);
+  return scored.slice(0, MAX_COMMAND_RESULTS).map((s) => s.entry);
 }

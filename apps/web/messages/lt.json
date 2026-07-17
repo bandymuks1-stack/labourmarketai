@@ -43,7 +43,10 @@
       "bookings": "Jūsų rezervacijos",
       "documents": "Jūsų dokumentų įrašai"
     },
-    "closeLabel": "Užverti paiešką"
+    "closeLabel": "Užverti paiešką",
+    "voiceStart": "Ieškoti balsu",
+    "voiceStop": "Sustabdyti balso įvestį",
+    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke."
   },
   "reports": {
     "eyebrow": "Ataskaitos",
