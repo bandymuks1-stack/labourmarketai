@@ -23,10 +23,16 @@ export function JournalEntryRow({
   children,
   skillLinks,
   statusSlot,
+  editSlot,
 }: {
   entryId: string;
   canDelete: boolean;
   children: React.ReactNode;
+  /** Edit-in-place control (journal compact UX v1): the page passes the
+   *  drawer-based edit launcher here so editing opens in a compact drawer
+   *  over the list — no navigation, scroll/day position preserved. Absent →
+   *  the `?editing=` link below stays the fallback path. */
+  editSlot?: React.ReactNode;
   /** Journal Entry ↔ Skill links v1 — present only when the worker owns the
    *  entry and the durable relation is available. Omitted → no link UI. */
   skillLinks?: {
@@ -144,14 +150,16 @@ export function JournalEntryRow({
         <div className="flex flex-wrap items-center gap-2">
           {canDelete ? (
             <>
-              <Link
-                href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
-                onClick={() => recordEvent("journal_edit_clicked")}
-                className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue"
-                data-testid={`journal-entry-edit-${entryId}`}
-              >
-                {t("entry.edit")} →
-              </Link>
+              {editSlot ?? (
+                <Link
+                  href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
+                  onClick={() => recordEvent("journal_edit_clicked")}
+                  className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue"
+                  data-testid={`journal-entry-edit-${entryId}`}
+                >
+                  {t("entry.edit")} →
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={onDelete}
