@@ -3157,7 +3157,8 @@
       "statusStrip": {
         "title": "Was jetzt auf Sie wartet",
         "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit.",
-        "viewAll": "Alle Aktivitäten"
+        "viewAll": "Alle Aktivitäten",
+        "calendar": "Kalender"
       },
       "moduleGrid": {
         "manage": "Karten anpassen",

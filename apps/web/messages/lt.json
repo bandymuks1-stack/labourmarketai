@@ -3157,7 +3157,8 @@
       "statusStrip": {
         "title": "Kas laukia dabar",
         "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio.",
-        "viewAll": "Visa veikla"
+        "viewAll": "Visa veikla",
+        "calendar": "Kalendorius"
       },
       "moduleGrid": {
         "manage": "Tvarkyti korteles",

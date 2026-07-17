@@ -3157,7 +3157,8 @@
       "statusStrip": {
         "title": "Waiting for you now",
         "allClear": "Nothing is waiting for your attention right now.",
-        "viewAll": "All activity"
+        "viewAll": "All activity",
+        "calendar": "Calendar"
       },
       "moduleGrid": {
         "manage": "Customize cards",

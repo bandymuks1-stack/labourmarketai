@@ -27,10 +27,19 @@ import { PremiumHubProjectCard } from "./premium-hub-project-card";
 export async function PremiumHubScreen({
   vm,
   embedded = false,
+  contextual = false,
   workEditor,
 }: {
   vm: PremiumHubViewModel;
   embedded?: boolean;
+  /** Primary-action hierarchy v1 (worker dashboard): the hub's PRIMARY slot
+   *  carries only the person card (the sole availability/pay editor +
+   *  activation surface) plus company/project cards that have REAL data
+   *  (`status === "ready"`). Empty/unavailable company & project cards and
+   *  the map preview move to the collapsed review section — the page renders
+   *  them there itself, so every door and honest empty state survives one
+   *  tap away. Contextual rendering follows real state, never a guess. */
+  contextual?: boolean;
   /** Worker-only: the state-aware next action + inline editor folded into the
    *  person block (dashboard worker branch). Absent for org roles. */
   workEditor?: WorkEditorVM;
@@ -42,14 +51,30 @@ export async function PremiumHubScreen({
   // on — internal data-source vocabulary is banned from the primary
   // hierarchy, so the hub renders no data-provenance badge at all.
 
+  const showCompany = !contextual || vm.company.status === "ready";
+  const showProject = !contextual || vm.project.status === "ready";
+  const showMap = !contextual;
+  const columns =
+    1 + (showCompany || showMap ? 1 : 0) + (showProject ? 1 : 0);
+
   const grid = (
-    <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+    <div
+      className={`grid gap-4 lg:items-stretch ${
+        columns === 3
+          ? "lg:grid-cols-3"
+          : columns === 2
+            ? "lg:grid-cols-2"
+            : ""
+      }`}
+    >
       <PremiumHubPersonCard person={vm.person} workEditor={workEditor} />
-      <div className="flex flex-col gap-4">
-        <PremiumHubCompanyCard company={vm.company} />
-        <PremiumHubMarketMap market={vm.market} />
-      </div>
-      <PremiumHubProjectCard project={vm.project} />
+      {showCompany || showMap ? (
+        <div className="flex flex-col gap-4">
+          {showCompany ? <PremiumHubCompanyCard company={vm.company} /> : null}
+          {showMap ? <PremiumHubMarketMap market={vm.market} /> : null}
+        </div>
+      ) : null}
+      {showProject ? <PremiumHubProjectCard project={vm.project} /> : null}
     </div>
   );
 
