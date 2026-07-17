@@ -424,7 +424,7 @@
         "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] Sign up with Google, or with your email and password. You'll pick your role next.",
+      "subcopy": "Jeden profil dla Twoich prawdziwych umiejętności, dostępności i doświadczenia — aby ludzie i firmy widzieli, gdzie pasujesz do prawdziwych potrzeb. Zarejestruj się przez Google lub e-mailem i hasłem; rolę wybierzesz w następnym kroku.",
       "submit_label": "[EN] Sign up"
     }
   },
@@ -1517,7 +1517,7 @@
   },
   "trust": {
     "title": "[EN] Trust signals",
-    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
@@ -2899,6 +2899,26 @@
         "title": "Kiedy możesz zacząć?",
         "hint": "Zaznacz swoją dostępność."
       }
+    }
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Gotowość profilu",
+      "ready": "Gotowy",
+      "building": "Jeszcze uzupełniany",
+      "start": "Dopiero rozpoczęty"
+    },
+    "freshness": {
+      "label": "Aktualność",
+      "today": "Ostatni wpis — dzisiaj",
+      "yesterday": "Ostatni wpis — wczoraj",
+      "onDate": "Ostatni wpis — {date}",
+      "none": "Nie ma jeszcze wpisów"
+    },
+    "activity": {
+      "label": "Dzisiejsza aktywność",
+      "count": "Wpisy dzisiaj: {n}",
+      "none": "Dzisiaj jeszcze niczego nie zapisano"
     }
   }
 }

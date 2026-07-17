@@ -424,7 +424,7 @@
         "admin": "Administrator"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] Sign up with Google, or with your email and password. You'll pick your role next.",
+      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
       "submit_label": "[EN] Sign up"
     }
   },
@@ -1517,7 +1517,7 @@
   },
   "trust": {
     "title": "[EN] Trust signals",
-    "caption": "[EN] Counts come straight from real records — declared skills become trusted only through journal entries a manager confirmed. Nothing here is weighted or invented.",
+    "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
@@ -2899,6 +2899,26 @@
         "title": "Hvornår kan du starte?",
         "hint": "Markér din tilgængelighed."
       }
+    }
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profilens parathed",
+      "ready": "Klar",
+      "building": "Udfyldes stadig",
+      "start": "Lige startet"
+    },
+    "freshness": {
+      "label": "Aktualitet",
+      "today": "Seneste registrering — i dag",
+      "yesterday": "Seneste registrering — i går",
+      "onDate": "Seneste registrering — {date}",
+      "none": "Ingen registreringer endnu"
+    },
+    "activity": {
+      "label": "Aktivitet i dag",
+      "count": "Registreringer i dag: {n}",
+      "none": "Intet registreret i dag endnu"
     }
   }
 }
