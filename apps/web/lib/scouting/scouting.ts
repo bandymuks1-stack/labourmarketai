@@ -21,6 +21,7 @@ import {
   type ScoutFacets,
   type ScoutFilters,
 } from "@/lib/scouting/scout-filters";
+import { validateShortlistWrite } from "@/lib/scouting/shortlist-note";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -222,16 +223,22 @@ export async function runScouting(
     // owner-gated migration not applied yet → no interest signals
   }
 
-  // Existing shortlist statuses for this demand (owner-scoped).
-  const shortlist = new Map<string, ShortlistStatus>();
+  // Existing shortlist statuses + internal notes for this demand
+  // (owner-scoped; the note column existed since 20260612220000 and is now
+  // actually read — extension B).
+  const shortlist = new Map<string, { status: ShortlistStatus; note: string | null }>();
   try {
     const { data: sl } = await asAny(supabase)
       .from("demand_shortlist")
-      .select("worker_id, status")
+      .select("worker_id, status, note")
       .eq("owner_id", user.id)
       .eq("request_id", requestId);
-    for (const r of (sl ?? []) as { worker_id: string; status: ShortlistStatus }[]) {
-      shortlist.set(r.worker_id, r.status);
+    for (const r of (sl ?? []) as {
+      worker_id: string;
+      status: ShortlistStatus;
+      note: string | null;
+    }[]) {
+      shortlist.set(r.worker_id, { status: r.status, note: r.note ?? null });
     }
   } catch {
     // table absent (pre-apply) → no shortlist statuses yet
@@ -252,7 +259,8 @@ export async function runScouting(
         subject: c.subject,
         match: matchWorkerToNeed(need, c.subject),
         needCountry: need.country,
-        shortlistStatus: shortlist.get(c.workerId) ?? null,
+        shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        shortlistNote: shortlist.get(c.workerId)?.note ?? null,
         lastActiveBucket: c.lastActiveBucket,
       }),
     )
@@ -271,8 +279,11 @@ export async function runScouting(
 }
 
 export type ShortlistWriteResult =
-  | { kind: "ok"; status: ShortlistStatus }
+  | { kind: "ok"; status: ShortlistStatus; note: string | null }
   | { kind: "invalid" }
+  /** `not_fit` needs a short reason and neither this write nor the stored
+   *  row carries one (extension B — server-enforced, never client-trusted). */
+  | { kind: "reason-required" }
   | { kind: "not-owner" }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
@@ -281,11 +292,17 @@ export type ShortlistWriteResult =
  * Upsert a shortlist decision for the company's own demand. Owner-scoped:
  * the request must belong to the caller (verified) and the row is written with
  * owner_id = auth.uid(), so a company can never touch another's shortlist.
+ *
+ * Extension B: writes/preserves the EXISTING `note` column (20260612220000 —
+ * internal to the company; the worker can never read shortlist rows under
+ * demand_shortlist RLS). `note === undefined` keeps the stored note;
+ * `not_fit` requires a reason (this write's note or the stored one).
  */
 export async function setShortlist(input: {
   requestId: string;
   workerId: string;
   status: ShortlistStatus;
+  note?: string | null;
 }): Promise<ShortlistWriteResult> {
   if (
     !input.requestId ||
@@ -310,21 +327,50 @@ export async function setShortlist(input: {
     .maybeSingle();
   if (!req) return { kind: "not-owner" };
 
+  // Current stored note (own row via RLS) — needed both to preserve it on a
+  // note-less write and to satisfy the not_fit reason rule honestly.
+  let existingNote: string | null = null;
+  try {
+    const { data: existing } = await asAny(supabase)
+      .from("demand_shortlist")
+      .select("note")
+      .eq("owner_id", user.id)
+      .eq("request_id", input.requestId)
+      .eq("worker_id", input.workerId)
+      .maybeSingle();
+    existingNote = (existing?.note as string | null) ?? null;
+  } catch {
+    // table absent → the upsert below returns needs-migration
+  }
+
+  const validated = validateShortlistWrite({
+    status: input.status,
+    note: input.note,
+    existingNote,
+  });
+  if (validated.kind === "reason-required") return { kind: "reason-required" };
+
+  const payload: Record<string, unknown> = {
+    owner_id: user.id,
+    request_id: input.requestId,
+    worker_id: input.workerId,
+    status: input.status,
+    updated_at: new Date().toISOString(),
+  };
+  // Only a provided note touches the column — an omitted note never erases
+  // the stored one.
+  if (validated.note !== undefined) payload.note = validated.note;
+
   const { error } = await asAny(supabase)
     .from("demand_shortlist")
-    .upsert(
-      {
-        owner_id: user.id,
-        request_id: input.requestId,
-        worker_id: input.workerId,
-        status: input.status,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "owner_id,request_id,worker_id" },
-    );
+    .upsert(payload, { onConflict: "owner_id,request_id,worker_id" });
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
   }
-  return { kind: "ok", status: input.status };
+  return {
+    kind: "ok",
+    status: input.status,
+    note: validated.note !== undefined ? validated.note : existingNote,
+  };
 }

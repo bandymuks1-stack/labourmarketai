@@ -6824,6 +6824,18 @@
       "fieldsNote": "Asks the worker to share their name, phone and email. The worker decides — nothing is shown without their approval.",
       "error": "The request could not be sent. Please try again.",
       "accepted": "The worker accepted the request — contact sharing not yet allowed."
+    },
+    "shortlistNote": {
+      "label": "Note",
+      "internalHint": "visible only to your company",
+      "add": "Add a note",
+      "edit": "Edit note",
+      "placeholder": "A short note about this candidate for your team.",
+      "reasonTitle": "Why not a fit?",
+      "reasonPlaceholder": "Write a short reason, e.g.: lacks experience with this kind of work.",
+      "reasonRequired": "Marking “Not a fit” needs a short reason.",
+      "save": "Save",
+      "cancel": "Cancel"
     }
   },
   "planBoundary": {
@@ -7607,6 +7619,20 @@
         "onsite": "On-site",
         "remote": "Remote",
         "hybrid": "Hybrid"
+      }
+    },
+    "myInterest": {
+      "title": "My interest",
+      "summary": "Total: {count}",
+      "intro": "Needs you showed interest in, with their current state. The entry stays even after a need closes.",
+      "closed": "This need is no longer active",
+      "viewDemand": "View the need",
+      "cvLink": "View tailored CV",
+      "status": {
+        "interested": "Sent",
+        "reviewed": "Company reviewed",
+        "contacted": "Company contacted you",
+        "withdrawn": "Withdrawn"
       }
     }
   },

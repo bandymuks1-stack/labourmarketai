@@ -53,6 +53,10 @@ import {
 } from "@/lib/opportunities/discovery-filters";
 import { MATCH_CALC_VERSION } from "@/lib/market/match-v1";
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
+import {
+  WorkerMyInterestSection,
+  type MyInterestDisplayRow,
+} from "@/components/app/worker-my-interest-section";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import type {
   OpportunityGap,
@@ -277,6 +281,37 @@ export default async function OpportunitiesPage({
     ),
   });
 
+  // ── "Mano susidomėjimai" (extension A): the worker's own interest signals
+  //    as precomputed display rows (RSC-serializable — no functions cross the
+  //    client boundary). Live board facts win; a closed demand keeps its row
+  //    with the honest "no longer active" label from the click-time snapshot.
+  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const myInterestDisplayRows: MyInterestDisplayRow[] =
+    result.kind === "ready"
+      ? result.myInterestRows.map((r) => {
+          const parts: string[] = [];
+          if (r.companyName) parts.push(r.companyName);
+          if (r.locationLabel) {
+            parts.push(`${r.locationLabel} · ${countryLabel(r.country)}`);
+          } else if (r.country) {
+            parts.push(countryLabel(r.country));
+          }
+          if (r.dateIso) parts.push(dateFmt.format(new Date(r.dateIso)));
+          return {
+            requestId: r.requestId,
+            status: r.status,
+            statusText: t(`myInterest.status.${r.status}` as never) as string,
+            stillOpen: r.stillOpen,
+            title: roleLabel(r.roleText),
+            metaLine: parts.join(" · "),
+            nextAction: r.nextAction,
+            cvHref: r.cvTemplate
+              ? `/${locale}/cv?need=${encodeURIComponent(r.requestId)}&template=${encodeURIComponent(r.cvTemplate)}`
+              : null,
+          };
+        })
+      : [];
+
   return (
     <main className="mx-auto flex w-full max-w-content flex-col gap-6">
       <TelemetryView
@@ -465,6 +500,36 @@ export default async function OpportunitiesPage({
           >
             {t("trustNote")}
           </p>
+
+          {/* ── Mano susidomėjimai (extension A) — the worker's OWN interest
+              signals, collapsible, INDEPENDENT of board visibility: a signal
+              whose demand closed stays here with an honest label instead of
+              silently vanishing. Renders only when at least one signal
+              exists — no empty wall, and never a section for an unapplied
+              store (rows are empty then). Actions reuse EXISTING flows only
+              (withdraw / contact employer / view demand / tailored CV). */}
+          {myInterestDisplayRows.length > 0 ? (
+            <WorkerMyInterestSection
+              locale={locale}
+              rows={myInterestDisplayRows}
+              labels={{
+                title: t("myInterest.title"),
+                summary: t("myInterest.summary", {
+                  count: myInterestDisplayRows.length,
+                }),
+                intro: t("myInterest.intro"),
+                closed: t("myInterest.closed"),
+                withdrawnStatusText: t("myInterest.status.withdrawn"),
+                withdraw: t("interest.withdraw"),
+                contactEmployer: t("interest.contactEmployer"),
+                openConversation: t("interest.contactedLink"),
+                viewDemand: t("myInterest.viewDemand"),
+                cvLink: t("myInterest.cvLink"),
+                error: t("interest.error"),
+                internalNote: t("interest.internalNote"),
+              }}
+            />
+          ) : null}
 
           {/* How matching works — deterministic rules + calc version, no AI
               claims, no global score (contract v2 presentation rule). */}
