@@ -55,46 +55,49 @@ export type TransportSituation = (typeof TRANSPORT_SITUATIONS)[number];
  * messages/[locale]/professions.json taxonomy (Lego section 10); the few not yet
  * in the registry are marked so PR follow-ups can register them — never
  * hardcoded enums in UI.
+ *
+ * Ordering is deliberately sector-neutral (alphabetical by slug) so no single
+ * sector leads the list — the intake starter set spans the whole labour market
+ * and construction is one family among many, never the default or the front of
+ * the list (Universal Labour-Market Realignment, owner directive 2026-07-17;
+ * guarded by lib/guards/universal-profession-directions-neutral.test.ts).
  */
 export const PROFESSION_DIRECTIONS = [
-  "general_laborer",
-  "carpenter",
-  "formwork_carpenter",
-  "rebar_worker", // steel fixer
-  "concrete_worker",
-  "mason", // bricklayer
-  "plasterer",
-  "drywaller",
-  "painter",
-  "tiler",
-  "roofer",
-  "electrician",
-  "plumber",
-  "welder",
-  "hvac_ventilation",
-  "mechanic_technician",
-  "warehouse_logistics",
-  // Universal profession families (professions.json + catalogue migration
-  // 20260704120000) — the intake starter list spans the whole labour market;
-  // construction is one family among many:
-  "driver",
-  "warehouse_worker",
-  "production_worker",
-  "furniture_assembler",
-  "cleaner",
-  "office_administrator",
-  "software_developer",
-  "customer_service_specialist",
-  "sales_assistant",
-  "cook",
-  "waiter",
-  "gardener",
-  "farm_worker",
   "caregiver",
+  "carpenter",
+  "cleaner",
+  "concrete_worker",
+  "cook",
+  "customer_service_specialist",
+  "driver",
+  "drywaller",
+  "electrician",
   "event_organizer",
-  "translator",
-  "teacher",
+  "farm_worker",
+  "formwork_carpenter",
+  "furniture_assembler",
+  "gardener",
+  "general_laborer",
+  "hvac_ventilation",
+  "mason", // bricklayer
+  "mechanic_technician",
+  "office_administrator",
+  "painter",
+  "plasterer",
+  "plumber",
+  "production_worker",
+  "rebar_worker", // steel fixer
+  "roofer",
   "safety_specialist",
+  "sales_assistant",
+  "software_developer",
+  "teacher",
+  "tiler",
+  "translator",
+  "waiter",
+  "warehouse_logistics",
+  "warehouse_worker",
+  "welder",
 ] as const;
 export type ProfessionDirection = (typeof PROFESSION_DIRECTIONS)[number];
 
