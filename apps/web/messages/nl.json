@@ -61,7 +61,7 @@
       "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
       "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
-      "orgDocuments": "Sommen van het toestemmingsgebonden poolaggregaat — alleen werknemers die toestemming gaven voor geaggregeerde documentzichtbaarheid worden geteld.",
+      "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
       "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens."
     },
     "worker": {
@@ -124,7 +124,7 @@
         "workers": "Werknemers met toestemming",
         "expiring": "Verlopende documenten",
         "attention": "Aandacht nodig",
-        "empty": "Nog geen poolwerknemers met toestemming — dit aggregaat telt alleen werknemers die toestemming gaven.",
+        "empty": "Nog geen werknemers met toestemming — alleen werknemers die toestemming gaven worden geteld.",
         "link": "Open het documentencentrum"
       },
       "finance": {
@@ -340,7 +340,7 @@
     "switchSpace": "Van ruimte wisselen",
     "addSpace": "Ruimte toevoegen",
     "availableSpaces": "Beschikbare ruimtes",
-    "comingLaterToggle": "Modules die later komen (tonen)",
+    "comingLaterToggle": "Onderdelen die later komen (tonen)",
     "profile": {
       "name": "Persoonlijk profiel",
       "purpose": "Beheer je avatar, CV, vaardigheden en werkstatus."
@@ -497,17 +497,17 @@
   },
   "marketMap": {
     "entities": {
-      "title": "Drie entiteiten op de kaart",
-      "intro": "De kaart onderscheidt drie verschillende ruimtelijke entiteiten: mensen, werkgebieden van bedrijven en projectlocaties. Elk heeft een eigen zichtbaarheidsregel en een eigen visuele vorm.",
-      "neverMixedNote": "De drie entiteiten worden nooit samengevoegd tot één markertype.",
+      "title": "Drie dingen op de kaart",
+      "intro": "De kaart toont drie verschillende dingen: mensen, werkgebieden van bedrijven en projectlocaties. Elk volgt zijn eigen zichtbaarheidsregel en ziet er anders uit.",
+      "neverMixedNote": "De drie worden nooit samengevoegd tot één markertype.",
       "contactNote": "Contact verloopt altijd via de LabourMarket.ai-werkstroom — de kaart toont nooit telefoonnummers of e-mailadressen.",
       "person": {
         "name": "Mensen",
-        "legend": "Geaggregeerde aanwezigheid per gebied (gevuld vierkant)",
+        "legend": "Aantal mensen per gebied (gevuld vierkant)",
         "countLabel": "{count}",
         "smallSample": "<5",
-        "empty": "Nog geen geaggregeerde aanwezigheid van mensen om te tonen. Mensen verschijnen hier alleen als tellingen op gebiedsniveau zodra er in een gebied genoeg signalen met toestemming zijn (een exact aantal pas vanaf 5).",
-        "visibilityNote": "Mensen worden alleen getoond als geaggregeerde gebiedstellingen — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
+        "empty": "Nog geen aantallen om te tonen. Mensen verschijnen hier alleen als aantallen per gebied zodra genoeg mensen in een gebied toestemming hebben gegeven (een exact aantal pas vanaf 5).",
+        "visibilityNote": "Mensen worden alleen getoond als aantallen per gebied — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
       },
       "company": {
         "name": "Bedrijfsterritoria",
@@ -603,7 +603,7 @@
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
       "disable": "Uitschakelen",
       "enable": "Inschakelen",
-      "aggregatedHint": "Wordt alleen geaggregeerd getoond zodra een publieke laag is ingeschakeld.",
+      "aggregatedHint": "Wordt pas als totaalcijfers getoond zodra een publieke laag aanstaat.",
       "preferred": {
         "title": "Voorkeurslocaties",
         "country": "Land",
@@ -639,7 +639,7 @@
         "self_only": "Alleen ik",
         "region_visible": "Regioniveau",
         "city_visible": "Stadsniveau",
-        "aggregated": "Geaggregeerd"
+        "aggregated": "Alleen totaalcijfer"
       },
       "needType": {
         "workers": "Werknemers nodig",
@@ -2992,8 +2992,8 @@
       "generic": "Er is iets misgegaan. Probeer het opnieuw.",
       "oauth": {
         "missing_code": "Google kwam terug zonder aanmeldcode. Probeer het opnieuw — als het zich herhaalt, laad de pagina dan opnieuw.",
-        "exchange_failed": "De aanmeldcode kon niet worden ingewisseld voor een sessie. Meestal werkt opnieuw proberen — codes zijn eenmalig en kort geldig.",
-        "no_user": "De sessie is aangemaakt, maar het gebruikersrecord is niet bereikbaar. Log uit en weer in.",
+        "exchange_failed": "Aanmelden is niet gelukt. Probeer het opnieuw — de aanmeldcode werkt één keer en verloopt snel.",
+        "no_user": "Je bent aangemeld, maar je account is niet bereikbaar. Log uit en weer in.",
         "callback": "Onverwachte fout tijdens het inloggen. Probeer het opnieuw — als het aanhoudt, deel dan het trace-ID hieronder.",
         "unknown": "Kon niet inloggen. Probeer het opnieuw."
       }
@@ -3770,7 +3770,7 @@
       }
     },
     "middleware": {
-      "session_expired": "Je sessie is verlopen. Log opnieuw in.",
+      "session_expired": "Je bent uitgelogd. Log opnieuw in.",
       "onboarding_required": "Rond eerst het instellen van je profiel af."
     },
     "notifications": {
@@ -4377,9 +4377,9 @@
     "backToAccount": "Terug naar account",
     "export": {
       "title": "Een kopie van mijn gegevens",
-      "body": "Download je profiel, werkjournaal, vaardigheden en toestemmingsgegevens als één JSON-bestand.",
+      "body": "Download je profiel, werkjournaal, vaardigheden en toestemmingsgegevens als één bestand.",
       "includes": "Het bestand bevat alleen je eigen gegevens: profiel, toestemmingsgeschiedenis, werknemerskaart, journaalregistraties, vaardigheden en je documentenlijst (geen bestandsinhoud, geen berichten van andere mensen).",
-      "download": "Download mijn gegevens (JSON)"
+      "download": "Download mijn gegevens"
     },
     "deletion": {
       "title": "Verzoek tot accountverwijdering",
@@ -5120,7 +5120,7 @@
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
       "positionsTitle": "Ontbrekende posities",
-      "positionsEmpty": "De module voor positiebehoeften is nog in voorbereiding — zodra die er is, zie je hier welke mensen ontbreken.",
+      "positionsEmpty": "Positiebehoeften zijn er nog niet — zodra ze er zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
       "gallery": {
         "title": "Werkgalerij",
@@ -5580,7 +5580,7 @@
     },
     "sourceStates": {
       "needs_admin_read": "niet leesbaar in deze omgeving",
-      "service_key_missing": "serviceverbinding niet geconfigureerd",
+      "service_key_missing": "verbinding niet ingesteld",
       "needs_migration": "nog niet ingeschakeld",
       "not_admin": "beheerderscontrole niet geslaagd",
       "error": "kon nu niet worden gelezen"
@@ -5622,7 +5622,7 @@
     "state": {
       "empty": "Nog geen rijen. Zodra iemand zich aanmeldt of een aanvraag indient, verschijnt die hier.",
       "needsAdminRead": "Deze bron is vanuit de app nog niet leesbaar — er bestaat in deze omgeving nog geen admin-leespad. Er wordt niets getoond in plaats van een valse nul.",
-      "serviceKeyMissing": "Deze bron heeft de serviceverbinding nodig, die in deze omgeving niet is geconfigureerd.",
+      "serviceKeyMissing": "Deze bron is in deze omgeving niet verbonden.",
       "error": "Deze bron kon op dit moment niet worden gelezen."
     },
     "actions": {
@@ -6413,10 +6413,10 @@
       "countsUnavailable": "Aantallen zijn in deze omgeving niet beschikbaar.",
       "galleryNote": "Foto's staan in uw dagboeknotities; projectgalerijen vindt u op de pagina van elk project."
     },
-    "uploadNote": "Dit is een metadata-inventaris — bestanden uploaden is nog niet mogelijk. U registreert wat u hebt en tot wanneer het geldig is; de bestanden zelf blijven bij u.",
+    "uploadNote": "Bestanden uploaden kan nog niet. U registreert wat u hebt en tot wanneer het geldig is — de bestanden zelf blijven bij u.",
     "org": {
       "title": "Documentgereedheid van de pool (op basis van toestemming)",
-      "intro": "Documenten zijn van de werknemers. U ziet alleen categorie-aantallen van poolwerknemers die het delen van totalen hebben ingeschakeld.",
+      "intro": "Documenten zijn van de werknemers. U ziet alleen aantallen per categorie van poolwerknemers die instemden met het tonen van totaalcijfers.",
       "workersLabel": "Werknemers met toestemming",
       "totalLabel": "Documenten",
       "validLabel": "Geldig",
@@ -8372,10 +8372,10 @@
   "planning": {
     "eyebrow": "KALENDER",
     "title": "Kalender",
-    "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Elke regel linkt naar de echte bron.",
+    "intro": "Boekingen, projectdata en taakdeadlines in één agenda. Tik op een regel om die te openen waar hij is gemaakt.",
     "notAuthed": "Log in om je planning te zien.",
     "filters": {
-      "label": "Bron",
+      "label": "Type",
       "all": "Alle"
     },
     "source": {
@@ -8410,7 +8410,7 @@
       "hint": "Deze records bestaan, maar er zijn nog geen data vastgelegd."
     },
     "empty": "Nog niets gepland. Geaccepteerde boekingen, projectdata en taakdeadlines verschijnen hier.",
-    "pastHidden": "Afgeronde items worden hier niet getoond: {count}. De geschiedenis blijft op elke bronpagina.",
+    "pastHidden": "Afgeronde items worden hier niet getoond: {count}. Je vindt ze terug op hun eigen pagina's.",
     "conflict": {
       "flag": "Data overlappen"
     },
@@ -8461,7 +8461,7 @@
     "year": {
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
-    "emptyFiltered": "Geen items voor deze bron.",
+    "emptyFiltered": "Geen items van dit type.",
     "emptyActions": {
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",
@@ -8494,7 +8494,7 @@
       "coveredAll": "Al het beoordeelde werk is gedekt",
       "capacityLabel": "Capaciteitsdekking",
       "userEntered": "Door u ingevoerd: {count}",
-      "systemSuggested": "Systeemvoorstel: {count} (bevestigen of bewerken)",
+      "systemSuggested": "Automatisch voorgesteld: {count} (bevestigen of bewerken)",
       "confirmedRequired": "Bevestigd: {count}"
     },
     "risk": {
@@ -8552,7 +8552,7 @@
     "intro": "Uw werklijst: wat wacht, wat loopt en wat vastzit.",
     "honestNote": "Alleen een interne lijst — een taak aanmaken verstuurt niets naar wie dan ook.",
     "notAuthed": "Log in om uw taken te zien.",
-    "unavailable": "De takenmodule wordt voorbereid — nog niet beschikbaar. Zodra deze actief is, verschijnen uw taken hier.",
+    "unavailable": "Taken staan nog niet aan. Zodra dat gebeurt, verschijnen uw taken hier.",
     "loadError": "Taken konden niet worden geladen. Probeer de pagina te vernieuwen.",
     "myEmpty": "Geen open taken — maak er hierboven een aan.",
     "views": {
@@ -8613,7 +8613,7 @@
       "created": "Taak aangemaakt.",
       "updated": "Taak bijgewerkt.",
       "invalid": "Controleer de velden — de titel moet 3–160 tekens zijn.",
-      "needs_migration": "De takenmodule is nog niet actief — de wijziging is niet opgeslagen.",
+      "needs_migration": "Taken staan nog niet aan — de wijziging is niet opgeslagen.",
       "not_authorized": "U mag deze actie niet uitvoeren.",
       "not_found": "Taak niet gevonden.",
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
@@ -8634,7 +8634,7 @@
     "intro": "Wat uw aandacht nodig heeft, samenvattingen berekend uit uw eigen gegevens en de eerlijke status van de AI-provider.",
     "attention": {
       "title": "Wat heeft mijn aandacht nodig",
-      "note": "Berekend uit uw eigen gegevens volgens vaste regels — dezelfde aantallen die de bel en elke module al tonen. Elke rij noemt zijn gegevensbron en linkt naar de pagina waar het wordt opgelost.",
+      "note": "Berekend uit uw eigen gegevens volgens vaste regels — dezelfde aantallen die de bel en elke pagina al tonen. Elke rij noemt waar de gegevens vandaan komen en linkt naar de pagina waar het wordt opgelost.",
       "empty": "Er is nu niets dat uw aandacht nodig heeft — er zijn geen openstaande signalen in uw gegevens.",
       "open": "Openen",
       "docExpiring": "Documenten die binnen 30 dagen verlopen",
@@ -8676,33 +8676,33 @@
     },
     "provider": {
       "title": "AI-provider",
-      "stateLabel": "Runtimestatus",
+      "stateLabel": "AI-status",
       "state": {
         "disabled": "Uit",
         "mock": "Mock (deterministische testmodus)",
         "live": "Actief"
       },
       "reason": {
-        "ok": "De runtime is geconfigureerd.",
-        "mode_disabled": "Er is geen providermodus ingesteld — de runtime staat standaard uit.",
-        "unknown_provider": "De geconfigureerde provider wordt niet herkend, dus de runtime blijft uit.",
-        "missing_api_key": "Er is geen providersleutel geconfigureerd, dus de runtime blijft uit."
+        "ok": "De AI-verbinding is ingesteld.",
+        "mode_disabled": "Er is geen AI-aanbieder gekozen — AI staat standaard uit.",
+        "unknown_provider": "De gekozen AI-aanbieder wordt niet herkend, dus AI blijft uit.",
+        "missing_api_key": "Er is geen AI-sleutel toegevoegd, dus AI blijft uit."
       },
       "disabledBody": "In deze omgeving is geen externe AI-provider gekoppeld. Alles op deze pagina is volgens vaste regels berekend uit uw eigen gegevens — geen enkele tekst hier is door een taalmodel gemaakt.",
       "whenEnabled": "Zodra de eigenaar een provider koppelt en de auditopslag voor suggesties is toegepast, komen controleerbare conceptsuggesties beschikbaar — altijd als suggesties die een persoon bevestigt, nooit als automatische wijzigingen.",
       "gates": "Twee poorten staan bewust open: (1) er is geen providersleutel geconfigureerd in productie en (2) de auditopslag voor suggesties (ai_runs / ai_suggestions) is een door de eigenaar goed te keuren migratie. Generatie blijft uit totdat beide gesloten zijn — suggesties zonder auditspoor zouden de eigen regels van het programma schenden.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
-      "notWired": "Generatiefuncties zijn in deze fase bewust niet aangesloten — resultaten zouden nog geen auditspoor hebben. De status hierboven wordt alleen voor transparantie getoond."
+      "notWired": "Genereren staat in deze fase bewust uit — resultaten zouden nog niet traceerbaar zijn. De status hierboven wordt alleen voor transparantie getoond."
     }
   },
   "finance": {
     "eyebrow": "Operationele financiën",
     "title": "Financiële registraties",
     "intro": "Handmatige registratie van verstuurde facturen, ontvangen facturen en uitgaven — met echte totalen en afgeleide vervallen-markeringen.",
-    "scopeNote": "Alleen handmatige registraties — dit is geen boekhoud-, belasting-, loon-, banksynchronisatie- of betalingsverwerkingssoftware. Een registratie verplaatst geen geld en neemt met niemand contact op.",
+    "scopeNote": "Alleen handmatige registraties — dit is geen software voor boekhouding, belasting, loon, bank of betalingen. Een registratie verplaatst geen geld en neemt met niemand contact op.",
     "notAuthed": "Log in om je financiële registraties te zien.",
-    "unavailable": "De financiënmodule wordt voorbereid — nog niet beschikbaar. Zodra deze is ingeschakeld, verschijnen je registraties hier.",
+    "unavailable": "Financiën staat nog niet aan. Zodra dat gebeurt, verschijnen je registraties hier.",
     "loadError": "Registraties konden niet worden geladen. Vernieuw de pagina.",
     "empty": "Nog geen financiële registraties — voeg hierboven de eerste toe.",
     "emptyFiltered": "Geen registraties voldoen aan de gekozen filters.",
@@ -8772,7 +8772,7 @@
       "created": "Registratie toegevoegd.",
       "updated": "Registratie bijgewerkt.",
       "invalid": "Controleer de velden — titel 3–160 tekens, tegenpartij 2–160, bedrag zoals 123.45.",
-      "needs_migration": "De financiënmodule is nog niet ingeschakeld — de wijziging is niet opgeslagen.",
+      "needs_migration": "Financiën staat nog niet aan — de wijziging is niet opgeslagen.",
       "not_authorized": "Dat mag je niet doen.",
       "not_found": "Registratie niet gevonden.",
       "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
@@ -9097,7 +9097,7 @@
       "label": "Zoeken",
       "placeholder": "Naam, bedrijf, stad…",
       "submit": "Zoeken",
-      "empty": "Niets gevonden voor deze zoekopdracht.",
+      "empty": "Niets gevonden.",
       "orgType": {
         "company": "Bedrijf",
         "agency": "Bureau",
@@ -9277,7 +9277,7 @@
     "removeButton": "Locatie verwijderen",
     "empty": "Nog geen locaties. Voeg je hoofdkantoor en werklocaties toe.",
     "gatedHeading": "Voorbereid — wacht op activering door eigenaar",
-    "gatedBody": "Het locatiemodel is klaar, maar de databasewijziging is nog niet toegepast. Activering is een beslissing van de eigenaar.",
+    "gatedBody": "Locaties zijn klaar maar staan nog niet aan. Aanzetten is een beslissing van de eigenaar.",
     "errorLabel": "Opslaan mislukt. Probeer het opnieuw."
   },
   "companyGallery": {
@@ -9328,7 +9328,7 @@
     "title": "Klanten",
     "subtitle": "Voor wie u personeel levert — klantbehoeften worden gekoppeld aan uw aanvragen en kandidaat-scouting.",
     "gatedHeading": "Voorbereid — wacht op activering door de eigenaar",
-    "gatedBody": "Klantrecords zijn klaar, maar de databasewijziging is nog niet toegepast.",
+    "gatedBody": "Klantrecords zijn klaar maar staan nog niet aan.",
     "notLinkable": "Aanvragen kunnen nog niet aan klanten worden gekoppeld.",
     "clientsEmpty": "Nog geen klanten. Voeg hieronder de eerste toe.",
     "demandsHeading": "Uw aanvragen",

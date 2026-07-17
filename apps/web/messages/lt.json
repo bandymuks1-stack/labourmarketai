@@ -61,7 +61,7 @@
       "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
       "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
-      "orgDocuments": "Sutikimu apsaugoto telkinio suvestinės sumos — skaičiuojami tik darbuotojai, davę sutikimą dėl suvestinio dokumentų matomumo.",
+      "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
       "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų."
     },
     "worker": {
@@ -124,7 +124,7 @@
         "workers": "Sutikę darbuotojai",
         "expiring": "Besibaigiantys dokumentai",
         "attention": "Reikia dėmesio",
-        "empty": "Sutikusių telkinio darbuotojų dar nėra — ši suvestinė skaičiuoja tik sutikimą davusius darbuotojus.",
+        "empty": "Sutikusių darbuotojų dar nėra — skaičiuojami tik sutikimą davę darbuotojai.",
         "link": "Atidaryti dokumentų centrą"
       },
       "finance": {
@@ -340,7 +340,7 @@
     "switchSpace": "Keisti erdvę",
     "addSpace": "Pridėti erdvę",
     "availableSpaces": "Galimos erdvės",
-    "comingLaterToggle": "Vėliau įjungiami moduliai (rodyti)",
+    "comingLaterToggle": "Vėliau įjungiamos skiltys (rodyti)",
     "profile": {
       "name": "Asmeninis profilis",
       "purpose": "Tvarkykite avatarą, CV, įgūdžius ir darbo statusą."
@@ -497,17 +497,17 @@
   },
   "marketMap": {
     "entities": {
-      "title": "Trys esybės žemėlapyje",
-      "intro": "Žemėlapis skiria tris skirtingas erdvines esybes: žmones, įmonių veiklos teritorijas ir projektų vietas. Kiekviena turi savo matomumo taisyklę ir savo vizualinę formą.",
-      "neverMixedNote": "Šios trys esybės niekada nesujungiamos į vieną žymeklio tipą.",
+      "title": "Trys dalykai žemėlapyje",
+      "intro": "Žemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.",
+      "neverMixedNote": "Šie trys dalykai niekada nesujungiami į vieną žymeklį.",
       "contactNote": "Susisiekimas visada vyksta tik per LabourMarket.ai platformą — žemėlapyje niekada nerodomi telefonai ar el. pašto adresai.",
       "person": {
         "name": "Žmonės",
-        "legend": "Apibendrintas buvimas pagal sritį (užpildytas kvadratas)",
+        "legend": "Žmonių skaičius pagal sritį (užpildytas kvadratas)",
         "countLabel": "{count}",
         "smallSample": "<5",
-        "empty": "Apibendrinto žmonių buvimo rodyti dar nėra. Žmonės čia matomi tik kaip srities lygio skaičiai, kai srityje susikaupia pakankamai sutikimu pagrįstų signalų (tikslus skaičius — tik nuo 5).",
-        "visibilityNote": "Žmonės rodomi tik kaip apibendrinti srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“."
+        "empty": "Žmonių skaičių rodyti dar nėra. Žmonės čia matomi tik kaip srities skaičiai, kai srityje susikaupia pakankamai sutikimą davusių žmonių (tikslus skaičius — tik nuo 5).",
+        "visibilityNote": "Žmonės rodomi tik kaip srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“."
       },
       "company": {
         "name": "Įmonių teritorijos",
@@ -603,7 +603,7 @@
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "disable": "Išjungti",
       "enable": "Įjungti",
-      "aggregatedHint": "Rodoma agreguotai tik tada, kai bus įjungtas viešas sluoksnis.",
+      "aggregatedHint": "Bus rodoma tik bendrais skaičiais, kai įjungsime viešą sluoksnį.",
       "preferred": {
         "title": "Norimos lokacijos",
         "country": "Šalis",
@@ -639,7 +639,7 @@
         "self_only": "Tik man",
         "region_visible": "Regiono lygiu",
         "city_visible": "Miesto lygiu",
-        "aggregated": "Agreguotai"
+        "aggregated": "Tik bendras skaičius"
       },
       "needType": {
         "workers": "Reikia žmonių",
@@ -2992,8 +2992,8 @@
       "generic": "Įvyko klaida. Bandyk dar kartą.",
       "oauth": {
         "missing_code": "Google grąžino atgal be prisijungimo kodo. Pabandykite dar kartą — jei kartojasi, perkraukite naršyklę.",
-        "exchange_failed": "Prisijungimo kodas neišsikeitė į sesiją. Dažniausiai užtenka pabandyti dar kartą — kodai yra vienkartiniai ir trumpos galiojimo trukmės.",
-        "no_user": "Sesija sukurta, bet vartotojo įrašas nepasiekiamas. Pabandykite atsijungti ir prisijungti iš naujo.",
+        "exchange_failed": "Prisijungti nepavyko. Pabandykite dar kartą — prisijungimo kodas galioja trumpai ir tik vieną kartą.",
+        "no_user": "Prisijungti pavyko, bet paskyros pasiekti nepavyko. Atsijunkite ir prisijunkite iš naujo.",
         "callback": "Įvyko nelaukta klaida prisijungimo metu. Pabandykite dar kartą — jei tęsiasi, atsiųskite žemiau pateiktą trace ID.",
         "unknown": "Prisijungti nepavyko. Pabandykite dar kartą."
       }
@@ -3770,7 +3770,7 @@
       }
     },
     "middleware": {
-      "session_expired": "Jūsų sesija pasibaigė. Prisijunkite iš naujo.",
+      "session_expired": "Prisijungimas baigė galioti. Prisijunkite iš naujo.",
       "onboarding_required": "Pirmiausia užpildykite profilį."
     },
     "notifications": {
@@ -4377,9 +4377,9 @@
     "backToAccount": "Grįžti į paskyrą",
     "export": {
       "title": "Mano duomenų kopija",
-      "body": "Atsisiųsk savo profilio, darbo žurnalo, įgūdžių ir sutikimų duomenis vienu JSON failu.",
+      "body": "Atsisiųsk savo profilio, darbo žurnalo, įgūdžių ir sutikimų duomenis vienu failu.",
       "includes": "Faile — tik tavo paties duomenys: profilis, sutikimų istorija, darbuotojo kortelė, žurnalo įrašai, įgūdžiai ir dokumentų sąrašas (be failų turinio, be kitų žmonių žinučių).",
-      "download": "Atsisiųsti mano duomenis (JSON)"
+      "download": "Atsisiųsti mano duomenis"
     },
     "deletion": {
       "title": "Paskyros šalinimo užklausa",
@@ -5120,7 +5120,7 @@
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
       "positionsTitle": "Trūkstamos pozicijos",
-      "positionsEmpty": "Pozicijų poreikių modulis dar ruošiamas — kai jis atsiras, čia matysi, kokių žmonių trūksta.",
+      "positionsEmpty": "Pozicijų poreikiai dar ruošiami — kai atsiras, čia matysi, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",
       "gallery": {
         "title": "Darbų galerija",
@@ -5580,7 +5580,7 @@
     },
     "sourceStates": {
       "needs_admin_read": "šioje aplinkoje neperskaitoma",
-      "service_key_missing": "nesukonfigūruotas serviso ryšys",
+      "service_key_missing": "ryšys dar nesujungtas",
       "needs_migration": "dar neįjungta",
       "not_admin": "nepraeitas administratoriaus patikrinimas",
       "error": "šiuo metu nepavyko perskaityti"
@@ -5622,7 +5622,7 @@
     "state": {
       "empty": "Įrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.",
       "needsAdminRead": "Šio šaltinio iš programos kol kas negalima perskaityti — šioje aplinkoje nėra administratoriaus skaitymo kelio. Rodome tai sąžiningai, o ne klaidingą nulį.",
-      "serviceKeyMissing": "Šiam šaltiniui reikia paslaugos sujungimo, kuris šioje aplinkoje nesukonfigūruotas.",
+      "serviceKeyMissing": "Šis šaltinis šioje aplinkoje dar nesujungtas.",
       "error": "Šio šaltinio šiuo metu nepavyko perskaityti."
     },
     "actions": {
@@ -6413,10 +6413,10 @@
       "countsUnavailable": "Skaičiai šioje aplinkoje nepasiekiami.",
       "galleryNote": "Nuotraukos saugomos jūsų žurnalo įrašuose; projektų nuotraukų galerijos — kiekvieno projekto puslapyje."
     },
-    "uploadNote": "Tai — metaduomenų inventorius: failų įkėlimas dar negalimas. Įrašote, ką turite ir iki kada galioja; patys failai lieka pas jus.",
+    "uploadNote": "Failų įkelti dar negalima. Įrašote, kokius dokumentus turite ir iki kada jie galioja — patys failai lieka pas jus.",
     "org": {
       "title": "Komandos dokumentų parengtis (pagal sutikimą)",
-      "intro": "Dokumentai priklauso darbuotojams. Matote tik kategorijų skaičius tų komandos darbuotojų, kurie įjungė suvestinės dalijimąsi.",
+      "intro": "Dokumentai priklauso darbuotojams. Matote tik kategorijų skaičius tų komandos darbuotojų, kurie sutiko rodyti bendrus skaičius.",
       "workersLabel": "Sutikę darbuotojai",
       "totalLabel": "Dokumentai",
       "validLabel": "Galiojantys",
@@ -8372,10 +8372,10 @@
   "planning": {
     "eyebrow": "KALENDORIUS",
     "title": "Kalendorius",
-    "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Kiekviena eilutė veda į tikrąjį šaltinį.",
+    "intro": "Rezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Paspaudę eilutę pateksite ten, kur ji sukurta.",
     "notAuthed": "Prisijunk, kad matytum savo planą.",
     "filters": {
-      "label": "Šaltinis",
+      "label": "Tipas",
       "all": "Visi"
     },
     "source": {
@@ -8410,7 +8410,7 @@
       "hint": "Šie įrašai egzistuoja, bet datos dar neįrašytos."
     },
     "empty": "Kol kas nieko nesuplanuota. Čia atsiras priimtos rezervacijos, projektų datos ir užduočių terminai.",
-    "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Istorija lieka kiekvieno šaltinio puslapyje.",
+    "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Juos rasite jų pačių puslapiuose.",
     "conflict": {
       "flag": "Datos persidengia"
     },
@@ -8461,7 +8461,7 @@
     "year": {
       "count": "{count, plural, =0 {nėra įrašų} one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
-    "emptyFiltered": "Pagal šį šaltinį įrašų nėra.",
+    "emptyFiltered": "Šio tipo įrašų nėra.",
     "emptyActions": {
       "bookings": "Pasiūlyti rezervaciją",
       "tasks": "Sukurti užduotį",
@@ -8494,7 +8494,7 @@
       "coveredAll": "Visi įvertinti darbai padengti",
       "capacityLabel": "Pajėgumo padengimas",
       "userEntered": "Jūsų įvesta: {count}",
-      "systemSuggested": "Sistemos pasiūlymas: {count} (patvirtinkite arba redaguokite)",
+      "systemSuggested": "Pasiūlyta automatiškai: {count} (patvirtinkite arba pataisykite)",
       "confirmedRequired": "Patvirtinta: {count}"
     },
     "risk": {
@@ -8552,7 +8552,7 @@
     "intro": "Jūsų darbų sąrašas: kas laukia, kas vyksta ir kas užstrigę.",
     "honestNote": "Vidinis sąrašas — užduoties sukūrimas niekam nieko nesiunčia.",
     "notAuthed": "Prisijunkite, kad matytumėte savo užduotis.",
-    "unavailable": "Užduočių modulis ruošiamas — dar neįjungtas. Kai tik bus įjungtas, čia matysite savo užduotis.",
+    "unavailable": "Užduotys dar neįjungtos. Kai įjungsime, jos atsiras čia.",
     "loadError": "Nepavyko įkelti užduočių. Pabandykite atnaujinti puslapį.",
     "myEmpty": "Atvirų užduočių nėra — sukurkite naują viršuje.",
     "views": {
@@ -8613,7 +8613,7 @@
       "created": "Užduotis sukurta.",
       "updated": "Užduotis atnaujinta.",
       "invalid": "Patikrinkite laukus — pavadinimas turi būti 3–160 ženklų.",
-      "needs_migration": "Užduočių modulis dar neįjungtas — pakeitimas neišsaugotas.",
+      "needs_migration": "Užduotys dar neįjungtos — pakeitimas neišsaugotas.",
       "not_authorized": "Neturite teisės atlikti šio veiksmo.",
       "not_found": "Užduotis nerasta.",
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
@@ -8634,7 +8634,7 @@
     "intro": "Kas laukia jūsų dėmesio, iš jūsų pačių duomenų apskaičiuotos santraukos ir sąžininga AI tiekėjo būsena.",
     "attention": {
       "title": "Kam reikia mano dėmesio",
-      "note": "Apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — tie patys skaičiai, kuriuos jau rodo varpelis ir kiekvienas modulis. Kiekviena eilutė nurodo savo duomenų šaltinį ir veda į puslapį, kuriame tai išsprendžiama.",
+      "note": "Apskaičiuota iš jūsų pačių įrašų pagal aiškias taisykles — tie patys skaičiai, kuriuos jau rodo varpelis ir kiekviena skiltis. Kiekviena eilutė nurodo, iš kur duomenys, ir veda į puslapį, kur tai išsprendžiama.",
       "empty": "Šiuo metu niekas nelaukia jūsų dėmesio — jūsų duomenyse nėra laukiančių signalų.",
       "open": "Atidaryti",
       "docExpiring": "Dokumentai, kurių galiojimas baigsis per 30 dienų",
@@ -8676,33 +8676,33 @@
     },
     "provider": {
       "title": "AI tiekėjas",
-      "stateLabel": "Vykdymo būsena",
+      "stateLabel": "DI būsena",
       "state": {
         "disabled": "Išjungta",
         "mock": "Testinė (deterministinė) veiksena",
         "live": "Aktyvi"
       },
       "reason": {
-        "ok": "Vykdymo aplinka sukonfigūruota.",
-        "mode_disabled": "Tiekėjo veiksena nenustatyta — vykdymo aplinka pagal numatytuosius nustatymus išjungta.",
-        "unknown_provider": "Nurodytas tiekėjas neatpažintas, todėl vykdymo aplinka lieka išjungta.",
-        "missing_api_key": "Tiekėjo raktas nesukonfigūruotas, todėl vykdymo aplinka lieka išjungta."
+        "ok": "DI ryšys paruoštas.",
+        "mode_disabled": "DI tiekėjas nepasirinktas — DI pagal nutylėjimą išjungtas.",
+        "unknown_provider": "Nurodytas DI tiekėjas neatpažintas, todėl DI lieka išjungtas.",
+        "missing_api_key": "DI tiekėjo raktas nepridėtas, todėl DI lieka išjungtas."
       },
       "disabledBody": "Šioje aplinkoje neprijungtas joks išorinis AI tiekėjas. Viskas šiame puslapyje apskaičiuota iš jūsų pačių įrašų pagal fiksuotas taisykles — joks tekstas čia nebuvo sukurtas kalbos modelio.",
       "whenEnabled": "Kai savininkas prijungs tiekėją ir bus pritaikyta pasiūlymų audito saugykla, atsiras peržiūrimi juodraščių pasiūlymai — visada kaip pasiūlymai, kuriuos patvirtina žmogus, niekada kaip automatiniai pakeitimai.",
       "gates": "Du vartai atviri sąmoningai: (1) gamybinėje aplinkoje nesukonfigūruotas tiekėjo raktas ir (2) pasiūlymų audito saugykla (ai_runs / ai_suggestions) yra savininko tvirtinama migracija. Generavimas lieka išjungtas, kol abu užsidarys — pasiūlymai be audito pėdsako pažeistų pačios programos taisykles.",
       "providerLabel": "Tiekėjas",
       "modelLabel": "Modelis",
-      "notWired": "Generavimo funkcijos šiame etape sąmoningai neprijungtos — rezultatai dar neturėtų audito pėdsako. Aukščiau rodoma būsena skirta tik skaidrumui."
+      "notWired": "Generavimas šiame etape sąmoningai neįjungtas — rezultatų dar nebūtų galima atsekti. Ši būsena rodoma tik dėl skaidrumo."
     }
   },
   "finance": {
     "eyebrow": "Veiklos finansai",
     "title": "Finansų įrašai",
     "intro": "Rankiniu būdu vedami išrašytų sąskaitų, gautų sąskaitų ir išlaidų įrašai — su tikromis sumomis ir išvestiniais vėlavimo žymenimis.",
-    "scopeNote": "Tik rankiniai įrašai — tai nėra buhalterijos, mokesčių, darbo užmokesčio, banko sinchronizacijos ar mokėjimų apdorojimo programa. Įrašo sukūrimas neperveda pinigų ir su niekuo nesusisiekia.",
+    "scopeNote": "Tik rankiniai įrašai — tai ne buhalterijos, mokesčių, atlyginimų, banko ar mokėjimų programa. Įrašas nepajudina pinigų ir niekam nieko nesiunčia.",
     "notAuthed": "Prisijunkite, kad matytumėte savo finansų įrašus.",
-    "unavailable": "Finansų modulis ruošiamas — dar neprieinamas. Kai bus įjungtas, jūsų įrašai atsiras čia.",
+    "unavailable": "Finansų skiltis dar neįjungta. Kai įjungsime, jūsų įrašai atsiras čia.",
     "loadError": "Nepavyko įkelti įrašų. Pabandykite atnaujinti puslapį.",
     "empty": "Finansų įrašų dar nėra — pridėkite pirmą aukščiau.",
     "emptyFiltered": "Nė vienas įrašas neatitinka pasirinktų filtrų.",
@@ -8772,7 +8772,7 @@
       "created": "Įrašas pridėtas.",
       "updated": "Įrašas atnaujintas.",
       "invalid": "Patikrinkite laukus — pavadinimas 3–160 simbolių, kita šalis 2–160, suma pvz. 123.45.",
-      "needs_migration": "Finansų modulis dar neįjungtas — pakeitimas nebuvo išsaugotas.",
+      "needs_migration": "Finansų skiltis dar neįjungta — pakeitimas neišsaugotas.",
       "not_authorized": "Jums neleidžiama to daryti.",
       "not_found": "Įrašas nerastas.",
       "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
@@ -9097,7 +9097,7 @@
       "label": "Paieška",
       "placeholder": "Vardas, įmonė, miestas…",
       "submit": "Ieškoti",
-      "empty": "Pagal šią užklausą nieko nerasta.",
+      "empty": "Nieko nerasta.",
       "orgType": {
         "company": "Įmonė",
         "agency": "Agentūra",
@@ -9277,7 +9277,7 @@
     "removeButton": "Pašalinti vietą",
     "empty": "Vietų dar nepridėta. Pridėkite būstinę ir veiklos vietas.",
     "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
-    "gatedBody": "Vietų valdymo modelis paruoštas, bet duomenų bazės pakeitimas dar nepritaikytas. Aktyvavimas — savininko sprendimas.",
+    "gatedBody": "Vietų sąrašas paruoštas, bet dar neįjungtas. Įjungimas — savininko sprendimas.",
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą."
   },
   "companyGallery": {
@@ -9328,7 +9328,7 @@
     "title": "Klientai",
     "subtitle": "Kam parūpinate darbuotojus — kliento poreikiai susiejami su jūsų užklausomis ir kandidatų paieška.",
     "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
-    "gatedBody": "Klientų įrašai paruošti, bet duomenų bazės pakeitimas dar nepritaikytas.",
+    "gatedBody": "Klientų įrašai paruošti, bet dar neįjungti.",
     "notLinkable": "Užklausų kol kas negalima susieti su klientais.",
     "clientsEmpty": "Klientų dar nėra. Pridėkite pirmą klientą žemiau.",
     "demandsHeading": "Jūsų užklausos",
