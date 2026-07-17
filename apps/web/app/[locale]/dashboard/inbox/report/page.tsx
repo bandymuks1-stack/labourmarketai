@@ -91,7 +91,7 @@ export default async function ReviewReportPage({
                   <li key={e.id} className="flex flex-col gap-1 border-t border-border/60 pt-2 first:border-0 first:pt-0">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                       <span className="text-text-muted">{fmtDate(e.date)}</span>
-                      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+                      <span className="rounded-full bg-state-warning/10 px-2 py-0.5 text-[10px] font-medium text-state-warning">
                         {t("status.pending")}
                       </span>
                       {e.hours && (
@@ -115,7 +115,7 @@ export default async function ReviewReportPage({
                       <span className="text-[11px] text-text-muted">{t("noWorks")}</span>
                     )}
                     {e.needsClarification && (
-                      <span className="text-[10px] text-amber-700">{t("uncertaintyNote")}</span>
+                      <span className="text-[10px] text-state-warning">{t("uncertaintyNote")}</span>
                     )}
                   </li>
                 ))}

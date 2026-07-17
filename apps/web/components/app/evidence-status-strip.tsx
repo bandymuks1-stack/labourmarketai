@@ -37,8 +37,8 @@ const ACTIVE_STYLE: Record<EvidenceStatus, { chip: string; dot: string }> = {
     dot: "bg-text-muted",
   },
   awaiting_confirmation: {
-    chip: "border-amber-500/40 bg-amber-500/10 text-amber-700",
-    dot: "bg-amber-500",
+    chip: "border-state-warning/40 bg-state-warning/10 text-state-warning",
+    dot: "bg-state-warning",
   },
   // Silent-trust rule: the strongest state carries a NEUTRAL tone, not a green
   // "verified" chip — it is a private signal, never a public certification.

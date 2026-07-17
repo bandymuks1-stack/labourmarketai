@@ -34,7 +34,7 @@ export async function ManagerEvidenceCard({ evidence }: { evidence: ManagerEvide
         <h3 className="font-display text-sm font-semibold text-text-primary">
           {t("title")}
         </h3>
-        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600">
+        <span className="rounded-full bg-state-success/10 px-2 py-0.5 text-[10px] font-medium text-state-success">
           {t("systemEvidenced")}
         </span>
       </div>

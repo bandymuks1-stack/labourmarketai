@@ -482,7 +482,7 @@ export default async function AdminDashboardPage({
   };
 
   return (
-    <div className="flex flex-col gap-8" data-testid="admin-dashboard">
+    <div className="flex flex-col gap-6" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
