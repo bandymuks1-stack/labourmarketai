@@ -3182,7 +3182,9 @@
         "moveUp": "Perkelti aukščiau",
         "moveDown": "Perkelti žemiau",
         "hide": "Slėpti",
-        "hiddenTitle": "Paslėptos kortelės"
+        "hiddenTitle": "Paslėptos kortelės",
+        "showAll": "Rodyti visus veiksmus ({count})",
+        "showLess": "Rodyti mažiau"
       },
       "jobsCard": {
         "title": "Man tinkantys darbai",
@@ -8218,7 +8220,6 @@
     "person": {
       "title": "Asmens kortelė",
       "openProfile": "Atidaryti profilį",
-      "completeness": "Profilio pilnumas",
       "availability": {
         "available": "Laisvas darbui",
         "busy": "Užimtas",

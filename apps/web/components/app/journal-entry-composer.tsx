@@ -130,6 +130,8 @@ export function JournalEntryComposer({
   workerSkills,
   editingEntry,
   templates,
+  onSaved,
+  onCancelEdit,
 }: {
   engagements: JournalEngagement[];
   directions: JournalDirection[];
@@ -146,6 +148,15 @@ export function JournalEntryComposer({
    *  prefills the textarea scaffold + default quantity unit — same fields,
    *  same single save path. */
   templates?: JournalTemplateOption[];
+  /** Edit-in-place hosting (journal compact UX v1): when the composer runs
+   *  inside the entry-row drawer, the host closes the drawer after a
+   *  successful EDIT save (the worker returns to the exact same list spot;
+   *  `revalidatePath` refreshes the row in place). Never called on create. */
+  onSaved?: () => void;
+  /** Drawer-hosted cancel: renders the edit-banner cancel as a plain button
+   *  that closes the drawer — no navigation, no page reload. Absent → the
+   *  page-level `?editing=` flow keeps its link back to the journal URL. */
+  onCancelEdit?: () => void;
 }) {
   const t = useTranslations("journal");
   const tS = useTranslations("structuring");
@@ -679,6 +690,14 @@ export function JournalEntryComposer({
       completeTask(taskName, {
         fragment_count: confirmedFragments.length,
       });
+      // Edit-in-place hosting: a drawer-hosted EDIT save hands control back
+      // to the host (drawer closes, the refreshed row shows the result in
+      // place). The create flow and the page-level edit flow keep the
+      // in-form saved banner below.
+      if (editingEntry && onSaved) {
+        onSaved();
+        return;
+      }
       // Count only what the action actually persisted (metrics + confirmed
       // fragments) so the success banner can honestly say how much structure
       // was saved. A plain direct save (no review) yields 0 and the banner
@@ -947,7 +966,9 @@ export function JournalEntryComposer({
             </div>
           </div>
         )}
-        {editingEntry ? (
+        {editingEntry && !onCancelEdit ? (
+          // Drawer hosting already shows this title in the sheet header —
+          // render it here only for the page-level `?editing=` flow.
           <h3 className="font-display text-lg font-semibold text-text-primary">
             {t("editEntryTitle")}
           </h3>
@@ -960,12 +981,25 @@ export function JournalEntryComposer({
             data-testid="journal-edit-mode-banner"
           >
             {t("editEntryBanner")}{" "}
-            <a
-              href={`/${locale}/dashboard/journal`}
-              className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
-            >
-              {t("editEntryCancel")}
-            </a>
+            {onCancelEdit ? (
+              // Drawer-hosted: cancel simply closes the drawer — no
+              // navigation, the worker stays exactly where they were.
+              <button
+                type="button"
+                onClick={onCancelEdit}
+                data-testid="journal-edit-cancel"
+                className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+              >
+                {t("editEntryCancel")}
+              </button>
+            ) : (
+              <a
+                href={`/${locale}/dashboard/journal`}
+                className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+              >
+                {t("editEntryCancel")}
+              </a>
+            )}
           </p>
         )}
         {editingEntry && (
