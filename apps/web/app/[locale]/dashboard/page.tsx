@@ -13,6 +13,14 @@ import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module
 import { DashboardMoreSection } from "@/components/app/dashboard/dashboard-more-section";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
 import { JobRecommendationsCard } from "@/components/app/dashboard/job-recommendations-card";
+import {
+  OpportunityDirectionsCard,
+  type DirectionView,
+} from "@/components/app/dashboard/opportunity-directions-card";
+import {
+  loadAdjacentDirectionsForWorker,
+  type AdjacentDirectionLimitation,
+} from "@/lib/opportunities/adjacent-directions";
 import { MyZone } from "@/components/app/my-zone";
 import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
@@ -595,6 +603,7 @@ export default async function DashboardOverviewPage({
 
   // ── Worker: "Mano darbo kortelė" — state-aware personal entry ──
   let professionName: string | null = null;
+  let primaryProfessionSlug: string | null = null;
   let skillsCount = 0;
   let entriesCount = 0;
   const { data: workerRow } = await supabase
@@ -623,7 +632,10 @@ export default async function DashboardOverviewPage({
     ]);
     const slug =
       (wpRes.data?.professions as { slug: string } | null)?.slug ?? null;
-    if (slug) professionName = tProf(slug);
+    if (slug) {
+      primaryProfessionSlug = slug;
+      professionName = tProf(slug);
+    }
     skillsCount = scRes.count ?? 0;
     entriesCount = ecRes.count ?? 0;
   }
@@ -655,6 +667,39 @@ export default async function DashboardOverviewPage({
     next: workDerived.next,
     values: cardData.values,
   };
+
+  // ── Opportunity Discovery v1: REAL adjacent professional directions derived
+  // from the worker's held skills over the SINGLE canonical adjacency map
+  // (lib/opportunities/adjacent-directions → lib/taxonomy/profession-skills).
+  // Localized here (server) so the client card never sees a raw slug or a
+  // locale key; honest limitation state when the profile is too thin. Only for
+  // workers who have started a profile (>=1 skill) — first-use is covered by
+  // MyZone above, so we don't nag a brand-new empty profile.
+  let opportunityDirections: {
+    directions: DirectionView[];
+    limitationState: AdjacentDirectionLimitation;
+  } | null = null;
+  if (workerRow?.id && skillsCount >= 1) {
+    const adj = await loadAdjacentDirectionsForWorker(
+      supabase,
+      workerRow.id,
+      primaryProfessionSlug,
+    );
+    const tSkill = await getTranslations("skillNames");
+    const profLabel = (s: string) =>
+      tProf.has(s) ? tProf(s) : s.replace(/-/g, " ");
+    const skillLabel = (s: string) =>
+      tSkill.has(s as never) ? tSkill(s as never) : s.replace(/-/g, " ");
+    opportunityDirections = {
+      limitationState: adj.limitationState,
+      directions: adj.directions.map((d) => ({
+        professionId: d.professionId,
+        professionName: profLabel(d.professionId),
+        sharedSkills: d.sharedSkills.map(skillLabel),
+        missingSkills: d.missingSkills.map(skillLabel),
+      })),
+    };
+  }
 
   // Booking next-action: surface ONLY when there is a REAL pending incoming
   // booking count (> 0). 0 on any missing-data state → no card, no fake badge.
@@ -799,6 +844,18 @@ export default async function DashboardOverviewPage({
           whenever an invitation occupies the slot) have no chip equivalent,
           so this card is their only dashboard presentation. */}
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
+
+      {/* Opportunity Discovery v1 — "Kur dar gali pritaikyti savo įgūdžius":
+          real adjacent professional directions from the worker's held skills,
+          in the main flow after the profile/readiness block and before the
+          (folded) job-opportunity stream. Server-computed + localized; honest
+          limitation state; no fake list. */}
+      {opportunityDirections ? (
+        <OpportunityDirectionsCard
+          directions={opportunityDirections.directions}
+          limitationState={opportunityDirections.limitationState}
+        />
+      ) : null}
 
       {/* Everything informational, collapsed by default (compact home v1).
           All sections still server-render with real data — the fold is

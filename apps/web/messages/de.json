@@ -1,4 +1,17 @@
 {
+  "opportunityDirections": {
+    "heading": "Wo Ihre Fähigkeiten noch passen könnten",
+    "intro": "Auf Basis Ihres Profils und Ihrer vorhandenen Fähigkeiten haben wir verwandte berufliche Richtungen gefunden, in denen Sie mehr Möglichkeiten haben könnten.",
+    "fitBecause": "Passt aufgrund von:",
+    "couldStrengthen": "Um die Übereinstimmung zu stärken, benötigen Sie möglicherweise:",
+    "viewOpportunities": "Möglichkeiten ansehen",
+    "addSkills": "Fähigkeiten hinzufügen",
+    "addProfileCta": "Profil vervollständigen",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "insufficientBody": "Fügen Sie weitere Fähigkeiten hinzu, damit wir Ihnen mehr berufliche Richtungen zeigen können.",
+    "noneBody": "Wir haben noch nicht genügend zuverlässige verwandte Richtungen aus Ihren Fähigkeiten gefunden. Vervollständigen Sie Ihr Profil, um mehr zu sehen."
+  },
   "activityCentre": {
     "eyebrow": "Aktivitätszentrum",
     "title": "Aktivität",

@@ -1,4 +1,17 @@
 {
+  "opportunityDirections": {
+    "heading": "Where else your skills could fit",
+    "intro": "Based on your profile and the skills you already have, we found related professional directions where you may have more options.",
+    "fitBecause": "Fits because of:",
+    "couldStrengthen": "To make the match stronger, you may need:",
+    "viewOpportunities": "View opportunities",
+    "addSkills": "Add skills",
+    "addProfileCta": "Complete your profile",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "insufficientBody": "Add more skills so we can show you more professional directions.",
+    "noneBody": "We haven't found enough reliable related directions from your skills yet. Complete your profile to see more."
+  },
   "activityCentre": {
     "eyebrow": "Activity centre",
     "title": "Activity",
