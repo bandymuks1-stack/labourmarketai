@@ -2788,7 +2788,7 @@
     },
     "planning": {
       "label": "Calendar",
-      "description": "One calendar: bookings, projects, tasks and journal entries."
+      "description": "One calendar: bookings, projects, tasks, journal entries, invitations and payment deadlines."
     },
     "network": {
       "label": "Network",
@@ -3182,17 +3182,17 @@
           "progress": "{n, plural, one {# step left} other {# steps left}} — tap an item to complete it directly.",
           "profession": {
             "title": "Set your profession",
-            "hint": "Opens profile editing — choose your main profession."
+            "hint": "Opens profile editing — choose your main profession. A completed profile lets employers find you according to your privacy settings."
           },
           "firstEntry": {
             "title": "Record your first work entry",
-            "hint": "Opens the work journal — briefly describe what you worked on."
+            "hint": "Opens the work journal — briefly describe what you worked on. Entries build up your profile and CV."
           }
         },
         "actions": {
           "recordWork": {
             "title": "Record work",
-            "desc": "Add what you did"
+            "desc": "Entries build your profile and CV"
           },
           "improveProfile": {
             "title": "Improve your profile",
@@ -3359,7 +3359,7 @@
           },
           "hire": {
             "title": "Find a worker or team",
-            "body": "Describe what worker or team your company needs. Your request is saved and stays private.",
+            "body": "Describe the worker or team you need. The request is saved, is not published publicly, and you can follow its status in your space.",
             "cta": "Create job request",
             "done": "Saved. Your job request is now visible in your space.",
             "roleLabel": "What worker or team do you need?",
@@ -5266,7 +5266,7 @@
     "newBadge": "new",
     "hubTitle": "Marketplace",
     "hubOffer": "Services I offer",
-    "hubOfferNote": "Create and activate what you offer",
+    "hubOfferNote": "An activated service can be found by signed-in members, who can send a request",
     "hubFind": "Discover & request services",
     "hubFindNote": "Browse active services and track requests",
     "hubOpportunities": "Work opportunities",
