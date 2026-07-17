@@ -3010,7 +3010,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort. Ihre Rolle wählen Sie im nächsten Schritt.",
+      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; Ihre Rolle wählen Sie im nächsten Schritt.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -6893,12 +6893,12 @@
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
-      "empty": "Noch keine Vorschläge."
+      "empty": "Noch keine Vorschläge. Wenn ein Unternehmen Ihnen Arbeit vorschlägt, erscheint der Vorschlag hier — Sie entscheiden, ob Sie annehmen."
     },
     "outgoing": {
       "title": "Von Ihnen gesendete Vorschläge",
       "help": "Arbeitskräfte, denen Sie einen Vorschlag gemacht haben. Sie nehmen an oder lehnen ab.",
-      "empty": "Sie haben noch keine Vorschläge gesendet."
+      "empty": "Sie haben noch keine Vorschläge gesendet. Wenn Sie einer Arbeitskraft eine Buchung vorschlagen, erscheint sie hier zusammen mit der Antwort."
     },
     "status": {
       "proposed": "Vorgeschlagen",
@@ -7458,6 +7458,7 @@
     "trustNote": "Arbeitskräfte sehen zuerst nur freigegebene oder sicher verwaltete Chancen. Das hilft, Risiken zu verringern und einen verlässlicheren Arbeitsmarkt aufzubauen.",
     "approvedEmptyTitle": "Noch keine freigegebenen Chancen.",
     "approvedEmptyBody": "Vervollständigen Sie Ihr Profil, damit wir Sie besser mit passenden Chancen matchen können, sobald diese freigegeben sind.",
+    "approvedEmptyCta": "Profil vervollständigen",
     "fieldCompany": "Unternehmen / Partner",
     "status": {
       "possible_match": "Mögliches Match",
@@ -9144,7 +9145,7 @@
     },
     "relationships": {
       "title": "Aktive Beziehungen",
-      "empty": "Noch keine aktiven Beziehungen.",
+      "empty": "Noch keine aktiven Arbeitsbeziehungen. Angenommene Einladungen und bestätigte Arbeitsbeziehungen erscheinen hier.",
       "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {
         "employee": "Mitarbeiter",

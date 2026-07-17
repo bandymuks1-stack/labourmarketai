@@ -3010,7 +3010,7 @@
         "service_provider": "Dienstverlener",
         "admin": "Beheerder"
       },
-      "subcopy": "Registreer je met Google, of met je e-mailadres en wachtwoord. Daarna kies je je rol.",
+      "subcopy": "Eén profiel voor je echte vaardigheden, beschikbaarheid en werkervaring — zodat mensen en bedrijven zien waar jij past bij echt werk. Registreer je met Google, of met je e-mailadres en wachtwoord; daarna kies je je rol.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -6893,12 +6893,12 @@
     "incoming": {
       "title": "Voorstellen voor jou",
       "help": "Een bedrijf heeft voorgesteld om met je samen te werken. Jij beslist.",
-      "empty": "Nog geen voorstellen."
+      "empty": "Nog geen voorstellen. Wanneer een bedrijf je werk voorstelt, verschijnt het hier — jij beslist of je het accepteert."
     },
     "outgoing": {
       "title": "Voorstellen die je hebt verstuurd",
       "help": "Werknemers aan wie je een voorstel hebt gedaan. Zij accepteren of weigeren.",
-      "empty": "Je hebt nog geen voorstellen verstuurd."
+      "empty": "Je hebt nog geen voorstellen verstuurd. Wanneer je een werker een boeking voorstelt, verschijnt die hier samen met het antwoord."
     },
     "status": {
       "proposed": "Voorgesteld",
@@ -7458,6 +7458,7 @@
     "trustNote": "Werknemers zien eerst alleen goedgekeurde of veilig beheerde kansen. Dit helpt risico's te verminderen en een betrouwbaardere arbeidsmarkt op te bouwen.",
     "approvedEmptyTitle": "Nog geen goedgekeurde kansen.",
     "approvedEmptyBody": "Maak je profiel compleet zodat we je beter kunnen matchen met passende kansen zodra ze zijn goedgekeurd.",
+    "approvedEmptyCta": "Profiel aanvullen",
     "fieldCompany": "Bedrijf / partner",
     "status": {
       "possible_match": "Mogelijke match",
@@ -9144,7 +9145,7 @@
     },
     "relationships": {
       "title": "Actieve relaties",
-      "empty": "Nog geen actieve relaties.",
+      "empty": "Nog geen actieve werkrelaties. Geaccepteerde uitnodigingen en bevestigde werkrelaties verschijnen hier.",
       "noOrg": "Persoonlijke relatie — niet gekoppeld aan een bedrijf",
       "slug": {
         "employee": "Medewerker",
