@@ -2788,7 +2788,7 @@
     },
     "planning": {
       "label": "Kalender",
-      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben und Journaleinträge."
+      "description": "Ein Kalender: Buchungen, Projekte, Aufgaben, Journaleinträge, Einladungen und Zahlungsfristen."
     },
     "network": {
       "label": "Netzwerk",
@@ -3182,17 +3182,17 @@
           "progress": "{n, plural, one {Noch # Schritt} other {Noch # Schritte}} — tippen Sie auf einen Punkt und füllen Sie ihn direkt aus.",
           "profession": {
             "title": "Geben Sie Ihren Beruf an",
-            "hint": "Öffnet die Profilbearbeitung — wählen Sie Ihren Hauptberuf."
+            "hint": "Öffnet die Profilbearbeitung — wählen Sie Ihren Hauptberuf. Ein ausgefülltes Profil lässt Arbeitgeber Sie gemäß Ihren Datenschutzeinstellungen finden."
           },
           "firstEntry": {
             "title": "Erfassen Sie Ihren ersten Arbeitseintrag",
-            "hint": "Öffnet das Arbeitsjournal — beschreiben Sie kurz, woran Sie gearbeitet haben."
+            "hint": "Öffnet das Arbeitsjournal — beschreiben Sie kurz, woran Sie gearbeitet haben. Einträge ergänzen Ihr Profil und Ihren Lebenslauf."
           }
         },
         "actions": {
           "recordWork": {
             "title": "Arbeit erfassen",
-            "desc": "Fügen Sie hinzu, was Sie getan haben"
+            "desc": "Einträge ergänzen Profil und Lebenslauf"
           },
           "improveProfile": {
             "title": "Profil verbessern",
@@ -3359,7 +3359,7 @@
           },
           "hire": {
             "title": "Arbeitskraft oder Team finden",
-            "body": "Beschreiben Sie, welche Arbeitskraft oder welches Team Ihr Unternehmen benötigt. Ihre Anfrage wird gespeichert und bleibt privat.",
+            "body": "Beschreiben Sie, welche Arbeitskraft oder welches Team Sie benötigen. Die Anfrage wird gespeichert, nicht öffentlich veröffentlicht, und ihren Status sehen Sie in Ihrem Bereich.",
             "cta": "Arbeitsanfrage erstellen",
             "done": "Gespeichert. Ihre Arbeitsanfrage ist jetzt in Ihrem Bereich sichtbar.",
             "roleLabel": "Welche Arbeitskraft oder welches Team benötigen Sie?",
@@ -5266,7 +5266,7 @@
     "newBadge": "neu",
     "hubTitle": "Marktplatz",
     "hubOffer": "Dienstleistungen, die ich anbiete",
-    "hubOfferNote": "Erstellen und aktivieren Sie Ihr Angebot",
+    "hubOfferNote": "Eine aktivierte Dienstleistung finden angemeldete Mitglieder und können eine Anfrage senden",
     "hubFind": "Dienstleistungen entdecken & anfragen",
     "hubFindNote": "Aktive Dienstleistungen durchsuchen und Anfragen verfolgen",
     "hubOpportunities": "Arbeitsmöglichkeiten",

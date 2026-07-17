@@ -2788,7 +2788,7 @@
     },
     "planning": {
       "label": "Kalender",
-      "description": "Eén kalender: boekingen, projecten, taken en journaalinvoeren."
+      "description": "Eén kalender: boekingen, projecten, taken, journaalnotities, uitnodigingen en betaaltermijnen."
     },
     "network": {
       "label": "Netwerk",
@@ -3182,17 +3182,17 @@
           "progress": "{n, plural, one {Nog # stap} other {Nog # stappen}} — tik op een item om het direct in te vullen.",
           "profession": {
             "title": "Geef uw beroep op",
-            "hint": "Opent profielbewerking — kies uw hoofdberoep."
+            "hint": "Opent profielbewerking — kies je hoofdberoep. Een ingevuld profiel laat werkgevers je vinden volgens jouw privacyinstellingen."
           },
           "firstEntry": {
             "title": "Maak uw eerste werkregistratie",
-            "hint": "Opent het werklogboek — beschrijf kort wat u heeft gedaan."
+            "hint": "Opent het werkjournaal — beschrijf kort waaraan je hebt gewerkt. Notities vullen je profiel en cv aan."
           }
         },
         "actions": {
           "recordWork": {
             "title": "Werk vastleggen",
-            "desc": "Voeg toe wat je hebt gedaan"
+            "desc": "Notities vullen je profiel en cv aan"
           },
           "improveProfile": {
             "title": "Verbeter je profiel",
@@ -3359,7 +3359,7 @@
           },
           "hire": {
             "title": "Vind een werknemer of ploeg",
-            "body": "Beschrijf welke werknemer of ploeg je bedrijf nodig heeft. Je aanvraag wordt opgeslagen en blijft privé.",
+            "body": "Beschrijf welke werknemer of welk team je nodig hebt. De aanvraag wordt opgeslagen, wordt niet openbaar gepubliceerd en de status volg je in jouw omgeving.",
             "cta": "Werkaanvraag aanmaken",
             "done": "Opgeslagen. Je werkaanvraag is nu zichtbaar in jouw ruimte.",
             "roleLabel": "Welke werknemer of ploeg heb je nodig?",
@@ -5266,7 +5266,7 @@
     "newBadge": "nieuw",
     "hubTitle": "Marktplaats",
     "hubOffer": "Diensten die ik aanbied",
-    "hubOfferNote": "Maak en activeer wat je aanbiedt",
+    "hubOfferNote": "Een geactiveerde dienst is vindbaar voor ingelogde leden, die een aanvraag kunnen sturen",
     "hubFind": "Diensten ontdekken en aanvragen",
     "hubFindNote": "Blader door actieve diensten en volg aanvragen",
     "hubOpportunities": "Werkkansen",

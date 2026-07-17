@@ -2788,7 +2788,7 @@
     },
     "planning": {
       "label": "Kalendorius",
-      "description": "Vienas kalendorius: rezervacijos, projektai, užduotys ir žurnalo įrašai."
+      "description": "Vienas kalendorius: rezervacijos, projektai, užduotys, žurnalo įrašai, kvietimai ir mokėjimų terminai."
     },
     "network": {
       "label": "Ryšiai",
@@ -3182,17 +3182,17 @@
           "progress": "{n, plural, one {Liko # žingsnis} few {Liko # žingsniai} other {Liko # žingsnių}} — paspauskite ir užpildykite tiesiogiai.",
           "profession": {
             "title": "Nurodykite savo profesiją",
-            "hint": "Atsidarys profilio redagavimas — pasirinkite pagrindinę profesiją."
+            "hint": "Atsidarys profilio redagavimas — pasirinkite pagrindinę profesiją. Užpildytas profilis leidžia darbdaviams jus rasti pagal jūsų privatumo nustatymus."
           },
           "firstEntry": {
             "title": "Įrašykite pirmą darbo įrašą",
-            "hint": "Atsidarys darbo žurnalas — trumpai aprašykite, ką dirbote."
+            "hint": "Atsidarys darbo žurnalas — trumpai aprašykite, ką dirbote. Įrašai pildo jūsų profilį ir CV."
           }
         },
         "actions": {
           "recordWork": {
             "title": "Įrašyti darbą",
-            "desc": "Pridėkite, ką nuveikėte"
+            "desc": "Įrašai pildo profilį ir CV"
           },
           "improveProfile": {
             "title": "Papildyti profilį",
@@ -3359,7 +3359,7 @@
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",
-            "body": "Aprašykite, kokio darbuotojo ar komandos reikia jūsų darbui. Užklausa iškart išsaugoma ir lieka privati.",
+            "body": "Aprašykite, kokio darbuotojo ar komandos reikia. Užklausa išsaugoma, nėra viešai skelbiama, o jos būseną matysite savo erdvėje.",
             "cta": "Sukurti darbo pasiūlymą",
             "done": "Išsaugota. Jūsų darbo pasiūlymas matomas jūsų erdvėje.",
             "roleLabel": "Kokio darbuotojo ar komandos ieškote?",
@@ -5266,7 +5266,7 @@
     "newBadge": "nauja",
     "hubTitle": "Prekyvietė",
     "hubOffer": "Mano siūlomos paslaugos",
-    "hubOfferNote": "Sukurk ir aktyvuok tai, ką siūlai",
+    "hubOfferNote": "Aktyvuotą paslaugą randa prisijungę nariai ir gali siųsti užklausą",
     "hubFind": "Atrask ir užsisakyk paslaugas",
     "hubFindNote": "Naršyk aktyvias paslaugas ir stebėk užklausas",
     "hubOpportunities": "Darbo galimybės",
