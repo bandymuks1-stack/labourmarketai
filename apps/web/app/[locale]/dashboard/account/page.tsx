@@ -399,7 +399,7 @@ export default async function AccountPage({
           where users expect a language setting, so the line is no longer
           mobile-only. Reuses the existing locale architecture (lt/en/ru active,
           RU preview-tagged) — no new locales, no new switcher system. */}
-      <section className="card-border p-6" data-testid="account-ui-language">
+      <section className="card-border p-5" data-testid="account-ui-language">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
           {tCommon("localeSwitch")}
         </p>
