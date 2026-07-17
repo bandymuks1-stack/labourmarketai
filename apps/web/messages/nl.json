@@ -7283,11 +7283,11 @@
     "eyebrow": "Werken in het buitenland",
     "title": "Jouw pad naar werken in het buitenland,",
     "titleAccent": "stap voor stap",
-    "subcopy": "Labourmarket.ai is een digitaal internationaal arbeidsbureau. Bouw één werknemersprofiel, zie wat elk land nodig heeft en laat werkgevers je bereiken wanneer je er klaar voor bent. We beloven nooit een baan of een loon — we helpen je om klaar te zijn en gematcht te worden.",
+    "subcopy": "Werken in heel Europa is een van de paden die LabourMarket.ai opent. Bouw één werkprofiel, zie wat elk land nodig heeft en laat werkgevers je bereiken wanneer je er klaar voor bent. We beloven nooit een baan of een loon — we helpen je om klaar te zijn en gematcht te worden.",
     "stepsTitle": "Hoe het werkt",
     "steps": [
       {
-        "title": "1. Vertel ons je vak",
+        "title": "1. Vertel ons je beroep",
         "body": "Voeg je beroep, ervaring en beschikbaarheid toe. Het duurt maar een paar minuten."
       },
       {
@@ -7300,7 +7300,7 @@
       },
       {
         "title": "4. Word gematcht",
-        "body": "Wanneer de behoefte van een werkgever past bij je vak, beschikbaarheid, huisvesting, vervoer en taal, verschijnt die op je kansenbord met een eerlijke uitleg van de match."
+        "body": "Wanneer de behoefte van een werkgever past bij je beroep, beschikbaarheid, huisvesting, vervoer en taal, verschijnt die op je kansenbord met een eerlijke uitleg van de match."
       },
       {
         "title": "5. Interesse en contact",
@@ -7309,7 +7309,7 @@
     ],
     "needTitle": "Wat je mogelijk nodig hebt",
     "needItems": [
-      "Een beroep of vak waarin je werkt",
+      "Een beroep waarin je werkt",
       "Je beschikbaarheid vanaf een datum",
       "Of je huisvesting nodig hebt of zelf hebt",
       "Vervoer: eigen vervoer, een rijbewijs of een ophaalservice",
@@ -7321,7 +7321,7 @@
     "aiNote": "AI helpt je cv en profiel voor te bereiden. Ze controleert niet zelf je vaardigheden of documenten — dat doen een mens en je documenten.",
     "ctaProfile": "Werknemersprofiel aanmaken",
     "ctaReadiness": "Landgereedheid controleren",
-    "ctaTrades": "Bekijk de vakgebieden waarmee we werken",
+    "ctaTrades": "Bekijk de beroepen waarmee we werken",
     "disclaimer": "We beloven geen werk of inkomsten, en gereedheidsinformatie is geen juridisch advies.",
     "structuredNote": "Uw cv-tekst wordt automatisch gestructureerd tot een profiel — u beoordeelt elke suggestie en beslist wat wordt opgeslagen."
   },

@@ -7283,11 +7283,11 @@
     "eyebrow": "Darbas užsienyje",
     "title": "Jūsų kelias dirbti užsienyje,",
     "titleAccent": "žingsnis po žingsnio",
-    "subcopy": "Labourmarket.ai yra skaitmeninė tarptautinės darbo jėgos agentūra. Susikurkite vieną darbuotojo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
+    "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurkite vieną darbo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
     "stepsTitle": "Kaip tai veikia",
     "steps": [
       {
-        "title": "1. Nurodykite savo amatą",
+        "title": "1. Nurodykite savo profesiją",
         "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
       },
       {
@@ -7309,7 +7309,7 @@
     ],
     "needTitle": "Ko gali prireikti",
     "needItems": [
-      "Profesijos ar amato, kuriame dirbate",
+      "Profesijos, kurioje dirbate",
       "Jūsų laisvumo nuo datos",
       "Ar reikia apgyvendinimo, ar turite savo",
       "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
@@ -7321,7 +7321,7 @@
     "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina jūsų įgūdžių ar dokumentų — tai daro žmogus ir jūsų dokumentai.",
     "ctaProfile": "Sukurti darbuotojo profilį",
     "ctaReadiness": "Patikrinti šalies pasiruošimą",
-    "ctaTrades": "Žiūrėti amatus, su kuriais dirbame",
+    "ctaTrades": "Žiūrėti profesijas, su kuriomis dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasiruošimo informacija nėra teisinė konsultacija.",
     "structuredNote": "Perskaitome jūsų CV ir paruošiame profilį, kurį galite peržiūrėti — kiekvieną pasiūlymą tikrinate ir sprendžiate jūs."
   },
