@@ -7,9 +7,18 @@ import { listMyBookings } from "@/lib/booking/booking-actions";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { listMyTasks } from "@/lib/tasks/tasks";
 import { isOpen } from "@/lib/tasks/task-model";
+import { listMyFinanceRecords } from "@/lib/finance/finance";
+import {
+  listInvitationsForMe,
+  listMySentInvitations,
+} from "@/lib/invitations/network";
 import {
   PLANNING_PROJECT_READ_LIMIT,
+  combineInvitationItems,
   hrefForSource,
+  projectFinanceItem,
+  projectIncomingInvitationItem,
+  projectSentInvitationItem,
   statusKeyForSource,
   toIsoDay,
   type PlanningItem,
@@ -63,6 +72,10 @@ export interface PlanningSources {
   readonly project: PlanningSourceState;
   readonly task: PlanningSourceState;
   readonly journal: PlanningSourceState;
+  readonly finance: PlanningSourceState;
+  /** ONE combined state for both invitation directions (sent + incoming) —
+   *  the projection dedupes overlapping scopes into single items. */
+  readonly invitation: PlanningSourceState;
 }
 
 export type PlanningReadResult =
@@ -297,6 +310,81 @@ async function readJournalItems(
   return { state: { status: "ok", count: items.length }, items };
 }
 
+/**
+ * Finance records as calendar items (Timeline Source Expansion v1). Reuses
+ * the finance surface's OWN RLS-scoped read (`listMyFinanceRecords` —
+ * creator / admin / company owner; bounded, deterministically ordered) and
+ * projects each record through the pure `projectFinanceItem` mapper. The
+ * projection deliberately drops every money field and third-party name —
+ * the calendar shows only safe operational facts (title, status, day) and
+ * links to /dashboard/finance where the full record lives under its
+ * existing permissions.
+ */
+async function readFinanceItems(todayIso: string): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await listMyFinanceRecords();
+  if (result.status === "not-authed") {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  if (result.status === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const items: PlanningItem[] = [];
+  for (const record of result.records) {
+    const item = projectFinanceItem(
+      {
+        id: record.id,
+        title: record.title,
+        status: record.status,
+        dueDate: record.dueDate,
+        paidAt: record.paidAt,
+      },
+      todayIso,
+    );
+    if (item) items.push(item);
+  }
+  const state: PlanningSourceState = result.error
+    ? { status: "error", count: items.length }
+    : { status: "ok", count: items.length };
+  return { state, items };
+}
+
+/**
+ * Invitations as calendar items — BOTH directions through their existing
+ * reads (`listMySentInvitations`: inviter-scoped RLS; `listInvitationsForMe`:
+ * the pending-for-my-verified-email RPC the dashboard invitations card
+ * already uses). Lifecycle days come from real timestamps only (expiry /
+ * accepted_at / declined_at / revoked_at); creation time is never presented
+ * as a scheduled event. Overlapping scopes (self-invitation) dedupe to one
+ * item via `combineInvitationItems`.
+ */
+async function readInvitationItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const [sent, incoming] = await Promise.all([
+    listMySentInvitations(),
+    listInvitationsForMe(),
+  ]);
+  if (sent.status === "needs-migration" && incoming.status === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const outgoingItems =
+    sent.status === "ok" ? sent.items.map(projectSentInvitationItem) : [];
+  const incomingItems =
+    incoming.status === "ok"
+      ? incoming.items.map(projectIncomingInvitationItem)
+      : [];
+  const items = combineInvitationItems(outgoingItems, incomingItems);
+  const failed = sent.status === "error" || incoming.status === "error";
+  return {
+    state: { status: failed ? "error" : "ok", count: items.length },
+    items,
+  };
+}
+
 export interface PlanningRange {
   /** Inclusive "YYYY-MM-DD" bounds of the visible view — drives the
    *  bounded journal-fact read (plan sources stay bounded on their own). */
@@ -305,7 +393,7 @@ export interface PlanningRange {
 }
 
 /**
- * The caller's combined planning read — one auth check, four independent
+ * The caller's combined planning read — one auth check, six independent
  * RLS-scoped sources in parallel, each degrading on its own.
  */
 export async function getPlanning(
@@ -322,21 +410,33 @@ export async function getPlanning(
   const rangeEnd =
     range && range.rangeEnd >= rangeStart ? range.rangeEnd : rangeStart;
 
-  const [booking, project, task, journal] = await Promise.all([
-    readBookingItems(),
-    readProjectItems(),
-    readTaskItems(),
-    readJournalItems(user.id, rangeStart, rangeEnd),
-  ]);
+  const [booking, project, task, journal, finance, invitation] =
+    await Promise.all([
+      readBookingItems(),
+      readProjectItems(),
+      readTaskItems(),
+      readJournalItems(user.id, rangeStart, rangeEnd),
+      readFinanceItems(today),
+      readInvitationItems(),
+    ]);
 
   return {
     status: "ok",
-    items: [...booking.items, ...project.items, ...task.items, ...journal.items],
+    items: [
+      ...booking.items,
+      ...project.items,
+      ...task.items,
+      ...journal.items,
+      ...finance.items,
+      ...invitation.items,
+    ],
     sources: {
       booking: booking.state,
       project: project.state,
       task: task.state,
       journal: journal.state,
+      finance: finance.state,
+      invitation: invitation.state,
     },
   };
 }

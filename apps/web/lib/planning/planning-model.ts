@@ -31,6 +31,8 @@ export const PLANNING_SOURCE_TYPES = [
   "project",
   "task",
   "journal",
+  "finance",
+  "invitation",
 ] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
 
@@ -105,6 +107,13 @@ export function hrefForSource(
       // The entry's own editor — the calendar never grows a duplicate
       // journal detail page; the source record stays canonical.
       return `/dashboard/journal?editing=${sourceId}#journal-composer`;
+    case "finance":
+      // List-anchored like bookings/tasks — amounts and counterparties live
+      // ONLY on the finance surface under its own permissions.
+      return "/dashboard/finance";
+    case "invitation":
+      // Both directions live on the network surface (sent list + incoming).
+      return "/dashboard/network";
   }
 }
 
@@ -124,6 +133,17 @@ export function statusKeyForSource(
       return `tasks.status.${status}`;
     case "journal":
       return `planning.journalStatus.${status}`;
+    case "finance":
+      // Reuses the finance surface's own lifecycle copy. "overdue" is a
+      // DERIVED display state (due_date passed + unpaid status — the same
+      // rule the finance page applies), so it names the finance surface's
+      // existing overdue label rather than a stored status.
+      return status === "overdue"
+        ? "finance.summary.overdue"
+        : `finance.status.${status}`;
+    case "invitation":
+      // Reuses the network surface's invitation lifecycle copy.
+      return `network.sent.status.${status}`;
   }
 }
 
@@ -561,4 +581,191 @@ export function visibleRange(
     case "agenda":
       return { start: anchorDay, end: addDays(anchorDay, PLANNING_WINDOW_DAYS - 1) };
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Source projections — finance & invitations (Timeline Source         */
+/* Expansion v1). PURE mappers: the server composition feeds them the  */
+/* rows its existing RLS-scoped services return; the mappers decide    */
+/* date/status/label semantics deterministically and are unit-tested   */
+/* without IO.                                                         */
+/* ------------------------------------------------------------------ */
+
+/** The finance fields the calendar is allowed to see. Deliberately NARROW:
+ *  no money fields and no third-party names — that detail stays on the
+ *  finance surface under its existing permissions (owner privacy decision,
+ *  Timeline Source Expansion v1). */
+export interface FinancePlanningInput {
+  readonly id: string;
+  readonly title: string;
+  readonly status: string;
+  /** "YYYY-MM-DD" or null. */
+  readonly dueDate: string | null;
+  /** ISO timestamp or null. */
+  readonly paidAt: string | null;
+}
+
+/** Unpaid lifecycle states — mirrors UNPAID_FINANCE_STATUSES in the finance
+ *  model (single rule: only unpaid records can be overdue). */
+const FINANCE_UNPAID = new Set(["draft", "issued", "partially_paid"]);
+
+/**
+ * Project ONE finance record to at most ONE calendar item (no per-timestamp
+ * fan-out — a record never becomes several rows in v1; documented decision):
+ *
+ *  - cancelled        → null (not an operational commitment; finance page
+ *                       keeps its history)
+ *  - paid             → the payment FACT at its real paid day (falls back to
+ *                       the due day when legacy rows lack paid_at)
+ *  - unpaid + due     → the due deadline; "overdue" is derived exactly like
+ *                       the finance surface derives it (due day before
+ *                       today + unpaid status)
+ *  - no usable date   → null (created_at is deliberately NOT projected —
+ *                       record creation is bookkeeping, not a plan)
+ */
+export function projectFinanceItem(
+  record: FinancePlanningInput,
+  todayIso: string,
+): PlanningItem | null {
+  if (record.status === "cancelled") return null;
+  const paidDay = toIsoDay(record.paidAt);
+  const dueDay = toIsoDay(record.dueDate);
+  const day = record.status === "paid" ? (paidDay ?? dueDay) : dueDay;
+  if (!day) return null;
+  const overdue =
+    FINANCE_UNPAID.has(record.status) && dueDay !== null && dueDay < todayIso;
+  const status = overdue ? "overdue" : record.status;
+  return {
+    id: `finance:${record.id}`,
+    sourceType: "finance",
+    sourceId: record.id,
+    label: record.title.trim() ? record.title : null,
+    detail: null,
+    startDate: day,
+    endDate: null,
+    status,
+    statusKey: statusKeyForSource("finance", status),
+    href: hrefForSource("finance", record.id),
+    roleContext: "mine",
+  };
+}
+
+/** A sent invitation as the calendar sees it (network.ts row subset). */
+export interface SentInvitationPlanningInput {
+  readonly id: string;
+  /** Display status — stale pending already reads as expired upstream. */
+  readonly status: string;
+  readonly invitedName: string | null;
+  readonly invitedEmail: string;
+  readonly expiresAt: string;
+  readonly acceptedAt: string | null;
+  readonly declinedAt: string | null;
+  readonly revokedAt: string | null;
+}
+
+/** An incoming (pending, addressed-to-me) invitation row subset. */
+export interface IncomingInvitationPlanningInput {
+  readonly id: string;
+  readonly expiresAt: string;
+  readonly organizationName: string | null;
+  readonly projectTitle: string | null;
+  readonly inviterName: string | null;
+}
+
+/**
+ * The day an invitation's lifecycle event REALLY happened / really ends:
+ * pending → its expiry deadline (a real future bound, never the creation
+ * time); accepted/declined/revoked → the decision day; expired → the day it
+ * expired. A missing decision timestamp yields null — the item degrades to
+ * the honest "no date yet" section instead of inventing a date.
+ */
+export function invitationEventDay(
+  status: string,
+  row: Pick<
+    SentInvitationPlanningInput,
+    "expiresAt" | "acceptedAt" | "declinedAt" | "revokedAt"
+  >,
+): string | null {
+  switch (status) {
+    case "pending":
+    case "expired":
+      return toIsoDay(row.expiresAt);
+    case "accepted":
+      return toIsoDay(row.acceptedAt);
+    case "declined":
+      return toIsoDay(row.declinedAt);
+    case "revoked":
+      return toIsoDay(row.revokedAt);
+    default:
+      return null;
+  }
+}
+
+/** ONE calendar item per sent invitation, at its real lifecycle day. */
+export function projectSentInvitationItem(
+  row: SentInvitationPlanningInput,
+): PlanningItem {
+  const name = row.invitedName?.trim() ? row.invitedName : row.invitedEmail;
+  return {
+    id: `invitation:${row.id}`,
+    sourceType: "invitation",
+    sourceId: row.id,
+    label: name?.trim() ? name : null,
+    detail: null,
+    startDate: invitationEventDay(row.status, row),
+    endDate: null,
+    status: row.status,
+    statusKey: statusKeyForSource("invitation", row.status),
+    href: hrefForSource("invitation", row.id),
+    roleContext: "outgoing",
+  };
+}
+
+/** ONE calendar item per incoming pending invitation — an actionable
+ *  deadline at its real expiry day. The read itself returns pending rows
+ *  only, so no past decision is ever presented as upcoming. */
+export function projectIncomingInvitationItem(
+  row: IncomingInvitationPlanningInput,
+): PlanningItem {
+  const label =
+    row.organizationName?.trim()
+      ? row.organizationName
+      : row.projectTitle?.trim()
+        ? row.projectTitle
+        : row.inviterName?.trim()
+          ? row.inviterName
+          : null;
+  return {
+    id: `invitation:${row.id}`,
+    sourceType: "invitation",
+    sourceId: row.id,
+    label,
+    detail: null,
+    startDate: toIsoDay(row.expiresAt),
+    endDate: null,
+    status: "pending",
+    statusKey: statusKeyForSource("invitation", "pending"),
+    href: hrefForSource("invitation", row.id),
+    roleContext: "incoming",
+  };
+}
+
+/**
+ * Combine both invitation directions into one deduped list. The same row can
+ * surface twice when someone invites their own address (inviter AND
+ * recipient scopes overlap) — the outgoing projection wins, the incoming
+ * duplicate is dropped, and the item count never inflates.
+ */
+export function combineInvitationItems(
+  outgoing: readonly PlanningItem[],
+  incoming: readonly PlanningItem[],
+): PlanningItem[] {
+  const seen = new Set(outgoing.map((i) => i.id));
+  const merged = [...outgoing];
+  for (const item of incoming) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    merged.push(item);
+  }
+  return merged;
 }

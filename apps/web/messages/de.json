@@ -8384,7 +8384,9 @@
       "booking": "Buchung",
       "project": "Projekt",
       "task": "Aufgabe",
-      "journal": "Journal"
+      "journal": "Journal",
+      "finance": "Finanzen",
+      "invitation": "Einladung"
     },
     "sourceNotes": {
       "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
@@ -8392,7 +8394,11 @@
       "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
       "projectManagersOnly": "Projekt-Zeiträume sehen Projektverantwortliche. Ein Projektplan für Arbeitskräfte folgt, sobald diese Ansicht existiert.",
       "projectError": "Projekte konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
-      "journalError": "Journaleinträge konnten gerade nicht geladen werden. Der restliche Plan wird normal angezeigt."
+      "journalError": "Journaleinträge konnten gerade nicht geladen werden. Der restliche Plan wird normal angezeigt.",
+      "financeUnavailable": "Finanzeinträge sind noch nicht aktiviert — Zahlungsfristen erscheinen im Plan, sobald die Finanzebene aktiviert ist.",
+      "financeError": "Finanzeinträge konnten gerade nicht geladen werden. Der Rest des Plans wird wie gewohnt angezeigt.",
+      "invitationUnavailable": "Einladungen sind noch nicht aktiviert — Einladungsfristen erscheinen im Plan, sobald die Einladungsebene aktiviert ist.",
+      "invitationError": "Einladungen konnten gerade nicht geladen werden. Der Rest des Plans wird wie gewohnt angezeigt."
     },
     "week": {
       "label": "Nächste 7 Tage"
@@ -8421,7 +8427,9 @@
       "booking": "Buchung",
       "project": "Projekt",
       "task": "Aufgabe",
-      "journal": "Arbeitseintrag"
+      "journal": "Arbeitseintrag",
+      "finance": "Finanzeintrag",
+      "invitation": "Einladung"
     },
     "projectStatus": {
       "draft": "Entwurf",
