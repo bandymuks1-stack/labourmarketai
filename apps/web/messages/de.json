@@ -3163,7 +3163,9 @@
         "moveUp": "Nach oben",
         "moveDown": "Nach unten",
         "hide": "Ausblenden",
-        "hiddenTitle": "Ausgeblendete Karten"
+        "hiddenTitle": "Ausgeblendete Karten",
+        "showAll": "Alle Aktionen anzeigen ({count})",
+        "showLess": "Weniger anzeigen"
       },
       "jobsCard": {
         "title": "Passende Jobs für mich",
@@ -8199,7 +8201,6 @@
     "person": {
       "title": "Persönliche Karte",
       "openProfile": "Profil öffnen",
-      "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
         "busy": "Beschäftigt",

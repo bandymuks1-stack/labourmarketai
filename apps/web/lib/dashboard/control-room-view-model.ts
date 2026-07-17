@@ -34,6 +34,10 @@ export interface ControlRoomModule {
   readonly iconKey: ModuleIconKey;
   /** Real attention count from the spine (0 = no badge rendered). */
   readonly badgeCount: number;
+  /** Human-first launch v1: part of the role's SMALL first-screen set. The
+   *  grid renders primary modules by default and folds the rest behind an
+   *  honest "show all" toggle — never a removed destination. */
+  readonly primary: boolean;
 }
 
 export interface StatusStripEntry {
@@ -97,6 +101,7 @@ export function buildControlRoomViewModel({
     descriptionKey: m.descriptionKey,
     iconKey: m.iconKey,
     badgeCount: moduleBadgeCount(m, counts),
+    primary: (m.primaryRoles ?? []).includes(role),
   }));
 
   // Status strip = the spine, count-gated exactly like the bell: a row exists
@@ -108,4 +113,19 @@ export function buildControlRoomViewModel({
   });
 
   return { modules, statusEntries };
+}
+
+/**
+ * Human-first launch v1 — the grid's collapsed ("focused") module set, as a
+ * pure function so the honesty rule is testable: a module stays visible while
+ * collapsed when it is primary for the role OR carries a REAL attention badge
+ * (a pending count may never disappear behind a fold). If the set would be
+ * empty (e.g. the user hid every primary card), the full list is returned —
+ * the fold reduces noise, it never blanks the workspace.
+ */
+export function collapsedGridModules(
+  modules: readonly ControlRoomModule[],
+): readonly ControlRoomModule[] {
+  const focused = modules.filter((m) => m.primary || m.badgeCount > 0);
+  return focused.length > 0 ? focused : modules;
 }
