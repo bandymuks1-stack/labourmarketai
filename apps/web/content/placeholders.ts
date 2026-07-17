@@ -622,34 +622,6 @@ export const placeholders: readonly Placeholder[] = [
       notes: "Plan tier row is real config; only the price is unset.",
     }),
   ),
-  ...(
-    [
-      ["join", "Statybos ir apdailos darbai", "Construction & finishing work"],
-      ["demand", "Logistika ir sandėliai", "Logistics & warehousing"],
-      ["match", "Slauga ir priežiūra", "Care & nursing"],
-      ["checkin", "Gamyba ir surinkimas", "Manufacturing & assembly"],
-      ["join", "Transportas ir vairuotojai", "Transport & drivers"],
-      ["demand", "Apgyvendinimas ir maitinimas", "Hospitality & catering"],
-      ["match", "Elektra ir mechanika", "Electrical & mechanical"],
-      ["checkin", "Valymas ir pastatų priežiūra", "Cleaning & facilities"],
-      ["join", "Suvirinimas ir metalo darbai", "Welding & metalwork"],
-      ["demand", "Žemės ūkis ir sezoniniai darbai", "Agriculture & seasonal work"],
-    ] as const
-  ).map(
-    ([icon, lt, en], i): Placeholder => ({
-      id: `activity.feed.${i + 1}`,
-      type: "metric",
-      value: { lt, en },
-      icon,
-      description: `Live activity feed — streaming item ${i + 1} (${icon}).`,
-      replacementSource: SQL(
-        "SELECT action, entity, occurred_at FROM audit_logs ORDER BY occurred_at DESC LIMIT 10",
-      ),
-      status: "placeholder",
-      addedIn: "M0",
-      consentRequired: false,
-    }),
-  ),
   ...Array.from({ length: 12 }, (_, i): Placeholder => {
     const n = i + 1;
     const samples: Record<number, { lt: string; en: string }> = {

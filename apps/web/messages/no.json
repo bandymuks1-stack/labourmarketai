@@ -637,9 +637,6 @@
     }
   },
   "live": {
-    "activity": {
-      "label": "[EN] Live activity feed"
-    },
     "chip": {
       "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
     },
