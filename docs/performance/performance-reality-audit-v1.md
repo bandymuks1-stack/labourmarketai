@@ -3,6 +3,7 @@
 **Branch:** `perf/cc/performance-reality-audit-v1` (from verified `main` 4e51d8f5 — PR #785 merged + deployed).
 **Type:** Draft PR — NOT merged, NOT deployed without owner review.
 **Rule honoured:** nothing below is called an improvement without before/after numbers.
+**v2 shipped on the same branch:** route-group provider subsetting — see §7.
 
 ---
 
@@ -100,8 +101,11 @@ so the baseline is real.
   removal, no Mobile-wave mixing.
 - Next candidates (future, each needs its own before/after): route-group
   provider subsetting (marketing vs dashboard get different allowlists —
-  potential further ~100 KB raw off public pages), lazy per-namespace
-  loading for admin-only client surfaces, cold-start mitigation.
+  potential further ~100 KB raw off public pages) — **DONE in v2, §7** (the
+  estimate was low: −294 KB raw off the landing document), lazy
+  per-namespace loading for admin-only client surfaces (dashboard docs are
+  not measurable without credentials — see §7 honesty note), cold-start
+  mitigation.
 
 ## 5. Validation
 
@@ -122,3 +126,80 @@ contracts. Mobile throttling: wire-weight reduction (−52 KB gzip on landing,
 
 Single squash revert (layout line + two new files + doc). No data, schema or
 service impact.
+
+---
+
+## 7. v2 — Route-group provider subsetting (second measured optimisation)
+
+**What:** v1 still shipped ONE union allowlist (~300 KB serialized) from the
+root layout to every route. v2 moves the provider into the route-group
+layouts, each with exactly the roots its own client components can reach.
+Nested `NextIntlClientProvider` REPLACES `messages` for its subtree (verified
+in use-intl context source: `messages === undefined ? prevContext?.messages
+: messages`), so:
+
+| Provider | Pick | Serialized (lt) |
+|---|---|---|
+| root `[locale]` layout | `BASE_CLIENT_MESSAGE_ROOTS` (`errorBoundary` — the root error boundary renders outside every group provider and `useTranslations` throws without context) | **0.1 KB** |
+| `(marketing)` layout | 9 roots (`common`, `company`, `draft`, `live`, `map`, `marketPulse`, `playercards`, `shared`, `waitlist`) | **4.1 KB** |
+| `auth` + new `onboarding` layout | `auth` | **27.9 KB** |
+| `dashboard` + `design` (dev-only gallery) layouts | FULL union pick (they render the dynamic whole-tree `useTranslations()` consumers: bottom nav, module grid, tabs) | 264.2 KB (unchanged vs v1) |
+| `cv`, `invite`, `[...rest]` | none beyond BASE (guard-proved: zero client-reachable namespaces) | — |
+
+### Before/after (deterministic: full documents from `next start` of the two
+builds on this branch, HEAD 74e34ea0 vs v2, identical byte-for-byte on
+refetch, same gzip -6; BEFORE reproduces §3's numbers exactly)
+
+| Route | Raw | Wire (gzip) | Largest inline flight chunk |
+|---|---|---|---|
+| `/lt` landing | 547.0 → **252.9 KB** (−54 %) | 127.8 → **40.8 KB** (**−68 %**) | 299.3 → 8.2 KB |
+| `/lt/auth/login` | 315.9 → **48.9 KB** (−85 %) | 92.9 → **15.2 KB** (**−84 %**) | 299.3 → 32.1 KB |
+| `/lt/pricing` | 453.5 → **159.3 KB** (−65 %) | 109.4 → **23.3 KB** (**−79 %**) | 299.3 → 8.2 KB |
+| `/lt/about` | 389.4 → **95.4 KB** (−76 %) | 102.8 → **15.7 KB** (**−85 %**) | 299.3 → 8.2 KB |
+
+Cumulative vs the original production baseline (pre-v1): landing wire
+180 KB → 40.8 KB (**−77 %**), login 151 KB → 15.2 KB (**−90 %**).
+
+Authenticated dashboard documents still cannot be captured without
+credentials; their provider ships the SAME full pick as v1 shipped from the
+root — i.e. provably no regression and no change for dashboard payloads
+(serialized pick measured identical, 264.2 KB lt).
+
+### Safety net (extended, same guard file)
+
+`client-messages-allowlist.test.ts` now walks the import graph of every
+route-group tree (static + dynamic imports, `@/` + relative, unresolvable
+local specifiers FAIL) and proves per group:
+
+- `(marketing)` reachable client roots ⊆ `MARKETING_CLIENT_MESSAGE_ROOTS`;
+- `auth` and `onboarding` trees ⊆ `AUTH_CLIENT_MESSAGE_ROOTS`;
+- provider-less trees (`cv`, `invite`, `[...rest]`, root shell incl.
+  `error.tsx`) ⊆ `BASE_CLIENT_MESSAGE_ROOTS`;
+- a NON-literal `useTranslations()` consumer (whole-tree/variable namespace)
+  reachable from any subset tree FAILS the guard — only full-pick trees
+  (dashboard, design) may render those;
+- an inventory pin of `app/[locale]` children so a NEW top-level route
+  directory fails CI until classified (own provider or provider-less list);
+- wiring pins: each layout must ship its exact pick (no silent revert).
+
+16 guard tests. Verified renders: zero `MISSING_MESSAGE` markers in all four
+captured documents; real LT copy present (auth form strings, waitlist form);
+route smoke — `/lt/dashboard` + `/lt/dashboard/planning` + `/lt/onboarding`
+307 to login, unknown path 404 branded.
+
+### v2 measurement honesty
+
+- BEFORE was re-captured from a fresh build of this branch's HEAD (74e34ea0),
+  not copied from §3 — it reproduced §3's numbers to the decimal (547.0 /
+  315.9 KB), which also validates the capture method.
+- Both captures fetched every document twice — byte-identical both times
+  (`identicalRefetch: true`), so no streamed-response variance.
+- The `/design` gallery (dev-only, `notFound()` in production) keeps the
+  full pick via its own layout so the dev gallery still renders; this weight
+  never ships in production builds.
+
+### v2 rollback
+
+Revert the v2 commit: root layout line back to `pickClientMessages`, remove
+the two new layouts (`onboarding`, `design`), unwrap the three group layouts.
+No data, schema or service impact.

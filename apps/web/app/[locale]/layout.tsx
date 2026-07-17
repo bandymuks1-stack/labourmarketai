@@ -2,7 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import { pickClientMessages } from "@/lib/i18n/client-messages";
+import {
+  BASE_CLIENT_MESSAGE_ROOTS,
+  pickMessages,
+} from "@/lib/i18n/client-messages";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
@@ -128,13 +131,21 @@ export default async function LocaleLayout({
             <html lang> and React strips the bootstrap's data-theme — this
             watcher restores the saved theme before the next paint. */}
         <ThemeReapply />
-        {/* Performance Reality Audit v1: the provider previously inherited
-            the FULL runtime message tree (~440 KB minified), serializing
-            every namespace — server-only ones included — into the RSC
-            flight payload of EVERY page. Client components can only reach
-            the allowlisted roots (guard-derived from source), so only that
-            subset ships; getTranslations on the server keeps the full tree. */}
-        <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
+        {/* Performance Reality Audit v1+v2: v1 replaced the FULL runtime
+            message tree (~440 KB minified serialized into EVERY page's RSC
+            flight payload) with the union client allowlist. v2 moves the
+            per-surface picks into the route-group layouts ((marketing),
+            auth, onboarding, dashboard, design) — a nested provider
+            REPLACES `messages` for its subtree — so the root ships only
+            what renders OUTSIDE every group provider: the [locale] error
+            boundary (~0.1 KB). getTranslations on the server keeps the
+            full tree. Guard: lib/guards/client-messages-allowlist.test.ts. */}
+        <NextIntlClientProvider
+          messages={pickMessages(
+            await getMessages(),
+            BASE_CLIENT_MESSAGE_ROOTS,
+          )}
+        >
           {children}
         </NextIntlClientProvider>
       </body>
