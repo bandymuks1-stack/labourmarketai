@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
+import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
@@ -127,7 +128,15 @@ export default async function LocaleLayout({
             <html lang> and React strips the bootstrap's data-theme — this
             watcher restores the saved theme before the next paint. */}
         <ThemeReapply />
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        {/* Performance Reality Audit v1: the provider previously inherited
+            the FULL runtime message tree (~440 KB minified), serializing
+            every namespace — server-only ones included — into the RSC
+            flight payload of EVERY page. Client components can only reach
+            the allowlisted roots (guard-derived from source), so only that
+            subset ships; getTranslations on the server keeps the full tree. */}
+        <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
