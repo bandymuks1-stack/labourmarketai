@@ -61,7 +61,7 @@
       "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
-      "orgDocuments": "Summen des zustimmungsgebundenen Pool-Aggregats — gezählt werden nur Arbeitskräfte, die der aggregierten Dokumentsichtbarkeit zugestimmt haben.",
+      "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
       "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten."
     },
     "worker": {
@@ -124,7 +124,7 @@
         "workers": "Arbeitskräfte mit Zustimmung",
         "expiring": "Ablaufende Dokumente",
         "attention": "Aufmerksamkeit nötig",
-        "empty": "Noch keine Pool-Arbeitskräfte mit Zustimmung — dieses Aggregat zählt nur Arbeitskräfte, die zugestimmt haben.",
+        "empty": "Noch keine Arbeitskräfte mit Zustimmung — gezählt werden nur Arbeitskräfte, die zugestimmt haben.",
         "link": "Dokumentenzentrum öffnen"
       },
       "finance": {
@@ -340,7 +340,7 @@
     "switchSpace": "Bereich wechseln",
     "addSpace": "Bereich hinzufügen",
     "availableSpaces": "Verfügbare Bereiche",
-    "comingLaterToggle": "Später verfügbare Module (anzeigen)",
+    "comingLaterToggle": "Bereiche, die später kommen (anzeigen)",
     "profile": {
       "name": "Persönliches Profil",
       "purpose": "Verwalten Sie Ihren Avatar, Ihren Lebenslauf, Ihre Fähigkeiten und Ihren Arbeitsstatus."
@@ -497,17 +497,17 @@
   },
   "marketMap": {
     "entities": {
-      "title": "Drei Entitäten auf der Karte",
-      "intro": "Die Karte unterscheidet drei verschiedene räumliche Entitäten: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jede hat ihre eigene Sichtbarkeitsregel und ihre eigene visuelle Form.",
-      "neverMixedNote": "Die drei Entitäten werden nie zu einem einzigen Markertyp zusammengeführt.",
+      "title": "Drei Dinge auf der Karte",
+      "intro": "Die Karte zeigt drei verschiedene Dinge: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jedes folgt seiner eigenen Sichtbarkeitsregel und sieht anders aus.",
+      "neverMixedNote": "Die drei werden nie zu einem einzigen Markertyp zusammengeführt.",
       "contactNote": "Kontakt läuft immer über den LabourMarket.ai-Workflow — die Karte zeigt nie Telefonnummern oder E-Mail-Adressen.",
       "person": {
         "name": "Personen",
-        "legend": "Aggregierte Präsenz je Gebiet (gefülltes Quadrat)",
+        "legend": "Personenzahl je Gebiet (gefülltes Quadrat)",
         "countLabel": "{count}",
         "smallSample": "<5",
-        "empty": "Noch keine aggregierte Personenpräsenz anzuzeigen. Personen erscheinen hier nur als Zählungen auf Gebietsebene, sobald in einem Gebiet genügend Signale mit Einwilligung vorliegen (eine genaue Zahl erst ab 5).",
-        "visibilityNote": "Personen werden nur als aggregierte Gebietszählungen gezeigt — nie als einzelner Punkt, Name oder Kontakt. Gebiete mit weniger als 5 sichtbaren Personen zeigen \"<5\"."
+        "empty": "Noch keine Zahlen anzuzeigen. Personen erscheinen hier nur als Gebietszahlen, sobald genug Personen in einem Gebiet eingewilligt haben (eine genaue Zahl erst ab 5).",
+        "visibilityNote": "Personen werden nur als Gebietszahlen gezeigt — nie als einzelner Punkt, Name oder Kontakt. Gebiete mit weniger als 5 sichtbaren Personen zeigen \"<5\"."
       },
       "company": {
         "name": "Unternehmensgebiete",
@@ -603,7 +603,7 @@
       "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "disable": "Deaktivieren",
       "enable": "Aktivieren",
-      "aggregatedHint": "Wird erst aggregiert angezeigt, sobald eine öffentliche Ebene aktiviert ist.",
+      "aggregatedHint": "Wird erst als Gesamtzahlen angezeigt, sobald eine öffentliche Ebene aktiv ist.",
       "preferred": {
         "title": "Bevorzugte Standorte",
         "country": "Land",
@@ -639,7 +639,7 @@
         "self_only": "Nur ich",
         "region_visible": "Regionsebene",
         "city_visible": "Stadtebene",
-        "aggregated": "Aggregiert"
+        "aggregated": "Nur Gesamtzahl"
       },
       "needType": {
         "workers": "Arbeitskräfte benötigt",
@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "Quelle meiner Arbeitskarte",
     "lead": "Das wissen wir bereits über Sie.",
-    "explainer": "Diese Daten speisen Ihre Arbeitskarte. Sie helfen einem Arbeitgeber, schnell zu verstehen, welche Arbeit zu Ihnen passt.",
+    "explainer": "Danach beurteilt ein Arbeitgeber, welche Arbeit zu Ihnen passt.",
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Passende Möglichkeiten ansehen"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profil-Bereitschaft",
+      "ready": "Bereit",
+      "building": "Wird noch ausgefüllt",
+      "start": "Gerade begonnen"
+    },
+    "freshness": {
+      "label": "Aktualität",
+      "today": "Letzter Eintrag — heute",
+      "yesterday": "Letzter Eintrag — gestern",
+      "onDate": "Letzter Eintrag — {date}",
+      "none": "Noch keine Einträge"
+    },
+    "activity": {
+      "label": "Aktivität heute",
+      "count": "Einträge heute: {n}",
+      "none": "Heute noch nichts erfasst"
+    }
   },
   "processAssistant": {
     "title": "Interner Prozessassistent",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Wartet auf Prüfung",
     "notExternallyVerified": "Noch nicht durch Arbeitsnachweise belegt",
     "sourceProfileText": "Quelle: Profiltext",
-    "disclaimer": "Diese Fähigkeiten stammen aus Ihrer eigenen Beschreibung. Sie sind noch nicht geprüft.",
+    "disclaimer": "Diese Fähigkeiten haben Sie selbst angegeben. Stärken Sie sie mit Einträgen im Arbeitsjournal.",
     "experienceTitle": "Arbeitsverlauf",
     "removeLabel": "Fähigkeit entfernen",
     "deleteError": "Konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
@@ -2534,7 +2553,7 @@
       "cta": "Fähigkeiten prüfen"
     },
     "pageTitle": "Mein Profil",
-    "pageSubtitle": "Alles, was Ihre Arbeitskarte ausmacht, lebt hier: was Sie tun, was Sie können und was es belegt. Ihr gewählter Bereich ist Kontext, keine Grenze.",
+    "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
     "professionLabel": "Ihr Beruf",
     "professionPlaceholder": "Beruf auswählen",
     "professionSaved": "Beruf gespeichert",
@@ -2992,8 +3011,8 @@
       "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
       "oauth": {
         "missing_code": "Google hat ohne Anmeldecode zurückverwiesen. Versuchen Sie es erneut — falls es sich wiederholt, laden Sie die Seite neu.",
-        "exchange_failed": "Der Anmeldecode konnte nicht gegen eine Sitzung eingetauscht werden. Meist hilft ein erneuter Versuch — Codes sind einmalig und kurzlebig.",
-        "no_user": "Die Sitzung wurde erstellt, aber der Benutzerdatensatz ist nicht erreichbar. Melden Sie sich ab und wieder an.",
+        "exchange_failed": "Die Anmeldung hat nicht geklappt. Versuchen Sie es erneut — der Anmeldecode gilt nur einmal und läuft schnell ab.",
+        "no_user": "Sie sind angemeldet, aber Ihr Konto ist nicht erreichbar. Melden Sie sich ab und wieder an.",
         "callback": "Unerwarteter Fehler bei der Anmeldung. Versuchen Sie es erneut — falls das Problem bestehen bleibt, teilen Sie die unten stehende Trace-ID mit.",
         "unknown": "Anmeldung nicht möglich. Bitte versuchen Sie es erneut."
       }
@@ -3010,7 +3029,7 @@
         "service_provider": "Dienstleister",
         "admin": "Administrator"
       },
-      "subcopy": "Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort. Ihre Rolle wählen Sie im nächsten Schritt.",
+      "subcopy": "Ein Profil für Ihre echten Fähigkeiten, Ihre Verfügbarkeit und Ihre Berufserfahrung — damit Menschen und Unternehmen sehen, wo Sie zu echtem Arbeitsbedarf passen. Registrieren Sie sich mit Google oder mit E-Mail-Adresse und Passwort; Ihre Rolle wählen Sie im nächsten Schritt.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -3163,7 +3182,9 @@
         "moveUp": "Nach oben",
         "moveDown": "Nach unten",
         "hide": "Ausblenden",
-        "hiddenTitle": "Ausgeblendete Karten"
+        "hiddenTitle": "Ausgeblendete Karten",
+        "showAll": "Alle Aktionen anzeigen ({count})",
+        "showLess": "Weniger anzeigen"
       },
       "jobsCard": {
         "title": "Passende Jobs für mich",
@@ -3770,7 +3791,7 @@
       }
     },
     "middleware": {
-      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "session_expired": "Sie wurden abgemeldet. Bitte melden Sie sich erneut an.",
       "onboarding_required": "Bitte schließen Sie zuerst die Einrichtung Ihres Profils ab."
     },
     "notifications": {
@@ -4377,9 +4398,9 @@
     "backToAccount": "Zurück zum Konto",
     "export": {
       "title": "Eine Kopie meiner Daten",
-      "body": "Laden Sie Ihr Profil, Arbeitsjournal, Ihre Fähigkeiten und Einwilligungsdaten als eine JSON-Datei herunter.",
+      "body": "Laden Sie Ihr Profil, Arbeitsjournal, Ihre Fähigkeiten und Einwilligungsdaten als eine Datei herunter.",
       "includes": "Die Datei enthält nur Ihre eigenen Daten: Profil, Einwilligungshistorie, Arbeitskraft-Karte, Journaleinträge, Fähigkeiten und Ihre Dokumentenliste (keine Dateiinhalte, keine Nachrichten anderer Personen).",
-      "download": "Meine Daten herunterladen (JSON)"
+      "download": "Meine Daten herunterladen"
     },
     "deletion": {
       "title": "Antrag auf Kontolöschung",
@@ -5120,7 +5141,7 @@
       "emptyTeam": "Dieses Projekt hat noch kein Team — starte den Draft und hole die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
       "positionsTitle": "Fehlende Positionen",
-      "positionsEmpty": "Das Modul für Positionsbedarf ist noch in Vorbereitung — sobald es da ist, siehst du hier, welche Leute fehlen.",
+      "positionsEmpty": "Der Positionsbedarf ist noch nicht bereit — sobald er da ist, siehst du hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",
       "gallery": {
         "title": "Arbeitsgalerie",
@@ -5580,7 +5601,7 @@
     },
     "sourceStates": {
       "needs_admin_read": "in dieser Umgebung nicht lesbar",
-      "service_key_missing": "Serviceverbindung nicht konfiguriert",
+      "service_key_missing": "Verbindung nicht eingerichtet",
       "needs_migration": "noch nicht aktiviert",
       "not_admin": "Admin-Prüfung nicht bestanden",
       "error": "konnte gerade nicht gelesen werden"
@@ -5622,7 +5643,7 @@
     "state": {
       "empty": "Noch keine Zeilen. Wenn sich jemand anmeldet oder eine Anfrage einreicht, erscheint sie hier.",
       "needsAdminRead": "Diese Quelle ist aus der App noch nicht lesbar — in dieser Umgebung existiert kein Admin-Lesepfad. Statt einer falschen Null wird nichts angezeigt.",
-      "serviceKeyMissing": "Diese Quelle benötigt die Dienstverbindung, die in dieser Umgebung nicht konfiguriert ist.",
+      "serviceKeyMissing": "Diese Quelle ist in dieser Umgebung nicht verbunden.",
       "error": "Diese Quelle konnte gerade nicht gelesen werden."
     },
     "actions": {
@@ -6413,10 +6434,10 @@
       "countsUnavailable": "Zahlen sind in dieser Umgebung nicht verfügbar.",
       "galleryNote": "Fotos liegen in Ihren Journaleinträgen; Projektgalerien finden Sie auf der Seite jedes Projekts."
     },
-    "uploadNote": "Dies ist ein Metadaten-Inventar — Datei-Upload ist noch nicht verfügbar. Sie erfassen, was Sie haben und wie lange es gültig ist; die Dateien selbst bleiben bei Ihnen.",
+    "uploadNote": "Datei-Upload ist noch nicht verfügbar. Sie erfassen, was Sie haben und wie lange es gültig ist — die Dateien selbst bleiben bei Ihnen.",
     "org": {
       "title": "Dokumentbereitschaft des Pools (einwilligungsbasiert)",
-      "intro": "Dokumente gehören den Arbeitskräften. Sie sehen nur Kategorien-Zahlen der Pool-Arbeitskräfte, die das Teilen von Summen aktiviert haben.",
+      "intro": "Dokumente gehören den Arbeitskräften. Sie sehen nur Kategorien-Zahlen der Pool-Arbeitskräfte, die dem Anzeigen von Gesamtzahlen zugestimmt haben.",
       "workersLabel": "Arbeitskräfte mit Einwilligung",
       "totalLabel": "Dokumente",
       "validLabel": "Gültig",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Vertrauenssignale",
-    "caption": "Die Zahlen stammen direkt aus echten Einträgen. Nichts hier ist gewichtet oder erfunden.",
+    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
     "verifiedSkills": "Verknüpfte Fähigkeiten",
     "managerConfirmations": "Geprüfte Einträge",
     "journalEntries": "Journaleinträge",
@@ -6893,12 +6914,12 @@
     "incoming": {
       "title": "Vorschläge für Sie",
       "help": "Ein Unternehmen hat Ihnen eine Zusammenarbeit vorgeschlagen. Sie entscheiden.",
-      "empty": "Noch keine Vorschläge."
+      "empty": "Noch keine Vorschläge. Wenn ein Unternehmen Ihnen Arbeit vorschlägt, erscheint der Vorschlag hier — Sie entscheiden, ob Sie annehmen."
     },
     "outgoing": {
       "title": "Von Ihnen gesendete Vorschläge",
       "help": "Arbeitskräfte, denen Sie einen Vorschlag gemacht haben. Sie nehmen an oder lehnen ab.",
-      "empty": "Sie haben noch keine Vorschläge gesendet."
+      "empty": "Sie haben noch keine Vorschläge gesendet. Wenn Sie einer Arbeitskraft eine Buchung vorschlagen, erscheint sie hier zusammen mit der Antwort."
     },
     "status": {
       "proposed": "Vorgeschlagen",
@@ -7458,6 +7479,7 @@
     "trustNote": "Arbeitskräfte sehen zuerst nur freigegebene oder sicher verwaltete Chancen. Das hilft, Risiken zu verringern und einen verlässlicheren Arbeitsmarkt aufzubauen.",
     "approvedEmptyTitle": "Noch keine freigegebenen Chancen.",
     "approvedEmptyBody": "Vervollständigen Sie Ihr Profil, damit wir Sie besser mit passenden Chancen matchen können, sobald diese freigegeben sind.",
+    "approvedEmptyCta": "Profil vervollständigen",
     "fieldCompany": "Unternehmen / Partner",
     "status": {
       "possible_match": "Mögliches Match",
@@ -8199,7 +8221,6 @@
     "person": {
       "title": "Persönliche Karte",
       "openProfile": "Profil öffnen",
-      "completeness": "Profilvollständigkeit",
       "availability": {
         "available": "Verfügbar für Arbeit",
         "busy": "Beschäftigt",
@@ -8372,10 +8393,10 @@
   "planning": {
     "eyebrow": "KALENDER",
     "title": "Kalender",
-    "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Jede Zeile führt zur echten Quelle.",
+    "intro": "Buchungen, Projekttermine und Aufgabenfristen in einer Agenda. Tippen Sie auf eine Zeile, um sie dort zu öffnen, wo sie erstellt wurde.",
     "notAuthed": "Melden Sie sich an, um Ihren Plan zu sehen.",
     "filters": {
-      "label": "Quelle",
+      "label": "Typ",
       "all": "Alle"
     },
     "source": {
@@ -8410,7 +8431,7 @@
       "hint": "Diese Einträge existieren, aber es sind noch keine Termine erfasst."
     },
     "empty": "Noch nichts geplant. Angenommene Buchungen, Projekttermine und Aufgabenfristen erscheinen hier.",
-    "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Die Historie bleibt auf der jeweiligen Quellseite.",
+    "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Sie bleiben auf ihren eigenen Seiten.",
     "conflict": {
       "flag": "Termine überschneiden sich"
     },
@@ -8461,7 +8482,7 @@
     "year": {
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
-    "emptyFiltered": "Keine Einträge für diese Quelle.",
+    "emptyFiltered": "Keine Einträge dieses Typs.",
     "emptyActions": {
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",
@@ -8494,7 +8515,7 @@
       "coveredAll": "Alle bewertete Arbeit ist abgedeckt",
       "capacityLabel": "Kapazitätsabdeckung",
       "userEntered": "Ihre Eingabe: {count}",
-      "systemSuggested": "Systemvorschlag: {count} (bestätigen oder bearbeiten)",
+      "systemSuggested": "Automatisch vorgeschlagen: {count} (bestätigen oder bearbeiten)",
       "confirmedRequired": "Bestätigt: {count}"
     },
     "risk": {
@@ -8552,7 +8573,7 @@
     "intro": "Ihre Arbeitsliste: was wartet, was läuft und was feststeckt.",
     "honestNote": "Nur eine interne Liste — das Anlegen einer Aufgabe versendet keine Nachricht an irgendjemanden.",
     "notAuthed": "Melden Sie sich an, um Ihre Aufgaben zu sehen.",
-    "unavailable": "Das Aufgabenmodul wird vorbereitet — noch nicht verfügbar. Sobald es aktiviert ist, erscheinen Ihre Aufgaben hier.",
+    "unavailable": "Aufgaben sind noch nicht freigeschaltet. Sobald sie es sind, erscheinen Ihre Aufgaben hier.",
     "loadError": "Aufgaben konnten nicht geladen werden. Bitte laden Sie die Seite neu.",
     "myEmpty": "Keine offenen Aufgaben — legen Sie oben eine an.",
     "views": {
@@ -8613,7 +8634,7 @@
       "created": "Aufgabe angelegt.",
       "updated": "Aufgabe aktualisiert.",
       "invalid": "Bitte prüfen Sie die Felder — der Titel muss 3–160 Zeichen lang sein.",
-      "needs_migration": "Das Aufgabenmodul ist noch nicht aktiviert — die Änderung wurde nicht gespeichert.",
+      "needs_migration": "Aufgaben sind noch nicht freigeschaltet — die Änderung wurde nicht gespeichert.",
       "not_authorized": "Sie dürfen diese Aktion nicht ausführen.",
       "not_found": "Aufgabe nicht gefunden.",
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
@@ -8634,7 +8655,7 @@
     "intro": "Was Ihre Aufmerksamkeit braucht, Zusammenfassungen aus Ihren eigenen Daten und der ehrliche Zustand des KI-Anbieters.",
     "attention": {
       "title": "Was braucht meine Aufmerksamkeit",
-      "note": "Aus Ihren eigenen Daten nach festen Regeln berechnet — dieselben Zahlen, die die Glocke und jedes Modul bereits zeigen. Jede Zeile nennt ihre Datenquelle und verlinkt die Seite, auf der sie sich klären lässt.",
+      "note": "Aus Ihren eigenen Daten nach festen Regeln berechnet — dieselben Zahlen, die die Glocke und jede Seite bereits zeigen. Jede Zeile nennt, woher die Daten stammen, und verlinkt die Seite, auf der es sich klären lässt.",
       "empty": "Im Moment braucht nichts Ihre Aufmerksamkeit — es gibt keine offenen Signale in Ihren Daten.",
       "open": "Öffnen",
       "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
@@ -8676,33 +8697,33 @@
     },
     "provider": {
       "title": "KI-Anbieter",
-      "stateLabel": "Laufzeitzustand",
+      "stateLabel": "KI-Status",
       "state": {
         "disabled": "Aus",
         "mock": "Mock (deterministischer Testmodus)",
         "live": "Aktiv"
       },
       "reason": {
-        "ok": "Die Laufzeitumgebung ist konfiguriert.",
-        "mode_disabled": "Kein Anbietermodus gesetzt — die Laufzeitumgebung ist standardmäßig aus.",
-        "unknown_provider": "Der konfigurierte Anbieter wird nicht erkannt, daher bleibt die Laufzeitumgebung aus.",
-        "missing_api_key": "Kein Anbieterschlüssel konfiguriert, daher bleibt die Laufzeitumgebung aus."
+        "ok": "Die KI-Verbindung ist eingerichtet.",
+        "mode_disabled": "Kein KI-Anbieter gewählt — die KI ist standardmäßig aus.",
+        "unknown_provider": "Der gewählte KI-Anbieter wird nicht erkannt, daher bleibt die KI aus.",
+        "missing_api_key": "Kein KI-Schlüssel hinterlegt, daher bleibt die KI aus."
       },
       "disabledBody": "In dieser Umgebung ist kein externer KI-Anbieter angebunden. Alles auf dieser Seite wird nach festen Regeln aus Ihren eigenen Daten berechnet — kein Text hier wurde von einem Sprachmodell erzeugt.",
       "whenEnabled": "Sobald der Eigentümer einen Anbieter anbindet und der Audit-Speicher für Vorschläge angewendet ist, werden prüfbare Entwurfsvorschläge verfügbar — immer als Vorschläge, die ein Mensch bestätigt, nie als automatische Änderungen.",
       "gates": "Zwei Tore sind bewusst offen: (1) in der Produktionsumgebung ist kein Anbieterschlüssel konfiguriert und (2) der Audit-Speicher für Vorschläge (ai_runs / ai_suggestions) ist eine vom Eigentümer freizugebende Migration. Die Generierung bleibt aus, bis beide geschlossen sind — Vorschläge ohne Audit-Spur würden die eigenen Regeln des Programms verletzen.",
       "providerLabel": "Anbieter",
       "modelLabel": "Modell",
-      "notWired": "Generierungsfunktionen sind in diesem Schritt bewusst nicht angeschlossen — Ergebnisse hätten noch keine Audit-Spur. Der Zustand oben dient nur der Transparenz."
+      "notWired": "Die Generierung ist in dieser Phase bewusst aus — Ergebnisse wären noch nicht nachvollziehbar. Der Status oben dient nur der Transparenz."
     }
   },
   "finance": {
     "eyebrow": "Operative Finanzen",
     "title": "Finanzeinträge",
     "intro": "Manuelle Erfassung ausgestellter Rechnungen, erhaltener Rechnungen und Ausgaben — mit echten Summen und abgeleiteten Überfälligkeits-Markierungen.",
-    "scopeNote": "Nur manuelle Einträge — dies ist keine Buchhaltungs-, Steuer-, Lohn-, Banksynchronisations- oder Zahlungsabwicklungssoftware. Ein Eintrag bewegt kein Geld und kontaktiert niemanden.",
+    "scopeNote": "Nur manuelle Einträge — dies ist keine Software für Buchhaltung, Steuern, Lohn, Bank oder Zahlungen. Ein Eintrag bewegt kein Geld und kontaktiert niemanden.",
     "notAuthed": "Melden Sie sich an, um Ihre Finanzeinträge zu sehen.",
-    "unavailable": "Das Finanzmodul wird vorbereitet — noch nicht verfügbar. Sobald es aktiviert ist, erscheinen Ihre Einträge hier.",
+    "unavailable": "Finanzen sind noch nicht freigeschaltet. Sobald sie es sind, erscheinen Ihre Einträge hier.",
     "loadError": "Einträge konnten nicht geladen werden. Aktualisieren Sie die Seite.",
     "empty": "Noch keine Finanzeinträge — fügen Sie oben den ersten hinzu.",
     "emptyFiltered": "Keine Einträge entsprechen den gewählten Filtern.",
@@ -8772,7 +8793,7 @@
       "created": "Eintrag hinzugefügt.",
       "updated": "Eintrag aktualisiert.",
       "invalid": "Prüfen Sie die Felder — Titel 3–160 Zeichen, Gegenpartei 2–160, Betrag wie 123.45.",
-      "needs_migration": "Das Finanzmodul ist noch nicht aktiviert — die Änderung wurde nicht gespeichert.",
+      "needs_migration": "Finanzen sind noch nicht freigeschaltet — die Änderung wurde nicht gespeichert.",
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Eintrag nicht gefunden.",
       "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
@@ -9097,7 +9118,7 @@
       "label": "Suche",
       "placeholder": "Name, Unternehmen, Stadt…",
       "submit": "Suchen",
-      "empty": "Für diese Suche wurde nichts gefunden.",
+      "empty": "Nichts gefunden.",
       "orgType": {
         "company": "Unternehmen",
         "agency": "Agentur",
@@ -9144,7 +9165,7 @@
     },
     "relationships": {
       "title": "Aktive Beziehungen",
-      "empty": "Noch keine aktiven Beziehungen.",
+      "empty": "Noch keine aktiven Arbeitsbeziehungen. Angenommene Einladungen und bestätigte Arbeitsbeziehungen erscheinen hier.",
       "noOrg": "Persönliche Beziehung — keinem Unternehmen zugeordnet",
       "slug": {
         "employee": "Mitarbeiter",
@@ -9277,7 +9298,7 @@
     "removeButton": "Standort entfernen",
     "empty": "Noch keine Standorte. Fügen Sie Hauptsitz und Einsatzorte hinzu.",
     "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Eigentümer",
-    "gatedBody": "Das Standortmodell ist bereit, aber die Datenbankänderung wurde noch nicht angewendet. Die Aktivierung ist eine Eigentümerentscheidung.",
+    "gatedBody": "Standorte sind bereit, aber noch nicht freigeschaltet. Die Freischaltung ist eine Entscheidung des Eigentümers.",
     "errorLabel": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
   },
   "companyGallery": {
@@ -9328,7 +9349,7 @@
     "title": "Kunden",
     "subtitle": "Für wen Sie Personal stellen — Kundenbedarfe werden mit Ihren Anfragen und dem Kandidaten-Scouting verknüpft.",
     "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Inhaber",
-    "gatedBody": "Kundendatensätze sind bereit, aber die Datenbankänderung ist noch nicht angewendet.",
+    "gatedBody": "Kundendatensätze sind bereit, aber noch nicht freigeschaltet.",
     "notLinkable": "Anfragen können noch nicht mit Kunden verknüpft werden.",
     "clientsEmpty": "Noch keine Kunden. Fügen Sie unten den ersten hinzu.",
     "demandsHeading": "Ihre Anfragen",

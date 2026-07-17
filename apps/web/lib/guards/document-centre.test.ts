@@ -159,14 +159,17 @@ describe("2. no second store, no bucket, no upload UI (bucket stays migration-ga
     expect(code).not.toMatch(/FileUpload|Dropzone|uppy/i);
   });
 
-  it("the page states the metadata-only truth instead", () => {
+  it("the page states the no-upload truth instead", () => {
     expect(PAGE).toMatch(/doc-centre-upload-note/);
     expect(PAGE).toMatch(/tc\("uploadNote"\)/);
     const en = JSON.parse(read("messages/en.json")).documentCentre as {
       uploadNote: string;
     };
+    // Same honesty pin, plain-language wording (human-first launch train v1):
+    // the copy must still say upload does not exist and files stay with the
+    // worker — it just says so without the word "metadata".
     expect(en.uploadNote).toMatch(/file upload is not available yet/i);
-    expect(en.uploadNote).toMatch(/metadata/i);
+    expect(en.uploadNote).toMatch(/files themselves stay with you/i);
   });
 });
 

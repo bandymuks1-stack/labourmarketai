@@ -188,8 +188,8 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             <span
               className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 entry.certainty === "clear"
-                  ? "bg-emerald-500/10 text-emerald-600"
-                  : "bg-amber-500/10 text-amber-600"
+                  ? "bg-state-success/10 text-state-success"
+                  : "bg-state-warning/10 text-state-warning"
               }`}
             >
               {entry.certainty === "clear"
@@ -216,7 +216,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
               {t("inbox.hoursLabel")}: {entry.hours.value} {entry.hours.unit}{" "}
               <span
                 className={
-                  entry.hours.certain ? "text-emerald-600" : "text-amber-600"
+                  entry.hours.certain ? "text-state-success" : "text-state-warning"
                 }
               >
                 ({entry.hours.certain ? t("inbox.hoursClear") : t("inbox.hoursUnclear")})
@@ -224,7 +224,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             </p>
           )}
           {entry.needsClarification && (
-            <p className="text-[10px] leading-relaxed text-amber-700">
+            <p className="text-[10px] leading-relaxed text-state-warning">
               {t("inbox.clarifyHint")}
             </p>
           )}
@@ -379,11 +379,11 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <input type="hidden" name="locale" value={locale} />
           {mode === "changes_requested" && entry.needsClarification ? (
             <div
-              className="flex flex-col gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/[0.05] p-2.5"
+              className="flex flex-col gap-1.5 rounded-lg border border-state-warning/30 bg-state-warning/5 p-2.5"
               data-testid={`journal-clarify-suggestion-${entry.id}`}
             >
               {entry.hours && !entry.hours.certain && (
-                <p className="text-[11px] leading-relaxed text-amber-700">
+                <p className="text-[11px] leading-relaxed text-state-warning">
                   {t("inbox.clarifyHoursIntro")}
                 </p>
               )}
@@ -393,7 +393,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
               <button
                 type="button"
                 onClick={copySuggestion}
-                className="w-fit rounded-md border border-amber-500/40 px-2 py-0.5 text-[10px] font-medium text-amber-700 hover:bg-amber-500/10"
+                className="w-fit rounded-md border border-state-warning/40 px-2 py-0.5 text-[10px] font-medium text-state-warning hover:bg-state-warning/10"
               >
                 {copied ? t("inbox.copied") : t("inbox.copySuggestion")}
               </button>

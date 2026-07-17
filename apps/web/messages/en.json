@@ -61,7 +61,7 @@
       "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
       "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
-      "orgDocuments": "Sums of the consent-gated pool aggregate — only workers who consented to aggregate document visibility are counted.",
+      "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
       "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data."
     },
     "worker": {
@@ -124,7 +124,7 @@
         "workers": "Consented workers",
         "expiring": "Expiring documents",
         "attention": "Needing attention",
-        "empty": "No consented pool workers yet — this aggregate counts only workers who gave consent.",
+        "empty": "No workers have agreed yet — only workers who gave consent are counted.",
         "link": "Open the document centre"
       },
       "finance": {
@@ -340,7 +340,7 @@
     "switchSpace": "Switch space",
     "addSpace": "Add space",
     "availableSpaces": "Available spaces",
-    "comingLaterToggle": "Modules coming later (show)",
+    "comingLaterToggle": "Sections coming later (show)",
     "profile": {
       "name": "Personal profile",
       "purpose": "Manage your avatar, CV, skills, and work status."
@@ -497,17 +497,17 @@
   },
   "marketMap": {
     "entities": {
-      "title": "Three entities on the map",
-      "intro": "The map distinguishes three different spatial entities: people, company operating territories and project locations. Each has its own visibility rule and its own visual shape.",
-      "neverMixedNote": "The three entities are never merged into one marker type.",
+      "title": "Three things on the map",
+      "intro": "The map shows three different things: people, company operating territories and project locations. Each follows its own visibility rule and looks different.",
+      "neverMixedNote": "The three are never merged into one marker type.",
       "contactNote": "Contact always happens through the LabourMarket.ai workflow — the map never shows phone numbers or email addresses.",
       "person": {
         "name": "People",
-        "legend": "Aggregated presence by area (filled square)",
+        "legend": "People count by area (filled square)",
         "countLabel": "{count}",
         "smallSample": "<5",
-        "empty": "No aggregated person presence to show yet. People appear here only as area-level counts once enough consented signals exist in an area (an exact count only from 5).",
-        "visibilityNote": "People are shown only as aggregated area counts — never as an individual point, name or contact. Areas with fewer than 5 visible people show \"<5\"."
+        "empty": "No people counts to show yet. People appear here only as area counts once enough people in an area have given consent (an exact count only from 5).",
+        "visibilityNote": "People are shown only as area counts — never as an individual point, name or contact. Areas with fewer than 5 visible people show \"<5\"."
       },
       "company": {
         "name": "Company territories",
@@ -603,7 +603,7 @@
       "error": "Could not save. Please try again.",
       "disable": "Disable",
       "enable": "Enable",
-      "aggregatedHint": "Shown aggregated only once a public layer is turned on.",
+      "aggregatedHint": "Shown only as combined counts once a public layer is turned on.",
       "preferred": {
         "title": "Preferred locations",
         "country": "Country",
@@ -639,7 +639,7 @@
         "self_only": "Only me",
         "region_visible": "Region level",
         "city_visible": "City level",
-        "aggregated": "Aggregated"
+        "aggregated": "Combined count only"
       },
       "needType": {
         "workers": "Workers needed",
@@ -852,9 +852,8 @@
     }
   },
   "profileHub": {
-    "eyebrow": "My work card source",
     "lead": "Here's what we already know about you.",
-    "explainer": "This data feeds your work card. It helps an employer quickly understand what work you fit.",
+    "explainer": "This is what an employer sees when deciding what work you fit.",
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
@@ -891,6 +890,26 @@
       }
     },
     "opportunitiesLink": "Review matched opportunities"
+  },
+  "profileState": {
+    "readiness": {
+      "label": "Profile readiness",
+      "ready": "Ready",
+      "building": "Still filling up",
+      "start": "Just started"
+    },
+    "freshness": {
+      "label": "Up to date",
+      "today": "Last entry — today",
+      "yesterday": "Last entry — yesterday",
+      "onDate": "Last entry — {date}",
+      "none": "No entries yet"
+    },
+    "activity": {
+      "label": "Today's activity",
+      "count": "Entries today: {n}",
+      "none": "Nothing recorded today yet"
+    }
   },
   "processAssistant": {
     "title": "Internal process assistant",
@@ -1094,7 +1113,7 @@
     "selfDeclaredStatus": "Waiting for review",
     "notExternallyVerified": "Not yet backed by work records",
     "sourceProfileText": "Source: profile text",
-    "disclaimer": "These skills are taken from your own description. They are not yet reviewed.",
+    "disclaimer": "You added these skills yourself. Strengthen them with work journal entries.",
     "experienceTitle": "Work history",
     "removeLabel": "Remove skill",
     "deleteError": "Could not remove. Please try again.",
@@ -2534,7 +2553,7 @@
       "cta": "Review skills"
     },
     "pageTitle": "My profile",
-    "pageSubtitle": "Everything that makes up your work card lives here: what you do, what you can do, and what proves it. Your chosen field is context, not a limit.",
+    "pageSubtitle": "What you do, what you can do, and what shows it — all in one place.",
     "professionLabel": "Your profession",
     "professionPlaceholder": "Select a profession",
     "professionSaved": "Profession saved",
@@ -2992,8 +3011,8 @@
       "generic": "Something went wrong. Please try again.",
       "oauth": {
         "missing_code": "Google bounced back without a sign-in code. Try again — if it repeats, reload the page.",
-        "exchange_failed": "The sign-in code couldn't be exchanged for a session. Usually a retry works — codes are one-time and short-lived.",
-        "no_user": "Session was created but the user record isn't reachable. Sign out and back in.",
+        "exchange_failed": "Sign-in didn't complete. Try again — the sign-in code works once and expires quickly.",
+        "no_user": "You signed in, but your account couldn't be reached. Sign out and back in.",
         "callback": "Unexpected error during sign-in. Try again — if it persists, share the trace ID below.",
         "unknown": "Couldn't sign in. Please try again."
       }
@@ -3010,7 +3029,7 @@
         "service_provider": "Service provider",
         "admin": "Admin"
       },
-      "subcopy": "Sign up with Google, or with your email and password. You'll pick your role next.",
+      "subcopy": "One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",
@@ -3163,7 +3182,9 @@
         "moveUp": "Move up",
         "moveDown": "Move down",
         "hide": "Hide",
-        "hiddenTitle": "Hidden cards"
+        "hiddenTitle": "Hidden cards",
+        "showAll": "Show all actions ({count})",
+        "showLess": "Show fewer"
       },
       "jobsCard": {
         "title": "Jobs that fit me",
@@ -3770,7 +3791,7 @@
       }
     },
     "middleware": {
-      "session_expired": "Your session has expired. Please sign in again.",
+      "session_expired": "You've been signed out. Please sign in again.",
       "onboarding_required": "Please finish setting up your profile first."
     },
     "notifications": {
@@ -4377,9 +4398,9 @@
     "backToAccount": "Back to account",
     "export": {
       "title": "A copy of my data",
-      "body": "Download your profile, work journal, skills and consent data as one JSON file.",
+      "body": "Download your profile, work journal, skills and consent data as one file.",
       "includes": "The file contains only your own data: profile, consent history, worker card, journal entries, skills and your document list (no file contents, no other people's messages).",
-      "download": "Download my data (JSON)"
+      "download": "Download my data"
     },
     "deletion": {
       "title": "Account deletion request",
@@ -5120,7 +5141,7 @@
       "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "Start the draft",
       "positionsTitle": "Missing positions",
-      "positionsEmpty": "The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "positionsEmpty": "Position needs are still on the way — once ready, you will see here which people are missing.",
       "openOps": "Open project management",
       "gallery": {
         "title": "Work gallery",
@@ -5580,7 +5601,7 @@
     },
     "sourceStates": {
       "needs_admin_read": "not readable in this environment",
-      "service_key_missing": "service connection not configured",
+      "service_key_missing": "connection not set up",
       "needs_migration": "not enabled yet",
       "not_admin": "admin check failed",
       "error": "could not be read right now"
@@ -5622,7 +5643,7 @@
     "state": {
       "empty": "No rows yet. When someone signs up or submits a request, it appears here.",
       "needsAdminRead": "This source is not readable from the app yet — no admin read path exists in this environment. Nothing is shown rather than a false zero.",
-      "serviceKeyMissing": "This source needs the service connection, which is not configured in this environment.",
+      "serviceKeyMissing": "This source is not connected in this environment.",
       "error": "This source could not be read right now."
     },
     "actions": {
@@ -6413,10 +6434,10 @@
       "countsUnavailable": "Counts are not available in this environment.",
       "galleryNote": "Photos live inside your journal entries; project photo galleries are on each project's page."
     },
-    "uploadNote": "This is a metadata inventory — file upload is not available yet. You record what you have and until when it is valid; the files themselves stay with you.",
+    "uploadNote": "File upload is not available yet. You record what you have and until when it is valid — the files themselves stay with you.",
     "org": {
       "title": "Pool document readiness (consent-based)",
-      "intro": "Workers own their documents. You see only category counts for pool workers who switched on aggregate sharing.",
+      "intro": "Workers own their documents. You see only category counts for pool workers who agreed to show combined counts.",
       "workersLabel": "Consented workers",
       "totalLabel": "Documents",
       "validLabel": "Valid",
@@ -6431,7 +6452,7 @@
   },
   "trust": {
     "title": "Trust signals",
-    "caption": "Counts come straight from real records. Nothing here is weighted or invented.",
+    "caption": "These counts come straight from your work records.",
     "verifiedSkills": "Linked skills",
     "managerConfirmations": "Reviewed records",
     "journalEntries": "Journal entries",
@@ -6893,12 +6914,12 @@
     "incoming": {
       "title": "Proposals for you",
       "help": "A company proposed working with you. You decide.",
-      "empty": "No proposals yet."
+      "empty": "No proposals yet. When a company proposes work to you, it appears here — you decide whether to accept."
     },
     "outgoing": {
       "title": "Proposals you sent",
       "help": "Workers you proposed to. They accept or decline.",
-      "empty": "You haven't sent any proposals yet."
+      "empty": "No proposals sent yet. When you propose a booking to a worker, it appears here together with their answer."
     },
     "status": {
       "proposed": "Proposed",
@@ -7458,6 +7479,7 @@
     "trustNote": "Workers first see only approved or safely managed opportunities. This helps reduce risk and build a more reliable labour market.",
     "approvedEmptyTitle": "No approved opportunities yet.",
     "approvedEmptyBody": "Complete your profile so we can better match you with suitable opportunities once they are approved.",
+    "approvedEmptyCta": "Complete your profile",
     "fieldCompany": "Company / partner",
     "status": {
       "possible_match": "Possible match",
@@ -8199,7 +8221,6 @@
     "person": {
       "title": "Personal card",
       "openProfile": "Open profile",
-      "completeness": "Profile completeness",
       "availability": {
         "available": "Available for work",
         "busy": "Busy",
@@ -8372,10 +8393,10 @@
   "planning": {
     "eyebrow": "CALENDAR",
     "title": "Calendar",
-    "intro": "Bookings, project dates and task deadlines in one agenda. Every row links to its real source.",
+    "intro": "Bookings, project dates and task deadlines in one agenda. Tap a row to open it where it was created.",
     "notAuthed": "Sign in to see your plan.",
     "filters": {
-      "label": "Source",
+      "label": "Type",
       "all": "All"
     },
     "source": {
@@ -8410,7 +8431,7 @@
       "hint": "These records exist, but no dates are recorded yet."
     },
     "empty": "Nothing planned yet. Accepted bookings, project dates and task deadlines appear here.",
-    "pastHidden": "Finished items not shown here: {count}. History stays on each source page.",
+    "pastHidden": "Finished items are not shown here: {count}. You can still find them on their own pages.",
     "conflict": {
       "flag": "Dates overlap"
     },
@@ -8461,7 +8482,7 @@
     "year": {
       "count": "{count, plural, =0 {no items} one {# item} other {# items}}"
     },
-    "emptyFiltered": "No items for this source.",
+    "emptyFiltered": "No items of this type.",
     "emptyActions": {
       "bookings": "Propose a booking",
       "tasks": "Create a task",
@@ -8494,7 +8515,7 @@
       "coveredAll": "All assessed work is covered",
       "capacityLabel": "Capacity coverage",
       "userEntered": "You entered: {count}",
-      "systemSuggested": "System suggestion: {count} (confirm or edit)",
+      "systemSuggested": "Suggested automatically: {count} (confirm or edit)",
       "confirmedRequired": "Confirmed: {count}"
     },
     "risk": {
@@ -8552,7 +8573,7 @@
     "intro": "Your work list: what's waiting, in progress and stuck.",
     "honestNote": "Internal list only — creating a task sends nothing to anyone.",
     "notAuthed": "Sign in to see your tasks.",
-    "unavailable": "The tasks module is being prepared — not available yet. Once enabled, your tasks will appear here.",
+    "unavailable": "Tasks are not switched on yet. Once they are, your tasks will appear here.",
     "loadError": "Tasks could not be loaded. Try refreshing the page.",
     "myEmpty": "No open tasks — create one above.",
     "views": {
@@ -8613,7 +8634,7 @@
       "created": "Task created.",
       "updated": "Task updated.",
       "invalid": "Check the fields — the title must be 3–160 characters.",
-      "needs_migration": "The tasks module is not enabled yet — the change was not saved.",
+      "needs_migration": "Tasks are not switched on yet — the change was not saved.",
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Task not found.",
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
@@ -8634,7 +8655,7 @@
     "intro": "What needs your attention, summaries computed from your own data, and the honest state of the AI provider.",
     "attention": {
       "title": "What needs my attention",
-      "note": "Computed from your own records by fixed rules — the same numbers the bell and each module already show. Every row names its data source and links the page that resolves it.",
+      "note": "Computed from your own records by fixed rules — the same numbers the bell and each page already show. Every row names where its data comes from and links the page that resolves it.",
       "empty": "Nothing needs your attention right now — there are no pending signals in your data.",
       "open": "Open",
       "docExpiring": "Documents expiring within 30 days",
@@ -8676,33 +8697,33 @@
     },
     "provider": {
       "title": "AI provider",
-      "stateLabel": "Runtime state",
+      "stateLabel": "AI status",
       "state": {
         "disabled": "Off",
         "mock": "Mock (deterministic test mode)",
         "live": "Live"
       },
       "reason": {
-        "ok": "The runtime is configured.",
-        "mode_disabled": "No provider mode is set — the runtime is switched off by default.",
-        "unknown_provider": "The configured provider is not recognised, so the runtime stays off.",
-        "missing_api_key": "No provider key is configured, so the runtime stays off."
+        "ok": "The AI connection is set up.",
+        "mode_disabled": "No AI provider is chosen — AI stays off by default.",
+        "unknown_provider": "The chosen AI provider is not recognised, so AI stays off.",
+        "missing_api_key": "No AI provider key is added, so AI stays off."
       },
       "disabledBody": "No external AI provider is connected in this environment. Everything on this page is computed from your own records by fixed rules — no text here was produced by a language model.",
       "whenEnabled": "Once the owner connects a provider and the suggestion audit storage is applied, reviewable drafting suggestions become available — always as suggestions a person confirms, never as automatic changes.",
       "gates": "Two gates are open on purpose: (1) no provider key is configured in production, and (2) the suggestion audit store (ai_runs / ai_suggestions) is an owner-gated migration. Generation stays off until both close — producing suggestions without the audit trail would break the programme's own rules.",
       "providerLabel": "Provider",
       "modelLabel": "Model",
-      "notWired": "Generation surfaces are deliberately not wired in this slice — outputs would have no audit trail yet. The runtime state above is shown for transparency only."
+      "notWired": "Generation is deliberately not switched on at this stage — outputs could not be traced yet. The status above is shown for transparency only."
     }
   },
   "finance": {
     "eyebrow": "Operational finance",
     "title": "Finance records",
     "intro": "Manual record of invoices issued, invoices received and expenses — with real totals and derived overdue flags.",
-    "scopeNote": "Manual records only — this is not bookkeeping, tax, payroll, bank sync or payment processing software. Recording an entry moves no money and contacts nobody.",
+    "scopeNote": "Manual records only — this is not bookkeeping, tax, payroll, banking or payment processing software. Recording an entry moves no money and contacts nobody.",
     "notAuthed": "Sign in to see your finance records.",
-    "unavailable": "The finance module is being prepared — not available yet. Once enabled, your records will appear here.",
+    "unavailable": "Finance is not switched on yet. Once it is, your records will appear here.",
     "loadError": "Records could not be loaded. Try refreshing the page.",
     "empty": "No finance records yet — add the first one above.",
     "emptyFiltered": "No records match the selected filters.",
@@ -8772,7 +8793,7 @@
       "created": "Record added.",
       "updated": "Record updated.",
       "invalid": "Check the fields — title 3–160 characters, counterparty 2–160, amount like 123.45.",
-      "needs_migration": "The finance module is not enabled yet — the change was not saved.",
+      "needs_migration": "Finance is not switched on yet — the change was not saved.",
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Record not found.",
       "limit_reached": "Record limit reached — this manual list is capped.",
@@ -9097,7 +9118,7 @@
       "label": "Search",
       "placeholder": "Name, company, city…",
       "submit": "Search",
-      "empty": "Nothing found for this query.",
+      "empty": "Nothing found.",
       "orgType": {
         "company": "Company",
         "agency": "Agency",
@@ -9144,7 +9165,7 @@
     },
     "relationships": {
       "title": "Active relationships",
-      "empty": "No active relationships yet.",
+      "empty": "No active work relationships yet. Accepted invitations and confirmed work relationships appear here.",
       "noOrg": "Personal relationship — not linked to a company",
       "slug": {
         "employee": "Employee",
@@ -9277,7 +9298,7 @@
     "removeButton": "Remove location",
     "empty": "No locations yet. Add your headquarters and operating locations.",
     "gatedHeading": "Prepared — awaiting owner activation",
-    "gatedBody": "The locations model is ready, but the database change has not been applied yet. Activation is an owner decision.",
+    "gatedBody": "Locations are ready but not switched on yet. Switching them on is an owner decision.",
     "errorLabel": "Could not save. Try again."
   },
   "companyGallery": {
@@ -9328,7 +9349,7 @@
     "title": "Clients",
     "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
     "gatedHeading": "Prepared — owner activation pending",
-    "gatedBody": "Client records are ready, but the database change is not applied yet.",
+    "gatedBody": "Client records are ready but not switched on yet.",
     "notLinkable": "Demands cannot be linked to clients yet.",
     "clientsEmpty": "No clients yet. Add your first client below.",
     "demandsHeading": "Your demands",

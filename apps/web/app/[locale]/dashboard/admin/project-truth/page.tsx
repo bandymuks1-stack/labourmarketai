@@ -177,7 +177,7 @@ export default async function ProjectTruthPage({
   const placeholderMarkersEnabled = showPlaceholderMarkers;
 
   return (
-    <div className="flex flex-col gap-8" data-testid="project-truth-page">
+    <div className="flex flex-col gap-6" data-testid="project-truth-page">
       <header className="flex flex-col gap-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
           P0 · PROJECT TRUTH

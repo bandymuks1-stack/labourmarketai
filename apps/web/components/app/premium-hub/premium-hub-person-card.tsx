@@ -164,10 +164,6 @@ export async function PremiumHubPersonCard({
 
       {showDetails ? (
         <>
-          {/* Completeness stays an informational meter (role="progressbar",
-              no button affordance) — the actionable missing-items checklist
-              lives in MyZone right on this page (user-journey repair v1). */}
-          <HubProgress label={t("person.completeness")} value={person.completenessPct} />
           {/* Every stat tile is a real door to the exact section it counts. */}
           <div className="grid grid-cols-3 gap-3">
             <HubStat

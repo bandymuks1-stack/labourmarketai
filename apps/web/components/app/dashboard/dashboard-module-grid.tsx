@@ -6,6 +6,8 @@ import {
   ArrowUp,
   BarChart3,
   Bell,
+  ChevronDown,
+  ChevronUp,
   Briefcase,
   Building2,
   CalendarDays,
@@ -34,7 +36,10 @@ import {
 import { useTranslations } from "next-intl";
 
 import { ActionCard } from "@/components/app/action-card";
-import type { ControlRoomModule } from "@/lib/dashboard/control-room-view-model";
+import {
+  collapsedGridModules,
+  type ControlRoomModule,
+} from "@/lib/dashboard/control-room-view-model";
 import type { ModuleIconKey } from "@/lib/dashboard/dashboard-module-registry";
 import {
   sanitizeCardPrefs,
@@ -63,6 +68,13 @@ import { saveDashboardCardPreferences } from "@/lib/dashboard/preferences-action
  * the owner-gated dashboard_preferences migration is unapplied the page
  * passes `serverPrefs: null` and the grid keeps the previous device-local
  * localStorage behaviour exactly (nothing pretends to persist).
+ *
+ * Human-first launch v1: the grid opens COLLAPSED to the role's small
+ * primary set (collapsedGridModules — pure, guard-tested): a first-time
+ * viewer meets ~6 clear actions, not the full module wall. "Rodyti visus
+ * veiksmus (N)" expands to everything; a module with a real badge is never
+ * folded away; managing always shows the full set. Display-only state —
+ * no destination is ever removed.
  *
  * Every card is fully clickable (ActionCard = a real Link to the module's
  * real route) and carries a badge ONLY when its notification-spine count is
@@ -103,6 +115,11 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
 /** Device-local card preferences (fallback mode only) — ids only.
  *  Version-keyed so a future shape change can never misread stale data. */
 const CARD_PREFS_STORAGE_KEY = "lm.dashboard.moduleCards.v1";
+
+/** Human-first launch v1: device-local "show all actions" display state.
+ *  Display-only (a boolean, no ids, no PII) — first render is always the
+ *  small focused set, so a first-time viewer never meets the full wall. */
+const SHOW_ALL_STORAGE_KEY = "lm.dashboard.moduleCards.showAll.v1";
 
 type CardPrefs = DashboardCardPrefs;
 
@@ -160,8 +177,17 @@ export function DashboardModuleGrid({
   // loads localStorage after mount, exactly as before.
   const [prefs, setPrefs] = useState<CardPrefs>(serverPrefs ?? EMPTY_PREFS);
   const [managing, setManaging] = useState(false);
+  // Human-first launch v1: the grid opens on the SMALL focused set (primary
+  // modules + anything with a real badge). "Show all" is a device-local
+  // display preference; the server render is always the focused set.
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
+    try {
+      setShowAll(window.localStorage.getItem(SHOW_ALL_STORAGE_KEY) === "1");
+    } catch {
+      // storage unavailable — the toggle still works for this visit
+    }
     if (serverMode) return; // server store is the truth — no local read
     try {
       setPrefs(parseCardPrefs(window.localStorage.getItem(CARD_PREFS_STORAGE_KEY)));
@@ -169,6 +195,16 @@ export function DashboardModuleGrid({
       // storage unavailable (private mode) — the grid works without prefs
     }
   }, [serverMode]);
+
+  const toggleShowAll = () => {
+    const next = !showAll;
+    setShowAll(next);
+    try {
+      window.localStorage.setItem(SHOW_ALL_STORAGE_KEY, next ? "1" : "0");
+    } catch {
+      // storage unavailable — display-only feature, nothing breaks
+    }
+  };
 
   const persist = (next: CardPrefs) => {
     setPrefs(next);
@@ -189,6 +225,11 @@ export function DashboardModuleGrid({
   const hiddenSet = useMemo(() => new Set(prefs.hidden), [prefs.hidden]);
   const visible = ordered.filter((m) => !hiddenSet.has(m.id as string));
   const hiddenModules = ordered.filter((m) => hiddenSet.has(m.id as string));
+  // Collapsed = the role's primary set + every module with a REAL badge (a
+  // pending count never disappears behind the fold) — pure, guard-tested.
+  const focused = collapsedGridModules(visible);
+  const foldedCount = visible.length - focused.length;
+  const shown = showAll || foldedCount === 0 ? visible : focused;
 
   const move = (id: string, delta: -1 | 1) => {
     const ids = ordered.map((m) => m.id as string);
@@ -227,19 +268,44 @@ export function DashboardModuleGrid({
       </div>
 
       {!managing ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-          {visible.map((m) => (
-            <ActionCard
-              key={m.id}
-              href={m.route}
-              testid={`dashboard-module-${m.id}`}
-              icon={ICONS[m.iconKey]}
-              badgeCount={m.badgeCount}
-              title={t(m.labelKey)}
-              description={t(m.descriptionKey)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {shown.map((m) => (
+              <ActionCard
+                key={m.id}
+                href={m.route}
+                testid={`dashboard-module-${m.id}`}
+                icon={ICONS[m.iconKey]}
+                badgeCount={m.badgeCount}
+                title={t(m.labelKey)}
+                description={t(m.descriptionKey)}
+              />
+            ))}
+          </div>
+          {/* Honest fold: every destination stays one tap away — the toggle
+              names exactly how many actions there are in total. */}
+          {foldedCount > 0 && (
+            <button
+              type="button"
+              onClick={toggleShowAll}
+              aria-expanded={showAll}
+              data-testid="module-grid-show-all-toggle"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border-subtle bg-ink-800/20 px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            >
+              {showAll ? (
+                <>
+                  <ChevronUp aria-hidden className="h-3.5 w-3.5" strokeWidth={2} />
+                  {tGrid("showLess")}
+                </>
+              ) : (
+                <>
+                  <ChevronDown aria-hidden className="h-3.5 w-3.5" strokeWidth={2} />
+                  {tGrid("showAll", { count: visible.length })}
+                </>
+              )}
+            </button>
+          )}
+        </>
       ) : (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
