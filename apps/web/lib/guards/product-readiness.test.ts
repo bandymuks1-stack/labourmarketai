@@ -1804,7 +1804,14 @@ describe("no migration files added by this sprint", () => {
     // (20260717150000_demand_interest_seen_v1 — worker-only seen-model for
     // demand_interest_signals ack notifications, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    const SPRINT_BASELINE = 147;
+    // Bumped 147 -> 148 for Official Vacancy Source — NAV Norway v1
+    // (20260717170000_external_vacancies_v1 — per-ad external vacancy rows
+    // from official sources, SEPARATE from the aggregates-only
+    // market_intelligence_observations; authenticated SELECT of ACTIVE rows
+    // only, writes service-role only, no contact data stored).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback; source stays
+    // OFF in the code registry until the owner completes NAV registration.
+    const SPRINT_BASELINE = 148;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

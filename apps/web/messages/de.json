@@ -7637,6 +7637,15 @@
         "contacted": "Unternehmen hat Kontakt aufgenommen",
         "withdrawn": "Zurückgezogen"
       }
+    },
+    "externalVacancies": {
+      "title": "Stellen aus offiziellen Quellen",
+      "sourceBadge": "Aus offizieller Quelle: arbeidsplassen.no (NAV)",
+      "intro": "Dies sind Original-Stellenanzeigen aus der offiziellen norwegischen Quelle arbeidsplassen.no. LabourMarket.ai ist nicht der Arbeitgeber dieser Anzeigen — die Bewerbung erfolgt ausschließlich auf der Originalseite der Quelle.",
+      "published": "Veröffentlicht {date}",
+      "expires": "Gültig bis {date}",
+      "cta": "Auf der Quellseite bewerben",
+      "externalNote": "Der Link öffnet die externe Seite der offiziellen Quelle in einem neuen Tab. Der Status der Anzeigen wird mit der Quelle synchronisiert; inaktive Anzeigen werden sofort entfernt."
     }
   },
   "workerIntake": {
@@ -9692,7 +9701,8 @@
         "eurostat": "Eurostat",
         "cvbankas_salary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)",
         "eures": "EURES",
-        "uzt_lt": "Užimtumo tarnyba"
+        "uzt_lt": "Užimtumo tarnyba",
+        "nav_arbeidsplassen": "NAV arbeidsplassen.no (offizielle norwegische Stellenquelle)"
       },
       "terms": {
         "internal": "Interne Ableitung aus kanonischen Plattformtabellen; die Kohortenregel schützt Einzelpersonen.",
@@ -9701,14 +9711,16 @@
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
         "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
-        "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
+        "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
+        "navArbeidsplassen": "Offizieller norwegischer öffentlicher Stellen-Feed. Die veröffentlichten Bedingungen erlauben die Wiederveröffentlichung mit Quellenangabe und verlangen sofortige Synchronisierung/Entfernung sowie Bewerbungen über die Quelle — die Aktivierung wartet auf die Registrierung des Inhabers und die schriftliche Bestätigung der Bedingungen. Heute wird nichts abgerufen."
       },
       "status": {
         "active": "Aktiv (intern)",
         "proposedOff": "Vorgeschlagen — aus"
       },
       "eures": "EURES (EU-Portal für berufliche Mobilität)",
-      "uztLt": "Litauischer Arbeitsdienst (Užimtumo tarnyba)"
+      "uztLt": "Litauischer Arbeitsdienst (Užimtumo tarnyba)",
+      "navArbeidsplassen": "NAV arbeidsplassen.no (offizielle norwegische Stellenquelle)"
     },
     "methodology": {
       "title": "Methodik",

@@ -7637,6 +7637,15 @@
         "contacted": "Įmonė susisiekė",
         "withdrawn": "Atšaukta"
       }
+    },
+    "externalVacancies": {
+      "title": "Skelbimai iš oficialių šaltinių",
+      "sourceBadge": "Iš oficialaus šaltinio: arbeidsplassen.no (NAV)",
+      "intro": "Šie skelbimai yra originalūs darbo skelbimai iš oficialaus Norvegijos šaltinio arbeidsplassen.no. LabourMarket.ai nėra šių skelbimų darbdavys — kandidatuojama tik pirminio šaltinio puslapyje.",
+      "published": "Paskelbta {date}",
+      "expires": "Galioja iki {date}",
+      "cta": "Kandidatuoti šaltinio puslapyje",
+      "externalNote": "Nuoroda atidaro išorinį oficialaus šaltinio puslapį naujame lange. Skelbimų būsena sinchronizuojama su šaltiniu; neaktyvūs skelbimai pašalinami nedelsiant."
     }
   },
   "workerIntake": {
@@ -9692,7 +9701,8 @@
         "eurostat": "Eurostat",
         "cvbankas_salary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)",
         "eures": "EURES",
-        "uzt_lt": "Užimtumo tarnyba"
+        "uzt_lt": "Užimtumo tarnyba",
+        "nav_arbeidsplassen": "NAV arbeidsplassen.no (oficialus Norvegijos darbo skelbimų šaltinis)"
       },
       "terms": {
         "internal": "Vidinis skaičiavimas iš kanoninių platformos lentelių; kohortų taisyklė saugo asmenis.",
@@ -9701,14 +9711,16 @@
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
         "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
-        "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
+        "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
+        "navArbeidsplassen": "Oficialus Norvegijos viešas darbo skelbimų srautas. Paskelbtos sąlygos leidžia pakartotinę publikaciją su šaltinio nuoroda, reikalauja neatidėliotino atnaujinimo/pašalinimo ir kandidatavimo per pirminį šaltinį — aktyvavimas laukia savininko registracijos ir rašytinio sąlygų patvirtinimo. Šiandien niekas neatsiunčiama."
       },
       "status": {
         "active": "Aktyvus (vidinis)",
         "proposedOff": "Siūlomas — išjungtas"
       },
       "eures": "EURES (ES darbo mobilumo portalas)",
-      "uztLt": "Užimtumo tarnyba"
+      "uztLt": "Užimtumo tarnyba",
+      "navArbeidsplassen": "NAV arbeidsplassen.no (oficialus Norvegijos darbo skelbimų šaltinis)"
     },
     "methodology": {
       "title": "Metodika",

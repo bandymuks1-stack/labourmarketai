@@ -95,6 +95,24 @@ const schema = z.object({
   // proxied through a server action. See services/transcribe/README.md.
   VOICE_TRANSCRIBE_URL: z.string().url().optional(),
   VOICE_TRANSCRIBE_TOKEN: z.string().min(32).optional(),
+
+  // ── NAV (arbeidsplassen.no) official vacancy feed — ships OFF ─────────────
+  // Official Vacancy Source — NAV Norway v1. BOTH stay unset until the owner
+  // completes the NAV consumer registration (private token + written terms
+  // confirmation — REQUIRES_OWNER_ACTION, see docs/intelligence/
+  // official-vacancy-source-nav-norway-v1.md). NAV_SOURCE_ENABLED is the
+  // kill-switch-style enable flag (fail-closed: anything but "on" = OFF;
+  // NAV_KILL_SWITCH="on" additionally hard-stops, mirroring eurostat).
+  // NAV_FEED_TOKEN is the registered PRIVATE bearer token — server/operator
+  // only, NEVER NEXT_PUBLIC, never committed, never printed. The operator
+  // import scripts (scripts/nav-vacancy-*.ts) read these from process.env;
+  // the app itself never fetches the feed.
+  // Kept as free-form optional strings (the scripts' isOn() accepts
+  // "1"/"true"/"on", mirroring eurostat) so a stray value can never brick
+  // the whole app boot through this validator — absence is simply OFF.
+  NAV_SOURCE_ENABLED: z.string().optional(),
+  NAV_KILL_SWITCH: z.string().optional(),
+  NAV_FEED_TOKEN: z.string().optional(),
 });
 
 const parsed = schema.safeParse({
@@ -138,6 +156,9 @@ const parsed = schema.safeParse({
   AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
   VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
   VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
+  NAV_SOURCE_ENABLED: process.env.NAV_SOURCE_ENABLED,
+  NAV_KILL_SWITCH: process.env.NAV_KILL_SWITCH,
+  NAV_FEED_TOKEN: process.env.NAV_FEED_TOKEN,
 });
 
 if (!parsed.success) {

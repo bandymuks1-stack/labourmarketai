@@ -383,6 +383,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 20260717130000_open_markets_countries_draft_v1) + Canonical Ideas
     // Integration v1 (20260717150000_demand_interest_seen_v1). Both DRAFT /
     // needs-human-gate, NOT applied; cross-pin follows product-readiness.
-    expect(guard).toMatch(/SPRINT_BASELINE = 147/);
+    // Bumped 147 -> 148 for Official Vacancy Source — NAV Norway v1
+    // (20260717170000_external_vacancies_v1). DRAFT / needs-human-gate, NOT
+    // applied; cross-pin follows the product-readiness baseline bump.
+    expect(guard).toMatch(/SPRINT_BASELINE = 148/);
   });
 });

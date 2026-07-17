@@ -7637,6 +7637,15 @@
         "contacted": "Company contacted you",
         "withdrawn": "Withdrawn"
       }
+    },
+    "externalVacancies": {
+      "title": "Vacancies from official sources",
+      "sourceBadge": "From official source: arbeidsplassen.no (NAV)",
+      "intro": "These are original job ads from the official Norwegian source arbeidsplassen.no. LabourMarket.ai is not the employer of these ads — applying happens only on the original source page.",
+      "published": "Published {date}",
+      "expires": "Expires {date}",
+      "cta": "Apply on the source page",
+      "externalNote": "The link opens the external official source page in a new tab. Ad status is synced with the source; inactive ads are removed immediately."
     }
   },
   "workerIntake": {
@@ -9692,7 +9701,8 @@
         "eurostat": "Eurostat",
         "cvbankas_salary": "CVbankas salary data — proposed external benchmark (not active)",
         "eures": "EURES",
-        "uzt_lt": "Užimtumo tarnyba"
+        "uzt_lt": "Užimtumo tarnyba",
+        "nav_arbeidsplassen": "NAV arbeidsplassen.no (official Norwegian vacancy feed)"
       },
       "terms": {
         "internal": "Internal derivation from canonical platform tables; the cohort policy protects individuals.",
@@ -9701,14 +9711,16 @@
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
-        "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
+        "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
+        "navArbeidsplassen": "Official Norwegian public vacancy feed. Published terms permit republication with attribution, immediate sync/removal and deep-linked applications — activation awaits the owner's consumer registration and written terms confirmation. Nothing is fetched today."
       },
       "status": {
         "active": "Active (internal)",
         "proposedOff": "Proposed — off"
       },
       "eures": "EURES (EU job mobility portal)",
-      "uztLt": "Lithuanian Employment Service (Užimtumo tarnyba)"
+      "uztLt": "Lithuanian Employment Service (Užimtumo tarnyba)",
+      "navArbeidsplassen": "NAV arbeidsplassen.no (official Norwegian vacancy feed)"
     },
     "methodology": {
       "title": "Methodology",

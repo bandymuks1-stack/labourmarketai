@@ -303,6 +303,10 @@ describe("NO new DB migration in this PR", () => {
     // (20260717150000_demand_interest_seen_v1 — worker-only seen-model for
     // demand_interest_signals ack notifications, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(147);
+    // Bumped 147 -> 148 for Official Vacancy Source — NAV Norway v1
+    // (20260717170000_external_vacancies_v1 — per-ad external vacancy rows,
+    // authenticated SELECT of ACTIVE rows only, service-role writes only).
+    // DRAFT / needs-human-gate, NOT applied; paired rollback.
+    expect(count).toBeLessThanOrEqual(148);
   });
 });

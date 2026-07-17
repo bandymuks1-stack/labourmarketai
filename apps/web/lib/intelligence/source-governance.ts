@@ -148,6 +148,33 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       importPolicy: null,
     },
     {
+      // NAV / arbeidsplassen.no — Norway's OFFICIAL public vacancy feed
+      // (pam-stilling-feed.nav.no; terms: arbeidsplassen.nav.no/vilkar-api,
+      // retrieved 2026-07-17 — see docs/intelligence/
+      // official-vacancy-source-nav-norway-v1.md). The published terms DO
+      // permit republication/display, BUT production access requires a
+      // PRIVATE token via consumer registration + WRITTEN confirmation of
+      // terms acceptance — the owner has NOT completed that yet, so under
+      // this framework's semantics the profile stays "unconfirmed"
+      // (terms read, owner confirmation pending) / "off" / proposedOnly,
+      // exactly like every other pending external source. The per-ad rows
+      // this source produces live in the SEPARATE external_vacancies model
+      // (never market_intelligence_observations — aggregates only), so the
+      // importPolicy metric list stays null (fail-closed) — vacancy imports
+      // are additionally gated by scripts/nav-vacancy-import.ts, which
+      // refuses while this profile is not confirmed+on.
+      key: "nav_arbeidsplassen",
+      displayNameCode: "intelligence.sources.navArbeidsplassen",
+      sourceKind: "public_official",
+      legalStatus: "unconfirmed",
+      activation: "off",
+      termsNoteCode: "intelligence.sources.terms.navArbeidsplassen",
+      attributionRequired: true,
+      homepage: "arbeidsplassen.nav.no",
+      proposedOnly: true,
+      importPolicy: null,
+    },
+    {
       // Lithuanian Employment Service (Užimtumo tarnyba) — official labour
       // market statistics. PROPOSED only, same owner gate as every external.
       key: "uzt_lt",

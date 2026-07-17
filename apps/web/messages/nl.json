@@ -7637,6 +7637,15 @@
         "contacted": "Bedrijf nam contact op",
         "withdrawn": "Ingetrokken"
       }
+    },
+    "externalVacancies": {
+      "title": "Vacatures uit officiële bronnen",
+      "sourceBadge": "Uit officiële bron: arbeidsplassen.no (NAV)",
+      "intro": "Dit zijn originele vacatures uit de officiële Noorse bron arbeidsplassen.no. LabourMarket.ai is niet de werkgever van deze vacatures — solliciteren gebeurt uitsluitend op de originele bronpagina.",
+      "published": "Gepubliceerd {date}",
+      "expires": "Geldig tot {date}",
+      "cta": "Solliciteer op de bronpagina",
+      "externalNote": "De link opent de externe pagina van de officiële bron in een nieuw tabblad. De status van vacatures wordt gesynchroniseerd met de bron; inactieve vacatures worden onmiddellijk verwijderd."
     }
   },
   "workerIntake": {
@@ -9692,7 +9701,8 @@
         "eurostat": "Eurostat",
         "cvbankas_salary": "CVbankas-salarisgegevens — voorgestelde externe referentie (niet actief)",
         "eures": "EURES",
-        "uzt_lt": "Užimtumo tarnyba"
+        "uzt_lt": "Užimtumo tarnyba",
+        "nav_arbeidsplassen": "NAV arbeidsplassen.no (officiële Noorse vacaturebron)"
       },
       "terms": {
         "internal": "Interne afleiding uit canonieke platformtabellen; het cohortbeleid beschermt individuen.",
@@ -9701,14 +9711,16 @@
         "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
         "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
         "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
-        "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
+        "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
+        "navArbeidsplassen": "Officiële Noorse publieke vacaturefeed. De gepubliceerde voorwaarden staan herpublicatie met bronvermelding toe en vereisen onmiddellijke synchronisatie/verwijdering en solliciteren via de bron — activering wacht op registratie door de eigenaar en schriftelijke bevestiging van de voorwaarden. Er wordt vandaag niets opgehaald."
       },
       "status": {
         "active": "Actief (intern)",
         "proposedOff": "Voorgesteld — uit"
       },
       "eures": "EURES (EU-portaal voor arbeidsmobiliteit)",
-      "uztLt": "Litouwse arbeidsdienst (Užimtumo tarnyba)"
+      "uztLt": "Litouwse arbeidsdienst (Užimtumo tarnyba)",
+      "navArbeidsplassen": "NAV arbeidsplassen.no (officiële Noorse vacaturebron)"
     },
     "methodology": {
       "title": "Methodiek",

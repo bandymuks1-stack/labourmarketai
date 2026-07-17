@@ -58,6 +58,8 @@ import {
   type MyInterestDisplayRow,
 } from "@/components/app/worker-my-interest-section";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import { ExternalVacanciesSection } from "@/components/app/external-vacancies-section";
+import { listActiveExternalVacancies } from "@/lib/vacancy-sources/read";
 import type {
   OpportunityGap,
   OpportunityNeed,
@@ -104,6 +106,13 @@ export default async function OpportunitiesPage({
   const tsd = await getTranslations("structuredDemand");
   const result = await loadWorkerOpportunities();
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
+
+  // ── External official-source vacancies (NAV Norway v1) — ships DARK. ──────
+  // Double-gated: code-registry activation (nav_arbeidsplassen is OFF /
+  // unconfirmed) AND the owner-gated external_vacancies migration (42P01
+  // probe). Until BOTH owner gates open this read returns {available:false}
+  // and the section below renders NOTHING — no coming-soon, no empty shell.
+  const externalVacancies = await listActiveExternalVacancies();
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
   //    deterministic salary-vs-benchmark trust card plus the four honest
@@ -1104,6 +1113,28 @@ export default async function OpportunitiesPage({
               );
             })()
           )}
+
+          {/* ── External official-source vacancies (NAV Norway v1) — a
+              SEPARATE, clearly source-badged block, never blended into the
+              internal demand list above, never scored by match-v1, no
+              internal interest button. The only CTA deep-links to the
+              ORIGINAL application page (source-terms obligation). Renders
+              ONLY when the owner-gated read is available AND non-empty. */}
+          {externalVacancies.available && externalVacancies.rows.length > 0 ? (
+            <ExternalVacanciesSection
+              rows={externalVacancies.rows}
+              locale={locale}
+              labels={{
+                title: t("externalVacancies.title"),
+                sourceBadge: t("externalVacancies.sourceBadge"),
+                intro: t("externalVacancies.intro"),
+                published: (date: string) => t("externalVacancies.published", { date }),
+                expires: (date: string) => t("externalVacancies.expires", { date }),
+                cta: t("externalVacancies.cta"),
+                externalNote: t("externalVacancies.externalNote"),
+              }}
+            />
+          ) : null}
 
           <p className="text-[11px] leading-relaxed text-text-muted">{t("footnote")}</p>
         </>
