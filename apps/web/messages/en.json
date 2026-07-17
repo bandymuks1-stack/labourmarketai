@@ -3163,7 +3163,9 @@
         "moveUp": "Move up",
         "moveDown": "Move down",
         "hide": "Hide",
-        "hiddenTitle": "Hidden cards"
+        "hiddenTitle": "Hidden cards",
+        "showAll": "Show all actions ({count})",
+        "showLess": "Show fewer"
       },
       "jobsCard": {
         "title": "Jobs that fit me",

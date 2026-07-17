@@ -3163,7 +3163,9 @@
         "moveUp": "Omhoog verplaatsen",
         "moveDown": "Omlaag verplaatsen",
         "hide": "Verbergen",
-        "hiddenTitle": "Verborgen kaarten"
+        "hiddenTitle": "Verborgen kaarten",
+        "showAll": "Alle acties tonen ({count})",
+        "showLess": "Minder tonen"
       },
       "jobsCard": {
         "title": "Banen die bij mij passen",

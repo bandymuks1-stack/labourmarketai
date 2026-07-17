@@ -3163,7 +3163,9 @@
         "moveUp": "Perkelti aukščiau",
         "moveDown": "Perkelti žemiau",
         "hide": "Slėpti",
-        "hiddenTitle": "Paslėptos kortelės"
+        "hiddenTitle": "Paslėptos kortelės",
+        "showAll": "Rodyti visus veiksmus ({count})",
+        "showLess": "Rodyti mažiau"
       },
       "jobsCard": {
         "title": "Man tinkantys darbai",
