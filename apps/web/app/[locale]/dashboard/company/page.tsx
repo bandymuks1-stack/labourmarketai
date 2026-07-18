@@ -33,6 +33,8 @@ import { listManagedProjects } from "@/lib/projects/projects";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
 import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
+import { BusinessPublicProfilePanel } from "@/components/app/business-public-profile-panel";
+import { getBusinessPublicSettings } from "@/lib/company/public-profile";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
@@ -153,6 +155,12 @@ export default async function CompanyDashboardPage({
     : ({ kind: "ok", rows: [] } as const);
   const orgMembers = ownCompany
     ? await getOrgMembersData("company", ownCompany.id)
+    : null;
+
+  // W13 slice 2 — public business showcase profile publication settings
+  // (owner/manager gated; default private; honest gated state pre-migration).
+  const businessPublicSettings = orgMembers
+    ? await getBusinessPublicSettings(orgMembers.orgId)
     : null;
 
   // F12.4/5 company geography (owner-gated migration → honest gated state)
@@ -1054,6 +1062,20 @@ export default async function CompanyDashboardPage({
           addable={orgMembers.addable}
           labels={orgMembersLabels}
         />
+      )}
+
+      {orgMembers && businessPublicSettings && (
+        <div id="public-business-profile" className="scroll-mt-20">
+          <BusinessPublicProfilePanel
+            orgId={orgMembers.orgId}
+            needsMigration={businessPublicSettings.kind === "needs-migration"}
+            settings={
+              businessPublicSettings.kind === "ok"
+                ? businessPublicSettings.settings
+                : null
+            }
+          />
+        </div>
       )}
 
       <section

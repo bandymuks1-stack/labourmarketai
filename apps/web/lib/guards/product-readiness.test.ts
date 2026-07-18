@@ -1822,7 +1822,9 @@ describe("no migration files added by this sprint", () => {
     // (20260718200000_delivery_quality). RED / owner-authorized.
     // Bumped 154 -> 155 for Wagon 13 Marketplace — work-resource listings
     // (20260718210000_marketplace_listings). RED / owner-authorized.
-    const SPRINT_BASELINE = 155;
+    // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile
+    // (20260719120000_business_public_profile). RED / owner-authorized.
+    const SPRINT_BASELINE = 156;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

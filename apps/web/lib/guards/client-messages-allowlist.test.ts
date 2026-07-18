@@ -269,6 +269,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
     // added here (no client i18n) or given its own provider layout.
     const usage = deriveClientUsage([
       ...treeEntries(
+        join(LOCALE_DIR, "business"),
         join(LOCALE_DIR, "cv"),
         join(LOCALE_DIR, "invite"),
         join(LOCALE_DIR, "[...rest]"),
@@ -291,6 +292,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "(marketing)",
       "[...rest]",
       "auth",
+      "business",
       "cv",
       "dashboard",
       "design",

@@ -392,6 +392,7 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 152 -> 153 for Wagon 10 Commercial CRM.
     // Bumped 153 -> 154 for Wagon 11 Delivery & Quality.
     // Bumped 154 -> 155 for Wagon 13 Marketplace — work-resource listings.
-    expect(guard).toMatch(/SPRINT_BASELINE = 155/);
+    // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile.
+    expect(guard).toMatch(/SPRINT_BASELINE = 156/);
   });
 });
