@@ -28,8 +28,10 @@ import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
 import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
+import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
 import { buildStageGantt, type StageGantt } from "@/lib/projects/stage-gantt";
+import { getProjectEconomics } from "@/lib/economics/economics";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
 
@@ -108,6 +110,7 @@ export default async function ProjectOperationsPage({
   const gantt: StageGantt = stages.applied
     ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
     : { hasTimeline: false };
+  const economics = await getProjectEconomics(id);
 
   const labels: OperationsBoardLabels = {
     eyebrow: t("eyebrow"),
@@ -313,6 +316,11 @@ export default async function ProjectOperationsPage({
             from real planned/actual dates, today marker, overdue highlight,
             mobile list fallback. */}
       <ProjectStageGantt gantt={gantt} />
+
+      {/* Wagon 8 — Project Economics: budget vs actual. Actual cost is read
+            from the canonical finance_records ledger (no second cost ledger);
+            EUR only, honest variance, manager-only. */}
+      <ProjectEconomicsPanel projectId={id} data={economics} />
 
       {/* ── PR G attention: blockers derived ONLY from real records —
             manager-set statuses, open checklist rows, overdue/blocked
