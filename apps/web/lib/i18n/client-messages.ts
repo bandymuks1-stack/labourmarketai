@@ -40,6 +40,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "absences",
   "assets",
   "commercial",
+  "quality",
   "activityCentre",
   "admin",
   "adminPilots",

@@ -1818,7 +1818,9 @@ describe("no migration files added by this sprint", () => {
     // (20260718180000_assets_rls_recursion_fix). RED / owner-authorized.
     // Bumped 152 -> 153 for Wagon 10 Commercial CRM
     // (20260718190000_commercial_crm). RED / owner-authorized.
-    const SPRINT_BASELINE = 153;
+    // Bumped 153 -> 154 for Wagon 11 Delivery & Quality
+    // (20260718200000_delivery_quality). RED / owner-authorized.
+    const SPRINT_BASELINE = 154;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

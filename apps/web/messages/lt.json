@@ -1,4 +1,64 @@
 {
+  "quality": {
+    "title": "Defektai ir kokybė",
+    "honestNote": "Defektas eina per realų ciklą. Niekas nepriimama automatiškai — kiekvieną būseną nustato vadovas. Nuotraukos yra projekto galerijoje.",
+    "preApply": "Defektai ir kokybė bus prieinami, kai bus pritaikytas pridavimo atnaujinimas.",
+    "empty": "Defektų neužfiksuota.",
+    "reportHeading": "Registruoti defektą",
+    "categoryLabel": "Kategorija",
+    "severityLabel": "Sunkumas",
+    "locationLabel": "Vieta",
+    "locationPlaceholder": "pvz., 2 aukštas, 3 kambarys",
+    "descriptionLabel": "Aprašymas",
+    "descriptionPlaceholder": "Kas negerai?",
+    "report": "Registruoti",
+    "saving": "Išsaugoma…",
+    "statusLabel": "Būsena",
+    "addCorrection": "Pridėti taisymą",
+    "delete": "Pašalinti",
+    "workLabel": "Atliktas darbas",
+    "workPlaceholder": "Kaip ištaisyta?",
+    "outcomeLabel": "Rezultatas",
+    "save": "Išsaugoti",
+    "category": {
+      "workmanship": "Darbo kokybė",
+      "materials": "Medžiagos",
+      "safety": "Sauga",
+      "documentation": "Dokumentai",
+      "other": "Kita"
+    },
+    "severity": {
+      "low": "Žemas",
+      "medium": "Vidutinis",
+      "high": "Aukštas",
+      "critical": "Kritinis"
+    },
+    "status": {
+      "reported": "Registruotas",
+      "acknowledged": "Pripažintas",
+      "assigned": "Priskirtas",
+      "in_correction": "Taisoma",
+      "ready_for_review": "Peržiūrai",
+      "accepted": "Priimtas",
+      "reopened": "Vėl atvertas",
+      "rejected": "Atmestas",
+      "cancelled": "Atšauktas"
+    },
+    "correctionOutcome": {
+      "pending": "Laukiama",
+      "passed": "Praėjo",
+      "failed": "Nepraėjo"
+    },
+    "outcome": {
+      "saved": "Išsaugota.",
+      "reported": "Defektas užregistruotas.",
+      "needs_migration": "Dar neprieinama — pridavimo atnaujinimas nepritaikytas.",
+      "invalid": "Patikrinkite duomenis.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Defektus galite valdyti tik savo projektuose.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    }
+  },
   "commercial": {
     "pageTitle": "Komercija",
     "pageIntro": "Jūsų pasiūlymai ir sutartys, susieti su poreikiais ir projektais. Sąskaitos ir mokėjimai registruojami Finansuose.",

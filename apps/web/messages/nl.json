@@ -1,4 +1,64 @@
 {
+  "quality": {
+    "title": "Gebreken & kwaliteit",
+    "honestNote": "Een gebrek volgt een echte levenscyclus. Niets wordt automatisch geaccepteerd — een manager zet elke status. Foto's staan in de projectgalerij.",
+    "preApply": "Gebreken & kwaliteit is beschikbaar zodra de opleverupdate is toegepast.",
+    "empty": "Geen gebreken vastgelegd.",
+    "reportHeading": "Gebrek melden",
+    "categoryLabel": "Categorie",
+    "severityLabel": "Ernst",
+    "locationLabel": "Locatie",
+    "locationPlaceholder": "bijv. Verdieping 2, kamer 3",
+    "descriptionLabel": "Omschrijving",
+    "descriptionPlaceholder": "Wat is er mis?",
+    "report": "Melden",
+    "saving": "Opslaan…",
+    "statusLabel": "Status",
+    "addCorrection": "Correctie toevoegen",
+    "delete": "Verwijderen",
+    "workLabel": "Uitgevoerd werk",
+    "workPlaceholder": "Wat is er gedaan om het op te lossen?",
+    "outcomeLabel": "Resultaat",
+    "save": "Opslaan",
+    "category": {
+      "workmanship": "Vakmanschap",
+      "materials": "Materialen",
+      "safety": "Veiligheid",
+      "documentation": "Documentatie",
+      "other": "Overig"
+    },
+    "severity": {
+      "low": "Laag",
+      "medium": "Middel",
+      "high": "Hoog",
+      "critical": "Kritiek"
+    },
+    "status": {
+      "reported": "Gemeld",
+      "acknowledged": "Erkend",
+      "assigned": "Toegewezen",
+      "in_correction": "In herstel",
+      "ready_for_review": "Klaar voor review",
+      "accepted": "Geaccepteerd",
+      "reopened": "Heropend",
+      "rejected": "Afgewezen",
+      "cancelled": "Geannuleerd"
+    },
+    "correctionOutcome": {
+      "pending": "In afwachting",
+      "passed": "Geslaagd",
+      "failed": "Mislukt"
+    },
+    "outcome": {
+      "saved": "Opgeslagen.",
+      "reported": "Gebrek gemeld.",
+      "needs_migration": "Nog niet beschikbaar — de opleverupdate is niet toegepast.",
+      "invalid": "Controleer de gegevens.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "U kunt alleen gebreken van uw eigen projecten beheren.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
+  },
   "commercial": {
     "pageTitle": "Commercieel",
     "pageIntro": "Uw offertes en contracten, gekoppeld aan vraag en projecten. Facturen en betalingen worden vastgelegd in Financiën.",

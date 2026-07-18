@@ -1,4 +1,64 @@
 {
+  "quality": {
+    "title": "Defects & quality",
+    "honestNote": "A defect follows a real lifecycle. Nothing is auto-accepted — a manager sets each status. Photos live in the project gallery.",
+    "preApply": "Defects & quality will be available once the delivery update is applied.",
+    "empty": "No defects logged.",
+    "reportHeading": "Report a defect",
+    "categoryLabel": "Category",
+    "severityLabel": "Severity",
+    "locationLabel": "Location",
+    "locationPlaceholder": "e.g. Floor 2, room 3",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What is wrong?",
+    "report": "Report",
+    "saving": "Saving…",
+    "statusLabel": "Status",
+    "addCorrection": "Add correction",
+    "delete": "Remove",
+    "workLabel": "Work performed",
+    "workPlaceholder": "What was done to fix it?",
+    "outcomeLabel": "Outcome",
+    "save": "Save",
+    "category": {
+      "workmanship": "Workmanship",
+      "materials": "Materials",
+      "safety": "Safety",
+      "documentation": "Documentation",
+      "other": "Other"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "status": {
+      "reported": "Reported",
+      "acknowledged": "Acknowledged",
+      "assigned": "Assigned",
+      "in_correction": "In correction",
+      "ready_for_review": "Ready for review",
+      "accepted": "Accepted",
+      "reopened": "Reopened",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "correctionOutcome": {
+      "pending": "Pending",
+      "passed": "Passed",
+      "failed": "Failed"
+    },
+    "outcome": {
+      "saved": "Saved.",
+      "reported": "Defect reported.",
+      "needs_migration": "Not available yet — the delivery update is not applied.",
+      "invalid": "Please check the details.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You can only manage defects on your own projects.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "commercial": {
     "pageTitle": "Commercial",
     "pageIntro": "Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",

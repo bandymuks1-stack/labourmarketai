@@ -1,4 +1,64 @@
 {
+  "quality": {
+    "title": "Mängel & Qualität",
+    "honestNote": "Ein Mangel folgt einem echten Lebenszyklus. Nichts wird automatisch akzeptiert — ein Manager setzt jeden Status. Fotos liegen in der Projektgalerie.",
+    "preApply": "Mängel & Qualität ist verfügbar, sobald das Übergabe-Update angewendet ist.",
+    "empty": "Keine Mängel erfasst.",
+    "reportHeading": "Mangel melden",
+    "categoryLabel": "Kategorie",
+    "severityLabel": "Schweregrad",
+    "locationLabel": "Ort",
+    "locationPlaceholder": "z. B. 2. Etage, Raum 3",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Was ist falsch?",
+    "report": "Melden",
+    "saving": "Speichern…",
+    "statusLabel": "Status",
+    "addCorrection": "Korrektur hinzufügen",
+    "delete": "Entfernen",
+    "workLabel": "Ausgeführte Arbeit",
+    "workPlaceholder": "Was wurde zur Behebung getan?",
+    "outcomeLabel": "Ergebnis",
+    "save": "Speichern",
+    "category": {
+      "workmanship": "Ausführung",
+      "materials": "Material",
+      "safety": "Sicherheit",
+      "documentation": "Dokumentation",
+      "other": "Sonstiges"
+    },
+    "severity": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "critical": "Kritisch"
+    },
+    "status": {
+      "reported": "Gemeldet",
+      "acknowledged": "Anerkannt",
+      "assigned": "Zugewiesen",
+      "in_correction": "In Korrektur",
+      "ready_for_review": "Bereit zur Prüfung",
+      "accepted": "Akzeptiert",
+      "reopened": "Wiedereröffnet",
+      "rejected": "Abgelehnt",
+      "cancelled": "Storniert"
+    },
+    "correctionOutcome": {
+      "pending": "Ausstehend",
+      "passed": "Bestanden",
+      "failed": "Fehlgeschlagen"
+    },
+    "outcome": {
+      "saved": "Gespeichert.",
+      "reported": "Mangel gemeldet.",
+      "needs_migration": "Noch nicht verfügbar — das Übergabe-Update ist nicht angewendet.",
+      "invalid": "Bitte prüfen Sie die Angaben.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie können nur Mängel Ihrer eigenen Projekte verwalten.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
   "commercial": {
     "pageTitle": "Kommerziell",
     "pageIntro": "Ihre Angebote und Verträge, verknüpft mit Bedarf und Projekten. Rechnungen und Zahlungen werden in Finanzen erfasst.",

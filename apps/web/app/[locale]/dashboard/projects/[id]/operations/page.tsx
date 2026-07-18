@@ -33,6 +33,8 @@ import { listProjectStages } from "@/lib/projects/stages";
 import { buildStageGantt, type StageGantt } from "@/lib/projects/stage-gantt";
 import { getProjectEconomics } from "@/lib/economics/economics";
 import { getProjectAssets } from "@/lib/assets/assets";
+import { ProjectDefectsPanel } from "@/components/app/project-defects-panel";
+import { getProjectDefects } from "@/lib/quality/quality";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
 
@@ -113,6 +115,7 @@ export default async function ProjectOperationsPage({
     : { hasTimeline: false };
   const economics = await getProjectEconomics(id);
   const projectAssets = await getProjectAssets(id);
+  const defects = await getProjectDefects(id);
   const tAssets = await getTranslations("assets");
 
   const labels: OperationsBoardLabels = {
@@ -345,6 +348,10 @@ export default async function ProjectOperationsPage({
           </Link>
         </section>
       )}
+
+      {/* Wagon 11 — Delivery & Quality: defects + corrections for this project.
+            Manager-only; nothing is auto-accepted. */}
+      <ProjectDefectsPanel projectId={id} data={defects} />
 
       {/* ── PR G attention: blockers derived ONLY from real records —
             manager-set statuses, open checklist rows, overdue/blocked
