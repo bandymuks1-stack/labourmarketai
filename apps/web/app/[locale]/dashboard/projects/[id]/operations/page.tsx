@@ -32,6 +32,7 @@ import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel"
 import { listProjectStages } from "@/lib/projects/stages";
 import { buildStageGantt, type StageGantt } from "@/lib/projects/stage-gantt";
 import { getProjectEconomics } from "@/lib/economics/economics";
+import { getProjectAssets } from "@/lib/assets/assets";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
 
@@ -111,6 +112,8 @@ export default async function ProjectOperationsPage({
     ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
     : { hasTimeline: false };
   const economics = await getProjectEconomics(id);
+  const projectAssets = await getProjectAssets(id);
+  const tAssets = await getTranslations("assets");
 
   const labels: OperationsBoardLabels = {
     eyebrow: t("eyebrow"),
@@ -321,6 +324,27 @@ export default async function ProjectOperationsPage({
             from the canonical finance_records ledger (no second cost ledger);
             EUR only, honest variance, manager-only. */}
       <ProjectEconomicsPanel projectId={id} data={economics} />
+
+      {/* Wagon 9 — Assets & Logistics: read-only view of the assets currently
+            assigned to THIS project (managed on /dashboard/assets). */}
+      {projectAssets.applied && projectAssets.assets.length > 0 && (
+        <section className="card-border flex flex-col gap-3 p-5" data-testid="project-assets">
+          <h2 className={sectionTitleClass}>{tAssets("onProjectTitle")}</h2>
+          <ul className="flex flex-col gap-2">
+            {projectAssets.assets.map((a) => (
+              <li key={a.assignmentId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 px-3 py-2" data-testid="project-asset-row">
+                <span className="text-sm text-text-primary">{a.assetName}</span>
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{tAssets(`types.${a.assetType}`)}</span>
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">{tAssets(`assignmentStatus.${a.status}`)}</span>
+                {a.workerName ? <span className="text-xs text-text-muted">· {a.workerName}</span> : null}
+              </li>
+            ))}
+          </ul>
+          <Link href={"/dashboard/assets" as "/dashboard"} className="text-sm text-brand-blue hover:underline" data-testid="project-assets-link">
+            {tAssets("manageLink")} →
+          </Link>
+        </section>
+      )}
 
       {/* ── PR G attention: blockers derived ONLY from real records —
             manager-set statuses, open checklist rows, overdue/blocked

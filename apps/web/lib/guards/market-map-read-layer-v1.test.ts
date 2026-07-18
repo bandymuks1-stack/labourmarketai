@@ -307,6 +307,7 @@ describe("NO new DB migration in this PR", () => {
     // (20260718140000_project_operations_stages). RED / owner-authorized.
     // Bumped 148 -> 149 for Wagon 7 Workforce (Leave/Absence).
     // Bumped 149 -> 150 for Wagon 8 Project Economics (project_budgets).
-    expect(count).toBeLessThanOrEqual(150);
+    // Bumped 150 -> 151 for Wagon 9 Assets & Logistics.
+    expect(count).toBeLessThanOrEqual(151);
   });
 });

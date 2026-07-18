@@ -1,4 +1,71 @@
 {
+  "assets": {
+    "pageTitle": "Middelen & logistiek",
+    "pageIntro": "Beheer gereedschap, uitrusting en voertuigen van uw organisatie: geef ze uit aan een project of werknemer en leg ontvangst, overdracht en teruggave vast.",
+    "registryTitle": "Middelenregister",
+    "honestNote": "Conditie en beschikbaarheid tonen alleen wat u invoert. Geen locatievolging.",
+    "preApply": "Middelen & logistiek is beschikbaar zodra de middelen-update is toegepast.",
+    "noOrg": "U beheert nog geen organisatie, dus er is geen middelenregister.",
+    "empty": "Nog geen middelen. Voeg hieronder het eerste toe.",
+    "addHeading": "Middel toevoegen",
+    "orgLabel": "Organisatie",
+    "typeLabel": "Type",
+    "nameLabel": "Naam",
+    "namePlaceholder": "bijv. Hilti-boor",
+    "serialLabel": "Serie / kenteken",
+    "serialPlaceholder": "Serie / kenteken",
+    "add": "Toevoegen",
+    "saving": "Opslaan…",
+    "issue": "Uitgeven",
+    "return": "Retourneren",
+    "transfer": "Overdragen",
+    "acknowledge": "Ontvangst bevestigen",
+    "assignedTo": "Toegewezen aan",
+    "conditionLabel": "Conditie",
+    "conditionAtReturn": "Conditie bij teruggave",
+    "projectLabel": "Project",
+    "workerLabel": "Werknemer",
+    "noProject": "Geen project",
+    "noWorker": "Geen werknemer",
+    "myAssetsTitle": "Aan mij toegewezen middelen",
+    "onProjectTitle": "Middelen op dit project",
+    "manageLink": "Middelen beheren",
+    "types": {
+      "tool": "Gereedschap",
+      "equipment": "Uitrusting",
+      "vehicle": "Voertuig",
+      "safety_equipment": "Veiligheidsuitrusting"
+    },
+    "conditions": {
+      "new": "Nieuw",
+      "good": "Goed",
+      "fair": "Redelijk",
+      "poor": "Slecht",
+      "damaged": "Beschadigd",
+      "unknown": "Onbekend"
+    },
+    "availability": {
+      "available": "Beschikbaar",
+      "assigned": "Toegewezen",
+      "maintenance": "Onderhoud",
+      "retired": "Afgeschreven"
+    },
+    "assignmentStatus": {
+      "issued": "Uitgegeven",
+      "acknowledged": "Bevestigd",
+      "transferred": "Overgedragen",
+      "returned": "Geretourneerd"
+    },
+    "outcome": {
+      "saved": "Opgeslagen.",
+      "acknowledged": "Bevestigd.",
+      "needs_migration": "Nog niet beschikbaar — de middelen-update is niet toegepast.",
+      "invalid": "Controleer de gegevens.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "Je mag dit niet doen.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
+  },
   "projectEconomics": {
     "title": "Budget & economie",
     "honestNote": "Budget is uw geplande basis. Werkelijke kosten komen uit het financieel grootboek (uitgaven + ontvangen facturen, EUR) — geen verzonnen cijfers.",
