@@ -18,6 +18,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
 import { WAVE2B_ANSWERS } from "@/content/answer-engine/wave2b-answers";
 import { WAVE2C_ANSWERS } from "@/content/answer-engine/wave2c-answers";
+import { WAVE2D_ANSWERS } from "@/content/answer-engine/wave2d-answers";
 
 /** Route segments that a question slug may NEVER take (reserved). */
 export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
@@ -33,6 +34,17 @@ export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
  * publicly on the answer page. Only official/primary hosts belong here — a
  * public forum thread is a discovery signal, never an evidence source.
  */
+/** Kind of official/primary source. A public forum is NEVER one of these. */
+export type EvidenceSourceType =
+  | "EU_OFFICIAL"
+  | "NATIONAL_OFFICIAL"
+  | "INTERNATIONAL_ORGANIZATION"
+  | "PRIMARY_RESEARCH"
+  | "PRODUCT_DOCUMENTATION";
+
+/** How quickly the cited source's content changes (drives re-check cadence). */
+export type EvidenceFreshnessClass = "evergreen" | "slow-changing" | "volatile";
+
 export interface AnswerEvidenceSource {
   /** Human-readable source title (e.g. "Professional qualifications — Your Europe"). */
   readonly title: string;
@@ -46,6 +58,12 @@ export interface AnswerEvidenceSource {
   readonly publishedOrUpdated?: string;
   /** ISO date an editor last verified this URL resolves and supports the claim. */
   readonly checkedAt: string;
+  /** Classification of the source (Wave 2D+ source contract). */
+  readonly sourceType?: EvidenceSourceType;
+  /** Freshness class driving the re-check cadence (Wave 2D+ source contract). */
+  readonly freshnessClass?: EvidenceFreshnessClass;
+  /** Short list of the specific claims this source backs (Wave 2D+ source contract). */
+  readonly supportsClaims?: readonly string[];
 }
 
 /** A localized, human-reviewed answer for one (question, locale). */
@@ -86,7 +104,12 @@ export interface LocalizedAnswer {
 const REGISTRY_BY_ID = new Map<string, CanonicalQuestion>(
   ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]),
 );
-const ANSWERS: readonly LocalizedAnswer[] = [...PILOT_ANSWERS, ...WAVE2B_ANSWERS, ...WAVE2C_ANSWERS];
+const ANSWERS: readonly LocalizedAnswer[] = [
+  ...PILOT_ANSWERS,
+  ...WAVE2B_ANSWERS,
+  ...WAVE2C_ANSWERS,
+  ...WAVE2D_ANSWERS,
+];
 
 function isComplete(a: LocalizedAnswer): boolean {
   return (
