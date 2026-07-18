@@ -40,8 +40,11 @@ import { activeLocales } from "@/lib/i18n/config";
  *     summary); its only direct table reads are tables the existing libs
  *     already read (projects / workers / booking_requests), bounded; never
  *     the admin client, never a write, never an RPC, never outbound.
- *   - NO FAKE MODELS: no milestone / issue / defect / equipment model is
- *     rendered or claimed — where a real model is absent, nothing renders.
+ *   - NO FAKE MODELS: no milestone / issue / risk model is rendered or claimed
+ *     — where a real model is absent, nothing renders. (Defects became a REAL
+ *     applied model in Wagon 11 — `defects`/`defect_corrections` with real RLS
+ *     and honest degradation — so the defects panel is a genuine composed model,
+ *     not a fake one, and is no longer forbidden here.)
  *   - REAL RATIOS ONLY: readiness ratios are raw counts of real checklist
  *     rows; attention items each trace to one real record; booking overlaps
  *     reuse the planning-model's inclusive accept-guard semantics and count
@@ -200,9 +203,12 @@ describe("1. composition-only: existing RLS-scoped reads, nothing new", () => {
 });
 
 describe("2. no fake models — absent models render NOTHING", () => {
-  it("no milestone / issue / risk / defect / equipment model in the centre code", () => {
+  it("no milestone / issue / risk / equipment model in the centre code", () => {
+    // `defect` dropped in Wagon 11 — defects are now a real applied model
+    // (defects/defect_corrections) rendered via the ProjectDefectsPanel with
+    // honest degradation, exactly like stages/gantt/economics/assets.
     for (const src of CENTRE_LAYER.map(stripComments)) {
-      expect(src).not.toMatch(/milestone|issueRegister|defect|equipment|riskScore/i);
+      expect(src).not.toMatch(/milestone|issueRegister|equipment|riskScore/i);
     }
   });
 
