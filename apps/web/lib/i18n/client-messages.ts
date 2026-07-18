@@ -48,6 +48,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "assist",
   "auth",
   "bookings",
+  "businessProfile",
   "capabilityProfile",
   "commandFinder",
   "common",

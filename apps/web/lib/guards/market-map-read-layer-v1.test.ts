@@ -312,6 +312,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 152 -> 153 for Wagon 10 Commercial CRM.
     // Bumped 153 -> 154 for Wagon 11 Delivery & Quality.
     // Bumped 154 -> 155 for Wagon 13 Marketplace — work-resource listings.
-    expect(count).toBeLessThanOrEqual(155);
+    // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile.
+    expect(count).toBeLessThanOrEqual(156);
   });
 });
