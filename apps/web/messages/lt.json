@@ -1,5 +1,9 @@
 {
   "projectStages": {
+    "ganttTitle": "Laiko juosta (Gantt)",
+    "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",
+    "ganttToday": "Šiandien",
+    "ganttOverdue": "Vėluoja",
     "title": "Projekto etapai",
     "intro": "Nuoseklūs šio projekto etapai — pridėkite etapą, nustatykite realią būseną ir planuojamas datas.",
     "honestNote": "Pažanga rodo tik jūsų įvestą realią būseną ir datas — jokių automatinių ar išgalvotų procentų.",

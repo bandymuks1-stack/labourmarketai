@@ -1,5 +1,9 @@
 {
   "projectStages": {
+    "ganttTitle": "Timeline (Gantt)",
+    "ganttEmpty": "Add planned dates to your stages to see the timeline.",
+    "ganttToday": "Today",
+    "ganttOverdue": "Overdue",
     "title": "Project stages",
     "intro": "Ordered phases of this project — add a stage, set its real status and planned dates.",
     "honestNote": "Progress reflects only the real status and dates you record — no automatic or fabricated completion percentage.",
