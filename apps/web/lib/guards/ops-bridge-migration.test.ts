@@ -389,6 +389,7 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 149 -> 150 for Wagon 8 Project Economics (project_budgets).
     // Bumped 150 -> 151 for Wagon 9 Assets & Logistics.
     // Bumped 151 -> 152 for the Wagon 9 assets RLS recursion fix.
-    expect(guard).toMatch(/SPRINT_BASELINE = 152/);
+    // Bumped 152 -> 153 for Wagon 10 Commercial CRM.
+    expect(guard).toMatch(/SPRINT_BASELINE = 153/);
   });
 });

@@ -1,4 +1,53 @@
 {
+  "commercial": {
+    "pageTitle": "Commercieel",
+    "pageIntro": "Uw offertes en contracten, gekoppeld aan vraag en projecten. Facturen en betalingen worden vastgelegd in Financiën.",
+    "preApply": "Commerciële CRM is beschikbaar zodra de commerciële update is toegepast.",
+    "proposalsTitle": "Offertes",
+    "honestNote": "Een offerte gaat concept → verzonden → geaccepteerd/afgewezen alleen als u dat instelt. Er wordt niets automatisch verzonden.",
+    "proposalsEmpty": "Nog geen offertes.",
+    "addProposal": "Offerte toevoegen",
+    "proposalTitlePlaceholder": "Offertetitel",
+    "contractsTitle": "Contracten",
+    "noSignatureNote": "Contracten bewaren een status en een optionele documentverwijzing. Er wordt geen elektronische handtekening gemaakt of geclaimd.",
+    "contractsEmpty": "Nog geen contracten.",
+    "addContract": "Contract toevoegen",
+    "contractTitlePlaceholder": "Contracttitel",
+    "docRef": "Doc.ref",
+    "docRefLabel": "Documentverwijzing",
+    "docRefPlaceholder": "Ondertekende doc.-referentie (optioneel)",
+    "invoicesTitle": "Facturen & betalingen",
+    "invoicesNote": "Facturen en betalingsregistraties staan in Financiën — handmatig ingevoerd, EUR. Dit platform verplaatst geen geld.",
+    "openFinance": "Financiën openen",
+    "statusLabel": "Status",
+    "titleLabel": "Titel",
+    "amountLabel": "Bedrag (EUR)",
+    "valueLabel": "Waarde (EUR)",
+    "add": "Toevoegen",
+    "saving": "Opslaan…",
+    "delete": "Verwijderen",
+    "proposalStatus": {
+      "draft": "Concept",
+      "sent": "Verzonden",
+      "accepted": "Geaccepteerd",
+      "rejected": "Afgewezen",
+      "withdrawn": "Ingetrokken"
+    },
+    "contractStatus": {
+      "draft": "Concept",
+      "active": "Actief",
+      "completed": "Voltooid",
+      "cancelled": "Geannuleerd"
+    },
+    "outcome": {
+      "saved": "Opgeslagen.",
+      "needs_migration": "Nog niet beschikbaar — de commerciële update is niet toegepast.",
+      "invalid": "Controleer de gegevens.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "U kunt alleen uw eigen records beheren.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
+  },
   "assets": {
     "pageTitle": "Middelen & logistiek",
     "pageIntro": "Beheer gereedschap, uitrusting en voertuigen van uw organisatie: geef ze uit aan een project of werknemer en leg ontvangst, overdracht en teruggave vast.",

@@ -1,4 +1,53 @@
 {
+  "commercial": {
+    "pageTitle": "Komercija",
+    "pageIntro": "Jūsų pasiūlymai ir sutartys, susieti su poreikiais ir projektais. Sąskaitos ir mokėjimai registruojami Finansuose.",
+    "preApply": "Komercijos CRM bus prieinamas, kai bus pritaikytas komercijos atnaujinimas.",
+    "proposalsTitle": "Pasiūlymai",
+    "honestNote": "Pasiūlymas juda juodraštis → išsiųstas → priimtas/atmestas tik jums nustačius. Niekas nesiunčiama automatiškai.",
+    "proposalsEmpty": "Pasiūlymų dar nėra.",
+    "addProposal": "Pridėti pasiūlymą",
+    "proposalTitlePlaceholder": "Pasiūlymo pavadinimas",
+    "contractsTitle": "Sutartys",
+    "noSignatureNote": "Sutartys saugo būseną ir neprivalomą dokumento nuorodą. Elektroninis parašas nekuriamas ir neteigiamas.",
+    "contractsEmpty": "Sutarčių dar nėra.",
+    "addContract": "Pridėti sutartį",
+    "contractTitlePlaceholder": "Sutarties pavadinimas",
+    "docRef": "Dok. nuoroda",
+    "docRefLabel": "Dokumento nuoroda",
+    "docRefPlaceholder": "Pasirašyto dok. nuoroda (nebūtina)",
+    "invoicesTitle": "Sąskaitos ir mokėjimai",
+    "invoicesNote": "Sąskaitos ir mokėjimų įrašai yra Finansuose — registruojami rankiniu būdu, EUR. Ši platforma pinigų neperveda.",
+    "openFinance": "Atverti Finansus",
+    "statusLabel": "Būsena",
+    "titleLabel": "Pavadinimas",
+    "amountLabel": "Suma (EUR)",
+    "valueLabel": "Vertė (EUR)",
+    "add": "Pridėti",
+    "saving": "Išsaugoma…",
+    "delete": "Pašalinti",
+    "proposalStatus": {
+      "draft": "Juodraštis",
+      "sent": "Išsiųstas",
+      "accepted": "Priimtas",
+      "rejected": "Atmestas",
+      "withdrawn": "Atšauktas"
+    },
+    "contractStatus": {
+      "draft": "Juodraštis",
+      "active": "Aktyvi",
+      "completed": "Užbaigta",
+      "cancelled": "Atšaukta"
+    },
+    "outcome": {
+      "saved": "Išsaugota.",
+      "needs_migration": "Dar neprieinama — komercijos atnaujinimas nepritaikytas.",
+      "invalid": "Patikrinkite duomenis.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Galite valdyti tik savo įrašus.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    }
+  },
   "assets": {
     "pageTitle": "Turtas ir logistika",
     "pageIntro": "Valdykite organizacijos įrankius, įrangą ir transportą: išduokite juos projektui ar darbuotojui, registruokite priėmimą, perdavimą ir grąžinimą.",

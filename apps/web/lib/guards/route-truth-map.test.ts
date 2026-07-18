@@ -29,6 +29,9 @@ const CLASSIFICATION: Record<string, string> = {
   // Assets & logistics (Wagon 9) — org asset registry + issue/acknowledge/
   // transfer/return lifecycle over the new assets/asset_assignments stores.
   "dashboard/assets": "REAL_LAUNCH_SURFACE",
+  // Commercial CRM (Wagon 10) — owner-scoped proposals + contracts; invoices/
+  // payments link to the canonical finance layer (not duplicated).
+  "dashboard/commercial": "REAL_LAUNCH_SURFACE",
   "dashboard/account": "REAL_LAUNCH_SURFACE",
   // Unified activity centre (control room PR C) — spine-only aggregation.
   "dashboard/activity": "REAL_LAUNCH_SURFACE",

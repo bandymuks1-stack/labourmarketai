@@ -39,6 +39,7 @@ import type { AbstractIntlMessages } from "next-intl";
 export const CLIENT_MESSAGE_ROOTS = [
   "absences",
   "assets",
+  "commercial",
   "activityCentre",
   "admin",
   "adminPilots",

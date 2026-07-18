@@ -1,4 +1,53 @@
 {
+  "commercial": {
+    "pageTitle": "Commercial",
+    "pageIntro": "Your proposals and contracts, linked to demand and projects. Invoices and payments are recorded in Finance.",
+    "preApply": "Commercial CRM will be available once the commercial update is applied.",
+    "proposalsTitle": "Proposals",
+    "honestNote": "A proposal moves draft → sent → accepted/rejected only when you set it. Nothing is sent to anyone automatically.",
+    "proposalsEmpty": "No proposals yet.",
+    "addProposal": "Add a proposal",
+    "proposalTitlePlaceholder": "Proposal title",
+    "contractsTitle": "Contracts",
+    "noSignatureNote": "Contracts store a status and an optional document reference. No electronic signature is created or claimed.",
+    "contractsEmpty": "No contracts yet.",
+    "addContract": "Add a contract",
+    "contractTitlePlaceholder": "Contract title",
+    "docRef": "Doc ref",
+    "docRefLabel": "Document reference",
+    "docRefPlaceholder": "Signed doc reference (optional)",
+    "invoicesTitle": "Invoices & payments",
+    "invoicesNote": "Invoices and payment records live in Finance — recorded manually, EUR. This platform moves no money.",
+    "openFinance": "Open Finance",
+    "statusLabel": "Status",
+    "titleLabel": "Title",
+    "amountLabel": "Amount (EUR)",
+    "valueLabel": "Value (EUR)",
+    "add": "Add",
+    "saving": "Saving…",
+    "delete": "Remove",
+    "proposalStatus": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "contractStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "outcome": {
+      "saved": "Saved.",
+      "needs_migration": "Not available yet — the commercial update is not applied.",
+      "invalid": "Please check the details.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You can only manage your own records.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "assets": {
     "pageTitle": "Assets & logistics",
     "pageIntro": "Track tools, equipment and vehicles owned by your organization: issue them to a project or worker, and record acknowledgement, transfer and return.",
