@@ -2905,7 +2905,7 @@
       "activeWorkers": "Darbuotojų profiliai",
       "liveDemand": "Darbo galimybės",
       "matchesToday": "Nauji veiksmai",
-      "previewNote": "Iliustraciniai skaičiai — ne realūs rodikliai.",
+      "previewNote": "Iliustracinis platformos tinklo aktyvumas — ne tikralaikiai rodikliai.",
       "avgOvr": "Profilio užpildymas"
     }
   },
@@ -4166,9 +4166,9 @@
     "headline": "Ne paprastas CV.",
     "headlineAccent": "Realių įgūdžių ir darbo poreikių atitiktys.",
     "subcopy": "Susikurkite Labourmarket.ai profilį, importuokite CV, pridėkite realius įgūdžius, prieinamumą ir darbo patirtį — kad žmonės, komandos ir įmonės aiškiau matytų, kur jūsų galimybės atitinka realius darbo poreikius vietinėje ir tarptautinėje rinkoje.",
-    "ctaPrimary": "Susikurti profilį",
+    "ctaPrimary": "Sukurti nemokamą darbuotojo profilį",
     "businessNote": "Įmonėms ir darbdaviams ·",
-    "businessLink": "Pradėti darbo poreikį",
+    "businessLink": "Pateikti darbuotojų poreikį",
     "signals": {
       "s1": "Realus profilis",
       "s2": "Įgūdžių įrašai",
@@ -4178,7 +4178,7 @@
   },
   "waitlist": {
     "title": "Įmonėms ir agentūroms",
-    "body_intro": "LabourMarket.ai platforma šiuo metu atvira darbuotojams.",
+    "body_intro": "Įmonės jau dabar gali pateikti darbuotojų poreikį LabourMarket.ai platformoje.",
     "body_detail": "Užsirašykite į sąrašą įmonių (samdymas, darbuotojų valdymas) ir agentūrų (tarpininkavimas) funkcijoms — pranešime, kai jas atidarysime jūsų paskyrai.",
     "body_cta": "Palik el. paštą — pranešime pirmiems.",
     "email_label": "El. paštas",

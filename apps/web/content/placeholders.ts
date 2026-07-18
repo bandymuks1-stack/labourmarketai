@@ -653,22 +653,27 @@ export const placeholders: readonly Placeholder[] = [
   }),
   ...(
     [
+      // Launch-honesty ranges (real-user-launch train, Wagon 2): illustrative
+      // PLATFORM-NETWORK scale, not live real-time totals. Bounded to the owner
+      // ranges — workers 180–420, active needs 25–80, new actions 8–35 — so the
+      // motion never implies traction the platform does not yet have. The old
+      // "318K"/"1,180" cycles overstated scale by ~1000× and are removed.
       [
         "active_workers",
-        "Active workers count",
-        ["318K", "320K", "321K", "323K"],
+        "Worker profiles in the platform network",
+        ["312", "319", "327", "336"],
         SQL("SELECT count(*) FROM workers WHERE availability_status='available'"),
       ],
       [
         "live_demand",
-        "Open job demands count",
-        ["1,180", "1,205", "1,240", "1,262"],
+        "Open workforce needs in the platform network",
+        ["47", "53", "58", "64"],
         SQL("SELECT count(*) FROM job_demands WHERE status='open'"),
       ],
       [
         "matches_today",
-        "Matches produced today",
-        ["84", "97", "112", "129"],
+        "New actions in the platform network",
+        ["18", "24", "29", "33"],
         SQL("SELECT count(*) FROM matches WHERE computed_at::date = now()::date"),
       ],
       [
