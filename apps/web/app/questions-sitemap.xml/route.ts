@@ -1,7 +1,8 @@
 /**
  * Answer Engine — questions sitemap (/questions-sitemap.xml).
  *
- * Emits ONLY indexable (HUMAN_APPROVED, published) answer URLs — capped at 200,
+ * Emits ONLY indexable (HUMAN_APPROVED, published) answer URLs — every one,
+ * bounded only by the sitemaps.org 50,000-per-file safety ceiling —
  * per-locale, with reciprocal hreflang alternates and lastModified from the
  * review date. No preview/noindex URLs, no inactive-locale URLs. Empty until
  * real pilot pages publish. Advertised in /robots.txt as a second Sitemap

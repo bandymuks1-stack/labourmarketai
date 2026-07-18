@@ -8,7 +8,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
 import { CHROME, CATEGORY_LABELS, CTA_FOR_CAPABILITY } from "@/lib/answer-engine/chrome";
-import { RESERVED_QUESTION_SLUGS } from "@/lib/answer-engine/publishing";
+import { RESERVED_QUESTION_SLUGS, publishedParams } from "@/lib/answer-engine/publishing";
 import { ANSWER_SITEMAP_MAX } from "@/lib/answer-engine/answer-seo";
 import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
 import { ANSWER_QUESTIONS } from "@/lib/answer-engine/registry";
@@ -133,8 +133,11 @@ describe("publishing engine — static invariants", () => {
     }
   });
 
-  it("sitemap cap is 200; active-locale set is exactly the 5", () => {
-    expect(ANSWER_SITEMAP_MAX).toBe(200);
+  it("sitemap lists every indexable page (no truncation) within the sitemaps.org limit; 5 active locales", () => {
+    // The cap is a safety ceiling (sitemaps.org 50,000/file), not a content cap:
+    // it must never truncate the real published set.
+    expect(ANSWER_SITEMAP_MAX).toBeLessThanOrEqual(50000);
+    expect(ANSWER_SITEMAP_MAX).toBeGreaterThanOrEqual(publishedParams().length);
     expect([...ANSWER_ENGINE_LOCALES].sort()).toEqual(ACTIVE);
   });
 });
