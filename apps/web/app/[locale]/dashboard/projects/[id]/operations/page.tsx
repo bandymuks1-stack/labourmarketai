@@ -26,6 +26,8 @@ import {
 } from "@/components/app/project-operations-board";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
+import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
+import { listProjectStages } from "@/lib/projects/stages";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { type Role } from "@/lib/auth/actions";
 
@@ -100,6 +102,7 @@ export default async function ProjectOperationsPage({
   }
 
   const { ops, passport, tasks, evidence, housingProvided } = centre;
+  const stages = await listProjectStages(id);
 
   const labels: OperationsBoardLabels = {
     eyebrow: t("eyebrow"),
@@ -294,6 +297,12 @@ export default async function ProjectOperationsPage({
           </span>
         </div>
       </section>
+
+      {/* Wagon 6 — Project Operations Core: ordered stages over the SAME
+            project spine. Managers add stages, set real status and planned
+            dates; no fabricated progress. Honest "not yet available" state
+            while the owner-gated migration is unapplied. */}
+      <ProjectStagesPanel projectId={id} data={stages} />
 
       {/* ── PR G attention: blockers derived ONLY from real records —
             manager-set statuses, open checklist rows, overdue/blocked

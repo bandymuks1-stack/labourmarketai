@@ -1804,7 +1804,11 @@ describe("no migration files added by this sprint", () => {
     // (20260717150000_demand_interest_seen_v1 — worker-only seen-model for
     // demand_interest_signals ack notifications, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    const SPRINT_BASELINE = 147;
+    // Bumped 147 -> 148 for Wagon 6 Project Operations Core slice 1
+    // (20260718140000_project_operations_stages — canonical project_stages over
+    // projects, default-closed RLS, 3 manager-gated SECURITY DEFINER RPCs).
+    // RED / owner-standing-authorized for this train; paired rollback.
+    const SPRINT_BASELINE = 148;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

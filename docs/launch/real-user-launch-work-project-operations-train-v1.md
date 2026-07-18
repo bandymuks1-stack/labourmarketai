@@ -101,9 +101,41 @@ graph TD
 
 ## PR order (per-wagon, small, isolated worktrees)
 
-`Launch honesty (W1+W2, code-only) → W6 Project Operations → W7 Workforce →
-W8 Economics → W9 Assets → W10 Commercial CRM → W11 Delivery & Quality →
-W12 integration`.
+`Launch honesty (W1+W2, code-only) ✅ → Premium visual ✅ → W6 Project
+Operations (stages ▶ / kanban / gantt) → W7 Workforce → W8 Economics →
+W9 Assets → W10 Commercial CRM → W11 Delivery & Quality → W12 integration →
+W13 Marketplace → final integration audit`.
+
+## Wagon 13 — European Work & Business Ecosystem Marketplace (MANDATORY, in-train)
+
+**Not backlog.** Wagon 13 is a mandatory implementation wagon of this train.
+Initial integrated capability, built over canonical entities (no second
+marketplace / search / asset / CRM / messaging / company-profile system):
+
+- **professional service listings** for people and companies (reuse profiles,
+  qualifications, `service_offerings`);
+- **public business showcase profiles** (over `organizations` + trust layer);
+- **work-related sale / rental listings** — accommodation & worker housing,
+  commercial premises, vehicles/transport, tools, equipment, machinery, safety
+  equipment (bounded to work/projects, never generic consumer classifieds);
+- **contact / enquiry flow** via the canonical `conversations` inbox;
+- **search** through the canonical command registry — never a second engine;
+- **project & asset/logistics linkage** (shares canonical asset entities from
+  W9 where appropriate).
+
+Migration surface: additive listing tables + RLS default-closed + SECURITY
+DEFINER write RPCs, one bounded wagon, reversible, applied via MCP after
+validation. Forbidden: consumer-classifieds scope, unrelated personal items.
+
+## Wagon status (this train)
+
+| Wagon | State |
+|---|---|
+| W1+W2 Launch honesty | MERGED_DEPLOYED_GREEN (#814, `8cc61f5e`) |
+| Premium visual | MERGED_DEPLOYED_GREEN (#816, `df96dc4f`) |
+| W6 Project Operations — Project Stages (slice 1) | IN PROGRESS (this PR): additive `project_stages` + RLS + 3 manager RPCs + navigable panel in the project workspace |
+| W6 Kanban (`work_tasks.stage_id`) / Gantt projection | queued (next W6 slices) |
+| W7–W12, W13 marketplace | queued, bounded order above |
 
 ## Owner gates / boundaries (in force under v2)
 

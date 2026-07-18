@@ -1,4 +1,41 @@
 {
+  "projectStages": {
+    "title": "Projekto etapai",
+    "intro": "Nuoseklūs šio projekto etapai — pridėkite etapą, nustatykite realią būseną ir planuojamas datas.",
+    "honestNote": "Pažanga rodo tik jūsų įvestą realią būseną ir datas — jokių automatinių ar išgalvotų procentų.",
+    "preApply": "Projekto etapai bus matomi, kai bus pritaikytas projektų operacijų atnaujinimas.",
+    "empty": "Etapų dar nėra. Pridėkite pirmą etapą žemiau.",
+    "addHeading": "Pridėti etapą",
+    "nameLabel": "Etapo pavadinimas",
+    "namePlaceholder": "pvz., Objekto paruošimas",
+    "plannedStartLabel": "Planuojama pradžia",
+    "plannedEndLabel": "Planuojama pabaiga",
+    "add": "Pridėti etapą",
+    "saving": "Išsaugoma…",
+    "statusLabel": "Būsena",
+    "plannedLabel": "Planuota",
+    "delete": "Pašalinti",
+    "saveBlocked": "Išsaugoti",
+    "blockedReasonLabel": "Blokavimo priežastis",
+    "blockedReasonPlaceholder": "Kodėl šis etapas blokuojamas?",
+    "statuses": {
+      "planned": "Suplanuota",
+      "in_progress": "Vykdoma",
+      "blocked": "Blokuota",
+      "done": "Atlikta",
+      "cancelled": "Atšaukta"
+    },
+    "outcome": {
+      "added": "Etapas pridėtas.",
+      "updated": "Etapas atnaujintas.",
+      "deleted": "Etapas pašalintas.",
+      "needs_migration": "Dar neprieinama — projektų operacijų atnaujinimas nepritaikytas.",
+      "invalid": "Patikrinkite duomenis ir bandykite dar kartą.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Etapus galite valdyti tik savo projektuose.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    }
+  },
   "opportunityDirections": {
     "heading": "Kur dar gali pritaikyti savo įgūdžius",
     "intro": "Pagal tavo profilį ir turimus įgūdžius radome artimas profesines kryptis, kuriose gali turėti daugiau galimybių.",
