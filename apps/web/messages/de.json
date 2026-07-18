@@ -1,4 +1,41 @@
 {
+  "projectStages": {
+    "title": "Projektphasen",
+    "intro": "Aufeinanderfolgende Phasen dieses Projekts — fügen Sie eine Phase hinzu, legen Sie den echten Status und geplante Termine fest.",
+    "honestNote": "Der Fortschritt zeigt nur den von Ihnen erfassten echten Status und Termine — keine automatischen oder erfundenen Prozentwerte.",
+    "preApply": "Projektphasen erscheinen hier, sobald das Projektoperations-Update angewendet ist.",
+    "empty": "Noch keine Phasen. Fügen Sie unten die erste Phase hinzu.",
+    "addHeading": "Phase hinzufügen",
+    "nameLabel": "Phasenname",
+    "namePlaceholder": "z. B. Baustellenvorbereitung",
+    "plannedStartLabel": "Geplanter Beginn",
+    "plannedEndLabel": "Geplantes Ende",
+    "add": "Phase hinzufügen",
+    "saving": "Speichern…",
+    "statusLabel": "Status",
+    "plannedLabel": "Geplant",
+    "delete": "Entfernen",
+    "saveBlocked": "Speichern",
+    "blockedReasonLabel": "Grund der Blockierung",
+    "blockedReasonPlaceholder": "Warum ist diese Phase blockiert?",
+    "statuses": {
+      "planned": "Geplant",
+      "in_progress": "In Arbeit",
+      "blocked": "Blockiert",
+      "done": "Erledigt",
+      "cancelled": "Abgebrochen"
+    },
+    "outcome": {
+      "added": "Phase hinzugefügt.",
+      "updated": "Phase aktualisiert.",
+      "deleted": "Phase entfernt.",
+      "needs_migration": "Noch nicht verfügbar — das Projektoperations-Update ist nicht angewendet.",
+      "invalid": "Bitte prüfen Sie die Angaben und versuchen Sie es erneut.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie können nur Phasen Ihrer eigenen Projekte verwalten.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
   "opportunityDirections": {
     "heading": "Wo Ihre Fähigkeiten noch passen könnten",
     "intro": "Auf Basis Ihres Profils und Ihrer vorhandenen Fähigkeiten haben wir verwandte berufliche Richtungen gefunden, in denen Sie mehr Möglichkeiten haben könnten.",

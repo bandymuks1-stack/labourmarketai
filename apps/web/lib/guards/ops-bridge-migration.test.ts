@@ -383,6 +383,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // 20260717130000_open_markets_countries_draft_v1) + Canonical Ideas
     // Integration v1 (20260717150000_demand_interest_seen_v1). Both DRAFT /
     // needs-human-gate, NOT applied; cross-pin follows product-readiness.
-    expect(guard).toMatch(/SPRINT_BASELINE = 147/);
+    // Bumped 147 -> 148 for Wagon 6 Project Operations Core slice 1
+    // (20260718140000_project_operations_stages). Cross-pin follows.
+    expect(guard).toMatch(/SPRINT_BASELINE = 148/);
   });
 });

@@ -1,4 +1,41 @@
 {
+  "projectStages": {
+    "title": "Projectfasen",
+    "intro": "Opeenvolgende fasen van dit project — voeg een fase toe, stel de echte status en geplande data in.",
+    "honestNote": "Voortgang toont alleen de echte status en data die u invoert — geen automatisch of verzonnen percentage.",
+    "preApply": "Projectfasen verschijnen hier zodra de projectoperaties-update is toegepast.",
+    "empty": "Nog geen fasen. Voeg hieronder de eerste fase toe.",
+    "addHeading": "Fase toevoegen",
+    "nameLabel": "Naam van de fase",
+    "namePlaceholder": "bijv. Voorbereiding locatie",
+    "plannedStartLabel": "Geplande start",
+    "plannedEndLabel": "Gepland einde",
+    "add": "Fase toevoegen",
+    "saving": "Opslaan…",
+    "statusLabel": "Status",
+    "plannedLabel": "Gepland",
+    "delete": "Verwijderen",
+    "saveBlocked": "Opslaan",
+    "blockedReasonLabel": "Reden voor blokkade",
+    "blockedReasonPlaceholder": "Waarom is deze fase geblokkeerd?",
+    "statuses": {
+      "planned": "Gepland",
+      "in_progress": "Bezig",
+      "blocked": "Geblokkeerd",
+      "done": "Voltooid",
+      "cancelled": "Geannuleerd"
+    },
+    "outcome": {
+      "added": "Fase toegevoegd.",
+      "updated": "Fase bijgewerkt.",
+      "deleted": "Fase verwijderd.",
+      "needs_migration": "Nog niet beschikbaar — de projectoperaties-update is niet toegepast.",
+      "invalid": "Controleer de gegevens en probeer opnieuw.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "U kunt alleen fasen van uw eigen projecten beheren.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
+  },
   "opportunityDirections": {
     "heading": "Waar je vaardigheden nog meer passen",
     "intro": "Op basis van je profiel en de vaardigheden die je al hebt, vonden we verwante professionele richtingen waar je meer mogelijkheden kunt hebben.",

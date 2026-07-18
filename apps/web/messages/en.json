@@ -1,4 +1,41 @@
 {
+  "projectStages": {
+    "title": "Project stages",
+    "intro": "Ordered phases of this project — add a stage, set its real status and planned dates.",
+    "honestNote": "Progress reflects only the real status and dates you record — no automatic or fabricated completion percentage.",
+    "preApply": "Project stages will appear here once the project-operations update is applied.",
+    "empty": "No stages yet. Add the first phase below.",
+    "addHeading": "Add a stage",
+    "nameLabel": "Stage name",
+    "namePlaceholder": "e.g. Site preparation",
+    "plannedStartLabel": "Planned start",
+    "plannedEndLabel": "Planned end",
+    "add": "Add stage",
+    "saving": "Saving…",
+    "statusLabel": "Status",
+    "plannedLabel": "Planned",
+    "delete": "Remove",
+    "saveBlocked": "Save",
+    "blockedReasonLabel": "Blocked reason",
+    "blockedReasonPlaceholder": "Why is this stage blocked?",
+    "statuses": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "outcome": {
+      "added": "Stage added.",
+      "updated": "Stage updated.",
+      "deleted": "Stage removed.",
+      "needs_migration": "Not available yet — the project-operations update is not applied.",
+      "invalid": "Please check the details and try again.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You can only manage stages for your own projects.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "opportunityDirections": {
     "heading": "Where else your skills could fit",
     "intro": "Based on your profile and the skills you already have, we found related professional directions where you may have more options.",
