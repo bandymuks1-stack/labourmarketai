@@ -72,6 +72,25 @@ export type CommandEntry = {
 export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Person / worker surfaces ──────────────────────────────────────────
   {
+    id: "commercial",
+    route: "/dashboard/commercial",
+    audience: "public",
+    labels: {
+      en: "Commercial (proposals, contracts)",
+      lt: "Komercija (pasiūlymai, sutartys)",
+      ru: "Коммерция (предложения, договоры)",
+      nl: "Commercieel (offertes, contracten)",
+      de: "Kommerziell (Angebote, Verträge)",
+    },
+    synonyms: {
+      en: ["proposal", "quote", "contract", "crm", "commercial", "deal"],
+      lt: ["pasiūlymas", "sutartis", "komercija", "sandoris"],
+      ru: ["предложение", "договор", "коммерция", "сделка", "crm"],
+      nl: ["offerte", "contract", "commercieel", "deal"],
+      de: ["angebot", "vertrag", "kommerziell", "deal"],
+    },
+  },
+  {
     id: "assets",
     route: "/dashboard/assets",
     audience: "public",

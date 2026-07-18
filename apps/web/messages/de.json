@@ -1,4 +1,53 @@
 {
+  "commercial": {
+    "pageTitle": "Kommerziell",
+    "pageIntro": "Ihre Angebote und Verträge, verknüpft mit Bedarf und Projekten. Rechnungen und Zahlungen werden in Finanzen erfasst.",
+    "preApply": "Kommerzielles CRM ist verfügbar, sobald das kommerzielle Update angewendet ist.",
+    "proposalsTitle": "Angebote",
+    "honestNote": "Ein Angebot geht Entwurf → gesendet → angenommen/abgelehnt nur, wenn Sie es setzen. Es wird nichts automatisch gesendet.",
+    "proposalsEmpty": "Noch keine Angebote.",
+    "addProposal": "Angebot hinzufügen",
+    "proposalTitlePlaceholder": "Angebotstitel",
+    "contractsTitle": "Verträge",
+    "noSignatureNote": "Verträge speichern einen Status und eine optionale Dokumentreferenz. Es wird keine elektronische Signatur erstellt oder behauptet.",
+    "contractsEmpty": "Noch keine Verträge.",
+    "addContract": "Vertrag hinzufügen",
+    "contractTitlePlaceholder": "Vertragstitel",
+    "docRef": "Dok.-Ref.",
+    "docRefLabel": "Dokumentreferenz",
+    "docRefPlaceholder": "Referenz des unterzeichneten Dok. (optional)",
+    "invoicesTitle": "Rechnungen & Zahlungen",
+    "invoicesNote": "Rechnungen und Zahlungsaufzeichnungen liegen in Finanzen — manuell erfasst, EUR. Diese Plattform bewegt kein Geld.",
+    "openFinance": "Finanzen öffnen",
+    "statusLabel": "Status",
+    "titleLabel": "Titel",
+    "amountLabel": "Betrag (EUR)",
+    "valueLabel": "Wert (EUR)",
+    "add": "Hinzufügen",
+    "saving": "Speichern…",
+    "delete": "Entfernen",
+    "proposalStatus": {
+      "draft": "Entwurf",
+      "sent": "Gesendet",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt",
+      "withdrawn": "Zurückgezogen"
+    },
+    "contractStatus": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "outcome": {
+      "saved": "Gespeichert.",
+      "needs_migration": "Noch nicht verfügbar — das kommerzielle Update ist nicht angewendet.",
+      "invalid": "Bitte prüfen Sie die Angaben.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie können nur Ihre eigenen Datensätze verwalten.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
   "assets": {
     "pageTitle": "Betriebsmittel & Logistik",
     "pageIntro": "Verwalten Sie Werkzeuge, Ausrüstung und Fahrzeuge Ihrer Organisation: geben Sie sie an ein Projekt oder einen Mitarbeiter aus und erfassen Sie Empfang, Übergabe und Rückgabe.",
