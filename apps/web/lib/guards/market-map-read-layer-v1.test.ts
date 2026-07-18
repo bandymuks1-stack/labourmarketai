@@ -305,6 +305,7 @@ describe("NO new DB migration in this PR", () => {
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
     // Bumped 147 -> 148 for Wagon 6 Project Operations slice 1
     // (20260718140000_project_operations_stages). RED / owner-authorized.
-    expect(count).toBeLessThanOrEqual(148);
+    // Bumped 148 -> 149 for Wagon 7 Workforce (Leave/Absence).
+    expect(count).toBeLessThanOrEqual(149);
   });
 });

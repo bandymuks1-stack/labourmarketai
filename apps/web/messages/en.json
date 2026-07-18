@@ -1,4 +1,53 @@
 {
+  "absences": {
+    "types": {
+      "annual_leave": "Annual leave",
+      "sickness": "Sick leave",
+      "unpaid": "Unpaid leave",
+      "training": "Training",
+      "other": "Other"
+    },
+    "statuses": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "outcome": {
+      "requested": "Request submitted.",
+      "cancelled": "Request cancelled.",
+      "approved": "Approved.",
+      "rejected": "Rejected.",
+      "needs_migration": "Not available yet — the workforce update is not applied.",
+      "invalid": "Please check the dates and details.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You are not allowed to do that.",
+      "error": "Something went wrong. Please try again."
+    },
+    "pageTitle": "Leave & absence",
+    "pageIntro": "Request time off and track its status. Managers review requests from the workers they manage.",
+    "myTitle": "My leave & absence",
+    "myEmpty": "No requests yet.",
+    "honestNote": "Requests stay 'requested' until a real manager approves them — nothing is auto-approved.",
+    "preApply": "Leave & absence will be available once the workforce update is applied.",
+    "noWorker": "This account has no worker profile yet, so there is nothing to request.",
+    "requestHeading": "Request time off",
+    "typeLabel": "Type",
+    "startLabel": "Start date",
+    "endLabel": "End date",
+    "noteLabel": "Note",
+    "notePlaceholder": "Optional note for your manager",
+    "halfDay": "Half day",
+    "requestButton": "Request",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "managerTitle": "Requests to review",
+    "managerNote": "Approving or rejecting is a real decision — recorded with your name and time.",
+    "managerEmpty": "No pending requests from your workers.",
+    "unknownWorker": "Worker",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
   "projectStages": {
     "ganttTitle": "Timeline (Gantt)",
     "ganttEmpty": "Add planned dates to your stages to see the timeline.",

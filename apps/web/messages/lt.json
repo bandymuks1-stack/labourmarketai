@@ -1,4 +1,53 @@
 {
+  "absences": {
+    "types": {
+      "annual_leave": "Kasmetinės atostogos",
+      "sickness": "Nedarbingumas",
+      "unpaid": "Neapmokamos atostogos",
+      "training": "Mokymai",
+      "other": "Kita"
+    },
+    "statuses": {
+      "requested": "Pateiktas",
+      "approved": "Patvirtintas",
+      "rejected": "Atmestas",
+      "cancelled": "Atšauktas"
+    },
+    "outcome": {
+      "requested": "Prašymas pateiktas.",
+      "cancelled": "Prašymas atšauktas.",
+      "approved": "Patvirtinta.",
+      "rejected": "Atmesta.",
+      "needs_migration": "Dar neprieinama — darbo jėgos atnaujinimas nepritaikytas.",
+      "invalid": "Patikrinkite datas ir duomenis.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Neturite teisės tai atlikti.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    },
+    "pageTitle": "Atostogos ir nebuvimas",
+    "pageIntro": "Pateikite prašymą dėl nebuvimo ir sekite jo būseną. Vadovai peržiūri savo darbuotojų prašymus.",
+    "myTitle": "Mano atostogos ir nebuvimas",
+    "myEmpty": "Prašymų dar nėra.",
+    "honestNote": "Prašymas lieka „pateiktas“, kol jį patvirtins tikras vadovas — niekas nepatvirtinama automatiškai.",
+    "preApply": "Atostogos ir nebuvimas bus prieinami, kai bus pritaikytas darbo jėgos atnaujinimas.",
+    "noWorker": "Ši paskyra dar neturi darbuotojo profilio, todėl nėra ko prašyti.",
+    "requestHeading": "Pateikti prašymą",
+    "typeLabel": "Tipas",
+    "startLabel": "Pradžios data",
+    "endLabel": "Pabaigos data",
+    "noteLabel": "Pastaba",
+    "notePlaceholder": "Neprivaloma pastaba vadovui",
+    "halfDay": "Pusė dienos",
+    "requestButton": "Pateikti",
+    "saving": "Išsaugoma…",
+    "cancel": "Atšaukti",
+    "managerTitle": "Prašymai peržiūrai",
+    "managerNote": "Patvirtinimas ar atmetimas yra tikras sprendimas — įrašomas su jūsų vardu ir laiku.",
+    "managerEmpty": "Nėra laukiančių jūsų darbuotojų prašymų.",
+    "unknownWorker": "Darbuotojas",
+    "approve": "Patvirtinti",
+    "reject": "Atmesti"
+  },
   "projectStages": {
     "ganttTitle": "Laiko juosta (Gantt)",
     "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",

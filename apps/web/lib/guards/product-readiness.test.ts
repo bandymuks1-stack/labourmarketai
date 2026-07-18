@@ -1808,7 +1808,9 @@ describe("no migration files added by this sprint", () => {
     // (20260718140000_project_operations_stages — canonical project_stages over
     // projects, default-closed RLS, 3 manager-gated SECURITY DEFINER RPCs).
     // RED / owner-standing-authorized for this train; paired rollback.
-    const SPRINT_BASELINE = 148;
+    // Bumped 148 -> 149 for Wagon 7 Workforce Operations (Leave/Absence)
+    // (20260718150000_leave_absence). RED / owner-authorized.
+    const SPRINT_BASELINE = 149;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

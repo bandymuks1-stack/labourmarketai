@@ -72,6 +72,25 @@ export type CommandEntry = {
 export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Person / worker surfaces ──────────────────────────────────────────
   {
+    id: "absences",
+    route: "/dashboard/absences",
+    audience: "public",
+    labels: {
+      en: "Leave & absence",
+      lt: "Atostogos ir nebuvimas",
+      ru: "Отпуска и отсутствия",
+      nl: "Verlof & afwezigheid",
+      de: "Urlaub & Abwesenheit",
+    },
+    synonyms: {
+      en: ["leave", "holiday", "time off", "absence", "sick leave", "vacation"],
+      lt: ["atostogos", "nebuvimas", "nedarbingumas", "laisvadienis"],
+      ru: ["отпуск", "отсутствие", "больничный", "выходной"],
+      nl: ["verlof", "vakantie", "afwezigheid", "ziekteverlof"],
+      de: ["urlaub", "abwesenheit", "krankheit", "freistellung"],
+    },
+  },
+  {
     id: "profile",
     route: getModuleRoute("profile"),
     audience: "public",

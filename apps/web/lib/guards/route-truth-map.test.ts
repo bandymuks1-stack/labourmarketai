@@ -23,6 +23,9 @@ import { join, relative, sep } from "node:path";
 const CLASSIFICATION: Record<string, string> = {
   // ── REAL_LAUNCH_SURFACE ────────────────────────────────────────────────
   "dashboard": "REAL_LAUNCH_SURFACE",
+  // Workforce leave & absence (Wagon 7) — worker requests + real manager
+  // approval over the new worker_absences store; honest degradation pre-apply.
+  "dashboard/absences": "REAL_LAUNCH_SURFACE",
   "dashboard/account": "REAL_LAUNCH_SURFACE",
   // Unified activity centre (control room PR C) — spine-only aggregation.
   "dashboard/activity": "REAL_LAUNCH_SURFACE",

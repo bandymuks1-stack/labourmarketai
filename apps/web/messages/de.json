@@ -1,4 +1,53 @@
 {
+  "absences": {
+    "types": {
+      "annual_leave": "Jahresurlaub",
+      "sickness": "Krankheit",
+      "unpaid": "Unbezahlter Urlaub",
+      "training": "Schulung",
+      "other": "Sonstiges"
+    },
+    "statuses": {
+      "requested": "Beantragt",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "cancelled": "Storniert"
+    },
+    "outcome": {
+      "requested": "Antrag eingereicht.",
+      "cancelled": "Antrag storniert.",
+      "approved": "Genehmigt.",
+      "rejected": "Abgelehnt.",
+      "needs_migration": "Noch nicht verfügbar — das Personal-Update ist nicht angewendet.",
+      "invalid": "Bitte prüfen Sie Daten und Angaben.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie dürfen das nicht tun.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    },
+    "pageTitle": "Urlaub & Abwesenheit",
+    "pageIntro": "Beantragen Sie Abwesenheit und verfolgen Sie den Status. Manager prüfen Anträge der von ihnen verwalteten Mitarbeiter.",
+    "myTitle": "Mein Urlaub & Abwesenheit",
+    "myEmpty": "Noch keine Anträge.",
+    "honestNote": "Ein Antrag bleibt „beantragt“, bis ein echter Manager ihn genehmigt — nichts wird automatisch genehmigt.",
+    "preApply": "Urlaub & Abwesenheit ist verfügbar, sobald das Personal-Update angewendet ist.",
+    "noWorker": "Dieses Konto hat noch kein Mitarbeiterprofil, daher gibt es nichts zu beantragen.",
+    "requestHeading": "Abwesenheit beantragen",
+    "typeLabel": "Typ",
+    "startLabel": "Startdatum",
+    "endLabel": "Enddatum",
+    "noteLabel": "Notiz",
+    "notePlaceholder": "Optionale Notiz für Ihren Manager",
+    "halfDay": "Halber Tag",
+    "requestButton": "Beantragen",
+    "saving": "Speichern…",
+    "cancel": "Stornieren",
+    "managerTitle": "Anträge zur Prüfung",
+    "managerNote": "Genehmigen oder Ablehnen ist eine echte Entscheidung — mit Ihrem Namen und Zeit erfasst.",
+    "managerEmpty": "Keine offenen Anträge Ihrer Mitarbeiter.",
+    "unknownWorker": "Mitarbeiter",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen"
+  },
   "projectStages": {
     "ganttTitle": "Zeitleiste (Gantt)",
     "ganttEmpty": "Fügen Sie Ihren Phasen geplante Termine hinzu, um die Zeitleiste zu sehen.",
