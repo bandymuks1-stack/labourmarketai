@@ -1,4 +1,53 @@
 {
+  "absences": {
+    "types": {
+      "annual_leave": "Jaarlijks verlof",
+      "sickness": "Ziekteverlof",
+      "unpaid": "Onbetaald verlof",
+      "training": "Opleiding",
+      "other": "Overig"
+    },
+    "statuses": {
+      "requested": "Aangevraagd",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "cancelled": "Geannuleerd"
+    },
+    "outcome": {
+      "requested": "Aanvraag ingediend.",
+      "cancelled": "Aanvraag geannuleerd.",
+      "approved": "Goedgekeurd.",
+      "rejected": "Afgewezen.",
+      "needs_migration": "Nog niet beschikbaar — de personeelsupdate is niet toegepast.",
+      "invalid": "Controleer de data en gegevens.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "Je mag dit niet doen.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    },
+    "pageTitle": "Verlof & afwezigheid",
+    "pageIntro": "Vraag verlof aan en volg de status. Managers beoordelen aanvragen van de werknemers die zij beheren.",
+    "myTitle": "Mijn verlof & afwezigheid",
+    "myEmpty": "Nog geen aanvragen.",
+    "honestNote": "Een aanvraag blijft 'aangevraagd' totdat een echte manager deze goedkeurt — niets wordt automatisch goedgekeurd.",
+    "preApply": "Verlof & afwezigheid is beschikbaar zodra de personeelsupdate is toegepast.",
+    "noWorker": "Dit account heeft nog geen werknemersprofiel, dus er is niets aan te vragen.",
+    "requestHeading": "Verlof aanvragen",
+    "typeLabel": "Type",
+    "startLabel": "Startdatum",
+    "endLabel": "Einddatum",
+    "noteLabel": "Notitie",
+    "notePlaceholder": "Optionele notitie voor je manager",
+    "halfDay": "Halve dag",
+    "requestButton": "Aanvragen",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren",
+    "managerTitle": "Aanvragen ter beoordeling",
+    "managerNote": "Goedkeuren of afwijzen is een echte beslissing — vastgelegd met je naam en tijd.",
+    "managerEmpty": "Geen openstaande aanvragen van je werknemers.",
+    "unknownWorker": "Werknemer",
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen"
+  },
   "projectStages": {
     "ganttTitle": "Tijdlijn (Gantt)",
     "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",

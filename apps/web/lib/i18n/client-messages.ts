@@ -37,6 +37,7 @@ import type { AbstractIntlMessages } from "next-intl";
  * fails the guard instead of silently rendering raw keys.
  */
 export const CLIENT_MESSAGE_ROOTS = [
+  "absences",
   "activityCentre",
   "admin",
   "adminPilots",

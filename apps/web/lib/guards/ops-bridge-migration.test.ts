@@ -385,6 +385,7 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // needs-human-gate, NOT applied; cross-pin follows product-readiness.
     // Bumped 147 -> 148 for Wagon 6 Project Operations Core slice 1
     // (20260718140000_project_operations_stages). Cross-pin follows.
-    expect(guard).toMatch(/SPRINT_BASELINE = 148/);
+    // Bumped 148 -> 149 for Wagon 7 Workforce (Leave/Absence). Cross-pin follows.
+    expect(guard).toMatch(/SPRINT_BASELINE = 149/);
   });
 });
