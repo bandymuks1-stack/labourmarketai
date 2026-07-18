@@ -15,7 +15,7 @@ import {
   type ProjectStage,
   type ProjectStagesData,
   type StageStatus,
-} from "@/lib/projects/stages";
+} from "@/lib/projects/stages-model";
 
 /**
  * Project stages panel (Wagon 6 — Project Operations Core, slice 1) on the

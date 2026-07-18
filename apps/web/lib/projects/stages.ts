@@ -19,31 +19,21 @@ import { createClient } from "@/lib/supabase/server";
  * "not yet available" state and NOTHING is faked.
  */
 
-export const STAGE_STATUSES = [
-  "planned",
-  "in_progress",
-  "blocked",
-  "done",
-  "cancelled",
-] as const;
-export type StageStatus = (typeof STAGE_STATUSES)[number];
+import {
+  STAGE_STATUSES,
+  isStageStatus,
+  type ProjectStage,
+  type ProjectStagesData,
+  type StageStatus,
+} from "@/lib/projects/stages-model";
 
-export interface ProjectStage {
-  readonly id: string;
-  readonly name: string;
-  readonly stageOrder: number;
-  readonly status: StageStatus;
-  readonly plannedStart: string | null;
-  readonly plannedEnd: string | null;
-  readonly actualStart: string | null;
-  readonly actualEnd: string | null;
-  readonly blockedReason: string | null;
-  readonly completionCriteria: string | null;
-}
-
-export type ProjectStagesData =
-  | { applied: false }
-  | { applied: true; stages: ProjectStage[]; error: string | null };
+export {
+  STAGE_STATUSES,
+  isStageStatus,
+  type ProjectStage,
+  type ProjectStagesData,
+  type StageStatus,
+} from "@/lib/projects/stages-model";
 
 const RELATION_NOT_FOUND_CODE = "42P01";
 const UNDEFINED_COLUMN_CODE = "42703";
@@ -51,10 +41,6 @@ const UNDEFINED_COLUMN_CODE = "42703";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(supabase: SupabaseClient): any {
   return supabase;
-}
-
-export function isStageStatus(v: unknown): v is StageStatus {
-  return typeof v === "string" && (STAGE_STATUSES as readonly string[]).includes(v);
 }
 
 export async function listProjectStages(

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { STAGE_STATUSES } from "@/lib/projects/stages";
+import { STAGE_STATUSES } from "@/lib/projects/stages-model";
 
 /**
  * Project stages write actions (Wagon 6 slice 1).
