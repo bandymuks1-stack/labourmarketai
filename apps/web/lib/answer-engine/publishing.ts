@@ -16,6 +16,7 @@ import { ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
 import type { CanonicalQuestion, AnswerCategoryKey } from "@/lib/answer-engine/contract";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
+import { WAVE2B_ANSWERS } from "@/content/answer-engine/wave2b-answers";
 
 /** Route segments that a question slug may NEVER take (reserved). */
 export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
@@ -56,7 +57,7 @@ export interface LocalizedAnswer {
 const REGISTRY_BY_ID = new Map<string, CanonicalQuestion>(
   ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]),
 );
-const ANSWERS: readonly LocalizedAnswer[] = PILOT_ANSWERS;
+const ANSWERS: readonly LocalizedAnswer[] = [...PILOT_ANSWERS, ...WAVE2B_ANSWERS];
 
 function isComplete(a: LocalizedAnswer): boolean {
   return (

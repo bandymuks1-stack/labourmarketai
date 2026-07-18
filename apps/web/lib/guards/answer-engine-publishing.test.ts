@@ -39,6 +39,9 @@ const FIXTURES = [
 ];
 
 vi.mock("@/content/answer-engine/pilot-answers", () => ({ PILOT_ANSWERS: FIXTURES }));
+// Wave 2B content is a separate module; keep this fixture-driven test isolated
+// from real content so the logic assertions stay pinned to FIXTURES only.
+vi.mock("@/content/answer-engine/wave2b-answers", () => ({ WAVE2B_ANSWERS: [] }));
 vi.mock("@/lib/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: unknown }) =>
     createElement("a", { href }, children as never),
