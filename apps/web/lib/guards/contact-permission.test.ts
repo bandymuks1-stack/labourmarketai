@@ -66,6 +66,7 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_accepted_service_request",
         "allowed_demand_interest",
         "allowed_accepted_booking",
+        "allowed_marketplace_enquiry",
         "no_permission",
       ].sort(),
     );
@@ -160,6 +161,10 @@ describe("no contact without permission — the create path is gated", () => {
       "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
+      // W13 Marketplace — marketplace-enquiry grant, verified server-side
+      // (listing exists, is active, caller is not the owner) before the
+      // conversation opens.
+      "lib/marketplace/listings.ts",
       // Audit PR4 — accepted-service-request grant, verified server-side in
       // the action before the conversation opens.
       "lib/marketplace/service-request-conversation.ts",

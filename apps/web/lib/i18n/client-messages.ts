@@ -81,6 +81,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "marketPulse",
   "marketRecognition",
   "marketplace",
+  "marketplaceListings",
   "messaging",
   "needStructuring",
   "network",
