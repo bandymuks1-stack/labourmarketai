@@ -57,6 +57,7 @@ function StageRow({
         status: next,
         blockedReason: next === "blocked" ? blockedReason.trim() : undefined,
       });
+      if (!res.ok) setStatus(stage.status); // no fake success — revert the badge
       onDone(res.ok ? t("outcome.updated") : t(`outcome.${res.code}`));
     });
   }
