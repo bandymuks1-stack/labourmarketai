@@ -121,17 +121,17 @@ export async function getAssetsOverview(): Promise<AssetsOverview> {
   // Orgs the caller manages (for the create form).
   const orgRes = await asAny(supabase)
     .from("engagement_contexts")
-    .select("organization_id, organizations(name)")
+    .select("organization_id, organizations(display_name)")
     .eq("profile_id", user.id)
     .eq("status", "active")
     .in("relationship_slug", ["manager", "owner", "external_manager"]);
   const orgs: OrgOption[] = [];
   const seenOrg = new Set<string>();
   if (!orgRes.error) {
-    for (const r of (orgRes.data ?? []) as { organization_id: string; organizations?: { name: string | null } | null }[]) {
+    for (const r of (orgRes.data ?? []) as { organization_id: string; organizations?: { display_name: string | null } | null }[]) {
       if (r.organization_id && !seenOrg.has(r.organization_id)) {
         seenOrg.add(r.organization_id);
-        orgs.push({ id: r.organization_id, name: r.organizations?.name ?? r.organization_id });
+        orgs.push({ id: r.organization_id, name: r.organizations?.display_name ?? r.organization_id });
       }
     }
   }
