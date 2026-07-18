@@ -1810,7 +1810,9 @@ describe("no migration files added by this sprint", () => {
     // RED / owner-standing-authorized for this train; paired rollback.
     // Bumped 148 -> 149 for Wagon 7 Workforce Operations (Leave/Absence)
     // (20260718150000_leave_absence). RED / owner-authorized.
-    const SPRINT_BASELINE = 149;
+    // Bumped 149 -> 150 for Wagon 8 Project Economics
+    // (20260718160000_project_budgets). RED / owner-authorized.
+    const SPRINT_BASELINE = 150;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

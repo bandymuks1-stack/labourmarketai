@@ -1,4 +1,56 @@
 {
+  "projectEconomics": {
+    "title": "Budget & Wirtschaftlichkeit",
+    "honestNote": "Das Budget ist Ihre geplante Basis. Ist-Kosten stammen aus dem Finanzjournal (Ausgaben + erhaltene Rechnungen, EUR) — keine erfundenen Zahlen.",
+    "preApply": "Budget & Wirtschaftlichkeit ist verfügbar, sobald das Wirtschaftlichkeits-Update angewendet ist.",
+    "empty": "Noch keine Budgetzeilen. Fügen Sie unten die erste hinzu.",
+    "baseline": "Budgetbasis",
+    "actual": "Ist-Kosten",
+    "variance": "Abweichung",
+    "noBaseline": "Nicht festgelegt",
+    "actualUnavailable": "Journal nicht verfügbar",
+    "actualNote": "Ist-Kosten sind die Summe der EUR-Ausgaben und erhaltenen Rechnungen dieses Projekts. Nicht nach Kategorie aufgeschlüsselt.",
+    "addHeading": "Budgetzeile festlegen",
+    "categoryLabel": "Kategorie",
+    "amountLabel": "Geplanter Betrag (EUR)",
+    "amountPlaceholder": "0,00",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "delete": "Entfernen",
+    "approve": "Genehmigen",
+    "unapprove": "Genehmigung zurücknehmen",
+    "categories": {
+      "labour": "Arbeit",
+      "materials": "Material",
+      "equipment": "Ausrüstung",
+      "transport": "Transport",
+      "accommodation": "Unterkunft",
+      "subcontractors": "Subunternehmer",
+      "overhead": "Gemeinkosten",
+      "contingency": "Reserve",
+      "other": "Sonstiges",
+      "total": "Gesamt (Überschreibung)"
+    },
+    "budgetStatus": {
+      "draft": "Entwurf",
+      "approved": "Genehmigt"
+    },
+    "state": {
+      "over_budget": "Über Budget",
+      "under_budget": "Unter Budget",
+      "on_budget": "Im Budget",
+      "no_baseline": "Keine Basis"
+    },
+    "outcome": {
+      "saved": "Gespeichert.",
+      "deleted": "Entfernt.",
+      "needs_migration": "Noch nicht verfügbar — das Wirtschaftlichkeits-Update ist nicht angewendet.",
+      "invalid": "Bitte geben Sie einen gültigen Betrag ein.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie können nur Budgets Ihrer eigenen Projekte verwalten.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
   "absences": {
     "types": {
       "annual_leave": "Jahresurlaub",

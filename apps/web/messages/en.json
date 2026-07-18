@@ -1,4 +1,56 @@
 {
+  "projectEconomics": {
+    "title": "Budget & economics",
+    "honestNote": "Budget is your planned baseline. Actual cost is read from the finance ledger (expenses + received invoices, EUR) — no invented figures.",
+    "preApply": "Budget & economics will be available once the economics update is applied.",
+    "empty": "No budget lines yet. Add the first below.",
+    "baseline": "Budget baseline",
+    "actual": "Actual cost",
+    "variance": "Variance",
+    "noBaseline": "Not set",
+    "actualUnavailable": "Ledger unavailable",
+    "actualNote": "Actual cost is the sum of EUR expenses and received invoices linked to this project. Not split by category.",
+    "addHeading": "Set a budget line",
+    "categoryLabel": "Category",
+    "amountLabel": "Planned amount (EUR)",
+    "amountPlaceholder": "0.00",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Remove",
+    "approve": "Approve",
+    "unapprove": "Unapprove",
+    "categories": {
+      "labour": "Labour",
+      "materials": "Materials",
+      "equipment": "Equipment",
+      "transport": "Transport",
+      "accommodation": "Accommodation",
+      "subcontractors": "Subcontractors",
+      "overhead": "Overhead",
+      "contingency": "Contingency",
+      "other": "Other",
+      "total": "Total (override)"
+    },
+    "budgetStatus": {
+      "draft": "Draft",
+      "approved": "Approved"
+    },
+    "state": {
+      "over_budget": "Over budget",
+      "under_budget": "Under budget",
+      "on_budget": "On budget",
+      "no_baseline": "No baseline"
+    },
+    "outcome": {
+      "saved": "Saved.",
+      "deleted": "Removed.",
+      "needs_migration": "Not available yet — the economics update is not applied.",
+      "invalid": "Please enter a valid amount.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You can only manage budgets for your own projects.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "absences": {
     "types": {
       "annual_leave": "Annual leave",

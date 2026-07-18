@@ -1,4 +1,56 @@
 {
+  "projectEconomics": {
+    "title": "Biudžetas ir ekonomika",
+    "honestNote": "Biudžetas – jūsų planuojama bazė. Faktinės išlaidos imamos iš finansų žurnalo (išlaidos + gautos sąskaitos, EUR) – jokių išgalvotų skaičių.",
+    "preApply": "Biudžetas ir ekonomika bus prieinami, kai bus pritaikytas ekonomikos atnaujinimas.",
+    "empty": "Biudžeto eilučių dar nėra. Pridėkite pirmą žemiau.",
+    "baseline": "Biudžeto bazė",
+    "actual": "Faktinės išlaidos",
+    "variance": "Nukrypimas",
+    "noBaseline": "Nenustatyta",
+    "actualUnavailable": "Žurnalas neprieinamas",
+    "actualNote": "Faktinės išlaidos – EUR išlaidų ir gautų sąskaitų, susietų su šiuo projektu, suma. Neskaidoma pagal kategorijas.",
+    "addHeading": "Nustatyti biudžeto eilutę",
+    "categoryLabel": "Kategorija",
+    "amountLabel": "Planuojama suma (EUR)",
+    "amountPlaceholder": "0,00",
+    "save": "Išsaugoti",
+    "saving": "Išsaugoma…",
+    "delete": "Pašalinti",
+    "approve": "Patvirtinti",
+    "unapprove": "Atšaukti patvirtinimą",
+    "categories": {
+      "labour": "Darbas",
+      "materials": "Medžiagos",
+      "equipment": "Įranga",
+      "transport": "Transportas",
+      "accommodation": "Apgyvendinimas",
+      "subcontractors": "Subrangovai",
+      "overhead": "Pridėtinės išlaidos",
+      "contingency": "Nenumatytos išlaidos",
+      "other": "Kita",
+      "total": "Iš viso (perrašymas)"
+    },
+    "budgetStatus": {
+      "draft": "Juodraštis",
+      "approved": "Patvirtinta"
+    },
+    "state": {
+      "over_budget": "Viršytas biudžetas",
+      "under_budget": "Neišnaudotas biudžetas",
+      "on_budget": "Pagal biudžetą",
+      "no_baseline": "Nėra bazės"
+    },
+    "outcome": {
+      "saved": "Išsaugota.",
+      "deleted": "Pašalinta.",
+      "needs_migration": "Dar neprieinama — ekonomikos atnaujinimas nepritaikytas.",
+      "invalid": "Įveskite teisingą sumą.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Biudžetus galite valdyti tik savo projektuose.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    }
+  },
   "absences": {
     "types": {
       "annual_leave": "Kasmetinės atostogos",

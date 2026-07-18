@@ -1,4 +1,56 @@
 {
+  "projectEconomics": {
+    "title": "Budget & economie",
+    "honestNote": "Budget is uw geplande basis. Werkelijke kosten komen uit het financieel grootboek (uitgaven + ontvangen facturen, EUR) — geen verzonnen cijfers.",
+    "preApply": "Budget & economie is beschikbaar zodra de economie-update is toegepast.",
+    "empty": "Nog geen budgetregels. Voeg hieronder de eerste toe.",
+    "baseline": "Budgetbasis",
+    "actual": "Werkelijke kosten",
+    "variance": "Afwijking",
+    "noBaseline": "Niet ingesteld",
+    "actualUnavailable": "Grootboek niet beschikbaar",
+    "actualNote": "Werkelijke kosten zijn de som van EUR-uitgaven en ontvangen facturen die aan dit project zijn gekoppeld. Niet uitgesplitst per categorie.",
+    "addHeading": "Budgetregel instellen",
+    "categoryLabel": "Categorie",
+    "amountLabel": "Gepland bedrag (EUR)",
+    "amountPlaceholder": "0,00",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "delete": "Verwijderen",
+    "approve": "Goedkeuren",
+    "unapprove": "Goedkeuring intrekken",
+    "categories": {
+      "labour": "Arbeid",
+      "materials": "Materialen",
+      "equipment": "Uitrusting",
+      "transport": "Transport",
+      "accommodation": "Huisvesting",
+      "subcontractors": "Onderaannemers",
+      "overhead": "Overhead",
+      "contingency": "Onvoorzien",
+      "other": "Overig",
+      "total": "Totaal (overschrijving)"
+    },
+    "budgetStatus": {
+      "draft": "Concept",
+      "approved": "Goedgekeurd"
+    },
+    "state": {
+      "over_budget": "Boven budget",
+      "under_budget": "Onder budget",
+      "on_budget": "Op budget",
+      "no_baseline": "Geen basis"
+    },
+    "outcome": {
+      "saved": "Opgeslagen.",
+      "deleted": "Verwijderd.",
+      "needs_migration": "Nog niet beschikbaar — de economie-update is niet toegepast.",
+      "invalid": "Voer een geldig bedrag in.",
+      "auth": "Log opnieuw in.",
+      "not_authorized": "U kunt alleen budgetten van uw eigen projecten beheren.",
+      "error": "Er ging iets mis. Probeer opnieuw."
+    }
+  },
   "absences": {
     "types": {
       "annual_leave": "Jaarlijks verlof",
