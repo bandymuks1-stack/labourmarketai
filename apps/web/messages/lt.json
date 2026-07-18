@@ -1,4 +1,71 @@
 {
+  "assets": {
+    "pageTitle": "Turtas ir logistika",
+    "pageIntro": "Valdykite organizacijos įrankius, įrangą ir transportą: išduokite juos projektui ar darbuotojui, registruokite priėmimą, perdavimą ir grąžinimą.",
+    "registryTitle": "Turto registras",
+    "honestNote": "Būklė ir prieinamumas rodo tik tai, ką įvedate. Jokio vietos sekimo.",
+    "preApply": "Turtas ir logistika bus prieinami, kai bus pritaikytas turto atnaujinimas.",
+    "noOrg": "Kol kas nevaldote organizacijos, todėl turto registro nėra.",
+    "empty": "Turto dar nėra. Pridėkite pirmą žemiau.",
+    "addHeading": "Pridėti turtą",
+    "orgLabel": "Organizacija",
+    "typeLabel": "Tipas",
+    "nameLabel": "Pavadinimas",
+    "namePlaceholder": "pvz., Hilti gręžtuvas",
+    "serialLabel": "Serija / reg.",
+    "serialPlaceholder": "Serija / numeris",
+    "add": "Pridėti",
+    "saving": "Išsaugoma…",
+    "issue": "Išduoti",
+    "return": "Grąžinti",
+    "transfer": "Perduoti",
+    "acknowledge": "Patvirtinti gavimą",
+    "assignedTo": "Priskirta",
+    "conditionLabel": "Būklė",
+    "conditionAtReturn": "Būklė grąžinant",
+    "projectLabel": "Projektas",
+    "workerLabel": "Darbuotojas",
+    "noProject": "Be projekto",
+    "noWorker": "Be darbuotojo",
+    "myAssetsTitle": "Man priskirtas turtas",
+    "onProjectTitle": "Šio projekto turtas",
+    "manageLink": "Valdyti turtą",
+    "types": {
+      "tool": "Įrankis",
+      "equipment": "Įranga",
+      "vehicle": "Transportas",
+      "safety_equipment": "Sauga"
+    },
+    "conditions": {
+      "new": "Naujas",
+      "good": "Geras",
+      "fair": "Vidutinis",
+      "poor": "Prastas",
+      "damaged": "Sugadintas",
+      "unknown": "Nežinoma"
+    },
+    "availability": {
+      "available": "Laisvas",
+      "assigned": "Priskirtas",
+      "maintenance": "Priežiūra",
+      "retired": "Nurašytas"
+    },
+    "assignmentStatus": {
+      "issued": "Išduotas",
+      "acknowledged": "Patvirtintas",
+      "transferred": "Perduotas",
+      "returned": "Grąžintas"
+    },
+    "outcome": {
+      "saved": "Išsaugota.",
+      "acknowledged": "Patvirtinta.",
+      "needs_migration": "Dar neprieinama — turto atnaujinimas nepritaikytas.",
+      "invalid": "Patikrinkite duomenis.",
+      "auth": "Prisijunkite iš naujo.",
+      "not_authorized": "Neturite teisės tai atlikti.",
+      "error": "Įvyko klaida. Bandykite dar kartą."
+    }
+  },
   "projectEconomics": {
     "title": "Biudžetas ir ekonomika",
     "honestNote": "Biudžetas – jūsų planuojama bazė. Faktinės išlaidos imamos iš finansų žurnalo (išlaidos + gautos sąskaitos, EUR) – jokių išgalvotų skaičių.",

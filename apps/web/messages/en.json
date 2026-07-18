@@ -1,4 +1,71 @@
 {
+  "assets": {
+    "pageTitle": "Assets & logistics",
+    "pageIntro": "Track tools, equipment and vehicles owned by your organization: issue them to a project or worker, and record acknowledgement, transfer and return.",
+    "registryTitle": "Asset registry",
+    "honestNote": "Condition and availability reflect only what you record. No location tracking.",
+    "preApply": "Assets & logistics will be available once the assets update is applied.",
+    "noOrg": "You don't manage an organization yet, so there is no asset registry.",
+    "empty": "No assets yet. Add the first below.",
+    "addHeading": "Add an asset",
+    "orgLabel": "Organization",
+    "typeLabel": "Type",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Hilti drill",
+    "serialLabel": "Serial / reg.",
+    "serialPlaceholder": "Serial / plate",
+    "add": "Add asset",
+    "saving": "Saving…",
+    "issue": "Issue",
+    "return": "Return",
+    "transfer": "Transfer",
+    "acknowledge": "Acknowledge receipt",
+    "assignedTo": "Assigned to",
+    "conditionLabel": "Condition",
+    "conditionAtReturn": "Condition at return",
+    "projectLabel": "Project",
+    "workerLabel": "Worker",
+    "noProject": "No project",
+    "noWorker": "No worker",
+    "myAssetsTitle": "Assets assigned to me",
+    "onProjectTitle": "Assets on this project",
+    "manageLink": "Manage assets",
+    "types": {
+      "tool": "Tool",
+      "equipment": "Equipment",
+      "vehicle": "Vehicle",
+      "safety_equipment": "Safety equipment"
+    },
+    "conditions": {
+      "new": "New",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "damaged": "Damaged",
+      "unknown": "Unknown"
+    },
+    "availability": {
+      "available": "Available",
+      "assigned": "Assigned",
+      "maintenance": "Maintenance",
+      "retired": "Retired"
+    },
+    "assignmentStatus": {
+      "issued": "Issued",
+      "acknowledged": "Acknowledged",
+      "transferred": "Transferred",
+      "returned": "Returned"
+    },
+    "outcome": {
+      "saved": "Saved.",
+      "acknowledged": "Acknowledged.",
+      "needs_migration": "Not available yet — the assets update is not applied.",
+      "invalid": "Please check the details.",
+      "auth": "Please sign in again.",
+      "not_authorized": "You are not allowed to do that.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "projectEconomics": {
     "title": "Budget & economics",
     "honestNote": "Budget is your planned baseline. Actual cost is read from the finance ledger (expenses + received invoices, EUR) — no invented figures.",

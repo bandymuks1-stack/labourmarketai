@@ -26,6 +26,9 @@ const CLASSIFICATION: Record<string, string> = {
   // Workforce leave & absence (Wagon 7) — worker requests + real manager
   // approval over the new worker_absences store; honest degradation pre-apply.
   "dashboard/absences": "REAL_LAUNCH_SURFACE",
+  // Assets & logistics (Wagon 9) — org asset registry + issue/acknowledge/
+  // transfer/return lifecycle over the new assets/asset_assignments stores.
+  "dashboard/assets": "REAL_LAUNCH_SURFACE",
   "dashboard/account": "REAL_LAUNCH_SURFACE",
   // Unified activity centre (control room PR C) — spine-only aggregation.
   "dashboard/activity": "REAL_LAUNCH_SURFACE",

@@ -1,4 +1,71 @@
 {
+  "assets": {
+    "pageTitle": "Betriebsmittel & Logistik",
+    "pageIntro": "Verwalten Sie Werkzeuge, Ausrüstung und Fahrzeuge Ihrer Organisation: geben Sie sie an ein Projekt oder einen Mitarbeiter aus und erfassen Sie Empfang, Übergabe und Rückgabe.",
+    "registryTitle": "Betriebsmittelregister",
+    "honestNote": "Zustand und Verfügbarkeit zeigen nur, was Sie erfassen. Keine Standortverfolgung.",
+    "preApply": "Betriebsmittel & Logistik ist verfügbar, sobald das Betriebsmittel-Update angewendet ist.",
+    "noOrg": "Sie verwalten noch keine Organisation, daher gibt es kein Register.",
+    "empty": "Noch keine Betriebsmittel. Fügen Sie unten das erste hinzu.",
+    "addHeading": "Betriebsmittel hinzufügen",
+    "orgLabel": "Organisation",
+    "typeLabel": "Typ",
+    "nameLabel": "Name",
+    "namePlaceholder": "z. B. Hilti-Bohrer",
+    "serialLabel": "Serien-/Kennz.",
+    "serialPlaceholder": "Serie / Kennzeichen",
+    "add": "Hinzufügen",
+    "saving": "Speichern…",
+    "issue": "Ausgeben",
+    "return": "Zurückgeben",
+    "transfer": "Übertragen",
+    "acknowledge": "Empfang bestätigen",
+    "assignedTo": "Zugewiesen an",
+    "conditionLabel": "Zustand",
+    "conditionAtReturn": "Zustand bei Rückgabe",
+    "projectLabel": "Projekt",
+    "workerLabel": "Mitarbeiter",
+    "noProject": "Kein Projekt",
+    "noWorker": "Kein Mitarbeiter",
+    "myAssetsTitle": "Mir zugewiesene Betriebsmittel",
+    "onProjectTitle": "Betriebsmittel in diesem Projekt",
+    "manageLink": "Betriebsmittel verwalten",
+    "types": {
+      "tool": "Werkzeug",
+      "equipment": "Ausrüstung",
+      "vehicle": "Fahrzeug",
+      "safety_equipment": "Schutzausrüstung"
+    },
+    "conditions": {
+      "new": "Neu",
+      "good": "Gut",
+      "fair": "Mittel",
+      "poor": "Schlecht",
+      "damaged": "Beschädigt",
+      "unknown": "Unbekannt"
+    },
+    "availability": {
+      "available": "Verfügbar",
+      "assigned": "Zugewiesen",
+      "maintenance": "Wartung",
+      "retired": "Ausgemustert"
+    },
+    "assignmentStatus": {
+      "issued": "Ausgegeben",
+      "acknowledged": "Bestätigt",
+      "transferred": "Übertragen",
+      "returned": "Zurückgegeben"
+    },
+    "outcome": {
+      "saved": "Gespeichert.",
+      "acknowledged": "Bestätigt.",
+      "needs_migration": "Noch nicht verfügbar — das Betriebsmittel-Update ist nicht angewendet.",
+      "invalid": "Bitte prüfen Sie die Angaben.",
+      "auth": "Bitte erneut anmelden.",
+      "not_authorized": "Sie dürfen das nicht tun.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
   "projectEconomics": {
     "title": "Budget & Wirtschaftlichkeit",
     "honestNote": "Das Budget ist Ihre geplante Basis. Ist-Kosten stammen aus dem Finanzjournal (Ausgaben + erhaltene Rechnungen, EUR) — keine erfundenen Zahlen.",

@@ -387,6 +387,7 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260718140000_project_operations_stages). Cross-pin follows.
     // Bumped 148 -> 149 for Wagon 7 Workforce (Leave/Absence). Cross-pin follows.
     // Bumped 149 -> 150 for Wagon 8 Project Economics (project_budgets).
-    expect(guard).toMatch(/SPRINT_BASELINE = 150/);
+    // Bumped 150 -> 151 for Wagon 9 Assets & Logistics.
+    expect(guard).toMatch(/SPRINT_BASELINE = 151/);
   });
 });

@@ -1812,7 +1812,9 @@ describe("no migration files added by this sprint", () => {
     // (20260718150000_leave_absence). RED / owner-authorized.
     // Bumped 149 -> 150 for Wagon 8 Project Economics
     // (20260718160000_project_budgets). RED / owner-authorized.
-    const SPRINT_BASELINE = 150;
+    // Bumped 150 -> 151 for Wagon 9 Assets & Logistics
+    // (20260718170000_assets_logistics). RED / owner-authorized.
+    const SPRINT_BASELINE = 151;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

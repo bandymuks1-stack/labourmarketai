@@ -72,6 +72,25 @@ export type CommandEntry = {
 export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   // ── Person / worker surfaces ──────────────────────────────────────────
   {
+    id: "assets",
+    route: "/dashboard/assets",
+    audience: "public",
+    labels: {
+      en: "Assets & logistics",
+      lt: "Turtas ir logistika",
+      ru: "Активы и логистика",
+      nl: "Middelen & logistiek",
+      de: "Betriebsmittel & Logistik",
+    },
+    synonyms: {
+      en: ["assets", "tools", "equipment", "vehicles", "logistics", "issue", "return"],
+      lt: ["turtas", "įrankiai", "įranga", "transportas", "logistika"],
+      ru: ["активы", "инструменты", "оборудование", "транспорт", "логистика"],
+      nl: ["middelen", "gereedschap", "uitrusting", "voertuigen", "logistiek"],
+      de: ["betriebsmittel", "werkzeuge", "ausrüstung", "fahrzeuge", "logistik"],
+    },
+  },
+  {
     id: "absences",
     route: "/dashboard/absences",
     audience: "public",
