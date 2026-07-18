@@ -68,6 +68,16 @@ const GATED_CALLERS: ReadonlyArray<
  *  resolved server-side inside getOrCreateDirectConversation itself. */
 const GENERIC_CALLER = "lib/communication/open-conversation-action.ts";
 
+/** Grant-only callers (W13): a real allowed_* grant, verified server-side, but
+ *  NO source stamp. A published ACTIVE marketplace listing is its own public
+ *  context — there is no private source row to link, so an enquiry needs a
+ *  grant (the security control) without a source hint. One grant per caller,
+ *  no cross-grant leakage — the invariant holds; only the (optional) stamp is
+ *  absent. */
+const GRANT_ONLY_CALLERS: ReadonlyArray<
+  readonly [string, ContactPermissionState]
+> = [["lib/marketplace/listings.ts", "allowed_marketplace_enquiry"]];
+
 /** Where getOrCreateDirectConversation is defined (not a caller). */
 const DEFINITION = "lib/communication/direct-conversation.ts";
 
@@ -93,14 +103,37 @@ function walkLib(): string[] {
 // ── 1. Closed caller set: exact grant + typed sourceHint per gated caller ──
 
 describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-typed set", () => {
-  it("the caller set is exactly the five gated callers + the one generic action", () => {
+  it("the caller set is exactly the gated callers + grant-only callers + the one generic action", () => {
     const callers = walkLib()
       .filter((rel) => rel !== DEFINITION)
       .filter((rel) => /getOrCreateDirectConversation\(/.test(read(rel)));
     expect(callers.sort()).toEqual(
-      [...GATED_CALLERS.map(([rel]) => rel), GENERIC_CALLER].sort(),
+      [
+        ...GATED_CALLERS.map(([rel]) => rel),
+        ...GRANT_ONLY_CALLERS.map(([rel]) => rel),
+        GENERIC_CALLER,
+      ].sort(),
     );
   });
+
+  for (const [rel, grant] of GRANT_ONLY_CALLERS) {
+    it(`${rel} passes its exact grant ('${grant}') and NO source stamp`, () => {
+      const src = read(rel);
+      expect(src).toMatch(new RegExp(`"${grant}"`));
+      expect(CONTACT_PERMISSION_STATES).toContain(grant);
+      expect(grant.startsWith("allowed_")).toBe(true);
+      // No source stamp — a public listing is its own context.
+      expect(src).not.toMatch(/source_type|source_id/);
+      // No OTHER allowed_* grant literal (one relationship, one grant).
+      const code = src
+        .replace(/\/\*[\s\S]*?\*\//g, " ")
+        .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+      for (const other of CONTACT_PERMISSION_STATES) {
+        if (other === grant || !other.startsWith("allowed_")) continue;
+        expect(code, `${rel} must not pass '${other}'`).not.toContain(`"${other}"`);
+      }
+    });
+  }
 
   for (const [rel, grant, hintType] of GATED_CALLERS) {
     it(`${rel} passes its exact allowed_* grant ('${grant}') and typed sourceHint ('${hintType}')`, () => {

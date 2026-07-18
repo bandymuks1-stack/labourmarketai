@@ -6,6 +6,7 @@ import {
   ArrowUp,
   BarChart3,
   Bell,
+  Boxes,
   ChevronDown,
   ChevronUp,
   Briefcase,
@@ -116,6 +117,7 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   deal: FileSignature,
   tools: Wrench,
   leave: CalendarOff,
+  resources: Boxes,
 };
 
 /** Device-local card preferences (fallback mode only) — ids only.

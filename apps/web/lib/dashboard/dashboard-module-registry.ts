@@ -52,6 +52,7 @@ export type DashboardModuleId =
   | "documents"
   | "services"
   | "service_requests"
+  | "listings"
   | "projects"
   | "finance"
   | "commercial"
@@ -87,7 +88,8 @@ export type ModuleIconKey =
   | "gauge"
   | "deal"
   | "tools"
-  | "leave";
+  | "leave"
+  | "resources";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -290,6 +292,22 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
       "incoming-service-requests",
       "service-request-responses",
     ],
+  },
+  {
+    id: "listings",
+    // Wagon 13 — European Work & Business Ecosystem Marketplace: work-resource
+    // listings (accommodation/premises/vehicles/tools/equipment/machinery/
+    // safety — sale/rent/wanted). The physical-resource half of the
+    // marketplace; the SERVICES half stays the canonical service_offerings
+    // (module `services`). Bounded to work & projects, never consumer
+    // classifieds. No attentionSignalIds: an enquiry-follow-up spine signal is
+    // a recorded follow-up, so no badge before real data.
+    surfaceRoute: "/dashboard/listings",
+    labelKey: "marketplaceListings.pageTitle",
+    descriptionKey: "marketplaceListings.pageIntro",
+    iconKey: "resources",
+    roles: ALL_ROLES,
+    surfaces: ["grid", "command"],
   },
 
   // ── Manager operations (control room PR G) ───────────────────────────

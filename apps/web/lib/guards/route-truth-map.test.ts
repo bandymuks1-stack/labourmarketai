@@ -95,6 +95,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/projects/[id]/operations": "REAL_LAUNCH_SURFACE",
   "dashboard/service-requests": "REAL_LAUNCH_SURFACE",
   "dashboard/services": "REAL_LAUNCH_SURFACE",
+  // W13 European Work & Business Ecosystem Marketplace — work-resource listings
+  // over the new marketplace_listings store; degrades honestly until applied.
+  "dashboard/listings": "REAL_LAUNCH_SURFACE",
   // Work tasks (control room PR D) — repo-safe layer over the human-gated
   // work_tasks migration (D2); degrades honestly until applied.
   "dashboard/tasks": "REAL_LAUNCH_SURFACE",

@@ -129,6 +129,25 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    id: "listings",
+    route: "/dashboard/listings",
+    audience: "public",
+    labels: {
+      en: "Marketplace listings",
+      lt: "Skelbimai (ištekliai)",
+      ru: "Объявления (ресурсы)",
+      nl: "Marktplaats-advertenties",
+      de: "Marktplatz-Anzeigen",
+    },
+    synonyms: {
+      en: ["marketplace", "listings", "rental", "accommodation", "housing", "premises", "vehicle", "tools", "equipment", "machinery"],
+      lt: ["skelbimai", "nuoma", "būstas", "apgyvendinimas", "patalpos", "transportas", "įranga", "technika", "įrankiai"],
+      ru: ["маркетплейс", "объявления", "аренда", "жильё", "помещения", "транспорт", "оборудование", "техника", "инструменты"],
+      nl: ["marktplaats", "advertenties", "huur", "huisvesting", "bedrijfsruimte", "voertuig", "gereedschap", "uitrusting", "machines"],
+      de: ["marktplatz", "anzeigen", "miete", "unterkunft", "räume", "fahrzeug", "werkzeuge", "ausrüstung", "maschinen"],
+    },
+  },
+  {
     id: "profile",
     route: getModuleRoute("profile"),
     audience: "public",

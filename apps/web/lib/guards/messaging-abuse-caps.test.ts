@@ -195,6 +195,12 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     const booking = read("lib/booking/booking-conversation.ts");
     expect(booking).toMatch(/role_text\?\.slice/);
     expect(booking).toMatch(/status !== "accepted"/);
+    // …the W13 marketplace enquiry derives it from the REAL ACTIVE listing
+    // row's title it verified server-side (status must be active, caller not
+    // the owner)…
+    const listings = read("lib/marketplace/listings.ts");
+    expect(listings).toMatch(/listing\.title\?\.slice/);
+    expect(listings).toMatch(/status !== "active"/);
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
@@ -207,6 +213,7 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
         "lib/communication/contact-interested-worker.ts",
         "lib/communication/open-conversation-action.ts",
         "lib/communication/request-worker-conversation.ts",
+        "lib/marketplace/listings.ts",
         "lib/marketplace/service-request-conversation.ts",
         // Canonical-journey P1 — worker→employer open; subject derives from
         // the REAL demand row it verified server-side (demand.title), same

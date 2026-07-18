@@ -97,6 +97,7 @@ export type ContactPermissionState =
   | "allowed_accepted_service_request"
   | "allowed_demand_interest"
   | "allowed_accepted_booking"
+  | "allowed_marketplace_enquiry"
   | "allowed_admin"
   | "no_permission";
 
@@ -108,6 +109,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_accepted_service_request",
   "allowed_demand_interest",
   "allowed_accepted_booking",
+  "allowed_marketplace_enquiry",
   "allowed_admin",
   "no_permission",
 ];

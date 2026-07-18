@@ -96,6 +96,11 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // module (registry-driven grid card + spine signals link here), so it joins
   // the smoke inventory like its sibling /dashboard/services.
   { id: "service-requests", urlPattern: "/dashboard/service-requests", sourceFile: "app/[locale]/dashboard/service-requests/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // W13 European Work & Business Ecosystem Marketplace: work-resource listings
+  // (physical resources — sale/rent/wanted). The services half stays the
+  // canonical service_offerings surface above. Role-aware page that degrades
+  // honestly before the marketplace_listings store is applied.
+  { id: "listings", urlPattern: "/dashboard/listings", sourceFile: "app/[locale]/dashboard/listings/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR C: the unified activity centre is a dashboard module
   // (registry-driven grid card + the bell/status-strip "view all" target),
   // so it joins the smoke inventory like the other module surfaces.
