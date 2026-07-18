@@ -3,12 +3,12 @@
 --
 -- Additive, default-closed. Introduces ONE new canonical structure — ordered
 -- project stages — over the existing `projects` truth. No canonical stage
--- equivalent exists: `projects.status` is the whole-project lifecycle,
--- `project_handover_entries.status_value` is the handover declaration timeline,
--- and `project_worker_operational_statuses` is per-worker readiness — none model
--- ordered sub-phases with their own dates/dependencies. Kanban rides the
--- existing `work_tasks` table (a later slice adds `work_tasks.stage_id`); Gantt
--- is a projection over this table, never a stored event set.
+-- equivalent exists: `projects.status` is the whole-project lifecycle, the
+-- handover-passport timeline is the handover declaration, and the per-worker
+-- operational-status model is worker readiness — none model ordered sub-phases
+-- with their own dates/dependencies. Kanban rides the existing canonical task
+-- table (a later slice links tasks to a stage); Gantt is a projection over this
+-- table, never a stored event set.
 --
 -- RED class (SECURITY DEFINER RPCs + GRANTs). Ships under the owner's explicit
 -- standing authorization for this train (bounded, one wagon, reversible,

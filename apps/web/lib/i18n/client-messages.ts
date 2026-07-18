@@ -86,6 +86,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "productivityUnits",
   "professions",
   "profileAvatar",
+  "projectStages",
   "projects",
   "relationshipTypes",
   "reports",

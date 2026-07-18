@@ -303,6 +303,8 @@ describe("NO new DB migration in this PR", () => {
     // (20260717150000_demand_interest_seen_v1 — worker-only seen-model for
     // demand_interest_signals ack notifications, RPC-only writes).
     // DRAFT / needs-human-gate, NOT applied; paired rollback.
-    expect(count).toBeLessThanOrEqual(147);
+    // Bumped 147 -> 148 for Wagon 6 Project Operations slice 1
+    // (20260718140000_project_operations_stages). RED / owner-authorized.
+    expect(count).toBeLessThanOrEqual(148);
   });
 });
