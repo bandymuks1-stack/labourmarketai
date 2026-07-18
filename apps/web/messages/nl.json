@@ -1,5 +1,9 @@
 {
   "projectStages": {
+    "ganttTitle": "Tijdlijn (Gantt)",
+    "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",
+    "ganttToday": "Vandaag",
+    "ganttOverdue": "Te laat",
     "title": "Projectfasen",
     "intro": "Opeenvolgende fasen van dit project — voeg een fase toe, stel de echte status en geplande data in.",
     "honestNote": "Voortgang toont alleen de echte status en data die u invoert — geen automatisch of verzonnen percentage.",

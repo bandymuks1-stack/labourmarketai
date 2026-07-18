@@ -1,5 +1,9 @@
 {
   "projectStages": {
+    "ganttTitle": "Zeitleiste (Gantt)",
+    "ganttEmpty": "Fügen Sie Ihren Phasen geplante Termine hinzu, um die Zeitleiste zu sehen.",
+    "ganttToday": "Heute",
+    "ganttOverdue": "Überfällig",
     "title": "Projektphasen",
     "intro": "Aufeinanderfolgende Phasen dieses Projekts — fügen Sie eine Phase hinzu, legen Sie den echten Status und geplante Termine fest.",
     "honestNote": "Der Fortschritt zeigt nur den von Ihnen erfassten echten Status und Termine — keine automatischen oder erfundenen Prozentwerte.",
