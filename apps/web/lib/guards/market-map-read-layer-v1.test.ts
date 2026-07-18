@@ -310,6 +310,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 150 -> 151 for Wagon 9 Assets & Logistics.
     // Bumped 151 -> 152 for the Wagon 9 assets RLS recursion fix.
     // Bumped 152 -> 153 for Wagon 10 Commercial CRM.
-    expect(count).toBeLessThanOrEqual(153);
+    // Bumped 153 -> 154 for Wagon 11 Delivery & Quality.
+    expect(count).toBeLessThanOrEqual(154);
   });
 });
