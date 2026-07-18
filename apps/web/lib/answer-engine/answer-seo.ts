@@ -117,6 +117,15 @@ export function breadcrumbJsonLd(items: readonly BreadcrumbItem[]) {
 
 /** A SINGLE editorial answer → Article (Q&A-page schema types are not used here). */
 export function answerArticleJsonLd(answer: LocalizedAnswer) {
+  // Official evidence sources become schema.org `citation` entries — real,
+  // machine-readable provenance for the factual claims (never a fake rating/
+  // review/author). Discovery signals are editorial-only and never cited here.
+  const citation = (answer.evidenceSources ?? []).map((s) => ({
+    "@type": "CreativeWork",
+    name: s.title,
+    url: s.url,
+    publisher: { "@type": "Organization", name: s.publisher },
+  }));
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -128,6 +137,7 @@ export function answerArticleJsonLd(answer: LocalizedAnswer) {
     author: { "@type": "Organization", name: BRAND_NAME },
     publisher: { "@type": "Organization", name: BRAND_NAME },
     mainEntityOfPage: url(answer.locale, questionPath(answer.localizedSlug)),
+    ...(citation.length > 0 ? { citation } : {}),
   };
 }
 

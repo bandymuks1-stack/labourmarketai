@@ -55,7 +55,21 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
 
   const related = relatedPublished(id, locale, 8);
   const cta = CTA_FOR_CAPABILITY[question.relatedProductCapability] ?? null;
-  const externalSources = question.sourceReferences.filter((s) => Boolean(s.url));
+  // Public "Sources" list = official answer evidence sources (shown with a
+  // readable title + publisher) PLUS any url-bearing registry sourceReferences,
+  // deduplicated by URL. Discovery signals are editorial-only and never shown.
+  const sourceLinks: { href: string; label: string }[] = [];
+  const seenSourceHrefs = new Set<string>();
+  for (const s of answer.evidenceSources ?? []) {
+    if (seenSourceHrefs.has(s.url)) continue;
+    seenSourceHrefs.add(s.url);
+    sourceLinks.push({ href: s.url, label: `${s.title} — ${s.publisher}` });
+  }
+  for (const s of question.sourceReferences) {
+    if (!s.url || seenSourceHrefs.has(s.url)) continue;
+    seenSourceHrefs.add(s.url);
+    sourceLinks.push({ href: s.url, label: s.id });
+  }
   const showLegalNote = question.riskLevel === "HIGH" || Boolean(answer.countryScope);
 
   return (
@@ -145,14 +159,14 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
           </div>
         ) : null}
 
-        {externalSources.length > 0 ? (
+        {sourceLinks.length > 0 ? (
           <section className="flex flex-col gap-1">
             <h2 className="text-sm font-semibold text-text-primary">{pickL(CHROME.sources, locale)}</h2>
             <ul className="flex flex-col gap-1 text-xs text-text-secondary">
-              {externalSources.map((s) => (
-                <li key={s.id}>
-                  <AnswerTrackedLink href={s.url as string} event="answer_source_opened" category={category} external className="text-brand-blue hover:underline">
-                    {s.id}
+              {sourceLinks.map((s) => (
+                <li key={s.href}>
+                  <AnswerTrackedLink href={s.href} event="answer_source_opened" category={category} external className="text-brand-blue hover:underline">
+                    {s.label}
                   </AnswerTrackedLink>
                 </li>
               ))}
