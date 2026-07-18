@@ -14,11 +14,15 @@ import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
  * The Answer Engine ships its own sitemap (/questions-sitemap.xml), which
  * lists ONLY HUMAN_APPROVED, indexable answer pages (empty until real pages
  * publish). It is advertised here as a second Sitemap entry — the standard
- * multi-sitemap discovery mechanism — without any change to crawler
- * allow/disallow policy. AI-crawler rules are unchanged (single `*` rule).
+ * multi-sitemap discovery mechanism — and is fully crawlable. Which paths
+ * crawlers may visit is unchanged; AI-crawler rules are unchanged (single
+ * `*` rule). The sitemap/host entries are declared before the rule block so
+ * the crawlable answer surface is never confused with a blocked path.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
+    sitemap: [`${MARKETING_ORIGIN}/sitemap.xml`, `${MARKETING_ORIGIN}/questions-sitemap.xml`],
+    host: MARKETING_ORIGIN,
     rules: [
       {
         userAgent: "*",
@@ -33,7 +37,5 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: [`${MARKETING_ORIGIN}/sitemap.xml`, `${MARKETING_ORIGIN}/questions-sitemap.xml`],
-    host: MARKETING_ORIGIN,
   };
 }
