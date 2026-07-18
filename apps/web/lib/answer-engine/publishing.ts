@@ -17,6 +17,7 @@ import type { CanonicalQuestion, AnswerCategoryKey } from "@/lib/answer-engine/c
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
 import { WAVE2B_ANSWERS } from "@/content/answer-engine/wave2b-answers";
+import { WAVE2C_ANSWERS } from "@/content/answer-engine/wave2c-answers";
 
 /** Route segments that a question slug may NEVER take (reserved). */
 export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
@@ -24,6 +25,28 @@ export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
   "sitemap",
   "sitemap.xml",
 ]);
+
+/**
+ * An OFFICIAL / primary evidence source that backs factual claims in an answer.
+ * Kept strictly separate from question-discovery signals (which live in the
+ * editorial research module and are never rendered). Evidence sources ARE shown
+ * publicly on the answer page. Only official/primary hosts belong here — a
+ * public forum thread is a discovery signal, never an evidence source.
+ */
+export interface AnswerEvidenceSource {
+  /** Human-readable source title (e.g. "Professional qualifications — Your Europe"). */
+  readonly title: string;
+  /** Canonical official URL. */
+  readonly url: string;
+  /** Issuing body (e.g. "European Union — Your Europe", "EURES", "CEDEFOP"). */
+  readonly publisher: string;
+  /** Scope of the claim the source backs: "EU", "EEA", or an ISO country code. */
+  readonly scope: string;
+  /** ISO date the source itself was published/last updated, when known. */
+  readonly publishedOrUpdated?: string;
+  /** ISO date an editor last verified this URL resolves and supports the claim. */
+  readonly checkedAt: string;
+}
 
 /** A localized, human-reviewed answer for one (question, locale). */
 export interface LocalizedAnswer {
@@ -52,12 +75,18 @@ export interface LocalizedAnswer {
   readonly reviewDate: string;
   /** Editorial responsibility (role label, never a fake person). */
   readonly editorialResponsibility: string;
+  /**
+   * Official/primary sources backing factual claims in this answer, shown
+   * publicly under the Sources heading. Required for factual/regulatory claims
+   * (MEDIUM/HIGH-risk questions); optional for pure product/editorial answers.
+   */
+  readonly evidenceSources?: readonly AnswerEvidenceSource[];
 }
 
 const REGISTRY_BY_ID = new Map<string, CanonicalQuestion>(
   ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]),
 );
-const ANSWERS: readonly LocalizedAnswer[] = [...PILOT_ANSWERS, ...WAVE2B_ANSWERS];
+const ANSWERS: readonly LocalizedAnswer[] = [...PILOT_ANSWERS, ...WAVE2B_ANSWERS, ...WAVE2C_ANSWERS];
 
 function isComplete(a: LocalizedAnswer): boolean {
   return (
