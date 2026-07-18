@@ -10,6 +10,12 @@ import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
  * Policy (2026-06-15): apex labourmarket.ai is the canonical public
  * host (see lib/domain/canonical.ts); the sitemap + host both point
  * there so search engines consolidate on one host.
+ *
+ * The Answer Engine ships its own sitemap (/questions-sitemap.xml), which
+ * lists ONLY HUMAN_APPROVED, indexable answer pages (empty until real pages
+ * publish). It is advertised here as a second Sitemap entry — the standard
+ * multi-sitemap discovery mechanism — without any change to crawler
+ * allow/disallow policy. AI-crawler rules are unchanged (single `*` rule).
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -27,7 +33,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${MARKETING_ORIGIN}/sitemap.xml`,
+    sitemap: [`${MARKETING_ORIGIN}/sitemap.xml`, `${MARKETING_ORIGIN}/questions-sitemap.xml`],
     host: MARKETING_ORIGIN,
   };
 }
