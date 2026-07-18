@@ -2905,7 +2905,7 @@
       "activeWorkers": "Worker profiles",
       "liveDemand": "Job opportunities",
       "matchesToday": "New actions",
-      "previewNote": "Illustrative figures — not current totals.",
+      "previewNote": "Illustrative platform-network activity — not live, real-time totals.",
       "avgOvr": "Profile completion"
     }
   },
@@ -4166,9 +4166,9 @@
     "headline": "Not just a CV.",
     "headlineAccent": "Real skills matched with real work needs.",
     "subcopy": "Create your Labourmarket.ai profile, import your CV, add real skills, availability and work experience — so people, teams and companies can see where your strengths fit real work needs, locally and internationally.",
-    "ctaPrimary": "Create your profile",
+    "ctaPrimary": "Create your free worker profile",
     "businessNote": "For companies & employers ·",
-    "businessLink": "Start a work need",
+    "businessLink": "Submit a workforce need",
     "signals": {
       "s1": "Real profile",
       "s2": "Skill records",
@@ -4178,7 +4178,7 @@
   },
   "waitlist": {
     "title": "For companies & agencies",
-    "body_intro": "LabourMarket.ai is currently open to workers.",
+    "body_intro": "Companies can already submit a workforce need on LabourMarket.ai today.",
     "body_detail": "Join the list for company (hiring, workforce management) and agency (placement) features — we'll let you know when they open for your account.",
     "body_cta": "Leave your email — we'll notify the first batch.",
     "email_label": "Email",
