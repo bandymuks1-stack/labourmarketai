@@ -11,13 +11,16 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  CalendarOff,
   Coins,
   Compass,
   Eye,
   EyeOff,
+  FileSignature,
   FileText,
   Gauge,
   Handshake,
+  Wrench,
   Home,
   IdCard,
   ListChecks,
@@ -110,6 +113,9 @@ const ICONS: Record<ModuleIconKey, LucideIcon> = {
   sparkles: Sparkles,
   chart: BarChart3,
   gauge: Gauge,
+  deal: FileSignature,
+  tools: Wrench,
+  leave: CalendarOff,
 };
 
 /** Device-local card preferences (fallback mode only) — ids only.

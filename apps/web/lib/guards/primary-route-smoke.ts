@@ -119,6 +119,14 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // (finance/export/route.ts) is a file download, not a page — routes here
   // list pages only (the journal-export precedent).
   { id: "finance", urlPattern: "/dashboard/finance", sourceFile: "app/[locale]/dashboard/finance/page.tsx", requiresAuth: true, kind: "role-flow" },
+  // W12 cross-module nav: the operational areas built as their own routes
+  // (Wagon 10 commercial, Wagon 9 assets, Wagon 7 leave) join the dashboard
+  // module grid (registry-driven card + existing command entry), so each
+  // joins the smoke inventory like the other module surfaces. All three are
+  // role-aware pages that degrade honestly before their store is applied.
+  { id: "commercial", urlPattern: "/dashboard/commercial", sourceFile: "app/[locale]/dashboard/commercial/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "assets", urlPattern: "/dashboard/assets", sourceFile: "app/[locale]/dashboard/assets/page.tsx", requiresAuth: true, kind: "role-flow" },
+  { id: "absences", urlPattern: "/dashboard/absences", sourceFile: "app/[locale]/dashboard/absences/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR G: the projects list (manager map) is a dashboard module
   // (registry-driven grid card + command entry into each project's operating
   // centre), so it joins the smoke inventory like the other module surfaces.

@@ -54,6 +54,9 @@ export type DashboardModuleId =
   | "service_requests"
   | "projects"
   | "finance"
+  | "commercial"
+  | "assets"
+  | "absences"
   | "company"
   | "workforce_planning"
   | "activity"
@@ -81,7 +84,10 @@ export type ModuleIconKey =
   | "coins"
   | "sparkles"
   | "chart"
-  | "gauge";
+  | "gauge"
+  | "deal"
+  | "tools"
+  | "leave";
 
 /** Where a module may surface. `nav` is informational — the primary nav
  *  stays derived from the feature catalogue via lib/config/navigation.ts
@@ -318,6 +324,48 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     descriptionKey: "finance.intro",
     iconKey: "coins",
     roles: ["company", "agency", "worker"],
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "commercial",
+    // Commercial CRM (Wagon 10): owner-scoped proposals + contracts linked
+    // to demand and projects. Seller side only — org roles. Invoices and
+    // payments are NOT duplicated here; the page links to Finance (the sole
+    // finance_records reader). No attentionSignalIds: a proposal-follow-up
+    // spine signal is a recorded follow-up, so no badge before real data.
+    surfaceRoute: "/dashboard/commercial",
+    labelKey: "commercial.pageTitle",
+    descriptionKey: "commercial.pageIntro",
+    iconKey: "deal",
+    roles: ORG_ROLES,
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "assets",
+    // Assets & logistics (Wagon 9): org-owned tools/equipment/vehicles with
+    // the issue → acknowledge → transfer → return lifecycle. Managers run
+    // the registry; an assigned worker sees and acknowledges their own
+    // issued items, so the module is shared (org + worker), like finance.
+    surfaceRoute: "/dashboard/assets",
+    labelKey: "assets.pageTitle",
+    descriptionKey: "assets.pageIntro",
+    iconKey: "tools",
+    roles: ["company", "agency", "worker"],
+    surfaces: ["grid", "command"],
+  },
+
+  {
+    id: "absences",
+    // Leave & absence (Wagon 7): a worker requests time off, a real manager
+    // (caller_manages_worker) approves — no self-approval. Shared surface:
+    // workers see their own requests, managers see their team's.
+    surfaceRoute: "/dashboard/absences",
+    labelKey: "absences.pageTitle",
+    descriptionKey: "absences.pageIntro",
+    iconKey: "leave",
+    roles: ["worker", "company", "agency"],
     surfaces: ["grid", "command"],
   },
 
