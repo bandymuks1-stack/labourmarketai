@@ -4,8 +4,8 @@
  * Emits ONLY indexable (HUMAN_APPROVED, published) answer URLs — capped at 200,
  * per-locale, with reciprocal hreflang alternates and lastModified from the
  * review date. No preview/noindex URLs, no inactive-locale URLs. Empty until
- * real pilot pages publish. Not wired into robots or the main sitemap in this
- * wave (no content yet); reachable directly.
+ * real pilot pages publish. Advertised in /robots.txt as a second Sitemap
+ * entry (see app/robots.ts) so crawlers discover it; reachable directly.
  */
 import { buildAnswerSitemap } from "@/lib/answer-engine/answer-seo";
 
