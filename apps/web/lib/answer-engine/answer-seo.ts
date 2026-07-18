@@ -142,7 +142,11 @@ export function answerArticleJsonLd(answer: LocalizedAnswer) {
 }
 
 // ── Sitemap ─────────────────────────────────────────────────────────────────
-export const ANSWER_SITEMAP_MAX = 200;
+// Upper bound on URLs in a single sitemap file = the sitemaps.org per-file
+// limit (50,000). This is a safety ceiling, not a content cap: every indexable
+// answer page is listed until that limit is reached. (Was 200 in Wave 1, which
+// truncated once the published set passed 200 pages.)
+export const ANSWER_SITEMAP_MAX = 50000;
 
 export function buildAnswerSitemap(): MetadataRoute.Sitemap {
   const params = publishedParams().slice(0, ANSWER_SITEMAP_MAX);
