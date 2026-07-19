@@ -34,6 +34,8 @@ const APP_HOST_ALLOWLIST = new Set([
   "lib/domain/middleware-redirect.test.ts",
   "lib/seo/seo-indexing-audit.ts",
   "lib/auth/oauth-trace.test.ts",
+  // Asserts the legacy app host is REJECTED as a CSRF origin.
+  "lib/auth/google-id-token.test.ts",
   "lib/guards/auth-middleware-session.test.ts",
   "lib/guards/single-domain-origin.test.ts",
 ]);
