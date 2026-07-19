@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -11,6 +11,37 @@ import {
 } from "@/lib/auth/oauth-trace";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+
+/** Public OAuth client id — inlined at build time. When set, the
+ *  first-party Google Identity Services (GIS) ID-token flow is active
+ *  and the browser NEVER navigates through the raw Supabase host; when
+ *  unset, the legacy signInWithOAuth redirect flow is used. */
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
+const GSI_SRC = "https://accounts.google.com/gsi/client";
+
+type GisCredentialResponse = { credential?: string };
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GisCredentialResponse) => void;
+            nonce?: string;
+            ux_mode?: "popup" | "redirect";
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: Record<string, unknown>,
+          ) => void;
+        };
+      };
+    };
+  }
+}
 
 /** Official Google "G" mark (multicolour). Inline so the white OAuth button
  *  needs no asset pipeline. */
@@ -39,10 +70,18 @@ function GoogleLogo() {
 
 /**
  * Shared "Continue with Google" button used on both /auth/login and
- * /auth/signup. Calls `signInWithOAuth` and reuses the existing PKCE callback
- * at /[locale]/auth/callback, which exchanges the code and routes to
- * /dashboard (or /onboarding for users who haven't onboarded). The SDK
- * redirects the browser to Google on success, so we only surface failures.
+ * /auth/signup.
+ *
+ * FIRST-PARTY MODE (NEXT_PUBLIC_GOOGLE_CLIENT_ID set): renders the GIS
+ * button. Google returns an ID token to this page; we POST it with a
+ * per-attempt nonce to the same-origin /api/auth/google, which performs
+ * the server-side Supabase exchange and answers with the safe `next`
+ * path. Visible surfaces: labourmarket.ai → accounts.google.com popup →
+ * labourmarket.ai. No *.supabase.co navigation.
+ *
+ * LEGACY MODE (client id unset): the previous signInWithOAuth redirect
+ * flow via the PKCE callback — scheduled for removal once the
+ * first-party flow is verified in production (Phase 3).
  */
 export function GoogleButton({
   label,
@@ -56,45 +95,132 @@ export function GoogleButton({
   errorLabel: string;
   disabled?: boolean;
   /** Already-sanitised internal path (see `getSafeReturnPath`). When set,
-   *  the OAuth callback is told to route the user here on success. */
+   *  the auth exchange routes the user here on success. */
   nextPath?: string;
 }) {
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const gisContainer = useRef<HTMLDivElement | null>(null);
+  // Per-attempt nonce: generated once per mount, passed BOTH to GIS
+  // (embedded into the ID token by Google) and to our endpoint (which
+  // requires equality + hands it to Supabase for its own check).
+  const nonceRef = useRef<string>("");
+  if (!nonceRef.current) {
+    nonceRef.current = generateOauthTraceId() + generateOauthTraceId();
+  }
 
-  async function onClick() {
+  const handleCredential = useCallback(
+    async (response: GisCredentialResponse) => {
+      setFailed(false);
+      setLoading(true);
+      try {
+        if (!response?.credential) throw new Error("no_credential");
+        trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
+        recordEvent("google_id_token_start", { provider: "google" });
+        const res = await fetch(
+          `/api/auth/google?locale=${encodeURIComponent(locale)}`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              credential: response.credential,
+              nonce: nonceRef.current,
+              next: nextPath ?? null,
+            }),
+            // Bounded: a hung auth exchange must fail visibly, not hang
+            // the login screen (client-fetch-timeout guard).
+            signal: AbortSignal.timeout(15_000),
+          },
+        );
+        const out = (await res.json().catch(() => null)) as
+          | { ok?: boolean; next?: string; error?: string }
+          | null;
+        if (!res.ok || !out?.ok || !out.next) {
+          throw new Error(out?.error ?? `http_${res.status}`);
+        }
+        recordEvent("google_id_token_success", { provider: "google" });
+        // Full navigation so server components render with the fresh
+        // session cookies.
+        window.location.assign(out.next);
+      } catch (e) {
+        // Never log the credential — name/message only.
+        console.error("[auth] first-party google sign-in failed:", {
+          name: e instanceof Error ? e.name : "unknown",
+          message: e instanceof Error ? e.message : String(e),
+        });
+        recordEvent("google_id_token_error", {
+          provider: "google",
+          result_kind: e instanceof Error ? e.message : "unknown",
+        });
+        setLoading(false);
+        setFailed(true);
+      }
+    },
+    [locale, nextPath],
+  );
+
+  // First-party mode: load the GIS script and render Google's button.
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    let cancelled = false;
+
+    const init = () => {
+      if (cancelled) return;
+      const gis = window.google?.accounts?.id;
+      const parent = gisContainer.current;
+      if (!gis || !parent) return;
+      gis.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredential,
+        nonce: nonceRef.current,
+        ux_mode: "popup",
+      });
+      gis.renderButton(parent, {
+        theme: "outline",
+        size: "large",
+        width: parent.offsetWidth || 320,
+        text: "continue_with",
+        locale,
+      });
+    };
+
+    const existing = document.querySelector(
+      `script[src="${GSI_SRC}"]`,
+    ) as HTMLScriptElement | null;
+    if (existing) {
+      if (window.google?.accounts?.id) init();
+      else existing.addEventListener("load", init, { once: true });
+    } else {
+      const s = document.createElement("script");
+      s.src = GSI_SRC;
+      s.async = true;
+      s.defer = true;
+      s.addEventListener("load", init, { once: true });
+      document.head.appendChild(s);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [handleCredential, locale]);
+
+  // ── Legacy redirect flow (client id unset) ────────────────────────────
+  async function onLegacyClick() {
     setFailed(false);
     setLoading(true);
     try {
       const supabase = createClient();
       // Evict stale local auth state BEFORE writing a fresh PKCE
-      // code_verifier cookie. Production logs showed a token_revoked
-      // event on a prior refresh_token at the exact second a new
-      // /authorize started, with no follow-up /token POST — classic
-      // PKCE race where the new verifier collides with a half-revoked
-      // session cookie. `scope: 'local'` ONLY clears this browser's
-      // tokens/cookies — it does NOT call Supabase /logout and never
-      // revokes the user's other sessions. Safe to ignore failures.
+      // code_verifier cookie (see the PKCE-race note in the git history).
       try {
         await supabase.auth.signOut({ scope: "local" });
       } catch {
-        // signOut may throw if no local session — irrelevant for the
-        // fresh-OAuth-start path. Continue to signInWithOAuth.
+        // No local session — irrelevant for a fresh OAuth start.
       }
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      // Forward the sanitised return path through Supabase → callback as
-      // a query param. The callback at `/[locale]/auth/callback`
-      // re-validates before honouring it.
       const callback = new URL(`${origin}/${locale}/auth/callback`);
       if (nextPath) callback.searchParams.set("next", nextPath);
-      // v1 observability — generate a short trace id, attach it as a
-      // query param so it survives the Google round-trip + lands in the
-      // Supabase auth log's `referer` field, and stash it in
-      // sessionStorage so the callback can still correlate if a
-      // provider/ad-blocker combo strips query params. NOT a secret;
-      // never derived from the auth code.
       const traceId = generateOauthTraceId();
       rememberOauthTraceId(traceId);
       const callbackWithTrace = withOauthTraceId(callback, traceId);
@@ -104,9 +230,6 @@ export function GoogleButton({
         origin,
         locale,
       });
-      // Pilot telemetry (v1) — fire-and-forget. The trace id is safe to
-      // share with the server-side recorder; we send `preview_host` so
-      // the admin can tell which sessions started from a preview deploy.
       recordEvent("google_oauth_start", {
         provider: "google",
         trace: traceId,
@@ -115,7 +238,6 @@ export function GoogleButton({
           typeof window !== "undefined" ? window.location.host : null,
         ),
       });
-      // Activation funnel (P0-A) — canonical login-start signal.
       trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -137,11 +259,33 @@ export function GoogleButton({
     }
   }
 
+  if (GOOGLE_CLIENT_ID) {
+    return (
+      <div className="flex flex-col gap-2">
+        {/* GIS renders its own accessible button into this container. */}
+        <div
+          ref={gisContainer}
+          data-testid="google-gis-button"
+          aria-busy={loading || undefined}
+          className="flex min-h-[40px] w-full justify-center"
+        />
+        {loading && (
+          <p className="text-xs text-text-secondary">{redirectingLabel}</p>
+        )}
+        {failed && (
+          <p className="text-xs text-state-danger" role="alert">
+            {errorLabel}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <button
         type="button"
-        onClick={onClick}
+        onClick={onLegacyClick}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         // The button surface is ALWAYS the Google-white card (`bg-white`), so
