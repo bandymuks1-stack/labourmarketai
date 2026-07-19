@@ -1024,10 +1024,12 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     expect(txt).toMatch(/errorKind === "alreadyRegistered"/);
   });
 
-  it("GoogleButton forwards a sanitised `next` into the OAuth redirect", () => {
+  it("GoogleButton forwards a sanitised `next` into the auth exchange", () => {
     const txt = readWeb("components/app/google-button.tsx");
     expect(txt).toMatch(/nextPath\?:\s*string/);
-    expect(txt).toMatch(/callback\.searchParams\.set\("next", nextPath\)/);
+    // First-party flow: `next` rides in the same-origin POST body and is
+    // re-sanitised server-side (getSafeReturnPath in /api/auth/google).
+    expect(txt).toMatch(/next:\s*nextPath \?\? null/);
   });
 
   it("OAuth callback honours `next` + preserves it on error rebounds", () => {

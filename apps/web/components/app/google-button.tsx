@@ -2,20 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import {
-  generateOauthTraceId,
-  isVercelPreviewHost,
-  rememberOauthTraceId,
-  withOauthTraceId,
-} from "@/lib/auth/oauth-trace";
+import { generateOauthTraceId } from "@/lib/auth/oauth-trace";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
-/** Public OAuth client id — inlined at build time. When set, the
- *  first-party Google Identity Services (GIS) ID-token flow is active
- *  and the browser NEVER navigates through the raw Supabase host; when
- *  unset, the legacy signInWithOAuth redirect flow is used. */
+/** Public OAuth client id — inlined at build time. Google sign-in is
+ *  offered ONLY when this is configured; the legacy Supabase-hosted
+ *  redirect fallback was removed in single-domain Phase 3 (2026-07-19)
+ *  after the first-party flow was proven live. Unset → the Google
+ *  option is simply absent and email/password remains the sign-in
+ *  path (honest absence, no dead button). */
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 const GSI_SRC = "https://accounts.google.com/gsi/client";
@@ -43,54 +39,26 @@ declare global {
   }
 }
 
-/** Official Google "G" mark (multicolour). Inline so the white OAuth button
- *  needs no asset pipeline. */
-function GoogleLogo() {
-  return (
-    <svg aria-hidden width="18" height="18" viewBox="0 0 18 18">
-      <path
-        fill="#4285F4"
-        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62Z"
-      />
-      <path
-        fill="#34A853"
-        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.47.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
-      />
-    </svg>
-  );
-}
-
 /**
- * Shared "Continue with Google" button used on both /auth/login and
- * /auth/signup.
+ * "Continue with Google" for /auth/login and /auth/signup — FIRST-PARTY
+ * ONLY (Google Identity Services ID-token flow):
  *
- * FIRST-PARTY MODE (NEXT_PUBLIC_GOOGLE_CLIENT_ID set): renders the GIS
- * button. Google returns an ID token to this page; we POST it with a
+ *   labourmarket.ai → accounts.google.com popup → labourmarket.ai
+ *
+ * Google returns an ID token to this page; we POST it with a
  * per-attempt nonce to the same-origin /api/auth/google, which performs
  * the server-side Supabase exchange and answers with the safe `next`
- * path. Visible surfaces: labourmarket.ai → accounts.google.com popup →
- * labourmarket.ai. No *.supabase.co navigation.
- *
- * LEGACY MODE (client id unset): the previous signInWithOAuth redirect
- * flow via the PKCE callback — scheduled for removal once the
- * first-party flow is verified in production (Phase 3).
+ * path. The browser NEVER navigates through the Supabase host —
+ * guarded by lib/guards/first-party-google-auth.test.ts.
  */
 export function GoogleButton({
-  label,
   redirectingLabel,
   errorLabel,
-  disabled,
   nextPath,
 }: {
-  label: string;
+  /** Kept in the prop contract for the login/signup callers; the GIS
+   *  iframe renders its own localized label. */
+  label?: string;
   redirectingLabel: string;
   errorLabel: string;
   disabled?: boolean;
@@ -160,7 +128,7 @@ export function GoogleButton({
     [locale, nextPath],
   );
 
-  // First-party mode: load the GIS script and render Google's button.
+  // Load the GIS script and render Google's button.
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
     let cancelled = false;
@@ -170,6 +138,8 @@ export function GoogleButton({
       const gis = window.google?.accounts?.id;
       const parent = gisContainer.current;
       if (!gis || !parent) return;
+      // Idempotent re-init: never stack a second Google iframe.
+      parent.innerHTML = "";
       gis.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredential,
@@ -204,100 +174,21 @@ export function GoogleButton({
     };
   }, [handleCredential, locale]);
 
-  // ── Legacy redirect flow (client id unset) ────────────────────────────
-  async function onLegacyClick() {
-    setFailed(false);
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      // Evict stale local auth state BEFORE writing a fresh PKCE
-      // code_verifier cookie (see the PKCE-race note in the git history).
-      try {
-        await supabase.auth.signOut({ scope: "local" });
-      } catch {
-        // No local session — irrelevant for a fresh OAuth start.
-      }
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
-      const callback = new URL(`${origin}/${locale}/auth/callback`);
-      if (nextPath) callback.searchParams.set("next", nextPath);
-      const traceId = generateOauthTraceId();
-      rememberOauthTraceId(traceId);
-      const callbackWithTrace = withOauthTraceId(callback, traceId);
-      console.info("[auth] oauth start", {
-        provider: "google",
-        trace: traceId,
-        origin,
-        locale,
-      });
-      recordEvent("google_oauth_start", {
-        provider: "google",
-        trace: traceId,
-        origin,
-        preview_host: isVercelPreviewHost(
-          typeof window !== "undefined" ? window.location.host : null,
-        ),
-      });
-      trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: callbackWithTrace.toString() },
-      });
-      if (error) throw error;
-      // Success: browser navigates to Google; keep the loading state.
-    } catch (e) {
-      console.error("[auth] signInWithOAuth(google) failed:", {
-        name: e instanceof Error ? e.name : "unknown",
-        message: e instanceof Error ? e.message : String(e),
-      });
-      recordEvent("google_oauth_error", {
-        provider: "google",
-        result_kind: e instanceof Error ? e.name : "unknown",
-      });
-      setLoading(false);
-      setFailed(true);
-    }
-  }
-
-  if (GOOGLE_CLIENT_ID) {
-    return (
-      <div className="flex flex-col gap-2">
-        {/* GIS renders its own accessible button into this container. */}
-        <div
-          ref={gisContainer}
-          data-testid="google-gis-button"
-          aria-busy={loading || undefined}
-          className="flex min-h-[40px] w-full justify-center"
-        />
-        {loading && (
-          <p className="text-xs text-text-secondary">{redirectingLabel}</p>
-        )}
-        {failed && (
-          <p className="text-xs text-state-danger" role="alert">
-            {errorLabel}
-          </p>
-        )}
-      </div>
-    );
-  }
+  // Not configured → the Google option is honestly absent.
+  if (!GOOGLE_CLIENT_ID) return null;
 
   return (
     <div className="flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={onLegacyClick}
-        disabled={disabled || loading}
+      {/* GIS renders its own accessible button into this container. */}
+      <div
+        ref={gisContainer}
+        data-testid="google-gis-button"
         aria-busy={loading || undefined}
-        // The button surface is ALWAYS the Google-white card (`bg-white`), so
-        // its label must use a FIXED dark ink — never `text-ink-900`, which
-        // inverts to near-white under `[data-theme="light"]` and makes the
-        // label invisible (white-on-white). `#1f1f1f` is Google's own button
-        // text colour and is theme-independent, matching the fixed `bg-white`.
-        className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <GoogleLogo />
-        {loading ? redirectingLabel : label}
-      </button>
+        className="flex min-h-[40px] w-full justify-center"
+      />
+      {loading && (
+        <p className="text-xs text-text-secondary">{redirectingLabel}</p>
+      )}
       {failed && (
         <p className="text-xs text-state-danger" role="alert">
           {errorLabel}

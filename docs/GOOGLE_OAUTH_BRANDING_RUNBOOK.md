@@ -77,11 +77,27 @@ external users may see an "unverified app" warning and the logo may not show).
 
 ## Lever 1.5 — FIRST-PARTY GIS ID-token flow (free; REMOVES the visible `supabase.co` hop) ⭐ IMPLEMENTED
 
-> **Status 2026-07-19:** implemented in PR branch
-> `fix/first-party-google-id-token-auth-v1` (Phase 2 of the
-> single-domain task). Supersedes the need for Lever 2 for the
-> *navigation-visibility* goal — the owner decided NOT to buy the
-> custom domain. Lever 2 remains documented below for history only.
+> **Status 2026-07-19:** LIVE in production (PR #830 merged +
+> validated: GIS button renders desktop+mobile with zero origin
+> errors; endpoint gates proven live). The legacy `signInWithOAuth`
+> redirect flow was REMOVED in Phase 3 (PR
+> `fix/legacy-oauth-removal-v1`) — Google sign-in is first-party only.
+> Supersedes Lever 2 for the *navigation-visibility* goal — the owner
+> decided NOT to buy the custom domain. Lever 2 remains documented
+> below for history only.
+>
+> **Owner console cleanup (after Phase 3 deploys + one successful
+> real Google login):**
+> 1. Google client → Authorized JavaScript origins → REMOVE
+>    `https://app.labourmarket.ai` (legacy host is redirect-only).
+> 2. Google client → Authorized redirect URIs → REMOVE
+>    `https://gorgitwvdzxbnaxhrsrw.supabase.co/auth/v1/callback`
+>    (only the removed signInWithOAuth authorize flow used it; email
+>    verify links use GoTrue's /auth/v1/verify, not this URI).
+> 3. Supabase → Auth → URL Configuration → remove the
+>    `app.labourmarket.ai` callback entries from the Redirect URLs
+>    allow-list (any straggler email link still lands correctly via
+>    the app→apex 308).
 
 How it works (code: `apps/web/app/api/auth/google/route.ts`,
 `components/app/google-button.tsx`, `lib/auth/google-id-token.ts`):

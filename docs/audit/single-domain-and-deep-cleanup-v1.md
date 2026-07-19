@@ -336,3 +336,35 @@ stray-code bridge /?code=<uuid>                      → 307 /lt/auth/callback?c
   `NEXT_PUBLIC_GOOGLE_CLIENT_ID` env. Phase 3 cleanup (remove
   signInWithOAuth, drop app-host allow-list entries) follows its live
   verification.
+
+---
+
+## PHASE 2+3 — FIRST-PARTY GOOGLE AUTH LIVE (2026-07-19)
+
+- Vercel Production env `NEXT_PUBLIC_GOOGLE_CLIENT_ID` verified ABSENT via
+  CLI (`vercel env ls production`), then ADDED via CLI and re-verified.
+- PR **#830** reviewed (two-layer: correctness/security + project
+  dimensions — no blockers), squash-merged (`58b6ee1d`), deployed.
+- Production validation **14/14 PASS**: GIS container + Google-rendered
+  iframe on desktop AND mobile (iPhone 13 viewport) with ZERO console/origin
+  errors → Google accepted `https://labourmarket.ai` as authorized JS origin;
+  legacy button absent; signup page carries GIS too; endpoint gates live
+  (cross-origin POST → 403, forged token → 401 invalid_token, malformed →
+  400); no forbidden-host main-frame navigation.
+- Full email/password auth loop re-run on the new build: signup → onboarding
+  gate → session persistence → logout → re-login → recovery dispatch — all
+  green; address bar never left labourmarket.ai. Disposable accounts deleted
+  (fixture-scope SQL, cascade verified).
+- Identity baseline recorded pre-first-GIS-login: 6 google identities,
+  25 auth users, 25 profiles (1:1, 0 orphans), 38 profile_roles. The GIS
+  exchange goes through the SAME GoTrue user store (`signInWithIdToken`) —
+  counts must be unchanged by an existing user's login.
+- Phase 3 (`fix/legacy-oauth-removal-v1`): `signInWithOAuth` removed
+  repo-wide (guarded); GoogleButton is GIS-only (env unset → honestly
+  absent); PKCE callback route + stray-code bridge RETAINED deliberately —
+  email flows (recovery / verify links) still exchange `?code=` there.
+- Remaining owner console cleanup listed in
+  `docs/GOOGLE_OAUTH_BRANDING_RUNBOOK.md` (remove app-host JS origin, remove
+  raw Supabase redirect URI from the Google client, drop app-host allowlist
+  entries) — safe only after one successful real Google login through the
+  new flow.

@@ -79,34 +79,44 @@ describe("first-party google auth — browser side", () => {
     );
   });
 
-  it("keeps signInWithOAuth only as the config-gated legacy fallback", () => {
-    // Phase 3 removes this entirely; until then it must live behind the
-    // GOOGLE_CLIENT_ID feature gate in this one file.
-    expect(button).toMatch(/GOOGLE_CLIENT_ID/);
-    expect(button).toMatch(/signInWithOAuth/);
+  it("is honestly absent (renders null) when the client id is unset", () => {
+    // No dead button, no legacy fallback — Phase 3 removed the
+    // Supabase-hosted redirect flow entirely.
+    expect(button).toMatch(/if \(!GOOGLE_CLIENT_ID\) return null;/);
   });
 });
 
-describe("no new supabase-hosted browser navigation anywhere else", () => {
-  it("signInWithOAuth appears in exactly one file (the gated fallback)", () => {
-    // Repo-wide check via the two known auth surfaces + a scan of lib/
-    // and components/ excluding tests.
-    const offenders: string[] = [];
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(dir)) {
-        const full = join(dir, entry);
-        if (statSync(full).isDirectory()) {
-          if (entry === "node_modules" || entry === ".next") continue;
-          walk(full);
-        } else if (/\.(ts|tsx)$/.test(entry) && !/\.test\./.test(entry)) {
-          const src = readFileSync(full, "utf8");
-          if (/signInWithOAuth/.test(src)) offenders.push(full);
-        }
+describe("regression — no visible browser OAuth navigation via *.supabase.co", () => {
+  const walk = (dir: string, out: string[], pattern: RegExp) => {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) {
+        if (entry === "node_modules" || entry === ".next") continue;
+        walk(full, out, pattern);
+      } else if (/\.(ts|tsx)$/.test(entry) && !/\.test\./.test(entry)) {
+        if (pattern.test(readFileSync(full, "utf8"))) out.push(full);
       }
-    };
-    for (const d of ["app", "components", "lib"]) walk(join(WEB_ROOT, d));
-    expect(
-      offenders.map((f) => f.split(/[\\/]/).slice(-1)[0]),
-    ).toEqual(["google-button.tsx"]);
+    }
+  };
+
+  it("signInWithOAuth (Supabase-hosted redirect flow) is gone repo-wide", () => {
+    // The redirect flow navigates the browser through
+    // <ref>.supabase.co/auth/v1/authorize — banned under the
+    // single-domain policy. Google sign-in goes through
+    // signInWithIdToken on the server only.
+    const offenders: string[] = [];
+    for (const d of ["app", "components", "lib"]) {
+      walk(join(WEB_ROOT, d), offenders, /signInWithOAuth/);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("no client component navigates to a supabase.co URL", () => {
+    // components/ is the browser-navigation surface; the only allowed
+    // supabase.co contact is XHR via supabase-js (which reads the env
+    // URL, never a literal).
+    const offenders: string[] = [];
+    walk(join(WEB_ROOT, "components"), offenders, /supabase\.co/);
+    expect(offenders).toEqual([]);
   });
 });

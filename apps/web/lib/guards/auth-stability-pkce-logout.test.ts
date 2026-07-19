@@ -70,29 +70,18 @@ describe("Guard: callback PKCE-race fallback calls getSession after exchange err
   });
 });
 
-describe("Guard: Google button clears local auth state before signInWithOAuth", () => {
+describe("Guard: Google button carries no Supabase-hosted redirect machinery", () => {
   const btn = read("components/app/google-button.tsx");
 
-  it("calls supabase.auth.signOut with scope: 'local' before signInWithOAuth", () => {
-    // signOut must precede signInWithOAuth in the source. We assert that
-    // by matching the two calls in order with no other signInWithOAuth
-    // between them.
-    expect(btn).toMatch(
-      /signOut\(\s*\{\s*scope:\s*["']local["']\s*\}\s*\)[\s\S]+signInWithOAuth\(/,
-    );
+  it("no signInWithOAuth / pre-OAuth signOut remains (Phase 3 removal)", () => {
+    // The first-party GIS flow exchanges the ID token server-side; the
+    // PKCE-race signOut work-around existed only for the removed
+    // redirect flow and must not come back with it.
+    expect(btn).not.toMatch(/signInWithOAuth|signOut\(/);
   });
 
-  it("does NOT pass scope: 'global' / 'others' (no remote-session revoke)", () => {
-    // A global revoke before OAuth would kill the user's other devices
-    // and would be observable in Supabase auth logs as an extra
-    // /logout call. Forbidden by spec.
+  it("never revokes remote sessions from the login surface", () => {
     expect(btn).not.toMatch(/scope:\s*["'](global|others)["']/);
-  });
-
-  it("signOut errors are swallowed (no UX block on missing local session)", () => {
-    expect(btn).toMatch(
-      /signOut\([\s\S]{0,80}\)\s*;?[\s\S]{0,80}catch\s*[\{(]/,
-    );
   });
 });
 

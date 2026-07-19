@@ -82,21 +82,24 @@ describe("Guard: oauth-trace helpers stay free of any auth-code derivation", () 
 describe("Guard: GoogleButton observability + safe logging", () => {
   const btn = read("components/app/google-button.tsx");
 
-  it("generates a trace id and attaches it to the callback URL", () => {
-    expect(btn).toMatch(/generateOauthTraceId\(\)/);
-    expect(btn).toMatch(/withOauthTraceId\(\s*callback/);
+  it("derives the per-attempt nonce from the crypto-random trace helper", () => {
+    // GIS flow: the nonce is the anti-replay anchor (embedded into the
+    // Google ID token + re-checked server-side). It must come from the
+    // crypto-random helper, never from user input or the URL.
+    expect(btn).toMatch(/generateOauthTraceId\(\)\s*\+\s*generateOauthTraceId\(\)/);
   });
 
-  it("logs an `oauth start` info line with trace + provider + origin + locale", () => {
-    expect(btn).toMatch(/oauth start/);
-    expect(btn).toMatch(/console\.info\(/);
+  it("records start/success/error telemetry for the first-party flow", () => {
+    expect(btn).toMatch(/google_id_token_start/);
+    expect(btn).toMatch(/google_id_token_success/);
+    expect(btn).toMatch(/google_id_token_error/);
   });
 
-  it("logs only name + message of an OAuth start failure (never the full Error object)", () => {
+  it("logs only name + message of a sign-in failure (never the full Error object)", () => {
     // The console.error must extract `.name` and `.message` explicitly so
     // a future Error subclass with sensitive `cause` data doesn't leak.
     expect(btn).toMatch(
-      /console\.error\(\s*["']\[auth\] signInWithOAuth\(google\) failed:["'][\s\S]{0,400}name:\s*e\s+instanceof\s+Error/,
+      /console\.error\(\s*["']\[auth\] first-party google sign-in failed:["'][\s\S]{0,400}name:\s*e\s+instanceof\s+Error/,
     );
   });
 
