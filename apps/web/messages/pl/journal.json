@@ -187,5 +187,30 @@
   "unresolvedSaveClaim": "Zapisz jako kompetencję",
   "unresolvedSkip": "Pomiń",
   "unresolvedSkipped": "Pominięto",
-  "unresolvedSaved": "Zapisano"
+  "unresolvedSaved": "Zapisano",
+  "compactEdit": {
+    "activitiesTitle": "Czynności i umiejętności",
+    "timeLabel": "Poświęcony czas",
+    "addActivity": "Dodaj czynność",
+    "searchPlaceholder": "Szukaj umiejętności…",
+    "addAsClaim": "Zapisz jako umiejętność",
+    "removeRow": "Usuń wiersz",
+    "save": "Zapisz zmiany",
+    "cancel": "Anuluj",
+    "saved": "Zmiany zapisane",
+    "unsavedChip": "Niezapisane",
+    "dirtyNote": "Niezapisane zmiany",
+    "confirmDiscard": "Masz niezapisane zmiany. Zamknąć bez zapisywania?",
+    "advanced": "Więcej informacji",
+    "close": "Zamknij",
+    "totalTime": "Łącznie",
+    "unitHours": "godz.",
+    "unitMinutes": "min",
+    "unitDays": "dni",
+    "quantityLabel": "Ilość",
+    "directionLabel": "Kierunek pracy",
+    "siteLabel": "Obiekt / miejsce",
+    "institutionLabel": "Instytucja",
+    "topicLabel": "Temat"
+  }
 }

@@ -348,5 +348,30 @@
   "unresolvedSaveClaim": "[EN] Save as capability",
   "unresolvedSkip": "[EN] Skip",
   "unresolvedSkipped": "[EN] Skipped",
-  "unresolvedSaved": "[EN] Saved"
+  "unresolvedSaved": "[EN] Saved",
+  "compactEdit": {
+    "activitiesTitle": "[EN] Activities and skills",
+    "timeLabel": "[EN] Time spent",
+    "addActivity": "[EN] Add activity",
+    "searchPlaceholder": "[EN] Search skills…",
+    "addAsClaim": "[EN] Save as a capability",
+    "removeRow": "[EN] Remove row",
+    "save": "[EN] Save changes",
+    "cancel": "[EN] Cancel",
+    "saved": "[EN] Changes saved",
+    "unsavedChip": "[EN] Not saved",
+    "dirtyNote": "[EN] Unsaved changes",
+    "confirmDiscard": "[EN] You have unsaved changes. Close without saving?",
+    "advanced": "[EN] More details",
+    "close": "[EN] Close",
+    "totalTime": "[EN] Total",
+    "unitHours": "[EN] h",
+    "unitMinutes": "[EN] min",
+    "unitDays": "[EN] d",
+    "quantityLabel": "[EN] Quantity",
+    "directionLabel": "[EN] Work direction",
+    "siteLabel": "[EN] Site / location",
+    "institutionLabel": "[EN] Institution",
+    "topicLabel": "[EN] Topic"
+  }
 }

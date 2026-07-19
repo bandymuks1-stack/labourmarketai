@@ -3,28 +3,32 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import {
-  JournalEntryComposer,
-  type JournalDirection,
-  type JournalEngagement,
-  type JournalSkill,
+import type {
+  JournalDirection,
+  JournalEngagement,
+  JournalSkill,
 } from "@/components/app/journal-entry-composer";
+import { JournalEntryCompactEditor } from "@/components/app/journal-entry-compact-editor";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import { recordEvent } from "@/lib/telemetry/task";
 
 /**
- * Edit-in-place launcher for one journal entry (journal compact UX v1).
+ * Edit-in-place launcher for one journal entry (journal compact edit UX, P0).
  *
- * Opens the SAME `JournalEntryComposer` in edit mode inside a compact drawer —
- * a bottom sheet on phones, a side panel on wider screens (identical
- * principle on both) — instead of navigating to the top-of-page composer.
- * The worker never leaves the diary: no navigation, no page reload, so the
- * scroll position and the selected day stay exactly where they were. Saving
- * goes through the one existing `supersedeJournalEntry` path; its
- * `revalidatePath` refreshes the list in place, and the drawer closes.
+ * Opens the COMPACT editor in edit mode inside a compact drawer — a bottom
+ * sheet on phones, a side panel on wider screens. The compact editor shows
+ * ONLY the entry text + one activity-row list (skill + its time together) +
+ * one sticky save; the full composer review matrix never renders here
+ * (production incident: editing opened a page-length multi-bucket matrix
+ * whose "Pridėti" taps looked saved but weren't).
+ *
+ * Saving still goes through the ONE existing `supersedeJournalEntry` path;
+ * its `revalidatePath` refreshes the list in place, and the drawer closes.
+ * While the form is DIRTY, closing (backdrop / Escape / ✕ / cancel) asks for
+ * confirmation — edits are never silently discarded.
  *
  * The `?editing=<id>` URL flow on the journal page stays untouched (planning
- * deep-links still use it); this launcher is the row's no-navigation path.
+ * deep-links still use it); this launcher is the row's default path.
  * Only unconfirmed entries ever receive this control (same rule as before —
  * the RPC re-enforces it server-side).
  */
@@ -41,6 +45,19 @@ export function JournalEntryEditLauncher({
 }) {
   const t = useTranslations("journal");
   const [open, setOpen] = useState(false);
+  // Dirty flag reported by the compact editor — close paths confirm first.
+  const dirtyRef = useRef(false);
+
+  function requestClose(): void {
+    if (
+      dirtyRef.current &&
+      !window.confirm(t("compactEdit.confirmDiscard"))
+    ) {
+      return;
+    }
+    dirtyRef.current = false;
+    setOpen(false);
+  }
 
   return (
     <>
@@ -59,19 +76,25 @@ export function JournalEntryEditLauncher({
         <EditEntrySheet
           title={t("editEntryTitle")}
           closeLabel={t("editEntryCancel")}
-          onClose={() => setOpen(false)}
+          onClose={requestClose}
           testId={`journal-edit-sheet-${entry.id}`}
         >
-          <JournalEntryComposer
+          <JournalEntryCompactEditor
             // Fresh mount per open so the edit always starts from the entry's
             // saved state (same remount rule the page-level edit flow pins).
             key={entry.id}
+            entry={entry}
             engagements={engagements}
             directions={directions}
             workerSkills={workerSkills}
-            editingEntry={entry}
-            onSaved={() => setOpen(false)}
-            onCancelEdit={() => setOpen(false)}
+            onDirtyChange={(dirty) => {
+              dirtyRef.current = dirty;
+            }}
+            onSaved={() => {
+              dirtyRef.current = false;
+              setOpen(false);
+            }}
+            onCancel={requestClose}
           />
         </EditEntrySheet>
       )}

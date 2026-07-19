@@ -423,5 +423,30 @@
   "unresolvedSaveClaim": "Opslaan als competentie",
   "unresolvedSkip": "Overslaan",
   "unresolvedSkipped": "Overgeslagen",
-  "unresolvedSaved": "Opgeslagen"
+  "unresolvedSaved": "Opgeslagen",
+  "compactEdit": {
+    "activitiesTitle": "Activiteiten en vaardigheden",
+    "timeLabel": "Bestede tijd",
+    "addActivity": "Activiteit toevoegen",
+    "searchPlaceholder": "Vaardigheden zoeken…",
+    "addAsClaim": "Opslaan als vaardigheid",
+    "removeRow": "Rij verwijderen",
+    "save": "Wijzigingen opslaan",
+    "cancel": "Annuleren",
+    "saved": "Wijzigingen opgeslagen",
+    "unsavedChip": "Niet opgeslagen",
+    "dirtyNote": "Niet-opgeslagen wijzigingen",
+    "confirmDiscard": "U heeft niet-opgeslagen wijzigingen. Sluiten zonder op te slaan?",
+    "advanced": "Meer informatie",
+    "close": "Sluiten",
+    "totalTime": "Totaal",
+    "unitHours": "u",
+    "unitMinutes": "min",
+    "unitDays": "d",
+    "quantityLabel": "Hoeveelheid",
+    "directionLabel": "Werkrichting",
+    "siteLabel": "Object / locatie",
+    "institutionLabel": "Instelling",
+    "topicLabel": "Onderwerp"
+  }
 }

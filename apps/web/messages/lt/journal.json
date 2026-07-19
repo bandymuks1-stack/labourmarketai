@@ -423,5 +423,30 @@
   "unresolvedSaveClaim": "Įrašyti kaip gebėjimą",
   "unresolvedSkip": "Praleisti",
   "unresolvedSkipped": "Praleista",
-  "unresolvedSaved": "Išsaugota"
+  "unresolvedSaved": "Išsaugota",
+  "compactEdit": {
+    "activitiesTitle": "Veikla ir įgūdžiai",
+    "timeLabel": "Skirtas laikas",
+    "addActivity": "Pridėti veiklą",
+    "searchPlaceholder": "Ieškoti gebėjimo…",
+    "addAsClaim": "Įrašyti kaip gebėjimą",
+    "removeRow": "Pašalinti eilutę",
+    "save": "Išsaugoti pakeitimus",
+    "cancel": "Atšaukti",
+    "saved": "Pakeitimai išsaugoti",
+    "unsavedChip": "Neišsaugota",
+    "dirtyNote": "Neišsaugoti pakeitimai",
+    "confirmDiscard": "Turite neišsaugotų pakeitimų. Uždaryti jų neišsaugojus?",
+    "advanced": "Daugiau informacijos",
+    "close": "Uždaryti",
+    "totalTime": "Iš viso",
+    "unitHours": "val.",
+    "unitMinutes": "min.",
+    "unitDays": "d.",
+    "quantityLabel": "Kiekis",
+    "directionLabel": "Darbo kryptis",
+    "siteLabel": "Objektas / vieta",
+    "institutionLabel": "Įstaiga",
+    "topicLabel": "Tema"
+  }
 }
