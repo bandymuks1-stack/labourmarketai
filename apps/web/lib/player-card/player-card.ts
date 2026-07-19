@@ -3,6 +3,13 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import {
+  getPrimaryProfessionSlug,
+  getWorkerCoreRow,
+  getWorkerSkillRows,
+  type WorkerSkillRow,
+} from "@/lib/data/worker-core";
 import { listAttentionInstructions } from "@/lib/instructions/instructions";
 
 /**
@@ -125,14 +132,22 @@ async function verifiedSkillBadges(
 /**
  * ONE declared-skills population (RC3): the deduped union of the worker's
  * free-text claims (`profile_skill_claims.normalized_label`) and catalogued
- * `worker_skills` (normalized catalogue name). Dedup key = lowercased,
- * whitespace-collapsed label, so a claim that mirrors a catalogued skill is
- * counted once. 0 on any read error — never inferred.
+ * `worker_skills` (canonical `skills.slug`; `skill_id` as last resort).
+ * Dedup key = lowercased, whitespace-collapsed label, so a claim that
+ * mirrors a catalogued skill is counted once. 0 on any read error — never
+ * inferred.
+ *
+ * P0 nav-performance fix: the catalogued half previously issued its own
+ * `worker_skills` select asking for the legacy localized skills name
+ * columns — columns that do NOT exist (the ESCO taxonomy dropped them), so
+ * the query 400-ed on EVERY navigation and catalogued skills silently never
+ * counted. It now consumes the request-cached core skill rows and labels by
+ * canonical slug.
  */
 async function declaredSkillsUnionCount(
   supabase: SupabaseClient,
   profileId: string,
-  workerId: string | null,
+  skillRows: readonly WorkerSkillRow[],
 ): Promise<number> {
   const norm = (s: string): string =>
     s.toLowerCase().replace(/\s+/g, " ").trim();
@@ -148,23 +163,9 @@ async function declaredSkillsUnionCount(
   } catch {
     /* keep whatever we have — honest degradation */
   }
-  if (workerId) {
-    try {
-      const { data: rows } = await asAny(supabase)
-        .from("worker_skills")
-        .select("skill_id, skills(slug, name_lt, name_en)")
-        .eq("worker_id", workerId);
-      for (const r of (rows ?? []) as {
-        skill_id: string | null;
-        skills: { slug: string | null; name_lt: string | null; name_en: string | null } | null;
-      }[]) {
-        const label =
-          r.skills?.name_lt ?? r.skills?.name_en ?? r.skills?.slug ?? r.skill_id;
-        if (label) labels.add(norm(String(label)));
-      }
-    } catch {
-      /* honest degradation */
-    }
+  for (const r of skillRows) {
+    const label = r.skills?.slug ?? r.skill_id;
+    if (label) labels.add(norm(String(label)));
   }
   return labels.size;
 }
@@ -201,16 +202,19 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Profile name + the worker row (id for journal scope, work-card confirmation,
-  // real availability for the card).
-  const [{ data: profile }, { data: worker }] = await Promise.all([
-    asAny(supabase).from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-    asAny(supabase)
-      .from("workers")
-      .select("id, work_card_confirmed_at, availability_status, available_from")
-      .eq("profile_id", user.id)
-      .maybeSingle(),
+  // P0 nav-performance: the profile name comes from the request-cached
+  // session-profile reader (shared with the auth-shell layout and the
+  // overview page — was an independent `profiles` SELECT here), and the
+  // worker row + skill rows come from THE canonical request-cached core
+  // readers (@/lib/data/worker-core) shared with every other per-navigation
+  // consumer — this module previously issued its own `workers` select plus
+  // three separate `worker_skills` queries per navigation.
+  const [session, worker, skillRows] = await Promise.all([
+    getSessionProfile(),
+    getWorkerCoreRow(),
+    getWorkerSkillRows(),
   ]);
+  const profile = session.profile;
 
   const workerId: string | null = worker?.id ?? null;
 
@@ -222,22 +226,20 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     attention,
     verifiedSkills,
     managerConfirmations,
-    professionRow,
+    professionSlug,
     latestEntry,
   ] = await Promise.all([
     // RC3 skills truth: ONE declared population (claims ∪ catalogued skills).
-    declaredSkillsUnionCount(supabase, user.id, workerId),
-    // work_journal-tier skills (source column, migration 0010). 0 without a
-    // worker row or on any read error — never inferred.
-    workerId
-      ? safeCount(
-          asAny(supabase)
-            .from("worker_skills")
-            .select("*", { count: "exact", head: true })
-            .eq("worker_id", workerId)
-            .eq("source", "work_journal"),
-        )
-      : Promise.resolve(0),
+    declaredSkillsUnionCount(supabase, user.id, workerId ? skillRows : []),
+    // work_journal-tier skills (real `source` column, migration 0010) —
+    // the same truth as the old `.eq("source", "work_journal")` head count,
+    // now derived from the ONE cached worker_skills read instead of a
+    // second per-navigation query. 0 without a worker row — never inferred.
+    Promise.resolve(
+      workerId
+        ? skillRows.filter((r) => r.source === "work_journal").length
+        : 0,
+    ),
     safeCount(
       asAny(supabase)
         .from("skill_candidate_clarifications")
@@ -261,16 +263,9 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     workerId
       ? ownConfirmationsCount(supabase, workerId)
       : Promise.resolve(0),
-    workerId
-      ? asAny(supabase)
-          .from("worker_professions")
-          .select("professions(slug)")
-          .eq("worker_id", workerId)
-          .eq("is_primary", true)
-          .maybeSingle()
-          .then((r: { data: { professions: { slug: string | null } | null } | null }) => r.data)
-          .catch(() => null)
-      : Promise.resolve(null),
+    // Primary profession from the ONE cached profession read (was its own
+    // `is_primary = true` select — one of 4 identical ones per navigation).
+    workerId ? getPrimaryProfessionSlug() : Promise.resolve(null),
     workerId
       ? asAny(supabase)
           .from("journal_entries")
@@ -297,9 +292,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     managerConfirmations,
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,
-    professionSlug:
-      (professionRow?.professions as { slug: string | null } | null)?.slug ??
-      null,
+    professionSlug: professionSlug ?? null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
   };
 });

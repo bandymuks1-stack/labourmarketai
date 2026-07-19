@@ -49,18 +49,30 @@ function asAny(c: SupabaseClient): any {
 /** Max ids per mark call — mirrors the RPC's own hard bound. */
 export const MARK_SEEN_MAX_IDS = 100;
 
+/** Process-lifetime memo (P0 perf): once the seen store is proven absent
+ *  (draft migration not applied), stop re-asking on EVERY navigation — the
+ *  404 was burning a round-trip per authed page load. Cleared naturally on
+ *  deploy/instance restart, i.e. after the owner applies the migration. */
+let seenStoreAbsent = false;
+
 /** Own seen markers (RLS: the owning profile only). Absent store → honest
  *  `available: false` and an empty set. */
 export async function listMyOpportunitySeen(
   supabase: SupabaseClient,
   profileId: string,
 ): Promise<SeenState> {
+  if (seenStoreAbsent) return { seenIds: new Set(), available: false };
   try {
     const { data, error } = await asAny(supabase)
       .from("worker_opportunity_seen")
       .select("customer_request_id")
       .eq("profile_id", profileId);
-    if (error) return { seenIds: new Set(), available: false };
+    if (error) {
+      if (isFeatureAbsentCode((error as { code?: string }).code)) {
+        seenStoreAbsent = true;
+      }
+      return { seenIds: new Set(), available: false };
+    }
     const seenIds = new Set<string>();
     for (const r of (data ?? []) as { customer_request_id: string }[]) {
       seenIds.add(r.customer_request_id);

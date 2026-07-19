@@ -77,7 +77,10 @@ describe("profession templates — §10 slug registry, owner-gated", () => {
   });
   it("the server read degrades honestly when the registry is not applied", () => {
     const lib = read("lib/journal/journal-templates.ts");
-    expect(lib).toMatch(/if \(res\.error\) return \[\]/);
+    // P0 perf v1: still returns [] on error, and additionally memoizes the
+    // proven-absent registry so the 404 isn't re-paid on every navigation.
+    expect(lib).toMatch(/if \(res\.error\) \{[\s\S]{0,200}return \[\];/);
+    expect(lib).toMatch(/templatesStoreAbsent/);
   });
 });
 

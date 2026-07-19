@@ -46,30 +46,34 @@ export default async function DashboardLayout({
   setRequestLocale(locale);
   const footerT = await getTranslations("footer");
 
+  const layoutStart = Date.now();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/auth/login`);
 
-  // Wagon 2 (nav performance): the profile row comes from the ONE
-  // request-cached session-profile reader shared with the overview page and
-  // the premium hub — previously three independent `profiles` SELECTs per
-  // navigation. It runs in parallel with the independent profile_roles and
-  // notification-spine reads (getUser above is memoized on the shared client,
-  // so the reader adds no extra auth round-trip). Every route under the
-  // dashboard tree pays this layout cost, so the saving compounds. (Avoid
-  // writing the literal slash-star sequence in this comment: the project's
-  // source-level guards run a comment-stripping regex that treats it as a
-  // block comment opener and would consume past this Promise.all into the
-  // JSX below.)
-  const [session, rolesRes, spineCounts] = await Promise.all([
+  // P0 auth-performance: NOTHING awaits serially before the batch. The
+  // memoized getUser fires inside the same Promise.all as the session
+  // profile, the roles read (chained off getUser — profiles.id === auth
+  // user id) and the notification spine, so the layout costs ONE parallel
+  // stage instead of getUser → batch → tail. (Wagon 2 note still holds:
+  // the profile row comes from the ONE request-cached session-profile
+  // reader shared with the overview page and the premium hub. Avoid
+  // writing the literal slash-star sequence in this comment: the
+  // project's source-level guards run a comment-stripping regex that
+  // treats it as a block comment opener.)
+  const userPromise = supabase.auth.getUser();
+  const rolesPromise: Promise<{ data: { role: string }[] | null }> =
+    userPromise.then(async ({ data: { user } }) =>
+      user
+        ? await supabase
+            .from("profile_roles")
+            .select("role")
+            .eq("profile_id", user.id)
+            .eq("is_active", true)
+        : { data: null },
+    );
+  const [userRes, session, rolesRes, spineCounts] = await Promise.all([
+    userPromise,
     getSessionProfile(),
-    supabase
-      .from("profile_roles")
-      .select("role")
-      .eq("profile_id", user.id)
-      .eq("is_active", true),
+    rolesPromise,
     // Notification spine v1 — ONE parallel read of every derived attention
     // signal (unread threads, pending requests/bookings, responses since
     // seen, pending invitations). The bell, the nav badges and the dashboard
@@ -78,9 +82,16 @@ export default async function DashboardLayout({
     // state, so a signal read never breaks the auth shell.
     getSpineCounts(),
   ]);
+  const user = userRes.data.user;
+  if (!user) redirect(`/${locale}/auth/login`);
   const profile = session.profile;
   const rolesRows = rolesRes.data;
   const navBadges = buildNavBadges(spineCounts);
+  // Non-secret observability (P0 perf): total layout data time per
+  // navigation, visible in Vercel function logs. No ids, no user data.
+  console.info("[perf] dashboard-layout", {
+    ms: Date.now() - layoutStart,
+  });
 
   if (!profile?.onboarded_at) redirect(`/${locale}/onboarding`);
 

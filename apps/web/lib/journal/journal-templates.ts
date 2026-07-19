@@ -18,10 +18,17 @@ import {
  * shows nothing (no RUOŠIAMA banner; an unavailable template registry is
  * simply absent, §18).
  */
+/** Process-lifetime memo (P0 perf): the registry table comes from a DRAFT
+ *  migration; until the owner applies it every read 404s. Ask once per
+ *  server instance instead of on every journal navigation. Cleared on
+ *  deploy/instance restart (i.e. after the migration is applied). */
+let templatesStoreAbsent = false;
+
 export async function listActiveJournalTemplates(
   professionSlugs: readonly string[],
   locale: string,
 ): Promise<JournalTemplateOption[]> {
+  if (templatesStoreAbsent) return [];
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = await (supabase as any)
@@ -29,7 +36,11 @@ export async function listActiveJournalTemplates(
     .select("slug, profession_slug, field_schema")
     .eq("active", true)
     .order("slug");
-  if (res.error) return [];
+  if (res.error) {
+    const code = (res.error as { code?: string }).code;
+    if (code === "42P01" || code === "PGRST205") templatesStoreAbsent = true;
+    return [];
+  }
   const rows = (res.data ?? []) as {
     slug: string;
     profession_slug: string | null;
