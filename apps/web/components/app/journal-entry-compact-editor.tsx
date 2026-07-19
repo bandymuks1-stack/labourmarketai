@@ -113,7 +113,12 @@ export function JournalEntryCompactEditor({
   // Advanced (collapsed) fields — preloaded from the persisted entry so an
   // untouched edit re-submits them unchanged.
   const [workDate, setWorkDate] = useState(entry.workDate ?? today);
-  const [engagementId, setEngagementId] = useState(primaryId);
+  // Default to the entry's OWN engagement (preloaded) so a text-only edit never
+  // silently reassigns the work to the worker's primary engagement. Falls back
+  // to the primary only for a legacy entry with no stored engagement.
+  const [engagementId, setEngagementId] = useState(
+    entry.engagementContextId ?? primaryId,
+  );
   const [quantityValue, setQuantityValue] = useState(
     entry.quantity ? String(entry.quantity.value) : "",
   );
@@ -149,6 +154,7 @@ export function JournalEntryCompactEditor({
   const saveInput: CompactSaveInput = {
     text,
     workDate,
+    engagementContextId: engagementId,
     rows,
     removedSkillSlugs,
     looseTimeValue,
@@ -166,6 +172,7 @@ export function JournalEntryCompactEditor({
     compactStateFingerprint({
       text: entry.originalText,
       workDate: entry.workDate ?? today,
+      engagementContextId: entry.engagementContextId ?? primaryId,
       rows: derived.rows,
       removedSkillSlugs: [],
       looseTimeValue: derived.looseTime ? String(derived.looseTime.value) : "",
@@ -372,7 +379,9 @@ export function JournalEntryCompactEditor({
         : formatDuration(
             total.value,
             total.unitSlug,
-            locale === "en" || locale === "ru" ? locale : "lt",
+            // formatDuration supports lt/en/ru; other active locales (de/nl/pl)
+            // use neutral international "h/min" rather than LT abbreviations.
+            locale === "ru" ? "ru" : "en",
           );
 
   return (
@@ -446,7 +455,7 @@ export function JournalEntryCompactEditor({
                 onClick={() => removeRow(row)}
                 aria-label={t("compactEdit.removeRow")}
                 data-testid="journal-compact-row-remove"
-                className="inline-flex min-h-[2.25rem] min-w-[2.25rem] items-center justify-center rounded-md border border-ink-500 text-sm text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger"
+                className="inline-flex min-h-[2.5rem] min-w-[2.5rem] items-center justify-center rounded-md border border-ink-500 text-sm text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger"
               >
                 ×
               </button>
@@ -518,7 +527,7 @@ export function JournalEntryCompactEditor({
                     type="button"
                     onClick={() => addRow(hit.label, hit.slug)}
                     data-testid="journal-compact-add-hit"
-                    className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+                    className="rounded-md border border-brand-blue/50 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
                   >
                     {hit.label}
                   </button>
@@ -530,7 +539,7 @@ export function JournalEntryCompactEditor({
                 type="button"
                 onClick={() => addRow(addQuery, null)}
                 data-testid="journal-compact-add-freetext"
-                className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+                className="w-fit rounded-md border border-ink-500 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
               >
                 {t("compactEdit.addAsClaim")}: „{addQuery.trim()}“
               </button>
@@ -698,7 +707,7 @@ export function JournalEntryCompactEditor({
                         disabled={state === "working"}
                         onClick={() => void chooseAmbiguous(c, ch.slug)}
                         data-testid="journal-compact-ambiguous-choice"
-                        className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                        className="rounded-md border border-brand-blue/50 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
                       >
                         {ch.label}
                       </button>
@@ -708,7 +717,7 @@ export function JournalEntryCompactEditor({
                       disabled={state === "working"}
                       onClick={() => void dismissAmbiguous(c)}
                       data-testid="journal-compact-ambiguous-reject"
-                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                      className="rounded-md border border-ink-500 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
                     >
                       {t("candidateReject")}
                     </button>

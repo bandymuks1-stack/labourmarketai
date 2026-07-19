@@ -361,6 +361,7 @@ export default async function JournalPage({
     created_at: string;
     deleted_at?: string | null;
     superseded_by?: string | null;
+    engagement_context_id?: string | null;
     journal_entry_metrics:
       | {
           metric_slug: string;
@@ -382,7 +383,7 @@ export default async function JournalPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const v3 = await (supabase.from("journal_entries") as any)
     .select(
-      "id, original_text, created_at, deleted_at, superseded_by, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
+      "id, original_text, created_at, deleted_at, superseded_by, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
     )
     .eq("worker_id", worker.id)
     .order("created_at", { ascending: false });
@@ -390,7 +391,7 @@ export default async function JournalPage({
     const legacy = await supabase
       .from("journal_entries")
       .select(
-        "id, original_text, created_at, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
+        "id, original_text, created_at, engagement_context_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)",
       )
       .eq("worker_id", worker.id)
       .order("created_at", { ascending: false });
@@ -454,6 +455,7 @@ export default async function JournalPage({
         id: editingRow.id,
         originalText: editingRow.original_text,
         metrics: editingRow.journal_entry_metrics,
+        engagementContextId: editingRow.engagement_context_id ?? null,
         linkedSkillSlugs: (linksByEntry.get(editingRow.id) ?? [])
           .map((sid) => skillIdToSlug.get(sid))
           .filter((s): s is string => !!s),
@@ -1006,6 +1008,7 @@ export default async function JournalPage({
                             id: e.id,
                             originalText: e.original_text,
                             metrics: e.journal_entry_metrics,
+                            engagementContextId: e.engagement_context_id ?? null,
                             linkedSkillSlugs: (linksByEntry.get(e.id) ?? [])
                               .map((sid) => skillIdToSlug.get(sid))
                               .filter((s): s is string => !!s),

@@ -666,6 +666,19 @@ export async function supersedeJournalEntry(
   // append-only, RLS-owned inserts).
   await carryForwardEntryDecisionMarkers(supabase, oldEntryId, newEntryId);
 
+  // NO DATA LOSS on edit (journal compact edit UX, P1-SKILL): entry↔skill
+  // evidence links that are NOT re-derivable from the entry text (e.g. a skill
+  // the worker manually linked to the entry) would vanish on supersede — the
+  // pipeline only re-links skills recognised from the new text. Carry the old
+  // entry's links to the new id BEFORE the pipeline (idempotent upsert),
+  // EXCLUDING any skill the worker rejected in this edit so a removal sticks.
+  await carryForwardEntrySkillLinks(
+    supabase,
+    oldEntryId,
+    newEntryId,
+    rejectedSlugs,
+  );
+
   // P0 Track B: run the canonical pipeline for the NEW entry id with the new
   // text — pipeline idempotency (ignore-duplicate upserts + metric dedupe)
   // makes an edit/re-save safe to reprocess.
@@ -761,6 +774,60 @@ async function carryForwardEntryDecisionMarkers(
   } catch (e) {
     console.error(
       "[journal] carry-forward threw:",
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+}
+
+/**
+ * Copy the superseded entry's skill EVIDENCE links to the new entry id so a
+ * text-only edit never drops a manually-linked (non-text-derivable) skill. The
+ * pipeline re-links only skills recognised from the new text; this preserves
+ * the rest. Idempotent (`ignoreDuplicates` on the (entry, skill) unique key),
+ * append-only, under the CALLER'S OWN RLS, and EXCLUDES any skill the worker
+ * rejected in this edit so a deliberate removal is not resurrected. A failure
+ * is logged (counts only) and never fails the already-persisted supersede.
+ */
+async function carryForwardEntrySkillLinks(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  oldEntryId: string,
+  newEntryId: string,
+  rejectedSlugs: ReadonlyArray<string>,
+): Promise<void> {
+  try {
+    const rejected = new Set(rejectedSlugs);
+    const { data: oldLinks, error } = await supabase
+      .from("journal_entry_skills")
+      .select("skill_id, worker_id, skills(slug)")
+      .eq("journal_entry_id", oldEntryId);
+    if (error) {
+      console.error("[journal] skill-link carry read failed:", error.message);
+      return;
+    }
+    const rows = (oldLinks ?? [])
+      .filter((l) => {
+        const slug = (l.skills as { slug: string | null } | null)?.slug ?? null;
+        return Boolean(l.skill_id) && Boolean(l.worker_id) && !(slug && rejected.has(slug));
+      })
+      .map((l) => ({
+        journal_entry_id: newEntryId,
+        worker_id: l.worker_id as string,
+        skill_id: l.skill_id as string,
+      }));
+    if (rows.length === 0) return;
+    const { error: insErr } = await supabase
+      .from("journal_entry_skills")
+      .upsert(rows, { onConflict: "journal_entry_id,skill_id", ignoreDuplicates: true });
+    if (insErr) {
+      console.error(
+        "[journal] skill-link carry insert failed:",
+        insErr.message,
+        `count=${rows.length}`,
+      );
+    }
+  } catch (e) {
+    console.error(
+      "[journal] skill-link carry threw:",
       e instanceof Error ? e.message : String(e),
     );
   }

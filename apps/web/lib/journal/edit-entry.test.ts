@@ -51,6 +51,22 @@ describe("buildEditingEntry — full preload", () => {
   });
 });
 
+describe("buildEditingEntry — engagement is preloaded (no silent reassignment)", () => {
+  it("carries the entry's OWN engagement so a text edit re-sends it", () => {
+    const out = buildEditingEntry({
+      id: "e9",
+      originalText: "tekstas",
+      metrics: [],
+      engagementContextId: "eng-agency-b",
+    });
+    expect(out.engagementContextId).toBe("eng-agency-b");
+  });
+  it("defaults to null when the entry has no stored engagement", () => {
+    const out = buildEditingEntry({ id: "e9", originalText: "x", metrics: [] });
+    expect(out.engagementContextId).toBeNull();
+  });
+});
+
 describe("buildEditingEntry — quantity vs time disambiguation", () => {
   it("a non-time unit becomes quantity, not time", () => {
     const out = buildEditingEntry({
@@ -93,6 +109,7 @@ describe("buildEditingEntry — text-only edit does not drop structured metrics"
     expect(out).toEqual({
       id: "e4",
       originalText: "Tiesiog dirbau",
+      engagementContextId: null,
       workDate: null,
       time: null,
       quantity: null,

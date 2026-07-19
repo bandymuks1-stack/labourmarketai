@@ -164,6 +164,9 @@ export function computeTotalTime(
 export type CompactSaveInput = {
   text: string;
   workDate: string;
+  /** Engagement (org/project) the entry is logged against — carried through
+   *  the save unchanged so an edit never silently moves it to another org. */
+  engagementContextId: string;
   rows: ReadonlyArray<CompactActivityRow>;
   /** Linked-skill rows the worker REMOVED — shipped as rejected slugs so the
    *  pipeline records entry-scoped `skill_rejected` markers (honest lane). */
@@ -195,6 +198,8 @@ export function buildCompactSaveFields(
     notes: input.text,
     work_date: input.workDate,
   };
+  if (input.engagementContextId)
+    fields.engagement_context_id = input.engagementContextId;
   if (input.siteName.trim()) fields.site_name = input.siteName.trim();
   if (input.directionSlug) fields.work_direction = input.directionSlug;
   if (input.institutionName.trim())

@@ -23,6 +23,7 @@ import type { JournalEditingEntry } from "./edit-entry";
 const baseEntry: JournalEditingEntry = {
   id: "e1",
   originalText: "1 val vairavau, 3 val kasoje",
+  engagementContextId: null,
   workDate: "2026-07-01",
   time: null,
   quantity: null,
@@ -168,6 +169,7 @@ function input(overrides: Partial<CompactSaveInput>): CompactSaveInput {
   return {
     text: "tekstas",
     workDate: "2026-07-01",
+    engagementContextId: "",
     rows: [],
     removedSkillSlugs: [],
     looseTimeValue: "",
@@ -312,9 +314,26 @@ describe("buildCompactSaveFields — the ONE batch save payload", () => {
     expect(s).not.toMatch(/verified/i);
     expect(s).not.toMatch(/manager_confirmed/i);
   });
+
+  it("re-sends the entry's engagement so an edit never reassigns the org", () => {
+    const fields = buildCompactSaveFields(
+      input({ engagementContextId: "eng-agency-b" }),
+    );
+    expect(fields.engagement_context_id).toBe("eng-agency-b");
+  });
+
+  it("omits engagement only when there is none (legacy entry)", () => {
+    const fields = buildCompactSaveFields(input({ engagementContextId: "" }));
+    expect(fields.engagement_context_id).toBeUndefined();
+  });
 });
 
 describe("compactStateFingerprint — dirty detection", () => {
+  it("changing the engagement flips the fingerprint (dirty)", () => {
+    expect(
+      compactStateFingerprint(input({ engagementContextId: "a" })),
+    ).not.toBe(compactStateFingerprint(input({ engagementContextId: "b" })));
+  });
   it("identical state → identical fingerprint (cancel changes nothing)", () => {
     expect(compactStateFingerprint(input({}))).toBe(
       compactStateFingerprint(input({})),

@@ -49,6 +49,10 @@ export type EditEntryActivity = {
 export type JournalEditingEntry = {
   id: string;
   originalText: string;
+  /** The engagement (org/project context) this entry was ORIGINALLY logged
+   *  against. Preloaded so a text-only edit re-submits the SAME engagement and
+   *  can never silently move the work to the worker's primary engagement. */
+  engagementContextId: string | null;
   /** Saved work date (`YYYY-MM-DD`), or null when none was stored. */
   workDate: string | null;
   /** Stored duration when the `quantity` metric used a time unit. */
@@ -73,6 +77,8 @@ export function buildEditingEntry(args: {
   originalText: string;
   metrics: ReadonlyArray<EditEntryMetricRow> | null | undefined;
   linkedSkillSlugs?: ReadonlyArray<string> | null;
+  /** The entry's own engagement/org context, preloaded so an edit re-sends it. */
+  engagementContextId?: string | null;
 }): JournalEditingEntry {
   const metrics = args.metrics ?? [];
   const first = (slug: string): EditEntryMetricRow | null =>
@@ -94,6 +100,7 @@ export function buildEditingEntry(args: {
   return {
     id: args.id,
     originalText: args.originalText,
+    engagementContextId: args.engagementContextId ?? null,
     workDate: textOf("work_date"),
     time,
     quantity,

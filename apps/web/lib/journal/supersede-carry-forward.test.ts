@@ -144,12 +144,32 @@ function entryIdOf(calls: Call[]): string | null {
   return (eq?.args[1] as string | undefined) ?? null;
 }
 
+type SkillLinkRow = {
+  skill_id: string;
+  worker_id: string;
+  skills: { slug: string } | null;
+};
+
+function journalEntryIdOf(calls: Call[]): string | null {
+  const eq = calls.find(
+    (c) => c.method === "eq" && c.args[0] === "journal_entry_id",
+  );
+  return (eq?.args[1] as string | undefined) ?? null;
+}
+
 function baseHandler(overrides: {
   oldMetrics?: MetricRow[];
   newMetrics?: MetricRow[];
+  oldSkillLinks?: SkillLinkRow[];
 }): Handler {
   return (table, calls) => {
     switch (table) {
+      case "journal_entry_skills": {
+        if (calls.some((c) => c.method === "upsert")) return { data: null };
+        const id = journalEntryIdOf(calls);
+        if (id === OLD_ID) return { data: overrides.oldSkillLinks ?? [] };
+        return { data: [] };
+      }
       case "productivity_units":
         return {
           data: [
@@ -246,6 +266,36 @@ describe("supersedeJournalEntry — decision-marker carry-forward", () => {
     expect(insertIdx).toBeGreaterThanOrEqual(0);
     expect(pipelineIdx).toBeGreaterThan(insertIdx);
     expect(pipelineCalls[0].entryId).toBe(NEW_ID);
+  });
+
+  it("carries entry-skill links forward, EXCLUDING skills rejected in this edit", async () => {
+    currentSupabase = makeSupabase(
+      baseHandler({
+        oldSkillLinks: [
+          { skill_id: "s-forklift", worker_id: "w1", skills: { slug: "forklift_operation" } },
+          // The worker removed this row in the edit → must NOT be carried.
+          { skill_id: "s-tiling", worker_id: "w1", skills: { slug: "tiling" } },
+        ],
+      }),
+      { id: "user-1" },
+    );
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({ rejected_slugs_json: JSON.stringify(["tiling"]) }),
+    );
+    expect(res.ok).toBe(true);
+
+    const skillUpserts = writePayloads.filter(
+      (w) => w.table === "journal_entry_skills",
+    );
+    expect(skillUpserts).toHaveLength(1);
+    expect(skillUpserts[0].rows).toEqual([
+      { journal_entry_id: NEW_ID, worker_id: "w1", skill_id: "s-forklift" },
+    ]);
+    // Carry must land BEFORE the pipeline (so recognised re-links dedupe).
+    const upsertIdx = eventLog.indexOf("upsert:journal_entry_skills");
+    expect(upsertIdx).toBeGreaterThanOrEqual(0);
+    expect(eventLog.indexOf("pipeline")).toBeGreaterThan(upsertIdx);
   });
 
   it("is idempotent — markers already on the new entry are never re-inserted", async () => {
