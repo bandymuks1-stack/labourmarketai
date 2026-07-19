@@ -32,6 +32,8 @@ import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { createClient } from "@/lib/supabase/server";
+import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
+import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { Link } from "@/lib/i18n/navigation";
 // Mano CV identity lead — the player-card/avatar identity is the visual layer
@@ -396,6 +398,38 @@ export default async function JournalPage({
   } else {
     const rows = (v3.data ?? []) as JournalEntryRow[];
     entries = rows.filter((e) => !e.deleted_at && !e.superseded_by);
+  }
+
+  // ── Lazy historical heal (Universal Journal Recall v2) ──────────────────
+  // Up to 5 own live entries whose latest `pipeline_version` metric is below
+  // the current pipeline version (or absent) are re-processed on page load —
+  // idempotent, bounded per request, and NEVER blocks rendering on failure.
+  // This heals ALL live historical entries progressively with zero admin
+  // machinery. Counts-only logging happens inside the pipeline itself.
+  {
+    const stale = (entries ?? [])
+      .filter((e) => {
+        const latest = Math.max(
+          0,
+          ...(e.journal_entry_metrics ?? [])
+            .filter((m) => m.metric_slug === "pipeline_version")
+            .map((m) => m.value_numeric ?? 0),
+        );
+        return latest < JOURNAL_PIPELINE_VERSION;
+      })
+      .slice(0, 5);
+    for (const e of stale) {
+      try {
+        await processJournalEntrySkills({
+          entryId: e.id,
+          text: e.original_text ?? "",
+          locale,
+          revalidate: false,
+        });
+      } catch {
+        // Heal is best-effort — a failure never blocks the page.
+      }
+    }
   }
 
   // EDIT preload (v5): when the worker arrived via ?editing=<id>, reconstruct

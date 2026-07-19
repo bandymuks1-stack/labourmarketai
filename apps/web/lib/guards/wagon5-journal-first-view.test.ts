@@ -88,7 +88,13 @@ describe("Wagon 5 completion — composer first view contract", () => {
     expect(actions).toMatch(/excludeSlugs:\s*rejectedSlugs/);
     const pipeline = read("lib/journal/skill-pipeline.ts");
     expect(pipeline).toMatch(/excludeSlugs\?/);
-    expect(pipeline).toMatch(/!excluded\.has\(r\.slug\)/);
+    // Universal pipeline v2: exclusions become durable ENTRY-scoped
+    // skill_rejected markers and are consulted at derivation time — the
+    // same no-trace guarantee, now surviving reprocess too.
+    expect(pipeline).toMatch(/rejectedSlugUnion/);
+    expect(pipeline).toMatch(/skill_rejected|skillRejected/);
+    const recognition = read("lib/journal/journal-recognition.ts");
+    expect(recognition).toMatch(/rejectedSlugSet\.has\(r\.slug\)/);
   });
 
   it("empty corrections can never be saved; corrected rows stay self-declared claims", () => {

@@ -77,6 +77,52 @@ export type JournalFragmentSuggestion = {
   isUnknown: boolean;
 };
 
+/**
+ * Canonical duration-unit patterns (regex sources, folded-text compatible) —
+ * the SAME unit families `findAllTimes` / `detectFragmentTime` match below.
+ * Exported so the universal journal fragmenter strips trailing time
+ * expressions with the exact same vocabulary instead of re-inventing it.
+ * Note: written against FOLDED text (diacritics stripped → `minu[ct]`).
+ */
+export const DURATION_UNIT_PATTERNS: readonly string[] = [
+  "valand[\\p{L}]*",
+  "val\\.?",
+  "h",
+  "час[\\p{L}]*",
+  "ч\\.?",
+  "minu[ct][\\p{L}]*",
+  "min\\.?",
+  "мин[\\p{L}]*\\.?",
+  "dien[\\p{L}]*",
+  "d\\.?",
+  "дн[\\p{L}]*",
+  "день",
+];
+
+/**
+ * Canonical quantity-unit patterns (regex sources) — the SAME unit families
+ * the quantity matcher below recognises (m² / kv.m / vnt / kg / pakuotės and
+ * their RU spellings). Exported for the journal fragmenter (see above).
+ */
+export const QUANTITY_UNIT_PATTERNS: readonly string[] = [
+  "m\\s*2",
+  "m²",
+  "kv\\.?\\s*m",
+  "kvadrat[\\p{L}]*",
+  "м\\s*2",
+  "м²",
+  "кв\\.?\\s*м",
+  "vnt\\.?",
+  "stuk[\\p{L}]*",
+  "шт\\.?",
+  "kg",
+  "кг",
+  "pakuo[\\p{L}]*",
+  "упак[\\p{L}]*",
+  "m",
+  "м",
+];
+
 const EMPTY: JournalSuggestions = {
   time: null,
   quantity: null,

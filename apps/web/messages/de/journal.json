@@ -409,5 +409,19 @@
   "candidateRejected": "Verworfen",
   "candidateError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
   "rejectedReasonUser": "von Ihnen verworfen",
-  "rejectedReasonInactive": "nicht im Katalog"
+  "rejectedReasonInactive": "nicht im Katalog",
+  "groupRecognized": "Automatisch erkannt und verknüpft",
+  "groupChoice": "Ihre Auswahl ist nötig",
+  "groupClaims": "Mögliche zusätzliche Kompetenzen",
+  "groupUnresolved": "Nicht erkannt — selbst benennen",
+  "ambiguousOther": "Andere Tätigkeit",
+  "ambiguousOtherPlaceholder": "Namen eingeben…",
+  "ambiguousOtherSave": "Namen ändern",
+  "unresolvedHint": "Das System hat diese Fragmente nicht erkannt. Wählen Sie eine Fähigkeit aus dem Katalog, speichern Sie sie als Kompetenz oder überspringen Sie sie — nichts verschwindet ohne Ihre Entscheidung.",
+  "unresolvedSearchPlaceholder": "Fähigkeitskatalog durchsuchen…",
+  "unresolvedClaimPlaceholder": "Kompetenznamen eingeben…",
+  "unresolvedSaveClaim": "Als Kompetenz speichern",
+  "unresolvedSkip": "Überspringen",
+  "unresolvedSkipped": "Übersprungen",
+  "unresolvedSaved": "Gespeichert"
 }
