@@ -263,11 +263,16 @@ async function ownEntryDerivation(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
   const inputs = await loadEntryRecognitionInputs(sb, worker.id, entryId);
+  if (!inputs) return { ok: false, code: "entry_not_found" };
   const recognition = deriveJournalRecognition(
     (entry.original_text as string | null) ?? "",
     {
       declaredSlugs: inputs.declaredSlugs,
       entryRejections: inputs.entryRejections,
+      // P2 integrity: trust-boundary derivation honours persisted
+      // ambiguity decisions too — a resolved candidate is no longer a
+      // member, so contradictory second resolutions are refused.
+      entryResolutions: inputs.entryResolutions,
     },
   );
 
@@ -446,20 +451,19 @@ export async function confirmJournalAmbiguousChoice(
   // decision time (provenance: worker_input on their own entry). A
   // decision here can never affect another entry — the marker lives in
   // this entry's metrics only. Idempotent: skip when already recorded.
+  // appendEntryMarker dedupes by full value, so a repeat of the SAME
+  // decision is a no-op — no slug-keyed pre-check (independent-review
+  // should-fix: a slug-keyed guard would skip a DIFFERENT label resolving
+  // to the same slug and re-offer that card forever).
   const normalizedCandidate = normalizeClaimLabel(candidate.label);
-  const already = ctx.recognition.recognizedSkills.some(
-    (r) => r.via === "resolved" && r.slug === chosenSlug,
+  const marked = await appendEntryMarker(
+    ctx.sb,
+    ctx.entryId,
+    ENTRY_MARKER_SLUGS.ambiguousResolved,
+    `${normalizedCandidate}=>${chosenSlug}`,
+    JOURNAL_PIPELINE_VERSION,
   );
-  if (!already) {
-    const marked = await appendEntryMarker(
-      ctx.sb,
-      ctx.entryId,
-      ENTRY_MARKER_SLUGS.ambiguousResolved,
-      `${normalizedCandidate}=>${chosenSlug}`,
-      JOURNAL_PIPELINE_VERSION,
-    );
-    if (!marked) return { ok: false, code: "write_failed" };
-  }
+  if (!marked) return { ok: false, code: "write_failed" };
 
   // The ambiguity is resolved by the worker's explicit answer — the pending
   // clarification row (their own; RLS-scoped) is no longer open.

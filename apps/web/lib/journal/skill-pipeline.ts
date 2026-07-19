@@ -220,7 +220,12 @@ export async function loadEntryRecognitionInputs(
   sb: any,
   workerId: string,
   entryId: string,
-): Promise<EntryRecognitionInputs> {
+): Promise<EntryRecognitionInputs | null> {
+  // P1 integrity (independent-review should-fix): a FAILED input read is
+  // fatal, never silently-empty. Empty rejections/claims/resolutions would
+  // resurrect rejected skills, duplicate append-only rows and stamp the
+  // version over a run that never saw the entry's real markers — so both
+  // consumers treat `null` as pipeline failure (entry stays stale).
   const [declaredRes, metricsRes] = await Promise.all([
     sb
       .from("worker_skills")
@@ -240,6 +245,7 @@ export async function loadEntryRecognitionInputs(
         ENTRY_MARKER_SLUGS.pipelineVersion,
       ]),
   ]);
+  if (declaredRes.error || metricsRes.error) return null;
 
   const declaredSlugs = new Set<string>();
   const declaredIdBySlug = new Map<string, string>();
@@ -373,6 +379,12 @@ export async function processJournalEntrySkills(opts: {
 
     // ── 2. Declared skills + entry-scoped markers (append-only lane) ─────
     const inputs = await loadEntryRecognitionInputs(sb, worker.id, entryId);
+    if (!inputs) {
+      // Failed input read = failed run (no stamp, entry stays stale) —
+      // never proceed on silently-empty markers.
+      logError(trace, "load_inputs", { code: "input_read_failed" });
+      return zeroResult(trace, "failed");
+    }
 
     // Save-time exclusions (client review step) become durable entry-scoped
     // skill_rejected markers, so a reprocess keeps honouring them.
@@ -414,6 +426,11 @@ export async function processJournalEntrySkills(opts: {
         slugs: rejectedSlugUnion,
         claimLabels: inputs.entryRejections.claimLabels,
       },
+      // P2 integrity: the worker's persisted ambiguity decisions — a
+      // resolved card is emitted as the chosen reading and never
+      // re-offered (this wiring is seam-tested through the pipeline,
+      // not only through the pure function).
+      entryResolutions: inputs.entryResolutions,
     });
 
     // ── 4. Resolve recognised slugs → active taxonomy rows ───────────────

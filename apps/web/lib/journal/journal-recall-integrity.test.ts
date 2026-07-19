@@ -332,8 +332,85 @@ describe("P2 — ambiguous resolution markers", () => {
     ).toHaveLength(1);
   });
 
-  it("pipeline version constant guards the marker version field semantics", () => {
-    expect(JOURNAL_PIPELINE_VERSION).toBeGreaterThanOrEqual(2);
+  it("SEAM: a persisted ambiguous_resolved marker suppresses the card through processJournalEntrySkills itself", async () => {
+    // Independent-review blocker regression: the wiring from
+    // loadEntryRecognitionInputs → deriveJournalRecognition must be
+    // exercised through the REAL pipeline, not only the pure function.
+    ambiguousMock.mockReturnValue([AMB]);
+    const inner = baseHandler();
+    const handler: Handler = (table, calls) => {
+      if (
+        table === "journal_entry_metrics" &&
+        !calls.some((c) => c.method === "insert")
+      ) {
+        return {
+          data: [
+            {
+              metric_slug: "ambiguous_resolved",
+              value_text: "namų tvarkymas / valymas=>cleaning-services",
+              value_numeric: JOURNAL_PIPELINE_VERSION,
+            },
+          ],
+        };
+      }
+      if (table === "skills")
+        return {
+          data: [
+            { id: SKILL_ID, slug: "cleaning-services", is_active: true },
+          ],
+        };
+      return inner(table, calls);
+    };
+    currentSupabase = makeSupabase(handler, USER);
+    const res = await processJournalEntrySkills({
+      entryId: ENTRY,
+      text: "tvarkiau namus",
+      locale: "lt",
+      revalidate: false,
+    });
+    // Card NOT re-offered; the chosen reading came back as recognized.
+    expect(
+      res.recognition.candidates.filter((c) => c.kind === "ambiguous"),
+    ).toEqual([]);
+    expect(
+      res.recognition.recognizedSkills.find(
+        (r) => r.slug === "cleaning-services",
+      )?.via,
+    ).toBe("resolved");
+    // The answered clarification row is NOT resurrected.
+    expect(
+      writePayloads.filter(
+        (p) => p.table === "skill_candidate_clarifications",
+      ),
+    ).toEqual([]);
+  });
+
+  it("SEAM: failed marker/input read → failed run, NO stamp, no writes on empty assumptions", async () => {
+    ambiguousMock.mockReturnValue([AMB]);
+    const inner = baseHandler();
+    const handler: Handler = (table, calls) => {
+      if (
+        table === "journal_entry_metrics" &&
+        !calls.some((c) => c.method === "insert")
+      ) {
+        return { error: { code: "XX000", message: "injected read failure" } };
+      }
+      return inner(table, calls);
+    };
+    currentSupabase = makeSupabase(handler, USER);
+    const res = await processJournalEntrySkills({
+      entryId: ENTRY,
+      text: "tvarkiau namus",
+      locale: "lt",
+      revalidate: false,
+    });
+    expect(res.status).toBe("failed");
+    expect(stampPayloads()).toEqual([]);
+    expect(
+      writePayloads.filter((p) =>
+        ["worker_skills", "journal_entry_skills"].includes(p.table),
+      ),
+    ).toEqual([]);
   });
 });
 
