@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateOauthTraceId,
@@ -9,6 +9,7 @@ import {
   rememberOauthTraceId,
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
+import { sha256Hex } from "@/lib/auth/google-id-token";
 import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -99,12 +100,20 @@ export function GoogleButton({
   nextPath?: string;
 }) {
   const locale = useLocale();
+  const tAuth = useTranslations("auth.login");
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Non-secret diagnostic reference shown after a GIS failure:
+  // "<safe error code> · <trace id>" — quotable in a bug report,
+  // matchable against server logs, contains no token material.
+  const [errorRef, setErrorRef] = useState<string | null>(null);
   const gisContainer = useRef<HTMLDivElement | null>(null);
-  // Per-attempt nonce: generated once per mount, passed BOTH to GIS
-  // (embedded into the ID token by Google) and to our endpoint (which
-  // requires equality + hands it to Supabase for its own check).
+  // Per-attempt RAW nonce, generated once per mount. NONCE CONTRACT
+  // (root cause of the 2026-07-19 "Nonces mismatch" incident): Google
+  // GIS receives the SHA-256 HASH (it lands in the ID token's nonce
+  // claim); our endpoint receives the RAW value and Supabase
+  // signInWithIdToken re-hashes + compares. See
+  // lib/auth/google-id-token.ts.
   const nonceRef = useRef<string>("");
   if (!nonceRef.current) {
     nonceRef.current = generateOauthTraceId() + generateOauthTraceId();
@@ -113,11 +122,15 @@ export function GoogleButton({
   const handleCredential = useCallback(
     async (response: GisCredentialResponse) => {
       setFailed(false);
+      setErrorRef(null);
       setLoading(true);
+      // Per-attempt non-secret trace id: rides in the POST body, is
+      // echoed in error responses and stamped on every server log line.
+      const trace = generateOauthTraceId();
       try {
         if (!response?.credential) throw new Error("no_credential");
         trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
-        recordEvent("google_id_token_start", { provider: "google" });
+        recordEvent("google_id_token_start", { provider: "google", trace });
         const res = await fetch(
           `/api/auth/google?locale=${encodeURIComponent(locale)}`,
           {
@@ -127,6 +140,7 @@ export function GoogleButton({
               credential: response.credential,
               nonce: nonceRef.current,
               next: nextPath ?? null,
+              trace,
             }),
             // Bounded: a hung auth exchange must fail visibly, not hang
             // the login screen (client-fetch-timeout guard).
@@ -139,20 +153,24 @@ export function GoogleButton({
         if (!res.ok || !out?.ok || !out.next) {
           throw new Error(out?.error ?? `http_${res.status}`);
         }
-        recordEvent("google_id_token_success", { provider: "google" });
+        recordEvent("google_id_token_success", { provider: "google", trace });
         // Full navigation so server components render with the fresh
         // session cookies.
         window.location.assign(out.next);
       } catch (e) {
         // Never log the credential — name/message only.
+        const safeCode = e instanceof Error ? e.message : "unknown";
         console.error("[auth] first-party google sign-in failed:", {
           name: e instanceof Error ? e.name : "unknown",
-          message: e instanceof Error ? e.message : String(e),
+          message: safeCode,
+          trace,
         });
         recordEvent("google_id_token_error", {
           provider: "google",
-          result_kind: e instanceof Error ? e.message : "unknown",
+          result_kind: safeCode,
+          trace,
         });
+        setErrorRef(`${safeCode} · ${trace}`);
         setLoading(false);
         setFailed(true);
       }
@@ -160,20 +178,27 @@ export function GoogleButton({
     [locale, nextPath],
   );
 
-  // First-party mode: load the GIS script and render Google's button.
+  // First-party mode: hash the nonce, load the GIS script, render
+  // Google's button. Hashing is async (WebCrypto), so the whole init
+  // chain lives in one cancellable effect.
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
     let cancelled = false;
 
-    const init = () => {
+    const init = async () => {
       if (cancelled) return;
       const gis = window.google?.accounts?.id;
       const parent = gisContainer.current;
       if (!gis || !parent) return;
+      // Google gets the HASHED nonce (nonce contract — see above).
+      const hashedNonce = await sha256Hex(nonceRef.current);
+      if (cancelled) return;
+      // Idempotent re-init: never stack a second Google iframe.
+      parent.innerHTML = "";
       gis.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredential,
-        nonce: nonceRef.current,
+        nonce: hashedNonce,
         ux_mode: "popup",
       });
       gis.renderButton(parent, {
@@ -189,14 +214,14 @@ export function GoogleButton({
       `script[src="${GSI_SRC}"]`,
     ) as HTMLScriptElement | null;
     if (existing) {
-      if (window.google?.accounts?.id) init();
-      else existing.addEventListener("load", init, { once: true });
+      if (window.google?.accounts?.id) void init();
+      else existing.addEventListener("load", () => void init(), { once: true });
     } else {
       const s = document.createElement("script");
       s.src = GSI_SRC;
       s.async = true;
       s.defer = true;
-      s.addEventListener("load", init, { once: true });
+      s.addEventListener("load", () => void init(), { once: true });
       document.head.appendChild(s);
     }
     return () => {
@@ -273,9 +298,38 @@ export function GoogleButton({
           <p className="text-xs text-text-secondary">{redirectingLabel}</p>
         )}
         {failed && (
-          <p className="text-xs text-state-danger" role="alert">
-            {errorLabel}
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-state-danger" role="alert">
+              {errorLabel}
+            </p>
+            {errorRef && (
+              // Non-secret diagnostic reference (safe error code + trace
+              // id) — quotable in a bug report, matchable in server logs.
+              <p
+                className="font-mono text-[11px] text-text-secondary"
+                data-testid="google-error-ref"
+              >
+                {errorRef}
+              </p>
+            )}
+            {/* TEMPORARY, explicitly labelled recovery path (incident
+                2026-07-19): while the first-party flow is unproven for
+                real accounts and PR #831 is unmerged, a failed GIS
+                attempt reveals the legacy Supabase-hosted redirect
+                sign-in. It VISIBLY navigates via the Supabase host —
+                never silently; the label says it is a backup route.
+                Remove together with the legacy flow (Phase 3). */}
+            <button
+              type="button"
+              onClick={onLegacyClick}
+              disabled={disabled || loading}
+              data-testid="google-legacy-recovery"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-border bg-white px-4 py-2 text-xs font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <GoogleLogo />
+              {tAuth("google_recovery_label")}
+            </button>
+          </div>
         )}
       </div>
     );

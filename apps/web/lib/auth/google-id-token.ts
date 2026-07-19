@@ -38,15 +38,40 @@ export type ClaimValidationResult =
 const GOOGLE_ISSUERS = ["accounts.google.com", "https://accounts.google.com"];
 
 /**
+ * SHA-256 hex digest. WebCrypto (`globalThis.crypto.subtle`) exists in
+ * every supported runtime here: browsers, Node 18+, edge.
+ *
+ * NONCE CONTRACT (root cause of the 2026-07-19 "Nonces mismatch"
+ * incident, per the Supabase Google sign-in docs): Supabase Auth
+ * expects the provider to carry the SHA-256 HASH of the nonce, so the
+ * client must give Google GIS the **hashed** nonce (it lands in the ID
+ * token's `nonce` claim) and give `signInWithIdToken` the **raw**
+ * nonce (GoTrue hashes it and compares). Our server-side tokeninfo
+ * check therefore also compares the token claim against the HASH of
+ * the raw nonce the browser sent.
+ */
+export async function sha256Hex(value: string): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
  * Validate the decoded claims of a Google ID token against the expected
- * audience (our OAuth client id) and the per-attempt nonce. `nowSeconds`
- * is injectable for tests. Signature validity is established by the
+ * audience (our OAuth client id) and the per-attempt nonce. The token's
+ * `nonce` claim carries the SHA-256 hex of the raw nonce (see the nonce
+ * contract above), so callers pass `hashedNonce`. `nowSeconds` is
+ * injectable for tests. Signature validity is established by the
  * caller (Google tokeninfo returns claims only for validly-signed
  * tokens) and re-checked by Supabase during signInWithIdToken.
  */
 export function validateGoogleIdTokenClaims(
   claims: GoogleIdTokenClaims,
-  expected: { clientId: string; nonce: string },
+  expected: { clientId: string; hashedNonce: string },
   nowSeconds: number = Math.floor(Date.now() / 1000),
 ): ClaimValidationResult {
   if (!expected.clientId) return { ok: false, reason: "client_id_unconfigured" };
@@ -60,7 +85,7 @@ export function validateGoogleIdTokenClaims(
   if (!exp || !Number.isFinite(exp) || exp <= nowSeconds) {
     return { ok: false, reason: "token_expired" };
   }
-  if (!expected.nonce || claims.nonce !== expected.nonce) {
+  if (!expected.hashedNonce || claims.nonce !== expected.hashedNonce) {
     return { ok: false, reason: "nonce_mismatch" };
   }
   if (!claims.sub) return { ok: false, reason: "missing_subject" };
@@ -72,12 +97,18 @@ export type GoogleSignInBody = {
   credential?: unknown;
   nonce?: unknown;
   next?: unknown;
+  trace?: unknown;
 };
 
 /** Narrow the untrusted body. Returns null when structurally invalid. */
 export function parseGoogleSignInBody(
   body: unknown,
-): { credential: string; nonce: string; next: string | null } | null {
+): {
+  credential: string;
+  nonce: string;
+  next: string | null;
+  trace: string | null;
+} | null {
   if (typeof body !== "object" || body === null) return null;
   const b = body as GoogleSignInBody;
   if (typeof b.credential !== "string" || b.credential.length < 20) return null;
@@ -88,7 +119,12 @@ export function parseGoogleSignInBody(
     return null;
   }
   const next = typeof b.next === "string" ? b.next : null;
-  return { credential: b.credential, nonce: b.nonce, next };
+  // Non-secret debug correlation id (bounded hex) — never influences auth.
+  const trace =
+    typeof b.trace === "string" && /^[0-9a-f]{8,32}$/i.test(b.trace)
+      ? b.trace
+      : null;
+  return { credential: b.credential, nonce: b.nonce, next, trace };
 }
 
 /**

@@ -6,6 +6,7 @@ import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   isAllowedAuthOrigin,
   parseGoogleSignInBody,
+  sha256Hex,
   validateGoogleIdTokenClaims,
   type GoogleIdTokenClaims,
 } from "@/lib/auth/google-id-token";
@@ -118,26 +119,32 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const trace = body.trace ?? "no-trace";
   try {
-    // 4. Confirm with Google + validate claims.
+    // 4. Confirm with Google + validate claims. NONCE CONTRACT: the
+    //    token's nonce claim carries SHA-256(raw nonce) — the browser
+    //    gave Google the hashed nonce and us the raw one (see
+    //    lib/auth/google-id-token.ts; root cause of the 2026-07-19
+    //    "Nonces mismatch" incident).
     const claims = await fetchGoogleClaims(body.credential);
     if (!claims) {
-      console.error("[auth/google] tokeninfo verification failed");
+      console.error("[auth/google] tokeninfo verification failed", { trace });
       return NextResponse.json(
-        { ok: false, error: "invalid_token" },
+        { ok: false, error: "invalid_token", trace },
         { status: 401 },
       );
     }
     const verdict = validateGoogleIdTokenClaims(claims, {
       clientId,
-      nonce: body.nonce,
+      hashedNonce: await sha256Hex(body.nonce),
     });
     if (!verdict.ok) {
       console.error("[auth/google] claim validation failed", {
         reason: verdict.reason,
+        trace,
       });
       return NextResponse.json(
-        { ok: false, error: verdict.reason },
+        { ok: false, error: verdict.reason, trace },
         { status: 401 },
       );
     }
@@ -159,9 +166,10 @@ export async function POST(request: NextRequest) {
         status: error?.status,
         name: error?.name,
         message: error?.message,
+        trace,
       });
       return NextResponse.json(
-        { ok: false, error: "exchange_failed" },
+        { ok: false, error: "exchange_failed", trace },
         { status: 401 },
       );
     }
@@ -182,16 +190,18 @@ export async function POST(request: NextRequest) {
     console.info("[auth/google] success", {
       locale,
       onboarded: !!profile?.onboarded_at,
+      trace,
     });
     return NextResponse.json({ ok: true, next });
   } catch (e) {
     console.error("[auth/google] unexpected error", {
+      trace,
       ...(e instanceof Error
         ? { name: e.name, message: e.message }
         : { value: String(e) }),
     });
     return NextResponse.json(
-      { ok: false, error: "internal" },
+      { ok: false, error: "internal", trace },
       { status: 500 },
     );
   }

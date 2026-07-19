@@ -315,7 +315,8 @@
       "signing": "[EN] Signing in...",
       "signup_link": "[EN] Sign up",
       "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
-      "submit_label": "[EN] Sign in"
+      "submit_label": "[EN] Sign in",
+      "google_recovery_label": "Zaloguj się przez Google — ścieżka zapasowa (tymczasowa, przez zewnętrzną stronę logowania)"
     },
     "middleware": {
       "onboarding_required": "[EN] Please finish setting up your profile first.",

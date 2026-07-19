@@ -34,10 +34,13 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 import { POST } from "@/app/api/auth/google/route";
+import { sha256Hex } from "@/lib/auth/google-id-token";
 
 const ORIGIN = "https://labourmarket.ai";
 const CLIENT_ID = "313295493545-test.apps.googleusercontent.com";
 const NONCE = "c".repeat(32);
+// NONCE CONTRACT: Google's token carries the HASH of the raw nonce.
+const HASHED_NONCE = await sha256Hex(NONCE);
 const JWT = `${"h".repeat(24)}.${"p".repeat(24)}.${"s".repeat(24)}`;
 
 let ipCounter = 0;
@@ -79,7 +82,7 @@ const GOOD_CLAIMS = {
   aud: CLIENT_ID,
   iss: "https://accounts.google.com",
   exp: String(Math.floor(Date.now() / 1000) + 300),
-  nonce: NONCE,
+  nonce: HASHED_NONCE,
   sub: "google-user-1",
 };
 
@@ -135,6 +138,25 @@ describe("claim validation", () => {
     const res = await POST(makeReq({}));
     expect(res.status).toBe(401);
     expect((await res.json()).error).toBe("nonce_mismatch");
+  });
+
+  it("401s when the token claim carries the RAW nonce (incident regression)", async () => {
+    // Root cause of the 2026-07-19 production failure: Google must be
+    // given the HASHED nonce. If the claim equals the raw nonce, the
+    // contract was violated client-side and the exchange must refuse.
+    mockTokeninfo({ ...GOOD_CLAIMS, nonce: NONCE });
+    const res = await POST(makeReq({}));
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("nonce_mismatch");
+  });
+
+  it("echoes the non-secret trace id in failure responses", async () => {
+    mockTokeninfo({ ...GOOD_CLAIMS, nonce: "d".repeat(32) });
+    const res = await POST(
+      makeReq({ body: { credential: JWT, nonce: NONCE, trace: "feedbeef12345678" } }),
+    );
+    const body = await res.json();
+    expect(body.trace).toBe("feedbeef12345678");
   });
 
   it("401s when tokeninfo rejects the token outright", async () => {
