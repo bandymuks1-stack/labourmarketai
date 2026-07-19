@@ -97,6 +97,32 @@ describe("deriveCompactRows", () => {
     expect(rows[1].timeValue).toBe("");
   });
 
+  it("a reloaded taxonomy selection keeps slug + human name on ONE row (P1-A)", () => {
+    // After save, `fragment_activity` stores the SLUG and the durable
+    // journal_entry_skills link exists — reload must reunite them into one
+    // row with the slug preserved and the human name displayed.
+    const { rows } = deriveCompactRows(
+      {
+        ...baseEntry,
+        skillSlugs: ["driving"],
+        activities: [
+          {
+            index: 1,
+            rawPhrase: "Vairavimas",
+            activityLabel: "driving",
+            time: { value: 2, unitSlug: "hours" },
+            userLabel: null,
+          },
+        ],
+      },
+      skills,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].skillSlug).toBe("driving");
+    expect(rows[0].label).toBe("Vairavimas");
+    expect(rows[0].timeValue).toBe("2");
+  });
+
   it("global entry time surfaces as looseTime ONLY when no row has its own", () => {
     const withGlobal = deriveCompactRows(
       { ...baseEntry, time: { value: 6, unitSlug: "hours" } },
@@ -247,6 +273,79 @@ describe("buildCompactSaveFields — the ONE batch save payload", () => {
     const fields = buildCompactSaveFields(
       input({ removedSkillSlugs: ["tiling", "tiling"] }),
     );
+    expect(JSON.parse(fields.rejected_slugs_json)).toEqual(["tiling"]);
+  });
+
+  it("a taxonomy-selected row keeps ITS slug as the fragment activitySlug (P1-A)", () => {
+    const fields = buildCompactSaveFields(
+      input({
+        rows: [
+          row({
+            key: "tax",
+            label: "Suvirinimas",
+            skillSlug: "welding",
+            origin: "added",
+          }),
+          row({ key: "free", label: "kita veikla", origin: "added" }),
+        ],
+      }),
+    );
+    const fragments = JSON.parse(fields.fragments_json) as Array<{
+      activitySlug: string | null;
+      activityLabel: string;
+      selected: boolean;
+    }>;
+    // The slug rides the EXACT row it belongs to — never every row, never null.
+    expect(fragments[0].activitySlug).toBe("welding");
+    expect(fragments[0].activityLabel).toBe("Suvirinimas");
+    // Only EXPLICIT selections carry the selected flag the server links on.
+    expect(fragments[0].selected).toBe(true);
+    // A free-text row stays an honest label — no fabricated taxonomy claim.
+    expect(fragments[1].activitySlug).toBeNull();
+    expect(fragments[1].selected).toBe(false);
+  });
+
+  it("the durable link merges into the SLUG-labelled row, not a same-named free-text row", () => {
+    const { rows } = deriveCompactRows(
+      {
+        ...baseEntry,
+        skillSlugs: ["driving"],
+        activities: [
+          // Free-text row that coincidentally spells the skill's display name.
+          {
+            index: 1,
+            rawPhrase: "Vairavimas",
+            activityLabel: "Vairavimas",
+            time: null,
+            userLabel: null,
+          },
+          // The actual saved taxonomy selection (fragment_activity = slug).
+          {
+            index: 2,
+            rawPhrase: "vežiau krovinį",
+            activityLabel: "driving",
+            time: { value: 2, unitSlug: "hours" },
+            userLabel: null,
+          },
+        ],
+      },
+      skills,
+    );
+    expect(rows).toHaveLength(2);
+    // The slug-labelled fragment won the link; the free-text row kept its lane.
+    expect(rows[1].skillSlug).toBe("driving");
+    expect(rows[1].label).toBe("Vairavimas");
+    expect(rows[0].skillSlug).toBeNull();
+  });
+
+  it("a slug removed then re-added in the same session is NOT rejected (P1-A)", () => {
+    const fields = buildCompactSaveFields(
+      input({
+        rows: [row({ key: "re", label: "Vairavimas", skillSlug: "driving" })],
+        removedSkillSlugs: ["driving", "tiling"],
+      }),
+    );
+    // The row present in the save wins over the earlier removal.
     expect(JSON.parse(fields.rejected_slugs_json)).toEqual(["tiling"]);
   });
 

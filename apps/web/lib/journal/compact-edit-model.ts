@@ -90,17 +90,26 @@ export function deriveCompactRows(
   }
 
   // Durable skill links → their own rows, unless a fragment row already
-  // carries the same label (then the link merges into that row).
+  // carries the same label (then the link merges into that row). The
+  // slug-labelled fragment (a saved taxonomy selection stores the SLUG in
+  // `fragment_activity`) is the canonical match and wins over a free-text
+  // row that merely happens to spell the skill's display name.
   for (const slug of entry.skillSlugs) {
     const name = nameBySlug.get(slug) ?? slug.replace(/[-_]+/g, " ");
-    const existing = rows.find(
-      (r) =>
-        r.skillSlug === null &&
-        (foldLabel(r.label) === foldLabel(name) ||
-          foldLabel(r.label) === foldLabel(slug)),
-    );
+    const existing =
+      rows.find(
+        (r) => r.skillSlug === null && foldLabel(r.label) === foldLabel(slug),
+      ) ??
+      rows.find(
+        (r) => r.skillSlug === null && foldLabel(r.label) === foldLabel(name),
+      );
     if (existing) {
       existing.skillSlug = slug;
+      // A row whose stored label IS the slug (a saved taxonomy selection —
+      // `fragment_activity` persists the slug) reads as the human skill name.
+      if (foldLabel(existing.label) === foldLabel(slug)) {
+        existing.label = name;
+      }
       continue;
     }
     rows.push({
@@ -207,6 +216,10 @@ export function buildCompactSaveFields(
   if (input.topic.trim()) fields.topic = input.topic.trim();
 
   // Activity rows → fragments_json (index association preserved by order).
+  // A row that originates from a taxonomy selection keeps ITS `skillSlug` as
+  // the fragment's `activitySlug` (P1-A): the server validates the slug and
+  // links the skill to the new entry; a free-text row ships `activitySlug:
+  // null` and stays an honest label — never a fabricated taxonomy claim.
   const fragments = input.rows
     .filter((r) => r.label.trim().length > 0)
     .map((r) => {
@@ -215,19 +228,31 @@ export function buildCompactSaveFields(
         rawPhrase: (r.rawPhrase ?? r.label).trim(),
         timeValue: t ? t.value : null,
         timeUnit: t ? t.unitSlug : null,
-        activitySlug: null,
+        activitySlug: r.skillSlug,
         activityLabel: r.label.trim(),
         isUnknown: false,
         userLabel: null,
+        // EXPLICIT worker selection marker — only fragments flagged here may
+        // be skill-linked by the server. The legacy composer never sets it,
+        // so its parser-derived slugs keep their pre-existing metric-only
+        // behaviour (no silent self-declaration from a time confirm).
+        selected: r.skillSlug !== null,
       };
     });
   if (fragments.length > 0) {
     fields.fragments_json = JSON.stringify(fragments);
   }
 
-  fields.rejected_slugs_json = JSON.stringify([
-    ...new Set(input.removedSkillSlugs),
-  ]);
+  // A slug the worker removed AND then re-added in the same session is NOT
+  // rejected — the row present in the save wins over the earlier removal.
+  const presentSlugs = new Set(
+    input.rows.map((r) => r.skillSlug).filter(Boolean),
+  );
+  fields.rejected_slugs_json = JSON.stringify(
+    [...new Set(input.removedSkillSlugs)].filter(
+      (slug) => !presentSlugs.has(slug),
+    ),
+  );
 
   // Entry-level quantity lane (one `quantity` metric slot, as before):
   const qtyRaw = input.quantityValue.trim().replace(",", ".");

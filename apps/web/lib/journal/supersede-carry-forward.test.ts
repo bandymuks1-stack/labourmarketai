@@ -164,6 +164,10 @@ function baseHandler(overrides: {
 }): Handler {
   return (table, calls) => {
     switch (table) {
+      // Stale-chain guard precheck (post-merge review P1): the action refuses
+      // an already-superseded/deleted old entry before calling the RPC.
+      case "journal_entries":
+        return { data: { id: OLD_ID, superseded_by: null, deleted_at: null } };
       case "journal_entry_skills": {
         if (calls.some((c) => c.method === "upsert")) return { data: null };
         const id = journalEntryIdOf(calls);

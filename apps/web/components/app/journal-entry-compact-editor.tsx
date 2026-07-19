@@ -141,6 +141,12 @@ export function JournalEntryCompactEditor({
   const [addHits, setAddHits] = useState<TaxonomySkillHit[]>([]);
   const addSeq = useRef(0);
 
+  // The LATEST live entry of this drawer's supersession chain (P1-B). The
+  // first save supersedes the original entry; every later save in the same
+  // open drawer must supersede the entry the previous save CREATED — never
+  // the original again (which would fork the chain into duplicate live
+  // entries). Advanced only on a successful save.
+  const [currentEntryId, setCurrentEntryId] = useState(entry.id);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedResult, setSavedResult] = useState<{
@@ -251,6 +257,15 @@ export function JournalEntryCompactEditor({
   function addRow(label: string, skillSlug: string | null): void {
     const clean = label.trim().slice(0, 120);
     if (!clean) return;
+    // One skill = one row: re-picking an already-present taxonomy skill
+    // closes the panel instead of minting a duplicate row (a duplicate
+    // would degrade to a slug-labelled free claim on the next reload).
+    if (skillSlug && rows.some((r) => r.skillSlug === skillSlug)) {
+      setAddOpen(false);
+      setAddQuery("");
+      setAddHits([]);
+      return;
+    }
     setRows((prev) => [
       ...prev,
       {
@@ -284,13 +299,15 @@ export function JournalEntryCompactEditor({
       fd.set("locale", locale);
       fd.set("engagement_context_id", engagementId);
       for (const [k, v] of Object.entries(fields)) fd.set(k, v);
-      const result = await supersedeJournalEntry(entry.id, fd);
+      const result = await supersedeJournalEntry(currentEntryId, fd);
       if (!result.ok) {
-        // Retryable: every edit stays in the form exactly as it was.
+        // Retryable: every edit stays in the form exactly as it was — and the
+        // chain does NOT advance (a failed save created no new entry).
         setError(result.message);
         recordEvent("journal_save_error_code", { result_kind: result.code });
         return;
       }
+      setCurrentEntryId(result.entryId);
       setSavedResult({ entryId: result.entryId, skills: result.skills });
       setBaseline(compactStateFingerprint(saveInput));
       // Persisted now — additions stop rendering as unsaved.

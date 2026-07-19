@@ -44,6 +44,11 @@ describe("1 · edit drawer mounts the COMPACT editor", () => {
     expect(LAUNCHER).toMatch(/confirmDiscard/);
     expect(LAUNCHER).toMatch(/onDirtyChange/);
   });
+  it("reopening remounts the editor from the entry's saved state (P1-B §13)", () => {
+    // Fresh mount per open — a reopened drawer starts from the CURRENT live
+    // entry the page passes in, never a stale in-memory chain.
+    expect(LAUNCHER).toMatch(/key=\{entry\.id\}/);
+  });
 });
 
 describe("2 · compact editor — no matrix, no empty buckets, rows own their time", () => {
@@ -88,10 +93,41 @@ describe("3 · one save contract (batch) + honest local state", () => {
     expect(EDITOR).toMatch(/compactEdit\.cancel/);
   });
   it("saves through the ONE existing supersede action", () => {
-    expect(EDITOR).toMatch(/supersedeJournalEntry\(entry\.id/);
+    // P1-B: every save supersedes the LATEST live entry of the drawer's
+    // chain — never the original entry again (which forked the chain into
+    // duplicate live entries on the second save).
+    expect(EDITOR).toMatch(/supersedeJournalEntry\(currentEntryId/);
+    expect(EDITOR).not.toMatch(/supersedeJournalEntry\(entry\.id/);
     // no second save path, no direct table writes from the editor
     expect(EDITOR).not.toMatch(/createJournalEntry/);
     expect(EDITOR).not.toMatch(/from\("journal_entr/);
+  });
+  it("the supersession chain advances ONLY on a successful save (P1-B)", () => {
+    expect(EDITOR).toMatch(
+      /const \[currentEntryId, setCurrentEntryId\] = useState\(entry\.id\)/,
+    );
+    expect(EDITOR).toMatch(/setCurrentEntryId\(result\.entryId\)/);
+    // the only advance sits AFTER the !result.ok early-return
+    const errReturn = EDITOR.indexOf("setError(result.message)");
+    const advance = EDITOR.indexOf("setCurrentEntryId(result.entryId)");
+    expect(errReturn).toBeGreaterThan(0);
+    expect(advance).toBeGreaterThan(errReturn);
+  });
+  it("taxonomy rows keep their slug through serialization (P1-A)", () => {
+    expect(MODEL).toMatch(/activitySlug: r\.skillSlug/);
+    expect(MODEL).not.toMatch(/activitySlug: null/);
+    // only EXPLICIT selections may be linked — composer fragments never
+    // set the flag, so parser slugs can't silently self-declare skills
+    expect(MODEL).toMatch(/selected: r\.skillSlug !== null/);
+    expect(ACTIONS).toMatch(/f\.selected === true/);
+    // the server validates + links the selection on the NEW entry
+    expect(ACTIONS).toMatch(/linkSelectedTaxonomySkills/);
+    expect(ACTIONS).toMatch(/verified: false/);
+    expect(ACTIONS).not.toMatch(/verified\s*:\s*true/);
+  });
+  it("a stale supersede of an already-superseded entry is refused (P1-B fork guard)", () => {
+    expect(ACTIONS).toMatch(/"entry_superseded"/);
+    expect(ACTIONS).toMatch(/oldEntry\.superseded_by \|\| oldEntry\.deleted_at/);
   });
   it("dirty indicator + unsaved chip on local additions", () => {
     expect(EDITOR).toMatch(/data-testid="journal-compact-dirty"/);
@@ -126,7 +162,7 @@ describe("4 · no data loss on supersede (decision markers carried forward)", ()
   });
   it("carry-forward runs BEFORE the pipeline for the new entry", () => {
     const carryIdx = ACTIONS.indexOf(
-      "await carryForwardEntryDecisionMarkers(supabase, oldEntryId, newEntryId)",
+      "await carryForwardEntryDecisionMarkers(",
     );
     const pipelineIdx = ACTIONS.indexOf("entryId: newEntryId");
     expect(carryIdx).toBeGreaterThan(0);
