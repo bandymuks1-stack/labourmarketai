@@ -397,5 +397,17 @@
   "pipelineCvUpdated": "CV обновлено.",
   "pipelineCvUnchanged": "CV не изменилось.",
   "pipelineFailed": "Запись сохранена, но распознавание навыков не удалось (код: {trace}). Используйте «Обновить распознавание».",
-  "reprocessEntry": "Обновить распознавание"
+  "reprocessEntry": "Обновить распознавание",
+  "resultDetected": "Обнаружено",
+  "resultAutoAdded": "Добавлено автоматически",
+  "resultNeedsConfirm": "На проверку",
+  "resultRejected": "Отклонено",
+  "candidateConfirm": "Добавить",
+  "candidateReject": "Отклонить",
+  "candidateConfirming": "Сохраняем…",
+  "candidateConfirmed": "Добавлено",
+  "candidateRejected": "Отклонено",
+  "candidateError": "Не удалось сохранить. Попробуйте ещё раз.",
+  "rejectedReasonUser": "отклонено вами",
+  "rejectedReasonInactive": "нет в каталоге"
 }

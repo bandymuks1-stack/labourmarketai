@@ -75,6 +75,34 @@ describe("recognition — Lithuanian incl. missing diacritics / slang / short", 
   });
 });
 
+describe("recognition — vehicle washing + house cleaning (P1 recall repair)", () => {
+  it("'Ploviau mašiną' → vehicle-cleaning (with and without diacritics)", () => {
+    expect(slugs("Ploviau mašiną 1 val")).toContain("vehicle-cleaning");
+    expect(slugs("ploviau masina")).toContain("vehicle-cleaning");
+    expect(slugs("ploviau automobilį klientui")).toContain("vehicle-cleaning");
+  });
+  it("RU/EN car-wash forms → vehicle-cleaning", () => {
+    expect(slugs("помыл машину")).toContain("vehicle-cleaning");
+    expect(slugs("мойка авто целый день")).toContain("vehicle-cleaning");
+    expect(slugs("washed the car for a client")).toContain("vehicle-cleaning");
+  });
+  it("vehicle washing never bleeds into repair / dishes / windows", () => {
+    expect(slugs("Remontavau mašiną")).not.toContain("vehicle-cleaning");
+    expect(slugs("Ploviau indus restorane")).not.toContain("vehicle-cleaning");
+    expect(slugs("Ploviau langus biure")).not.toContain("vehicle-cleaning");
+  });
+  it("unambiguous house-cleaning forms → cleaning-services", () => {
+    expect(slugs("Valiau namus po remonto")).toContain("cleaning-services");
+    expect(slugs("namų valymas 2 val")).toContain("cleaning-services");
+    expect(slugs("убирал дом")).toContain("cleaning-services");
+    expect(slugs("cleaned the house")).toContain("cleaning-services");
+  });
+  it("AMBIGUOUS 'tvarkiau namus' is NOT a direct cleaning skill (candidate lane only)", () => {
+    expect(slugs("tvarkiau namus")).not.toContain("cleaning-services");
+    expect(slugs("tvarkiau butą")).not.toContain("cleaning-services");
+  });
+});
+
 describe("recognition — Russian", () => {
   it("15 клал плитку → tiling", () => {
     expect(slugs("клал плитку в ванной")).toContain("tiling");

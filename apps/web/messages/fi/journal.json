@@ -322,5 +322,17 @@
   "pipelineCvUpdated": "[EN] CV updated.",
   "pipelineCvUnchanged": "[EN] CV unchanged.",
   "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
-  "reprocessEntry": "[EN] Refresh recognition"
+  "reprocessEntry": "[EN] Refresh recognition",
+  "resultDetected": "[EN] Detected",
+  "resultAutoAdded": "[EN] Added automatically",
+  "resultNeedsConfirm": "[EN] To review",
+  "resultRejected": "[EN] Dismissed",
+  "candidateConfirm": "[EN] Add",
+  "candidateReject": "[EN] Dismiss",
+  "candidateConfirming": "[EN] Saving…",
+  "candidateConfirmed": "[EN] Added",
+  "candidateRejected": "[EN] Dismissed",
+  "candidateError": "[EN] Could not save. Try again.",
+  "rejectedReasonUser": "[EN] dismissed by you",
+  "rejectedReasonInactive": "[EN] not in the catalogue"
 }

@@ -153,7 +153,20 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
   ...asSector("cleaning_facility", [
     // Generic cleaning is a first-class cleaning_facility skill — it used to
     // be swallowed by the construction site-cleaning slug (see above).
-    { slug: "cleaning-services", needles: ["valym", "valiau", "valau", "valytoj", "siurbiau", "tvarkiau ofis", "tvarkiau biur", "ofiso tvark", "biuro tvark", "уборк", "убира", "убрал", "уборщ", "клинин", "мыл пол", "помыл пол", "cleaning", "cleaned", "cleaner", "mopped"] },
+    // P1 recall repair 2026-07-19: unambiguous house-cleaning phrasings added
+    // ("namų tvarkymas/valymas", "valiau namus", RU/EN equivalents). The bare
+    // verb "tvarkiau" is deliberately NOT a needle — in LT it also means
+    // "fixed/repaired", so "tvarkiau namus"/"tvarkiau butą" surface through the
+    // AMBIGUOUS-candidate lane (lib/structuring/ambiguous-journal-candidates.ts)
+    // as a confirmable clarification, never as an auto skill.
+    { slug: "cleaning-services", needles: ["valym", "valiau", "valau", "valytoj", "siurbiau", "tvarkiau ofis", "tvarkiau biur", "ofiso tvark", "biuro tvark", "namu tvarkym", "namu valym", "valiau namus", "уборка дома", "убирал дом", "house cleaning", "cleaned the house", "уборк", "убира", "убрал", "уборщ", "клинин", "мыл пол", "помыл пол", "cleaning", "cleaned", "cleaner", "mopped"] },
+    // P1 recall repair 2026-07-19 (production incident "Ploviau mašiną - 1 h"):
+    // car/vehicle washing had NO slug and NO needle — a direct skill signal was
+    // silently dropped. Needles are written FOLDED (no diacritics, matching how
+    // the matcher runs — same convention as "statybviet") and are verb+vehicle
+    // anchored so they never collide with dishwashing ("ploviau ind"), window
+    // cleaning ("ploviau lang") or auto-REPAIR ("remontavau mašin").
+    { slug: "vehicle-cleaning", needles: ["plov masin", "ploviau masin", "ploviau automobil", "automobil plov", "masinos plovim", "car wash", "washed the car", "мойка машин", "мойка авто", "помыл машин"] },
     { slug: "window-cleaning", needles: ["valiau lang", "valau lang", "ploviau lang", "langu valym", "langų valym", "мыл окн", "мытье окон", "мытьё окон", "window clean", "cleaned windows"] },
     { slug: "housekeeping", needles: ["kambari viesbut", "kambarius viesbut", "viesbut kambar", "kambarines", "patalyne", "patalynes keit", "housekeep", "room attendant", "горничн", "уборка номер", "смена белья"] },
     { slug: "winter-service", needles: ["valiau snieg", "sniego valym", "snieg nuo tak", "kasiau snieg", "barst drusk", "druska nuo led", "led barst", "snow remov", "snow clear", "gritting", "уборка снег", "чистил снег", "посыпал реагент"] },

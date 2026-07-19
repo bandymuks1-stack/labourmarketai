@@ -1824,7 +1824,10 @@ describe("no migration files added by this sprint", () => {
     // (20260718210000_marketplace_listings). RED / owner-authorized.
     // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile
     // (20260719120000_business_public_profile). RED / owner-authorized.
-    const SPRINT_BASELINE = 156;
+    // Bumped 156 -> 157 for the P1 journal-recall repair — additive
+    // vehicle-cleaning skill seed (20260719150000_vehicle_cleaning_skill).
+    // GREEN / additive, ON CONFLICT DO NOTHING, paired rollback.
+    const SPRINT_BASELINE = 157;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -39,6 +39,40 @@ describe("extractProfileSkillClaims", () => {
     expect(result.map((r) => r.label)).toContain("Programavimas");
   });
 
+  // P1 recall repair (production incident 2026-07-19): work done WITH AI
+  // tools is an inferable capability — tool mention → capability row.
+  describe("Tool mention → Darbas su AI įrankiais (ChatGPT / Claude)", () => {
+    const AI = "Darbas su AI įrankiais (ChatGPT / Claude)";
+    it("fires on the incident phrasing 'su chat gpt ir claude code'", () => {
+      const result = extractProfileSkillClaims(
+        "Kodavau programą su chat gpt ir claude code",
+      );
+      const ai = result.find((r) => r.label === AI);
+      expect(ai).toBeDefined();
+      expect(ai?.ambiguous).not.toBe(true);
+    });
+    it("fires on each unambiguous tool mention", () => {
+      for (const text of [
+        "dirbau su chatgpt",
+        "naudojau claude",
+        "rašiau kodą su copilot",
+        "diegiau ai įrankius komandai",
+      ]) {
+        expect(
+          extractProfileSkillClaims(text).some((r) => r.label === AI),
+          text,
+        ).toBe(true);
+      }
+    });
+    it("does NOT fire without a tool mention", () => {
+      expect(
+        extractProfileSkillClaims("Ploviau mašiną ir tvarkiau namus").some(
+          (r) => r.label === AI,
+        ),
+      ).toBe(false);
+    });
+  });
+
   it("maps English 'plumbing' → 'Santechnika'", () => {
     const result = extractProfileSkillClaims(
       "Mostly residential plumbing work.",

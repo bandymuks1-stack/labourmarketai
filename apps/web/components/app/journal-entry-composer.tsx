@@ -31,7 +31,15 @@ import {
   createJournalEntry,
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
-import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
+import type {
+  JournalPipelineCandidate,
+  JournalSkillPipelineResult,
+} from "@/lib/journal/skill-pipeline";
+import {
+  confirmJournalSkillCandidate,
+  rejectJournalAmbiguousCandidate,
+  rejectJournalClaimCandidate,
+} from "@/lib/journal/skill-pipeline-actions";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import {
@@ -304,6 +312,12 @@ export function JournalEntryComposer({
   // real counts (detected/added/strengthened/review) + honest failure state.
   const [savedPipeline, setSavedPipeline] =
     useState<JournalSkillPipelineResult | null>(null);
+  // P1 recall repair: the saved entry id (candidate confirm/reject targets it)
+  // + per-candidate action state for the one-tap confirm/reject buttons.
+  const [savedEntryId, setSavedEntryId] = useState<string | null>(null);
+  const [candidateStates, setCandidateStates] = useState<
+    Record<string, "idle" | "working" | "confirmed" | "rejected" | "error">
+  >({});
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
   >(editSkillSuggestions);
@@ -548,6 +562,85 @@ export function JournalEntryComposer({
     }
   }
 
+  // ── P1 recall repair — one-tap confirm/reject on pipeline candidates ────
+  const candidateKey = (c: JournalPipelineCandidate) => `${c.kind}:${c.label}`;
+
+  /** Locale-aware display label per candidate kind. Fuzzy candidates carry a
+   *  taxonomy slug (localized via skillNames); ambiguous candidates show
+   *  their canonical clarification label; claims localize via the capability
+   *  label map (LT fallback — never a raw slug). */
+  function candidateDisplayLabel(c: JournalPipelineCandidate): string {
+    if (c.kind === "fuzzy_skill" && c.slug) return tSkillSafe(tSkill, c.slug);
+    if (c.kind === "claim") return localizeCapabilityLabel(c.label, locale);
+    return c.label;
+  }
+
+  function setCandidateState(
+    key: string,
+    next: "idle" | "working" | "confirmed" | "rejected" | "error",
+  ) {
+    setCandidateStates((prev) => ({ ...prev, [key]: next }));
+  }
+
+  /** Confirm a candidate — every path is the honest existing lane: taxonomy
+   *  candidates via confirmJournalSkillCandidate (verified:false,
+   *  self_declared, yellow + entry link), claims via the profile claim action.
+   *  The button state shows the RETURNED result, never an optimistic count. */
+  async function confirmCandidate(c: JournalPipelineCandidate) {
+    const key = candidateKey(c);
+    setCandidateState(key, "working");
+    try {
+      if (c.kind === "claim") {
+        await saveProfileSkillClaimsAction([c.label]);
+        setCandidateState(key, "confirmed");
+        return;
+      }
+      if (!savedEntryId || !c.slug) {
+        setCandidateState(key, "error");
+        return;
+      }
+      const res = await confirmJournalSkillCandidate(
+        savedEntryId,
+        c.slug,
+        c.kind === "ambiguous" ? { clarificationLabel: c.label } : undefined,
+      );
+      setCandidateState(key, res.ok ? "confirmed" : "error");
+    } catch (e) {
+      console.error("[journal-composer] candidate confirm failed:", e);
+      setCandidateState(key, "error");
+    }
+  }
+
+  /** Reject a candidate. Fuzzy candidates were never persisted (client-side
+   *  dismiss); ambiguous ones remove the worker's own pending clarification
+   *  row; claims get an append-only rejection marker (the metric lane is
+   *  append-only by doctrine §3 — nothing is rewritten). */
+  async function rejectCandidate(c: JournalPipelineCandidate) {
+    const key = candidateKey(c);
+    setCandidateState(key, "working");
+    try {
+      if (c.kind === "ambiguous") {
+        const res = await rejectJournalAmbiguousCandidate(c.label);
+        setCandidateState(key, res.ok ? "rejected" : "error");
+        return;
+      }
+      if (c.kind === "claim") {
+        if (!savedEntryId) {
+          setCandidateState(key, "error");
+          return;
+        }
+        const res = await rejectJournalClaimCandidate(savedEntryId, c.label);
+        setCandidateState(key, res.ok ? "rejected" : "error");
+        return;
+      }
+      // fuzzy_skill: nothing was persisted — dismissing it is purely local.
+      setCandidateState(key, "rejected");
+    } catch (e) {
+      console.error("[journal-composer] candidate reject failed:", e);
+      setCandidateState(key, "error");
+    }
+  }
+
   function setFragmentStatus(idx: number, next: SuggestionStatus) {
     setFragments((prev) =>
       prev.map((f, i) => {
@@ -663,6 +756,8 @@ export function JournalEntryComposer({
       // the save action (awaited, idempotent, RLS-scoped). The result below
       // is the real outcome — no fire-and-forget call that can silently die.
       setSavedPipeline(result.skills);
+      setSavedEntryId(result.entryId);
+      setCandidateStates({});
       // Wagon 5: persist corrected rows ("Pataisyti") as SELF-DECLARED claims.
       // The action dedups by normalized label; EMPTY corrections are filtered
       // here so an empty value can never be saved. Never verified, never
@@ -944,6 +1039,162 @@ export function JournalEntryComposer({
                     : t("pipelineCvUnchanged")}
                 </p>
               ))}
+            {/* P1 recall repair: per-category result — real lists, not just
+                counts. Four labelled groups (detected / auto-added / needs
+                confirmation / rejected); each renders ONLY with real data.
+                Candidates are one-tap confirm/reject through the honest
+                lanes (self-declared skill, clarification, claim) — never a
+                fake count; nothing is ever marked verified here. */}
+            {savedPipeline !== null &&
+              savedPipeline.status !== "failed" &&
+              (() => {
+                const detectedSlugs = [
+                  ...new Set([
+                    ...savedPipeline.addedSkills.map((s) => s.slug),
+                    ...savedPipeline.strengthenedSkills.map((s) => s.slug),
+                  ]),
+                ];
+                const groups =
+                  detectedSlugs.length +
+                  savedPipeline.candidates.length +
+                  savedPipeline.rejected.length;
+                if (groups === 0) return null;
+                return (
+                  <div
+                    className="flex flex-col gap-2"
+                    data-testid="journal-pipeline-groups"
+                  >
+                    {detectedSlugs.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("resultDetected")}
+                        </span>
+                        {detectedSlugs.map((slug) => (
+                          <span
+                            key={`det-${slug}`}
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
+                            data-testid={`journal-detected-skill-${slug}`}
+                          >
+                            {tSkillSafe(tSkill, slug)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {savedPipeline.addedSkills.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("resultAutoAdded")}
+                        </span>
+                        {savedPipeline.addedSkills.map((s) => (
+                          <span
+                            key={`add-${s.slug}`}
+                            className="rounded-md border border-state-success/40 bg-state-success/5 px-2 py-0.5 text-[11px] text-state-success"
+                            data-testid={`journal-added-skill-${s.slug}`}
+                          >
+                            {tSkillSafe(tSkill, s.slug)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {savedPipeline.candidates.length > 0 && (
+                      <div className="flex flex-col gap-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("resultNeedsConfirm")}
+                        </span>
+                        {savedPipeline.candidates.map((c) => {
+                          const key = candidateKey(c);
+                          const state = candidateStates[key] ?? "idle";
+                          return (
+                            <div
+                              key={key}
+                              className="flex flex-wrap items-center gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5"
+                              data-testid="journal-candidate-chip"
+                            >
+                              <span className="text-xs font-semibold text-text-primary">
+                                {candidateDisplayLabel(c)}
+                              </span>
+                              {c.reason ? (
+                                <span className="text-[11px] text-text-muted">
+                                  {c.kind === "ambiguous"
+                                    ? c.reason
+                                    : t("reasonFound", { word: c.reason })}
+                                </span>
+                              ) : null}
+                              {state === "confirmed" ? (
+                                <span
+                                  className="text-[11px] font-semibold text-state-success"
+                                  data-testid="journal-candidate-confirmed"
+                                >
+                                  ✓ {t("candidateConfirmed")}
+                                </span>
+                              ) : state === "rejected" ? (
+                                <span
+                                  className="text-[11px] text-text-muted"
+                                  data-testid="journal-candidate-rejected"
+                                >
+                                  {t("candidateRejected")}
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    disabled={state === "working"}
+                                    aria-busy={state === "working" || undefined}
+                                    onClick={() => void confirmCandidate(c)}
+                                    data-testid="journal-candidate-confirm"
+                                    className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                  >
+                                    {state === "working"
+                                      ? t("candidateConfirming")
+                                      : t("candidateConfirm")}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={state === "working"}
+                                    onClick={() => void rejectCandidate(c)}
+                                    data-testid="journal-candidate-reject"
+                                    className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                                  >
+                                    {t("candidateReject")}
+                                  </button>
+                                </span>
+                              )}
+                              {state === "error" && (
+                                <span
+                                  className="text-[11px] text-state-danger"
+                                  role="alert"
+                                  data-testid="journal-candidate-error"
+                                >
+                                  {t("candidateError")}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {savedPipeline.rejected.length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          {t("resultRejected")}
+                        </span>
+                        {savedPipeline.rejected.map((r) => (
+                          <p
+                            key={`rej-${r.label}`}
+                            className="text-[11px] leading-relaxed text-text-muted"
+                            data-testid="journal-rejected-line"
+                          >
+                            {tSkillSafe(tSkill, r.label)} —{" "}
+                            {r.reason === "user_rejected"
+                              ? t("rejectedReasonUser")
+                              : t("rejectedReasonInactive")}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             {/* Honest "what's next + who confirms" — saving is never a dead end:
                 the entry is below, skills surface in the profile, and it stays
                 private until a real human confirms it. */}

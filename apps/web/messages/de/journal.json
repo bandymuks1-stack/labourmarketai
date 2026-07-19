@@ -397,5 +397,17 @@
   "pipelineCvUpdated": "CV aktualisiert.",
   "pipelineCvUnchanged": "CV unverändert.",
   "pipelineFailed": "Eintrag gespeichert, aber die Fähigkeitserkennung ist fehlgeschlagen (Code: {trace}). Nutzen Sie „Erkennung aktualisieren“.",
-  "reprocessEntry": "Erkennung aktualisieren"
+  "reprocessEntry": "Erkennung aktualisieren",
+  "resultDetected": "Erkannt",
+  "resultAutoAdded": "Automatisch hinzugefügt",
+  "resultNeedsConfirm": "Zu prüfen",
+  "resultRejected": "Verworfen",
+  "candidateConfirm": "Hinzufügen",
+  "candidateReject": "Verwerfen",
+  "candidateConfirming": "Wird gespeichert…",
+  "candidateConfirmed": "Hinzugefügt",
+  "candidateRejected": "Verworfen",
+  "candidateError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+  "rejectedReasonUser": "von Ihnen verworfen",
+  "rejectedReasonInactive": "nicht im Katalog"
 }

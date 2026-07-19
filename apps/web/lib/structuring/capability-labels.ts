@@ -29,6 +29,11 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
   },
   // Owner-example capability/activity signals touched by PR #513.
   Programavimas: { en: "Programming", ru: "Программирование" },
+  // P1 recall repair 2026-07-19 — AI-tools-assisted work capability.
+  "Darbas su AI įrankiais (ChatGPT / Claude)": {
+    en: "Working with AI tools (ChatGPT / Claude)",
+    ru: "Работа с AI-инструментами (ChatGPT / Claude)",
+  },
   "Interneto svetainės dizainas": { en: "Website design", ru: "Дизайн сайта" },
   "Sunkiosios technikos operavimas": {
     en: "Heavy machinery operation",

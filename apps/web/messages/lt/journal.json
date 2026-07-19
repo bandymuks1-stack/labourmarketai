@@ -397,5 +397,17 @@
   "pipelineCvUpdated": "CV atnaujintas.",
   "pipelineCvUnchanged": "CV nepakito.",
   "pipelineFailed": "Įrašas išsaugotas, bet įgūdžių atpažinimas nepavyko (kodas: {trace}). Naudokite „Atnaujinti atpažinimą“.",
-  "reprocessEntry": "Atnaujinti atpažinimą"
+  "reprocessEntry": "Atnaujinti atpažinimą",
+  "resultDetected": "Aptikta",
+  "resultAutoAdded": "Pridėta automatiškai",
+  "resultNeedsConfirm": "Reikia peržiūrėti",
+  "resultRejected": "Atmesta",
+  "candidateConfirm": "Pridėti",
+  "candidateReject": "Atmesti",
+  "candidateConfirming": "Saugoma…",
+  "candidateConfirmed": "Pridėta",
+  "candidateRejected": "Atmesta",
+  "candidateError": "Nepavyko išsaugoti. Bandykite dar kartą.",
+  "rejectedReasonUser": "atmesta jūsų",
+  "rejectedReasonInactive": "nėra kataloge"
 }

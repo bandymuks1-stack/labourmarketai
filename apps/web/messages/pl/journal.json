@@ -161,5 +161,17 @@
   "pipelineCvUpdated": "CV zaktualizowane.",
   "pipelineCvUnchanged": "CV bez zmian.",
   "pipelineFailed": "Wpis zapisany, ale rozpoznawanie umiejętności nie powiodło się (kod: {trace}). Użyj „Odśwież rozpoznawanie”.",
-  "reprocessEntry": "Odśwież rozpoznawanie"
+  "reprocessEntry": "Odśwież rozpoznawanie",
+  "resultDetected": "Wykryto",
+  "resultAutoAdded": "Dodano automatycznie",
+  "resultNeedsConfirm": "Do przeglądu",
+  "resultRejected": "Odrzucone",
+  "candidateConfirm": "Dodaj",
+  "candidateReject": "Odrzuć",
+  "candidateConfirming": "Zapisywanie…",
+  "candidateConfirmed": "Dodano",
+  "candidateRejected": "Odrzucone",
+  "candidateError": "Nie udało się zapisać. Spróbuj ponownie.",
+  "rejectedReasonUser": "odrzucone przez Ciebie",
+  "rejectedReasonInactive": "brak w katalogu"
 }

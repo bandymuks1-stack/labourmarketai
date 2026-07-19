@@ -82,3 +82,85 @@ describe("P0 Track B — canonical journal skill pipeline", () => {
     expect(ENTRY_ROW).toMatch(/reprocessEntry/);
   });
 });
+
+describe("P1 recall repair — lists not counts, confirmable candidates", () => {
+  it("pipeline result carries the candidate/rejected LISTS (nothing silently dropped)", () => {
+    expect(PIPELINE).toMatch(/addedSkills:\s*\{ slug: string \}\[\]/);
+    expect(PIPELINE).toMatch(/strengthenedSkills:\s*\{ slug: string \}\[\]/);
+    expect(PIPELINE).toMatch(/candidates:\s*JournalPipelineCandidate\[\]/);
+    expect(PIPELINE).toMatch(/rejected:\s*JournalPipelineRejected\[\]/);
+    expect(PIPELINE).toMatch(/"fuzzy_skill"\s*\|\s*"ambiguous"\s*\|\s*"claim"/);
+    expect(PIPELINE).toMatch(/"user_rejected"\s*\|\s*"inactive_skill"/);
+  });
+
+  it("ambiguous phrasings ride the EXISTING clarification lane, never worker_skills", () => {
+    // The pipeline consumes the curated ambiguous extractor…
+    expect(PIPELINE).toMatch(/extractAmbiguousCandidates/);
+    // …and persists through skill_candidate_clarifications (canonical lane,
+    // migration 20260609160000) — no parallel candidate structure.
+    expect(PIPELINE).toMatch(/skill_candidate_clarifications/);
+    // The ONLY worker_skills insert path is the strong-recognition toAdd set
+    // (behavioural guard lives in skill-pipeline.test.ts: an ambiguous
+    // candidate never produces a worker_skills write).
+    const workerSkillWrites = PIPELINE.match(/from\("worker_skills"\)\.upsert/g);
+    expect(workerSkillWrites).toHaveLength(1);
+    // The ambiguous section itself never touches worker_skills.
+    const ambiguousSection = PIPELINE.slice(
+      PIPELINE.indexOf("6b. Ambiguous"),
+      PIPELINE.indexOf("── 7."),
+    );
+    expect(ambiguousSection.length).toBeGreaterThan(0);
+    expect(ambiguousSection).not.toMatch(/from\("worker_skills"\)/);
+  });
+
+  it("composer renders the four per-category result groups with one-tap actions", () => {
+    expect(COMPOSER).toMatch(/data-testid="journal-pipeline-groups"/);
+    expect(COMPOSER).toMatch(/t\("resultDetected"\)/);
+    expect(COMPOSER).toMatch(/t\("resultAutoAdded"\)/);
+    expect(COMPOSER).toMatch(/t\("resultNeedsConfirm"\)/);
+    expect(COMPOSER).toMatch(/t\("resultRejected"\)/);
+    expect(COMPOSER).toMatch(/data-testid="journal-candidate-chip"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-candidate-confirm"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-candidate-reject"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-rejected-line"/);
+  });
+
+  it("candidate confirm goes through the honest self-declared lane only", () => {
+    const ACTIONS_FILE = read("lib/journal/skill-pipeline-actions.ts");
+    expect(ACTIONS_FILE).toMatch(/export async function confirmJournalSkillCandidate/);
+    expect(ACTIONS_FILE).toMatch(/verified:\s*false/);
+    expect(ACTIONS_FILE).toMatch(/source:\s*"self_declared"/);
+    expect(ACTIONS_FILE).toMatch(/confidence_bin:\s*"yellow"/);
+    expect(ACTIONS_FILE).not.toMatch(/verified:\s*true/);
+    expect(ACTIONS_FILE).not.toMatch(/manager_confirmed/);
+    // Claim rejection is APPEND-ONLY (doctrine §3): a marker row, never an
+    // update/delete on the journal metric lane.
+    expect(ACTIONS_FILE).toMatch(/skill_claim_rejected/);
+    expect(ACTIONS_FILE).not.toMatch(
+      /from\("journal_entry_metrics"\)\s*\.\s*delete/,
+    );
+  });
+
+  it("the i18n keys for the four groups exist in every journal.json locale", () => {
+    const locales = [
+      "da", "de", "en", "et", "fi", "lt", "lv", "nl", "no", "pl", "ru", "sv",
+    ];
+    for (const loc of locales) {
+      const j = JSON.parse(
+        read(`messages/${loc}/journal.json`),
+      ) as Record<string, string>;
+      for (const key of [
+        "resultDetected",
+        "resultAutoAdded",
+        "resultNeedsConfirm",
+        "resultRejected",
+        "candidateConfirm",
+        "candidateReject",
+        "rejectedReasonUser",
+        "rejectedReasonInactive",
+      ]) {
+        expect(typeof j[key], `${loc}.${key}`).toBe("string");
+      }
+    }
+  });
+});

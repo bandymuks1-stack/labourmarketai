@@ -49,6 +49,12 @@ vi.mock("@/lib/structuring/extract-journal-suggestions", () => ({
     extractSuggestionsMock(...args),
 }));
 
+type AmbiguousStub = { label: string; reason: string; possibleSlug: string };
+const ambiguousMock = vi.fn((_text: string): AmbiguousStub[] => []);
+vi.mock("@/lib/structuring/ambiguous-journal-candidates", () => ({
+  extractAmbiguousCandidates: (...args: [string]) => ambiguousMock(...args),
+}));
+
 // ── Chainable supabase mock ────────────────────────────────────────────────
 type Call = { method: string; args: unknown[] };
 type TableResponse = { data?: unknown; error?: unknown };
@@ -121,7 +127,7 @@ function baseHandler(overrides: {
   entry?: { id: string; worker_id: string } | null;
   linkError?: unknown;
   claimRows?: { normalized_label: string }[];
-  claimMetrics?: { value_text: string }[];
+  claimMetrics?: { value_text: string; metric_slug?: string }[];
 }): Handler {
   return (table, calls) => {
     const wrote = (m: string) => calls.some((c) => c.method === m);
@@ -151,6 +157,8 @@ function baseHandler(overrides: {
       case "journal_entry_metrics":
         if (wrote("insert")) return { data: null };
         return { data: overrides.claimMetrics ?? [] };
+      case "skill_candidate_clarifications":
+        return { data: null };
       default:
         return { data: null };
     }
@@ -175,6 +183,8 @@ beforeEach(() => {
   recognizeSkillsMock.mockReturnValue([]);
   extractSuggestionsMock.mockReset();
   extractSuggestionsMock.mockReturnValue({ capabilitySuggestions: [] });
+  ambiguousMock.mockReset();
+  ambiguousMock.mockReturnValue([]);
 });
 
 describe("processJournalEntrySkills", () => {
@@ -193,6 +203,7 @@ describe("processJournalEntrySkills", () => {
     expect(result.detected).toBe(1);
     expect(result.added).toBe(0);
     expect(result.strengthened).toBe(1);
+    expect(result.strengthenedSkills).toEqual([{ slug: "tiling" }]);
     expect(result.alreadyLinked).toBe(0);
     expect(result.cvUpdated).toBe(true);
     const linkWrite = writePayloads.find(
@@ -220,6 +231,7 @@ describe("processJournalEntrySkills", () => {
     );
     expect(result.status).toBe("completed");
     expect(result.added).toBe(1);
+    expect(result.addedSkills).toEqual([{ slug: "tiling" }]);
     expect(result.strengthened).toBe(0);
     expect(result.cvUpdated).toBe(true);
     const skillWrite = writePayloads.find((w) => w.table === "worker_skills");
@@ -257,6 +269,16 @@ describe("processJournalEntrySkills", () => {
     expect(result.reviewNeeded).toBe(1);
     expect(result.cvUpdated).toBe(false);
     expect(writePayloads).toHaveLength(0);
+    // P1 recall repair: the fuzzy recognition is a VISIBLE confirmable
+    // candidate (slug + matched word), not just an opaque count.
+    expect(result.candidates).toEqual([
+      {
+        kind: "fuzzy_skill",
+        label: "tiling",
+        slug: "tiling",
+        reason: "plytelms",
+      },
+    ]);
   });
 
   it("duplicate retry (link already exists) → alreadyLinked, nothing re-written", async () => {
@@ -292,6 +314,111 @@ describe("processJournalEntrySkills", () => {
     expect(result.detected).toBe(0);
     expect(result.added).toBe(0);
     expect(writePayloads).toHaveLength(0);
+    // …but the rejection is VISIBLE in the result (nothing silently dropped).
+    expect(result.rejected).toEqual([
+      { label: "tiling", reason: "user_rejected" },
+    ]);
+  });
+
+  it("recognition that fails taxonomy resolve → rejected/inactive_skill", async () => {
+    recognizeSkillsMock.mockReturnValue([
+      { slug: "tiling", confidence: "high", via: "exact", matchedText: "plyteles" },
+      { slug: "ghost-skill", confidence: "high", via: "exact", matchedText: "ghost" },
+    ]);
+    const result = await run(
+      baseHandler({
+        skills: [
+          { id: "s1", slug: "tiling", is_active: true },
+          { id: "s2", slug: "ghost-skill", is_active: false },
+        ],
+        ownedSkillIds: ["s1"],
+      }),
+    );
+    expect(result.detected).toBe(1);
+    expect(result.rejected).toEqual([
+      { label: "ghost-skill", reason: "inactive_skill" },
+    ]);
+  });
+
+  it("ambiguous phrasing → clarification-lane candidate, NEVER worker_skills", async () => {
+    ambiguousMock.mockReturnValue([
+      {
+        label: "Namų tvarkymas / valymas",
+        reason: "»tvarkiau namus« gali reikšti valymą arba remontą",
+        possibleSlug: "cleaning-services",
+      },
+    ]);
+    const result = await run(
+      baseHandler({
+        skills: [{ id: "s9", slug: "cleaning-services", is_active: true }],
+      }),
+    );
+    expect(result.detected).toBe(0);
+    expect(result.added).toBe(0);
+    expect(result.reviewNeeded).toBe(1);
+    expect(result.candidates).toEqual([
+      {
+        kind: "ambiguous",
+        label: "Namų tvarkymas / valymas",
+        slug: "cleaning-services",
+        reason: "»tvarkiau namus« gali reikšti valymą arba remontą",
+      },
+    ]);
+    // Persisted through the EXISTING clarification lane only.
+    expect(
+      writePayloads.some((w) => w.table === "worker_skills"),
+    ).toBe(false);
+    expect(
+      writePayloads.some((w) => w.table === "journal_entry_skills"),
+    ).toBe(false);
+    const clar = writePayloads.find(
+      (w) => w.table === "skill_candidate_clarifications",
+    );
+    expect(clar?.rows).toEqual([
+      {
+        profile_id: "user-1",
+        label: "Namų tvarkymas / valymas",
+        normalized_label: "namų tvarkymas / valymas",
+      },
+    ]);
+  });
+
+  it("ambiguous candidate for an ALREADY-declared skill is skipped", async () => {
+    ambiguousMock.mockReturnValue([
+      {
+        label: "Namų tvarkymas / valymas",
+        reason: "gali reikšti valymą arba remontą",
+        possibleSlug: "cleaning-services",
+      },
+    ]);
+    const result = await run(
+      baseHandler({
+        skills: [{ id: "s9", slug: "cleaning-services", is_active: true }],
+        ownedSkillIds: ["s9"],
+      }),
+    );
+    expect(result.candidates).toEqual([]);
+    expect(result.reviewNeeded).toBe(0);
+    expect(writePayloads).toHaveLength(0);
+  });
+
+  it("worker-REJECTED claim label (skill_claim_rejected marker) never re-saves", async () => {
+    extractSuggestionsMock.mockReturnValue({
+      capabilitySuggestions: [
+        { label: "Vairavimas", normalizedLabel: "vairavimas" },
+      ],
+    });
+    const result = await run(
+      baseHandler({
+        claimMetrics: [
+          { value_text: "Vairavimas", metric_slug: "skill_claim_rejected" },
+        ],
+      }),
+    );
+    expect(result.claimsSaved).toBe(0);
+    expect(
+      writePayloads.some((w) => w.table === "journal_entry_metrics"),
+    ).toBe(false);
   });
 
   it("entry not owned → status failed, everything 0, no writes", async () => {
@@ -322,6 +449,9 @@ describe("processJournalEntrySkills", () => {
     expect(result.claimsSaved).toBe(1);
     expect(result.reviewNeeded).toBe(1);
     expect(result.cvUpdated).toBe(true);
+    expect(result.candidates).toEqual([
+      { kind: "claim", label: "Programavimas" },
+    ]);
     const metricWrite = writePayloads.find(
       (w) => w.table === "journal_entry_metrics",
     );
