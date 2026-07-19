@@ -68,9 +68,28 @@ describe("first-party google auth — browser side", () => {
     expect(button).not.toMatch(/fetch\(\s*["'`]https?:\/\//);
   });
 
-  it("passes a per-attempt nonce to BOTH Google and the endpoint", () => {
-    expect(button).toMatch(/nonce:\s*nonceRef\.current/);
-    expect(button).toMatch(/nonce:\s*nonceRef\.current,\s*\n\s*ux_mode/);
+  it("honours the nonce contract: HASHED nonce to Google, RAW to the endpoint", () => {
+    // Incident 2026-07-19 ("invalid nonce: Nonces mismatch"): Supabase
+    // expects the provider token to carry SHA-256(raw nonce). GIS init
+    // must therefore receive the hashed nonce; the POST body the raw.
+    expect(button).toMatch(/sha256Hex\(nonceRef\.current\)/);
+    expect(button).toMatch(/nonce:\s*hashedNonce,\s*\n\s*ux_mode/);
+    expect(button).toMatch(/nonce:\s*nonceRef\.current,\s*\n\s*next/);
+  });
+
+  it("carries a per-attempt trace id and surfaces the safe error reference", () => {
+    expect(button).toMatch(/const trace = generateOauthTraceId\(\)/);
+    expect(button).toMatch(/data-testid="google-error-ref"/);
+  });
+
+  it("the temporary legacy recovery is explicit, labelled and failure-gated", () => {
+    // Incident rollout correction: while PR #831 is unmerged, a FAILED
+    // GIS attempt reveals an explicitly labelled backup route — never a
+    // silent redirect through the Supabase host.
+    expect(button).toMatch(/data-testid="google-legacy-recovery"/);
+    expect(button).toMatch(/google_recovery_label/);
+    // Rendered only inside the failed-state branch.
+    expect(button).toMatch(/\{failed && \([\s\S]*google-legacy-recovery/);
   });
 
   it("loads GIS from accounts.google.com only", () => {

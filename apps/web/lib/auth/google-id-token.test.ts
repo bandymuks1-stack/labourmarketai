@@ -2,25 +2,42 @@ import { describe, expect, it } from "vitest";
 import {
   isAllowedAuthOrigin,
   parseGoogleSignInBody,
+  sha256Hex,
   validateGoogleIdTokenClaims,
 } from "./google-id-token";
 
 const CLIENT_ID = "313295493545-test.apps.googleusercontent.com";
 const NONCE = "a".repeat(32);
+// NONCE CONTRACT: the token's nonce claim carries SHA-256(raw nonce) —
+// Google received the hashed nonce, Supabase + our endpoint the raw one.
+const HASHED_NONCE = "hash-of-nonce-hex"; // placeholder; claims use this value
 const NOW = 1_800_000_000;
 
 const validClaims = {
   aud: CLIENT_ID,
   iss: "https://accounts.google.com",
   exp: String(NOW + 300),
-  nonce: NONCE,
+  nonce: HASHED_NONCE,
   sub: "google-user-1",
 };
+
+describe("sha256Hex", () => {
+  it("produces the known SHA-256 hex vector", async () => {
+    // Standard test vector: sha256("abc")
+    expect(await sha256Hex("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
+  });
+
+  it("differs from its input (raw nonce never equals hashed nonce)", async () => {
+    expect(await sha256Hex(NONCE)).not.toBe(NONCE);
+  });
+});
 
 describe("validateGoogleIdTokenClaims", () => {
   it("accepts a valid claim set", () => {
     expect(
-      validateGoogleIdTokenClaims(validClaims, { clientId: CLIENT_ID, nonce: NONCE }, NOW),
+      validateGoogleIdTokenClaims(validClaims, { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE }, NOW),
     ).toEqual({ ok: true });
   });
 
@@ -28,7 +45,7 @@ describe("validateGoogleIdTokenClaims", () => {
     expect(
       validateGoogleIdTokenClaims(
         { ...validClaims, iss: "accounts.google.com" },
-        { clientId: CLIENT_ID, nonce: NONCE },
+        { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
         NOW,
       ).ok,
     ).toBe(true);
@@ -37,7 +54,7 @@ describe("validateGoogleIdTokenClaims", () => {
   it("rejects a wrong audience (token minted for another app)", () => {
     const r = validateGoogleIdTokenClaims(
       { ...validClaims, aud: "other-client.apps.googleusercontent.com" },
-      { clientId: CLIENT_ID, nonce: NONCE },
+      { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
       NOW,
     );
     expect(r).toEqual({ ok: false, reason: "audience_mismatch" });
@@ -46,7 +63,7 @@ describe("validateGoogleIdTokenClaims", () => {
   it("rejects a non-Google issuer", () => {
     const r = validateGoogleIdTokenClaims(
       { ...validClaims, iss: "https://evil.example.com" },
-      { clientId: CLIENT_ID, nonce: NONCE },
+      { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
       NOW,
     );
     expect(r).toEqual({ ok: false, reason: "issuer_mismatch" });
@@ -55,7 +72,7 @@ describe("validateGoogleIdTokenClaims", () => {
   it("rejects an expired token", () => {
     const r = validateGoogleIdTokenClaims(
       { ...validClaims, exp: String(NOW - 1) },
-      { clientId: CLIENT_ID, nonce: NONCE },
+      { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
       NOW,
     );
     expect(r).toEqual({ ok: false, reason: "token_expired" });
@@ -65,14 +82,14 @@ describe("validateGoogleIdTokenClaims", () => {
     expect(
       validateGoogleIdTokenClaims(
         { ...validClaims, nonce: "b".repeat(32) },
-        { clientId: CLIENT_ID, nonce: NONCE },
+        { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
         NOW,
       ),
     ).toEqual({ ok: false, reason: "nonce_mismatch" });
     expect(
       validateGoogleIdTokenClaims(
         { ...validClaims, nonce: undefined },
-        { clientId: CLIENT_ID, nonce: NONCE },
+        { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
         NOW,
       ),
     ).toEqual({ ok: false, reason: "nonce_mismatch" });
@@ -80,7 +97,7 @@ describe("validateGoogleIdTokenClaims", () => {
 
   it("rejects when the feature is unconfigured (empty client id)", () => {
     expect(
-      validateGoogleIdTokenClaims(validClaims, { clientId: "", nonce: NONCE }, NOW),
+      validateGoogleIdTokenClaims(validClaims, { clientId: "", hashedNonce: HASHED_NONCE }, NOW),
     ).toEqual({ ok: false, reason: "client_id_unconfigured" });
   });
 
@@ -88,7 +105,7 @@ describe("validateGoogleIdTokenClaims", () => {
     expect(
       validateGoogleIdTokenClaims(
         { ...validClaims, sub: undefined },
-        { clientId: CLIENT_ID, nonce: NONCE },
+        { clientId: CLIENT_ID, hashedNonce: HASHED_NONCE },
         NOW,
       ),
     ).toEqual({ ok: false, reason: "missing_subject" });
@@ -101,7 +118,7 @@ describe("parseGoogleSignInBody", () => {
   it("accepts a structurally valid body", () => {
     expect(
       parseGoogleSignInBody({ credential: jwt, nonce: NONCE, next: "/lt/dashboard" }),
-    ).toEqual({ credential: jwt, nonce: NONCE, next: "/lt/dashboard" });
+    ).toEqual({ credential: jwt, nonce: NONCE, next: "/lt/dashboard", trace: null });
   });
 
   it("normalises a missing next to null", () => {
@@ -109,7 +126,20 @@ describe("parseGoogleSignInBody", () => {
       credential: jwt,
       nonce: NONCE,
       next: null,
+      trace: null,
     });
+  });
+
+  it("accepts a bounded hex trace id and drops malformed ones", () => {
+    expect(
+      parseGoogleSignInBody({ credential: jwt, nonce: NONCE, trace: "abcdef1234567890" })?.trace,
+    ).toBe("abcdef1234567890");
+    expect(
+      parseGoogleSignInBody({ credential: jwt, nonce: NONCE, trace: "<script>" })?.trace,
+    ).toBeNull();
+    expect(
+      parseGoogleSignInBody({ credential: jwt, nonce: NONCE, trace: "x".repeat(400) })?.trace,
+    ).toBeNull();
   });
 
   it("rejects non-JWT credentials and bad nonces", () => {
