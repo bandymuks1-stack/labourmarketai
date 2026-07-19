@@ -1555,7 +1555,8 @@
     "proofEmpty": "Ingen bekræftede registreringer endnu.",
     "generatedAt": "Genereret",
     "verifyNote": "Bekræftelser kan kontrolleres på platformen.",
-    "notWorker": "CV-eksport er tilgængelig for medarbejderprofiler — det opbygges af arbejdsjournalen og bekræftede færdigheder."
+    "notWorker": "CV-eksport er tilgængelig for medarbejderprofiler — det opbygges af arbejdsjournalen og bekræftede færdigheder.",
+    "claimFromJournal": "[EN] from work journal"
   },
   "todayScreen": {
     "eyebrow": "I dag",

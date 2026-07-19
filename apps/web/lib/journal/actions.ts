@@ -4,6 +4,11 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  failedPipelineResult,
+  processJournalEntrySkills,
+  type JournalSkillPipelineResult,
+} from "@/lib/journal/skill-pipeline";
 
 /**
  * Result of `createJournalEntry`. Replaces the old throw-based contract so the
@@ -14,10 +19,52 @@ import { createClient } from "@/lib/supabase/server";
  * composer only ever saw a generic rejection and surfaced "Nepavyko išsaugoti"
  * (P0-B in the journal-evidence-loop sprint goal). Returning a tagged result
  * keeps the real cause attached and stops the silent failure mode.
+ *
+ * P0 Track B: the ok-variant now carries the AWAITED skill-pipeline result
+ * (`skills`) so the composer renders the REAL recognition outcome instead of
+ * trusting a fire-and-forget client call that could silently die.
  */
 export type CreateJournalEntryResult =
-  | { ok: true; entryId: string }
+  | { ok: true; entryId: string; skills: JournalSkillPipelineResult }
   | { ok: false; code: JournalSaveErrorCode; message: string };
+
+/** Defensive parse of the composer's `rejected_slugs_json` FormData field:
+ *  JSON string array, capped at 50, slug-shaped entries only. Anything
+ *  malformed degrades to an empty exclusion list (never a save failure). */
+function parseRejectedSlugs(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (s): s is string =>
+          typeof s === "string" && /^[a-z0-9_-]{1,64}$/i.test(s),
+      )
+      .slice(0, 50);
+  } catch {
+    return [];
+  }
+}
+
+/** Run the canonical skill pipeline for a saved entry. A pipeline throw must
+ *  NEVER fail the already-persisted save — it degrades to an honest `failed`
+ *  result the UI can show (with a trace id + reprocess path). */
+async function runSkillPipeline(opts: {
+  entryId: string;
+  text: string;
+  locale: string;
+  excludeSlugs: string[];
+}): Promise<JournalSkillPipelineResult> {
+  try {
+    return await processJournalEntrySkills(opts);
+  } catch (e) {
+    console.error(
+      "[journal] skill pipeline threw:",
+      e instanceof Error ? e.message : String(e),
+    );
+    return failedPipelineResult();
+  }
+}
 
 export type JournalSaveErrorCode =
   | "not_authenticated"
@@ -138,6 +185,11 @@ export async function createJournalEntry(
     .slice(0, 200);
   const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
   const fragments = parseFragments(String(formData.get("fragments_json") ?? "") || null);
+  // P0 Track B: slugs the worker explicitly REJECTED in the review step — the
+  // pipeline must leave no trace for them (not even an evidence link).
+  const rejectedSlugs = parseRejectedSlugs(
+    String(formData.get("rejected_slugs_json") ?? ""),
+  );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
 
   if (!engagementId) {
@@ -384,12 +436,26 @@ export async function createJournalEntry(
       metrics: metrics.map((m) => ({ ...m })),
     });
     if (!legacy.ok) return legacy;
+    // Canonical save → recognition → evidence → CV pipeline (AWAITED so the
+    // outcome is real, but a pipeline failure never loses the saved entry).
+    const legacySkills = await runSkillPipeline({
+      entryId: legacy.entryId,
+      text: originalText,
+      locale,
+      excludeSlugs: rejectedSlugs,
+    });
     revalidatePath(`/${locale}/dashboard/journal`);
-    return { ok: true, entryId: legacy.entryId };
+    return { ok: true, entryId: legacy.entryId, skills: legacySkills };
   }
 
+  const skills = await runSkillPipeline({
+    entryId: rpcEntryId,
+    text: originalText,
+    locale,
+    excludeSlugs: rejectedSlugs,
+  });
   revalidatePath(`/${locale}/dashboard/journal`);
-  return { ok: true, entryId: rpcEntryId };
+  return { ok: true, entryId: rpcEntryId, skills };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -457,6 +523,9 @@ export async function supersedeJournalEntry(
   const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
   const fragments = parseFragments(
     String(formData.get("fragments_json") ?? "") || null,
+  );
+  const rejectedSlugs = parseRejectedSlugs(
+    String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
 
@@ -570,7 +639,11 @@ export async function supersedeJournalEntry(
     );
     if (mapped) {
       // mapped is JournalLifecycleResult; convert to CreateJournalEntryResult.
-      if (mapped.ok) return { ok: true, entryId: oldEntryId };
+      if (mapped.ok) {
+        // Defensive path (mapJournalRpcError never returns ok today): the
+        // pipeline did not run for the old entry — report that honestly.
+        return { ok: true, entryId: oldEntryId, skills: failedPipelineResult() };
+      }
       return {
         ok: false,
         code: mapped.code === "rpc_unavailable" ? "entry_insert_failed" : "entry_insert_failed",
@@ -584,8 +657,17 @@ export async function supersedeJournalEntry(
     };
   }
 
+  // P0 Track B: run the canonical pipeline for the NEW entry id with the new
+  // text — pipeline idempotency (ignore-duplicate upserts + metric dedupe)
+  // makes an edit/re-save safe to reprocess.
+  const skills = await runSkillPipeline({
+    entryId: newEntryId,
+    text: originalText,
+    locale,
+    excludeSlugs: rejectedSlugs,
+  });
   revalidatePath(`/${locale}/dashboard/journal`);
-  return { ok: true, entryId: newEntryId };
+  return { ok: true, entryId: newEntryId, skills };
 }
 
 /** Shared metric-row builder used by both `createJournalEntry` and
@@ -904,7 +986,12 @@ async function legacyTwoStepSave(
     visibility_scope: string;
     metrics: RpcMetricRow[];
   },
-): Promise<CreateJournalEntryResult> {
+): Promise<
+  // The skill pipeline runs AFTER this save step, so the legacy path returns
+  // the bare save outcome; the caller attaches the pipeline result.
+  | { ok: true; entryId: string }
+  | { ok: false; code: JournalSaveErrorCode; message: string }
+> {
   const { metrics, ...entryFields } = args;
   const { data: entry, error } = await supabase
     .from("journal_entries")

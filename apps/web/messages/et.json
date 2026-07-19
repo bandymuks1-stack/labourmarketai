@@ -1555,7 +1555,8 @@
     "proofEmpty": "Kinnitatud sissekandeid pole veel.",
     "generatedAt": "Loodud",
     "verifyNote": "Kinnitusi saab kontrollida platvormil.",
-    "notWorker": "CV eksport on saadaval töötaja profiilile — see koostatakse tööpäevikust ja kinnitatud oskustest."
+    "notWorker": "CV eksport on saadaval töötaja profiilile — see koostatakse tööpäevikust ja kinnitatud oskustest.",
+    "claimFromJournal": "[EN] from work journal"
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",

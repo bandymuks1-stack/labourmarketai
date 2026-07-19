@@ -136,7 +136,10 @@ async function readWorkerEvidence(): Promise<WorkerEvidenceFigures | null> {
         verified: 0,
       },
       supportedSkills: supported,
-      unsupportedSkills: [...cv.tiers.declared, ...cv.declaredClaims],
+      unsupportedSkills: [
+        ...cv.tiers.declared,
+        ...cv.declaredClaims.map((c) => c.label),
+      ],
       awaitingConfirmation: supported,
       journalEntries: cv.signals.journalEntries,
       confirmations: cv.signals.managerConfirmations,

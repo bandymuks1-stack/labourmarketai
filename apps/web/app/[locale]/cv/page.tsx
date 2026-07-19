@@ -114,9 +114,18 @@ export default async function VerifiedCvPage({
     tailoredOk?.matchedSlugs ?? new Set<string>();
 
   const tierSlugs: Record<CvSkillTier, string[]> = cv.tiers;
-  const declaredAll = [
-    ...tierSlugs.declared.map((slug) => tSkill(slug)),
-    ...cv.declaredClaims,
+  // Declared tier: catalogued declared skills + free-label claims. Journal-
+  // derived claims (P0 Track B) carry a small provenance suffix — same
+  // declared tier, never presented as verified.
+  const declaredAll: { name: string; fromJournal: boolean }[] = [
+    ...tierSlugs.declared.map((slug) => ({
+      name: tSkill(slug),
+      fromJournal: false,
+    })),
+    ...cv.declaredClaims.map((c) => ({
+      name: c.label,
+      fromJournal: c.origin === "journal",
+    })),
   ];
 
   const summary = [
@@ -514,12 +523,20 @@ export default async function VerifiedCvPage({
                     {t(`tiers.${tier}`)}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {declaredAll.map((name) => (
+                    {declaredAll.map(({ name, fromJournal }) => (
                       <span
                         key={name}
                         className={`rounded-full border px-2.5 py-0.5 text-xs ${TIER_STYLES[tier]}`}
                       >
                         {name}
+                        {fromJournal ? (
+                          <span
+                            className="ml-1 text-[10px] text-zinc-500"
+                            data-testid="cv-claim-from-journal"
+                          >
+                            · {t("claimFromJournal")}
+                          </span>
+                        ) : null}
                       </span>
                     ))}
                   </div>

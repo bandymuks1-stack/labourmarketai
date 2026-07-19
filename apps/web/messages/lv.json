@@ -1555,7 +1555,8 @@
     "proofEmpty": "Apstiprinātu ierakstu vēl nav.",
     "generatedAt": "Izveidots",
     "verifyNote": "Apstiprinājumus var pārbaudīt platformā.",
-    "notWorker": "CV eksports ir pieejams darbinieka profilam — to veido no darba žurnāla un apstiprinātām prasmēm."
+    "notWorker": "CV eksports ir pieejams darbinieka profilam — to veido no darba žurnāla un apstiprinātām prasmēm.",
+    "claimFromJournal": "[EN] from work journal"
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",

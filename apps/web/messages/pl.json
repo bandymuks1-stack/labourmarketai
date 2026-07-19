@@ -1555,7 +1555,8 @@
     "proofEmpty": "Brak potwierdzonych wpisów.",
     "generatedAt": "Wygenerowano",
     "verifyNote": "Potwierdzenia można sprawdzić na platformie.",
-    "notWorker": "Eksport CV jest dostępny dla profili pracowników — powstaje z dziennika pracy i potwierdzonych umiejętności."
+    "notWorker": "Eksport CV jest dostępny dla profili pracowników — powstaje z dziennika pracy i potwierdzonych umiejętności.",
+    "claimFromJournal": "z dziennika pracy"
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",

@@ -156,5 +156,10 @@
   "statusExplainer": "Hvordan bruges dine poster?",
   "exampleLine": "For eksempel: jeg monterede gipsvægge, læste tegninger og arbejdede med et laserniveau.",
   "moreOptions": "Flere valg",
-  "savedSkillsLine": "Færdigheder: {added} tilføjet, {corrected} rettet, {rejected} afvist."
+  "savedSkillsLine": "Færdigheder: {added} tilføjet, {corrected} rettet, {rejected} afvist.",
+  "pipelineLine": "[EN] Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "[EN] CV updated.",
+  "pipelineCvUnchanged": "[EN] CV unchanged.",
+  "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "[EN] Refresh recognition"
 }

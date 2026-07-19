@@ -156,5 +156,10 @@
   "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?",
   "exampleLine": "Piemēram: montēju ģipša starpsienas, lasīju rasējumus un strādāju ar lāzera līmeņrādi.",
   "moreOptions": "Vairāk iespēju",
-  "savedSkillsLine": "Prasmes: pievienotas {added}, izlabotas {corrected}, noraidītas {rejected}."
+  "savedSkillsLine": "Prasmes: pievienotas {added}, izlabotas {corrected}, noraidītas {rejected}.",
+  "pipelineLine": "[EN] Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "[EN] CV updated.",
+  "pipelineCvUnchanged": "[EN] CV unchanged.",
+  "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "[EN] Refresh recognition"
 }

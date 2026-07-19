@@ -156,5 +156,10 @@
   "statusExplainer": "Jak wykorzystywane są Twoje wpisy?",
   "exampleLine": "Na przykład: montowałem ścianki gipsowe, czytałem rysunki i pracowałem z niwelatorem laserowym.",
   "moreOptions": "Więcej opcji",
-  "savedSkillsLine": "Umiejętności: dodano {added}, poprawiono {corrected}, odrzucono {rejected}."
+  "savedSkillsLine": "Umiejętności: dodano {added}, poprawiono {corrected}, odrzucono {rejected}.",
+  "pipelineLine": "Wykryte umiejętności: {detected} · dodano do CV: {added} · wzmocnione tym wpisem: {strengthened} · do przeglądu: {review}",
+  "pipelineCvUpdated": "CV zaktualizowane.",
+  "pipelineCvUnchanged": "CV bez zmian.",
+  "pipelineFailed": "Wpis zapisany, ale rozpoznawanie umiejętności nie powiodło się (kod: {trace}). Użyj „Odśwież rozpoznawanie”.",
+  "reprocessEntry": "Odśwież rozpoznawanie"
 }

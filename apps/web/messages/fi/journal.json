@@ -317,5 +317,10 @@
   "statusExplainer": "Miten merkintöjäsi käytetään?",
   "exampleLine": "Esimerkiksi: asensin kipsiväliseiniä, luin piirustuksia ja työskentelin laservaaituslaitteella.",
   "moreOptions": "Lisää valintoja",
-  "savedSkillsLine": "Taidot: lisätty {added}, korjattu {corrected}, hylätty {rejected}."
+  "savedSkillsLine": "Taidot: lisätty {added}, korjattu {corrected}, hylätty {rejected}.",
+  "pipelineLine": "[EN] Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "[EN] CV updated.",
+  "pipelineCvUnchanged": "[EN] CV unchanged.",
+  "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "[EN] Refresh recognition"
 }

@@ -392,5 +392,10 @@
   "statusExplainer": "Wie werden Ihre Einträge verwendet?",
   "exampleLine": "Zum Beispiel: Ich habe Gipswände montiert, Zeichnungen gelesen und mit einem Lasernivellier gearbeitet.",
   "moreOptions": "Mehr Optionen",
-  "savedSkillsLine": "Fähigkeiten: {added} hinzugefügt, {corrected} korrigiert, {rejected} abgelehnt."
+  "savedSkillsLine": "Fähigkeiten: {added} hinzugefügt, {corrected} korrigiert, {rejected} abgelehnt.",
+  "pipelineLine": "Erkannte Fähigkeiten: {detected} · zum CV hinzugefügt: {added} · durch diesen Eintrag gestärkt: {strengthened} · zu prüfen: {review}",
+  "pipelineCvUpdated": "CV aktualisiert.",
+  "pipelineCvUnchanged": "CV unverändert.",
+  "pipelineFailed": "Eintrag gespeichert, aber die Fähigkeitserkennung ist fehlgeschlagen (Code: {trace}). Nutzen Sie „Erkennung aktualisieren“.",
+  "reprocessEntry": "Erkennung aktualisieren"
 }

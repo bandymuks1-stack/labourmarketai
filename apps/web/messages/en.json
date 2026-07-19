@@ -6964,7 +6964,8 @@
       "notVisible": "This request is not visible to you — showing the standard CV.",
       "noStructure": "This request has no structured skill requirements — showing the standard CV.",
       "matchedTag": "Matches the request"
-    }
+    },
+    "claimFromJournal": "from work journal"
   },
   "todayScreen": {
     "eyebrow": "Today",
