@@ -20,7 +20,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  *   • no write payload anywhere carries verified:true / manager_confirmed.
  */
 
-const revalidatePathMock = vi.fn(() => undefined);
+const revalidatePathMock = vi.fn((..._args: unknown[]) => undefined);
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => revalidatePathMock(...args),
 }));

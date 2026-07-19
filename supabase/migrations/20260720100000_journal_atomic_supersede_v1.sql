@@ -1,3 +1,17 @@
+-- @human-gate-approved
+-- RED classes acknowledged (security definer / grant-revoke / conditional
+-- UPDATE of journal_entries.superseded_by): this is the owner-directed W0 of
+-- the Invite-Ready Closure Train v1 — the atomic-supersede repair the train
+-- doc explicitly orders. Same SECURITY DEFINER + grant surface as the
+-- functions it replaces (0018 / 20260610213000); the only data DML is the
+-- conditional chain-pointer update those functions already performed,
+-- now guarded by a FOR UPDATE lock. Human-gated application via the train's
+-- RED migration discipline — never self-applied by auto-merge.
+--
+-- ROLLBACK: paired reverse file
+--   supabase/rollbacks/20260720100000_journal_atomic_supersede_v1.down.sql
+--   (drops journal_entry_supersede_v2 and restores the prior
+--   journal_entry_supersede body from 20260610213000 verbatim, incl. grants).
 -- ============================================================================
 -- 20260720100000_journal_atomic_supersede_v1.sql
 --
