@@ -28,7 +28,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => revalidatePathMock(...args),
 }));
 
-const reconcileMock = vi.fn(async (..._args: unknown[]) => {});
+// Returns true = reconcile fully applied (P1 integrity contract): a false
+// return now counts as a REQUIRED-phase failure and blocks the version stamp.
+const reconcileMock = vi.fn(async (..._args: unknown[]) => true);
 vi.mock("@/lib/journal/skill-source-apply", () => ({
   applyWorkerSkillSourceReconcile: (...args: unknown[]) =>
     reconcileMock(...args),

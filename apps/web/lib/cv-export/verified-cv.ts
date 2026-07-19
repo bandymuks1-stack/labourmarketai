@@ -343,38 +343,22 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const journalClaimLabels: string[] = [];
   if (liveEntryIds.length > 0) {
     const { data: claimMetrics } = await tolerant<
-      Array<{ value_text: string | null; metric_slug?: string | null }>
+      Array<{
+        entry_id: string | null;
+        value_text: string | null;
+        metric_slug?: string | null;
+      }>
     >(
       sb
         .from("journal_entry_metrics")
-        .select("value_text, metric_slug")
+        .select("entry_id, value_text, metric_slug")
         .in("entry_id", liveEntryIds)
         .in("metric_slug", ["skill_claim", "skill_claim_rejected"]),
     );
     const profileNormalized = new Set(claims.map((c) => c.normalized_label));
-    // Worker-rejected claim labels (append-only `skill_claim_rejected`
-    // markers, P1 recall repair) never surface on the CV.
-    const rejectedNormalized = new Set(
-      (claimMetrics ?? [])
-        .filter((m) => m.metric_slug === "skill_claim_rejected")
-        .map((m) => (m.value_text ?? "").trim().toLowerCase().replace(/\s+/g, " "))
-        .filter((v) => v.length > 0),
+    journalClaimLabels.push(
+      ...selectJournalClaimLabels(claimMetrics ?? [], profileNormalized),
     );
-    const seen = new Set<string>();
-    for (const m of claimMetrics ?? []) {
-      if (m.metric_slug === "skill_claim_rejected") continue;
-      const label = (m.value_text ?? "").trim();
-      if (!label) continue;
-      const normalized = label.toLowerCase().replace(/\s+/g, " ");
-      if (
-        profileNormalized.has(normalized) ||
-        rejectedNormalized.has(normalized) ||
-        seen.has(normalized)
-      )
-        continue;
-      seen.add(normalized);
-      journalClaimLabels.push(label);
-    }
   }
   const declaredClaims: VerifiedCvData["declaredClaims"] = [
     ...claims.map((c) => ({
@@ -563,4 +547,45 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       proof,
     },
   };
+}
+
+/**
+ * P2 integrity fix (post-#837 independent review): journal claim → CV
+ * pairing with ENTRY-SCOPED rejections. A `skill_claim_rejected` marker
+ * hides a label ONLY on its own entry (pairing key: entry_id + normalized
+ * label) — the same un-rejected claim from another entry still surfaces.
+ * Pure and exported so the two-entry regression test exercises the exact
+ * production logic.
+ */
+export function selectJournalClaimLabels(
+  claimMetrics: ReadonlyArray<{
+    entry_id: string | null;
+    value_text: string | null;
+    metric_slug?: string | null;
+  }>,
+  profileNormalized: ReadonlySet<string>,
+): string[] {
+  const norm = (v: string) => v.trim().toLowerCase().replace(/\s+/g, " ");
+  const rejectedByEntry = new Set(
+    claimMetrics
+      .filter((m) => m.metric_slug === "skill_claim_rejected" && m.entry_id)
+      .map((m) => `${m.entry_id}|${norm(m.value_text ?? "")}`),
+  );
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const m of claimMetrics) {
+    if (m.metric_slug === "skill_claim_rejected") continue;
+    const label = (m.value_text ?? "").trim();
+    if (!label || !m.entry_id) continue;
+    const normalized = norm(label);
+    if (
+      profileNormalized.has(normalized) ||
+      rejectedByEntry.has(`${m.entry_id}|${normalized}`) ||
+      seen.has(normalized)
+    )
+      continue;
+    seen.add(normalized);
+    out.push(label);
+  }
+  return out;
 }

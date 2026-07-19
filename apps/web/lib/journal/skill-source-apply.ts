@@ -18,9 +18,14 @@ export async function applyWorkerSkillSourceReconcile(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   workerId: string,
-): Promise<void> {
+): Promise<boolean> {
+  // Returns TRUE only when the reconcile fully applied (reads + every
+  // update succeeded). Callers that treat it as best-effort may ignore
+  // the value; the journal pipeline treats `false` as a REQUIRED-phase
+  // failure so it never stamps a pipeline version over a half-applied
+  // evidence tier (P1 integrity fix, post-#837 review).
   try {
-    const [{ data: skillRows }, { data: linkRows }] = await Promise.all([
+    const [skillsRes, linksRes] = await Promise.all([
       supabase
         .from("worker_skills")
         .select("skill_id, source, verified")
@@ -30,6 +35,9 @@ export async function applyWorkerSkillSourceReconcile(
         .select("skill_id")
         .eq("worker_id", workerId),
     ]);
+    if (skillsRes.error || linksRes.error) return false;
+    const skillRows = skillsRes.data;
+    const linkRows = linksRes.data;
     const rows = ((skillRows ?? []) as WorkerSkillRow[]).map((r) => ({
       skill_id: r.skill_id,
       source: r.source,
@@ -47,14 +55,18 @@ export async function applyWorkerSkillSourceReconcile(
     }
     for (const [source, ids] of bySource) {
       if (ids.length === 0) continue;
-      await supabase
+      const upd = await supabase
         .from("worker_skills")
         .update({ source, updated_at: new Date().toISOString() })
         .eq("worker_id", workerId)
         .eq("verified", false) // defense-in-depth: never alter a confirmed row
         .in("skill_id", ids);
+      if (upd.error) return false;
     }
+    return true;
   } catch {
-    // best-effort — journal links remain the source of truth; source is derived
+    // best-effort for legacy callers — journal links remain the source of
+    // truth; the pipeline reads the boolean and keeps the entry stale.
+    return false;
   }
 }

@@ -110,7 +110,8 @@ describe("stage 3 — claim extractor (AI-tools-assisted work is inferable)", ()
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/journal/skill-source-apply", () => ({
-  applyWorkerSkillSourceReconcile: vi.fn(async () => {}),
+  // true = fully applied (P1 integrity contract — false blocks the stamp).
+  applyWorkerSkillSourceReconcile: vi.fn(async () => true),
 }));
 
 type Call = { method: string; args: unknown[] };
