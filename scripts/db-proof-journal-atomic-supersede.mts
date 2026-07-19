@@ -29,6 +29,21 @@ const DB_URL =
   process.env.DB_URL ??
   "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 
+// HARD local-only guard (security review P2): this harness creates fixture
+// auth users and installs failure-injection triggers on real tables — it must
+// be impossible to point at production by accident. Localhost only, ever.
+{
+  const host = new URL(DB_URL.replace(/^postgres(ql)?:/, "http:")).hostname;
+  const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
+  if (!LOCAL_HOSTS.has(host)) {
+    console.error(
+      `refusing to run: DB_URL host "${host}" is not local. ` +
+        "This proof harness only ever runs against a scratch/local database.",
+    );
+    process.exit(1);
+  }
+}
+
 const results: { name: string; pass: boolean; detail: string }[] = [];
 
 function record(name: string, pass: boolean, detail: string): void {
