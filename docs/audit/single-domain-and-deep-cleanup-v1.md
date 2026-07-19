@@ -289,3 +289,50 @@ presentations (2× ~143 MB pptx, PDFs), and marketing videos.
   the load-bearing policy docs (`domain-truth-v1.md` → v3, README,
   `GOOGLE_OAUTH_BRANDING_RUNBOOK.md` note) now state the single-domain
   truth, and the CI guard blocks any *code* regression.
+
+---
+
+## POST-DEPLOY LIVE PROOF (2026-07-19, production commit 32d5cd96)
+
+Supabase URL config verified live pre-merge (GoTrue verify-redirect probe):
+Site URL = `https://labourmarket.ai`; apex wildcard allow-listed with full
+path preservation; app-host callback entries retained temporarily.
+
+PR #828 squash-merged to `main` → Vercel production deploy → validation:
+
+### Redirect matrix — 27/27 PASS (curl/fetch, redirect:manual)
+
+```
+app.labourmarket.ai/lt/dashboard?x=1                 → 308 https://labourmarket.ai/lt/dashboard?x=1
+app.labourmarket.ai/en/auth/login?next=…&invite=tok  → 308 same path+query on apex (tokens preserved)
+app.labourmarket.ai/api/anything?id=5                → 308 apex /api (next.config host rule)
+app.labourmarket.ai/lt/business/some-company?ref=qr  → 308 apex deep link
+www.labourmarket.ai/*                                → 308 apex (unchanged)
+labourmarket.ai                                      → serves; / → /lt locale only; NO host redirect (no loops)
+full chain app→apex                                  → terminates in 1 hop at 200
+login HTML                                           → 0 × raw supabase ref, 0 × app-host links
+stray-code bridge /?code=<uuid>                      → 307 /lt/auth/callback?code=… (Site-URL fallback net)
+```
+
+### Browser validation (Playwright, production)
+
+- Public-route live-render smoke: **9/9** (lt home, for-workers/companies/
+  agencies, vision, pricing, login, signup + anonymous /onboarding bounce),
+  zero uncaught page errors.
+- Full auth loop with a disposable account (deleted from prod afterwards via
+  fixture-scope SQL): signup → session cookies on `labourmarket.ai` →
+  onboarding gate → reload keeps session → logout clears session →
+  email/password re-login → no redirect loops → recovery email dispatch
+  confirmed ("Patikrink savo el. paštą") → **the address bar never left
+  labourmarket.ai for the entire loop.**
+
+### State after cutover
+
+- `labourmarket.ai` — the ONLY serving origin (marketing + auth + product).
+- `www` + `app` — 308 aliases only. Old bookmarks/deep links preserved.
+- Google OAuth (legacy redirect flow) still hops via the Supabase-hosted
+  authorize URL until the first-party GIS flow ships: **PR #830**
+  (draft, replaces auto-closed #829) — owner activation = Google JS origin +
+  `NEXT_PUBLIC_GOOGLE_CLIENT_ID` env. Phase 3 cleanup (remove
+  signInWithOAuth, drop app-host allow-list entries) follows its live
+  verification.
