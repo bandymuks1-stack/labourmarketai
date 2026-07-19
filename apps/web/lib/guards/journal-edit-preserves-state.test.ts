@@ -60,7 +60,10 @@ describe("compact editor preloads + preserves the persisted state (default edit 
   });
   it("always submits the work date + full field map in ONE save", () => {
     expect(editor).toMatch(/buildCompactSaveFields\(saveInput\)/);
-    expect(editor).toMatch(/supersedeJournalEntry\(entry\.id, fd\)/);
+    // P1-B: the save targets the LATEST live entry of the drawer's
+    // supersession chain — the original id only ever seeds the chain.
+    expect(editor).toMatch(/supersedeJournalEntry\(currentEntryId, fd\)/);
+    expect(editor).not.toMatch(/supersedeJournalEntry\(entry\.id/);
   });
 });
 

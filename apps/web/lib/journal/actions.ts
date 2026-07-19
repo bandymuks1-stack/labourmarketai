@@ -679,6 +679,22 @@ export async function supersedeJournalEntry(
     rejectedSlugs,
   );
 
+  // Manually selected taxonomy skills (journal compact edit, P1-A): a row the
+  // worker picked from taxonomy search ships its slug as the fragment's
+  // `activitySlug`. The pipeline only links skills recognised from the TEXT,
+  // so a selection whose label never appears in the text would leave no
+  // worker_skills / journal_entry_skills evidence. Validate every submitted
+  // slug server-side (active taxonomy, caller's own worker) and link the
+  // survivors to the NEW entry — self-declared lane, verified=false, never a
+  // fabricated verification.
+  await linkSelectedTaxonomySkills(
+    supabase,
+    user.id,
+    newEntryId,
+    fragments.map((f) => f.activitySlug ?? null),
+    rejectedSlugs,
+  );
+
   // P0 Track B: run the canonical pipeline for the NEW entry id with the new
   // text — pipeline idempotency (ignore-duplicate upserts + metric dedupe)
   // makes an edit/re-save safe to reprocess.
@@ -828,6 +844,118 @@ async function carryForwardEntrySkillLinks(
   } catch (e) {
     console.error(
       "[journal] skill-link carry threw:",
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+}
+
+/** Slug shape accepted from the client before any DB lookup — mirrors the
+ *  pipeline actions' SLUG_RE so injection attempts die at the boundary. */
+const SELECTED_SLUG_RE = /^[a-z0-9_-]{1,64}$/;
+
+/**
+ * Link the worker's MANUALLY SELECTED taxonomy skills to the new entry
+ * (journal compact edit, P1-A). Every candidate slug is validated server-side:
+ *   • slug-shaped (regex) before any lookup — no arbitrary client injection;
+ *   • an ACTIVE row in the `skills` taxonomy table;
+ *   • never a slug the worker rejected in the same save;
+ *   • written only for the CALLER'S OWN worker profile (resolved from the
+ *     authenticated user; the supersede RPC has already proven the caller
+ *     owns the edited entry).
+ * Survivors get the honest self-declared lane: `worker_skills` with
+ * verified=false (upsert, never downgrades an existing row) + a
+ * `journal_entry_skills` evidence link on the NEW entry. Idempotent
+ * (ignore-duplicate upserts) so repeated saves never duplicate. A failure is
+ * logged (counts only — never entry text) and never fails the persisted save.
+ */
+async function linkSelectedTaxonomySkills(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  profileId: string,
+  newEntryId: string,
+  candidateSlugs: ReadonlyArray<string | null>,
+  rejectedSlugs: ReadonlyArray<string>,
+): Promise<void> {
+  try {
+    const rejected = new Set(rejectedSlugs);
+    const slugs = [
+      ...new Set(
+        candidateSlugs.filter(
+          (s): s is string =>
+            typeof s === "string" &&
+            SELECTED_SLUG_RE.test(s) &&
+            !rejected.has(s),
+        ),
+      ),
+    ].slice(0, 50);
+    if (slugs.length === 0) return;
+
+    const { data: worker } = await supabase
+      .from("workers")
+      .select("id")
+      .eq("profile_id", profileId)
+      .maybeSingle();
+    if (!worker?.id) return;
+
+    // Active-taxonomy validation: unknown or inactive slugs are dropped —
+    // their rows stay honest free labels, no fabricated taxonomy claim.
+    const { data: skillRows, error: skillErr } = await supabase
+      .from("skills")
+      .select("id, slug, is_active")
+      .in("slug", slugs);
+    if (skillErr) {
+      console.error(
+        "[journal] selected-skill lookup failed:",
+        skillErr.message,
+      );
+      return;
+    }
+    const active = (skillRows ?? []).filter((s) => s.is_active !== false);
+    if (active.length < slugs.length) {
+      console.warn(
+        `[journal] selected-skill validation dropped ${slugs.length - active.length} of ${slugs.length} slugs`,
+      );
+    }
+    if (active.length === 0) return;
+
+    const { error: ownErr } = await supabase.from("worker_skills").upsert(
+      active.map((s) => ({
+        worker_id: worker.id,
+        skill_id: s.id,
+        verified: false,
+        source: "self_declared",
+        confidence_bin: "yellow",
+      })),
+      { onConflict: "worker_id,skill_id", ignoreDuplicates: true },
+    );
+    if (ownErr) {
+      console.error(
+        "[journal] selected-skill worker_skills upsert failed:",
+        ownErr.message,
+        `count=${active.length}`,
+      );
+      return;
+    }
+
+    const { error: linkErr } = await supabase
+      .from("journal_entry_skills")
+      .upsert(
+        active.map((s) => ({
+          journal_entry_id: newEntryId,
+          worker_id: worker.id,
+          skill_id: s.id,
+        })),
+        { onConflict: "journal_entry_id,skill_id", ignoreDuplicates: true },
+      );
+    if (linkErr) {
+      console.error(
+        "[journal] selected-skill evidence link failed:",
+        linkErr.message,
+        `count=${active.length}`,
+      );
+    }
+  } catch (e) {
+    console.error(
+      "[journal] selected-skill linking threw:",
       e instanceof Error ? e.message : String(e),
     );
   }

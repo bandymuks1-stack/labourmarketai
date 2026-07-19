@@ -101,6 +101,11 @@ export function deriveCompactRows(
     );
     if (existing) {
       existing.skillSlug = slug;
+      // A row whose stored label IS the slug (a saved taxonomy selection —
+      // `fragment_activity` persists the slug) reads as the human skill name.
+      if (foldLabel(existing.label) === foldLabel(slug)) {
+        existing.label = name;
+      }
       continue;
     }
     rows.push({
@@ -207,6 +212,10 @@ export function buildCompactSaveFields(
   if (input.topic.trim()) fields.topic = input.topic.trim();
 
   // Activity rows → fragments_json (index association preserved by order).
+  // A row that originates from a taxonomy selection keeps ITS `skillSlug` as
+  // the fragment's `activitySlug` (P1-A): the server validates the slug and
+  // links the skill to the new entry; a free-text row ships `activitySlug:
+  // null` and stays an honest label — never a fabricated taxonomy claim.
   const fragments = input.rows
     .filter((r) => r.label.trim().length > 0)
     .map((r) => {
@@ -215,7 +224,7 @@ export function buildCompactSaveFields(
         rawPhrase: (r.rawPhrase ?? r.label).trim(),
         timeValue: t ? t.value : null,
         timeUnit: t ? t.unitSlug : null,
-        activitySlug: null,
+        activitySlug: r.skillSlug,
         activityLabel: r.label.trim(),
         isUnknown: false,
         userLabel: null,
@@ -225,9 +234,16 @@ export function buildCompactSaveFields(
     fields.fragments_json = JSON.stringify(fragments);
   }
 
-  fields.rejected_slugs_json = JSON.stringify([
-    ...new Set(input.removedSkillSlugs),
-  ]);
+  // A slug the worker removed AND then re-added in the same session is NOT
+  // rejected — the row present in the save wins over the earlier removal.
+  const presentSlugs = new Set(
+    input.rows.map((r) => r.skillSlug).filter(Boolean),
+  );
+  fields.rejected_slugs_json = JSON.stringify(
+    [...new Set(input.removedSkillSlugs)].filter(
+      (slug) => !presentSlugs.has(slug),
+    ),
+  );
 
   // Entry-level quantity lane (one `quantity` metric slot, as before):
   const qtyRaw = input.quantityValue.trim().replace(",", ".");
