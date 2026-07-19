@@ -4,7 +4,7 @@ import type { WorkCardValues } from "@/lib/worker/work-card";
 import type { WorkCardNext, WorkCardState } from "@/lib/worker/work-card-state";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { getOwnAvailability } from "@/lib/market-map/owner-readiness";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import {
   getOwnCompany,
   type CompanyReadResult,
@@ -137,10 +137,15 @@ async function loadPerson(): Promise<PersonVM> {
   const session = await getSessionProfile();
   if (!session.user) return { ...base, status: "unavailable" };
 
-  const [playerCard, avatar, availability] = await Promise.all([
+  // P0 nav-performance: availability + current country come straight from
+  // THE request-cached core worker row (@/lib/data/worker-core) shared with
+  // the player-card / opportunities readers — this block previously called
+  // getOwnAvailability(), whose own `workers` select was the fourth
+  // independent read of the same row in one navigation.
+  const [playerCard, avatar, worker] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
-    getOwnAvailability(),
+    getWorkerCoreRow(),
   ]);
 
   const profile = session.profile;
@@ -157,12 +162,15 @@ async function loadPerson(): Promise<PersonVM> {
   const journalSupportedSkills = playerCard?.journalSupportedSkills ?? 0;
   const evidenceEntries = playerCard?.evidenceEntries ?? 0;
   const avatarUrl = avatar.signedUrl;
-  const locationCountry = profile?.country ?? availability.currentCountry ?? null;
+  // Same normalization getOwnAvailability applied: a country renders only as
+  // a clean ISO-3166 alpha-2 code; anything else is honestly absent.
+  const rawCountry = (worker?.current_location_country ?? "").trim().toUpperCase();
+  const workerCountry = /^[A-Z]{2}$/.test(rawCountry) ? rawCountry : null;
+  const locationCountry = profile?.country ?? workerCountry ?? null;
+  const rawState = worker?.availability_status ?? null;
   const availabilityState: Availability | null =
-    availability.state === "available" ||
-    availability.state === "busy" ||
-    availability.state === "unavailable"
-      ? availability.state
+    rawState === "available" || rawState === "busy" || rawState === "unavailable"
+      ? rawState
       : null;
 
   // "Empty" only when the account has nothing meaningful yet (brand-new).

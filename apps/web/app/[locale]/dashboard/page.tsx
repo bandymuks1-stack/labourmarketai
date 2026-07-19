@@ -52,7 +52,7 @@ import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-scree
 import { PremiumHubCompanyCard } from "@/components/app/premium-hub/premium-hub-company-card";
 import { PremiumHubMarketMap } from "@/components/app/premium-hub/premium-hub-market-map";
 import { PremiumHubProjectCard } from "@/components/app/premium-hub/premium-hub-project-card";
-import { getPremiumHubViewModel } from "@/components/app/premium-hub/premium-hub-data";
+import { getPremiumHubViewModel } from "@/lib/premium-hub/premium-hub-data";
 import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
 import {
   getCompanyDemandIntelligence,

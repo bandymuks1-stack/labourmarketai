@@ -7,6 +7,11 @@
  * (lib/opportunities/load-worker-opportunities.ts: gated RPC rows ×
  * matchWorkerToNeed), plus the worker's own seen markers; this module only
  * decides WHICH of those matches are worth surfacing and in what shape.
+ * Every per-navigation worker read behind those rows (the worker row, skill
+ * rows and primary profession that build the match subject in
+ * ./worker-subject.ts) goes through the request-cached core readers in
+ * `@/lib/data/worker-core` — one Supabase round-trip per table per
+ * navigation, shared with the player-card and premium-hub consumers.
  *
  * Doctrine compliance:
  *   • §19: every surfaced fit carries its FULL basis (matched/total/confirmed

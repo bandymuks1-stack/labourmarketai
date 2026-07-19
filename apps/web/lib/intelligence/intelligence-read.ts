@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { getWorkerProfessionRows } from "@/lib/data/worker-core";
 import {
   buildSalaryIntelligenceView,
   compareSalaryToBenchmark,
@@ -336,13 +337,11 @@ export async function getWorkerSalaryIntelligence(): Promise<WorkerSalaryIntelli
   const country: string | null = worker.current_location_country ?? null;
   if (!country) missingCodes.push("intelligence.missing.country");
 
-  const { data: wp } = await asAny(supabase)
-    .from("worker_professions")
-    .select("profession_id")
-    .eq("worker_id", worker.id)
-    .eq("is_primary", true)
-    .maybeSingle();
-  const professionId: string | null = wp?.profession_id ?? null;
+  // Primary profession from THE request-cached core read (was one of the 4
+  // identical `is_primary = true` selects per dashboard navigation).
+  const professionRows = await getWorkerProfessionRows();
+  const professionId: string | null =
+    professionRows.find((r) => r.is_primary === true)?.profession_id ?? null;
   if (!professionId) missingCodes.push("intelligence.missing.primaryProfession");
 
   if (missingCodes.length > 0) {

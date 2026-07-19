@@ -31,8 +31,15 @@ describe("Guard: dashboard layout parallelizes profile + profile_roles reads", (
     // getSessionProfile() reader (shared with the page and the hub) — it must
     // still run INSIDE the same Promise.all as profile_roles, and the reader
     // itself must be the one doing the profiles SELECT.
+    // P0 perf v1: the roles read is now a promise chained off the memoized
+    // getUser (so it can join the SAME batch without a serial user await);
+    // the batch must still contain the session-profile reader AND that
+    // roles promise — one parallel stage, no waterfall.
     expect(layout).toMatch(
-      /Promise\.all\(\s*\[[\s\S]{0,400}getSessionProfile\(\)[\s\S]{0,600}from\(["']profile_roles["']\)/,
+      /const rolesPromise[\s\S]{0,400}from\(["']profile_roles["']\)/,
+    );
+    expect(layout).toMatch(
+      /Promise\.all\(\s*\[[\s\S]{0,200}getSessionProfile\(\)[\s\S]{0,200}rolesPromise/,
     );
     const reader = read("lib/auth/session-profile.ts");
     expect(reader).toMatch(/cache\(/);

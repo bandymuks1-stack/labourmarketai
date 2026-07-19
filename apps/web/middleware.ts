@@ -89,6 +89,50 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
 }
 
+/** Seconds of remaining access-token life below which the middleware still
+ *  performs the full network refresh (rotation window). */
+const TOKEN_FRESH_MARGIN_S = 120;
+
+/**
+ * P0 auth-performance fast path: read the access token's `exp` straight from
+ * the `@supabase/ssr` session cookie WITHOUT any network call. When the JWT
+ * is comfortably fresh, the middleware skips its GoTrue `getUser()`
+ * round-trip — the RSC layer (dashboard layout / pages) still performs the
+ * REAL validated `getUser()` on every request, and RLS enforces authz at the
+ * data layer, so this removes only a redundant validation hop (~100-300 ms
+ * on every authenticated navigation), never an authorization boundary.
+ * Unparseable/legacy/expiring cookies fall through to the full refresh path.
+ */
+function readAccessTokenExpSeconds(request: NextRequest): number | null {
+  try {
+    const chunks = request.cookies
+      .getAll()
+      .filter((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"))
+      .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
+    if (chunks.length === 0) return null;
+    let raw = chunks.map((c) => c.value).join("");
+    raw = decodeURIComponent(raw);
+    if (raw.startsWith("base64-")) {
+      raw = Buffer.from(raw.slice("base64-".length), "base64").toString("utf8");
+    }
+    const session = JSON.parse(raw) as { access_token?: string };
+    const jwt = session.access_token;
+    if (!jwt) return null;
+    const payload = JSON.parse(
+      Buffer.from(jwt.split(".")[1] ?? "", "base64").toString("utf8"),
+    ) as { exp?: number };
+    return typeof payload.exp === "number" ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function hasFreshAccessToken(request: NextRequest): boolean {
+  const exp = readAccessTokenExpSeconds(request);
+  if (exp === null) return false;
+  return exp - Math.floor(Date.now() / 1000) > TOKEN_FRESH_MARGIN_S;
+}
+
 export async function middleware(request: NextRequest) {
   // 0. Host normalization runs BEFORE locale/intl + auth so legacy
   //    aliases (www + app) never reach the app shell — they 308
@@ -124,6 +168,16 @@ export async function middleware(request: NextRequest) {
   const isAuthedRequest = hasSupabaseAuthCookie(request);
   if (!needsAuth && !isAuthedRequest) return intlResponse;
 
+  // Fast path (P0 perf): a comfortably-fresh access token needs neither
+  // rotation nor a middleware-level validation round-trip — the RSC layer
+  // validates for real on every request and redirects unauthenticated
+  // visitors itself. This turns the per-navigation middleware cost into
+  // pure cookie parsing. Stale/absent/legacy tokens take the full path.
+  if (hasFreshAccessToken(request)) {
+    intlResponse.headers.set("Server-Timing", "mw;dur=0;desc=jwt-fresh");
+    return intlResponse;
+  }
+
   // Refreshed Set-Cookie headers are written onto the intl response so BOTH the
   // locale handling and the rotated session cookies survive (the prior code
   // discarded the intl response on authed routes).
@@ -144,9 +198,15 @@ export async function middleware(request: NextRequest) {
   );
 
   // getUser() validates + refreshes the session (rotating cookies via setAll).
+  const refreshStart = Date.now();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // Non-secret observability: how long the middleware auth hop took.
+  response.headers.set(
+    "Server-Timing",
+    `mw;dur=${Date.now() - refreshStart};desc=refresh`,
+  );
 
   // Public route (auth cookie present but maybe expired): just propagate the
   // refreshed session — never gate.
