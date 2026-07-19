@@ -69,18 +69,21 @@ async function makeFixture(a: Client, tag: string): Promise<Fixture> {
   );
   const profileId = u[0].id as string;
   await a.query(
-    `insert into public.profiles (id, role, full_name) values ($1, 'worker', 'W0 Proof ' || $2)
-     on conflict (id) do update set role = 'worker'`,
+    `insert into public.profiles (id, active_role, full_name) values ($1, 'worker', 'W0 Proof ' || $2)
+     on conflict (id) do update set active_role = 'worker'`,
     [profileId, tag],
   );
+  // A role trigger may have auto-created the worker row — upsert either way.
   const { rows: w } = await a.query(
-    `insert into public.workers (profile_id) values ($1) returning id`,
+    `insert into public.workers (profile_id) values ($1)
+     on conflict (profile_id) do update set profile_id = excluded.profile_id
+     returning id`,
     [profileId],
   );
   const workerId = w[0].id as string;
   const { rows: e } = await a.query(
     `insert into public.engagement_contexts (profile_id, relationship_slug, title, hash_self)
-     values ($1, 'freelancer', 'W0 proof context', md5($1::text || clock_timestamp()::text))
+     values ($1::uuid, 'freelancer', 'W0 proof context', md5($1 || clock_timestamp()::text))
      returning id`,
     [profileId],
   );
@@ -184,13 +187,13 @@ async function main(): Promise<void> {
       [fixtureTag],
     );
     await a.query(
-      `insert into public.profiles (id, role, full_name) values ($1, 'company', 'W0 Confirmer')
-       on conflict (id) do update set role = 'company'`,
+      `insert into public.profiles (id, active_role, full_name) values ($1, 'company', 'W0 Confirmer')
+       on conflict (id) do update set active_role = 'company'`,
       [conf[0].id],
     );
     const { rows: confCtx } = await a.query(
       `insert into public.engagement_contexts (profile_id, relationship_slug, title, hash_self)
-       values ($1, 'manager', 'W0 confirmer context', md5($1::text || clock_timestamp()::text))
+       values ($1::uuid, 'manager', 'W0 confirmer context', md5($1 || clock_timestamp()::text))
        returning id`,
       [conf[0].id],
     );
