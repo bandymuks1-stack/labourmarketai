@@ -173,5 +173,19 @@
   "candidateRejected": "Odrzucone",
   "candidateError": "Nie udało się zapisać. Spróbuj ponownie.",
   "rejectedReasonUser": "odrzucone przez Ciebie",
-  "rejectedReasonInactive": "brak w katalogu"
+  "rejectedReasonInactive": "brak w katalogu",
+  "groupRecognized": "Rozpoznane i powiązane automatycznie",
+  "groupChoice": "Potrzebny jest Twój wybór",
+  "groupClaims": "Możliwe dodatkowe kompetencje",
+  "groupUnresolved": "Nierozpoznane — nazwij samodzielnie",
+  "ambiguousOther": "Inna działalność",
+  "ambiguousOtherPlaceholder": "Wpisz nazwę…",
+  "ambiguousOtherSave": "Zmień nazwę",
+  "unresolvedHint": "System nie rozpoznał tych fragmentów. Wybierz umiejętność z katalogu, zapisz jako kompetencję lub pomiń — nic nie znika bez Twojej decyzji.",
+  "unresolvedSearchPlaceholder": "Szukaj w katalogu umiejętności…",
+  "unresolvedClaimPlaceholder": "Wpisz nazwę kompetencji…",
+  "unresolvedSaveClaim": "Zapisz jako kompetencję",
+  "unresolvedSkip": "Pomiń",
+  "unresolvedSkipped": "Pominięto",
+  "unresolvedSaved": "Zapisano"
 }

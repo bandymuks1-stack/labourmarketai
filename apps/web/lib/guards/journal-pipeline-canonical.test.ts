@@ -26,6 +26,8 @@ const COMPOSER = read("components/app/journal-entry-composer.tsx");
 const PIPELINE = read("lib/journal/skill-pipeline.ts");
 const REPROCESS = read("lib/journal/skill-pipeline-actions.ts");
 const ENTRY_ROW = read("components/app/journal-entry-row.tsx");
+const RECOGNITION = read("lib/journal/journal-recognition.ts");
+const FRAGMENTER = read("lib/structuring/journal-fragmenter.ts");
 
 describe("P0 Track B — canonical journal skill pipeline", () => {
   it("save actions AWAIT the server-side pipeline", () => {
@@ -94,8 +96,10 @@ describe("P1 recall repair — lists not counts, confirmable candidates", () => 
   });
 
   it("ambiguous phrasings ride the EXISTING clarification lane, never worker_skills", () => {
-    // The pipeline consumes the curated ambiguous extractor…
-    expect(PIPELINE).toMatch(/extractAmbiguousCandidates/);
+    // Pipeline v2: the ONE derivation module consumes the curated ambiguous
+    // extractor, and the pipeline persists ONLY from the derivation result…
+    expect(RECOGNITION).toMatch(/extractAmbiguousCandidates/);
+    expect(PIPELINE).toMatch(/deriveJournalRecognition/);
     // …and persists through skill_candidate_clarifications (canonical lane,
     // migration 20260609160000) — no parallel candidate structure.
     expect(PIPELINE).toMatch(/skill_candidate_clarifications/);
@@ -162,5 +166,124 @@ describe("P1 recall repair — lists not counts, confirmable candidates", () => 
         expect(typeof j[key], `${loc}.${key}`).toBe("string");
       }
     }
+  });
+});
+
+describe("Universal Journal Recall v2 — fragment pipeline source guards", () => {
+  it("the fragmenter + derivation modules are PURE (no IO, no supabase)", () => {
+    for (const src of [FRAGMENTER, RECOGNITION]) {
+      expect(src).not.toMatch(/@\/lib\/supabase/);
+      expect(src).not.toMatch(/createClient/);
+      expect(src).not.toMatch(/"use server"/);
+      expect(src).not.toMatch(/node:crypto/);
+    }
+    expect(FRAGMENTER).toMatch(/export function fragmentJournalText/);
+    expect(RECOGNITION).toMatch(/export function deriveJournalRecognition/);
+    expect(RECOGNITION).toMatch(/JOURNAL_PIPELINE_VERSION = 2/);
+  });
+
+  it("the pipeline persists ONLY from the derivation result (one source of truth)", () => {
+    expect(PIPELINE).toMatch(/deriveJournalRecognition/);
+    // the pipeline never runs its own recognition lanes
+    expect(PIPELINE).not.toMatch(/recognizeSkills\(/);
+    expect(PIPELINE).not.toMatch(/extractJournalSuggestions/);
+    expect(PIPELINE).not.toMatch(/extractProfileSkillClaims/);
+    // legacy counts are DERIVED from the lists — never hand-maintained
+    expect(PIPELINE).toMatch(/summarizeJournalPipelineResult/);
+    // the full recognition object is embedded in the result
+    expect(PIPELINE).toMatch(/recognition:\s*JournalRecognitionResult/);
+  });
+
+  it("unresolved fragments + pipeline version ride the append-only metric lane", () => {
+    expect(PIPELINE).toMatch(/unresolved_fragment/);
+    expect(PIPELINE).toMatch(/unresolved_dismissed/);
+    expect(PIPELINE).toMatch(/pipeline_version/);
+    expect(PIPELINE).toMatch(/skill_rejected/);
+    // never update/delete on the metric lane (doctrine §3)
+    expect(PIPELINE).not.toMatch(/from\("journal_entry_metrics"\)\s*\.\s*delete/);
+    expect(PIPELINE).not.toMatch(/from\("journal_entry_metrics"\)\s*\.\s*update/);
+  });
+
+  it("server trust boundary: re-derivation + membership + version check, no client trust", () => {
+    expect(REPROCESS).toMatch(/deriveJournalRecognition/);
+    expect(REPROCESS).toMatch(/candidate_not_found/);
+    expect(REPROCESS).toMatch(/JOURNAL_PIPELINE_VERSION/);
+    expect(REPROCESS).toMatch(/export async function confirmJournalAmbiguousChoice/);
+    expect(REPROCESS).toMatch(/export async function nameUnresolvedFragment/);
+    expect(REPROCESS).toMatch(/export async function dismissUnresolvedFragment/);
+    expect(REPROCESS).toMatch(/export async function rejectJournalSkillCandidate/);
+    expect(REPROCESS).toMatch(/export async function searchTaxonomySkills/);
+    // rejections are ENTRY-scoped append-only markers
+    expect(REPROCESS).toMatch(/unresolved_dismissed|unresolvedDismissed/);
+    expect(REPROCESS).not.toMatch(/from\("journal_entry_metrics"\)\s*\.\s*delete/);
+  });
+
+  it("composer renders the five recognition groups from the ONE result", () => {
+    expect(COMPOSER).toMatch(/data-testid="journal-group-recognized"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-group-choice"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-group-claims"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-group-unresolved"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-group-rejected"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-unresolved-chip"/);
+    expect(COMPOSER).toMatch(/data-testid="journal-ambiguous-choice"/);
+    // summary line comes from the ONE pure summary rule
+    expect(COMPOSER).toMatch(/summarizeJournalPipelineResult/);
+    // every candidate action ships the pipeline version (trust boundary)
+    expect(COMPOSER).toMatch(/savedPipelineVersion/);
+  });
+
+  it("the new v2 i18n keys exist in every journal.json locale", () => {
+    const locales = [
+      "da", "de", "en", "et", "fi", "lt", "lv", "nl", "no", "pl", "ru", "sv",
+    ];
+    for (const loc of locales) {
+      const j = JSON.parse(
+        read(`messages/${loc}/journal.json`),
+      ) as Record<string, string>;
+      for (const key of [
+        "groupRecognized",
+        "groupChoice",
+        "groupClaims",
+        "groupUnresolved",
+        "ambiguousOther",
+        "ambiguousOtherPlaceholder",
+        "ambiguousOtherSave",
+        "unresolvedHint",
+        "unresolvedSearchPlaceholder",
+        "unresolvedClaimPlaceholder",
+        "unresolvedSaveClaim",
+        "unresolvedSkip",
+        "unresolvedSkipped",
+        "unresolvedSaved",
+      ]) {
+        expect(typeof j[key], `${loc}.${key}`).toBe("string");
+      }
+    }
+  });
+
+  it("silent-trust wording ban: the new group actions never say Patvirtinti", () => {
+    const lt = JSON.parse(read("messages/lt/journal.json")) as Record<
+      string,
+      string
+    >;
+    for (const key of [
+      "candidateConfirm",
+      "ambiguousOtherSave",
+      "unresolvedSaveClaim",
+      "unresolvedSkip",
+    ]) {
+      expect(lt[key].toLowerCase()).not.toContain("patvirtin");
+    }
+  });
+
+  it("lifecycle: restore + journal page heal re-enter the pipeline", () => {
+    expect(ACTIONS).toMatch(/journal_entry_restore/);
+    // restore path runs the pipeline for the restored entry
+    const restoreSection = ACTIONS.slice(ACTIONS.indexOf("journal_entry_restore"));
+    expect(restoreSection).toMatch(/runSkillPipeline/);
+    const page = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(page).toMatch(/JOURNAL_PIPELINE_VERSION/);
+    expect(page).toMatch(/processJournalEntrySkills/);
+    expect(page).toMatch(/\.slice\(0, 5\)/); // bounded per request
   });
 });

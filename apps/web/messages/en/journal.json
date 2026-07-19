@@ -409,5 +409,19 @@
   "candidateRejected": "Dismissed",
   "candidateError": "Could not save. Try again.",
   "rejectedReasonUser": "dismissed by you",
-  "rejectedReasonInactive": "not in the catalogue"
+  "rejectedReasonInactive": "not in the catalogue",
+  "groupRecognized": "Recognised and linked automatically",
+  "groupChoice": "Your choice is needed",
+  "groupClaims": "Possible additional capabilities",
+  "groupUnresolved": "Not recognised — name it yourself",
+  "ambiguousOther": "Other activity",
+  "ambiguousOtherPlaceholder": "Type a name…",
+  "ambiguousOtherSave": "Change the name",
+  "unresolvedHint": "The system did not recognise these fragments. Pick a skill from the catalogue, save it as a capability, or skip — nothing disappears without your decision.",
+  "unresolvedSearchPlaceholder": "Search the skill catalogue…",
+  "unresolvedClaimPlaceholder": "Type a capability name…",
+  "unresolvedSaveClaim": "Save as capability",
+  "unresolvedSkip": "Skip",
+  "unresolvedSkipped": "Skipped",
+  "unresolvedSaved": "Saved"
 }

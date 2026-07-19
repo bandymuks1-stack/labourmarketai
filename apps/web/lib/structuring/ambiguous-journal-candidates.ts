@@ -17,14 +17,26 @@
  */
 import { foldText } from "./normalize";
 
+export interface AmbiguousChoice {
+  /** Real taxonomy slug this reading resolves to when the worker picks it. */
+  readonly slug: string;
+  /** Human wording of the reading (canonical LT — UI may localize). */
+  readonly label: string;
+}
+
 export interface AmbiguousJournalCandidate {
   /** Canonical LT label stored in the clarification lane. */
   readonly label: string;
   /** Why this is a clarification, not a fact (shown to the worker). */
   readonly reason: string;
   /** The taxonomy slug the phrase MOST LIKELY means — used only when the
-   *  worker explicitly confirms; never auto-added. */
+   *  worker explicitly confirms; never auto-added. Kept as the first
+   *  `choices` entry for backward compatibility. */
   readonly possibleSlug: string;
+  /** ALL curated readings of the phrase (universal pipeline v2): the worker
+   *  picks ONE — plus the implicit "Kita veikla" rename handled by the UI.
+   *  Every slug must exist in the taxonomy; never auto-added. */
+  readonly choices: readonly AmbiguousChoice[];
 }
 
 type AmbiguousRow = AmbiguousJournalCandidate & {
@@ -41,6 +53,13 @@ const AMBIGUOUS_ROWS: readonly AmbiguousRow[] = [
     label: "Namų tvarkymas / valymas",
     reason: "»tvarkiau namus« gali reikšti valymą arba remontą",
     possibleSlug: "cleaning-services",
+    choices: [
+      // Both slugs verified against the taxonomy (keywords.ts):
+      // cleaning-services (cleaning_facility) + appliance-repair
+      // (repair_maintenance, wave-2 catalogue).
+      { slug: "cleaning-services", label: "Namų valymas" },
+      { slug: "appliance-repair", label: "Namų remontas / priežiūra" },
+    ],
   },
 ];
 
@@ -64,6 +83,7 @@ export function extractAmbiguousCandidates(
         label: row.label,
         reason: row.reason,
         possibleSlug: row.possibleSlug,
+        choices: row.choices,
       });
     }
   }

@@ -59,6 +59,11 @@ describe("stage 2 — ambiguous extractor (»tvarkiau namus« is NOT auto-cleani
         label: "Namų tvarkymas / valymas",
         reason: "»tvarkiau namus« gali reikšti valymą arba remontą",
         possibleSlug: "cleaning-services",
+        // Universal pipeline v2: the worker picks ONE curated reading.
+        choices: [
+          { slug: "cleaning-services", label: "Namų valymas" },
+          { slug: "appliance-repair", label: "Namų remontas / priežiūra" },
+        ],
       },
     ]);
   });
@@ -208,14 +213,30 @@ describe("stage 4 — pipeline result carries EVERY incident signal", () => {
 
     // The ambiguous house phrase is a confirmable candidate — never auto-added.
     const ambiguous = result.candidates.filter((c) => c.kind === "ambiguous");
-    expect(ambiguous).toEqual([
+    expect(ambiguous).toMatchObject([
       {
         kind: "ambiguous",
         label: "Namų tvarkymas / valymas",
         slug: "cleaning-services",
         reason: "»tvarkiau namus« gali reikšti valymą arba remontą",
+        // v2: the candidate carries its curated choices + fragment provenance.
+        choices: [
+          { slug: "cleaning-services", label: "Namų valymas" },
+          { slug: "appliance-repair", label: "Namų remontas / priežiūra" },
+        ],
       },
     ]);
+    expect(ambiguous[0].fragmentIds?.length).toBeGreaterThan(0);
+
+    // v2 coverage invariant on the incident text: 3 meaningful fragments,
+    // all covered, zero unresolved, ZERO silent loss.
+    expect(result.recognition.coverage).toEqual({
+      fragmentCount: 3,
+      meaningfulFragmentCount: 3,
+      coveredFragmentCount: 3,
+      unresolvedFragmentCount: 0,
+      silentlyLostFragmentCount: 0,
+    });
 
     // The inferred AI-tools capability landed as a claim candidate.
     const claims = result.candidates.filter((c) => c.kind === "claim");

@@ -409,5 +409,19 @@
   "candidateRejected": "Отклонено",
   "candidateError": "Не удалось сохранить. Попробуйте ещё раз.",
   "rejectedReasonUser": "отклонено вами",
-  "rejectedReasonInactive": "нет в каталоге"
+  "rejectedReasonInactive": "нет в каталоге",
+  "groupRecognized": "Распознано и связано автоматически",
+  "groupChoice": "Нужен ваш выбор",
+  "groupClaims": "Возможные дополнительные компетенции",
+  "groupUnresolved": "Не распознано — назовите сами",
+  "ambiguousOther": "Другая деятельность",
+  "ambiguousOtherPlaceholder": "Введите название…",
+  "ambiguousOtherSave": "Изменить название",
+  "unresolvedHint": "Система не распознала эти фрагменты. Выберите навык из каталога, сохраните как умение или пропустите — ничего не исчезает без вашего решения.",
+  "unresolvedSearchPlaceholder": "Поиск по каталогу навыков…",
+  "unresolvedClaimPlaceholder": "Введите название умения…",
+  "unresolvedSaveClaim": "Сохранить как умение",
+  "unresolvedSkip": "Пропустить",
+  "unresolvedSkipped": "Пропущено",
+  "unresolvedSaved": "Сохранено"
 }

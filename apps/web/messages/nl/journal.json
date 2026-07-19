@@ -409,5 +409,19 @@
   "candidateRejected": "Afgewezen",
   "candidateError": "Opslaan mislukt. Probeer het opnieuw.",
   "rejectedReasonUser": "door u afgewezen",
-  "rejectedReasonInactive": "niet in de catalogus"
+  "rejectedReasonInactive": "niet in de catalogus",
+  "groupRecognized": "Automatisch herkend en gekoppeld",
+  "groupChoice": "Uw keuze is nodig",
+  "groupClaims": "Mogelijke extra competenties",
+  "groupUnresolved": "Niet herkend — benoem het zelf",
+  "ambiguousOther": "Andere activiteit",
+  "ambiguousOtherPlaceholder": "Typ een naam…",
+  "ambiguousOtherSave": "Naam wijzigen",
+  "unresolvedHint": "Het systeem heeft deze fragmenten niet herkend. Kies een vaardigheid uit de catalogus, sla op als competentie of sla over — niets verdwijnt zonder uw beslissing.",
+  "unresolvedSearchPlaceholder": "Zoek in de vaardighedencatalogus…",
+  "unresolvedClaimPlaceholder": "Typ een competentienaam…",
+  "unresolvedSaveClaim": "Opslaan als competentie",
+  "unresolvedSkip": "Overslaan",
+  "unresolvedSkipped": "Overgeslagen",
+  "unresolvedSaved": "Opgeslagen"
 }

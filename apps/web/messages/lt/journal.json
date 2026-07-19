@@ -409,5 +409,19 @@
   "candidateRejected": "Atmesta",
   "candidateError": "Nepavyko išsaugoti. Bandykite dar kartą.",
   "rejectedReasonUser": "atmesta jūsų",
-  "rejectedReasonInactive": "nėra kataloge"
+  "rejectedReasonInactive": "nėra kataloge",
+  "groupRecognized": "Automatiškai atpažinta ir susieta",
+  "groupChoice": "Reikia jūsų pasirinkimo",
+  "groupClaims": "Papildomos galimos kompetencijos",
+  "groupUnresolved": "Neatpažinta — įvardykite patys",
+  "ambiguousOther": "Kita veikla",
+  "ambiguousOtherPlaceholder": "Įrašykite pavadinimą…",
+  "ambiguousOtherSave": "Pakeisti pavadinimą",
+  "unresolvedHint": "Sistema šių fragmentų neatpažino. Pasirinkite įgūdį iš katalogo, įrašykite kaip gebėjimą arba praleiskite — niekas nedingsta be jūsų sprendimo.",
+  "unresolvedSearchPlaceholder": "Ieškoti įgūdžio kataloge…",
+  "unresolvedClaimPlaceholder": "Įrašykite gebėjimo pavadinimą…",
+  "unresolvedSaveClaim": "Įrašyti kaip gebėjimą",
+  "unresolvedSkip": "Praleisti",
+  "unresolvedSkipped": "Praleista",
+  "unresolvedSaved": "Išsaugota"
 }

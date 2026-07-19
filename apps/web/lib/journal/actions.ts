@@ -884,6 +884,22 @@ export async function restoreJournalEntry(
     };
   }
 
+  // Universal pipeline lifecycle rule: a RESTORED entry re-enters the
+  // recognition loop (idempotent; a pipeline failure never fails the restore).
+  const { data: restored } = await supabase
+    .from("journal_entries")
+    .select("id, original_text")
+    .eq("id", entryId)
+    .maybeSingle();
+  if (restored?.id) {
+    await runSkillPipeline({
+      entryId: restored.id,
+      text: (restored.original_text as string | null) ?? "",
+      locale,
+      excludeSlugs: [],
+    });
+  }
+
   revalidatePath(`/${locale}/dashboard/journal`);
   return { ok: true };
 }

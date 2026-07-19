@@ -76,6 +76,15 @@ export const CAPABILITY_LABEL_I18N: Readonly<Record<string, LocalizedLabel>> = {
     en: "Programming / code fixes",
     ru: "Программирование / правки кода",
   },
+  // Universal journal pipeline v2 — the debugging/code-fixing claim row was
+  // retitled to the specialization wording (the plain "Programavimas" claim
+  // covers the general competence; this one is genuinely about fixing).
+  // The old "Programavimas / kodo pataisymai" key above stays mapped — it is
+  // still referenced by the activity lexicon (keywords.ts).
+  "Kodo pataisymai / derinimas": {
+    en: "Code fixes / debugging",
+    ru: "Правки кода / отладка",
+  },
   // Cross-sector recognition (feat/cc/cross-sector-skills, mandate §8.7): the
   // profile recognizer now fires for cooking / care / languages, so their
   // canonical LT labels must localize too (no LT leak into EN/RU).

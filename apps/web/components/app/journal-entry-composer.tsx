@@ -37,9 +37,20 @@ import type {
 } from "@/lib/journal/skill-pipeline";
 import {
   confirmJournalSkillCandidate,
+  confirmJournalAmbiguousChoice,
+  rejectJournalSkillCandidate,
   rejectJournalAmbiguousCandidate,
   rejectJournalClaimCandidate,
+  nameUnresolvedFragment,
+  dismissUnresolvedFragment,
+  searchTaxonomySkills,
+  type TaxonomySkillHit,
 } from "@/lib/journal/skill-pipeline-actions";
+import {
+  summarizeJournalPipelineResult,
+  JOURNAL_PIPELINE_VERSION,
+  type JournalUnresolvedFragment,
+} from "@/lib/journal/journal-recognition";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import {
@@ -318,6 +329,21 @@ export function JournalEntryComposer({
   const [candidateStates, setCandidateStates] = useState<
     Record<string, "idle" | "working" | "confirmed" | "rejected" | "error">
   >({});
+  // Universal pipeline v2 — "Kita veikla" rename drafts per ambiguous
+  // candidate + unresolved-fragment naming state (search / claim drafts).
+  const [renameDrafts, setRenameDrafts] = useState<Record<string, string>>({});
+  const [unresolvedStates, setUnresolvedStates] = useState<
+    Record<string, "idle" | "working" | "named" | "skipped" | "error">
+  >({});
+  const [unresolvedQueries, setUnresolvedQueries] = useState<
+    Record<string, string>
+  >({});
+  const [unresolvedHits, setUnresolvedHits] = useState<
+    Record<string, TaxonomySkillHit[]>
+  >({});
+  const [unresolvedClaimDrafts, setUnresolvedClaimDrafts] = useState<
+    Record<string, string>
+  >({});
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
   >(editSkillSuggestions);
@@ -582,10 +608,16 @@ export function JournalEntryComposer({
     setCandidateStates((prev) => ({ ...prev, [key]: next }));
   }
 
-  /** Confirm a candidate — every path is the honest existing lane: taxonomy
-   *  candidates via confirmJournalSkillCandidate (verified:false,
-   *  self_declared, yellow + entry link), claims via the profile claim action.
-   *  The button state shows the RETURNED result, never an optimistic count. */
+  /** Pipeline version of the LAST save — every confirm/reject/name action
+   *  ships it; the server refuses stale versions (trust boundary). */
+  const savedPipelineVersion =
+    savedPipeline?.recognition.pipelineVersion ?? JOURNAL_PIPELINE_VERSION;
+
+  /** Confirm a candidate — every path is the honest existing lane: fuzzy
+   *  taxonomy candidates via confirmJournalSkillCandidate (verified:false,
+   *  self_declared, yellow + entry link; server re-derives + membership-
+   *  checks), claims via the profile claim action. The button state shows
+   *  the RETURNED result, never an optimistic count. */
   async function confirmCandidate(c: JournalPipelineCandidate) {
     const key = candidateKey(c);
     setCandidateState(key, "working");
@@ -602,7 +634,7 @@ export function JournalEntryComposer({
       const res = await confirmJournalSkillCandidate(
         savedEntryId,
         c.slug,
-        c.kind === "ambiguous" ? { clarificationLabel: c.label } : undefined,
+        savedPipelineVersion,
       );
       setCandidateState(key, res.ok ? "confirmed" : "error");
     } catch (e) {
@@ -611,33 +643,166 @@ export function JournalEntryComposer({
     }
   }
 
-  /** Reject a candidate. Fuzzy candidates were never persisted (client-side
-   *  dismiss); ambiguous ones remove the worker's own pending clarification
-   *  row; claims get an append-only rejection marker (the metric lane is
-   *  append-only by doctrine §3 — nothing is rewritten). */
+  /** Resolve an AMBIGUOUS candidate by picking one of its curated choices
+   *  (server validates the choice belongs to the candidate's derivation). */
+  async function chooseAmbiguous(c: JournalPipelineCandidate, slug: string) {
+    const key = candidateKey(c);
+    if (!savedEntryId) {
+      setCandidateState(key, "error");
+      return;
+    }
+    setCandidateState(key, "working");
+    try {
+      const res = await confirmJournalAmbiguousChoice(
+        savedEntryId,
+        c.label,
+        slug,
+        savedPipelineVersion,
+      );
+      setCandidateState(key, res.ok ? "confirmed" : "error");
+    } catch (e) {
+      console.error("[journal-composer] ambiguous choice failed:", e);
+      setCandidateState(key, "error");
+    }
+  }
+
+  /** "Kita veikla" — the worker renames the ambiguous phrase themselves:
+   *  the typed label becomes a SELF-DECLARED claim; the open clarification
+   *  is closed via the entry-scoped reject action. Never a taxonomy write. */
+  async function renameAmbiguous(c: JournalPipelineCandidate) {
+    const key = candidateKey(c);
+    const label = (renameDrafts[key] ?? "").trim();
+    if (!label || !savedEntryId) return;
+    setCandidateState(key, "working");
+    try {
+      await saveProfileSkillClaimsAction([label.slice(0, 120)]);
+      await rejectJournalAmbiguousCandidate(
+        savedEntryId,
+        c.label,
+        savedPipelineVersion,
+      );
+      setCandidateState(key, "confirmed");
+    } catch (e) {
+      console.error("[journal-composer] ambiguous rename failed:", e);
+      setCandidateState(key, "error");
+    }
+  }
+
+  /** Reject a candidate — ALL paths are entry-scoped append-only markers on
+   *  the server (skill_rejected / skill_claim_rejected); nothing global,
+   *  nothing rewritten (doctrine §3). */
   async function rejectCandidate(c: JournalPipelineCandidate) {
     const key = candidateKey(c);
+    if (!savedEntryId) {
+      setCandidateState(key, "error");
+      return;
+    }
     setCandidateState(key, "working");
     try {
       if (c.kind === "ambiguous") {
-        const res = await rejectJournalAmbiguousCandidate(c.label);
+        const res = await rejectJournalAmbiguousCandidate(
+          savedEntryId,
+          c.label,
+          savedPipelineVersion,
+        );
         setCandidateState(key, res.ok ? "rejected" : "error");
         return;
       }
       if (c.kind === "claim") {
-        if (!savedEntryId) {
-          setCandidateState(key, "error");
-          return;
-        }
-        const res = await rejectJournalClaimCandidate(savedEntryId, c.label);
+        const res = await rejectJournalClaimCandidate(
+          savedEntryId,
+          c.label,
+          savedPipelineVersion,
+        );
         setCandidateState(key, res.ok ? "rejected" : "error");
         return;
       }
-      // fuzzy_skill: nothing was persisted — dismissing it is purely local.
-      setCandidateState(key, "rejected");
+      if (!c.slug) {
+        setCandidateState(key, "error");
+        return;
+      }
+      const res = await rejectJournalSkillCandidate(
+        savedEntryId,
+        c.slug,
+        savedPipelineVersion,
+      );
+      setCandidateState(key, res.ok ? "rejected" : "error");
     } catch (e) {
       console.error("[journal-composer] candidate reject failed:", e);
       setCandidateState(key, "error");
+    }
+  }
+
+  // ── Unresolved fragments — the worker names what the lexicon missed ────
+  function setUnresolvedState(
+    id: string,
+    next: "idle" | "working" | "named" | "skipped" | "error",
+  ) {
+    setUnresolvedStates((prev) => ({ ...prev, [id]: next }));
+  }
+
+  async function searchUnresolved(fragmentId: string, q: string) {
+    setUnresolvedQueries((prev) => ({ ...prev, [fragmentId]: q }));
+    if (q.trim().length < 2) {
+      setUnresolvedHits((prev) => ({ ...prev, [fragmentId]: [] }));
+      return;
+    }
+    try {
+      const hits = await searchTaxonomySkills(q);
+      setUnresolvedHits((prev) => ({ ...prev, [fragmentId]: hits }));
+    } catch {
+      setUnresolvedHits((prev) => ({ ...prev, [fragmentId]: [] }));
+    }
+  }
+
+  async function nameUnresolvedAsSkill(
+    u: JournalUnresolvedFragment,
+    slug: string,
+  ) {
+    if (!savedEntryId) return;
+    setUnresolvedState(u.fragmentId, "working");
+    try {
+      const res = await nameUnresolvedFragment(
+        savedEntryId,
+        u.normalized,
+        { type: "skill", slug },
+        savedPipelineVersion,
+      );
+      setUnresolvedState(u.fragmentId, res.ok ? "named" : "error");
+    } catch {
+      setUnresolvedState(u.fragmentId, "error");
+    }
+  }
+
+  async function nameUnresolvedAsClaim(u: JournalUnresolvedFragment) {
+    const label = (unresolvedClaimDrafts[u.fragmentId] ?? "").trim();
+    if (!label || !savedEntryId) return;
+    setUnresolvedState(u.fragmentId, "working");
+    try {
+      const res = await nameUnresolvedFragment(
+        savedEntryId,
+        u.normalized,
+        { type: "claim", label: label.slice(0, 120) },
+        savedPipelineVersion,
+      );
+      setUnresolvedState(u.fragmentId, res.ok ? "named" : "error");
+    } catch {
+      setUnresolvedState(u.fragmentId, "error");
+    }
+  }
+
+  async function skipUnresolved(u: JournalUnresolvedFragment) {
+    if (!savedEntryId) return;
+    setUnresolvedState(u.fragmentId, "working");
+    try {
+      const res = await dismissUnresolvedFragment(
+        savedEntryId,
+        u.normalized,
+        savedPipelineVersion,
+      );
+      setUnresolvedState(u.fragmentId, res.ok ? "skipped" : "error");
+    } catch {
+      setUnresolvedState(u.fragmentId, "error");
     }
   }
 
@@ -758,6 +923,11 @@ export function JournalEntryComposer({
       setSavedPipeline(result.skills);
       setSavedEntryId(result.entryId);
       setCandidateStates({});
+      setRenameDrafts({});
+      setUnresolvedStates({});
+      setUnresolvedQueries({});
+      setUnresolvedHits({});
+      setUnresolvedClaimDrafts({});
       // Wagon 5: persist corrected rows ("Pataisyti") as SELF-DECLARED claims.
       // The action dedups by normalized label; EMPTY corrections are filtered
       // here so an empty value can never be saved. Never verified, never
@@ -1024,27 +1194,37 @@ export function JournalEntryComposer({
                   {t("pipelineFailed", { trace: savedPipeline.trace })}
                 </p>
               ) : (
-                <p
-                  className="text-xs leading-relaxed text-text-secondary"
-                  data-testid="journal-pipeline-result"
-                >
-                  {t("pipelineLine", {
-                    detected: savedPipeline.detected,
-                    added: savedPipeline.added,
-                    strengthened: savedPipeline.strengthened,
-                    review: savedPipeline.reviewNeeded,
-                  })}{" "}
-                  {savedPipeline.cvUpdated
-                    ? t("pipelineCvUpdated")
-                    : t("pipelineCvUnchanged")}
-                </p>
+                (() => {
+                  // ONE summary rule: the line renders the pure summary
+                  // derived from the result LISTS — counts can never drift
+                  // from the groups below.
+                  const summary = summarizeJournalPipelineResult(savedPipeline);
+                  return (
+                    <p
+                      className="text-xs leading-relaxed text-text-secondary"
+                      data-testid="journal-pipeline-result"
+                    >
+                      {t("pipelineLine", {
+                        detected: summary.detected,
+                        added: summary.added,
+                        strengthened: summary.strengthened,
+                        review: summary.reviewNeeded,
+                      })}{" "}
+                      {summary.cvUpdated
+                        ? t("pipelineCvUpdated")
+                        : t("pipelineCvUnchanged")}
+                    </p>
+                  );
+                })()
               ))}
-            {/* P1 recall repair: per-category result — real lists, not just
-                counts. Four labelled groups (detected / auto-added / needs
-                confirmation / rejected); each renders ONLY with real data.
-                Candidates are one-tap confirm/reject through the honest
-                lanes (self-declared skill, clarification, claim) — never a
-                fake count; nothing is ever marked verified here. */}
+            {/* Universal pipeline v2: per-category result — real lists, not
+                just counts, fed ONLY from result.recognition + persisted
+                deltas. FIVE labelled groups (recognized+linked / needs your
+                choice / possible capabilities / unresolved-name-it-yourself /
+                rejected); each renders ONLY with real data. All actions ride
+                the honest lanes (self-declared skill, clarification, claim,
+                entry-scoped markers) — nothing is ever marked verified here,
+                and nothing the derivation produced can disappear. */}
             {savedPipeline !== null &&
               savedPipeline.status !== "failed" &&
               (() => {
@@ -1054,111 +1234,206 @@ export function JournalEntryComposer({
                     ...savedPipeline.strengthenedSkills.map((s) => s.slug),
                   ]),
                 ];
+                const skillCandidates = savedPipeline.candidates.filter(
+                  (c) => c.kind !== "claim",
+                );
+                const claimCandidates = savedPipeline.candidates.filter(
+                  (c) => c.kind === "claim",
+                );
+                const unresolvedList =
+                  savedPipeline.recognition.unresolvedFragments;
                 const groups =
                   detectedSlugs.length +
-                  savedPipeline.candidates.length +
+                  skillCandidates.length +
+                  claimCandidates.length +
+                  unresolvedList.length +
                   savedPipeline.rejected.length;
                 if (groups === 0) return null;
+                const candidateActions = (
+                  c: JournalPipelineCandidate,
+                  state: string,
+                ) => (
+                  <span className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={state === "working"}
+                      aria-busy={state === "working" || undefined}
+                      onClick={() => void confirmCandidate(c)}
+                      data-testid="journal-candidate-confirm"
+                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                    >
+                      {state === "working"
+                        ? t("candidateConfirming")
+                        : t("candidateConfirm")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={state === "working"}
+                      onClick={() => void rejectCandidate(c)}
+                      data-testid="journal-candidate-reject"
+                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                    >
+                      {t("candidateReject")}
+                    </button>
+                  </span>
+                );
+                const stateBadge = (state: string) =>
+                  state === "confirmed" ? (
+                    <span
+                      className="text-[11px] font-semibold text-state-success"
+                      data-testid="journal-candidate-confirmed"
+                    >
+                      ✓ {t("candidateConfirmed")}
+                    </span>
+                  ) : state === "rejected" ? (
+                    <span
+                      className="text-[11px] text-text-muted"
+                      data-testid="journal-candidate-rejected"
+                    >
+                      {t("candidateRejected")}
+                    </span>
+                  ) : null;
                 return (
                   <div
                     className="flex flex-col gap-2"
                     data-testid="journal-pipeline-groups"
                   >
-                    {detectedSlugs.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                          {t("resultDetected")}
+                    {/* 1 · Automatically recognised + linked */}
+                    {(detectedSlugs.length > 0 ||
+                      savedPipeline.addedSkills.length > 0) && (
+                      <div
+                        className="flex flex-col gap-1.5"
+                        data-testid="journal-group-recognized"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                          {t("groupRecognized")}
                         </span>
-                        {detectedSlugs.map((slug) => (
-                          <span
-                            key={`det-${slug}`}
-                            className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
-                            data-testid={`journal-detected-skill-${slug}`}
-                          >
-                            {tSkillSafe(tSkill, slug)}
-                          </span>
-                        ))}
+                        {detectedSlugs.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              {t("resultDetected")}
+                            </span>
+                            {detectedSlugs.map((slug) => (
+                              <span
+                                key={`det-${slug}`}
+                                className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
+                                data-testid={`journal-detected-skill-${slug}`}
+                              >
+                                {tSkillSafe(tSkill, slug)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {savedPipeline.addedSkills.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              {t("resultAutoAdded")}
+                            </span>
+                            {savedPipeline.addedSkills.map((s) => (
+                              <span
+                                key={`add-${s.slug}`}
+                                className="rounded-md border border-state-success/40 bg-state-success/5 px-2 py-0.5 text-[11px] text-state-success"
+                                data-testid={`journal-added-skill-${s.slug}`}
+                              >
+                                {tSkillSafe(tSkill, s.slug)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                    {savedPipeline.addedSkills.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                          {t("resultAutoAdded")}
+                    {/* 2 · Needs YOUR choice (fuzzy + ambiguous readings) */}
+                    {skillCandidates.length > 0 && (
+                      <div
+                        className="flex flex-col gap-1.5"
+                        data-testid="journal-group-choice"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                          {t("groupChoice")}
                         </span>
-                        {savedPipeline.addedSkills.map((s) => (
-                          <span
-                            key={`add-${s.slug}`}
-                            className="rounded-md border border-state-success/40 bg-state-success/5 px-2 py-0.5 text-[11px] text-state-success"
-                            data-testid={`journal-added-skill-${s.slug}`}
-                          >
-                            {tSkillSafe(tSkill, s.slug)}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {savedPipeline.candidates.length > 0 && (
-                      <div className="flex flex-col gap-1.5">
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
-                          {t("resultNeedsConfirm")}
-                        </span>
-                        {savedPipeline.candidates.map((c) => {
+                        <span className="sr-only">{t("resultNeedsConfirm")}</span>
+                        {skillCandidates.map((c) => {
                           const key = candidateKey(c);
                           const state = candidateStates[key] ?? "idle";
                           return (
                             <div
                               key={key}
-                              className="flex flex-wrap items-center gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5"
+                              className="flex flex-col gap-1.5 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5"
                               data-testid="journal-candidate-chip"
                             >
-                              <span className="text-xs font-semibold text-text-primary">
-                                {candidateDisplayLabel(c)}
-                              </span>
-                              {c.reason ? (
-                                <span className="text-[11px] text-text-muted">
-                                  {c.kind === "ambiguous"
-                                    ? c.reason
-                                    : t("reasonFound", { word: c.reason })}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold text-text-primary">
+                                  {candidateDisplayLabel(c)}
                                 </span>
-                              ) : null}
-                              {state === "confirmed" ? (
-                                <span
-                                  className="text-[11px] font-semibold text-state-success"
-                                  data-testid="journal-candidate-confirmed"
-                                >
-                                  ✓ {t("candidateConfirmed")}
-                                </span>
-                              ) : state === "rejected" ? (
-                                <span
-                                  className="text-[11px] text-text-muted"
-                                  data-testid="journal-candidate-rejected"
-                                >
-                                  {t("candidateRejected")}
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-1.5">
-                                  <button
-                                    type="button"
-                                    disabled={state === "working"}
-                                    aria-busy={state === "working" || undefined}
-                                    onClick={() => void confirmCandidate(c)}
-                                    data-testid="journal-candidate-confirm"
-                                    className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
-                                  >
-                                    {state === "working"
-                                      ? t("candidateConfirming")
-                                      : t("candidateConfirm")}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={state === "working"}
-                                    onClick={() => void rejectCandidate(c)}
-                                    data-testid="journal-candidate-reject"
-                                    className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
-                                  >
-                                    {t("candidateReject")}
-                                  </button>
-                                </span>
-                              )}
+                                {c.reason ? (
+                                  <span className="text-[11px] text-text-muted">
+                                    {c.kind === "ambiguous"
+                                      ? c.reason
+                                      : t("reasonFound", { word: c.reason })}
+                                  </span>
+                                ) : null}
+                                {stateBadge(state)}
+                              </div>
+                              {state !== "confirmed" &&
+                                state !== "rejected" &&
+                                (c.kind === "ambiguous" && c.choices?.length ? (
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    {c.choices.map((ch) => (
+                                      <button
+                                        key={ch.slug}
+                                        type="button"
+                                        disabled={state === "working"}
+                                        onClick={() =>
+                                          void chooseAmbiguous(c, ch.slug)
+                                        }
+                                        data-testid="journal-ambiguous-choice"
+                                        className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                      >
+                                        {ch.label}
+                                      </button>
+                                    ))}
+                                    <span className="flex items-center gap-1">
+                                      <input
+                                        type="text"
+                                        value={renameDrafts[key] ?? ""}
+                                        onChange={(e) =>
+                                          setRenameDrafts((prev) => ({
+                                            ...prev,
+                                            [key]: e.target.value,
+                                          }))
+                                        }
+                                        placeholder={t("ambiguousOtherPlaceholder")}
+                                        aria-label={t("ambiguousOther")}
+                                        data-testid="journal-ambiguous-rename-input"
+                                        className="w-40 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                      />
+                                      <button
+                                        type="button"
+                                        disabled={
+                                          state === "working" ||
+                                          (renameDrafts[key] ?? "").trim()
+                                            .length === 0
+                                        }
+                                        onClick={() => void renameAmbiguous(c)}
+                                        data-testid="journal-ambiguous-rename"
+                                        className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary transition-colors hover:border-brand-blue disabled:opacity-50"
+                                      >
+                                        {t("ambiguousOtherSave")}
+                                      </button>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      disabled={state === "working"}
+                                      onClick={() => void rejectCandidate(c)}
+                                      data-testid="journal-candidate-reject"
+                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                                    >
+                                      {t("candidateReject")}
+                                    </button>
+                                  </div>
+                                ) : (
+                                  candidateActions(c, state)
+                                ))}
                               {state === "error" && (
                                 <span
                                   className="text-[11px] text-state-danger"
@@ -1173,8 +1448,194 @@ export function JournalEntryComposer({
                         })}
                       </div>
                     )}
+                    {/* 3 · Possible additional capabilities (claims) */}
+                    {claimCandidates.length > 0 && (
+                      <div
+                        className="flex flex-col gap-1.5"
+                        data-testid="journal-group-claims"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                          {t("groupClaims")}
+                        </span>
+                        {claimCandidates.map((c) => {
+                          const key = candidateKey(c);
+                          const state = candidateStates[key] ?? "idle";
+                          return (
+                            <div
+                              key={key}
+                              className="flex flex-wrap items-center gap-2 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5"
+                              data-testid="journal-candidate-chip"
+                            >
+                              <span className="text-xs font-semibold text-text-primary">
+                                {candidateDisplayLabel(c)}
+                              </span>
+                              {stateBadge(state) ??
+                                candidateActions(c, state)}
+                              {state === "error" && (
+                                <span
+                                  className="text-[11px] text-state-danger"
+                                  role="alert"
+                                  data-testid="journal-candidate-error"
+                                >
+                                  {t("candidateError")}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* 4 · Unresolved — the worker names it themselves */}
+                    {unresolvedList.length > 0 && (
+                      <div
+                        className="flex flex-col gap-1.5"
+                        data-testid="journal-group-unresolved"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                          {t("groupUnresolved")}
+                        </span>
+                        <p className="text-[11px] leading-relaxed text-text-muted">
+                          {t("unresolvedHint")}
+                        </p>
+                        {unresolvedList.map((u) => {
+                          const state =
+                            unresolvedStates[u.fragmentId] ?? "idle";
+                          return (
+                            <div
+                              key={u.fragmentId}
+                              className="flex flex-col gap-1.5 rounded-md border border-state-warning/40 bg-state-warning/5 px-2.5 py-1.5"
+                              data-testid="journal-unresolved-chip"
+                            >
+                              <span className="text-xs font-semibold text-text-primary">
+                                „{u.text}“
+                              </span>
+                              {state === "named" ? (
+                                <span
+                                  className="text-[11px] font-semibold text-state-success"
+                                  data-testid="journal-unresolved-named"
+                                >
+                                  ✓ {t("unresolvedSaved")}
+                                </span>
+                              ) : state === "skipped" ? (
+                                <span
+                                  className="text-[11px] text-text-muted"
+                                  data-testid="journal-unresolved-skipped"
+                                >
+                                  {t("unresolvedSkipped")}
+                                </span>
+                              ) : (
+                                <>
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <input
+                                      type="text"
+                                      value={
+                                        unresolvedQueries[u.fragmentId] ?? ""
+                                      }
+                                      onChange={(e) =>
+                                        void searchUnresolved(
+                                          u.fragmentId,
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder={t(
+                                        "unresolvedSearchPlaceholder",
+                                      )}
+                                      aria-label={t(
+                                        "unresolvedSearchPlaceholder",
+                                      )}
+                                      data-testid="journal-unresolved-search"
+                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                    />
+                                    {(unresolvedHits[u.fragmentId] ?? []).map(
+                                      (hit) => (
+                                        <button
+                                          key={hit.slug}
+                                          type="button"
+                                          disabled={state === "working"}
+                                          onClick={() =>
+                                            void nameUnresolvedAsSkill(
+                                              u,
+                                              hit.slug,
+                                            )
+                                          }
+                                          data-testid="journal-unresolved-skill-pick"
+                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                        >
+                                          {hit.label}
+                                        </button>
+                                      ),
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <input
+                                      type="text"
+                                      value={
+                                        unresolvedClaimDrafts[u.fragmentId] ??
+                                        ""
+                                      }
+                                      onChange={(e) =>
+                                        setUnresolvedClaimDrafts((prev) => ({
+                                          ...prev,
+                                          [u.fragmentId]: e.target.value,
+                                        }))
+                                      }
+                                      placeholder={t(
+                                        "unresolvedClaimPlaceholder",
+                                      )}
+                                      aria-label={t("unresolvedSaveClaim")}
+                                      data-testid="journal-unresolved-claim-input"
+                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                    />
+                                    <button
+                                      type="button"
+                                      disabled={
+                                        state === "working" ||
+                                        (
+                                          unresolvedClaimDrafts[
+                                            u.fragmentId
+                                          ] ?? ""
+                                        ).trim().length === 0
+                                      }
+                                      onClick={() =>
+                                        void nameUnresolvedAsClaim(u)
+                                      }
+                                      data-testid="journal-unresolved-save-claim"
+                                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                    >
+                                      {t("unresolvedSaveClaim")}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={state === "working"}
+                                      onClick={() => void skipUnresolved(u)}
+                                      data-testid="journal-unresolved-skip"
+                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                                    >
+                                      {t("unresolvedSkip")}
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                              {state === "error" && (
+                                <span
+                                  className="text-[11px] text-state-danger"
+                                  role="alert"
+                                  data-testid="journal-unresolved-error"
+                                >
+                                  {t("candidateError")}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* 5 · Rejected — visible with the honest reason */}
                     {savedPipeline.rejected.length > 0 && (
-                      <div className="flex flex-col gap-1">
+                      <div
+                        className="flex flex-col gap-1"
+                        data-testid="journal-group-rejected"
+                      >
                         <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
                           {t("resultRejected")}
                         </span>

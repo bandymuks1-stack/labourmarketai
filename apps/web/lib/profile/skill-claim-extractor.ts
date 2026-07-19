@@ -40,6 +40,27 @@ type DictionaryRow = {
   needles: readonly string[];
   /** Canonical LT display label (UI-visible). */
   label: string;
+  /** Universal journal pipeline v2 — SEMANTIC DEDUP metadata (consumed by
+   *  `deriveJournalRecognition`, NOT by this extractor):
+   *  taxonomy slug this claim SHADOWS. When the slug is recognised in the
+   *  SAME text fragment the claim is a duplicate and is suppressed there —
+   *  unless one of `contextNeedles` matches the fragment (then the claim
+   *  carries extra meaning and appears IN ADDITION). */
+  claimAffinity?: string;
+  /** Folded needles that RESCUE an affinity-suppressed claim (see above). */
+  contextNeedles?: readonly string[];
+  /** Folded needles that must be PRESENT in the fragment for the journal
+   *  pipeline to emit this claim at all (hard context gate — e.g. plain
+   *  ChatGPT mentions must not read as "AI integrations"). Profile-narrative
+   *  extraction is unaffected. */
+  requireContextNeedles?: readonly string[];
+};
+
+/** Journal-pipeline-facing view of a claim row's semantic-dedup metadata. */
+export type JournalClaimRowMeta = {
+  claimAffinity?: string;
+  contextNeedles?: readonly string[];
+  requireContextNeedles?: readonly string[];
 };
 
 /**
@@ -78,6 +99,45 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "kodo klaid",
       "kodo pataisym",
       "programos klaid",
+    ],
+    // Journal semantic dedup: plain "Programavimas" duplicates the
+    // taxonomy `programming` skill when both fire from one fragment.
+    claimAffinity: "programming",
+  },
+  {
+    // SPECIALIZATION of Programavimas — debugging / code-fixing work.
+    // Trigger needles are CODE-anchored so "pataisiau tvorą" never fires;
+    // `contextNeedles` rescue it from affinity suppression when the fragment
+    // is genuinely about fixing/debugging (then it appears IN ADDITION to
+    // the recognised `programming` taxonomy skill).
+    label: "Kodo pataisymai / derinimas",
+    needles: [
+      "kodo pataisym",
+      "kodo klaid",
+      "taisiau kod",
+      "pataisiau kod",
+      "code fix",
+      "bug fix",
+      "bugfix",
+      "fixed a bug",
+      "fixed bugs",
+      "debug",
+      "исправил баг",
+      "правил код",
+      "отлад",
+    ],
+    claimAffinity: "programming",
+    contextNeedles: [
+      "pataisiau",
+      "taisiau klaid",
+      "klaidu taisym",
+      "debug",
+      "bugfix",
+      "bug fix",
+      "fixed",
+      "исправил ошиб",
+      "исправил баг",
+      "отлад",
     ],
   },
   {
@@ -464,6 +524,18 @@ const DICTIONARY: readonly DictionaryRow[] = [
       "ai agent",
       "ai agentų",
       "machine learning",
+    ],
+    // Journal hard gate: a plain ChatGPT/Claude mention is TOOL USE, not an
+    // integration project — without integration context the fragment yields
+    // ONLY "Darbas su AI įrankiais (ChatGPT / Claude)" below.
+    requireContextNeedles: [
+      "integracij",
+      "integrav",
+      "api",
+      "automatiz",
+      "integration",
+      "автоматизац",
+      "интеграц",
     ],
   },
   {
@@ -1170,4 +1242,27 @@ export function extractProfileSkillClaims(
  */
 export function normalizeClaimLabel(label: string): string {
   return label.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** Semantic-dedup metadata per canonical claim label (universal journal
+ *  pipeline v2). Built once from the DICTIONARY rows that declare any. */
+const CLAIM_ROW_META: ReadonlyMap<string, JournalClaimRowMeta> = (() => {
+  const m = new Map<string, JournalClaimRowMeta>();
+  for (const row of DICTIONARY) {
+    if (row.claimAffinity || row.contextNeedles || row.requireContextNeedles) {
+      m.set(normalizeClaimLabel(row.label), {
+        claimAffinity: row.claimAffinity,
+        contextNeedles: row.contextNeedles,
+        requireContextNeedles: row.requireContextNeedles,
+      });
+    }
+  }
+  return m;
+})();
+
+/** Lookup by (any-cased) claim label — undefined when the row has no meta. */
+export function getJournalClaimRowMeta(
+  label: string,
+): JournalClaimRowMeta | undefined {
+  return CLAIM_ROW_META.get(normalizeClaimLabel(label));
 }
