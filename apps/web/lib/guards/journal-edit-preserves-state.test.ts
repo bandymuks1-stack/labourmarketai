@@ -41,6 +41,29 @@ describe("composer preloads structured state from editingEntry", () => {
   });
 });
 
+describe("compact editor preloads + preserves the persisted state (default edit path)", () => {
+  // Journal compact edit UX (P0): the row's edit drawer now mounts the
+  // COMPACT editor. It must preload the SAME full state (so an untouched
+  // edit re-submits everything unchanged) — the composer assertions above
+  // keep covering the legacy `?editing=` page flow.
+  const editor = read("components/app/journal-entry-compact-editor.tsx");
+  it("preloads work date / quantity / direction / site / institution / topic", () => {
+    expect(editor).toMatch(/entry\.workDate \?\? today/);
+    expect(editor).toMatch(/entry\.quantity \? String\(entry\.quantity\.value\)/);
+    expect(editor).toMatch(/entry\.workDirectionSlug \?\? ""/);
+    expect(editor).toMatch(/entry\.siteName \?\? ""/);
+    expect(editor).toMatch(/entry\.institutionName \?\? ""/);
+    expect(editor).toMatch(/entry\.topic \?\? ""/);
+  });
+  it("derives rows from the persisted entry (links + fragment metrics)", () => {
+    expect(editor).toMatch(/deriveCompactRows\(entry, workerSkills\)/);
+  });
+  it("always submits the work date + full field map in ONE save", () => {
+    expect(editor).toMatch(/buildCompactSaveFields\(saveInput\)/);
+    expect(editor).toMatch(/supersedeJournalEntry\(entry\.id, fd\)/);
+  });
+});
+
 describe("page reconstructs the full editing entry", () => {
   it("builds editingEntry via the pure buildEditingEntry helper", () => {
     expect(page).toMatch(/buildEditingEntry\(\{/);

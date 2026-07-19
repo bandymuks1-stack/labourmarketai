@@ -423,5 +423,30 @@
   "unresolvedSaveClaim": "Als Kompetenz speichern",
   "unresolvedSkip": "Überspringen",
   "unresolvedSkipped": "Übersprungen",
-  "unresolvedSaved": "Gespeichert"
+  "unresolvedSaved": "Gespeichert",
+  "compactEdit": {
+    "activitiesTitle": "Tätigkeiten und Fähigkeiten",
+    "timeLabel": "Aufgewendete Zeit",
+    "addActivity": "Tätigkeit hinzufügen",
+    "searchPlaceholder": "Fähigkeiten suchen…",
+    "addAsClaim": "Als Fähigkeit eintragen",
+    "removeRow": "Zeile entfernen",
+    "save": "Änderungen speichern",
+    "cancel": "Abbrechen",
+    "saved": "Änderungen gespeichert",
+    "unsavedChip": "Nicht gespeichert",
+    "dirtyNote": "Ungespeicherte Änderungen",
+    "confirmDiscard": "Sie haben ungespeicherte Änderungen. Ohne Speichern schließen?",
+    "advanced": "Weitere Angaben",
+    "close": "Schließen",
+    "totalTime": "Gesamt",
+    "unitHours": "Std.",
+    "unitMinutes": "Min.",
+    "unitDays": "T.",
+    "quantityLabel": "Menge",
+    "directionLabel": "Arbeitsrichtung",
+    "siteLabel": "Objekt / Ort",
+    "institutionLabel": "Einrichtung",
+    "topicLabel": "Thema"
+  }
 }

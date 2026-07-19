@@ -423,5 +423,30 @@
   "unresolvedSaveClaim": "Сохранить как умение",
   "unresolvedSkip": "Пропустить",
   "unresolvedSkipped": "Пропущено",
-  "unresolvedSaved": "Сохранено"
+  "unresolvedSaved": "Сохранено",
+  "compactEdit": {
+    "activitiesTitle": "Деятельность и навыки",
+    "timeLabel": "Затраченное время",
+    "addActivity": "Добавить деятельность",
+    "searchPlaceholder": "Поиск навыков…",
+    "addAsClaim": "Записать как умение",
+    "removeRow": "Удалить строку",
+    "save": "Сохранить изменения",
+    "cancel": "Отмена",
+    "saved": "Изменения сохранены",
+    "unsavedChip": "Не сохранено",
+    "dirtyNote": "Несохранённые изменения",
+    "confirmDiscard": "Есть несохранённые изменения. Закрыть без сохранения?",
+    "advanced": "Больше информации",
+    "close": "Закрыть",
+    "totalTime": "Всего",
+    "unitHours": "ч",
+    "unitMinutes": "мин",
+    "unitDays": "дн.",
+    "quantityLabel": "Количество",
+    "directionLabel": "Направление работы",
+    "siteLabel": "Объект / место",
+    "institutionLabel": "Учреждение",
+    "topicLabel": "Тема"
+  }
 }

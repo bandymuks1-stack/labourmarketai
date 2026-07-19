@@ -1788,8 +1788,14 @@ export function JournalEntryComposer({
                 </span>
               )}
               {timeValue && (
+                // LT plural honesty: "1 valandos" is wrong — format durations
+                // through the shared duration formatter ("1 val.", "9 val.").
                 <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-time">
-                  {timeValue} {tUnit(timeUnit)}
+                  {formatDuration(
+                    Number(timeValue.replace(",", ".")) || 0,
+                    timeUnit,
+                    locale === "en" || locale === "ru" ? locale : "lt",
+                  )}
                 </span>
               )}
               {qtyValue && (
@@ -2203,7 +2209,13 @@ export function JournalEntryComposer({
           >
             {timeValue && (
               <DetectedSuggestionCard
-                label={`${timeValue} ${tUnit(timeUnit)}`}
+                // LT plural honesty: never "1 valandos" — the duration
+                // formatter renders the correct short form ("1 val.").
+                label={formatDuration(
+                  Number(timeValue.replace(",", ".")) || 0,
+                  timeUnit,
+                  locale === "en" || locale === "ru" ? locale : "lt",
+                )}
                 status={timeStatus}
                 onConfirm={() => setTimeStatus("confirmed")}
                 onDiscard={() => setTimeStatus("discarded")}

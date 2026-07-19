@@ -101,6 +101,82 @@ describe("buildEditingEntry — text-only edit does not drop structured metrics"
       institutionName: null,
       topic: null,
       skillSlugs: [],
+      activities: [],
     });
+  });
+});
+
+describe("buildEditingEntry — index-grouped activity fragments (compact edit)", () => {
+  it("pairs each fragment's activity with ITS OWN time by the stored index", () => {
+    const out = buildEditingEntry({
+      id: "e5",
+      originalText: "1 val vairavau, 3 val kasoje",
+      metrics: [
+        m("parsed_fragment", "1|1 val vairavau"),
+        m("fragment_time", "1", 1, "hours"),
+        m("fragment_activity", "1|vairavimas"),
+        m("parsed_fragment", "2|3 val kasoje"),
+        m("fragment_time", "2", 3, "hours"),
+        m("fragment_activity", "2|kasininko darbas"),
+      ],
+    });
+    expect(out.activities).toEqual([
+      {
+        index: 1,
+        rawPhrase: "1 val vairavau",
+        activityLabel: "vairavimas",
+        time: { value: 1, unitSlug: "hours" },
+        userLabel: null,
+      },
+      {
+        index: 2,
+        rawPhrase: "3 val kasoje",
+        activityLabel: "kasininko darbas",
+        time: { value: 3, unitSlug: "hours" },
+        userLabel: null,
+      },
+    ]);
+  });
+
+  it("keeps a fragment without time and a time without activity separate", () => {
+    const out = buildEditingEntry({
+      id: "e6",
+      originalText: "x",
+      metrics: [
+        m("parsed_fragment", "1|sandėlio tvarkymas"),
+        m("fragment_activity", "1|sandėlio tvarkymas"),
+        m("parsed_fragment", "2|dar kažkas"),
+        m("fragment_time", "2", 30, "minutes"),
+      ],
+    });
+    expect(out.activities).toHaveLength(2);
+    expect(out.activities[0].time).toBeNull();
+    expect(out.activities[1].time).toEqual({ value: 30, unitSlug: "minutes" });
+    expect(out.activities[1].activityLabel).toBeNull();
+  });
+
+  it("carries the unknown-fragment clarification label", () => {
+    const out = buildEditingEntry({
+      id: "e7",
+      originalText: "x",
+      metrics: [
+        m("parsed_fragment", "1|2 val prie stendo"),
+        m("fragment_time", "1", 2, "hours"),
+        m("unknown_phrase", "1|2 val prie stendo|stendo montavimas"),
+      ],
+    });
+    expect(out.activities[0].userLabel).toBe("stendo montavimas");
+  });
+
+  it("skips malformed index prefixes instead of guessing associations", () => {
+    const out = buildEditingEntry({
+      id: "e8",
+      originalText: "x",
+      metrics: [
+        m("parsed_fragment", "abc|ne indeksas"),
+        m("fragment_time", "not-a-number", 5, "hours"),
+      ],
+    });
+    expect(out.activities).toEqual([]);
   });
 });

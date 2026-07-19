@@ -24,6 +24,28 @@ export type EditEntryMetricRow = {
 
 export type EditEntryAmount = { value: number; unitSlug: string };
 
+/**
+ * One persisted activity fragment of the entry, reconstructed from the
+ * INDEX-GROUPED metric rows the save action writes (`parsed_fragment` =
+ * `"N|rawPhrase"`, `fragment_activity` = `"N|label"`, `fragment_time` with
+ * `value_text = "N"` + value_numeric + unit_slug, `unknown_phrase` =
+ * `"N|rawPhrase|userLabel"`). The index prefix is the truthful
+ * activity↔time association — a fragment's time can never drift to another
+ * activity across save → DB → reload.
+ */
+export type EditEntryActivity = {
+  /** 1-based fragment index as stored in the metric rows. */
+  index: number;
+  /** The worker's original phrase for this fragment (evidence). */
+  rawPhrase: string | null;
+  /** Activity/skill label stored for the fragment (slug or free label). */
+  activityLabel: string | null;
+  /** Per-activity time (`fragment_time` row for the same index). */
+  time: EditEntryAmount | null;
+  /** Worker-typed clarification for an unknown fragment, when present. */
+  userLabel: string | null;
+};
+
 export type JournalEditingEntry = {
   id: string;
   originalText: string;
@@ -39,6 +61,8 @@ export type JournalEditingEntry = {
   topic: string | null;
   /** Skill slugs durably linked to the entry (shown as confirmed chips). */
   skillSlugs: string[];
+  /** Persisted activity fragments with their OWN times (index-grouped). */
+  activities: EditEntryActivity[];
 };
 
 /** Units that mean the `quantity` metric is a DURATION, not a productivity count. */
@@ -78,5 +102,87 @@ export function buildEditingEntry(args: {
     institutionName: textOf("institution_name"),
     topic: textOf("topic"),
     skillSlugs: [...new Set((args.linkedSkillSlugs ?? []).filter(Boolean))],
+    activities: buildActivities(metrics),
   };
+}
+
+/** Split an `"N|rest"` metric value into its index + payload (null when the
+ *  prefix is not a positive integer — malformed rows are skipped, never
+ *  guessed into an association). */
+function splitIndexed(valueText: string | null): {
+  index: number;
+  rest: string;
+} | null {
+  if (!valueText) return null;
+  const sep = valueText.indexOf("|");
+  if (sep <= 0) return null;
+  const index = Number(valueText.slice(0, sep));
+  if (!Number.isInteger(index) || index <= 0) return null;
+  return { index, rest: valueText.slice(sep + 1) };
+}
+
+/** Reconstruct the entry's activity fragments from the index-grouped metric
+ *  rows (see `EditEntryActivity`). First row per index wins — the save action
+ *  writes each index once, so duplicates only exist on malformed data. */
+function buildActivities(
+  metrics: ReadonlyArray<EditEntryMetricRow>,
+): EditEntryActivity[] {
+  const byIndex = new Map<number, EditEntryActivity>();
+  const get = (index: number): EditEntryActivity => {
+    let a = byIndex.get(index);
+    if (!a) {
+      a = { index, rawPhrase: null, activityLabel: null, time: null, userLabel: null };
+      byIndex.set(index, a);
+    }
+    return a;
+  };
+  for (const m of metrics) {
+    switch (m.metric_slug) {
+      case "parsed_fragment": {
+        const p = splitIndexed(m.value_text);
+        if (p && p.rest.trim()) {
+          const a = get(p.index);
+          if (a.rawPhrase === null) a.rawPhrase = p.rest.trim();
+        }
+        break;
+      }
+      case "fragment_activity": {
+        const p = splitIndexed(m.value_text);
+        if (p && p.rest.trim()) {
+          const a = get(p.index);
+          if (a.activityLabel === null) a.activityLabel = p.rest.trim();
+        }
+        break;
+      }
+      case "fragment_time": {
+        const index = Number(m.value_text ?? "");
+        if (
+          Number.isInteger(index) &&
+          index > 0 &&
+          typeof m.value_numeric === "number" &&
+          m.unit_slug
+        ) {
+          const a = get(index);
+          if (a.time === null) {
+            a.time = { value: m.value_numeric, unitSlug: m.unit_slug };
+          }
+        }
+        break;
+      }
+      case "unknown_phrase": {
+        // "N|rawPhrase|userLabel" — keep the worker's clarification label.
+        const p = splitIndexed(m.value_text);
+        if (p) {
+          const sep = p.rest.indexOf("|");
+          const label = sep >= 0 ? p.rest.slice(sep + 1).trim() : "";
+          if (label) {
+            const a = get(p.index);
+            if (a.userLabel === null) a.userLabel = label;
+          }
+        }
+        break;
+      }
+    }
+  }
+  return [...byIndex.values()].sort((a, b) => a.index - b.index);
 }
