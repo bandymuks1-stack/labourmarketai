@@ -447,6 +447,8 @@
     "directionLabel": "Darbo kryptis",
     "siteLabel": "Objektas / vieta",
     "institutionLabel": "Įstaiga",
-    "topicLabel": "Tema"
+    "topicLabel": "Tema",
+    "conflictNote": "Šis įrašas jau buvo pakeistas kitame lange ar sesijoje. Jūsų neišsaugoti pakeitimai liko formoje — perkraukite puslapį ir redaguokite naujausią versiją.",
+    "conflictReload": "Perkrauti puslapį"
   }
 }

@@ -447,6 +447,8 @@
     "directionLabel": "Arbeitsrichtung",
     "siteLabel": "Objekt / Ort",
     "institutionLabel": "Einrichtung",
-    "topicLabel": "Thema"
+    "topicLabel": "Thema",
+    "conflictNote": "Dieser Eintrag wurde bereits in einem anderen Tab oder einer anderen Sitzung geändert. Ihre ungespeicherten Änderungen bleiben im Formular — laden Sie die Seite neu und bearbeiten Sie die neueste Version.",
+    "conflictReload": "Seite neu laden"
   }
 }

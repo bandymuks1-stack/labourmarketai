@@ -1,27 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Journal compact edit UX (P0-F) — NO DATA LOSS on edit, tested through the
- * REAL `supersedeJournalEntry` action with a mocked supabase client.
+ * Journal compact edit — NO DATA LOSS on edit, tested through the REAL
+ * `supersedeJournalEntry` action with a mocked supabase client.
  *
- * Pins:
- *   • the worker's DECISION markers (ambiguous_resolved / skill_rejected /
- *     skill_claim_rejected / unresolved_dismissed) are COPIED from the
- *     superseded entry to the new entry id BEFORE the pipeline runs, so the
- *     derivation honours them (resolved ambiguity never re-offered,
- *     rejected suggestion never resurrected);
- *   • the copy is idempotent (existing rows on the new entry are skipped —
- *     repeated saves never duplicate) and NEVER copies non-decision metrics;
- *   • per-activity times ship as INDEX-PAIRED fragment metric rows inside
- *     the atomic p_metrics payload;
- *   • save-time removals ride excludeSlugs into the pipeline;
+ * W0 (Invite-Ready Closure Train, post-#840 review P1): the supersede is now
+ * ATOMIC. The `journal_entry_supersede_v2` RPC carries the worker's decision
+ * markers, non-rederivable skill links and selected taxonomy evidence INSIDE
+ * the database transaction. The action therefore:
+ *   • ships `p_selected_slugs` + `p_rejected_slugs` on the RPC call and
+ *     performs NO app-side carry/link writes at all (nothing to swallow —
+ *     a failed required write fails the whole RPC and the whole save);
+ *   • per-activity times still ship as INDEX-PAIRED fragment metric rows
+ *     inside the atomic `p_metrics` payload;
+ *   • save-time removals still ride `excludeSlugs` into the pipeline;
  *   • an RPC failure returns a tagged error and runs NO pipeline (the
  *     component keeps all edits in the form — its state is never reset by
  *     the action);
  *   • no write payload anywhere carries verified:true / manager_confirmed.
  */
 
-const revalidatePathMock = vi.fn((..._args: unknown[]) => undefined);
+const revalidatePathMock = vi.fn(() => undefined);
 vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => revalidatePathMock(...args),
 }));
@@ -32,8 +31,7 @@ type PipelineCall = {
   excludeSlugs: string[];
 };
 const pipelineCalls: PipelineCall[] = [];
-/** Ordered event log: metric inserts vs pipeline run (carry-forward MUST
- *  land before the pipeline). */
+/** Ordered event log: RPC vs pipeline (the atomic RPC must land first). */
 const eventLog: string[] = [];
 
 vi.mock("@/lib/journal/skill-pipeline", () => ({
@@ -73,7 +71,7 @@ type Call = { method: string; args: unknown[] };
 type TableResponse = { data?: unknown; error?: unknown };
 type Handler = (table: string, calls: Call[]) => TableResponse;
 
-let writePayloads: { table: string; rows: unknown }[] = [];
+let writePayloads: { table: string; rows: unknown; options?: unknown }[] = [];
 let rpcMock: (
   fn: string,
   params: Record<string, unknown>,
@@ -85,6 +83,7 @@ function makeSupabase(handler: Handler, user: { id: string } | null) {
     auth: { getUser: vi.fn(async () => ({ data: { user } })) },
     rpc: vi.fn(async (fn: string, params: Record<string, unknown>) => {
       rpcCalls.push({ fn, params });
+      eventLog.push(`rpc:${fn}`);
       return rpcMock(fn, params);
     }),
     from(table: string) {
@@ -100,7 +99,7 @@ function makeSupabase(handler: Handler, user: { id: string } | null) {
       for (const m of ["insert", "upsert"]) {
         builder[m] = (...args: unknown[]) => {
           calls.push({ method: m, args });
-          writePayloads.push({ table, rows: args[0] });
+          writePayloads.push({ table, rows: args[0], options: args[1] });
           eventLog.push(`${m}:${table}`);
           return builder;
         };
@@ -130,50 +129,15 @@ import { supersedeJournalEntry } from "@/lib/journal/actions";
 
 const OLD_ID = "old-entry";
 const NEW_ID = "new-entry";
+const RPC_V2 = "journal_entry_supersede_v2";
 
-type MetricRow = {
-  metric_slug: string;
-  value_text: string | null;
-  value_numeric?: number | null;
-};
-
-function entryIdOf(calls: Call[]): string | null {
-  const eq = calls.find(
-    (c) => c.method === "eq" && c.args[0] === "entry_id",
-  );
-  return (eq?.args[1] as string | undefined) ?? null;
-}
-
-type SkillLinkRow = {
-  skill_id: string;
-  worker_id: string;
-  skills: { slug: string } | null;
-};
-
-function journalEntryIdOf(calls: Call[]): string | null {
-  const eq = calls.find(
-    (c) => c.method === "eq" && c.args[0] === "journal_entry_id",
-  );
-  return (eq?.args[1] as string | undefined) ?? null;
-}
-
-function baseHandler(overrides: {
-  oldMetrics?: MetricRow[];
-  newMetrics?: MetricRow[];
-  oldSkillLinks?: SkillLinkRow[];
-}): Handler {
-  return (table, calls) => {
+function baseHandler(): Handler {
+  return (table) => {
     switch (table) {
-      // Stale-chain guard precheck (post-merge review P1): the action refuses
-      // an already-superseded/deleted old entry before calling the RPC.
+      // Stale-chain fast-path precheck: the action refuses an
+      // already-superseded/deleted old entry before calling the RPC.
       case "journal_entries":
         return { data: { id: OLD_ID, superseded_by: null, deleted_at: null } };
-      case "journal_entry_skills": {
-        if (calls.some((c) => c.method === "upsert")) return { data: null };
-        const id = journalEntryIdOf(calls);
-        if (id === OLD_ID) return { data: overrides.oldSkillLinks ?? [] };
-        return { data: [] };
-      }
       case "productivity_units":
         return {
           data: [
@@ -185,12 +149,6 @@ function baseHandler(overrides: {
         };
       case "professions":
         return { data: { id: "prof-1" } };
-      case "journal_entry_metrics": {
-        if (calls.some((c) => c.method === "insert")) return { data: null };
-        const id = entryIdOf(calls);
-        if (id === OLD_ID) return { data: overrides.oldMetrics ?? [] };
-        return { data: overrides.newMetrics ?? [] };
-      }
       default:
         return { data: null };
     }
@@ -207,13 +165,6 @@ function makeFormData(overrides: Record<string, string> = {}): FormData {
   return fd;
 }
 
-const DECISION_ROWS: MetricRow[] = [
-  { metric_slug: "ambiguous_resolved", value_text: "kasa=>cash_register_operation", value_numeric: 2 },
-  { metric_slug: "skill_rejected", value_text: "tiling" },
-  { metric_slug: "skill_claim_rejected", value_text: "kažkoks gebėjimas" },
-  { metric_slug: "unresolved_dismissed", value_text: "kažkoks fragmentas" },
-];
-
 beforeEach(() => {
   writePayloads = [];
   rpcCalls = [];
@@ -222,121 +173,43 @@ beforeEach(() => {
   rpcMock = () => ({ data: NEW_ID, error: null });
 });
 
-describe("supersedeJournalEntry — decision-marker carry-forward", () => {
-  it("copies the 4 decision marker kinds to the new entry BEFORE the pipeline", async () => {
-    currentSupabase = makeSupabase(
-      baseHandler({
-        oldMetrics: [
-          ...DECISION_ROWS,
-          // Non-decision metrics must NOT be copied (they are rebuilt from
-          // the submitted form via p_metrics).
-          { metric_slug: "quantity", value_text: null, value_numeric: 6 },
-          { metric_slug: "pipeline_version", value_text: null, value_numeric: 2 },
-        ],
-      }),
-      { id: "user-1" },
-    );
-    const res = await supersedeJournalEntry(OLD_ID, makeFormData());
-    expect(res.ok).toBe(true);
-
-    const markerInsert = writePayloads.find(
-      (w) => w.table === "journal_entry_metrics",
-    );
-    expect(markerInsert).toBeTruthy();
-    const rows = markerInsert!.rows as Array<{
-      entry_id: string;
-      metric_slug: string;
-      value_text: string;
-      source: string;
-      value_numeric?: number;
-    }>;
-    expect(rows).toHaveLength(4);
-    expect(rows.every((r) => r.entry_id === NEW_ID)).toBe(true);
-    expect(rows.every((r) => r.source === "worker_input")).toBe(true);
-    expect(rows.map((r) => r.metric_slug).sort()).toEqual([
-      "ambiguous_resolved",
-      "skill_claim_rejected",
-      "skill_rejected",
-      "unresolved_dismissed",
-    ]);
-    const resolved = rows.find((r) => r.metric_slug === "ambiguous_resolved")!;
-    expect(resolved.value_text).toBe("kasa=>cash_register_operation");
-    expect(resolved.value_numeric).toBe(2);
-
-    // Order: carry-forward insert strictly before the pipeline run, so the
-    // derivation sees the markers.
-    const insertIdx = eventLog.indexOf("insert:journal_entry_metrics");
-    const pipelineIdx = eventLog.indexOf("pipeline");
-    expect(insertIdx).toBeGreaterThanOrEqual(0);
-    expect(pipelineIdx).toBeGreaterThan(insertIdx);
-    expect(pipelineCalls[0].entryId).toBe(NEW_ID);
-  });
-
-  it("carries entry-skill links forward, EXCLUDING skills rejected in this edit", async () => {
-    currentSupabase = makeSupabase(
-      baseHandler({
-        oldSkillLinks: [
-          { skill_id: "s-forklift", worker_id: "w1", skills: { slug: "forklift_operation" } },
-          // The worker removed this row in the edit → must NOT be carried.
-          { skill_id: "s-tiling", worker_id: "w1", skills: { slug: "tiling" } },
-        ],
-      }),
-      { id: "user-1" },
-    );
+describe("supersedeJournalEntry — atomic carry (in-RPC, no app-side writes)", () => {
+  it("performs ZERO app-side table writes — everything rides the atomic RPC", async () => {
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(
       OLD_ID,
       makeFormData({ rejected_slugs_json: JSON.stringify(["tiling"]) }),
     );
     expect(res.ok).toBe(true);
 
-    const skillUpserts = writePayloads.filter(
-      (w) => w.table === "journal_entry_skills",
-    );
-    expect(skillUpserts).toHaveLength(1);
-    expect(skillUpserts[0].rows).toEqual([
-      { journal_entry_id: NEW_ID, worker_id: "w1", skill_id: "s-forklift" },
-    ]);
-    // Carry must land BEFORE the pipeline (so recognised re-links dedupe).
-    const upsertIdx = eventLog.indexOf("upsert:journal_entry_skills");
-    expect(upsertIdx).toBeGreaterThanOrEqual(0);
-    expect(eventLog.indexOf("pipeline")).toBeGreaterThan(upsertIdx);
+    // The old post-commit carry/link helpers are gone: no insert/upsert into
+    // journal_entry_metrics / journal_entry_skills / worker_skills from the
+    // action. The RPC transaction owns those writes now.
+    expect(writePayloads).toHaveLength(0);
+
+    const rpc = rpcCalls.find((c) => c.fn === RPC_V2)!;
+    expect(rpc).toBeTruthy();
+    // Rejections ride the transaction so marker carry + link carry exclude
+    // them server-side (a deliberate removal sticks, atomically).
+    expect(rpc.params.p_rejected_slugs).toEqual(["tiling"]);
+    expect(rpc.params.p_selected_slugs).toEqual([]);
   });
 
-  it("is idempotent — markers already on the new entry are never re-inserted", async () => {
-    currentSupabase = makeSupabase(
-      baseHandler({
-        oldMetrics: DECISION_ROWS,
-        newMetrics: DECISION_ROWS,
-      }),
-      { id: "user-1" },
-    );
+  it("runs the pipeline AFTER the RPC, for the NEW entry id", async () => {
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(OLD_ID, makeFormData());
     expect(res.ok).toBe(true);
-    expect(
-      writePayloads.filter((w) => w.table === "journal_entry_metrics"),
-    ).toHaveLength(0);
-  });
-
-  it("duplicate markers on the OLD entry copy once (double-save safety)", async () => {
-    currentSupabase = makeSupabase(
-      baseHandler({
-        oldMetrics: [
-          { metric_slug: "skill_rejected", value_text: "tiling" },
-          { metric_slug: "skill_rejected", value_text: "tiling" },
-        ],
-      }),
-      { id: "user-1" },
-    );
-    await supersedeJournalEntry(OLD_ID, makeFormData());
-    const rows = writePayloads.find((w) => w.table === "journal_entry_metrics")!
-      .rows as unknown[];
-    expect(rows).toHaveLength(1);
+    const rpcIdx = eventLog.indexOf(`rpc:${RPC_V2}`);
+    const pipelineIdx = eventLog.indexOf("pipeline");
+    expect(rpcIdx).toBeGreaterThanOrEqual(0);
+    expect(pipelineIdx).toBeGreaterThan(rpcIdx);
+    expect(pipelineCalls[0].entryId).toBe(NEW_ID);
   });
 });
 
 describe("supersedeJournalEntry — per-activity time pairing in p_metrics", () => {
   it("several activities keep their OWN times via index-paired metric rows", async () => {
-    currentSupabase = makeSupabase(baseHandler({}), { id: "user-1" });
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     const fragments = [
       {
         rawPhrase: "1 val vairavau",
@@ -363,7 +236,7 @@ describe("supersedeJournalEntry — per-activity time pairing in p_metrics", () 
     );
     expect(res.ok).toBe(true);
 
-    const rpc = rpcCalls.find((c) => c.fn === "journal_entry_supersede")!;
+    const rpc = rpcCalls.find((c) => c.fn === RPC_V2)!;
     const metrics = rpc.params.p_metrics as Array<{
       metric_slug: string;
       value_text?: string | null;
@@ -386,7 +259,7 @@ describe("supersedeJournalEntry — per-activity time pairing in p_metrics", () 
 
 describe("supersedeJournalEntry — exclusions, failure, integrity", () => {
   it("removed skills ride excludeSlugs into the pipeline", async () => {
-    currentSupabase = makeSupabase(baseHandler({}), { id: "user-1" });
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     await supersedeJournalEntry(
       OLD_ID,
       makeFormData({ rejected_slugs_json: JSON.stringify(["tiling"]) }),
@@ -396,7 +269,7 @@ describe("supersedeJournalEntry — exclusions, failure, integrity", () => {
 
   it("an RPC failure returns a tagged error and runs NO pipeline", async () => {
     rpcMock = () => ({ data: null, error: { message: "boom" } });
-    currentSupabase = makeSupabase(baseHandler({}), { id: "user-1" });
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(OLD_ID, makeFormData());
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.code).toBe("entry_insert_failed");
@@ -404,11 +277,34 @@ describe("supersedeJournalEntry — exclusions, failure, integrity", () => {
     expect(writePayloads).toHaveLength(0);
   });
 
+  it("an RPC-level entry_superseded (lost race) maps to the conflict code", async () => {
+    // The fast-path precheck saw a live entry, but the RPC row-lock found it
+    // superseded by the time the transaction ran — the atomic guard wins.
+    rpcMock = () => ({
+      data: null,
+      error: { message: "entry_superseded", code: "55000" },
+    });
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
+    const res = await supersedeJournalEntry(OLD_ID, makeFormData());
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("entry_superseded");
+    expect(pipelineCalls).toHaveLength(0);
+  });
+
+  it("an RPC-level skill_slug_unknown maps to skill_selection_invalid (whole save rolled back)", async () => {
+    rpcMock = () => ({
+      data: null,
+      error: { message: "skill_slug_unknown", code: "22023" },
+    });
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
+    const res = await supersedeJournalEntry(OLD_ID, makeFormData());
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("skill_selection_invalid");
+    expect(pipelineCalls).toHaveLength(0);
+  });
+
   it("no write payload anywhere carries fake verification", async () => {
-    currentSupabase = makeSupabase(
-      baseHandler({ oldMetrics: DECISION_ROWS }),
-      { id: "user-1" },
-    );
+    currentSupabase = makeSupabase(baseHandler(), { id: "user-1" });
     await supersedeJournalEntry(OLD_ID, makeFormData());
     const everything = JSON.stringify({ writePayloads, rpcCalls });
     expect(everything).not.toMatch(/"verified"\s*:\s*true/);

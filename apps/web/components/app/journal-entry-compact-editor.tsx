@@ -149,6 +149,9 @@ export function JournalEntryCompactEditor({
   const [currentEntryId, setCurrentEntryId] = useState(entry.id);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** W0 — the edited version was superseded in another tab/session; the save
+   *  was atomically rejected and every unsaved edit stays in the form. */
+  const [conflict, setConflict] = useState(false);
   const [savedResult, setSavedResult] = useState<{
     entryId: string;
     skills: JournalSkillPipelineResult;
@@ -292,6 +295,7 @@ export function JournalEntryCompactEditor({
       return;
     }
     setError(null);
+    setConflict(false);
     setSaving(true);
     try {
       const fields = buildCompactSaveFields(saveInput);
@@ -302,8 +306,16 @@ export function JournalEntryCompactEditor({
       const result = await supersedeJournalEntry(currentEntryId, fd);
       if (!result.ok) {
         // Retryable: every edit stays in the form exactly as it was — and the
-        // chain does NOT advance (a failed save created no new entry).
-        setError(result.message);
+        // chain does NOT advance (a failed save created no new entry; the
+        // atomic RPC rolled back every partial write).
+        if (result.code === "entry_superseded") {
+          // W0 — concurrent-edit conflict: this version was already replaced
+          // in another tab/session. Distinct banner + explicit reload action;
+          // the form keeps every unsaved edit until the worker decides.
+          setConflict(true);
+        } else {
+          setError(result.message);
+        }
         recordEvent("journal_save_error_code", { result_kind: result.code });
         return;
       }
@@ -759,6 +771,24 @@ export function JournalEntryCompactEditor({
         >
           {error}
         </p>
+      )}
+
+      {conflict && (
+        <div
+          className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-primary"
+          role="alert"
+          data-testid="journal-compact-conflict"
+        >
+          <p>{t("compactEdit.conflictNote")}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-2 rounded-md border border-state-warning px-3 py-1.5 text-xs font-medium transition-colors hover:bg-state-warning/10"
+            data-testid="journal-compact-conflict-reload"
+          >
+            {t("compactEdit.conflictReload")}
+          </button>
+        </div>
       )}
 
       {/* Sticky save bar — ONE batch save + cancel; dirty state is explicit. */}

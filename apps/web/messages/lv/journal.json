@@ -211,6 +211,8 @@
     "directionLabel": "[EN] Work direction",
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
-    "topicLabel": "[EN] Topic"
+    "topicLabel": "[EN] Topic",
+    "conflictNote": "Šis ieraksts jau ir mainīts citā cilnē vai sesijā. Nesaglabātās izmaiņas palika formā — pārlādējiet lapu un rediģējiet jaunāko versiju.",
+    "conflictReload": "Pārlādēt lapu"
   }
 }

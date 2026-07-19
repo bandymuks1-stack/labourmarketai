@@ -27,9 +27,13 @@
     "e2e": "pnpm -C apps/web e2e"
   },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "pg": "^8.22.0",
     "supabase": "^2.100.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["supabase"]
+    "onlyBuiltDependencies": [
+      "supabase"
+    ]
   }
 }

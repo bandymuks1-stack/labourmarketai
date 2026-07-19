@@ -120,9 +120,11 @@ describe("3 · one save contract (batch) + honest local state", () => {
     // set the flag, so parser slugs can't silently self-declare skills
     expect(MODEL).toMatch(/selected: r\.skillSlug !== null/);
     expect(ACTIONS).toMatch(/f\.selected === true/);
-    // the server validates + links the selection on the NEW entry
-    expect(ACTIONS).toMatch(/linkSelectedTaxonomySkills/);
-    expect(ACTIONS).toMatch(/verified: false/);
+    // W0: the selection rides the ATOMIC RPC (p_selected_slugs) — the
+    // transaction validates it and persists verified=false evidence, or
+    // rolls the whole save back. No app-side post-commit link writes.
+    expect(ACTIONS).toMatch(/p_selected_slugs: selectedSlugs/);
+    expect(ACTIONS).not.toMatch(/linkSelectedTaxonomySkills/);
     expect(ACTIONS).not.toMatch(/verified\s*:\s*true/);
   });
   it("a stale supersede of an already-superseded entry is refused (P1-B fork guard)", () => {
@@ -153,20 +155,24 @@ describe("3 · one save contract (batch) + honest local state", () => {
 });
 
 describe("4 · no data loss on supersede (decision markers carried forward)", () => {
-  it("actions copy the 4 decision marker kinds to the new entry", () => {
-    expect(ACTIONS).toMatch(/carryForwardEntryDecisionMarkers/);
-    expect(ACTIONS).toMatch(/"ambiguous_resolved"/);
-    expect(ACTIONS).toMatch(/"skill_rejected"/);
-    expect(ACTIONS).toMatch(/"skill_claim_rejected"/);
-    expect(ACTIONS).toMatch(/"unresolved_dismissed"/);
+  // W0: the carry moved INTO the atomic RPC transaction — the migration
+  // guard (journal-atomic-supersede.test.ts) pins the SQL side; here we pin
+  // that the action delegates instead of doing lossy post-commit writes.
+  const MIGRATION = read(
+    "../../supabase/migrations/20260720100000_journal_atomic_supersede_v1.sql",
+  );
+  it("the ATOMIC RPC carries the 4 decision marker kinds in-transaction", () => {
+    expect(ACTIONS).not.toMatch(/carryForwardEntryDecisionMarkers/);
+    expect(MIGRATION).toMatch(/'ambiguous_resolved'/);
+    expect(MIGRATION).toMatch(/'skill_rejected'/);
+    expect(MIGRATION).toMatch(/'skill_claim_rejected'/);
+    expect(MIGRATION).toMatch(/'unresolved_dismissed'/);
   });
-  it("carry-forward runs BEFORE the pipeline for the new entry", () => {
-    const carryIdx = ACTIONS.indexOf(
-      "await carryForwardEntryDecisionMarkers(",
-    );
+  it("the atomic RPC call runs BEFORE the pipeline for the new entry", () => {
+    const rpcIdx = ACTIONS.indexOf('"journal_entry_supersede_v2"');
     const pipelineIdx = ACTIONS.indexOf("entryId: newEntryId");
-    expect(carryIdx).toBeGreaterThan(0);
-    expect(pipelineIdx).toBeGreaterThan(carryIdx);
+    expect(rpcIdx).toBeGreaterThan(0);
+    expect(pipelineIdx).toBeGreaterThan(rpcIdx);
   });
   it("carry-forward is append-only (insert; never update/delete the lane)", () => {
     expect(ACTIONS).not.toMatch(/from\("journal_entry_metrics"\)\s*\.\s*update/);

@@ -372,6 +372,8 @@
     "directionLabel": "[EN] Work direction",
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
-    "topicLabel": "[EN] Topic"
+    "topicLabel": "[EN] Topic",
+    "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Tallentamattomat muutokset ovat yhä lomakkeessa — lataa sivu uudelleen ja muokkaa uusinta versiota.",
+    "conflictReload": "Lataa sivu uudelleen"
   }
 }

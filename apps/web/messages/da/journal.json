@@ -211,6 +211,8 @@
     "directionLabel": "[EN] Work direction",
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
-    "topicLabel": "[EN] Topic"
+    "topicLabel": "[EN] Topic",
+    "conflictNote": "Denne post er allerede blevet ændret i en anden fane eller session. Dine ugemte ændringer er stadig i formularen — genindlæs siden og rediger den nyeste version.",
+    "conflictReload": "Genindlæs siden"
   }
 }

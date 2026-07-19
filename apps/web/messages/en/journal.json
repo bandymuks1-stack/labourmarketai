@@ -447,6 +447,8 @@
     "directionLabel": "Work direction",
     "siteLabel": "Site / location",
     "institutionLabel": "Institution",
-    "topicLabel": "Topic"
+    "topicLabel": "Topic",
+    "conflictNote": "This entry was already updated in another tab or session. Your unsaved changes are still in the form — reload the page and edit the latest version.",
+    "conflictReload": "Reload page"
   }
 }
