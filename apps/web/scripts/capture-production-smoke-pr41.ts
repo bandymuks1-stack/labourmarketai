@@ -1,7 +1,7 @@
 /**
  * Production smoke capture for PR #41 (vision-hide gate).
  *
- * Hits the LIVE production deploy at app.labourmarket.ai with an
+ * Hits the LIVE production deploy at labourmarket.ai with an
  * iPhone 13 viewport and saves PNGs into the PR #42 evidence folder.
  * Only public surfaces are touched — authenticated dashboard checks
  * remain owner-only and PENDING.
@@ -14,7 +14,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Page } from "@playwright/test";
 
-const BASE = process.env.E2E_BASE_URL ?? "https://app.labourmarket.ai";
+const BASE = process.env.E2E_BASE_URL ?? "https://labourmarket.ai";
 const OUT = resolve(
   __dirname,
   "..",

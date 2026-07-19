@@ -1,78 +1,76 @@
 /**
- * Canonical domain policy — single source of truth for the
- * labourmarket.ai public surface vs. the app surface.
+ * Canonical domain policy — SINGLE DOMAIN.
  *
- * Policy (effective 2026-06-15, owner-decided — SUPERSEDES the
- * 2026-05-28 "apex redirects to app" policy):
+ * Policy (effective 2026-07-19, owner task
+ * `single-domain-and-deep-cleanup-v1` — SUPERSEDES the 2026-06-15
+ * split marketing/app policy and the 2026-05-28 "apex redirects to
+ * app" policy):
  *
- *   - `labourmarket.ai` (apex) is the CANONICAL PUBLIC MARKETING
- *     surface. It serves the public site (home + marketing pages)
- *     and is the host every public canonical URL / sitemap entry /
- *     OpenGraph URL points to. Search engines should index it.
- *   - `www.labourmarket.ai` is an ALIAS that must permanently
- *     (308 / 301-class) redirect to the apex
- *     `https://labourmarket.ai/<same-path>?<same-query>`.
- *   - `app.labourmarket.ai` is the APP host — login / dashboard /
- *     authenticated product. It is NOT the public marketing
- *     canonical. Public marketing pages served there still declare
- *     their canonical on the apex so Google consolidates on apex.
- *     The public marketing domain must never auto-redirect to the
- *     app subdomain; only an explicit login/app CTA sends a user
- *     there.
+ *   - `labourmarket.ai` (apex) is the ONLY public product origin.
+ *     It serves EVERYTHING: marketing, auth (login / signup /
+ *     callback / password recovery), onboarding, dashboard, all
+ *     workspaces, admin, public business pages and API routes.
+ *     Every canonical URL / sitemap entry / OpenGraph URL /
+ *     hreflang / email link points here.
+ *   - `www.labourmarket.ai` and `app.labourmarket.ai` are LEGACY
+ *     REDIRECT ALIASES only. Both permanently (308) redirect to
+ *     `https://labourmarket.ai/<same-path>?<same-query>`, preserving
+ *     locale, `next` params, entity IDs and invitation tokens so old
+ *     bookmarks and deep links keep working. `app.labourmarket.ai`
+ *     must NEVER serve product content again — reintroducing it as a
+ *     product origin is a policy violation (guarded by
+ *     lib/guards/single-domain-origin.test.ts).
  *   - `labourmarket-ai.vercel.app` is the Vercel-managed alias
- *     (used internally for OAuth + monitoring); it is NOT a public
- *     canonical surface and is not advertised.
- *   - Anything else under `.vercel.app` is a preview deploy gated
- *     by Vercel preview SSO (401). Previews never redirect to
- *     production.
+ *     (internal/monitoring); it is NOT advertised anywhere.
+ *   - Anything else under `.vercel.app` is a preview deploy gated by
+ *     Vercel preview SSO. Previews never redirect to production.
  *
- * Why this changed: the apex was previously redirecting to
- * `app.labourmarket.ai`, so search engines never saw a clean
- * LabourMarket.ai public surface — results showed the old / confused
- * "Labma — Construction OS" signal instead. The owner (2026-06-15)
- * wants LabourMarket.ai to surface clearly as a public labour-market
- * platform for construction / technical workers, teams, agencies and
- * employers across Europe. The apex now serves and owns the public
- * SEO surface; the app keeps its own subdomain.
+ * Why this changed: the split policy pinned auth CTAs to the app
+ * subdomain via a host-upgrade helper (now removed), which made the
+ * product LOOK like two versions — users bounced between hosts,
+ * sessions were host-scoped, and the app subdomain leaked into
+ * bookmarks and emails. Both hosts always served the same Vercel
+ * deployment; the single-domain policy keeps every flow (including
+ * the whole OAuth PKCE round-trip) on one origin, so there is no
+ * cross-host cookie seam at all.
  *
- * NOTE: actual host→deployment assignment (which Vercel domain is
- * primary vs. redirect) is configured in the Vercel dashboard + DNS,
- * NOT in code. This module + the middleware encode the in-app rule
- * (www→apex, no apex→app); the owner must ensure the apex is attached
- * to this project as a primary (non-redirecting) domain. See
- * docs/audit/public-seo-indexing-foundation-v1.md for the OWNER
- * ACTION list.
+ * Host → deployment binding lives in Vercel + DNS, not here. This
+ * module + middleware + next.config redirects encode the in-app rule
+ * (www/app → apex 308; the apex never redirects to another host).
  *
  * PURE. No fs / net / spawn / env. Safe to import from middleware
  * (edge runtime), client components, and tests.
  */
 
-/** The canonical PUBLIC MARKETING host (apex). */
-export const MARKETING_HOST = "labourmarket.ai";
+/** The ONLY canonical product host (apex). */
+export const CANONICAL_HOST = "labourmarket.ai";
 
-/** The canonical public marketing origin (https://<marketing-host>). */
-export const MARKETING_ORIGIN = `https://${MARKETING_HOST}` as const;
-
-/** The APP host — login / dashboard / authenticated product. */
-export const APP_HOST = "app.labourmarket.ai";
-
-/** The app origin (https://<app-host>). */
-export const APP_ORIGIN = `https://${APP_HOST}` as const;
-
-/** The www alias that must redirect to the apex. */
-export const WWW_HOST = "www.labourmarket.ai";
+/** The only canonical product origin (https://<canonical-host>). */
+export const CANONICAL_ORIGIN = `https://${CANONICAL_HOST}` as const;
 
 /**
- * Back-compat alias. `CANONICAL_ORIGIN` now means the canonical
- * PUBLIC surface (apex), which is what metadataBase / canonical
- * URLs need. (Previously it meant the app host.)
+ * Back-compat aliases — the SEO layer (metadata / robots / sitemap /
+ * answer-engine) imports these names. Same value as the canonical
+ * host/origin BY DEFINITION under the single-domain policy.
  */
-export const CANONICAL_ORIGIN = MARKETING_ORIGIN;
+export const MARKETING_HOST = CANONICAL_HOST;
+export const MARKETING_ORIGIN = CANONICAL_ORIGIN;
 
-/** Hosts that must permanently redirect to the apex marketing origin. */
-export const WWW_REDIRECT_HOSTS: readonly string[] = [WWW_HOST];
+/** Legacy www alias — 308 redirect to the apex only. */
+export const WWW_HOST = "www.labourmarket.ai";
 
-/** Vercel-managed alias treated as internal (auth / monitoring);
+/** Legacy app alias — 308 redirect to the apex ONLY. Never a product
+ *  origin. Kept as a named constant so redirect config + guards can
+ *  reference it without scattering the literal. */
+export const LEGACY_APP_HOST = "app.labourmarket.ai";
+
+/** Hosts that must permanently redirect to the canonical origin. */
+export const LEGACY_REDIRECT_HOSTS: readonly string[] = [
+  WWW_HOST,
+  LEGACY_APP_HOST,
+];
+
+/** Vercel-managed alias treated as internal (monitoring);
  *  not a public surface, not advertised, never redirected here. */
 export const VERCEL_PRODUCTION_ALIAS = "labourmarket-ai.vercel.app";
 
@@ -82,81 +80,22 @@ function normalizeHost(host: string | null | undefined): string | null {
   return host.toLowerCase().replace(/:\d+$/, "");
 }
 
-/** Returns true if the given host should be permanently redirected to
- *  the apex marketing origin (currently: www.labourmarket.ai).
+/** Returns true if the given host must be permanently redirected to
+ *  the canonical origin (www + legacy app host).
  *  Case-insensitive, port-stripping. */
-export function isWwwRedirectHost(host: string | null | undefined): boolean {
+export function isLegacyRedirectHost(host: string | null | undefined): boolean {
   const normalised = normalizeHost(host);
   if (!normalised) return false;
-  return WWW_REDIRECT_HOSTS.includes(normalised);
+  return LEGACY_REDIRECT_HOSTS.includes(normalised);
 }
 
-/** Returns true if the host is the apex public marketing host. */
-export function isMarketingHost(host: string | null | undefined): boolean {
-  return normalizeHost(host) === MARKETING_HOST;
+/** Returns true if the host is the canonical apex host. */
+export function isCanonicalHost(host: string | null | undefined): boolean {
+  return normalizeHost(host) === CANONICAL_HOST;
 }
 
-/** Returns true if the host is the app host. */
-export function isAppHost(host: string | null | undefined): boolean {
-  return normalizeHost(host) === APP_HOST;
-}
-
-/** Returns true if the host is one of the production surfaces
- *  (apex marketing, app, or Vercel-managed alias). */
-export function isProductionHost(host: string | null | undefined): boolean {
-  const normalised = normalizeHost(host);
-  if (!normalised) return false;
-  return (
-    normalised === MARKETING_HOST ||
-    normalised === APP_HOST ||
-    normalised === VERCEL_PRODUCTION_ALIAS
-  );
-}
-
-/** Build a full URL on the apex public marketing origin. */
+/** Build a full URL on the canonical origin. */
 export function buildCanonicalUrl(pathname: string, search: string = ""): string {
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  return `${MARKETING_ORIGIN}${path}${search ?? ""}`;
-}
-
-/** Build a full URL on the app origin (login / dashboard). */
-export function buildAppUrl(pathname: string, search: string = ""): string {
-  const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  return `${APP_ORIGIN}${path}${search ?? ""}`;
-}
-
-/**
- * Decide the href an auth CTA (login / signup) should use given the host the
- * page is currently served on.
- *
- * Why: OAuth uses PKCE — the `code_verifier` cookie is written on the origin
- * where sign-in STARTS and must be readable by the callback. If a visitor on
- * the apex public marketing host (`labourmarket.ai`) clicks a relative
- * `/auth/login`, sign-in starts on the apex but the flow returns to the app
- * host — the verifier is missing and the exchange fails. Pinning the auth CTA
- * to the app origin keeps the whole OAuth round-trip same-origin.
- *
- * - App host → return the relative path unchanged (normal same-host nav).
- * - localhost / loopback (dev) → relative (never bounce dev to production).
- * - Any other host (apex, www, vercel alias) → absolute app-origin URL.
- *
- * `relPath` is an already locale-prefixed internal path, e.g. `/lt/auth/login`.
- */
-export function preferAppHostHref(
-  host: string | null | undefined,
-  relPath: string,
-): string {
-  const normalised = normalizeHost(host);
-  if (!normalised) return relPath;
-  if (normalised === APP_HOST) return relPath;
-  if (
-    normalised === "localhost" ||
-    normalised === "127.0.0.1" ||
-    normalised === "0.0.0.0" ||
-    normalised === "[::1]" ||
-    normalised === "::1"
-  ) {
-    return relPath;
-  }
-  return `${APP_ORIGIN}${relPath.startsWith("/") ? relPath : `/${relPath}`}`;
+  return `${CANONICAL_ORIGIN}${path}${search ?? ""}`;
 }

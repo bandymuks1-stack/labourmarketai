@@ -3501,7 +3501,7 @@
       "error_password_required": "Please enter your password.",
       "error_invalid_credentials": "Invalid email or password.",
       "google_hint": "Signed up with Google? Then you don't have a password — use \"Continue with Google\" above.",
-      "preview_host_notice": "You're on a preview version of the site. Google sign-in only works on the live site — open https://app.labourmarket.ai to use it. Email and password sign-in works here as usual."
+      "preview_host_notice": "You're on a preview version of the site. Google sign-in only works on the live site — open https://labourmarket.ai to use it. Email and password sign-in works here as usual."
     },
     "forgotPassword": {
       "headline": "Forgot password?",

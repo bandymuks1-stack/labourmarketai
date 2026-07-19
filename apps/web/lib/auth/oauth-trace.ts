@@ -97,11 +97,10 @@ export function clearOauthTraceId(): void {
 export function isVercelPreviewHost(host: string | null | undefined): boolean {
   if (!host) return false;
   const h = host.toLowerCase();
-  // Production deploy is `app.labourmarket.ai`; the Vercel-managed alias
-  // for production is `labourmarket-ai.vercel.app` (see memory note
-  // `labourmarketai_vercel_topology`). Anything else under `.vercel.app`
-  // is a preview branch deploy.
-  if (h === "app.labourmarket.ai") return false;
+  // Production is the single canonical host `labourmarket.ai` (legacy
+  // aliases 308 there before any page renders); the Vercel-managed
+  // alias for production is `labourmarket-ai.vercel.app`. Anything
+  // else under `.vercel.app` is a preview branch deploy.
   if (h === "labourmarket-ai.vercel.app") return false;
   return h.endsWith(".vercel.app");
 }

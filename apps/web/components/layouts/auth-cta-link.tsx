@@ -1,19 +1,19 @@
-"use client";
-
-import { useEffect, useState, type ReactNode } from "react";
-import { preferAppHostHref } from "@/lib/domain/canonical";
-
 /**
  * Auth call-to-action link (login / signup) for the PUBLIC marketing nav.
  *
- * Renders an SSR-safe, locale-prefixed RELATIVE href by default (works with no
- * JS, on the app host, and in local dev). On the client it upgrades the href to
- * the canonical app origin ONLY when the page is served on a marketing host
- * (apex / www / vercel alias), so the OAuth round-trip starts and finishes on
- * the same app origin — keeping the PKCE `code_verifier` cookie valid. See
- * `preferAppHostHref`. Plain <a> (not the SPA Link) because crossing to the app
- * host is a full navigation and login is an auth boundary anyway.
+ * Single-domain policy (2026-07-19): the whole product — marketing,
+ * auth, callback, dashboard — lives on https://labourmarket.ai, so an
+ * auth CTA is a plain RELATIVE link. The OAuth PKCE round-trip starts
+ * and finishes on the same (current) origin, so there is no cross-host
+ * cookie seam and no host upgrade is needed. The former host-upgrade
+ * helper that pinned CTAs to the app subdomain is intentionally gone —
+ * do not reintroduce it (see lib/guards/single-domain-origin.test.ts).
+ *
+ * Plain <a> (not the SPA Link): login is an auth boundary and a full
+ * navigation keeps the auth pages outside the marketing SPA state.
  */
+import type { ReactNode } from "react";
+
 export function AuthCtaLink({
   /** Locale-prefixed internal path, e.g. "/lt/auth/login". */
   relPath,
@@ -24,15 +24,8 @@ export function AuthCtaLink({
   className?: string;
   children: ReactNode;
 }) {
-  const [href, setHref] = useState(relPath);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setHref(preferAppHostHref(window.location.host, relPath));
-  }, [relPath]);
-
   return (
-    <a href={href} className={className} data-testid="auth-cta-link">
+    <a href={relPath} className={className} data-testid="auth-cta-link">
       {children}
     </a>
   );

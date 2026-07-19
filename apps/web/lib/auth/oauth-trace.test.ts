@@ -21,14 +21,14 @@ describe("oauth-trace — generateOauthTraceId", () => {
 
 describe("oauth-trace — withOauthTraceId / readOauthTraceId", () => {
   it("round-trips a trace id through the URL", () => {
-    const url = new URL("https://app.labourmarket.ai/lt/auth/callback?next=%2Flt%2Fdashboard");
+    const url = new URL("https://labourmarket.ai/lt/auth/callback?next=%2Flt%2Fdashboard");
     const with_ = withOauthTraceId(url, "abc123def4567890");
     expect(with_.searchParams.get("trace")).toBe("abc123def4567890");
     expect(readOauthTraceId(with_)).toBe("abc123def4567890");
   });
 
   it("does not mutate the source URL", () => {
-    const url = new URL("https://app.labourmarket.ai/lt/auth/callback");
+    const url = new URL("https://labourmarket.ai/lt/auth/callback");
     withOauthTraceId(url, "xyz");
     expect(url.searchParams.has("trace")).toBe(false);
   });
@@ -45,7 +45,9 @@ describe("oauth-trace — withOauthTraceId / readOauthTraceId", () => {
 });
 
 describe("oauth-trace — isVercelPreviewHost", () => {
-  it("treats production hosts as NOT preview", () => {
+  it("treats production + legacy-alias hosts as NOT preview", () => {
+    expect(isVercelPreviewHost("labourmarket.ai")).toBe(false);
+    // Legacy redirect alias (308s to the apex) — not a preview either.
     expect(isVercelPreviewHost("app.labourmarket.ai")).toBe(false);
     expect(isVercelPreviewHost("labourmarket-ai.vercel.app")).toBe(false);
     expect(isVercelPreviewHost("LABOURMARKET-AI.VERCEL.APP")).toBe(false);
