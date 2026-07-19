@@ -90,15 +90,19 @@ export function deriveCompactRows(
   }
 
   // Durable skill links → their own rows, unless a fragment row already
-  // carries the same label (then the link merges into that row).
+  // carries the same label (then the link merges into that row). The
+  // slug-labelled fragment (a saved taxonomy selection stores the SLUG in
+  // `fragment_activity`) is the canonical match and wins over a free-text
+  // row that merely happens to spell the skill's display name.
   for (const slug of entry.skillSlugs) {
     const name = nameBySlug.get(slug) ?? slug.replace(/[-_]+/g, " ");
-    const existing = rows.find(
-      (r) =>
-        r.skillSlug === null &&
-        (foldLabel(r.label) === foldLabel(name) ||
-          foldLabel(r.label) === foldLabel(slug)),
-    );
+    const existing =
+      rows.find(
+        (r) => r.skillSlug === null && foldLabel(r.label) === foldLabel(slug),
+      ) ??
+      rows.find(
+        (r) => r.skillSlug === null && foldLabel(r.label) === foldLabel(name),
+      );
     if (existing) {
       existing.skillSlug = slug;
       // A row whose stored label IS the slug (a saved taxonomy selection —
@@ -228,6 +232,11 @@ export function buildCompactSaveFields(
         activityLabel: r.label.trim(),
         isUnknown: false,
         userLabel: null,
+        // EXPLICIT worker selection marker — only fragments flagged here may
+        // be skill-linked by the server. The legacy composer never sets it,
+        // so its parser-derived slugs keep their pre-existing metric-only
+        // behaviour (no silent self-declaration from a time confirm).
+        selected: r.skillSlug !== null,
       };
     });
   if (fragments.length > 0) {

@@ -139,10 +139,35 @@ function skillsMatching(calls: Call[]): unknown[] {
   return ACTIVE_SKILLS.filter((s) => slugs.includes(s.slug));
 }
 
-/** Handler with a worker profile + an ACTIVE skills taxonomy. */
-function p1aHandler(): Handler {
+type EntryState = { superseded_by: string | null; deleted_at: string | null };
+
+function requestedEntryId(calls: Call[]): string | null {
+  const eq = calls.find((c) => c.method === "eq" && c.args[0] === "id");
+  return (eq?.args[1] as string | undefined) ?? null;
+}
+
+/** Old-entry decision-marker rows served by p1aHandler (per-test). */
+let oldMetricsRef: Array<{
+  metric_slug: string;
+  value_text: string | null;
+  value_numeric?: number | null;
+}> = [];
+
+/** Handler with a worker profile + an ACTIVE skills taxonomy. The stale-chain
+ *  precheck reads `journal_entries` — `entryLookup` answers it (default: the
+ *  requested entry is live). */
+function p1aHandler(
+  entryLookup?: (id: string | null) => EntryState | null,
+): Handler {
   return (table, calls) => {
     switch (table) {
+      case "journal_entries": {
+        const id = requestedEntryId(calls);
+        const state = entryLookup
+          ? entryLookup(id)
+          : { superseded_by: null, deleted_at: null };
+        return { data: state ? { id, ...state } : null };
+      }
       case "workers":
         return { data: { id: "w1" } };
       case "skills":
@@ -163,8 +188,14 @@ function p1aHandler(): Handler {
             { slug: "square_meters" },
           ],
         };
-      case "journal_entry_metrics":
-        return { data: [] };
+      case "journal_entry_metrics": {
+        if (calls.some((c) => c.method === "insert")) return { data: null };
+        const eq = calls.find(
+          (c) => c.method === "eq" && c.args[0] === "entry_id",
+        );
+        const id = (eq?.args[1] as string | undefined) ?? null;
+        return { data: id === OLD_ID ? oldMetricsRef : [] };
+      }
       default:
         return { data: null };
     }
@@ -190,11 +221,18 @@ function fragment(overrides: Record<string, unknown> = {}) {
     activityLabel: "Suvirinimas",
     isUnknown: false,
     userLabel: null,
+    selected: false,
     ...overrides,
   };
 }
 
+/** A compact-editor taxonomy selection: slug + the EXPLICIT selected flag. */
+function selectedFragment(slug: string, overrides: Record<string, unknown> = {}) {
+  return fragment({ activitySlug: slug, selected: true, ...overrides });
+}
+
 beforeEach(() => {
+  oldMetricsRef = [];
   writePayloads = [];
   rpcCalls = [];
   pipelineCalls.length = 0;
@@ -210,9 +248,7 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
     const res = await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
-        fragments_json: JSON.stringify([
-          fragment({ activitySlug: "welding" }),
-        ]),
+        fragments_json: JSON.stringify([selectedFragment("welding")]),
       }),
     );
     expect(res.ok).toBe(true);
@@ -269,9 +305,9 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
       OLD_ID,
       makeFormData({
         fragments_json: JSON.stringify([
-          fragment({ activitySlug: "not-in-taxonomy" }),
-          fragment({ rawPhrase: "b", activitySlug: "retired_skill" }),
-          fragment({ rawPhrase: "c", activitySlug: "bad slug; drop table" }),
+          selectedFragment("not-in-taxonomy"),
+          selectedFragment("retired_skill", { rawPhrase: "b" }),
+          selectedFragment("bad slug; drop table", { rawPhrase: "c" }),
         ]),
       }),
     );
@@ -306,9 +342,7 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
     await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
-        fragments_json: JSON.stringify([
-          fragment({ activitySlug: "welding" }),
-        ]),
+        fragments_json: JSON.stringify([selectedFragment("welding")]),
         rejected_slugs_json: JSON.stringify(["welding"]),
       }),
     );
@@ -317,14 +351,79 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
     ).toHaveLength(0);
   });
 
+  it("composer-style fragments (slug present, NOT selected) are never linked", async () => {
+    // The legacy composer ships parser-derived activitySlugs on confirmed
+    // fragments without the selected flag — its pre-existing metric-only
+    // behaviour must not gain silent self-declaration side effects.
+    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({
+        fragments_json: JSON.stringify([
+          fragment({ activitySlug: "welding" }), // selected: false
+        ]),
+      }),
+    );
+    expect(res.ok).toBe(true);
+    expect(
+      writePayloads.filter((w) => w.table === "worker_skills"),
+    ).toHaveLength(0);
+    expect(
+      writePayloads.filter((w) => w.table === "journal_entry_skills"),
+    ).toHaveLength(0);
+    // The slug still lands in the fragment_activity provenance metric.
+    const rpc = rpcCalls.find((c) => c.fn === "journal_entry_supersede")!;
+    const metrics = rpc.params.p_metrics as Array<{
+      metric_slug: string;
+      value_text?: string | null;
+    }>;
+    expect(
+      metrics.find((m) => m.metric_slug === "fragment_activity")?.value_text,
+    ).toBe("1|welding");
+  });
+
+  it("a re-selected slug's OLD skill_rejected marker is NOT carried forward (others are)", async () => {
+    // remove→save→re-add→save: the old rejection marker must not ride the
+    // carry and permanently suppress the re-added skill on the chain.
+    oldMetricsRef = [
+      { metric_slug: "skill_rejected", value_text: "welding" },
+      { metric_slug: "skill_rejected", value_text: "tiling" },
+      { metric_slug: "unresolved_dismissed", value_text: "kažkoks fragmentas" },
+    ];
+    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({
+        fragments_json: JSON.stringify([selectedFragment("welding")]),
+      }),
+    );
+    expect(res.ok).toBe(true);
+    const markerInsert = writePayloads.find(
+      (w) => w.table === "journal_entry_metrics",
+    );
+    expect(markerInsert).toBeTruthy();
+    const rows = markerInsert!.rows as Array<{
+      metric_slug: string;
+      value_text: string;
+    }>;
+    expect(rows.map((r) => `${r.metric_slug}|${r.value_text}`).sort()).toEqual([
+      "skill_rejected|tiling",
+      "unresolved_dismissed|kažkoks fragmentas",
+    ]);
+    // And the re-selected skill IS linked.
+    expect(
+      writePayloads.filter((w) => w.table === "journal_entry_skills"),
+    ).toHaveLength(1);
+  });
+
   it("selection writes carry NO fake verification anywhere", async () => {
     currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
     await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
         fragments_json: JSON.stringify([
-          fragment({ activitySlug: "welding" }),
-          fragment({ rawPhrase: "vairavau", activitySlug: "driving" }),
+          selectedFragment("welding"),
+          selectedFragment("driving", { rawPhrase: "vairavau" }),
         ]),
       }),
     );
@@ -344,6 +443,10 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
       ["entry-A", { superseded_by: null }],
     ]);
     let n = 0;
+    const lookup = (id: string | null): EntryState | null => {
+      const e = id ? entries.get(id) : undefined;
+      return e ? { superseded_by: e.superseded_by, deleted_at: null } : null;
+    };
     rpcMock = (fn, params) => {
       if (fn !== "journal_entry_supersede") return { data: null, error: null };
       const oldId = params.p_old_entry_id as string;
@@ -356,6 +459,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
       return { data: newId, error: null };
     };
     return {
+      lookup,
       liveIds: () =>
         [...entries.entries()]
           .filter(([, e]) => e.superseded_by === null)
@@ -376,8 +480,8 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
   }
 
   it("three consecutive saves: A→B→C→D, exactly ONE live entry, last state wins", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
     const chain = statefulRpc();
+    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
 
     let current = "entry-A";
     for (const text of ["pirmas keitimas", "antras keitimas", "trečias keitimas"]) {
@@ -409,14 +513,14 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
   });
 
   it("data from the previous save survives into the next supersede (B's fragments ride into C)", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
-    statefulRpc();
+    const chain = statefulRpc();
+    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
 
     // Save 1: adds a taxonomy selection with time. Save 2 (same open drawer)
     // re-submits the full row state — the model always ships the ENTIRE form,
     // so B's data plus the second edit lands in C.
     let current = "entry-A";
-    const frag = fragment({ activitySlug: "welding" });
+    const frag = selectedFragment("welding");
     let r = await clientSave(
       current,
       makeFormData({ fragments_json: JSON.stringify([frag]) }),
@@ -428,7 +532,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
         notes: "papildyta",
         fragments_json: JSON.stringify([
           frag,
-          fragment({ rawPhrase: "vairavau", activitySlug: "driving" }),
+          selectedFragment("driving", { rawPhrase: "vairavau" }),
         ]),
       }),
     );
@@ -449,8 +553,8 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
   });
 
   it("a failed save does NOT advance the chain — the retry targets the same entry", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
     const chain = statefulRpc();
+    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
 
     let current = "entry-A";
     let r = await clientSave(current, makeFormData());
@@ -474,5 +578,34 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
         .map((c) => c.params.p_old_entry_id),
     ).toEqual(["entry-A", "entry-B", "entry-B"]);
     expect(chain.liveIds()).toEqual(["entry-C"]);
+  });
+
+  it("a STALE client superseding an already-superseded entry is refused before the RPC", async () => {
+    // Second tab / old ?editing= deep link: A was already superseded by B.
+    currentSupabase = makeSupabase(
+      p1aHandler((id) =>
+        id === "entry-A"
+          ? { superseded_by: "entry-B", deleted_at: null }
+          : { superseded_by: null, deleted_at: null },
+      ),
+      { id: "user-1" },
+    );
+    const res = await supersedeJournalEntry("entry-A", makeFormData());
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("entry_superseded");
+    expect(rpcCalls.filter((c) => c.fn === "journal_entry_supersede")).toHaveLength(0);
+    expect(pipelineCalls).toHaveLength(0);
+    expect(writePayloads).toHaveLength(0);
+  });
+
+  it("a deleted old entry is refused the same way", async () => {
+    currentSupabase = makeSupabase(
+      p1aHandler(() => ({ superseded_by: null, deleted_at: "2026-07-19T00:00:00Z" })),
+      { id: "user-1" },
+    );
+    const res = await supersedeJournalEntry("entry-A", makeFormData());
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("entry_superseded");
+    expect(rpcCalls.filter((c) => c.fn === "journal_entry_supersede")).toHaveLength(0);
   });
 });

@@ -257,6 +257,15 @@ export function JournalEntryCompactEditor({
   function addRow(label: string, skillSlug: string | null): void {
     const clean = label.trim().slice(0, 120);
     if (!clean) return;
+    // One skill = one row: re-picking an already-present taxonomy skill
+    // closes the panel instead of minting a duplicate row (a duplicate
+    // would degrade to a slug-labelled free claim on the next reload).
+    if (skillSlug && rows.some((r) => r.skillSlug === skillSlug)) {
+      setAddOpen(false);
+      setAddQuery("");
+      setAddHits([]);
+      return;
+    }
     setRows((prev) => [
       ...prev,
       {

@@ -116,10 +116,18 @@ describe("3 · one save contract (batch) + honest local state", () => {
   it("taxonomy rows keep their slug through serialization (P1-A)", () => {
     expect(MODEL).toMatch(/activitySlug: r\.skillSlug/);
     expect(MODEL).not.toMatch(/activitySlug: null/);
+    // only EXPLICIT selections may be linked — composer fragments never
+    // set the flag, so parser slugs can't silently self-declare skills
+    expect(MODEL).toMatch(/selected: r\.skillSlug !== null/);
+    expect(ACTIONS).toMatch(/f\.selected === true/);
     // the server validates + links the selection on the NEW entry
     expect(ACTIONS).toMatch(/linkSelectedTaxonomySkills/);
     expect(ACTIONS).toMatch(/verified: false/);
     expect(ACTIONS).not.toMatch(/verified\s*:\s*true/);
+  });
+  it("a stale supersede of an already-superseded entry is refused (P1-B fork guard)", () => {
+    expect(ACTIONS).toMatch(/"entry_superseded"/);
+    expect(ACTIONS).toMatch(/oldEntry\.superseded_by \|\| oldEntry\.deleted_at/);
   });
   it("dirty indicator + unsaved chip on local additions", () => {
     expect(EDITOR).toMatch(/data-testid="journal-compact-dirty"/);
@@ -154,7 +162,7 @@ describe("4 · no data loss on supersede (decision markers carried forward)", ()
   });
   it("carry-forward runs BEFORE the pipeline for the new entry", () => {
     const carryIdx = ACTIONS.indexOf(
-      "await carryForwardEntryDecisionMarkers(supabase, oldEntryId, newEntryId)",
+      "await carryForwardEntryDecisionMarkers(",
     );
     const pipelineIdx = ACTIONS.indexOf("entryId: newEntryId");
     expect(carryIdx).toBeGreaterThan(0);

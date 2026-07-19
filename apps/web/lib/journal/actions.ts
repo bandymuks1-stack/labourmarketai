@@ -74,7 +74,10 @@ export type JournalSaveErrorCode =
   | "quantity_invalid"
   | "unit_slug_unknown"
   | "entry_insert_failed"
-  | "metrics_insert_failed";
+  | "metrics_insert_failed"
+  /** P1-B — the target entry was already superseded (stale tab/deep link);
+   *  superseding it again would fork the chain into duplicate live entries. */
+  | "entry_superseded";
 
 type ParsedFragmentInput = {
   rawPhrase: string;
@@ -89,6 +92,11 @@ type ParsedFragmentInput = {
    *  Persists as `unknown_phrase` metric (review-only, no fake
    *  taxonomy claim). */
   userLabel?: string | null;
+  /** P1-A — true ONLY when the worker EXPLICITLY picked this fragment's
+   *  taxonomy skill (compact-editor selection). Only selected fragments may
+   *  be skill-linked by the save; the composer's parser-derived slugs never
+   *  set it, so confirming a time parse can't silently declare a skill. */
+  selected?: boolean;
 };
 
 function parseFragments(raw: string | null): ParsedFragmentInput[] {
@@ -125,6 +133,7 @@ function parseFragments(raw: string | null): ParsedFragmentInput[] {
           typeof r.userLabel === "string" && r.userLabel.trim().length > 0
             ? r.userLabel.trim().slice(0, 200)
             : null,
+        selected: r.selected === true,
       });
     }
     return out;
@@ -552,6 +561,35 @@ export async function supersedeJournalEntry(
     };
   }
 
+  // Stale-chain guard (post-merge review P1): the `journal_entry_supersede`
+  // RPC does not refuse an already-superseded old entry, so a stale client
+  // (second tab, old `?editing=` deep link, drawer left open across a
+  // refresh) could stamp `superseded_by` on the SAME entry twice — forking
+  // the chain into duplicate live entries. Refuse here, under the caller's
+  // own RLS (a foreign entry reads as not found). The RPC-level raise is an
+  // owner-gated migration follow-up; this closes every app path today.
+  const { data: oldEntry } = await supabase
+    .from("journal_entries")
+    .select("id, superseded_by, deleted_at")
+    .eq("id", oldEntryId)
+    .maybeSingle();
+  if (!oldEntry) {
+    return {
+      ok: false,
+      code: "entry_insert_failed",
+      message: "Keičiamas įrašas nerastas. Perkraukite puslapį.",
+    };
+  }
+  if (oldEntry.superseded_by || oldEntry.deleted_at) {
+    return {
+      ok: false,
+      code: "entry_superseded",
+      message:
+        "Šis įrašas jau buvo pakeistas kitur (kitame lange ar sesijoje). " +
+        "Perkraukite puslapį ir redaguokite naujausią įrašo versiją.",
+    };
+  }
+
   // Pre-validate unit_slug just like the create path so the worker sees
   // a precise reason on un-migrated DBs.
   const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
@@ -657,6 +695,14 @@ export async function supersedeJournalEntry(
     };
   }
 
+  // Slugs the worker EXPLICITLY selected in this save (compact-editor rows
+  // only — see ParsedFragmentInput.selected). Used twice below: they must be
+  // linked, and a previously-rejected slug among them must NOT have its
+  // rejection marker carried forward (the re-add wins over the old removal).
+  const selectedSlugs = fragments
+    .filter((f) => f.selected === true)
+    .map((f) => f.activitySlug ?? null);
+
   // NO DATA LOSS on edit (journal compact edit UX, P0-F): the worker's
   // DECISION markers live as append-only metrics on the OLD entry and the
   // pipeline for the NEW entry would otherwise re-derive without them —
@@ -664,7 +710,12 @@ export async function supersedeJournalEntry(
   // dismissed fragments re-inserted. Copy them to the new entry id BEFORE
   // the pipeline runs so the derivation honours them (idempotent,
   // append-only, RLS-owned inserts).
-  await carryForwardEntryDecisionMarkers(supabase, oldEntryId, newEntryId);
+  await carryForwardEntryDecisionMarkers(
+    supabase,
+    oldEntryId,
+    newEntryId,
+    selectedSlugs,
+  );
 
   // NO DATA LOSS on edit (journal compact edit UX, P1-SKILL): entry↔skill
   // evidence links that are NOT re-derivable from the entry text (e.g. a skill
@@ -691,7 +742,7 @@ export async function supersedeJournalEntry(
     supabase,
     user.id,
     newEntryId,
-    fragments.map((f) => f.activitySlug ?? null),
+    selectedSlugs,
     rejectedSlugs,
   );
 
@@ -726,13 +777,23 @@ const DECISION_MARKER_SLUGS = [
  * duplicates. Append-only inserts under the CALLER'S OWN RLS. A failure is
  * logged (counts only — never entry text) and never fails the already-
  * persisted supersede.
+ *
+ * `reselectedSlugs` (post-merge review P1): slugs the worker EXPLICITLY
+ * selected in THIS save. A `skill_rejected` marker for such a slug is NOT
+ * carried — otherwise remove→save→re-add→save would pin a contradictory
+ * rejection on the whole chain and permanently suppress that skill's
+ * recognition. Other marker kinds are never slug-scoped and carry as before.
  */
 async function carryForwardEntryDecisionMarkers(
   supabase: Awaited<ReturnType<typeof createClient>>,
   oldEntryId: string,
   newEntryId: string,
+  reselectedSlugs: ReadonlyArray<string | null> = [],
 ): Promise<void> {
   try {
+    const reselected = new Set(
+      reselectedSlugs.filter((s): s is string => typeof s === "string" && s.length > 0),
+    );
     const { data: oldRows, error: oldErr } = await supabase
       .from("journal_entry_metrics")
       .select("metric_slug, value_text, value_numeric")
@@ -760,6 +821,14 @@ async function carryForwardEntryDecisionMarkers(
     const seen = new Set<string>();
     const toCopy = oldRows.filter((r) => {
       if (!r.metric_slug || !r.value_text) return false;
+      // The worker re-selected this skill in the current save — the old
+      // rejection is overridden, not carried.
+      if (
+        r.metric_slug === "skill_rejected" &&
+        reselected.has(r.value_text.trim())
+      ) {
+        return false;
+      }
       const key = markerKey(r);
       if (existing.has(key) || seen.has(key)) return false;
       seen.add(key);
@@ -889,12 +958,21 @@ async function linkSelectedTaxonomySkills(
     ].slice(0, 50);
     if (slugs.length === 0) return;
 
-    const { data: worker } = await supabase
+    const { data: worker, error: workerErr } = await supabase
       .from("workers")
       .select("id")
       .eq("profile_id", profileId)
       .maybeSingle();
-    if (!worker?.id) return;
+    if (!worker?.id) {
+      // Never silent: without the worker row the selection cannot be linked
+      // and the P1-A symptom would recur invisibly on a transient DB error.
+      console.error(
+        "[journal] selected-skill worker lookup failed:",
+        workerErr?.message ?? "no worker row",
+        `slugs=${slugs.length}`,
+      );
+      return;
+    }
 
     // Active-taxonomy validation: unknown or inactive slugs are dropped —
     // their rows stay honest free labels, no fabricated taxonomy claim.
