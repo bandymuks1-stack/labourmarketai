@@ -129,9 +129,9 @@ export default async function CompanyNeedPage({
       <div className="card-border flex flex-col gap-3 p-5" data-testid="need-bridge">
         <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
         <div className="flex flex-col gap-2 sm:flex-row">
-          {/* AuthCtaLink (not the SPA Link): on the apex/marketing host these
-              must cross to app.labourmarket.ai so the OAuth PKCE round-trip
-              starts and finishes on the app origin. */}
+          {/* AuthCtaLink (plain <a>, not the SPA Link): auth is a full-page
+              boundary. Single-domain policy: the link stays relative — the
+              whole flow lives on labourmarket.ai. */}
           <AuthCtaLink relPath={`/${locale}/auth/signup`}>
             <Button>{t("bridgeSignup")} →</Button>
           </AuthCtaLink>

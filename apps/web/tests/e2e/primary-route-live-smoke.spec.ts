@@ -15,7 +15,7 @@ import { test, expect } from "@playwright/test";
  *
  * Run against local dev (default) or any deployed URL:
  *   pnpm -F web e2e primary-route-live-smoke
- *   E2E_BASE_URL=https://app.labourmarket.ai E2E_NO_SERVER=1 \
+ *   E2E_BASE_URL=https://labourmarket.ai E2E_NO_SERVER=1 \
  *     pnpm -F web exec playwright test primary-route-live-smoke
  *
  * Uses the already-present @playwright/test (no new dependency). See

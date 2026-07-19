@@ -4,32 +4,67 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
 import { env } from "@/lib/env";
 import {
-  MARKETING_ORIGIN,
-  isWwwRedirectHost,
+  CANONICAL_ORIGIN,
+  isLegacyRedirectHost,
 } from "@/lib/domain/canonical";
 
 const intl = createIntlMiddleware(routing);
 
-/** Pure host-normalization: if a request lands on
- *  www.labourmarket.ai, permanently (308) redirect to the apex
- *  https://labourmarket.ai/<same-path>?<same-query>. The apex itself
- *  serves content (it is the public marketing canonical), so it is
- *  NEVER redirected. Returns undefined when no redirect is needed.
+/** Pure host-normalization: if a request lands on a legacy alias
+ *  (www.labourmarket.ai or app.labourmarket.ai), permanently (308)
+ *  redirect to the canonical apex
+ *  https://labourmarket.ai/<same-path>?<same-query> — preserving
+ *  locale, query, `next`, IDs and invitation tokens. The apex itself
+ *  serves content and is NEVER redirected (no loop possible: the
+ *  target host is not a legacy host). Returns undefined when no
+ *  redirect is needed.
  *
- *  Policy (2026-06-15): apex = public marketing canonical, www → apex,
- *  app.labourmarket.ai stays the app host. The public marketing
- *  domain must not auto-redirect to the app subdomain — only an
- *  explicit login/app CTA sends a user there. */
-function maybeRedirectWwwToApex(request: NextRequest): NextResponse | undefined {
+ *  Policy (2026-07-19, single-domain): labourmarket.ai is the only
+ *  product origin; www + app are redirect aliases only. next.config
+ *  host redirects cover /api and static paths this middleware
+ *  matcher excludes — this is the in-app belt-and-braces layer. */
+function maybeRedirectLegacyHostToCanonical(
+  request: NextRequest,
+): NextResponse | undefined {
   const host = request.headers.get("host");
-  if (!isWwwRedirectHost(host)) return undefined;
+  if (!isLegacyRedirectHost(host)) return undefined;
   const target = new URL(
     `${request.nextUrl.pathname}${request.nextUrl.search}`,
-    MARKETING_ORIGIN,
+    CANONICAL_ORIGIN,
   );
   // 308 = permanent + method-preserving (301-class for SEO). Consolidates
-  // the www alias onto the apex so Google indexes a single host.
+  // all legacy aliases onto the apex so Google indexes a single host.
   return NextResponse.redirect(target, 308);
+}
+
+/** OAuth-code safety net: if Supabase's redirect allow-list rejects a
+ *  `redirect_to`, GoTrue falls back to the configured Site URL — the user
+ *  then lands on the site ROOT carrying `?code=<uuid>` instead of on
+ *  `/{locale}/auth/callback`, and the PKCE exchange never runs. Forward
+ *  such a stray code to the locale callback (same query preserved) so
+ *  Google login survives an allow-list/site-URL mismatch during the
+ *  single-domain migration. Scoped tightly: root or bare-locale path
+ *  only, and the code must be UUID-shaped (GoTrue's PKCE code format)
+ *  so ordinary `?code=` marketing params elsewhere are untouched. */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function maybeForwardStrayOauthCode(
+  request: NextRequest,
+): NextResponse | undefined {
+  const { pathname, searchParams } = request.nextUrl;
+  const code = searchParams.get("code");
+  if (!code || !UUID_RE.test(code)) return undefined;
+  const parts = pathname.split("/").filter(Boolean);
+  const isRoot = parts.length === 0;
+  const isBareLocale =
+    parts.length === 1 &&
+    (routing.locales as readonly string[]).includes(parts[0]);
+  if (!isRoot && !isBareLocale) return undefined;
+  const locale = isBareLocale ? parts[0] : routing.defaultLocale;
+  const target = request.nextUrl.clone();
+  target.pathname = `/${locale}/auth/callback`;
+  return NextResponse.redirect(target, 307);
 }
 
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
@@ -55,11 +90,15 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  // 0. Host normalization runs BEFORE locale/intl + auth so the www
-  //    alias never reaches the app shell — it 308s straight to the
-  //    apex. The apex + app hosts both fall through and serve content.
-  const hostRedirect = maybeRedirectWwwToApex(request);
+  // 0. Host normalization runs BEFORE locale/intl + auth so legacy
+  //    aliases (www + app) never reach the app shell — they 308
+  //    straight to the apex. Only the apex serves content.
+  const hostRedirect = maybeRedirectLegacyHostToCanonical(request);
   if (hostRedirect) return hostRedirect;
+
+  // 0b. Stray OAuth code on the root (Site-URL fallback) → locale callback.
+  const codeForward = maybeForwardStrayOauthCode(request);
+  if (codeForward) return codeForward;
 
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)

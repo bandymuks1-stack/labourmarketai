@@ -55,7 +55,7 @@ export function LoginForm() {
 
   // Detect Vercel preview host (e.g. labourmarketai-<sha>.vercel.app)
   // client-side only — the host is window-bound. Production
-  // (`app.labourmarket.ai`) and the Vercel-managed prod alias
+  // (`labourmarket.ai`) and the Vercel-managed prod alias
   // (`labourmarket-ai.vercel.app`) are NOT flagged.
   useEffect(() => {
     if (typeof window !== "undefined") {

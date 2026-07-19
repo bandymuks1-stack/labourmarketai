@@ -26,7 +26,7 @@ import {
   POST,
 } from "@/app/[locale]/auth/logout/route";
 
-const ORIGIN = "https://app.labourmarket.ai";
+const ORIGIN = "https://labourmarket.ai";
 
 beforeEach(() => {
   signOutMock.mockReset();

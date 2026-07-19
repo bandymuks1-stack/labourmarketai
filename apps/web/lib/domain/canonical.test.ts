@@ -1,143 +1,116 @@
 /**
  * Pure tests for the canonical domain policy module.
  *
- * Policy (2026-06-15): apex labourmarket.ai = public marketing
- * canonical; www → apex; app.labourmarket.ai = app host. This
- * SUPERSEDES the 2026-05-28 "apex redirects to app" policy.
+ * Policy (2026-07-19, single-domain): apex labourmarket.ai is the
+ * ONLY product origin; www.labourmarket.ai and app.labourmarket.ai
+ * are permanent (308) redirect aliases. This SUPERSEDES the
+ * 2026-06-15 split marketing/app policy and the 2026-05-28 "apex
+ * redirects to app" policy.
  */
 import { describe, expect, it } from "vitest";
 
 import {
-  APP_HOST,
-  APP_ORIGIN,
+  CANONICAL_HOST,
+  CANONICAL_ORIGIN,
   MARKETING_HOST,
   MARKETING_ORIGIN,
-  CANONICAL_ORIGIN,
   WWW_HOST,
-  WWW_REDIRECT_HOSTS,
+  LEGACY_APP_HOST,
+  LEGACY_REDIRECT_HOSTS,
   VERCEL_PRODUCTION_ALIAS,
-  buildAppUrl,
   buildCanonicalUrl,
-  isAppHost,
-  isMarketingHost,
-  isProductionHost,
-  isWwwRedirectHost,
+  isCanonicalHost,
+  isLegacyRedirectHost,
 } from "./canonical";
 
 describe("canonical domain policy — constants", () => {
-  it("has labourmarket.ai (apex) as the canonical public marketing host", () => {
-    expect(MARKETING_HOST).toBe("labourmarket.ai");
-    expect(MARKETING_ORIGIN).toBe("https://labourmarket.ai");
-  });
-
-  it("keeps app.labourmarket.ai as the app host", () => {
-    expect(APP_HOST).toBe("app.labourmarket.ai");
-    expect(APP_ORIGIN).toBe("https://app.labourmarket.ai");
-  });
-
-  it("CANONICAL_ORIGIN (back-compat) points at the public apex", () => {
+  it("has labourmarket.ai (apex) as the one canonical product host", () => {
+    expect(CANONICAL_HOST).toBe("labourmarket.ai");
     expect(CANONICAL_ORIGIN).toBe("https://labourmarket.ai");
   });
 
-  it("treats www as the alias that must redirect to the apex", () => {
+  it("SEO back-compat aliases equal the canonical host/origin", () => {
+    expect(MARKETING_HOST).toBe(CANONICAL_HOST);
+    expect(MARKETING_ORIGIN).toBe(CANONICAL_ORIGIN);
+  });
+
+  it("www and the legacy app host are both redirect aliases", () => {
     expect(WWW_HOST).toBe("www.labourmarket.ai");
-    expect(WWW_REDIRECT_HOSTS).toContain("www.labourmarket.ai");
+    expect(LEGACY_APP_HOST).toBe("app.labourmarket.ai");
+    expect(LEGACY_REDIRECT_HOSTS).toContain(WWW_HOST);
+    expect(LEGACY_REDIRECT_HOSTS).toContain(LEGACY_APP_HOST);
   });
 
-  it("never redirects the apex itself (it serves content)", () => {
-    expect(WWW_REDIRECT_HOSTS).not.toContain("labourmarket.ai");
+  it("the apex is never listed as a redirect host (no loop)", () => {
+    expect(LEGACY_REDIRECT_HOSTS).not.toContain(CANONICAL_HOST);
   });
 
-  it("keeps the Vercel-managed alias as a non-public production host", () => {
+  it("the Vercel managed alias is known and never redirected", () => {
     expect(VERCEL_PRODUCTION_ALIAS).toBe("labourmarket-ai.vercel.app");
-    expect(WWW_REDIRECT_HOSTS).not.toContain(VERCEL_PRODUCTION_ALIAS);
+    expect(LEGACY_REDIRECT_HOSTS).not.toContain(VERCEL_PRODUCTION_ALIAS);
   });
 });
 
-describe("canonical domain policy — isWwwRedirectHost", () => {
-  it("returns true for the www subdomain", () => {
-    expect(isWwwRedirectHost("www.labourmarket.ai")).toBe(true);
+describe("canonical domain policy — isLegacyRedirectHost", () => {
+  it("matches www + legacy app host only", () => {
+    expect(isLegacyRedirectHost("www.labourmarket.ai")).toBe(true);
+    expect(isLegacyRedirectHost("app.labourmarket.ai")).toBe(true);
+    expect(isLegacyRedirectHost("labourmarket.ai")).toBe(false);
+    expect(isLegacyRedirectHost("labourmarket-ai.vercel.app")).toBe(false);
+    expect(isLegacyRedirectHost("feat-something.vercel.app")).toBe(false);
   });
 
-  it("returns false for the apex (it must NOT redirect)", () => {
-    expect(isWwwRedirectHost("labourmarket.ai")).toBe(false);
+  it("is case-insensitive and strips ports", () => {
+    expect(isLegacyRedirectHost("WWW.LABOURMARKET.AI")).toBe(true);
+    expect(isLegacyRedirectHost("APP.LABOURMARKET.AI:443")).toBe(true);
+    expect(isLegacyRedirectHost("www.labourmarket.ai:8080")).toBe(true);
   });
 
-  it("returns false for the app host", () => {
-    expect(isWwwRedirectHost("app.labourmarket.ai")).toBe(false);
-  });
-
-  it("returns false for the Vercel-managed alias + previews", () => {
-    expect(isWwwRedirectHost("labourmarket-ai.vercel.app")).toBe(false);
-    expect(isWwwRedirectHost("feat-something.vercel.app")).toBe(false);
-  });
-
-  it("is case-insensitive + port-stripping", () => {
-    expect(isWwwRedirectHost("WWW.LABOURMARKET.AI")).toBe(true);
-    expect(isWwwRedirectHost("www.labourmarket.ai:8080")).toBe(true);
-  });
-
-  it("returns false on null/undefined/empty inputs", () => {
-    expect(isWwwRedirectHost(null)).toBe(false);
-    expect(isWwwRedirectHost(undefined)).toBe(false);
-    expect(isWwwRedirectHost("")).toBe(false);
+  it("is false for null / undefined / empty", () => {
+    expect(isLegacyRedirectHost(null)).toBe(false);
+    expect(isLegacyRedirectHost(undefined)).toBe(false);
+    expect(isLegacyRedirectHost("")).toBe(false);
   });
 });
 
-describe("canonical domain policy — host predicates", () => {
-  it("isMarketingHost is true only for the apex", () => {
-    expect(isMarketingHost("labourmarket.ai")).toBe(true);
-    expect(isMarketingHost("www.labourmarket.ai")).toBe(false);
-    expect(isMarketingHost("app.labourmarket.ai")).toBe(false);
-  });
-
-  it("isAppHost is true only for the app subdomain", () => {
-    expect(isAppHost("app.labourmarket.ai")).toBe(true);
-    expect(isAppHost("labourmarket.ai")).toBe(false);
-  });
-
-  it("isProductionHost covers apex, app + Vercel alias", () => {
-    expect(isProductionHost("labourmarket.ai")).toBe(true);
-    expect(isProductionHost("app.labourmarket.ai")).toBe(true);
-    expect(isProductionHost("labourmarket-ai.vercel.app")).toBe(true);
-    expect(isProductionHost("preview-x.vercel.app")).toBe(false);
-    expect(isProductionHost("example.com")).toBe(false);
+describe("canonical domain policy — isCanonicalHost", () => {
+  it("is true only for the apex", () => {
+    expect(isCanonicalHost("labourmarket.ai")).toBe(true);
+    expect(isCanonicalHost("LABOURMARKET.AI:443")).toBe(true);
+    expect(isCanonicalHost("www.labourmarket.ai")).toBe(false);
+    expect(isCanonicalHost("app.labourmarket.ai")).toBe(false);
+    expect(isCanonicalHost("labourmarket-ai.vercel.app")).toBe(false);
+    expect(isCanonicalHost(null)).toBe(false);
   });
 });
 
-describe("canonical domain policy — URL builders", () => {
-  it("buildCanonicalUrl returns a full URL on the apex public origin", () => {
+describe("canonical domain policy — buildCanonicalUrl", () => {
+  it("returns a full URL on the canonical origin", () => {
     expect(buildCanonicalUrl("/lt/for-workers")).toBe(
       "https://labourmarket.ai/lt/for-workers",
     );
   });
 
-  it("buildCanonicalUrl preserves search params + inserts leading slash", () => {
+  it("preserves search params + inserts leading slash", () => {
     expect(buildCanonicalUrl("lt", "?ref=x")).toBe(
       "https://labourmarket.ai/lt?ref=x",
     );
   });
-
-  it("buildAppUrl returns a full URL on the app origin", () => {
-    expect(buildAppUrl("/lt/dashboard")).toBe(
-      "https://app.labourmarket.ai/lt/dashboard",
-    );
-  });
 });
 
-describe("canonical domain policy — anti-regression", () => {
-  // Protects the owner's 2026-06-15 decision: the PUBLIC canonical is
-  // the apex. If a future change ever flips the public canonical back
-  // to the app subdomain, search engines stop seeing a clean
-  // labourmarket.ai public surface — this test fails first.
-  it("the public canonical is the apex, NOT the app subdomain", () => {
-    expect(MARKETING_HOST).toBe("labourmarket.ai");
-    expect(MARKETING_ORIGIN).not.toBe("https://app.labourmarket.ai");
-    expect(CANONICAL_ORIGIN).not.toBe("https://app.labourmarket.ai");
+// Anti-regression lock for the 2026-07-19 owner decision: one domain.
+// If someone reintroduces an app-host product origin (a second origin
+// constant used for serving, an auth-CTA host-upgrade helper),
+// lib/guards/single-domain-origin.test.ts fails; if someone flips the
+// canonical constants themselves, THIS fails.
+describe("anti-regression — single-domain policy", () => {
+  it("the canonical origin is the apex, not a subdomain", () => {
+    expect(CANONICAL_ORIGIN).toBe("https://labourmarket.ai");
+    expect(CANONICAL_ORIGIN).not.toContain("app.");
+    expect(CANONICAL_ORIGIN).not.toContain("www.");
   });
 
-  it("the apex never appears in the www-redirect set", () => {
-    expect(WWW_REDIRECT_HOSTS).not.toContain("labourmarket.ai");
-    expect(isWwwRedirectHost("labourmarket.ai")).toBe(false);
+  it("the legacy app host stays classified as redirect-only", () => {
+    expect(isLegacyRedirectHost(LEGACY_APP_HOST)).toBe(true);
   });
 });

@@ -3501,7 +3501,7 @@
       "error_password_required": "Voer je wachtwoord in.",
       "error_invalid_credentials": "Ongeldig e-mailadres of wachtwoord.",
       "google_hint": "Geregistreerd met Google? Dan heb je geen wachtwoord — gebruik \"Doorgaan met Google\" hierboven.",
-      "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://app.labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon."
+      "preview_host_notice": "Je bekijkt een previewversie van de site. Inloggen met Google werkt alleen op de live site — open https://labourmarket.ai om het te gebruiken. Inloggen met e-mailadres en wachtwoord werkt hier gewoon."
     },
     "forgotPassword": {
       "headline": "Wachtwoord vergeten?",

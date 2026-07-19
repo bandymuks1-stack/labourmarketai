@@ -84,41 +84,57 @@ export function auditPublicSeoIndexing(read: SeoFileReader): {
     files[rel] = content;
   }
 
-  // 1. Canonical host = apex labourmarket.ai (not the app subdomain).
+  // 1. Canonical host = apex labourmarket.ai — the ONLY product origin
+  //    (single-domain policy 2026-07-19).
   const canonical = files["lib/domain/canonical.ts"];
   if (canonical) {
-    if (!/MARKETING_HOST\s*=\s*"labourmarket\.ai"/.test(canonical)) {
+    if (!/CANONICAL_HOST\s*=\s*"labourmarket\.ai"/.test(canonical)) {
       add(
         violations,
         "lib/domain/canonical.ts",
-        'MARKETING_HOST must be exactly "labourmarket.ai" (apex)',
+        'CANONICAL_HOST must be exactly "labourmarket.ai" (apex)',
       );
     }
-    if (/MARKETING_HOST\s*=\s*"app\.labourmarket\.ai"/.test(canonical)) {
+    if (/CANONICAL_HOST\s*=\s*"(app|www)\.labourmarket\.ai"/.test(canonical)) {
       add(
         violations,
         "lib/domain/canonical.ts",
-        "the app subdomain must not be the public marketing host",
+        "a subdomain must never be the canonical product host",
+      );
+    }
+    if (!/LEGACY_APP_HOST\s*=\s*"app\.labourmarket\.ai"/.test(canonical)) {
+      add(
+        violations,
+        "lib/domain/canonical.ts",
+        "LEGACY_APP_HOST must be defined so the app alias stays a redirect",
       );
     }
     if (!/WWW_HOST\s*=\s*"www\.labourmarket\.ai"/.test(canonical)) {
       add(violations, "lib/domain/canonical.ts", "WWW_HOST must be defined for the www→apex redirect");
     }
+    // The split-domain CTA upgrade must stay removed.
+    if (/preferAppHostHref/.test(canonical)) {
+      add(
+        violations,
+        "lib/domain/canonical.ts",
+        "preferAppHostHref (split-domain auth CTA upgrade) must not be reintroduced",
+      );
+    }
   }
 
-  // 2. www → apex redirect rule present in middleware.
+  // 2. Legacy-alias (www + app) → apex redirect rule present in middleware.
   const mw = files["middleware.ts"];
   if (mw) {
-    if (!/isWwwRedirectHost/.test(mw) || !/MARKETING_ORIGIN/.test(mw)) {
+    if (!/isLegacyRedirectHost/.test(mw) || !/CANONICAL_ORIGIN/.test(mw)) {
       add(
         violations,
         "middleware.ts",
-        "must implement the www→apex redirect via isWwwRedirectHost + MARKETING_ORIGIN",
+        "must implement the legacy-host→apex redirect via isLegacyRedirectHost + CANONICAL_ORIGIN",
       );
     }
-    // Apex must NOT be redirected to the app subdomain anywhere.
-    if (/redirect[^\n]*app\.labourmarket\.ai/i.test(mw)) {
-      add(violations, "middleware.ts", "must not redirect to the app subdomain");
+    // The apex must never redirect to a subdomain.
+    if (/redirect[^\n]*"https:\/\/(app|www)\.labourmarket\.ai/i.test(mw)) {
+      add(violations, "middleware.ts", "must not redirect to a subdomain");
     }
   }
 

@@ -49,7 +49,7 @@ import { middleware } from "@/middleware";
 const AUTH_COOKIE = "sb-example-auth-token";
 
 function req(path: string, opts?: { authed?: boolean }): NextRequest {
-  const r = new NextRequest(`https://app.labourmarket.ai${path}`);
+  const r = new NextRequest(`https://labourmarket.ai${path}`);
   if (opts?.authed) r.cookies.set(AUTH_COOKIE, "token-value");
   return r;
 }
@@ -59,6 +59,61 @@ beforeEach(() => {
   fromSingleMock.mockReset();
   getUserMock.mockResolvedValue({ data: { user: null } });
   fromSingleMock.mockResolvedValue({ data: { onboarded_at: "2026-01-01" } });
+});
+
+describe("legacy host aliases (single-domain policy 2026-07-19)", () => {
+  it("308s www + app hosts to the apex before any auth/session work", async () => {
+    for (const host of ["www.labourmarket.ai", "app.labourmarket.ai"]) {
+      const r = new NextRequest(`https://${host}/lt/dashboard?x=1`, {
+        headers: { host },
+      });
+      const res = await middleware(r);
+      expect(res.status, host).toBe(308);
+      expect(res.headers.get("location"), host).toBe(
+        "https://labourmarket.ai/lt/dashboard?x=1",
+      );
+      // Host redirect short-circuits: no Supabase call on legacy hosts.
+      expect(getUserMock).not.toHaveBeenCalled();
+    }
+  });
+
+  it("never redirects the apex itself (no loop)", async () => {
+    const res = await middleware(req("/lt"));
+    expect(res.status).not.toBe(308);
+  });
+});
+
+describe("stray OAuth code forwarding (Site-URL fallback safety net)", () => {
+  const CODE = "6f2d71e2-9b5a-4a01-8b8c-2f4f2b9a7d10";
+
+  it("forwards a UUID code on the root to the default-locale callback", async () => {
+    const res = await middleware(req(`/?code=${CODE}`));
+    const loc = res.headers.get("location")!;
+    expect(loc).toContain("/lt/auth/callback");
+    expect(loc).toContain(`code=${CODE}`);
+  });
+
+  it("forwards a UUID code on a bare locale path to that locale's callback", async () => {
+    const res = await middleware(req(`/en?code=${CODE}`));
+    const loc = res.headers.get("location")!;
+    expect(loc).toContain("/en/auth/callback");
+    expect(loc).toContain(`code=${CODE}`);
+  });
+
+  it("ignores non-UUID codes (marketing/promo params stay untouched)", async () => {
+    const res = await middleware(req("/lt?code=SUMMER24"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("ignores UUID codes on deeper paths (only the Site-URL root fallback)", async () => {
+    const res = await middleware(req(`/lt/pricing?code=${CODE}`));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("does not intercept the real callback route", async () => {
+    const res = await middleware(req(`/lt/auth/callback?code=${CODE}`));
+    expect(res.headers.get("location")).toBeNull();
+  });
 });
 
 describe("anonymous traffic", () => {
