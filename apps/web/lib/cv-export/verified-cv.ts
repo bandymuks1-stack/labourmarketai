@@ -343,21 +343,35 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const journalClaimLabels: string[] = [];
   if (liveEntryIds.length > 0) {
     const { data: claimMetrics } = await tolerant<
-      Array<{ value_text: string | null }>
+      Array<{ value_text: string | null; metric_slug?: string | null }>
     >(
       sb
         .from("journal_entry_metrics")
-        .select("value_text")
+        .select("value_text, metric_slug")
         .in("entry_id", liveEntryIds)
-        .eq("metric_slug", "skill_claim"),
+        .in("metric_slug", ["skill_claim", "skill_claim_rejected"]),
     );
     const profileNormalized = new Set(claims.map((c) => c.normalized_label));
+    // Worker-rejected claim labels (append-only `skill_claim_rejected`
+    // markers, P1 recall repair) never surface on the CV.
+    const rejectedNormalized = new Set(
+      (claimMetrics ?? [])
+        .filter((m) => m.metric_slug === "skill_claim_rejected")
+        .map((m) => (m.value_text ?? "").trim().toLowerCase().replace(/\s+/g, " "))
+        .filter((v) => v.length > 0),
+    );
     const seen = new Set<string>();
     for (const m of claimMetrics ?? []) {
+      if (m.metric_slug === "skill_claim_rejected") continue;
       const label = (m.value_text ?? "").trim();
       if (!label) continue;
       const normalized = label.toLowerCase().replace(/\s+/g, " ");
-      if (profileNormalized.has(normalized) || seen.has(normalized)) continue;
+      if (
+        profileNormalized.has(normalized) ||
+        rejectedNormalized.has(normalized) ||
+        seen.has(normalized)
+      )
+        continue;
       seen.add(normalized);
       journalClaimLabels.push(label);
     }

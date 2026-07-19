@@ -313,6 +313,8 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 153 -> 154 for Wagon 11 Delivery & Quality.
     // Bumped 154 -> 155 for Wagon 13 Marketplace — work-resource listings.
     // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile.
-    expect(count).toBeLessThanOrEqual(156);
+    // Bumped 156 -> 157 for the P1 journal-recall repair (additive
+    // vehicle-cleaning skill seed, 20260719150000). GREEN / paired rollback.
+    expect(count).toBeLessThanOrEqual(157);
   });
 });

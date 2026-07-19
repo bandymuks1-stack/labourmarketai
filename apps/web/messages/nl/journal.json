@@ -397,5 +397,17 @@
   "pipelineCvUpdated": "CV bijgewerkt.",
   "pipelineCvUnchanged": "CV ongewijzigd.",
   "pipelineFailed": "Invoer opgeslagen, maar de vaardigheidsherkenning is mislukt (code: {trace}). Gebruik “Herkenning vernieuwen”.",
-  "reprocessEntry": "Herkenning vernieuwen"
+  "reprocessEntry": "Herkenning vernieuwen",
+  "resultDetected": "Gedetecteerd",
+  "resultAutoAdded": "Automatisch toegevoegd",
+  "resultNeedsConfirm": "Te controleren",
+  "resultRejected": "Afgewezen",
+  "candidateConfirm": "Toevoegen",
+  "candidateReject": "Afwijzen",
+  "candidateConfirming": "Opslaan…",
+  "candidateConfirmed": "Toegevoegd",
+  "candidateRejected": "Afgewezen",
+  "candidateError": "Opslaan mislukt. Probeer het opnieuw.",
+  "rejectedReasonUser": "door u afgewezen",
+  "rejectedReasonInactive": "niet in de catalogus"
 }

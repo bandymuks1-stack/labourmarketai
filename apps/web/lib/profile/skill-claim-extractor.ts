@@ -467,6 +467,23 @@ const DICTIONARY: readonly DictionaryRow[] = [
     ],
   },
   {
+    // Tool mention → capability (P1 recall repair 2026-07-19): work done WITH
+    // AI tools is a real, inferable capability the incident entry named
+    // outright ("Kodavau programą su chat gpt ir claude code"). Unambiguous
+    // tool names only — surfaced as a review candidate (never verified, §7).
+    label: "Darbas su AI įrankiais (ChatGPT / Claude)",
+    needles: [
+      "chat gpt",
+      "chatgpt",
+      "claude",
+      "copilot",
+      "dirbtin intelekt",
+      "dirbtinį intelekt",
+      "ai irank",
+      "ai įrank",
+    ],
+  },
+  {
     // Founding / building companies — "kuriu įmones", "įkūriau įmonę".
     label: "Įmonių kūrimas",
     needles: [

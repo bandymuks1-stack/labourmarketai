@@ -153,6 +153,9 @@ export const SKILL_RECOGNITION_STATUS: Readonly<Record<string, SkillRecognitionS
   "animal-care": deferred(
     "LT/EN/RU needles only — per-language animal words collide with pet smalltalk; revisit with real journal data",
   ),
+  "vehicle-cleaning": deferred(
+    "P1 recall repair 2026-07-19 — LT/EN/RU needles only; per-language car-wash phrasings ride a future pack wave",
+  ),
   "first-aid": deferred(
     "LT/EN/RU needles only — regulated-adjacent phrasing per language needs owner review (no medical claims, doctrine §7)",
   ),
