@@ -1047,6 +1047,17 @@ function mapJournalRpcError(err: {
         "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
     };
   }
+  // W0 restore hardening: a competing live correction of the same original
+  // already exists — restoring would show two versions of the same work.
+  if (text.includes("correction_conflict_cannot_restore")) {
+    return {
+      ok: false,
+      code: "entry_superseded",
+      message:
+        "Šio įrašo atkurti negalima — tam pačiam darbui jau yra kita " +
+        "aktuali pataisyta versija.",
+    };
+  }
   // W0 atomic supersede: the RPC row-lock rejected a stale/concurrent save.
   // Checked AFTER the `_cannot_restore` variant (that text contains this one).
   if (text.includes("entry_superseded")) {

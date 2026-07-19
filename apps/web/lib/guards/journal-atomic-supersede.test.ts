@@ -119,6 +119,38 @@ describe("W0 migration — journal_entry_supersede_v2 atomicity", () => {
     expect(migration).not.toMatch(/verified\s*(=|,)\s*true/i);
     expect(migration).not.toMatch(/manager_confirmed/);
   });
+
+  it("carries correction_of forward when editing a live correction (review P2-2)", () => {
+    expect(v2Body).toMatch(
+      /case when v_old_confirmed > 0 then p_old_entry_id\s+else v_old_correction_of end/i,
+    );
+    expect(legacyBody).toMatch(
+      /case when v_old_confirmed > 0 then p_old_entry_id\s+else v_old_correction_of end/i,
+    );
+  });
+});
+
+describe("W0 migration — hardened journal_entry_restore (review P2-1)", () => {
+  const restoreStart = migration.indexOf(
+    "create or replace function public.journal_entry_restore(",
+  );
+  const restoreBody = migration.slice(restoreStart);
+
+  it("locks the row and its correction parent before restoring", () => {
+    expect(restoreStart).toBeGreaterThan(0);
+    expect(restoreBody).toMatch(
+      /where id = p_entry_id\s+for update/i,
+    );
+    expect(restoreBody).toMatch(
+      /where id = v_correction_of\s+for update/i,
+    );
+  });
+
+  it("refuses to resurrect a second live correction", () => {
+    expect(restoreBody).toMatch(
+      /c\.correction_of = v_correction_of[\s\S]*c\.id <> p_entry_id[\s\S]*raise exception 'correction_conflict_cannot_restore'/i,
+    );
+  });
 });
 
 describe("W0 migration — hardened legacy journal_entry_supersede", () => {
@@ -159,12 +191,15 @@ describe("W0 migration — grants and rollback", () => {
     expect(searchPaths.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("rollback drops v2 and restores the prior legacy body", () => {
+  it("rollback drops v2 and restores the prior legacy bodies", () => {
     expect(rollback).toMatch(
       /drop function if exists public\.journal_entry_supersede_v2/i,
     );
     expect(rollback).toMatch(
       /create or replace function public\.journal_entry_supersede\(/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.journal_entry_restore\(/i,
     );
   });
 });

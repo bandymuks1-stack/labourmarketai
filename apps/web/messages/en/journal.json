@@ -448,7 +448,7 @@
     "siteLabel": "Site / location",
     "institutionLabel": "Institution",
     "topicLabel": "Topic",
-    "conflictNote": "This entry was already updated in another tab or session. Your unsaved changes are still in the form — reload the page and edit the latest version.",
+    "conflictNote": "This entry was already updated in another tab or session. If you want to keep the changes typed here, copy your text first — reloading the page will discard them and open the latest version for editing.",
     "conflictReload": "Reload page"
   }
 }

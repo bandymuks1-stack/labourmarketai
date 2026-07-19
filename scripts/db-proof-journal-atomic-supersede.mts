@@ -18,6 +18,10 @@
  *   5. Same injection on the journal_entry_skills link write.
  *   6. Stale save (already superseded) → structured `entry_superseded`.
  *   7. Unknown taxonomy slug → `skill_slug_unknown`, nothing persisted.
+ *   8. Editing a live correction carries `correction_of` forward and the
+ *      one-live-correction guard still refuses a second correction.
+ *   9. Restore cannot resurrect a second live correction
+ *      (`correction_conflict_cannot_restore`).
  *
  * Usage:  npx tsx scripts/db-proof-journal-atomic-supersede.mts
  * Env:    DB_URL (default local supabase: postgresql://postgres:postgres@127.0.0.1:54322/postgres)
@@ -390,6 +394,93 @@ async function main(): Promise<void> {
       "P7 unknown slug fails whole save",
       err.includes("skill_slug_unknown") && live.length === 1 && live[0] === entryA,
       `error=${err.slice(0, 50)} live=${live.length}`,
+    );
+    await c1.end();
+  }
+
+  // ── Proof 8: editing a live correction carries correction_of forward ──────
+  // (review P2-2: without the carry, superseding correction C of confirmed
+  // original O strips the marker, and a second correction of O slips past
+  // the one-live-correction guard.)
+  {
+    const f = await makeFixture(a, `${fixtureTag}-p8`);
+    const entryO = await makeEntry(a, f, "patvirtintas originalas");
+    const { rows: conf8 } = await a.query(
+      `insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+       values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+               'w0-proof-conf8-' || $1 || '@fixture.local', 'x', now(), '{"provider":"email"}', '{}', now(), now())
+       returning id`,
+      [fixtureTag],
+    );
+    await a.query(
+      `insert into public.profiles (id, active_role, full_name) values ($1, 'company', 'W0 Confirmer 8')
+       on conflict (id) do update set active_role = 'company'`,
+      [conf8[0].id],
+    );
+    const { rows: ctx8 } = await a.query(
+      `insert into public.engagement_contexts (profile_id, relationship_slug, title, hash_self)
+       values ($1::uuid, 'manager', 'W0 confirmer ctx 8', md5($1 || clock_timestamp()::text))
+       returning id`,
+      [conf8[0].id],
+    );
+    await a.query(
+      `insert into public.journal_entry_confirmations
+         (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+       values ($1, $2, $3, 'manager', '{"scope":"w0-proof"}'::jsonb)`,
+      [entryO, conf8[0].id, ctx8[0].id],
+    );
+    const c1 = await asUser(f.profileId);
+    // Correction C of confirmed O.
+    const sC = supersedeSql(entryO, f, "pataisymas C");
+    const { rows: cRows } = await c1.query(sC.sql, sC.params);
+    const entryC = cRows[0].id as string;
+    // Edit the (unconfirmed) correction C → C'.
+    const sC2 = supersedeSql(entryC, f, "pataisymas C atnaujintas");
+    const { rows: c2Rows } = await c1.query(sC2.sql, sC2.params);
+    const entryC2 = c2Rows[0].id as string;
+    const { rows: carried } = await a.query(
+      `select correction_of from public.journal_entries where id = $1`,
+      [entryC2],
+    );
+    // A fresh second correction of O must STILL be refused.
+    let refused = "";
+    try {
+      const sX = supersedeSql(entryO, f, "antras pataisymas");
+      await c1.query(sX.sql, sX.params);
+    } catch (e) {
+      refused = String((e as Error).message);
+    }
+    record(
+      "P8 correction_of carried on edit; one-live-correction holds",
+      carried[0].correction_of === entryO && refused.includes("entry_superseded"),
+      `carried=${carried[0].correction_of === entryO} secondCorrection=${refused.slice(0, 30)}`,
+    );
+    // ── Proof 9: restore of a superseded/competing correction is refused ────
+    // C was superseded by C' → restore(C) must fail; and a deleted correction
+    // cannot resurrect alongside a live sibling correction.
+    await a.query(
+      `update public.journal_entries set deleted_at = now() where id = $1`,
+      [entryC2],
+    );
+    // With C' deleted, a NEW correction of O is legal...
+    const sY = supersedeSql(entryO, f, "trečias pataisymas");
+    const { rows: yRows } = await c1.query(sY.sql, sY.params);
+    // ...and restoring C' must now be refused (competing live correction).
+    let restoreErr = "";
+    try {
+      await c1.query(`select public.journal_entry_restore($1::uuid)`, [entryC2]);
+    } catch (e) {
+      restoreErr = String((e as Error).message);
+    }
+    const { rows: liveCorr } = await a.query(
+      `select count(*)::int as n from public.journal_entries
+        where correction_of = $1 and deleted_at is null and superseded_by is null`,
+      [entryO],
+    );
+    record(
+      "P9 restore cannot resurrect a second live correction",
+      restoreErr.includes("correction_conflict_cannot_restore") && liveCorr[0].n === 1,
+      `restoreErr=${restoreErr.slice(0, 45)} liveCorrections=${liveCorr[0].n} newCorrection=${Boolean(yRows[0].id)}`,
     );
     await c1.end();
   }

@@ -212,7 +212,7 @@
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
     "topicLabel": "[EN] Topic",
-    "conflictNote": "Šis ieraksts jau ir mainīts citā cilnē vai sesijā. Nesaglabātās izmaiņas palika formā — pārlādējiet lapu un rediģējiet jaunāko versiju.",
+    "conflictNote": "Šis ieraksts jau ir mainīts citā cilnē vai sesijā. Ja vēlaties saglabāt šeit ievadītās izmaiņas, vispirms nokopējiet tekstu — pārlādējot lapu, tās tiks zaudētas, un pēc tam rediģēsiet jaunāko versiju.",
     "conflictReload": "Pārlādēt lapu"
   }
 }

@@ -373,7 +373,7 @@
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
     "topicLabel": "[EN] Topic",
-    "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Tallentamattomat muutokset ovat yhä lomakkeessa — lataa sivu uudelleen ja muokkaa uusinta versiota.",
+    "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Jos haluat säilyttää tähän kirjoitetut muutokset, kopioi teksti ensin — sivun uudelleenlataus hävittää ne, ja muokkaat sen jälkeen uusinta versiota.",
     "conflictReload": "Lataa sivu uudelleen"
   }
 }

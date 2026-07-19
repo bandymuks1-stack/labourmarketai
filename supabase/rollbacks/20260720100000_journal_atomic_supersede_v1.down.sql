@@ -6,6 +6,8 @@
 --    supabase/migrations/20260610213000_journal_entry_project_autolink.sql
 --    (no lock, unconditional pointer update) — i.e. re-introduces the known
 --    race; use only for a deliberate rollback.
+-- 3. Restores the PRIOR journal_entry_restore body verbatim from
+--    supabase/migrations/20260712120000_journal_entry_restore.sql.
 -- ============================================================================
 
 begin;
@@ -127,5 +129,48 @@ revoke all on function public.journal_entry_supersede(
 grant execute on function public.journal_entry_supersede(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb
 ) to authenticated;
+
+create or replace function public.journal_entry_restore(
+  p_entry_id uuid
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_worker_id      uuid;
+  v_deleted_at     timestamptz;
+  v_superseded_by  uuid;
+begin
+  select worker_id, deleted_at, superseded_by
+    into v_worker_id, v_deleted_at, v_superseded_by
+    from public.journal_entries
+    where id = p_entry_id;
+
+  if v_worker_id is null then
+    raise exception 'entry_not_found' using errcode = 'P0002';
+  end if;
+
+  if not public.owns_worker(v_worker_id) then
+    raise exception 'not_owner' using errcode = '42501';
+  end if;
+
+  if v_deleted_at is null then
+    return; -- Idempotent.
+  end if;
+
+  if v_superseded_by is not null then
+    raise exception 'entry_superseded_cannot_restore' using errcode = '42P10';
+  end if;
+
+  update public.journal_entries
+     set deleted_at = null,
+         updated_at = now()
+   where id = p_entry_id;
+end;
+$$;
+
+revoke all on function public.journal_entry_restore(uuid) from public;
+grant execute on function public.journal_entry_restore(uuid) to authenticated;
 
 commit;

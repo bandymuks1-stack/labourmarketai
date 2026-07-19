@@ -448,7 +448,7 @@
     "siteLabel": "Object / locatie",
     "institutionLabel": "Instelling",
     "topicLabel": "Onderwerp",
-    "conflictNote": "Deze registratie is al gewijzigd in een ander tabblad of een andere sessie. Uw niet-opgeslagen wijzigingen staan nog in het formulier — herlaad de pagina en bewerk de nieuwste versie.",
+    "conflictNote": "Deze registratie is al gewijzigd in een ander tabblad of een andere sessie. Wilt u de hier ingevoerde wijzigingen bewaren, kopieer dan eerst uw tekst — bij het herladen van de pagina gaan ze verloren en bewerkt u daarna de nieuwste versie.",
     "conflictReload": "Pagina herladen"
   }
 }
