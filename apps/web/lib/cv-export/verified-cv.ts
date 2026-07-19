@@ -106,8 +106,12 @@ export type VerifiedCvData = {
   /** Flat catalogued skill facts (slug + real verified flag) — the tailored
    *  mode's fit subject; same rows the tiers are grouped from. */
   skillFacts: { slug: string; verified: boolean }[];
-  /** Free-label self-declared claims — ALWAYS the declared tier. */
-  declaredClaims: string[];
+  /** Free-label self-declared claims — ALWAYS the declared tier, NEVER
+   *  presented as verified/confirmed. `origin` says where the claim came
+   *  from: the profile narrative ("profile") or a work-journal entry's
+   *  `skill_claim` metric ("journal", P0 Track B) — the CV UI labels the
+   *  journal-derived ones so provenance stays honest. */
+  declaredClaims: { label: string; origin: "profile" | "journal" }[];
   /** Real work history from engagement_contexts (companies, role, dates) —
    *  the same source the profile renders; empty array when none. */
   workHistory: VerifiedCvEngagement[];
@@ -186,7 +190,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       getOwnTrustSignals(workerId),
       supabase
         .from("journal_entries")
-        .select("id, created_at, project_id")
+        .select("id, created_at, project_id, deleted_at, superseded_by")
         .eq("worker_id", workerId),
       supabase
         .from("engagement_contexts")
@@ -324,7 +328,50 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     verified: t.verified,
   }));
 
-  const declaredClaims = claims.map((c) => c.normalized_label);
+  // Declared-tier claims: profile narrative claims + DISTINCT journal-derived
+  // `skill_claim` metric labels (P0 Track B). Two-step under the worker's own
+  // RLS: own live entry ids (not deleted / not superseded) → metrics in those
+  // ids. Journal claims dedupe against profile claims by normalized label and
+  // stay in the SAME declared tier — never presented as verified.
+  const liveEntryIds = (entriesRes.data ?? [])
+    .filter(
+      (e) =>
+        (e as { deleted_at?: string | null }).deleted_at == null &&
+        (e as { superseded_by?: string | null }).superseded_by == null,
+    )
+    .map((e) => e.id);
+  const journalClaimLabels: string[] = [];
+  if (liveEntryIds.length > 0) {
+    const { data: claimMetrics } = await tolerant<
+      Array<{ value_text: string | null }>
+    >(
+      sb
+        .from("journal_entry_metrics")
+        .select("value_text")
+        .in("entry_id", liveEntryIds)
+        .eq("metric_slug", "skill_claim"),
+    );
+    const profileNormalized = new Set(claims.map((c) => c.normalized_label));
+    const seen = new Set<string>();
+    for (const m of claimMetrics ?? []) {
+      const label = (m.value_text ?? "").trim();
+      if (!label) continue;
+      const normalized = label.toLowerCase().replace(/\s+/g, " ");
+      if (profileNormalized.has(normalized) || seen.has(normalized)) continue;
+      seen.add(normalized);
+      journalClaimLabels.push(label);
+    }
+  }
+  const declaredClaims: VerifiedCvData["declaredClaims"] = [
+    ...claims.map((c) => ({
+      label: c.normalized_label,
+      origin: "profile" as const,
+    })),
+    ...journalClaimLabels.map((label) => ({
+      label,
+      origin: "journal" as const,
+    })),
+  ];
 
   // Confirmed Work Proof — REAL confirmations only (action 'confirm' or an
   // approved review), one row per entry (latest confirmation), role only.

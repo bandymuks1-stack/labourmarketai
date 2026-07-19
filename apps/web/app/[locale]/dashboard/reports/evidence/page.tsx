@@ -43,7 +43,10 @@ export default async function EvidenceReportPage({
   }
   const cv = cvRes.cv;
   const supported = cv.tiers.evidence.map(skillName);
-  const unsupported = [...cv.tiers.declared.map(skillName), ...cv.declaredClaims];
+  const unsupported = [
+    ...cv.tiers.declared.map(skillName),
+    ...cv.declaredClaims.map((c) => c.label),
+  ];
 
   const report = buildEvidenceReport({
     tierCounts: {

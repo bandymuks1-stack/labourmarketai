@@ -31,7 +31,7 @@ import {
   createJournalEntry,
   supersedeJournalEntry,
 } from "@/lib/journal/actions";
-import { autoLinkRecognizedJournalSkills } from "@/lib/journal/journal-entry-skills-actions";
+import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import {
@@ -300,6 +300,10 @@ export function JournalEntryComposer({
     corrected: number;
     rejected: number;
   } | null>(null);
+  // P0 Track B: the AWAITED server-side pipeline result for the last save —
+  // real counts (detected/added/strengthened/review) + honest failure state.
+  const [savedPipeline, setSavedPipeline] =
+    useState<JournalSkillPipelineResult | null>(null);
   const [skillSuggestions, setSkillSuggestions] = useState<
     ComposerSkillSuggestion[]
   >(editSkillSuggestions);
@@ -576,6 +580,7 @@ export function JournalEntryComposer({
       return;
     }
     setError(null);
+    setSavedPipeline(null);
     setSubmitting(true);
     try {
       const fd = new FormData();
@@ -615,6 +620,13 @@ export function JournalEntryComposer({
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
+      // P0 Track B: rows the worker explicitly REJECTED in review ship WITH
+      // the save so the SERVER-side pipeline excludes them — a rejected
+      // suggestion leaves no trace, not even an internal evidence link.
+      const rejectedSlugs = Object.entries(skillStatuses)
+        .filter(([, s]) => s === "discarded")
+        .map(([slug]) => slug);
+      fd.set("rejected_slugs_json", JSON.stringify(rejectedSlugs));
       const result = editingEntry
         ? await supersedeJournalEntry(editingEntry.id, fd)
         : await createJournalEntry(fd);
@@ -647,16 +659,10 @@ export function JournalEntryComposer({
       } else {
         setPhotoOutcome(null);
       }
-      // systemic-ux-skills-v1: recognition → evidence on save. Links the
-      // recognised skills the worker already declared to this entry (real
-      // journal-supported evidence). Best-effort + additive: never invents a
-      // skill, never verifies, and a failure here never loses the saved entry.
-      // Wagon 5: rows the worker explicitly REJECTED in review are excluded —
-      // a rejected suggestion leaves no trace, not even an evidence link.
-      const rejectedSlugs = Object.entries(skillStatuses)
-        .filter(([, s]) => s === "discarded")
-        .map(([slug]) => slug);
-      void autoLinkRecognizedJournalSkills(result.entryId, text, rejectedSlugs);
+      // P0 Track B: recognition → evidence → CV now runs SERVER-side inside
+      // the save action (awaited, idempotent, RLS-scoped). The result below
+      // is the real outcome — no fire-and-forget call that can silently die.
+      setSavedPipeline(result.skills);
       // Wagon 5: persist corrected rows ("Pataisyti") as SELF-DECLARED claims.
       // The action dedups by normalized label; EMPTY corrections are filtered
       // here so an empty value can never be saved. Never verified, never
@@ -911,6 +917,33 @@ export function JournalEntryComposer({
                   {t("savedSkillsLine", savedSkillsSummary)}
                 </p>
               )}
+            {/* P0 Track B: honest SERVER-side pipeline outcome — real counts
+                from the awaited recognition→evidence→CV run, or the failure
+                line with its trace id (never a silent death). */}
+            {savedPipeline !== null &&
+              (savedPipeline.status === "failed" ? (
+                <p
+                  className="text-xs leading-relaxed text-state-warning"
+                  data-testid="journal-pipeline-failed"
+                >
+                  {t("pipelineFailed", { trace: savedPipeline.trace })}
+                </p>
+              ) : (
+                <p
+                  className="text-xs leading-relaxed text-text-secondary"
+                  data-testid="journal-pipeline-result"
+                >
+                  {t("pipelineLine", {
+                    detected: savedPipeline.detected,
+                    added: savedPipeline.added,
+                    strengthened: savedPipeline.strengthened,
+                    review: savedPipeline.reviewNeeded,
+                  })}{" "}
+                  {savedPipeline.cvUpdated
+                    ? t("pipelineCvUpdated")
+                    : t("pipelineCvUnchanged")}
+                </p>
+              ))}
             {/* Honest "what's next + who confirms" — saving is never a dead end:
                 the entry is below, skills surface in the profile, and it stays
                 private until a real human confirms it. */}

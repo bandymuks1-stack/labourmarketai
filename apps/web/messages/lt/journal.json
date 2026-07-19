@@ -392,5 +392,10 @@
   "statusExplainer": "Kaip naudojami jūsų įrašai?",
   "exampleLine": "Pavyzdžiui: montavau gipso pertvaras, skaičiau brėžinius ir dirbau su lazeriniu nivelyru.",
   "moreOptions": "Daugiau parinkčių",
-  "savedSkillsLine": "Įgūdžiai: pridėta {added}, pataisyta {corrected}, atmesta {rejected}."
+  "savedSkillsLine": "Įgūdžiai: pridėta {added}, pataisyta {corrected}, atmesta {rejected}.",
+  "pipelineLine": "Aptikta įgūdžių: {detected} · pridėta į CV: {added} · sustiprinta įrašu: {strengthened} · peržiūrėti: {review}",
+  "pipelineCvUpdated": "CV atnaujintas.",
+  "pipelineCvUnchanged": "CV nepakito.",
+  "pipelineFailed": "Įrašas išsaugotas, bet įgūdžių atpažinimas nepavyko (kodas: {trace}). Naudokite „Atnaujinti atpažinimą“.",
+  "reprocessEntry": "Atnaujinti atpažinimą"
 }

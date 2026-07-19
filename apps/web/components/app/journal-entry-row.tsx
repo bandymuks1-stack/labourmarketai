@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { restoreJournalEntry, softDeleteJournalEntry } from "@/lib/journal/actions";
+import { reprocessJournalEntrySkills } from "@/lib/journal/skill-pipeline-actions";
+import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { JournalEntrySkillLinks } from "@/components/app/journal-entry-skill-links";
 import type { EntrySkillSource } from "@/lib/journal/entry-skill-source";
 import { recordEvent } from "@/lib/telemetry/task";
@@ -57,6 +59,26 @@ export function JournalEntryRow({
   // undo, instead of silently vanishing (destructive-action contract v1:
   // immediate visible result + working restore path).
   const [deleted, setDeleted] = useState(false);
+  // P0 Track B: idempotent per-entry re-run of the canonical skill pipeline
+  // ("Atnaujinti atpažinimą") — result rendered inline with real counts.
+  const [reprocessing, setReprocessing] = useState(false);
+  const [reprocessResult, setReprocessResult] =
+    useState<JournalSkillPipelineResult | null>(null);
+  const [reprocessError, setReprocessError] = useState(false);
+
+  function onReprocess() {
+    setReprocessError(false);
+    setReprocessResult(null);
+    setReprocessing(true);
+    recordEvent("journal_reprocess_clicked");
+    void reprocessJournalEntrySkills(entryId)
+      .then((res) => {
+        if (res.ok) setReprocessResult(res.result);
+        else setReprocessError(true);
+      })
+      .catch(() => setReprocessError(true))
+      .finally(() => setReprocessing(false));
+  }
 
   function onDelete() {
     recordEvent("journal_delete_clicked");
@@ -176,6 +198,19 @@ export function JournalEntryRow({
               {t("entry.deleteBlocked")}
             </span>
           )}
+          {/* P0 Track B: unobtrusive idempotent re-run of the canonical
+              recognition pipeline for THIS entry (recovery path after a
+              failed save-time run; safe to repeat). */}
+          <button
+            type="button"
+            onClick={onReprocess}
+            disabled={reprocessing}
+            aria-busy={reprocessing || undefined}
+            className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid={`journal-entry-reprocess-${entryId}`}
+          >
+            {t("reprocessEntry")}
+          </button>
         </div>
         {error && (
           <span
@@ -184,6 +219,39 @@ export function JournalEntryRow({
             data-testid={`journal-entry-delete-error-${entryId}`}
           >
             {error}
+          </span>
+        )}
+        {reprocessResult !== null &&
+          (reprocessResult.status === "failed" ? (
+            <span
+              className="w-full text-[11px] text-state-warning"
+              data-testid={`journal-entry-reprocess-failed-${entryId}`}
+            >
+              {t("pipelineFailed", { trace: reprocessResult.trace })}
+            </span>
+          ) : (
+            <span
+              className="w-full text-[11px] text-text-secondary"
+              data-testid={`journal-entry-reprocess-result-${entryId}`}
+            >
+              {t("pipelineLine", {
+                detected: reprocessResult.detected,
+                added: reprocessResult.added,
+                strengthened: reprocessResult.strengthened,
+                review: reprocessResult.reviewNeeded,
+              })}{" "}
+              {reprocessResult.cvUpdated
+                ? t("pipelineCvUpdated")
+                : t("pipelineCvUnchanged")}
+            </span>
+          ))}
+        {reprocessError && (
+          <span
+            role="alert"
+            className="w-full text-[11px] text-state-danger"
+            data-testid={`journal-entry-reprocess-error-${entryId}`}
+          >
+            {t("saveError")}
           </span>
         )}
       </div>

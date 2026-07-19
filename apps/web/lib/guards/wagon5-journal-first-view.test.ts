@@ -74,13 +74,21 @@ describe("Wagon 5 completion — composer first view contract", () => {
     expect(details).toMatch(/examplesTitle/);
   });
 
-  it("rejected suggestions leave no trace — excluded from evidence auto-link", () => {
+  it("rejected suggestions leave no trace — excluded from the SERVER pipeline", () => {
+    // P0 Track B repin: the fire-and-forget client call is gone; the rejected
+    // slugs now ship WITH the save (rejected_slugs_json) and the AWAITED
+    // server-side pipeline excludes them — same no-trace guarantee, stronger
+    // delivery (it can no longer die silently in a closing tab).
+    expect(COMPOSER).not.toMatch(/void autoLinkRecognizedJournalSkills/);
     expect(COMPOSER).toMatch(
-      /autoLinkRecognizedJournalSkills\(result\.entryId,\s*text,\s*rejectedSlugs\)/,
+      /fd\.set\("rejected_slugs_json",\s*JSON\.stringify\(rejectedSlugs\)\)/,
     );
-    const actions = read("lib/journal/journal-entry-skills-actions.ts");
-    expect(actions).toMatch(/excludeSlugs\?/);
-    expect(actions).toMatch(/!excluded\.has\(r\.slug\)/);
+    const actions = read("lib/journal/actions.ts");
+    expect(actions).toMatch(/rejected_slugs_json/);
+    expect(actions).toMatch(/excludeSlugs:\s*rejectedSlugs/);
+    const pipeline = read("lib/journal/skill-pipeline.ts");
+    expect(pipeline).toMatch(/excludeSlugs\?/);
+    expect(pipeline).toMatch(/!excluded\.has\(r\.slug\)/);
   });
 
   it("empty corrections can never be saved; corrected rows stay self-declared claims", () => {

@@ -6964,7 +6964,8 @@
       "notVisible": "Deze aanvraag is niet zichtbaar voor jou — het standaard-cv wordt getoond.",
       "noStructure": "Deze aanvraag heeft geen gestructureerde vaardigheidseisen — het standaard-cv wordt getoond.",
       "matchedTag": "Sluit aan op de aanvraag"
-    }
+    },
+    "claimFromJournal": "uit het werkjournaal"
   },
   "todayScreen": {
     "eyebrow": "Vandaag",

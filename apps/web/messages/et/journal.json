@@ -156,5 +156,10 @@
   "statusExplainer": "Kuidas teie sissekandeid kasutatakse?",
   "exampleLine": "Näiteks: paigaldasin kipsseinu, lugesin jooniseid ja töötasin laserloodiga.",
   "moreOptions": "Rohkem valikuid",
-  "savedSkillsLine": "Oskused: lisatud {added}, parandatud {corrected}, tagasi lükatud {rejected}."
+  "savedSkillsLine": "Oskused: lisatud {added}, parandatud {corrected}, tagasi lükatud {rejected}.",
+  "pipelineLine": "[EN] Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "[EN] CV updated.",
+  "pipelineCvUnchanged": "[EN] CV unchanged.",
+  "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "[EN] Refresh recognition"
 }

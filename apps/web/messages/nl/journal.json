@@ -392,5 +392,10 @@
   "statusExplainer": "Hoe worden uw invoeren gebruikt?",
   "exampleLine": "Bijvoorbeeld: ik plaatste gipswanden, las tekeningen en werkte met een laserwaterpas.",
   "moreOptions": "Meer opties",
-  "savedSkillsLine": "Vaardigheden: {added} toegevoegd, {corrected} gecorrigeerd, {rejected} afgewezen."
+  "savedSkillsLine": "Vaardigheden: {added} toegevoegd, {corrected} gecorrigeerd, {rejected} afgewezen.",
+  "pipelineLine": "Gevonden vaardigheden: {detected} · toegevoegd aan CV: {added} · versterkt door deze invoer: {strengthened} · te beoordelen: {review}",
+  "pipelineCvUpdated": "CV bijgewerkt.",
+  "pipelineCvUnchanged": "CV ongewijzigd.",
+  "pipelineFailed": "Invoer opgeslagen, maar de vaardigheidsherkenning is mislukt (code: {trace}). Gebruik “Herkenning vernieuwen”.",
+  "reprocessEntry": "Herkenning vernieuwen"
 }

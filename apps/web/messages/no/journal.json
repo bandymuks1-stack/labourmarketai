@@ -156,5 +156,10 @@
   "statusExplainer": "Hvordan brukes oppføringene dine?",
   "exampleLine": "For eksempel: jeg monterte gipsvegger, leste tegninger og jobbet med laser-nivellér.",
   "moreOptions": "Flere valg",
-  "savedSkillsLine": "Ferdigheter: {added} lagt til, {corrected} rettet, {rejected} avvist."
+  "savedSkillsLine": "Ferdigheter: {added} lagt til, {corrected} rettet, {rejected} avvist.",
+  "pipelineLine": "[EN] Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "[EN] CV updated.",
+  "pipelineCvUnchanged": "[EN] CV unchanged.",
+  "pipelineFailed": "[EN] Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "[EN] Refresh recognition"
 }

@@ -6964,7 +6964,8 @@
       "notVisible": "Šis poreikis jums nematomas — rodomas standartinis CV.",
       "noStructure": "Šis poreikis neturi struktūruotų įgūdžių reikalavimų — rodomas standartinis CV.",
       "matchedTag": "Atitinka poreikį"
-    }
+    },
+    "claimFromJournal": "iš darbo įrašo"
   },
   "todayScreen": {
     "eyebrow": "Šiandien",

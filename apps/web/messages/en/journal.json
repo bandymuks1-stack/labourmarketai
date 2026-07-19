@@ -392,5 +392,10 @@
   "statusExplainer": "How are your entries used?",
   "exampleLine": "For example: I installed drywall partitions, read blueprints and worked with a laser level.",
   "moreOptions": "More options",
-  "savedSkillsLine": "Skills: added {added}, corrected {corrected}, dismissed {rejected}."
+  "savedSkillsLine": "Skills: added {added}, corrected {corrected}, dismissed {rejected}.",
+  "pipelineLine": "Skills detected: {detected} · added to CV: {added} · strengthened by this entry: {strengthened} · to review: {review}",
+  "pipelineCvUpdated": "CV updated.",
+  "pipelineCvUnchanged": "CV unchanged.",
+  "pipelineFailed": "Entry saved, but skill recognition failed (code: {trace}). Use “Refresh recognition”.",
+  "reprocessEntry": "Refresh recognition"
 }

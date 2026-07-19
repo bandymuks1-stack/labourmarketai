@@ -392,5 +392,10 @@
   "statusExplainer": "Как используются ваши записи?",
   "exampleLine": "Например: монтировал гипсокартонные перегородки, читал чертежи и работал с лазерным нивелиром.",
   "moreOptions": "Больше настроек",
-  "savedSkillsLine": "Навыки: добавлено {added}, исправлено {corrected}, отклонено {rejected}."
+  "savedSkillsLine": "Навыки: добавлено {added}, исправлено {corrected}, отклонено {rejected}.",
+  "pipelineLine": "Обнаружено навыков: {detected} · добавлено в CV: {added} · подкреплено записью: {strengthened} · на проверку: {review}",
+  "pipelineCvUpdated": "CV обновлено.",
+  "pipelineCvUnchanged": "CV не изменилось.",
+  "pipelineFailed": "Запись сохранена, но распознавание навыков не удалось (код: {trace}). Используйте «Обновить распознавание».",
+  "reprocessEntry": "Обновить распознавание"
 }

@@ -1555,7 +1555,8 @@
     "proofEmpty": "Inga bekräftade poster ännu.",
     "generatedAt": "Genererad",
     "verifyNote": "Bekräftelser kan kontrolleras på plattformen.",
-    "notWorker": "CV-export är tillgänglig för arbetarprofiler — det byggs av arbetsjournalen och bekräftade färdigheter."
+    "notWorker": "CV-export är tillgänglig för arbetarprofiler — det byggs av arbetsjournalen och bekräftade färdigheter.",
+    "claimFromJournal": "[EN] from work journal"
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",

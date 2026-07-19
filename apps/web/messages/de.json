@@ -6964,7 +6964,8 @@
       "notVisible": "Diese Anfrage ist für Sie nicht sichtbar — der Standard-Lebenslauf wird angezeigt.",
       "noStructure": "Diese Anfrage hat keine strukturierten Anforderungen — der Standard-Lebenslauf wird angezeigt.",
       "matchedTag": "Passt zur Anfrage"
-    }
+    },
+    "claimFromJournal": "aus dem Arbeitsjournal"
   },
   "todayScreen": {
     "eyebrow": "Heute",
