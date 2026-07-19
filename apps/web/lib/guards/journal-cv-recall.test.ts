@@ -24,9 +24,13 @@ describe("verified CV — journal recall read side", () => {
     expect(CV).toMatch(/superseded_by == null/);
   });
 
-  it("honours rejection markers (rejected labels never print)", () => {
+  it("honours rejection markers ENTRY-SCOPED (P2 integrity fix)", () => {
     expect(CV).toMatch(/skill_claim_rejected/);
-    expect(CV).toMatch(/rejectedNormalized/);
+    // Pairing key is entry_id + normalized label — a rejection on one
+    // entry must never hide the same un-rejected claim from another.
+    expect(CV).toMatch(/rejectedByEntry/);
+    expect(CV).toMatch(/\$\{m\.entry_id\}\|/);
+    expect(CV).toMatch(/selectJournalClaimLabels/);
   });
 
   it("journal claims stay in the DECLARED tier with journal origin", () => {

@@ -66,9 +66,14 @@ export type JournalOutcomeKind =
  *  slug (skills), normalized label (claims/ambiguous) or fragment id. */
 export type OutcomeRef = { kind: JournalOutcomeKind; ref: string };
 
+/** 'resolved' = the worker answered an ambiguity card for THIS entry
+ *  (entry-scoped ambiguous_resolved marker) — ranked above every automatic
+ *  match because it is an explicit human decision (P2 integrity fix). */
+export type JournalRecognizedVia = SkillMatchVia | "resolved";
+
 export type JournalRecognizedSkill = {
   slug: string;
-  via: SkillMatchVia;
+  via: JournalRecognizedVia;
   confidence: SkillConfidence;
   fragmentIds: string[];
 };
@@ -141,9 +146,14 @@ export type JournalEntryRejections = {
 export type DeriveJournalRecognitionOptions = {
   declaredSlugs: ReadonlySet<string>;
   entryRejections: JournalEntryRejections;
+  /** Worker ambiguity decisions on THIS entry (normalized candidate label →
+   *  chosen slug). A resolved ambiguity is emitted as a recognized skill
+   *  (via 'resolved') and never re-offered as a candidate (P2 fix). */
+  entryResolutions?: ReadonlyMap<string, string>;
 };
 
-const VIA_RANK: Record<SkillMatchVia, number> = {
+const VIA_RANK: Record<JournalRecognizedVia, number> = {
+  resolved: 4,
   exact: 3,
   synonym: 2,
   fuzzy: 1,
@@ -185,7 +195,11 @@ export function deriveJournalRecognition(
 
   const recognizedMap = new Map<
     string,
-    { via: SkillMatchVia; confidence: SkillConfidence; fragmentIds: Set<string> }
+    {
+      via: JournalRecognizedVia;
+      confidence: SkillConfidence;
+      fragmentIds: Set<string>;
+    }
   >();
   const fuzzyMap = new Map<
     string,
@@ -288,6 +302,30 @@ export function deriveJournalRecognition(
         // still decides which reading this entry evidences.
         if (choiceSlugs.some((s) => recognizedInFragment.has(s))) continue;
         const norm = normalizeClaimLabel(a.label);
+        // Worker already resolved THIS ambiguity on THIS entry: emit the
+        // chosen reading as a recognized skill (via 'resolved') and never
+        // re-offer the card — reprocess/restore/pipeline upgrades keep the
+        // decision. Decisions are entry-scoped by construction (the marker
+        // lives in this entry's metrics only).
+        const resolvedSlug = opts.entryResolutions?.get(norm);
+        if (resolvedSlug) {
+          const prior = recognizedMap.get(resolvedSlug);
+          if (!prior) {
+            recognizedMap.set(resolvedSlug, {
+              via: "resolved",
+              confidence: "high",
+              fragmentIds: new Set([f.id]),
+            });
+          } else {
+            prior.fragmentIds.add(f.id);
+            if (VIA_RANK.resolved > VIA_RANK[prior.via]) {
+              prior.via = "resolved";
+              prior.confidence = "high";
+            }
+          }
+          outcomes.push({ kind: "recognized", ref: resolvedSlug });
+          continue;
+        }
         if (rejectedClaimSet.has(norm)) {
           pushRejected("claim", a.label, undefined, "user_rejected", f.id);
           outcomes.push({ kind: "rejected", ref: norm });

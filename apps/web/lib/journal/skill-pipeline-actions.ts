@@ -351,6 +351,7 @@ async function appendEntryMarker(
   entryId: string,
   metricSlug: string,
   valueText: string,
+  valueNumeric?: number,
 ): Promise<boolean> {
   const { data: existing } = await sb
     .from("journal_entry_metrics")
@@ -368,6 +369,9 @@ async function appendEntryMarker(
       metric_slug: metricSlug,
       source: "worker_input",
       value_text: valueText,
+      ...(typeof valueNumeric === "number"
+        ? { value_numeric: valueNumeric }
+        : {}),
     },
   ]);
   return !ins.error;
@@ -434,6 +438,28 @@ export async function confirmJournalAmbiguousChoice(
     chosenSlug,
   );
   if (!res.ok) return res;
+
+  // P2 integrity fix: persist the worker's DECISION as an entry-scoped
+  // append-only marker so reprocess / restore / pipeline upgrades never
+  // re-offer the same ambiguity on THIS entry. value = normalized
+  // candidate label => chosen slug; value_numeric = pipeline version at
+  // decision time (provenance: worker_input on their own entry). A
+  // decision here can never affect another entry — the marker lives in
+  // this entry's metrics only. Idempotent: skip when already recorded.
+  const normalizedCandidate = normalizeClaimLabel(candidate.label);
+  const already = ctx.recognition.recognizedSkills.some(
+    (r) => r.via === "resolved" && r.slug === chosenSlug,
+  );
+  if (!already) {
+    const marked = await appendEntryMarker(
+      ctx.sb,
+      ctx.entryId,
+      ENTRY_MARKER_SLUGS.ambiguousResolved,
+      `${normalizedCandidate}=>${chosenSlug}`,
+      JOURNAL_PIPELINE_VERSION,
+    );
+    if (!marked) return { ok: false, code: "write_failed" };
+  }
 
   // The ambiguity is resolved by the worker's explicit answer — the pending
   // clarification row (their own; RLS-scoped) is no longer open.

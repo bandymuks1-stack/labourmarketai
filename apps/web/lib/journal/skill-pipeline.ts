@@ -123,7 +123,27 @@ export const ENTRY_MARKER_SLUGS = {
   unresolvedFragment: "unresolved_fragment",
   unresolvedDismissed: "unresolved_dismissed",
   pipelineVersion: "pipeline_version",
+  /** Worker's ambiguity decision (P2 integrity fix): entry-scoped,
+   *  append-only. value_text = `<normalized candidate label>=><chosen slug>`,
+   *  value_numeric = pipeline version at decision time, source =
+   *  worker_input (the worker's own decision on their own entry). The
+   *  derivation reads it so a resolved ambiguity is never re-offered on
+   *  reprocess/restore/upgrade — and a decision on one entry can never
+   *  leak into another (it lives in that entry's metrics only). */
+  ambiguousResolved: "ambiguous_resolved",
 } as const;
+
+/** Parse an ambiguous_resolved marker value into [normalizedLabel, slug]. */
+export function parseAmbiguousResolvedMarker(
+  valueText: string,
+): { normalizedLabel: string; slug: string } | null {
+  const idx = valueText.indexOf("=>");
+  if (idx <= 0) return null;
+  const normalizedLabel = valueText.slice(0, idx).trim();
+  const slug = valueText.slice(idx + 2).trim();
+  if (!normalizedLabel || !slug) return null;
+  return { normalizedLabel, slug };
+}
 
 function newTrace(): string {
   return randomBytes(6).toString("hex");
@@ -182,6 +202,9 @@ export type EntryRecognitionInputs = {
   existingUnresolvedSet: ReadonlySet<string>;
   /** Normalized texts the worker dismissed (unresolved_dismissed markers). */
   dismissedUnresolvedSet: ReadonlySet<string>;
+  /** Worker ambiguity decisions on THIS entry: normalized candidate label →
+   *  chosen slug (ambiguous_resolved markers, P2 integrity fix). */
+  entryResolutions: ReadonlyMap<string, string>;
   /** Latest pipeline_version metric on the entry (0 when absent). */
   latestPipelineVersion: number;
 };
@@ -213,6 +236,7 @@ export async function loadEntryRecognitionInputs(
         ENTRY_MARKER_SLUGS.claim,
         ENTRY_MARKER_SLUGS.unresolvedFragment,
         ENTRY_MARKER_SLUGS.unresolvedDismissed,
+        ENTRY_MARKER_SLUGS.ambiguousResolved,
         ENTRY_MARKER_SLUGS.pipelineVersion,
       ]),
   ]);
@@ -235,6 +259,7 @@ export async function loadEntryRecognitionInputs(
   const existingClaimSet = new Set<string>();
   const existingUnresolvedSet = new Set<string>();
   const dismissedUnresolvedSet = new Set<string>();
+  const entryResolutions = new Map<string, string>();
   let latestPipelineVersion = 0;
   for (const r of (metricsRes.data ?? []) as {
     metric_slug: string | null;
@@ -259,6 +284,18 @@ export async function loadEntryRecognitionInputs(
         if (r.value_text)
           dismissedUnresolvedSet.add(normalizeClaimLabel(r.value_text));
         break;
+      case ENTRY_MARKER_SLUGS.ambiguousResolved: {
+        const parsed = r.value_text
+          ? parseAmbiguousResolvedMarker(r.value_text)
+          : null;
+        if (parsed) {
+          entryResolutions.set(
+            normalizeClaimLabel(parsed.normalizedLabel),
+            parsed.slug,
+          );
+        }
+        break;
+      }
       case ENTRY_MARKER_SLUGS.pipelineVersion:
         if (
           typeof r.value_numeric === "number" &&
@@ -277,6 +314,7 @@ export async function loadEntryRecognitionInputs(
     existingClaimSet,
     existingUnresolvedSet,
     dismissedUnresolvedSet,
+    entryResolutions,
     latestPipelineVersion,
   };
 }
@@ -605,8 +643,29 @@ export async function processJournalEntrySkills(opts: {
       }
     }
 
-    // ── 9. Pipeline version stamp (append-only, latest-wins read) ────────
-    if (inputs.latestPipelineVersion !== JOURNAL_PIPELINE_VERSION) {
+    // ── 9. Evidence-tier recompute — a REQUIRED phase (P1 integrity fix):
+    // a half-applied tier must keep the entry stale so lazy-heal /
+    // history-reprocess retries it, so a reconcile failure counts as a
+    // write failure and blocks the version stamp below.
+    const reconcileOk = await applyWorkerSkillSourceReconcile(
+      supabase,
+      worker.id,
+    );
+    if (!reconcileOk) {
+      logError(trace, "reconcile", { code: "reconcile_failed" });
+      writeFailures += 1;
+    }
+
+    // ── 10. Pipeline version stamp — ONLY after a fully successful run
+    // (P1 integrity fix): any failed persist phase (worker_skills, links,
+    // claims, unresolved fragments, reconcile) leaves the entry UNSTAMPED,
+    // so it is automatically re-selected by the lazy heal and by
+    // reprocessOwnJournalHistory until a clean pass completes the missing
+    // writes idempotently.
+    if (
+      writeFailures === 0 &&
+      inputs.latestPipelineVersion !== JOURNAL_PIPELINE_VERSION
+    ) {
       const ins = await sb.from("journal_entry_metrics").insert([
         {
           entry_id: entryId,
@@ -622,9 +681,6 @@ export async function processJournalEntrySkills(opts: {
         writeSuccesses += 1;
       }
     }
-
-    // ── 10. Evidence-tier recompute (best-effort, swallows its own errors) ─
-    await applyWorkerSkillSourceReconcile(supabase, worker.id);
 
     // ── 11. Surface freshness ────────────────────────────────────────────
     if (opts.revalidate !== false) {
