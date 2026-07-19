@@ -23,12 +23,15 @@ export function DashboardTabs({
   badges,
 }: {
   className?: string;
-  /** Per-feature unread/attention counts, e.g. { communication: 3 }. */
+  /** Per-feature unread/attention counts, e.g. { communication: 3 }.
+   *  When omitted, the counts come from the STREAMED notification spine
+   *  via the auth context (P0 perf — badges hydrate after first paint). */
   badges?: Partial<Record<FeatureKey, number>>;
 }) {
   const t = useTranslations();
   const pathname = usePathname();
-  const { isAdmin, adminUiHidden } = useAuth();
+  const { isAdmin, adminUiHidden, badges: spineBadges } = useAuth();
+  badges = badges ?? (spineBadges as Partial<Record<FeatureKey, number>>);
   // Admin is a permission dimension, not a catalogue feature — append the
   // admin tab only for admins who haven't hidden admin chrome.
   const items =

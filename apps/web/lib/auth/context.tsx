@@ -72,12 +72,21 @@ type AuthState = {
 };
 
 type AuthContextValue = AuthState & {
+  /** Nav badges derived from the streamed notification spine (P0 perf):
+   *  empty until the SpineStream hydrates — badges appear as soon as the
+   *  derived signals resolve, without gating the shell's TTFB. */
+  badges: Partial<Record<string, number>>;
   switchRole: (role: Role) => Promise<void>;
   addRole: (role: Role) => Promise<void>;
   /** Switch the ACTIVE organization (server-side pointer, then refresh). */
   switchOrganization: (organizationId: string) => Promise<void>;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
+  /** Streamed-spine hydration hook (SpineHydrator only). */
+  applySpine: (
+    notifications: Notification[],
+    badges: Partial<Record<string, number>>,
+  ) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -86,13 +95,23 @@ export function AuthProvider({
   initial,
   children,
 }: {
-  initial: AuthState;
+  /** `notifications` may be omitted: the notification spine STREAMS in after
+   *  first paint (P0 perf — the spine no longer gates TTFB) and hydrates the
+   *  context via `applySpine`. The bell is never permanently empty: the
+   *  SpineStream server component always renders inside the auth shell and
+   *  pushes the real derived signals as soon as they resolve. */
+  initial: Omit<AuthState, "notifications"> & {
+    notifications?: Notification[];
+  };
   children: ReactNode;
 }) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>(
-    initial.notifications,
+    initial.notifications ?? [],
   );
+  const [badges, setBadges] = useState<
+    Partial<Record<string, number>>
+  >({});
 
   const switchRole = useCallback(
     async (role: Role) => {
@@ -133,6 +152,19 @@ export function AuthProvider({
     setNotifications((cur) => cur.map((n) => ({ ...n, read_at: now })));
   }, []);
 
+  /** Streamed-spine hydration (P0 perf): the SpineStream server component
+   *  resolves the derived signals AFTER first paint and pushes them here —
+   *  same single spine source, no TTFB gate. Replaces the list wholesale
+   *  (server truth wins; per-navigation semantics identical to the old
+   *  blocking read). */
+  const applySpine = useCallback(
+    (next: Notification[], nextBadges: Partial<Record<string, number>>) => {
+      setNotifications(next);
+      setBadges(nextBadges);
+    },
+    [],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: initial.user,
@@ -145,11 +177,13 @@ export function AuthProvider({
       organizations: initial.organizations ?? [],
       activeOrganizationId: initial.activeOrganizationId ?? null,
       notifications,
+      badges,
       switchRole,
       addRole,
       switchOrganization,
       markAsRead,
       markAllRead,
+      applySpine,
     }),
     [
       initial.user,
@@ -162,11 +196,13 @@ export function AuthProvider({
       initial.organizations,
       initial.activeOrganizationId,
       notifications,
+      badges,
       switchRole,
       addRole,
       switchOrganization,
       markAsRead,
       markAllRead,
+      applySpine,
     ],
   );
 

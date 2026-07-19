@@ -21,6 +21,7 @@ import {
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
+import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 
 // Tabs are sourced from `lib/config/navigation.ts`, which itself derives
@@ -53,11 +54,15 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
 export function BottomNav({
   badges,
 }: {
-  /** Per-feature unread/attention counts, e.g. { communication: 3 }. */
+  /** Per-feature unread/attention counts, e.g. { communication: 3 }.
+   *  When omitted, the counts come from the STREAMED notification spine
+   *  via the auth context (P0 perf — badges hydrate after first paint). */
   badges?: Partial<Record<FeatureKey, number>>;
 }) {
   const t = useTranslations();
   const pathname = usePathname();
+  const { badges: spineBadges } = useAuth();
+  badges = badges ?? (spineBadges as Partial<Record<FeatureKey, number>>);
   // Mobile bottom nav stays the focused catalogue-driven core (currently
   // Apžvalga / Žemėlapis / Žurnalas / Žinutės) — no Admin tab here (it crowds
   // the small bar). Admin remains reachable for admins via the header account

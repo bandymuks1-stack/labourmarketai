@@ -193,25 +193,38 @@ describe("visiting the destination IS the read event", () => {
 
 describe("bell, badges and layout consume the one spine source", () => {
   const LAYOUT = read("app/[locale]/dashboard/layout.tsx");
+  const STREAM = read("components/app/spine-stream.tsx");
+  const HYDRATOR = read("components/app/spine-hydrator.tsx");
 
-  it("layout builds notifications from the spine — never a hardcoded list", () => {
-    expect(LAYOUT).toMatch(/getSpineCounts\(\)/);
-    expect(LAYOUT).toMatch(/buildSpineNotifications\(/);
+  // P0 perf (2026-07-19): the spine no longer gates layout TTFB — it
+  // STREAMS via <SpineStream> inside <Suspense> and hydrates the auth
+  // context. The invariants below keep the original intent: ONE spine
+  // source, derived (never hardcoded) notifications, a bell that is
+  // never permanently empty, both nav surfaces badged from the spine.
+  it("layout streams the spine inside the auth shell (never omits it)", () => {
+    expect(LAYOUT).toMatch(/<Suspense fallback=\{null\}>\s*<SpineStream/);
     // The audit's original defect: a permanently-empty bell.
     expect(LAYOUT).not.toMatch(/notifications:\s*\[\]/);
   });
 
-  it("nav badges derive from the same spine counts", () => {
-    expect(LAYOUT).toMatch(/const navBadges = buildNavBadges\(spineCounts\)/);
+  it("the stream derives notifications + badges from the one spine source", () => {
+    expect(STREAM).toMatch(/getSpineCounts\(\)/);
+    expect(STREAM).toMatch(/buildSpineNotifications\(/);
+    expect(STREAM).toMatch(/buildNavBadges\(spineCounts\)/);
+    expect(HYDRATOR).toMatch(/applySpine\(notifications, badges\)/);
   });
 
   it("the header actually renders the bell", () => {
     expect(LAYOUT).toMatch(/<NotificationPanel \/>/);
   });
 
-  it("BOTH nav surfaces (desktop tabs + mobile bottom nav) receive the badges", () => {
-    expect(LAYOUT).toMatch(/<DashboardTabs[^>]*badges=\{navBadges\}/);
-    expect(LAYOUT).toMatch(/<BottomNav badges=\{navBadges\}/);
+  it("BOTH nav surfaces (desktop tabs + mobile bottom nav) read the spine badges", () => {
+    const tabs = read("components/app/dashboard-tabs.tsx");
+    const bottom = read("components/app/bottom-nav.tsx");
+    for (const src of [tabs, bottom]) {
+      expect(src).toMatch(/badges: spineBadges \} = useAuth\(\)/);
+      expect(src).toMatch(/badges = badges \?\? \(spineBadges/);
+    }
   });
 
   it("nav badges carry ONLY tabs whose surface clears the signal", () => {

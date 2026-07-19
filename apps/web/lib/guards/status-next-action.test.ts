@@ -125,11 +125,14 @@ describe("4. booking responses are visible, never silent", () => {
 describe("5. the bell states only real derived signals", () => {
   it("the layout builds signals from the same real per-surface counts", () => {
     // The per-surface fetches moved into the notification spine (quality-
-    // train PR B): layout → getSpineCounts() → the same real helpers.
+    // train PR B) and now STREAM (P0 perf): layout → <SpineStream> →
+    // getSpineCounts() → the same real helpers.
     const layout = read("app/[locale]/dashboard/layout.tsx");
     expect(layout).not.toMatch(/notifications:\s*\[\]/);
-    expect(layout).toMatch(/getSpineCounts\(\)/);
-    expect(layout).toMatch(/buildSpineNotifications\(/);
+    expect(layout).toMatch(/<SpineStream/);
+    const stream = read("components/app/spine-stream.tsx");
+    expect(stream).toMatch(/getSpineCounts\(\)/);
+    expect(stream).toMatch(/buildSpineNotifications\(/);
     const spine = read("lib/notifications/spine.ts");
     for (const fn of [
       "getUnreadConversationCount",
