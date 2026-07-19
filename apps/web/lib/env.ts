@@ -87,6 +87,17 @@ const schema = z.object({
   AGENTAI_OS_ALERT_ENDPOINT: z.string().url().optional(),
   AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
 
+  // ── First-party Google sign-in (Google Identity Services ID-token flow) ────
+  // The OAuth *client id* is public by design (it appears in every Google
+  // auth URL). When set, the login/signup Google button uses the
+  // first-party GIS flow: credential → POST /api/auth/google (same origin)
+  // → server-side Supabase signInWithIdToken. The browser then NEVER
+  // navigates through the raw Supabase host. When unset, the legacy
+  // Supabase-hosted redirect flow stays active (safe rollout).
+  // Requires the owner to add https://labourmarket.ai to the OAuth
+  // client's Authorized JavaScript origins in Google Cloud Console.
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
+
   // ── Voice Work Journal transcription (server-only, never NEXT_PUBLIC) ──────
   // Points at the LabourMarket.ai-controlled self-hosted whisper.cpp service
   // (services/transcribe). OFF unless BOTH are set — the journal voice surface
@@ -136,6 +147,7 @@ const parsed = schema.safeParse({
   AGENTAI_OS_ALERTS_ENABLED: process.env.AGENTAI_OS_ALERTS_ENABLED,
   AGENTAI_OS_ALERT_ENDPOINT: process.env.AGENTAI_OS_ALERT_ENDPOINT,
   AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
   VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
 });

@@ -75,7 +75,55 @@ external users may see an "unverified app" warning and the logo may not show).
 
 ---
 
-## Lever 2 — Supabase custom auth domain `auth.labourmarket.ai` (paid; fully removes `supabase.co`)
+## Lever 1.5 — FIRST-PARTY GIS ID-token flow (free; REMOVES the visible `supabase.co` hop) ⭐ IMPLEMENTED
+
+> **Status 2026-07-19:** implemented in PR branch
+> `fix/first-party-google-id-token-auth-v1` (Phase 2 of the
+> single-domain task). Supersedes the need for Lever 2 for the
+> *navigation-visibility* goal — the owner decided NOT to buy the
+> custom domain. Lever 2 remains documented below for history only.
+
+How it works (code: `apps/web/app/api/auth/google/route.ts`,
+`components/app/google-button.tsx`, `lib/auth/google-id-token.ts`):
+
+1. Google Identity Services button runs ON `https://labourmarket.ai`
+   (popup → `accounts.google.com` only).
+2. Google hands the page a signed **ID token**; the browser POSTs it
+   with a per-attempt **nonce** to the same-origin
+   `POST /api/auth/google`.
+3. The server validates the token via Google tokeninfo (audience,
+   issuer, expiry, nonce) and exchanges it with
+   `supabase.auth.signInWithIdToken` (cookie-bound SSR client → same
+   auth users/profiles/roles as before — no second identity system).
+4. The browser never NAVIGATES through `*.supabase.co`. The Supabase
+   exchange is a server-to-server call.
+
+**Owner activation steps (≈3 minutes, free):**
+
+1. Google Cloud Console → Credentials → OAuth client `313295493545-…`
+   → **Authorized JavaScript origins** → ADD:
+   - `https://labourmarket.ai`
+   (Keep the existing redirect URIs — the legacy flow stays as a
+   gated fallback until Phase 3 removes it.)
+2. Supabase Dashboard → Authentication → Providers → Google → ensure
+   **Client ID** contains
+   `313295493545-cdt9i065q3j9fgirq2lhp6n4801lj29t.apps.googleusercontent.com`
+   (it already does — same client; `signInWithIdToken` validates the
+   token audience against it).
+3. Vercel → Project → Settings → Environment Variables → add
+   `NEXT_PUBLIC_GOOGLE_CLIENT_ID=313295493545-cdt9i065q3j9fgirq2lhp6n4801lj29t.apps.googleusercontent.com`
+   (Production; it is a public identifier, not a secret) → redeploy.
+4. Smoke: incognito → `https://labourmarket.ai/lt/auth/login` → Google
+   button → popup shows only `accounts.google.com` → you land back on
+   labourmarket.ai onboarding/dashboard. Address bar never leaves
+   `labourmarket.ai`.
+
+Rollback: remove the env var → the button reverts to the legacy
+redirect flow on the next deploy.
+
+---
+
+## Lever 2 — Supabase custom auth domain `auth.labourmarket.ai` (paid; SUPERSEDED by Lever 1.5 — owner declined the paid add-on)
 
 ### Owner approval list (nothing applied without these)
 1. **Cost:** upgrade Supabase project **Free → Pro (~$25/mo)** **and** enable the
