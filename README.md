@@ -16,13 +16,14 @@ organises selection; it does not claim automatic matching.
 
 | Role | Host |
 |---|---|
-| Public canonical (marketing) | `https://labourmarket.ai` |
-| App (auth + dashboard) | `https://app.labourmarket.ai` |
-| WWW | 308-redirects to the apex |
+| The ONE product origin (everything) | `https://labourmarket.ai` |
+| WWW (legacy alias) | 308-redirects to the apex |
+| `app.labourmarket.ai` (legacy alias) | 308-redirects to the apex |
 
-Policy source of truth: `docs/policies/domain-truth-v1.md` (v2) and
-`apps/web/lib/domain/canonical.ts`. Live audit:
-`docs/launch/domain-production-truth-v1.md`.
+Single-domain policy (2026-07-19). Policy source of truth:
+`docs/policies/domain-truth-v1.md` (v3) and
+`apps/web/lib/domain/canonical.ts`. Migration evidence:
+`docs/audit/single-domain-and-deep-cleanup-v1.md`.
 
 ## Locales
 
@@ -80,8 +81,9 @@ human-gated process** — reviewed PR + owner-approved manual apply; never
 
 ## Deploy
 
-Vercel auto-builds and deploys `main` to production (`labourmarket.ai`,
-`app.labourmarket.ai`). Secrets live only in Vercel project env vars.
+Vercel auto-builds and deploys `main` to production (`labourmarket.ai`;
+the legacy `www`/`app` hosts 308-redirect there). Secrets live only in
+Vercel project env vars.
 **Public payments are NOT active**: billing config is hard-blocked from
 live mode (`apps/web/lib/billing/config-core.ts`); the pricing page shows
 the concierge early-access offer, never a live checkout.

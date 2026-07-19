@@ -203,6 +203,89 @@ https://app.labourmarket.ai/lt/dashboard?x=1
 
 ---
 
-## Phase 7–9 — Computer, worktree and project-memory cleanup
+## Phase 7–9 — Computer, worktree and project-memory cleanup (2026-07-19)
 
-*(appended after migration work — see sections below)*
+Quarantine (task-mandated, do NOT delete during this task):
+`C:\Users\Mano\Documents\_project-quarantine\labourmarketai-single-domain-20260719-112210`
+
+### Worktrees (were 64 registered; now 3)
+
+- **Kept registered:** main repo, `labourmarketai-w12-wt`,
+  `labourmarketai-w13-wt` (project memory marks W12/W13 as the active
+  resume point of the launch/ops train).
+- **Deregistered via `git worktree remove` + prune: 59** (all verified
+  clean; branches and objects remain in the main repo — no history lost).
+- Pre-removal preservation into the quarantine:
+  - `unpushed-branches-20260719.bundle` (65 MB) — git bundle of the 8
+    branches that existed nowhere on origin
+    (canonical-user-journey-impl, 4× intelligence-*, journal-simplification-v2
+    — note: pushed variant existed, bundle covers the local tip anyway,
+    labour-market-os-v1, labour-market-intelligence-layer-v1).
+  - `dirty-*.patch` + `dirty-*.status.txt` for the 5 slightly-dirty
+    worktrees (3× a local `supabase/config.toml` tweak; 2× one untracked
+    file each, copied as `untracked-*`).
+- **Residue handling:** on Windows, `git worktree remove` deleted tracked
+  files but left gitignored residue (`node_modules`, `.next`). Permanent
+  deletion of that generated residue was **blocked by the local
+  permission classifier**, so the residue dirs were MOVED to
+  `quarantine/residue-worktrees/` (55 dirs). Owner may safely delete that
+  subfolder — contents are proven generated-only (git validated the
+  worktrees clean before removal; any `.env*` would have been salvaged —
+  none were found).
+
+### Ghost directories (never-registered leftovers) → quarantine
+
+55 directories moved to `quarantine/ghost-worktrees/` — 45 top-level
+(`labourmarketai-w8/w9/w10/w11/w13/w14/w15/w8fix`, `-user-journey`,
+`wt-booking-guards`, `wt-burndown`, `wt-clicks`, `wt-conv-*`,
+`wt-exec-report`, `wt-journal-fix`, `wt-landing-*`, `wt-launch-*`,
+`wt-mfa-*`, `wt-migration(s)`, `wt-notif-guards`, `wt-pr6..9`,
+`wt-progresshelper`, `wt-route-smoke`, `wt-sec`, `wt-status*`,
+`wt-store-*`, `wt-tokens`, `wt-train`, `wt-voice`, `wt-w1/w2/w4/w5-*`)
+plus 10 from inside `labourmarketai-worktrees\` (anon-intake, nav-funnel,
+nav-performance-v1, paid-intake, partner-copy, partner-names,
+pre-ads-launch-v1, reality-map, viewport-readability-v1,
+wagon6-final-proof). These may contain unique uncommitted work from old
+sessions — hence quarantine, not deletion. The empty
+`labourmarketai-worktrees` shell was removed.
+
+### Old clones → `quarantine/old-clones/`
+
+- `Documents\Labma` (old LABMA repo, mtime 2026-05-18)
+- `Documents\Labma-local-tooling-backup` (2026-04-30)
+- `Documents\labourmarket.ai` (minimal old repo, 2026-06-15)
+- `Documents\labourmarket-ai-clean` (old Next.js repo, 2026-05-18)
+
+### Downloads → `quarantine/downloads-task-md/`
+
+96 obsolete `*labourmarket*`/`*labma*` task/handoff `.md` files moved.
+KEPT in place (evidentiary/business value — deletion forbidden by task):
+the current task file (`labourmarketai-single-domain-and-deep-cleanup-v1.md`),
+`labourmarketai-legal-entity-pack-v1\` (legal drafts), the logo folder,
+presentations (2× ~143 MB pptx, PDFs), and marketing videos.
+
+### Kept in place (classified, not moved)
+
+- `runtime\` inside the repo (~215 MB: auth 88M, review 58M,
+  review-evidence 37M, project-quality 31M) — HISTORICAL_ARCHIVE:
+  production/audit evidence, partially git-tracked; left untouched.
+- `apps\web\.next` — active build output of the current session.
+- No `.vercel` directory exists anywhere (main repo, apps/web, or any
+  sibling) — no stale Vercel CLI bindings to clean. No repo-level ZIPs.
+- Stashes `stash@{0}`/`stash@{1}` — left untouched (may hold unique WIP).
+
+### Project memory
+
+- `~/.claude/projects/...labourmarketai/memory/` — audited: **no**
+  split-domain / app-host policy statements found in the 21 memory files.
+  Added `single-domain-migration-v1.md` recording the new policy, PR
+  #828 gate state and the quarantine location. MEMORY.md index updated.
+- Repo `README.md` — Domains + Deploy sections updated to the
+  single-domain policy (v3).
+- `AGENTS.md`, `TASKS.md`, root `CLAUDE.md` — audited: no stale domain
+  policy references.
+- 34 historical docs under `docs/` still mention `app.labourmarket.ai`
+  in past-tense audit/runbook contexts — kept as historical record;
+  the load-bearing policy docs (`domain-truth-v1.md` → v3, README,
+  `GOOGLE_OAUTH_BRANDING_RUNBOOK.md` note) now state the single-domain
+  truth, and the CI guard blocks any *code* regression.
