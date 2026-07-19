@@ -27,8 +27,8 @@ import { getOwnCompany } from "@/lib/company/company-setup";
 import { Link } from "@/lib/i18n/navigation";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
-import { buildNavBadges, getSpineCounts } from "@/lib/notifications/spine";
-import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
+import { Suspense } from "react";
+import { SpineStream } from "@/components/app/spine-stream";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
@@ -70,23 +70,22 @@ export default async function DashboardLayout({
             .eq("is_active", true)
         : { data: null },
     );
-  const [userRes, session, rolesRes, spineCounts] = await Promise.all([
+  // Notification spine v1 → STREAMED (P0 perf): the spine batch (8 derived
+  // signal helpers; slowest ≈ the full job-recommendation model) measured
+  // 850-1290 ms and used to gate the layout render on EVERY navigation. It
+  // now resolves inside <Suspense> via <SpineStream> below — the shell
+  // paints immediately, the bell + nav badges hydrate when the SAME single
+  // spine source resolves. The overview page still awaits its own
+  // request-cached getSpineCounts() for the module cards (shared promise).
+  const [userRes, session, rolesRes] = await Promise.all([
     userPromise,
     getSessionProfile(),
     rolesPromise,
-    // Notification spine v1 — ONE parallel read of every derived attention
-    // signal (unread threads, pending requests/bookings, responses since
-    // seen, pending invitations). The bell, the nav badges and the dashboard
-    // cards all trace to these same per-surface helpers, so the surfaces can
-    // never disagree. Defensive: each count returns 0 on any missing-data
-    // state, so a signal read never breaks the auth shell.
-    getSpineCounts(),
   ]);
   const user = userRes.data.user;
   if (!user) redirect(`/${locale}/auth/login`);
   const profile = session.profile;
   const rolesRows = rolesRes.data;
-  const navBadges = buildNavBadges(spineCounts);
   // Non-secret observability (P0 perf): total layout data time per
   // navigation, visible in Vercel function logs. No ids, no user data.
   console.info("[perf] dashboard-layout", {
@@ -153,16 +152,10 @@ export default async function DashboardLayout({
     }
   }
 
-  // Derived-signal notifications (audit PR5 → spine v1): the bell states
-  // only what is REALLY true right now. The signal catalogue lives in
-  // lib/notifications/spine-signals.ts — each row links the exact surface
-  // that clears it (visiting IS the read event) — no notifications table,
-  // no fake "mark read".
-  const notifications = buildSpineNotifications(
-    spineCounts,
-    activeRole ?? "worker",
-  );
-
+  // Derived-signal notifications (audit PR5 → spine v1) now arrive via the
+  // STREAMED <SpineStream> below: the bell still states only what is REALLY
+  // true (same signal catalogue, same single spine source) — it just no
+  // longer gates the shell's first paint.
   return (
     /* Performance Reality Audit v2 (route-group provider subsetting): the
        dashboard tree renders the dynamic whole-tree useTranslations()
@@ -184,10 +177,15 @@ export default async function DashboardLayout({
           activeOrgName,
           organizations,
           activeOrganizationId,
-          notifications,
         }}
       >
         <div className="relative min-h-screen">
+          {/* Streamed notification spine: same single source, off the TTFB
+            critical path. Hydrates the bell + nav badges via the auth
+            context as soon as the derived signals resolve. */}
+          <Suspense fallback={null}>
+            <SpineStream activeRole={activeRole} />
+          </Suspense>
           <SessionTelemetry />
           <AmbientGlow />
           <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
@@ -202,7 +200,7 @@ export default async function DashboardLayout({
               >
                 LabourMarket<span className="text-gradient-accent">.ai</span>
               </Link>
-              <DashboardTabs className="hidden md:flex" badges={navBadges} />
+              <DashboardTabs className="hidden md:flex" />
               <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
                 {/* Universal OS search (owner UX recovery v1) — the ONE
                   CommandFinder, reachable from every dashboard page. */}
@@ -240,7 +238,7 @@ export default async function DashboardLayout({
               </a>
             </div>
           </main>
-          <BottomNav badges={navBadges} />
+          <BottomNav />
           {/* v1 tester language-feedback widget. Mounted INSIDE the auth
             shell so it's only visible to authenticated sessions — the
             inbox is also admin-only via RLS, so this is double-gated. */}

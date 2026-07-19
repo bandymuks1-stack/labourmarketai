@@ -54,11 +54,15 @@ describe("P0.1 request delivery: communication is a reachable primary-nav surfac
 
   it("the dashboard layout feeds a REAL unread count into the badges", () => {
     // The unread fetch moved into the notification spine (quality-train
-    // PR B) — the layout consumes the spine, the spine reads the one real
-    // unread helper, and the badge chain stays unbroken.
+    // PR B) and now STREAMS (P0 perf 2026-07-19): layout renders
+    // <SpineStream>, the stream reads the one real unread helper via the
+    // spine, and the nav badges hydrate from the auth context — the badge
+    // chain stays unbroken end to end.
     const layout = read("app/[locale]/dashboard/layout.tsx");
-    expect(layout).toMatch(/getSpineCounts\(\)/);
-    expect(layout).toMatch(/badges=\{navBadges\}/);
+    expect(layout).toMatch(/<SpineStream/);
+    const stream = read("components/app/spine-stream.tsx");
+    expect(stream).toMatch(/getSpineCounts\(\)/);
+    expect(stream).toMatch(/buildNavBadges\(spineCounts\)/);
     const spine = read("lib/notifications/spine.ts");
     expect(spine).toMatch(/getUnreadConversationCount/);
     // Control room PR B: badges derive from the signal catalogue — the
