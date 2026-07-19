@@ -33,11 +33,26 @@ Vercel/GitHub event side (missed webhook delivery or a transient integration
 error). **This very docs commit is the live probe**: it lands on `main` and
 must trigger a production deployment. Outcome recorded below.
 
-- [ ] **Probe outcome (fill after this commit):** deployment created? If NO →
-  owner action: Vercel Dashboard → labourmarketai → Settings → Git →
-  disconnect/reconnect the GitHub repository (re-registers the webhook), and
-  GitHub → repo Settings → Webhooks → check the Vercel webhook's recent
-  deliveries for failures.
+- [x] **Probe outcome (2026-07-19 ~19:05 UTC): NO production deployment within
+  12 minutes of the probe commit (`8f977cd1`) — the integration defect is
+  CONFIRMED, not a one-off missed event.**
+
+  Additional diagnosis (CLI, same evening):
+  - `vercel git connect <repo>` → "already connected" — the Vercel-side link
+    is intact; the break is inside the GitHub App event flow.
+  - Repo-level webhooks list is empty — expected (Vercel uses a GitHub App
+    installation, whose deliveries are not readable with user credentials).
+  - A CLI `vercel git disconnect` + reconnect was attempted as remediation
+    but is blocked by the local agent permission policy → **OWNER ACTION
+    (the one remaining step):** Vercel Dashboard → labourmarketai →
+    Settings → Git → **Disconnect** then **Connect** the GitHub repository
+    (re-registers the App events). Alternatively check GitHub →
+    Settings → Integrations → Vercel App → whether the installation is
+    suspended or repository access was narrowed.
+  - Until reconnected: after every merge verify a Production deployment
+    appears; if not, `vercel promote` the matching CI-built preview (this is
+    how #838 and this docs commit are currently served — production content
+    is correct and current).
 
 ## 3. Binding CLI rule (lesson, also in agent memory)
 
