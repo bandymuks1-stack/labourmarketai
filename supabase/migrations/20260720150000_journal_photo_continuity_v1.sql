@@ -22,9 +22,12 @@
 -- DEFECT: editing an entry (atomic supersede A->B) left the photo metadata
 -- row attached to the superseded, hidden entry A. The live entry B showed no
 -- photo evidence; every per-entry photo surface (document centre, project
--- gallery, AI work-journal context) saw the live entry as photo-less. The
--- composer hides the photo field in edit mode, so the worker had no way to
--- re-attach — silent evidence loss on every edit.
+-- gallery, AI work-journal context) saw the live entry as photo-less, and a
+-- re-attach in the composer's edit flow left the ORIGINAL photo stranded on
+-- the hidden entry — silent evidence loss/duplication on every edit. After
+-- this fix a re-attach on an entry that already has a photo hits the honest
+-- free-tier photo_limit_reached (photo replace/remove UI is a tracked
+-- follow-up).
 --
 -- FIX: one additional UPDATE inside the already-atomic
 -- journal_entry_supersede_v2 transaction moves active photo metadata
