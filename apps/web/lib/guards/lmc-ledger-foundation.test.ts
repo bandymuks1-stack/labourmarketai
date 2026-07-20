@@ -55,6 +55,11 @@ describe("LMC Wagon 1 — migration and rollback presence", () => {
     expect(raw.indexOf("lmc_rollback_refused")).toBeLessThan(
       raw.indexOf("drop view"),
     );
+    // Maintenance advisory lock: writers shared, rollback exclusive.
+    expect(raw).toContain("pg_advisory_xact_lock(hashtext('lmc_ledger')");
+    expect(readRepo(MIGRATION)).toContain(
+      "pg_advisory_xact_lock_shared(hashtext('lmc_ledger')",
+    );
   });
 
   it("paired rollback exists and drops ONLY lmc_* objects", () => {

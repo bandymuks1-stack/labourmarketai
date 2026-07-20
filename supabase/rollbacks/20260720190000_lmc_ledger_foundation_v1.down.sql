@@ -26,7 +26,12 @@ declare
   v_force text := coalesce(current_setting('lmc.force_rollback', true), 'off');
   t text;
 begin
-  -- Write-blocking locks FIRST (held to transaction end): a concurrent RPC
+  -- EXCLUSIVE LMC maintenance advisory lock FIRST: every write RPC holds the
+  -- shared counterpart for its transaction, so this waits for in-flight
+  -- writers to commit and queues later writers — the table locks below can
+  -- then be taken in any order without deadlocking against an RPC.
+  perform pg_advisory_xact_lock(hashtext('lmc_ledger')::bigint);
+  -- Write-blocking locks (held to transaction end): a concurrent RPC
   -- insert is compatible with a plain SELECT's ACCESS SHARE lock, so the
   -- zero-row assertion must be taken under ACCESS EXCLUSIVE to remain true
   -- through the drops below.

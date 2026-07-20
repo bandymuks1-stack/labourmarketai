@@ -501,6 +501,10 @@ declare
   v_amount constant bigint := 5000; -- 50 LMC, fixed
   v_expires timestamptz := now() + interval '60 days';
 begin
+  -- Shared LMC maintenance lock: writers hold it for the transaction, the
+  -- rollback's guard takes it EXCLUSIVE before any table lock — overlap
+  -- quiesces safely instead of deadlocking.
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_kind not in ('promotional_signup', 'promotional_activity') then
     raise exception 'lmc_invalid_promotional_kind: %', p_kind using errcode = '22023';
@@ -588,6 +592,7 @@ declare
   v_existing jsonb;
   v_tx uuid;
 begin
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
@@ -679,6 +684,7 @@ begin
   if not public.is_admin() then
     raise exception 'Admin only' using errcode = '42501';
   end if;
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then
     raise exception 'lmc_invalid_amount: must be positive and <= % LMC-cents', v_cap
@@ -821,6 +827,7 @@ declare
   v_available bigint;
   r record;
 begin
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
@@ -973,6 +980,7 @@ declare
   v_remaining bigint;
   r record;
 begin
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   if p_limit is null or p_limit <= 0 or p_limit > 1000 then
     raise exception 'lmc_invalid_limit' using errcode = '22023';
   end if;
@@ -1049,6 +1057,7 @@ declare
   v_remaining bigint;
   v_tx uuid;
 begin
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   if p_kind not in ('reversal', 'refund_reversal', 'chargeback_reversal') then
     raise exception 'lmc_invalid_reversal_kind: %', p_kind using errcode = '22023';
   end if;

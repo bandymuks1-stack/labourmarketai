@@ -46,6 +46,8 @@
  *        writes are refused)
  *   P30  spend provenance: the initiating actor is required, validated and
  *        recorded on the transaction and in audit_logs
+ *   P31  rollback SERIALIZES with in-flight writers via the LMC maintenance
+ *        advisory lock (blocks, never deadlocks)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -1183,6 +1185,40 @@ async function main() {
       "P29-flag-flip-serializes-with-writers",
       blocked.ok && newBuy.ok,
       `flip blocked on in-flight writer (${blocked.msg.slice(0, 40)}); after flip committed, new purchase refused`,
+    );
+  }
+
+  // ── P31: rollback serializes with in-flight writers (no deadlock) ─────────
+  {
+    const u12 = await makePerson(a, "u12");
+    const writer = await admin();
+    const roller = await admin();
+    await writer.query("begin");
+    await writer.query(
+      `select public.lmc_record_purchase_v1(400, 'p31', 'p31-buy-${RUN}', $1, null)`,
+      [u12],
+    );
+    // The uncommitted writer holds the SHARED maintenance advisory lock; the
+    // rollback must WAIT at its exclusive advisory acquisition — a blocked
+    // statement-timeout, never a deadlock abort.
+    await roller.query(
+      `select set_config('lmc.force_rollback', 'lmc-ledger-removal-approved', false)`,
+    );
+    await roller.query(`set statement_timeout = 1500`);
+    const blocked = await expectError(
+      () => roller.query(readFileSync(ROLLBACK_PATH, "utf8")),
+      "statement timeout",
+    );
+    const deadlocked = blocked.msg.toLowerCase().includes("deadlock");
+    await roller.query(`rollback`).catch(() => {});
+    await roller.query(`set statement_timeout = 0`);
+    await writer.query("commit");
+    await writer.end();
+    await roller.end();
+    record(
+      "P31-rollback-serializes-no-deadlock",
+      blocked.ok && !deadlocked,
+      `rollback waited on in-flight writer (${blocked.msg.slice(0, 40)}); deadlock=${deadlocked}`,
     );
   }
 
