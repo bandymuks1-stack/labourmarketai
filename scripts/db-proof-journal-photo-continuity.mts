@@ -551,6 +551,74 @@ async function main(): Promise<void> {
     await c2.end();
   }
 
+  // ── D7-backfill: photos stranded BEFORE this migration are repaired ─────
+  // Simulates the pre-migration world: chains superseded WITHOUT the photo
+  // move (direct pointer updates), then re-applies the ACTUAL migration file
+  // and asserts the one-time backfill repaired exactly the safe rows.
+  {
+    const { readFileSync } = await import("node:fs");
+    const { join, dirname } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const here = dirname(fileURLToPath(import.meta.url));
+    const migrationSql = readFileSync(
+      join(here, "..", "supabase", "migrations", "20260720150000_journal_photo_continuity_v1.sql"),
+      "utf-8",
+    );
+
+    // Chain 1: A(photo, stranded) -> B -> C(live, no photo)  => photo moves to C.
+    const f = await makeFixture(a, `${tag}-bf1`);
+    const A = await makeEntry(a, f, "senas su nuotrauka");
+    const B = await makeEntry(a, f, "vidurinis");
+    const C = await makeEntry(a, f, "gyvas galas");
+    const c = await asUser(f.profileId);
+    const { photoId: ph1 } = await addPhoto(c, f, A);
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [A, B]);
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [B, C]);
+
+    // Chain 2: D(photo, stranded) -> E(live, HAS its own photo) => stays on D.
+    const D = await makeEntry(a, f, "senas su kolizija");
+    const { photoId: ph2 } = await addPhoto(c, f, D);
+    const E = await makeEntry(a, f, "gyvas su sava nuotrauka");
+    const { photoId: ph3 } = await addPhoto(c, f, E);
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [D, E]);
+
+    // Chain 3: F(photo, stranded) -> G(deleted tip) => stays on F.
+    const F = await makeEntry(a, f, "senas i istrinta");
+    const { photoId: ph4 } = await addPhoto(c, f, F);
+    const G = await makeEntry(a, f, "istrintas galas");
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [F, G]);
+    await a.query(`update public.journal_entries set deleted_at = now() where id = $1`, [G]);
+
+    await a.query(migrationSql); // re-apply the REAL migration file (idempotent)
+
+    const loc = async (id: string) =>
+      (await a.query(`select entry_id from public.journal_entry_photos where id = $1`, [id]))
+        .rows[0].entry_id as string;
+    record(
+      "D7a backfill moves a stranded photo to the LIVE chain tip",
+      (await loc(ph1)) === C,
+      `photoOn=${(await loc(ph1)) === C ? "liveTip" : "stranded"}`,
+    );
+    record(
+      "D7b backfill never creates a second active attachment (collision stays)",
+      (await loc(ph2)) === D && (await loc(ph3)) === E,
+      `collisionStayed=${(await loc(ph2)) === D} tipKept=${(await loc(ph3)) === E}`,
+    );
+    record(
+      "D7c backfill skips chains ending in a deleted tip",
+      (await loc(ph4)) === F,
+      `stayed=${(await loc(ph4)) === F}`,
+    );
+    // Idempotency: second apply changes nothing.
+    await a.query(migrationSql);
+    record(
+      "D7d backfill idempotent on re-apply",
+      (await loc(ph1)) === C && (await loc(ph2)) === D && (await loc(ph4)) === F,
+      "second apply no-op",
+    );
+    await c.end();
+  }
+
   await a.end();
   const failed = results.filter((r) => !r.pass);
   console.log(`\n— RESULT: ${results.length - failed.length}/${results.length} proofs passed —`);

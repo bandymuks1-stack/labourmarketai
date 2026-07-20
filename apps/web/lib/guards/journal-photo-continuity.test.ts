@@ -96,7 +96,7 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     expect(migration).not.toMatch(/service_role/);
   });
 
-  it("rollback restores every changed piece without touching the W0 integrity fix", () => {
+  it("rollback reverts behavior but RETAINS coherent authorization (Codex rev2 P1)", () => {
     expect(rollback).toMatch(
       /create or replace function public\.journal_entry_supersede_v2\(/i,
     );
@@ -108,11 +108,24 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     expect(rollback).toMatch(
       /create or replace function public\.register_journal_entry_photo\(/i,
     );
-    expect(rollback).toMatch(
-      /create policy "journal-entry-photos org manager select"[\s\S]*storage\.foldername\(name\)\)\[2\]/i,
-    );
-    expect(rollback).toMatch(
+    // The path-segment storage policy must NEVER come back: after any
+    // cross-context move it would re-expose objects to the old org.
+    expect(rollback).not.toMatch(/storage\.foldername/i);
+    expect(rollback).not.toMatch(
       /grant update on public\.journal_entry_photos to authenticated/i,
+    );
+    expect(rollback).toMatch(/DELIBERATELY RETAINED/);
+  });
+
+  it("one-time backfill repairs pre-migration stranded photos safely (Codex rev2 P1)", () => {
+    expect(migration).toMatch(/with recursive chain as \(/i);
+    // Only ACTIVE stranded rows, only to a LIVE non-deleted tip.
+    expect(migration).toMatch(
+      /je\.superseded_by is not null[\s\S]*tip\.deleted_at is null/i,
+    );
+    // Never creates a second active attachment on the tip.
+    expect(migration).toMatch(
+      /not exists \(\s*select 1 from public\.journal_entry_photos q\s+where q\.entry_id = l\.live_entry_id/i,
     );
   });
 });

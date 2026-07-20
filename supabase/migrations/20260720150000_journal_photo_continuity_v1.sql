@@ -292,6 +292,45 @@ begin
 end;
 $$;
 
+-- == 1b. One-time repair: photos stranded by supersedes completed between ==
+-- the W0 production deploy and this migration (Codex rev2 P1). Follow each
+-- ACTIVE stranded photo's supersede chain to its LIVE, non-deleted tip and
+-- move the metadata there — but ONLY when the tip has no active photo of its
+-- own (never create a second active attachment; a colliding stranded row
+-- stays where it is, honestly historical). Idempotent: a repaired chain has
+-- no stranded active rows left, so a re-run matches nothing.
+
+with recursive chain as (
+  select p.id as photo_id, je.id as entry_id, je.superseded_by
+    from public.journal_entry_photos p
+    join public.journal_entries je on je.id = p.entry_id
+   where p.upload_status in ('uploading','uploaded')
+     and je.superseded_by is not null
+  union all
+  select c.photo_id, n.id, n.superseded_by
+    from chain c
+    join public.journal_entries n on n.id = c.superseded_by
+),
+live_tip as (
+  select c.photo_id, c.entry_id as live_entry_id
+    from chain c
+    join public.journal_entries tip on tip.id = c.entry_id
+   where c.superseded_by is null
+     and tip.deleted_at is null
+)
+update public.journal_entry_photos p
+   set entry_id = l.live_entry_id,
+       updated_at = now()
+  from live_tip l
+ where p.id = l.photo_id
+   and p.entry_id <> l.live_entry_id
+   and not exists (
+     select 1 from public.journal_entry_photos q
+      where q.entry_id = l.live_entry_id
+        and q.upload_status in ('uploading','uploaded')
+        and q.id <> p.id
+   );
+
 -- == 2. Serialize photo registration with the supersede (owner-hold P2) ==
 -- Locks the journal entry row FOR UPDATE (the same lock the supersede takes)
 -- and refuses superseded/deleted entries with structured errors, so a

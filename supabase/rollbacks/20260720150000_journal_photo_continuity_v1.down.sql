@@ -5,9 +5,9 @@
 --   1. journal_entry_supersede_v2 - the applied W0 production body
 --      (ledger 20260720035240); the W0 integrity fix is NOT reverted.
 --   2. register_journal_entry_photo - the 20260612091000 body (no entry lock).
---   3. The 20260705250000 org-manager storage policy (path-segment resolve).
---   4. The 20260612091000 journal_entry_photos UPDATE policy (USING-only) and
---      the original full-column UPDATE grant.
+--   3. RETAINS the metadata-resolving storage policy and the tightened
+--      UPDATE policy/grant (reverting them would recreate metadata/object
+--      authorization divergence for rows already moved — see below).
 -- Photo metadata rows already moved stay with their live entries; storage
 -- objects were never touched.
 -- ============================================================================
@@ -326,28 +326,16 @@ begin
   return resolved_id;
 end $$;
 
-drop policy if exists "journal-entry-photos org manager select"
-  on storage.objects;
-create policy "journal-entry-photos org manager select"
-  on storage.objects for select
-  using (
-    bucket_id = 'journal-entry-photos'
-    and auth.uid() is not null
-    and exists (
-      select 1
-        from public.journal_entries je
-        join public.engagement_contexts ec on ec.id = je.engagement_context_id
-       where je.id::text = (storage.foldername(name))[2]
-         and public.manages_organization(ec.organization_id)
-    )
-  );
-
-drop policy if exists journal_entry_photos_update on public.journal_entry_photos;
-create policy journal_entry_photos_update on public.journal_entry_photos for update
-  using (profile_id = auth.uid());
-
-revoke update on public.journal_entry_photos from authenticated;
-grant update on public.journal_entry_photos to authenticated;
+-- DELIBERATELY RETAINED (Codex rev2 P1 on this rollback): the
+-- metadata-resolving org-manager storage policy and the tightened
+-- journal_entry_photos UPDATE policy/column grant are NOT reverted. After any
+-- cross-context move the immutable object path still embeds the ORIGINAL
+-- entry id; restoring path-segment authorization would re-expose objects to
+-- the old organization and deny the current one (metadata/object
+-- divergence). The metadata-resolved policy stays coherent with rows wherever
+-- they are, with or without the move logic, so retaining it is the only
+-- rollback that cannot leak. The behavioral change (photo move + serialized
+-- registration) IS fully reverted by the function restores above.
 
 revoke all on function public.journal_entry_supersede_v2(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb, text[], text[]
