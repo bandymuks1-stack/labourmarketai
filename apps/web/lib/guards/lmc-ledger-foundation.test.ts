@@ -51,7 +51,7 @@ describe("LMC Wagon 1 — migration and rollback presence", () => {
   it("rollback refuses to drop a populated ledger without the scratch override", () => {
     const raw = readRepo(ROLLBACK);
     expect(raw).toContain("lmc_rollback_refused");
-    expect(raw).toContain("force-delete-scratch-ledger");
+    expect(raw).toContain("lmc-ledger-removal-approved");
     expect(raw.indexOf("lmc_rollback_refused")).toBeLessThan(
       raw.indexOf("drop view"),
     );

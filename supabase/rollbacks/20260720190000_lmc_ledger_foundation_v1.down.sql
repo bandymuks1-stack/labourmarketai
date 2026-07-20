@@ -10,12 +10,15 @@
 begin;
 
 -- ── Zero-row safety guard (AGENTS.md: DROP TABLE only after asserting the
--- target has zero rows). If ANY committed ledger row exists, this rollback
--- REFUSES to run: dropping an immutable financial ledger with data is an
--- owner-only decision. The explicit override below exists ONLY for local
--- scratch databases (the db-proof harness sets it); never set it against
--- production.
---   select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false);
+-- target has zero rows). If ANY row exists in the LMC tables — including
+-- the always-seeded (and possibly owner-modified) lmc_settings — this
+-- rollback REFUSES to run without the explicit approval override below.
+-- Because the forward migration always seeds lmc_settings, running this
+-- rollback ALWAYS requires the override: removing the ledger foundation is
+-- never a silent side effect. Setting the override against production is an
+-- owner-only decision; the localhost-guarded db-proof harness sets it for
+-- scratch databases.
+--   select set_config('lmc.force_rollback', 'lmc-ledger-removal-approved', false);
 do $guard$
 declare
   v_rows bigint := 0;
@@ -23,7 +26,21 @@ declare
   v_force text := coalesce(current_setting('lmc.force_rollback', true), 'off');
   t text;
 begin
+  -- Write-blocking locks FIRST (held to transaction end): a concurrent RPC
+  -- insert is compatible with a plain SELECT's ACCESS SHARE lock, so the
+  -- zero-row assertion must be taken under ACCESS EXCLUSIVE to remain true
+  -- through the drops below.
   foreach t in array array[
+    'public.lmc_settings',
+    'public.lmc_transactions', 'public.lmc_lots',
+    'public.lmc_lot_consumptions', 'public.lmc_accounts']
+  loop
+    if to_regclass(t) is not null then
+      execute format('lock table %s in access exclusive mode', t);
+    end if;
+  end loop;
+  foreach t in array array[
+    'public.lmc_settings',
     'public.lmc_transactions', 'public.lmc_lots',
     'public.lmc_lot_consumptions', 'public.lmc_accounts']
   loop
@@ -32,8 +49,8 @@ begin
       v_rows := v_rows + coalesce(v_part, 0);
     end if;
   end loop;
-  if v_rows > 0 and v_force <> 'force-delete-scratch-ledger' then
-    raise exception 'lmc_rollback_refused: % committed ledger row(s) exist — dropping a populated immutable ledger is an owner-only decision (scratch override: lmc.force_rollback)',
+  if v_rows > 0 and v_force <> 'lmc-ledger-removal-approved' then
+    raise exception 'lmc_rollback_refused: % row(s) exist across the LMC tables (including seeded/owner-modified lmc_settings) — removal requires the explicit approval override lmc.force_rollback = lmc-ledger-removal-approved',
       v_rows using errcode = '42501';
   end if;
 end;

@@ -211,7 +211,7 @@ async function main() {
   // The rollback's zero-row guard requires the SCRATCH-ONLY override here
   // (this harness is hard-guarded to localhost above).
   await a.query(
-    `select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false)`,
+    `select set_config('lmc.force_rollback', 'lmc-ledger-removal-approved', false)`,
   );
   await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
   await restoreMigration(a);
@@ -1435,7 +1435,7 @@ async function main() {
       refused.msg.slice(0, 80),
     );
     await a.query(
-      `select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false)`,
+      `select set_config('lmc.force_rollback', 'lmc-ledger-removal-approved', false)`,
     );
     await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
     const { rows: gone } = await a.query(
