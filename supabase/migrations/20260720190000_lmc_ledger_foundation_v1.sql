@@ -798,9 +798,6 @@ begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
   end if;
-  if not public.is_admin() then
-    raise exception 'Admin only' using errcode = '42501';
-  end if;
   perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then
@@ -821,12 +818,19 @@ begin
   -- idempotency lookup below: an identical replay must stay idempotent even
   -- after the originally granted expiry has elapsed.
 
-  -- GLOBAL replay resolution FIRST — independent of mutable email ownership.
-  -- A committed admin grant is identified by its (globally unique) key, and
-  -- the stored recipient_email_at_grant is the identity fingerprint: even if
-  -- the email address was later reassigned to a different verified profile,
-  -- an identical retry returns the ORIGINAL transaction instead of issuing a
-  -- second grant to the address's new owner. Any payload difference conflicts.
+  -- GLOBAL replay resolution FIRST — independent of mutable email ownership
+  -- AND of the caller's CURRENT admin authority (an admin whose role was
+  -- revoked after a committed grant can still acknowledge that exact grant —
+  -- same doctrine as reversals/spends). Only the RECORDED ACTOR's identical
+  -- retry resolves here; a different caller's reuse of the key falls
+  -- through to the live admin gate and then the global unique index, so key
+  -- existence is never leaked to non-admins. A committed admin grant is
+  -- identified by its (globally unique) key, and the stored
+  -- recipient_email_at_grant is the identity fingerprint: even if the email
+  -- address was later reassigned to a different verified profile, an
+  -- identical retry returns the ORIGINAL transaction instead of issuing a
+  -- second grant to the address's new owner. Any payload difference
+  -- conflicts.
   declare
     v_prior public.lmc_transactions%rowtype;
     v_prior_expires timestamptz;
@@ -834,7 +838,7 @@ begin
     select * into v_prior
       from public.lmc_transactions
      where idempotency_key = p_idempotency_key and kind = 'admin_grant';
-    if found then
+    if found and v_prior.actor_profile_id = uid then
       if lower(v_prior.recipient_email_at_grant)
          is distinct from lower(trim(p_recipient_email)) then
         raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
@@ -861,7 +865,14 @@ begin
         'amount_cents', v_prior.amount_cents,
         'already_processed', true);
     end if;
+    -- found but different actor: fall through — the live admin gate below
+    -- and the global unique index handle the reuse honestly.
   end;
+
+  -- Live admin authority for a NEW grant (replays resolved above).
+  if not public.is_admin() then
+    raise exception 'Admin only' using errcode = '42501';
+  end if;
 
   -- Kill-switch AFTER replay resolution: a disabled flag blocks NEW grants,
   -- never the acknowledgement of an already-committed one.

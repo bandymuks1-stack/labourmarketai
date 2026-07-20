@@ -51,6 +51,8 @@
  *   P32  flag flips are RPC-only, admin-actor-bound and audited
  *   P33  reversal replay survives a later authority change (new reversals
  *        by the demoted actor stay refused)
+ *   P34  admin-grant replay survives a later authority change (new grants
+ *        by the demoted admin stay refused)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -986,6 +988,44 @@ async function main() {
     );
   }
 
+  // ── P34: admin-grant replay survives a later authority change ─────────────
+  {
+    const { rows: ts34 } = await a.query(
+      `select (now() + interval '25 days') as t`,
+    );
+    const exp34 = ts34[0].t as Date;
+    const admConn = await asUser(adm);
+    const { rows: g1 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 250, 'demotion proof', 'proof-campaign', $2, 'p34-${RUN}') as r`,
+      [`${RUN}-u1@fixture.local`, exp34],
+    );
+    // The admin loses the role AFTER the grant committed…
+    await a.query(`update public.profiles set active_role = 'worker' where id = $1`, [adm]);
+    // …the identical retry still acknowledges the committed grant…
+    const { rows: g2 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 250, 'demotion proof', 'proof-campaign', $2, 'p34-${RUN}') as r`,
+      [`${RUN}-u1@fixture.local`, exp34],
+    );
+    // …while a NEW grant by the demoted admin is refused.
+    const demotedNew = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 250, 'demoted new', 'proof-campaign', $2, 'p34-new-${RUN}')`,
+          [`${RUN}-u1@fixture.local`, exp34],
+        ),
+      "Admin only",
+    );
+    await a.query(`update public.profiles set active_role = 'admin' where id = $1`, [adm]);
+    await admConn.end();
+    record(
+      "P34-admin-grant-replay-survives-authority-change",
+      g2[0].r.already_processed === true &&
+        g2[0].r.transaction_id === g1[0].r.transaction_id &&
+        demotedNew.ok,
+      `demoted-admin replay acknowledged same tx; demoted-admin NEW grant refused`,
+    );
+  }
+
   // ── P13–P15: direct writes refused ────────────────────────────────────────
   {
     const acc1 = await accountOf(a, u1);
@@ -1446,11 +1486,25 @@ async function main() {
         where acc.profile_id = $1 and c.consumption_kind = 'spend'`,
       [u5],
     );
-    const overspendAppeared = weakOk === 2 && Number(consumed[0].spent) > 10000;
+    const { rows: txTotal } = await a.query(
+      `select coalesce(sum(t.amount_cents), 0)::bigint as debited
+         from public.lmc_transactions t
+         join public.lmc_accounts acc on acc.id = t.account_id
+        where acc.profile_id = $1 and t.kind = 'spend'`,
+      [u5],
+    );
+    // Without the lock the race breaks the invariant one of two ways
+    // depending on timing: raw overspend (consumed > funds) or a spend
+    // transaction that could not be fully allocated (debited > consumed).
+    // Either is the corruption the account lock prevents.
+    const inconsistencyAppeared =
+      weakOk === 2 &&
+      (Number(consumed[0].spent) > 10000 ||
+        Number(txTotal[0].debited) > Number(consumed[0].spent));
     record(
       "NCA1-weakened-lock-overspends",
-      overspendAppeared,
-      `fulfilled=${weakOk} spent=${consumed[0].spent} of 10000 (guard removed → failure visible)`,
+      inconsistencyAppeared,
+      `fulfilled=${weakOk} debited=${txTotal[0].debited} consumed=${consumed[0].spent} of 10000 (guard removed → inconsistency visible)`,
     );
 
     // Restore + cleanup, then prove correctness again on a fresh account.
