@@ -81,16 +81,21 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     );
   });
 
-  it("no fabricated verification outside the verbatim manager-confirm RPC", () => {
-    // confirm_entry_and_verify_skills is copied VERBATIM from 20260530140000
-    // (the real, manager-gated verification flow) plus only a stale check —
+  it("no fabricated verification outside the verbatim manager-verification RPCs", () => {
+    // confirm_entry_and_verify_skills (20260530140000) and
+    // apply_learning_auto_confirmation (20260627132759) are copied VERBATIM
+    // (the real, manager-gated verification flows) plus only stale checks —
     // everything else in the migration must never write verification.
-    const confirmStart = migration.indexOf(
+    let outside = migration;
+    for (const fn of [
       "create or replace function public.confirm_entry_and_verify_skills(",
-    );
-    const confirmEnd = migration.indexOf("end $$;", confirmStart) + 7;
-    const outside =
-      migration.slice(0, confirmStart) + migration.slice(confirmEnd);
+      "create or replace function public.apply_learning_auto_confirmation(",
+    ]) {
+      const start = outside.indexOf(fn);
+      expect(start).toBeGreaterThan(0);
+      const end = outside.indexOf("end $$;", start) + 7;
+      outside = outside.slice(0, start) + outside.slice(end);
+    }
     expect(outside).not.toMatch(/verified\s*=\s*true/i);
     expect(outside).not.toMatch(/set\s+verified/i);
     expect(outside).not.toMatch(/manager_confirmed/);
@@ -249,6 +254,87 @@ describe("W1 rev7 — confirmation lifecycle serialization (owner-hold v4)", () 
     expect(rbPol.slice(0, rbPol.indexOf(");"))).not.toMatch(
       /superseded_by is null/i,
     );
+  });
+});
+
+describe("W1 rev10 — stale learning items + stale review cards (owner-hold v5)", () => {
+  it("apply_learning_auto_confirmation closes stale items terminally (pre-check + race handler)", () => {
+    const fn = migration.slice(
+      migration.indexOf(
+        "create or replace function public.apply_learning_auto_confirmation(",
+      ),
+    );
+    const body = fn.slice(0, fn.indexOf("end $$;") + 7);
+    expect(body).toMatch(/je\.superseded_by, je\.deleted_at/i);
+    expect(body).toMatch(/set status = 'superseded', reviewed_by = uid, reviewed_at = now\(\)/i);
+    expect(body).toContain("return case when v_je_deleted is not null");
+    // Race handler: the guard-trigger refusal transitions the item too.
+    expect(body).toMatch(/exception when others then/i);
+    expect(body).toMatch(/stale \(race\)/i);
+    // The guard trigger remains the final race-proof guard (not removed).
+    expect(migration).toMatch(/create trigger journal_entry_confirmations_guard/i);
+  });
+
+  it("rollback restores the 20260627132759 body verbatim (no staleness logic)", () => {
+    const rb = rollback.slice(
+      rollback.indexOf(
+        "create or replace function public.apply_learning_auto_confirmation(",
+      ),
+    );
+    const body = rb.slice(0, rb.indexOf("end $$;") + 7);
+    expect(body).not.toMatch(/stale/i);
+    expect(body).not.toMatch(/v_je_superseded/i);
+  });
+
+  it("review action + inbox card treat stale outcomes as TERMINAL with honest copy", () => {
+    const actions = readFileSync(
+      join(process.cwd(), "lib/journal/review-actions.ts"),
+      "utf-8",
+    );
+    expect(actions).toMatch(/\| "entry_superseded"\s*\| "entry_deleted"/);
+    // Stale outcome refreshes inbox + dashboard counts immediately.
+    const staleBlock = actions.slice(
+      actions.indexOf('outcome === "entry_superseded"'),
+    );
+    expect(staleBlock.slice(0, 400)).toMatch(/revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox`\)/);
+    const card = readFileSync(
+      join(process.cwd(), "components/app/journal-inbox-entry.tsx"),
+      "utf-8",
+    );
+    expect(card).toMatch(/"entry_superseded",\s*"entry_deleted",\s*\] as const/);
+    expect(card).toMatch(/inbox\.result\.entrySuperseded/);
+    expect(card).toMatch(/inbox\.result\.entryDeleted/);
+  });
+
+  it("stale learning items are not actionable in the section UI", () => {
+    const section = readFileSync(
+      join(process.cwd(), "components/app/learning-review-section.tsx"),
+      "utf-8",
+    );
+    expect(section).toMatch(/item\.status === "pending" && item\.entryStale/);
+    expect(section).toMatch(/item\.status === "pending" && !item\.entryStale/);
+    expect(section).toMatch(/labels\.staleEntry/);
+    const learning = readFileSync(
+      join(process.cwd(), "lib/learning/learning.ts"),
+      "utf-8",
+    );
+    expect(learning).toMatch(/journal_entries\(superseded_by, deleted_at\)/);
+    expect(learning).toMatch(/entryStale/);
+  });
+
+  it("every registered locale ships the stale copy (both surfaces)", () => {
+    const locales = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
+    for (const loc of locales) {
+      const journal = JSON.parse(
+        readFileSync(join(process.cwd(), `messages/${loc}/journal.json`), "utf-8"),
+      ) as { inbox?: { result?: Record<string, string> } };
+      expect(journal.inbox?.result?.entrySuperseded, loc).toBeTruthy();
+      expect(journal.inbox?.result?.entryDeleted, loc).toBeTruthy();
+      const mono = JSON.parse(
+        readFileSync(join(process.cwd(), `messages/${loc}.json`), "utf-8"),
+      ) as { learning?: Record<string, string> };
+      expect(mono.learning?.staleEntry, loc).toBeTruthy();
+    }
   });
 });
 

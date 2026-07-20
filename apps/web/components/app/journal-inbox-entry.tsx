@@ -86,6 +86,10 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         return { text: t("inbox.result.skillsVerified", { count: confirmState.verified }), ok: true };
       }
       switch (confirmState.code) {
+        case "entry_superseded":
+          return { text: t("inbox.result.entrySuperseded"), ok: false };
+        case "entry_deleted":
+          return { text: t("inbox.result.entryDeleted"), ok: false };
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
@@ -110,6 +114,10 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         return { text: t(`inbox.${key}`), ok: true };
       }
       switch (reviewState.code) {
+        case "entry_superseded":
+          return { text: t("inbox.result.entrySuperseded"), ok: false };
+        case "entry_deleted":
+          return { text: t("inbox.result.entryDeleted"), ok: false };
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
@@ -135,7 +143,19 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   // honest reason (`resultMessage`) is what remains. No fake approval, and no
   // backend change — the buttons simply stop pretending an action is available
   // when the real permission path already refused it.
-  const blockedCodes = ["not_authorized", "no_reviewer_engagement", "review_not_enabled"] as const;
+  // W1 (owner-hold v5): a stale card (entry edited/deleted mid-review) is
+  // equally TERMINAL — Approve/Reject can only repeat the same refusal, so
+  // the actions disappear and the honest reason remains; the server-side
+  // revalidation removes the card and updates the inbox count without a
+  // manual reload. Genuine temporary failures (generic "error") keep the
+  // buttons for a normal retry.
+  const blockedCodes = [
+    "not_authorized",
+    "no_reviewer_engagement",
+    "review_not_enabled",
+    "entry_superseded",
+    "entry_deleted",
+  ] as const;
   const isBlocked = (code: string | undefined) =>
     code != null && (blockedCodes as readonly string[]).includes(code);
   const permissionBlocked =

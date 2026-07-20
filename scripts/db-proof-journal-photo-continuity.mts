@@ -1056,6 +1056,136 @@ async function main(): Promise<void> {
     await cu.end();
   }
 
+  // ═══ Owner-hold v5 E-matrix: stale learning-queue lifecycle ═══
+  {
+    const setup = async (tag2: string) => {
+      const f = await makeFixture(a, tag2);
+      const org = await makeOrgManager(a, `${tag2}-o`);
+      const { rows: ec } = await a.query(
+        `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self, journal_review_enabled)
+         values ($1::uuid, $2, 'employee', 'W1 e ec', md5($1 || clock_timestamp()::text), true) returning id`,
+        [f.profileId, org.orgId],
+      );
+      const { rows: er } = await a.query(
+        `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+         values ($1, $2, 'freeform', 'e-matrix įrašas', 'lt', md5($3 || clock_timestamp()::text), 'closed') returning id`,
+        [f.workerId, ec[0].id, tag2],
+      );
+      const A = er[0].id as string;
+      const { rows: skill } = await a.query(
+        `select id from public.skills where is_active is not false limit 1`,
+      );
+      await a.query(
+        `insert into public.worker_skills (worker_id, skill_id, verified, source, confidence_bin)
+         values ($1, $2, false, 'self_declared', 'yellow')
+         on conflict (worker_id, skill_id) do nothing`,
+        [f.workerId, skill[0].id],
+      );
+      await a.query(
+        `insert into public.learning_policy_settings (organization_id, policy_kind, enabled, scope, rule, enabled_by)
+         values ($1, 'auto_confirm_journal_skill', true, '{"all_org_workers": true}'::jsonb, '{"min_confidence": 50}'::jsonb, $2)`,
+        [org.orgId, org.managerId],
+      );
+      const { rows: sig } = await a.query(
+        `insert into public.learning_signals (subject_worker_id, subject_skill_id, organization_id, source, signal_kind, confidence_score, confidence_bin)
+         values ($1, $2, $3, 'journal_entry', 'skill_evidence', 90, 'green') returning id`,
+        [f.workerId, skill[0].id, org.orgId],
+      );
+      const { rows: item } = await a.query(
+        `insert into public.learning_review_queue (signal_id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind)
+         values ($1, $2, $3, $4, $5, 'confirm_skill') returning id`,
+        [sig[0].id, f.workerId, skill[0].id, org.orgId, A],
+      );
+      return { f, org, entry: A, itemId: item[0].id as string };
+    };
+
+    const queueRow = async (id: string) =>
+      (await a.query(
+        `select status, reviewed_by, reviewed_at, review_note from public.learning_review_queue where id = $1`,
+        [id],
+      )).rows[0];
+
+    // E1: item already stale BEFORE applying → clean status + terminal row.
+    {
+      const { f, org, entry, itemId } = await setup(`${tag}-e1`);
+      const cu = await asUser(f.profileId);
+      const s = supersedeSql(entry, f, "e1 keitimas");
+      await cu.query(s.sql, s.params);
+      const cMgr = await asUser(org.managerId);
+      const { rows } = await cMgr.query(
+        `select public.apply_learning_auto_confirmation($1::uuid) as status`,
+        [itemId],
+      );
+      const q = await queueRow(itemId);
+      record(
+        "E1 stale-before-apply: RPC returns entry_superseded, item closed terminally with audit",
+        rows[0].status === "entry_superseded" && q.status === "superseded" &&
+          q.reviewed_by === org.managerId && q.reviewed_at !== null &&
+          String(q.review_note).includes("entry_superseded"),
+        `rpc=${rows[0].status} item=${q.status} note=${String(q.review_note).slice(0, 26)}`,
+      );
+      // Repeat attempt: honest not_pending, no further mutation.
+      const { rows: again } = await cMgr.query(
+        `select public.apply_learning_auto_confirmation($1::uuid) as status`,
+        [itemId],
+      );
+      record(
+        "E1b repeated apply on the closed item: not_pending (no loop)",
+        again[0].status === "not_pending",
+        `rpc=${again[0].status}`,
+      );
+      await cu.end();
+      await cMgr.end();
+    }
+
+    // E2: entry becomes stale AFTER the RPC's own pre-check (real race) —
+    // the guard trigger refuses, the handler transitions the queue item.
+    {
+      const { f, org, entry, itemId } = await setup(`${tag}-e2`);
+      const cu = await asUser(f.profileId);
+      await cu.query("begin");
+      const s = supersedeSql(entry, f, "e2 lenktynių keitimas");
+      await cu.query(s.sql, s.params); // holds FOR UPDATE, uncommitted
+      const cMgr = await asUser(org.managerId);
+      const applyPromise = cMgr.query(
+        `select public.apply_learning_auto_confirmation($1::uuid) as status`,
+        [itemId],
+      );
+      let early = false;
+      void applyPromise.then(() => { early = true; }).catch(() => { early = true; });
+      await new Promise((r) => setTimeout(r, 1200));
+      const blocked = !early;
+      await cu.query("commit");
+      const { rows } = await applyPromise;
+      const q = await queueRow(itemId);
+      record(
+        "E2 stale-after-load race: apply blocked on trigger, then terminal transition",
+        blocked && rows[0].status === "entry_superseded" && q.status === "superseded" &&
+          String(q.review_note).includes("race"),
+        `blocked=${blocked} rpc=${rows[0].status} item=${q.status}`,
+      );
+      await cu.end();
+      await cMgr.end();
+    }
+
+    // E3: valid item unaffected — auto-confirm still works end to end.
+    {
+      const { org, itemId } = await setup(`${tag}-e3`);
+      const cMgr = await asUser(org.managerId);
+      const { rows } = await cMgr.query(
+        `select public.apply_learning_auto_confirmation($1::uuid) as status`,
+        [itemId],
+      );
+      const q = await queueRow(itemId);
+      record(
+        "E3 valid item unaffected: auto-confirmed and closed as auto_actioned",
+        String(rows[0].status).startsWith("auto_confirmed:") && q.status === "auto_actioned",
+        `rpc=${rows[0].status} item=${q.status}`,
+      );
+      await cMgr.end();
+    }
+  }
+
   // ── L7: rollback round-trip — behavioral revert, retained authorization ─
   {
     const { readFileSync } = await import("node:fs");

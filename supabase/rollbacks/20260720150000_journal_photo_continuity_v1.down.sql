@@ -613,4 +613,118 @@ end $$;
 revoke all on function public.reviewable_journal_entry_ids() from public;
 grant execute on function public.reviewable_journal_entry_ids() to authenticated;
 
+-- Restore the 20260627132759 apply_learning_auto_confirmation verbatim.
+
+create or replace function public.apply_learning_auto_confirmation(p_review_item_id uuid)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid          uuid := auth.uid();
+  v_worker     uuid; v_skill uuid; v_org uuid; v_entry uuid; v_signal uuid; v_status text; v_kind text;
+  v_policy_id  uuid; v_enabled boolean; v_scope jsonb; v_rule jsonb; v_enabled_by uuid;
+  v_min_conf   int;  v_sig_score int;
+  v_eorg       uuid; v_eworker uuid; v_review_enabled boolean;
+  v_eng        uuid; v_role text; v_conf_id uuid; v_n int;
+begin
+  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+
+  -- Load the review item.
+  select subject_worker_id, subject_skill_id, organization_id, journal_entry_id,
+         signal_id, status, suggestion_kind
+    into v_worker, v_skill, v_org, v_entry, v_signal, v_status, v_kind
+  from public.learning_review_queue where id = p_review_item_id;
+  if not found then return 'item_not_found'; end if;
+  if v_status <> 'pending' then return 'not_pending'; end if;
+  if v_kind <> 'confirm_skill' then return 'unsupported_kind'; end if;
+  if v_entry is null or v_skill is null then return 'item_incomplete'; end if;
+
+  -- Live authority of the CALLER over the item's org (no stored-flag trust).
+  if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;
+
+  -- Policy must exist for this org and be ENABLED.
+  select id, enabled, scope, rule, enabled_by
+    into v_policy_id, v_enabled, v_scope, v_rule, v_enabled_by
+  from public.learning_policy_settings
+  where organization_id = v_org and policy_kind = 'auto_confirm_journal_skill';
+  if not found or v_enabled is not true then return 'policy_disabled'; end if;
+
+  -- Scope check. Empty/missing scope confirms NOTHING.
+  if not (
+       coalesce((v_scope->>'all_org_workers')::boolean, false)
+       or (v_scope ? 'worker_ids' and (v_scope->'worker_ids') ? v_worker::text)
+     ) then
+    return 'out_of_scope';
+  end if;
+
+  -- Threshold check. Missing min_confidence => nothing passes.
+  v_min_conf := nullif(v_rule->>'min_confidence', '')::int;
+  if v_min_conf is null then return 'threshold_not_met'; end if;
+  select confidence_score into v_sig_score from public.learning_signals where id = v_signal;
+  if v_sig_score is null or v_sig_score < v_min_conf then return 'threshold_not_met'; end if;
+
+  -- Re-derive org/worker and the journal_review_enabled gate from the SOURCE
+  -- entry (same gate the manual spine uses).
+  select ec.organization_id, je.worker_id, coalesce(ec.journal_review_enabled, false)
+    into v_eorg, v_eworker, v_review_enabled
+  from public.journal_entries je
+  join public.engagement_contexts ec on ec.id = je.engagement_context_id
+  where je.id = v_entry;
+  if not found then return 'entry_not_found'; end if;
+  if v_eorg is distinct from v_org then return 'org_mismatch'; end if;
+  if v_eworker is distinct from v_worker then return 'worker_mismatch'; end if;
+  if not v_review_enabled then return 'review_not_enabled'; end if;
+
+  -- The skill must actually belong to this worker.
+  if not exists (select 1 from public.worker_skills ws
+                  where ws.worker_id = v_worker and ws.skill_id = v_skill) then
+    return 'skill_not_owned';
+  end if;
+
+  -- The caller must have an ACTIVE reviewer engagement in this org.
+  select ec.id, ec.relationship_slug into v_eng, v_role
+  from public.engagement_contexts ec
+  where ec.profile_id = uid and ec.organization_id = v_org and ec.status = 'active'
+    and ec.relationship_slug in ('manager','owner','external_manager')
+  limit 1;
+  if v_eng is null then return 'no_reviewer_engagement'; end if;
+
+  -- 1) REAL confirmation (append-only). action='auto_confirm' makes it honest;
+  --    the policy + enabling manager + rule + source signal are recorded.
+  insert into public.journal_entry_confirmations
+    (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+  values (v_entry, uid, v_eng, v_role,
+    jsonb_build_object(
+      'action','auto_confirm', 'decision','approved',
+      'skills_confirmed', to_jsonb(array[v_skill]),
+      'policy_id', v_policy_id, 'policy_enabled_by', v_enabled_by,
+      'rule', v_rule, 'source_signal_id', v_signal,
+      'review_item_id', p_review_item_id))
+  returning id into v_conf_id;
+
+  -- 2) THE PROOF — same write as the manual path.
+  update public.worker_skills
+     set verified = true, verified_by = uid, verified_at = now(),
+         source = 'manager_confirmed', confidence_bin = 'green', updated_at = now()
+   where worker_id = v_worker and skill_id = v_skill
+     and (verified is distinct from true);
+  get diagnostics v_n = row_count;
+
+  -- 3) Audit (real event, attributes both the live confirmer and the policy).
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'auto_confirm_via_learning_policy', 'journal_entries', v_entry,
+    jsonb_build_object('organization_id', v_org, 'worker_id', v_worker, 'skill_id', v_skill,
+      'policy_id', v_policy_id, 'policy_enabled_by', v_enabled_by,
+      'review_item_id', p_review_item_id, 'skills_newly_verified', v_n));
+
+  -- 4) Close the queue item.
+  update public.learning_review_queue
+     set status = 'auto_actioned', reviewed_by = uid, reviewed_at = now(),
+         produced_confirmation_id = v_conf_id, policy_id = v_policy_id, updated_at = now()
+   where id = p_review_item_id;
+
+  return 'auto_confirmed:' || v_n::text;
+end $$;
+
+revoke all on function public.apply_learning_auto_confirmation(uuid) from public;
+grant execute on function public.apply_learning_auto_confirmation(uuid) to authenticated;
+
 commit;

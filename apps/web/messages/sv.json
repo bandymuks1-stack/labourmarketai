@@ -2922,5 +2922,8 @@
       "count": "Anteckningar i dag: {n}",
       "none": "Inget antecknat i dag ännu"
     }
+  },
+  "learning": {
+    "staleEntry": "Posten har ändrats eller raderats — det här objektet är inte längre aktuellt."
   }
 }

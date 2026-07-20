@@ -5779,7 +5779,8 @@
         "auto_actioned": "Confirmed by policy"
       }
     },
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "staleEntry": "The entry was edited or deleted — this item is no longer actionable."
   },
   "serviceOfferings": {
     "pageTitle": "Services",

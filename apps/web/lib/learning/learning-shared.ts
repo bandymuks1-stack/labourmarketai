@@ -52,6 +52,9 @@ export interface ReviewItemRow {
   readonly producedConfirmationId: string | null;
   readonly policyId: string | null;
   readonly createdAt: string;
+  /** True when the source journal entry is superseded or deleted — the item
+   *  is no longer actionable (owner-hold v5 P2-1). */
+  readonly entryStale: boolean;
 }
 
 export interface LearningPolicyRow {

@@ -5779,7 +5779,8 @@
         "auto_actioned": "Durch Richtlinie bestätigt"
       }
     },
-    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "staleEntry": "Der Eintrag wurde geändert oder gelöscht — dieses Element ist nicht mehr bearbeitbar."
   },
   "serviceOfferings": {
     "pageTitle": "Dienstleistungen",

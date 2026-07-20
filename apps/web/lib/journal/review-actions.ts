@@ -27,7 +27,11 @@ export type ReviewBlockCode =
   | "entry_not_org_scoped"
   | "not_authorized"
   | "review_not_enabled"
-  | "no_reviewer_engagement";
+  | "no_reviewer_engagement"
+  /** W1 (owner-hold v5): terminal stale outcomes — the entry was edited or
+   *  deleted after the card loaded. The card must stop offering actions. */
+  | "entry_superseded"
+  | "entry_deleted";
 
 export type ReviewActionState =
   | { ok: true; decision: ReviewDecision }
@@ -79,6 +83,12 @@ export async function reviewJournalEntry(
 
   const outcome = data as string;
   if (outcome !== decision) {
+    if (outcome === "entry_superseded" || outcome === "entry_deleted") {
+      // Terminal stale card: refresh the inbox list + counts immediately
+      // (reviewable_journal_entry_ids no longer returns this entry).
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard`);
+    }
     // The RPC returned a block reason instead of the decision.
     return { ok: false, code: outcome as ReviewBlockCode };
   }
@@ -134,7 +144,12 @@ export async function confirmEntrySkills(
 
   const res = await confirmEntryAndVerifySkills(entryId, skillIds, note, locale);
   if (res.ok) return { ok: true, verified: res.verified ?? skillIds.length };
+  if (res.code === "entry_superseded" || res.code === "entry_deleted") {
+    // Terminal stale card (owner-hold v5): refresh inbox list + counts now.
+    revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   // Map the RPC block reasons through unchanged (review_not_enabled,
-  // not_authorized, skill_not_owned, no_reviewer_engagement, error, …).
+  // not_authorized, skill_not_owned, no_reviewer_engagement, error, ...).
   return { ok: false, code: res.code, message: res.message };
 }

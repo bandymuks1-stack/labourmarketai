@@ -2922,5 +2922,8 @@
       "count": "Registreringer i dag: {n}",
       "none": "Ingenting registrert i dag ennå"
     }
+  },
+  "learning": {
+    "staleEntry": "Oppføringen er endret eller slettet — dette elementet er ikke lenger aktuelt."
   }
 }

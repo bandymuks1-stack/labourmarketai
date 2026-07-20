@@ -64,6 +64,13 @@ function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
     journalEntryId: (r.journal_entry_id as string | null) ?? null,
     suggestionKind: (r.suggestion_kind as ReviewItemRow["suggestionKind"]) ?? "review_skill",
     status: (r.status as ReviewItemRow["status"]) ?? "pending",
+    entryStale: (() => {
+      const je = r.journal_entries as
+        | { superseded_by?: string | null; deleted_at?: string | null }
+        | null
+        | undefined;
+      return Boolean(je && (je.superseded_by != null || je.deleted_at != null));
+    })(),
     reviewedBy: (r.reviewed_by as string | null) ?? null,
     reviewedAt: (r.reviewed_at as string | null) ?? null,
     reviewNote: (r.review_note as string | null) ?? null,
@@ -85,7 +92,7 @@ export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   const { data, error } = await asAny(supabase)
     .from("learning_review_queue")
     .select(
-      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at, workers(profiles(full_name, email)), skills(slug)",
+      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at, workers(profiles(full_name, email)), skills(slug), journal_entries(superseded_by, deleted_at)",
     )
     .order("created_at", { ascending: false });
   if (error) {

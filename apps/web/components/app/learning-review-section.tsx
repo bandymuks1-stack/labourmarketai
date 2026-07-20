@@ -55,6 +55,8 @@ export type LearningLabels = {
     statusLabel: Record<ReviewStatus, string>;
   };
   errorGeneric: string;
+  /** Honest terminal copy when the source entry was edited/removed. */
+  staleEntry: string;
 };
 
 const STATUS_RING: Record<ReviewStatus, string> = {
@@ -119,7 +121,16 @@ export function LearningReviewSection({
     setError(null);
     startTransition(async () => {
       const res = await applyAutoConfirmation(id);
-      if (res.kind !== "ok") setError(labels.errorGeneric);
+      if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+      } else if (
+        res.detail === "entry_superseded" ||
+        res.detail === "entry_deleted"
+      ) {
+        // Terminal stale outcome (owner-hold v5): the RPC closed the queue
+        // item; the refresh below removes it from the actionable list.
+        setError(labels.staleEntry);
+      }
       router.refresh();
     });
   }
@@ -207,7 +218,15 @@ export function LearningReviewSection({
                     {labels.managerContextLink}
                   </Link>
                 )}
-                {item.status === "pending" && (
+                {item.status === "pending" && item.entryStale && (
+                  <span
+                    className="text-[11px] text-text-muted"
+                    data-testid={`learning-item-stale-${item.id}`}
+                  >
+                    {labels.staleEntry}
+                  </span>
+                )}
+                {item.status === "pending" && !item.entryStale && (
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"

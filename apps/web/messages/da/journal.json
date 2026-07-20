@@ -72,6 +72,10 @@
       "excludedNote": "{count, plural, =0 {Alle undtagelser er gennemgået — hele listen bliver bekræftet.} one {# post med undtagelse bliver IKKE bekræftet, før du markerer den som gennemgået.} other {# poster med undtagelser bliver IKKE bekræftet, før du markerer dem som gennemgået.}}",
       "outcomeNotAcknowledged": "ikke bekræftet — undtagelsen blev ikke gennemgået",
       "outcomeBlocked": "ikke bekræftet ({code})"
+    },
+    "result": {
+      "entrySuperseded": "Posten er allerede erstattet af en nyere version — kortet er ikke længere aktuelt og fjernes fra listen.",
+      "entryDeleted": "Posten er blevet slettet — kortet er ikke længere aktuelt og fjernes fra listen."
     }
   },
   "listEmpty": "[EN] No entries yet.",
