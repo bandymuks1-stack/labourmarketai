@@ -49,11 +49,17 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
   const confirmed = confirmState?.ok === true;
   const rejected = rejectState?.ok === true;
 
-  const failureCode = !confirmState?.ok
-    ? confirmState?.code
-    : !rejectState?.ok
-      ? rejectState?.code
-      : undefined;
+  // Select the failure from whichever action actually RAN and failed. The
+  // previous `!confirmState?.ok ? ... : ...` shape was wrong: with confirmState
+  // still null (nothing confirmed yet) `!undefined` is true, so a REJECT
+  // failure was read off confirmState and always came back undefined — the
+  // reject path rendered neither a terminal state nor an error (Codex rev12).
+  const failureCode =
+    confirmState && !confirmState.ok
+      ? confirmState.code
+      : rejectState && !rejectState.ok
+        ? rejectState.code
+        : undefined;
 
   /**
    * TERMINAL STALE (owner-hold v5 P2-3). The worker edited or removed the entry
@@ -63,10 +69,7 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
    * the repeated failing submissions. Genuine temporary failures keep the
    * buttons and the retry path untouched (see errorText below).
    */
-  const staleOutcome =
-    !confirmState?.ok && !rejectState?.ok && isTerminalStaleOutcome(failureCode)
-      ? failureCode
-      : null;
+  const staleOutcome = isTerminalStaleOutcome(failureCode) ? failureCode : null;
 
   const errorText = (() => {
     const code = failureCode;

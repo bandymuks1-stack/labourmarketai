@@ -140,10 +140,9 @@ describe("P2-2 — learning decisions revalidate inside the mutation", () => {
     expect(migration).toMatch(
       /from public\.learning_review_queue\s+where id = p_review_item_id\s+for update/i,
     );
-    // Source entry re-read INSIDE the mutation, with the lock discipline that
-    // conflicts with the supersedes' FOR UPDATE.
+    // Source entry re-read INSIDE the mutation, under FOR UPDATE.
     expect(migration).toMatch(
-      /from public\.journal_entries je\s+where je\.id = v_entry\s+for key share/i,
+      /from public\.journal_entries je\s+where je\.id = v_entry\s+for update/i,
     );
     // A stale source closes the item INSTEAD of recording the decision.
     expect(migration).toMatch(/'entry_deleted' else 'entry_superseded' end/i);
@@ -179,6 +178,19 @@ describe("P2-2 — learning decisions revalidate inside the mutation", () => {
     expect(migration).toMatch(
       /if not \(public\.is_admin\(\) or public\.manages_organization\(v_org\)\) then\s+return 'not_authorized';/i,
     );
+  });
+
+  it("locks the source entry with FOR UPDATE, never FOR KEY SHARE (rev12 P1)", () => {
+    // journal_entry_soft_delete (0018) is a bare `update ... set deleted_at,
+    // updated_at` — no key column touched — so it takes only FOR NO KEY
+    // UPDATE. FOR KEY SHARE does NOT conflict with that, which would let a
+    // decision commit against a concurrently-deleted source. Both the RPC and
+    // the guard trigger must therefore take FOR UPDATE.
+    expect(migrationSql).not.toMatch(/for key share/i);
+    const entryLocks =
+      migrationSql.match(/from public\.journal_entries je[\s\S]{0,120}?for update/gi) ?? [];
+    // One in set_learning_review_item_status, one in the guard trigger.
+    expect(entryLocks.length).toBeGreaterThanOrEqual(2);
   });
 
   it("has a trigger-backed race-proof backstop for approve/reject", () => {
@@ -227,6 +239,22 @@ describe("P2-3 — quick-confirm treats stale outcomes as terminal", () => {
     expect(staleBranch).toBeGreaterThan(0);
     expect(confirmForm).toBeGreaterThan(staleBranch);
     expect(quickCard).toMatch(/data-testid=\{`quick-stale-\$\{entry\.id\}`\}/);
+  });
+
+  it("[tests 9/10] a stale outcome from the REJECT action is read (rev12 P2)", () => {
+    // Regression: the previous `!confirmState?.ok ? confirmState?.code : ...`
+    // shape short-circuited on a NULL confirmState (nothing confirmed yet), so
+    // a reject failure was read off the wrong state and always came back
+    // undefined — the reject path showed neither terminal state nor error.
+    // The selector must require the state to be non-null before reading it.
+    expect(quickCard).toMatch(
+      /confirmState && !confirmState\.ok\s*\n?\s*\?\s*confirmState\.code\s*\n?\s*:\s*rejectState && !rejectState\.ok\s*\n?\s*\?\s*rejectState\.code/,
+    );
+    expect(quickCard).not.toMatch(/!confirmState\?\.ok\s*\n?\s*\?\s*confirmState\?\.code/);
+    // staleOutcome derives purely from the (correctly selected) failure code.
+    expect(quickCard).toMatch(
+      /const staleOutcome = isTerminalStaleOutcome\(failureCode\) \? failureCode : null;/,
+    );
   });
 
   it("[test 11] a terminal stale outcome is not rendered as a generic error", () => {

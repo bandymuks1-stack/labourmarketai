@@ -446,6 +446,96 @@ async function main(): Promise<void> {
     await mgr.end();
   }
 
+  // ── 7b: TRUE CONCURRENCY vs SOFT DELETE (Codex rev12 P1) ───────────────
+  //
+  // The regression this proves: journal_entry_soft_delete is a bare
+  // `update ... set deleted_at, updated_at`, which takes only FOR NO KEY
+  // UPDATE. A FOR KEY SHARE re-read does NOT conflict with that, so the
+  // decision could commit against a source the worker deleted concurrently.
+  // With FOR UPDATE the decision must block and then observe the delete.
+  {
+    const w = await makeWorld(a, `${tag}-c7b`);
+    const entry = await makeEntry(a, w, "trynimo lenktynių įrašas");
+    const item = await makeQueueItem(a, w, entry);
+
+    const mgr = await asUser(w.managerProfileId);
+    const worker = await asUser(w.workerProfileId);
+
+    // Session A (worker): the SOFT-DELETE shape — a plain UPDATE on non-key
+    // columns, uncommitted. This is the exact lock the real RPC takes.
+    await worker.query("begin");
+    await worker.query(
+      `update public.journal_entries set deleted_at = now(), updated_at = now()
+        where id = $1`,
+      [entry],
+    );
+
+    // Session B (manager): Approve. Must BLOCK on the entry lock.
+    const decision = mgr
+      .query(
+        `select public.set_learning_review_item_status($1, 'approved', null) as outcome`,
+        [item],
+      )
+      .then((r) => r.rows[0].outcome as string);
+
+    await new Promise((r) => setTimeout(r, 400));
+    const { rows: waiting } = await a.query(
+      `select count(*)::int as n from pg_stat_activity
+        where wait_event_type = 'Lock' and query like '%set_learning_review_item_status%'`,
+    );
+    await worker.query("commit");
+
+    const outcome = await decision;
+    const after = await queueRow(a, item);
+    record(
+      "7b. CONCURRENCY: SOFT DELETE racing Approve is serialized, decision refused",
+      waiting[0].n === 1 &&
+        outcome === "entry_deleted" &&
+        after.status === "superseded" &&
+        after.status !== "approved",
+      `blockedOnLock=${waiting[0].n === 1} outcome=${outcome} status=${after.status}`,
+    );
+    await worker.end();
+    await mgr.end();
+  }
+
+  // ── 7c: the guard trigger blocks the same soft-delete race ─────────────
+  {
+    const w = await makeWorld(a, `${tag}-c7c`);
+    const entry = await makeEntry(a, w, "trigerio trynimo lenktynės");
+    const item = await makeQueueItem(a, w, entry);
+    const worker = await asUser(w.workerProfileId);
+
+    await worker.query("begin");
+    await worker.query(
+      `update public.journal_entries set deleted_at = now(), updated_at = now()
+        where id = $1`,
+      [entry],
+    );
+
+    // A DIRECT write (the legacy path) must also be serialized by the trigger's
+    // own FOR UPDATE re-read, then refused once the delete is visible.
+    const direct = a
+      .query(
+        `update public.learning_review_queue set status = 'approved', updated_at = now()
+          where id = $1`,
+        [item],
+      )
+      .then(() => "committed")
+      .catch((e) => (e as Error).message);
+
+    await new Promise((r) => setTimeout(r, 400));
+    await worker.query("commit");
+    const outcome = await direct;
+    const after = await queueRow(a, item);
+    record(
+      "7c. guard trigger serializes + refuses a DIRECT approve racing a soft delete",
+      outcome.includes("entry_deleted") && after.status === "pending",
+      `outcome="${outcome}" status=${after.status}`,
+    );
+    await worker.end();
+  }
+
   // ── 8: the guard trigger backstops any DIRECT write ────────────────────
   {
     const w = await makeWorld(a, `${tag}-c8`);

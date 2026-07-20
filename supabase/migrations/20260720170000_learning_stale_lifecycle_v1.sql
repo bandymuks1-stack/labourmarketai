@@ -179,16 +179,29 @@ begin
   if v_status <> 'pending' then return 'not_pending'; end if;
 
   -- THE P2-2 FIX: re-read the SOURCE entry inside this transaction, never the
-  -- client's render-time snapshot. FOR KEY SHARE conflicts with the supersede
-  -- RPCs' FOR UPDATE on the same row, so this either sees the pre-supersede
-  -- state and blocks the supersede until we commit, or waits and then sees the
-  -- superseded state. There is no window in between.
+  -- client's render-time snapshot.
+  --
+  -- LOCK STRENGTH (rev12, Codex P1): this MUST be FOR UPDATE, not FOR KEY
+  -- SHARE. The two ways an entry goes stale take different locks:
+  --   * journal_entry_supersede{,_v2} takes an explicit FOR UPDATE;
+  --   * journal_entry_soft_delete (0018) is a bare `update ... set deleted_at,
+  --     updated_at`, which touches no key column and therefore takes only
+  --     FOR NO KEY UPDATE.
+  -- FOR KEY SHARE conflicts with FOR UPDATE but NOT with FOR NO KEY UPDATE, so
+  -- it would serialize the supersede race while leaving the SOFT-DELETE race
+  -- open: the worker could commit a delete between this read and our commit
+  -- and the decision would land on a deleted source. FOR UPDATE conflicts with
+  -- both, closing the lifecycle against every staleness path.
+  --
+  -- Lock ORDER is always queue row -> entry row (here and in the guard
+  -- trigger), and the supersede/soft-delete paths never take a queue lock, so
+  -- no cycle is possible.
   if v_entry is not null then
     select je.superseded_by, je.deleted_at
       into v_superseded, v_deleted
     from public.journal_entries je
     where je.id = v_entry
-    for key share;
+    for update;
 
     -- `not found` = the source row is gone entirely (hard delete). The FK is
     -- ON DELETE CASCADE so this is defensive, but it is still terminal stale.
@@ -240,8 +253,10 @@ grant execute on function public.set_learning_review_item_status(uuid, text, tex
 --
 -- Even if some other caller (a legacy deployed build, a direct PostgREST
 -- write) tries to stamp approved/rejected on an item whose source went stale,
--- the database refuses it. Same FOR KEY SHARE vs FOR UPDATE discipline as the
--- confirmation guard added in 20260720150000.
+-- the database refuses it. It takes the SAME FOR UPDATE lock as the decision
+-- RPC above (see the lock-strength note there): FOR KEY SHARE would leave the
+-- soft-delete race open, because journal_entry_soft_delete only takes
+-- FOR NO KEY UPDATE.
 --
 -- Deliberately NOT guarded: transitions to 'superseded' / 'auto_actioned' —
 -- those ARE the honest terminal closes this train introduces.
@@ -263,7 +278,7 @@ begin
       into v_superseded, v_deleted
     from public.journal_entries je
     where je.id = new.journal_entry_id
-    for key share;
+    for update;
 
     if v_deleted is not null then
       raise exception 'entry_deleted' using errcode = '55000';
