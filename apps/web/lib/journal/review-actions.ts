@@ -6,7 +6,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyApprovalSkillEffects } from "./confirm-actions";
 import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
-import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
+import {
+  isTerminalStaleOutcome,
+  terminalStaleFromError,
+} from "@/lib/learning/learning-shared";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
 
 /**
@@ -79,6 +82,17 @@ export async function reviewJournalEntry(
   });
   if (error) {
     if (error.code === RPC_NOT_FOUND_CODE) return { ok: false, code: "needs_migration" };
+    // The confirmation guard trigger RAISES when the entry went stale between
+    // this RPC's pre-check and its confirmation INSERT — an error, not a
+    // tagged return. Map it to the terminal outcome so the card stops offering
+    // actions instead of retrying an impossible one (rev14, Codex P2).
+    const stale = terminalStaleFromError(error.message);
+    if (stale) {
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
+      revalidatePath(`/${locale}/dashboard`);
+      return { ok: false, code: stale };
+    }
     return { ok: false, code: "error", message: error.message };
   }
 

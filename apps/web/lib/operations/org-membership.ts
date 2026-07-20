@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { terminalStaleFromError } from "@/lib/learning/learning-shared";
 
 /**
  * Canonical membership + verified-proof actions for the keystone
@@ -116,7 +117,16 @@ export async function confirmEntryAndVerifySkills(
     p_skill_ids: skillIds,
     p_note: note,
   });
-  if (error) return { ok: false, code: "error", message: error.message };
+  // The confirmation guard trigger RAISES when the entry went stale between
+  // this RPC's own pre-check and its confirmation INSERT. That arrives as an
+  // error, not a tagged return — mapping it to the generic `error` code left
+  // the card actionable and inviting retries of an impossible action
+  // (rev14, Codex P2). Surface the terminal outcome instead.
+  if (error) {
+    const stale = terminalStaleFromError(error.message);
+    if (stale) return { ok: false, code: stale };
+    return { ok: false, code: "error", message: error.message };
+  }
   const code = String(data ?? "");
   if (code.startsWith("verified:")) {
     revalidatePath(`/${locale}/dashboard/inbox`);

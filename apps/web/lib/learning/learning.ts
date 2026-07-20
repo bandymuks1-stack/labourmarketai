@@ -95,17 +95,30 @@ function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
  *   * it re-checks live manager/admin authority per row inside the RPC, so a
  *     worker loading their own transparency list closes nothing.
  *
- * Best-effort by design: if the RPC is absent (migration not applied) or the
- * sweep fails, the listing below still renders — the rows simply keep their
- * current status and the UI keeps degrading honestly. Never throws.
+ * ABSENT-RPC DETECTION (rev14, Codex P2): the migration is human-gated, so the
+ * app can be deployed BEFORE it is applied. PostgREST resolves a missing
+ * function as an `{ error }` RESULT rather than a rejected promise, so a bare
+ * try/catch would read "missing function" as success. The older learning
+ * TABLES already exist, so the listing query would then succeed too and the
+ * page would render live controls whose every decision hits the equally-absent
+ * `set_learning_review_item_status` and dies with a generic error. We therefore
+ * inspect the result and report absence upward, so the page shows its intended
+ * "not available yet" state instead.
+ *
+ * Any OTHER failure stays best-effort: the listing still renders, rows keep
+ * their current status, and the UI degrades honestly. Never throws.
  */
-async function closeStaleReviewItems(supabase: SupabaseClient): Promise<void> {
+async function closeStaleReviewItems(
+  supabase: SupabaseClient,
+): Promise<{ absent: boolean }> {
   try {
-    await asAny(supabase).rpc("close_stale_learning_review_items", {
+    const { error } = await asAny(supabase).rpc("close_stale_learning_review_items", {
       p_organization_id: null,
     });
+    return { absent: isAbsent(error) };
   } catch {
     // Read paths never fail because a cleanup sweep failed.
+    return { absent: false };
   }
 }
 
@@ -120,8 +133,11 @@ export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   if (!user) return { kind: "not-authed" };
 
   // P2-1: close stale rows BEFORE reading, so the snapshot the UI renders is
-  // already truthful (no pending badge on an unactionable item).
-  await closeStaleReviewItems(supabase);
+  // already truthful (no pending badge on an unactionable item). If the RPC is
+  // absent the lifecycle is not deployed yet — degrade to the honest
+  // "not available yet" state rather than rendering controls that cannot work.
+  const { absent } = await closeStaleReviewItems(supabase);
+  if (absent) return { kind: "needs-migration" };
 
   const { data, error } = await asAny(supabase)
     .from("learning_review_queue")

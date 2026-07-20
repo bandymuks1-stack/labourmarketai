@@ -536,6 +536,126 @@ async function main(): Promise<void> {
     await worker.end();
   }
 
+  // ── 7d: SOFT DELETE decides under the lock too (rev14, Codex P1) ───────
+  //
+  // The OPPOSITE ordering from 7b/C3b: the delete reads + counts confirmations
+  // FIRST (seeing zero), then a confirmation commits, then the delete proceeds.
+  // Without a lock on its initial read, journal_entry_soft_delete would act on
+  // its stale count and leave a CONFIRMED entry deleted.
+  {
+    const w = await makeWorld(a, `${tag}-c7d`);
+    const entry = await makeEntry(a, w, "istrynimo pirmumo lenktynes");
+
+    const { rows: mgrCtx } = await a.query(
+      `select id from public.engagement_contexts
+        where profile_id = $1 and organization_id = $2 limit 1`,
+      [w.managerProfileId, w.orgId],
+    );
+
+    const holder = await admin();
+    const worker = await asUser(w.workerProfileId);
+
+    // Session A: hold the entry lock WITHOUT having confirmed anything yet.
+    await holder.query("begin");
+    await holder.query(`select id from public.journal_entries where id = $1 for update`, [
+      entry,
+    ]);
+
+    // Session B (worker): soft-delete. This is the discriminating step.
+    //   * FIXED  — the very FIRST read takes FOR UPDATE, so B blocks HERE,
+    //     before counting confirmations. When A commits, B's read (and its
+    //     count) happen AFTER the confirmation exists -> already_confirmed.
+    //   * BROKEN — B's unlocked read + count run immediately, observing ZERO
+    //     confirmations, and B blocks only at the final UPDATE. When A commits,
+    //     B proceeds on that stale count and deletes a CONFIRMED entry.
+    const deleting = worker
+      .query(`select public.journal_entry_soft_delete($1::uuid)`, [entry])
+      .then(() => "deleted")
+      .catch((e) => (e as Error).message);
+
+    await new Promise((r) => setTimeout(r, 400));
+    // Session A now confirms the entry and commits — strictly after B started.
+    await holder.query(
+      `insert into public.journal_entry_confirmations
+         (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+       values ($1, $2, $3, 'manager', '{"action":"confirm"}'::jsonb)`,
+      [entry, w.managerProfileId, mgrCtx[0].id],
+    );
+    await holder.query("commit");
+    const delOutcome = String(await deleting);
+
+    const { rows: final } = await a.query(
+      `select je.deleted_at is not null as deleted,
+              (select count(*)::int from public.journal_entry_confirmations c
+                where c.entry_id = je.id) as confs
+         from public.journal_entries je where je.id = $1`,
+      [entry],
+    );
+    // The invariant: an entry may be deleted OR confirmed, never both.
+    const corrupt = final[0].deleted && final[0].confs > 0;
+    record(
+      "7d. soft delete decides under the lock (no deleted+confirmed entry)",
+      !corrupt && delOutcome.includes("already_confirmed"),
+      `deleteOutcome="${delOutcome.slice(0, 34)}" deleted=${final[0].deleted} confirmations=${final[0].confs}`,
+    );
+    await holder.end();
+    await worker.end();
+  }
+
+  // ── 7e: auto-confirmation cannot overwrite a committed decision ────────
+  //
+  // rev14 (Codex P1): apply_learning_auto_confirmation used to read the queue
+  // row UNLOCKED, so it could observe 'pending', have a manager rejection
+  // commit underneath it, and then overwrite that human decision with
+  // 'auto_actioned'. Both writers must take the same row lock.
+  {
+    const w = await makeWorld(a, `${tag}-c7e`);
+    const entry = await makeEntry(a, w, "auto vs rankinis sprendimas");
+    const item = await makeQueueItem(a, w, entry);
+    await a.query(
+      `insert into public.learning_policy_settings
+         (organization_id, policy_kind, enabled, scope, rule, enabled_by, enabled_at)
+       values ($1, 'auto_confirm_journal_skill', true,
+               '{"all_org_workers":true}'::jsonb, '{"min_confidence":10}'::jsonb, $2, now())`,
+      [w.orgId, w.managerProfileId],
+    );
+
+    const mgrA = await asUser(w.managerProfileId);
+    const mgrB = await asUser(w.managerProfileId);
+
+    // Session A: record a REJECTION and hold the transaction open.
+    await mgrA.query("begin");
+    const { rows: rej } = await mgrA.query(
+      `select public.set_learning_review_item_status($1, 'rejected', 'ne') as outcome`,
+      [item],
+    );
+
+    // Session B: auto-confirm the SAME item. It must block on the queue row.
+    const auto = mgrB
+      .query(`select public.apply_learning_auto_confirmation($1) as outcome`, [item])
+      .then((r) => r.rows[0].outcome as string)
+      .catch((e) => (e as Error).message);
+
+    await new Promise((r) => setTimeout(r, 400));
+    const { rows: blocked } = await a.query(
+      `select count(*)::int as n from pg_stat_activity
+        where wait_event_type = 'Lock' and query like '%apply_learning_auto_confirmation%'`,
+    );
+    await mgrA.query("commit");
+    const autoOutcome = await auto;
+    const after = await queueRow(a, item);
+    record(
+      "7e. auto-confirmation cannot overwrite a committed manager rejection",
+      rej[0].outcome === "rejected" &&
+        blocked[0].n >= 1 &&
+        after.status === "rejected" &&
+        !String(autoOutcome).startsWith("auto_confirmed"),
+      `blockedOnLock=${blocked[0].n >= 1} autoOutcome=${autoOutcome} finalStatus=${after.status}`,
+    );
+    await mgrA.end();
+    await mgrB.end();
+  }
+
   // ── 8: the guard trigger backstops any DIRECT write ────────────────────
   {
     const w = await makeWorld(a, `${tag}-c8`);

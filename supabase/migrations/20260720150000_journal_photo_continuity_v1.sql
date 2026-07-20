@@ -638,11 +638,19 @@ declare
 begin
   if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
 
-  -- Load the review item.
+  -- Load the review item UNDER A ROW LOCK (rev14, Codex P1). An unlocked read
+  -- here could observe 'pending', a concurrent manager rejection (which DOES
+  -- lock, via set_learning_review_item_status) could commit, and this path
+  -- would then produce a real confirmation and overwrite the committed
+  -- rejection with 'auto_actioned' — replacing a human decision with a
+  -- verification. Both writers must take the same lock for either to
+  -- serialize; the terminal update at the end is additionally conditional on
+  -- the row still being pending.
   select subject_worker_id, subject_skill_id, organization_id, journal_entry_id,
          signal_id, status, suggestion_kind
     into v_worker, v_skill, v_org, v_entry, v_signal, v_status, v_kind
-  from public.learning_review_queue where id = p_review_item_id;
+  from public.learning_review_queue where id = p_review_item_id
+  for update;
   if not found then return 'item_not_found'; end if;
   if v_status <> 'pending' then return 'not_pending'; end if;
   if v_kind <> 'confirm_skill' then return 'unsupported_kind'; end if;
@@ -759,11 +767,15 @@ begin
       'policy_id', v_policy_id, 'policy_enabled_by', v_enabled_by,
       'review_item_id', p_review_item_id, 'skills_newly_verified', v_n));
 
-  -- 4) Close the queue item.
+  -- 4) Close the queue item — CONDITIONALLY (rev14, Codex P1). Belt and braces
+  --    with the FOR UPDATE above: this can never overwrite a decision that
+  --    another transaction already recorded.
   update public.learning_review_queue
      set status = 'auto_actioned', reviewed_by = uid, reviewed_at = now(),
          produced_confirmation_id = v_conf_id, policy_id = v_policy_id, updated_at = now()
-   where id = p_review_item_id;
+   where id = p_review_item_id
+     and status = 'pending';
+  if not found then return 'not_pending'; end if;
 
   return 'auto_confirmed:' || v_n::text;
 end $$;

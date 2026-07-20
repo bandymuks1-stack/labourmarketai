@@ -249,6 +249,77 @@ revoke all on function public.set_learning_review_item_status(uuid, text, text) 
 grant execute on function public.set_learning_review_item_status(uuid, text, text) to authenticated;
 
 
+-- == 2b. Soft delete must LOCK before it decides ============================
+--
+-- rev14 (Codex P1): strengthening the confirmation guard to FOR UPDATE closed
+-- only ONE ordering. journal_entry_soft_delete (0018) reads the entry and
+-- counts confirmations while holding NO row lock, then updates. In the
+-- opposite interleaving the delete pauses after counting zero confirmations,
+-- the confirmation guard acquires FOR UPDATE, inserts and commits — and the
+-- paused delete then proceeds on its stale count, leaving a CONFIRMED entry
+-- deleted. Serialization needs both sides to take the lock, so the decision
+-- and the write happen under it.
+--
+-- Body is 0018 verbatim except for the `for update` on the initial read, which
+-- now covers the confirmation count and the update. No signature, no
+-- authorization, no error contract changes: same tagged exceptions
+-- (entry_not_found / not_owner / already_confirmed_use_correction_request),
+-- same idempotent early return.
+
+create or replace function public.journal_entry_soft_delete(
+  p_entry_id uuid
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_worker_id        uuid;
+  v_already_deleted  timestamptz;
+  v_confirmed_count  int;
+begin
+  -- THE FIX: take the row lock BEFORE reading, so the confirmation count below
+  -- and the update at the end are decided under the same lock the
+  -- confirmation guard and the supersedes take.
+  select worker_id, deleted_at into v_worker_id, v_already_deleted
+    from public.journal_entries
+    where id = p_entry_id
+    for update;
+
+  if v_worker_id is null then
+    raise exception 'entry_not_found' using errcode = 'P0002';
+  end if;
+
+  -- Ownership check — security definer bypasses RLS, so this is the only
+  -- gate that stops a caller from acting on someone else's entry.
+  if not public.owns_worker(v_worker_id) then
+    raise exception 'not_owner' using errcode = '42501';
+  end if;
+
+  if v_already_deleted is not null then
+    return; -- Idempotent.
+  end if;
+
+  select count(*) into v_confirmed_count
+    from public.journal_entry_confirmations
+    where entry_id = p_entry_id;
+
+  if v_confirmed_count > 0 then
+    raise exception 'already_confirmed_use_correction_request'
+      using errcode = '42P10';
+  end if;
+
+  update public.journal_entries
+     set deleted_at = now(),
+         updated_at = now()
+   where id = p_entry_id;
+end;
+$$;
+
+revoke all on function public.journal_entry_soft_delete(uuid) from public;
+grant execute on function public.journal_entry_soft_delete(uuid) to authenticated;
+
+
 -- == 3. Race-proof final guard trigger ======================================
 --
 -- Even if some other caller (a legacy deployed build, a direct PostgREST

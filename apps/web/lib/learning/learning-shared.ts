@@ -94,6 +94,28 @@ export function isTerminalStaleOutcome(code: unknown): code is TerminalStaleOutc
   );
 }
 
+/**
+ * Recover a terminal stale outcome from a DATABASE ERROR message.
+ *
+ * The confirmation guard trigger (20260720150000) and the learning queue guard
+ * trigger (20260720170000) RAISE when an entry goes stale between an RPC's own
+ * pre-check and its write. That surfaces as an error rather than a tagged
+ * return value, and mapping it to a generic `error` code leaves the card
+ * actionable and invites retries of an impossible action. Every wrapper around
+ * a guarded RPC routes its error through here first.
+ *
+ * Order matters: 'entry_deleted' is checked first because a deleted entry is
+ * the stronger statement when both markers somehow appear.
+ */
+export function terminalStaleFromError(
+  message: string | null | undefined,
+): TerminalStaleOutcome | null {
+  if (!message) return null;
+  if (message.includes("entry_deleted")) return "entry_deleted";
+  if (message.includes("entry_superseded")) return "entry_superseded";
+  return null;
+}
+
 export type LearningMutateResult =
   | { kind: "ok"; id?: string; detail?: string }
   /** The mutation refused a decision because the source entry went stale

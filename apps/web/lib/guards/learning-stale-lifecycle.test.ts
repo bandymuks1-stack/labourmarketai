@@ -193,6 +193,40 @@ describe("P2-2 — learning decisions revalidate inside the mutation", () => {
     expect(entryLocks.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("soft delete decides under the row lock (rev14 P1)", () => {
+    // journal_entry_soft_delete (0018) read + counted confirmations with NO
+    // row lock, then updated. Strengthening only the confirmation guard closed
+    // one ordering; the reverse (delete counts zero, confirmation commits,
+    // delete proceeds on the stale count) left a CONFIRMED entry deleted.
+    // Both sides must decide under the lock.
+    expect(migration).toMatch(
+      /create or replace function public\.journal_entry_soft_delete\(/i,
+    );
+    expect(migration).toMatch(
+      /from public\.journal_entries\s+where id = p_entry_id\s+for update;/i,
+    );
+    // The lock must precede the confirmation count it guards.
+    const fn = migration.slice(
+      migration.indexOf("create or replace function public.journal_entry_soft_delete("),
+    );
+    const lockIdx = fn.indexOf("for update;");
+    const countIdx = fn.indexOf("select count(*) into v_confirmed_count");
+    expect(lockIdx).toBeGreaterThan(0);
+    expect(countIdx).toBeGreaterThan(lockIdx);
+    // Error contract unchanged — the rollback restores 0018 verbatim.
+    for (const err of [
+      "entry_not_found",
+      "not_owner",
+      "already_confirmed_use_correction_request",
+    ]) {
+      expect(fn).toContain(err);
+      expect(rollback).toContain(err);
+    }
+    expect(rollback).toMatch(
+      /create or replace function public\.journal_entry_soft_delete\(/i,
+    );
+  });
+
   it("has a trigger-backed race-proof backstop for approve/reject", () => {
     expect(migration).toMatch(
       /create or replace function public\.learning_review_queue_guard_stale\(\)/i,
@@ -363,7 +397,12 @@ describe("stale-lifecycle migration hygiene", () => {
   it("never writes verified — confirmation stays on the audited spine", () => {
     expect(migrationSql).not.toMatch(/update public\.worker_skills/i);
     expect(migrationSql).not.toMatch(/set verified\s*=/i);
-    expect(migrationSql).not.toMatch(/journal_entry_confirmations/i);
+    // No confirmation may be CREATED or altered here. Reading the table is
+    // fine and necessary — journal_entry_soft_delete counts confirmations to
+    // decide whether a delete is still allowed (rev14).
+    expect(migrationSql).not.toMatch(/insert into public\.journal_entry_confirmations/i);
+    expect(migrationSql).not.toMatch(/update public\.journal_entry_confirmations/i);
+    expect(migrationSql).not.toMatch(/delete from public\.journal_entry_confirmations/i);
   });
 
   it("grants stay authenticated-only, revoked from public", () => {
@@ -424,6 +463,54 @@ describe("stale-lifecycle migration hygiene", () => {
 // ───────────────────────────────────────────────────────────────────────────
 // One stale contract across every surface
 // ───────────────────────────────────────────────────────────────────────────
+
+describe("rev14 — serialization and honest degradation", () => {
+  const photoMigration = readFileSync(
+    join(REPO_ROOT, "supabase/migrations/20260720150000_journal_photo_continuity_v1.sql"),
+    "utf-8",
+  );
+  const orgMembership = read("lib/operations/org-membership.ts");
+
+  it("auto-confirmation locks the queue row and closes conditionally (P1)", () => {
+    // An unlocked read could observe 'pending', a concurrent manager rejection
+    // (which DOES lock) could commit, and auto-confirm would then overwrite a
+    // human decision with 'auto_actioned'.
+    expect(photoMigration).toMatch(
+      /from public\.learning_review_queue where id = p_review_item_id\s*\n?\s*for update;/i,
+    );
+    // ...and the terminal write is conditional as belt-and-braces.
+    expect(photoMigration).toMatch(
+      /set status = 'auto_actioned'[\s\S]{0,220}?where id = p_review_item_id\s*\n?\s*and status = 'pending';/i,
+    );
+    expect(photoMigration).toMatch(/if not found then return 'not_pending'; end if;/i);
+  });
+
+  it("guarded RPC wrappers map trigger raises to terminal stale outcomes (P2)", () => {
+    // The guard triggers RAISE when an entry goes stale between an RPC's own
+    // pre-check and its write; that arrives as an error, not a tagged return.
+    // Mapping it to the generic `error` code left the card actionable.
+    expect(learningShared).toMatch(/export function terminalStaleFromError/);
+    for (const src of [reviewActions, orgMembership]) {
+      expect(src).toMatch(/terminalStaleFromError/);
+    }
+    // review_journal_entry additionally revalidates on that path.
+    expect(reviewActions).toMatch(
+      /const stale = terminalStaleFromError\(error\.message\);[\s\S]{0,320}?dashboard\/inbox\/quick/,
+    );
+  });
+
+  it("an absent cleanup RPC degrades to needs-migration, not live controls (P2)", () => {
+    // PostgREST resolves a missing function as an { error } RESULT, not a
+    // rejected promise, so a bare try/catch read absence as success. Because
+    // the older learning TABLES exist, the page would then render live
+    // controls whose decisions hit the equally-absent decision RPC.
+    expect(learningActions).toMatch(/Promise<\{ absent: boolean \}>/);
+    expect(learningActions).toMatch(/return \{ absent: isAbsent\(error\) \};/);
+    expect(learningActions).toMatch(
+      /const \{ absent \} = await closeStaleReviewItems\(supabase\);\s*\n?\s*if \(absent\) return \{ kind: "needs-migration" \};/,
+    );
+  });
+});
 
 describe("the stale contract is shared, not duplicated per surface", () => {
   it("exports one predicate and one result channel", () => {
