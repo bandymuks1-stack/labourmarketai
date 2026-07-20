@@ -156,11 +156,19 @@ begin
     raise exception 'lmc_actor_not_authorized: flag flips require the dual-signal admin role'
       using errcode = '42501';
   end if;
+  -- Same-state calls are a strict NO-OP: a retry (even by a different
+  -- admin) must not overwrite updated_by while the triggers skip the
+  -- timestamp and audit row — provenance always pairs the stored actor
+  -- with the audit record of the flip that actually happened.
   update public.lmc_settings
      set enabled = p_enabled, updated_by = p_actor_profile_id
-   where key = p_key;
+   where key = p_key
+     and enabled is distinct from p_enabled;
   if not found then
-    raise exception 'lmc_unknown_flag: %', p_key using errcode = '22023';
+    if not exists (select 1 from public.lmc_settings where key = p_key) then
+      raise exception 'lmc_unknown_flag: %', p_key using errcode = '22023';
+    end if;
+    -- flag already in the requested state — nothing changed, nothing claimed.
   end if;
 end;
 $$;

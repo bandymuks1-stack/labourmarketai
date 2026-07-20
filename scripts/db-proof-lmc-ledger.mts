@@ -335,11 +335,26 @@ async function main() {
           and (payload ->> 'to')::boolean = true`,
       [FLAG_ACTOR],
     );
+    // Same-state repeat is a strict no-op: no new audit row, no provenance
+    // overwrite.
+    await setFlag(a, "lmc_purchases_enabled", true);
+    const { rows: flipAudit2 } = await a.query(
+      `select count(*)::int as n from public.audit_logs
+        where action = 'lmc_flag_changed'
+          and actor_id = $1
+          and payload ->> 'key' = 'lmc_purchases_enabled'
+          and (payload ->> 'to')::boolean = true`,
+      [FLAG_ACTOR],
+    );
     await setFlag(a, "lmc_purchases_enabled", false); // back to default for P28 etc.
     record(
       "P32-flag-flips-audited",
-      noActorFlip.ok && directFlip.ok && nonAdminFlip.ok && flipAudit[0].n === 1,
-      `owner-path actor-less refused; service_role direct UPDATE refused; non-admin RPC refused; audited flip rows=${flipAudit[0].n}`,
+      noActorFlip.ok &&
+        directFlip.ok &&
+        nonAdminFlip.ok &&
+        flipAudit[0].n === 1 &&
+        flipAudit2[0].n === 1,
+      `owner-path actor-less refused; service_role direct UPDATE refused; non-admin RPC refused; audited flip rows=${flipAudit[0].n}; same-state repeat no-op (still ${flipAudit2[0].n})`,
     );
   }
 
