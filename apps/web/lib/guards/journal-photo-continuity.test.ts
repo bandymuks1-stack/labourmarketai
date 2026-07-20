@@ -119,6 +119,9 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
 
   it("one-time backfill repairs pre-migration stranded photos safely (Codex rev2 P1)", () => {
     expect(migration).toMatch(/with recursive chain as \(/i);
+    // Termination + single-mover-per-tip hardening.
+    expect(migration).toMatch(/c\.depth \+ 1[\s\S]*where c\.depth < 100/i);
+    expect(migration).toMatch(/select distinct on \(l\.live_entry_id\)/i);
     // Only ACTIVE stranded rows, only to a LIVE non-deleted tip.
     expect(migration).toMatch(
       /je\.superseded_by is not null[\s\S]*tip\.deleted_at is null/i,

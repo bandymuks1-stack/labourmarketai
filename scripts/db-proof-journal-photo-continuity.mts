@@ -641,6 +641,26 @@ async function main(): Promise<void> {
       on_I === 1 && (await loc(ph5)) === I && (await loc(ph6)) === H,
       `onTip=${on_I} oldestMoved=${(await loc(ph5)) === I} newerStayed=${(await loc(ph6)) === H}`,
     );
+
+    // Chain 5: adversarial superseded_by CYCLE (J <-> K) with an active photo
+    // — the apply must TERMINATE (depth guard) and leave the photo in place.
+    const J = await makeEntry(a, f, "ciklas J");
+    const K = await makeEntry(a, f, "ciklas K");
+    const { photoId: ph7 } = await addPhoto(c, f, J);
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [J, K]);
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [K, J]);
+    let cycleOk = false;
+    try {
+      await a.query(migrationSql); // must not hang or error
+      cycleOk = (await loc(ph7)) === J;
+    } catch { /* cycleOk stays false */ }
+    // Repair the fixture graph so cleanup queries stay sane.
+    await a.query(`update public.journal_entries set superseded_by = null where id in ($1, $2)`, [J, K]);
+    record(
+      "D7f adversarial pointer cycle: apply terminates, photo stays put",
+      cycleOk,
+      `terminated=${cycleOk}`,
+    );
     await c.end();
   }
 
