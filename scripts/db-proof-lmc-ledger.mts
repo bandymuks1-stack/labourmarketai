@@ -304,6 +304,7 @@ async function main() {
       `select count(*)::int as n from public.audit_logs
         where action = 'lmc_flag_changed'
           and actor_id = $1
+          and payload ->> 'updated_by' = $1::text
           and payload ->> 'key' = 'lmc_purchases_enabled'
           and (payload ->> 'to')::boolean = true`,
       [FLAG_ACTOR],

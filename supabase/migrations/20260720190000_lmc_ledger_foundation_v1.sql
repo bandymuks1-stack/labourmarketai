@@ -110,10 +110,14 @@ set search_path = public
 as $$
 begin
   if new.enabled is distinct from old.enabled then
+    -- The actor uuid is ALSO copied into the immutable payload:
+    -- audit_logs.actor_id and lmc_settings.updated_by are FK SET NULL on
+    -- profile deletion, but the payload value survives forever.
     insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
     values (new.updated_by, 'lmc_flag_changed', 'lmc_settings', null,
             jsonb_build_object('key', new.key,
-                               'from', old.enabled, 'to', new.enabled));
+                               'from', old.enabled, 'to', new.enabled,
+                               'updated_by', new.updated_by));
   end if;
   return null;
 end;
