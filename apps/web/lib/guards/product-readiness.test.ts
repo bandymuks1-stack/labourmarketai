@@ -1827,7 +1827,10 @@ describe("no migration files added by this sprint", () => {
     // Bumped 156 -> 157 for the P1 journal-recall repair — additive
     // vehicle-cleaning skill seed (20260719150000_vehicle_cleaning_skill).
     // GREEN / additive, ON CONFLICT DO NOTHING, paired rollback.
-    const SPRINT_BASELINE = 157;
+    // Bumped 157 -> 158 for W0 atomic supersede — function-only migration
+    // (20260720100000_journal_atomic_supersede_v1): CREATE OR REPLACE of the
+    // supersede RPCs, no schema/RLS change, paired rollback.
+    const SPRINT_BASELINE = 158;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

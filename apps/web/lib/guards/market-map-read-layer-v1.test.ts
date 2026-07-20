@@ -315,6 +315,8 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 155 -> 156 for Wagon 13 slice 2 — public business profile.
     // Bumped 156 -> 157 for the P1 journal-recall repair (additive
     // vehicle-cleaning skill seed, 20260719150000). GREEN / paired rollback.
-    expect(count).toBeLessThanOrEqual(157);
+    // Bumped 157 -> 158 for W0 atomic supersede (function-only migration
+    // 20260720100000_journal_atomic_supersede_v1, paired rollback).
+    expect(count).toBeLessThanOrEqual(158);
   });
 });

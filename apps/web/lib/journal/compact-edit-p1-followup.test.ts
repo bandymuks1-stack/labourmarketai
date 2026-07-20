@@ -1,24 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Journal compact edit — post-merge P1 follow-up regressions, tested through
- * the REAL `supersedeJournalEntry` action with a mocked supabase client.
+ * Journal compact edit — post-merge P1 regressions, tested through the REAL
+ * `supersedeJournalEntry` action with a mocked supabase client.
  *
- * P1-A — manually selected taxonomy skills must create durable evidence:
- *   • a row picked from taxonomy search ships ITS slug as the fragment's
- *     `activitySlug`; the server validates it (slug-shaped, ACTIVE taxonomy
- *     row, not rejected in the same save) and links it to the NEW entry:
- *     `worker_skills` verified=false + `journal_entry_skills` evidence link;
- *   • an unknown / inactive / malformed slug is dropped — the row stays an
- *     honest free label, no fabricated taxonomy claim, no link writes;
- *   • a free-text row (activitySlug null) never touches worker_skills.
+ * W0 (Invite-Ready Closure Train): both P1s are now closed ATOMICALLY by the
+ * `journal_entry_supersede_v2` RPC. The action-level contract pinned here:
+ *
+ * P1-A — manually selected taxonomy skills create durable evidence:
+ *   • a row picked from taxonomy search ships ITS slug via `p_selected_slugs`
+ *     INSIDE the atomic RPC call — the transaction validates it (slug format,
+ *     ACTIVE taxonomy row, not rejected in the same save) and persists
+ *     `worker_skills` verified=false + the `journal_entry_skills` link, or
+ *     ROLLS BACK the whole save;
+ *   • malformed slugs never reach the payload (app-side shape filter);
+ *   • a free-text row (activitySlug null) and a non-selected composer
+ *     fragment never enter `p_selected_slugs`;
+ *   • the action itself performs NO skill/link table writes — nothing left
+ *     to swallow after the RPC commits.
  *
  * P1-B — repeated saves in one open drawer form ONE supersession chain:
  *   • save 1 supersedes A→B, save 2 supersedes B→C, save 3 supersedes C→D
- *     (never A twice — that forked the chain into duplicate live entries);
- *   • after three saves exactly ONE entry is live and it carries the last
- *     submitted state;
- *   • a failed save does NOT advance the chain.
+ *     (never A twice);
+ *   • a failed save does NOT advance the chain;
+ *   • a stale client is refused BEFORE the RPC by the fast-path precheck, and
+ *     a lost race is refused BY the RPC (`entry_superseded`) — both map to
+ *     the `entry_superseded` result code the editor renders as a conflict.
  */
 
 const revalidatePathMock = vi.fn((..._args: unknown[]) => undefined);
@@ -79,6 +86,7 @@ function makeSupabase(handler: Handler, user: { id: string } | null) {
     auth: { getUser: vi.fn(async () => ({ data: { user } })) },
     rpc: vi.fn(async (fn: string, params: Record<string, unknown>) => {
       rpcCalls.push({ fn, params });
+      eventLog.push(`rpc:${fn}`);
       return rpcMock(fn, params);
     }),
     from(table: string) {
@@ -124,20 +132,7 @@ import { supersedeJournalEntry } from "@/lib/journal/actions";
 
 const OLD_ID = "entry-A";
 const NEW_ID = "entry-B";
-
-const ACTIVE_SKILLS = [
-  { id: "s-welding", slug: "welding", is_active: true },
-  { id: "s-driving", slug: "driving", is_active: true },
-  { id: "s-retired", slug: "retired_skill", is_active: false },
-];
-
-function skillsMatching(calls: Call[]): unknown[] {
-  const inCall = calls.find(
-    (c) => c.method === "in" && c.args[0] === "slug",
-  );
-  const slugs = (inCall?.args[1] as string[] | undefined) ?? [];
-  return ACTIVE_SKILLS.filter((s) => slugs.includes(s.slug));
-}
+const RPC_V2 = "journal_entry_supersede_v2";
 
 type EntryState = { superseded_by: string | null; deleted_at: string | null };
 
@@ -146,17 +141,9 @@ function requestedEntryId(calls: Call[]): string | null {
   return (eq?.args[1] as string | undefined) ?? null;
 }
 
-/** Old-entry decision-marker rows served by p1aHandler (per-test). */
-let oldMetricsRef: Array<{
-  metric_slug: string;
-  value_text: string | null;
-  value_numeric?: number | null;
-}> = [];
-
-/** Handler with a worker profile + an ACTIVE skills taxonomy. The stale-chain
- *  precheck reads `journal_entries` — `entryLookup` answers it (default: the
- *  requested entry is live). */
-function p1aHandler(
+/** Handler for the fast-path stale-chain precheck (`journal_entries` read).
+ *  Default: the requested entry is live. */
+function liveHandler(
   entryLookup?: (id: string | null) => EntryState | null,
 ): Handler {
   return (table, calls) => {
@@ -168,17 +155,6 @@ function p1aHandler(
           : { superseded_by: null, deleted_at: null };
         return { data: state ? { id, ...state } : null };
       }
-      case "workers":
-        return { data: { id: "w1" } };
-      case "skills":
-        return { data: skillsMatching(calls) };
-      case "worker_skills":
-        return { data: null };
-      case "journal_entry_skills":
-        // Old-entry link carry reads return nothing; upserts succeed.
-        return calls.some((c) => c.method === "upsert")
-          ? { data: null }
-          : { data: [] };
       case "productivity_units":
         return {
           data: [
@@ -188,14 +164,6 @@ function p1aHandler(
             { slug: "square_meters" },
           ],
         };
-      case "journal_entry_metrics": {
-        if (calls.some((c) => c.method === "insert")) return { data: null };
-        const eq = calls.find(
-          (c) => c.method === "eq" && c.args[0] === "entry_id",
-        );
-        const id = (eq?.args[1] as string | undefined) ?? null;
-        return { data: id === OLD_ID ? oldMetricsRef : [] };
-      }
       default:
         return { data: null };
     }
@@ -231,8 +199,13 @@ function selectedFragment(slug: string, overrides: Record<string, unknown> = {})
   return fragment({ activitySlug: slug, selected: true, ...overrides });
 }
 
+function v2Params(index = 0): Record<string, unknown> {
+  const calls = rpcCalls.filter((c) => c.fn === RPC_V2);
+  expect(calls.length).toBeGreaterThan(index);
+  return calls[index].params;
+}
+
 beforeEach(() => {
-  oldMetricsRef = [];
   writePayloads = [];
   rpcCalls = [];
   pipelineCalls.length = 0;
@@ -240,9 +213,9 @@ beforeEach(() => {
   rpcMock = () => ({ data: NEW_ID, error: null });
 });
 
-describe("P1-A — selected taxonomy skill creates durable evidence", () => {
-  it("links a validated selection to the NEW entry: worker_skills verified=false + evidence link", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+describe("P1-A — selected taxonomy evidence rides the ATOMIC RPC", () => {
+  it("ships the selected slug via p_selected_slugs; no app-side skill writes", async () => {
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     // The entry TEXT does not contain the skill label — only the selected
     // fragment carries it (the exact production defect scenario).
     const res = await supersedeJournalEntry(
@@ -253,35 +226,17 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
     );
     expect(res.ok).toBe(true);
 
-    const own = writePayloads.find((w) => w.table === "worker_skills");
-    expect(own).toBeTruthy();
-    expect(own!.rows).toEqual([
-      {
-        worker_id: "w1",
-        skill_id: "s-welding",
-        verified: false,
-        source: "self_declared",
-        confidence_bin: "yellow",
-      },
-    ]);
-    // Never downgrades an existing row — ignore-duplicate upsert only.
-    expect(own!.options).toMatchObject({
-      onConflict: "worker_id,skill_id",
-      ignoreDuplicates: true,
-    });
+    const params = v2Params();
+    expect(params.p_selected_slugs).toEqual(["welding"]);
+    expect(params.p_rejected_slugs).toEqual([]);
 
-    const link = writePayloads.find(
-      (w) => w.table === "journal_entry_skills",
-    );
-    expect(link).toBeTruthy();
-    expect(link!.rows).toEqual([
-      { journal_entry_id: NEW_ID, worker_id: "w1", skill_id: "s-welding" },
-    ]);
+    // The action performs NO worker_skills / journal_entry_skills /
+    // journal_entry_metrics writes — the transaction owns the evidence.
+    expect(writePayloads).toHaveLength(0);
 
-    // Provenance: the fragment metrics on the new entry carry the slug + the
-    // worker's phrase (index-paired), so the evidence chain is inspectable.
-    const rpc = rpcCalls.find((c) => c.fn === "journal_entry_supersede")!;
-    const metrics = rpc.params.p_metrics as Array<{
+    // Provenance: the fragment metrics carry the slug + the worker's phrase
+    // (index-paired), so the evidence chain is inspectable.
+    const metrics = params.p_metrics as Array<{
       metric_slug: string;
       value_text?: string | null;
     }>;
@@ -292,36 +247,51 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
       metrics.find((m) => m.metric_slug === "parsed_fragment")?.value_text,
     ).toBe("1|Suvirinimas");
 
-    // Linking lands BEFORE the pipeline run for the new entry.
-    const linkIdx = eventLog.indexOf("upsert:journal_entry_skills");
-    expect(linkIdx).toBeGreaterThanOrEqual(0);
-    expect(eventLog.indexOf("pipeline")).toBeGreaterThan(linkIdx);
+    // Pipeline runs AFTER the atomic commit, for the new id.
+    expect(eventLog.indexOf("pipeline")).toBeGreaterThan(
+      eventLog.indexOf(`rpc:${RPC_V2}`),
+    );
     expect(pipelineCalls[0].entryId).toBe(NEW_ID);
   });
 
-  it("drops unknown, inactive and malformed slugs — no link writes, row stays a label", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+  it("filters malformed slugs out of the payload; duplicates collapse", async () => {
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
         fragments_json: JSON.stringify([
-          selectedFragment("not-in-taxonomy"),
-          selectedFragment("retired_skill", { rawPhrase: "b" }),
+          selectedFragment("welding"),
+          selectedFragment("welding", { rawPhrase: "dar kartą" }),
           selectedFragment("bad slug; drop table", { rawPhrase: "c" }),
+          selectedFragment("UPPER", { rawPhrase: "d" }),
         ]),
       }),
     );
     expect(res.ok).toBe(true);
-    expect(
-      writePayloads.filter((w) => w.table === "worker_skills"),
-    ).toHaveLength(0);
-    expect(
-      writePayloads.filter((w) => w.table === "journal_entry_skills"),
-    ).toHaveLength(0);
+    expect(v2Params().p_selected_slugs).toEqual(["welding"]);
   });
 
-  it("a free-text row (activitySlug null) never fabricates a taxonomy skill", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+  it("an unknown/inactive slug fails the WHOLE save (skill_selection_invalid), nothing silently dropped", async () => {
+    rpcMock = () => ({
+      data: null,
+      error: { message: "skill_slug_unknown", code: "22023" },
+    });
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
+    const res = await supersedeJournalEntry(
+      OLD_ID,
+      makeFormData({
+        fragments_json: JSON.stringify([selectedFragment("not_in_taxonomy")]),
+      }),
+    );
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("skill_selection_invalid");
+    // Atomic: no pipeline, no partial writes, the form keeps every edit.
+    expect(pipelineCalls).toHaveLength(0);
+    expect(writePayloads).toHaveLength(0);
+  });
+
+  it("a free-text row (activitySlug null) never enters p_selected_slugs", async () => {
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
@@ -329,16 +299,11 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
       }),
     );
     expect(res.ok).toBe(true);
-    expect(
-      writePayloads.filter((w) => w.table === "worker_skills"),
-    ).toHaveLength(0);
-    expect(
-      writePayloads.filter((w) => w.table === "journal_entry_skills"),
-    ).toHaveLength(0);
+    expect(v2Params().p_selected_slugs).toEqual([]);
   });
 
-  it("a slug rejected in the SAME save is never linked (removal wins)", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+  it("a slug rejected in the SAME save still ships via p_rejected_slugs (removal resolved in-RPC)", async () => {
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
@@ -346,16 +311,18 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
         rejected_slugs_json: JSON.stringify(["welding"]),
       }),
     );
-    expect(
-      writePayloads.filter((w) => w.table === "worker_skills"),
-    ).toHaveLength(0);
+    const params = v2Params();
+    // Both lanes reach the transaction; the RPC resolves selected∩rejected to
+    // REJECTED deterministically (pinned by the migration guard test).
+    expect(params.p_rejected_slugs).toEqual(["welding"]);
+    expect(params.p_selected_slugs).toEqual(["welding"]);
   });
 
-  it("composer-style fragments (slug present, NOT selected) are never linked", async () => {
+  it("composer-style fragments (slug present, NOT selected) are never in p_selected_slugs", async () => {
     // The legacy composer ships parser-derived activitySlugs on confirmed
     // fragments without the selected flag — its pre-existing metric-only
     // behaviour must not gain silent self-declaration side effects.
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
@@ -365,15 +332,10 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
       }),
     );
     expect(res.ok).toBe(true);
-    expect(
-      writePayloads.filter((w) => w.table === "worker_skills"),
-    ).toHaveLength(0);
-    expect(
-      writePayloads.filter((w) => w.table === "journal_entry_skills"),
-    ).toHaveLength(0);
+    const params = v2Params();
+    expect(params.p_selected_slugs).toEqual([]);
     // The slug still lands in the fragment_activity provenance metric.
-    const rpc = rpcCalls.find((c) => c.fn === "journal_entry_supersede")!;
-    const metrics = rpc.params.p_metrics as Array<{
+    const metrics = params.p_metrics as Array<{
       metric_slug: string;
       value_text?: string | null;
     }>;
@@ -382,42 +344,8 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
     ).toBe("1|welding");
   });
 
-  it("a re-selected slug's OLD skill_rejected marker is NOT carried forward (others are)", async () => {
-    // remove→save→re-add→save: the old rejection marker must not ride the
-    // carry and permanently suppress the re-added skill on the chain.
-    oldMetricsRef = [
-      { metric_slug: "skill_rejected", value_text: "welding" },
-      { metric_slug: "skill_rejected", value_text: "tiling" },
-      { metric_slug: "unresolved_dismissed", value_text: "kažkoks fragmentas" },
-    ];
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
-    const res = await supersedeJournalEntry(
-      OLD_ID,
-      makeFormData({
-        fragments_json: JSON.stringify([selectedFragment("welding")]),
-      }),
-    );
-    expect(res.ok).toBe(true);
-    const markerInsert = writePayloads.find(
-      (w) => w.table === "journal_entry_metrics",
-    );
-    expect(markerInsert).toBeTruthy();
-    const rows = markerInsert!.rows as Array<{
-      metric_slug: string;
-      value_text: string;
-    }>;
-    expect(rows.map((r) => `${r.metric_slug}|${r.value_text}`).sort()).toEqual([
-      "skill_rejected|tiling",
-      "unresolved_dismissed|kažkoks fragmentas",
-    ]);
-    // And the re-selected skill IS linked.
-    expect(
-      writePayloads.filter((w) => w.table === "journal_entry_skills"),
-    ).toHaveLength(1);
-  });
-
-  it("selection writes carry NO fake verification anywhere", async () => {
-    currentSupabase = makeSupabase(p1aHandler(), { id: "user-1" });
+  it("save payloads carry NO fake verification anywhere", async () => {
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     await supersedeJournalEntry(
       OLD_ID,
       makeFormData({
@@ -434,10 +362,8 @@ describe("P1-A — selected taxonomy skill creates durable evidence", () => {
 });
 
 describe("P1-B — repeated saves form ONE supersession chain", () => {
-  /** Stateful supersede RPC emulating production 0018 semantics: any live-or-
-   *  not old id succeeds and gets `superseded_by` stamped — which is exactly
-   *  why a client that re-supersedes the ORIGINAL forks the chain into
-   *  duplicate live entries. The client-side chain rule is the fix. */
+  /** Stateful supersede RPC emulating the ATOMIC v2 semantics: a superseded
+   *  old id is REFUSED with `entry_superseded` (the row-lock guarantee). */
   function statefulRpc() {
     const entries = new Map<string, { superseded_by: string | null }>([
       ["entry-A", { superseded_by: null }],
@@ -448,13 +374,20 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
       return e ? { superseded_by: e.superseded_by, deleted_at: null } : null;
     };
     rpcMock = (fn, params) => {
-      if (fn !== "journal_entry_supersede") return { data: null, error: null };
+      if (fn !== RPC_V2) return { data: null, error: null };
       const oldId = params.p_old_entry_id as string;
-      if (!entries.has(oldId)) {
+      const old = entries.get(oldId);
+      if (!old) {
         return { data: null, error: { message: "entry_not_found" } };
       }
+      if (old.superseded_by !== null) {
+        return {
+          data: null,
+          error: { message: "entry_superseded", code: "55000" },
+        };
+      }
       const newId = `entry-${String.fromCharCode(66 + n++)}`; // B, C, D…
-      entries.get(oldId)!.superseded_by = newId;
+      old.superseded_by = newId;
       entries.set(newId, { superseded_by: null });
       return { data: newId, error: null };
     };
@@ -481,7 +414,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
 
   it("three consecutive saves: A→B→C→D, exactly ONE live entry, last state wins", async () => {
     const chain = statefulRpc();
-    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
+    currentSupabase = makeSupabase(liveHandler(chain.lookup), { id: "user-1" });
 
     let current = "entry-A";
     for (const text of ["pirmas keitimas", "antras keitimas", "trečias keitimas"]) {
@@ -492,7 +425,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
 
     // Every save superseded the LATEST entry — never the original again.
     const oldIds = rpcCalls
-      .filter((c) => c.fn === "journal_entry_supersede")
+      .filter((c) => c.fn === RPC_V2)
       .map((c) => c.params.p_old_entry_id);
     expect(oldIds).toEqual(["entry-A", "entry-B", "entry-C"]);
 
@@ -501,9 +434,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
     expect(current).toBe("entry-D");
 
     // The final live entry carries the LAST submitted state.
-    const lastRpc = rpcCalls.filter(
-      (c) => c.fn === "journal_entry_supersede",
-    )[2];
+    const lastRpc = rpcCalls.filter((c) => c.fn === RPC_V2)[2];
     expect(lastRpc.params.p_original_text).toBe("trečias keitimas");
     expect(pipelineCalls.map((p) => p.entryId)).toEqual([
       "entry-B",
@@ -514,7 +445,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
 
   it("data from the previous save survives into the next supersede (B's fragments ride into C)", async () => {
     const chain = statefulRpc();
-    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
+    currentSupabase = makeSupabase(liveHandler(chain.lookup), { id: "user-1" });
 
     // Save 1: adds a taxonomy selection with time. Save 2 (same open drawer)
     // re-submits the full row state — the model always ships the ENTIRE form,
@@ -538,10 +469,9 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
     );
     expect(r.ok).toBe(true);
 
-    const second = rpcCalls.filter(
-      (c) => c.fn === "journal_entry_supersede",
-    )[1];
+    const second = rpcCalls.filter((c) => c.fn === RPC_V2)[1];
     expect(second.params.p_old_entry_id).toBe("entry-B");
+    expect(second.params.p_selected_slugs).toEqual(["welding", "driving"]);
     const metrics = second.params.p_metrics as Array<{
       metric_slug: string;
       value_text?: string | null;
@@ -554,7 +484,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
 
   it("a failed save does NOT advance the chain — the retry targets the same entry", async () => {
     const chain = statefulRpc();
-    currentSupabase = makeSupabase(p1aHandler(chain.lookup), { id: "user-1" });
+    currentSupabase = makeSupabase(liveHandler(chain.lookup), { id: "user-1" });
 
     let current = "entry-A";
     let r = await clientSave(current, makeFormData());
@@ -574,7 +504,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
     expect(r.ok).toBe(true);
     expect(
       rpcCalls
-        .filter((c) => c.fn === "journal_entry_supersede")
+        .filter((c) => c.fn === RPC_V2)
         .map((c) => c.params.p_old_entry_id),
     ).toEqual(["entry-A", "entry-B", "entry-B"]);
     expect(chain.liveIds()).toEqual(["entry-C"]);
@@ -583,7 +513,7 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
   it("a STALE client superseding an already-superseded entry is refused before the RPC", async () => {
     // Second tab / old ?editing= deep link: A was already superseded by B.
     currentSupabase = makeSupabase(
-      p1aHandler((id) =>
+      liveHandler((id) =>
         id === "entry-A"
           ? { superseded_by: "entry-B", deleted_at: null }
           : { superseded_by: null, deleted_at: null },
@@ -593,19 +523,23 @@ describe("P1-B — repeated saves form ONE supersession chain", () => {
     const res = await supersedeJournalEntry("entry-A", makeFormData());
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.code).toBe("entry_superseded");
-    expect(rpcCalls.filter((c) => c.fn === "journal_entry_supersede")).toHaveLength(0);
+    expect(rpcCalls.filter((c) => c.fn === RPC_V2)).toHaveLength(0);
     expect(pipelineCalls).toHaveLength(0);
     expect(writePayloads).toHaveLength(0);
   });
 
-  it("a deleted old entry is refused the same way", async () => {
-    currentSupabase = makeSupabase(
-      p1aHandler(() => ({ superseded_by: null, deleted_at: "2026-07-19T00:00:00Z" })),
-      { id: "user-1" },
-    );
+  it("a LOST RACE (precheck passed, RPC row-lock refused) maps to entry_superseded", async () => {
+    // Both tabs read the entry as live; the RPC serialises them — the loser
+    // gets the structured conflict, not a fork.
+    rpcMock = () => ({
+      data: null,
+      error: { message: "entry_superseded", code: "55000" },
+    });
+    currentSupabase = makeSupabase(liveHandler(), { id: "user-1" });
     const res = await supersedeJournalEntry("entry-A", makeFormData());
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.code).toBe("entry_superseded");
-    expect(rpcCalls.filter((c) => c.fn === "journal_entry_supersede")).toHaveLength(0);
+    expect(pipelineCalls).toHaveLength(0);
+    expect(writePayloads).toHaveLength(0);
   });
 });

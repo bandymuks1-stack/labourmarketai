@@ -211,6 +211,8 @@
     "directionLabel": "[EN] Work direction",
     "siteLabel": "[EN] Site / location",
     "institutionLabel": "[EN] Institution",
-    "topicLabel": "[EN] Topic"
+    "topicLabel": "[EN] Topic",
+    "conflictNote": "Seda sissekannet on juba muudetud teises vahekaardis või seansis. Kui soovite siia sisestatud muudatused alles hoida, kopeerige kõigepealt oma tekst — lehe uuesti laadimisel lähevad need kaotsi ja seejärel muudate uusimat versiooni.",
+    "conflictReload": "Laadi leht uuesti"
   }
 }

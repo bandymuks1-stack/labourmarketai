@@ -77,7 +77,10 @@ export type JournalSaveErrorCode =
   | "metrics_insert_failed"
   /** P1-B — the target entry was already superseded (stale tab/deep link);
    *  superseding it again would fork the chain into duplicate live entries. */
-  | "entry_superseded";
+  | "entry_superseded"
+  /** W0 — a selected taxonomy slug failed server-side validation (unknown /
+   *  inactive / malformed). The atomic RPC rolled the whole save back. */
+  | "skill_selection_invalid";
 
 type ParsedFragmentInput = {
   rawPhrase: string;
@@ -650,6 +653,29 @@ export async function supersedeJournalEntry(
     fragments,
   });
 
+  // Slugs the worker EXPLICITLY selected in this save (compact-editor rows
+  // only — see ParsedFragmentInput.selected). Slug-shaped values only — the
+  // RPC re-validates every survivor against the ACTIVE taxonomy and fails the
+  // WHOLE transaction on an unknown slug, so a "successful save" can never
+  // silently drop a selection.
+  const selectedSlugs = [
+    ...new Set(
+      fragments
+        .filter((f) => f.selected === true)
+        .map((f) => f.activitySlug ?? null)
+        .filter(
+          (s): s is string =>
+            typeof s === "string" && SELECTED_SLUG_RE.test(s),
+        ),
+    ),
+  ].slice(0, 50);
+
+  // Atomic supersede (post-#840 review P1 repair): ONE transaction locks the
+  // old row, refuses stale/concurrent saves (`entry_superseded`), creates the
+  // new entry + metrics, carries decision markers and non-rederivable skill
+  // links, and persists the selected taxonomy evidence (worker_skills
+  // verified=false + journal_entry_skills). Any required-write failure rolls
+  // back everything — success here means the entire requested edit is durable.
   const rpcParams = {
     p_old_entry_id: oldEntryId,
     p_engagement_context_id: engagementId,
@@ -660,6 +686,8 @@ export async function supersedeJournalEntry(
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
+    p_selected_slugs: selectedSlugs,
+    p_rejected_slugs: rejectedSlugs,
   };
   const { data: newEntryId, error } = await (
     supabase.rpc as unknown as (
@@ -669,9 +697,24 @@ export async function supersedeJournalEntry(
       data: string | null;
       error: { code?: string; message?: string } | null;
     }>
-  )("journal_entry_supersede", rpcParams);
+  )("journal_entry_supersede_v2", rpcParams);
 
   if (error || typeof newEntryId !== "string") {
+    const errText = `${error?.message ?? ""} ${error?.code ?? ""}`.toLowerCase();
+    if (
+      errText.includes("invalid_skill_slug") ||
+      errText.includes("skill_slug_unknown")
+    ) {
+      // The whole transaction rolled back — nothing was saved, the form keeps
+      // every edit. Honest failure beats silently dropping the selection.
+      return {
+        ok: false,
+        code: "skill_selection_invalid",
+        message:
+          "Pasirinkto įgūdžio nebėra įgūdžių kataloge. Pašalinkite jį iš " +
+          "sąrašo ir bandykite išsaugoti dar kartą — visi kiti pakeitimai liko formoje.",
+      };
+    }
     const mapped = mapJournalRpcError(
       error ?? { code: undefined, message: undefined },
     );
@@ -684,7 +727,7 @@ export async function supersedeJournalEntry(
       }
       return {
         ok: false,
-        code: mapped.code === "rpc_unavailable" ? "entry_insert_failed" : "entry_insert_failed",
+        code: mapped.code === "entry_superseded" ? "entry_superseded" : "entry_insert_failed",
         message: mapped.message,
       };
     }
@@ -694,57 +737,6 @@ export async function supersedeJournalEntry(
       message: `Įrašo atnaujinti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
     };
   }
-
-  // Slugs the worker EXPLICITLY selected in this save (compact-editor rows
-  // only — see ParsedFragmentInput.selected). Used twice below: they must be
-  // linked, and a previously-rejected slug among them must NOT have its
-  // rejection marker carried forward (the re-add wins over the old removal).
-  const selectedSlugs = fragments
-    .filter((f) => f.selected === true)
-    .map((f) => f.activitySlug ?? null);
-
-  // NO DATA LOSS on edit (journal compact edit UX, P0-F): the worker's
-  // DECISION markers live as append-only metrics on the OLD entry and the
-  // pipeline for the NEW entry would otherwise re-derive without them —
-  // resolved ambiguities re-offered, rejected suggestions resurrected,
-  // dismissed fragments re-inserted. Copy them to the new entry id BEFORE
-  // the pipeline runs so the derivation honours them (idempotent,
-  // append-only, RLS-owned inserts).
-  await carryForwardEntryDecisionMarkers(
-    supabase,
-    oldEntryId,
-    newEntryId,
-    selectedSlugs,
-  );
-
-  // NO DATA LOSS on edit (journal compact edit UX, P1-SKILL): entry↔skill
-  // evidence links that are NOT re-derivable from the entry text (e.g. a skill
-  // the worker manually linked to the entry) would vanish on supersede — the
-  // pipeline only re-links skills recognised from the new text. Carry the old
-  // entry's links to the new id BEFORE the pipeline (idempotent upsert),
-  // EXCLUDING any skill the worker rejected in this edit so a removal sticks.
-  await carryForwardEntrySkillLinks(
-    supabase,
-    oldEntryId,
-    newEntryId,
-    rejectedSlugs,
-  );
-
-  // Manually selected taxonomy skills (journal compact edit, P1-A): a row the
-  // worker picked from taxonomy search ships its slug as the fragment's
-  // `activitySlug`. The pipeline only links skills recognised from the TEXT,
-  // so a selection whose label never appears in the text would leave no
-  // worker_skills / journal_entry_skills evidence. Validate every submitted
-  // slug server-side (active taxonomy, caller's own worker) and link the
-  // survivors to the NEW entry — self-declared lane, verified=false, never a
-  // fabricated verification.
-  await linkSelectedTaxonomySkills(
-    supabase,
-    user.id,
-    newEntryId,
-    selectedSlugs,
-    rejectedSlugs,
-  );
 
   // P0 Track B: run the canonical pipeline for the NEW entry id with the new
   // text — pipeline idempotency (ignore-duplicate upserts + metric dedupe)
@@ -759,285 +751,10 @@ export async function supersedeJournalEntry(
   return { ok: true, entryId: newEntryId, skills };
 }
 
-/** Worker DECISION markers that must survive a supersede (entry-scoped,
- *  append-only — see `ENTRY_MARKER_SLUGS` in the pipeline). */
-const DECISION_MARKER_SLUGS = [
-  "ambiguous_resolved",
-  "skill_rejected",
-  "skill_claim_rejected",
-  "unresolved_dismissed",
-] as const;
-
-/**
- * Copy the superseded entry's decision markers to the new entry id so the
- * pipeline derivation keeps honouring the worker's answers (a text-only edit
- * must never resurrect a rejected suggestion or re-open a resolved
- * ambiguity). Idempotent: rows already present on the new entry (matched by
- * metric_slug + value_text) are skipped, so a repeated save never
- * duplicates. Append-only inserts under the CALLER'S OWN RLS. A failure is
- * logged (counts only — never entry text) and never fails the already-
- * persisted supersede.
- *
- * `reselectedSlugs` (post-merge review P1): slugs the worker EXPLICITLY
- * selected in THIS save. A `skill_rejected` marker for such a slug is NOT
- * carried — otherwise remove→save→re-add→save would pin a contradictory
- * rejection on the whole chain and permanently suppress that skill's
- * recognition. Other marker kinds are never slug-scoped and carry as before.
- */
-async function carryForwardEntryDecisionMarkers(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  oldEntryId: string,
-  newEntryId: string,
-  reselectedSlugs: ReadonlyArray<string | null> = [],
-): Promise<void> {
-  try {
-    const reselected = new Set(
-      reselectedSlugs.filter((s): s is string => typeof s === "string" && s.length > 0),
-    );
-    const { data: oldRows, error: oldErr } = await supabase
-      .from("journal_entry_metrics")
-      .select("metric_slug, value_text, value_numeric")
-      .eq("entry_id", oldEntryId)
-      .in("metric_slug", [...DECISION_MARKER_SLUGS]);
-    if (oldErr) {
-      console.error("[journal] carry-forward read failed:", oldErr.message);
-      return;
-    }
-    if (!oldRows || oldRows.length === 0) return;
-
-    const { data: newRows, error: newErr } = await supabase
-      .from("journal_entry_metrics")
-      .select("metric_slug, value_text")
-      .eq("entry_id", newEntryId)
-      .in("metric_slug", [...DECISION_MARKER_SLUGS]);
-    if (newErr) {
-      console.error("[journal] carry-forward check failed:", newErr.message);
-      return;
-    }
-    const markerKey = (r: { metric_slug: string | null; value_text: string | null }) =>
-      `${r.metric_slug ?? ""}|${(r.value_text ?? "").trim()}`;
-    const existing = new Set((newRows ?? []).map(markerKey));
-
-    const seen = new Set<string>();
-    const toCopy = oldRows.filter((r) => {
-      if (!r.metric_slug || !r.value_text) return false;
-      // The worker re-selected this skill in the current save — the old
-      // rejection is overridden, not carried.
-      if (
-        r.metric_slug === "skill_rejected" &&
-        reselected.has(r.value_text.trim())
-      ) {
-        return false;
-      }
-      const key = markerKey(r);
-      if (existing.has(key) || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    if (toCopy.length === 0) return;
-
-    const { error: insErr } = await supabase
-      .from("journal_entry_metrics")
-      .insert(
-        toCopy.map((r) => ({
-          entry_id: newEntryId,
-          metric_slug: r.metric_slug as string,
-          source: "worker_input",
-          value_text: r.value_text,
-          ...(typeof r.value_numeric === "number"
-            ? { value_numeric: r.value_numeric }
-            : {}),
-        })),
-      );
-    if (insErr) {
-      console.error(
-        "[journal] carry-forward insert failed:",
-        insErr.message,
-        `count=${toCopy.length}`,
-      );
-    }
-  } catch (e) {
-    console.error(
-      "[journal] carry-forward threw:",
-      e instanceof Error ? e.message : String(e),
-    );
-  }
-}
-
-/**
- * Copy the superseded entry's skill EVIDENCE links to the new entry id so a
- * text-only edit never drops a manually-linked (non-text-derivable) skill. The
- * pipeline re-links only skills recognised from the new text; this preserves
- * the rest. Idempotent (`ignoreDuplicates` on the (entry, skill) unique key),
- * append-only, under the CALLER'S OWN RLS, and EXCLUDES any skill the worker
- * rejected in this edit so a deliberate removal is not resurrected. A failure
- * is logged (counts only) and never fails the already-persisted supersede.
- */
-async function carryForwardEntrySkillLinks(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  oldEntryId: string,
-  newEntryId: string,
-  rejectedSlugs: ReadonlyArray<string>,
-): Promise<void> {
-  try {
-    const rejected = new Set(rejectedSlugs);
-    const { data: oldLinks, error } = await supabase
-      .from("journal_entry_skills")
-      .select("skill_id, worker_id, skills(slug)")
-      .eq("journal_entry_id", oldEntryId);
-    if (error) {
-      console.error("[journal] skill-link carry read failed:", error.message);
-      return;
-    }
-    const rows = (oldLinks ?? [])
-      .filter((l) => {
-        const slug = (l.skills as { slug: string | null } | null)?.slug ?? null;
-        return Boolean(l.skill_id) && Boolean(l.worker_id) && !(slug && rejected.has(slug));
-      })
-      .map((l) => ({
-        journal_entry_id: newEntryId,
-        worker_id: l.worker_id as string,
-        skill_id: l.skill_id as string,
-      }));
-    if (rows.length === 0) return;
-    const { error: insErr } = await supabase
-      .from("journal_entry_skills")
-      .upsert(rows, { onConflict: "journal_entry_id,skill_id", ignoreDuplicates: true });
-    if (insErr) {
-      console.error(
-        "[journal] skill-link carry insert failed:",
-        insErr.message,
-        `count=${rows.length}`,
-      );
-    }
-  } catch (e) {
-    console.error(
-      "[journal] skill-link carry threw:",
-      e instanceof Error ? e.message : String(e),
-    );
-  }
-}
-
 /** Slug shape accepted from the client before any DB lookup — mirrors the
- *  pipeline actions' SLUG_RE so injection attempts die at the boundary. */
+ *  pipeline actions' SLUG_RE. The RPC re-validates server-side; this filter
+ *  just keeps junk out of the request payload. */
 const SELECTED_SLUG_RE = /^[a-z0-9_-]{1,64}$/;
-
-/**
- * Link the worker's MANUALLY SELECTED taxonomy skills to the new entry
- * (journal compact edit, P1-A). Every candidate slug is validated server-side:
- *   • slug-shaped (regex) before any lookup — no arbitrary client injection;
- *   • an ACTIVE row in the `skills` taxonomy table;
- *   • never a slug the worker rejected in the same save;
- *   • written only for the CALLER'S OWN worker profile (resolved from the
- *     authenticated user; the supersede RPC has already proven the caller
- *     owns the edited entry).
- * Survivors get the honest self-declared lane: `worker_skills` with
- * verified=false (upsert, never downgrades an existing row) + a
- * `journal_entry_skills` evidence link on the NEW entry. Idempotent
- * (ignore-duplicate upserts) so repeated saves never duplicate. A failure is
- * logged (counts only — never entry text) and never fails the persisted save.
- */
-async function linkSelectedTaxonomySkills(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  profileId: string,
-  newEntryId: string,
-  candidateSlugs: ReadonlyArray<string | null>,
-  rejectedSlugs: ReadonlyArray<string>,
-): Promise<void> {
-  try {
-    const rejected = new Set(rejectedSlugs);
-    const slugs = [
-      ...new Set(
-        candidateSlugs.filter(
-          (s): s is string =>
-            typeof s === "string" &&
-            SELECTED_SLUG_RE.test(s) &&
-            !rejected.has(s),
-        ),
-      ),
-    ].slice(0, 50);
-    if (slugs.length === 0) return;
-
-    const { data: worker, error: workerErr } = await supabase
-      .from("workers")
-      .select("id")
-      .eq("profile_id", profileId)
-      .maybeSingle();
-    if (!worker?.id) {
-      // Never silent: without the worker row the selection cannot be linked
-      // and the P1-A symptom would recur invisibly on a transient DB error.
-      console.error(
-        "[journal] selected-skill worker lookup failed:",
-        workerErr?.message ?? "no worker row",
-        `slugs=${slugs.length}`,
-      );
-      return;
-    }
-
-    // Active-taxonomy validation: unknown or inactive slugs are dropped —
-    // their rows stay honest free labels, no fabricated taxonomy claim.
-    const { data: skillRows, error: skillErr } = await supabase
-      .from("skills")
-      .select("id, slug, is_active")
-      .in("slug", slugs);
-    if (skillErr) {
-      console.error(
-        "[journal] selected-skill lookup failed:",
-        skillErr.message,
-      );
-      return;
-    }
-    const active = (skillRows ?? []).filter((s) => s.is_active !== false);
-    if (active.length < slugs.length) {
-      console.warn(
-        `[journal] selected-skill validation dropped ${slugs.length - active.length} of ${slugs.length} slugs`,
-      );
-    }
-    if (active.length === 0) return;
-
-    const { error: ownErr } = await supabase.from("worker_skills").upsert(
-      active.map((s) => ({
-        worker_id: worker.id,
-        skill_id: s.id,
-        verified: false,
-        source: "self_declared",
-        confidence_bin: "yellow",
-      })),
-      { onConflict: "worker_id,skill_id", ignoreDuplicates: true },
-    );
-    if (ownErr) {
-      console.error(
-        "[journal] selected-skill worker_skills upsert failed:",
-        ownErr.message,
-        `count=${active.length}`,
-      );
-      return;
-    }
-
-    const { error: linkErr } = await supabase
-      .from("journal_entry_skills")
-      .upsert(
-        active.map((s) => ({
-          journal_entry_id: newEntryId,
-          worker_id: worker.id,
-          skill_id: s.id,
-        })),
-        { onConflict: "journal_entry_id,skill_id", ignoreDuplicates: true },
-      );
-    if (linkErr) {
-      console.error(
-        "[journal] selected-skill evidence link failed:",
-        linkErr.message,
-        `count=${active.length}`,
-      );
-    }
-  } catch (e) {
-    console.error(
-      "[journal] selected-skill linking threw:",
-      e instanceof Error ? e.message : String(e),
-    );
-  }
-}
 
 /** Shared metric-row builder used by both `createJournalEntry` and
  *  `supersedeJournalEntry`. Keeps the field semantics identical across
@@ -1288,7 +1005,8 @@ function mapJournalRpcError(err: {
       code: "rpc_unavailable",
       message:
         "Pataisymų funkcija dar nepritaikyta šioje aplinkoje. " +
-        "Paprašykite administratoriaus pritaikyti migraciją 0018.",
+        "Paprašykite administratoriaus pritaikyti naujausią žurnalo " +
+        "migraciją (0018 / 20260720100000).",
     };
   }
   if (text.includes("entry_not_found")) {
@@ -1327,6 +1045,28 @@ function mapJournalRpcError(err: {
       code: "entry_superseded",
       message:
         "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
+    };
+  }
+  // W0 restore hardening: a competing live correction of the same original
+  // already exists — restoring would show two versions of the same work.
+  if (text.includes("correction_conflict_cannot_restore")) {
+    return {
+      ok: false,
+      code: "entry_superseded",
+      message:
+        "Šio įrašo atkurti negalima — tam pačiam darbui jau yra kita " +
+        "aktuali pataisyta versija.",
+    };
+  }
+  // W0 atomic supersede: the RPC row-lock rejected a stale/concurrent save.
+  // Checked AFTER the `_cannot_restore` variant (that text contains this one).
+  if (text.includes("entry_superseded")) {
+    return {
+      ok: false,
+      code: "entry_superseded",
+      message:
+        "Šis įrašas jau buvo pakeistas kitur (kitame lange ar sesijoje). " +
+        "Perkraukite puslapį ir redaguokite naujausią įrašo versiją.",
     };
   }
   return null;

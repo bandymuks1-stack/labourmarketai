@@ -211,6 +211,8 @@
     "directionLabel": "Kierunek pracy",
     "siteLabel": "Obiekt / miejsce",
     "institutionLabel": "Instytucja",
-    "topicLabel": "Temat"
+    "topicLabel": "Temat",
+    "conflictNote": "Ten wpis został już zmieniony w innej karcie lub sesji. Jeśli chcesz zachować wpisane tu zmiany, najpierw skopiuj tekst — po odświeżeniu strony zostaną utracone, a edytować będziesz najnowszą wersję.",
+    "conflictReload": "Odśwież stronę"
   }
 }
