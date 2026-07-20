@@ -176,7 +176,12 @@ Ordering rules (BINDING, enforced in `lmc_spend_v1`):
 3. Sources distinguishable: `kind` on every transaction, `source_kind` on
    every lot (`purchased`, `promotional_signup`, `promotional_activity`,
    `admin_grant`, `referral_reward`).
-4. Idempotency at DB level: `unique (account_id, idempotency_key)`.
+4. Idempotency at DB level: `unique (account_id, idempotency_key)`, and a
+   replay must be an **exact** replay — the RPCs fingerprint the
+   operation-defining fields (kind, amount, reversal linkage, campaign,
+   purchase reference) and raise `lmc_idempotency_conflict` when a key is
+   reused with a different payload instead of silently returning the old
+   result.
 5. Every reversal references its original entry (`original_transaction_id`
    NOT NULL for reversal kinds, CHECK-enforced) and at most one reversal per
    original (partial unique index).

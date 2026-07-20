@@ -31,6 +31,7 @@
  *   P22  rollback removes only Wagon 1 objects, unrelated data preserved
  *   P23  re-apply after rollback succeeds cleanly (flags false again)
  *   P24  expiry batch is never wedged by already-completed old lots
+ *   P25  idempotency-key reuse with a DIFFERENT payload is rejected
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -535,6 +536,59 @@ async function main() {
         c2[0].r.already_processed === true &&
         c1[0].r.transaction_id === c2[0].r.transaction_id,
       `replay returned same tx ${c1[0].r.transaction_id}`,
+    );
+  }
+
+  // ── P25: idempotency-key reuse with a different payload is rejected ───────
+  {
+    const u8 = await makePerson(a, "u8");
+    // Same key, different amount → conflict (not a silent replay).
+    await a.query(
+      `select public.lmc_record_purchase_v1(1000, 'p25-ref', 'p25-buy-${RUN}', $1, null)`,
+      [u8],
+    );
+    const amountConflict = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_record_purchase_v1(2000, 'p25-ref', 'p25-buy-${RUN}', $1, null)`,
+          [u8],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    // The critical reversal case: reverse purchase A with key R, then try to
+    // reverse purchase B with the SAME key R → must conflict, and B must
+    // still be reversible with a fresh key.
+    const { rows: buyA } = await a.query(
+      `select public.lmc_record_purchase_v1(500, 'p25-a', 'p25-buy-a-${RUN}', $1, null) as r`,
+      [u8],
+    );
+    const { rows: buyB } = await a.query(
+      `select public.lmc_record_purchase_v1(600, 'p25-b', 'p25-buy-b-${RUN}', $1, null) as r`,
+      [u8],
+    );
+    await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund A', 'p25-rev-${RUN}')`,
+      [buyA[0].r.transaction_id],
+    );
+    const linkageConflict = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-${RUN}')`,
+          [buyB[0].r.transaction_id],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    const { rows: freshB } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-b-${RUN}') as r`,
+      [buyB[0].r.transaction_id],
+    );
+    record(
+      "P25-idempotency-payload-fingerprint",
+      amountConflict.ok &&
+        linkageConflict.ok &&
+        freshB[0].r.kind === "refund_reversal" &&
+        freshB[0].r.already_processed === false,
+      `amount reuse: ${amountConflict.msg.slice(0, 50)} | linkage reuse: ${linkageConflict.msg.slice(0, 50)} | B reversed with fresh key`,
     );
   }
 

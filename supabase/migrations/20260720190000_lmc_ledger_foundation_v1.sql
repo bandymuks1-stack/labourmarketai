@@ -344,12 +344,20 @@ end;
 $$;
 
 -- Shared idempotency lookup: returns the existing transaction (as jsonb)
--- when the same (account, key) was already committed; raises when the key is
--- being reused for a DIFFERENT operation kind.
+-- when the same (account, key) was already committed with the SAME payload;
+-- raises lmc_idempotency_conflict when the key is being reused for a
+-- different kind OR with different operation-defining fields (amount,
+-- reversal linkage, campaign, purchase reference). A replay must be an exact
+-- replay — a changed payload is never silently mapped to the old result.
+-- (Free-text reason is deliberately not part of the fingerprint.)
 create or replace function public.lmc_existing_by_idempotency_v1(
   p_account uuid,
   p_key text,
-  p_kind text)
+  p_kind text,
+  p_amount_cents bigint default null,
+  p_original_transaction_id uuid default null,
+  p_campaign text default null,
+  p_reference text default null)
 returns jsonb
 language plpgsql
 security definer
@@ -367,6 +375,25 @@ begin
   if v_existing.kind <> p_kind then
     raise exception 'lmc_idempotency_conflict: key % already used for kind %',
       p_key, v_existing.kind using errcode = '23505';
+  end if;
+  if p_amount_cents is not null and v_existing.amount_cents <> p_amount_cents then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different amount',
+      p_key using errcode = '23505';
+  end if;
+  if p_original_transaction_id is not null
+     and v_existing.original_transaction_id is distinct from p_original_transaction_id then
+    raise exception 'lmc_idempotency_conflict: key % already used for a different original entry',
+      p_key using errcode = '23505';
+  end if;
+  if p_campaign is not null
+     and v_existing.campaign is distinct from p_campaign then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different campaign',
+      p_key using errcode = '23505';
+  end if;
+  if p_reference is not null
+     and (v_existing.metadata ->> 'reference') is distinct from p_reference then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different reference',
+      p_key using errcode = '23505';
   end if;
   return jsonb_build_object(
     'transaction_id', v_existing.id,
@@ -419,7 +446,8 @@ begin
   perform 1 from public.lmc_accounts where id = v_account for update;
 
   v_existing := public.lmc_existing_by_idempotency_v1(
-    v_account, p_idempotency_key, p_kind);
+    v_account, p_idempotency_key, p_kind,
+    p_amount_cents => v_amount, p_campaign => p_campaign);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -485,7 +513,8 @@ begin
   perform 1 from public.lmc_accounts where id = v_account for update;
 
   v_existing := public.lmc_existing_by_idempotency_v1(
-    v_account, p_idempotency_key, 'purchased');
+    v_account, p_idempotency_key, 'purchased',
+    p_amount_cents => p_amount_cents, p_reference => p_reference);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -578,7 +607,8 @@ begin
   perform 1 from public.lmc_accounts where id = v_account for update;
 
   v_existing := public.lmc_existing_by_idempotency_v1(
-    v_account, p_idempotency_key, 'admin_grant');
+    v_account, p_idempotency_key, 'admin_grant',
+    p_amount_cents => p_amount_cents, p_campaign => p_campaign);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -656,7 +686,8 @@ begin
   perform 1 from public.lmc_accounts where id = v_account for update;
 
   v_existing := public.lmc_existing_by_idempotency_v1(
-    v_account, p_idempotency_key, 'spend');
+    v_account, p_idempotency_key, 'spend',
+    p_amount_cents => p_amount_cents);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -846,8 +877,13 @@ begin
 
   perform 1 from public.lmc_accounts where id = v_orig.account_id for update;
 
+  -- Amount is derived (remaining at first execution), so the replay
+  -- fingerprint is the ORIGINAL-ENTRY LINKAGE: reusing this key for a
+  -- different original transaction must conflict, never report the old
+  -- reversal as already_processed.
   v_existing := public.lmc_existing_by_idempotency_v1(
-    v_orig.account_id, p_idempotency_key, p_kind);
+    v_orig.account_id, p_idempotency_key, p_kind,
+    p_original_transaction_id => v_orig.id);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -986,7 +1022,7 @@ revoke all on function public.lmc_flag_enabled(text) from public;
 revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
-revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text) from public;
+revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text) from public;
 revoke all on function public.lmc_grant_promotional_v1(text, uuid, text, text) from public;
 revoke all on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) from public;
 revoke all on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) from public;
@@ -997,7 +1033,7 @@ revoke all on function public.lmc_reverse_v1(uuid, text, text, text) from public
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
 -- Server-side monetary writes only:
 grant execute on function public.lmc_ensure_account_v1(uuid, uuid) to service_role;
-grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text) to service_role;
+grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text) to service_role;
 grant execute on function public.lmc_grant_promotional_v1(text, uuid, text, text) to service_role;
 grant execute on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) to service_role;
 grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid) to service_role;
