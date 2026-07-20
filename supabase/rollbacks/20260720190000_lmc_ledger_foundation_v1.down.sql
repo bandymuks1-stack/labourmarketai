@@ -74,21 +74,36 @@ drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, 
 drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text);
 drop function if exists public.lmc_ensure_account_v1(uuid, uuid);
 
--- Triggers + trigger functions.
-drop trigger if exists lmc_transactions_referral_guard on public.lmc_transactions;
-drop trigger if exists lmc_transactions_append_only on public.lmc_transactions;
-drop trigger if exists lmc_lots_append_only on public.lmc_lots;
-drop trigger if exists lmc_lot_consumptions_append_only on public.lmc_lot_consumptions;
-drop trigger if exists lmc_accounts_immutable on public.lmc_accounts;
+-- Triggers + policies. `IF EXISTS` does NOT cover an absent relation named
+-- by ON, so each drop is guarded by to_regclass — the rollback stays
+-- idempotent and can clean a partial state (second run, or a partially
+-- failed forward apply).
+do $cleanup$
+begin
+  if to_regclass('public.lmc_transactions') is not null then
+    drop trigger if exists lmc_transactions_referral_guard on public.lmc_transactions;
+    drop trigger if exists lmc_transactions_append_only on public.lmc_transactions;
+    drop policy if exists lmc_transactions_select on public.lmc_transactions;
+  end if;
+  if to_regclass('public.lmc_lots') is not null then
+    drop trigger if exists lmc_lots_append_only on public.lmc_lots;
+    drop policy if exists lmc_lots_select on public.lmc_lots;
+  end if;
+  if to_regclass('public.lmc_lot_consumptions') is not null then
+    drop trigger if exists lmc_lot_consumptions_append_only on public.lmc_lot_consumptions;
+    drop policy if exists lmc_lot_consumptions_select on public.lmc_lot_consumptions;
+  end if;
+  if to_regclass('public.lmc_accounts') is not null then
+    drop trigger if exists lmc_accounts_immutable on public.lmc_accounts;
+    drop policy if exists lmc_accounts_select on public.lmc_accounts;
+  end if;
+  if to_regclass('public.lmc_settings') is not null then
+    drop policy if exists lmc_settings_select on public.lmc_settings;
+  end if;
+end;
+$cleanup$;
 drop function if exists public.lmc_referral_insert_guard();
 drop function if exists public.lmc_forbid_mutation();
-
--- Policies.
-drop policy if exists lmc_lot_consumptions_select on public.lmc_lot_consumptions;
-drop policy if exists lmc_lots_select on public.lmc_lots;
-drop policy if exists lmc_transactions_select on public.lmc_transactions;
-drop policy if exists lmc_accounts_select on public.lmc_accounts;
-drop policy if exists lmc_settings_select on public.lmc_settings;
 
 -- Tables (children first).
 drop table if exists public.lmc_lot_consumptions;

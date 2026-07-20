@@ -30,7 +30,8 @@
  *   P21  concurrent grants with the same idempotency key produce ONE result
  *   P22  rollback removes only Wagon 1 objects, unrelated data preserved
  *        (P22a: a POPULATED ledger refuses to roll back without the
- *        scratch-only override — zero-row-before-DROP rule)
+ *        scratch-only override — zero-row-before-DROP rule;
+ *        P22b: a second rollback run on absent tables succeeds cleanly)
  *   P23  re-apply after rollback succeeds cleanly (flags false again)
  *   P24  expiry batch is never wedged by already-completed old lots
  *   P25  idempotency-key reuse with a DIFFERENT payload is rejected
@@ -93,6 +94,30 @@ const record = (name: string, pass: boolean, detail: string) => {
   results.push({ name, pass, detail });
   console.log(`${pass ? "PASS" : "FAIL"}  ${name} — ${detail}`);
 };
+
+/**
+ * Scratch-database IDENTITY assertion — a localhost hostname is not enough
+ * (an SSH tunnel or proxy to production would also present as 127.0.0.1).
+ * The Supabase LOCAL dev cluster always carries the well-known development
+ * JWT secret as a cluster GUC; no production cluster ever runs with it.
+ * This harness performs irreversible scratch cleanup (force-rollback), so it
+ * refuses to run against anything that is not provably the local dev DB.
+ */
+const LOCAL_DEV_JWT_SECRET =
+  "super-secret-jwt-token-with-at-least-32-characters-long";
+async function assertScratchDatabase(c: Client): Promise<void> {
+  const { rows } = await c.query(
+    `select current_database() as db,
+            current_setting('app.settings.jwt_secret', true) as jwt`,
+  );
+  if (rows[0].db !== "postgres" || rows[0].jwt !== LOCAL_DEV_JWT_SECRET) {
+    console.error(
+      `refusing to run: DB at ${DB_URL.replace(/\/\/.*@/, "//[redacted]@")} does not present the Supabase LOCAL dev identity marker (db=${rows[0].db}, marker=${rows[0].jwt ? "present-but-different" : "absent"}). A tunnel to a remote database is not a scratch database.`,
+    );
+    await c.end();
+    process.exit(1);
+  }
+}
 
 async function admin(): Promise<Client> {
   const c = new Client({ connectionString: DB_URL });
@@ -203,6 +228,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
   const a = await admin();
+  await assertScratchDatabase(a);
 
   // Clean current schema each run: roll back any prior Wagon 1 objects (the
   // rollback is fully `if exists`-guarded), then apply the real migration.
@@ -1463,6 +1489,19 @@ async function main() {
         intact[0].profiles === profBefore[0].n,
       `lmc objects gone=${allGone}, unrelated intact (profiles ${intact[0].profiles})`,
     );
+
+    // P22b: a SECOND rollback run — with every LMC relation absent — must
+    // succeed cleanly (idempotent partial-state cleanup).
+    let secondRunOk = true;
+    let secondRunMsg = "second rollback run succeeded on absent tables";
+    try {
+      await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
+    } catch (e) {
+      secondRunOk = false;
+      secondRunMsg = errMsg(e).slice(0, 80);
+      await a.query(`rollback`).catch(() => {});
+    }
+    record("P22b-rollback-idempotent-on-absent-tables", secondRunOk, secondRunMsg);
 
     await restoreMigration(a);
     const { rows: back } = await a.query(
