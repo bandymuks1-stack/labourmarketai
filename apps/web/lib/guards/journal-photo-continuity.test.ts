@@ -93,6 +93,43 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
       migration.slice(0, confirmStart) + migration.slice(confirmEnd);
     expect(outside).not.toMatch(/verified\s*=\s*true/i);
     expect(outside).not.toMatch(/set\s+verified/i);
+    expect(outside).not.toMatch(/manager_confirmed/);
+  });
+
+  it("reviewable set excludes stale rows; cutover lock ordered after child DDL", () => {
+    const reviewable = migration.slice(
+      migration.indexOf(
+        "create or replace function public.reviewable_journal_entry_ids()",
+      ),
+    );
+    const rEnd = reviewable.indexOf("end $$;");
+    expect(reviewable.slice(0, rEnd)).toMatch(/je\.superseded_by is null/i);
+    expect(reviewable.slice(0, rEnd)).toMatch(/je\.deleted_at is null/i);
+    // lock_timeout + parent lock AFTER every child-table DDL (deadlock-safe).
+    expect(migration).toMatch(/set local lock_timeout = '10s';\s*lock table public\.journal_entries in exclusive mode;/i);
+    const lockIdx = migration.indexOf("lock table public.journal_entries");
+    for (const ddl of [
+      "create trigger journal_entry_confirmations_guard",
+      'create policy "journal-entry-photos org manager select"',
+      "create policy journal_entry_photos_update",
+    ]) {
+      expect(migration.indexOf(ddl)).toBeGreaterThan(0);
+      expect(migration.indexOf(ddl)).toBeLessThan(lockIdx);
+    }
+    // Backfill skips confirmed sources.
+    const seed = migration.slice(migration.indexOf("with recursive chain as ("));
+    expect(seed.slice(0, seed.indexOf("union all"))).toMatch(
+      /not exists \(select 1 from public\.journal_entry_confirmations cc/i,
+    );
+    // Rollback restores the original reviewable body (no staleness filter).
+    const rbRev = rollback.slice(
+      rollback.indexOf(
+        "create or replace function public.reviewable_journal_entry_ids()",
+      ),
+    );
+    expect(rbRev.slice(0, rbRev.indexOf("end $$;"))).not.toMatch(
+      /superseded_by is null/i,
+    );
   });
 
   it("grants stay authenticated-only", () => {

@@ -25,6 +25,11 @@
 --      staleness predicate in the direct-insert policy, EXCLUSIVE-mode
 --      cutover quiesce before the backfill, and explicit path-based cycle
 --      detection in the backfill CTE.
+--   6. reviewable_journal_entry_ids excludes superseded/deleted rows (the
+--      inbox/queue/counts otherwise show permanently-unactionable cards);
+--      cutover locks reordered child->parent with lock_timeout (deadlock-
+--      safe quiesce that also drains legacy photo registrations); backfill
+--      skips sources that acquired confirmations pre-trigger.
 -- Human-gated application per the train's RED migration discipline - DRY-RUN
 -- ONLY until explicit owner approval; never self-applied.
 --
@@ -301,212 +306,6 @@ begin
   return v_new_entry_id;
 end;
 $$;
-
--- == 1a. Cutover quiesce (owner-hold v4 item 5) ==
--- A writer transaction that began BEFORE this migration commits still runs
--- the OLD function bodies (no photo move). EXCLUSIVE mode conflicts with
--- every row-writing lock, so this statement waits for all in-flight journal
--- writers to finish and blocks new ones until this migration commits — the
--- backfill below therefore sees every completed supersede. Reads continue.
-
-lock table public.journal_entries in exclusive mode;
-
--- == 1b. One-time repair: photos stranded by supersedes completed between ==
--- the W0 production deploy and this migration (Codex rev2 P1). Follow each
--- ACTIVE stranded photo's supersede chain to its LIVE, non-deleted tip and
--- move the metadata there — but ONLY when the tip has no active photo of its
--- own (never create a second active attachment; a colliding stranded row
--- stays where it is, honestly historical). Idempotent: a repaired chain has
--- no stranded active rows left, so a re-run matches nothing.
-
-with recursive chain as (
-  select p.id as photo_id, je.id as entry_id, je.superseded_by,
-         array[je.id] as path
-    from public.journal_entry_photos p
-    join public.journal_entries je on je.id = p.entry_id
-   where p.upload_status in ('uploading','uploaded')
-     and je.superseded_by is not null
-  union all
-  -- Explicit cycle detection: legitimate writers keep this graph acyclic,
-  -- but the apply must terminate even against adversarially pre-positioned
-  -- pointer cycles. A node already on the traversal path is never revisited,
-  -- so a cycle simply never yields a live tip and its photos stay put.
-  select c.photo_id, n.id, n.superseded_by, c.path || n.id
-    from chain c
-    join public.journal_entries n on n.id = c.superseded_by
-   where not (n.id = any(c.path))
-),
-live_tip as (
-  select c.photo_id, c.entry_id as live_entry_id
-    from chain c
-    join public.journal_entries tip on tip.id = c.entry_id
-   where c.superseded_by is null
-     and tip.deleted_at is null
-),
--- Exactly ONE photo may land on each tip (oldest wins) — two stranded rows
--- converging on the same tip must not both pass the snapshot-time collision
--- check and break the 1-active-photo invariant.
-pick as (
-  select distinct on (l.live_entry_id) l.photo_id, l.live_entry_id
-    from live_tip l
-    join public.journal_entry_photos pp on pp.id = l.photo_id
-   order by l.live_entry_id, pp.created_at asc, pp.id asc
-)
-update public.journal_entry_photos p
-   set entry_id = l.live_entry_id,
-       updated_at = now()
-  from pick l
- where p.id = l.photo_id
-   and p.entry_id <> l.live_entry_id
-   and not exists (
-     select 1 from public.journal_entry_photos q
-      where q.entry_id = l.live_entry_id
-        and q.upload_status in ('uploading','uploaded')
-        and q.id <> p.id
-   );
-
--- == 1c. LEGACY journal_entry_supersede: full photo-continuity parity ==
--- (owner-hold #2 P1). The 9-arg legacy RPC stays executable for older
--- deployed callers and rollback builds; without the move, any legacy call
--- AFTER the one-time backfill would strand its active photo on the hidden
--- predecessor. It now carries the identical W0 lock + stale-rejection body
--- PLUS the same gated photo move as v2 — same entry row lock, so every
--- concurrency, authorization, correction-lane and removed/failed-row
--- invariant is shared with v2.
-
-create or replace function public.journal_entry_supersede(
-  p_old_entry_id          uuid,
-  p_engagement_context_id uuid,
-  p_entry_type_slug       text,
-  p_profession_id         uuid,
-  p_original_text         text,
-  p_original_language     char(2),
-  p_hash_self             text,
-  p_visibility_scope      text,
-  p_metrics               jsonb
-) returns uuid
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_worker_id         uuid;
-  v_old_confirmed     int;
-  v_new_entry_id      uuid;
-  v_row               jsonb;
-  v_old_deleted_at    timestamptz;
-  v_old_superseded_by uuid;
-  v_old_project_id    uuid;
-  v_old_correction_of uuid;
-begin
-  select worker_id, deleted_at, superseded_by, project_id, correction_of
-    into v_worker_id, v_old_deleted_at, v_old_superseded_by, v_old_project_id,
-         v_old_correction_of
-    from public.journal_entries
-    where id = p_old_entry_id
-    for update;
-
-  if v_worker_id is null then
-    raise exception 'entry_not_found' using errcode = 'P0002';
-  end if;
-  if v_old_deleted_at is not null then
-    raise exception 'cannot_supersede_deleted' using errcode = '42P10';
-  end if;
-  if not public.owns_worker(v_worker_id) then
-    raise exception 'not_owner' using errcode = '42501';
-  end if;
-  if v_old_superseded_by is not null then
-    raise exception 'entry_superseded' using errcode = '55000';
-  end if;
-
-  select count(*) into v_old_confirmed
-    from public.journal_entry_confirmations
-    where entry_id = p_old_entry_id;
-
-  if v_old_confirmed > 0 and exists (
-    select 1 from public.journal_entries c
-     where c.correction_of = p_old_entry_id
-       and c.deleted_at is null
-       and c.superseded_by is null
-  ) then
-    raise exception 'entry_superseded' using errcode = '55000';
-  end if;
-
-  insert into public.journal_entries (
-    worker_id, engagement_context_id, entry_type_slug, profession_id,
-    original_text, original_language, hash_prev, hash_self,
-    visibility_scope, correction_of, project_id
-  )
-  values (
-    v_worker_id, p_engagement_context_id, p_entry_type_slug, p_profession_id,
-    p_original_text, p_original_language,
-    (select hash_self
-       from public.journal_entries
-      where worker_id = v_worker_id
-        and deleted_at is null
-      order by created_at desc
-      limit 1),
-    p_hash_self, p_visibility_scope,
-    case when v_old_confirmed > 0 then p_old_entry_id
-         else v_old_correction_of end,
-    v_old_project_id
-  )
-  returning id into v_new_entry_id;
-
-  if jsonb_typeof(p_metrics) = 'array' then
-    for v_row in select * from jsonb_array_elements(coalesce(p_metrics, '[]'::jsonb))
-    loop
-      insert into public.journal_entry_metrics (
-        entry_id, metric_slug, value_text, value_numeric, unit_slug, source
-      )
-      values (
-        v_new_entry_id,
-        v_row->>'metric_slug',
-        nullif(v_row->>'value_text', ''),
-        case
-          when v_row ? 'value_numeric' and v_row->>'value_numeric' is not null
-            then (v_row->>'value_numeric')::numeric
-          else null
-        end,
-        nullif(v_row->>'unit_slug', ''),
-        coalesce(v_row->>'source', 'worker_input')
-      );
-    end loop;
-  end if;
-
-  -- Photo evidence continuity (W1 rev6 — owner-hold #2): the LEGACY RPC gets
-  -- the SAME in-transaction metadata move as v2, so an older deployed caller
-  -- can never strand an active photo on the hidden predecessor. Storage
-  -- objects untouched; confirmed originals (correction lane) keep theirs.
-  if v_old_confirmed = 0 then
-    update public.journal_entry_photos
-       set entry_id = v_new_entry_id,
-           updated_at = now()
-     where entry_id = p_old_entry_id
-       and upload_status in ('uploading','uploaded');
-  end if;
-
-  if v_old_confirmed = 0 then
-    update public.journal_entries
-       set superseded_by = v_new_entry_id,
-           updated_at = now()
-     where id = p_old_entry_id
-       and superseded_by is null;
-    if not found then
-      raise exception 'entry_superseded' using errcode = '55000';
-    end if;
-  end if;
-
-  return v_new_entry_id;
-end;
-$$;
-
-revoke all on function public.journal_entry_supersede(
-  uuid, uuid, text, uuid, text, char(2), text, text, jsonb
-) from public;
-grant execute on function public.journal_entry_supersede(
-  uuid, uuid, text, uuid, text, char(2), text, text, jsonb
-) to authenticated;
 
 -- == 2. Serialize photo registration with the supersede (owner-hold P2) ==
 -- Locks the journal entry row FOR UPDATE (the same lock the supersede takes)
@@ -795,6 +594,32 @@ begin
   return 'verified:' || v_n::text;
 end $$;
 
+-- Shared read set: stale rows are not reviewable (owner-hold v4 P1 —
+-- inbox/queue/dashboard counts consume this RPC without extra filtering).
+
+create or replace function public.reviewable_journal_entry_ids()
+returns setof uuid language plpgsql stable security definer set search_path = public as $$
+begin
+  if auth.uid() is null then return; end if;
+  return query
+    select je.id
+    from public.journal_entries je
+    join public.engagement_contexts ec on ec.id = je.engagement_context_id
+    where ec.organization_id is not null
+      -- Stale rows are no longer reviewable (owner-hold v4 follow-through):
+      -- every confirmation path now refuses superseded/deleted entries, so
+      -- the shared read set must exclude them or the inbox/queue/counts show
+      -- permanently-broken cards.
+      and je.superseded_by is null
+      and je.deleted_at is null
+      and coalesce(ec.journal_review_enabled, false) is true
+      and (public.is_admin() or public.manages_organization(ec.organization_id))
+      and not exists (select 1 from public.journal_entry_confirmations c where c.entry_id = je.id);
+end $$;
+
+revoke all on function public.reviewable_journal_entry_ids() from public;
+grant execute on function public.reviewable_journal_entry_ids() to authenticated;
+
 revoke all on function public.review_journal_entry(uuid, text, text) from public;
 grant execute on function public.review_journal_entry(uuid, text, text) to authenticated;
 revoke all on function public.confirm_entry_and_verify_skills(uuid, uuid[], text) from public;
@@ -837,6 +662,226 @@ create policy journal_entry_photos_update on public.journal_entry_photos for upd
 
 revoke update on public.journal_entry_photos from authenticated;
 grant update (upload_status) on public.journal_entry_photos to authenticated;
+
+-- == 4b. Cutover quiesce + one-time backfill (owner-hold v4 item 5) ==
+-- Ordering is deliberate and deadlock-safe: every child-table DDL above
+-- (confirmations trigger/policy, storage policy, photos policy) has already
+-- taken ACCESS EXCLUSIVE locks on those tables — in-flight OLD-body writers
+-- (register: photos -> entries FK; confirmations: confirmations -> entries
+-- FK) acquire children BEFORE the parent, and so do we; old supersedes touch
+-- only the parent. Taking journal_entries EXCLUSIVE LAST therefore waits for
+-- every in-flight legacy writer (including legacy photo registrations, which
+-- queue behind the photos ACCESS EXCLUSIVE) without any lock-order cycle,
+-- and blocks new writers until commit. lock_timeout keeps a stuck apply from
+-- queueing production writers indefinitely — on timeout the whole
+-- transaction rolls back cleanly and the apply is safely retried.
+-- The backfill is idempotent; the deploy runbook may re-run it once
+-- post-deploy as a belt-and-braces sweep.
+
+set local lock_timeout = '10s';
+lock table public.journal_entries in exclusive mode;
+
+-- == 1b. One-time repair: photos stranded by supersedes completed between ==
+-- the W0 production deploy and this migration (Codex rev2 P1). Follow each
+-- ACTIVE stranded photo's supersede chain to its LIVE, non-deleted tip and
+-- move the metadata there — but ONLY when the tip has no active photo of its
+-- own (never create a second active attachment; a colliding stranded row
+-- stays where it is, honestly historical). Idempotent: a repaired chain has
+-- no stranded active rows left, so a re-run matches nothing.
+
+with recursive chain as (
+  select p.id as photo_id, je.id as entry_id, je.superseded_by,
+         array[je.id] as path
+    from public.journal_entry_photos p
+    join public.journal_entries je on je.id = p.entry_id
+   where p.upload_status in ('uploading','uploaded')
+     and je.superseded_by is not null
+     -- A source that acquired confirmations (via the pre-trigger paths)
+     -- keeps its evidence — same doctrine as the RPCs' correction lane.
+     and not exists (select 1 from public.journal_entry_confirmations cc
+                      where cc.entry_id = je.id)
+  union all
+  -- Explicit cycle detection: legitimate writers keep this graph acyclic,
+  -- but the apply must terminate even against adversarially pre-positioned
+  -- pointer cycles. A node already on the traversal path is never revisited,
+  -- so a cycle simply never yields a live tip and its photos stay put.
+  select c.photo_id, n.id, n.superseded_by, c.path || n.id
+    from chain c
+    join public.journal_entries n on n.id = c.superseded_by
+   where not (n.id = any(c.path))
+),
+live_tip as (
+  select c.photo_id, c.entry_id as live_entry_id
+    from chain c
+    join public.journal_entries tip on tip.id = c.entry_id
+   where c.superseded_by is null
+     and tip.deleted_at is null
+),
+-- Exactly ONE photo may land on each tip (oldest wins) — two stranded rows
+-- converging on the same tip must not both pass the snapshot-time collision
+-- check and break the 1-active-photo invariant.
+pick as (
+  select distinct on (l.live_entry_id) l.photo_id, l.live_entry_id
+    from live_tip l
+    join public.journal_entry_photos pp on pp.id = l.photo_id
+   order by l.live_entry_id, pp.created_at asc, pp.id asc
+)
+update public.journal_entry_photos p
+   set entry_id = l.live_entry_id,
+       updated_at = now()
+  from pick l
+ where p.id = l.photo_id
+   and p.entry_id <> l.live_entry_id
+   and not exists (
+     select 1 from public.journal_entry_photos q
+      where q.entry_id = l.live_entry_id
+        and q.upload_status in ('uploading','uploaded')
+        and q.id <> p.id
+   );
+
+-- == 1c. LEGACY journal_entry_supersede: full photo-continuity parity ==
+-- (owner-hold #2 P1). The 9-arg legacy RPC stays executable for older
+-- deployed callers and rollback builds; without the move, any legacy call
+-- AFTER the one-time backfill would strand its active photo on the hidden
+-- predecessor. It now carries the identical W0 lock + stale-rejection body
+-- PLUS the same gated photo move as v2 — same entry row lock, so every
+-- concurrency, authorization, correction-lane and removed/failed-row
+-- invariant is shared with v2.
+
+create or replace function public.journal_entry_supersede(
+  p_old_entry_id          uuid,
+  p_engagement_context_id uuid,
+  p_entry_type_slug       text,
+  p_profession_id         uuid,
+  p_original_text         text,
+  p_original_language     char(2),
+  p_hash_self             text,
+  p_visibility_scope      text,
+  p_metrics               jsonb
+) returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_worker_id         uuid;
+  v_old_confirmed     int;
+  v_new_entry_id      uuid;
+  v_row               jsonb;
+  v_old_deleted_at    timestamptz;
+  v_old_superseded_by uuid;
+  v_old_project_id    uuid;
+  v_old_correction_of uuid;
+begin
+  select worker_id, deleted_at, superseded_by, project_id, correction_of
+    into v_worker_id, v_old_deleted_at, v_old_superseded_by, v_old_project_id,
+         v_old_correction_of
+    from public.journal_entries
+    where id = p_old_entry_id
+    for update;
+
+  if v_worker_id is null then
+    raise exception 'entry_not_found' using errcode = 'P0002';
+  end if;
+  if v_old_deleted_at is not null then
+    raise exception 'cannot_supersede_deleted' using errcode = '42P10';
+  end if;
+  if not public.owns_worker(v_worker_id) then
+    raise exception 'not_owner' using errcode = '42501';
+  end if;
+  if v_old_superseded_by is not null then
+    raise exception 'entry_superseded' using errcode = '55000';
+  end if;
+
+  select count(*) into v_old_confirmed
+    from public.journal_entry_confirmations
+    where entry_id = p_old_entry_id;
+
+  if v_old_confirmed > 0 and exists (
+    select 1 from public.journal_entries c
+     where c.correction_of = p_old_entry_id
+       and c.deleted_at is null
+       and c.superseded_by is null
+  ) then
+    raise exception 'entry_superseded' using errcode = '55000';
+  end if;
+
+  insert into public.journal_entries (
+    worker_id, engagement_context_id, entry_type_slug, profession_id,
+    original_text, original_language, hash_prev, hash_self,
+    visibility_scope, correction_of, project_id
+  )
+  values (
+    v_worker_id, p_engagement_context_id, p_entry_type_slug, p_profession_id,
+    p_original_text, p_original_language,
+    (select hash_self
+       from public.journal_entries
+      where worker_id = v_worker_id
+        and deleted_at is null
+      order by created_at desc
+      limit 1),
+    p_hash_self, p_visibility_scope,
+    case when v_old_confirmed > 0 then p_old_entry_id
+         else v_old_correction_of end,
+    v_old_project_id
+  )
+  returning id into v_new_entry_id;
+
+  if jsonb_typeof(p_metrics) = 'array' then
+    for v_row in select * from jsonb_array_elements(coalesce(p_metrics, '[]'::jsonb))
+    loop
+      insert into public.journal_entry_metrics (
+        entry_id, metric_slug, value_text, value_numeric, unit_slug, source
+      )
+      values (
+        v_new_entry_id,
+        v_row->>'metric_slug',
+        nullif(v_row->>'value_text', ''),
+        case
+          when v_row ? 'value_numeric' and v_row->>'value_numeric' is not null
+            then (v_row->>'value_numeric')::numeric
+          else null
+        end,
+        nullif(v_row->>'unit_slug', ''),
+        coalesce(v_row->>'source', 'worker_input')
+      );
+    end loop;
+  end if;
+
+  -- Photo evidence continuity (W1 rev6 — owner-hold #2): the LEGACY RPC gets
+  -- the SAME in-transaction metadata move as v2, so an older deployed caller
+  -- can never strand an active photo on the hidden predecessor. Storage
+  -- objects untouched; confirmed originals (correction lane) keep theirs.
+  if v_old_confirmed = 0 then
+    update public.journal_entry_photos
+       set entry_id = v_new_entry_id,
+           updated_at = now()
+     where entry_id = p_old_entry_id
+       and upload_status in ('uploading','uploaded');
+  end if;
+
+  if v_old_confirmed = 0 then
+    update public.journal_entries
+       set superseded_by = v_new_entry_id,
+           updated_at = now()
+     where id = p_old_entry_id
+       and superseded_by is null;
+    if not found then
+      raise exception 'entry_superseded' using errcode = '55000';
+    end if;
+  end if;
+
+  return v_new_entry_id;
+end;
+$$;
+
+revoke all on function public.journal_entry_supersede(
+  uuid, uuid, text, uuid, text, char(2), text, text, jsonb
+) from public;
+grant execute on function public.journal_entry_supersede(
+  uuid, uuid, text, uuid, text, char(2), text, text, jsonb
+) to authenticated;
+
 
 -- == 5. Grants (function surface unchanged in shape) ==
 

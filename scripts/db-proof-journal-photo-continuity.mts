@@ -1020,6 +1020,42 @@ async function main(): Promise<void> {
     await cu.end();
   }
 
+  // ── R1: reviewable set excludes superseded/deleted rows (owner-hold v4 P1)
+  {
+    const f = await makeFixture(a, `${tag}-r1`);
+    const org = await makeOrgManager(a, `${tag}-r1o`);
+    const { rows: ec } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self, journal_review_enabled)
+       values ($1::uuid, $2, 'employee', 'W1 r1 ec', md5($1 || clock_timestamp()::text), true) returning id`,
+      [f.profileId, org.orgId],
+    );
+    const mk = async (text: string) =>
+      (await a.query(
+        `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+         values ($1, $2, 'freeform', $3, 'lt', md5($3 || clock_timestamp()::text), 'closed') returning id`,
+        [f.workerId, ec[0].id, text],
+      )).rows[0].id as string;
+    const live = await mk("r1 gyvas");
+    const sup = await mk("r1 pakeistas");
+    const del = await mk("r1 istrintas");
+    const cu = await asUser(f.profileId);
+    const s = supersedeSql(sup, f, "r1 pakeitimas");
+    await cu.query(s.sql, s.params); // sup -> hidden, new live child appears
+    await a.query(`update public.journal_entries set deleted_at = now() where id = $1`, [del]);
+    const cMgr = await asUser(org.managerId);
+    const { rows: ids } = await cMgr.query(
+      `select public.reviewable_journal_entry_ids() as id`,
+    );
+    const set = new Set(ids.map((r) => r.id as string));
+    record(
+      "R1 reviewable set: live rows in, superseded/deleted rows out",
+      set.has(live) && !set.has(sup) && !set.has(del),
+      `live=${set.has(live)} superseded=${set.has(sup)} deleted=${set.has(del)} n=${set.size}`,
+    );
+    await cMgr.end();
+    await cu.end();
+  }
+
   // ── L7: rollback round-trip — behavioral revert, retained authorization ─
   {
     const { readFileSync } = await import("node:fs");

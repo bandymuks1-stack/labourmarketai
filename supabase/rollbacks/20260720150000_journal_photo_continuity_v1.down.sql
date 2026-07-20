@@ -594,4 +594,23 @@ create policy journal_entry_confirmations_insert on public.journal_entry_confirm
                   and manages_organization(ec.organization_id))
   );
 
+-- Restore the 20260530140000 reviewable_journal_entry_ids verbatim.
+
+create or replace function public.reviewable_journal_entry_ids()
+returns setof uuid language plpgsql stable security definer set search_path = public as $$
+begin
+  if auth.uid() is null then return; end if;
+  return query
+    select je.id
+    from public.journal_entries je
+    join public.engagement_contexts ec on ec.id = je.engagement_context_id
+    where ec.organization_id is not null
+      and coalesce(ec.journal_review_enabled, false) is true
+      and (public.is_admin() or public.manages_organization(ec.organization_id))
+      and not exists (select 1 from public.journal_entry_confirmations c where c.entry_id = je.id);
+end $$;
+
+revoke all on function public.reviewable_journal_entry_ids() from public;
+grant execute on function public.reviewable_journal_entry_ids() to authenticated;
+
 commit;
