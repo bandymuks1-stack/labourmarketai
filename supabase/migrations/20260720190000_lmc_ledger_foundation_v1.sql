@@ -800,9 +800,12 @@ begin
   end if;
   perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
-  if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then
-    raise exception 'lmc_invalid_amount: must be positive and <= % LMC-cents', v_cap
-      using errcode = '22023';
+  -- Structural validation only before replay resolution; the (owner-
+  -- adjustable) upper cap is a LIVE policy and is enforced further below for
+  -- NEW grants only, so lowering the cap never breaks acknowledgement of an
+  -- earlier larger committed grant.
+  if p_amount_cents is null or p_amount_cents <= 0 then
+    raise exception 'lmc_invalid_amount: must be positive' using errcode = '22023';
   end if;
   if p_reason is null or char_length(trim(p_reason)) = 0 then
     raise exception 'lmc_reason_required' using errcode = '22023';
@@ -872,6 +875,12 @@ begin
   -- Live admin authority for a NEW grant (replays resolved above).
   if not public.is_admin() then
     raise exception 'Admin only' using errcode = '42501';
+  end if;
+
+  -- Live upper cap for a NEW grant (see the structural check above).
+  if p_amount_cents > v_cap then
+    raise exception 'lmc_invalid_amount: must be positive and <= % LMC-cents', v_cap
+      using errcode = '22023';
   end if;
 
   -- Kill-switch AFTER replay resolution: a disabled flag blocks NEW grants,
