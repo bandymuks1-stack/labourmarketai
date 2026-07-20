@@ -616,6 +616,31 @@ async function main(): Promise<void> {
       (await loc(ph1)) === C && (await loc(ph2)) === D && (await loc(ph4)) === F,
       "second apply no-op",
     );
+
+    // Chain 4: TWO stranded photos on one ancestor (pre-W0 race artifact)
+    // converging on one tip — exactly ONE (the oldest) moves.
+    const H = await makeEntry(a, f, "senas su dviem nuotraukom");
+    const { photoId: ph5 } = await addPhoto(c, f, H);
+    const ph6Path = `${f.profileId}/${H}/${crypto.randomUUID()}/antra.jpg`;
+    const { rows: ph6r } = await a.query(
+      `insert into public.journal_entry_photos (entry_id, profile_id, file_name, mime_type, file_size_bytes, storage_path)
+       values ($1::uuid, $2::uuid, 'antra.jpg', 'image/jpeg', 222, $3)
+       returning id`,
+      [H, f.profileId, ph6Path],
+    );
+    const ph6 = ph6r[0].id as string;
+    const I = await makeEntry(a, f, "gyvas galas 2");
+    await a.query(`update public.journal_entries set superseded_by = $2 where id = $1`, [H, I]);
+    await a.query(migrationSql);
+    const on_I = (await a.query(
+      `select count(*)::int as n from public.journal_entry_photos
+        where entry_id = $1 and upload_status in ('uploading','uploaded')`, [I],
+    )).rows[0].n as number;
+    record(
+      "D7e converging stranded photos: exactly ONE (oldest) lands on the tip",
+      on_I === 1 && (await loc(ph5)) === I && (await loc(ph6)) === H,
+      `onTip=${on_I} oldestMoved=${(await loc(ph5)) === I} newerStayed=${(await loc(ph6)) === H}`,
+    );
     await c.end();
   }
 

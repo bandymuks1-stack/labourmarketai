@@ -317,11 +317,20 @@ live_tip as (
     join public.journal_entries tip on tip.id = c.entry_id
    where c.superseded_by is null
      and tip.deleted_at is null
+),
+-- Exactly ONE photo may land on each tip (oldest wins) — two stranded rows
+-- converging on the same tip must not both pass the snapshot-time collision
+-- check and break the 1-active-photo invariant.
+pick as (
+  select distinct on (l.live_entry_id) l.photo_id, l.live_entry_id
+    from live_tip l
+    join public.journal_entry_photos pp on pp.id = l.photo_id
+   order by l.live_entry_id, pp.created_at asc, pp.id asc
 )
 update public.journal_entry_photos p
    set entry_id = l.live_entry_id,
        updated_at = now()
-  from live_tip l
+  from pick l
  where p.id = l.photo_id
    and p.entry_id <> l.live_entry_id
    and not exists (
