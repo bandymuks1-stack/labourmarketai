@@ -68,6 +68,16 @@
 
 begin;
 
+-- Bound EVERY lock wait in this transaction (child-table DDL included): a
+-- stuck acquisition fails the whole apply cleanly instead of queueing
+-- production writers behind it. Deadlock note: legacy supersedes read
+-- confirmations AFTER their entry lock (parent->child) while confirmation
+-- inserts go child->parent — no static order satisfies both, so a racing
+-- legacy supersede can, in a sub-second window, deadlock this apply. That
+-- aborts THIS transaction cleanly (or one app request gets 40P01); the
+-- runbook step is simply: retry the apply once.
+set local lock_timeout = '10s';
+
 -- == 1. Atomic v2: supersede + selected-skill evidence + photo continuity ==
 
 create or replace function public.journal_entry_supersede_v2(
@@ -668,17 +678,17 @@ grant update (upload_status) on public.journal_entry_photos to authenticated;
 -- (confirmations trigger/policy, storage policy, photos policy) has already
 -- taken ACCESS EXCLUSIVE locks on those tables — in-flight OLD-body writers
 -- (register: photos -> entries FK; confirmations: confirmations -> entries
--- FK) acquire children BEFORE the parent, and so do we; old supersedes touch
--- only the parent. Taking journal_entries EXCLUSIVE LAST therefore waits for
--- every in-flight legacy writer (including legacy photo registrations, which
--- queue behind the photos ACCESS EXCLUSIVE) without any lock-order cycle,
--- and blocks new writers until commit. lock_timeout keeps a stuck apply from
--- queueing production writers indefinitely — on timeout the whole
--- transaction rolls back cleanly and the apply is safely retried.
+-- FK) acquire children BEFORE the parent, and so do we. Old supersedes lock
+-- the parent entry first and then READ confirmations — the one writer shape
+-- with the opposite order; a racing one can deadlock this apply in a
+-- sub-second window, which aborts cleanly under the transaction-wide
+-- lock_timeout set at the top (runbook: retry the apply once). Taking
+-- journal_entries EXCLUSIVE LAST waits for every other in-flight legacy
+-- writer (including legacy photo registrations, which queue behind the
+-- photos ACCESS EXCLUSIVE) and blocks new writers until commit.
 -- The backfill is idempotent; the deploy runbook may re-run it once
 -- post-deploy as a belt-and-braces sweep.
 
-set local lock_timeout = '10s';
 lock table public.journal_entries in exclusive mode;
 
 -- == 1b. One-time repair: photos stranded by supersedes completed between ==

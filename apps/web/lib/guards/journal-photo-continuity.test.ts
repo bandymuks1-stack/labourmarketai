@@ -106,7 +106,13 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     expect(reviewable.slice(0, rEnd)).toMatch(/je\.superseded_by is null/i);
     expect(reviewable.slice(0, rEnd)).toMatch(/je\.deleted_at is null/i);
     // lock_timeout + parent lock AFTER every child-table DDL (deadlock-safe).
-    expect(migration).toMatch(/set local lock_timeout = '10s';\s*lock table public\.journal_entries in exclusive mode;/i);
+    // lock_timeout bounds EVERY acquisition — set at the top of the txn.
+    const timeoutIdx = migration.indexOf("set local lock_timeout = '10s';");
+    expect(timeoutIdx).toBeGreaterThan(0);
+    expect(timeoutIdx).toBeLessThan(
+      migration.indexOf("create or replace function"),
+    );
+    expect(migration).toMatch(/lock table public\.journal_entries in exclusive mode;/i);
     const lockIdx = migration.indexOf("lock table public.journal_entries");
     for (const ddl of [
       "create trigger journal_entry_confirmations_guard",
