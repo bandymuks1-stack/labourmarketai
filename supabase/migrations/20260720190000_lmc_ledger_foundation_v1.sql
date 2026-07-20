@@ -614,11 +614,13 @@ begin
   if p_campaign is null or char_length(trim(p_campaign)) = 0 then
     raise exception 'lmc_campaign_required' using errcode = '22023';
   end if;
-  if p_expires_at is null or p_expires_at <= now()
-     or p_expires_at > now() + interval '365 days' then
+  if p_expires_at is null then
     raise exception 'lmc_invalid_expiry: required, future, <= 365 days'
       using errcode = '22023';
   end if;
+  -- The future/365-day WINDOW check is deliberately deferred until after the
+  -- idempotency lookup below: an identical replay must stay idempotent even
+  -- after the originally granted expiry has elapsed.
 
   -- Verified recipient resolution: confirmed email, existing profile.
   select u.id, u.email into v_recipient, v_email
@@ -641,6 +643,12 @@ begin
     p_expires_at => p_expires_at);
   if v_existing is not null then
     return v_existing;
+  end if;
+
+  -- Time-dependent window check runs only for a NEW grant (see note above).
+  if p_expires_at <= now() or p_expires_at > now() + interval '365 days' then
+    raise exception 'lmc_invalid_expiry: required, future, <= 365 days'
+      using errcode = '22023';
   end if;
 
   insert into public.lmc_transactions

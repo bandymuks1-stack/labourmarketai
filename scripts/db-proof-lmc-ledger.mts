@@ -617,10 +617,18 @@ async function main() {
     // replays; a changed expiry conflicts instead of silently keeping the
     // original lot validity.
     const { rows: ts } = await a.query(
-      `select (now() + interval '30 days') as t`,
+      `select (now() + interval '30 days') as t, (now() + interval '3 seconds') as short`,
     );
     const expiry = ts[0].t as Date;
+    const shortExpiry = ts[0].short as Date;
     const admConn = await asUser(adm);
+    // Short-lived grant whose expiry will have ELAPSED by the time we replay
+    // it below — the identical replay must stay idempotent (no window check
+    // before the idempotency lookup).
+    const { rows: s1 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 400, 'elapsed replay', 'proof-campaign', $2, 'p26-short-${RUN}') as r`,
+      [`${RUN}-u9@fixture.local`, shortExpiry],
+    );
     const { rows: g1 } = await admConn.query(
       `select public.lmc_admin_grant_v1($1, 900, 'expiry fp', 'proof-campaign', $2, 'p26-grant-${RUN}') as r`,
       [`${RUN}-u9@fixture.local`, expiry],
@@ -637,6 +645,21 @@ async function main() {
         ),
       "lmc_idempotency_conflict",
     );
+    // Identical replay AFTER the granted expiry has elapsed: still idempotent.
+    await sleep(3500);
+    const { rows: s2 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 400, 'elapsed replay', 'proof-campaign', $2, 'p26-short-${RUN}') as r`,
+      [`${RUN}-u9@fixture.local`, shortExpiry],
+    );
+    // A genuinely NEW grant with an elapsed expiry is still refused.
+    const elapsedNew = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 400, 'elapsed new', 'proof-campaign', $2, 'p26-elapsed-new-${RUN}')`,
+          [`${RUN}-u9@fixture.local`, shortExpiry],
+        ),
+      "lmc_invalid_expiry",
+    );
     await admConn.end();
     record(
       "P26-reserved-namespace-and-expiry-fingerprint",
@@ -644,8 +667,11 @@ async function main() {
         reservedSpend.ok &&
         g2[0].r.already_processed === true &&
         g2[0].r.transaction_id === g1[0].r.transaction_id &&
-        expiryConflict.ok,
-      `reserved buy/spend refused; same-expiry replay=same tx; changed expiry: ${expiryConflict.msg.slice(0, 50)}`,
+        expiryConflict.ok &&
+        s2[0].r.already_processed === true &&
+        s2[0].r.transaction_id === s1[0].r.transaction_id &&
+        elapsedNew.ok,
+      `reserved buy/spend refused; same-expiry replay=same tx; changed expiry: ${expiryConflict.msg.slice(0, 40)}; elapsed-expiry replay idempotent; elapsed NEW grant refused`,
     );
   }
 
@@ -823,10 +849,16 @@ async function main() {
     const admA = await asUser(adm);
     const admB = await asUser(adm);
     const key = `p21-${RUN}`;
+    // Identical payload on both concurrent calls (a real client retry sends
+    // the same expiry) — computed once so the replay fingerprint matches.
+    const { rows: ts21 } = await a.query(
+      `select (now() + interval '60 days') as t`,
+    );
+    const raceExpiry = ts21[0].t as Date;
     const call = (c: Client) =>
       c.query(
-        `select public.lmc_admin_grant_v1($1, 700, 'race grant', 'proof-campaign', now() + interval '60 days', $2) as r`,
-        [`${RUN}-u2@fixture.local`, key],
+        `select public.lmc_admin_grant_v1($1, 700, 'race grant', 'proof-campaign', $3, $2) as r`,
+        [`${RUN}-u2@fixture.local`, key, raceExpiry],
       );
     const settled = await Promise.allSettled([call(admA), call(admB)]);
     await admA.end();
