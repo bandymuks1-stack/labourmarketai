@@ -24,10 +24,11 @@
 --
 -- ROLLBACK: paired reverse file
 --   supabase/rollbacks/20260720150000_journal_photo_continuity_v1.down.sql
---   restores, verbatim: the applied W0 v2 body, the 20260612091000
---   register_journal_entry_photo body + update policy + table grants, and the
---   20260705250000 org-manager storage policy. It does NOT touch the W0
---   integrity fix.
+--   restores, verbatim: the applied W0 v2 + legacy supersede bodies and the
+--   20260612091000 register_journal_entry_photo body. It deliberately
+--   RETAINS the metadata-resolving storage policy and the tightened UPDATE
+--   policy/column grant (reverting those would re-expose already-moved
+--   objects to the old organization). It does NOT touch the W0 integrity fix.
 -- ============================================================================
 -- 20260720150000_journal_photo_continuity_v1.sql
 --
