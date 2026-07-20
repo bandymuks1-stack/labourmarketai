@@ -53,6 +53,10 @@
  *        by the demoted actor stay refused)
  *   P34  admin-grant replay survives a later authority change (new grants
  *        by the demoted admin stay refused)
+ *   P35  admin-grant replay survives a later cap reduction: committed grant
+ *        above a lowered cap is still acknowledged by its recorded actor
+ *        (exact payload only), no duplicate tx/lot, foreign actors cannot
+ *        resolve it, and a NEW grant above the lowered cap is refused
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -65,6 +69,9 @@
  *   NC-F  lmc_referrals_enabled=true → referral insert passes the trigger
  *   NC-G  flag gate without FOR SHARE → flip no longer blocks on an
  *         in-flight writer (race window visible), restored gate blocks
+ *   NC-H  cap check restored to BEFORE replay resolution (wrong ordering)
+ *         → the recorded actor's identical retry is wrongly refused;
+ *         restored migration acknowledges it again
  *
  * Usage: npx tsx scripts/db-proof-lmc-ledger.mts
  * Env:   DB_URL (default postgresql://postgres:postgres@127.0.0.1:54322/postgres)
@@ -215,6 +222,38 @@ async function expectError(
 /** Restore every weakened object by re-applying the real migration file. */
 async function restoreMigration(a: Client) {
   await a.query(readFileSync(MIGRATION_PATH, "utf8"));
+}
+
+/**
+ * Extract the REAL lmc_admin_grant_v1 definition from the migration text and
+ * derive scratch variants from it (so variants can never drift from the real
+ * function):
+ *  - loweredCap: identical logic, v_cap lowered — simulates a future owner
+ *    cap reduction;
+ *  - wrongOrderLoweredCap: additionally re-attaches the cap to the
+ *    STRUCTURAL check before replay resolution — the exact defect the
+ *    correct ordering prevents (NEGATIVE CONTROL only).
+ */
+function adminGrantVariants(): { loweredCap: string; wrongOrderLoweredCap: string } {
+  const mig = readFileSync(MIGRATION_PATH, "utf8");
+  const start = mig.indexOf(
+    "create or replace function public.lmc_admin_grant_v1",
+  );
+  if (start < 0) throw new Error("lmc_admin_grant_v1 not found in migration");
+  const end = mig.indexOf("$$;", start);
+  if (end < 0) throw new Error("lmc_admin_grant_v1 terminator not found");
+  const fn = mig.slice(start, end + 3);
+  const CAP_DECL = "v_cap constant bigint := 100000";
+  const STRUCT_CHECK = "if p_amount_cents is null or p_amount_cents <= 0 then";
+  if (!fn.includes(CAP_DECL) || !fn.includes(STRUCT_CHECK)) {
+    throw new Error("admin-grant variant anchors not found");
+  }
+  const loweredCap = fn.replace(CAP_DECL, "v_cap constant bigint := 500");
+  const wrongOrderLoweredCap = loweredCap.replace(
+    STRUCT_CHECK,
+    "if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then",
+  );
+  return { loweredCap, wrongOrderLoweredCap };
 }
 
 /**
@@ -1037,6 +1076,107 @@ async function main() {
         demotedNew.ok &&
         otherAdminReuse.ok,
       `demoted-admin replay acknowledged same tx; demoted-admin NEW grant refused; other-admin key reuse conflicts`,
+    );
+  }
+
+  // ── P35 + NC-H: admin-grant replay survives a later cap reduction ─────────
+  {
+    const u13 = await makePerson(a, "u13");
+    const { rows: ts35 } = await a.query(
+      `select (now() + interval '40 days') as t, (now() + interval '10 days') as t2`,
+    );
+    const exp35 = ts35[0].t as Date;
+    const otherExp35 = ts35[0].t2 as Date;
+    const variants = adminGrantVariants();
+    const admConn = await asUser(adm);
+    const grantSql = (amount: number, reason: string, expiry: Date, key: string) =>
+      admConn.query(
+        `select public.lmc_admin_grant_v1($1, ${amount}, '${reason}', 'proof-campaign', $2, '${key}') as r`,
+        [`${RUN}-u13@fixture.local`, expiry],
+      );
+    // A: grant commits while the cap (1000 LMC) permits 900 cents.
+    const { rows: g1 } = await grantSql(900, "cap proof", exp35, `p35-${RUN}`);
+    // B: the owner later lowers the cap below the committed amount (500).
+    await a.query(variants.loweredCap);
+    // C/D: the recorded actor's identical retry acknowledges the commit.
+    const { rows: g2 } = await grantSql(900, "cap proof", exp35, `p35-${RUN}`);
+    // E: still exactly one transaction and one lot.
+    const { rows: counts } = await a.query(
+      `select
+         (select count(*)::int from public.lmc_transactions
+           where idempotency_key = $1) as txs,
+         (select count(*)::int from public.lmc_lots l
+           join public.lmc_transactions t on t.id = l.transaction_id
+          where t.idempotency_key = $1) as lots`,
+      [`p35-${RUN}`],
+    );
+    // F/G + reason: any payload difference conflicts.
+    const diffAmount = await expectError(
+      () => grantSql(400, "cap proof", exp35, `p35-${RUN}`),
+      "lmc_idempotency_conflict",
+    );
+    const diffExpiry = await expectError(
+      () => grantSql(900, "cap proof", otherExp35, `p35-${RUN}`),
+      "lmc_idempotency_conflict",
+    );
+    const diffReason = await expectError(
+      () => grantSql(900, "other reason", exp35, `p35-${RUN}`),
+      "lmc_idempotency_conflict",
+    );
+    // H: a different admin cannot resolve the recorded actor's replay.
+    const adm3 = await makePerson(a, "adm3", "admin");
+    const adm3Conn = await asUser(adm3);
+    const foreignResolve = await expectError(
+      () =>
+        adm3Conn.query(
+          `select public.lmc_admin_grant_v1($1, 900, 'cap proof', 'proof-campaign', $2, 'p35-${RUN}') as r`,
+          [`${RUN}-u13@fixture.local`, exp35],
+        ),
+      "lmc_",
+    );
+    await adm3Conn.end();
+    // I: a genuinely NEW grant above the lowered cap is refused.
+    const newAboveCap = await expectError(
+      () => grantSql(900, "new above cap", exp35, `p35-new-${RUN}`),
+      "lmc_invalid_amount",
+    );
+    record(
+      "P35-replay-survives-cap-reduction",
+      g1[0].r.already_processed === false &&
+        g2[0].r.already_processed === true &&
+        g2[0].r.transaction_id === g1[0].r.transaction_id &&
+        counts[0].txs === 1 &&
+        counts[0].lots === 1 &&
+        diffAmount.ok &&
+        diffExpiry.ok &&
+        diffReason.ok &&
+        foreignResolve.ok &&
+        newAboveCap.ok,
+      `retry acknowledged same tx under lowered cap; tx=${counts[0].txs} lot=${counts[0].lots}; amount/expiry/reason reuse conflict; foreign admin refused (${foreignResolve.msg.slice(0, 30)}); new grant above cap refused`,
+    );
+
+    // NC-H: restore the WRONG cap-before-replay ordering (lowered cap) —
+    // the recorded actor's identical retry is now wrongly refused.
+    await a.query(variants.wrongOrderLoweredCap);
+    const wrongOrder = await expectError(
+      () => grantSql(900, "cap proof", exp35, `p35-${RUN}`),
+      "lmc_invalid_amount",
+    );
+    record(
+      "NCH1-cap-before-replay-breaks-acknowledgement",
+      wrongOrder.ok,
+      `wrong ordering refused the identical committed retry: ${wrongOrder.msg.slice(0, 50)}`,
+    );
+    // Restore the real migration (cap 1000 LMC, correct ordering): the
+    // identical retry acknowledges again.
+    await restoreMigration(a);
+    const { rows: g3 } = await grantSql(900, "cap proof", exp35, `p35-${RUN}`);
+    await admConn.end();
+    record(
+      "NCH2-restored-ordering-acknowledges",
+      g3[0].r.already_processed === true &&
+        g3[0].r.transaction_id === g1[0].r.transaction_id,
+      `restored migration acknowledges the committed grant (same tx)`,
     );
   }
 
