@@ -358,6 +358,11 @@ as $$
 declare
   v_account uuid;
 begin
+  -- This helper is an independently exposed service-role write path, so it
+  -- takes the shared maintenance lock itself (a re-acquisition inside the
+  -- other RPCs is a no-op) — the rollback's exclusive lock queues EVERY
+  -- ledger writer, including direct account creation.
+  perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   if (p_profile_id is null) = (p_company_id is null) then
     raise exception 'lmc_invalid_subject: exactly one of profile or company required'
       using errcode = '22023';
