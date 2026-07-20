@@ -54,10 +54,12 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     expect(moveIdx - gate).toBeLessThan(200);
   });
 
-  it("never touches storage objects (metadata-only continuity)", () => {
-    expect(migration).not.toMatch(/storage\.objects/i);
-    expect(migration).not.toMatch(/storage\.buckets/i);
+  it("never mutates storage objects (metadata-only continuity; read policy only)", () => {
+    expect(migration).not.toMatch(/(insert into|update|delete from)\s+storage\.objects/i);
+    expect(migration).not.toMatch(/(insert into|update|delete from)\s+storage\.buckets/i);
     expect(migration).not.toMatch(/delete from public\.journal_entry_photos/i);
+    // The only storage.objects reference is the SELECT policy.
+    expect(migration).toMatch(/on storage\.objects for select/i);
   });
 
   it("keeps every W0 atomicity invariant in the replaced body", () => {
@@ -94,10 +96,66 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     expect(migration).not.toMatch(/service_role/);
   });
 
-  it("rollback restores the W0 body (no photo move)", () => {
+  it("rollback restores every changed piece without touching the W0 integrity fix", () => {
     expect(rollback).toMatch(
       /create or replace function public\.journal_entry_supersede_v2\(/i,
     );
-    expect(rollback).not.toMatch(/journal_entry_photos/);
+    // W0 body restored WITHOUT the photo move.
+    const rbV2End = rollback.indexOf("$$;");
+    expect(rollback.slice(0, rbV2End)).not.toMatch(
+      /update public\.journal_entry_photos/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.register_journal_entry_photo\(/i,
+    );
+    expect(rollback).toMatch(
+      /create policy "journal-entry-photos org manager select"[\s\S]*storage\.foldername\(name\)\)\[2\]/i,
+    );
+    expect(rollback).toMatch(
+      /grant update on public\.journal_entry_photos to authenticated/i,
+    );
+  });
+});
+
+describe("W1 rev2 — registration serialized with the supersede (owner-hold P2)", () => {
+  it("register_journal_entry_photo locks the entry row and refuses stale entries", () => {
+    const fn = migration.slice(
+      migration.indexOf("create or replace function public.register_journal_entry_photo("),
+    );
+    expect(fn).toMatch(/from public\.journal_entries je[\s\S]*for update of je/i);
+    expect(fn).toContain(`raise exception 'entry_superseded'`);
+    expect(fn).toContain(`raise exception 'entry_deleted'`);
+    // Cap check remains AFTER the lock (race-proof ordering).
+    const lockIdx = fn.indexOf("for update of je");
+    const capIdx = fn.indexOf("photo_limit_reached");
+    expect(lockIdx).toBeGreaterThan(0);
+    expect(capIdx).toBeGreaterThan(lockIdx);
+  });
+});
+
+describe("W1 rev2 — one coherent authorization source (owner-hold P1)", () => {
+  it("storage manager policy resolves the CANONICAL metadata row, never the path segment", () => {
+    const policy = migration.slice(
+      migration.indexOf(`create policy "journal-entry-photos org manager select"`),
+    );
+    expect(policy).toMatch(/p\.storage_path = storage\.objects\.name/i);
+    expect(policy).toMatch(/join public\.journal_entries je on je\.id = p\.entry_id/i);
+    expect(policy).toMatch(/manages_organization\(ec\.organization_id\)/i);
+    // The embedded historical entry id must never be authorization input.
+    expect(policy.slice(0, policy.indexOf(");"))).not.toMatch(
+      /storage\.foldername/i,
+    );
+  });
+
+  it("photo rows cannot be repointed: WITH CHECK + upload_status-only grant", () => {
+    expect(migration).toMatch(
+      /create policy journal_entry_photos_update[\s\S]*using \(profile_id = auth\.uid\(\)\)\s*with check \(profile_id = auth\.uid\(\)\)/i,
+    );
+    expect(migration).toMatch(
+      /revoke update on public\.journal_entry_photos from authenticated/i,
+    );
+    expect(migration).toMatch(
+      /grant update \(upload_status\) on public\.journal_entry_photos to authenticated/i,
+    );
   });
 });

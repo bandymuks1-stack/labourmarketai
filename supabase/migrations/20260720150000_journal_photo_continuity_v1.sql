@@ -1,47 +1,59 @@
 -- @human-gate-approved
--- RED classes acknowledged (security definer / grant-revoke / data DML): this
--- is the owner-directed W1 of the Invite-Ready Closure Train v1 — journal
--- attachment continuity. The ONLY change vs the applied W0 body of
--- journal_entry_supersede_v2 (ledger 20260720035240) is one additional
--- in-transaction UPDATE that moves the old entry's ACTIVE photo metadata rows
--- (journal_entry_photos.entry_id) to the new live entry when the old entry is
--- being hidden (unconfirmed supersede). No storage object is copied, moved or
--- deleted; no new privilege surface (same grant re-issue as W0). Human-gated
--- application per the train's RED migration discipline.
+-- RED classes acknowledged (security definer / grant-revoke / data DML /
+-- policy change): owner-directed W1 of the Invite-Ready Closure Train v1 —
+-- journal attachment continuity, revision 2 after the owner hold. Changes vs
+-- the applied W0 production body (ledger 20260720035240):
+--   1. journal_entry_supersede_v2 gains the in-transaction photo-metadata
+--      move (unconfirmed supersede only).
+--   2. register_journal_entry_photo now LOCKS the entry row (FOR UPDATE) and
+--      refuses superseded/deleted entries - serialized with the supersede on
+--      the same row lock (owner-hold P2).
+--   3. The org-manager STORAGE read policy now resolves the CANONICAL
+--      journal_entry_photos metadata row (storage_path = object name) and its
+--      CURRENT entry_id instead of trusting the immutable historical entry id
+--      embedded in the path - metadata and object authorization can never
+--      diverge (owner-hold P1). No access broadened; bucket stays private.
+--   4. journal_entry_photos UPDATE tightened: WITH CHECK added and the column
+--      grant restricted to upload_status only, so a worker cannot repoint a
+--      photo row's entry_id and redirect authorization.
+-- Human-gated application per the train's RED migration discipline - DRY-RUN
+-- ONLY until explicit owner approval; never self-applied.
 --
 -- ROLLBACK: paired reverse file
 --   supabase/rollbacks/20260720150000_journal_photo_continuity_v1.down.sql
---   (restores the W0 journal_entry_supersede_v2 body verbatim; metadata rows
---   already moved stay with the live entry — the storage objects were never
---   touched).
+--   restores, verbatim: the applied W0 v2 body, the 20260612091000
+--   register_journal_entry_photo body + update policy + table grants, and the
+--   20260705250000 org-manager storage policy. It does NOT touch the W0
+--   integrity fix.
 -- ============================================================================
 -- 20260720150000_journal_photo_continuity_v1.sql
 --
--- Invite-Ready Closure Train v1 — Wagon 1: journal attachment continuity.
+-- Invite-Ready Closure Train v1 - Wagon 1: journal attachment continuity.
 --
 -- DEFECT: editing an entry (atomic supersede A->B) left the photo metadata
 -- row attached to the superseded, hidden entry A. The live entry B showed no
 -- photo evidence; every per-entry photo surface (document centre, project
 -- gallery, AI work-journal context) saw the live entry as photo-less, and a
 -- re-attach in the composer's edit flow left the ORIGINAL photo stranded on
--- the hidden entry — silent evidence loss/duplication on every edit. After
+-- the hidden entry - silent evidence loss/duplication on every edit. After
 -- this fix a re-attach on an entry that already has a photo hits the honest
 -- free-tier photo_limit_reached (photo replace/remove UI is a tracked
 -- follow-up).
 --
--- FIX: one additional UPDATE inside the already-atomic
--- journal_entry_supersede_v2 transaction moves active photo metadata
--- (upload_status uploading/uploaded) to the new live entry. Failed/removed
--- rows stay on the historical entry. Storage objects are immutable and
--- untouched: no duplicates, no copy cleanup, no cross-worker exposure (the
--- RPC already proved ownership of the entry; photo rows carry profile_id
--- unchanged). Confirmed originals keep their photo (correction lane shows
--- both rows).
+-- FIX (one coherent authorization source + serialized attachment lifecycle):
+--   metadata move inside the atomic supersede; registration serialized on the
+--   same entry row lock; storage-object authorization resolved through the
+--   canonical metadata row. Storage objects are immutable and untouched - one
+--   logical attachment, provenance inherent in the storage path
+--   (<profile_id>/<original_entry_id>/<photo_id>/<file>). Confirmed originals
+--   (correction lane) keep their photo; removed/failed rows stay historical.
 --
--- Idempotent: CREATE OR REPLACE, fixed signature. Reversible: see above.
+-- Idempotent: CREATE OR REPLACE + drop-and-recreate policies. Reversible.
 -- ============================================================================
 
 begin;
+
+-- == 1. Atomic v2: supersede + selected-skill evidence + photo continuity ==
 
 create or replace function public.journal_entry_supersede_v2(
   p_old_entry_id          uuid,
@@ -280,12 +292,163 @@ begin
 end;
 $$;
 
--- Grants unchanged in shape; re-issued to keep this file self-contained.
+-- == 2. Serialize photo registration with the supersede (owner-hold P2) ==
+-- Locks the journal entry row FOR UPDATE (the same lock the supersede takes)
+-- and refuses superseded/deleted entries with structured errors, so a
+-- registration racing an edit either lands BEFORE the move scan (and rides
+-- it) or is refused AFTER - an active photo can never strand on a hidden
+-- entry, and the 1-photo cap is race-proof.
+
+create or replace function public.register_journal_entry_photo(
+  p_photo_id     uuid,
+  p_entry_id     uuid,
+  p_file_name    text,
+  p_mime_type    text,
+  p_file_size    bigint,
+  p_storage_path text
+) returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid               uuid := auth.uid();
+  resolved_id       uuid;
+  cleaned_name      text := nullif(trim(coalesce(p_file_name, '')), '');
+  cleaned_mime      text := lower(nullif(trim(coalesce(p_mime_type, '')), ''));
+  cleaned_path      text := nullif(trim(coalesce(p_storage_path, '')), '');
+  expected_prefix   text;
+  entry_owner       uuid;
+  v_superseded_by   uuid;
+  v_deleted_at      timestamptz;
+  existing_count    integer;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+
+  if cleaned_name is null or char_length(cleaned_name) > 255 then
+    raise exception 'Invalid file_name' using errcode = '22023';
+  end if;
+
+  if cleaned_mime is null or cleaned_mime not in (
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+  ) then
+    raise exception 'unsupported_mime_type' using errcode = '22023';
+  end if;
+
+  if p_file_size is null or p_file_size <= 0 or p_file_size > 5242880 then
+    raise exception 'file_too_large' using errcode = '22023';
+  end if;
+
+  if cleaned_path is null or char_length(cleaned_path) > 1024 then
+    raise exception 'Invalid storage_path' using errcode = '22023';
+  end if;
+
+  -- Caller must own the journal entry. FOR UPDATE serializes this whole
+  -- registration against journal_entry_supersede_v2 (which locks the same
+  -- row): register-then-edit rides the move; edit-then-register is refused.
+  select w.profile_id, je.superseded_by, je.deleted_at
+    into entry_owner, v_superseded_by, v_deleted_at
+    from public.journal_entries je
+    join public.workers w on w.id = je.worker_id
+   where je.id = p_entry_id
+   for update of je;
+  if entry_owner is null then
+    raise exception 'Entry not found' using errcode = '42704';
+  end if;
+  if entry_owner <> uid then
+    raise exception 'Entry not owned' using errcode = '42501';
+  end if;
+  if v_deleted_at is not null then
+    raise exception 'entry_deleted' using errcode = '42P10';
+  end if;
+  if v_superseded_by is not null then
+    raise exception 'entry_superseded' using errcode = '55000';
+  end if;
+
+  -- FREE-TIER LIMIT: one photo per entry. Honest, server-enforced, and now
+  -- race-proof (the entry row lock serializes concurrent registrations).
+  select count(*) into existing_count
+    from public.journal_entry_photos
+   where entry_id = p_entry_id
+     and upload_status in ('uploading','uploaded');
+  if existing_count >= 1 then
+    raise exception 'photo_limit_reached' using errcode = '22023';
+  end if;
+
+  expected_prefix := uid::text || '/' || p_entry_id::text || '/';
+  if position(expected_prefix in cleaned_path) <> 1 then
+    raise exception 'storage_path does not start with %', expected_prefix
+      using errcode = '22023';
+  end if;
+
+  insert into public.journal_entry_photos (
+    id, entry_id, profile_id, file_name, mime_type, file_size_bytes, storage_path
+  ) values (
+    coalesce(p_photo_id, gen_random_uuid()),
+    p_entry_id,
+    uid,
+    cleaned_name,
+    cleaned_mime,
+    p_file_size,
+    cleaned_path
+  )
+  returning id into resolved_id;
+
+  return resolved_id;
+end $$;
+
+-- == 3. One coherent authorization source for storage reads (owner-hold P1) ==
+-- The org-manager storage policy now resolves the CANONICAL metadata row by
+-- storage_path (UNIQUE) and authorizes through its CURRENT entry - identical
+-- scope to journal_entry_photos_select_org_manager, before and after any
+-- move/engagement change. The historical entry id embedded in the path is
+-- provenance only, never authorization. Worker-owner and admin policies from
+-- 20260612091000 are unchanged (profile_id is immutable on move).
+
+drop policy if exists "journal-entry-photos org manager select"
+  on storage.objects;
+create policy "journal-entry-photos org manager select"
+  on storage.objects for select
+  using (
+    bucket_id = 'journal-entry-photos'
+    and auth.uid() is not null
+    and exists (
+      select 1
+        from public.journal_entry_photos p
+        join public.journal_entries je on je.id = p.entry_id
+        join public.engagement_contexts ec on ec.id = je.engagement_context_id
+       where p.storage_path = storage.objects.name
+         and public.manages_organization(ec.organization_id)
+    )
+  );
+
+-- == 4. Photo rows cannot be repointed by the owner ==
+-- WITH CHECK + a column-restricted UPDATE grant: a worker may only change
+-- upload_status (remove/replace lifecycle), never entry_id / profile_id /
+-- storage_path - so metadata-resolved authorization cannot be redirected.
+
+drop policy if exists journal_entry_photos_update on public.journal_entry_photos;
+create policy journal_entry_photos_update on public.journal_entry_photos for update
+  using (profile_id = auth.uid())
+  with check (profile_id = auth.uid());
+
+revoke update on public.journal_entry_photos from authenticated;
+grant update (upload_status) on public.journal_entry_photos to authenticated;
+
+-- == 5. Grants (function surface unchanged in shape) ==
+
 revoke all on function public.journal_entry_supersede_v2(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb, text[], text[]
 ) from public;
 grant execute on function public.journal_entry_supersede_v2(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb, text[], text[]
 ) to authenticated;
+
+revoke all on function public.register_journal_entry_photo(uuid, uuid, text, text, bigint, text) from public;
+grant execute on function public.register_journal_entry_photo(uuid, uuid, text, text, bigint, text) to authenticated;
 
 commit;

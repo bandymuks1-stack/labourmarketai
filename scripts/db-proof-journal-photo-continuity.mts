@@ -319,6 +319,238 @@ async function main(): Promise<void> {
     await c.end();
   }
 
+  // ═══ Owner-hold D-matrix: authorization coherence + registration race ═══
+
+  /** Run an RLS-enforced query as `profileId` (role authenticated + claims),
+   *  restoring the admin role afterwards. */
+  async function rlsQuery(
+    profileId: string,
+    sql: string,
+    params: unknown[],
+  ): Promise<{ rows: Array<Record<string, unknown>> }> {
+    const c = new Client({ connectionString: DB_URL });
+    await c.connect();
+    try {
+      await c.query(`select set_config('request.jwt.claims', $1, false)`, [
+        JSON.stringify({ sub: profileId, role: "authenticated" }),
+      ]);
+      await c.query(`set role authenticated`);
+      return await c.query(sql, params);
+    } finally {
+      await c.end();
+    }
+  }
+
+  async function makeOrgManager(
+    aConn: Client,
+    tag2: string,
+  ): Promise<{ orgId: string; managerId: string }> {
+    const { rows: org } = await aConn.query(
+      `insert into public.organizations (organization_type, display_name)
+       values ('company', 'W1 Org ' || $1) returning id`,
+      [tag2],
+    );
+    const { rows: mu } = await aConn.query(
+      `insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+       values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+               'w1-proof-mgr-' || $1 || '@fixture.local', 'x', now(), '{"provider":"email"}', '{}', now(), now())
+       returning id`,
+      [tag2],
+    );
+    await aConn.query(
+      `insert into public.profiles (id, active_role, full_name) values ($1, 'company', 'W1 Mgr ' || $2)
+       on conflict (id) do update set active_role = 'company'`,
+      [mu[0].id, tag2],
+    );
+    await aConn.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self)
+       values ($1::uuid, $2, 'manager', 'W1 mgr ctx ' || $3, md5($1 || clock_timestamp()::text))`,
+      [mu[0].id, org[0].id, tag2],
+    );
+    return { orgId: org[0].id as string, managerId: mu[0].id as string };
+  }
+
+  // ── D2/D3/D4/D6: engagement-context change moves BOTH metadata and object
+  //     authorization to the new org; old org loses both; stranger sees none.
+  {
+    const f = await makeFixture(a, `${tag}-d2`);
+    const org1 = await makeOrgManager(a, `${tag}-o1`);
+    const org2 = await makeOrgManager(a, `${tag}-o2`);
+    const org3 = await makeOrgManager(a, `${tag}-o3`); // never involved
+    // Worker's org-bound contexts.
+    const { rows: ec1 } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self)
+       values ($1::uuid, $2, 'employee', 'W1 d2 ec1', md5($1 || '1' || clock_timestamp()::text)) returning id`,
+      [f.profileId, org1.orgId],
+    );
+    const { rows: ec2 } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self)
+       values ($1::uuid, $2, 'employee', 'W1 d2 ec2', md5($1 || '2' || clock_timestamp()::text)) returning id`,
+      [f.profileId, org2.orgId],
+    );
+    const { rows: entryRows } = await a.query(
+      `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+       values ($1, $2, 'freeform', 'd2 su nuotrauka', 'lt', md5('d2' || clock_timestamp()::text), 'closed') returning id`,
+      [f.workerId, ec1[0].id],
+    );
+    const A = entryRows[0].id as string;
+    const c = await asUser(f.profileId);
+    const { path } = await addPhoto(c, f, A);
+    // Mirror the storage object row (fixture; prod upload creates it).
+    await a.query(
+      `insert into storage.objects (bucket_id, name, owner) values ('journal-entry-photos', $1, $2::uuid)`,
+      [path, f.profileId],
+    );
+
+    // BEFORE the cross-context edit: org1 manager sees metadata + object.
+    const m1MetaBefore = await rlsQuery(org1.managerId,
+      `select count(*)::int as n from public.journal_entry_photos where storage_path = $1`, [path]);
+    const m1ObjBefore = await rlsQuery(org1.managerId,
+      `select count(*)::int as n from storage.objects where bucket_id = 'journal-entry-photos' and name = $1`, [path]);
+
+    // Cross-context edit: supersede A -> B with engagement context ec2 (org2).
+    const { rows: bRows } = await c.query(
+      `select public.journal_entry_supersede_v2(
+        $1::uuid, $2::uuid, 'freeform', null, 'd2 perkelta i org2', 'lt',
+        md5('d2b' || clock_timestamp()::text), 'closed', '[]'::jsonb, '{}'::text[], '{}'::text[]) as id`,
+      [A, ec2[0].id],
+    );
+    const B = bRows[0].id as string;
+
+    const m1Meta = await rlsQuery(org1.managerId,
+      `select count(*)::int as n from public.journal_entry_photos where storage_path = $1`, [path]);
+    const m1Obj = await rlsQuery(org1.managerId,
+      `select count(*)::int as n from storage.objects where bucket_id = 'journal-entry-photos' and name = $1`, [path]);
+    const m2Meta = await rlsQuery(org2.managerId,
+      `select count(*)::int as n from public.journal_entry_photos where storage_path = $1`, [path]);
+    const m2Obj = await rlsQuery(org2.managerId,
+      `select count(*)::int as n from storage.objects where bucket_id = 'journal-entry-photos' and name = $1`, [path]);
+    const m3Meta = await rlsQuery(org3.managerId,
+      `select count(*)::int as n from public.journal_entry_photos where storage_path = $1`, [path]);
+    const m3Obj = await rlsQuery(org3.managerId,
+      `select count(*)::int as n from storage.objects where bucket_id = 'journal-entry-photos' and name = $1`, [path]);
+    const ownerObj = await rlsQuery(f.profileId,
+      `select count(*)::int as n from storage.objects where bucket_id = 'journal-entry-photos' and name = $1`, [path]);
+
+    record(
+      "D2 pre-edit: origin-org manager authorized for metadata AND object",
+      m1MetaBefore.rows[0].n === 1 && m1ObjBefore.rows[0].n === 1,
+      `meta=${m1MetaBefore.rows[0].n} obj=${m1ObjBefore.rows[0].n}`,
+    );
+    record(
+      "D3 post-edit: OLD org manager loses metadata AND object access",
+      m1Meta.rows[0].n === 0 && m1Obj.rows[0].n === 0,
+      `meta=${m1Meta.rows[0].n} obj=${m1Obj.rows[0].n}`,
+    );
+    record(
+      "D4 post-edit: NEW org manager gains metadata AND object access",
+      m2Meta.rows[0].n === 1 && m2Obj.rows[0].n === 1,
+      `meta=${m2Meta.rows[0].n} obj=${m2Obj.rows[0].n}`,
+    );
+    record(
+      "D6 uninvolved org manager sees nothing; owner keeps object access",
+      m3Meta.rows[0].n === 0 && m3Obj.rows[0].n === 0 && ownerObj.rows[0].n === 1,
+      `strangerMeta=${m3Meta.rows[0].n} strangerObj=${m3Obj.rows[0].n} ownerObj=${ownerObj.rows[0].n}`,
+    );
+
+    // Metadata/object authorization IDENTITY after a SECOND edit back to ec1.
+    await c.query(
+      `select public.journal_entry_supersede_v2(
+        $1::uuid, $2::uuid, 'freeform', null, 'd2 atgal i org1', 'lt',
+        md5('d2c' || clock_timestamp()::text), 'closed', '[]'::jsonb, '{}'::text[], '{}'::text[])`,
+      [B, ec1[0].id],
+    );
+    const m1Again = await rlsQuery(org1.managerId,
+      `select (select count(*)::int from public.journal_entry_photos where storage_path = $1) as meta,
+              (select count(*)::int from storage.objects where bucket_id = 'journal-entry-photos' and name = $1) as obj`,
+      [path]);
+    const m2Again = await rlsQuery(org2.managerId,
+      `select (select count(*)::int from public.journal_entry_photos where storage_path = $1) as meta,
+              (select count(*)::int from storage.objects where bucket_id = 'journal-entry-photos' and name = $1) as obj`,
+      [path]);
+    record(
+      "D2b edits keep metadata and object authorization IDENTICAL",
+      m1Again.rows[0].meta === m1Again.rows[0].obj && m2Again.rows[0].meta === m2Again.rows[0].obj &&
+        m1Again.rows[0].meta === 1 && m2Again.rows[0].meta === 0,
+      `org1(meta=obj)=${m1Again.rows[0].meta}/${m1Again.rows[0].obj} org2(meta=obj)=${m2Again.rows[0].meta}/${m2Again.rows[0].obj}`,
+    );
+
+    // D-policy: owner cannot repoint entry_id (column grant restricted).
+    let repointErr = "";
+    try {
+      await rlsQuery(f.profileId,
+        `update public.journal_entry_photos set entry_id = $1 where storage_path = $2`,
+        [A, path]);
+    } catch (e) {
+      repointErr = String((e as Error).message);
+    }
+    record(
+      "D-policy: owner cannot repoint photo entry_id (column grant)",
+      repointErr.includes("permission denied"),
+      `err=${repointErr.slice(0, 40)}`,
+    );
+    await c.end();
+  }
+
+  // ── D5: concurrent registration vs supersede — serialized, no stranding ──
+  {
+    const f = await makeFixture(a, `${tag}-d5`);
+    const A = await makeEntry(a, f, "lenktynių įrašas");
+    const c1 = await asUser(f.profileId);
+    const c2 = await asUser(f.profileId);
+    const regSql = `select public.register_journal_entry_photo(
+      gen_random_uuid(), $1::uuid, 'race.jpg', 'image/jpeg', 111,
+      $2 || '/' || $1 || '/' || gen_random_uuid() || '/race.jpg') as id`;
+    const s = supersedeSql(A, f, "lenktynių keitimas");
+    const [regRes, supRes] = await Promise.allSettled([
+      c1.query(regSql, [A, f.profileId]),
+      c2.query(s.sql, s.params),
+    ]);
+    const regOk = regRes.status === "fulfilled";
+    const supOk = supRes.status === "fulfilled";
+    const regErr = regRes.status === "rejected" ? String(regRes.reason?.message) : "";
+    const liveId = supOk ? ((supRes as PromiseFulfilledResult<{ rows: Array<{ id: string }> }>).value.rows[0].id) : A;
+    const { rows: strandedOnA } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos
+        where entry_id = $1 and upload_status in ('uploading','uploaded')`,
+      [A],
+    );
+    const { rows: total } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos where profile_id = $1`,
+      [f.profileId],
+    );
+    const { rows: onLive } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos
+        where entry_id = $1 and upload_status in ('uploading','uploaded')`,
+      [liveId],
+    );
+    // Legal outcomes: register-first (photo rides to live entry) or
+    // supersede-first (register refused entry_superseded). Never stranded.
+    const outcomeLegal = supOk && (
+      (regOk && strandedOnA[0].n === 0 && onLive[0].n === 1 && total[0].n === 1) ||
+      (!regOk && regErr.includes("entry_superseded") && strandedOnA[0].n === 0 && total[0].n === 0)
+    );
+    record(
+      "D5 register/supersede race: serialized, one attachment location, no stranding",
+      outcomeLegal,
+      `register=${regOk ? "won" : "refused"} supersede=${supOk} strandedOnHidden=${strandedOnA[0].n} total=${total[0].n} onLive=${onLive[0].n}`,
+    );
+    // Explicit post-supersede registration attempt → structured refusal.
+    let postErr = "";
+    try {
+      await c1.query(regSql, [A, f.profileId]);
+    } catch (e) {
+      postErr = String((e as Error).message);
+    }
+    record(
+      "D5b registration on a superseded entry refused with entry_superseded",
+      postErr.includes("entry_superseded"),
+      `err=${postErr.slice(0, 40)}`,
+    );
+    await c1.end();
+    await c2.end();
+  }
+
   await a.end();
   const failed = results.filter((r) => !r.pass);
   console.log(`\n— RESULT: ${results.length - failed.length}/${results.length} proofs passed —`);

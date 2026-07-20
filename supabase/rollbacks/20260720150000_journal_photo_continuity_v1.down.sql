@@ -1,10 +1,15 @@
 -- ============================================================================
--- Rollback for 20260720150000_journal_photo_continuity_v1.sql
+-- Rollback for 20260720150000_journal_photo_continuity_v1.sql (revision 2)
 --
--- Restores the W0 journal_entry_supersede_v2 body verbatim (from
--- 20260720100000_journal_atomic_supersede_v1.sql, ledger 20260720035240) —
--- i.e. removes the photo-continuity move. Photo metadata rows already moved
--- remain with their live entries; storage objects were never touched.
+-- Restores, verbatim:
+--   1. journal_entry_supersede_v2 - the applied W0 production body
+--      (ledger 20260720035240); the W0 integrity fix is NOT reverted.
+--   2. register_journal_entry_photo - the 20260612091000 body (no entry lock).
+--   3. The 20260705250000 org-manager storage policy (path-segment resolve).
+--   4. The 20260612091000 journal_entry_photos UPDATE policy (USING-only) and
+--      the original full-column UPDATE grant.
+-- Photo metadata rows already moved stay with their live entries; storage
+-- objects were never touched.
 -- ============================================================================
 
 begin;
@@ -231,12 +236,127 @@ begin
 end;
 $$;
 
--- Grants unchanged in shape; re-issued to keep this file self-contained.
+create or replace function public.register_journal_entry_photo(
+  p_photo_id     uuid,
+  p_entry_id     uuid,
+  p_file_name    text,
+  p_mime_type    text,
+  p_file_size    bigint,
+  p_storage_path text
+) returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid             uuid := auth.uid();
+  resolved_id     uuid;
+  cleaned_name    text := nullif(trim(coalesce(p_file_name, '')), '');
+  cleaned_mime    text := lower(nullif(trim(coalesce(p_mime_type, '')), ''));
+  cleaned_path    text := nullif(trim(coalesce(p_storage_path, '')), '');
+  expected_prefix text;
+  entry_owner     uuid;
+  existing_count  integer;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+
+  if cleaned_name is null or char_length(cleaned_name) > 255 then
+    raise exception 'Invalid file_name' using errcode = '22023';
+  end if;
+
+  if cleaned_mime is null or cleaned_mime not in (
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+  ) then
+    raise exception 'unsupported_mime_type' using errcode = '22023';
+  end if;
+
+  if p_file_size is null or p_file_size <= 0 or p_file_size > 5242880 then
+    raise exception 'file_too_large' using errcode = '22023';
+  end if;
+
+  if cleaned_path is null or char_length(cleaned_path) > 1024 then
+    raise exception 'Invalid storage_path' using errcode = '22023';
+  end if;
+
+  -- Caller must own the journal entry (workers.profile_id chain).
+  select w.profile_id into entry_owner
+    from public.journal_entries je
+    join public.workers w on w.id = je.worker_id
+   where je.id = p_entry_id;
+  if entry_owner is null then
+    raise exception 'Entry not found' using errcode = '42704';
+  end if;
+  if entry_owner <> uid then
+    raise exception 'Entry not owned' using errcode = '42501';
+  end if;
+
+  -- FREE-TIER LIMIT: one photo per entry. Honest, server-enforced. More
+  -- photos are a future VIP/Pro feature; nothing here fakes that tier.
+  select count(*) into existing_count
+    from public.journal_entry_photos
+   where entry_id = p_entry_id
+     and upload_status in ('uploading','uploaded');
+  if existing_count >= 1 then
+    raise exception 'photo_limit_reached' using errcode = '22023';
+  end if;
+
+  expected_prefix := uid::text || '/' || p_entry_id::text || '/';
+  if position(expected_prefix in cleaned_path) <> 1 then
+    raise exception 'storage_path does not start with %', expected_prefix
+      using errcode = '22023';
+  end if;
+
+  insert into public.journal_entry_photos (
+    id, entry_id, profile_id, file_name, mime_type, file_size_bytes, storage_path
+  ) values (
+    coalesce(p_photo_id, gen_random_uuid()),
+    p_entry_id,
+    uid,
+    cleaned_name,
+    cleaned_mime,
+    p_file_size,
+    cleaned_path
+  )
+  returning id into resolved_id;
+
+  return resolved_id;
+end $$;
+
+drop policy if exists "journal-entry-photos org manager select"
+  on storage.objects;
+create policy "journal-entry-photos org manager select"
+  on storage.objects for select
+  using (
+    bucket_id = 'journal-entry-photos'
+    and auth.uid() is not null
+    and exists (
+      select 1
+        from public.journal_entries je
+        join public.engagement_contexts ec on ec.id = je.engagement_context_id
+       where je.id::text = (storage.foldername(name))[2]
+         and public.manages_organization(ec.organization_id)
+    )
+  );
+
+drop policy if exists journal_entry_photos_update on public.journal_entry_photos;
+create policy journal_entry_photos_update on public.journal_entry_photos for update
+  using (profile_id = auth.uid());
+
+revoke update on public.journal_entry_photos from authenticated;
+grant update on public.journal_entry_photos to authenticated;
+
 revoke all on function public.journal_entry_supersede_v2(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb, text[], text[]
 ) from public;
 grant execute on function public.journal_entry_supersede_v2(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb, text[], text[]
 ) to authenticated;
+
+revoke all on function public.register_journal_entry_photo(uuid, uuid, text, text, bigint, text) from public;
+grant execute on function public.register_journal_entry_photo(uuid, uuid, text, text, bigint, text) to authenticated;
 
 commit;
