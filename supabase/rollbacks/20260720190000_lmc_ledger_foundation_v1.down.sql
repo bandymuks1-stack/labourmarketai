@@ -50,7 +50,8 @@ drop table if exists public.lmc_transactions;
 drop table if exists public.lmc_accounts;
 drop table if exists public.lmc_settings;
 
--- Flag helper last (referenced by dropped triggers only).
+-- Flag helpers last (referenced by dropped triggers/RPCs only).
+drop function if exists public.lmc_require_flag_v1(text);
 drop function if exists public.lmc_flag_enabled(text);
 
 commit;

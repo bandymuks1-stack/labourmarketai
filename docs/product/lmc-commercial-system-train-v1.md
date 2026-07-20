@@ -409,7 +409,11 @@ action).
 - Because balances are derived and writes are RPC-only, disabling every flag
   (all default false) is a complete behavioural rollback without schema
   changes: no grant, purchase, spend or referral path can execute — spends
-  are DB-gated by `lmc_spending_enabled` inside `lmc_spend_v1`.
+  are DB-gated by `lmc_spending_enabled` inside `lmc_spend_v1`. Flag flips
+  are a true serialization point: every new-write gate takes `FOR SHARE` on
+  the flag row (`lmc_require_flag_v1`), so an emergency disable waits for
+  in-flight writers to commit and no later writer can pass. Committed exact
+  replays still resolve after a flip (idempotency survives the rollback).
 - Ledger data itself is append-only and is **never** deleted in production;
   a production rollback of an applied LMC migration is an OWNER GATE with a
   data-preservation review first (§3 CLAUDE.md destructive-migration gate).

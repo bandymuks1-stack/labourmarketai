@@ -38,6 +38,9 @@
  *        to the address's new owner; different recipient conflicts)
  *   P28  committed replays resolve across kill-switch flips (flags off →
  *        replays return already_processed; NEW operations stay blocked)
+ *   P29  a kill-switch flip SERIALIZES with in-flight writers (FOR SHARE on
+ *        the flag row: the flip blocks until the writer commits, then new
+ *        writes are refused)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -48,6 +51,8 @@
  *   NC-D  insert policy + grant added → direct authenticated insert succeeds
  *   NC-E  permissive read policy added → foreign read succeeds
  *   NC-F  lmc_referrals_enabled=true → referral insert passes the trigger
+ *   NC-G  flag gate without FOR SHARE → flip no longer blocks on an
+ *         in-flight writer (race window visible), restored gate blocks
  *
  * Usage: npx tsx scripts/db-proof-lmc-ledger.mts
  * Env:   DB_URL (default postgresql://postgres:postgres@127.0.0.1:54322/postgres)
@@ -1033,7 +1038,109 @@ async function main() {
     );
   }
 
+  // ── P29: kill-switch flips serialize with in-flight writers ───────────────
+  {
+    const u11 = await makePerson(a, "u11");
+    const writer = await admin();
+    const flipper = await admin();
+    await writer.query("begin");
+    await writer.query(
+      `select public.lmc_record_purchase_v1(700, 'p29', 'p29-buy-${RUN}', $1, null)`,
+      [u11],
+    );
+    // The uncommitted purchase holds FOR SHARE on the flag row: the
+    // emergency flip must BLOCK until the writer commits.
+    await flipper.query(`set statement_timeout = 1500`);
+    const blocked = await expectError(
+      () =>
+        flipper.query(
+          `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+        ),
+      "statement timeout",
+    );
+    await writer.query("commit");
+    await flipper.query(`set statement_timeout = 0`);
+    await flipper.query(
+      `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+    );
+    const newBuy = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_record_purchase_v1(700, 'p29', 'p29-buy-2-${RUN}', $1, null)`,
+          [u11],
+        ),
+      "lmc_purchases_disabled",
+    );
+    await setFlag(a, "lmc_purchases_enabled", true);
+    await writer.end();
+    await flipper.end();
+    record(
+      "P29-flag-flip-serializes-with-writers",
+      blocked.ok && newBuy.ok,
+      `flip blocked on in-flight writer (${blocked.msg.slice(0, 40)}); after flip committed, new purchase refused`,
+    );
+  }
+
   // ── NEGATIVE CONTROLS ─────────────────────────────────────────────────────
+
+  // NC-G: flag gate WITHOUT FOR SHARE → the flip no longer waits for an
+  // in-flight writer (the race window Codex flagged becomes visible).
+  {
+    await a.query(WEAKENED_REQUIRE_FLAG_NO_LOCK);
+    const u11b = await makePerson(a, "u11b");
+    const writer = await admin();
+    const flipper = await admin();
+    await writer.query("begin");
+    await writer.query(
+      `select public.lmc_record_purchase_v1(300, 'ncg', 'ncg-buy-${RUN}', $1, null)`,
+      [u11b],
+    );
+    await flipper.query(`set statement_timeout = 1500`);
+    let flippedWithoutWaiting = false;
+    try {
+      await flipper.query(
+        `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+      );
+      flippedWithoutWaiting = true;
+    } catch {
+      /* unexpectedly blocked */
+    }
+    await writer.query("commit"); // writer's credit lands AFTER the shutdown
+    record(
+      "NCG1-weakened-gate-lets-flip-race",
+      flippedWithoutWaiting,
+      flippedWithoutWaiting
+        ? "flip committed while a writer was in flight (guard removed → race visible)"
+        : "flip unexpectedly blocked",
+    );
+    await flipper.query(`set statement_timeout = 0`);
+    await restoreMigration(a);
+    await setFlag(a, "lmc_purchases_enabled", true);
+    // Restored gate: the same sequence blocks again.
+    await writer.query("begin");
+    await writer.query(
+      `select public.lmc_record_purchase_v1(300, 'ncg2', 'ncg2-buy-${RUN}', $1, null)`,
+      [u11b],
+    );
+    await flipper.query(`set statement_timeout = 1500`);
+    const blockedAgain = await expectError(
+      () =>
+        flipper.query(
+          `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+        ),
+      "statement timeout",
+    );
+    await writer.query("commit");
+    await flipper.query(`set statement_timeout = 0`);
+    await setFlag(a, "lmc_purchases_enabled", true);
+    await writer.end();
+    await flipper.end();
+    record(
+      "NCG2-restored-gate-blocks-flip",
+      blockedAgain.ok,
+      blockedAgain.msg.slice(0, 60),
+    );
+  }
 
   // NC-A: remove the account FOR UPDATE lock from lmc_spend_v1 → overspend.
   {
@@ -1362,6 +1469,30 @@ async function main() {
     process.exit(1);
   }
 }
+
+/** lmc_require_flag_v1 WITHOUT the FOR SHARE row lock — NEGATIVE CONTROL
+ *  ONLY (scratch DB), restored via the real migration file right after. */
+const WEAKENED_REQUIRE_FLAG_NO_LOCK = `
+create or replace function public.lmc_require_flag_v1(p_key text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $fn$
+declare
+  v_enabled boolean;
+begin
+  -- WEAKENED: plain read, no FOR SHARE.
+  select s.enabled into v_enabled
+    from public.lmc_settings s
+   where s.key = p_key;
+  if not coalesce(v_enabled, false) then
+    raise exception '%', replace(p_key, '_enabled', '_disabled')
+      using errcode = '42501';
+  end if;
+end;
+$fn$;
+`;
 
 /** lmc_spend_v1 with the account FOR UPDATE lock removed and a widened race
  *  window — NEGATIVE CONTROL ONLY (scratch DB), restored via the real

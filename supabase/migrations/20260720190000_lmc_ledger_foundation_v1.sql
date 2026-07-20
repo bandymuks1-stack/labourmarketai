@@ -78,7 +78,8 @@ insert into public.lmc_settings (key, enabled) values
   ('lmc_spending_enabled', false)
 on conflict (key) do nothing;
 
--- Fail-closed flag read: a missing row is FALSE.
+-- Fail-closed flag read: a missing row is FALSE. (Read-only; gate points in
+-- the write RPCs use lmc_require_flag_v1 below, which locks the row.)
 create or replace function public.lmc_flag_enabled(p_key text)
 returns boolean
 language sql
@@ -88,6 +89,31 @@ as $$
   select coalesce(
     (select s.enabled from public.lmc_settings s where s.key = p_key),
     false);
+$$;
+
+-- Kill-switch gate for NEW monetary writes. Takes FOR SHARE on the flag row,
+-- held to transaction end: an emergency flag flip (row-exclusive UPDATE)
+-- BLOCKS until every in-flight writer commits, and no writer that starts
+-- after the flip commits can pass — the check-then-write race is closed and
+-- "disable everything" is a true serialization point. Missing row = FALSE.
+create or replace function public.lmc_require_flag_v1(p_key text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_enabled boolean;
+begin
+  select s.enabled into v_enabled
+    from public.lmc_settings s
+   where s.key = p_key
+   for share;
+  if not coalesce(v_enabled, false) then
+    raise exception '%', replace(p_key, '_enabled', '_disabled')
+      using errcode = '42501';
+  end if;
+end;
 $$;
 
 -- ── 2. lmc_accounts — one owner-scoped account per eligible identity ────────
@@ -253,11 +279,21 @@ returns trigger
 language plpgsql
 set search_path = public
 as $$
+declare
+  v_enabled boolean;
 begin
-  if new.kind = 'referral_reward'
-     and not public.lmc_flag_enabled('lmc_referrals_enabled') then
-    raise exception 'lmc_referrals_disabled: referral_reward entries are impossible while lmc_referrals_enabled is false'
-      using errcode = '42501';
+  if new.kind = 'referral_reward' then
+    -- FOR SHARE: same flip-serialization as lmc_require_flag_v1 — a
+    -- referral insert in flight blocks a concurrent disable until it
+    -- commits, and no insert passes after the disable commits.
+    select s.enabled into v_enabled
+      from public.lmc_settings s
+     where s.key = 'lmc_referrals_enabled'
+     for share;
+    if not coalesce(v_enabled, false) then
+      raise exception 'lmc_referrals_disabled: referral_reward entries are impossible while lmc_referrals_enabled is false'
+        using errcode = '42501';
+    end if;
   end if;
   return new;
 end;
@@ -479,9 +515,7 @@ begin
     end if;
   end if;
 
-  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
-    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
-  end if;
+  perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
   -- Verified signup only: the recipient must have a confirmed email.
   if not exists (
     select 1 from auth.users u
@@ -572,9 +606,7 @@ begin
     end if;
   end if;
 
-  if not public.lmc_flag_enabled('lmc_purchases_enabled') then
-    raise exception 'lmc_purchases_disabled' using errcode = '42501';
-  end if;
+  perform public.lmc_require_flag_v1('lmc_purchases_enabled');
 
   v_account := public.lmc_ensure_account_v1(p_profile_id, p_company_id);
   perform 1 from public.lmc_accounts where id = v_account for update;
@@ -702,9 +734,7 @@ begin
 
   -- Kill-switch AFTER replay resolution: a disabled flag blocks NEW grants,
   -- never the acknowledgement of an already-committed one.
-  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
-    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
-  end if;
+  perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
 
   -- Verified recipient resolution: confirmed email, existing profile.
   select u.id, u.email into v_recipient, v_email
@@ -811,9 +841,7 @@ begin
 
   -- DB-level kill-switch: when spending is disabled, even already-issued
   -- credits are frozen for NEW spends (complete behavioural rollback).
-  if not public.lmc_flag_enabled('lmc_spending_enabled') then
-    raise exception 'lmc_spending_disabled' using errcode = '42501';
-  end if;
+  perform public.lmc_require_flag_v1('lmc_spending_enabled');
   if v_account is null then
     raise exception 'lmc_insufficient_balance' using errcode = 'P0001';
   end if;
@@ -1156,6 +1184,7 @@ revoke insert, update, delete on public.lmc_lot_consumptions from service_role;
 
 -- Function execution: fail closed, then grant narrowly.
 revoke all on function public.lmc_flag_enabled(text) from public;
+revoke all on function public.lmc_require_flag_v1(text) from public;
 revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
@@ -1169,6 +1198,7 @@ revoke all on function public.lmc_expire_lots_v1(int) from public;
 revoke all on function public.lmc_reverse_v1(uuid, text, text, text) from public;
 
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
+grant execute on function public.lmc_require_flag_v1(text) to service_role;
 -- Server-side monetary writes only:
 grant execute on function public.lmc_ensure_account_v1(uuid, uuid) to service_role;
 grant execute on function public.lmc_assert_external_idempotency_key_v1(text) to service_role;

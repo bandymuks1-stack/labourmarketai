@@ -168,7 +168,10 @@ describe("LMC Wagon 1 — every commercial flag ships disabled", () => {
     const sql = sqlBody(readRepo(MIGRATION));
     expect(sql).toContain("lmc_referral_insert_guard");
     expect(sql).toContain("lmc_transactions_referral_guard");
-    expect(sql).toContain("lmc_flag_enabled('lmc_referrals_enabled')");
+    expect(sql).toContain("s.key = 'lmc_referrals_enabled'");
+    // Flag gates take FOR SHARE so kill-switch flips serialize with writers.
+    expect(sql).toContain("lmc_require_flag_v1");
+    expect(sql).toMatch(/for share/);
     // No reward rate/percentage may exist anywhere in schema or flags.
     for (const surface of [sql, readApp(FLAGS).toLowerCase()]) {
       expect(surface).not.toMatch(/referral[a-z_]*(rate|percent|pct|bps)/);
