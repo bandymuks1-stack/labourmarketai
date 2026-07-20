@@ -142,7 +142,10 @@ describe("LMC Wagon 1 — append-only and fail-closed invariants", () => {
   it("live policy checks run AFTER replay resolution in the admin grant", () => {
     // Replay-vs-live-policy doctrine: an identical retry of a committed
     // grant must survive later changes to admin authority and the grant cap.
-    const replayAt = sql.indexOf("global replay resolution first");
+    // Anchor on the executable global replay lookup (comments are stripped).
+    const replayAt = sql.indexOf(
+      "where idempotency_key = p_idempotency_key and kind = 'admin_grant'",
+    );
     expect(replayAt).toBeGreaterThan(0);
     expect(sql.indexOf("if not public.is_admin() then", replayAt)).toBeGreaterThan(replayAt);
     expect(sql.indexOf("p_amount_cents > v_cap", replayAt)).toBeGreaterThan(replayAt);
