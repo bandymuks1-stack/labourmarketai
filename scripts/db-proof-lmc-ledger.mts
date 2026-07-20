@@ -48,6 +48,9 @@
  *        recorded on the transaction and in audit_logs
  *   P31  rollback SERIALIZES with in-flight writers via the LMC maintenance
  *        advisory lock (blocks, never deadlocks)
+ *   P32  flag flips are RPC-only, admin-actor-bound and audited
+ *   P33  reversal replay survives a later authority change (new reversals
+ *        by the demoted actor stay refused)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -164,13 +167,14 @@ async function makePerson(
   return profileId;
 }
 
-/** Actor recorded on every harness flag flip (settings trigger requires it). */
+/** Admin actor for every harness flag flip (flips are RPC-only). */
 let FLAG_ACTOR = "";
 async function setFlag(a: Client, key: string, enabled: boolean) {
-  await a.query(
-    `update public.lmc_settings set enabled = $2, updated_by = $3 where key = $1`,
-    [key, enabled, FLAG_ACTOR],
-  );
+  await a.query(`select public.lmc_set_flag_v1($1, $2, $3)`, [
+    key,
+    enabled,
+    FLAG_ACTOR,
+  ]);
 }
 
 async function accountOf(a: Client, profileId: string): Promise<string> {
@@ -290,14 +294,36 @@ async function main() {
     );
   }
 
-  // ── P32: flag flips are accountable (actor required, audit row written) ───
+  // ── P32: flag flips are accountable (RPC-only, admin actor, audited) ──────
   {
+    // The trigger belt: even a table-owner UPDATE that omits a fresh actor
+    // is refused on an enabled change.
     const noActorFlip = await expectError(
       () =>
         a.query(
-          `update public.lmc_settings set enabled = true where key = 'lmc_purchases_enabled'`,
+          `update public.lmc_settings set enabled = true, updated_by = null where key = 'lmc_purchases_enabled'`,
         ),
       "lmc_flag_actor_required",
+    );
+    // Client roles cannot UPDATE settings at all — flips are RPC-only.
+    const svc = await admin();
+    await svc.query(`set role service_role`);
+    const directFlip = await expectError(
+      () =>
+        svc.query(
+          `update public.lmc_settings set enabled = true where key = 'lmc_purchases_enabled'`,
+        ),
+      "permission denied",
+    );
+    await svc.end();
+    // A non-admin actor cannot flip a flag through the RPC.
+    const flagUser = await makePerson(a, "flaguser");
+    const nonAdminFlip = await expectError(
+      () =>
+        a.query(`select public.lmc_set_flag_v1('lmc_purchases_enabled', true, $1)`, [
+          flagUser,
+        ]),
+      "lmc_actor_not_authorized",
     );
     await setFlag(a, "lmc_purchases_enabled", true);
     const { rows: flipAudit } = await a.query(
@@ -312,8 +338,8 @@ async function main() {
     await setFlag(a, "lmc_purchases_enabled", false); // back to default for P28 etc.
     record(
       "P32-flag-flips-audited",
-      noActorFlip.ok && flipAudit[0].n === 1,
-      `actor-less flip refused (${noActorFlip.msg.slice(0, 40)}); audited flip rows=${flipAudit[0].n}`,
+      noActorFlip.ok && directFlip.ok && nonAdminFlip.ok && flipAudit[0].n === 1,
+      `owner-path actor-less refused; service_role direct UPDATE refused; non-admin RPC refused; audited flip rows=${flipAudit[0].n}`,
     );
   }
 
@@ -636,6 +662,44 @@ async function main() {
         c2[0].r.already_processed === true &&
         c1[0].r.transaction_id === c2[0].r.transaction_id,
       `replay returned same tx ${c1[0].r.transaction_id}`,
+    );
+
+    // ── P33: reversal replay survives a later authority change ──────────────
+    const { rows: buy3 } = await a.query(
+      `select public.lmc_record_purchase_v1(700, 'p33-buy', 'p33-buy-${RUN}', $1, null) as r`,
+      [u3],
+    );
+    const { rows: rv1 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'admin refund', 'p33-rev-${RUN}', $2) as r`,
+      [buy3[0].r.transaction_id, adm],
+    );
+    // The admin loses the role AFTER the reversal committed…
+    await a.query(`update public.profiles set active_role = 'worker' where id = $1`, [adm]);
+    // …an identical replay still acknowledges the committed reversal…
+    const { rows: rv2 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'admin refund', 'p33-rev-${RUN}', $2) as r`,
+      [buy3[0].r.transaction_id, adm],
+    );
+    // …while a NEW reversal by the demoted actor is refused.
+    const { rows: buy4 } = await a.query(
+      `select public.lmc_record_purchase_v1(300, 'p33-buy2', 'p33-buy2-${RUN}', $1, null) as r`,
+      [u3],
+    );
+    const demotedNew = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'demoted', 'p33-rev2-${RUN}', $2)`,
+          [buy4[0].r.transaction_id, adm],
+        ),
+      "lmc_actor_not_authorized",
+    );
+    await a.query(`update public.profiles set active_role = 'admin' where id = $1`, [adm]);
+    record(
+      "P33-reversal-replay-survives-authority-change",
+      rv2[0].r.already_processed === true &&
+        rv2[0].r.transaction_id === rv1[0].r.transaction_id &&
+        demotedNew.ok,
+      `demoted-actor replay acknowledged same tx; demoted-actor NEW reversal refused`,
     );
   }
 
@@ -1221,14 +1285,14 @@ async function main() {
     const blocked = await expectError(
       () =>
         flipper.query(
-          `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
+          `select public.lmc_set_flag_v1('lmc_purchases_enabled', false, '${FLAG_ACTOR}')`,
         ),
       "statement timeout",
     );
     await writer.query("commit");
     await flipper.query(`set statement_timeout = 0`);
     await flipper.query(
-      `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
+      `select public.lmc_set_flag_v1('lmc_purchases_enabled', false, '${FLAG_ACTOR}')`,
     );
     const newBuy = await expectError(
       () =>
@@ -1300,7 +1364,7 @@ async function main() {
     let flippedWithoutWaiting = false;
     try {
       await flipper.query(
-        `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
+        `select public.lmc_set_flag_v1('lmc_purchases_enabled', false, '${FLAG_ACTOR}')`,
       );
       flippedWithoutWaiting = true;
     } catch {
@@ -1327,7 +1391,7 @@ async function main() {
     const blockedAgain = await expectError(
       () =>
         flipper.query(
-          `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
+          `select public.lmc_set_flag_v1('lmc_purchases_enabled', false, '${FLAG_ACTOR}')`,
         ),
       "statement timeout",
     );

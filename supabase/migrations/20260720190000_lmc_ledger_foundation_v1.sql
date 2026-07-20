@@ -127,6 +127,44 @@ create or replace trigger lmc_settings_audit
   after update on public.lmc_settings
   for each row execute function public.lmc_settings_audit();
 
+-- The ONLY flag-flip path: an authority-bound RPC. Direct UPDATE privileges
+-- on lmc_settings are revoked from every client role (incl. service_role),
+-- so a flip can never inherit a stale updated_by — the actor of THIS flip is
+-- always supplied explicitly and must carry the dual-signal admin role.
+create or replace function public.lmc_set_flag_v1(
+  p_key text,
+  p_enabled boolean,
+  p_actor_profile_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_enabled is null then
+    raise exception 'lmc_invalid_flag_value' using errcode = '22023';
+  end if;
+  if p_actor_profile_id is null then
+    raise exception 'lmc_flag_actor_required' using errcode = '22023';
+  end if;
+  if not (
+    exists (select 1 from public.profiles pa
+             where pa.id = p_actor_profile_id and pa.active_role = 'admin')
+    or exists (select 1 from public.profile_roles pr
+                where pr.profile_id = p_actor_profile_id and pr.role = 'admin')
+  ) then
+    raise exception 'lmc_actor_not_authorized: flag flips require the dual-signal admin role'
+      using errcode = '42501';
+  end if;
+  update public.lmc_settings
+     set enabled = p_enabled, updated_by = p_actor_profile_id
+   where key = p_key;
+  if not found then
+    raise exception 'lmc_unknown_flag: %', p_key using errcode = '22023';
+  end if;
+end;
+$$;
+
 -- Fail-closed flag read: a missing row is FALSE. (Read-only; gate points in
 -- the write RPCs use lmc_require_flag_v1 below, which locks the row.)
 create or replace function public.lmc_flag_enabled(p_key text)
@@ -1171,8 +1209,23 @@ begin
 
   perform 1 from public.lmc_accounts where id = v_orig.account_id for update;
 
-  -- Actor AUTHORITY: the recorded initiator must own the affected account
-  -- (person or company owner) or carry the dual-signal admin role.
+  -- Actor-bound REPLAY resolution FIRST (mirrors lmc_spend_v1): a committed
+  -- reversal must stay acknowledgeable by its recorded actor even if that
+  -- actor's authority later changed. The fingerprint is the ORIGINAL-ENTRY
+  -- LINKAGE plus the initiating actor — reusing this key for a different
+  -- original transaction (or by a different actor) conflicts, never
+  -- reporting the old reversal as already_processed.
+  v_existing := public.lmc_existing_by_idempotency_v1(
+    v_orig.account_id, p_idempotency_key, p_kind,
+    p_original_transaction_id => v_orig.id,
+    p_actor_profile_id => p_actor_profile_id);
+  if v_existing is not null then
+    return v_existing;
+  end if;
+
+  -- Actor AUTHORITY for a NEW reversal: the recorded initiator must own the
+  -- affected account (person or company owner) or carry the dual-signal
+  -- admin role.
   select * into v_account from public.lmc_accounts where id = v_orig.account_id;
   if not (
     v_account.profile_id = p_actor_profile_id
@@ -1187,19 +1240,6 @@ begin
   ) then
     raise exception 'lmc_actor_not_authorized: the initiating actor must own the affected account or be an admin'
       using errcode = '42501';
-  end if;
-
-  -- Amount is derived (remaining at first execution), so the replay
-  -- fingerprint is the ORIGINAL-ENTRY LINKAGE plus the initiating actor:
-  -- reusing this key for a different original transaction (or by a
-  -- different actor) must conflict, never report the old reversal as
-  -- already_processed.
-  v_existing := public.lmc_existing_by_idempotency_v1(
-    v_orig.account_id, p_idempotency_key, p_kind,
-    p_original_transaction_id => v_orig.id,
-    p_actor_profile_id => p_actor_profile_id);
-  if v_existing is not null then
-    return v_existing;
   end if;
 
   if exists (select 1 from public.lmc_transactions
@@ -1315,11 +1355,10 @@ grant select on public.lmc_account_balances to authenticated;
 
 -- Even the service role may NOT write the ledger directly: every monetary
 -- write goes through the SECURITY DEFINER RPCs (owned by the migration role),
--- which are the only remaining write path. Settings stay service-managable
--- (config, not ledger).
+-- which are the only remaining write path. Flag flips are RPC-only too
+-- (lmc_set_flag_v1) so the actor of each flip is always explicit.
 grant select on public.lmc_settings to service_role;
-grant select, insert, update on public.lmc_settings to service_role;
-revoke delete on public.lmc_settings from service_role;
+revoke insert, update, delete on public.lmc_settings from service_role;
 grant select on public.lmc_accounts to service_role;
 grant select on public.lmc_transactions to service_role;
 grant select on public.lmc_lots to service_role;
@@ -1334,6 +1373,7 @@ revoke insert, update, delete on public.lmc_lot_consumptions from service_role;
 -- Function execution: fail closed, then grant narrowly.
 revoke all on function public.lmc_flag_enabled(text) from public;
 revoke all on function public.lmc_require_flag_v1(text) from public;
+revoke all on function public.lmc_set_flag_v1(text, boolean, uuid) from public;
 revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
@@ -1348,6 +1388,7 @@ revoke all on function public.lmc_reverse_v1(uuid, text, text, text, uuid) from 
 
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
 grant execute on function public.lmc_require_flag_v1(text) to service_role;
+grant execute on function public.lmc_set_flag_v1(text, boolean, uuid) to service_role;
 -- Server-side monetary writes only:
 grant execute on function public.lmc_ensure_account_v1(uuid, uuid) to service_role;
 grant execute on function public.lmc_assert_external_idempotency_key_v1(text) to service_role;
