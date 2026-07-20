@@ -664,6 +664,256 @@ async function main(): Promise<void> {
     await c.end();
   }
 
+  // ═══ Owner-hold #2 L-matrix: LEGACY journal_entry_supersede parity ═══
+  const legacySql = (oldId: string, f: Fixture, text: string) => ({
+    sql: `select public.journal_entry_supersede(
+      $1::uuid, $2::uuid, 'freeform', null, $3, 'lt', md5($3 || clock_timestamp()::text), 'closed',
+      '[]'::jsonb) as id`,
+    params: [oldId, f.engagementId, text],
+  });
+
+  // ── L1+L2+L5: legacy supersede moves the photo — including AFTER the
+  //    backfill already ran — and repeated legacy supersedes keep ONE
+  //    attachment on the live tip.
+  {
+    const f = await makeFixture(a, `${tag}-l1`);
+    const A = await makeEntry(a, f, "legacy su nuotrauka");
+    const c = await asUser(f.profileId);
+    const { photoId, path } = await addPhoto(c, f, A);
+    // (The backfill from the migration apply has ALREADY completed by now —
+    // any stranding created from here on is post-backfill by construction.)
+    const l1 = legacySql(A, f, "legacy pirmas keitimas");
+    const B = (await c.query(l1.sql, l1.params)).rows[0].id as string;
+    const locOf = async (id: string) =>
+      (await a.query(`select entry_id, storage_path from public.journal_entry_photos where id = $1`, [id])).rows[0];
+    const afterB = await locOf(photoId);
+    record(
+      "L1 legacy RPC moves the active photo to the new live entry",
+      afterB.entry_id === B && afterB.storage_path === path,
+      `entry=${afterB.entry_id === B ? "live" : "stranded"} pathUnchanged=${afterB.storage_path === path}`,
+    );
+    const l2 = legacySql(B, f, "legacy antras keitimas");
+    const C = (await c.query(l2.sql, l2.params)).rows[0].id as string;
+    const l3 = legacySql(C, f, "legacy trecias keitimas");
+    const D = (await c.query(l3.sql, l3.params)).rows[0].id as string;
+    const afterD = await locOf(photoId);
+    const { rows: strandedAny } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos p
+        join public.journal_entries je on je.id = p.entry_id
+       where p.profile_id = $1 and p.upload_status in ('uploading','uploaded')
+         and je.superseded_by is not null`,
+      [f.profileId],
+    );
+    record(
+      "L2+L5 repeated legacy supersedes (post-backfill): photo rides every hop, zero stranded",
+      afterD.entry_id === D && strandedAny[0].n === 0,
+      `onTip=${afterD.entry_id === D} strandedActive=${strandedAny[0].n}`,
+    );
+    await c.end();
+  }
+
+  // ── L3: register-photo vs LEGACY supersede concurrency ──────────────────
+  {
+    const f = await makeFixture(a, `${tag}-l3`);
+    const A = await makeEntry(a, f, "legacy lenktynes");
+    const c1 = await asUser(f.profileId);
+    const c2 = await asUser(f.profileId);
+    const regSql = `select public.register_journal_entry_photo(
+      gen_random_uuid(), $1::uuid, 'lrace.jpg', 'image/jpeg', 111,
+      $2 || '/' || $1 || '/' || gen_random_uuid() || '/lrace.jpg') as id`;
+    const ls = legacySql(A, f, "legacy lenktyniu keitimas");
+    const [regRes, supRes] = await Promise.allSettled([
+      c1.query(regSql, [A, f.profileId]),
+      c2.query(ls.sql, ls.params),
+    ]);
+    const regOk = regRes.status === "fulfilled";
+    const supOk = supRes.status === "fulfilled";
+    const regErr = regRes.status === "rejected" ? String(regRes.reason?.message) : "";
+    const liveId = supOk
+      ? ((supRes as PromiseFulfilledResult<{ rows: Array<{ id: string }> }>).value.rows[0].id)
+      : A;
+    const { rows: strandedOnA } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos
+        where entry_id = $1 and upload_status in ('uploading','uploaded')`, [A]);
+    const { rows: onLive } = await a.query(
+      `select count(*)::int as n from public.journal_entry_photos
+        where entry_id = $1 and upload_status in ('uploading','uploaded')`, [liveId]);
+    const legal = supOk && (
+      (regOk && strandedOnA[0].n === 0 && onLive[0].n === 1) ||
+      (!regOk && regErr.includes("entry_superseded") && strandedOnA[0].n === 0 && onLive[0].n === 0)
+    );
+    record(
+      "L3 register vs LEGACY supersede: serialized, no stranding",
+      legal,
+      `register=${regOk ? "won" : "refused"} strandedOnHidden=${strandedOnA[0].n} onLive=${onLive[0].n}`,
+    );
+    await c1.end();
+    await c2.end();
+  }
+
+  // ── L4: old-deployed-caller simulation during migration-first rollout ───
+  // An old build calls ONLY the legacy RPC with the exact production
+  // argument shape; behavior must match v2 for continuity: entry chain
+  // advances, photo follows, stale second call refused.
+  {
+    const f = await makeFixture(a, `${tag}-l4`);
+    const A = await makeEntry(a, f, "senas klientas");
+    const c = await asUser(f.profileId);
+    const { photoId } = await addPhoto(c, f, A);
+    const l = legacySql(A, f, "seno kliento keitimas");
+    const B = (await c.query(l.sql, l.params)).rows[0].id as string;
+    let staleErr = "";
+    try {
+      const l2 = legacySql(A, f, "pavelaves senas klientas");
+      await c.query(l2.sql, l2.params);
+    } catch (e) {
+      staleErr = String((e as Error).message);
+    }
+    const { rows: photo } = await a.query(
+      `select entry_id from public.journal_entry_photos where id = $1`, [photoId]);
+    record(
+      "L4 old-deployed caller (legacy shape): chain + photo continuity + stale refusal",
+      photo[0].entry_id === B && staleErr.includes("entry_superseded"),
+      `photoOnLive=${photo[0].entry_id === B} stale=${staleErr.slice(0, 25)}`,
+    );
+    await c.end();
+  }
+
+  // ── L6: cross-context authorization after a LEGACY supersede ────────────
+  {
+    const f = await makeFixture(a, `${tag}-l6`);
+    const orgA = await makeOrgManager(a, `${tag}-lo1`);
+    const orgB = await makeOrgManager(a, `${tag}-lo2`);
+    const { rows: ecA } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self)
+       values ($1::uuid, $2, 'employee', 'W1 l6 ecA', md5($1 || 'a' || clock_timestamp()::text)) returning id`,
+      [f.profileId, orgA.orgId],
+    );
+    const { rows: ecB } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self)
+       values ($1::uuid, $2, 'employee', 'W1 l6 ecB', md5($1 || 'b' || clock_timestamp()::text)) returning id`,
+      [f.profileId, orgB.orgId],
+    );
+    const { rows: er } = await a.query(
+      `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+       values ($1, $2, 'freeform', 'l6 su nuotrauka', 'lt', md5('l6' || clock_timestamp()::text), 'closed') returning id`,
+      [f.workerId, ecA[0].id],
+    );
+    const A = er[0].id as string;
+    const c = await asUser(f.profileId);
+    const { path } = await addPhoto(c, f, A);
+    await a.query(
+      `insert into storage.objects (bucket_id, name, owner) values ('journal-entry-photos', $1, $2::uuid)`,
+      [path, f.profileId],
+    );
+    // Legacy cross-context supersede (old builds pass whatever context the
+    // composer selected).
+    await c.query(
+      `select public.journal_entry_supersede(
+        $1::uuid, $2::uuid, 'freeform', null, 'l6 perkelta', 'lt',
+        md5('l6b' || clock_timestamp()::text), 'closed', '[]'::jsonb)`,
+      [A, ecB[0].id],
+    );
+    const mA = await rlsQuery(orgA.managerId,
+      `select (select count(*)::int from public.journal_entry_photos where storage_path = $1) as meta,
+              (select count(*)::int from storage.objects where bucket_id = 'journal-entry-photos' and name = $1) as obj`, [path]);
+    const mB = await rlsQuery(orgB.managerId,
+      `select (select count(*)::int from public.journal_entry_photos where storage_path = $1) as meta,
+              (select count(*)::int from storage.objects where bucket_id = 'journal-entry-photos' and name = $1) as obj`, [path]);
+    record(
+      "L6 cross-context LEGACY supersede: authorization moves coherently",
+      mA.rows[0].meta === 0 && mA.rows[0].obj === 0 && mB.rows[0].meta === 1 && mB.rows[0].obj === 1,
+      `oldOrg=${mA.rows[0].meta}/${mA.rows[0].obj} newOrg=${mB.rows[0].meta}/${mB.rows[0].obj}`,
+    );
+    await c.end();
+  }
+
+  // ── L8: GLOBAL invariant — zero active photos on hidden entries across
+  //    EVERY fixture this run created, through BOTH RPCs and the backfill.
+  {
+    const { rows: globalStranded } = await a.query(
+      `select count(*)::int as n
+         from public.journal_entry_photos p
+         join public.journal_entries je on je.id = p.entry_id
+         join public.workers w on w.id = je.worker_id
+         join public.profiles pr on pr.id = w.profile_id
+        where pr.full_name like 'W1 Proof %'
+          and p.upload_status in ('uploading','uploaded')
+          and je.superseded_by is not null
+          -- The deliberate exceptions: collision/deleted-tip/cycle chains the
+          -- backfill must NOT touch (D7b/D7c/D7f fixtures).
+          and p.file_name not in ('antra.jpg')
+          and not exists (
+            select 1 from public.journal_entry_photos q
+             where q.entry_id in (
+               select c2.id from public.journal_entries c2
+                where c2.id = je.superseded_by
+             )
+             and q.upload_status in ('uploading','uploaded'))
+          and exists (
+            select 1 from public.journal_entries tip
+             where tip.id = je.superseded_by and tip.deleted_at is null
+          )`,
+    );
+    record(
+      "L8 global: no unexplained active photo on any hidden entry (both RPCs + backfill)",
+      globalStranded[0].n === 0,
+      `unexplainedStranded=${globalStranded[0].n}`,
+    );
+  }
+
+  // ── L7: rollback round-trip — behavioral revert, retained authorization ─
+  {
+    const { readFileSync } = await import("node:fs");
+    const { join, dirname } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const here = dirname(fileURLToPath(import.meta.url));
+    const rollbackSql = readFileSync(
+      join(here, "..", "supabase", "rollbacks", "20260720150000_journal_photo_continuity_v1.down.sql"),
+      "utf-8",
+    );
+    const migrationSql = readFileSync(
+      join(here, "..", "supabase", "migrations", "20260720150000_journal_photo_continuity_v1.sql"),
+      "utf-8",
+    );
+    await a.query(rollbackSql);
+    const { rows: fns } = await a.query(
+      `select p.proname, (p.prosrc like '%journal_entry_photos%') as has_photo_move,
+              (p.prosrc like '%for update%') as has_lock
+         from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public'
+          and p.proname in ('journal_entry_supersede', 'journal_entry_supersede_v2')
+        order by p.proname`,
+    );
+    const { rows: pol } = await a.query(
+      `select (select count(*) from pg_policies
+          where schemaname='storage' and tablename='objects'
+            and policyname='journal-entry-photos org manager select'
+            and qual like '%storage_path%') as metadata_policy_retained,
+        (select count(*) from pg_policies
+          where schemaname='storage' and tablename='objects'
+            and policyname='journal-entry-photos org manager select'
+            and qual like '%foldername%') as path_policy_back`,
+    );
+    const reverted =
+      fns.every((f2) => f2.has_photo_move === false && f2.has_lock === true) &&
+      pol[0].metadata_policy_retained === "1" &&
+      pol[0].path_policy_back === "0";
+    // Restore the migrated state for any later run.
+    await a.query(migrationSql);
+    const { rows: fns2 } = await a.query(
+      `select bool_and(p.prosrc like '%journal_entry_photos%') as all_moved
+         from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public'
+          and p.proname in ('journal_entry_supersede', 'journal_entry_supersede_v2')`,
+    );
+    record(
+      "L7 rollback: photo move removed from BOTH RPCs, W0 locks kept, metadata policy retained; re-apply restores",
+      reverted && fns2[0].all_moved === true,
+      `reverted=${reverted} reapplied=${fns2[0].all_moved}`,
+    );
+  }
+
   await a.end();
   const failed = results.filter((r) => !r.pass);
   console.log(`\n— RESULT: ${results.length - failed.length}/${results.length} proofs passed —`);

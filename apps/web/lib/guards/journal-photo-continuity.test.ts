@@ -133,6 +133,39 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
   });
 });
 
+describe("W1 rev6 — LEGACY supersede photo parity (owner-hold #2 P1)", () => {
+  it("the 9-arg legacy RPC carries the identical gated photo move", () => {
+    const legacyStart = migration.indexOf(
+      "create or replace function public.journal_entry_supersede(",
+    );
+    expect(legacyStart).toBeGreaterThan(0);
+    const legacyBody = migration.slice(
+      legacyStart,
+      migration.indexOf("$$;", legacyStart),
+    );
+    expect(legacyBody).toMatch(
+      /update public\.journal_entry_photos\s+set entry_id = v_new_entry_id/i,
+    );
+    expect(legacyBody).toMatch(
+      /upload_status in \('uploading','uploaded'\)/i,
+    );
+    expect(legacyBody).toMatch(/for update/i);
+  });
+
+  it("rollback restores the LEGACY RPC to the W0 body (no photo move)", () => {
+    const rbLegacyStart = rollback.indexOf(
+      "create or replace function public.journal_entry_supersede(",
+    );
+    expect(rbLegacyStart).toBeGreaterThan(0);
+    const rbLegacyBody = rollback.slice(
+      rbLegacyStart,
+      rollback.indexOf("$$;", rbLegacyStart),
+    );
+    expect(rbLegacyBody).not.toMatch(/journal_entry_photos/i);
+    expect(rbLegacyBody).toMatch(/for update/i);
+  });
+});
+
 describe("W1 rev2 — registration serialized with the supersede (owner-hold P2)", () => {
   it("register_journal_entry_photo locks the entry row and refuses stale entries", () => {
     const fn = migration.slice(
