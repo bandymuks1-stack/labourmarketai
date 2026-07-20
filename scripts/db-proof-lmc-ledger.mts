@@ -34,6 +34,8 @@
  *   P25  idempotency-key reuse with a DIFFERENT payload is rejected
  *   P26  reserved expiry-key namespace refused externally; admin-grant
  *        replay with a different expiry conflicts (same expiry replays)
+ *   P27  admin-grant replay survives email reassignment (no duplicate grant
+ *        to the address's new owner; different recipient conflicts)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -672,6 +674,62 @@ async function main() {
         s2[0].r.transaction_id === s1[0].r.transaction_id &&
         elapsedNew.ok,
       `reserved buy/spend refused; same-expiry replay=same tx; changed expiry: ${expiryConflict.msg.slice(0, 40)}; elapsed-expiry replay idempotent; elapsed NEW grant refused`,
+    );
+  }
+
+  // ── P27: admin-grant replay is immune to email reassignment ───────────────
+  {
+    const c = await makePerson(a, "c");
+    const d = await makePerson(a, "d");
+    const emailC = `${RUN}-c@fixture.local`;
+    const { rows: ts27 } = await a.query(
+      `select (now() + interval '20 days') as t`,
+    );
+    const exp27 = ts27[0].t as Date;
+    const admConn = await asUser(adm);
+    const { rows: g1 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 1100, 'reassign proof', 'proof-campaign', $2, 'p27-${RUN}') as r`,
+      [emailC, exp27],
+    );
+    // Simulate the address moving to a DIFFERENT verified profile: c gets a
+    // new address, d takes over c's original address.
+    await a.query(`update auth.users set email = $2 where id = $1`, [
+      c,
+      `${RUN}-c-old@fixture.local`,
+    ]);
+    await a.query(`update auth.users set email = $2 where id = $1`, [
+      d,
+      emailC,
+    ]);
+    // Identical retry: must return the ORIGINAL transaction, not grant the
+    // new owner of the address.
+    const { rows: g2 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 1100, 'reassign proof', 'proof-campaign', $2, 'p27-${RUN}') as r`,
+      [emailC, exp27],
+    );
+    const { rows: dTx } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions t
+        join public.lmc_accounts acc on acc.id = t.account_id
+       where acc.profile_id = $1`,
+      [d],
+    );
+    // Same key with a DIFFERENT recipient email → conflict, never a new grant.
+    const otherRecipient = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 1100, 'reassign proof', 'proof-campaign', $2, 'p27-${RUN}')`,
+          [`${RUN}-d@fixture.local`, exp27],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    await admConn.end();
+    record(
+      "P27-replay-immune-to-email-reassignment",
+      g2[0].r.already_processed === true &&
+        g2[0].r.transaction_id === g1[0].r.transaction_id &&
+        dTx[0].n === 0 &&
+        otherRecipient.ok,
+      `retry returned original tx; new address owner has ${dTx[0].n} txs; different recipient: ${otherRecipient.msg.slice(0, 45)}`,
     );
   }
 

@@ -184,6 +184,10 @@ Ordering rules (BINDING, enforced in `lmc_spend_v1`):
    instead of silently returning the old result. The system-derived
    `lmc-expiry:` key namespace is reserved: externally keyed RPCs refuse it,
    so a foreign transaction can never masquerade as an expiry record.
+   Admin-grant keys are globally unique and replay-resolved **before**
+   recipient email resolution against the stored `recipient_email_at_grant`,
+   so a retried grant can never be re-issued to a different profile that
+   later acquired the recipient's email address.
 5. Every reversal references its original entry (`original_transaction_id`
    NOT NULL for reversal kinds, CHECK-enforced) and at most one reversal per
    original (partial unique index).

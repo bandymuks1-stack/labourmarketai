@@ -166,6 +166,12 @@ create unique index if not exists lmc_one_signup_grant_per_account
 create unique index if not exists lmc_one_activity_grant_per_account
   on public.lmc_transactions (account_id) where kind = 'promotional_activity';
 
+-- Admin-grant idempotency keys are GLOBALLY unique (not just per account):
+-- replay resolution must not depend on mutable email ownership, so a key can
+-- never legitimately appear on two accounts for admin grants.
+create unique index if not exists lmc_admin_grant_key_global
+  on public.lmc_transactions (idempotency_key) where kind = 'admin_grant';
+
 -- ── 4. lmc_lots — remaining-value containers for credit transactions ────────
 create table if not exists public.lmc_lots (
   id             uuid primary key default gen_random_uuid(),
@@ -621,6 +627,48 @@ begin
   -- The future/365-day WINDOW check is deliberately deferred until after the
   -- idempotency lookup below: an identical replay must stay idempotent even
   -- after the originally granted expiry has elapsed.
+
+  -- GLOBAL replay resolution FIRST — independent of mutable email ownership.
+  -- A committed admin grant is identified by its (globally unique) key, and
+  -- the stored recipient_email_at_grant is the identity fingerprint: even if
+  -- the email address was later reassigned to a different verified profile,
+  -- an identical retry returns the ORIGINAL transaction instead of issuing a
+  -- second grant to the address's new owner. Any payload difference conflicts.
+  declare
+    v_prior public.lmc_transactions%rowtype;
+    v_prior_expires timestamptz;
+  begin
+    select * into v_prior
+      from public.lmc_transactions
+     where idempotency_key = p_idempotency_key and kind = 'admin_grant';
+    if found then
+      if lower(v_prior.recipient_email_at_grant)
+         is distinct from lower(trim(p_recipient_email)) then
+        raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
+          p_idempotency_key using errcode = '23505';
+      end if;
+      if v_prior.amount_cents <> p_amount_cents then
+        raise exception 'lmc_idempotency_conflict: key % already used with a different amount',
+          p_idempotency_key using errcode = '23505';
+      end if;
+      if v_prior.campaign is distinct from p_campaign then
+        raise exception 'lmc_idempotency_conflict: key % already used with a different campaign',
+          p_idempotency_key using errcode = '23505';
+      end if;
+      select l.expires_at into v_prior_expires
+        from public.lmc_lots l where l.transaction_id = v_prior.id;
+      if v_prior_expires is distinct from p_expires_at then
+        raise exception 'lmc_idempotency_conflict: key % already used with a different expiry',
+          p_idempotency_key using errcode = '23505';
+      end if;
+      return jsonb_build_object(
+        'transaction_id', v_prior.id,
+        'account_id', v_prior.account_id,
+        'kind', v_prior.kind,
+        'amount_cents', v_prior.amount_cents,
+        'already_processed', true);
+    end if;
+  end;
 
   -- Verified recipient resolution: confirmed email, existing profile.
   select u.id, u.email into v_recipient, v_email
