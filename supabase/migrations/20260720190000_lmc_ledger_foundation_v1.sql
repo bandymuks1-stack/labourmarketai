@@ -343,13 +343,32 @@ begin
 end;
 $$;
 
+-- Reserved idempotency-key namespaces: system-derived keys (the expiry
+-- worker's 'lmc-expiry:<lot_id>') may never be claimed by an externally
+-- keyed operation, or the worker would treat the foreign row as its own
+-- processing record and skip the lot forever.
+create or replace function public.lmc_assert_external_idempotency_key_v1(p_key text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_key is null or p_key like 'lmc-expiry:%' then
+    raise exception 'lmc_reserved_idempotency_key: the lmc-expiry: namespace is system-reserved'
+      using errcode = '22023';
+  end if;
+end;
+$$;
+
 -- Shared idempotency lookup: returns the existing transaction (as jsonb)
 -- when the same (account, key) was already committed with the SAME payload;
 -- raises lmc_idempotency_conflict when the key is being reused for a
 -- different kind OR with different operation-defining fields (amount,
--- reversal linkage, campaign, purchase reference). A replay must be an exact
--- replay — a changed payload is never silently mapped to the old result.
--- (Free-text reason is deliberately not part of the fingerprint.)
+-- reversal linkage, campaign, purchase reference, admin-grant lot expiry).
+-- A replay must be an exact replay — a changed payload is never silently
+-- mapped to the old result. (Free-text reason is deliberately not part of
+-- the fingerprint.)
 create or replace function public.lmc_existing_by_idempotency_v1(
   p_account uuid,
   p_key text,
@@ -357,7 +376,8 @@ create or replace function public.lmc_existing_by_idempotency_v1(
   p_amount_cents bigint default null,
   p_original_transaction_id uuid default null,
   p_campaign text default null,
-  p_reference text default null)
+  p_reference text default null,
+  p_expires_at timestamptz default null)
 returns jsonb
 language plpgsql
 security definer
@@ -395,6 +415,12 @@ begin
     raise exception 'lmc_idempotency_conflict: key % already used with a different reference',
       p_key using errcode = '23505';
   end if;
+  if p_expires_at is not null
+     and (select l.expires_at from public.lmc_lots l
+           where l.transaction_id = v_existing.id) is distinct from p_expires_at then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different expiry',
+      p_key using errcode = '23505';
+  end if;
   return jsonb_build_object(
     'transaction_id', v_existing.id,
     'account_id', v_existing.account_id,
@@ -428,6 +454,7 @@ begin
   if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
     raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
   end if;
+  perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_kind not in ('promotional_signup', 'promotional_activity') then
     raise exception 'lmc_invalid_promotional_kind: %', p_kind using errcode = '22023';
   end if;
@@ -501,6 +528,7 @@ begin
   if not public.lmc_flag_enabled('lmc_purchases_enabled') then
     raise exception 'lmc_purchases_disabled' using errcode = '42501';
   end if;
+  perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
   end if;
@@ -575,6 +603,7 @@ begin
   if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
     raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
   end if;
+  perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then
     raise exception 'lmc_invalid_amount: must be positive and <= % LMC-cents', v_cap
       using errcode = '22023';
@@ -608,7 +637,8 @@ begin
 
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_account, p_idempotency_key, 'admin_grant',
-    p_amount_cents => p_amount_cents, p_campaign => p_campaign);
+    p_amount_cents => p_amount_cents, p_campaign => p_campaign,
+    p_expires_at => p_expires_at);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -665,6 +695,7 @@ begin
   if not public.lmc_flag_enabled('lmc_spending_enabled') then
     raise exception 'lmc_spending_disabled' using errcode = '42501';
   end if;
+  perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
   end if;
@@ -848,6 +879,7 @@ begin
   if p_kind not in ('reversal', 'refund_reversal', 'chargeback_reversal') then
     raise exception 'lmc_invalid_reversal_kind: %', p_kind using errcode = '22023';
   end if;
+  perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_reason is null or char_length(trim(p_reason)) = 0 then
     raise exception 'lmc_reason_required' using errcode = '22023';
   end if;
@@ -1022,7 +1054,8 @@ revoke all on function public.lmc_flag_enabled(text) from public;
 revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
-revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text) from public;
+revoke all on function public.lmc_assert_external_idempotency_key_v1(text) from public;
+revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz) from public;
 revoke all on function public.lmc_grant_promotional_v1(text, uuid, text, text) from public;
 revoke all on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) from public;
 revoke all on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) from public;
@@ -1033,7 +1066,8 @@ revoke all on function public.lmc_reverse_v1(uuid, text, text, text) from public
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
 -- Server-side monetary writes only:
 grant execute on function public.lmc_ensure_account_v1(uuid, uuid) to service_role;
-grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text) to service_role;
+grant execute on function public.lmc_assert_external_idempotency_key_v1(text) to service_role;
+grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz) to service_role;
 grant execute on function public.lmc_grant_promotional_v1(text, uuid, text, text) to service_role;
 grant execute on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) to service_role;
 grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid) to service_role;

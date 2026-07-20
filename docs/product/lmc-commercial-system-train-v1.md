@@ -179,9 +179,11 @@ Ordering rules (BINDING, enforced in `lmc_spend_v1`):
 4. Idempotency at DB level: `unique (account_id, idempotency_key)`, and a
    replay must be an **exact** replay — the RPCs fingerprint the
    operation-defining fields (kind, amount, reversal linkage, campaign,
-   purchase reference) and raise `lmc_idempotency_conflict` when a key is
-   reused with a different payload instead of silently returning the old
-   result.
+   purchase reference, admin-grant lot expiry) and raise
+   `lmc_idempotency_conflict` when a key is reused with a different payload
+   instead of silently returning the old result. The system-derived
+   `lmc-expiry:` key namespace is reserved: externally keyed RPCs refuse it,
+   so a foreign transaction can never masquerade as an expiry record.
 5. Every reversal references its original entry (`original_transaction_id`
    NOT NULL for reversal kinds, CHECK-enforced) and at most one reversal per
    original (partial unique index).

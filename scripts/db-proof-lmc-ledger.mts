@@ -32,6 +32,8 @@
  *   P23  re-apply after rollback succeeds cleanly (flags false again)
  *   P24  expiry batch is never wedged by already-completed old lots
  *   P25  idempotency-key reuse with a DIFFERENT payload is rejected
+ *   P26  reserved expiry-key namespace refused externally; admin-grant
+ *        replay with a different expiry conflicts (same expiry replays)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -589,6 +591,61 @@ async function main() {
         freshB[0].r.kind === "refund_reversal" &&
         freshB[0].r.already_processed === false,
       `amount reuse: ${amountConflict.msg.slice(0, 50)} | linkage reuse: ${linkageConflict.msg.slice(0, 50)} | B reversed with fresh key`,
+    );
+  }
+
+  // ── P26: reserved key namespace + expiry in the replay fingerprint ────────
+  {
+    const u9 = await makePerson(a, "u9");
+    const reservedBuy = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_record_purchase_v1(1000, 'p26', 'lmc-expiry:${RUN}-fake', $1, null)`,
+          [u9],
+        ),
+      "lmc_reserved_idempotency_key",
+    );
+    const reservedSpend = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p26 spend', 'lmc-expiry:${RUN}-fake2', $1, null)`,
+          [u9],
+        ),
+      "lmc_reserved_idempotency_key",
+    );
+    // Admin-grant expiry rides the replay fingerprint: identical expiry
+    // replays; a changed expiry conflicts instead of silently keeping the
+    // original lot validity.
+    const { rows: ts } = await a.query(
+      `select (now() + interval '30 days') as t`,
+    );
+    const expiry = ts[0].t as Date;
+    const admConn = await asUser(adm);
+    const { rows: g1 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 900, 'expiry fp', 'proof-campaign', $2, 'p26-grant-${RUN}') as r`,
+      [`${RUN}-u9@fixture.local`, expiry],
+    );
+    const { rows: g2 } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 900, 'expiry fp', 'proof-campaign', $2, 'p26-grant-${RUN}') as r`,
+      [`${RUN}-u9@fixture.local`, expiry],
+    );
+    const expiryConflict = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 900, 'expiry fp', 'proof-campaign', now() + interval '5 days', 'p26-grant-${RUN}')`,
+          [`${RUN}-u9@fixture.local`],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    await admConn.end();
+    record(
+      "P26-reserved-namespace-and-expiry-fingerprint",
+      reservedBuy.ok &&
+        reservedSpend.ok &&
+        g2[0].r.already_processed === true &&
+        g2[0].r.transaction_id === g1[0].r.transaction_id &&
+        expiryConflict.ok,
+      `reserved buy/spend refused; same-expiry replay=same tx; changed expiry: ${expiryConflict.msg.slice(0, 50)}`,
     );
   }
 
