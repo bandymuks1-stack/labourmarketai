@@ -164,11 +164,13 @@ async function makePerson(
   return profileId;
 }
 
+/** Actor recorded on every harness flag flip (settings trigger requires it). */
+let FLAG_ACTOR = "";
 async function setFlag(a: Client, key: string, enabled: boolean) {
-  await a.query(`update public.lmc_settings set enabled = $2 where key = $1`, [
-    key,
-    enabled,
-  ]);
+  await a.query(
+    `update public.lmc_settings set enabled = $2, updated_by = $3 where key = $1`,
+    [key, enabled, FLAG_ACTOR],
+  );
 }
 
 async function accountOf(a: Client, profileId: string): Promise<string> {
@@ -246,6 +248,8 @@ async function main() {
   await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
   await restoreMigration(a);
 
+  FLAG_ACTOR = await makePerson(a, "flagadmin", "admin");
+
   // ── P00: fail-closed baseline ─────────────────────────────────────────────
   {
     const { rows } = await a.query(
@@ -283,6 +287,32 @@ async function main() {
       "P00b-disabled-rpcs-refuse",
       g.ok && p.ok && s.ok,
       `grant: ${g.msg.slice(0, 50)} | purchase: ${p.msg.slice(0, 50)} | spend: ${s.msg.slice(0, 50)}`,
+    );
+  }
+
+  // ── P32: flag flips are accountable (actor required, audit row written) ───
+  {
+    const noActorFlip = await expectError(
+      () =>
+        a.query(
+          `update public.lmc_settings set enabled = true where key = 'lmc_purchases_enabled'`,
+        ),
+      "lmc_flag_actor_required",
+    );
+    await setFlag(a, "lmc_purchases_enabled", true);
+    const { rows: flipAudit } = await a.query(
+      `select count(*)::int as n from public.audit_logs
+        where action = 'lmc_flag_changed'
+          and actor_id = $1
+          and payload ->> 'key' = 'lmc_purchases_enabled'
+          and (payload ->> 'to')::boolean = true`,
+      [FLAG_ACTOR],
+    );
+    await setFlag(a, "lmc_purchases_enabled", false); // back to default for P28 etc.
+    record(
+      "P32-flag-flips-audited",
+      noActorFlip.ok && flipAudit[0].n === 1,
+      `actor-less flip refused (${noActorFlip.msg.slice(0, 40)}); audited flip rows=${flipAudit[0].n}`,
     );
   }
 
@@ -1169,14 +1199,14 @@ async function main() {
     const blocked = await expectError(
       () =>
         flipper.query(
-          `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+          `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
         ),
       "statement timeout",
     );
     await writer.query("commit");
     await flipper.query(`set statement_timeout = 0`);
     await flipper.query(
-      `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+      `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
     );
     const newBuy = await expectError(
       () =>
@@ -1248,7 +1278,7 @@ async function main() {
     let flippedWithoutWaiting = false;
     try {
       await flipper.query(
-        `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+        `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
       );
       flippedWithoutWaiting = true;
     } catch {
@@ -1275,7 +1305,7 @@ async function main() {
     const blockedAgain = await expectError(
       () =>
         flipper.query(
-          `update public.lmc_settings set enabled = false where key = 'lmc_purchases_enabled'`,
+          `update public.lmc_settings set enabled = false, updated_by = '${FLAG_ACTOR}' where key = 'lmc_purchases_enabled'`,
         ),
       "statement timeout",
     );

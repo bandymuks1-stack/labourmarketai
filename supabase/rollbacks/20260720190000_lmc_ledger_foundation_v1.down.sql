@@ -106,10 +106,14 @@ begin
     drop policy if exists lmc_accounts_select on public.lmc_accounts;
   end if;
   if to_regclass('public.lmc_settings') is not null then
+    drop trigger if exists lmc_settings_update_guard on public.lmc_settings;
+    drop trigger if exists lmc_settings_audit on public.lmc_settings;
     drop policy if exists lmc_settings_select on public.lmc_settings;
   end if;
 end;
 $cleanup$;
+drop function if exists public.lmc_settings_update_guard();
+drop function if exists public.lmc_settings_audit();
 drop function if exists public.lmc_referral_insert_guard();
 drop function if exists public.lmc_forbid_mutation();
 

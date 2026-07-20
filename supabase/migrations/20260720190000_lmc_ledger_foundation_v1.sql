@@ -78,6 +78,51 @@ insert into public.lmc_settings (key, enabled) values
   ('lmc_spending_enabled', false)
 on conflict (key) do nothing;
 
+-- Every commercial flag change is accountable: a flip must record WHO
+-- (updated_by required), WHEN (updated_at stamped by trigger, not left at
+-- the insert-time default) and leaves an immutable audit_logs row — even
+-- through the direct service_role UPDATE path.
+create or replace function public.lmc_settings_update_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.enabled is distinct from old.enabled then
+    if new.updated_by is null then
+      raise exception 'lmc_flag_actor_required: flag changes must record updated_by'
+        using errcode = '22023';
+    end if;
+    new.updated_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+create or replace trigger lmc_settings_update_guard
+  before update on public.lmc_settings
+  for each row execute function public.lmc_settings_update_guard();
+
+create or replace function public.lmc_settings_audit()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.enabled is distinct from old.enabled then
+    insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+    values (new.updated_by, 'lmc_flag_changed', 'lmc_settings', null,
+            jsonb_build_object('key', new.key,
+                               'from', old.enabled, 'to', new.enabled));
+  end if;
+  return null;
+end;
+$$;
+
+create or replace trigger lmc_settings_audit
+  after update on public.lmc_settings
+  for each row execute function public.lmc_settings_audit();
+
 -- Fail-closed flag read: a missing row is FALSE. (Read-only; gate points in
 -- the write RPCs use lmc_require_flag_v1 below, which locks the row.)
 create or replace function public.lmc_flag_enabled(p_key text)
