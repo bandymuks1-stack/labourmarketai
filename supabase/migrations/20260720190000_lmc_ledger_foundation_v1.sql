@@ -902,10 +902,13 @@ begin
   v_account := public.lmc_ensure_account_v1(p_profile_id => v_recipient);
   perform 1 from public.lmc_accounts where id = v_account for update;
 
+  -- Actor-bound like the global block above: a DIFFERENT admin reusing the
+  -- key must get an idempotency conflict here, never the recorded actor's
+  -- transaction as already_processed.
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_account, p_idempotency_key, 'admin_grant',
     p_amount_cents => p_amount_cents, p_campaign => p_campaign,
-    p_expires_at => p_expires_at);
+    p_expires_at => p_expires_at, p_actor_profile_id => uid);
   if v_existing is not null then
     return v_existing;
   end if;

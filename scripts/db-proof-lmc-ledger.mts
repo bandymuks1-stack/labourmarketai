@@ -1017,12 +1017,26 @@ async function main() {
     );
     await a.query(`update public.profiles set active_role = 'admin' where id = $1`, [adm]);
     await admConn.end();
+    // A DIFFERENT currently-authorized admin reusing the same key + payload
+    // must get an idempotency conflict, never the first admin's transaction.
+    const adm2 = await makePerson(a, "adm2", "admin");
+    const adm2Conn = await asUser(adm2);
+    const otherAdminReuse = await expectError(
+      () =>
+        adm2Conn.query(
+          `select public.lmc_admin_grant_v1($1, 250, 'demotion proof', 'proof-campaign', $2, 'p34-${RUN}')`,
+          [`${RUN}-u1@fixture.local`, exp34],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    await adm2Conn.end();
     record(
       "P34-admin-grant-replay-survives-authority-change",
       g2[0].r.already_processed === true &&
         g2[0].r.transaction_id === g1[0].r.transaction_id &&
-        demotedNew.ok,
-      `demoted-admin replay acknowledged same tx; demoted-admin NEW grant refused`,
+        demotedNew.ok &&
+        otherAdminReuse.ok,
+      `demoted-admin replay acknowledged same tx; demoted-admin NEW grant refused; other-admin key reuse conflicts`,
     );
   }
 
