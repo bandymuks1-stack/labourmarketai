@@ -75,7 +75,8 @@
     },
     "result": {
       "entrySuperseded": "Wpis został już zastąpiony nowszą wersją — ta karta nie jest już aktualna i zostanie usunięta z listy.",
-      "entryDeleted": "Wpis został usunięty — ta karta nie jest już aktualna i zostanie usunięta z listy."
+      "entryDeleted": "Wpis został usunięty — ta karta nie jest już aktualna i zostanie usunięta z listy.",
+      "staleTerminalHint": "Nic nie zostało zapisane. Jeśli pracownik zapisał nowszą wersję, pojawi się ona w skrzynce jako nowa karta."
     }
   },
   "listEmpty": "[EN] No entries yet.",

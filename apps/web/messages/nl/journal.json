@@ -187,7 +187,8 @@
       "rejected": "Niet bevestigd — het item blijft de eigen, zelf opgegeven registratie van de werknemer in zijn journaal.",
       "reviewNotEnabled": "Beoordeling is voor deze werknemer nog niet ingeschakeld.",
       "entrySuperseded": "De registratie is al vervangen door een nieuwere versie — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
-      "entryDeleted": "De registratie is verwijderd — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd."
+      "entryDeleted": "De registratie is verwijderd — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
+      "staleTerminalHint": "Er is niets vastgelegd. Als de medewerker een nieuwere versie heeft opgeslagen, verschijnt die als nieuwe kaart in de inbox."
     },
     "showOriginal": "Origineel tonen",
     "skills": "Vaardigheden",

@@ -75,7 +75,8 @@
     },
     "result": {
       "entrySuperseded": "Posten har redan ersatts av en nyare version — kortet är inte längre aktuellt och tas bort från listan.",
-      "entryDeleted": "Posten har raderats — kortet är inte längre aktuellt och tas bort från listan."
+      "entryDeleted": "Posten har raderats — kortet är inte längre aktuellt och tas bort från listan.",
+      "staleTerminalHint": "Ingenting registrerades. Om arbetaren sparade en nyare version visas den som ett nytt kort i inkorgen."
     }
   },
   "listEmpty": "[EN] No entries yet.",

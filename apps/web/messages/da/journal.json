@@ -75,7 +75,8 @@
     },
     "result": {
       "entrySuperseded": "Posten er allerede erstattet af en nyere version — kortet er ikke længere aktuelt og fjernes fra listen.",
-      "entryDeleted": "Posten er blevet slettet — kortet er ikke længere aktuelt og fjernes fra listen."
+      "entryDeleted": "Posten er blevet slettet — kortet er ikke længere aktuelt og fjernes fra listen.",
+      "staleTerminalHint": "Der blev ikke registreret noget. Hvis medarbejderen gemte en nyere version, vises den som et nyt kort i indbakken."
     }
   },
   "listEmpty": "[EN] No entries yet.",

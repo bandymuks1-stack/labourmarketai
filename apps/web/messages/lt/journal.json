@@ -187,7 +187,8 @@
       "rejected": "Nepatvirtinta — įrašas lieka paties darbuotojo nurodytas jo žurnale.",
       "reviewNotEnabled": "Šiam darbuotojui peržiūra dar neįjungta.",
       "entrySuperseded": "Įrašas jau buvo pakeistas naujesne versija — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
-      "entryDeleted": "Įrašas buvo pašalintas — kortelė nebeaktuali ir bus pašalinta iš sąrašo."
+      "entryDeleted": "Įrašas buvo pašalintas — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
+      "staleTerminalHint": "Niekas nebuvo įrašyta. Jei darbuotojas išsaugojo naujesnę versiją, ji atsiras gautuosiuose kaip nauja kortelė."
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",

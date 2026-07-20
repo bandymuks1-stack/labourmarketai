@@ -75,7 +75,8 @@
     },
     "result": {
       "entrySuperseded": "Ieraksts jau ir aizstāts ar jaunāku versiju — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
-      "entryDeleted": "Ieraksts ir izdzēsts — kartīte vairs nav aktuāla un tiks noņemta no saraksta."
+      "entryDeleted": "Ieraksts ir izdzēsts — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
+      "staleTerminalHint": "Nekas netika ierakstīts. Ja darbinieks saglabāja jaunāku versiju, tā parādīsies iesūtnē kā jauna kartīte."
     }
   },
   "listEmpty": "[EN] No entries yet.",

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyApprovalSkillEffects } from "./confirm-actions";
 import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
+import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
 
 /**
@@ -83,10 +84,13 @@ export async function reviewJournalEntry(
 
   const outcome = data as string;
   if (outcome !== decision) {
-    if (outcome === "entry_superseded" || outcome === "entry_deleted") {
-      // Terminal stale card: refresh the inbox list + counts immediately
-      // (reviewable_journal_entry_ids no longer returns this entry).
+    if (isTerminalStaleOutcome(outcome)) {
+      // Terminal stale card: refresh the inbox list, the QUICK route and the
+      // counts immediately (reviewable_journal_entry_ids no longer returns this
+      // entry). The quick route is included because the same card is rendered
+      // there and must stop offering actions (owner-hold v5 P2-3).
       revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
       revalidatePath(`/${locale}/dashboard`);
     }
     // The RPC returned a block reason instead of the decision.
@@ -144,9 +148,11 @@ export async function confirmEntrySkills(
 
   const res = await confirmEntryAndVerifySkills(entryId, skillIds, note, locale);
   if (res.ok) return { ok: true, verified: res.verified ?? skillIds.length };
-  if (res.code === "entry_superseded" || res.code === "entry_deleted") {
-    // Terminal stale card (owner-hold v5): refresh inbox list + counts now.
+  if (isTerminalStaleOutcome(res.code)) {
+    // Terminal stale card (owner-hold v5): refresh inbox list, quick route and
+    // counts now — the card must vanish from every surface that renders it.
     revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard/inbox/quick`);
     revalidatePath(`/${locale}/dashboard`);
   }
   // Map the RPC block reasons through unchanged (review_not_enabled,

@@ -396,6 +396,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 156 -> 157 for the P1 journal-recall repair (vehicle-cleaning seed).
     // Bumped 157 -> 158 for W0 atomic supersede (function-only, paired rollback).
     // Bumped 158 -> 159 for W1 photo continuity (function-only, paired rollback).
-    expect(guard).toMatch(/SPRINT_BASELINE = 159/);
+    // Bumped 159 -> 160 for the W1 stale learning lifecycle (function+trigger
+    // only, additive, paired rollback).
+    expect(guard).toMatch(/SPRINT_BASELINE = 160/);
   });
 });

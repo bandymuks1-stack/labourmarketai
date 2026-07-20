@@ -292,11 +292,20 @@ describe("W1 rev10 — stale learning items + stale review cards (owner-hold v5)
       "utf-8",
     );
     expect(actions).toMatch(/\| "entry_superseded"\s*\| "entry_deleted"/);
-    // Stale outcome refreshes inbox + dashboard counts immediately.
+    // rev11 (Codex P2-3): the per-surface literal comparison was replaced by
+    // the SHARED isTerminalStaleOutcome predicate, so every surface maps the
+    // same two codes. The stale outcome now refreshes the inbox, the QUICK
+    // route and the dashboard counts immediately.
+    expect(actions).toMatch(/isTerminalStaleOutcome/);
     const staleBlock = actions.slice(
-      actions.indexOf('outcome === "entry_superseded"'),
+      actions.indexOf("if (isTerminalStaleOutcome(outcome))"),
     );
-    expect(staleBlock.slice(0, 400)).toMatch(/revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox`\)/);
+    expect(staleBlock.slice(0, 500)).toMatch(
+      /revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox`\)/,
+    );
+    expect(staleBlock.slice(0, 500)).toMatch(
+      /revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox\/quick`\)/,
+    );
     const card = readFileSync(
       join(process.cwd(), "components/app/journal-inbox-entry.tsx"),
       "utf-8",
@@ -311,8 +320,15 @@ describe("W1 rev10 — stale learning items + stale review cards (owner-hold v5)
       join(process.cwd(), "components/app/learning-review-section.tsx"),
       "utf-8",
     );
-    expect(section).toMatch(/item\.status === "pending" && item\.entryStale/);
-    expect(section).toMatch(/item\.status === "pending" && !item\.entryStale/);
+    // rev11 (Codex P2-1/P2-2): the render-time `entryStale` snapshot is still
+    // honoured, but it is no longer the ONLY signal — an item the server just
+    // refused a decision on (staleIds) hides its controls immediately too.
+    expect(section).toMatch(
+      /item\.status === "pending" &&\s*\n?\s*\(item\.entryStale \|\| staleIds\.has\(item\.id\)\)/,
+    );
+    expect(section).toMatch(
+      /item\.status === "pending" &&\s*\n?\s*!item\.entryStale &&\s*\n?\s*!staleIds\.has\(item\.id\)/,
+    );
     expect(section).toMatch(/labels\.staleEntry/);
     const learning = readFileSync(
       join(process.cwd(), "lib/learning/learning.ts"),
@@ -320,6 +336,11 @@ describe("W1 rev10 — stale learning items + stale review cards (owner-hold v5)
     );
     expect(learning).toMatch(/journal_entries\(superseded_by, deleted_at\)/);
     expect(learning).toMatch(/entryStale/);
+    // The snapshot is a HINT for the UI, never the authority: the decision
+    // itself is revalidated server-side inside the mutation RPC, and stale
+    // rows are closed on the read path.
+    expect(learning).toMatch(/rpc\("set_learning_review_item_status"/);
+    expect(learning).toMatch(/close_stale_learning_review_items/);
   });
 
   it("every registered locale ships the stale copy (both surfaces)", () => {

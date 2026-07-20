@@ -12,6 +12,7 @@ import {
   reviewJournalEntry,
   type ReviewActionState,
 } from "@/lib/journal/review-actions";
+import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
 
 export type QuickConfirmEntryView = {
   id: string;
@@ -48,13 +49,28 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
   const confirmed = confirmState?.ok === true;
   const rejected = rejectState?.ok === true;
 
+  const failureCode = !confirmState?.ok
+    ? confirmState?.code
+    : !rejectState?.ok
+      ? rejectState?.code
+      : undefined;
+
+  /**
+   * TERMINAL STALE (owner-hold v5 P2-3). The worker edited or removed the entry
+   * after this card rendered, so it can never be confirmed or rejected. This is
+   * NOT a generic error and NOT retryable: the card collapses to a calm
+   * explanatory state and every action button is removed, which is what stops
+   * the repeated failing submissions. Genuine temporary failures keep the
+   * buttons and the retry path untouched (see errorText below).
+   */
+  const staleOutcome =
+    !confirmState?.ok && !rejectState?.ok && isTerminalStaleOutcome(failureCode)
+      ? failureCode
+      : null;
+
   const errorText = (() => {
-    const code = !confirmState?.ok
-      ? confirmState?.code
-      : !rejectState?.ok
-        ? rejectState?.code
-        : undefined;
-    if (confirmState?.ok || rejectState?.ok || !code) return null;
+    const code = failureCode;
+    if (confirmState?.ok || rejectState?.ok || !code || staleOutcome) return null;
     switch (code) {
       case "review_not_enabled":
         return t("inbox.result.reviewNotEnabled");
@@ -79,6 +95,25 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
         {confirmState.verifiedSkills > 0
           ? ` · ${t("inbox.result.skillsVerified", { count: confirmState.verifiedSkills })}`
           : null}
+      </li>
+    );
+  }
+  // Terminal stale — rendered BEFORE the action markup, so the confirm/reject
+  // buttons are gone from the tree entirely (not merely disabled).
+  if (staleOutcome) {
+    return (
+      <li
+        className="card-border flex flex-col gap-1 p-4 text-sm text-text-muted"
+        data-testid={`quick-stale-${entry.id}`}
+        data-stale-outcome={staleOutcome}
+        role="status"
+      >
+        <span className="text-text-secondary">
+          {staleOutcome === "entry_deleted"
+            ? t("inbox.result.entryDeleted")
+            : t("inbox.result.entrySuperseded")}
+        </span>
+        <span className="text-xs">{t("inbox.result.staleTerminalHint")}</span>
       </li>
     );
   }

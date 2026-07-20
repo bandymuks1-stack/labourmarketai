@@ -75,7 +75,8 @@
     },
     "result": {
       "entrySuperseded": "Sissekanne on juba asendatud uuema versiooniga — kaart ei ole enam aktuaalne ja eemaldatakse loendist.",
-      "entryDeleted": "Sissekanne on kustutatud — kaart ei ole enam aktuaalne ja eemaldatakse loendist."
+      "entryDeleted": "Sissekanne on kustutatud — kaart ei ole enam aktuaalne ja eemaldatakse loendist.",
+      "staleTerminalHint": "Midagi ei salvestatud. Kui töötaja salvestas uuema versiooni, ilmub see postkasti uue kaardina."
     }
   },
   "listEmpty": "[EN] No entries yet.",

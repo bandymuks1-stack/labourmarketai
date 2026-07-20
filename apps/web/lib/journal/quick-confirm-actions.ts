@@ -5,6 +5,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 
 import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
+import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
 import { reviewJournalEntry } from "./review-actions";
 import {
   fetchBatchExceptions,
@@ -67,7 +68,16 @@ export async function quickConfirmEntry(
     .filter((v) => v !== "");
   if (entryId === "") return { ok: false, code: "error", message: "entry_id required" };
   const res = await confirmOne(entryId, skillIds, locale);
-  if (res.ok) revalidatePath(`/${locale}/dashboard/inbox/quick`);
+  // Revalidate the quick route on success AND on a terminal stale outcome
+  // (owner-hold v5 P2-3). A stale card is permanently unactionable: leaving it
+  // on screen only invites repeated failing submissions, so the route and the
+  // count surfaces must refresh without a manual reload. Genuine temporary
+  // failures deliberately do NOT revalidate — the card stays, retry still works.
+  if (res.ok || isTerminalStaleOutcome(res.code)) {
+    revalidatePath(`/${locale}/dashboard/inbox/quick`);
+    revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   return res;
 }
 
@@ -201,7 +211,14 @@ export async function batchQuickConfirm(
     }
   }
 
-  if (confirmedEntries > 0) revalidatePath(`/${locale}/dashboard/inbox/quick`);
+  // Same rule for the batch path: a confirmation OR any terminal stale entry
+  // makes the rendered list wrong, so refresh the quick route + counts.
+  const sawTerminalStale = [...outcomeById.values()].some(isTerminalStaleOutcome);
+  if (confirmedEntries > 0 || sawTerminalStale) {
+    revalidatePath(`/${locale}/dashboard/inbox/quick`);
+    revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   return {
     ok: true,
     confirmedEntries,

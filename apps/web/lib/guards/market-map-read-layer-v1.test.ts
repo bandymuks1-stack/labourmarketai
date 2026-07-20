@@ -318,6 +318,8 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 157 -> 158 for W0 atomic supersede (function-only migration
     // 20260720100000_journal_atomic_supersede_v1, paired rollback).
     // Bumped 158 -> 159 for W1 photo continuity (20260720150000, paired rollback).
-    expect(count).toBeLessThanOrEqual(159);
+    // Bumped 159 -> 160 for the W1 stale learning lifecycle (20260720170000,
+    // paired rollback) — still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(160);
   });
 });

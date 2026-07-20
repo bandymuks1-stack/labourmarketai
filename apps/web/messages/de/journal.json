@@ -187,7 +187,8 @@
       "rejected": "Nicht bestätigt — der Eintrag bleibt der eigene, selbst deklarierte Eintrag der Arbeitskraft in ihrem Journal.",
       "reviewNotEnabled": "Die Überprüfung ist für diese Arbeitskraft noch nicht aktiviert.",
       "entrySuperseded": "Der Eintrag wurde bereits durch eine neuere Version ersetzt — diese Karte ist nicht mehr bearbeitbar und wird aus der Liste entfernt.",
-      "entryDeleted": "Der Eintrag wurde gelöscht — diese Karte ist nicht mehr bearbeitbar und wird aus der Liste entfernt."
+      "entryDeleted": "Der Eintrag wurde gelöscht — diese Karte ist nicht mehr bearbeitbar und wird aus der Liste entfernt.",
+      "staleTerminalHint": "Es wurde nichts erfasst. Wenn die Mitarbeiterin oder der Mitarbeiter eine neuere Version gespeichert hat, erscheint sie als neue Karte im Posteingang."
     },
     "showOriginal": "Original anzeigen",
     "skills": "Fähigkeiten",
