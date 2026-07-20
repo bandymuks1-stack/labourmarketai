@@ -1115,7 +1115,8 @@ create or replace function public.lmc_reverse_v1(
   p_original_transaction_id uuid,
   p_kind text,
   p_reason text,
-  p_idempotency_key text)
+  p_idempotency_key text,
+  p_actor_profile_id uuid default null)
 returns jsonb
 language plpgsql
 security definer
@@ -1124,6 +1125,7 @@ as $$
 declare
   v_orig public.lmc_transactions%rowtype;
   v_lot public.lmc_lots%rowtype;
+  v_account public.lmc_accounts%rowtype;
   v_existing jsonb;
   v_remaining bigint;
   v_tx uuid;
@@ -1135,6 +1137,13 @@ begin
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_reason is null or char_length(trim(p_reason)) = 0 then
     raise exception 'lmc_reason_required' using errcode = '22023';
+  end if;
+  -- Complete audit provenance: every reversal records WHO authorized it.
+  if p_actor_profile_id is null then
+    raise exception 'lmc_actor_required' using errcode = '22023';
+  end if;
+  if not exists (select 1 from public.profiles where id = p_actor_profile_id) then
+    raise exception 'lmc_unknown_actor' using errcode = '22023';
   end if;
 
   select * into v_orig from public.lmc_transactions
@@ -1162,13 +1171,33 @@ begin
 
   perform 1 from public.lmc_accounts where id = v_orig.account_id for update;
 
+  -- Actor AUTHORITY: the recorded initiator must own the affected account
+  -- (person or company owner) or carry the dual-signal admin role.
+  select * into v_account from public.lmc_accounts where id = v_orig.account_id;
+  if not (
+    v_account.profile_id = p_actor_profile_id
+    or (v_account.company_id is not null and exists (
+          select 1 from public.companies c
+           where c.id = v_account.company_id
+             and c.profile_id = p_actor_profile_id))
+    or exists (select 1 from public.profiles pa
+                where pa.id = p_actor_profile_id and pa.active_role = 'admin')
+    or exists (select 1 from public.profile_roles pr
+                where pr.profile_id = p_actor_profile_id and pr.role = 'admin')
+  ) then
+    raise exception 'lmc_actor_not_authorized: the initiating actor must own the affected account or be an admin'
+      using errcode = '42501';
+  end if;
+
   -- Amount is derived (remaining at first execution), so the replay
-  -- fingerprint is the ORIGINAL-ENTRY LINKAGE: reusing this key for a
-  -- different original transaction must conflict, never report the old
-  -- reversal as already_processed.
+  -- fingerprint is the ORIGINAL-ENTRY LINKAGE plus the initiating actor:
+  -- reusing this key for a different original transaction (or by a
+  -- different actor) must conflict, never report the old reversal as
+  -- already_processed.
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_orig.account_id, p_idempotency_key, p_kind,
-    p_original_transaction_id => v_orig.id);
+    p_original_transaction_id => v_orig.id,
+    p_actor_profile_id => p_actor_profile_id);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -1190,9 +1219,9 @@ begin
 
   insert into public.lmc_transactions
     (account_id, kind, amount_cents, idempotency_key,
-     original_transaction_id, reason)
+     original_transaction_id, reason, actor_profile_id)
   values (v_orig.account_id, p_kind, v_remaining, p_idempotency_key,
-          v_orig.id, p_reason)
+          v_orig.id, p_reason, p_actor_profile_id)
   returning id into v_tx;
 
   insert into public.lmc_lot_consumptions
@@ -1200,7 +1229,7 @@ begin
   values (v_orig.account_id, v_lot.id, v_tx, p_kind, v_remaining);
 
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (null, 'lmc_reverse', 'lmc_transactions', v_tx,
+  values (p_actor_profile_id, 'lmc_reverse', 'lmc_transactions', v_tx,
           jsonb_build_object('original_transaction_id', v_orig.id,
                              'kind', p_kind, 'amount_cents', v_remaining,
                              'reason', p_reason));
@@ -1315,7 +1344,7 @@ revoke all on function public.lmc_record_purchase_v1(bigint, text, text, uuid, u
 revoke all on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) from public;
 revoke all on function public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid) from public;
 revoke all on function public.lmc_expire_lots_v1(int) from public;
-revoke all on function public.lmc_reverse_v1(uuid, text, text, text) from public;
+revoke all on function public.lmc_reverse_v1(uuid, text, text, text, uuid) from public;
 
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
 grant execute on function public.lmc_require_flag_v1(text) to service_role;
@@ -1327,7 +1356,7 @@ grant execute on function public.lmc_grant_promotional_v1(text, uuid, text, text
 grant execute on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) to service_role;
 grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid) to service_role;
 grant execute on function public.lmc_expire_lots_v1(int) to service_role;
-grant execute on function public.lmc_reverse_v1(uuid, text, text, text) to service_role;
+grant execute on function public.lmc_reverse_v1(uuid, text, text, text, uuid) to service_role;
 -- Admin grant: authenticated admins only (in-body public.is_admin() gate).
 grant execute on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) to authenticated;
 

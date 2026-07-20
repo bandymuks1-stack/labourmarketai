@@ -551,25 +551,46 @@ async function main() {
     await admConn.end();
     const grantTx = g[0].r.transaction_id as string;
 
+    // Reversal provenance: actor required and authority-bound.
+    const revNoActor = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'reversal', 'no actor', 'p09-noactor-${RUN}')`,
+          [grantTx],
+        ),
+      "lmc_actor_required",
+    );
+    const revForeign = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'reversal', 'foreign', 'p09-foreign-${RUN}', $2)`,
+          [grantTx, u1],
+        ),
+      "lmc_actor_not_authorized",
+    );
     const { rows: rev } = await a.query(
-      `select public.lmc_reverse_v1($1, 'reversal', 'admin error', 'p09-rev-${RUN}') as r`,
-      [grantTx],
+      `select public.lmc_reverse_v1($1, 'reversal', 'admin error', 'p09-rev-${RUN}', $2) as r`,
+      [grantTx, u3],
     );
     const { rows: link } = await a.query(
-      `select original_transaction_id from public.lmc_transactions where id = $1`,
+      `select original_transaction_id, actor_profile_id
+         from public.lmc_transactions where id = $1`,
       [rev[0].r.transaction_id],
     );
     record(
       "P09-reversal-links-original",
-      link[0].original_transaction_id === grantTx,
-      `reversal.original_transaction_id=${link[0].original_transaction_id}`,
+      revNoActor.ok &&
+        revForeign.ok &&
+        link[0].original_transaction_id === grantTx &&
+        link[0].actor_profile_id === u3,
+      `actor-less + foreign-actor refused; original linked; actor recorded`,
     );
 
     const dup = await expectError(
       () =>
         a.query(
-          `select public.lmc_reverse_v1($1, 'reversal', 'again', 'p10-rev-${RUN}')`,
-          [grantTx],
+          `select public.lmc_reverse_v1($1, 'reversal', 'again', 'p10-rev-${RUN}', $2)`,
+          [grantTx, u3],
         ),
       "lmc_already_reversed",
     );
@@ -581,12 +602,12 @@ async function main() {
       [u3],
     );
     const { rows: r1 } = await a.query(
-      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}') as r`,
-      [buy[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}', $2) as r`,
+      [buy[0].r.transaction_id, u3],
     );
     const { rows: r2 } = await a.query(
-      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}') as r`,
-      [buy[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}', $2) as r`,
+      [buy[0].r.transaction_id, u3],
     );
     record(
       "P11-refund-reversal-idempotent",
@@ -602,12 +623,12 @@ async function main() {
       [u3],
     );
     const { rows: c1 } = await a.query(
-      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}') as r`,
-      [buy2[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}', $2) as r`,
+      [buy2[0].r.transaction_id, u3],
     );
     const { rows: c2 } = await a.query(
-      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}') as r`,
-      [buy2[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}', $2) as r`,
+      [buy2[0].r.transaction_id, u3],
     );
     record(
       "P12-chargeback-reversal-idempotent",
@@ -724,20 +745,20 @@ async function main() {
       [u8],
     );
     await a.query(
-      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund A', 'p25-rev-${RUN}')`,
-      [buyA[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund A', 'p25-rev-${RUN}', $2)`,
+      [buyA[0].r.transaction_id, u8],
     );
     const linkageConflict = await expectError(
       () =>
         a.query(
-          `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-${RUN}')`,
-          [buyB[0].r.transaction_id],
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-${RUN}', $2)`,
+          [buyB[0].r.transaction_id, u8],
         ),
       "lmc_idempotency_conflict",
     );
     const { rows: freshB } = await a.query(
-      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-b-${RUN}') as r`,
-      [buyB[0].r.transaction_id],
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-b-${RUN}', $2) as r`,
+      [buyB[0].r.transaction_id, u8],
     );
     record(
       "P25-idempotency-payload-fingerprint",
