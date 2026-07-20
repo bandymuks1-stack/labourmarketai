@@ -63,6 +63,8 @@ drop view if exists public.lmc_lot_balances;
 -- RPCs / helpers.
 drop function if exists public.lmc_reverse_v1(uuid, text, text, text);
 drop function if exists public.lmc_expire_lots_v1(int);
+drop function if exists public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid);
+-- Pre-rev13 signature (never shipped to production; scratch hygiene only).
 drop function if exists public.lmc_spend_v1(bigint, text, text, uuid, uuid);
 drop function if exists public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text);
 drop function if exists public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid);

@@ -44,6 +44,8 @@
  *   P29  a kill-switch flip SERIALIZES with in-flight writers (FOR SHARE on
  *        the flag row: the flip blocks until the writer commits, then new
  *        writes are refused)
+ *   P30  spend provenance: the initiating actor is required, validated and
+ *        recorded on the transaction and in audit_logs
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -270,7 +272,7 @@ async function main() {
     const s = await expectError(
       () =>
         a.query(
-          `select public.lmc_spend_v1(100, 'frozen spend', 'p00-spend-${RUN}', $1, null)`,
+          `select public.lmc_spend_v1(100, 'frozen spend', 'p00-spend-${RUN}', $1, null, $1)`,
           [uVerified],
         ),
       "lmc_spending_disabled",
@@ -392,7 +394,7 @@ async function main() {
 
     // P07 first (while the promo lot is alive): spend consumes promo first.
     await a.query(
-      `select public.lmc_spend_v1(500, 'p07 spend', 'p07-${RUN}', $1, null)`,
+      `select public.lmc_spend_v1(500, 'p07 spend', 'p07-${RUN}', $1, null, $1)`,
       [u2],
     );
     const { rows: alloc } = await a.query(
@@ -450,7 +452,7 @@ async function main() {
     const res = await expectError(
       () =>
         a.query(
-          `select public.lmc_spend_v1(999999, 'too much', 'p08-${RUN}', $1, null)`,
+          `select public.lmc_spend_v1(999999, 'too much', 'p08-${RUN}', $1, null, $1)`,
           [u2],
         ),
       "lmc_insufficient_balance",
@@ -477,7 +479,7 @@ async function main() {
       [`${RUN}-w1@fixture.local`],
     );
     await a.query(
-      `select public.lmc_spend_v1(1000, 'consume fully', 'p24-spend-${RUN}', $1, null)`,
+      `select public.lmc_spend_v1(1000, 'consume fully', 'p24-spend-${RUN}', $1, null, $1)`,
       [w1],
     );
     // Newer lot: expires later than w1's, still has remainder.
@@ -583,6 +585,48 @@ async function main() {
     );
   }
 
+  // ── P30: spend provenance — initiating actor required and recorded ────────
+  {
+    const acc2 = await accountOf(a, u2);
+    const noActor = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p30 no actor', 'p30-noactor-${RUN}', $1, null)`,
+          [u2],
+        ),
+      "lmc_actor_required",
+    );
+    const ghostActor = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p30 ghost', 'p30-ghost-${RUN}', $1, null, gen_random_uuid())`,
+          [u2],
+        ),
+      "lmc_unknown_actor",
+    );
+    const { rows: ok } = await a.query(
+      `select public.lmc_spend_v1(100, 'p30 spend', 'p30-${RUN}', $1, null, $1) as r`,
+      [u2],
+    );
+    const { rows: tx } = await a.query(
+      `select actor_profile_id from public.lmc_transactions where id = $1`,
+      [ok[0].r.transaction_id],
+    );
+    const { rows: audit } = await a.query(
+      `select count(*)::int as n from public.audit_logs
+        where action = 'lmc_spend' and entity_id = $1 and actor_id = $2`,
+      [ok[0].r.transaction_id, u2],
+    );
+    record(
+      "P30-spend-provenance-recorded",
+      noActor.ok &&
+        ghostActor.ok &&
+        tx[0].actor_profile_id === u2 &&
+        audit[0].n === 1,
+      `missing actor refused; unknown actor refused; tx.actor=${tx[0].actor_profile_id === u2}; audit rows=${audit[0].n} (account ${acc2})`,
+    );
+  }
+
   // ── P25: idempotency-key reuse with a different payload is rejected ───────
   {
     const u8 = await makePerson(a, "u8");
@@ -650,7 +694,7 @@ async function main() {
     const reservedSpend = await expectError(
       () =>
         a.query(
-          `select public.lmc_spend_v1(100, 'p26 spend', 'lmc-expiry:${RUN}-fake2', $1, null)`,
+          `select public.lmc_spend_v1(100, 'p26 spend', 'lmc-expiry:${RUN}-fake2', $1, null, $1)`,
           [u9],
         ),
       "lmc_reserved_idempotency_key",
@@ -919,7 +963,7 @@ async function main() {
     const c2 = await admin();
     const spend = (c: Client, key: string) =>
       c.query(
-        `select public.lmc_spend_v1(7000, 'race spend', $1, $2, null) as r`,
+        `select public.lmc_spend_v1(7000, 'race spend', $1, $2, null, $2) as r`,
         [key, u4],
       );
     const settled = await Promise.allSettled([
@@ -990,7 +1034,7 @@ async function main() {
       [u10],
     );
     const { rows: spend } = await a.query(
-      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null) as r`,
+      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null, $1) as r`,
       [u10],
     );
     const { rows: promo } = await a.query(
@@ -1013,7 +1057,7 @@ async function main() {
       [u10],
     );
     const { rows: spendR } = await a.query(
-      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null) as r`,
+      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null, $1) as r`,
       [u10],
     );
     const { rows: promoR } = await a.query(
@@ -1045,7 +1089,7 @@ async function main() {
     const newSpend = await expectError(
       () =>
         a.query(
-          `select public.lmc_spend_v1(100, 'p28 new spend', 'p28-spend-new-${RUN}', $1, null)`,
+          `select public.lmc_spend_v1(100, 'p28 new spend', 'p28-spend-new-${RUN}', $1, null, $1)`,
           [u10],
         ),
       "lmc_spending_disabled",
@@ -1186,8 +1230,8 @@ async function main() {
     const c1 = await admin();
     const c2 = await admin();
     const settled = await Promise.allSettled([
-      c1.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-a-${RUN}', $1, null)`, [u5]),
-      c2.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-b-${RUN}', $1, null)`, [u5]),
+      c1.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-a-${RUN}', $1, null, $1)`, [u5]),
+      c2.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-b-${RUN}', $1, null, $1)`, [u5]),
     ]);
     await c1.end();
     await c2.end();
@@ -1218,8 +1262,8 @@ async function main() {
     const c3 = await admin();
     const c4 = await admin();
     const settled2 = await Promise.allSettled([
-      c3.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-c-${RUN}', $1, null)`, [u5]),
-      c4.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-d-${RUN}', $1, null)`, [u5]),
+      c3.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-c-${RUN}', $1, null, $1)`, [u5]),
+      c4.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-d-${RUN}', $1, null, $1)`, [u5]),
     ]);
     await c3.end();
     await c4.end();
@@ -1246,8 +1290,8 @@ async function main() {
     const c1 = await admin();
     const c2 = await admin();
     await Promise.allSettled([
-      c1.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null)`, [key, u6]),
-      c2.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null)`, [key, u6]),
+      c1.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null, $2)`, [key, u6]),
+      c2.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null, $2)`, [key, u6]),
     ]);
     await c1.end();
     await c2.end();
@@ -1277,8 +1321,8 @@ async function main() {
     const c4 = await admin();
     const key2 = `ncb-fixed-${RUN}`;
     const settled2 = await Promise.allSettled([
-      c3.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null)`, [key2, u6]),
-      c4.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null)`, [key2, u6]),
+      c3.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null, $2)`, [key2, u6]),
+      c4.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null, $2)`, [key2, u6]),
     ]);
     await c3.end();
     await c4.end();
@@ -1566,7 +1610,8 @@ create or replace function public.lmc_spend_v1(
   p_reason text,
   p_idempotency_key text,
   p_profile_id uuid default null,
-  p_company_id uuid default null)
+  p_company_id uuid default null,
+  p_actor_profile_id uuid default null)
 returns jsonb
 language plpgsql
 security definer

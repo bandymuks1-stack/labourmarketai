@@ -797,7 +797,8 @@ create or replace function public.lmc_spend_v1(
   p_reason text,
   p_idempotency_key text,
   p_profile_id uuid default null,
-  p_company_id uuid default null)
+  p_company_id uuid default null,
+  p_actor_profile_id uuid default null)
 returns jsonb
 language plpgsql
 security definer
@@ -818,6 +819,13 @@ begin
   end if;
   if p_reason is null or char_length(trim(p_reason)) = 0 then
     raise exception 'lmc_reason_required' using errcode = '22023';
+  end if;
+  -- Complete audit provenance: every spend records WHO initiated it.
+  if p_actor_profile_id is null then
+    raise exception 'lmc_actor_required' using errcode = '22023';
+  end if;
+  if not exists (select 1 from public.profiles where id = p_actor_profile_id) then
+    raise exception 'lmc_unknown_actor' using errcode = '22023';
   end if;
 
   if (p_profile_id is null) = (p_company_id is null) then
@@ -872,8 +880,10 @@ begin
   end if;
 
   insert into public.lmc_transactions
-    (account_id, kind, amount_cents, idempotency_key, reason)
-  values (v_account, 'spend', p_amount_cents, p_idempotency_key, p_reason)
+    (account_id, kind, amount_cents, idempotency_key, reason,
+     actor_profile_id)
+  values (v_account, 'spend', p_amount_cents, p_idempotency_key, p_reason,
+          p_actor_profile_id)
   returning id into v_tx;
 
   -- Deterministic allocation: expiring (promotional) lots first by earliest
@@ -906,7 +916,7 @@ begin
   end if;
 
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
-  values (null, 'lmc_spend', 'lmc_transactions', v_tx,
+  values (p_actor_profile_id, 'lmc_spend', 'lmc_transactions', v_tx,
           jsonb_build_object('amount_cents', p_amount_cents, 'reason', p_reason));
 
   return jsonb_build_object(
@@ -1193,7 +1203,7 @@ revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, b
 revoke all on function public.lmc_grant_promotional_v1(text, uuid, text, text) from public;
 revoke all on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) from public;
 revoke all on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) from public;
-revoke all on function public.lmc_spend_v1(bigint, text, text, uuid, uuid) from public;
+revoke all on function public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid) from public;
 revoke all on function public.lmc_expire_lots_v1(int) from public;
 revoke all on function public.lmc_reverse_v1(uuid, text, text, text) from public;
 
@@ -1205,7 +1215,7 @@ grant execute on function public.lmc_assert_external_idempotency_key_v1(text) to
 grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz) to service_role;
 grant execute on function public.lmc_grant_promotional_v1(text, uuid, text, text) to service_role;
 grant execute on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) to service_role;
-grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid) to service_role;
+grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid) to service_role;
 grant execute on function public.lmc_expire_lots_v1(int) to service_role;
 grant execute on function public.lmc_reverse_v1(uuid, text, text, text) to service_role;
 -- Admin grant: authenticated admins only (in-body public.is_admin() gate).
