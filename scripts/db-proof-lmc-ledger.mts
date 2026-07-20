@@ -604,6 +604,21 @@ async function main() {
         ),
       "lmc_unknown_actor",
     );
+    // An unrelated EXISTING profile must not be recordable as the initiator
+    // of someone else's debit.
+    const foreignActor = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p30 foreign', 'p30-foreign-${RUN}', $1, null, $2)`,
+          [u2, u1],
+        ),
+      "lmc_actor_not_authorized",
+    );
+    // An admin actor IS authorized (dual-signal admin role).
+    const { rows: admSpend } = await a.query(
+      `select public.lmc_spend_v1(50, 'p30 admin spend', 'p30-admin-${RUN}', $1, null, $2) as r`,
+      [u2, adm],
+    );
     const { rows: ok } = await a.query(
       `select public.lmc_spend_v1(100, 'p30 spend', 'p30-${RUN}', $1, null, $1) as r`,
       [u2],
@@ -621,9 +636,11 @@ async function main() {
       "P30-spend-provenance-recorded",
       noActor.ok &&
         ghostActor.ok &&
+        foreignActor.ok &&
+        admSpend[0].r.kind === "spend" &&
         tx[0].actor_profile_id === u2 &&
         audit[0].n === 1,
-      `missing actor refused; unknown actor refused; tx.actor=${tx[0].actor_profile_id === u2}; audit rows=${audit[0].n} (account ${acc2})`,
+      `missing/unknown/foreign actor refused; admin actor allowed; tx.actor recorded; audit rows=${audit[0].n} (account ${acc2})`,
     );
   }
 

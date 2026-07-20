@@ -850,6 +850,26 @@ begin
   -- DB-level kill-switch: when spending is disabled, even already-issued
   -- credits are frozen for NEW spends (complete behavioural rollback).
   perform public.lmc_require_flag_v1('lmc_spending_enabled');
+
+  -- Actor AUTHORITY, not just existence: the recorded initiator must own the
+  -- debited personal account, own the debited company, or carry the
+  -- dual-signal admin role — a spend can never be attributed to an
+  -- unrelated profile. (Finer-grained company member authority is a later
+  -- wagon; owner-or-admin is the fail-closed v1 rule.)
+  if not (
+    (p_profile_id is not null and p_actor_profile_id = p_profile_id)
+    or (p_company_id is not null and exists (
+          select 1 from public.companies c
+           where c.id = p_company_id and c.profile_id = p_actor_profile_id))
+    or exists (select 1 from public.profiles pa
+                where pa.id = p_actor_profile_id and pa.active_role = 'admin')
+    or exists (select 1 from public.profile_roles pr
+                where pr.profile_id = p_actor_profile_id and pr.role = 'admin')
+  ) then
+    raise exception 'lmc_actor_not_authorized: the initiating actor must own the debited account or be an admin'
+      using errcode = '42501';
+  end if;
+
   if v_account is null then
     raise exception 'lmc_insufficient_balance' using errcode = 'P0001';
   end if;
