@@ -81,9 +81,18 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     );
   });
 
-  it("no fabricated verification anywhere", () => {
-    expect(migration).not.toMatch(/verified\s*(=|,)\s*true/i);
-    expect(migration).not.toMatch(/manager_confirmed/);
+  it("no fabricated verification outside the verbatim manager-confirm RPC", () => {
+    // confirm_entry_and_verify_skills is copied VERBATIM from 20260530140000
+    // (the real, manager-gated verification flow) plus only a stale check —
+    // everything else in the migration must never write verification.
+    const confirmStart = migration.indexOf(
+      "create or replace function public.confirm_entry_and_verify_skills(",
+    );
+    const confirmEnd = migration.indexOf("end $$;", confirmStart) + 7;
+    const outside =
+      migration.slice(0, confirmStart) + migration.slice(confirmEnd);
+    expect(outside).not.toMatch(/verified\s*=\s*true/i);
+    expect(outside).not.toMatch(/set\s+verified/i);
   });
 
   it("grants stay authenticated-only", () => {
@@ -119,9 +128,13 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
 
   it("one-time backfill repairs pre-migration stranded photos safely (Codex rev2 P1)", () => {
     expect(migration).toMatch(/with recursive chain as \(/i);
-    // Termination + single-mover-per-tip hardening.
-    expect(migration).toMatch(/c\.depth \+ 1[\s\S]*where c\.depth < 100/i);
+    // Explicit cycle detection (owner-hold v4 item 6) + single-mover-per-tip.
+    expect(migration).toMatch(/array\[je\.id\] as path/i);
+    expect(migration).toMatch(/not \(n\.id = any\(c\.path\)\)/i);
+    expect(migration).not.toMatch(/c\.depth/i);
     expect(migration).toMatch(/select distinct on \(l\.live_entry_id\)/i);
+    // Cutover quiesce (owner-hold v4 item 5).
+    expect(migration).toMatch(/lock table public\.journal_entries in exclusive mode/i);
     // Only ACTIVE stranded rows, only to a LIVE non-deleted tip.
     expect(migration).toMatch(
       /je\.superseded_by is not null[\s\S]*tip\.deleted_at is null/i,
@@ -129,6 +142,69 @@ describe("W1 migration — photo continuity inside the atomic supersede", () => 
     // Never creates a second active attachment on the tip.
     expect(migration).toMatch(
       /not exists \(\s*select 1 from public\.journal_entry_photos q\s+where q\.entry_id = l\.live_entry_id/i,
+    );
+  });
+});
+
+describe("W1 rev7 — confirmation lifecycle serialization (owner-hold v4)", () => {
+  it("BEFORE INSERT guard trigger serializes every confirmation path", () => {
+    expect(migration).toMatch(
+      /create or replace function public\.journal_entry_confirmations_guard\(\)/i,
+    );
+    expect(migration).toMatch(
+      /from public\.journal_entries\s+where id = new\.entry_id\s+for key share/i,
+    );
+    expect(migration).toMatch(
+      /create trigger journal_entry_confirmations_guard\s+before insert on public\.journal_entry_confirmations/i,
+    );
+    const guard = migration.slice(
+      migration.indexOf("journal_entry_confirmations_guard()"),
+    );
+    expect(guard).toContain(`raise exception 'entry_superseded'`);
+    expect(guard).toContain(`raise exception 'entry_deleted'`);
+  });
+
+  it("interactive confirmation RPCs return clean stale statuses", () => {
+    for (const fn of ["review_journal_entry", "confirm_entry_and_verify_skills"]) {
+      const body = migration.slice(
+        migration.indexOf(`create or replace function public.${fn}(`),
+      );
+      const end = body.indexOf("end $$;");
+      expect(body.slice(0, end)).toContain(`return 'entry_superseded';`);
+      expect(body.slice(0, end)).toContain(`return 'entry_deleted';`);
+    }
+  });
+
+  it("direct-insert policy refuses stale targets (defense in depth)", () => {
+    const pol = migration.slice(
+      migration.indexOf(
+        "create policy journal_entry_confirmations_insert",
+      ),
+    );
+    const polEnd = pol.indexOf(");");
+    expect(pol.slice(0, polEnd)).toMatch(/je\.superseded_by is null/i);
+    expect(pol.slice(0, polEnd)).toMatch(/je\.deleted_at is null/i);
+  });
+
+  it("rollback drops the guard trigger and restores original RPCs + policy", () => {
+    expect(rollback).toMatch(
+      /drop trigger if exists journal_entry_confirmations_guard/i,
+    );
+    expect(rollback).toMatch(
+      /drop function if exists public\.journal_entry_confirmations_guard\(\)/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.review_journal_entry\(/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.confirm_entry_and_verify_skills\(/i,
+    );
+    // Restored policy is the ORIGINAL (no staleness predicate).
+    const rbPol = rollback.slice(
+      rollback.indexOf("create policy journal_entry_confirmations_insert"),
+    );
+    expect(rbPol.slice(0, rbPol.indexOf(");"))).not.toMatch(
+      /superseded_by is null/i,
     );
   });
 });

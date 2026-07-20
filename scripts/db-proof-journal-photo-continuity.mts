@@ -862,6 +862,164 @@ async function main(): Promise<void> {
     );
   }
 
+  // ═══ Owner-hold v4 C-matrix: confirmation serialization + cutover ═══
+
+  // ── C1: confirmation commits FIRST → racing supersede takes the correction
+  //    lane and the photo STAYS on the confirmed source (item 1).
+  {
+    const f = await makeFixture(a, `${tag}-c1`);
+    const org = await makeOrgManager(a, `${tag}-c1o`);
+    const { rows: ec } = await a.query(
+      `insert into public.engagement_contexts (profile_id, organization_id, relationship_slug, title, hash_self, journal_review_enabled)
+       values ($1::uuid, $2, 'employee', 'W1 c1 ec', md5($1 || clock_timestamp()::text), true) returning id`,
+      [f.profileId, org.orgId],
+    );
+    const { rows: er } = await a.query(
+      `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+       values ($1, $2, 'freeform', 'c1 su nuotrauka', 'lt', md5('c1' || clock_timestamp()::text), 'closed') returning id`,
+      [f.workerId, ec[0].id],
+    );
+    const A = er[0].id as string;
+    const cu = await asUser(f.profileId);
+    const { photoId } = await addPhoto(cu, f, A);
+    const { rows: mgrCtx } = await a.query(
+      `select id, relationship_slug from public.engagement_contexts where profile_id = $1 limit 1`,
+      [org.managerId],
+    );
+    // c1 txn: confirmation INSERT held open (KEY SHARE on A) …
+    const cConf = new Client({ connectionString: DB_URL });
+    await cConf.connect();
+    await cConf.query("begin");
+    await cConf.query(
+      `insert into public.journal_entry_confirmations
+         (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+       values ($1, $2, $3, 'manager', '{"action":"confirm","decision":"approved"}'::jsonb)`,
+      [A, org.managerId, mgrCtx[0].id],
+    );
+    // … while the supersede races (must BLOCK on FOR UPDATE vs KEY SHARE).
+    const s = supersedeSql(A, f, "c1 keitimas per lenktynes");
+    const supPromise = cu.query(s.sql, s.params);
+    let supersedeFinishedEarly = false;
+    await new Promise((r) => setTimeout(r, 1200));
+    void supPromise.then(() => { supersedeFinishedEarly = true; }).catch(() => { supersedeFinishedEarly = true; });
+    await new Promise((r) => setTimeout(r, 100));
+    const blockedWhileHeld = !supersedeFinishedEarly;
+    await cConf.query("commit");
+    await cConf.end();
+    const supRows = await supPromise; // now unblocks
+    const B = supRows.rows[0].id as string;
+    const { rows: oldRow } = await a.query(
+      `select superseded_by from public.journal_entries where id = $1`, [A]);
+    const { rows: newRow } = await a.query(
+      `select correction_of from public.journal_entries where id = $1`, [B]);
+    const { rows: photo } = await a.query(
+      `select entry_id from public.journal_entry_photos where id = $1`, [photoId]);
+    record(
+      "C1 confirm-first race: supersede blocked, correction lane taken, photo STAYS on confirmed source",
+      blockedWhileHeld && oldRow[0].superseded_by === null &&
+        newRow[0].correction_of === A && photo[0].entry_id === A,
+      `blocked=${blockedWhileHeld} correctionLane=${newRow[0].correction_of === A} photoOnSource=${photo[0].entry_id === A}`,
+    );
+
+    // ── C2 (same fixtures): supersede-first → stale confirmations REFUSED.
+    // The correction B is unconfirmed → supersede B → B hidden; confirming B
+    // must now fail on every path.
+    const s2 = supersedeSql(B, f, "c2 antras keitimas");
+    await cu.query(s2.sql, s2.params);
+    let directErr = "";
+    try {
+      await a.query(
+        `insert into public.journal_entry_confirmations
+           (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+         values ($1, $2, $3, 'manager', '{"action":"confirm"}'::jsonb)`,
+        [B, org.managerId, mgrCtx[0].id],
+      );
+    } catch (e) {
+      directErr = String((e as Error).message);
+    }
+    const cMgr = await asUser(org.managerId);
+    const { rows: rpcStatus } = await cMgr.query(
+      `select public.review_journal_entry($1::uuid, 'approved') as status`, [B]);
+    record(
+      "C2 supersede-first: stale confirmation refused on BOTH paths (trigger + RPC status)",
+      directErr.includes("entry_superseded") && rpcStatus[0].status === "entry_superseded",
+      `direct=${directErr.slice(0, 22)} rpc=${rpcStatus[0].status}`,
+    );
+
+    // ── C3: deleted entry → entry_deleted on both paths.
+    const { rows: dRows } = await a.query(
+      `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope, deleted_at)
+       values ($1, $2, 'freeform', 'c3 istrintas', 'lt', md5('c3' || clock_timestamp()::text), 'closed', now()) returning id`,
+      [f.workerId, ec[0].id],
+    );
+    const D = dRows[0].id as string;
+    let delErr = "";
+    try {
+      await a.query(
+        `insert into public.journal_entry_confirmations
+           (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+         values ($1, $2, $3, 'manager', '{"action":"confirm"}'::jsonb)`,
+        [D, org.managerId, mgrCtx[0].id],
+      );
+    } catch (e) {
+      delErr = String((e as Error).message);
+    }
+    const { rows: delStatus } = await cMgr.query(
+      `select public.review_journal_entry($1::uuid, 'approved') as status`, [D]);
+    record(
+      "C3 deleted entry: confirmation refused with entry_deleted (trigger + RPC status)",
+      delErr.includes("entry_deleted") && delStatus[0].status === "entry_deleted",
+      `direct=${delErr.slice(0, 18)} rpc=${delStatus[0].status}`,
+    );
+    await cMgr.end();
+    await cu.end();
+  }
+
+  // ── C4: cutover quiesce — an in-flight pre-migration writer transaction
+  //    blocks the migration apply; the backfill then sees its supersede.
+  {
+    const { readFileSync } = await import("node:fs");
+    const { join, dirname } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const here = dirname(fileURLToPath(import.meta.url));
+    const migrationSql = readFileSync(
+      join(here, "..", "supabase", "migrations", "20260720150000_journal_photo_continuity_v1.sql"),
+      "utf-8",
+    );
+    const f = await makeFixture(a, `${tag}-c4`);
+    const A = await makeEntry(a, f, "c4 senas rasytojas");
+    const B = await makeEntry(a, f, "c4 naujas galas");
+    const cu = await asUser(f.profileId);
+    const { photoId } = await addPhoto(cu, f, A);
+    // In-flight OLD-function-shaped writer: supersedes A→B WITHOUT a photo
+    // move, transaction held open.
+    const writer = new Client({ connectionString: DB_URL });
+    await writer.connect();
+    await writer.query("begin");
+    await writer.query(
+      `update public.journal_entries set superseded_by = $2 where id = $1`, [A, B]);
+    // Migration apply must BLOCK on `lock table … in exclusive mode`.
+    const applier = new Client({ connectionString: DB_URL });
+    await applier.connect();
+    const applyPromise = applier.query(migrationSql);
+    let applyFinishedEarly = false;
+    void applyPromise.then(() => { applyFinishedEarly = true; }).catch(() => { applyFinishedEarly = true; });
+    await new Promise((r) => setTimeout(r, 1500));
+    const blocked = !applyFinishedEarly;
+    await writer.query("commit");
+    await writer.end();
+    await applyPromise;
+    await applier.end();
+    const { rows: photo } = await a.query(
+      `select entry_id from public.journal_entry_photos where id = $1`, [photoId]);
+    record(
+      "C4 cutover quiesce: apply blocked behind in-flight writer, backfill then repaired it",
+      blocked && photo[0].entry_id === B,
+      `applyBlocked=${blocked} photoRepairedToLive=${photo[0].entry_id === B}`,
+    );
+    await cu.end();
+  }
+
   // ── L7: rollback round-trip — behavioral revert, retained authorization ─
   {
     const { readFileSync } = await import("node:fs");

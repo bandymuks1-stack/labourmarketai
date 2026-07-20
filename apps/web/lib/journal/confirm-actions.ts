@@ -172,7 +172,19 @@ export async function confirmEntry(formData: FormData): Promise<void> {
     confirmer_role: auth.role,
     confirmation_scope: { action: "confirm", skills_confirmed: [], metrics_confirmed: [] },
   });
-  if (cErr) throw new Error(`confirmation insert failed: ${cErr.message}`);
+  if (cErr) {
+    // W1: the DB guard trigger refuses confirmations on superseded/deleted
+    // entries (serialized against the supersede row lock) - surface honestly.
+    if (cErr.message?.includes("entry_superseded")) {
+      throw new Error(
+        "Irasas jau buvo pakeistas naujesne versija - patvirtinkite naujausia versija.",
+      );
+    }
+    if (cErr.message?.includes("entry_deleted")) {
+      throw new Error("Irasas pasalintas - patvirtinti nebegalima.");
+    }
+    throw new Error(`confirmation insert failed: ${cErr.message}`);
+  }
 
   // M1: approval verifies all the worker's self-declared skills under this
   // entry's profession (selective scoping arrives in M2) + recomputes
@@ -219,7 +231,17 @@ export async function rejectEntry(formData: FormData): Promise<void> {
     confirmer_role: auth.role,
     confirmation_scope: { action: "reject", reason },
   });
-  if (error) throw new Error(`rejection insert failed: ${error.message}`);
+  if (error) {
+    if (error.message?.includes("entry_superseded")) {
+      throw new Error(
+        "Irasas jau buvo pakeistas naujesne versija - atmeskite naujausia versija.",
+      );
+    }
+    if (error.message?.includes("entry_deleted")) {
+      throw new Error("Irasas pasalintas - atmesti nebegalima.");
+    }
+    throw new Error(`rejection insert failed: ${error.message}`);
+  }
 
   revalidatePath(`/${locale}/dashboard/inbox`);
 }

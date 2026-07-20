@@ -19,6 +19,12 @@
 --   4. journal_entry_photos UPDATE tightened: WITH CHECK added and the column
 --      grant restricted to upload_status only, so a worker cannot repoint a
 --      photo row's entry_id and redirect authorization.
+--   5. Confirmation lifecycle serialized (owner-hold v4): BEFORE INSERT
+--      guard trigger on journal_entry_confirmations (FOR KEY SHARE vs the
+--      supersedes' FOR UPDATE), stale statuses in the interactive RPCs,
+--      staleness predicate in the direct-insert policy, EXCLUSIVE-mode
+--      cutover quiesce before the backfill, and explicit path-based cycle
+--      detection in the backfill CTE.
 -- Human-gated application per the train's RED migration discipline - DRY-RUN
 -- ONLY until explicit owner approval; never self-applied.
 --
@@ -296,6 +302,15 @@ begin
 end;
 $$;
 
+-- == 1a. Cutover quiesce (owner-hold v4 item 5) ==
+-- A writer transaction that began BEFORE this migration commits still runs
+-- the OLD function bodies (no photo move). EXCLUSIVE mode conflicts with
+-- every row-writing lock, so this statement waits for all in-flight journal
+-- writers to finish and blocks new ones until this migration commits — the
+-- backfill below therefore sees every completed supersede. Reads continue.
+
+lock table public.journal_entries in exclusive mode;
+
 -- == 1b. One-time repair: photos stranded by supersedes completed between ==
 -- the W0 production deploy and this migration (Codex rev2 P1). Follow each
 -- ACTIVE stranded photo's supersede chain to its LIVE, non-deleted tip and
@@ -305,19 +320,21 @@ $$;
 -- no stranded active rows left, so a re-run matches nothing.
 
 with recursive chain as (
-  select p.id as photo_id, je.id as entry_id, je.superseded_by, 1 as depth
+  select p.id as photo_id, je.id as entry_id, je.superseded_by,
+         array[je.id] as path
     from public.journal_entry_photos p
     join public.journal_entries je on je.id = p.entry_id
    where p.upload_status in ('uploading','uploaded')
      and je.superseded_by is not null
   union all
-  -- Depth guard: legitimate writers keep this graph acyclic, but the apply
-  -- must terminate even against adversarially pre-positioned pointer cycles
-  -- (a cycle never yields a live tip, so its photos simply stay put).
-  select c.photo_id, n.id, n.superseded_by, c.depth + 1
+  -- Explicit cycle detection: legitimate writers keep this graph acyclic,
+  -- but the apply must terminate even against adversarially pre-positioned
+  -- pointer cycles. A node already on the traversal path is never revisited,
+  -- so a cycle simply never yields a live tip and its photos stay put.
+  select c.photo_id, n.id, n.superseded_by, c.path || n.id
     from chain c
     join public.journal_entries n on n.id = c.superseded_by
-   where c.depth < 100
+   where not (n.id = any(c.path))
 ),
 live_tip as (
   select c.photo_id, c.entry_id as live_entry_id
@@ -599,6 +616,189 @@ begin
 
   return resolved_id;
 end $$;
+
+-- == 2b. Serialize EVERY confirmation path with the supersedes ==
+-- (owner-hold v4 items 1-4). ONE BEFORE INSERT guard trigger is the hard
+-- serialization point for every insert path into journal_entry_confirmations
+-- (review_journal_entry, confirm_entry_and_verify_skills,
+-- apply_learning_auto_confirmation, the app's direct inserts, and any future
+-- compatibility path): its FOR KEY SHARE read conflicts with the supersedes'
+-- FOR UPDATE, so
+--   * a confirmation committed first makes the racing supersede take the
+--     correction lane -> the photo STAYS on the confirmed source (item 1);
+--   * a supersede committed first makes the racing confirmation re-read the
+--     row and be REFUSED with a structured error (item 3).
+
+create or replace function public.journal_entry_confirmations_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_superseded uuid;
+  v_deleted    timestamptz;
+begin
+  select superseded_by, deleted_at
+    into v_superseded, v_deleted
+    from public.journal_entries
+   where id = new.entry_id
+   for key share;
+  if not found then
+    raise exception 'entry_not_found' using errcode = 'P0002';
+  end if;
+  if v_deleted is not null then
+    raise exception 'entry_deleted' using errcode = '42P10';
+  end if;
+  if v_superseded is not null then
+    raise exception 'entry_superseded' using errcode = '55000';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists journal_entry_confirmations_guard
+  on public.journal_entry_confirmations;
+create trigger journal_entry_confirmations_guard
+  before insert on public.journal_entry_confirmations
+  for each row execute function public.journal_entry_confirmations_guard();
+
+-- Defense in depth: the direct-insert RLS policy also refuses stale targets
+-- (the trigger remains the race-proof guarantee).
+drop policy if exists journal_entry_confirmations_insert
+  on public.journal_entry_confirmations;
+create policy journal_entry_confirmations_insert on public.journal_entry_confirmations for insert
+  with check (
+    confirmer_id = auth.uid()
+    and exists (select 1 from public.journal_entries je
+                 join public.engagement_contexts ec on ec.id = je.engagement_context_id
+                where je.id = journal_entry_confirmations.entry_id
+                  and je.superseded_by is null
+                  and je.deleted_at is null
+                  and manages_organization(ec.organization_id))
+  );
+
+-- Clean stale statuses in the interactive confirmation RPCs (bodies from
+-- 20260530140000 verbatim + the stale check; apply_learning_auto_confirmation
+-- is covered by the guard trigger).
+
+create or replace function public.review_journal_entry(
+  p_entry_id uuid, p_decision text, p_note text default null)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  v_org uuid; v_worker uuid; v_eng uuid; v_role text; v_action text; v_enabled boolean;
+  v_superseded uuid; v_deleted timestamptz;
+begin
+  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if p_decision not in ('approved','rejected','changes_requested') then return 'invalid_decision'; end if;
+
+  select ec.organization_id, je.worker_id, coalesce(ec.journal_review_enabled, false),
+         je.superseded_by, je.deleted_at
+    into v_org, v_worker, v_enabled, v_superseded, v_deleted
+  from public.journal_entries je
+  join public.engagement_contexts ec on ec.id = je.engagement_context_id
+  where je.id = p_entry_id;
+  if not found then return 'entry_not_found'; end if;
+  -- Stale-confirmation refusal (owner-hold v4 items 2/3): a superseded or
+  -- deleted entry can no longer be confirmed. The BEFORE INSERT guard
+  -- trigger on journal_entry_confirmations is the hard serialization point;
+  -- this check returns the clean status in the common (non-racing) case.
+  if v_deleted is not null then return 'entry_deleted'; end if;
+  if v_superseded is not null then return 'entry_superseded'; end if;
+  if v_org is null then return 'entry_not_org_scoped'; end if;
+  if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;
+  if not v_enabled then return 'review_not_enabled'; end if;
+
+  select ec.id, ec.relationship_slug into v_eng, v_role
+  from public.engagement_contexts ec
+  where ec.profile_id = uid and ec.organization_id = v_org and ec.status = 'active'
+    and ec.relationship_slug in ('manager','owner','external_manager') limit 1;
+  if v_eng is null then return 'no_reviewer_engagement'; end if;
+
+  v_action := case p_decision when 'approved' then 'confirm'
+                              when 'rejected' then 'reject'
+                              else 'request_changes' end;
+
+  insert into public.journal_entry_confirmations
+    (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+  values (p_entry_id, uid, v_eng, v_role,
+    jsonb_build_object('action', v_action, 'decision', p_decision,
+      'note', nullif(btrim(coalesce(p_note,'')), '')));
+
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'review_journal_entry', 'journal_entries', p_entry_id,
+    jsonb_build_object('decision', p_decision, 'organization_id', v_org, 'worker_id', v_worker));
+  return p_decision;
+end $$;
+
+create or replace function public.confirm_entry_and_verify_skills(
+  p_entry_id uuid, p_skill_ids uuid[], p_note text default null)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  v_org uuid; v_worker uuid; v_eng uuid; v_role text; v_enabled boolean; v_n int;
+  v_superseded uuid; v_deleted timestamptz;
+begin
+  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if p_skill_ids is null or array_length(p_skill_ids, 1) is null then return 'no_skills'; end if;
+
+  select ec.organization_id, je.worker_id, coalesce(ec.journal_review_enabled, false),
+         je.superseded_by, je.deleted_at
+    into v_org, v_worker, v_enabled, v_superseded, v_deleted
+  from public.journal_entries je
+  join public.engagement_contexts ec on ec.id = je.engagement_context_id
+  where je.id = p_entry_id;
+  if not found then return 'entry_not_found'; end if;
+  -- Stale-confirmation refusal (owner-hold v4 items 2/3): a superseded or
+  -- deleted entry can no longer be confirmed. The BEFORE INSERT guard
+  -- trigger on journal_entry_confirmations is the hard serialization point;
+  -- this check returns the clean status in the common (non-racing) case.
+  if v_deleted is not null then return 'entry_deleted'; end if;
+  if v_superseded is not null then return 'entry_superseded'; end if;
+  if v_org is null then return 'entry_not_org_scoped'; end if;
+  if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;
+  if not v_enabled then return 'review_not_enabled'; end if;
+
+  -- Every confirmed skill must actually belong to this worker.
+  if exists (
+    select 1 from unnest(p_skill_ids) sid
+    where not exists (select 1 from public.worker_skills ws
+                       where ws.worker_id = v_worker and ws.skill_id = sid)
+  ) then return 'skill_not_owned'; end if;
+
+  select ec.id, ec.relationship_slug into v_eng, v_role
+  from public.engagement_contexts ec
+  where ec.profile_id = uid and ec.organization_id = v_org and ec.status = 'active'
+    and ec.relationship_slug in ('manager','owner','external_manager') limit 1;
+  if v_eng is null then return 'no_reviewer_engagement'; end if;
+
+  -- 1) record the confirmation (append-only) against the reviewer's engagement
+  insert into public.journal_entry_confirmations
+    (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+  values (p_entry_id, uid, v_eng, v_role,
+    jsonb_build_object('action','confirm','decision','approved',
+      'skills_confirmed', to_jsonb(p_skill_ids),
+      'note', nullif(btrim(coalesce(p_note,'')), '')));
+
+  -- 2) THE PROOF: flip the confirmed declared skills to verified
+  update public.worker_skills
+     set verified = true, verified_by = uid, verified_at = now(),
+         source = 'manager_confirmed', confidence_bin = 'green', updated_at = now()
+   where worker_id = v_worker and skill_id = any(p_skill_ids)
+     and (verified is distinct from true);
+  get diagnostics v_n = row_count;
+
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'confirm_entry_and_verify_skills', 'journal_entries', p_entry_id,
+    jsonb_build_object('organization_id', v_org, 'worker_id', v_worker,
+      'skills_confirmed', to_jsonb(p_skill_ids), 'skills_newly_verified', v_n));
+  return 'verified:' || v_n::text;
+end $$;
+
+revoke all on function public.review_journal_entry(uuid, text, text) from public;
+grant execute on function public.review_journal_entry(uuid, text, text) to authenticated;
+revoke all on function public.confirm_entry_and_verify_skills(uuid, uuid[], text) from public;
+grant execute on function public.confirm_entry_and_verify_skills(uuid, uuid[], text) to authenticated;
 
 -- == 3. One coherent authorization source for storage reads (owner-hold P1) ==
 -- The org-manager storage policy now resolves the CANONICAL metadata row by

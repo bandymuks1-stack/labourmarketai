@@ -473,4 +473,125 @@ grant execute on function public.journal_entry_supersede(
   uuid, uuid, text, uuid, text, char(2), text, text, jsonb
 ) to authenticated;
 
+-- Owner-hold v4 reverts: remove the confirmation guard trigger, restore the
+-- 20260530140000 RPC bodies and the 0013 direct-insert policy verbatim.
+
+drop trigger if exists journal_entry_confirmations_guard
+  on public.journal_entry_confirmations;
+drop function if exists public.journal_entry_confirmations_guard();
+
+create or replace function public.review_journal_entry(
+  p_entry_id uuid, p_decision text, p_note text default null)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  v_org uuid; v_worker uuid; v_eng uuid; v_role text; v_action text; v_enabled boolean;
+begin
+  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if p_decision not in ('approved','rejected','changes_requested') then return 'invalid_decision'; end if;
+
+  select ec.organization_id, je.worker_id, coalesce(ec.journal_review_enabled, false)
+    into v_org, v_worker, v_enabled
+  from public.journal_entries je
+  join public.engagement_contexts ec on ec.id = je.engagement_context_id
+  where je.id = p_entry_id;
+  if not found then return 'entry_not_found'; end if;
+  if v_org is null then return 'entry_not_org_scoped'; end if;
+  if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;
+  if not v_enabled then return 'review_not_enabled'; end if;
+
+  select ec.id, ec.relationship_slug into v_eng, v_role
+  from public.engagement_contexts ec
+  where ec.profile_id = uid and ec.organization_id = v_org and ec.status = 'active'
+    and ec.relationship_slug in ('manager','owner','external_manager') limit 1;
+  if v_eng is null then return 'no_reviewer_engagement'; end if;
+
+  v_action := case p_decision when 'approved' then 'confirm'
+                              when 'rejected' then 'reject'
+                              else 'request_changes' end;
+
+  insert into public.journal_entry_confirmations
+    (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+  values (p_entry_id, uid, v_eng, v_role,
+    jsonb_build_object('action', v_action, 'decision', p_decision,
+      'note', nullif(btrim(coalesce(p_note,'')), '')));
+
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'review_journal_entry', 'journal_entries', p_entry_id,
+    jsonb_build_object('decision', p_decision, 'organization_id', v_org, 'worker_id', v_worker));
+  return p_decision;
+end $$;
+
+create or replace function public.confirm_entry_and_verify_skills(
+  p_entry_id uuid, p_skill_ids uuid[], p_note text default null)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  v_org uuid; v_worker uuid; v_eng uuid; v_role text; v_enabled boolean; v_n int;
+begin
+  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if p_skill_ids is null or array_length(p_skill_ids, 1) is null then return 'no_skills'; end if;
+
+  select ec.organization_id, je.worker_id, coalesce(ec.journal_review_enabled, false)
+    into v_org, v_worker, v_enabled
+  from public.journal_entries je
+  join public.engagement_contexts ec on ec.id = je.engagement_context_id
+  where je.id = p_entry_id;
+  if not found then return 'entry_not_found'; end if;
+  if v_org is null then return 'entry_not_org_scoped'; end if;
+  if not (public.is_admin() or public.manages_organization(v_org)) then return 'not_authorized'; end if;
+  if not v_enabled then return 'review_not_enabled'; end if;
+
+  -- Every confirmed skill must actually belong to this worker.
+  if exists (
+    select 1 from unnest(p_skill_ids) sid
+    where not exists (select 1 from public.worker_skills ws
+                       where ws.worker_id = v_worker and ws.skill_id = sid)
+  ) then return 'skill_not_owned'; end if;
+
+  select ec.id, ec.relationship_slug into v_eng, v_role
+  from public.engagement_contexts ec
+  where ec.profile_id = uid and ec.organization_id = v_org and ec.status = 'active'
+    and ec.relationship_slug in ('manager','owner','external_manager') limit 1;
+  if v_eng is null then return 'no_reviewer_engagement'; end if;
+
+  -- 1) record the confirmation (append-only) against the reviewer's engagement
+  insert into public.journal_entry_confirmations
+    (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+  values (p_entry_id, uid, v_eng, v_role,
+    jsonb_build_object('action','confirm','decision','approved',
+      'skills_confirmed', to_jsonb(p_skill_ids),
+      'note', nullif(btrim(coalesce(p_note,'')), '')));
+
+  -- 2) THE PROOF: flip the confirmed declared skills to verified
+  update public.worker_skills
+     set verified = true, verified_by = uid, verified_at = now(),
+         source = 'manager_confirmed', confidence_bin = 'green', updated_at = now()
+   where worker_id = v_worker and skill_id = any(p_skill_ids)
+     and (verified is distinct from true);
+  get diagnostics v_n = row_count;
+
+  insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+  values (uid, 'confirm_entry_and_verify_skills', 'journal_entries', p_entry_id,
+    jsonb_build_object('organization_id', v_org, 'worker_id', v_worker,
+      'skills_confirmed', to_jsonb(p_skill_ids), 'skills_newly_verified', v_n));
+  return 'verified:' || v_n::text;
+end $$;
+
+revoke all on function public.review_journal_entry(uuid, text, text) from public;
+grant execute on function public.review_journal_entry(uuid, text, text) to authenticated;
+revoke all on function public.confirm_entry_and_verify_skills(uuid, uuid[], text) from public;
+grant execute on function public.confirm_entry_and_verify_skills(uuid, uuid[], text) to authenticated;
+
+drop policy if exists journal_entry_confirmations_insert
+  on public.journal_entry_confirmations;
+create policy journal_entry_confirmations_insert on public.journal_entry_confirmations for insert
+  with check (
+    confirmer_id = auth.uid()
+    and exists (select 1 from public.journal_entries je
+                 join public.engagement_contexts ec on ec.id = je.engagement_context_id
+                where je.id = journal_entry_confirmations.entry_id
+                  and manages_organization(ec.organization_id))
+  );
+
 commit;
