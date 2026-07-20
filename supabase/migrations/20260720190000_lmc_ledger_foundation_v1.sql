@@ -457,15 +457,30 @@ declare
   v_amount constant bigint := 5000; -- 50 LMC, fixed
   v_expires timestamptz := now() + interval '60 days';
 begin
-  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
-    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
-  end if;
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_kind not in ('promotional_signup', 'promotional_activity') then
     raise exception 'lmc_invalid_promotional_kind: %', p_kind using errcode = '22023';
   end if;
   if p_campaign is null or char_length(trim(p_campaign)) = 0 then
     raise exception 'lmc_campaign_required' using errcode = '22023';
+  end if;
+
+  -- Committed exact replays resolve BEFORE the kill-switch: a disabled flag
+  -- blocks NEW grants but never the acknowledgement of an already-committed
+  -- one (a replay must stay idempotent across flag flips).
+  select id into v_account from public.lmc_accounts
+   where profile_id = p_profile_id;
+  if v_account is not null then
+    v_existing := public.lmc_existing_by_idempotency_v1(
+      v_account, p_idempotency_key, p_kind,
+      p_amount_cents => v_amount, p_campaign => p_campaign);
+    if v_existing is not null then
+      return v_existing;
+    end if;
+  end if;
+
+  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
+    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
   end if;
   -- Verified signup only: the recipient must have a confirmed email.
   if not exists (
@@ -531,9 +546,6 @@ declare
   v_existing jsonb;
   v_tx uuid;
 begin
-  if not public.lmc_flag_enabled('lmc_purchases_enabled') then
-    raise exception 'lmc_purchases_disabled' using errcode = '42501';
-  end if;
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
@@ -541,6 +553,27 @@ begin
   if p_reference is null or char_length(trim(p_reference)) = 0
      or char_length(p_reference) > 200 then
     raise exception 'lmc_reference_required' using errcode = '22023';
+  end if;
+  if (p_profile_id is null) = (p_company_id is null) then
+    raise exception 'lmc_invalid_subject: exactly one of profile or company required'
+      using errcode = '22023';
+  end if;
+
+  -- Committed exact replays resolve BEFORE the kill-switch (see grant RPC).
+  select id into v_account from public.lmc_accounts
+   where (p_profile_id is not null and profile_id = p_profile_id)
+      or (p_company_id is not null and company_id = p_company_id);
+  if v_account is not null then
+    v_existing := public.lmc_existing_by_idempotency_v1(
+      v_account, p_idempotency_key, 'purchased',
+      p_amount_cents => p_amount_cents, p_reference => p_reference);
+    if v_existing is not null then
+      return v_existing;
+    end if;
+  end if;
+
+  if not public.lmc_flag_enabled('lmc_purchases_enabled') then
+    raise exception 'lmc_purchases_disabled' using errcode = '42501';
   end if;
 
   v_account := public.lmc_ensure_account_v1(p_profile_id, p_company_id);
@@ -606,9 +639,6 @@ begin
   if not public.is_admin() then
     raise exception 'Admin only' using errcode = '42501';
   end if;
-  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
-    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
-  end if;
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > v_cap then
     raise exception 'lmc_invalid_amount: must be positive and <= % LMC-cents', v_cap
@@ -669,6 +699,12 @@ begin
         'already_processed', true);
     end if;
   end;
+
+  -- Kill-switch AFTER replay resolution: a disabled flag blocks NEW grants,
+  -- never the acknowledgement of an already-committed one.
+  if not public.lmc_flag_enabled('lmc_promotional_grants_enabled') then
+    raise exception 'lmc_promotional_grants_disabled' using errcode = '42501';
+  end if;
 
   -- Verified recipient resolution: confirmed email, existing profile.
   select u.id, u.email into v_recipient, v_email
@@ -746,11 +782,6 @@ declare
   v_available bigint;
   r record;
 begin
-  -- DB-level kill-switch: when spending is disabled, even already-issued
-  -- credits are frozen (complete behavioural rollback of commerce).
-  if not public.lmc_flag_enabled('lmc_spending_enabled') then
-    raise exception 'lmc_spending_disabled' using errcode = '42501';
-  end if;
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
@@ -765,6 +796,24 @@ begin
   select id into v_account from public.lmc_accounts
    where (p_profile_id is not null and profile_id = p_profile_id)
       or (p_company_id is not null and company_id = p_company_id);
+
+  -- Committed exact replays resolve BEFORE the kill-switch: a retried spend
+  -- that already debited the balance must report already_processed, not a
+  -- disabled error (which would invite a second spend under a new key).
+  if v_account is not null then
+    v_existing := public.lmc_existing_by_idempotency_v1(
+      v_account, p_idempotency_key, 'spend',
+      p_amount_cents => p_amount_cents);
+    if v_existing is not null then
+      return v_existing;
+    end if;
+  end if;
+
+  -- DB-level kill-switch: when spending is disabled, even already-issued
+  -- credits are frozen for NEW spends (complete behavioural rollback).
+  if not public.lmc_flag_enabled('lmc_spending_enabled') then
+    raise exception 'lmc_spending_disabled' using errcode = '42501';
+  end if;
   if v_account is null then
     raise exception 'lmc_insufficient_balance' using errcode = 'P0001';
   end if;

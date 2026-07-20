@@ -36,6 +36,8 @@
  *        replay with a different expiry conflicts (same expiry replays)
  *   P27  admin-grant replay survives email reassignment (no duplicate grant
  *        to the address's new owner; different recipient conflicts)
+ *   P28  committed replays resolve across kill-switch flips (flags off →
+ *        replays return already_processed; NEW operations stay blocked)
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -935,6 +937,99 @@ async function main() {
       "P21-concurrent-same-key-single-result",
       n[0].n === 1 && fulfilled.length === 2 && txIds.size === 1,
       `rows=${n[0].n} fulfilled=${fulfilled.length} distinct-tx=${txIds.size}`,
+    );
+  }
+
+  // ── P28: committed replays resolve across kill-switch flips ───────────────
+  {
+    const u10 = await makePerson(a, "u10");
+    const { rows: ts28 } = await a.query(
+      `select (now() + interval '15 days') as t`,
+    );
+    const exp28 = ts28[0].t as Date;
+    const { rows: buy } = await a.query(
+      `select public.lmc_record_purchase_v1(2000, 'p28-ref', 'p28-buy-${RUN}', $1, null) as r`,
+      [u10],
+    );
+    const { rows: spend } = await a.query(
+      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null) as r`,
+      [u10],
+    );
+    const { rows: promo } = await a.query(
+      `select public.lmc_grant_promotional_v1('promotional_signup', $1, 'p28-campaign', 'p28-promo-${RUN}') as r`,
+      [u10],
+    );
+    const admConn = await asUser(adm);
+    const { rows: ag } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 300, 'p28 grant', 'p28-campaign', $2, 'p28-admin-${RUN}') as r`,
+      [`${RUN}-u10@fixture.local`, exp28],
+    );
+
+    // Emergency rollback: every commerce flag off.
+    await setFlag(a, "lmc_purchases_enabled", false);
+    await setFlag(a, "lmc_promotional_grants_enabled", false);
+    await setFlag(a, "lmc_spending_enabled", false);
+
+    const { rows: buyR } = await a.query(
+      `select public.lmc_record_purchase_v1(2000, 'p28-ref', 'p28-buy-${RUN}', $1, null) as r`,
+      [u10],
+    );
+    const { rows: spendR } = await a.query(
+      `select public.lmc_spend_v1(500, 'p28 spend', 'p28-spend-${RUN}', $1, null) as r`,
+      [u10],
+    );
+    const { rows: promoR } = await a.query(
+      `select public.lmc_grant_promotional_v1('promotional_signup', $1, 'p28-campaign', 'p28-promo-${RUN}') as r`,
+      [u10],
+    );
+    const { rows: agR } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 300, 'p28 grant', 'p28-campaign', $2, 'p28-admin-${RUN}') as r`,
+      [`${RUN}-u10@fixture.local`, exp28],
+    );
+    const replaysOk =
+      buyR[0].r.already_processed === true &&
+      buyR[0].r.transaction_id === buy[0].r.transaction_id &&
+      spendR[0].r.already_processed === true &&
+      spendR[0].r.transaction_id === spend[0].r.transaction_id &&
+      promoR[0].r.already_processed === true &&
+      promoR[0].r.transaction_id === promo[0].r.transaction_id &&
+      agR[0].r.already_processed === true &&
+      agR[0].r.transaction_id === ag[0].r.transaction_id;
+
+    const newBuy = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_record_purchase_v1(2000, 'p28-ref', 'p28-buy-new-${RUN}', $1, null)`,
+          [u10],
+        ),
+      "lmc_purchases_disabled",
+    );
+    const newSpend = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p28 new spend', 'p28-spend-new-${RUN}', $1, null)`,
+          [u10],
+        ),
+      "lmc_spending_disabled",
+    );
+    const newGrant = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 300, 'p28 new', 'p28-campaign', now() + interval '15 days', 'p28-admin-new-${RUN}')`,
+          [`${RUN}-u10@fixture.local`],
+        ),
+      "lmc_promotional_grants_disabled",
+    );
+    await admConn.end();
+
+    await setFlag(a, "lmc_purchases_enabled", true);
+    await setFlag(a, "lmc_promotional_grants_enabled", true);
+    await setFlag(a, "lmc_spending_enabled", true);
+
+    record(
+      "P28-replays-survive-flag-flips",
+      replaysOk && newBuy.ok && newSpend.ok && newGrant.ok,
+      `4/4 committed replays already_processed with flags OFF; new buy/spend/grant blocked`,
     );
   }
 
