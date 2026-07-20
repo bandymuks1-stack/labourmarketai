@@ -971,6 +971,65 @@ async function main(): Promise<void> {
       delErr.includes("entry_deleted") && delStatus[0].status === "entry_deleted",
       `direct=${delErr.slice(0, 18)} rpc=${delStatus[0].status}`,
     );
+    // ── C3b (rev12, Codex P1): CONCURRENT soft delete vs confirmation.
+    // journal_entry_soft_delete is a bare non-key UPDATE, so it takes only
+    // FOR NO KEY UPDATE. A FOR KEY SHARE guard would NOT conflict with it and
+    // both transactions could commit — leaving an append-only confirmation on
+    // a deleted entry. With FOR UPDATE the confirmation must block, then be
+    // refused once the delete is visible.
+    {
+      const { rows: eRows } = await a.query(
+        `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self, visibility_scope)
+         values ($1, $2, 'freeform', 'c3b lenktynes', 'lt', md5('c3b' || clock_timestamp()::text), 'closed') returning id`,
+        [f.workerId, ec[0].id],
+      );
+      const E = eRows[0].id as string;
+
+      // Session A: the SOFT-DELETE shape, uncommitted.
+      const deleter = new Client({ connectionString: DB_URL });
+      await deleter.connect();
+      await deleter.query("begin");
+      await deleter.query(
+        `update public.journal_entries set deleted_at = now(), updated_at = now() where id = $1`,
+        [E],
+      );
+
+      // Session B: a confirmation insert. Must BLOCK on the guard's entry lock.
+      // NB: this needs its OWN connection — node-postgres serializes queries
+      // per client, so issuing a blocking statement on `a` would stall every
+      // later query on `a` (including the pg_stat_activity probe below).
+      const confirmer = new Client({ connectionString: DB_URL });
+      await confirmer.connect();
+      const confirming = confirmer
+        .query(
+          `insert into public.journal_entry_confirmations
+             (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope)
+           values ($1, $2, $3, 'manager', '{"action":"confirm"}'::jsonb)`,
+          [E, org.managerId, mgrCtx[0].id],
+        )
+        .then(() => "committed")
+        .catch((e) => String((e as Error).message));
+
+      await new Promise((r) => setTimeout(r, 400));
+      const { rows: blocked } = await a.query(
+        `select count(*)::int as n from pg_stat_activity
+          where wait_event_type = 'Lock' and query like '%journal_entry_confirmations%'`,
+      );
+      await deleter.query("commit");
+      const outcome = await confirming;
+      const { rows: confs } = await a.query(
+        `select count(*)::int as n from public.journal_entry_confirmations where entry_id = $1`,
+        [E],
+      );
+      record(
+        "C3b CONCURRENCY: soft delete racing a confirmation is serialized and refused",
+        blocked[0].n >= 1 && outcome.includes("entry_deleted") && confs[0].n === 0,
+        `blockedOnLock=${blocked[0].n >= 1} outcome="${outcome.slice(0, 22)}" confirmations=${confs[0].n}`,
+      );
+      await confirmer.end();
+      await deleter.end();
+    }
+
     await cMgr.end();
     await cu.end();
   }

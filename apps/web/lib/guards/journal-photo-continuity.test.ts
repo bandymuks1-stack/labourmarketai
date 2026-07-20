@@ -199,9 +199,20 @@ describe("W1 rev7 — confirmation lifecycle serialization (owner-hold v4)", () 
     expect(migration).toMatch(
       /create or replace function public\.journal_entry_confirmations_guard\(\)/i,
     );
+    // rev12 (Codex P1): FOR UPDATE, not FOR KEY SHARE. The supersedes take an
+    // explicit FOR UPDATE, but journal_entry_soft_delete (0018) is a bare
+    // non-key UPDATE taking only FOR NO KEY UPDATE — which FOR KEY SHARE does
+    // NOT conflict with. A confirmation racing a soft delete could otherwise
+    // commit against a deleted entry.
     expect(migration).toMatch(
-      /from public\.journal_entries\s+where id = new\.entry_id\s+for key share/i,
+      /from public\.journal_entries\s+where id = new\.entry_id\s+for update/i,
     );
+    // Judged on EXECUTABLE SQL — the header prose still discusses FOR KEY
+    // SHARE to explain WHY it is wrong here, which must not count as usage.
+    const executableSql = migration
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/--[^\n]*/g, " ");
+    expect(executableSql).not.toMatch(/for key share/i);
     expect(migration).toMatch(
       /create trigger journal_entry_confirmations_guard\s+before insert on public\.journal_entry_confirmations/i,
     );

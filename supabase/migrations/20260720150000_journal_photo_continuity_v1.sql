@@ -19,9 +19,14 @@
 --   4. journal_entry_photos UPDATE tightened: WITH CHECK added and the column
 --      grant restricted to upload_status only, so a worker cannot repoint a
 --      photo row's entry_id and redirect authorization.
---   5. Confirmation lifecycle serialized (owner-hold v4): BEFORE INSERT
---      guard trigger on journal_entry_confirmations (FOR KEY SHARE vs the
---      supersedes' FOR UPDATE), stale statuses in the interactive RPCs,
+--   5. Confirmation lifecycle serialized (owner-hold v4; lock strengthened in
+--      rev12 per Codex P1): BEFORE INSERT guard trigger on
+--      journal_entry_confirmations taking FOR UPDATE on the source entry — it
+--      must conflict with BOTH the supersedes' FOR UPDATE and the soft
+--      delete's FOR NO KEY UPDATE (journal_entry_soft_delete, 0018, is a bare
+--      non-key UPDATE; a FOR KEY SHARE guard would not conflict with it and a
+--      confirmation could commit against a concurrently-deleted entry) —
+--      plus stale statuses in the interactive RPCs,
 --      staleness predicate in the direct-insert policy, EXCLUSIVE-mode
 --      cutover quiesce before the backfill, and explicit path-based cycle
 --      detection in the backfill CTE.
@@ -434,8 +439,8 @@ end $$;
 -- serialization point for every insert path into journal_entry_confirmations
 -- (review_journal_entry, confirm_entry_and_verify_skills,
 -- apply_learning_auto_confirmation, the app's direct inserts, and any future
--- compatibility path): its FOR KEY SHARE read conflicts with the supersedes'
--- FOR UPDATE, so
+-- compatibility path): its FOR UPDATE read conflicts with the supersedes'
+-- FOR UPDATE *and* with the soft delete's FOR NO KEY UPDATE, so
 --   * a confirmation committed first makes the racing supersede take the
 --     correction lane -> the photo STAYS on the confirmed source (item 1);
 --   * a supersede committed first makes the racing confirmation re-read the
@@ -451,11 +456,19 @@ declare
   v_superseded uuid;
   v_deleted    timestamptz;
 begin
+  -- LOCK STRENGTH (rev12, Codex P1): FOR UPDATE, not FOR KEY SHARE. The two
+  -- staleness paths take DIFFERENT locks: the supersedes take an explicit
+  -- FOR UPDATE, but journal_entry_soft_delete (0018) is a bare
+  -- `update ... set deleted_at, updated_at` touching no key column, so it
+  -- takes only FOR NO KEY UPDATE. FOR KEY SHARE conflicts with the former but
+  -- NOT the latter, so a confirmation racing a SOFT DELETE could pass this
+  -- guard and commit — leaving an append-only confirmation attached to a
+  -- deleted entry. FOR UPDATE conflicts with both.
   select superseded_by, deleted_at
     into v_superseded, v_deleted
     from public.journal_entries
    where id = new.entry_id
-   for key share;
+   for update;
   if not found then
     raise exception 'entry_not_found' using errcode = 'P0002';
   end if;

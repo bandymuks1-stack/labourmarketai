@@ -247,10 +247,24 @@ describe("P2-3 — quick-confirm treats stale outcomes as terminal", () => {
     // a reject failure was read off the wrong state and always came back
     // undefined — the reject path showed neither terminal state nor error.
     // The selector must require the state to be non-null before reading it.
+    // rev13 (Codex): neither "is it null" nor a fixed confirm-then-reject
+    // precedence is a valid discriminator — useActionState keeps BOTH results
+    // and never clears them, so after a retryable confirm failure a later
+    // Reject would keep reporting the stale confirm reason. The card must
+    // track which action was submitted LAST.
     expect(quickCard).toMatch(
-      /confirmState && !confirmState\.ok\s*\n?\s*\?\s*confirmState\.code\s*\n?\s*:\s*rejectState && !rejectState\.ok\s*\n?\s*\?\s*rejectState\.code/,
+      /const \[lastAction, setLastAction\] = useState<"confirm" \| "reject" \| null>\(null\)/,
     );
+    expect(quickCard).toMatch(/onSubmit=\{\(\) => setLastAction\("confirm"\)\}/);
+    expect(quickCard).toMatch(/onSubmit=\{\(\) => setLastAction\("reject"\)\}/);
+    expect(quickCard).toMatch(
+      /const failureCode = activeState && !activeState\.ok \? activeState\.code : undefined;/,
+    );
+    // The two superseded shapes must not come back.
     expect(quickCard).not.toMatch(/!confirmState\?\.ok\s*\n?\s*\?\s*confirmState\?\.code/);
+    expect(quickCard).not.toMatch(
+      /confirmState && !confirmState\.ok\s*\n?\s*\?\s*confirmState\.code/,
+    );
     // staleOutcome derives purely from the (correctly selected) failure code.
     expect(quickCard).toMatch(
       /const staleOutcome = isTerminalStaleOutcome\(failureCode\) \? failureCode : null;/,

@@ -36,6 +36,9 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
   const t = useTranslations("journal");
   const locale = useLocale();
   const [rejecting, setRejecting] = useState(false);
+  /** Which action the manager submitted last — the discriminator for reading
+   *  the right `useActionState` result (both persist independently). */
+  const [lastAction, setLastAction] = useState<"confirm" | "reject" | null>(null);
   const [confirmState, confirmAction, confirmPending] = useActionState<
     QuickConfirmState | null,
     FormData
@@ -49,17 +52,14 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
   const confirmed = confirmState?.ok === true;
   const rejected = rejectState?.ok === true;
 
-  // Select the failure from whichever action actually RAN and failed. The
-  // previous `!confirmState?.ok ? ... : ...` shape was wrong: with confirmState
-  // still null (nothing confirmed yet) `!undefined` is true, so a REJECT
-  // failure was read off confirmState and always came back undefined — the
-  // reject path rendered neither a terminal state nor an error (Codex rev12).
-  const failureCode =
-    confirmState && !confirmState.ok
-      ? confirmState.code
-      : rejectState && !rejectState.ok
-        ? rejectState.code
-        : undefined;
+  // Report the failure of the action the manager MOST RECENTLY submitted.
+  // `useActionState` keeps both results independently and neither is ever
+  // cleared, so no fixed precedence works: after a retryable confirm failure a
+  // later Reject would keep surfacing the stale confirm reason, and a terminal
+  // reject outcome would never be recognized (Codex rev13). Tracking the last
+  // submitted action is the only correct discriminator.
+  const activeState = lastAction === "confirm" ? confirmState : lastAction === "reject" ? rejectState : null;
+  const failureCode = activeState && !activeState.ok ? activeState.code : undefined;
 
   /**
    * TERMINAL STALE (owner-hold v5 P2-3). The worker edited or removed the entry
@@ -73,7 +73,9 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
 
   const errorText = (() => {
     const code = failureCode;
-    if (confirmState?.ok || rejectState?.ok || !code || staleOutcome) return null;
+    // Success is already handled by the terminal branches above, and a stale
+    // outcome renders its own terminal card — neither reaches the error line.
+    if (!code || staleOutcome) return null;
     switch (code) {
       case "review_not_enabled":
         return t("inbox.result.reviewNotEnabled");
@@ -193,7 +195,11 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
 
       {!rejecting ? (
         <div className="flex items-center gap-2">
-          <form action={confirmAction} className="flex-1">
+          <form
+            action={confirmAction}
+            onSubmit={() => setLastAction("confirm")}
+            className="flex-1"
+          >
             <input type="hidden" name="entry_id" value={entry.id} />
             <input type="hidden" name="locale" value={locale} />
             {entry.skills.map((s) => (
@@ -226,7 +232,11 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
           </Button>
         </div>
       ) : (
-        <form action={rejectAction} className="flex flex-col gap-2">
+        <form
+          action={rejectAction}
+          onSubmit={() => setLastAction("reject")}
+          className="flex flex-col gap-2"
+        >
           <input type="hidden" name="entry_id" value={entry.id} />
           <input type="hidden" name="decision" value="rejected" />
           <input type="hidden" name="locale" value={locale} />
