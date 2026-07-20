@@ -1,0 +1,1144 @@
+/**
+ * LMC Commercial System Train v1 — Wagon 1: REAL-DATABASE proof for the
+ * immutable LMC ledger foundation (20260720190000_lmc_ledger_foundation_v1).
+ *
+ * LOCAL scratch database ONLY (hard localhost guard below) — never production.
+ * Contract: docs/product/lmc-commercial-system-train-v1.md
+ *
+ * Proof matrix (train task, 23 required proofs):
+ *   P00  flags default FALSE + disabled RPCs refuse (fail-closed baseline)
+ *   P01  1 LMC represented exactly (bigint LMC-cents, no float)
+ *   P02  duplicate signup grant refused idempotently
+ *   P03  duplicate activity grant refused idempotently
+ *   P04  no daily-repeat grant is possible (once-per-account, structurally)
+ *   P05  promotional value expires correctly
+ *   P06  purchased value does NOT expire with promotional value
+ *   P07  promotional value is consumed before purchased value
+ *   P08  insufficient balance fails atomically
+ *   P09  reversal references the original entry
+ *   P10  duplicate reversal is refused
+ *   P11  refund reversal is idempotent
+ *   P12  chargeback reversal is idempotent
+ *   P13  direct authenticated insert is refused
+ *   P14  direct update is refused (client roles AND table-owner path)
+ *   P15  direct delete is refused (client roles AND table-owner path)
+ *   P16  foreign user cannot read another account
+ *   P17  authorized admin can perform a bounded grant (and cap holds)
+ *   P18  unauthorized user cannot perform an admin grant
+ *   P19  referral reward cannot be created while disabled
+ *   P20  concurrent spends cannot overspend
+ *   P21  concurrent grants with the same idempotency key produce ONE result
+ *   P22  rollback removes only Wagon 1 objects, unrelated data preserved
+ *   P23  re-apply after rollback succeeds cleanly (flags false again)
+ *
+ * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
+ * actually appears, restores the guard by re-applying the migration file, and
+ * proves the proof passes again):
+ *   NC-A  spend without the account FOR UPDATE lock → overspend appears
+ *   NC-B  same-key concurrency without lock+unique constraint → duplicate txs
+ *   NC-C  admin grant without the is_admin() gate → non-admin grant succeeds
+ *   NC-D  insert policy + grant added → direct authenticated insert succeeds
+ *   NC-E  permissive read policy added → foreign read succeeds
+ *   NC-F  lmc_referrals_enabled=true → referral insert passes the trigger
+ *
+ * Usage: npx tsx scripts/db-proof-lmc-ledger.mts
+ * Env:   DB_URL (default postgresql://postgres:postgres@127.0.0.1:54322/postgres)
+ */
+
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Client } from "pg";
+
+const DB_URL =
+  process.env.DB_URL ??
+  "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
+{
+  const host = new URL(DB_URL.replace(/^postgres(ql)?:/, "http:")).hostname;
+  const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
+  if (!LOCAL_HOSTS.has(host)) {
+    console.error(`refusing to run: DB_URL host "${host}" is not local.`);
+    process.exit(1);
+  }
+}
+
+const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const MIGRATION_PATH = resolve(
+  REPO,
+  "supabase/migrations/20260720190000_lmc_ledger_foundation_v1.sql",
+);
+const ROLLBACK_PATH = resolve(
+  REPO,
+  "supabase/rollbacks/20260720190000_lmc_ledger_foundation_v1.down.sql",
+);
+
+const results: { name: string; pass: boolean; detail: string }[] = [];
+const record = (name: string, pass: boolean, detail: string) => {
+  results.push({ name, pass, detail });
+  console.log(`${pass ? "PASS" : "FAIL"}  ${name} — ${detail}`);
+};
+
+async function admin(): Promise<Client> {
+  const c = new Client({ connectionString: DB_URL });
+  await c.connect();
+  return c;
+}
+
+/** Authenticated-role connection with RLS enforced for the given profile. */
+async function asUser(profileId: string): Promise<Client> {
+  const c = new Client({ connectionString: DB_URL });
+  await c.connect();
+  await c.query(`select set_config('request.jwt.claims', $1, false)`, [
+    JSON.stringify({ sub: profileId, role: "authenticated" }),
+  ]);
+  await c.query(`set role authenticated`);
+  return c;
+}
+
+const RUN = `lmc-${Date.now()}`;
+
+async function makePerson(
+  a: Client,
+  tag: string,
+  role: "worker" | "admin" = "worker",
+): Promise<string> {
+  const { rows } = await a.query(
+    `insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+     values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+             $1 || '@fixture.local', 'x', now(), '{"provider":"email"}', '{}', now(), now())
+     returning id`,
+    [`${RUN}-${tag}`],
+  );
+  const profileId = rows[0].id as string;
+  await a.query(
+    `insert into public.profiles (id, active_role, full_name)
+     values ($1, $2, 'LMC Proof ' || $3)
+     on conflict (id) do update set active_role = excluded.active_role`,
+    [profileId, role, tag],
+  );
+  return profileId;
+}
+
+async function setFlag(a: Client, key: string, enabled: boolean) {
+  await a.query(`update public.lmc_settings set enabled = $2 where key = $1`, [
+    key,
+    enabled,
+  ]);
+}
+
+async function accountOf(a: Client, profileId: string): Promise<string> {
+  const { rows } = await a.query(
+    `select id from public.lmc_accounts where profile_id = $1`,
+    [profileId],
+  );
+  return rows[0]?.id as string;
+}
+
+async function balance(a: Client, accountId: string) {
+  const { rows } = await a.query(
+    `select * from public.lmc_account_balances where account_id = $1`,
+    [accountId],
+  );
+  return rows[0] ?? null;
+}
+
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+async function expectError(
+  fn: () => Promise<unknown>,
+  needle: string,
+): Promise<{ ok: boolean; msg: string }> {
+  try {
+    await fn();
+    return { ok: false, msg: "NO ERROR RAISED" };
+  } catch (e) {
+    const msg = errMsg(e);
+    return { ok: msg.includes(needle), msg };
+  }
+}
+
+/** Restore every weakened object by re-applying the real migration file. */
+async function restoreMigration(a: Client) {
+  await a.query(readFileSync(MIGRATION_PATH, "utf8"));
+}
+
+/**
+ * NEGATIVE-CONTROL CLEANUP (scratch-only): remove ledger rows created while a
+ * guard was deliberately weakened, so the restored invariants hold again.
+ * Requires superuser + temporarily disabled append-only triggers; this is the
+ * test harness acting on a scratch database, never a production code path.
+ */
+async function purgeLedgerRows(a: Client, txIds: string[]) {
+  if (txIds.length === 0) return;
+  await a.query(`alter table public.lmc_lot_consumptions disable trigger lmc_lot_consumptions_append_only`);
+  await a.query(`alter table public.lmc_lots disable trigger lmc_lots_append_only`);
+  await a.query(`alter table public.lmc_transactions disable trigger lmc_transactions_append_only`);
+  await a.query(`delete from public.lmc_lot_consumptions where transaction_id = any($1::uuid[])`, [txIds]);
+  await a.query(`delete from public.lmc_lots where transaction_id = any($1::uuid[])`, [txIds]);
+  await a.query(`delete from public.lmc_transactions where id = any($1::uuid[])`, [txIds]);
+  await a.query(`alter table public.lmc_transactions enable trigger lmc_transactions_append_only`);
+  await a.query(`alter table public.lmc_lots enable trigger lmc_lots_append_only`);
+  await a.query(`alter table public.lmc_lot_consumptions enable trigger lmc_lot_consumptions_append_only`);
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function main() {
+  const a = await admin();
+
+  // Ensure the Wagon 1 migration is present on the scratch DB (idempotent).
+  await restoreMigration(a);
+
+  // ── P00: fail-closed baseline ─────────────────────────────────────────────
+  {
+    const { rows } = await a.query(
+      `select key, enabled from public.lmc_settings order by key`,
+    );
+    const allFalse = rows.length === 5 && rows.every((r) => r.enabled === false);
+    record("P00a-flags-default-false", allFalse, JSON.stringify(rows));
+
+    const uVerified = await makePerson(a, "p00");
+    const g = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_grant_promotional_v1('promotional_signup', $1, 'proof', 'p00-signup-${RUN}')`,
+          [uVerified],
+        ),
+      "lmc_promotional_grants_disabled",
+    );
+    const p = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_record_purchase_v1(10000, 'ref-p00', 'p00-buy-${RUN}', $1, null)`,
+          [uVerified],
+        ),
+      "lmc_purchases_disabled",
+    );
+    record(
+      "P00b-disabled-rpcs-refuse",
+      g.ok && p.ok,
+      `grant: ${g.msg.slice(0, 60)} | purchase: ${p.msg.slice(0, 60)}`,
+    );
+  }
+
+  // Enable grant+purchase mechanics for the remaining proofs (scratch-only;
+  // referrals stay disabled throughout — P19 proves that path stays shut).
+  await setFlag(a, "lmc_promotional_grants_enabled", true);
+  await setFlag(a, "lmc_purchases_enabled", true);
+
+  const u1 = await makePerson(a, "u1");
+  const u2 = await makePerson(a, "u2");
+  const adm = await makePerson(a, "adm", "admin");
+
+  // ── P01: 1 LMC represented exactly ────────────────────────────────────────
+  {
+    const { rows } = await a.query(
+      `select public.lmc_record_purchase_v1(100, 'one-lmc', 'p01-${RUN}', $1, null) as r`,
+      [u1],
+    );
+    const acc = await accountOf(a, u1);
+    const bal = await balance(a, acc);
+    const { rows: t } = await a.query(
+      `select amount_cents, pg_typeof(amount_cents)::text as ty
+         from public.lmc_transactions where id = $1`,
+      [rows[0].r.transaction_id],
+    );
+    record(
+      "P01-one-lmc-exact",
+      t[0].amount_cents === "100" &&
+        t[0].ty === "bigint" &&
+        bal.available_cents === "100" &&
+        bal.purchased_available_cents === "100",
+      `amount=${t[0].amount_cents} type=${t[0].ty} available=${bal.available_cents}`,
+    );
+  }
+
+  // ── P02/P03: duplicate signup + activity grants refused idempotently ──────
+  for (const [proof, kind] of [
+    ["P02-signup-idempotent", "promotional_signup"],
+    ["P03-activity-idempotent", "promotional_activity"],
+  ] as const) {
+    const key = `${proof}-${RUN}`;
+    const { rows: first } = await a.query(
+      `select public.lmc_grant_promotional_v1($1, $2, 'registration', $3) as r`,
+      [kind, u1, key],
+    );
+    const { rows: replay } = await a.query(
+      `select public.lmc_grant_promotional_v1($1, $2, 'registration', $3) as r`,
+      [kind, u1, key],
+    );
+    const freshKey = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_grant_promotional_v1($1, $2, 'registration', $3)`,
+          [kind, u1, `${key}-different`],
+        ),
+      "lmc_duplicate_grant",
+    );
+    const { rows: count } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions
+        where account_id = $1 and kind = $2`,
+      [await accountOf(a, u1), kind],
+    );
+    record(
+      proof,
+      first[0].r.already_processed === false &&
+        replay[0].r.already_processed === true &&
+        replay[0].r.transaction_id === first[0].r.transaction_id &&
+        freshKey.ok &&
+        count[0].n === 1,
+      `replay=same-tx, fresh-key: ${freshKey.msg.slice(0, 60)}, rows=${count[0].n}`,
+    );
+  }
+
+  // ── P04: no daily-repeat grant possible ───────────────────────────────────
+  {
+    const dayLater = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_grant_promotional_v1('promotional_signup', $1, 'registration', $2)`,
+          [u1, `p04-next-day-${RUN}`],
+        ),
+      "lmc_duplicate_grant",
+    );
+    const { rows } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions
+        where account_id = $1 and kind like 'promotional_%'`,
+      [await accountOf(a, u1)],
+    );
+    record(
+      "P04-no-daily-repeat",
+      dayLater.ok && rows[0].n === 2,
+      `simulated next-day grant refused (${rows[0].n} promo txs total): ${dayLater.msg.slice(0, 60)}`,
+    );
+  }
+
+  // ── P05/P06/P07: expiry + ordering (fresh user u2) ────────────────────────
+  {
+    const admConn = await asUser(adm);
+    // Short-lived promotional lot via admin grant (expiry ~6s in the future).
+    await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 2000, 'expiry proof', 'proof-campaign', now() + interval '6 seconds', 'p05-grant-${RUN}') as r`,
+      [`${RUN}-u2@fixture.local`],
+    );
+    await admConn.end();
+    const acc2 = await accountOf(a, u2);
+    await a.query(
+      `select public.lmc_record_purchase_v1(10000, 'p06-buy', 'p06-${RUN}', $1, null)`,
+      [u2],
+    );
+
+    // P07 first (while the promo lot is alive): spend consumes promo first.
+    await a.query(
+      `select public.lmc_spend_v1(500, 'p07 spend', 'p07-${RUN}', $1, null)`,
+      [u2],
+    );
+    const { rows: alloc } = await a.query(
+      `select l.source_kind, c.amount_cents
+         from public.lmc_lot_consumptions c
+         join public.lmc_lots l on l.id = c.lot_id
+        where c.account_id = $1 and c.consumption_kind = 'spend'`,
+      [acc2],
+    );
+    record(
+      "P07-promo-before-purchased",
+      alloc.length === 1 &&
+        alloc[0].source_kind === "admin_grant" &&
+        alloc[0].amount_cents === "500",
+      JSON.stringify(alloc),
+    );
+
+    // While the promo lot is still alive: 1500 promo + 10000 purchased.
+    const balBefore = await balance(a, acc2);
+    await sleep(6500); // let the promotional lot pass its expires_at
+    const { rows: exp } = await a.query(
+      `select public.lmc_expire_lots_v1(100) as r`,
+    );
+    const rerun = await a.query(`select public.lmc_expire_lots_v1(100) as r`);
+    const { rows: expTx } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions
+        where account_id = $1 and kind = 'expiry'`,
+      [acc2],
+    );
+    const balAfter = await balance(a, acc2);
+    record(
+      "P05-promo-expires",
+      balBefore.available_cents === "11500" &&
+        balBefore.promotional_available_cents === "1500" &&
+        expTx[0].n === 1 &&
+        balAfter.promotional_available_cents === "0" &&
+        rerun.rows[0].r.expired_lots === 0,
+      `before=${balBefore.available_cents}/promo=${balBefore.promotional_available_cents} run1=${JSON.stringify(exp[0].r)} run2=${JSON.stringify(rerun.rows[0].r)} after-promo=${balAfter.promotional_available_cents}`,
+    );
+    record(
+      "P06-purchased-never-expires",
+      balAfter.purchased_available_cents === "10000" &&
+        balAfter.available_cents === "10000",
+      `purchased=${balAfter.purchased_available_cents} available=${balAfter.available_cents}`,
+    );
+  }
+
+  // ── P08: insufficient balance fails atomically ────────────────────────────
+  {
+    const acc2 = await accountOf(a, u2);
+    const { rows: before } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc2],
+    );
+    const res = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(999999, 'too much', 'p08-${RUN}', $1, null)`,
+          [u2],
+        ),
+      "lmc_insufficient_balance",
+    );
+    const { rows: after } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc2],
+    );
+    record(
+      "P08-insufficient-atomic",
+      res.ok && before[0].n === after[0].n,
+      `refused, tx count unchanged (${before[0].n}): ${res.msg.slice(0, 60)}`,
+    );
+  }
+
+  // ── P09–P12: reversal doctrine (fresh users to keep lots clean) ───────────
+  {
+    const u3 = await makePerson(a, "u3");
+    const admConn = await asUser(adm);
+    const { rows: g } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 3000, 'reversal proof', 'proof-campaign', now() + interval '30 days', 'p09-grant-${RUN}') as r`,
+      [`${RUN}-u3@fixture.local`],
+    );
+    await admConn.end();
+    const grantTx = g[0].r.transaction_id as string;
+
+    const { rows: rev } = await a.query(
+      `select public.lmc_reverse_v1($1, 'reversal', 'admin error', 'p09-rev-${RUN}') as r`,
+      [grantTx],
+    );
+    const { rows: link } = await a.query(
+      `select original_transaction_id from public.lmc_transactions where id = $1`,
+      [rev[0].r.transaction_id],
+    );
+    record(
+      "P09-reversal-links-original",
+      link[0].original_transaction_id === grantTx,
+      `reversal.original_transaction_id=${link[0].original_transaction_id}`,
+    );
+
+    const dup = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'reversal', 'again', 'p10-rev-${RUN}')`,
+          [grantTx],
+        ),
+      "lmc_already_reversed",
+    );
+    record("P10-duplicate-reversal-refused", dup.ok, dup.msg.slice(0, 80));
+
+    // P11: refund reversal idempotent (purchased original).
+    const { rows: buy } = await a.query(
+      `select public.lmc_record_purchase_v1(4000, 'p11-buy', 'p11-buy-${RUN}', $1, null) as r`,
+      [u3],
+    );
+    const { rows: r1 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}') as r`,
+      [buy[0].r.transaction_id],
+    );
+    const { rows: r2 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund', 'p11-rev-${RUN}') as r`,
+      [buy[0].r.transaction_id],
+    );
+    record(
+      "P11-refund-reversal-idempotent",
+      r1[0].r.already_processed === false &&
+        r2[0].r.already_processed === true &&
+        r1[0].r.transaction_id === r2[0].r.transaction_id,
+      `replay returned same tx ${r1[0].r.transaction_id}`,
+    );
+
+    // P12: chargeback reversal idempotent (fresh purchase).
+    const { rows: buy2 } = await a.query(
+      `select public.lmc_record_purchase_v1(2500, 'p12-buy', 'p12-buy-${RUN}', $1, null) as r`,
+      [u3],
+    );
+    const { rows: c1 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}') as r`,
+      [buy2[0].r.transaction_id],
+    );
+    const { rows: c2 } = await a.query(
+      `select public.lmc_reverse_v1($1, 'chargeback_reversal', 'chargeback', 'p12-rev-${RUN}') as r`,
+      [buy2[0].r.transaction_id],
+    );
+    record(
+      "P12-chargeback-reversal-idempotent",
+      c1[0].r.already_processed === false &&
+        c2[0].r.already_processed === true &&
+        c1[0].r.transaction_id === c2[0].r.transaction_id,
+      `replay returned same tx ${c1[0].r.transaction_id}`,
+    );
+  }
+
+  // ── P13–P15: direct writes refused ────────────────────────────────────────
+  {
+    const acc1 = await accountOf(a, u1);
+    const userConn = await asUser(u1);
+    const ins = await expectError(
+      () =>
+        userConn.query(
+          `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+           values ($1, 'purchased', 100, 'p13-direct-${RUN}', 'direct insert')`,
+          [acc1],
+        ),
+      "permission denied",
+    );
+    record("P13-direct-insert-refused", ins.ok, ins.msg.slice(0, 80));
+
+    const updUser = await expectError(
+      () => userConn.query(`update public.lmc_transactions set reason = 'x'`),
+      "permission denied",
+    );
+    const updOwner = await expectError(
+      () =>
+        a.query(
+          `update public.lmc_transactions set reason = 'x' where account_id = $1`,
+          [acc1],
+        ),
+      "lmc_append_only",
+    );
+    record(
+      "P14-direct-update-refused",
+      updUser.ok && updOwner.ok,
+      `authenticated: ${updUser.msg.slice(0, 40)} | owner-path trigger: ${updOwner.msg.slice(0, 60)}`,
+    );
+
+    const delUser = await expectError(
+      () => userConn.query(`delete from public.lmc_transactions`),
+      "permission denied",
+    );
+    const delOwner = await expectError(
+      () =>
+        a.query(`delete from public.lmc_transactions where account_id = $1`, [
+          acc1,
+        ]),
+      "lmc_append_only",
+    );
+    record(
+      "P15-direct-delete-refused",
+      delUser.ok && delOwner.ok,
+      `authenticated: ${delUser.msg.slice(0, 40)} | owner-path trigger: ${delOwner.msg.slice(0, 60)}`,
+    );
+    await userConn.end();
+  }
+
+  // ── P16: foreign user cannot read another account ─────────────────────────
+  {
+    const acc1 = await accountOf(a, u1);
+    const own = await asUser(u1);
+    const foreign = await asUser(u2);
+    const { rows: mine } = await own.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc1],
+    );
+    const { rows: theirs } = await foreign.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc1],
+    );
+    const { rows: theirBal } = await foreign.query(
+      `select count(*)::int as n from public.lmc_account_balances where account_id = $1`,
+      [acc1],
+    );
+    record(
+      "P16-foreign-read-refused",
+      mine[0].n > 0 && theirs[0].n === 0 && theirBal[0].n === 0,
+      `owner sees ${mine[0].n} rows, foreign sees ${theirs[0].n} tx / ${theirBal[0].n} balance rows`,
+    );
+    await own.end();
+    await foreign.end();
+  }
+
+  // ── P17/P18: admin grant authorization + bound ────────────────────────────
+  {
+    const admConn = await asUser(adm);
+    const { rows: ok } = await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 1500, 'welcome credit', 'proof-campaign', now() + interval '60 days', 'p17-${RUN}') as r`,
+      [`${RUN}-u1@fixture.local`],
+    );
+    const overCap = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1($1, 999999999, 'too big', 'proof-campaign', now() + interval '60 days', 'p17-big-${RUN}')`,
+          [`${RUN}-u1@fixture.local`],
+        ),
+      "lmc_invalid_amount",
+    );
+    const unverified = await expectError(
+      () =>
+        admConn.query(
+          `select public.lmc_admin_grant_v1('nobody-${RUN}@fixture.local', 100, 'ghost', 'proof-campaign', now() + interval '60 days', 'p17-ghost-${RUN}')`,
+        ),
+      "lmc_recipient_not_found_or_unverified",
+    );
+    await admConn.end();
+    record(
+      "P17-admin-bounded-grant",
+      ok[0].r.kind === "admin_grant" && overCap.ok && unverified.ok,
+      `grant ok, over-cap refused (${overCap.msg.slice(0, 40)}), unknown recipient refused`,
+    );
+
+    const nonAdmin = await asUser(u2);
+    const denied = await expectError(
+      () =>
+        nonAdmin.query(
+          `select public.lmc_admin_grant_v1($1, 100, 'sneaky', 'proof-campaign', now() + interval '60 days', 'p18-${RUN}')`,
+          [`${RUN}-u1@fixture.local`],
+        ),
+      "Admin only",
+    );
+    await nonAdmin.end();
+    record("P18-non-admin-grant-refused", denied.ok, denied.msg.slice(0, 80));
+  }
+
+  // ── P19: referral reward impossible while disabled ────────────────────────
+  {
+    const acc1 = await accountOf(a, u1);
+    const res = await expectError(
+      () =>
+        a.query(
+          `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+           values ($1, 'referral_reward', 100, 'p19-${RUN}', 'should be impossible')`,
+          [acc1],
+        ),
+      "lmc_referrals_disabled",
+    );
+    record("P19-referral-impossible-while-disabled", res.ok, res.msg.slice(0, 80));
+  }
+
+  // ── P20: concurrent spends cannot overspend ───────────────────────────────
+  {
+    const u4 = await makePerson(a, "u4");
+    await a.query(
+      `select public.lmc_record_purchase_v1(10000, 'p20-buy', 'p20-buy-${RUN}', $1, null)`,
+      [u4],
+    );
+    const c1 = await admin();
+    const c2 = await admin();
+    const spend = (c: Client, key: string) =>
+      c.query(
+        `select public.lmc_spend_v1(7000, 'race spend', $1, $2, null) as r`,
+        [key, u4],
+      );
+    const settled = await Promise.allSettled([
+      spend(c1, `p20-a-${RUN}`),
+      spend(c2, `p20-b-${RUN}`),
+    ]);
+    await c1.end();
+    await c2.end();
+    const okCount = settled.filter((s) => s.status === "fulfilled").length;
+    const failMsgs = settled
+      .filter((s): s is PromiseRejectedResult => s.status === "rejected")
+      .map((s) => errMsg(s.reason));
+    const bal4 = await balance(a, await accountOf(a, u4));
+    record(
+      "P20-concurrent-no-overspend",
+      okCount === 1 &&
+        failMsgs.every((m) => m.includes("lmc_insufficient_balance")) &&
+        bal4.available_cents === "3000",
+      `ok=${okCount} fails=${failMsgs.length} final=${bal4.available_cents}`,
+    );
+  }
+
+  // ── P21: concurrent same-key grants → one result ──────────────────────────
+  {
+    const admA = await asUser(adm);
+    const admB = await asUser(adm);
+    const key = `p21-${RUN}`;
+    const call = (c: Client) =>
+      c.query(
+        `select public.lmc_admin_grant_v1($1, 700, 'race grant', 'proof-campaign', now() + interval '60 days', $2) as r`,
+        [`${RUN}-u2@fixture.local`, key],
+      );
+    const settled = await Promise.allSettled([call(admA), call(admB)]);
+    await admA.end();
+    await admB.end();
+    const fulfilled = settled.filter(
+      (s): s is PromiseFulfilledResult<{ rows: { r: { transaction_id: string } }[] }> =>
+        s.status === "fulfilled",
+    );
+    const { rows: n } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions
+        where idempotency_key = $1`,
+      [key],
+    );
+    const txIds = new Set(fulfilled.map((f) => f.value.rows[0].r.transaction_id));
+    record(
+      "P21-concurrent-same-key-single-result",
+      n[0].n === 1 && fulfilled.length === 2 && txIds.size === 1,
+      `rows=${n[0].n} fulfilled=${fulfilled.length} distinct-tx=${txIds.size}`,
+    );
+  }
+
+  // ── NEGATIVE CONTROLS ─────────────────────────────────────────────────────
+
+  // NC-A: remove the account FOR UPDATE lock from lmc_spend_v1 → overspend.
+  {
+    const u5 = await makePerson(a, "u5");
+    await a.query(
+      `select public.lmc_record_purchase_v1(10000, 'nca-buy', 'nca-buy-${RUN}', $1, null)`,
+      [u5],
+    );
+    await a.query(WEAKENED_SPEND_NO_LOCK);
+    const c1 = await admin();
+    const c2 = await admin();
+    const settled = await Promise.allSettled([
+      c1.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-a-${RUN}', $1, null)`, [u5]),
+      c2.query(`select public.lmc_spend_v1(7000, 'weak race', 'nca-b-${RUN}', $1, null)`, [u5]),
+    ]);
+    await c1.end();
+    await c2.end();
+    const weakOk = settled.filter((s) => s.status === "fulfilled").length;
+    const { rows: consumed } = await a.query(
+      `select coalesce(sum(c.amount_cents), 0)::bigint as spent
+         from public.lmc_lot_consumptions c
+         join public.lmc_accounts acc on acc.id = c.account_id
+        where acc.profile_id = $1 and c.consumption_kind = 'spend'`,
+      [u5],
+    );
+    const overspendAppeared = weakOk === 2 && Number(consumed[0].spent) > 10000;
+    record(
+      "NCA1-weakened-lock-overspends",
+      overspendAppeared,
+      `fulfilled=${weakOk} spent=${consumed[0].spent} of 10000 (guard removed → failure visible)`,
+    );
+
+    // Restore + cleanup, then prove correctness again on a fresh account.
+    const { rows: badTx } = await a.query(
+      `select t.id from public.lmc_transactions t
+         join public.lmc_accounts acc on acc.id = t.account_id
+        where acc.profile_id = $1 and t.kind = 'spend'`,
+      [u5],
+    );
+    await restoreMigration(a);
+    await purgeLedgerRows(a, badTx.map((r) => r.id as string));
+    const c3 = await admin();
+    const c4 = await admin();
+    const settled2 = await Promise.allSettled([
+      c3.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-c-${RUN}', $1, null)`, [u5]),
+      c4.query(`select public.lmc_spend_v1(7000, 'fixed race', 'nca-d-${RUN}', $1, null)`, [u5]),
+    ]);
+    await c3.end();
+    await c4.end();
+    const fixedOk = settled2.filter((s) => s.status === "fulfilled").length;
+    record(
+      "NCA2-restored-lock-holds",
+      fixedOk === 1,
+      `after restore exactly ${fixedOk} of 2 concurrent spends succeeded`,
+    );
+  }
+
+  // NC-B: drop unique(account,key) + lock → concurrent same-key duplicates.
+  {
+    await a.query(WEAKENED_SPEND_NO_LOCK); // remove serialization again
+    await a.query(
+      `alter table public.lmc_transactions drop constraint lmc_tx_idempotency`,
+    );
+    const u6 = await makePerson(a, "u6");
+    await a.query(
+      `select public.lmc_record_purchase_v1(10000, 'ncb-buy', 'ncb-buy-${RUN}', $1, null)`,
+      [u6],
+    );
+    const key = `ncb-race-${RUN}`;
+    const c1 = await admin();
+    const c2 = await admin();
+    await Promise.allSettled([
+      c1.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null)`, [key, u6]),
+      c2.query(`select public.lmc_spend_v1(1000, 'dup race', $1, $2, null)`, [key, u6]),
+    ]);
+    await c1.end();
+    await c2.end();
+    const { rows: dup } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions where idempotency_key = $1`,
+      [key],
+    );
+    record(
+      "NCB1-weakened-idempotency-duplicates",
+      dup[0].n === 2,
+      `same key produced ${dup[0].n} transactions with constraint removed`,
+    );
+
+    const { rows: badTx } = await a.query(
+      `select id from public.lmc_transactions where idempotency_key = $1`,
+      [key],
+    );
+    await purgeLedgerRows(a, badTx.map((r) => r.id as string));
+    await restoreMigration(a); // recreates constraint via table (already exists) …
+    // The dropped table CONSTRAINT is not auto-recreated by `create table if
+    // not exists` — restore it explicitly, then re-verify.
+    await a.query(
+      `alter table public.lmc_transactions
+         add constraint lmc_tx_idempotency unique (account_id, idempotency_key)`,
+    );
+    const c3 = await admin();
+    const c4 = await admin();
+    const key2 = `ncb-fixed-${RUN}`;
+    const settled2 = await Promise.allSettled([
+      c3.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null)`, [key2, u6]),
+      c4.query(`select public.lmc_spend_v1(1000, 'fixed dup race', $1, $2, null)`, [key2, u6]),
+    ]);
+    await c3.end();
+    await c4.end();
+    const { rows: fixed } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions where idempotency_key = $1`,
+      [key2],
+    );
+    record(
+      "NCB2-restored-idempotency-holds",
+      fixed[0].n === 1,
+      `same key now produces ${fixed[0].n} transaction`,
+    );
+  }
+
+  // NC-C: strip the is_admin() gate from lmc_admin_grant_v1 → non-admin grant.
+  {
+    await a.query(WEAKENED_ADMIN_GRANT_NO_GATE);
+    const nonAdmin = await asUser(u2);
+    let sneakyTx: string | null = null;
+    try {
+      const { rows } = await nonAdmin.query(
+        `select public.lmc_admin_grant_v1($1, 100, 'sneaky', 'proof-campaign', now() + interval '10 days', 'ncc-${RUN}') as r`,
+        [`${RUN}-u1@fixture.local`],
+      );
+      sneakyTx = rows[0].r.transaction_id as string;
+    } catch {
+      /* stays null */
+    }
+    await nonAdmin.end();
+    record(
+      "NCC1-weakened-admin-gate-permits",
+      sneakyTx !== null,
+      `non-admin grant ${sneakyTx ? "SUCCEEDED (gate removed → failure visible)" : "still refused (unexpected)"}`,
+    );
+    if (sneakyTx) await purgeLedgerRows(a, [sneakyTx]);
+    await restoreMigration(a);
+    const nonAdmin2 = await asUser(u2);
+    const denied = await expectError(
+      () =>
+        nonAdmin2.query(
+          `select public.lmc_admin_grant_v1($1, 100, 'sneaky', 'proof-campaign', now() + interval '10 days', 'ncc2-${RUN}')`,
+          [`${RUN}-u1@fixture.local`],
+        ),
+      "Admin only",
+    );
+    await nonAdmin2.end();
+    record("NCC2-restored-admin-gate-holds", denied.ok, denied.msg.slice(0, 60));
+  }
+
+  // NC-D: add insert grant + policy → direct authenticated insert succeeds.
+  {
+    await a.query(`grant insert on public.lmc_transactions to authenticated`);
+    await a.query(
+      `create policy lmc_nc_insert on public.lmc_transactions
+         for insert to authenticated with check (true)`,
+    );
+    const acc1 = await accountOf(a, u1);
+    const userConn = await asUser(u1);
+    let inserted = false;
+    let insertedId: string | null = null;
+    try {
+      const { rows } = await userConn.query(
+        `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+         values ($1, 'purchased', 100, 'ncd-${RUN}', 'weakened direct insert')
+         returning id`,
+        [acc1],
+      );
+      inserted = true;
+      insertedId = rows[0].id as string;
+    } catch {
+      /* not inserted */
+    }
+    await userConn.end();
+    record(
+      "NCD1-weakened-rls-permits-insert",
+      inserted,
+      inserted ? "direct insert SUCCEEDED (guard removed → failure visible)" : "still refused (unexpected)",
+    );
+    await a.query(`drop policy if exists lmc_nc_insert on public.lmc_transactions`);
+    await a.query(`revoke insert on public.lmc_transactions from authenticated`);
+    if (insertedId) await purgeLedgerRows(a, [insertedId]);
+    const userConn2 = await asUser(u1);
+    const refused = await expectError(
+      () =>
+        userConn2.query(
+          `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+           values ($1, 'purchased', 100, 'ncd2-${RUN}', 'direct insert')`,
+          [acc1],
+        ),
+      "permission denied",
+    );
+    await userConn2.end();
+    record("NCD2-restored-rls-refuses-insert", refused.ok, refused.msg.slice(0, 60));
+  }
+
+  // NC-E: permissive read policy → foreign read succeeds; removed → refused.
+  {
+    await a.query(
+      `create policy lmc_nc_read_all on public.lmc_transactions
+         for select to authenticated using (account_id is not null)`,
+    );
+    const acc1 = await accountOf(a, u1);
+    const foreign = await asUser(u2);
+    const { rows: weak } = await foreign.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc1],
+    );
+    await foreign.end();
+    record(
+      "NCE1-weakened-policy-permits-foreign-read",
+      weak[0].n > 0,
+      `foreign user sees ${weak[0].n} rows with permissive policy (guard removed → failure visible)`,
+    );
+    await a.query(`drop policy if exists lmc_nc_read_all on public.lmc_transactions`);
+    const foreign2 = await asUser(u2);
+    const { rows: fixed } = await foreign2.query(
+      `select count(*)::int as n from public.lmc_transactions where account_id = $1`,
+      [acc1],
+    );
+    await foreign2.end();
+    record(
+      "NCE2-restored-policy-refuses-foreign-read",
+      fixed[0].n === 0,
+      `foreign user sees ${fixed[0].n} rows after restore`,
+    );
+  }
+
+  // NC-F: flip lmc_referrals_enabled → referral insert passes; flip back → shut.
+  {
+    const acc1 = await accountOf(a, u1);
+    await setFlag(a, "lmc_referrals_enabled", true);
+    let refTx: string | null = null;
+    try {
+      const { rows } = await a.query(
+        `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+         values ($1, 'referral_reward', 100, 'ncf-${RUN}', 'flag flipped in scratch')
+         returning id`,
+        [acc1],
+      );
+      refTx = rows[0].id as string;
+    } catch {
+      /* stays null */
+    }
+    record(
+      "NCF1-enabled-flag-permits-referral",
+      refTx !== null,
+      refTx ? "referral tx inserted with flag=true (control works)" : "unexpected refusal",
+    );
+    if (refTx) await purgeLedgerRows(a, [refTx]);
+    await setFlag(a, "lmc_referrals_enabled", false);
+    const shut = await expectError(
+      () =>
+        a.query(
+          `insert into public.lmc_transactions (account_id, kind, amount_cents, idempotency_key, reason)
+           values ($1, 'referral_reward', 100, 'ncf2-${RUN}', 'flag back off')`,
+          [acc1],
+        ),
+      "lmc_referrals_disabled",
+    );
+    record("NCF2-disabled-flag-refuses-referral", shut.ok, shut.msg.slice(0, 60));
+  }
+
+  // ── P22/P23: rollback removes only Wagon 1 objects; re-apply clean ────────
+  {
+    const { rows: profBefore } = await a.query(
+      `select count(*)::int as n from public.profiles`,
+    );
+    await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
+    const { rows: gone } = await a.query(
+      `select
+         to_regclass('public.lmc_transactions') as t,
+         to_regclass('public.lmc_accounts') as acc,
+         to_regclass('public.lmc_lots') as lots,
+         to_regclass('public.lmc_lot_consumptions') as cons,
+         to_regclass('public.lmc_settings') as st`,
+    );
+    const { rows: intact } = await a.query(
+      `select
+         to_regclass('public.journal_entries') as journal,
+         to_regclass('public.audit_logs') as audit,
+         to_regclass('public.plans') as plans,
+         (select count(*)::int from public.profiles) as profiles`,
+    );
+    const allGone = Object.values(gone[0]).every((v) => v === null);
+    record(
+      "P22-rollback-only-wagon1",
+      allGone &&
+        intact[0].journal !== null &&
+        intact[0].audit !== null &&
+        intact[0].plans !== null &&
+        intact[0].profiles === profBefore[0].n,
+      `lmc objects gone=${allGone}, unrelated intact (profiles ${intact[0].profiles})`,
+    );
+
+    await restoreMigration(a);
+    const { rows: back } = await a.query(
+      `select to_regclass('public.lmc_transactions') as t,
+              (select count(*)::int from public.lmc_settings where enabled = false) as off_flags`,
+    );
+    const u7 = await makePerson(a, "p23");
+    await setFlag(a, "lmc_purchases_enabled", true);
+    const { rows: smoke } = await a.query(
+      `select public.lmc_record_purchase_v1(100, 'p23', 'p23-${RUN}', $1, null) as r`,
+      [u7],
+    );
+    record(
+      "P23-reapply-clean",
+      back[0].t !== null && back[0].off_flags === 5 && smoke[0].r.kind === "purchased",
+      `objects back, 5/5 flags re-seeded false, smoke purchase ok`,
+    );
+  }
+
+  await a.end();
+
+  const failed = results.filter((r) => !r.pass);
+  console.log(
+    `\n${results.length - failed.length}/${results.length} proofs passed`,
+  );
+  if (failed.length > 0) {
+    console.error("FAILED:", failed.map((f) => f.name).join(", "));
+    process.exit(1);
+  }
+}
+
+/** lmc_spend_v1 with the account FOR UPDATE lock removed and a widened race
+ *  window — NEGATIVE CONTROL ONLY (scratch DB), restored via the real
+ *  migration file right after. */
+const WEAKENED_SPEND_NO_LOCK = `
+create or replace function public.lmc_spend_v1(
+  p_amount_cents bigint,
+  p_reason text,
+  p_idempotency_key text,
+  p_profile_id uuid default null,
+  p_company_id uuid default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $fn$
+declare
+  v_account uuid;
+  v_tx uuid;
+  v_remaining bigint;
+  v_take bigint;
+  v_available bigint;
+  r record;
+begin
+  select id into v_account from public.lmc_accounts
+   where (p_profile_id is not null and profile_id = p_profile_id)
+      or (p_company_id is not null and company_id = p_company_id);
+  if v_account is null then
+    raise exception 'lmc_insufficient_balance';
+  end if;
+  -- WEAKENED: no FOR UPDATE lock, artificial check→write gap.
+  select coalesce(sum(
+    case when l.expires_at is not null and l.expires_at <= now() then 0
+         else l.amount_cents - coalesce(c.consumed, 0) end), 0)
+    into v_available
+    from public.lmc_lots l
+    left join (
+      select lot_id, sum(amount_cents) as consumed
+      from public.lmc_lot_consumptions group by lot_id) c on c.lot_id = l.id
+   where l.account_id = v_account;
+  if v_available < p_amount_cents then
+    raise exception 'lmc_insufficient_balance: available % < requested %',
+      v_available, p_amount_cents;
+  end if;
+  perform pg_sleep(0.2);
+  insert into public.lmc_transactions
+    (account_id, kind, amount_cents, idempotency_key, reason)
+  values (v_account, 'spend', p_amount_cents, p_idempotency_key, p_reason)
+  returning id into v_tx;
+  v_remaining := p_amount_cents;
+  for r in
+    select l.id as lot_id,
+           l.amount_cents - coalesce(c.consumed, 0) as lot_remaining
+      from public.lmc_lots l
+      left join (
+        select lot_id, sum(amount_cents) as consumed
+        from public.lmc_lot_consumptions group by lot_id) c on c.lot_id = l.id
+     where l.account_id = v_account
+       and (l.expires_at is null or l.expires_at > now())
+       and l.amount_cents - coalesce(c.consumed, 0) > 0
+     order by (l.expires_at is null) asc, l.expires_at asc, l.created_at asc, l.id asc
+  loop
+    exit when v_remaining <= 0;
+    v_take := least(v_remaining, r.lot_remaining);
+    insert into public.lmc_lot_consumptions
+      (account_id, lot_id, transaction_id, consumption_kind, amount_cents)
+    values (v_account, r.lot_id, v_tx, 'spend', v_take);
+    v_remaining := v_remaining - v_take;
+  end loop;
+  return jsonb_build_object('transaction_id', v_tx, 'account_id', v_account,
+                            'kind', 'spend', 'amount_cents', p_amount_cents,
+                            'already_processed', false);
+end;
+$fn$;
+`;
+
+/** lmc_admin_grant_v1 with the is_admin() gate stripped — NEGATIVE CONTROL
+ *  ONLY (scratch DB), restored via the real migration file right after. */
+const WEAKENED_ADMIN_GRANT_NO_GATE = `
+create or replace function public.lmc_admin_grant_v1(
+  p_recipient_email text,
+  p_amount_cents bigint,
+  p_reason text,
+  p_campaign text,
+  p_expires_at timestamptz,
+  p_idempotency_key text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $fn$
+declare
+  uid uuid := auth.uid();
+  v_recipient uuid;
+  v_email text;
+  v_account uuid;
+  v_tx uuid;
+begin
+  -- WEAKENED: is_admin() gate removed.
+  select u.id, u.email into v_recipient, v_email
+    from auth.users u
+   where lower(u.email) = lower(trim(p_recipient_email))
+     and u.email_confirmed_at is not null;
+  if v_recipient is null then
+    raise exception 'lmc_recipient_not_found_or_unverified';
+  end if;
+  v_account := public.lmc_ensure_account_v1(p_profile_id => v_recipient);
+  perform 1 from public.lmc_accounts where id = v_account for update;
+  insert into public.lmc_transactions
+    (account_id, kind, amount_cents, idempotency_key, campaign, reason,
+     actor_profile_id, recipient_email_at_grant)
+  values (v_account, 'admin_grant', p_amount_cents, p_idempotency_key,
+          p_campaign, p_reason, uid, v_email)
+  returning id into v_tx;
+  insert into public.lmc_lots
+    (account_id, transaction_id, source_kind, amount_cents, expires_at)
+  values (v_account, v_tx, 'admin_grant', p_amount_cents, p_expires_at);
+  return jsonb_build_object('transaction_id', v_tx, 'account_id', v_account,
+                            'kind', 'admin_grant',
+                            'amount_cents', p_amount_cents,
+                            'already_processed', false);
+end;
+$fn$;
+`;
+
+main().catch((e) => {
+  console.error("proof harness crashed:", e);
+  process.exit(1);
+});
