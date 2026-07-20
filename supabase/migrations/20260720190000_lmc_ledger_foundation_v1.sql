@@ -373,18 +373,35 @@ begin
     end if;
     insert into public.lmc_accounts (subject_type, profile_id)
     values ('person', p_profile_id)
-    on conflict do nothing;
-    select id into v_account from public.lmc_accounts
-      where profile_id = p_profile_id;
+    on conflict do nothing
+    returning id into v_account;
+    if v_account is not null then
+      -- Provenance for the actual creation (idempotent re-calls skip this).
+      insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+      values (null, 'lmc_account_created', 'lmc_accounts', v_account,
+              jsonb_build_object('subject_type', 'person',
+                                 'profile_id', p_profile_id));
+    else
+      select id into v_account from public.lmc_accounts
+        where profile_id = p_profile_id;
+    end if;
   else
     if not exists (select 1 from public.companies where id = p_company_id) then
       raise exception 'lmc_unknown_company' using errcode = '22023';
     end if;
     insert into public.lmc_accounts (subject_type, company_id)
     values ('company', p_company_id)
-    on conflict do nothing;
-    select id into v_account from public.lmc_accounts
-      where company_id = p_company_id;
+    on conflict do nothing
+    returning id into v_account;
+    if v_account is not null then
+      insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
+      values (null, 'lmc_account_created', 'lmc_accounts', v_account,
+              jsonb_build_object('subject_type', 'company',
+                                 'company_id', p_company_id));
+    else
+      select id into v_account from public.lmc_accounts
+        where company_id = p_company_id;
+    end if;
   end if;
   return v_account;
 end;

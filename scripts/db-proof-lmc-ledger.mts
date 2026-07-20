@@ -644,6 +644,13 @@ async function main() {
         where action = 'lmc_spend' and entity_id = $1 and actor_id = $2`,
       [ok[0].r.transaction_id, u2],
     );
+    // Account creation itself is audited (exactly once, despite many
+    // idempotent ensure-account calls across the proofs).
+    const { rows: accAudit } = await a.query(
+      `select count(*)::int as n from public.audit_logs
+        where action = 'lmc_account_created' and entity_id = $1`,
+      [acc2],
+    );
     record(
       "P30-spend-provenance-recorded",
       noActor.ok &&
@@ -652,8 +659,9 @@ async function main() {
         foreignReplay.ok &&
         admSpend[0].r.kind === "spend" &&
         tx[0].actor_profile_id === u2 &&
-        audit[0].n === 1,
-      `missing/unknown/foreign actor refused; foreign REPLAY refused; admin actor allowed; tx.actor recorded; audit rows=${audit[0].n} (account ${acc2})`,
+        audit[0].n === 1 &&
+        accAudit[0].n === 1,
+      `missing/unknown/foreign actor refused; foreign REPLAY refused; admin actor allowed; tx.actor recorded; spend audit=${audit[0].n}; account-created audit=${accAudit[0].n}`,
     );
   }
 
