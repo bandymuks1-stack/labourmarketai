@@ -43,7 +43,9 @@
 --
 -- EVERY COMMERCIAL FLAG SHIPS DISABLED (lmc_settings seeds, all false):
 --   lmc_purchases_enabled, lmc_promotional_grants_enabled,
---   lmc_referrals_enabled, stripe_lmc_topups_enabled, live_payments_enabled.
+--   lmc_referrals_enabled, stripe_lmc_topups_enabled, live_payments_enabled,
+--   lmc_spending_enabled (spend kill-switch — disabling every flag freezes
+--   even already-issued credits: complete behavioural rollback).
 --   TS mirror: apps/web/lib/billing/lmc-flags.ts (false as const, guard-pinned).
 --
 -- ADDITIVE ONLY: no existing table/policy/grant/function is touched.
@@ -60,7 +62,8 @@ create table if not exists public.lmc_settings (
                'lmc_promotional_grants_enabled',
                'lmc_referrals_enabled',
                'stripe_lmc_topups_enabled',
-               'live_payments_enabled')),
+               'live_payments_enabled',
+               'lmc_spending_enabled')),
   enabled    boolean not null default false,
   updated_at timestamptz not null default now(),
   updated_by uuid references public.profiles(id) on delete set null
@@ -71,7 +74,8 @@ insert into public.lmc_settings (key, enabled) values
   ('lmc_promotional_grants_enabled', false),
   ('lmc_referrals_enabled', false),
   ('stripe_lmc_topups_enabled', false),
-  ('live_payments_enabled', false)
+  ('live_payments_enabled', false),
+  ('lmc_spending_enabled', false)
 on conflict (key) do nothing;
 
 -- Fail-closed flag read: a missing row is FALSE.
@@ -626,6 +630,11 @@ declare
   v_available bigint;
   r record;
 begin
+  -- DB-level kill-switch: when spending is disabled, even already-issued
+  -- credits are frozen (complete behavioural rollback of commerce).
+  if not public.lmc_flag_enabled('lmc_spending_enabled') then
+    raise exception 'lmc_spending_disabled' using errcode = '42501';
+  end if;
   if p_amount_cents is null or p_amount_cents <= 0 or p_amount_cents > 100000000 then
     raise exception 'lmc_invalid_amount' using errcode = '22023';
   end if;
@@ -732,10 +741,20 @@ begin
   if p_limit is null or p_limit <= 0 or p_limit > 1000 then
     raise exception 'lmc_invalid_limit' using errcode = '22023';
   end if;
+  -- Candidate set EXCLUDES completed lots BEFORE the LIMIT, so a batch can
+  -- never be wedged by already-consumed / already-expired old lots: only
+  -- expired lots that still have unconsumed remainder and no expiry record
+  -- occupy the window.
   for r in
     select l.id as lot_id, l.account_id
       from public.lmc_lots l
      where l.expires_at is not null and l.expires_at <= now()
+       and not exists (select 1 from public.lmc_lot_consumptions ec
+                        where ec.lot_id = l.id
+                          and ec.consumption_kind = 'expiry')
+       and (select coalesce(sum(c.amount_cents), 0)
+              from public.lmc_lot_consumptions c
+             where c.lot_id = l.id) < l.amount_cents
      order by l.expires_at asc, l.id asc
      limit p_limit
   loop

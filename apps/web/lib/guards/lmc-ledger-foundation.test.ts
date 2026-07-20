@@ -135,7 +135,7 @@ describe("LMC Wagon 1 — append-only and fail-closed invariants", () => {
 });
 
 describe("LMC Wagon 1 — every commercial flag ships disabled", () => {
-  it("DB seeds all five lmc_settings flags as false", () => {
+  it("DB seeds all six lmc_settings flags as false", () => {
     const sql = sqlBody(readRepo(MIGRATION));
     for (const key of [
       "lmc_purchases_enabled",
@@ -143,6 +143,7 @@ describe("LMC Wagon 1 — every commercial flag ships disabled", () => {
       "lmc_referrals_enabled",
       "stripe_lmc_topups_enabled",
       "live_payments_enabled",
+      "lmc_spending_enabled",
     ]) {
       expect(sql).toContain(`('${key}', false)`);
     }
@@ -157,6 +158,7 @@ describe("LMC Wagon 1 — every commercial flag ships disabled", () => {
       "LMC_REFERRALS_ENABLED",
       "STRIPE_LMC_TOPUPS_ENABLED",
       "LIVE_PAYMENTS_ENABLED",
+      "LMC_SPENDING_ENABLED",
     ]) {
       expect(ts).toContain(`export const ${name} = false as const;`);
     }

@@ -329,6 +329,7 @@ default false and are guard-pinned:
 | `LMC_REFERRALS_ENABLED` | `false` | TS constant + `lmc_settings.lmc_referrals_enabled` (trigger-enforced) |
 | `STRIPE_LMC_TOPUPS_ENABLED` | `false` | TS constant + `lmc_settings.stripe_lmc_topups_enabled` |
 | `LIVE_PAYMENTS_ENABLED` | `false` | TS constant + `lmc_settings.live_payments_enabled` (in addition to the existing live-key hard block) |
+| `LMC_SPENDING_ENABLED` | `false` | TS constant + `lmc_settings.lmc_spending_enabled` — spend kill-switch enforced inside `lmc_spend_v1`; while false even already-issued LMC is frozen (added after Codex P1 review so the §14 behavioural-rollback claim is DB-true) |
 
 A missing settings row reads as **false** (fail-closed helper).
 `feature-availability.ts` entries for wallet UI are **deferred to Wagon 7**
@@ -396,7 +397,8 @@ action).
 - Rollback → re-apply is proven clean in the scratch DB (proof 23).
 - Because balances are derived and writes are RPC-only, disabling every flag
   (all default false) is a complete behavioural rollback without schema
-  changes: no grant, purchase, spend or referral path can execute.
+  changes: no grant, purchase, spend or referral path can execute — spends
+  are DB-gated by `lmc_spending_enabled` inside `lmc_spend_v1`.
 - Ledger data itself is append-only and is **never** deleted in production;
   a production rollback of an applied LMC migration is an OWNER GATE with a
   data-preservation review first (§3 CLAUDE.md destructive-migration gate).

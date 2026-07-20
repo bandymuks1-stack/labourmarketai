@@ -23,6 +23,8 @@ export const LMC_PROMOTIONAL_GRANTS_ENABLED = false as const;
 export const LMC_REFERRALS_ENABLED = false as const;
 export const STRIPE_LMC_TOPUPS_ENABLED = false as const;
 export const LIVE_PAYMENTS_ENABLED = false as const;
+/** Spend kill-switch: while false, even already-issued LMC is frozen. */
+export const LMC_SPENDING_ENABLED = false as const;
 
 /** True only when some commercial LMC behaviour is enabled — never in Wagon 1. */
 export function lmcCommerceEnabled(): boolean {
@@ -31,6 +33,7 @@ export function lmcCommerceEnabled(): boolean {
     LMC_PROMOTIONAL_GRANTS_ENABLED ||
     LMC_REFERRALS_ENABLED ||
     STRIPE_LMC_TOPUPS_ENABLED ||
-    LIVE_PAYMENTS_ENABLED
+    LIVE_PAYMENTS_ENABLED ||
+    LMC_SPENDING_ENABLED
   );
 }

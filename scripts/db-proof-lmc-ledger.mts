@@ -6,7 +6,7 @@
  * Contract: docs/product/lmc-commercial-system-train-v1.md
  *
  * Proof matrix (train task, 23 required proofs):
- *   P00  flags default FALSE + disabled RPCs refuse (fail-closed baseline)
+ *   P00  flags default FALSE + disabled RPCs refuse, incl. spend (fail-closed)
  *   P01  1 LMC represented exactly (bigint LMC-cents, no float)
  *   P02  duplicate signup grant refused idempotently
  *   P03  duplicate activity grant refused idempotently
@@ -30,6 +30,7 @@
  *   P21  concurrent grants with the same idempotency key produce ONE result
  *   P22  rollback removes only Wagon 1 objects, unrelated data preserved
  *   P23  re-apply after rollback succeeds cleanly (flags false again)
+ *   P24  expiry batch is never wedged by already-completed old lots
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -189,7 +190,11 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function main() {
   const a = await admin();
 
-  // Ensure the Wagon 1 migration is present on the scratch DB (idempotent).
+  // Clean current schema each run: roll back any prior Wagon 1 objects (the
+  // rollback is fully `if exists`-guarded), then apply the real migration.
+  // This also guarantees constraint/seed changes in the migration take effect
+  // instead of silently keeping a stale `create table if not exists` shape.
+  await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
   await restoreMigration(a);
 
   // ── P00: fail-closed baseline ─────────────────────────────────────────────
@@ -197,7 +202,7 @@ async function main() {
     const { rows } = await a.query(
       `select key, enabled from public.lmc_settings order by key`,
     );
-    const allFalse = rows.length === 5 && rows.every((r) => r.enabled === false);
+    const allFalse = rows.length === 6 && rows.every((r) => r.enabled === false);
     record("P00a-flags-default-false", allFalse, JSON.stringify(rows));
 
     const uVerified = await makePerson(a, "p00");
@@ -217,17 +222,26 @@ async function main() {
         ),
       "lmc_purchases_disabled",
     );
+    const s = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'frozen spend', 'p00-spend-${RUN}', $1, null)`,
+          [uVerified],
+        ),
+      "lmc_spending_disabled",
+    );
     record(
       "P00b-disabled-rpcs-refuse",
-      g.ok && p.ok,
-      `grant: ${g.msg.slice(0, 60)} | purchase: ${p.msg.slice(0, 60)}`,
+      g.ok && p.ok && s.ok,
+      `grant: ${g.msg.slice(0, 50)} | purchase: ${p.msg.slice(0, 50)} | spend: ${s.msg.slice(0, 50)}`,
     );
   }
 
-  // Enable grant+purchase mechanics for the remaining proofs (scratch-only;
-  // referrals stay disabled throughout — P19 proves that path stays shut).
+  // Enable grant+purchase+spend mechanics for the remaining proofs (scratch-
+  // only; referrals stay disabled throughout — P19 proves that path stays shut).
   await setFlag(a, "lmc_promotional_grants_enabled", true);
   await setFlag(a, "lmc_purchases_enabled", true);
+  await setFlag(a, "lmc_spending_enabled", true);
 
   const u1 = await makePerson(a, "u1");
   const u2 = await makePerson(a, "u2");
@@ -404,6 +418,45 @@ async function main() {
       "P08-insufficient-atomic",
       res.ok && before[0].n === after[0].n,
       `refused, tx count unchanged (${before[0].n}): ${res.msg.slice(0, 60)}`,
+    );
+  }
+
+  // ── P24: expiry batch never wedged by completed old lots ──────────────────
+  {
+    const w1 = await makePerson(a, "w1");
+    const w2 = await makePerson(a, "w2");
+    const admConn = await asUser(adm);
+    // Older lot: fully consumed BEFORE it expires (remaining 0 at expiry).
+    await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 1000, 'wedge older lot', 'proof-campaign', now() + interval '3 seconds', 'p24-w1-${RUN}')`,
+      [`${RUN}-w1@fixture.local`],
+    );
+    await a.query(
+      `select public.lmc_spend_v1(1000, 'consume fully', 'p24-spend-${RUN}', $1, null)`,
+      [w1],
+    );
+    // Newer lot: expires later than w1's, still has remainder.
+    await admConn.query(
+      `select public.lmc_admin_grant_v1($1, 800, 'wedge newer lot', 'proof-campaign', now() + interval '4 seconds', 'p24-w2-${RUN}')`,
+      [`${RUN}-w2@fixture.local`],
+    );
+    await admConn.end();
+    await sleep(4500); // both lots are now past expires_at
+    // Batch limit 1: without the completed-lot filter, w1's older consumed lot
+    // would occupy the window forever and w2's value would never expire.
+    const { rows: run1 } = await a.query(
+      `select public.lmc_expire_lots_v1(1) as r`,
+    );
+    const { rows: w2exp } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions t
+        join public.lmc_accounts acc on acc.id = t.account_id
+       where acc.profile_id = $1 and t.kind = 'expiry'`,
+      [w2],
+    );
+    record(
+      "P24-expiry-batch-not-wedged",
+      run1[0].r.expired_lots === 1 && w2exp[0].n === 1,
+      `limit-1 run expired ${run1[0].r.expired_lots} lot(s); newer lot recorded=${w2exp[0].n} despite older consumed lot`,
     );
   }
 
@@ -997,8 +1050,8 @@ async function main() {
     );
     record(
       "P23-reapply-clean",
-      back[0].t !== null && back[0].off_flags === 5 && smoke[0].r.kind === "purchased",
-      `objects back, 5/5 flags re-seeded false, smoke purchase ok`,
+      back[0].t !== null && back[0].off_flags === 6 && smoke[0].r.kind === "purchased",
+      `objects back, 6/6 flags re-seeded false, smoke purchase ok`,
     );
   }
 
