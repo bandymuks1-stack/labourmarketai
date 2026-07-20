@@ -58,7 +58,8 @@ describe("LMC Wagon 1 — migration and rollback presence", () => {
   });
 
   it("paired rollback exists and drops ONLY lmc_* objects", () => {
-    const raw = readRepo(ROLLBACK);
+    // Scan executable SQL only — `--` comments may mention DROP in prose.
+    const raw = sqlBody(readRepo(ROLLBACK));
     const drops = raw.match(/drop\s+\w+(\s+if exists)?\s+(?:public\.)?([a-z0-9_]+)/gi) ?? [];
     expect(drops.length).toBeGreaterThan(10);
     for (const d of drops) {
