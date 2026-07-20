@@ -419,7 +419,8 @@ create or replace function public.lmc_existing_by_idempotency_v1(
   p_original_transaction_id uuid default null,
   p_campaign text default null,
   p_reference text default null,
-  p_expires_at timestamptz default null)
+  p_expires_at timestamptz default null,
+  p_actor_profile_id uuid default null)
 returns jsonb
 language plpgsql
 security definer
@@ -461,6 +462,13 @@ begin
      and (select l.expires_at from public.lmc_lots l
            where l.transaction_id = v_existing.id) is distinct from p_expires_at then
     raise exception 'lmc_idempotency_conflict: key % already used with a different expiry',
+      p_key using errcode = '23505';
+  end if;
+  -- A replay must come from the SAME initiator: a foreign actor may not read
+  -- another initiator's committed result through the replay path.
+  if p_actor_profile_id is not null
+     and v_existing.actor_profile_id is distinct from p_actor_profile_id then
+    raise exception 'lmc_idempotency_conflict: key % already used by a different actor',
       p_key using errcode = '23505';
   end if;
   return jsonb_build_object(
@@ -841,7 +849,8 @@ begin
   if v_account is not null then
     v_existing := public.lmc_existing_by_idempotency_v1(
       v_account, p_idempotency_key, 'spend',
-      p_amount_cents => p_amount_cents);
+      p_amount_cents => p_amount_cents,
+      p_actor_profile_id => p_actor_profile_id);
     if v_existing is not null then
       return v_existing;
     end if;
@@ -879,7 +888,8 @@ begin
 
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_account, p_idempotency_key, 'spend',
-    p_amount_cents => p_amount_cents);
+    p_amount_cents => p_amount_cents,
+    p_actor_profile_id => p_actor_profile_id);
   if v_existing is not null then
     return v_existing;
   end if;
@@ -1219,7 +1229,7 @@ revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
 revoke all on function public.lmc_assert_external_idempotency_key_v1(text) from public;
-revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz) from public;
+revoke all on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz, uuid) from public;
 revoke all on function public.lmc_grant_promotional_v1(text, uuid, text, text) from public;
 revoke all on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) from public;
 revoke all on function public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text) from public;
@@ -1232,7 +1242,7 @@ grant execute on function public.lmc_require_flag_v1(text) to service_role;
 -- Server-side monetary writes only:
 grant execute on function public.lmc_ensure_account_v1(uuid, uuid) to service_role;
 grant execute on function public.lmc_assert_external_idempotency_key_v1(text) to service_role;
-grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz) to service_role;
+grant execute on function public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz, uuid) to service_role;
 grant execute on function public.lmc_grant_promotional_v1(text, uuid, text, text) to service_role;
 grant execute on function public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid) to service_role;
 grant execute on function public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid) to service_role;

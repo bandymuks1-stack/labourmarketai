@@ -623,6 +623,16 @@ async function main() {
       `select public.lmc_spend_v1(100, 'p30 spend', 'p30-${RUN}', $1, null, $1) as r`,
       [u2],
     );
+    // A committed spend's replay result is NOT readable by a foreign actor:
+    // same key + same amount but a different initiator conflicts.
+    const foreignReplay = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p30 spend', 'p30-${RUN}', $1, null, $2)`,
+          [u2, u1],
+        ),
+      "lmc_idempotency_conflict",
+    );
     const { rows: tx } = await a.query(
       `select actor_profile_id from public.lmc_transactions where id = $1`,
       [ok[0].r.transaction_id],
@@ -637,10 +647,11 @@ async function main() {
       noActor.ok &&
         ghostActor.ok &&
         foreignActor.ok &&
+        foreignReplay.ok &&
         admSpend[0].r.kind === "spend" &&
         tx[0].actor_profile_id === u2 &&
         audit[0].n === 1,
-      `missing/unknown/foreign actor refused; admin actor allowed; tx.actor recorded; audit rows=${audit[0].n} (account ${acc2})`,
+      `missing/unknown/foreign actor refused; foreign REPLAY refused; admin actor allowed; tx.actor recorded; audit rows=${audit[0].n} (account ${acc2})`,
     );
   }
 

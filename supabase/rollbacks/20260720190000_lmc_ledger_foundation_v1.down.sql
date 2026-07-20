@@ -69,9 +69,10 @@ drop function if exists public.lmc_spend_v1(bigint, text, text, uuid, uuid);
 drop function if exists public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text);
 drop function if exists public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid);
 drop function if exists public.lmc_grant_promotional_v1(text, uuid, text, text);
-drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz);
+drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz, uuid);
 drop function if exists public.lmc_assert_external_idempotency_key_v1(text);
--- Pre-rev3/rev4 signatures (never shipped to production; scratch hygiene only).
+-- Pre-rev15 signatures (never shipped to production; scratch hygiene only).
+drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz);
 drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text);
 drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text);
 drop function if exists public.lmc_ensure_account_v1(uuid, uuid);
