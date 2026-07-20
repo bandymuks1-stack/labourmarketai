@@ -29,6 +29,8 @@
  *   P20  concurrent spends cannot overspend
  *   P21  concurrent grants with the same idempotency key produce ONE result
  *   P22  rollback removes only Wagon 1 objects, unrelated data preserved
+ *        (P22a: a POPULATED ledger refuses to roll back without the
+ *        scratch-only override — zero-row-before-DROP rule)
  *   P23  re-apply after rollback succeeds cleanly (flags false again)
  *   P24  expiry batch is never wedged by already-completed old lots
  *   P25  idempotency-key reuse with a DIFFERENT payload is rejected
@@ -206,6 +208,11 @@ async function main() {
   // rollback is fully `if exists`-guarded), then apply the real migration.
   // This also guarantees constraint/seed changes in the migration take effect
   // instead of silently keeping a stale `create table if not exists` shape.
+  // The rollback's zero-row guard requires the SCRATCH-ONLY override here
+  // (this harness is hard-guarded to localhost above).
+  await a.query(
+    `select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false)`,
+  );
   await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
   await restoreMigration(a);
 
@@ -1412,6 +1419,23 @@ async function main() {
   {
     const { rows: profBefore } = await a.query(
       `select count(*)::int as n from public.profiles`,
+    );
+    // Without the scratch override, a populated ledger REFUSES to roll back
+    // (AGENTS.md zero-row rule — owner-only decision in production).
+    await a.query(`select set_config('lmc.force_rollback', 'off', false)`);
+    const refused = await expectError(
+      () => a.query(readFileSync(ROLLBACK_PATH, "utf8")),
+      "lmc_rollback_refused",
+    );
+    // The refused batch aborted inside its own `begin;` — clear the session.
+    await a.query(`rollback`).catch(() => {});
+    record(
+      "P22a-populated-rollback-refused-without-override",
+      refused.ok,
+      refused.msg.slice(0, 80),
+    );
+    await a.query(
+      `select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false)`,
     );
     await a.query(readFileSync(ROLLBACK_PATH, "utf8"));
     const { rows: gone } = await a.query(

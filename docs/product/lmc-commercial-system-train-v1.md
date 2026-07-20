@@ -404,7 +404,11 @@ action).
 
 **Rollback strategy:**
 - Every LMC migration ships a paired `supabase/rollbacks/<name>.down.sql`
-  that removes **only** that migration's objects (proof 22).
+  that removes **only** that migration's objects (proof 22), and the
+  rollback itself is fail-closed: if any committed ledger row exists it
+  refuses to run (zero-row-before-DROP rule) unless an explicit
+  scratch-only override setting is provided — dropping a populated
+  immutable ledger is an owner-only decision.
 - Rollback → re-apply is proven clean in the scratch DB (proof 23).
 - Because balances are derived and writes are RPC-only, disabling every flag
   (all default false) is a complete behavioural rollback without schema

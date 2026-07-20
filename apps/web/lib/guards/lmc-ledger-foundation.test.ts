@@ -48,6 +48,15 @@ describe("LMC Wagon 1 — migration and rollback presence", () => {
     expect(raw).toContain("needs-human-gate");
   });
 
+  it("rollback refuses to drop a populated ledger without the scratch override", () => {
+    const raw = readRepo(ROLLBACK);
+    expect(raw).toContain("lmc_rollback_refused");
+    expect(raw).toContain("force-delete-scratch-ledger");
+    expect(raw.indexOf("lmc_rollback_refused")).toBeLessThan(
+      raw.indexOf("drop view"),
+    );
+  });
+
   it("paired rollback exists and drops ONLY lmc_* objects", () => {
     const raw = readRepo(ROLLBACK);
     const drops = raw.match(/drop\s+\w+(\s+if exists)?\s+(?:public\.)?([a-z0-9_]+)/gi) ?? [];

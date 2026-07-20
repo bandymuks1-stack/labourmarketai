@@ -9,6 +9,36 @@
 
 begin;
 
+-- ── Zero-row safety guard (AGENTS.md: DROP TABLE only after asserting the
+-- target has zero rows). If ANY committed ledger row exists, this rollback
+-- REFUSES to run: dropping an immutable financial ledger with data is an
+-- owner-only decision. The explicit override below exists ONLY for local
+-- scratch databases (the db-proof harness sets it); never set it against
+-- production.
+--   select set_config('lmc.force_rollback', 'force-delete-scratch-ledger', false);
+do $guard$
+declare
+  v_rows bigint := 0;
+  v_part bigint;
+  v_force text := coalesce(current_setting('lmc.force_rollback', true), 'off');
+  t text;
+begin
+  foreach t in array array[
+    'public.lmc_transactions', 'public.lmc_lots',
+    'public.lmc_lot_consumptions', 'public.lmc_accounts']
+  loop
+    if to_regclass(t) is not null then
+      execute format('select count(*) from %s', t) into v_part;
+      v_rows := v_rows + coalesce(v_part, 0);
+    end if;
+  end loop;
+  if v_rows > 0 and v_force <> 'force-delete-scratch-ledger' then
+    raise exception 'lmc_rollback_refused: % committed ledger row(s) exist — dropping a populated immutable ledger is an owner-only decision (scratch override: lmc.force_rollback)',
+      v_rows using errcode = '42501';
+  end if;
+end;
+$guard$;
+
 -- Views first (depend on tables).
 drop view if exists public.lmc_account_balances;
 drop view if exists public.lmc_lot_balances;
