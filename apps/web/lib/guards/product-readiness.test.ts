@@ -1830,7 +1830,9 @@ describe("no migration files added by this sprint", () => {
     // Bumped 157 -> 158 for W0 atomic supersede — function-only migration
     // (20260720100000_journal_atomic_supersede_v1): CREATE OR REPLACE of the
     // supersede RPCs, no schema/RLS change, paired rollback.
-    const SPRINT_BASELINE = 158;
+    // Bumped 158 -> 159 for W1 photo continuity — function-only migration
+    // (20260720150000_journal_photo_continuity_v1), paired rollback.
+    const SPRINT_BASELINE = 159;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

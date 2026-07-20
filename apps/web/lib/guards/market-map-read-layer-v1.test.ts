@@ -317,6 +317,7 @@ describe("NO new DB migration in this PR", () => {
     // vehicle-cleaning skill seed, 20260719150000). GREEN / paired rollback.
     // Bumped 157 -> 158 for W0 atomic supersede (function-only migration
     // 20260720100000_journal_atomic_supersede_v1, paired rollback).
-    expect(count).toBeLessThanOrEqual(158);
+    // Bumped 158 -> 159 for W1 photo continuity (20260720150000, paired rollback).
+    expect(count).toBeLessThanOrEqual(159);
   });
 });
