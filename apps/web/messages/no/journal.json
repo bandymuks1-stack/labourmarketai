@@ -72,6 +72,11 @@
       "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
       "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
       "outcomeBlocked": "[EN] not confirmed ({code})"
+    },
+    "result": {
+      "entrySuperseded": "Oppføringen er allerede erstattet av en nyere versjon — kortet er ikke lenger aktuelt og fjernes fra listen.",
+      "entryDeleted": "Oppføringen er slettet — kortet er ikke lenger aktuelt og fjernes fra listen.",
+      "staleTerminalHint": "Ingenting ble registrert. Hvis arbeideren lagret en nyere versjon, vises den som et nytt kort i innboksen."
     }
   },
   "listEmpty": "[EN] No entries yet.",

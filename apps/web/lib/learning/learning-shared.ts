@@ -52,6 +52,9 @@ export interface ReviewItemRow {
   readonly producedConfirmationId: string | null;
   readonly policyId: string | null;
   readonly createdAt: string;
+  /** True when the source journal entry is superseded or deleted — the item
+   *  is no longer actionable (owner-hold v5 P2-1). */
+  readonly entryStale: boolean;
 }
 
 export interface LearningPolicyRow {
@@ -78,8 +81,46 @@ export type LearningPolicyListResult =
   | { kind: "needs-migration" }
   | { kind: "not-authed" };
 
+/** Terminal stale outcomes shared by the journal review surfaces and the
+ *  learning queue: the source entry was edited (superseded) or removed after
+ *  the surface rendered. Both are TERMINAL — never a retryable error. */
+export const TERMINAL_STALE_OUTCOMES = ["entry_superseded", "entry_deleted"] as const;
+export type TerminalStaleOutcome = (typeof TERMINAL_STALE_OUTCOMES)[number];
+
+export function isTerminalStaleOutcome(code: unknown): code is TerminalStaleOutcome {
+  return (
+    typeof code === "string" &&
+    (TERMINAL_STALE_OUTCOMES as readonly string[]).includes(code)
+  );
+}
+
+/**
+ * Recover a terminal stale outcome from a DATABASE ERROR message.
+ *
+ * The confirmation guard trigger (20260720150000) and the learning queue guard
+ * trigger (20260720170000) RAISE when an entry goes stale between an RPC's own
+ * pre-check and its write. That surfaces as an error rather than a tagged
+ * return value, and mapping it to a generic `error` code leaves the card
+ * actionable and invites retries of an impossible action. Every wrapper around
+ * a guarded RPC routes its error through here first.
+ *
+ * Order matters: 'entry_deleted' is checked first because a deleted entry is
+ * the stronger statement when both markers somehow appear.
+ */
+export function terminalStaleFromError(
+  message: string | null | undefined,
+): TerminalStaleOutcome | null {
+  if (!message) return null;
+  if (message.includes("entry_deleted")) return "entry_deleted";
+  if (message.includes("entry_superseded")) return "entry_superseded";
+  return null;
+}
+
 export type LearningMutateResult =
   | { kind: "ok"; id?: string; detail?: string }
+  /** The mutation refused a decision because the source entry went stale
+   *  between render and click; the queue item was closed instead (P2-2). */
+  | { kind: "stale"; outcome: TerminalStaleOutcome }
   | { kind: "needs-migration" }
   | { kind: "not-authed" }
   | { kind: "invalid"; field: string }

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   MANAGER_SETTABLE_STATUSES,
+  isTerminalStaleOutcome,
   type LearningMutateResult,
   type LearningPolicyListResult,
   type LearningPolicyRow,
@@ -64,6 +65,13 @@ function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
     journalEntryId: (r.journal_entry_id as string | null) ?? null,
     suggestionKind: (r.suggestion_kind as ReviewItemRow["suggestionKind"]) ?? "review_skill",
     status: (r.status as ReviewItemRow["status"]) ?? "pending",
+    entryStale: (() => {
+      const je = r.journal_entries as
+        | { superseded_by?: string | null; deleted_at?: string | null }
+        | null
+        | undefined;
+      return Boolean(je && (je.superseded_by != null || je.deleted_at != null));
+    })(),
     reviewedBy: (r.reviewed_by as string | null) ?? null,
     reviewedAt: (r.reviewed_at as string | null) ?? null,
     reviewNote: (r.review_note as string | null) ?? null,
@@ -73,8 +81,50 @@ function mapReviewRow(r: Record<string, unknown>): ReviewItemRow {
   };
 }
 
+/**
+ * SERVER-SIDE READ CLEANUP (owner-hold v5 P2-1). Before listing, transition
+ * every PENDING queue row whose source journal entry is superseded/deleted to
+ * the honest terminal 'superseded' status, via the race-safe SECURITY DEFINER
+ * RPC. This is what guarantees a stale item cannot sit `pending` forever:
+ *
+ *   * it does NOT depend on a UI button (the UI hides controls exactly when an
+ *     item is stale, which is what stranded the row in the first place);
+ *   * it fires even when the page is opened long AFTER the entry went stale;
+ *   * it is IDEMPOTENT — `status = 'pending'` is the idempotency key, so a
+ *     second call closes nothing;
+ *   * it re-checks live manager/admin authority per row inside the RPC, so a
+ *     worker loading their own transparency list closes nothing.
+ *
+ * ABSENT-RPC DETECTION (rev14, Codex P2): the migration is human-gated, so the
+ * app can be deployed BEFORE it is applied. PostgREST resolves a missing
+ * function as an `{ error }` RESULT rather than a rejected promise, so a bare
+ * try/catch would read "missing function" as success. The older learning
+ * TABLES already exist, so the listing query would then succeed too and the
+ * page would render live controls whose every decision hits the equally-absent
+ * `set_learning_review_item_status` and dies with a generic error. We therefore
+ * inspect the result and report absence upward, so the page shows its intended
+ * "not available yet" state instead.
+ *
+ * Any OTHER failure stays best-effort: the listing still renders, rows keep
+ * their current status, and the UI degrades honestly. Never throws.
+ */
+async function closeStaleReviewItems(
+  supabase: SupabaseClient,
+): Promise<{ absent: boolean }> {
+  try {
+    const { error } = await asAny(supabase).rpc("close_stale_learning_review_items", {
+      p_organization_id: null,
+    });
+    return { absent: isAbsent(error) };
+  } catch {
+    // Read paths never fail because a cleanup sweep failed.
+    return { absent: false };
+  }
+}
+
 /** Review-queue items the caller is allowed to see (RLS: own-worker, org-manager,
- *  or admin). Newest first. */
+ *  or admin). Newest first. Stale items are closed server-side first, so the
+ *  list never renders a permanently-unactionable pending badge. */
 export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   const supabase = await createClient();
   const {
@@ -82,10 +132,17 @@ export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
+  // P2-1: close stale rows BEFORE reading, so the snapshot the UI renders is
+  // already truthful (no pending badge on an unactionable item). If the RPC is
+  // absent the lifecycle is not deployed yet — degrade to the honest
+  // "not available yet" state rather than rendering controls that cannot work.
+  const { absent } = await closeStaleReviewItems(supabase);
+  if (absent) return { kind: "needs-migration" };
+
   const { data, error } = await asAny(supabase)
     .from("learning_review_queue")
     .select(
-      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at, workers(profiles(full_name, email)), skills(slug)",
+      "id, subject_worker_id, subject_skill_id, organization_id, journal_entry_id, suggestion_kind, status, reviewed_by, reviewed_at, review_note, produced_confirmation_id, policy_id, created_at, workers(profiles(full_name, email)), skills(slug), journal_entries(superseded_by, deleted_at)",
     )
     .order("created_at", { ascending: false });
   if (error) {
@@ -96,10 +153,28 @@ export async function listVisibleReviewItems(): Promise<ReviewQueueListResult> {
   return { kind: "ok", rows: ((data ?? []) as Record<string, unknown>[]).map(mapReviewRow) };
 }
 
-/** Set a review item's status (manager review decision). RLS enforces that only
- *  an org manager/admin can update; a worker's attempt fails server-side. Only
- *  approved/rejected are settable here — auto_actioned is produced ONLY by the
- *  audited RPC, never by a direct status write. */
+/**
+ * Set a review item's status (manager review decision).
+ *
+ * OWNER-HOLD v5 P2-2: this goes through the SECURITY DEFINER RPC
+ * `set_learning_review_item_status`, NOT a direct table update. The RPC locks
+ * the queue row and RE-READS the linked journal entry inside the same
+ * transaction (FOR KEY SHARE against the supersedes' FOR UPDATE), so:
+ *
+ *   * the client's render-time `entryStale` snapshot is never trusted — the
+ *     entry can go stale between render and click and the decision is still
+ *     refused;
+ *   * a stale source is closed with the honest terminal 'superseded' status
+ *     and reported back as `{ kind: "stale" }` — it is NEVER recorded as an
+ *     approval or a rejection;
+ *   * authority is re-checked live inside the RPC (admin or org manager),
+ *     matching the table's RLS, and the audit fields (reviewed_by /
+ *     reviewed_at / review_note) are written on every terminal transition.
+ *
+ * Only approved/rejected are settable here — 'superseded' is systemic and
+ * auto_actioned is produced ONLY by the audited spine RPC. A BEFORE UPDATE
+ * guard trigger is the final race-proof backstop underneath all of this.
+ */
 export async function setReviewItemStatus(
   id: string,
   status: ManagerSettableStatus,
@@ -114,22 +189,31 @@ export async function setReviewItemStatus(
   if (!MANAGER_SETTABLE_STATUSES.includes(status)) return { kind: "invalid", field: "status" };
 
   const cleanNote = typeof note === "string" ? note.trim().slice(0, 2000) || null : null;
-  const { error } = await asAny(supabase)
-    .from("learning_review_queue")
-    .update({
-      status,
-      reviewed_by: user.id,
-      reviewed_at: new Date().toISOString(),
-      review_note: cleanNote,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
+  const { data, error } = await asAny(supabase).rpc("set_learning_review_item_status", {
+    p_review_item_id: id,
+    p_status: status,
+    p_note: cleanNote,
+  });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
+    // The guard trigger refused a decision that raced a supersede after the
+    // RPC's own re-read. Report it as the same terminal stale outcome rather
+    // than a retryable error — the item is unactionable either way.
+    const raw = `${error.message ?? ""}`;
+    if (raw.includes("entry_deleted")) return { kind: "stale", outcome: "entry_deleted" };
+    if (raw.includes("entry_superseded")) return { kind: "stale", outcome: "entry_superseded" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+
+  const outcome = typeof data === "string" ? data : "";
   revalidatePath("/dashboard/learning");
-  return { kind: "ok", id };
+  // TERMINAL STALE: the RPC closed the item instead of recording the decision.
+  if (isTerminalStaleOutcome(outcome)) return { kind: "stale", outcome };
+  if (outcome !== status) {
+    // 'not_authorized' | 'not_pending' | 'item_not_found' | 'invalid_status'
+    return { kind: "error", message: outcome || "unknown" };
+  }
+  return { kind: "ok", id, detail: outcome };
 }
 
 function mapPolicyRow(r: Record<string, unknown>): LearningPolicyRow {
@@ -238,5 +322,10 @@ export async function applyAutoConfirmation(reviewItemId: string): Promise<Learn
   }
   revalidatePath("/dashboard/learning");
   // The RPC returns a tagged string (e.g. "auto_confirmed:1", "policy_disabled").
-  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+  const outcome = typeof data === "string" ? data : undefined;
+  // The spine RPC already closes a stale item itself (20260720150000) — surface
+  // it through the SAME terminal channel the decision path uses, so every
+  // caller has one stale contract instead of two.
+  if (isTerminalStaleOutcome(outcome)) return { kind: "stale", outcome };
+  return { kind: "ok", detail: outcome };
 }

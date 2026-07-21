@@ -2922,5 +2922,8 @@
       "count": "Wpisy dzisiaj: {n}",
       "none": "Dzisiaj jeszcze niczego nie zapisano"
     }
+  },
+  "learning": {
+    "staleEntry": "Wpis został zmieniony lub usunięty — ten element nie jest już aktualny."
   }
 }

@@ -5779,7 +5779,8 @@
         "auto_actioned": "Bevestigd door beleid"
       }
     },
-    "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw."
+    "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
+    "staleEntry": "De registratie is gewijzigd of verwijderd — dit item is niet meer uitvoerbaar."
   },
   "serviceOfferings": {
     "pageTitle": "Diensten",

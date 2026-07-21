@@ -184,7 +184,10 @@
       "needsMigration": "Tarkastus ei ole vielä valmis.",
       "notAuthorized": "Sinulla ei ole oikeutta tarkastaa tätä kirjausta.",
       "rejected": "Ei vahvistettu — kirjaus pysyy työntekijän omana itse ilmoitettuna merkintänä hänen työpäiväkirjassaan.",
-      "reviewNotEnabled": "Tarkastusta ei ole vielä otettu käyttöön tälle työntekijälle."
+      "reviewNotEnabled": "Tarkastusta ei ole vielä otettu käyttöön tälle työntekijälle.",
+      "entrySuperseded": "Merkintä on jo korvattu uudemmalla versiolla — tämä kortti ei ole enää käytettävissä ja poistetaan listalta.",
+      "entryDeleted": "Merkintä on poistettu — tämä kortti ei ole enää käytettävissä ja poistetaan listalta.",
+      "staleTerminalHint": "Mitään ei tallennettu. Jos työntekijä tallensi uudemman version, se näkyy saapuneissa uutena korttina."
     },
     "showOriginal": "Näytä alkuperäinen",
     "skills": "Taidot",

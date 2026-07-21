@@ -5779,7 +5779,8 @@
         "auto_actioned": "Patvirtinta pagal nuostatą"
       }
     },
-    "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą."
+    "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
+    "staleEntry": "Įrašas buvo pakeistas arba pašalintas — šis elementas nebeaktualus."
   },
   "serviceOfferings": {
     "pageTitle": "Paslaugos",

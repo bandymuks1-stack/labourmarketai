@@ -2922,5 +2922,8 @@
       "count": "Ieraksti šodien: {n}",
       "none": "Šodien vēl nekas nav ierakstīts"
     }
+  },
+  "learning": {
+    "staleEntry": "Ieraksts ir mainīts vai izdzēsts — šis vienums vairs nav aktuāls."
   }
 }

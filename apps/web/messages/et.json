@@ -2922,5 +2922,8 @@
       "count": "Sissekandeid täna: {n}",
       "none": "Täna pole veel midagi kirja pandud"
     }
+  },
+  "learning": {
+    "staleEntry": "Sissekannet on muudetud või see on kustutatud — see üksus ei ole enam aktuaalne."
   }
 }

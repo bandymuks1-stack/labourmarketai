@@ -185,7 +185,10 @@
       "needsMigration": "Review is not ready yet.",
       "notAuthorized": "You are not allowed to review this entry.",
       "rejected": "Not confirmed — the entry stays the worker's own self-declared record in their journal.",
-      "reviewNotEnabled": "Review is not enabled for this worker yet."
+      "reviewNotEnabled": "Review is not enabled for this worker yet.",
+      "entrySuperseded": "The entry was already replaced by a newer version — this card is no longer actionable and will be removed from the list.",
+      "entryDeleted": "The entry was deleted — this card is no longer actionable and will be removed from the list.",
+      "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card."
     },
     "showOriginal": "Show original",
     "skills": "Skills",

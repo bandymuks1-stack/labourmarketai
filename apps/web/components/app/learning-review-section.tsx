@@ -55,6 +55,8 @@ export type LearningLabels = {
     statusLabel: Record<ReviewStatus, string>;
   };
   errorGeneric: string;
+  /** Honest terminal copy when the source entry was edited/removed. */
+  staleEntry: string;
 };
 
 const STATUS_RING: Record<ReviewStatus, string> = {
@@ -84,6 +86,10 @@ export function LearningReviewSection({
   const tSkillNames = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  /** Locally-known terminal stale items: the server refused the decision and
+   *  closed the item. Their controls disappear IMMEDIATELY, before the refresh
+   *  lands, so a manager cannot fire a second doomed click. */
+  const [staleIds, setStaleIds] = useState<ReadonlySet<string>>(new Set());
 
   const skillName = (slug: string | null) =>
     slug ? (tSkillNames.has(slug) ? tSkillNames(slug) : slug) : labels.skillFallback;
@@ -106,11 +112,22 @@ export function LearningReviewSection({
     );
   }
 
+  const markStale = (id: string) =>
+    setStaleIds((prev) => new Set(prev).add(id));
+
   function review(id: string, status: "approved" | "rejected") {
     setError(null);
     startTransition(async () => {
       const res = await setReviewItemStatus(id, status);
-      if (res.kind !== "ok") setError(labels.errorGeneric);
+      if (res.kind === "stale") {
+        // P2-2: the source entry went stale between render and click. The
+        // decision was NOT recorded; the item is closed. Honest terminal copy,
+        // not a generic error.
+        markStale(id);
+        setError(labels.staleEntry);
+      } else if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+      }
       router.refresh();
     });
   }
@@ -119,7 +136,14 @@ export function LearningReviewSection({
     setError(null);
     startTransition(async () => {
       const res = await applyAutoConfirmation(id);
-      if (res.kind !== "ok") setError(labels.errorGeneric);
+      if (res.kind === "stale") {
+        // Terminal stale outcome (owner-hold v5): the spine RPC closed the
+        // queue item; hide the controls now and let the refresh confirm it.
+        markStale(id);
+        setError(labels.staleEntry);
+      } else if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+      }
       router.refresh();
     });
   }
@@ -207,8 +231,22 @@ export function LearningReviewSection({
                     {labels.managerContextLink}
                   </Link>
                 )}
-                {item.status === "pending" && (
-                  <div className="flex flex-wrap items-center gap-2">
+                {item.status === "pending" &&
+                  (item.entryStale || staleIds.has(item.id)) && (
+                    <span
+                      className="text-[11px] text-text-muted"
+                      data-testid={`learning-item-stale-${item.id}`}
+                    >
+                      {labels.staleEntry}
+                    </span>
+                  )}
+                {item.status === "pending" &&
+                  !item.entryStale &&
+                  !staleIds.has(item.id) && (
+                  <div
+                    className="flex flex-wrap items-center gap-2"
+                    data-testid={`learning-item-actions-${item.id}`}
+                  >
                     <button
                       type="button"
                       disabled={pending}

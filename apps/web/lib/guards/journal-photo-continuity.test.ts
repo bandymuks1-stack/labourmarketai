@@ -1,0 +1,447 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * W1 — Invite-Ready Closure Train v1: journal attachment continuity.
+ *
+ * Pins `supabase/migrations/20260720150000_journal_photo_continuity_v1.sql`:
+ *  - the atomic supersede transaction moves the old entry's ACTIVE photo
+ *    metadata rows to the new live entry (unconfirmed supersede only);
+ *  - confirmed originals (correction lane) keep their photo — the move is
+ *    gated on `v_old_confirmed = 0`;
+ *  - failed/removed photo rows stay on the historical entry;
+ *  - NO storage object is copied, moved or deleted (metadata-only continuity;
+ *    the immutable object + its path keep provenance to the original upload);
+ *  - all W0 atomicity invariants survive in the replaced body (row lock,
+ *    structured errors, conditional pointer update);
+ *  - grants stay authenticated-only; paired rollback restores the W0 body.
+ */
+
+const REPO_ROOT = join(process.cwd(), "..", "..");
+const migration = readFileSync(
+  join(
+    REPO_ROOT,
+    "supabase/migrations/20260720150000_journal_photo_continuity_v1.sql",
+  ),
+  "utf-8",
+);
+const rollback = readFileSync(
+  join(
+    REPO_ROOT,
+    "supabase/rollbacks/20260720150000_journal_photo_continuity_v1.down.sql",
+  ),
+  "utf-8",
+);
+
+describe("W1 migration — photo continuity inside the atomic supersede", () => {
+  it("moves ACTIVE photo metadata to the new live entry in-transaction", () => {
+    expect(migration).toMatch(
+      /update public\.journal_entry_photos\s+set entry_id = v_new_entry_id/i,
+    );
+    expect(migration).toMatch(
+      /where entry_id = p_old_entry_id\s+and upload_status in \('uploading','uploaded'\)/i,
+    );
+  });
+
+  it("confirmed originals keep their photo (move gated on v_old_confirmed = 0)", () => {
+    const moveIdx = migration.indexOf(
+      "update public.journal_entry_photos",
+    );
+    const gate = migration.lastIndexOf("if v_old_confirmed = 0 then", moveIdx);
+    expect(gate).toBeGreaterThan(0);
+    // The gate sits inside the photo-continuity block, directly before the move.
+    expect(moveIdx - gate).toBeLessThan(200);
+  });
+
+  it("never mutates storage objects (metadata-only continuity; read policy only)", () => {
+    expect(migration).not.toMatch(/(insert into|update|delete from)\s+storage\.objects/i);
+    expect(migration).not.toMatch(/(insert into|update|delete from)\s+storage\.buckets/i);
+    expect(migration).not.toMatch(/delete from public\.journal_entry_photos/i);
+    // The only storage.objects reference is the SELECT policy.
+    expect(migration).toMatch(/on storage\.objects for select/i);
+  });
+
+  it("keeps every W0 atomicity invariant in the replaced body", () => {
+    expect(migration).toMatch(
+      /from public\.journal_entries\s+where id = p_old_entry_id\s+for update/i,
+    );
+    for (const err of [
+      "entry_not_found",
+      "not_owner",
+      "cannot_supersede_deleted",
+      "entry_superseded",
+      "invalid_skill_slug",
+      "skill_slug_unknown",
+    ]) {
+      expect(migration).toContain(`raise exception '${err}'`);
+    }
+    expect(migration).toMatch(
+      /set superseded_by = v_new_entry_id[\s\S]*where id = p_old_entry_id\s+and superseded_by is null/i,
+    );
+  });
+
+  it("no fabricated verification outside the verbatim manager-verification RPCs", () => {
+    // confirm_entry_and_verify_skills (20260530140000) and
+    // apply_learning_auto_confirmation (20260627132759) are copied VERBATIM
+    // (the real, manager-gated verification flows) plus only stale checks —
+    // everything else in the migration must never write verification.
+    let outside = migration;
+    for (const fn of [
+      "create or replace function public.confirm_entry_and_verify_skills(",
+      "create or replace function public.apply_learning_auto_confirmation(",
+    ]) {
+      const start = outside.indexOf(fn);
+      expect(start).toBeGreaterThan(0);
+      const end = outside.indexOf("end $$;", start) + 7;
+      outside = outside.slice(0, start) + outside.slice(end);
+    }
+    expect(outside).not.toMatch(/verified\s*=\s*true/i);
+    expect(outside).not.toMatch(/set\s+verified/i);
+    expect(outside).not.toMatch(/manager_confirmed/);
+  });
+
+  it("reviewable set excludes stale rows; cutover lock ordered after child DDL", () => {
+    const reviewable = migration.slice(
+      migration.indexOf(
+        "create or replace function public.reviewable_journal_entry_ids()",
+      ),
+    );
+    const rEnd = reviewable.indexOf("end $$;");
+    expect(reviewable.slice(0, rEnd)).toMatch(/je\.superseded_by is null/i);
+    expect(reviewable.slice(0, rEnd)).toMatch(/je\.deleted_at is null/i);
+    // lock_timeout + parent lock AFTER every child-table DDL (deadlock-safe).
+    // lock_timeout bounds EVERY acquisition — set at the top of the txn.
+    const timeoutIdx = migration.indexOf("set local lock_timeout = '10s';");
+    expect(timeoutIdx).toBeGreaterThan(0);
+    expect(timeoutIdx).toBeLessThan(
+      migration.indexOf("create or replace function"),
+    );
+    expect(migration).toMatch(/lock table public\.journal_entries in exclusive mode;/i);
+    const lockIdx = migration.indexOf("lock table public.journal_entries");
+    for (const ddl of [
+      "create trigger journal_entry_confirmations_guard",
+      'create policy "journal-entry-photos org manager select"',
+      "create policy journal_entry_photos_update",
+    ]) {
+      expect(migration.indexOf(ddl)).toBeGreaterThan(0);
+      expect(migration.indexOf(ddl)).toBeLessThan(lockIdx);
+    }
+    // Backfill skips confirmed sources.
+    const seed = migration.slice(migration.indexOf("with recursive chain as ("));
+    expect(seed.slice(0, seed.indexOf("union all"))).toMatch(
+      /not exists \(select 1 from public\.journal_entry_confirmations cc/i,
+    );
+    // Rollback restores the original reviewable body (no staleness filter).
+    const rbRev = rollback.slice(
+      rollback.indexOf(
+        "create or replace function public.reviewable_journal_entry_ids()",
+      ),
+    );
+    expect(rbRev.slice(0, rbRev.indexOf("end $$;"))).not.toMatch(
+      /superseded_by is null/i,
+    );
+  });
+
+  it("grants stay authenticated-only", () => {
+    expect(migration).toMatch(
+      /revoke all on function public\.journal_entry_supersede_v2\([\s\S]*?\) from public/i,
+    );
+    expect(migration).toMatch(
+      /grant execute on function public\.journal_entry_supersede_v2\([\s\S]*?\) to authenticated/i,
+    );
+    expect(migration).not.toMatch(/service_role/);
+  });
+
+  it("rollback reverts behavior but RETAINS coherent authorization (Codex rev2 P1)", () => {
+    expect(rollback).toMatch(
+      /create or replace function public\.journal_entry_supersede_v2\(/i,
+    );
+    // W0 body restored WITHOUT the photo move.
+    const rbV2End = rollback.indexOf("$$;");
+    expect(rollback.slice(0, rbV2End)).not.toMatch(
+      /update public\.journal_entry_photos/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.register_journal_entry_photo\(/i,
+    );
+    // The path-segment storage policy must NEVER come back: after any
+    // cross-context move it would re-expose objects to the old org.
+    expect(rollback).not.toMatch(/storage\.foldername/i);
+    expect(rollback).not.toMatch(
+      /grant update on public\.journal_entry_photos to authenticated/i,
+    );
+    expect(rollback).toMatch(/DELIBERATELY RETAINED/);
+  });
+
+  it("one-time backfill repairs pre-migration stranded photos safely (Codex rev2 P1)", () => {
+    expect(migration).toMatch(/with recursive chain as \(/i);
+    // Explicit cycle detection (owner-hold v4 item 6) + single-mover-per-tip.
+    expect(migration).toMatch(/array\[je\.id\] as path/i);
+    expect(migration).toMatch(/not \(n\.id = any\(c\.path\)\)/i);
+    expect(migration).not.toMatch(/c\.depth/i);
+    expect(migration).toMatch(/select distinct on \(l\.live_entry_id\)/i);
+    // Cutover quiesce (owner-hold v4 item 5).
+    expect(migration).toMatch(/lock table public\.journal_entries in exclusive mode/i);
+    // Only ACTIVE stranded rows, only to a LIVE non-deleted tip.
+    expect(migration).toMatch(
+      /je\.superseded_by is not null[\s\S]*tip\.deleted_at is null/i,
+    );
+    // Never creates a second active attachment on the tip.
+    expect(migration).toMatch(
+      /not exists \(\s*select 1 from public\.journal_entry_photos q\s+where q\.entry_id = l\.live_entry_id/i,
+    );
+  });
+});
+
+describe("W1 rev7 — confirmation lifecycle serialization (owner-hold v4)", () => {
+  it("BEFORE INSERT guard trigger serializes every confirmation path", () => {
+    expect(migration).toMatch(
+      /create or replace function public\.journal_entry_confirmations_guard\(\)/i,
+    );
+    // rev12 (Codex P1): FOR UPDATE, not FOR KEY SHARE. The supersedes take an
+    // explicit FOR UPDATE, but journal_entry_soft_delete (0018) is a bare
+    // non-key UPDATE taking only FOR NO KEY UPDATE — which FOR KEY SHARE does
+    // NOT conflict with. A confirmation racing a soft delete could otherwise
+    // commit against a deleted entry.
+    expect(migration).toMatch(
+      /from public\.journal_entries\s+where id = new\.entry_id\s+for update/i,
+    );
+    // Judged on EXECUTABLE SQL — the header prose still discusses FOR KEY
+    // SHARE to explain WHY it is wrong here, which must not count as usage.
+    const executableSql = migration
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/--[^\n]*/g, " ");
+    expect(executableSql).not.toMatch(/for key share/i);
+    expect(migration).toMatch(
+      /create trigger journal_entry_confirmations_guard\s+before insert on public\.journal_entry_confirmations/i,
+    );
+    const guard = migration.slice(
+      migration.indexOf("journal_entry_confirmations_guard()"),
+    );
+    expect(guard).toContain(`raise exception 'entry_superseded'`);
+    expect(guard).toContain(`raise exception 'entry_deleted'`);
+  });
+
+  it("interactive confirmation RPCs return clean stale statuses", () => {
+    for (const fn of ["review_journal_entry", "confirm_entry_and_verify_skills"]) {
+      const body = migration.slice(
+        migration.indexOf(`create or replace function public.${fn}(`),
+      );
+      const end = body.indexOf("end $$;");
+      expect(body.slice(0, end)).toContain(`return 'entry_superseded';`);
+      expect(body.slice(0, end)).toContain(`return 'entry_deleted';`);
+    }
+  });
+
+  it("direct-insert policy refuses stale targets (defense in depth)", () => {
+    const pol = migration.slice(
+      migration.indexOf(
+        "create policy journal_entry_confirmations_insert",
+      ),
+    );
+    const polEnd = pol.indexOf(");");
+    expect(pol.slice(0, polEnd)).toMatch(/je\.superseded_by is null/i);
+    expect(pol.slice(0, polEnd)).toMatch(/je\.deleted_at is null/i);
+  });
+
+  it("rollback drops the guard trigger and restores original RPCs + policy", () => {
+    expect(rollback).toMatch(
+      /drop trigger if exists journal_entry_confirmations_guard/i,
+    );
+    expect(rollback).toMatch(
+      /drop function if exists public\.journal_entry_confirmations_guard\(\)/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.review_journal_entry\(/i,
+    );
+    expect(rollback).toMatch(
+      /create or replace function public\.confirm_entry_and_verify_skills\(/i,
+    );
+    // Restored policy is the ORIGINAL (no staleness predicate).
+    const rbPol = rollback.slice(
+      rollback.indexOf("create policy journal_entry_confirmations_insert"),
+    );
+    expect(rbPol.slice(0, rbPol.indexOf(");"))).not.toMatch(
+      /superseded_by is null/i,
+    );
+  });
+});
+
+describe("W1 rev10 — stale learning items + stale review cards (owner-hold v5)", () => {
+  it("apply_learning_auto_confirmation closes stale items terminally (pre-check + race handler)", () => {
+    const fn = migration.slice(
+      migration.indexOf(
+        "create or replace function public.apply_learning_auto_confirmation(",
+      ),
+    );
+    const body = fn.slice(0, fn.indexOf("end $$;") + 7);
+    expect(body).toMatch(/je\.superseded_by, je\.deleted_at/i);
+    expect(body).toMatch(/set status = 'superseded', reviewed_by = uid, reviewed_at = now\(\)/i);
+    expect(body).toContain("return case when v_je_deleted is not null");
+    // Race handler: the guard-trigger refusal transitions the item too.
+    expect(body).toMatch(/exception when others then/i);
+    expect(body).toMatch(/stale \(race\)/i);
+    // The guard trigger remains the final race-proof guard (not removed).
+    expect(migration).toMatch(/create trigger journal_entry_confirmations_guard/i);
+  });
+
+  it("rollback restores the 20260627132759 body verbatim (no staleness logic)", () => {
+    const rb = rollback.slice(
+      rollback.indexOf(
+        "create or replace function public.apply_learning_auto_confirmation(",
+      ),
+    );
+    const body = rb.slice(0, rb.indexOf("end $$;") + 7);
+    expect(body).not.toMatch(/stale/i);
+    expect(body).not.toMatch(/v_je_superseded/i);
+  });
+
+  it("review action + inbox card treat stale outcomes as TERMINAL with honest copy", () => {
+    const actions = readFileSync(
+      join(process.cwd(), "lib/journal/review-actions.ts"),
+      "utf-8",
+    );
+    expect(actions).toMatch(/\| "entry_superseded"\s*\| "entry_deleted"/);
+    // rev11 (Codex P2-3): the per-surface literal comparison was replaced by
+    // the SHARED isTerminalStaleOutcome predicate, so every surface maps the
+    // same two codes. The stale outcome now refreshes the inbox, the QUICK
+    // route and the dashboard counts immediately.
+    expect(actions).toMatch(/isTerminalStaleOutcome/);
+    const staleBlock = actions.slice(
+      actions.indexOf("if (isTerminalStaleOutcome(outcome))"),
+    );
+    expect(staleBlock.slice(0, 500)).toMatch(
+      /revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox`\)/,
+    );
+    expect(staleBlock.slice(0, 500)).toMatch(
+      /revalidatePath\(`\/\$\{locale\}\/dashboard\/inbox\/quick`\)/,
+    );
+    const card = readFileSync(
+      join(process.cwd(), "components/app/journal-inbox-entry.tsx"),
+      "utf-8",
+    );
+    expect(card).toMatch(/"entry_superseded",\s*"entry_deleted",\s*\] as const/);
+    expect(card).toMatch(/inbox\.result\.entrySuperseded/);
+    expect(card).toMatch(/inbox\.result\.entryDeleted/);
+  });
+
+  it("stale learning items are not actionable in the section UI", () => {
+    const section = readFileSync(
+      join(process.cwd(), "components/app/learning-review-section.tsx"),
+      "utf-8",
+    );
+    // rev11 (Codex P2-1/P2-2): the render-time `entryStale` snapshot is still
+    // honoured, but it is no longer the ONLY signal — an item the server just
+    // refused a decision on (staleIds) hides its controls immediately too.
+    expect(section).toMatch(
+      /item\.status === "pending" &&\s*\n?\s*\(item\.entryStale \|\| staleIds\.has\(item\.id\)\)/,
+    );
+    expect(section).toMatch(
+      /item\.status === "pending" &&\s*\n?\s*!item\.entryStale &&\s*\n?\s*!staleIds\.has\(item\.id\)/,
+    );
+    expect(section).toMatch(/labels\.staleEntry/);
+    const learning = readFileSync(
+      join(process.cwd(), "lib/learning/learning.ts"),
+      "utf-8",
+    );
+    expect(learning).toMatch(/journal_entries\(superseded_by, deleted_at\)/);
+    expect(learning).toMatch(/entryStale/);
+    // The snapshot is a HINT for the UI, never the authority: the decision
+    // itself is revalidated server-side inside the mutation RPC, and stale
+    // rows are closed on the read path.
+    expect(learning).toMatch(/rpc\("set_learning_review_item_status"/);
+    expect(learning).toMatch(/close_stale_learning_review_items/);
+  });
+
+  it("every registered locale ships the stale copy (both surfaces)", () => {
+    const locales = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"];
+    for (const loc of locales) {
+      const journal = JSON.parse(
+        readFileSync(join(process.cwd(), `messages/${loc}/journal.json`), "utf-8"),
+      ) as { inbox?: { result?: Record<string, string> } };
+      expect(journal.inbox?.result?.entrySuperseded, loc).toBeTruthy();
+      expect(journal.inbox?.result?.entryDeleted, loc).toBeTruthy();
+      const mono = JSON.parse(
+        readFileSync(join(process.cwd(), `messages/${loc}.json`), "utf-8"),
+      ) as { learning?: Record<string, string> };
+      expect(mono.learning?.staleEntry, loc).toBeTruthy();
+    }
+  });
+});
+
+describe("W1 rev6 — LEGACY supersede photo parity (owner-hold #2 P1)", () => {
+  it("the 9-arg legacy RPC carries the identical gated photo move", () => {
+    const legacyStart = migration.indexOf(
+      "create or replace function public.journal_entry_supersede(",
+    );
+    expect(legacyStart).toBeGreaterThan(0);
+    const legacyBody = migration.slice(
+      legacyStart,
+      migration.indexOf("$$;", legacyStart),
+    );
+    expect(legacyBody).toMatch(
+      /update public\.journal_entry_photos\s+set entry_id = v_new_entry_id/i,
+    );
+    expect(legacyBody).toMatch(
+      /upload_status in \('uploading','uploaded'\)/i,
+    );
+    expect(legacyBody).toMatch(/for update/i);
+  });
+
+  it("rollback restores the LEGACY RPC to the W0 body (no photo move)", () => {
+    const rbLegacyStart = rollback.indexOf(
+      "create or replace function public.journal_entry_supersede(",
+    );
+    expect(rbLegacyStart).toBeGreaterThan(0);
+    const rbLegacyBody = rollback.slice(
+      rbLegacyStart,
+      rollback.indexOf("$$;", rbLegacyStart),
+    );
+    expect(rbLegacyBody).not.toMatch(/journal_entry_photos/i);
+    expect(rbLegacyBody).toMatch(/for update/i);
+  });
+});
+
+describe("W1 rev2 — registration serialized with the supersede (owner-hold P2)", () => {
+  it("register_journal_entry_photo locks the entry row and refuses stale entries", () => {
+    const fn = migration.slice(
+      migration.indexOf("create or replace function public.register_journal_entry_photo("),
+    );
+    expect(fn).toMatch(/from public\.journal_entries je[\s\S]*for update of je/i);
+    expect(fn).toContain(`raise exception 'entry_superseded'`);
+    expect(fn).toContain(`raise exception 'entry_deleted'`);
+    // Cap check remains AFTER the lock (race-proof ordering).
+    const lockIdx = fn.indexOf("for update of je");
+    const capIdx = fn.indexOf("photo_limit_reached");
+    expect(lockIdx).toBeGreaterThan(0);
+    expect(capIdx).toBeGreaterThan(lockIdx);
+  });
+});
+
+describe("W1 rev2 — one coherent authorization source (owner-hold P1)", () => {
+  it("storage manager policy resolves the CANONICAL metadata row, never the path segment", () => {
+    const policy = migration.slice(
+      migration.indexOf(`create policy "journal-entry-photos org manager select"`),
+    );
+    expect(policy).toMatch(/p\.storage_path = storage\.objects\.name/i);
+    expect(policy).toMatch(/join public\.journal_entries je on je\.id = p\.entry_id/i);
+    expect(policy).toMatch(/manages_organization\(ec\.organization_id\)/i);
+    // The embedded historical entry id must never be authorization input.
+    expect(policy.slice(0, policy.indexOf(");"))).not.toMatch(
+      /storage\.foldername/i,
+    );
+  });
+
+  it("photo rows cannot be repointed: WITH CHECK + upload_status-only grant", () => {
+    expect(migration).toMatch(
+      /create policy journal_entry_photos_update[\s\S]*using \(profile_id = auth\.uid\(\)\)\s*with check \(profile_id = auth\.uid\(\)\)/i,
+    );
+    expect(migration).toMatch(
+      /revoke update on public\.journal_entry_photos from authenticated/i,
+    );
+    expect(migration).toMatch(
+      /grant update \(upload_status\) on public\.journal_entry_photos to authenticated/i,
+    );
+  });
+});

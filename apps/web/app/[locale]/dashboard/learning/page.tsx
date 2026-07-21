@@ -90,6 +90,7 @@ export default async function LearningPage({
       },
     },
     errorGeneric: t("errorGeneric"),
+    staleEntry: t("staleEntry"),
   };
 
   return (

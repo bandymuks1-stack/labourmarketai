@@ -1830,7 +1830,12 @@ describe("no migration files added by this sprint", () => {
     // Bumped 157 -> 158 for W0 atomic supersede — function-only migration
     // (20260720100000_journal_atomic_supersede_v1): CREATE OR REPLACE of the
     // supersede RPCs, no schema/RLS change, paired rollback.
-    const SPRINT_BASELINE = 158;
+    // Bumped 158 -> 159 for W1 photo continuity — function-only migration
+    // (20260720150000_journal_photo_continuity_v1), paired rollback.
+    // Bumped 159 -> 160 for the W1 stale learning lifecycle
+    // (20260720170000_learning_stale_lifecycle_v1) — function+trigger only,
+    // additive, paired rollback. Closes Codex exact-head P2-1/P2-2 on PR #842.
+    const SPRINT_BASELINE = 160;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

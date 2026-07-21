@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyApprovalSkillEffects } from "./confirm-actions";
 import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
+import {
+  isTerminalStaleOutcome,
+  terminalStaleFromError,
+} from "@/lib/learning/learning-shared";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
 
 /**
@@ -27,7 +31,11 @@ export type ReviewBlockCode =
   | "entry_not_org_scoped"
   | "not_authorized"
   | "review_not_enabled"
-  | "no_reviewer_engagement";
+  | "no_reviewer_engagement"
+  /** W1 (owner-hold v5): terminal stale outcomes — the entry was edited or
+   *  deleted after the card loaded. The card must stop offering actions. */
+  | "entry_superseded"
+  | "entry_deleted";
 
 export type ReviewActionState =
   | { ok: true; decision: ReviewDecision }
@@ -74,11 +82,31 @@ export async function reviewJournalEntry(
   });
   if (error) {
     if (error.code === RPC_NOT_FOUND_CODE) return { ok: false, code: "needs_migration" };
+    // The confirmation guard trigger RAISES when the entry went stale between
+    // this RPC's pre-check and its confirmation INSERT — an error, not a
+    // tagged return. Map it to the terminal outcome so the card stops offering
+    // actions instead of retrying an impossible one (rev14, Codex P2).
+    const stale = terminalStaleFromError(error.message);
+    if (stale) {
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
+      revalidatePath(`/${locale}/dashboard`);
+      return { ok: false, code: stale };
+    }
     return { ok: false, code: "error", message: error.message };
   }
 
   const outcome = data as string;
   if (outcome !== decision) {
+    if (isTerminalStaleOutcome(outcome)) {
+      // Terminal stale card: refresh the inbox list, the QUICK route and the
+      // counts immediately (reviewable_journal_entry_ids no longer returns this
+      // entry). The quick route is included because the same card is rendered
+      // there and must stop offering actions (owner-hold v5 P2-3).
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
+      revalidatePath(`/${locale}/dashboard`);
+    }
     // The RPC returned a block reason instead of the decision.
     return { ok: false, code: outcome as ReviewBlockCode };
   }
@@ -134,7 +162,14 @@ export async function confirmEntrySkills(
 
   const res = await confirmEntryAndVerifySkills(entryId, skillIds, note, locale);
   if (res.ok) return { ok: true, verified: res.verified ?? skillIds.length };
+  if (isTerminalStaleOutcome(res.code)) {
+    // Terminal stale card (owner-hold v5): refresh inbox list, quick route and
+    // counts now — the card must vanish from every surface that renders it.
+    revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard/inbox/quick`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
   // Map the RPC block reasons through unchanged (review_not_enabled,
-  // not_authorized, skill_not_owned, no_reviewer_engagement, error, …).
+  // not_authorized, skill_not_owned, no_reviewer_engagement, error, ...).
   return { ok: false, code: res.code, message: res.message };
 }
