@@ -398,6 +398,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 158 -> 159 for W1 photo continuity (function-only, paired rollback).
     // Bumped 159 -> 160 for the W1 stale learning lifecycle (function+trigger
     // only, additive, paired rollback).
-    expect(guard).toMatch(/SPRINT_BASELINE = 161/);
+    // Bumped 161 -> 162 for Stripe TEST subscriptions v1 (additive nullable
+    // billing_subscriptions.organization_id, paired rollback, human-gated).
+    expect(guard).toMatch(/SPRINT_BASELINE = 162/);
   });
 });

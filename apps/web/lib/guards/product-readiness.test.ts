@@ -1838,7 +1838,12 @@ describe("no migration files added by this sprint", () => {
     // Bumped 160 -> 161 for LMC Wagon 1 — immutable LMC ledger foundation
     // (20260720190000_lmc_ledger_foundation_v1). RED / human-gated DRAFT,
     // ships UNAPPLIED with paired rollback; all LMC flags OFF.
-    const SPRINT_BASELINE = 161;
+    // Bumped 161 -> 162 for Stripe TEST subscriptions v1
+    // (20260721150000_stripe_subscriptions_v1): ONE additive nullable
+    // organization_id column on billing_subscriptions (paired rollback).
+    // RED / human-gated DRAFT, ships UNAPPLIED; app code degrades honestly
+    // (42703 retry) until the owner applies it.
+    const SPRINT_BASELINE = 162;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

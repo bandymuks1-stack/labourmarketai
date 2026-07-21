@@ -24,11 +24,9 @@ const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 /** Client components that legitimately need no fetch timeout — explicit, with a
  *  reason. Each entry is a deliberate exception, not an oversight. */
 const ALLOWLIST: Record<string, string> = {
-  // Stripe test-checkout: out of scope (no Stripe changes this PR) AND it
-  // immediately redirects the browser to Stripe on success, so a hung request
-  // does not leave an in-app pending state to clear. Revisit with billing work.
-  "components/marketing/test-checkout-button.tsx":
-    "Stripe checkout redirect — out of scope; navigates away on success.",
+  // (empty) The former test-checkout-button exception was closed by the
+  // Stripe TEST subscriptions v1 work: both billing buttons now carry
+  // AbortSignal.timeout — the guard is strengthened, never widened.
 };
 
 /** Recursively collect .tsx files under a dir. */

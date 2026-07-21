@@ -324,6 +324,11 @@ describe("NO new DB migration in this PR", () => {
     // (20260720190000_lmc_ledger_foundation_v1, paired rollback). RED /
     // human-gated DRAFT, ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(161);
+    // Bumped 161 -> 162 for Stripe TEST subscriptions v1
+    // (20260721150000_stripe_subscriptions_v1, paired rollback) — additive
+    // nullable billing_subscriptions.organization_id. RED / human-gated
+    // DRAFT, ships UNAPPLIED; still no migration from the market-map read
+    // layer.
+    expect(count).toBeLessThanOrEqual(162);
   });
 });

@@ -153,6 +153,7 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `app/api/leads/route.ts` | **runtime** | **No** — writes `leads` only (anon funnel, §17.2) | ✅ legitimate; RLS-less by design for anonymous capture |
 | `lib/billing/subscription-store.ts` | **runtime** | **No** — billing tables only (Stripe TEST webhook; no user session exists) | ✅ legitimate; billing tables carry no authenticated write policy by design |
 | `lib/admin/billing-actions.ts` | **runtime** | **No** — billing tables only (admin manual pilot override, `isSuperadmin`-gated) | ✅ legitimate; same billing-table design |
+| `lib/billing/customer-store.ts` | **runtime** | **No** — `billing_customers` only (Stripe TEST subscriptions v1 profile↔customer mapping; always keyed by the authenticated caller's own profile id) | ✅ legitimate; billing tables carry no authenticated write policy by design |
 | `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |

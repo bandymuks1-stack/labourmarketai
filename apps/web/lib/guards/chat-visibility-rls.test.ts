@@ -231,6 +231,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    path — the billing-webhook pattern. The row carries field NAMES +
     //    a bounded validated-output excerpt, never input content; touches
     //    no chat table, sends nothing outbound.
+    //  - lib/billing/customer-store.ts — Stripe TEST subscriptions v1
+    //    profile↔customer mapping over billing_customers, which by design
+    //    carries NO authenticated write policy (owner/admin SELECT only —
+    //    the same billing-table design as subscription-store). Lookup and
+    //    insert are ALWAYS keyed by the authenticated caller's own profile
+    //    id (the route passes user.id; no caller-supplied ids exist);
+    //    touches no chat table, sends nothing outbound.
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
     // ai_runs audit row (the reads write nothing at all).
@@ -243,6 +250,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
       "lib/ai/runtime/audit-store.ts",
+      "lib/billing/customer-store.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
       "lib/opportunities/contact-employer.ts",
