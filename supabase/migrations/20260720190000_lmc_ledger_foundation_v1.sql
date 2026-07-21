@@ -547,13 +547,23 @@ as $$
 declare
   v_existing public.lmc_transactions%rowtype;
 begin
+  -- rev34 (Codex P2): a NULL operation kind must never enter replay
+  -- resolution. `kind <> NULL` is NULL, so the mismatch branch below would
+  -- silently NOT raise and a malformed retry could be acknowledged as
+  -- already_processed without ever naming its operation. Reject it here,
+  -- for every current and future caller.
+  if p_kind is null then
+    raise exception 'lmc_invalid_kind' using errcode = '22023';
+  end if;
   select * into v_existing
     from public.lmc_transactions
    where account_id = p_account and idempotency_key = p_key;
   if not found then
     return null;
   end if;
-  if v_existing.kind <> p_kind then
+  -- IS DISTINCT FROM: NULL-safe by construction (belt-and-braces with the
+  -- entry check above — this comparison can never silently yield NULL).
+  if v_existing.kind is distinct from p_kind then
     raise exception 'lmc_idempotency_conflict: key % already used for kind %',
       p_key, v_existing.kind using errcode = '23505';
   end if;
@@ -629,8 +639,11 @@ begin
   -- quiesces safely instead of deadlocking.
   perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
-  if p_kind not in ('promotional_signup', 'promotional_activity') then
-    raise exception 'lmc_invalid_promotional_kind: %', p_kind using errcode = '22023';
+  -- rev34 (Codex P2): NULL-safe — `NULL NOT IN (...)` is NULL and would
+  -- skip this refusal entirely.
+  if p_kind is null or p_kind not in ('promotional_signup', 'promotional_activity') then
+    raise exception 'lmc_invalid_promotional_kind: %', coalesce(p_kind, '<null>')
+      using errcode = '22023';
   end if;
   if p_campaign is null or char_length(trim(p_campaign)) = 0 then
     raise exception 'lmc_campaign_required' using errcode = '22023';
@@ -1330,8 +1343,11 @@ declare
   v_tx uuid;
 begin
   perform pg_advisory_xact_lock_shared(hashtext('lmc_ledger')::bigint);
-  if p_kind not in ('reversal', 'refund_reversal', 'chargeback_reversal') then
-    raise exception 'lmc_invalid_reversal_kind: %', p_kind using errcode = '22023';
+  -- rev34 (Codex P2): NULL-safe — `NULL NOT IN (...)` is NULL and would
+  -- skip this refusal entirely.
+  if p_kind is null or p_kind not in ('reversal', 'refund_reversal', 'chargeback_reversal') then
+    raise exception 'lmc_invalid_reversal_kind: %', coalesce(p_kind, '<null>')
+      using errcode = '22023';
   end if;
   perform public.lmc_assert_external_idempotency_key_v1(p_idempotency_key);
   if p_reason is null or char_length(trim(p_reason)) = 0 then

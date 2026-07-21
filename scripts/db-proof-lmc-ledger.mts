@@ -1390,6 +1390,102 @@ async function main() {
     );
   }
 
+  // ── P36 (Codex P2, rev34): NULL operation kind never resolves a replay ────
+  // `kind <> NULL` is NULL, so before rev34 a malformed retry with an
+  // existing idempotency key and p_kind = NULL could be acknowledged as
+  // already_processed without naming its operation, and the callers'
+  // `p_kind NOT IN (...)` validations likewise waved NULL through. Now the
+  // helper rejects NULL kind at entry (lmc_invalid_kind), the callers
+  // reject it explicitly, the mismatch check is IS DISTINCT FROM, and no
+  // refused attempt mutates any ledger state.
+  {
+    const u36 = await makePerson(a, "u36");
+    const { rows: buy36 } = await a.query(
+      `select public.lmc_record_purchase_v1(900, 'p36-ref', 'p36-buy-${RUN}', $1, null) as r`,
+      [u36],
+    );
+    const acc36 = buy36[0].r.account_id as string;
+    const snap = async () => {
+      const { rows: s } = await a.query(
+        `select (select count(*)::int from public.lmc_transactions where account_id = $1) as txs,
+                (select count(*)::int from public.lmc_lots where account_id = $1) as lots,
+                (select count(*)::int from public.lmc_lot_consumptions where account_id = $1) as cons,
+                (select count(*)::int from public.lmc_transactions
+                  where account_id = $1 and original_transaction_id is not null) as reversals`,
+        [acc36],
+      );
+      const bal = await balance(a, acc36);
+      return { ...s[0], available: bal.available_cents };
+    };
+    const before = await snap();
+    // 1) Helper retry with the EXISTING key and NULL kind → lmc_invalid_kind.
+    const helperNull = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_existing_by_idempotency_v1($1, $2, null)`,
+          [acc36, `p36-buy-${RUN}`],
+        ),
+      "lmc_invalid_kind",
+    );
+    // 2) Promo retry with NULL kind (same existing key) → caller refusal.
+    const promoNull = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_grant_promotional_v1(null, $1, 'p36-campaign', $2)`,
+          [u36, `p36-buy-${RUN}`],
+        ),
+      "lmc_invalid_promotional_kind",
+    );
+    // 3) Reversal retry with NULL kind (same existing key) → caller refusal.
+    const revNull = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, null, 'p36 reason', $2, $3)`,
+          [buy36[0].r.transaction_id, `p36-buy-${RUN}`, u36],
+        ),
+      "lmc_invalid_reversal_kind",
+    );
+    // 4) NON-existent key with NULL kind is rejected too (entry check fires
+    //    before the lookup — never a silent null return).
+    const helperNullFresh = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_existing_by_idempotency_v1($1, $2, null)`,
+          [acc36, `p36-nonexistent-${RUN}`],
+        ),
+      "lmc_invalid_kind",
+    );
+    // 7) None of the refused attempts changed anything.
+    const after = await snap();
+    const untouched = JSON.stringify(before) === JSON.stringify(after);
+    // 5) A valid identical replay still resolves already_processed.
+    const { rows: replay } = await a.query(
+      `select public.lmc_record_purchase_v1(900, 'p36-ref', 'p36-buy-${RUN}', $1, null) as r`,
+      [u36],
+    );
+    // 6) A WRONG non-NULL kind is still a conflict, never a silent match.
+    const wrongKind = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_existing_by_idempotency_v1($1, $2, 'spend')`,
+          [acc36, `p36-buy-${RUN}`],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    record(
+      "P36-null-kind-rejected-everywhere",
+      helperNull.ok &&
+        promoNull.ok &&
+        revNull.ok &&
+        helperNullFresh.ok &&
+        untouched &&
+        replay[0].r.already_processed === true &&
+        replay[0].r.transaction_id === buy36[0].r.transaction_id &&
+        wrongKind.ok,
+      `helper-null: ${helperNull.msg.slice(0, 30)} | promo-null: ${promoNull.msg.slice(0, 40)} | rev-null: ${revNull.msg.slice(0, 40)} | fresh-key-null: ${helperNullFresh.msg.slice(0, 30)} | untouched=${untouched} | exact replay ok | wrong-kind: ${wrongKind.msg.slice(0, 40)}`,
+    );
+  }
+
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────
   {
     const u9 = await makePerson(a, "u9");
