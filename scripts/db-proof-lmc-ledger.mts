@@ -1298,6 +1298,98 @@ async function main() {
     record("P25h-admin-grant-replay-survives-kill-switch-flip", judge(outH), detail(outH));
   }
 
+  // ── P33b (Codex P1, rev33): company-account reversal actor authority ──────
+  // The bare `v_account.profile_id = p_actor_profile_id` branch was NULL for
+  // COMPANY accounts (subject XOR ⇒ profile_id IS NULL), so `IF NOT (NULL)`
+  // skipped the raise and an unrelated non-admin actor passed the authority
+  // gate. rev33 makes the branch explicitly NULL-safe. This proof pins the
+  // full authority matrix and that a refused attempt mutates NOTHING.
+  {
+    const uCowner = await makePerson(a, "u33bo");
+    const uStranger = await makePerson(a, "u33bs");
+    const { rows: co } = await a.query(
+      `insert into public.companies (profile_id, legal_name, display_name)
+       values ($1, 'P33b Proof Co', 'P33b Proof Co') returning id`,
+      [uCowner],
+    );
+    const companyId = co[0].id as string;
+    const { rows: buyA } = await a.query(
+      `select public.lmc_record_purchase_v1(2000, 'p33b-ref-a', 'p33b-buy-a-${RUN}', null, $1) as r`,
+      [companyId],
+    );
+    const { rows: buyB } = await a.query(
+      `select public.lmc_record_purchase_v1(3000, 'p33b-ref-b', 'p33b-buy-b-${RUN}', null, $1) as r`,
+      [companyId],
+    );
+    const accCo = buyA[0].r.account_id as string;
+    const snapshot = async () => {
+      const { rows: s } = await a.query(
+        `select (select count(*)::int from public.lmc_transactions where account_id = $1) as txs,
+                (select count(*)::int from public.lmc_lots where account_id = $1) as lots,
+                (select count(*)::int from public.lmc_lot_consumptions where account_id = $1) as cons,
+                (select count(*)::int from public.lmc_transactions
+                  where account_id = $1 and original_transaction_id is not null) as reversals`,
+        [accCo],
+      );
+      const bal = await balance(a, accCo);
+      return { ...s[0], available: bal.available_cents };
+    };
+    const before = await snapshot();
+    // (a) An UNRELATED non-admin actor must be refused (the rev33 fix).
+    const stranger = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'p33b stranger', 'p33b-rev-x-${RUN}', $2)`,
+          [buyA[0].r.transaction_id, uStranger],
+        ),
+      "lmc_actor_not_authorized",
+    );
+    // (f) The refused attempt changed NOTHING: no tx, no reversal linkage,
+    // no lot/consumption movement, identical balance.
+    const after = await snapshot();
+    const untouched = JSON.stringify(before) === JSON.stringify(after);
+    // (b) The COMPANY OWNER can reverse purchase A.
+    const { rows: ownerRev } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'p33b owner refund', 'p33b-rev-a-${RUN}', $2) as r`,
+      [buyA[0].r.transaction_id, uCowner],
+    );
+    // (c) A legitimate ADMIN can reverse purchase B.
+    const { rows: adminRev } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'p33b admin refund', 'p33b-rev-b-${RUN}', $2) as r`,
+      [buyB[0].r.transaction_id, adm],
+    );
+    // (d) A PERSONAL account owner can still reverse their own purchase
+    // (the guarded branch keeps working where profile_id IS NOT NULL).
+    const { rows: pbuy } = await a.query(
+      `select public.lmc_record_purchase_v1(400, 'p33b-ref-p', 'p33b-buy-p-${RUN}', $1, null) as r`,
+      [uCowner],
+    );
+    const { rows: prev } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'p33b personal refund', 'p33b-rev-p-${RUN}', $2) as r`,
+      [pbuy[0].r.transaction_id, uCowner],
+    );
+    // (e) An unrelated actor is refused on the PERSONAL account too.
+    const strangerPersonal = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'p33b stranger p', 'p33b-rev-y-${RUN}', $2)`,
+          [pbuy[0].r.transaction_id, uStranger],
+        ),
+      "lmc_actor_not_authorized",
+    );
+    record(
+      "P33b-company-reversal-actor-authority-null-safe",
+      stranger.ok &&
+        untouched &&
+        ownerRev[0].r.kind === "refund_reversal" &&
+        ownerRev[0].r.already_processed === false &&
+        adminRev[0].r.kind === "refund_reversal" &&
+        prev[0].r.kind === "refund_reversal" &&
+        strangerPersonal.ok,
+      `stranger-company: ${stranger.msg.slice(0, 40)} | untouched=${untouched} | owner ok | admin ok | personal owner ok | stranger-personal: ${strangerPersonal.msg.slice(0, 40)}`,
+    );
+  }
+
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────
   {
     const u9 = await makePerson(a, "u9");

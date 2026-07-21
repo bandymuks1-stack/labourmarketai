@@ -1391,8 +1391,16 @@ begin
   -- affected account (person or company owner) or carry the dual-signal
   -- admin role.
   select * into v_account from public.lmc_accounts where id = v_orig.account_id;
+  -- rev33 (Codex P1): the personal-owner branch MUST be explicitly
+  -- NULL-safe. For a COMPANY account v_account.profile_id is necessarily
+  -- NULL (subject XOR), so the bare `profile_id = actor` comparison made the
+  -- whole OR chain NULL for an unrelated non-admin actor — and
+  -- `IF NOT (NULL)` skips the raise, waving the actor through. The guarded
+  -- form yields FALSE there, so authority falls through to the company-owner
+  -- / admin branches and an unrelated actor is refused.
   if not (
-    v_account.profile_id = p_actor_profile_id
+    (v_account.profile_id is not null
+       and v_account.profile_id = p_actor_profile_id)
     or (v_account.company_id is not null and exists (
           select 1 from public.companies c
            where c.id = v_account.company_id
