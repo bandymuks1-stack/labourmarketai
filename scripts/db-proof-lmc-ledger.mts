@@ -1124,6 +1124,178 @@ async function main() {
         consumedLots[0] === tie[0].min_lot,
       `consumed=${consumedLots.map((l) => l.slice(0, 8)).join(",")} min-id=${(tie[0].min_lot ?? "").slice(0, 8)} single-lot=${consumedLots.length === 1}`,
     );
+
+    // P25f/g/h (Codex P2, rev32): the SAME kill-switch-flip interleaving as
+    // P25d, applied to every remaining gated path — purchase, promotional
+    // grant (hardest case: the winner CREATES the account in-flight, so the
+    // retry's pre-gate account lookup provably sees nothing) and admin grant
+    // (global key-based replay block + email identity re-check in the wrap).
+    // Shape per path: winner runs in an OPEN transaction (holds the settings
+    // row FOR SHARE via its gate); the flag flip's FOR UPDATE queues behind
+    // it; the identical retry starts while the winner is uncommitted and its
+    // gate read queues behind the waiting flip; winner commits → flip lands
+    // (flag OFF) → the retry must STILL resolve already_processed with the
+    // winner's transaction (no duplicate), while a fresh-key operation is
+    // refused with the disabled error. Flag restored afterwards.
+    type RaceOut = {
+      queued: boolean;
+      flip: string;
+      retry: string;
+      winnerTx: string;
+      txCount: number;
+      newRefused: boolean;
+      newMsg: string;
+    };
+    const gatedRace = async (opts: {
+      tag: string;
+      flag: string;
+      winnerConn: () => Promise<Client>;
+      retryConn: () => Promise<Client>;
+      call: (c: Client, key: string) => Promise<{ rows: { r: { transaction_id: string; already_processed: boolean } }[] }>;
+      freshCall: (c: Client, key: string) => Promise<unknown>;
+      disabledMsg: string;
+      waitPattern: string;
+    }): Promise<RaceOut> => {
+      const key = `p25-${opts.tag}-${RUN}`;
+      const winner = await opts.winnerConn();
+      const flipper = await admin();
+      const retrier = await opts.retryConn();
+      await winner.query("begin");
+      const { rows: w } = await opts.call(winner, key);
+      const flipping = flipper
+        .query(`select public.lmc_set_flag_v1($1, false, $2)`, [opts.flag, FLAG_ACTOR])
+        .then(() => "flipped")
+        .catch((e) => String((e as Error).message));
+      await sleep(400);
+      const retrying = opts
+        .call(retrier, key)
+        .then((r) =>
+          r.rows[0].r.already_processed === true
+            ? `already_processed:${r.rows[0].r.transaction_id}`
+            : `NEW_TX:${r.rows[0].r.transaction_id}`,
+        )
+        .catch((e) => String((e as Error).message));
+      await sleep(500);
+      const { rows: waiting } = await a.query(
+        `select count(*)::int as n from pg_stat_activity
+          where wait_event_type = 'Lock'
+            and (query like '%lmc_set_flag_v1%' or query like $1)`,
+        [`%${opts.waitPattern}%`],
+      );
+      await winner.query("commit");
+      const flip = await flipping;
+      const retry = await retrying;
+      const { rows: txn } = await a.query(
+        `select count(*)::int as n from public.lmc_transactions where idempotency_key = $1`,
+        [key],
+      );
+      const fresh = await expectError(
+        () => opts.freshCall(a, `p25-${opts.tag}-new-${RUN}`),
+        opts.disabledMsg,
+      );
+      await setFlag(a, opts.flag, true); // restore for later proofs
+      await winner.end();
+      await flipper.end();
+      await retrier.end();
+      return {
+        queued: waiting[0].n >= 1,
+        flip,
+        retry,
+        winnerTx: w[0].r.transaction_id,
+        txCount: txn[0].n,
+        newRefused: fresh.ok,
+        newMsg: fresh.msg,
+      };
+    };
+    const judge = (o: RaceOut) =>
+      o.queued &&
+      o.flip === "flipped" &&
+      o.retry === `already_processed:${o.winnerTx}` &&
+      o.txCount === 1 &&
+      o.newRefused;
+    const detail = (o: RaceOut) =>
+      `queued=${o.queued} flip=${o.flip} retry="${o.retry.slice(0, 55)}" tx=${o.txCount} new-op: ${o.newMsg.slice(0, 40)}`;
+
+    // P25f — purchase path.
+    const uF = await makePerson(a, "u25f");
+    const outF = await gatedRace({
+      tag: "f-buy",
+      flag: "lmc_purchases_enabled",
+      winnerConn: admin,
+      retryConn: admin,
+      call: (c, key) =>
+        c.query(
+          `select public.lmc_record_purchase_v1(1500, 'p25f-ref', $1, $2, null) as r`,
+          [key, uF],
+        ),
+      freshCall: (c, key) =>
+        c.query(
+          `select public.lmc_record_purchase_v1(1500, 'p25f-ref-new', $1, $2, null)`,
+          [key, uF],
+        ),
+      disabledMsg: "lmc_purchases_disabled",
+      waitPattern: "lmc_record_purchase_v1",
+    });
+    record("P25f-purchase-replay-survives-kill-switch-flip", judge(outF), detail(outF));
+
+    // P25g — promotional grant, account created IN-FLIGHT by the winner.
+    const uG = await makePerson(a, "u25g");
+    const { rows: accPre } = await a.query(
+      `select count(*)::int as n from public.lmc_accounts where profile_id = $1`,
+      [uG],
+    );
+    const outG = await gatedRace({
+      tag: "g-promo",
+      flag: "lmc_promotional_grants_enabled",
+      winnerConn: admin,
+      retryConn: admin,
+      call: (c, key) =>
+        c.query(
+          `select public.lmc_grant_promotional_v1('promotional_signup', $1, 'p25g-campaign', $2) as r`,
+          [uG, key],
+        ),
+      freshCall: (c, key) =>
+        c.query(
+          `select public.lmc_grant_promotional_v1('promotional_activity', $1, 'p25g-campaign', $2)`,
+          [uG, key],
+        ),
+      disabledMsg: "lmc_promotional_grants_disabled",
+      waitPattern: "lmc_grant_promotional_v1",
+    });
+    record(
+      "P25g-promo-replay-survives-flip-account-created-in-flight",
+      accPre[0].n === 0 && judge(outG),
+      `account-preexisted=${accPre[0].n > 0} | ${detail(outG)}`,
+    );
+
+    // P25h — admin grant (same actor on both sides, email-identity re-check).
+    const { rows: tsH } = await a.query(`select (now() + interval '45 days') as t`);
+    const expH = tsH[0].t as Date;
+    const outH = await gatedRace({
+      tag: "h-admgrant",
+      flag: "lmc_promotional_grants_enabled",
+      winnerConn: () => asUser(adm),
+      retryConn: () => asUser(adm),
+      call: (c, key) =>
+        c.query(
+          `select public.lmc_admin_grant_v1($1, 500, 'p25h reason', 'proof-campaign', $2, $3) as r`,
+          [`${RUN}-u25f@fixture.local`, expH, key],
+        ),
+      freshCall: async (_c, key) => {
+        const c2 = await asUser(adm);
+        try {
+          return await c2.query(
+            `select public.lmc_admin_grant_v1($1, 500, 'p25h new', 'proof-campaign', $2, $3)`,
+            [`${RUN}-u25f@fixture.local`, expH, key],
+          );
+        } finally {
+          await c2.end();
+        }
+      },
+      disabledMsg: "lmc_promotional_grants_disabled",
+      waitPattern: "lmc_admin_grant_v1",
+    });
+    record("P25h-admin-grant-replay-survives-kill-switch-flip", judge(outH), detail(outH));
   }
 
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────

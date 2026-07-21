@@ -650,7 +650,31 @@ begin
     end if;
   end if;
 
-  perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
+  -- rev32 (Codex P2): same wrap as lmc_spend_v1 (rev31) — a committed
+  -- promotional grant's replay must resolve even when the flag flips off in
+  -- the winner-commit → retry-gate window. Re-check idempotency UNDER the
+  -- account lock before surfacing lmc_promotional_grants_disabled.
+  begin
+    perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
+  exception when others then
+    if sqlerrm like '%lmc_promotional_grants_disabled%' then
+      -- RE-resolve the account: a signup grant is usually the account's FIRST
+      -- event, so the winner may have created the row inside the transaction
+      -- this retry just waited out.
+      select id into v_account from public.lmc_accounts
+       where profile_id = p_profile_id;
+      if v_account is not null then
+        perform 1 from public.lmc_accounts where id = v_account for update;
+        v_existing := public.lmc_existing_by_idempotency_v1(
+          v_account, p_idempotency_key, p_kind,
+          p_amount_cents => v_amount, p_campaign => p_campaign);
+        if v_existing is not null then
+          return v_existing;
+        end if;
+      end if;
+    end if;
+    raise;
+  end;
   -- Verified signup only: the recipient must have a confirmed email.
   if not exists (
     select 1 from auth.users u
@@ -742,7 +766,32 @@ begin
     end if;
   end if;
 
-  perform public.lmc_require_flag_v1('lmc_purchases_enabled');
+  -- rev32 (Codex P2): same wrap as lmc_spend_v1 (rev31) — a committed replay
+  -- must resolve even when the purchases flag flips off in the winner-commit
+  -- → retry-gate window. Re-check idempotency UNDER the account lock before
+  -- surfacing lmc_purchases_disabled; every other error re-raises verbatim.
+  begin
+    perform public.lmc_require_flag_v1('lmc_purchases_enabled');
+  exception when others then
+    if sqlerrm like '%lmc_purchases_disabled%' then
+      -- RE-resolve the account: the winner may have CREATED it inside the
+      -- transaction this retry just waited out — the pre-gate lookup above
+      -- ran while that row was still invisible.
+      select id into v_account from public.lmc_accounts
+       where (p_profile_id is not null and profile_id = p_profile_id)
+          or (p_company_id is not null and company_id = p_company_id);
+      if v_account is not null then
+        perform 1 from public.lmc_accounts where id = v_account for update;
+        v_existing := public.lmc_existing_by_idempotency_v1(
+          v_account, p_idempotency_key, 'purchased',
+          p_amount_cents => p_amount_cents, p_reference => p_reference);
+        if v_existing is not null then
+          return v_existing;
+        end if;
+      end if;
+    end if;
+    raise;
+  end;
 
   v_account := public.lmc_ensure_account_v1(p_profile_id, p_company_id);
   perform 1 from public.lmc_accounts where id = v_account for update;
@@ -895,7 +944,44 @@ begin
 
   -- Kill-switch AFTER replay resolution: a disabled flag blocks NEW grants,
   -- never the acknowledgement of an already-committed one.
-  perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
+  -- rev32 (Codex P2): same wrap as lmc_spend_v1 (rev31) — an identical retry
+  -- can miss the winner at the GLOBAL replay block above (winner uncommitted)
+  -- and reach this gate only after the winner committed AND the flag flipped
+  -- off. Before surfacing lmc_promotional_grants_disabled, re-resolve the
+  -- committed grant: the recorded actor + recipient-email identity checks
+  -- mirror the global block, and lmc_existing_by_idempotency_v1 re-checks
+  -- the full remaining fingerprint (amount, campaign, expiry, actor, exact
+  -- reason). A genuinely new grant still gets the disabled error.
+  begin
+    perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
+  exception when others then
+    if sqlerrm like '%lmc_promotional_grants_disabled%' then
+      declare
+        v_race public.lmc_transactions%rowtype;
+      begin
+        select * into v_race
+          from public.lmc_transactions
+         where idempotency_key = p_idempotency_key and kind = 'admin_grant';
+        if found and v_race.actor_profile_id = uid then
+          if lower(v_race.recipient_email_at_grant)
+             is distinct from lower(trim(p_recipient_email)) then
+            raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
+              p_idempotency_key using errcode = '23505';
+          end if;
+          perform 1 from public.lmc_accounts where id = v_race.account_id for update;
+          v_existing := public.lmc_existing_by_idempotency_v1(
+            v_race.account_id, p_idempotency_key, 'admin_grant',
+            p_amount_cents => p_amount_cents, p_campaign => p_campaign,
+            p_expires_at => p_expires_at, p_actor_profile_id => uid,
+            p_reason_exact => p_reason);
+          if v_existing is not null then
+            return v_existing;
+          end if;
+        end if;
+      end;
+    end if;
+    raise;
+  end;
 
   -- Verified recipient resolution: confirmed email, existing profile.
   select u.id, u.email into v_recipient, v_email

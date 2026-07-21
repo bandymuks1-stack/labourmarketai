@@ -73,22 +73,27 @@ Audited tree: worktree on PR #842 head
   tables key ownership on `profiles.id`. Admin = dual signal
   `public.is_admin()` (`profiles.active_role='admin'` OR `profile_roles`
   role `admin`).
-- **Migration chain tip** (after PR #842): `20260720170000_learning_stale_lifecycle_v1.sql`.
-  160 files in `supabase/migrations/`; `supabase/rollbacks/` holds paired
+- **Migration chain tip** (after PR #842, which merged to `main` as `a2e85def`
+  on 2026-07-21): `20260720170000_learning_stale_lifecycle_v1.sql` — 160 files
+  on `main`; this PR's Wagon 1 migration `20260720190000_*` makes it 161 on
+  the branch. `supabase/rollbacks/` holds paired
   `.down.sql` files; `.github/scripts/migration-safety.mjs` classifies
   RED classes; `-- @human-gate-approved` + DRAFT banner is the human-gate
   convention.
 
-### 2.2 Known constraint accepted for this wagon
+### 2.2 Ratchet integration state (RESOLVED after the #842 merge)
 
-`apps/web/lib/guards/product-readiness.test.ts` holds a migration-count
-ratchet `SPRINT_BASELINE = 160` with `files.length <= SPRINT_BASELINE`. That
-file (and `ops-bridge-migration.test.ts`, which pins the literal) is on the
-**PR #842 parallel-work denylist** and must not be edited from this train.
-Adding the Wagon 1 migration makes the count 161, so **exactly one guard test
-fails by design** in this stacked Draft PR. The 2-line ratchet bump
-(160 → 161) is a **deferred integration surface**, applied when PR #842 merges
-and this PR is rebased/retargeted to `main` (see §14).
+While PR #842 was open, `apps/web/lib/guards/product-readiness.test.ts`
+(ratchet `SPRINT_BASELINE = 160`), `market-map-read-layer-v1.test.ts` and
+`ops-bridge-migration.test.ts` were on the **PR #842 parallel-work denylist**
+and could not be edited from this train, so exactly one guard test failed by
+design in the stacked Draft PR.
+
+**That constraint is now closed.** PR #842 merged to `main` (`a2e85def`,
+2026-07-21); this branch was rebased onto `main`, retargeted, and the ratchet
+bump **160 → 161** landed as the recorded integration commits (`904a6e02` +
+`8510075a`). All three guard files now carry the 161 baseline with the LMC
+migration documented, and Quality Gates run fully green on this branch.
 
 ---
 
@@ -376,8 +381,8 @@ app code, journal guards, **all top-level + journal locale message files**,
 |---|---|
 | `supabase/migrations/*` | **No overlap** — Wagon 1 migration is `20260720190000_*`, after the verified #842 chain (`…150000`, `…170000`). |
 | `apps/web/messages/*.json` | **Denylisted, not touched.** Wallet/referral i18n deferred to Wagon 7. |
-| `apps/web/lib/guards/product-readiness.test.ts` | **Denylisted, not touched.** Ratchet bump 160 → 161 is a deferred integration step (§2.2) — the single expected guard failure in this stacked PR. |
-| `apps/web/lib/guards/ops-bridge-migration.test.ts`, `market-map-read-layer-v1.test.ts` | **Denylisted, not touched.** No LMC change needed there beyond the deferred ratchet literal. |
+| `apps/web/lib/guards/product-readiness.test.ts` | **Ratchet bumped 160 → 161** in the post-#842 integration commits (§2.2); green. The denylist ended when #842 merged. |
+| `apps/web/lib/guards/ops-bridge-migration.test.ts`, `market-map-read-layer-v1.test.ts` | **Ratchet literals aligned to 161** in the same integration commits; green. |
 | Journal/learning app code + proofs | **No overlap** — LMC touches none of those files. |
 
 No commit, amend, force-push or any other modification of PR #842 or its
