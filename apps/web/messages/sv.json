@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Posten har ändrats eller raderats — det här objektet är inte längre aktuellt."
+  },
+  "billingTest": {
+    "badge": "TESTLÄGE",
+    "title": "Testbetalning (intern testning)",
+    "body": "Stripes testläge är på. Dessa knappar öppnar en TEST-betalning — inga riktiga pengar, ingen verklig debitering. Använd endast Stripes testkort.",
+    "start": "Starta testbetalning",
+    "starting": "Startar…",
+    "error": "Kunde inte starta",
+    "orgPlaceholder": "Organisations-ID (tomt = din egen organisation)",
+    "portal": {
+      "title": "Kundportal (TEST)",
+      "body": "Öppnar Stripes TEST-kundportal för dina egna testprenumerationer — inga riktiga pengar, inga live-data.",
+      "open": "Öppna testportal",
+      "opening": "Öppnar…"
+    }
   }
 }

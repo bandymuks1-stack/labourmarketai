@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Ieraksts ir mainīts vai izdzēsts — šis vienums vairs nav aktuāls."
+  },
+  "billingTest": {
+    "badge": "TESTA REŽĪMS",
+    "title": "Testa maksājums (iekšējai testēšanai)",
+    "body": "Stripe testa režīms ir ieslēgts. Šīs pogas atver TESTA maksājumu — bez īstas naudas un bez reālas norakstīšanas. Izmantojiet tikai Stripe testa kartes.",
+    "start": "Sākt testa maksājumu",
+    "starting": "Sāk…",
+    "error": "Neizdevās sākt",
+    "orgPlaceholder": "Organizācijas ID (tukšs = jūsu organizācija)",
+    "portal": {
+      "title": "Klienta portāls (TESTS)",
+      "body": "Atver Stripe TESTA klienta portālu jūsu testa abonementiem — bez īstas naudas un live datiem.",
+      "open": "Atvērt testa portālu",
+      "opening": "Atver…"
+    }
   }
 }

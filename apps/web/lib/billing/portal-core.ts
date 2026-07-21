@@ -44,3 +44,30 @@ export function evaluatePortalRequest(input: {
   }
   return { ok: true };
 }
+
+/**
+ * Checkout-side customer readiness (pure). Checkout must NOT proceed without
+ * a PERSISTED customer mapping: a session created with a bare email mints a
+ * provider customer that has no billing_customers row, so the portal can
+ * never manage it and expired idempotency keys could mint further customers.
+ * Fail closed with an honest, specific reason instead.
+ */
+export type CustomerReadiness =
+  | { proceed: true; customerId: string }
+  | {
+      proceed: false;
+      status: number;
+      reason: "billing_customer_needs_migration" | "billing_customer_unavailable";
+    };
+
+export function evaluateCustomerReadiness(
+  ensure:
+    | { ok: true; customerId: string }
+    | { ok: false; reason: string },
+): CustomerReadiness {
+  if (ensure.ok) return { proceed: true, customerId: ensure.customerId };
+  if (ensure.reason === "needs-migration") {
+    return { proceed: false, status: 503, reason: "billing_customer_needs_migration" };
+  }
+  return { proceed: false, status: 502, reason: "billing_customer_unavailable" };
+}

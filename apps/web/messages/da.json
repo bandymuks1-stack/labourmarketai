@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Posten er ændret eller slettet — dette element er ikke længere aktuelt."
+  },
+  "billingTest": {
+    "badge": "TESTTILSTAND",
+    "title": "Testbetaling (intern test)",
+    "body": "Stripe-testtilstand er slået til. Disse knapper åbner en TEST-betaling — ingen rigtige penge, ingen reel trækning. Brug kun Stripe-testkort.",
+    "start": "Start testbetaling",
+    "starting": "Starter…",
+    "error": "Kunne ikke starte",
+    "orgPlaceholder": "Organisations-id (tomt = din egen organisation)",
+    "portal": {
+      "title": "Kundeportal (TEST)",
+      "body": "Åbner Stripes TEST-kundeportal for dine egne testabonnementer — ingen rigtige penge, ingen live-data.",
+      "open": "Åbn testportal",
+      "opening": "Åbner…"
+    }
   }
 }

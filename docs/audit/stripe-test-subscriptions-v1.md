@@ -104,6 +104,9 @@ authenticated user
 
 - Customer mapping: `billing_customers` (one TEST customer per profile;
   concurrent create resolves via the unique constraint, never two customers).
+  Checkout FAILS CLOSED when the mapping cannot be persisted (Codex P2):
+  `evaluateCustomerReadiness` returns 503/502 instead of starting a session
+  with a bare email — no unmanageable orphan customers can be minted.
 - Metadata standard (`lib/billing/metadata-core.ts`) on every created Stripe
   object: `project=labourmarket.ai`, `environment=test`,
   `canonical_plan_key`, `schema_version=1`, `owner_id`, `organization_id?`.
@@ -138,6 +141,10 @@ Handled (signature-verified, test-mode-only, idempotent):
 `invoice.paid` + `invoice.payment_succeeded` (→ `last_payment_status=succeeded`),
 `invoice.payment_failed` (→ `failed` + status `past_due`).
 Unknown types: recorded + acknowledged (`ignored:true`), never an error.
+Invoice → subscription resolution reads BOTH Stripe shapes (Codex P1): legacy
+top-level `invoice.subscription` AND the current v22 API shape
+`invoice.parent.subscription_details.subscription` (string or expanded
+object) — `invoiceSubscriptionId()` in `webhook-core.ts`, regression-tested.
 
 Stripe → canonical status (`billing_subscriptions.status` CHECK enum):
 
@@ -180,13 +187,65 @@ no fake debts, no LMC rows.
 
 ## 8. Migration (DRAFT — NOT applied)
 
-`supabase/migrations/20260721150000_stripe_subscriptions_v1.sql` — ONE
-additive, idempotent change: nullable `billing_subscriptions.organization_id`
-(FK → `organizations`, partial index, comment). RED class by policy (billing)
-→ draft PR + `needs-human-gate`; **not applied to production**. Rollback:
-`supabase/rollbacks/20260721150000_stripe_subscriptions_v1.down.sql` (refuses
-to drop while linkage rows exist). Until applied, the store degrades honestly
+`supabase/migrations/20260721150000_stripe_subscriptions_v1.sql` — idempotent,
+human-gated; **not applied to production**. Two changes:
+
+1. Nullable `billing_subscriptions.organization_id` (FK → `organizations`
+   ON DELETE SET NULL, partial index, comment).
+2. **Uniqueness remodel (Codex review P1):** the applied
+   `unique (owner_id, plan_key, provider)` would reject the same owner buying
+   the same company/agency plan for a SECOND organization (the webhook upsert
+   would hit the constraint and leave the real Stripe subscription
+   untracked). It is dropped (exact prod-verified constraint name
+   `billing_subscriptions_owner_id_plan_key_provider_key`) and replaced by
+   two partial unique indexes: personal scope
+   `(owner_id, plan_key, provider) WHERE organization_id IS NULL` and org
+   scope `(organization_id, plan_key, provider) WHERE organization_id IS NOT
+   NULL`. Regression-pinned in `lib/guards/stripe-lmc-separation.test.ts`.
+
+Rollback (`supabase/rollbacks/…down.sql`): refuses while org-linked rows
+exist; on a clean table drops the column/indexes AND restores the original
+constraint (true down-migration). Until applied, the store degrades honestly
 (42703 → retry without the column).
+
+### 8.1 Scratch-base apply proof (2026-07-21)
+
+Executed on a LOCAL scratch cluster only (127.0.0.1:54322, identity-guarded;
+Supabase local PG 15.8 — prod is PG 17.6, all statements are ancient DDL with
+no version-sensitive behavior). Base = stubs (`profiles`, `organizations`,
+`auth.uid()`, `is_admin()`, roles) + **verbatim** applied
+`20260613200000_billing_test_mode_records.sql`; the resulting
+`billing_subscriptions` constraint set was byte-identical to the
+production-verified set (7 constraints incl.
+`billing_subscriptions_owner_id_plan_key_provider_key`). Results:
+
+- APPLY CLEAN; RE-APPLY CLEAN (idempotent, `if exists/if not exists` guards).
+- Structure: `organization_id` FK `ON DELETE SET NULL`; old constraint gone;
+  `billing_subscriptions_personal_plan_uniq` / `_org_plan_uniq` /
+  `_org_idx` exactly as designed; RLS still enabled on all three tables with
+  the same three SELECT policies; grants unchanged (authenticated=SELECT,
+  service_role=INSERT/SELECT/UPDATE).
+- Behavior (the Codex P1 scenario): same owner + same company plan for TWO
+  orgs → both rows accepted (`MULTI-ORG OK: 2`); duplicate plan for the SAME
+  org → rejected by `_org_plan_uniq`; personal plan stays one-per-owner
+  (`_personal_plan_uniq`); deleting an org nulls the linkage and preserves
+  the subscription row.
+- Rollback: REFUSES while an org-linked row exists (raise proven); after
+  deliberate cleanup ROLLBACK CLEAN — column + partial indexes gone, the
+  ORIGINAL constraint restored; full cycle re-apply CLEAN. Scratch DB
+  dropped.
+
+### 8.2 Supabase Preview check — fail root cause
+
+The non-required `Supabase Preview` status on PR #844 failed because the
+Supabase GitHub integration **ignored the PR after reaching the concurrent
+preview-branch limit** (its own PR comment: "This pull request has been
+ignored for the connected project `gorgitwvdzxbnaxhrsrw` due to reaching the
+limit of concurrent preview branches."). It never attempted to run this PR's
+SQL — the failure is a quota condition, not a migration defect; §8.1 proves
+the SQL applies cleanly from a production-equivalent base. Required checks
+(`quality`, `migration-safety`) are green; apply remains MCP-only after owner
+review.
 
 ## 9. Public UI honesty
 
@@ -196,6 +255,10 @@ to drop while linkage rows exist). Until applied, the store degrades honestly
   `/dashboard/admin/billing` surface, only when the config resolves
   `stripe_test`, always TEST-labelled.
 - Dead `BillingStatusBanner` removed (zero importers).
+- i18n (Codex P1 / doctrine §2.4): the `billingTest` namespace (incl. the new
+  `orgPlaceholder` + `portal.*` keys) now exists in ALL 11 full-UI catalogs —
+  real translations were added for pl/da/no/sv/lv/et (no `[EN]` debt
+  markers), matching the active-locale copy exactly in meaning and honesty.
 
 ## 10. Validation + remaining owner gates
 

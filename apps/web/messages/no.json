@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Oppføringen er endret eller slettet — dette elementet er ikke lenger aktuelt."
+  },
+  "billingTest": {
+    "badge": "TESTMODUS",
+    "title": "Testbetaling (intern testing)",
+    "body": "Stripe-testmodus er på. Disse knappene åpner en TEST-betaling — ingen ekte penger, ingen reell belastning. Bruk kun Stripe-testkort.",
+    "start": "Start testbetaling",
+    "starting": "Starter…",
+    "error": "Kunne ikke starte",
+    "orgPlaceholder": "Organisasjons-ID (tom = din egen organisasjon)",
+    "portal": {
+      "title": "Kundeportal (TEST)",
+      "body": "Åpner Stripes TEST-kundeportal for dine egne testabonnementer — ingen ekte penger, ingen live-data.",
+      "open": "Åpne testportal",
+      "opening": "Åpner…"
+    }
   }
 }

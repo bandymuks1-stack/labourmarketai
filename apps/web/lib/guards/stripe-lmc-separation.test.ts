@@ -111,6 +111,53 @@ describe("Stripe subscriptions never touch the LMC ledger", () => {
   });
 });
 
+describe("subscription uniqueness model (draft migration 20260721150000)", () => {
+  const REPO_ROOT = resolve(webRoot, "..", "..");
+  const migration = readFileSync(
+    join(
+      REPO_ROOT,
+      "supabase",
+      "migrations",
+      "20260721150000_stripe_subscriptions_v1.sql",
+    ),
+    "utf8",
+  );
+  const rollback = readFileSync(
+    join(
+      REPO_ROOT,
+      "supabase",
+      "rollbacks",
+      "20260721150000_stripe_subscriptions_v1.down.sql",
+    ),
+    "utf8",
+  );
+
+  it("replaces owner/plan uniqueness with org-scoped partial indexes", () => {
+    // Regression pin (Codex P1): the applied unique (owner_id, plan_key,
+    // provider) would reject the same owner buying the same company plan for
+    // a SECOND organization and leave the real Stripe subscription untracked.
+    expect(migration).toMatch(
+      /drop constraint if exists billing_subscriptions_owner_id_plan_key_provider_key/,
+    );
+    expect(migration).toMatch(
+      /billing_subscriptions_personal_plan_uniq[\s\S]*?\(owner_id, plan_key, provider\)[\s\S]*?where organization_id is null/,
+    );
+    expect(migration).toMatch(
+      /billing_subscriptions_org_plan_uniq[\s\S]*?\(organization_id, plan_key, provider\)[\s\S]*?where organization_id is not null/,
+    );
+  });
+
+  it("stays human-gated with a paired, guarded rollback", () => {
+    expect(migration).toMatch(/@human-gate-approved/);
+    expect(migration).toMatch(/DO NOT APPLY automatically/);
+    expect(rollback).toMatch(/Refusing rollback/);
+    // The rollback restores the ORIGINAL constraint so down = pre-migration.
+    expect(rollback).toMatch(
+      /add constraint billing_subscriptions_owner_id_plan_key_provider_key[\s\S]*?unique \(owner_id, plan_key, provider\)/,
+    );
+  });
+});
+
 describe("portal + checkout structural safety", () => {
   it("the portal route never reads a request body (no caller-supplied ids)", () => {
     const src = read("app/api/billing/portal/route.ts");

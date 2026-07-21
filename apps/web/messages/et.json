@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Sissekannet on muudetud või see on kustutatud — see üksus ei ole enam aktuaalne."
+  },
+  "billingTest": {
+    "badge": "TESTREŽIIM",
+    "title": "Testmakse (sisemine testimine)",
+    "body": "Stripe testrežiim on sees. Need nupud avavad TESTmakse — päris raha ei liigu, reaalset debiteerimist ei toimu. Kasuta ainult Stripe testkaarte.",
+    "start": "Alusta testmakset",
+    "starting": "Alustamine…",
+    "error": "Ei õnnestunud alustada",
+    "orgPlaceholder": "Organisatsiooni ID (tühi = sinu organisatsioon)",
+    "portal": {
+      "title": "Kliendiportaal (TEST)",
+      "body": "Avab Stripe TESTI kliendiportaali sinu testtellimustele — päris raha ja live-andmeteta.",
+      "open": "Ava testportaal",
+      "opening": "Avamine…"
+    }
   }
 }

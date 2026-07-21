@@ -2925,5 +2925,20 @@
   },
   "learning": {
     "staleEntry": "Wpis został zmieniony lub usunięty — ten element nie jest już aktualny."
+  },
+  "billingTest": {
+    "badge": "TRYB TESTOWY",
+    "title": "Płatność testowa (testy wewnętrzne)",
+    "body": "Tryb testowy Stripe jest włączony. Te przyciski otwierają TESTOWĄ płatność — bez prawdziwych pieniędzy i bez realnego obciążenia. Używaj wyłącznie kart testowych Stripe.",
+    "start": "Rozpocznij płatność testową",
+    "starting": "Rozpoczynanie…",
+    "error": "Nie udało się rozpocząć",
+    "orgPlaceholder": "ID organizacji (puste = Twoja organizacja)",
+    "portal": {
+      "title": "Portal klienta (TEST)",
+      "body": "Otwiera testowy portal klienta Stripe dla Twoich subskrypcji testowych — bez prawdziwych pieniędzy i danych live.",
+      "open": "Otwórz portal testowy",
+      "opening": "Otwieranie…"
+    }
   }
 }

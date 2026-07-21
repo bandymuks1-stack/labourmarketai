@@ -108,6 +108,29 @@ describe("webhook-core — event mapping", () => {
     expect(parseInvoiceObject({ subscription: "sub_1" }, true).lastPaymentStatus).toBe("succeeded");
   });
 
+  it("reads the subscription id from BOTH invoice shapes (legacy + v22 parent)", () => {
+    // Legacy top-level field (older API versions).
+    expect(parseInvoiceObject({ subscription: "sub_legacy" }, true).providerSubscriptionId)
+      .toBe("sub_legacy");
+    // Current shape: parent.subscription_details.subscription (string id).
+    expect(
+      parseInvoiceObject(
+        { parent: { subscription_details: { subscription: "sub_modern" } } },
+        true,
+      ).providerSubscriptionId,
+    ).toBe("sub_modern");
+    // Expanded object form carries the id inside.
+    expect(
+      parseInvoiceObject(
+        { parent: { subscription_details: { subscription: { id: "sub_expanded" } } } },
+        false,
+      ).providerSubscriptionId,
+    ).toBe("sub_expanded");
+    // Neither shape present → null (applyInvoicePayment stays a no-op).
+    expect(parseInvoiceObject({ parent: {} }, true).providerSubscriptionId).toBeNull();
+    expect(parseInvoiceObject({}, true).providerSubscriptionId).toBeNull();
+  });
+
   it("a live event is rejected (test-only chain)", () => {
     expect(assertTestEvent({ testMode: true })).toBe(true);
     expect(assertTestEvent({ testMode: false })).toBe(false);

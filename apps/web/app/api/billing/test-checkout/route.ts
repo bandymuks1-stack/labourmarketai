@@ -10,6 +10,7 @@ import {
   planRequiresOrganization,
   type OrgBindingResult,
 } from "@/lib/billing/checkout-core";
+import { evaluateCustomerReadiness } from "@/lib/billing/portal-core";
 import { getPlan } from "@/lib/billing/plans";
 import { resolveOrganizationBinding } from "@/lib/billing/org-membership";
 import { ensureBillingCustomer } from "@/lib/billing/customer-store";
@@ -111,10 +112,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "price_not_configured" }, { status: 400 });
   }
 
-  // One stored TEST customer per profile (find-or-create, race-safe). A
-  // missing mapping table degrades honestly without blocking checkout.
+  // One stored TEST customer per profile (find-or-create, race-safe).
+  // Checkout FAILS CLOSED when the mapping cannot be persisted — a session
+  // without a stored customer would mint an unmanageable provider customer
+  // (no portal access, duplicate customers after key expiry).
   const customer = await ensureBillingCustomer({ id: user.id, email: user.email ?? null });
-  const providerCustomerId = customer.ok ? customer.customerId : null;
+  const readiness = evaluateCustomerReadiness(customer);
+  if (!readiness.proceed) {
+    return NextResponse.json(
+      { ok: false, reason: readiness.reason, testMode: config.testMode },
+      { status: readiness.status },
+    );
+  }
 
   const provider = await getBillingProvider();
   const result = await provider.createCheckoutSession({
@@ -122,7 +131,7 @@ export async function POST(req: Request) {
     priceId,
     clientReferenceId: user.id,
     customerEmail: user.email ?? null,
-    providerCustomerId,
+    providerCustomerId: readiness.customerId,
     organizationId,
     metadata: checkoutMetadata({ planKey, ownerId: user.id, organizationId }),
     idempotencyKey: checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId }),

@@ -116,13 +116,40 @@ export function parseCheckoutSessionObject(
   };
 }
 
-/** Parse an invoice.payment_* object → the last payment status + sub id. */
+/**
+ * The subscription reference on an invoice object across Stripe API shapes:
+ *   - legacy (pre-2025 API versions): top-level `invoice.subscription`;
+ *   - current (Stripe SDK v22 default API): `invoice.parent.subscription_details.subscription`
+ *     (string id, or an expanded object with an `id`).
+ * Reading only the legacy field would silently drop payment status updates
+ * (a null id makes applyInvoicePayment a no-op) — so both shapes are read.
+ */
+export function invoiceSubscriptionId(
+  obj: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!obj) return null;
+  const legacy = asString(obj.subscription);
+  if (legacy) return legacy;
+  const parent = obj.parent as Record<string, unknown> | null | undefined;
+  const details = parent?.subscription_details as
+    | Record<string, unknown>
+    | null
+    | undefined;
+  const modern = details?.subscription;
+  if (typeof modern === "string" && modern.length > 0) return modern;
+  if (modern && typeof modern === "object") {
+    return asString((modern as Record<string, unknown>).id);
+  }
+  return null;
+}
+
+/** Parse an invoice event object → the last payment status + sub id. */
 export function parseInvoiceObject(
   obj: Record<string, unknown> | null | undefined,
   succeeded: boolean,
 ): { providerSubscriptionId: string | null; lastPaymentStatus: PaymentStatus } {
   return {
-    providerSubscriptionId: asString(obj?.subscription),
+    providerSubscriptionId: invoiceSubscriptionId(obj),
     lastPaymentStatus: succeeded ? "succeeded" : "failed",
   };
 }
