@@ -188,52 +188,79 @@ no fake debts, no LMC rows.
 ## 8. Migration (DRAFT — NOT applied)
 
 `supabase/migrations/20260721150000_stripe_subscriptions_v1.sql` — idempotent,
-human-gated; **not applied to production**. Two changes:
+human-gated; **not applied to production**. Changes:
 
 1. Nullable `billing_subscriptions.organization_id` (FK → `organizations`
-   ON DELETE SET NULL, partial index, comment).
-2. **Uniqueness remodel (Codex review P1):** the applied
+   ON DELETE SET NULL, partial index, comment) — the LIVE org linkage.
+2. Nullable `billing_subscriptions.origin_organization_id` (**no FK**) — an
+   IMMUTABLE snapshot of the org a subscription was born bound to, captured
+   from `organization_id` by trigger `trg_billing_subscriptions_capture_origin_org`
+   (INVOKER rights, `set search_path = ''`) and never nulled. This keeps an
+   orphaned (org-deleted) subscription out of the personal uniqueness scope.
+3. **Uniqueness remodel (Codex review P1):** the applied
    `unique (owner_id, plan_key, provider)` would reject the same owner buying
    the same company/agency plan for a SECOND organization (the webhook upsert
    would hit the constraint and leave the real Stripe subscription
    untracked). It is dropped (exact prod-verified constraint name
    `billing_subscriptions_owner_id_plan_key_provider_key`) and replaced by
    two partial unique indexes: personal scope
-   `(owner_id, plan_key, provider) WHERE organization_id IS NULL` and org
-   scope `(organization_id, plan_key, provider) WHERE organization_id IS NOT
-   NULL`. Regression-pinned in `lib/guards/stripe-lmc-separation.test.ts`.
+   `(owner_id, plan_key, provider) WHERE origin_organization_id IS NULL` and
+   org scope `(organization_id, plan_key, provider) WHERE organization_id IS
+   NOT NULL`. Regression-pinned in `lib/guards/stripe-lmc-separation.test.ts`.
 
-Rollback (`supabase/rollbacks/…down.sql`): refuses while org-linked rows
-exist; on a clean table drops the column/indexes AND restores the original
-constraint (true down-migration). Until applied, the store degrades honestly
-(42703 → retry without the column).
+**Codex round 2 fixes (this revision):**
 
-### 8.1 Scratch-base apply proof (2026-07-21)
+- **P2 — ON DELETE SET NULL collision:** in the prior revision the personal
+  index was keyed on `organization_id IS NULL`, so `ON DELETE SET NULL` moved
+  a former-org row into the personal scope; deleting a second org holding the
+  same plan collided on `_personal_plan_uniq` and BLOCKED the org delete.
+  Keying the personal index on `origin_organization_id IS NULL` (retained by
+  the trigger) means orphaned org rows are under NEITHER partial index and
+  coexist freely — the org delete always succeeds and the subscription is
+  preserved.
+- **P1 — manual pilot grant conflict target:** a partial unique index cannot
+  be an `ON CONFLICT` arbiter without its predicate (supabase-js can't supply
+  one), so `grantPilotAccessAction` no longer upserts against the dropped
+  `(owner_id, plan_key, provider)` target. It uses find-then-write (reuse an
+  existing org-less `manual_%` grant or insert a fresh one; a concurrent
+  `23505` is absorbed as success). Behaviourally pinned in
+  `lib/admin/billing-actions.test.ts`.
+- **P1 — org checkout fail-closed:** the store no longer strips the org
+  binding and retries without the column on `42703`; it returns
+  `needs-migration`. The checkout route probes `isOrganizationLinkageReady()`
+  and rejects org-bound plans with `organization_billing_unavailable` (503)
+  until the column exists — no real Stripe subscription is ever created that
+  we could only store with its verified org binding discarded. Behaviourally
+  pinned in `lib/billing/subscription-store.test.ts`.
 
-Executed on a LOCAL scratch cluster only (127.0.0.1:54322, identity-guarded;
-Supabase local PG 15.8 — prod is PG 17.6, all statements are ancient DDL with
-no version-sensitive behavior). Base = stubs (`profiles`, `organizations`,
-`auth.uid()`, `is_admin()`, roles) + **verbatim** applied
-`20260613200000_billing_test_mode_records.sql`; the resulting
-`billing_subscriptions` constraint set was byte-identical to the
-production-verified set (7 constraints incl.
-`billing_subscriptions_owner_id_plan_key_provider_key`). Results:
+Rollback (`supabase/rollbacks/…down.sql`): refuses while ANY row is
+org-associated (`organization_id` OR `origin_organization_id`); on a clean
+table drops the trigger/function/columns/indexes AND restores the original
+constraint (true down-migration).
 
-- APPLY CLEAN; RE-APPLY CLEAN (idempotent, `if exists/if not exists` guards).
-- Structure: `organization_id` FK `ON DELETE SET NULL`; old constraint gone;
-  `billing_subscriptions_personal_plan_uniq` / `_org_plan_uniq` /
-  `_org_idx` exactly as designed; RLS still enabled on all three tables with
-  the same three SELECT policies; grants unchanged (authenticated=SELECT,
-  service_role=INSERT/SELECT/UPDATE).
-- Behavior (the Codex P1 scenario): same owner + same company plan for TWO
-  orgs → both rows accepted (`MULTI-ORG OK: 2`); duplicate plan for the SAME
-  org → rejected by `_org_plan_uniq`; personal plan stays one-per-owner
-  (`_personal_plan_uniq`); deleting an org nulls the linkage and preserves
-  the subscription row.
-- Rollback: REFUSES while an org-linked row exists (raise proven); after
-  deliberate cleanup ROLLBACK CLEAN — column + partial indexes gone, the
-  ORIGINAL constraint restored; full cycle re-apply CLEAN. Scratch DB
-  dropped.
+### 8.1 Scratch-base apply + behaviour proof (2026-07-21, round-2 structure)
+
+Executed on a LOCAL scratch database only (PG 16.13, `stripe_r2_scratch`,
+dropped afterward). Base = stubs (`profiles`, `organizations`, `auth.uid()`,
+`is_admin()`) + the `billing_subscriptions` column/constraint set from
+`20260613200000` (both uniques incl.
+`billing_subscriptions_owner_id_plan_key_provider_key`), then the round-2
+migration DDL verbatim. Results:
+
+- APPLY CLEAN; old constraint dropped; `_personal_plan_uniq` (keyed on
+  `origin_organization_id IS NULL`) / `_org_plan_uniq` / `_org_idx` / the
+  capture trigger created as designed.
+- Trigger: both org rows had `origin_organization_id` auto-captured on insert.
+- Codex P1 scenario: same owner + same company plan for TWO orgs → both rows
+  accepted; duplicate plan for the SAME org → rejected by `_org_plan_uniq`.
+- **Codex round 2 P2 scenario:** deleting BOTH orgs left 2 orphaned rows
+  coexisting (`organization_id` NULL, `origin_organization_id` retained) with
+  NO uniqueness collision — the org delete succeeded and both subscriptions
+  were preserved (the exact case that was blocked in the prior revision).
+- Genuine personal plan stays one-per-owner (`_personal_plan_uniq`).
+- Rollback: REFUSES while org-associated rows exist (raise proven); after
+  deliberate cleanup ROLLBACK CLEAN — trigger/function/columns/indexes gone,
+  the ORIGINAL constraint restored. Scratch DB dropped.
 
 ### 8.2 Supabase Preview check — fail root cause
 
