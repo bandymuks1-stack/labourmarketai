@@ -320,6 +320,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 158 -> 159 for W1 photo continuity (20260720150000, paired rollback).
     // Bumped 159 -> 160 for the W1 stale learning lifecycle (20260720170000,
     // paired rollback) — still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(160);
+    // Bumped 160 -> 161 for LMC Wagon 1 — immutable LMC ledger foundation
+    // (20260720190000_lmc_ledger_foundation_v1, paired rollback). RED /
+    // human-gated DRAFT, ships UNAPPLIED; still no migration from the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(161);
   });
 });

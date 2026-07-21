@@ -1835,7 +1835,10 @@ describe("no migration files added by this sprint", () => {
     // Bumped 159 -> 160 for the W1 stale learning lifecycle
     // (20260720170000_learning_stale_lifecycle_v1) — function+trigger only,
     // additive, paired rollback. Closes Codex exact-head P2-1/P2-2 on PR #842.
-    const SPRINT_BASELINE = 160;
+    // Bumped 160 -> 161 for LMC Wagon 1 — immutable LMC ledger foundation
+    // (20260720190000_lmc_ledger_foundation_v1). RED / human-gated DRAFT,
+    // ships UNAPPLIED with paired rollback; all LMC flags OFF.
+    const SPRINT_BASELINE = 161;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
