@@ -12,6 +12,7 @@ import type { SubscriptionUpsert, PaymentStatus } from "@/lib/billing/webhook-co
 
 const RELATION_ABSENT = "42P01";
 const UNIQUE_VIOLATION = "23505";
+const COLUMN_ABSENT = "42703";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function admin(): any {
@@ -70,7 +71,7 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     if (!existing) return "ok";
   }
 
-  const row = {
+  const row: Record<string, unknown> = {
     owner_id: ownerId,
     plan_key: planKey,
     provider: "stripe",
@@ -83,10 +84,24 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     test_mode: u.testMode,
     updated_at: new Date().toISOString(),
   };
+  // Org linkage (company/agency plans) rides along when known. The column
+  // ships in DRAFT migration 20260721150000; until the owner applies it, the
+  // upsert degrades honestly by retrying WITHOUT the column (42703).
+  if (u.organizationId) row.organization_id = u.organizationId;
+
   const { error } = await sb
     .from("billing_subscriptions")
     .upsert(row, { onConflict: "provider,provider_subscription_id" });
   if (!error) return "ok";
+  if (error.code === COLUMN_ABSENT && "organization_id" in row) {
+    delete row.organization_id;
+    const retry = await sb
+      .from("billing_subscriptions")
+      .upsert(row, { onConflict: "provider,provider_subscription_id" });
+    if (!retry.error) return "ok";
+    if (retry.error.code === RELATION_ABSENT) return "needs-migration";
+    return "error";
+  }
   if (error.code === RELATION_ABSENT) return "needs-migration";
   return "error";
 }

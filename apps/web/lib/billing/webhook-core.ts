@@ -22,9 +22,15 @@ const HANDLED = new Set([
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
+  "invoice.paid",
   "invoice.payment_succeeded",
   "invoice.payment_failed",
 ]);
+
+/** Both invoice-success shapes Stripe emits (invoice.paid is the modern one). */
+export function isInvoiceSuccessEvent(type: string): boolean {
+  return type === "invoice.paid" || type === "invoice.payment_succeeded";
+}
 
 export function isHandledEventType(type: string): boolean {
   return HANDLED.has(type);
@@ -40,7 +46,9 @@ export function mapStripeStatus(s: string | undefined): SubStatus {
     case "canceled": return "cancelled";
     case "incomplete": return "incomplete";
     case "incomplete_expired": return "expired";
-    case "paused": return "past_due";
+    // `paused` (trial ended without a payment method) must NOT entitle —
+    // past_due carries grace, so paused maps to the non-entitling `unpaid`.
+    case "paused": return "unpaid";
     default: return "none";
   }
 }
@@ -49,7 +57,8 @@ export interface SubscriptionUpsert {
   providerSubscriptionId: string;
   providerCustomerId: string | null;
   ownerId: string | null; // our profile id (from metadata / client_reference_id)
-  planKey: string | null; // from metadata.plan_key
+  planKey: string | null; // from metadata.canonical_plan_key / plan_key
+  organizationId: string | null; // canonical org (company/agency plans)
   status: SubStatus;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
@@ -78,7 +87,8 @@ export function parseSubscriptionObject(
     providerSubscriptionId: obj.id,
     providerCustomerId: asString(obj.customer),
     ownerId: asString(meta.client_reference_id) ?? asString(meta.owner_id),
-    planKey: asString(meta.plan_key),
+    planKey: asString(meta.canonical_plan_key) ?? asString(meta.plan_key),
+    organizationId: asString(meta.organization_id),
     status: mapStripeStatus(obj.status as string | undefined),
     currentPeriodStart: isoFromUnix(obj.current_period_start),
     currentPeriodEnd: isoFromUnix(obj.current_period_end),
@@ -91,7 +101,7 @@ export function parseSubscriptionObject(
 export function parseCheckoutSessionObject(
   obj: Record<string, unknown> | null | undefined,
   testMode: boolean,
-): Pick<SubscriptionUpsert, "providerSubscriptionId" | "providerCustomerId" | "ownerId" | "planKey" | "testMode"> | null {
+): Pick<SubscriptionUpsert, "providerSubscriptionId" | "providerCustomerId" | "ownerId" | "planKey" | "organizationId" | "testMode"> | null {
   if (!obj) return null;
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
   const sub = asString(obj.subscription);
@@ -100,7 +110,8 @@ export function parseCheckoutSessionObject(
     providerSubscriptionId: sub,
     providerCustomerId: asString(obj.customer),
     ownerId: asString(obj.client_reference_id) ?? asString(meta.client_reference_id),
-    planKey: asString(meta.plan_key),
+    planKey: asString(meta.canonical_plan_key) ?? asString(meta.plan_key),
+    organizationId: asString(meta.organization_id),
     testMode,
   };
 }

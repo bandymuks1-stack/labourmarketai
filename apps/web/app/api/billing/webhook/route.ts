@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getBillingProvider } from "@/lib/billing/provider";
 import {
   isHandledEventType,
+  isInvoiceSuccessEvent,
   parseSubscriptionObject,
   parseCheckoutSessionObject,
   parseInvoiceObject,
@@ -73,6 +74,7 @@ export async function POST(req: Request) {
           providerCustomerId: link.providerCustomerId,
           ownerId: link.ownerId,
           planKey: link.planKey,
+          organizationId: link.organizationId,
           status: "incomplete",
           currentPeriodStart: null,
           currentPeriodEnd: null,
@@ -89,8 +91,8 @@ export async function POST(req: Request) {
           result = await upsertSubscription(sub);
         }
       }
-    } else if (event.type === "invoice.payment_succeeded" || event.type === "invoice.payment_failed") {
-      const inv = parseInvoiceObject(event.object, event.type === "invoice.payment_succeeded");
+    } else if (isInvoiceSuccessEvent(event.type) || event.type === "invoice.payment_failed") {
+      const inv = parseInvoiceObject(event.object, isInvoiceSuccessEvent(event.type));
       result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
     }
     await markWebhookProcessed(event.id, result === "ok" ? undefined : result);

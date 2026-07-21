@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   isHandledEventType,
+  isInvoiceSuccessEvent,
   mapStripeStatus,
   parseSubscriptionObject,
   parseCheckoutSessionObject,
@@ -15,10 +16,17 @@ describe("webhook-core — event mapping", () => {
       "customer.subscription.created",
       "customer.subscription.updated",
       "customer.subscription.deleted",
+      "invoice.paid",
       "invoice.payment_succeeded",
       "invoice.payment_failed",
     ]) expect(isHandledEventType(t)).toBe(true);
     expect(isHandledEventType("charge.refunded")).toBe(false);
+  });
+
+  it("invoice.paid and invoice.payment_succeeded are both success shapes", () => {
+    expect(isInvoiceSuccessEvent("invoice.paid")).toBe(true);
+    expect(isInvoiceSuccessEvent("invoice.payment_succeeded")).toBe(true);
+    expect(isInvoiceSuccessEvent("invoice.payment_failed")).toBe(false);
   });
 
   it("maps Stripe statuses → our enum (active grants, canceled limits, etc.)", () => {
@@ -29,6 +37,9 @@ describe("webhook-core — event mapping", () => {
     expect(mapStripeStatus("canceled")).toBe("cancelled");
     expect(mapStripeStatus("incomplete")).toBe("incomplete");
     expect(mapStripeStatus("incomplete_expired")).toBe("expired");
+    // paused must NOT entitle — it maps to the non-entitling unpaid state
+    // (past_due would carry grace entitlement, which paused must never get).
+    expect(mapStripeStatus("paused")).toBe("unpaid");
     expect(mapStripeStatus(undefined)).toBe("none");
   });
 
@@ -63,6 +74,33 @@ describe("webhook-core — event mapping", () => {
     expect(link?.providerSubscriptionId).toBe("sub_9");
     expect(link?.ownerId).toBe("owner_9");
     expect(link?.planKey).toBe("worker_plus");
+    expect(link?.organizationId).toBeNull();
+  });
+
+  it("canonical metadata wins and organization linkage is carried", () => {
+    const link = parseCheckoutSessionObject(
+      {
+        subscription: "sub_10", customer: "cus_10", client_reference_id: "owner_10",
+        metadata: { canonical_plan_key: "company_pilot", organization_id: "org_1" },
+      },
+      true,
+    );
+    expect(link?.planKey).toBe("company_pilot");
+    expect(link?.organizationId).toBe("org_1");
+
+    const sub = parseSubscriptionObject(
+      {
+        id: "sub_10", customer: "cus_10", status: "active",
+        metadata: {
+          canonical_plan_key: "company_pilot", owner_id: "owner_10",
+          organization_id: "org_1",
+        },
+      },
+      true,
+    );
+    expect(sub?.planKey).toBe("company_pilot");
+    expect(sub?.ownerId).toBe("owner_10");
+    expect(sub?.organizationId).toBe("org_1");
   });
 
   it("a failed invoice maps to last_payment_status=failed", () => {
