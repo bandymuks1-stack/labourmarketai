@@ -57,6 +57,20 @@
  *        above a lowered cap is still acknowledged by its recorded actor
  *        (exact payload only), no duplicate tx/lot, foreign actors cannot
  *        resolve it, and a NEW grant above the lowered cap is refused
+ *   P37  flag authorization matrix (rev35, Codex P1): admin-class flags flip
+ *        via the setter; owner_only flags (live_payments_enabled,
+ *        stripe_lmc_topups_enabled) are refused for admin, superadmin,
+ *        service_role, caller-supplied UUIDs, both directions, plus the
+ *        owner-path UPDATE belt; unknown flags and unpolicied
+ *        system_locked keys fail closed; refused attempts leave no partial
+ *        DB change and both owner flags stay false
+ *   P38  admin-grant GLOBAL key canonical matrix (rev35, Codex P2): exact
+ *        same-actor replay; different recipient/amount and ANY foreign-actor
+ *        reuse (same or different recipient) → lmc_idempotency_conflict,
+ *        SQLSTATE 23505, never the raw lmc_admin_grant_key_global index
+ *        error; P38b proves the concurrent cross-account race surfaces the
+ *        SAME canonical conflict via the unique_violation backstop with
+ *        exactly one surviving grant
  *
  * NEGATIVE CONTROLS (scratch-only; each weakens the guard, proves the failure
  * actually appears, restores the guard by re-applying the migration file, and
@@ -396,6 +410,159 @@ async function main() {
         flipAudit[0].n === 1 &&
         flipAudit2[0].n === 1,
       `owner-path actor-less refused; service_role direct UPDATE refused; non-admin RPC refused; audited flip rows=${flipAudit[0].n}; same-state repeat no-op (still ${flipAudit2[0].n})`,
+    );
+  }
+
+  // ── P37 (rev35, Codex P1): flag authorization matrix — canonical policy ───
+  {
+    // Baseline: an admin CAN flip an admin-class flag (and back to default).
+    await setFlag(a, "lmc_purchases_enabled", true);
+    const { rows: adminOn } = await a.query(
+      `select enabled from public.lmc_settings where key = 'lmc_purchases_enabled'`,
+    );
+    await setFlag(a, "lmc_purchases_enabled", false);
+
+    // Dual-signal "superadmin" actor (active_role AND profile_roles row) —
+    // the strongest identity the shared setter can ever be handed.
+    const superAdmin = await makePerson(a, "superflag", "admin");
+    await a.query(
+      `insert into public.profile_roles (profile_id, role) values ($1, 'admin')
+       on conflict do nothing`,
+      [superAdmin],
+    );
+    // owner_only flags: refused for EVERY caller-supplied actor, in BOTH
+    // directions (enable and disable), always with the canonical error.
+    const ownerOnlyRefusals: { ok: boolean; msg: string }[] = [];
+    for (const key of ["live_payments_enabled", "stripe_lmc_topups_enabled"]) {
+      for (const enabled of [true, false]) {
+        for (const actor of [FLAG_ACTOR, superAdmin]) {
+          ownerOnlyRefusals.push(
+            await expectError(
+              () =>
+                a.query(`select public.lmc_set_flag_v1($1, $2, $3)`, [
+                  key,
+                  enabled,
+                  actor,
+                ]),
+              "lmc_owner_only_flag",
+            ),
+          );
+        }
+      }
+    }
+    // service_role caller (has EXECUTE on the setter): still refused.
+    const svc37 = await admin();
+    await svc37.query(`set role service_role`);
+    const svcOwnerOnly = await expectError(
+      () =>
+        svc37.query(
+          `select public.lmc_set_flag_v1('live_payments_enabled', true, $1)`,
+          [superAdmin],
+        ),
+      "lmc_owner_only_flag",
+    );
+    await svc37.end();
+    // A caller-supplied NON-admin profile UUID ("owner UUID" model): the
+    // class gate fires before any identity check — the setter cannot verify
+    // caller identity, so no supplied UUID can ever prove an owner decision.
+    const plainUser37 = await makePerson(a, "plainflag");
+    const plainOwnerOnly = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_set_flag_v1('stripe_lmc_topups_enabled', true, $1)`,
+          [plainUser37],
+        ),
+      "lmc_owner_only_flag",
+    );
+    // Trigger belt: even a table-owner direct UPDATE cannot ENABLE an
+    // owner_only flag.
+    const ownerPathBelt = await expectError(
+      () =>
+        a.query(
+          `update public.lmc_settings set enabled = true, updated_by = $1
+            where key = 'live_payments_enabled'`,
+          [FLAG_ACTOR],
+        ),
+      "lmc_owner_only_flag",
+    );
+    // Unknown flag: fail-closed refusal — never treated as admin-class.
+    const unknownFlag = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_set_flag_v1('lmc_totally_unknown_flag', true, $1)`,
+          [FLAG_ACTOR],
+        ),
+      "lmc_unknown_flag",
+    );
+    // system_locked (scratch-only shape): widen the key CHECK and seed a
+    // future flag that has NO policy entry — its class defaults to
+    // system_locked, and both the setter and the owner-path UPDATE refuse.
+    // Restored to the exact migration shape right after.
+    await a.query(
+      `alter table public.lmc_settings drop constraint lmc_settings_key_check`,
+    );
+    await a.query(
+      `insert into public.lmc_settings (key, enabled)
+       values ('lmc_future_flag_enabled', false)
+       on conflict (key) do nothing`,
+    );
+    const lockedSetter = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_set_flag_v1('lmc_future_flag_enabled', true, $1)`,
+          [FLAG_ACTOR],
+        ),
+      "lmc_system_locked_flag",
+    );
+    const lockedDirect = await expectError(
+      () =>
+        a.query(
+          `update public.lmc_settings set enabled = true, updated_by = $1
+            where key = 'lmc_future_flag_enabled'`,
+          [FLAG_ACTOR],
+        ),
+      "lmc_system_locked_flag",
+    );
+    await a.query(
+      `delete from public.lmc_settings where key = 'lmc_future_flag_enabled'`,
+    );
+    await a.query(
+      `alter table public.lmc_settings add constraint lmc_settings_key_check
+       check (key in (
+         'lmc_purchases_enabled',
+         'lmc_promotional_grants_enabled',
+         'lmc_referrals_enabled',
+         'stripe_lmc_topups_enabled',
+         'live_payments_enabled',
+         'lmc_spending_enabled'))`,
+    );
+    // No partial DB change from ANY refused attempt: both owner_only flags
+    // are still false with untouched provenance and ZERO audit rows.
+    const { rows: state37 } = await a.query(
+      `select count(*) filter (where enabled) ::int as on_flags,
+              count(*) filter (where updated_by is not null) ::int as touched
+         from public.lmc_settings
+        where key in ('live_payments_enabled', 'stripe_lmc_topups_enabled')`,
+    );
+    const { rows: audit37 } = await a.query(
+      `select count(*)::int as n from public.audit_logs
+        where action = 'lmc_flag_changed'
+          and payload ->> 'key' in ('live_payments_enabled', 'stripe_lmc_topups_enabled')`,
+    );
+    record(
+      "P37-flag-authorization-matrix",
+      adminOn[0].enabled === true &&
+        ownerOnlyRefusals.every((r) => r.ok) &&
+        svcOwnerOnly.ok &&
+        plainOwnerOnly.ok &&
+        ownerPathBelt.ok &&
+        unknownFlag.ok &&
+        lockedSetter.ok &&
+        lockedDirect.ok &&
+        state37[0].on_flags === 0 &&
+        state37[0].touched === 0 &&
+        audit37[0].n === 0,
+      `admin-class flip ok; owner_only refused ${ownerOnlyRefusals.length}x (admin+superadmin, both directions) + service_role + plain-UUID + owner-path UPDATE; unknown + system_locked fail-closed; both owner flags false, provenance untouched, 0 audit rows`,
     );
   }
 
@@ -1773,6 +1940,141 @@ async function main() {
       g3[0].r.already_processed === true &&
         g3[0].r.transaction_id === g1[0].r.transaction_id,
       `restored migration acknowledges the committed grant (same tx)`,
+    );
+  }
+
+  // ── P38 (rev35, Codex P2): admin-grant GLOBAL key canonical matrix ────────
+  {
+    const adm38 = await makePerson(a, "adm38", "admin");
+    await makePerson(a, "p38ra");
+    await makePerson(a, "p38rb");
+    const eA = `${RUN}-p38ra@fixture.local`;
+    const eB = `${RUN}-p38rb@fixture.local`;
+    const { rows: ts38 } = await a.query(
+      `select (now() + interval '30 days') as t`,
+    );
+    const exp38 = ts38[0].t as Date;
+    const key38 = `p38-${RUN}`;
+    type GrantOutcome = {
+      ok: boolean;
+      r: { transaction_id: string; account_id: string; already_processed: boolean } | null;
+      msg: string;
+      code: string | undefined;
+    };
+    const grantAs = async (
+      who: string,
+      email: string,
+      amount: number,
+      key: string,
+    ): Promise<GrantOutcome> => {
+      const c = await asUser(who);
+      try {
+        const r = await c.query(
+          `select public.lmc_admin_grant_v1($1, ${amount}, 'p38 reason', 'proof-campaign', $2, $3) as r`,
+          [email, exp38, key],
+        );
+        return { ok: true, r: r.rows[0].r, msg: "", code: undefined };
+      } catch (e) {
+        return {
+          ok: false,
+          r: null,
+          msg: errMsg(e),
+          code: (e as { code?: string }).code,
+        };
+      } finally {
+        await c.end();
+      }
+    };
+    // The canonical conflict shape: documented ledger error + SQLSTATE 23505,
+    // NEVER the raw unique-index surface.
+    const canonical = (g: GrantOutcome) =>
+      !g.ok &&
+      g.msg.includes("lmc_idempotency_conflict") &&
+      g.code === "23505" &&
+      !g.msg.includes("lmc_admin_grant_key_global") &&
+      !g.msg.includes("duplicate key value");
+
+    // 1. The recorded actor commits the grant.
+    const g1 = await grantAs(adm, eA, 600, key38);
+    const balBefore = await balance(a, g1.r!.account_id);
+    // 2. Same actor + same key + same payload → canonical replay: no second
+    //    grant, no balance change.
+    const g2 = await grantAs(adm, eA, 600, key38);
+    // 3. Same actor + same key + different recipient → canonical conflict.
+    const g3 = await grantAs(adm, eB, 600, key38);
+    // 4. Same actor + same key + different amount → canonical conflict.
+    const g4 = await grantAs(adm, eA, 700, key38);
+    // 5. FOREIGN admin + same key + identical payload → canonical conflict
+    //    (never resolves another actor's replay, never a raw index error).
+    const g5 = await grantAs(adm38, eA, 600, key38);
+    // 6. FOREIGN admin + same key + different recipient — the exact Codex P2
+    //    case that previously fell through to the raw
+    //    lmc_admin_grant_key_global unique-constraint error.
+    const g6 = await grantAs(adm38, eB, 600, key38);
+    const balAfter = await balance(a, g1.r!.account_id);
+    const { rows: counts38 } = await a.query(
+      `select
+         (select count(*)::int from public.lmc_transactions
+           where idempotency_key = $1) as txs,
+         (select count(*)::int from public.lmc_lots l
+            join public.lmc_transactions t on t.id = l.transaction_id
+           where t.idempotency_key = $1) as lots,
+         (select count(*)::int from public.audit_logs al
+            join public.lmc_transactions t2 on t2.id = al.entity_id
+           where al.action = 'lmc_admin_grant'
+             and t2.idempotency_key = $1) as audits`,
+      [key38],
+    );
+    record(
+      "P38-admin-grant-global-key-matrix",
+      g1.ok &&
+        g1.r!.already_processed === false &&
+        g2.ok &&
+        g2.r!.already_processed === true &&
+        g2.r!.transaction_id === g1.r!.transaction_id &&
+        canonical(g3) &&
+        g3.msg.includes("different recipient") &&
+        canonical(g4) &&
+        g4.msg.includes("different amount") &&
+        canonical(g5) &&
+        g5.msg.includes("different actor") &&
+        canonical(g6) &&
+        g6.msg.includes("different actor") &&
+        counts38[0].txs === 1 &&
+        counts38[0].lots === 1 &&
+        counts38[0].audits === 1 &&
+        balAfter.available_cents === balBefore.available_cents,
+      `replay=same-tx; diff-recipient/amount + foreign(same & diff recipient) all canonical 23505; tx=${counts38[0].txs} lot=${counts38[0].lots} audit=${counts38[0].audits}; balance stable`,
+    );
+
+    // P38b: CONCURRENT global-key reuse — two admins, two DIFFERENT
+    // recipients (different accounts, so the account row lock CANNOT
+    // serialize them). The loser provably misses both global lookups (winner
+    // uncommitted), blocks INSIDE its insert on the winner's in-flight
+    // global unique-index entry, and must surface the SAME canonical
+    // conflict via the unique_violation backstop after the winner commits —
+    // exactly one grant survives.
+    const keyC = `p38c-${RUN}`;
+    const winner38 = await asUser(adm);
+    await winner38.query("begin");
+    await winner38.query(
+      `select public.lmc_admin_grant_v1($1, 500, 'p38 reason', 'proof-campaign', $2, $3)`,
+      [eA, exp38, keyC],
+    );
+    const losing38 = grantAs(adm38, eB, 500, keyC);
+    await sleep(500);
+    await winner38.query("commit");
+    await winner38.end();
+    const lc = await losing38;
+    const { rows: countsC } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions
+        where idempotency_key = $1`,
+      [keyC],
+    );
+    record(
+      "P38b-concurrent-global-key-canonical-conflict",
+      canonical(lc) && lc.msg.includes("different actor") && countsC[0].n === 1,
+      `loser: ${lc.msg.slice(0, 70)} | surviving grants=${countsC[0].n}`,
     );
   }
 

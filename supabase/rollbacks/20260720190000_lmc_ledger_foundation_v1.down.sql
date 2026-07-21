@@ -74,6 +74,7 @@ drop function if exists public.lmc_spend_v1(bigint, text, text, uuid, uuid, uuid
 -- Pre-rev13 signature (never shipped to production; scratch hygiene only).
 drop function if exists public.lmc_spend_v1(bigint, text, text, uuid, uuid);
 drop function if exists public.lmc_admin_grant_v1(text, bigint, text, text, timestamptz, text);
+drop function if exists public.lmc_admin_grant_existing_v1(text, uuid, text, bigint, text, text, timestamptz, boolean);
 drop function if exists public.lmc_record_purchase_v1(bigint, text, text, uuid, uuid);
 drop function if exists public.lmc_grant_promotional_v1(text, uuid, text, text);
 drop function if exists public.lmc_existing_by_idempotency_v1(uuid, text, text, bigint, uuid, text, text, timestamptz, uuid, text);
@@ -131,5 +132,6 @@ drop table if exists public.lmc_settings;
 drop function if exists public.lmc_set_flag_v1(text, boolean, uuid);
 drop function if exists public.lmc_require_flag_v1(text);
 drop function if exists public.lmc_flag_enabled(text);
+drop function if exists public.lmc_flag_policy_v1(text);
 
 commit;

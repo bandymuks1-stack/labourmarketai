@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -31,9 +31,12 @@ function readApp(rel: string): string {
   return readFileSync(resolve(APP, rel), "utf8");
 }
 
-/** SQL with `--` line comments stripped, lowercased. */
+/** SQL with `--` line comments stripped, lowercased. CRLF-normalized so the
+ *  guard behaves identically on Windows checkouts (`.` never matches `\r`,
+ *  which would keep comment lines alive and break the drop-only-lmc scan). */
 function sqlBody(raw: string): string {
   return raw
+    .replace(/\r/g, "")
     .split("\n")
     .map((l) => l.replace(/--.*$/, ""))
     .join("\n")
@@ -206,6 +209,137 @@ describe("LMC Wagon 1 — every commercial flag ships disabled", () => {
     for (const surface of [sql, readApp(FLAGS).toLowerCase()]) {
       expect(surface).not.toMatch(/referral[a-z_]*(rate|percent|pct|bps)/);
     }
+  });
+});
+
+describe("LMC rev35 — canonical flag authorization policy", () => {
+  const sql = sqlBody(readRepo(MIGRATION));
+
+  /** Function body between its CREATE and terminating `$$;`. */
+  function fnBody(name: string): string {
+    const start = sql.indexOf(`create or replace function public.${name}`);
+    expect(start, `${name} must exist in the migration`).toBeGreaterThan(-1);
+    return sql.slice(start, sql.indexOf("$$;", start) + 3);
+  }
+
+  it("lmc_flag_policy_v1 is the single policy source with fail-closed default", () => {
+    const policy = fnBody("lmc_flag_policy_v1");
+    expect(policy).toContain("when 'live_payments_enabled'");
+    expect(policy).toContain("when 'stripe_lmc_topups_enabled'");
+    // Both owner-only commercial activation flags map to owner_only.
+    expect(policy).toMatch(/'stripe_lmc_topups_enabled'\s+then 'owner_only'/);
+    expect(policy).toMatch(/'live_payments_enabled'\s+then 'owner_only'/);
+    // Unknown keys fall through to system_locked — never admin.
+    expect(policy).toMatch(/else 'system_locked'/);
+  });
+
+  it("TS policy mirror matches the SQL mapping exactly", () => {
+    const ts = readApp(FLAGS);
+    const policy = fnBody("lmc_flag_policy_v1");
+    for (const [key, cls] of [
+      ["lmc_purchases_enabled", "admin"],
+      ["lmc_promotional_grants_enabled", "admin"],
+      ["lmc_referrals_enabled", "admin"],
+      ["lmc_spending_enabled", "admin"],
+      ["stripe_lmc_topups_enabled", "owner_only"],
+      ["live_payments_enabled", "owner_only"],
+    ] as const) {
+      expect(policy).toMatch(new RegExp(`'${key}'\\s+then '${cls}'`));
+      expect(ts).toMatch(new RegExp(`${key}: "${cls}"`));
+    }
+    // TS fail-closed default mirrors the SQL else-branch.
+    expect(ts).toContain('?? "system_locked"');
+  });
+
+  it("the shared setter refuses owner_only flags BEFORE any identity check", () => {
+    const setter = fnBody("lmc_set_flag_v1");
+    expect(setter).toContain("lmc_flag_policy_v1");
+    expect(setter).toContain("lmc_owner_only_flag");
+    expect(setter).toContain("lmc_system_locked_flag");
+    // Policy class gate precedes the dual-signal admin identity gate.
+    expect(setter.indexOf("lmc_owner_only_flag")).toBeLessThan(
+      setter.indexOf("lmc_actor_not_authorized"),
+    );
+  });
+
+  it("the update-guard trigger is a policy belt for every write path", () => {
+    const guard = fnBody("lmc_settings_update_guard");
+    expect(guard).toContain("lmc_flag_policy_v1");
+    expect(guard).toContain("lmc_owner_only_flag");
+    expect(guard).toContain("lmc_system_locked_flag");
+  });
+
+  it("no hardcoded owner identity exists anywhere in the shipped surfaces", () => {
+    for (const surface of [sql, readApp(FLAGS).toLowerCase()]) {
+      // No hardcoded UUID literal (all-zero instance ids excluded — none exist
+      // in these files either) and no hardcoded email address.
+      expect(surface).not.toMatch(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/,
+      );
+      expect(surface).not.toMatch(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/);
+    }
+    // No temporary owner-activation RPC ships in this wagon.
+    expect(sql).not.toContain("lmc_owner_set_flag");
+    expect(sql).not.toContain("owner_activation");
+  });
+});
+
+describe("LMC rev35 — canonical admin-grant global-key contract", () => {
+  const sql = sqlBody(readRepo(MIGRATION));
+
+  it("one global-key interpreter exists and every resolution point uses it", () => {
+    expect(sql).toContain(
+      "create or replace function public.lmc_admin_grant_existing_v1",
+    );
+    // Pre-gate (leak-safe), kill-switch race window, post-lock pre-insert and
+    // the unique_violation backstop all call the same interpreter.
+    const calls = sql.match(/public\.lmc_admin_grant_existing_v1\(/g) ?? [];
+    expect(calls.length).toBeGreaterThanOrEqual(5); // 1 def + 4 call sites
+  });
+
+  it("a foreign actor's key reuse is the canonical conflict, never a raw index error", () => {
+    const start = sql.indexOf(
+      "create or replace function public.lmc_admin_grant_v1",
+    );
+    const grant = sql.slice(start, sql.indexOf("$$;", start) + 3);
+    // No fall-through: the raw global unique index is a concurrency backstop
+    // whose unique_violation is rewritten to the canonical conflict.
+    expect(grant).toContain("exception when unique_violation");
+    expect(grant).toContain("foreign_actor");
+    expect(grant).toContain("lmc_idempotency_conflict");
+    // The interpreter raises the documented error with SQLSTATE 23505.
+    const interp = sql.slice(
+      sql.indexOf("create or replace function public.lmc_admin_grant_existing_v1"),
+    );
+    const interpBody = interp.slice(0, interp.indexOf("$$;") + 3);
+    expect(interpBody).toContain("already used by a different actor");
+    expect(interpBody).toMatch(/errcode = '23505'/);
+  });
+});
+
+describe("LMC rev35 — cleanup regression (no competing implementation)", () => {
+  it("no superseded #754 credit/offer/usage schema or module exists", () => {
+    const migrations = readdirSync(resolve(REPO, "supabase/migrations"));
+    const rollbacks = readdirSync(resolve(REPO, "supabase/rollbacks"));
+    for (const f of [...migrations, ...rollbacks]) {
+      expect(f).not.toMatch(
+        /billing_plans_offers|ad_products_registry|usage_cost_tracking|credit_(ledger|balances|types)/,
+      );
+    }
+    const billing = readdirSync(resolve(APP, "lib/billing"));
+    for (const f of billing) {
+      expect(f).not.toMatch(
+        /^(offer|offers|offer-store|usage|usage-core|cost-engine|cost-engine-core|ad-products|plans-v2)\./,
+      );
+    }
+  });
+
+  it("exactly one flag setter and one admin-grant RPC family exist", () => {
+    const sql = sqlBody(readRepo(MIGRATION));
+    expect(sql.match(/create or replace function public\.lmc_set_flag_v\d+/g))
+      .toHaveLength(1);
+    expect(sql.match(/create or replace function public\.lmc_admin_grant_v\d+\(/g))
+      .toHaveLength(1);
   });
 });
 

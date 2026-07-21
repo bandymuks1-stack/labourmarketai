@@ -26,6 +26,34 @@ export const LIVE_PAYMENTS_ENABLED = false as const;
 /** Spend kill-switch: while false, even already-issued LMC is frozen. */
 export const LMC_SPENDING_ENABLED = false as const;
 
+/**
+ * Canonical flag authorization classes — the TS mirror of
+ * `public.lmc_flag_policy_v1` in the ledger migration (guard-pinned to stay
+ * identical):
+ * - `admin`: flippable through `lmc_set_flag_v1` by a dual-signal admin.
+ * - `owner_only`: owner-only commercial activation. The shared DB setter
+ *   refuses EVERY caller (admin, superadmin, service_role, caller-supplied
+ *   UUID) with the canonical `lmc_owner_only_flag` error; no owner
+ *   activation mechanism exists in this wagon (train doc §14a).
+ * - `system_locked`: not changeable by anyone; also the fail-closed default
+ *   for any key missing from this map — never `admin`.
+ */
+export const LMC_FLAG_POLICY = {
+  lmc_purchases_enabled: "admin",
+  lmc_promotional_grants_enabled: "admin",
+  lmc_referrals_enabled: "admin",
+  lmc_spending_enabled: "admin",
+  stripe_lmc_topups_enabled: "owner_only",
+  live_payments_enabled: "owner_only",
+} as const satisfies Record<string, "admin" | "owner_only" | "system_locked">;
+
+export type LmcFlagPolicyClass = "admin" | "owner_only" | "system_locked";
+
+/** Fail-closed policy lookup: an unknown key is system_locked, never admin. */
+export function lmcFlagPolicy(key: string): LmcFlagPolicyClass {
+  return (LMC_FLAG_POLICY as Record<string, LmcFlagPolicyClass>)[key] ?? "system_locked";
+}
+
 /** True only when some commercial LMC behaviour is enabled — never in Wagon 1. */
 export function lmcCommerceEnabled(): boolean {
   return (

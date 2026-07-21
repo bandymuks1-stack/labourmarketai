@@ -193,6 +193,20 @@ Ordering rules (BINDING, enforced in `lmc_spend_v1`):
    recipient email resolution against the stored `recipient_email_at_grant`,
    so a retried grant can never be re-issued to a different profile that
    later acquired the recipient's email address.
+
+   **Global admin-grant key matrix (rev35, binding — ONE interpretation,
+   `lmc_admin_grant_existing_v1`):**
+
+   | Reuse case | Outcome |
+   |---|---|
+   | Same recorded actor + identical payload | Canonical replay (`already_processed`, no second grant, no balance change) |
+   | Same recorded actor + different recipient / amount / campaign / reason / expiry | `lmc_idempotency_conflict`, SQLSTATE `23505` |
+   | Different actor (any recipient/payload), caller passed the live admin gate | `lmc_idempotency_conflict`, SQLSTATE `23505`, immediately — **no fall-through** to the raw unique index |
+   | Different actor, caller FAILED the admin gate | `Admin only` — key existence is never leaked to non-admins |
+   | Concurrent global-key reuse (cross-account race) | The insert's `unique_violation` handler rewrites `lmc_admin_grant_key_global` into the **same** canonical `lmc_idempotency_conflict` — the error contract never depends on when the conflict was detected |
+
+   Conflict messages never expose the other actor's or recipient's identity —
+   only that the key is taken.
 5. Every reversal references its original entry (`original_transaction_id`
    NOT NULL for reversal kinds, CHECK-enforced) and at most one reversal per
    original (partial unique index).
@@ -338,14 +352,31 @@ Canonical mechanism: the repo's kill-switch-constant pattern
 invariants that must hold **inside the database** (referral trigger). Both
 default false and are guard-pinned:
 
-| Flag | Default | Layer |
-|---|---|---|
-| `LMC_PURCHASES_ENABLED` | `false` | TS constant + `lmc_settings.lmc_purchases_enabled` |
-| `LMC_PROMOTIONAL_GRANTS_ENABLED` | `false` | TS constant + `lmc_settings.lmc_promotional_grants_enabled` |
-| `LMC_REFERRALS_ENABLED` | `false` | TS constant + `lmc_settings.lmc_referrals_enabled` (trigger-enforced) |
-| `STRIPE_LMC_TOPUPS_ENABLED` | `false` | TS constant + `lmc_settings.stripe_lmc_topups_enabled` |
-| `LIVE_PAYMENTS_ENABLED` | `false` | TS constant + `lmc_settings.live_payments_enabled` (in addition to the existing live-key hard block) |
-| `LMC_SPENDING_ENABLED` | `false` | TS constant + `lmc_settings.lmc_spending_enabled` — spend kill-switch enforced inside `lmc_spend_v1`; while false even already-issued LMC is frozen (added after Codex P1 review so the §14 behavioural-rollback claim is DB-true) |
+| Flag | Default | Policy class | Layer |
+|---|---|---|---|
+| `LMC_PURCHASES_ENABLED` | `false` | `admin` | TS constant + `lmc_settings.lmc_purchases_enabled` |
+| `LMC_PROMOTIONAL_GRANTS_ENABLED` | `false` | `admin` | TS constant + `lmc_settings.lmc_promotional_grants_enabled` |
+| `LMC_REFERRALS_ENABLED` | `false` | `admin` | TS constant + `lmc_settings.lmc_referrals_enabled` (trigger-enforced) |
+| `STRIPE_LMC_TOPUPS_ENABLED` | `false` | **`owner_only`** | TS constant + `lmc_settings.stripe_lmc_topups_enabled` |
+| `LIVE_PAYMENTS_ENABLED` | `false` | **`owner_only`** | TS constant + `lmc_settings.live_payments_enabled` (in addition to the existing live-key hard block) |
+| `LMC_SPENDING_ENABLED` | `false` | `admin` | TS constant + `lmc_settings.lmc_spending_enabled` — spend kill-switch enforced inside `lmc_spend_v1`; while false even already-issued LMC is frozen (added after Codex P1 review so the §14 behavioural-rollback claim is DB-true) |
+
+**Canonical flag authorization policy (rev35, binding).** One policy source —
+`public.lmc_flag_policy_v1` in SQL, mirrored by `LMC_FLAG_POLICY` in
+`lmc-flags.ts` (guard-pinned to stay identical). Classes:
+
+- `admin` — flippable through `lmc_set_flag_v1` by a dual-signal admin actor.
+- `owner_only` — commercial activation reserved to the owner. The shared
+  setter (`lmc_set_flag_v1`) refuses **every** caller — admin, superadmin,
+  `service_role`, any caller-supplied profile UUID (a supplied UUID can never
+  prove an owner decision) — with the canonical `lmc_owner_only_flag` error,
+  in both directions. A trigger belt additionally refuses enabling an
+  owner_only flag on every write path, including table-owner UPDATEs. No
+  owner activation mechanism exists in this wagon (§14a).
+- `system_locked` — not changeable by anyone through any setter; also the
+  **fail-closed default** for any key without an explicit policy entry — an
+  unknown or future flag can never silently inherit the weaker `admin`
+  policy.
 
 A missing settings row reads as **false** (fail-closed helper).
 `feature-availability.ts` entries for wallet UI are **deferred to Wagon 7**
@@ -404,8 +435,32 @@ action).
 5. Legal copy review of all public wallet/credit wording (no cash-out
    implications; §1 positioning).
 6. Stripe live keys added by owner only; `LIVE_PAYMENTS_ENABLED` flipped by
-   owner only.
+   owner only — DB-enforced since rev35: the flag is `owner_only` class in
+   `lmc_flag_policy_v1`, so the shared setter structurally cannot flip it
+   (§11, §14a).
 7. Acceptance proofs re-run against production shape (Wagon 8).
+
+### 14a. Owner activation mechanism boundary (future wagon — NOT in this PR)
+
+The `owner_only` flags (`live_payments_enabled`, `stripe_lmc_topups_enabled`)
+currently have **no activation path at all**: the shared setter refuses every
+caller, the trigger belt refuses every enabling write, and no owner RPC
+exists. Activating them will require a **dedicated owner RPC in a separate
+future wagon**, which MUST:
+
+1. derive owner identity from a canonical **server-side owner registry**,
+   matched against `auth.uid()` — never against a caller-supplied UUID;
+2. contain **no hardcoded owner UUID or owner email** in the function body;
+3. require a strengthened confirmation input (explicit intent phrase or
+   equivalent second factor of intent);
+4. carry an **expected-current-value** (or equivalent compare-and-set)
+   guard so a stale decision can never overwrite a newer one;
+5. append an **immutable audit record** with the old value, the new value,
+   the reason, the executing actor and the timestamp;
+6. ship with its own authorization-matrix proofs and a Codex review.
+
+Until that wagon lands and the owner explicitly activates them, both flags
+remain `false` everywhere (TS constants and DB seeds, guard-pinned).
 
 **Rollback strategy:**
 - Every LMC migration ships a paired `supabase/rollbacks/<name>.down.sql`

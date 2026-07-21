@@ -47,6 +47,11 @@
 --   lmc_spending_enabled (spend kill-switch — disabling every flag freezes
 --   even already-issued credits: complete behavioural rollback).
 --   TS mirror: apps/web/lib/billing/lmc-flags.ts (false as const, guard-pinned).
+--   Flag authorization is CLASS-BASED (lmc_flag_policy_v1, §1a): admin
+--   flags flip through lmc_set_flag_v1 only; owner_only flags
+--   (live_payments_enabled, stripe_lmc_topups_enabled) are refused for
+--   every caller of the shared setter (canonical lmc_owner_only_flag);
+--   unknown/unpolicied keys are system_locked — fail-closed, never admin.
 --
 -- ADDITIVE ONLY: no existing table/policy/grant/function is touched.
 -- Idempotently re-appliable (create or replace / if not exists / on conflict
@@ -78,6 +83,45 @@ insert into public.lmc_settings (key, enabled) values
   ('lmc_spending_enabled', false)
 on conflict (key) do nothing;
 
+-- ── 1a. Canonical flag authorization policy (rev35, Codex P1) ───────────────
+-- The ONE policy source for every commercial-flag authorization decision.
+-- lmc_set_flag_v1 and the lmc_settings update-guard trigger consult THIS
+-- function — no scattered per-function string special-cases. Classes:
+--   admin         — changeable through lmc_set_flag_v1 by a dual-signal
+--                   admin actor (the shared setter's live authority gate).
+--   owner_only    — commercial activation reserved to the OWNER
+--                   (live_payments_enabled, stripe_lmc_topups_enabled).
+--                   The shared setter refuses EVERY caller — admin,
+--                   superadmin, service_role, any caller-supplied profile
+--                   UUID — with the canonical lmc_owner_only_flag error, in
+--                   both directions, even for a same-state call. No owner
+--                   activation mechanism exists in this wagon: the future
+--                   owner RPC (separate wagon, train doc §14a) must derive
+--                   owner identity server-side from auth.uid() against a
+--                   canonical registry — never from a caller-supplied UUID,
+--                   a hardcoded UUID/email, or an unverified JWT field.
+--   system_locked — not changeable by anyone through any setter. This is
+--                   also the FAIL-CLOSED DEFAULT: a key without an explicit
+--                   policy entry below is system_locked, never admin — an
+--                   unknown or future flag can never silently inherit the
+--                   weaker admin policy.
+create or replace function public.lmc_flag_policy_v1(p_key text)
+returns text
+language sql
+immutable
+set search_path = public
+as $$
+  select case p_key
+    when 'lmc_purchases_enabled'          then 'admin'
+    when 'lmc_promotional_grants_enabled' then 'admin'
+    when 'lmc_referrals_enabled'          then 'admin'
+    when 'lmc_spending_enabled'           then 'admin'
+    when 'stripe_lmc_topups_enabled'      then 'owner_only'
+    when 'live_payments_enabled'          then 'owner_only'
+    else 'system_locked'
+  end;
+$$;
+
 -- Every commercial flag change is accountable: a flip must record WHO
 -- (updated_by required), WHEN (updated_at stamped by trigger, not left at
 -- the insert-time default) and leaves an immutable audit_logs row — even
@@ -89,6 +133,21 @@ set search_path = public
 as $$
 begin
   if new.enabled is distinct from old.enabled then
+    -- Defense-in-depth policy belt (rev35, Codex P1): even a table-owner /
+    -- superuser-context UPDATE cannot ENABLE an owner_only flag or change a
+    -- system_locked flag — the policy holds on every write path, not only
+    -- inside lmc_set_flag_v1. (A true→false emergency disable of an
+    -- owner_only flag stays possible at this layer; the shared setter still
+    -- refuses it, so disabling would require the future owner mechanism or
+    -- a reviewed migration.)
+    if public.lmc_flag_policy_v1(new.key) = 'owner_only' and new.enabled then
+      raise exception 'lmc_owner_only_flag: % may only be activated by the owner mechanism — no shared write path can enable it',
+        new.key using errcode = '42501';
+    end if;
+    if public.lmc_flag_policy_v1(new.key) = 'system_locked' then
+      raise exception 'lmc_system_locked_flag: % is not changeable through any setter',
+        new.key using errcode = '42501';
+    end if;
     if new.updated_by is null then
       raise exception 'lmc_flag_actor_required: flag changes must record updated_by'
         using errcode = '22023';
@@ -140,12 +199,36 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_policy text;
 begin
   if p_enabled is null then
     raise exception 'lmc_invalid_flag_value' using errcode = '22023';
   end if;
   if p_actor_profile_id is null then
     raise exception 'lmc_flag_actor_required' using errcode = '22023';
+  end if;
+  -- Canonical policy gate FIRST (rev35, Codex P1): the flag's CLASS decides
+  -- which authorization can ever apply — identity is checked only for the
+  -- admin class. owner_only flags (live_payments_enabled,
+  -- stripe_lmc_topups_enabled) are refused for EVERY caller of this shared
+  -- setter — admin, superadmin, service_role, any caller-supplied profile
+  -- UUID (including a UUID that happens to belong to the owner: this setter
+  -- cannot verify caller identity, so it can never prove an owner decision).
+  -- Both directions and same-state calls are refused, deterministically,
+  -- before any state is read or written.
+  v_policy := public.lmc_flag_policy_v1(p_key);
+  if v_policy = 'owner_only' then
+    raise exception 'lmc_owner_only_flag: % is an owner-only commercial activation flag — the shared setter refuses every caller',
+      p_key using errcode = '42501';
+  end if;
+  if v_policy <> 'admin' then
+    -- system_locked and every unpolicied key: fail-closed, never admin.
+    if exists (select 1 from public.lmc_settings where key = p_key) then
+      raise exception 'lmc_system_locked_flag: % is not changeable through any setter',
+        p_key using errcode = '42501';
+    end if;
+    raise exception 'lmc_unknown_flag: %', p_key using errcode = '22023';
   end if;
   if not (
     exists (select 1 from public.profiles pa
@@ -838,6 +921,89 @@ begin
 end;
 $$;
 
+-- ── 11a. lmc_admin_grant_existing_v1 — the ONE global admin-grant key
+-- interpretation (rev35, Codex P2). Every resolution point in
+-- lmc_admin_grant_v1 (pre-gate, kill-switch race window, post-lock
+-- pre-insert) consults THIS function, so the outcome for a reused global
+-- key is identical wherever it is detected:
+--   * key unused                                → NULL;
+--   * same recorded actor + identical payload   → canonical replay object
+--     (already_processed = true, no second grant, no balance change);
+--   * same recorded actor + ANY payload difference (recipient identity
+--     fingerprint = recipient_email_at_grant, amount, campaign, reason,
+--     lot expiry)                               → lmc_idempotency_conflict,
+--     SQLSTATE 23505;
+--   * DIFFERENT recorded actor                  → the SAME canonical
+--     lmc_idempotency_conflict when p_conflict_on_foreign is true (caller
+--     has passed the live admin gate) — immediately, with NO fall-through
+--     to the raw lmc_admin_grant_key_global unique index; when false (admin
+--     gate not yet passed) a silent marker is returned instead, so key
+--     existence is never leaked to a caller that fails the gate.
+-- The conflict messages never expose the other actor's or the recipient's
+-- identity — only that the key is already taken (documented contract).
+create or replace function public.lmc_admin_grant_existing_v1(
+  p_idempotency_key text,
+  p_actor uuid,
+  p_recipient_email text,
+  p_amount_cents bigint,
+  p_campaign text,
+  p_reason text,
+  p_expires_at timestamptz,
+  p_conflict_on_foreign boolean)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_prior public.lmc_transactions%rowtype;
+  v_prior_expires timestamptz;
+begin
+  select * into v_prior
+    from public.lmc_transactions
+   where idempotency_key = p_idempotency_key and kind = 'admin_grant';
+  if not found then
+    return null;
+  end if;
+  if v_prior.actor_profile_id is distinct from p_actor then
+    if p_conflict_on_foreign then
+      raise exception 'lmc_idempotency_conflict: key % already used by a different actor',
+        p_idempotency_key using errcode = '23505';
+    end if;
+    return jsonb_build_object('foreign_actor', true);
+  end if;
+  if lower(v_prior.recipient_email_at_grant)
+     is distinct from lower(trim(p_recipient_email)) then
+    raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
+      p_idempotency_key using errcode = '23505';
+  end if;
+  if v_prior.amount_cents <> p_amount_cents then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different amount',
+      p_idempotency_key using errcode = '23505';
+  end if;
+  if v_prior.campaign is distinct from p_campaign then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different campaign',
+      p_idempotency_key using errcode = '23505';
+  end if;
+  if v_prior.reason is distinct from p_reason then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different reason',
+      p_idempotency_key using errcode = '23505';
+  end if;
+  select l.expires_at into v_prior_expires
+    from public.lmc_lots l where l.transaction_id = v_prior.id;
+  if v_prior_expires is distinct from p_expires_at then
+    raise exception 'lmc_idempotency_conflict: key % already used with a different expiry',
+      p_idempotency_key using errcode = '23505';
+  end if;
+  return jsonb_build_object(
+    'transaction_id', v_prior.id,
+    'account_id', v_prior.account_id,
+    'kind', v_prior.kind,
+    'amount_cents', v_prior.amount_cents,
+    'already_processed', true);
+end;
+$$;
+
 -- ── 12. lmc_admin_grant_v1 — bounded admin promotional grant ────────────────
 -- Callable by an AUTHENTICATED ADMIN only (public.is_admin() in-body gate).
 -- Recipient is resolved by VERIFIED email; provenance (actor, resolved
@@ -860,6 +1026,7 @@ declare
   v_email text;
   v_account uuid;
   v_existing jsonb;
+  v_foreign_key boolean := false;
   v_tx uuid;
   v_cap constant bigint := 100000; -- 1000 LMC per grant (owner-adjustable later)
 begin
@@ -892,61 +1059,43 @@ begin
   -- GLOBAL replay resolution FIRST — independent of mutable email ownership
   -- AND of the caller's CURRENT admin authority (an admin whose role was
   -- revoked after a committed grant can still acknowledge that exact grant —
-  -- same doctrine as reversals/spends). Only the RECORDED ACTOR's identical
-  -- retry resolves here; a different caller's reuse of the key falls
-  -- through to the live admin gate and then the global unique index, so key
-  -- existence is never leaked to non-admins. A committed admin grant is
-  -- identified by its (globally unique) key, and the stored
-  -- recipient_email_at_grant is the identity fingerprint: even if the email
-  -- address was later reassigned to a different verified profile, an
-  -- identical retry returns the ORIGINAL transaction instead of issuing a
-  -- second grant to the address's new owner. Any payload difference
-  -- conflicts.
-  declare
-    v_prior public.lmc_transactions%rowtype;
-    v_prior_expires timestamptz;
-  begin
-    select * into v_prior
-      from public.lmc_transactions
-     where idempotency_key = p_idempotency_key and kind = 'admin_grant';
-    if found and v_prior.actor_profile_id = uid then
-      if lower(v_prior.recipient_email_at_grant)
-         is distinct from lower(trim(p_recipient_email)) then
-        raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
-          p_idempotency_key using errcode = '23505';
-      end if;
-      if v_prior.amount_cents <> p_amount_cents then
-        raise exception 'lmc_idempotency_conflict: key % already used with a different amount',
-          p_idempotency_key using errcode = '23505';
-      end if;
-      if v_prior.campaign is distinct from p_campaign then
-        raise exception 'lmc_idempotency_conflict: key % already used with a different campaign',
-          p_idempotency_key using errcode = '23505';
-      end if;
-      if v_prior.reason is distinct from p_reason then
-        raise exception 'lmc_idempotency_conflict: key % already used with a different reason',
-          p_idempotency_key using errcode = '23505';
-      end if;
-      select l.expires_at into v_prior_expires
-        from public.lmc_lots l where l.transaction_id = v_prior.id;
-      if v_prior_expires is distinct from p_expires_at then
-        raise exception 'lmc_idempotency_conflict: key % already used with a different expiry',
-          p_idempotency_key using errcode = '23505';
-      end if;
-      return jsonb_build_object(
-        'transaction_id', v_prior.id,
-        'account_id', v_prior.account_id,
-        'kind', v_prior.kind,
-        'amount_cents', v_prior.amount_cents,
-        'already_processed', true);
+  -- same doctrine as reversals/spends). The single global-key interpretation
+  -- lives in lmc_admin_grant_existing_v1 (§11a): the RECORDED ACTOR's
+  -- identical retry resolves as a replay, any payload difference conflicts,
+  -- and a committed admin grant is identified by its (globally unique) key
+  -- with the stored recipient_email_at_grant as the identity fingerprint —
+  -- even if the email address was later reassigned to a different verified
+  -- profile, an identical retry returns the ORIGINAL transaction instead of
+  -- issuing a second grant to the address's new owner.
+  -- A DIFFERENT caller's reuse is NOT resolved here (conflict_on_foreign =
+  -- false): key existence must never leak to a caller that fails the admin
+  -- gate, so the canonical conflict for a foreign actor is raised only
+  -- AFTER the live admin gate below (rev35, Codex P2 — no fall-through to
+  -- the raw unique index anymore).
+  v_existing := public.lmc_admin_grant_existing_v1(
+    p_idempotency_key, uid, p_recipient_email, p_amount_cents,
+    p_campaign, p_reason, p_expires_at, false);
+  if v_existing is not null then
+    if coalesce((v_existing ->> 'foreign_actor')::boolean, false) then
+      v_foreign_key := true;
+    else
+      return v_existing;
     end if;
-    -- found but different actor: fall through — the live admin gate below
-    -- and the global unique index handle the reuse honestly.
-  end;
+  end if;
+  v_existing := null;
 
   -- Live admin authority for a NEW grant (replays resolved above).
   if not public.is_admin() then
     raise exception 'Admin only' using errcode = '42501';
+  end if;
+
+  -- rev35 (Codex P2): a globally existing key recorded for a DIFFERENT
+  -- actor gets the documented canonical conflict for an authorized admin —
+  -- immediately, before any further processing, identical in shape to every
+  -- other idempotency conflict. No recipient or actor identity is exposed.
+  if v_foreign_key then
+    raise exception 'lmc_idempotency_conflict: key % already used by a different actor',
+      p_idempotency_key using errcode = '23505';
   end if;
 
   -- Live upper cap for a NEW grant (see the structural check above).
@@ -961,37 +1110,21 @@ begin
   -- can miss the winner at the GLOBAL replay block above (winner uncommitted)
   -- and reach this gate only after the winner committed AND the flag flipped
   -- off. Before surfacing lmc_promotional_grants_disabled, re-resolve the
-  -- committed grant: the recorded actor + recipient-email identity checks
-  -- mirror the global block, and lmc_existing_by_idempotency_v1 re-checks
-  -- the full remaining fingerprint (amount, campaign, expiry, actor, exact
-  -- reason). A genuinely new grant still gets the disabled error.
+  -- committed grant through the canonical global-key interpreter (§11a):
+  -- the recorded actor's exact replay is acknowledged, any payload
+  -- difference conflicts, and — the caller being a proven live admin here —
+  -- a foreign actor's key raises the canonical conflict (conflict_on_foreign
+  -- = true). A genuinely new grant still gets the disabled error.
   begin
     perform public.lmc_require_flag_v1('lmc_promotional_grants_enabled');
   exception when others then
     if sqlerrm like '%lmc_promotional_grants_disabled%' then
-      declare
-        v_race public.lmc_transactions%rowtype;
-      begin
-        select * into v_race
-          from public.lmc_transactions
-         where idempotency_key = p_idempotency_key and kind = 'admin_grant';
-        if found and v_race.actor_profile_id = uid then
-          if lower(v_race.recipient_email_at_grant)
-             is distinct from lower(trim(p_recipient_email)) then
-            raise exception 'lmc_idempotency_conflict: key % already used for a different recipient',
-              p_idempotency_key using errcode = '23505';
-          end if;
-          perform 1 from public.lmc_accounts where id = v_race.account_id for update;
-          v_existing := public.lmc_existing_by_idempotency_v1(
-            v_race.account_id, p_idempotency_key, 'admin_grant',
-            p_amount_cents => p_amount_cents, p_campaign => p_campaign,
-            p_expires_at => p_expires_at, p_actor_profile_id => uid,
-            p_reason_exact => p_reason);
-          if v_existing is not null then
-            return v_existing;
-          end if;
-        end if;
-      end;
+      v_existing := public.lmc_admin_grant_existing_v1(
+        p_idempotency_key, uid, p_recipient_email, p_amount_cents,
+        p_campaign, p_reason, p_expires_at, true);
+      if v_existing is not null then
+        return v_existing;
+      end if;
     end if;
     raise;
   end;
@@ -1011,9 +1144,24 @@ begin
   v_account := public.lmc_ensure_account_v1(p_profile_id => v_recipient);
   perform 1 from public.lmc_accounts where id = v_account for update;
 
-  -- Actor-bound like the global block above: a DIFFERENT admin reusing the
-  -- key must get an idempotency conflict here, never the recorded actor's
-  -- transaction as already_processed.
+  -- GLOBAL pre-insert re-check UNDER the account lock (rev35, Codex P2): a
+  -- winner that committed after the pre-gate lookup — same actor (replay /
+  -- payload conflict) or a DIFFERENT actor or recipient (canonical
+  -- conflict, conflict_on_foreign = true; the caller is a proven live
+  -- admin) — is resolved here, so only a genuinely unused key reaches the
+  -- insert below. This is deliberately the GLOBAL interpreter, not the
+  -- account-scoped lookup: a reused key granted to a DIFFERENT recipient
+  -- lives on another account and would be invisible to an account-scoped
+  -- check.
+  v_existing := public.lmc_admin_grant_existing_v1(
+    p_idempotency_key, uid, p_recipient_email, p_amount_cents,
+    p_campaign, p_reason, p_expires_at, true);
+  if v_existing is not null then
+    return v_existing;
+  end if;
+  -- Cross-kind reuse on THIS account (key already used for a spend /
+  -- purchase / reversal): the account-scoped helper names the earlier kind
+  -- in the same canonical conflict.
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_account, p_idempotency_key, 'admin_grant',
     p_amount_cents => p_amount_cents, p_campaign => p_campaign,
@@ -1029,13 +1177,32 @@ begin
       using errcode = '22023';
   end if;
 
-  insert into public.lmc_transactions
-    (account_id, kind, amount_cents, idempotency_key, campaign, reason,
-     actor_profile_id, recipient_email_at_grant)
-  values
-    (v_account, 'admin_grant', p_amount_cents, p_idempotency_key, p_campaign,
-     p_reason, uid, v_email)
-  returning id into v_tx;
+  begin
+    insert into public.lmc_transactions
+      (account_id, kind, amount_cents, idempotency_key, campaign, reason,
+       actor_profile_id, recipient_email_at_grant)
+    values
+      (v_account, 'admin_grant', p_amount_cents, p_idempotency_key, p_campaign,
+       p_reason, uid, v_email)
+    returning id into v_tx;
+  exception when unique_violation then
+    -- Concurrency backstop (rev35, Codex P2): a concurrent same-key grant
+    -- that committed between the pre-insert re-check and this insert
+    -- surfaces as the lmc_admin_grant_key_global unique index. The raw
+    -- index error is NEVER exposed: re-run the canonical interpreter
+    -- against the now-committed winner — it returns the recorded actor's
+    -- exact replay or raises the SAME lmc_idempotency_conflict the
+    -- pre-insert check raises, so the error contract does not depend on
+    -- WHEN the conflict was detected. No second grant exists on any path.
+    v_existing := public.lmc_admin_grant_existing_v1(
+      p_idempotency_key, uid, p_recipient_email, p_amount_cents,
+      p_campaign, p_reason, p_expires_at, true);
+    if v_existing is not null then
+      return v_existing;
+    end if;
+    raise exception 'lmc_idempotency_conflict: key % already used',
+      p_idempotency_key using errcode = '23505';
+  end;
 
   insert into public.lmc_lots
     (account_id, transaction_id, source_kind, amount_cents, expires_at)
@@ -1560,8 +1727,12 @@ revoke insert, update, delete on public.lmc_lot_consumptions from service_role;
 
 -- Function execution: fail closed, then grant narrowly.
 revoke all on function public.lmc_flag_enabled(text) from public;
+revoke all on function public.lmc_flag_policy_v1(text) from public;
 revoke all on function public.lmc_require_flag_v1(text) from public;
 revoke all on function public.lmc_set_flag_v1(text, boolean, uuid) from public;
+-- Internal-only global admin-grant key interpreter: callable ONLY from
+-- inside the SECURITY DEFINER RPCs (no client role receives execute).
+revoke all on function public.lmc_admin_grant_existing_v1(text, uuid, text, bigint, text, text, timestamptz, boolean) from public;
 revoke all on function public.lmc_forbid_mutation() from public;
 revoke all on function public.lmc_referral_insert_guard() from public;
 revoke all on function public.lmc_ensure_account_v1(uuid, uuid) from public;
@@ -1575,6 +1746,9 @@ revoke all on function public.lmc_expire_lots_v1(int) from public;
 revoke all on function public.lmc_reverse_v1(uuid, text, text, text, uuid) from public;
 
 grant execute on function public.lmc_flag_enabled(text) to authenticated, service_role;
+-- Policy introspection is read-only and non-secret (the mapping is in this
+-- public migration); server code may consult it before calling the setter.
+grant execute on function public.lmc_flag_policy_v1(text) to authenticated, service_role;
 grant execute on function public.lmc_require_flag_v1(text) to service_role;
 grant execute on function public.lmc_set_flag_v1(text, boolean, uuid) to service_role;
 -- Server-side monetary writes only:
