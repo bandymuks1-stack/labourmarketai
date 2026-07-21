@@ -931,6 +931,84 @@ async function main() {
         rvExact[0].r.already_processed === true,
       `spend reason reuse: ${spendReasonConflict.msg.slice(0, 50)} | exact spend replay ok | reversal reason reuse: ${reversalReasonConflict.msg.slice(0, 50)} | exact reversal replay ok`,
     );
+
+    // P25c (Codex P2, rev30): the POST-LOCK spend replay lookup also carries
+    // the exact reason. Deterministic interleaving: the winner holds the
+    // account FOR UPDATE lock in an OPEN transaction, so the loser provably
+    // misses the pre-lock lookup (winner uncommitted), blocks on the account
+    // lock, and reaches the post-lock lookup only after the winner commits.
+    // A different reason must then raise lmc_idempotency_conflict — and an
+    // EXACT same-reason loser must resolve already_processed with the
+    // winner's transaction, never a duplicate.
+    const u25c = await makePerson(a, "u25c");
+    await a.query(
+      `select public.lmc_record_purchase_v1(10000, 'p25c-ref', 'p25c-buy-${RUN}', $1, null)`,
+      [u25c],
+    );
+    const raceOnce = async (
+      tag: string,
+      loserReason: string,
+    ): Promise<{
+      blocked: boolean;
+      loser: string;
+      winnerTx: string;
+      txCount: number;
+    }> => {
+      const key = `p25c-${tag}-${RUN}`;
+      const winner = await admin();
+      const loser = await admin();
+      await winner.query("begin");
+      const { rows: w } = await winner.query(
+        `select public.lmc_spend_v1(100, 'p25c reason', $1, $2, null, $2) as r`,
+        [key, u25c],
+      );
+      // Loser starts NOW: pre-lock lookup sees nothing (winner uncommitted),
+      // then blocks on the account row lock the winner still holds.
+      const losing = loser
+        .query(
+          `select public.lmc_spend_v1(100, $3, $1, $2, null, $2) as r`,
+          [key, u25c, loserReason],
+        )
+        .then((r) =>
+          r.rows[0].r.already_processed === true
+            ? `already_processed:${r.rows[0].r.transaction_id}`
+            : `NEW_TX:${r.rows[0].r.transaction_id}`,
+        )
+        .catch((e) => String((e as Error).message));
+      await sleep(500);
+      const { rows: blockedRows } = await a.query(
+        `select count(*)::int as n from pg_stat_activity
+          where wait_event_type = 'Lock' and query like '%lmc_spend_v1%'`,
+      );
+      await winner.query("commit");
+      const outcome = await losing;
+      const { rows: txn } = await a.query(
+        `select count(*)::int as n from public.lmc_transactions
+          where idempotency_key = $1`,
+        [key],
+      );
+      await winner.end();
+      await loser.end();
+      return {
+        blocked: blockedRows[0].n >= 1,
+        loser: outcome,
+        winnerTx: w[0].r.transaction_id,
+        txCount: txn[0].n,
+      };
+    };
+    const diffReason = await raceOnce("diff", "p25c DIFFERENT reason");
+    const sameReason = await raceOnce("same", "p25c reason");
+    record(
+      "P25c-post-lock-reason-conflict-under-concurrency",
+      diffReason.blocked &&
+        diffReason.loser.includes("lmc_idempotency_conflict") &&
+        diffReason.loser.includes("different reason") &&
+        diffReason.txCount === 1 &&
+        sameReason.blocked &&
+        sameReason.loser === `already_processed:${sameReason.winnerTx}` &&
+        sameReason.txCount === 1,
+      `diff-reason: blockedOnLock=${diffReason.blocked} loser="${diffReason.loser.slice(0, 60)}" tx=${diffReason.txCount} | same-reason: blockedOnLock=${sameReason.blocked} loser=already_processed(winner)=${sameReason.loser === `already_processed:${sameReason.winnerTx}`} tx=${sameReason.txCount}`,
+    );
   }
 
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────

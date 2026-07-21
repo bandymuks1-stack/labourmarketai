@@ -1045,10 +1045,16 @@ begin
   -- Account row lock: serializes concurrent spends — overspend is impossible.
   perform 1 from public.lmc_accounts where id = v_account for update;
 
+  -- Post-lock replay re-check (Codex P2, rev30): two concurrent spends with
+  -- the same key can BOTH miss the pre-lock lookup; the loser then reaches
+  -- this point only after the winner committed. It must see the identical
+  -- fingerprint — including the exact reason — so a changed-reason retry
+  -- conflicts here exactly as it does pre-lock, never already_processed.
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_account, p_idempotency_key, 'spend',
     p_amount_cents => p_amount_cents,
-    p_actor_profile_id => p_actor_profile_id);
+    p_actor_profile_id => p_actor_profile_id,
+    p_reason_exact => p_reason);
   if v_existing is not null then
     return v_existing;
   end if;
