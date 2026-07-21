@@ -1009,6 +1009,121 @@ async function main() {
         sameReason.txCount === 1,
       `diff-reason: blockedOnLock=${diffReason.blocked} loser="${diffReason.loser.slice(0, 60)}" tx=${diffReason.txCount} | same-reason: blockedOnLock=${sameReason.blocked} loser=already_processed(winner)=${sameReason.loser === `already_processed:${sameReason.winnerTx}`} tx=${sameReason.txCount}`,
     );
+
+    // P25d (Codex P2, rev31): a committed replay resolves even when the
+    // spending kill-switch flips off in the winner-commit → retry-gate
+    // window. Deterministic queue interleaving: the winner holds the
+    // settings row FOR SHARE (via its own gate) and the account FOR UPDATE
+    // in an OPEN transaction; a flag flip (FOR UPDATE on the settings row)
+    // queues behind it; the identical retry starts while the winner is
+    // uncommitted (provably misses the pre-lock lookup) and its own gate
+    // read queues behind the waiting flip. Winner commits → flip lands
+    // (spending disabled) → the retry sees the DISABLED flag, and must still
+    // return already_processed with the winner's transaction (rev31 wrap),
+    // while a genuinely NEW spend is refused with lmc_spending_disabled.
+    const keyD = `p25d-${RUN}`;
+    const winner = await admin();
+    const flipper = await admin();
+    const retrier = await admin();
+    await winner.query("begin");
+    const { rows: wD } = await winner.query(
+      `select public.lmc_spend_v1(100, 'p25d reason', $1, $2, null, $2) as r`,
+      [keyD, u25c],
+    );
+    const flipping = flipper
+      .query(`select public.lmc_set_flag_v1('lmc_spending_enabled', false, $1)`, [
+        FLAG_ACTOR,
+      ])
+      .then(() => "flipped")
+      .catch((e) => String((e as Error).message));
+    await sleep(400); // flip must be queued on the settings row before the retry starts
+    const retrying = retrier
+      .query(
+        `select public.lmc_spend_v1(100, 'p25d reason', $1, $2, null, $2) as r`,
+        [keyD, u25c],
+      )
+      .then((r) =>
+        r.rows[0].r.already_processed === true
+          ? `already_processed:${r.rows[0].r.transaction_id}`
+          : `NEW_TX:${r.rows[0].r.transaction_id}`,
+      )
+      .catch((e) => String((e as Error).message));
+    await sleep(500);
+    const { rows: waiting } = await a.query(
+      `select count(*)::int as n from pg_stat_activity
+        where wait_event_type = 'Lock'
+          and (query like '%lmc_set_flag_v1%' or query like '%lmc_spend_v1%')`,
+    );
+    await winner.query("commit");
+    const flipOutcome = await flipping;
+    const retryOutcome = await retrying;
+    const { rows: txD } = await a.query(
+      `select count(*)::int as n from public.lmc_transactions where idempotency_key = $1`,
+      [keyD],
+    );
+    const { rows: flagRow } = await a.query(
+      `select enabled from public.lmc_settings where key = 'lmc_spending_enabled'`,
+    );
+    const newSpendWhileOff = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p25d new', 'p25d-new-${RUN}', $1, null, $1)`,
+          [u25c],
+        ),
+      "lmc_spending_disabled",
+    );
+    await setFlag(a, "lmc_spending_enabled", true); // restore for later proofs
+    await winner.end();
+    await flipper.end();
+    await retrier.end();
+    record(
+      "P25d-committed-replay-survives-kill-switch-flip",
+      waiting[0].n >= 1 &&
+        flipOutcome === "flipped" &&
+        retryOutcome === `already_processed:${wD[0].r.transaction_id}` &&
+        txD[0].n === 1 &&
+        flagRow[0].enabled === false &&
+        newSpendWhileOff.ok,
+      `queued=${waiting[0].n} flip=${flipOutcome} retry="${retryOutcome.slice(0, 55)}" tx=${txD[0].n} flag-off=${flagRow[0].enabled === false} new-spend: ${newSpendWhileOff.msg.slice(0, 40)}`,
+    );
+
+    // P25e (Codex P2, rev31): binding §4 tie-break — two expiring lots with
+    // the SAME expires_at consume in LOT ID order, not creation order. Two
+    // admin grants with an identical expiry produce the lots; the assertion
+    // (min(id) first) is deterministic whichever grant got the smaller uuid.
+    const u25e = await makePerson(a, "u25e");
+    const admE = await asUser(adm);
+    const { rows: tsE } = await a.query(`select (now() + interval '30 days') as t`);
+    const expE = tsE[0].t as Date;
+    await admE.query(
+      `select public.lmc_admin_grant_v1($1, 300, 'tie A', 'proof-campaign', $2, 'p25e-a-${RUN}')`,
+      [`${RUN}-u25e@fixture.local`, expE],
+    );
+    await admE.query(
+      `select public.lmc_admin_grant_v1($1, 300, 'tie B', 'proof-campaign', $2, 'p25e-b-${RUN}')`,
+      [`${RUN}-u25e@fixture.local`, expE],
+    );
+    await admE.end();
+    const accE = await accountOf(a, u25e);
+    await a.query(
+      `select public.lmc_spend_v1(100, 'p25e tie spend', 'p25e-spend-${RUN}', $1, null, $1)`,
+      [u25e],
+    );
+    const { rows: tie } = await a.query(
+      `select (select min(l.id::text) from public.lmc_lots l
+                where l.account_id = $1 and l.expires_at is not null) as min_lot,
+              (select array_agg(distinct c.lot_id::text) from public.lmc_lot_consumptions c
+                where c.account_id = $1 and c.consumption_kind = 'spend') as consumed_lots`,
+      [accE],
+    );
+    const consumedLots: string[] = tie[0].consumed_lots ?? [];
+    record(
+      "P25e-same-expiry-tie-break-is-lot-id",
+      tie[0].min_lot !== null &&
+        consumedLots.length === 1 &&
+        consumedLots[0] === tie[0].min_lot,
+      `consumed=${consumedLots.map((l) => l.slice(0, 8)).join(",")} min-id=${(tie[0].min_lot ?? "").slice(0, 8)} single-lot=${consumedLots.length === 1}`,
+    );
   }
 
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────

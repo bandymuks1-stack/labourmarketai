@@ -1017,7 +1017,28 @@ begin
 
   -- DB-level kill-switch: when spending is disabled, even already-issued
   -- credits are frozen for NEW spends (complete behavioural rollback).
-  perform public.lmc_require_flag_v1('lmc_spending_enabled');
+  -- rev31 (Codex P2): a COMMITTED replay must still resolve when the flag is
+  -- off — an identical retry can miss the pre-lock lookup (winner
+  -- uncommitted), and the flag can flip between the winner's commit and this
+  -- gate. Before surfacing lmc_spending_disabled, re-check idempotency UNDER
+  -- the account lock; only a genuinely NEW spend is refused. Error precedence
+  -- for every other case is unchanged (the sub-block re-raises verbatim).
+  begin
+    perform public.lmc_require_flag_v1('lmc_spending_enabled');
+  exception when others then
+    if sqlerrm like '%lmc_spending_disabled%' and v_account is not null then
+      perform 1 from public.lmc_accounts where id = v_account for update;
+      v_existing := public.lmc_existing_by_idempotency_v1(
+        v_account, p_idempotency_key, 'spend',
+        p_amount_cents => p_amount_cents,
+        p_actor_profile_id => p_actor_profile_id,
+        p_reason_exact => p_reason);
+      if v_existing is not null then
+        return v_existing;
+      end if;
+    end if;
+    raise;
+  end;
 
   -- Actor AUTHORITY, not just existence: the recorded initiator must own the
   -- debited personal account, own the debited company, or carry the
@@ -1094,8 +1115,13 @@ begin
      where l.account_id = v_account
        and (l.expires_at is null or l.expires_at > now())
        and l.amount_cents - coalesce(c.consumed, 0) > 0
+     -- rev31 (Codex P2): binding tie-breaks per train doc §4 — expiring lots
+     -- order by expires_at with LOT ID as the tie-break (created_at must not
+     -- reorder same-expiry lots); non-expiring purchased lots stay
+     -- oldest-first (created_at) with the id tie-break.
      order by (l.expires_at is null) asc, l.expires_at asc,
-              l.created_at asc, l.id asc
+              (case when l.expires_at is null then l.created_at end) asc,
+              l.id asc
   loop
     exit when v_remaining <= 0;
     v_take := least(v_remaining, r.lot_remaining);
