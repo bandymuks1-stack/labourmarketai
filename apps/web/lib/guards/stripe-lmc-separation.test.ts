@@ -139,22 +139,104 @@ describe("subscription uniqueness model (draft migration 20260721150000)", () =>
     expect(migration).toMatch(
       /drop constraint if exists billing_subscriptions_owner_id_plan_key_provider_key/,
     );
+    // Personal scope is keyed on origin_organization_id (NOT organization_id):
+    // an orphaned org row keeps its origin so it never collapses into the
+    // personal uniqueness scope (Codex round 2 P2).
     expect(migration).toMatch(
-      /billing_subscriptions_personal_plan_uniq[\s\S]*?\(owner_id, plan_key, provider\)[\s\S]*?where organization_id is null/,
+      /billing_subscriptions_personal_plan_uniq[\s\S]*?\(owner_id, plan_key, provider\)[\s\S]*?where origin_organization_id is null/,
     );
     expect(migration).toMatch(
       /billing_subscriptions_org_plan_uniq[\s\S]*?\(organization_id, plan_key, provider\)[\s\S]*?where organization_id is not null/,
     );
   });
 
+  it("adds the immutable origin snapshot column captured by a trigger", () => {
+    // Codex round 2 P2: origin_organization_id retains the org linkage after
+    // ON DELETE SET NULL so a second former-org row cannot collide on the
+    // personal partial unique index and block the organization delete.
+    expect(migration).toMatch(
+      /add column if not exists origin_organization_id uuid/,
+    );
+    // NO foreign key on the snapshot — it must survive the organization delete.
+    expect(migration).not.toMatch(
+      /origin_organization_id uuid[\s\S]*?references public\.organizations/,
+    );
+    // The FK column, by contrast, is ON DELETE SET NULL.
+    expect(migration).toMatch(
+      /organization_id uuid[\s\S]*?references public\.organizations\(id\) on delete set null/,
+    );
+    // Capture trigger fills origin from organization_id, invoker rights only.
+    expect(migration).toMatch(
+      /create trigger trg_billing_subscriptions_capture_origin_org\s+before insert or update of organization_id on public\.billing_subscriptions/,
+    );
+    expect(migration).toMatch(
+      /new\.origin_organization_id := new\.organization_id/,
+    );
+    expect(migration).not.toMatch(/security\s+definer/i);
+    expect(migration).toMatch(/set search_path = ''/);
+  });
+
   it("stays human-gated with a paired, guarded rollback", () => {
     expect(migration).toMatch(/@human-gate-approved/);
     expect(migration).toMatch(/DO NOT APPLY automatically/);
     expect(rollback).toMatch(/Refusing rollback/);
-    // The rollback restores the ORIGINAL constraint so down = pre-migration.
+    // The rollback refuses while ANY row is org-associated (live OR orphaned),
+    // drops the trigger/function/columns, then restores the ORIGINAL
+    // constraint so down = pre-migration.
+    expect(rollback).toMatch(
+      /organization_id is not null[\s\S]*?or origin_organization_id is not null/,
+    );
+    expect(rollback).toMatch(
+      /drop trigger if exists trg_billing_subscriptions_capture_origin_org/,
+    );
+    expect(rollback).toMatch(
+      /drop function if exists public\.billing_subscriptions_capture_origin_org/,
+    );
+    expect(rollback).toMatch(/drop column if exists origin_organization_id/);
     expect(rollback).toMatch(
       /add constraint billing_subscriptions_owner_id_plan_key_provider_key[\s\S]*?unique \(owner_id, plan_key, provider\)/,
     );
+  });
+});
+
+describe("org checkout fails closed until the linkage migration is applied", () => {
+  it("the store returns needs-migration (never strips the org binding) on 42703", () => {
+    const store = read("lib/billing/subscription-store.ts");
+    // The COLUMN_ABSENT branch must NOT delete organization_id and retry — it
+    // returns needs-migration (fail closed). Codex round 2 P1.
+    expect(store).toMatch(
+      /error\.code === COLUMN_ABSENT && "organization_id" in row[\s\S]*?return "needs-migration"/,
+    );
+    expect(store).not.toMatch(/delete row\.organization_id/);
+  });
+
+  it("the store exports a fail-closed readiness probe", () => {
+    const store = read("lib/billing/subscription-store.ts");
+    expect(store).toMatch(/export async function isOrganizationLinkageReady/);
+  });
+
+  it("the checkout route blocks org plans until the column exists", () => {
+    const route = read("app/api/billing/test-checkout/route.ts");
+    expect(route).toMatch(/isOrganizationLinkageReady/);
+    expect(route).toMatch(/organization_billing_unavailable/);
+    // Guarded by organizationId (org-bound plans only) and returns 503.
+    expect(route).toMatch(/if \(organizationId\)[\s\S]*?status: 503/);
+  });
+});
+
+describe("manual pilot grants survive the uniqueness remodel", () => {
+  it("never upserts over the dropped (owner,plan,provider) conflict target", () => {
+    const actions = read("lib/admin/billing-actions.ts");
+    // Codex round 2 P1: onConflict over the now-partial index is impossible.
+    expect(actions).not.toMatch(/onConflict:\s*["'`]owner_id,plan_key,provider["'`]/);
+  });
+
+  it("uses find-then-write scoped to org-less manual rows", () => {
+    const actions = read("lib/admin/billing-actions.ts");
+    expect(actions).toMatch(/\.is\(\s*["'`]organization_id["'`],\s*null\s*\)/);
+    expect(actions).toMatch(/\.like\(\s*["'`]provider_subscription_id["'`],\s*["'`]manual_%["'`]\s*\)/);
+    // A concurrent duplicate is absorbed as success, not surfaced as an error.
+    expect(actions).toMatch(/23505/);
   });
 });
 
