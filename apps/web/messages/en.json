@@ -7529,7 +7529,14 @@
     "body": "Stripe test mode is on. These buttons open a TEST checkout — no real money, no live charge. Use Stripe test cards only.",
     "start": "Start test checkout",
     "starting": "Starting…",
-    "error": "Could not start"
+    "error": "Could not start",
+    "orgPlaceholder": "Organization ID (blank = your own organization)",
+    "portal": {
+      "title": "Customer portal (TEST)",
+      "body": "Opens the Stripe TEST customer portal for your own test subscriptions — no real money, no live data.",
+      "open": "Open test portal",
+      "opening": "Opening…"
+    }
   },
   "adminBilling": {
     "eyebrow": "BILLING — TEST MODE",
@@ -7695,19 +7702,6 @@
         "freshness_demotion": "Stale profiles ranked lower"
       }
     }
-  },
-  "billingStatus": {
-    "badge": {
-      "disabled": "PAYMENTS OFF",
-      "stripe_test": "TEST MODE",
-      "stripe_live_blocked": "LIVE BLOCKED"
-    },
-    "body": {
-      "disabled": "Payments are not enabled. Plans below describe scope; request pilot access to start.",
-      "stripe_test": "Stripe test mode is on for internal testing — no real money, no live charge.",
-      "stripe_live_blocked": "A live key/mode was detected and hard-blocked by safety. Live is never enabled here."
-    },
-    "futureLive": "Live payments are prepared but inactive — no live checkout until the owner signs off."
   },
   "workAbroad": {
     "eyebrow": "Work abroad",

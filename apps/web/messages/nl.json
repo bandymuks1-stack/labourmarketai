@@ -7529,7 +7529,14 @@
     "body": "De Stripe-testmodus staat aan. Deze knoppen openen een TEST-checkout — geen echt geld, geen echte afschrijving. Gebruik alleen Stripe-testkaarten.",
     "start": "Start testcheckout",
     "starting": "Starten…",
-    "error": "Kon niet starten"
+    "error": "Kon niet starten",
+    "orgPlaceholder": "Organisatie-ID (leeg = je eigen organisatie)",
+    "portal": {
+      "title": "Klantportaal (TEST)",
+      "body": "Opent het Stripe TEST-klantportaal voor je eigen testabonnementen — geen echt geld, geen live gegevens.",
+      "open": "Testportaal openen",
+      "opening": "Openen…"
+    }
   },
   "adminBilling": {
     "eyebrow": "FACTURATIE — TESTMODUS",
@@ -7695,19 +7702,6 @@
         "freshness_demotion": "Verouderde profielen lager gerangschikt"
       }
     }
-  },
-  "billingStatus": {
-    "badge": {
-      "disabled": "BETALINGEN UIT",
-      "stripe_test": "TESTMODUS",
-      "stripe_live_blocked": "LIVE GEBLOKKEERD"
-    },
-    "body": {
-      "disabled": "Betalingen zijn niet ingeschakeld. De plannen hieronder beschrijven de omvang; vraag pilottoegang aan om te starten.",
-      "stripe_test": "De Stripe-testmodus staat aan voor interne tests — geen echt geld, geen echte afschrijving.",
-      "stripe_live_blocked": "Er is een live sleutel/modus gedetecteerd en hard geblokkeerd door de beveiliging. Live wordt hier nooit ingeschakeld."
-    },
-    "futureLive": "Live betalingen zijn voorbereid maar inactief — geen live checkout totdat de eigenaar akkoord geeft."
   },
   "workAbroad": {
     "eyebrow": "Werken in het buitenland",

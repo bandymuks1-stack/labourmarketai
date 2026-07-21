@@ -7529,7 +7529,14 @@
     "body": "Stripe test mode įjungtas. Šie mygtukai atidaro TESTINĮ apmokėjimą — jokių realių pinigų, jokio realaus nuskaitymo. Naudok tik Stripe test korteles.",
     "start": "Pradėti testinį apmokėjimą",
     "starting": "Pradedama…",
-    "error": "Nepavyko pradėti"
+    "error": "Nepavyko pradėti",
+    "orgPlaceholder": "Organizacijos ID (tuščia = tavo organizacija)",
+    "portal": {
+      "title": "Kliento portalas (TEST)",
+      "body": "Atidaro Stripe TEST kliento portalą tavo testinėms prenumeratoms — jokių realių pinigų, jokių live duomenų.",
+      "open": "Atidaryti testinį portalą",
+      "opening": "Atidaroma…"
+    }
   },
   "adminBilling": {
     "eyebrow": "MOKĖJIMAI — TEST MODE",
@@ -7695,19 +7702,6 @@
         "freshness_demotion": "Seni profiliai reitinguojami žemiau"
       }
     }
-  },
-  "billingStatus": {
-    "badge": {
-      "disabled": "MOKĖJIMAI IŠJUNGTI",
-      "stripe_test": "TEST MODE",
-      "stripe_live_blocked": "LIVE BLOKUOJAMAS"
-    },
-    "body": {
-      "disabled": "Mokėjimai neįjungti. Žemiau planai aprašo apimtį; paprašyk piloto prieigos, kad pradėtum.",
-      "stripe_test": "Stripe test mode įjungtas vidiniam testavimui — jokių realių pinigų, jokio realaus nuskaitymo.",
-      "stripe_live_blocked": "Aptiktas live raktas/režimas ir saugumo sumetimais griežtai užblokuotas. Live čia niekada neįjungiamas."
-    },
-    "futureLive": "Live mokėjimai paruošti, bet neaktyvūs — jokio live checkout, kol savininkas nepatvirtins."
   },
   "workAbroad": {
     "eyebrow": "Darbas užsienyje",

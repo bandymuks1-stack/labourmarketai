@@ -7529,7 +7529,14 @@
     "body": "Der Stripe-Testmodus ist aktiv. Diese Buttons öffnen einen TEST-Checkout — kein echtes Geld, keine echte Abbuchung. Verwenden Sie nur Stripe-Testkarten.",
     "start": "Test-Checkout starten",
     "starting": "Wird gestartet…",
-    "error": "Konnte nicht gestartet werden"
+    "error": "Konnte nicht gestartet werden",
+    "orgPlaceholder": "Organisations-ID (leer = eigene Organisation)",
+    "portal": {
+      "title": "Kundenportal (TEST)",
+      "body": "Öffnet das Stripe-TEST-Kundenportal für Ihre eigenen Test-Abonnements — kein echtes Geld, keine Live-Daten.",
+      "open": "Test-Portal öffnen",
+      "opening": "Wird geöffnet…"
+    }
   },
   "adminBilling": {
     "eyebrow": "ABRECHNUNG — TESTMODUS",
@@ -7695,19 +7702,6 @@
         "freshness_demotion": "Veraltete Profile niedriger eingestuft"
       }
     }
-  },
-  "billingStatus": {
-    "badge": {
-      "disabled": "ZAHLUNGEN AUS",
-      "stripe_test": "TESTMODUS",
-      "stripe_live_blocked": "LIVE BLOCKIERT"
-    },
-    "body": {
-      "disabled": "Zahlungen sind nicht aktiviert. Die Pläne unten beschreiben den Umfang; fordern Sie Pilotzugang an, um zu starten.",
-      "stripe_test": "Der Stripe-Testmodus ist für interne Tests aktiv — kein echtes Geld, keine echte Abbuchung.",
-      "stripe_live_blocked": "Ein Live-Schlüssel/-Modus wurde erkannt und aus Sicherheitsgründen hart blockiert. Live wird hier niemals aktiviert."
-    },
-    "futureLive": "Live-Zahlungen sind vorbereitet, aber inaktiv — kein Live-Checkout, bis der Inhaber freigibt."
   },
   "workAbroad": {
     "eyebrow": "Arbeiten im Ausland",
