@@ -14,6 +14,7 @@ import { evaluateCustomerReadiness } from "@/lib/billing/portal-core";
 import { getPlan } from "@/lib/billing/plans";
 import { resolveOrganizationBinding } from "@/lib/billing/org-membership";
 import { ensureBillingCustomer } from "@/lib/billing/customer-store";
+import { isOrganizationLinkageReady } from "@/lib/billing/subscription-store";
 import {
   checkoutMetadata,
   checkoutIdempotencyKey,
@@ -110,6 +111,21 @@ export async function POST(req: Request) {
   if (!priceId || !user) {
     // Defensive — the gate already covers these.
     return NextResponse.json({ ok: false, reason: "price_not_configured" }, { status: 400 });
+  }
+
+  // Org-scoped (company/agency) checkout FAILS CLOSED until the organization
+  // linkage migration (20260721150000) is applied. Starting a real Stripe
+  // subscription we could only store WITHOUT its verified organization binding
+  // would discard the linkage permanently and, for a second org on the same
+  // plan, leave the subscription untracked. Block it up front (Codex R2 P1).
+  if (organizationId) {
+    const ready = await isOrganizationLinkageReady();
+    if (!ready) {
+      return NextResponse.json(
+        { ok: false, reason: "organization_billing_unavailable", testMode: config.testMode },
+        { status: 503 },
+      );
+    }
   }
 
   // One stored TEST customer per profile (find-or-create, race-safe).

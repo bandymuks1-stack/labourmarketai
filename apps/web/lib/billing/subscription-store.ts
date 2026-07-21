@@ -21,6 +21,24 @@ function admin(): any {
 
 export type StoreResult = "ok" | "duplicate" | "needs-migration" | "error";
 
+/**
+ * True only when the DRAFT migration 20260721150000 (billing_subscriptions
+ * .organization_id + origin snapshot + org-scoped unique indexes) is applied.
+ * Org-scoped (company/agency) checkout FAILS CLOSED until this is true, so we
+ * never mint a real Stripe subscription we cannot store with its verified
+ * organization linkage. A missing column (42703) or table (42P01) → not ready.
+ */
+export async function isOrganizationLinkageReady(): Promise<boolean> {
+  const { error } = await admin()
+    .from("billing_subscriptions")
+    .select("organization_id")
+    .limit(1);
+  if (!error) return true;
+  if (error.code === COLUMN_ABSENT || error.code === RELATION_ABSENT) return false;
+  // Any other read error is treated as not-ready — fail closed, never open.
+  return false;
+}
+
 /** Idempotent record of a webhook event. Duplicate (same provider+event_id) → 'duplicate'. */
 export async function recordWebhookEvent(input: {
   provider?: string;
@@ -85,8 +103,9 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     updated_at: new Date().toISOString(),
   };
   // Org linkage (company/agency plans) rides along when known. The column
-  // ships in DRAFT migration 20260721150000; until the owner applies it, the
-  // upsert degrades honestly by retrying WITHOUT the column (42703).
+  // ships in DRAFT migration 20260721150000; until the owner applies it, an
+  // org-scoped subscription must FAIL CLOSED (see COLUMN_ABSENT below) rather
+  // than be persisted with its verified organization binding discarded.
   if (u.organizationId) row.organization_id = u.organizationId;
 
   const { error } = await sb
@@ -94,13 +113,13 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     .upsert(row, { onConflict: "provider,provider_subscription_id" });
   if (!error) return "ok";
   if (error.code === COLUMN_ABSENT && "organization_id" in row) {
-    delete row.organization_id;
-    const retry = await sb
-      .from("billing_subscriptions")
-      .upsert(row, { onConflict: "provider,provider_subscription_id" });
-    if (!retry.error) return "ok";
-    if (retry.error.code === RELATION_ABSENT) return "needs-migration";
-    return "error";
+    // The organization_id column is not migrated yet. Do NOT retry without it:
+    // stripping the linkage would store an org subscription under the personal
+    // uniqueness model and, for a second org on the same plan, collide on the
+    // old constraint and leave a real Stripe subscription untracked. Fail
+    // closed — org-scoped checkout is already blocked at the route until the
+    // column exists, so this is defense in depth (Codex round 2 P1).
+    return "needs-migration";
   }
   if (error.code === RELATION_ABSENT) return "needs-migration";
   return "error";
