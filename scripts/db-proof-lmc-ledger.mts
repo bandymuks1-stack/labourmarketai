@@ -888,6 +888,49 @@ async function main() {
         freshB[0].r.already_processed === false,
       `amount reuse: ${amountConflict.msg.slice(0, 50)} | linkage reuse: ${linkageConflict.msg.slice(0, 50)} | B reversed with fresh key`,
     );
+
+    // P25b (Codex P2 exact-head follow-up): the REASON text is part of the
+    // spend and reversal replay fingerprints — a retry with the same key,
+    // amount/linkage and actor but a DIFFERENT reason is an idempotency
+    // conflict, never already_processed; the exact replay still resolves.
+    const { rows: s1 } = await a.query(
+      `select public.lmc_spend_v1(100, 'p25b spend reason', 'p25b-spend-${RUN}', $1, null, $1) as r`,
+      [u8],
+    );
+    const spendReasonConflict = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_spend_v1(100, 'p25b DIFFERENT reason', 'p25b-spend-${RUN}', $1, null, $1)`,
+          [u8],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    const { rows: s2 } = await a.query(
+      `select public.lmc_spend_v1(100, 'p25b spend reason', 'p25b-spend-${RUN}', $1, null, $1) as r`,
+      [u8],
+    );
+    const reversalReasonConflict = await expectError(
+      () =>
+        a.query(
+          `select public.lmc_reverse_v1($1, 'refund_reversal', 'DIFFERENT refund B', 'p25-rev-b-${RUN}', $2)`,
+          [buyB[0].r.transaction_id, u8],
+        ),
+      "lmc_idempotency_conflict",
+    );
+    const { rows: rvExact } = await a.query(
+      `select public.lmc_reverse_v1($1, 'refund_reversal', 'refund B', 'p25-rev-b-${RUN}', $2) as r`,
+      [buyB[0].r.transaction_id, u8],
+    );
+    record(
+      "P25b-reason-in-spend-and-reversal-fingerprint",
+      s1[0].r.already_processed === false &&
+        spendReasonConflict.ok &&
+        s2[0].r.already_processed === true &&
+        s2[0].r.transaction_id === s1[0].r.transaction_id &&
+        reversalReasonConflict.ok &&
+        rvExact[0].r.already_processed === true,
+      `spend reason reuse: ${spendReasonConflict.msg.slice(0, 50)} | exact spend replay ok | reversal reason reuse: ${reversalReasonConflict.msg.slice(0, 50)} | exact reversal replay ok`,
+    );
   }
 
   // ── P26: reserved key namespace + expiry in the replay fingerprint ────────

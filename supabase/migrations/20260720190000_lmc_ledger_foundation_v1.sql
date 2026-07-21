@@ -1008,7 +1008,8 @@ begin
     v_existing := public.lmc_existing_by_idempotency_v1(
       v_account, p_idempotency_key, 'spend',
       p_amount_cents => p_amount_cents,
-      p_actor_profile_id => p_actor_profile_id);
+      p_actor_profile_id => p_actor_profile_id,
+      p_reason_exact => p_reason);
     if v_existing is not null then
       return v_existing;
     end if;
@@ -1254,13 +1255,16 @@ begin
   -- Actor-bound REPLAY resolution FIRST (mirrors lmc_spend_v1): a committed
   -- reversal must stay acknowledgeable by its recorded actor even if that
   -- actor's authority later changed. The fingerprint is the ORIGINAL-ENTRY
-  -- LINKAGE plus the initiating actor — reusing this key for a different
-  -- original transaction (or by a different actor) conflicts, never
-  -- reporting the old reversal as already_processed.
+  -- LINKAGE plus the initiating actor plus the EXACT reason text (Codex P2:
+  -- a refund/chargeback justification is operation-defining — a retry with a
+  -- different reason is a conflict, never already_processed) — reusing this
+  -- key for a different original transaction, actor or reason conflicts,
+  -- never reporting the old reversal as already_processed.
   v_existing := public.lmc_existing_by_idempotency_v1(
     v_orig.account_id, p_idempotency_key, p_kind,
     p_original_transaction_id => v_orig.id,
-    p_actor_profile_id => p_actor_profile_id);
+    p_actor_profile_id => p_actor_profile_id,
+    p_reason_exact => p_reason);
   if v_existing is not null then
     return v_existing;
   end if;
