@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
 import { GoogleButton } from "@/components/app/google-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -139,6 +140,10 @@ export function SignupForm() {
         </p>
       </header>
 
+      {/* GDPR Art. 13 first-layer notice must be visible BEFORE the Google
+          button is pressed — the Google path collects account data too. */}
+      <AuthLegalNotice variant="signup" />
+
       <GoogleButton
         label={t("google_label")}
         redirectingLabel={t("google_redirecting")}
@@ -233,6 +238,11 @@ export function SignupForm() {
           )}
         </div>
       )}
+
+      {/* Repeated above the submit so the notice is on-screen at the moment
+          the email/password form is submitted — the top instance can be a
+          full viewport away on mobile. */}
+      <AuthLegalNotice variant="signup" />
 
       <div className="flex items-center justify-between">
         <Button type="submit" disabled={disabled}>

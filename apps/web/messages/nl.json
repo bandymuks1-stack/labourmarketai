@@ -3432,6 +3432,11 @@
     "conceptNote": "Conceptpreview — fictieve profielen, geen echte mensen. Je echte profiel wordt opgebouwd uit je echte registraties."
   },
   "auth": {
+    "legalNotice": {
+      "signup": "Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
+      "googleLogin": "Hebt u nog geen account, dan wordt er een aangemaakt wanneer u doorgaat met Google. Door een account aan te maken bevestigt u dat u de <terms>Gebruiksvoorwaarden</terms> en het <privacy>Privacybeleid</privacy> hebt gelezen.",
+      "controller": "De verwerkingsverantwoordelijke voor uw accountgegevens is UAB „Nonstop Group“. Uw gegevens worden verwerkt om uw account aan te maken en de dienst te leveren; ze worden niet voor marketing gebruikt zonder uw afzonderlijke, optionele toestemming."
+    },
     "errors": {
       "userAlreadyRegistered": "Dit e-mailadres is al geregistreerd. Log in plaats daarvan in.",
       "passwordTooShort": "Wachtwoord te kort (minimaal {min} tekens).",
