@@ -252,22 +252,51 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     expect(existsSync(join(REPO_ROOT, VERIFICATION))).toBe(true);
   });
 
-  it("proves all nine required properties and leaves no rows behind", () => {
+  it("proves all ten required properties and leaves no rows behind", () => {
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    for (const proof of [
-      "PROOF 1",
-      "PROOF 2",
-      "PROOF 3",
-      "PROOF 4",
-      "PROOF 5",
-      "PROOF 6",
-      "PROOF 7",
-      "PROOF 8",
-      "PROOF 9",
-    ]) {
-      expect(verification).toContain(proof);
+    for (let n = 1; n <= 10; n += 1) {
+      expect(verification).toContain(`PROOF ${n}`);
     }
     expect(verification).toMatch(/\brollback\b/i);
     expect(verification).not.toMatch(/^\s*commit\s*;/im);
+  });
+
+  it("exercises the in-body NULL guard through an executable role, not only the ACL", () => {
+    // Codex review of PR #845: after the migration `anon` has no EXECUTE, so an
+    // anon call is refused by the privilege check and never reaches the guard.
+    // Proof 10 must therefore use a role that CAN execute while leaving the JWT
+    // identity unset, so auth.uid() is NULL and the guard is the only barrier.
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    const proof10 = verification.slice(verification.indexOf("PROOF 10"));
+    expect(proof10).toMatch(/set local role authenticated/i);
+    expect(proof10).toMatch(/set_config\('request\.jwt\.claims',\s*''/);
+  });
+
+  it("states the corrected pre-apply expectation (not the wrong '1-8 all fail')", () => {
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    expect(verification).toMatch(/EXPECTED FAIL\s*:\s*1,\s*2,\s*6,\s*7,\s*8,\s*10/);
+    expect(verification).toMatch(/EXPECTED PASS\s*:\s*3,\s*4,\s*5,\s*9/);
+  });
+
+  it("performs no DDL and no irreversible operation", () => {
+    const verification = statementsOnly(
+      readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8"),
+    );
+    for (const forbidden of [
+      /\bcreate\s+(table|function|index|policy|trigger|sequence)\b/i,
+      /\balter\s+(table|function|sequence)\b/i,
+      /\bdrop\s+/i,
+      /\btruncate\b/i,
+      /\bgrant\b/i,
+      /\brevoke\b/i,
+      /\bnextval\b/i,
+      /\bsetval\b/i,
+      /\bcopy\b/i,
+      /\bpg_notify\b/i,
+      /\bdblink\b/i,
+      /\bhttp[_s]?\s*\(/i,
+    ]) {
+      expect(verification).not.toMatch(forbidden);
+    }
   });
 });

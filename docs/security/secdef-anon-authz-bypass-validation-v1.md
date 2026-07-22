@@ -136,14 +136,34 @@ The proof is written and shipped, ready to run:
 | 7 | the other four RPCs also refuse `anon`, and rows stay intact |
 | 8 | catalog: no `PUBLIC` or `anon` entry in any of the seven ACLs |
 | 9 | catalog: `authenticated` retains EXECUTE on all seven (product contract) |
+| **10** | **the in-body guard itself** — a role that *can* execute (`authenticated`) with the JWT identity **unset**, so `auth.uid()` is NULL; must be refused with the row unchanged |
 
 The script runs inside one transaction ending in `ROLLBACK`, contains no `COMMIT`, seeds
 only rows it creates itself, and finishes with a row-count query proving it left nothing
 behind.
 
-**Run it twice and record both outputs:** before the apply, proofs 1–8 are *expected to
-fail* — that failure is the reproduction of the defect. After the apply, all nine must
-pass.
+> **Proof 10 was added after Codex review of this PR.** Proofs 2/5/6/7 call as `anon` —
+> but *after* the migration `anon` holds no EXECUTE, so those calls are refused by the
+> **privilege** check and never enter the function body. They therefore cannot demonstrate
+> that the new `auth.uid() is null` guard works. Proof 10 closes that gap by using an
+> executable role with a NULL identity, which is the only way to exercise the guard
+> behaviourally. `auth.uid()` resolves an empty setting to NULL via
+> `nullif(current_setting(...), '')`, verified against the live `auth.uid()` definition.
+
+**Run it twice and record both outputs.**
+
+| Run | Expected |
+|---|---|
+| **Before the apply** (vulnerable state) | **FAIL: 1, 2, 6, 7, 8, 10** · **PASS: 3, 4, 5, 9** |
+| **After the apply** | **All 10 PASS** |
+
+> **The earlier version of this runbook said "proofs 1–8 are expected to fail". That was
+> wrong** and would have made the two runs incomparable. Codex review caught it. Proof 3
+> passes pre-apply because a non-NULL *wrong* uid still trips the old `<>` comparison;
+> proof 4 passes because the owner is legitimately allowed; proof 5 passes because the old
+> function raises `listing not found` for an unknown id, which the predicate accepts as a
+> refusal; proof 9 passes because `authenticated` already holds EXECUTE. The six genuine
+> failures (1, 2, 6, 7, 8, 10) are the reproduction of the defect.
 
 ### 5.3 Repo gates
 

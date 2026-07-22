@@ -27,12 +27,19 @@
 --   Every proof prints `PROOF n ... = PASS` or `= FAIL`. Any FAIL means the fix
 --   is not effective — stop and do not proceed.
 --
--- WHEN TO RUN
---   1. BEFORE the production apply → proofs 1–7 are EXPECTED TO FAIL on the
---      vulnerable functions and proof 8 is EXPECTED TO FAIL. That failure is the
---      reproduction of the defect.
---   2. AFTER the production apply → every proof must PASS.
+-- WHEN TO RUN — AND EXACTLY WHAT TO EXPECT
+--   1. BEFORE the production apply, against the VULNERABLE state:
+--        EXPECTED FAIL : 1, 2, 6, 7, 8, 10
+--        EXPECTED PASS : 3, 4, 5, 9
+--      (3 passes because a non-NULL wrong uid still trips the old `<>` check;
+--       4 passes because the owner is legitimately allowed; 5 passes because
+--       the old function raises 'listing not found' for an unknown id, which
+--       the predicate accepts; 9 passes because `authenticated` already holds
+--       EXECUTE.)  Those six failures ARE the reproduction of the defect.
+--   2. AFTER the production apply → all 10 proofs must PASS.
 --   Record both outputs in the task log (AGENTS.md §Migrations (d)).
+--   Corrected after Codex review of PR #845 — the earlier "1–8 all fail"
+--   expectation was wrong and would have made the two runs incomparable.
 
 begin;
 
@@ -268,10 +275,45 @@ begin
   raise notice 'PROOF 9 (authenticated keeps EXECUTE on all 7)    = %  [granted: %/7]',
     case when v_pass then 'PASS' else 'FAIL' end, v_count;
 
+  -- ====================================================================
+  -- PROOF 10 — THE GUARD ITSELF (added after Codex review of PR #845).
+  --
+  -- Proofs 2/5/6/7 call as `anon`. AFTER the migration `anon` has no EXECUTE,
+  -- so those calls are refused by the PRIVILEGE check and never enter the
+  -- function body — they therefore cannot demonstrate that the new
+  -- `auth.uid() is null` guard works. This proof closes that gap: it uses a
+  -- role that CAN execute (`authenticated`) while leaving the JWT identity
+  -- UNSET, so auth.uid() is NULL and the in-body guard is the only thing
+  -- standing between the caller and the write.
+  --
+  -- auth.uid() is `coalesce(nullif(current_setting('request.jwt.claim.sub',
+  -- true),''), (nullif(current_setting('request.jwt.claims', true),'')::jsonb
+  -- ->> 'sub'))::uuid` — an empty setting is safely NULL.
+  --
+  -- Pre-apply this FAILS (old code falls through and mutates the row);
+  -- post-apply it must PASS with the row untouched.
+  -- ====================================================================
+  select status into v_status from public.marketplace_listings where id = v_listing;
+  begin
+    set local role authenticated;
+    perform set_config('request.jwt.claims', '', true);
+    perform set_config('request.jwt.claim.sub', '', true);
+    perform public.set_marketplace_listing_status_v1(v_listing, 'closed');
+    v_err := 'NO_ERROR';
+  exception when others then
+    v_err := sqlstate;
+  end;
+  reset role;
+  select status into v_title from public.marketplace_listings where id = v_listing;
+  v_pass := (v_err <> 'NO_ERROR') and (v_title = v_status);
+  if not v_pass then v_fails := v_fails + 1; end if;
+  raise notice 'PROOF 10 (NULL identity blocked BY THE GUARD, not the ACL) = %  [err=% status: %->%]',
+    case when v_pass then 'PASS' else 'FAIL' end, v_err, v_status, v_title;
+
   -- --------------------------------------------------------------------
   raise notice '=====================================================';
   if v_fails = 0 then
-    raise notice 'RESULT: ALL 9 PROOFS PASS';
+    raise notice 'RESULT: ALL 10 PROOFS PASS';
   else
     raise notice 'RESULT: % PROOF(S) FAILED — DO NOT PROCEED', v_fails;
   end if;
