@@ -12,6 +12,57 @@
 > `version` differ for everything applied via MCP `apply_migration` — the tool
 > stamps its own apply-time timestamp. Both identify the migration by `name`.
 
+---
+
+## ⚠️ CORRECTION 2026-07-22 — "authenticated only, no anon" was FACTUALLY WRONG
+
+Several rows below state that a migration granted `EXECUTE` to `authenticated`
+**only**, with wording such as *"GRANT SELECT + EXECUTE to authenticated only, no
+anon"*, *"granted authenticated only, never anon"* and *"grants … authenticated only
+(no anon)"*. **Those statements did not describe production.** This correction is
+recorded here rather than by editing the history, so the mistake stays visible.
+
+**What was actually true in production (verified 2026-07-22 by catalog read):**
+of the **205** `SECURITY DEFINER` functions in `public`, **54** were executable by
+the `anon` role. Only **4** of those were granted to `anon` deliberately. The other
+**50** inherited `EXECUTE` from PostgreSQL's default `PUBLIC` grant, because the
+migrations issued `GRANT EXECUTE … TO authenticated` without the matching
+`REVOKE EXECUTE … FROM PUBLIC`. The ACL shows it plainly — the leading `=X/postgres`
+entry **is** the `PUBLIC` grant:
+
+```
+add_project_stage_v1           {=X/postgres,postgres=X/postgres,authenticated=X/postgres}   <- PUBLIC present
+submit_company_need_public_v1  {postgres=X/postgres,anon=X/postgres,authenticated=X/postgres} <- correct pattern
+```
+
+**Why the original post-apply verifications missed it:** they tested a *non-owner
+authenticated* caller (a non-NULL `auth.uid()`), which was correctly rejected. The
+**unauthenticated** case was never tested, and the grant itself was never inspected.
+
+**How bad it was:** seven of the 54 were genuinely exploitable, because their
+ownership check was NULL-unsafe — `if v_owner <> auth.uid()` evaluates to NULL when
+`auth.uid()` is NULL, and PL/pgSQL treats NULL as false, so the exception never
+fired. Confirmed live and rolled back: calling
+`set_marketplace_listing_status_v1` as `anon` returned no error and **changed** the
+row. Affected rows below: **`20260718190000_commercial_crm.sql`** and
+**`20260718210000_marketplace_listings.sql`**. Blast radius was zero rows only
+because `contracts`, `proposals` and `marketplace_listings` were all empty.
+
+**State separation — read this carefully:**
+
+| | Statement |
+|---|---|
+| **Before the fix (fact)** | 54 functions anon-executable; 7 of them exploitable; production carried a live unauthenticated write path. |
+| **What the fix migration guarantees (code)** | `20260722120000_secdef_anon_authz_bypass_fix_v1.sql` rejects unauthenticated callers explicitly, replaces `<>` with `is distinct from`, and revokes `PUBLIC`/`anon` on those **7 exact signatures**. |
+| **Verified so far** | Static contract only — 72 assertions in `apps/web/lib/guards/secdef-anon-authz-bypass.test.ts`. **No behavioural proof against any database has been run yet** (no local Postgres was available: Supabase CLI absent, Docker not running). |
+| **NOT yet true in production** | Nothing. **The fix migration has NOT been applied.** As of this commit production still carries the defect. |
+| **Becomes true only after the owner applies it** | The 9 runtime proofs in `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` must be run and recorded — before the apply (expected to FAIL, reproducing the defect) and after (must all PASS). |
+
+**Still outstanding (not fixed by that migration):** the other **47** anon-reachable
+functions — 3 with no authorization logic at all, 40 that currently fail closed but
+should never have been reachable, and the 4 that are intentionally public. Full
+classification: `docs/security/secdef-public-execute-inventory-v1.md`.
+
 | Repo file | Ledger version | Applied (UTC) | Approved by | What it did |
 |---|---|---|---|---|
 | `20260530120000_drop_legacy_threads_messages.sql` | `20260530120000` | 2026-05-30 | DI | Dropped the unused legacy `threads` + `messages` tables (0 rows) + `can_access_thread()`; `conversations*` is canonical. |
@@ -89,11 +140,11 @@
 
 | `20260718180000_assets_rls_recursion_fix.sql` | `20260718161235` | 2026-07-18 | DI (explicit owner standing authorization) + Claude Code | **Wagon 9 fix — assets RLS recursion.** The `assets` / `asset_assignments` SELECT policies referenced each other → infinite recursion (42P17). Routed each cross-table check through a SECURITY DEFINER helper (`asset_open_assignment_for_caller` + existing `caller_manages_asset`), same visibility, non-recursive. Post-apply verified with the full authenticated lifecycle proof: manager create+issue → worker acknowledge → manager return (ended status=returned, availability=available, condition=good); non-manager create rejected — all rolled back, 0 test rows. Rollback: paired down file (restores prior definitions). |
 
-| `20260718190000_commercial_crm.sql` | `20260718181812` | 2026-07-18 | DI (explicit owner standing authorization — real-user-launch + operations train v2) + Claude Code | **Wagon 10 Commercial CRM (PR #823).** NEW owner-scoped `proposals` (draft/sent/accepted/rejected/withdrawn) + `contracts` (draft/active/completed/cancelled; document REFERENCE only, no e-signature). EUR-only; linked to `customer_requests`/`projects`. Default-closed RLS `owner_id = auth.uid()`; 6 SECURITY DEFINER RPCs (create/set-status/delete per table). Invoices + payments are NOT duplicated — they stay in the canonical finance ledger (read via lib/finance). Post-apply verified: authenticated proof (owner create→send→accept→contract OK; non-owner rejected) rolled back, 0 test rows. Rollback: paired down file. |
+| `20260718190000_commercial_crm.sql` | `20260718181812` | 2026-07-18 | DI (explicit owner standing authorization — real-user-launch + operations train v2) + Claude Code | **Wagon 10 Commercial CRM (PR #823).** NEW owner-scoped `proposals` (draft/sent/accepted/rejected/withdrawn) + `contracts` (draft/active/completed/cancelled; document REFERENCE only, no e-signature). EUR-only; linked to `customer_requests`/`projects`. Default-closed RLS `owner_id = auth.uid()`; 6 SECURITY DEFINER RPCs (create/set-status/delete per table). Invoices + payments are NOT duplicated — they stay in the canonical finance ledger (read via lib/finance). Post-apply verified: authenticated proof (owner create→send→accept→contract OK; non-owner rejected) rolled back, 0 test rows. Rollback: paired down file. **⚠️ CORRECTION 2026-07-22 — the post-apply verification above was INCOMPLETE.** It tested a non-owner *authenticated* caller only. Four of these six RPCs (`delete_contract_v1`, `set_contract_status_v1`, `delete_proposal_v1`, `set_proposal_status_v1`) were left executable by `anon` (inherited `PUBLIC` grant) **and** used the NULL-unsafe check `v_owner <> auth.uid()`, which does not fire when `auth.uid()` is NULL. An unauthenticated caller could therefore delete or re-status any contract or proposal. Zero rows existed, so nothing was lost. Fixed by `20260722120000_secdef_anon_authz_bypass_fix_v1.sql` — **not yet applied to production**. See the CORRECTION block at the top of this file. |
 
 | `20260718200000_delivery_quality.sql` | `20260718191614` | 2026-07-18 | DI (explicit owner standing authorization — real-user-launch + operations train v2) + Claude Code | **Wagon 11 Delivery & Quality — defects + corrections (PR #824).** NEW `defects` (over `projects`, optional `project_stages` link; category/severity; lifecycle reported→acknowledged→assigned→in_correction→ready_for_review→accepted/reopened/rejected/cancelled; reporter/assignee) + `defect_corrections` (a correction moves a defect to `in_correction` only — **never auto-accepts**; acceptance is a separate manager act). Project-scoped default-closed RLS (`can_manage_project` OR reporter); the corrections policy routes its cross-table check through the SECURITY DEFINER helper `caller_manages_defect` so it stays non-recursive (W9 42P17 lesson applied). No second photo store. Post-apply verified: authenticated proof (report→correct→accept OK; non-manager rejected) rolled back, 0 test rows. Rollback: paired down file. |
 
-| `20260718210000_marketplace_listings.sql` | `20260718210411` | 2026-07-19 | DI (explicit owner approval of PR #826 under standing train authorization) + Claude Code | **Wagon 13 slice 1 — work-resource marketplace listings (PR #826).** NEW `marketplace_listings` (physical WORK resources: accommodation/premises/vehicle/tools/equipment/machinery/safety_equipment; sale/rent/wanted; optional org/project link validated in-RPC via `manages_organization`/`can_manage_project`; optional free-text price, NO cents ledger). Default-closed RLS: authenticated discovery of `active` rows + owner's own + admin (non-recursive); writes via 4 owner-gated SECURITY DEFINER RPCs (`search_path=public` pinned, granted authenticated only, never anon, no `using(true)`). The professional-SERVICES half stays canonical `service_offerings` (reused, not duplicated); enquiries reuse the canonical conversations bridge (grant `allowed_marketplace_enquiry`). Post-apply verified: structural (anon has no select; 4 secdef RPCs) + authenticated proof (owner create→draft hidden from non-owner→update→publish; unauthorized update/status/delete all rejected; enquirer discovers active) rolled back, 0 test rows. Rollback: paired down file. |
+| `20260718210000_marketplace_listings.sql` | `20260718210411` | 2026-07-19 | DI (explicit owner approval of PR #826 under standing train authorization) + Claude Code | **Wagon 13 slice 1 — work-resource marketplace listings (PR #826).** NEW `marketplace_listings` (physical WORK resources: accommodation/premises/vehicle/tools/equipment/machinery/safety_equipment; sale/rent/wanted; optional org/project link validated in-RPC via `manages_organization`/`can_manage_project`; optional free-text price, NO cents ledger). Default-closed RLS: authenticated discovery of `active` rows + owner's own + admin (non-recursive); writes via 4 owner-gated SECURITY DEFINER RPCs (`search_path=public` pinned, granted authenticated only, never anon, no `using(true)`). The professional-SERVICES half stays canonical `service_offerings` (reused, not duplicated); enquiries reuse the canonical conversations bridge (grant `allowed_marketplace_enquiry`). Post-apply verified: structural (anon has no select; 4 secdef RPCs) + authenticated proof (owner create→draft hidden from non-owner→update→publish; unauthorized update/status/delete all rejected; enquirer discovers active) rolled back, 0 test rows. Rollback: paired down file. **⚠️ CORRECTION 2026-07-22 — "granted authenticated only, never anon" was FALSE.** All four write RPCs kept the default `PUBLIC` EXECUTE grant, so `anon` could reach them; three of them (`delete_marketplace_listing_v1`, `set_marketplace_listing_status_v1`, `update_marketplace_listing_v1`) also used the NULL-unsafe check `v_owner <> auth.uid()`. Proven live and rolled back: an `anon` call to `set_marketplace_listing_status_v1` returned no error and set the row's status to `closed`. The "anon has no select" structural check that was recorded here covered RLS on the table, not EXECUTE on the functions. Fixed by `20260722120000_secdef_anon_authz_bypass_fix_v1.sql` — **not yet applied to production**. See the CORRECTION block at the top of this file. |
 
 ## Deferred (committed/known, NOT applied)
 - **`20260713120000_company_locations_v1.sql` — company operating geography (F12.4/5, production UX repair v2). HUMAN GATE: do NOT apply without explicit owner OK.** New `company_locations` table (headquarters / operating / desired_market; ISO country; bounded region/city/label; optional both-or-neither approx coords — COMPANY geography only, never worker coordinates; single-HQ partial unique index; 50-row cap in RPC). RLS SELECT owner/admin only (fail-closed, no public read in v1); writes RPC-only (`save_company_location_v1` / `remove_company_location_v1`, SECURITY DEFINER, owner-checked, authenticated-only grants). Consumer: company workspace Locations section + market-map company layer detect 42P01 and show an honest "prepared, owner activation pending" state until applied. Paired rollback: `supabase/rollbacks/20260713120000_company_locations_v1.down.sql`.

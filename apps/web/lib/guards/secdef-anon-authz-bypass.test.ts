@@ -1,0 +1,273 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * P0 SECURITY HOTFIX pinning tests —
+ * `supabase/migrations/20260722120000_secdef_anon_authz_bypass_fix_v1.sql`
+ *
+ * Defect (verified in production 2026-07-22, project gorgitwvdzxbnaxhrsrw):
+ * seven SECURITY DEFINER RPCs guarded ownership with `v_owner <> auth.uid()`.
+ * For an unauthenticated caller `auth.uid()` is NULL, `v_owner <> NULL` is NULL,
+ * PL/pgSQL treats NULL as false, the raise never fires, and the write proceeds
+ * with DEFINER privileges. They were reachable by `anon` because their ACL kept
+ * the default PUBLIC grant (`=X/postgres`) — `GRANT ... TO authenticated` was
+ * issued without `REVOKE ... FROM PUBLIC`.
+ *
+ * The contract encoded here so a future edit cannot silently regress it:
+ *   - all seven functions reject an unauthenticated caller EXPLICITLY, and do so
+ *     BEFORE the row lookup (a non-existent id must never read as authorized);
+ *   - no NULL-unsafe identity comparison survives anywhere in the migration;
+ *   - each of the seven exact signatures is revoked from PUBLIC and from anon,
+ *     and granted to authenticated;
+ *   - SECURITY DEFINER and the pinned search_path are preserved;
+ *   - the blast radius stays at exactly these seven functions (no blanket
+ *     revoke that would break the intentionally-public RPCs);
+ *   - a paired rollback exists and it never re-opens the hole.
+ *
+ * NOTE ON SCOPE: these are static contract assertions, which is this repo's
+ * convention for migration guards (see admin-grant-guard-migration.test.ts).
+ * Behavioural proof against a live database is a separate artifact —
+ * `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` —
+ * and is executed at the production owner gate. This file cannot and does not
+ * claim runtime proof.
+ */
+
+const REPO_ROOT = join(process.cwd(), "..", "..");
+const MIGRATION_NAME = "20260722120000_secdef_anon_authz_bypass_fix_v1.sql";
+const MIGRATION = `supabase/migrations/${MIGRATION_NAME}`;
+const ROLLBACK = `supabase/rollbacks/${MIGRATION_NAME.replace(/\.sql$/, ".down.sql")}`;
+const VERIFICATION =
+  "supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql";
+
+const migration = readFileSync(join(REPO_ROOT, MIGRATION), "utf-8");
+const rollback = readFileSync(join(REPO_ROOT, ROLLBACK), "utf-8");
+
+/** The seven functions, with the exact identity signature production reports
+ *  via `pg_get_function_identity_arguments`. Order matters only for readability. */
+const FUNCTIONS: ReadonlyArray<{ name: string; args: string }> = [
+  { name: "delete_contract_v1", args: "p_contract_id uuid" },
+  { name: "set_contract_status_v1", args: "p_contract_id uuid, p_status text" },
+  { name: "delete_proposal_v1", args: "p_proposal_id uuid" },
+  {
+    name: "set_proposal_status_v1",
+    args: "p_proposal_id uuid, p_status text, p_rejection_reason text",
+  },
+  { name: "delete_marketplace_listing_v1", args: "p_id uuid" },
+  { name: "set_marketplace_listing_status_v1", args: "p_id uuid, p_status text" },
+  {
+    name: "update_marketplace_listing_v1",
+    args: "p_id uuid, p_title text, p_category text, p_listing_kind text, p_description text, p_location_country text, p_location_label text, p_price_text text",
+  },
+];
+
+/** The SQL with `--` line comments removed, so assertions test executable
+ *  statements rather than the explanatory header (which legitimately names the
+ *  intentionally-public RPCs it must not touch). */
+function statementsOnly(sql: string): string {
+  return sql
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*--/.test(line))
+    .join("\n");
+}
+
+/** Body of one `create or replace function public.<name>(...) ... $function$;` block. */
+function bodyOf(sql: string, name: string): string {
+  const start = sql.indexOf(`create or replace function public.${name}(`);
+  expect(start, `function ${name} present`).toBeGreaterThan(-1);
+  const end = sql.indexOf("$function$;", start);
+  expect(end, `function ${name} terminated`).toBeGreaterThan(start);
+  return sql.slice(start, end);
+}
+
+describe("20260722120000 — P0 anon SECURITY DEFINER authorization bypass", () => {
+  it("covers exactly the seven affected functions and no others", () => {
+    const defined = [
+      ...migration.matchAll(/create or replace function public\.(\w+)\(/g),
+    ].map((m) => m[1]);
+    expect(defined.sort()).toEqual(FUNCTIONS.map((f) => f.name).sort());
+  });
+
+  describe.each(FUNCTIONS)("$name", ({ name, args }) => {
+    const body = () => bodyOf(migration, name);
+
+    it("rejects an unauthenticated caller explicitly", () => {
+      expect(body()).toMatch(
+        /if auth\.uid\(\) is null then raise exception 'not authorized'; end if;/i,
+      );
+    });
+
+    it("rejects the unauthenticated caller BEFORE the row lookup", () => {
+      const b = body();
+      const guard = b.indexOf("auth.uid() is null");
+      const lookup = b.indexOf("select owner_id into v_owner");
+      expect(guard).toBeGreaterThan(-1);
+      expect(lookup).toBeGreaterThan(-1);
+      expect(guard).toBeLessThan(lookup);
+    });
+
+    it("uses a NULL-safe ownership comparison", () => {
+      expect(body()).toMatch(
+        /if v_owner is distinct from auth\.uid\(\) then raise exception 'not authorized'; end if;/i,
+      );
+    });
+
+    it("contains no NULL-unsafe identity comparison", () => {
+      expect(body()).not.toMatch(/(<>|!=)\s*auth\.uid\(\)/);
+    });
+
+    it("preserves SECURITY DEFINER and the pinned search_path", () => {
+      const b = body();
+      expect(b).toMatch(/security definer/i);
+      expect(b).toMatch(/set search_path to 'public'/i);
+    });
+
+    it("revokes EXECUTE from PUBLIC on the exact signature", () => {
+      expect(migration).toContain(
+        `revoke execute on function public.${name}(${args}) from public;`,
+      );
+    });
+
+    it("revokes EXECUTE from anon on the exact signature", () => {
+      expect(migration).toContain(
+        `revoke execute on function public.${name}(${args}) from anon;`,
+      );
+    });
+
+    it("grants EXECUTE to authenticated on the exact signature", () => {
+      expect(migration).toContain(
+        `grant  execute on function public.${name}(${args}) to authenticated;`,
+      );
+    });
+  });
+
+  it("does not blanket-revoke across the schema (the public RPCs must keep working)", () => {
+    // A schema-wide revoke would also strip submit_company_need_public_v1 and the
+    // three get_public_business_* readers, which are intentionally anon-callable.
+    const sql = statementsOnly(migration);
+    expect(sql).not.toMatch(/revoke\s+execute\s+on\s+all\s+functions/i);
+    for (const intentionallyPublic of [
+      "submit_company_need_public_v1",
+      "get_public_business_profile_v1",
+      "get_public_business_listings_v1",
+      "get_public_business_services_v1",
+    ]) {
+      // They may be named in the header prose; no STATEMENT may reference them.
+      expect(sql).not.toContain(intentionallyPublic);
+    }
+  });
+
+  it("never grants anything to anon or PUBLIC", () => {
+    expect(migration).not.toMatch(/grant\s+execute[^;]*\bto\s+(anon|public)\b/i);
+  });
+
+  it("touches no table, row, policy or trigger", () => {
+    for (const forbidden of [
+      /\bcreate\s+table\b/i,
+      /\balter\s+table\b/i,
+      /\bdrop\s+table\b/i,
+      /\bcreate\s+policy\b/i,
+      /\balter\s+policy\b/i,
+      /\bdrop\s+policy\b/i,
+      /\bcreate\s+trigger\b/i,
+      /\btruncate\b/i,
+      /\binsert\s+into\b/i,
+    ]) {
+      expect(migration).not.toMatch(forbidden);
+    }
+  });
+
+  it("carries the human-gate annotation (RED class: SECURITY DEFINER + GRANT/REVOKE)", () => {
+    expect(migration).toMatch(/--\s*@human-gate-approved/);
+  });
+
+  it("ships a paired rollback file", () => {
+    expect(existsSync(join(REPO_ROOT, ROLLBACK))).toBe(true);
+  });
+
+  it("uses the 14-digit timestamp naming convention (doctrine §16)", () => {
+    expect(MIGRATION_NAME).toMatch(/^\d{14}_[a-z0-9_]+\.sql$/);
+  });
+
+  it("does not reuse an existing migration version", () => {
+    const versions = readdirSync(join(REPO_ROOT, "supabase/migrations"))
+      .filter((f) => f.endsWith(".sql"))
+      .map((f) => f.slice(0, 14));
+    const mine = MIGRATION_NAME.slice(0, 14);
+    expect(versions.filter((v) => v === mine)).toHaveLength(1);
+  });
+});
+
+describe("20260722120000 — rollback never re-opens the hole", () => {
+  it("never grants EXECUTE to anon or PUBLIC", () => {
+    expect(rollback).not.toMatch(/grant\s+execute[^;]*\bto\s+(anon|public)\b/i);
+  });
+
+  it("keeps PUBLIC and anon revoked for every one of the seven signatures", () => {
+    for (const { name, args } of FUNCTIONS) {
+      expect(rollback).toContain(
+        `revoke execute on function public.${name}(${args}) from public;`,
+      );
+      expect(rollback).toContain(
+        `revoke execute on function public.${name}(${args}) from anon;`,
+      );
+    }
+  });
+
+  it("never restores a NULL-unsafe identity comparison", () => {
+    expect(rollback).not.toMatch(/(<>|!=)\s*auth\.uid\(\)/);
+  });
+
+  it("keeps the explicit unauthenticated rejection in every function", () => {
+    for (const { name } of FUNCTIONS) {
+      expect(bodyOf(rollback, name)).toMatch(
+        /if auth\.uid\(\) is null then raise exception 'not authorized'; end if;/i,
+      );
+    }
+  });
+
+  it("destroys nothing (a security rollback must not drop the write paths)", () => {
+    const sql = statementsOnly(rollback);
+    expect(sql).not.toMatch(/\bdrop\s+function\b/i);
+    expect(sql).not.toMatch(/\btruncate\b/i);
+    expect(sql).not.toMatch(/\bdrop\s+table\b/i);
+  });
+
+  it("deletes only a single owner-checked row, never a set", () => {
+    // `delete from` is legitimate — it is what delete_*_v1 exists to do. What
+    // must never appear is an unqualified or multi-row delete.
+    const deletes = [...statementsOnly(rollback).matchAll(/delete\s+from\s+[^;]+;/gi)].map(
+      (m) => m[0].replace(/\s+/g, " ").trim(),
+    );
+    expect(deletes).toEqual([
+      "delete from public.contracts where id = p_contract_id;",
+      "delete from public.proposals where id = p_proposal_id;",
+      "delete from public.marketplace_listings where id = p_id;",
+    ]);
+  });
+});
+
+describe("20260722120000 — behavioural verification script is shipped", () => {
+  it("exists (executed at the production owner gate, not in CI)", () => {
+    expect(existsSync(join(REPO_ROOT, VERIFICATION))).toBe(true);
+  });
+
+  it("proves all nine required properties and leaves no rows behind", () => {
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    for (const proof of [
+      "PROOF 1",
+      "PROOF 2",
+      "PROOF 3",
+      "PROOF 4",
+      "PROOF 5",
+      "PROOF 6",
+      "PROOF 7",
+      "PROOF 8",
+      "PROOF 9",
+    ]) {
+      expect(verification).toContain(proof);
+    }
+    expect(verification).toMatch(/\brollback\b/i);
+    expect(verification).not.toMatch(/^\s*commit\s*;/im);
+  });
+});
