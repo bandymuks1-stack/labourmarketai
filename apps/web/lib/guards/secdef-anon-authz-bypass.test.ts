@@ -6,7 +6,7 @@ import { join } from "node:path";
  * P0 SECURITY HOTFIX pinning tests —
  * `supabase/migrations/20260722120000_secdef_anon_authz_bypass_fix_v1.sql`
  *
- * Defect (verified in production 2026-07-22, project gorgitwvdzxbnaxhrsrw):
+ * Defect (verified in production 2026-07-22):
  * seven SECURITY DEFINER RPCs guarded ownership with `v_owner <> auth.uid()`.
  * For an unauthenticated caller `auth.uid()` is NULL, `v_owner <> NULL` is NULL,
  * PL/pgSQL treats NULL as false, the raise never fires, and the write proceeds

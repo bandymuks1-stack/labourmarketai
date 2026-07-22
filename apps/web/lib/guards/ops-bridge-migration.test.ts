@@ -398,6 +398,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 158 -> 159 for W1 photo continuity (function-only, paired rollback).
     // Bumped 159 -> 160 for the W1 stale learning lifecycle (function+trigger
     // only, additive, paired rollback).
-    expect(guard).toMatch(/SPRINT_BASELINE = 161/);
+    // Bumped 160 -> 161 for LMC Wagon 1 (immutable LMC ledger foundation).
+    // Bumped 161 -> 162 for the P0 anon SECURITY DEFINER authorization-bypass
+    // fix (20260722120000) — function bodies + EXECUTE grants only, paired
+    // rollback, RED / human-gated, ships UNAPPLIED.
+    expect(guard).toMatch(/SPRINT_BASELINE = 162/);
   });
 });

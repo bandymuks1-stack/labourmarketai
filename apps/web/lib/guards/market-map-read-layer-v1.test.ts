@@ -324,6 +324,10 @@ describe("NO new DB migration in this PR", () => {
     // (20260720190000_lmc_ledger_foundation_v1, paired rollback). RED /
     // human-gated DRAFT, ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(161);
+    // Bumped 161 -> 162 for the P0 anon SECURITY DEFINER authorization-bypass
+    // fix (20260722120000_secdef_anon_authz_bypass_fix_v1, paired rollback).
+    // RED / human-gated, ships UNAPPLIED; still no migration from the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(162);
   });
 });
