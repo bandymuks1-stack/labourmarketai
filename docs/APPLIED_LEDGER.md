@@ -55,13 +55,73 @@ because `contracts`, `proposals` and `marketplace_listings` were all empty.
 | **Before the fix (fact)** | 54 functions anon-executable; 7 of them exploitable; production carried a live unauthenticated write path. |
 | **What the fix migration guarantees (code)** | `20260722120000_secdef_anon_authz_bypass_fix_v1.sql` rejects unauthenticated callers explicitly, replaces `<>` with `is distinct from`, and revokes `PUBLIC`/`anon` on those **7 exact signatures**. |
 | **Verified so far** | Static contract only — `apps/web/lib/guards/secdef-anon-authz-bypass.test.ts`, all assertions passing (reproduce: `pnpm -F web test lib/guards/secdef-anon-authz-bypass.test.ts`). A raw assertion count is deliberately NOT recorded here: it drifts every time a test is added and then silently disagrees with reality. **The acceptance criterion is the TEN proofs in the verification script, not a test count.** **No behavioural proof against any database has been run yet** (no local Postgres was available: Supabase CLI absent, Docker not running). |
-| **NOT yet true in production** | Nothing. **The fix migration has NOT been applied.** As of this commit production still carries the defect. |
-| **Becomes true only after the owner applies it** | **All TEN** runtime proofs in `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` must be run and recorded — **before** the apply (expected: **FAIL 1, 2, 6, 7, 8, 10 / PASS 3, 4, 5, 9** — the six failures reproduce the defect) and **after** (all ten must PASS). **Evidence that omits PROOF 10 is incomplete and must not be accepted:** PROOF 10 is the only proof that exercises the in-body `auth.uid() is null` guard rather than the ACL. |
+| ~~**NOT yet true in production**~~ | **SUPERSEDED — APPLIED 2026-07-22.** See the applied row below. |
+| ~~**Becomes true only after the owner applies it**~~ | **All TEN** runtime proofs in `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` must be run and recorded — **before** the apply (expected: **FAIL 1, 2, 6, 7, 8, 10 / PASS 3, 4, 5, 9** — the six failures reproduce the defect) and **after** (all ten must PASS). **Evidence that omits PROOF 10 is incomplete and must not be accepted:** PROOF 10 is the only proof that exercises the in-body `auth.uid() is null` guard rather than the ACL. |
 
 **Still outstanding (not fixed by that migration):** the other **47** anon-reachable
 functions — 3 with no authorization logic at all, 40 that currently fail closed but
 should never have been reachable, and the 4 that are intentionally public. Full
 classification: `docs/security/secdef-public-execute-inventory-v1.md`.
+
+### ✅ APPLIED TO PROD — `20260722120000_secdef_anon_authz_bypass_fix_v1`
+
+| Field | Value |
+|---|---|
+| Applied | **2026-07-22**, ledger version `20260722074749` |
+| Method | Supabase MCP `apply_migration` (never `supabase db push`) |
+| PR | #845, squash-merged as **`bfd4a5f883e375034ec94f8d27ddc98d4370c588`** |
+| Reviewed PR HEAD | `75ca5c81b134e59e891f9e0e130a30d811642165` |
+| Migration sha256 | `8b906b1fb51737652fb5e6faac13208188082891e5f23709b08689ae4965f18c` |
+| Rollback | `supabase/rollbacks/20260722120000_secdef_anon_authz_bypass_fix_v1.down.sql`, sha256 `5199e39221ba88821631307f0e1fa244419bccc7a1ebb2b691fdfb5aeed10f00` |
+
+**Pre-apply reproduction (recorded, defect confirmed live).** All ten proofs executed in a
+single transaction ending in `ROLLBACK`. Result matched the predicted matrix exactly:
+**FAIL 1, 2, 6, 7, 8, 10 · PASS 3, 4, 5, 9** (harness counter = 6). The defect was
+reproduced end to end, not merely inferred:
+
+- PROOF 6 — an **anonymous** caller rewrote a listing title to `HIJACKED TITLE`.
+- PROOF 7 — an **anonymous** caller **deleted** the contract, the proposal and the listing
+  (`contracts=0 proposals=0 listings=0`).
+- PROOF 10 — a NULL-identity caller succeeded (`real-row err=NO_ERROR status=closed`), and
+  the missing-id probe returned `listing not found`, proving the row lookup ran **before**
+  any identity check — i.e. the guard did not exist.
+
+**Post-apply verification (recorded).** Same harness, same transaction discipline:
+**all TEN proofs PASS**, harness failure counter **0**, distinct proofs **10**, NULL
+verdicts **0**, invalid verdicts **0**. Decisive line — PROOF 10:
+`missing-id err=not authorized | real-row err=not authorized status=draft` — the explicit
+guard now fires **before** the owner lookup.
+
+**Catalog confirmation after apply:**
+
+| Check | Result |
+|---|---|
+| anon-reachable `SECURITY DEFINER` in `public` | **54 → 47** |
+| the 7: anon EXECUTE | **0/7** |
+| the 7: `PUBLIC` entry in ACL | **0/7** |
+| the 7: authenticated EXECUTE | **7/7** |
+| the 7: NULL guard before owner lookup | **7/7** |
+| the 7: NULL-unsafe `<> auth.uid()` remaining | **0/7** |
+| Leftover verification rows | **0** (`contracts` + `proposals` + `marketplace_listings` = 0) |
+| Intentionally-public RPCs still anon-callable | **4/4** (`submit_company_need_public_v1`, `get_public_business_{profile,listings,services}_v1`) |
+
+**Evidence transport note (for reproducibility).** The shipped harness
+`supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` reports via
+`RAISE NOTICE`, which the Supabase MCP `execute_sql` channel does not return (verified by
+probe: a bare `raise notice` yields `[]`). Under explicit owner authorisation a one-time
+**result-set read-back wrapper** was used instead: identical fixtures, identical function
+calls, identical roles and auth context, identical assertions and failure counter, identical
+order and transaction boundaries — the **only** difference being that each verdict was
+written to a transaction-local table and returned as a result set rather than printed as a
+notice. The wrapper was **not committed** and changed no shipped file. The harness file
+remains byte-identical.
+
+> ⚠️ **This does NOT mean the `SECURITY DEFINER` exposure is resolved.** Seven of
+> fifty-four are fixed. **47 remain anon-reachable**, including **3 with no authorization
+> logic at all** that are stopped only by a `NOT NULL` constraint error — which is a
+> constraint, not a security control. Follow-up audit plan:
+> `docs/security/secdef-remaining-47-audit-plan-v1.md`. The recurrence guard specified
+> there must be a reviewed exact-identity-signature **allowlist**, never a count.
 
 | Repo file | Ledger version | Applied (UTC) | Approved by | What it did |
 |---|---|---|---|---|
