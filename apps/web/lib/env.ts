@@ -8,6 +8,32 @@ import { z } from "zod";
  * optional at build time but REQUIRED in production — they are provided via
  * Vercel environment variables and `.env.local`, never committed.
  */
+
+/**
+ * Treat a blank string as an ABSENT variable, and trim surrounding whitespace.
+ *
+ * Why this exists (2026-07-22 incident): `BILLING_PROVIDER` was set in the Vercel
+ * dashboard to an empty string in both Production and Preview. `z.enum(...)
+ * .default("none")` does NOT rescue that — a Zod default applies only when the
+ * value is `undefined`, and an empty string is present, so the enum rejected it
+ * with `Invalid input`. Every `main` deploy failed for ~19 hours while the live
+ * site kept serving the last good build.
+ *
+ * A dashboard field that has been cleared, or that carries a stray space or a
+ * trailing newline from a copy-paste, means "not configured" — not "invalid".
+ * This maps that intent onto `undefined` so the documented default applies.
+ *
+ * It deliberately does NOT coerce unknown values. `BILLING_PROVIDER=paypal` or a
+ * legacy provider name must still fail loudly: silently rewriting an unrecognised
+ * billing provider to `none` would turn a misconfiguration into a silent
+ * payments-off state, which is a worse failure than a red build.
+ */
+export function blankAsAbsent(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  return trimmed === "" ? undefined : trimmed;
+}
+
 const schema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z
     .string()
@@ -25,7 +51,13 @@ const schema = z.object({
   // a valid test config (sk_test_ + whsec_) via Vercel env / .env.local —
   // never committed. The safety logic lives in lib/billing/config.ts.
   PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
-  BILLING_PROVIDER: z.enum(["stripe", "none"]).default("none"),
+  // Normalised: see `blankAsAbsent` above. A dashboard-set empty string took the
+  // whole production deploy pipeline down on 2026-07-22; `.default()` alone
+  // cannot catch that, because an empty string is present, not absent.
+  BILLING_PROVIDER: z.preprocess(
+    blankAsAbsent,
+    z.enum(["stripe", "none"]).default("none"),
+  ),
   STRIPE_MODE: z.enum(["test", "live"]).default("test"),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
