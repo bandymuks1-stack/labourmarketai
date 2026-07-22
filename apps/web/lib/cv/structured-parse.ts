@@ -19,11 +19,25 @@
 
 export type CvProposalConfidence = "high" | "medium" | "low";
 
+/** A period endpoint at the precision the CV actually stated — never more.
+ *  A bare year keeps month/day null; "2021-03" keeps day null. Downstream
+ *  persistence (lib/cv/period-dates.ts) expands to first/last day of the
+ *  STATED unit, so the worker's real precision is preserved, not invented. */
+export interface CvDatePart {
+  year: number;
+  month: number | null;
+  day: number | null;
+}
+
 export interface CvWorkHistoryProposal {
   /** Employer + role exactly as stated in the CV line (bounded). */
   title: string;
   startYear: number | null;
   endYear: number | null;
+  /** Full-precision period endpoints (deterministic parser only — the AI
+   *  enhancement path still proposes bare years and leaves these unset). */
+  start?: CvDatePart | null;
+  end?: CvDatePart | null;
   isCurrent: boolean;
   confidence: CvProposalConfidence;
   sourceLine: string;
@@ -111,12 +125,14 @@ const DAY = "(?:0[1-9]|[12]\\d|3[01])";
  *  silently lost. */
 const MONTH_FIRST = `(?:(?:${DAY}\\s?[./-]\\s?)?${MONTH}\\s?[./-]\\s?)?`;
 const MONTH_AFTER = `(?:\\s?[./-]\\s?${MONTH}(?:\\s?[./-]\\s?${DAY})?(?!\\d))?`;
-const YEAR_MONTH = `${MONTH_FIRST}(${YEAR})${MONTH_AFTER}`;
+/** One period endpoint, whole token (no inner captures — parsed by
+ *  parseDateToken so the STATED precision survives into the proposal). */
+const DATE_TOKEN = `${MONTH_FIRST}${YEAR}${MONTH_AFTER}`;
 const RANGE_END =
-  `(?:${MONTH_FIRST}(?:19|20)\\d{2}${MONTH_AFTER}` +
+  `(?:${DATE_TOKEN}` +
   "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|наст\\.?|настоящее время)";
 const YEAR_RANGE_RE = new RegExp(
-  `${YEAR_MONTH}\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
+  `(${DATE_TOKEN})\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
   "i",
 );
 /** Standalone date tokens left over once the range fragment is removed. */
@@ -209,9 +225,47 @@ function clampLine(line: string): string {
   return line.length > MAX_LINE ? line.slice(0, MAX_LINE) : line;
 }
 
+/** Days in a calendar month (leap-aware); pure — no clock access. */
+function daysInMonthOf(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+/** Parse one matched DATE_TOKEN at its STATED precision. Calendar-invalid
+ *  input (e.g. "2021-02-30") is REJECTED (null) — never silently clamped. */
+function parseDateToken(token: string): CvDatePart | null {
+  const parts = token.replace(/\s+/g, "").split(/[./-]/).filter(Boolean);
+  const isYear = (s: string) => /^(?:19|20)\d{2}$/.test(s);
+  let year: number, month: number | null = null, day: number | null = null;
+  if (parts.length === 1 && isYear(parts[0])) {
+    year = Number.parseInt(parts[0], 10);
+  } else if (parts.length === 2 && isYear(parts[0])) {
+    year = Number.parseInt(parts[0], 10);
+    month = Number.parseInt(parts[1], 10);
+  } else if (parts.length === 2 && isYear(parts[1])) {
+    month = Number.parseInt(parts[0], 10);
+    year = Number.parseInt(parts[1], 10);
+  } else if (parts.length === 3 && isYear(parts[0])) {
+    year = Number.parseInt(parts[0], 10);
+    month = Number.parseInt(parts[1], 10);
+    day = Number.parseInt(parts[2], 10);
+  } else if (parts.length === 3 && isYear(parts[2])) {
+    day = Number.parseInt(parts[0], 10);
+    month = Number.parseInt(parts[1], 10);
+    year = Number.parseInt(parts[2], 10);
+  } else {
+    return null;
+  }
+  if (month !== null && (month < 1 || month > 12)) return null;
+  if (day !== null) {
+    if (month === null) return null;
+    if (day < 1 || day > daysInMonthOf(year, month)) return null;
+  }
+  return { year, month, day };
+}
+
 function parseYearRange(line: string): {
-  startYear: number | null;
-  endYear: number | null;
+  start: CvDatePart;
+  end: CvDatePart | null;
   isCurrent: boolean;
 } | null {
   const m = YEAR_RANGE_RE.exec(line);
@@ -219,15 +273,19 @@ function parseYearRange(line: string): {
     // single year — end-of-study / certificate style ("2018")
     return null;
   }
-  const startYear = Number.parseInt(m[1], 10);
+  const start = parseDateToken(m[1]);
+  if (!start) return null;
   const isCurrent = CURRENT_RE.test(m[2]);
-  // The end token may carry a month ("2024-11" / "11/2024") — extract the year.
-  const endYearMatch = isCurrent ? null : new RegExp(`(${YEAR})`).exec(m[2]);
-  const endYear = isCurrent || !endYearMatch ? null : Number.parseInt(endYearMatch[1], 10);
-  if (!isCurrent && endYear === null) return null;
-  if (endYear !== null && Number.isNaN(endYear)) return null;
-  if (endYear !== null && endYear < startYear) return null;
-  return { startYear, endYear, isCurrent };
+  const end = isCurrent ? null : parseDateToken(m[2]);
+  if (!isCurrent && !end) return null;
+  if (end) {
+    // Reject only clearly reversed ranges: compare the end's latest possible
+    // day against the start's earliest possible day at stated precision.
+    const startLower = start.year * 10000 + (start.month ?? 1) * 100 + (start.day ?? 1);
+    const endUpper = end.year * 10000 + (end.month ?? 12) * 100 + (end.day ?? 31);
+    if (endUpper < startLower) return null;
+  }
+  return { start, end, isCurrent };
 }
 
 function firstYear(line: string): number | null {
@@ -378,8 +436,8 @@ export function parseCvSections(text: string): CvSectionProposals {
             institution,
             program,
             educationTypeSlug: educationTypeSlugFor(line),
-            startYear: range?.startYear ?? null,
-            endYear: range?.endYear ?? firstYear(line),
+            startYear: range?.start.year ?? null,
+            endYear: range?.end?.year ?? firstYear(line),
             confidence: range ? "medium" : "low",
             sourceLine: line,
           });
@@ -399,8 +457,10 @@ export function parseCvSections(text: string): CvSectionProposals {
           seenTitles.add(key);
           out.workHistory.push({
             title,
-            startYear: range?.startYear ?? null,
-            endYear: range?.endYear ?? null,
+            startYear: range?.start.year ?? null,
+            endYear: range?.end?.year ?? null,
+            start: range?.start ?? null,
+            end: range?.end ?? null,
             isCurrent: range?.isCurrent ?? false,
             confidence: range && hasCompany ? "high" : range ? "medium" : "low",
             sourceLine: line,

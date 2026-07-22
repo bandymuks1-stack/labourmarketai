@@ -147,6 +147,9 @@ describe("parseCvSections", () => {
       expect(w.title).toBe("Murininkas, UAB Statybos testas, Vilnius");
       expect(w.startYear).toBe(2021);
       expect(w.endYear).toBe(2024);
+      // Stated month precision is preserved, not widened to bare years.
+      expect(w.start).toEqual({ year: 2021, month: 3, day: null });
+      expect(w.end).toEqual({ year: 2024, month: 11, day: null });
       expect(w.isCurrent).toBe(false);
       expect(w.confidence).toBe("high"); // range + company marker
     });
@@ -167,14 +170,50 @@ describe("parseCvSections", () => {
       expect(monthFirst.workHistory).toHaveLength(1);
       expect(monthFirst.workHistory[0].startYear).toBe(2019);
       expect(monthFirst.workHistory[0].endYear).toBe(2022);
+      expect(monthFirst.workHistory[0].start).toEqual({ year: 2019, month: 3, day: null });
+      expect(monthFirst.workHistory[0].end).toEqual({ year: 2022, month: 11, day: null });
       expect(monthFirst.workHistory[0].title).toBe("Elektrikas, AB Testo energija");
 
       const dotted = parseCvSections("2020.06 - dabar - Suvirintojas, UAB Metalo testas");
       expect(dotted.workHistory).toHaveLength(1);
       expect(dotted.workHistory[0].startYear).toBe(2020);
       expect(dotted.workHistory[0].endYear).toBeNull();
+      // Ongoing: start precision preserved, no end invented.
+      expect(dotted.workHistory[0].start).toEqual({ year: 2020, month: 6, day: null });
+      expect(dotted.workHistory[0].end).toBeNull();
       expect(dotted.workHistory[0].isCurrent).toBe(true);
       expect(dotted.workHistory[0].title).toBe("Suvirintojas, UAB Metalo testas");
+    });
+
+    it("keeps full-date precision (YYYY-MM-DD and DD.MM.YYYY) in the proposal", () => {
+      const iso = parseCvSections(
+        "2021-03-15 - 2024-11-20 - Murininkas, UAB Statybos testas, Vilnius",
+      );
+      expect(iso.workHistory[0].start).toEqual({ year: 2021, month: 3, day: 15 });
+      expect(iso.workHistory[0].end).toEqual({ year: 2024, month: 11, day: 20 });
+
+      const dayFirst = parseCvSections("15.03.2021 – 20.11.2024 Dažytojas, UAB Spalvos testas");
+      expect(dayFirst.workHistory[0].start).toEqual({ year: 2021, month: 3, day: 15 });
+      expect(dayFirst.workHistory[0].end).toEqual({ year: 2024, month: 11, day: 20 });
+    });
+
+    it("keeps bare-year ranges at year precision (month/day stay null)", () => {
+      const p = parseCvSections("UAB Statyba — mūrininkas 2019–2022");
+      expect(p.workHistory[0].start).toEqual({ year: 2019, month: null, day: null });
+      expect(p.workHistory[0].end).toEqual({ year: 2022, month: null, day: null });
+    });
+
+    it("rejects calendar-invalid dates instead of silently normalising them", () => {
+      // 2021-02-30 does not exist — the range must NOT yield dates and the
+      // parser must NOT clamp it to 2021-02-28.
+      const p = parseCvSections(
+        "2021-02-30 - 2024-11-20 - Murininkas, UAB Statybos testas, Vilnius",
+      );
+      expect(p.workHistory).toHaveLength(1); // company marker still proposes it
+      expect(p.workHistory[0].start ?? null).toBeNull();
+      expect(p.workHistory[0].end ?? null).toBeNull();
+      expect(p.workHistory[0].startYear).toBeNull();
+      expect(p.workHistory[0].endYear).toBeNull();
     });
 
     it("keeps plain year ranges working exactly as before (regression)", () => {

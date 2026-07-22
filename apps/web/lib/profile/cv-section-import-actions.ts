@@ -20,7 +20,8 @@ import {
   classifyAchievementsError,
 } from "@/lib/worker/worker-achievements-model";
 import { getOwnAvailabilityPrefs } from "@/lib/worker/availability-prefs";
-import type { CvAvailabilityHintKey } from "@/lib/cv/structured-parse";
+import type { CvAvailabilityHintKey, CvDatePart } from "@/lib/cv/structured-parse";
+import { periodEndIso, periodStartIso } from "@/lib/cv/period-dates";
 
 /**
  * Confirm actions for the structured CV import review panel (Full CV System
@@ -88,6 +89,10 @@ export async function confirmCvWorkHistoryAction(input: {
   title: string;
   startYear: number | null;
   endYear: number | null;
+  /** Full-precision endpoints from the deterministic parser; when absent
+   *  (AI-enhancement proposals) the bare years above are used. */
+  start?: CvDatePart | null;
+  end?: CvDatePart | null;
   isCurrent: boolean;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
@@ -95,14 +100,16 @@ export async function confirmCvWorkHistoryAction(input: {
 
   const title = (input.title ?? "").trim();
   if (title.length < 3 || title.length > 200) return { ok: false, code: "invalid" };
-  const startedAt =
-    input.startYear && input.startYear >= 1900 && input.startYear <= 2100
-      ? `${input.startYear}-01-01`
-      : null;
-  const endedAt =
-    !input.isCurrent && input.endYear && input.endYear >= 1900 && input.endYear <= 2100
-      ? `${input.endYear}-12-31`
-      : null;
+  const startPart =
+    input.start ??
+    (input.startYear ? { year: input.startYear, month: null, day: null } : null);
+  const endPart =
+    input.end ??
+    (input.endYear ? { year: input.endYear, month: null, day: null } : null);
+  // Stated precision is preserved: Y → Y-01-01/Y-12-31, Y-M → first/last real
+  // day of that month (leap-aware), full date → exact day. Invalid → null.
+  const startedAt = periodStartIso(startPart);
+  const endedAt = input.isCurrent ? null : periodEndIso(endPart);
 
   const { error } = await asAny(ctx.supabase).rpc(
     "save_self_declared_work_history_v1",
