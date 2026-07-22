@@ -3432,6 +3432,11 @@
     "conceptNote": "Concept preview — fictional profiles, not real people. Your real profile is built from your real entries."
   },
   "auth": {
+    "legalNotice": {
+      "signup": "By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
+      "googleLogin": "If you don't have an account yet, continuing with Google will create one. By creating an account you confirm that you have read the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
+      "controller": "The controller of your account data is UAB “Nonstop Group”. Your data is processed to create your account and provide the service; it is not used for marketing without your separate, optional consent."
+    },
     "errors": {
       "userAlreadyRegistered": "This email is already registered. Sign in instead.",
       "passwordTooShort": "Password too short (at least {min} characters).",

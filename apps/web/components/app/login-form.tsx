@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
 import { GoogleButton } from "@/components/app/google-button";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -155,6 +156,12 @@ export function LoginForm() {
           {t("preview_host_notice")}
         </div>
       )}
+
+      {/* The Google button on LOGIN also creates an account for a new Google
+          identity, so the same pre-collection notice must appear here — the
+          OAuth path may not bypass it. Email/password login below creates no
+          account and needs no notice. */}
+      <AuthLegalNotice variant="googleLogin" />
 
       <GoogleButton
         label={t("google_label")}
