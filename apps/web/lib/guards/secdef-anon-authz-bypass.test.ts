@@ -318,6 +318,31 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     expect(proof10).toMatch(/v_listing10/);
   });
 
+  it("neither owner-gate document hardcodes a drift-prone assertion count", () => {
+    // A stale "72 assertions" survived several revisions in both documents and
+    // had to be caught in review. The acceptance criterion is the TEN proofs,
+    // which is stable; a test count is not. Ban the pattern outright so it
+    // cannot silently disagree with reality again.
+    for (const doc of [
+      "docs/security/secdef-anon-authz-bypass-validation-v1.md",
+      "docs/APPLIED_LEDGER.md",
+    ]) {
+      const text = readFileSync(join(REPO_ROOT, doc), "utf-8");
+      const secdefSection = doc.endsWith("APPLIED_LEDGER.md")
+        ? text.slice(
+            text.indexOf("CORRECTION 2026-07-22"),
+            text.indexOf("CORRECTION 2026-07-22") + 6000,
+          )
+        : text;
+      expect(secdefSection, `${doc} must not pin an assertion count`).not.toMatch(
+        /\b\d+\s+assertions\b/i,
+      );
+      expect(secdefSection, `${doc} must not pin an N/N pass count`).not.toMatch(
+        /✅\s*\d+\/\d+/,
+      );
+    }
+  });
+
   it("the apply runbook states the corrected matrix and requires all TEN proofs", () => {
     // Codex round 2: the authoritative operator procedure in §6 still carried the
     // old "1-8 fail / nine pass" wording, contradicting the corrected matrix.
@@ -361,6 +386,42 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
       );
     });
     expect(nullIdentityBlocks).toEqual([10]);
+  });
+
+  it("exercises ALL SEVEN functions as anon — no coverage gap", () => {
+    // Codex found that an earlier revision claimed six-function anon coverage
+    // while actually exercising five: delete_contract_v1 was called only as an
+    // authenticated NON-OWNER in PROOF 3. This asserts the claim mechanically so
+    // it cannot drift again.
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    const anonCalled = new Set<string>();
+    for (const n of [5, 6, 7]) {
+      const block = proofBlock(verification, n);
+      if (!/set local role anon/i.test(block)) continue;
+      for (const m of block.matchAll(/perform public\.(\w+)\(/g)) {
+        anonCalled.add(m[1]);
+      }
+    }
+    // PROOF 10 covers the seventh via an executable role with a NULL identity.
+    const proof10 = proofBlock(verification, 10);
+    for (const m of proof10.matchAll(/perform public\.(\w+)\(/g)) {
+      anonCalled.add(m[1]);
+    }
+    expect([...anonCalled].sort()).toEqual(FUNCTIONS.map((f) => f.name).sort());
+  });
+
+  it("PROOF 7 cannot silently pass when an anon DELETE succeeds", () => {
+    // If an anon delete succeeded, the scalar subqueries return NULL, `NULL =
+    // 'draft'` is NULL, and `if not NULL` is not true — so the proof would print
+    // FAIL without incrementing the failure counter, and the summary could still
+    // announce "ALL 10 PROOFS PASS". coalesce(..., false) closes that.
+    const proof7 = proofBlock(
+      readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8"),
+      7,
+    );
+    expect(proof7).toMatch(/coalesce\(v_pass/);
+    expect(proof7).toMatch(/,\s*false\)/);
+    expect(proof7).toMatch(/count\(\*\) from public\.contracts where id = v_contract\) = 1/);
   });
 
   it("every proof block is delimited exactly once, in order", () => {

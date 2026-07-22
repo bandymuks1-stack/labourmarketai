@@ -100,8 +100,16 @@ uppercase/`left(...,2)` normalisation, and the two differing not-found semantics
 
 ### 5.1 Static contract (DONE, green)
 
-`apps/web/lib/guards/secdef-anon-authz-bypass.test.ts` — **72 assertions, 72 passed**
-(`npx vitest run`, 0.97 s). It pins, per function: the explicit unauthenticated
+`apps/web/lib/guards/secdef-anon-authz-bypass.test.ts` — **all assertions passing**.
+Reproduce: `pnpm -F web test lib/guards/secdef-anon-authz-bypass.test.ts`.
+
+> A raw assertion count is deliberately **not** recorded in this document or in
+> `APPLIED_LEDGER.md`. It drifts every time a test is added and then silently disagrees
+> with reality — which is exactly how a stale "72" survived several revisions here and had
+> to be caught in review. **The acceptance criterion is the TEN proofs in the verification
+> script**, which is a stable contract, not a test count.
+
+It pins, per function: the explicit unauthenticated
 rejection; that the rejection precedes the row lookup; the NULL-safe comparison; the
 absence of any `<>`/`!=` against `auth.uid()`; preservation of `SECURITY DEFINER` and
 `search_path`; and the exact-signature `REVOKE PUBLIC` / `REVOKE anon` / `GRANT
@@ -189,7 +197,7 @@ behind.
 
 | Gate | Result |
 |---|---|
-| New guard test | ✅ 72/72 |
+| New guard test | ✅ all assertions passing (`pnpm -F web test lib/guards/secdef-anon-authz-bypass.test.ts`) |
 | `migration-safety` | see PR checks — the migration is RED by design (`SECURITY DEFINER` + `GRANT`/`REVOKE`) and carries `-- @human-gate-approved`, which permits CI to pass while forcing the human gate |
 | typecheck / lint / full test suite / build | see PR checks |
 

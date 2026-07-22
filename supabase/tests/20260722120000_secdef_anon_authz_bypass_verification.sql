@@ -17,9 +17,18 @@
 --   An `anon` caller loses EXECUTE after the migration, so any anon RPC call is
 --   refused by the PRIVILEGE check and can only ever demonstrate reachability,
 --   never the in-body guard. PROOF 2 therefore performs NO RPC call — it is a
---   pure catalog privilege check. PROOFS 6 and 7 keep their anon calls because
---   they cover the reachability of the OTHER six functions, which is a distinct
---   property, not a second attempt at the guard.
+--   pure catalog privilege check.
+--
+--   ANON REACHABILITY COVERAGE — all SEVEN functions, no gaps:
+--     PROOF 6   update_marketplace_listing_v1                      (1)
+--     PROOF 7   delete_proposal_v1, set_proposal_status_v1,
+--               set_contract_status_v1, delete_marketplace_listing_v1,
+--               delete_contract_v1                                  (5)
+--     PROOF 10  set_marketplace_listing_status_v1                   (1)
+--   PROOF 3 also calls delete_contract_v1, but as an authenticated NON-OWNER,
+--   which is a different property — that is why PROOF 7 calls it as anon too.
+--   (Coverage gap found by Codex review of PR #845: an earlier revision claimed
+--   six-function coverage while actually exercising five.)
 --
 -- SAFETY CONTRACT — verified against the live catalog on 2026-07-22
 --   * ONE transaction, ending in ROLLBACK. There is no COMMIT anywhere.
@@ -265,9 +274,15 @@ begin
   -- <<<PROOF_6_END
 
   -- >>>PROOF_7_BEGIN
-  -- PROOF 7 — BEHAVIOURAL. Reachability of the OTHER four functions. This is a
+  -- PROOF 7 — BEHAVIOURAL. Anon reachability of the FIVE functions not covered
+  --           by PROOF 6 (update_) or PROOF 10 (set_marketplace_listing_status_).
+  --           Together the three proofs call all SEVEN as anon. This is a
   --           distinct property from the in-body guard (PROOF 10) — it asserts
   --           that no anon caller reaches these write paths at all.
+  --
+  --           `delete_contract_v1` is included here deliberately: it is the one
+  --           function PROOF 3 exercises only as an authenticated NON-OWNER, so
+  --           without this call there would be no anon coverage for it at all.
   v_pass := true;
   begin set local role anon; perform public.delete_proposal_v1(v_proposal);
     v_pass := false; exception when others then null; end;
@@ -281,14 +296,25 @@ begin
   begin set local role anon; perform public.delete_marketplace_listing_v1(v_listing);
     v_pass := false; exception when others then null; end;
   reset role;
-  v_pass := v_pass
+  begin set local role anon; perform public.delete_contract_v1(v_contract);
+    v_pass := false; exception when others then null; end;
+  reset role;
+  -- coalesce(): if an anon DELETE succeeded, the scalar subqueries below return
+  -- NULL, `NULL = 'draft'` is NULL, and `if not NULL` is NOT true — the failure
+  -- would print FAIL but never increment v_fails, so the summary could still
+  -- announce "ALL 10 PROOFS PASS". Force NULL to false.
+  v_pass := coalesce(v_pass
         and (select count(*) from public.proposals where id = v_proposal) = 1
         and (select count(*) from public.marketplace_listings where id = v_listing) = 1
+        and (select count(*) from public.contracts where id = v_contract) = 1
         and (select status from public.proposals where id = v_proposal) = 'draft'
-        and (select status from public.contracts where id = v_contract) = 'draft';
+        and (select status from public.contracts where id = v_contract) = 'draft', false);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 7  (other 4 RPCs refuse anon; rows intact)   = %',
-    case when v_pass then 'PASS' else 'FAIL' end;
+  raise notice 'PROOF 7  (other 5 RPCs refuse anon; rows intact)   = %  [contracts=% proposals=% listings=%]',
+    case when v_pass then 'PASS' else 'FAIL' end,
+    (select count(*) from public.contracts where id = v_contract),
+    (select count(*) from public.proposals where id = v_proposal),
+    (select count(*) from public.marketplace_listings where id = v_listing);
   -- <<<PROOF_7_END
 
   -- >>>PROOF_8_BEGIN

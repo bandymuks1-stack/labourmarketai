@@ -54,7 +54,7 @@ because `contracts`, `proposals` and `marketplace_listings` were all empty.
 |---|---|
 | **Before the fix (fact)** | 54 functions anon-executable; 7 of them exploitable; production carried a live unauthenticated write path. |
 | **What the fix migration guarantees (code)** | `20260722120000_secdef_anon_authz_bypass_fix_v1.sql` rejects unauthenticated callers explicitly, replaces `<>` with `is distinct from`, and revokes `PUBLIC`/`anon` on those **7 exact signatures**. |
-| **Verified so far** | Static contract only — 72 assertions in `apps/web/lib/guards/secdef-anon-authz-bypass.test.ts`. **No behavioural proof against any database has been run yet** (no local Postgres was available: Supabase CLI absent, Docker not running). |
+| **Verified so far** | Static contract only — `apps/web/lib/guards/secdef-anon-authz-bypass.test.ts`, all assertions passing (reproduce: `pnpm -F web test lib/guards/secdef-anon-authz-bypass.test.ts`). A raw assertion count is deliberately NOT recorded here: it drifts every time a test is added and then silently disagrees with reality. **The acceptance criterion is the TEN proofs in the verification script, not a test count.** **No behavioural proof against any database has been run yet** (no local Postgres was available: Supabase CLI absent, Docker not running). |
 | **NOT yet true in production** | Nothing. **The fix migration has NOT been applied.** As of this commit production still carries the defect. |
 | **Becomes true only after the owner applies it** | The 9 runtime proofs in `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql` must be run and recorded — before the apply (expected to FAIL, reproducing the defect) and after (must all PASS). |
 
