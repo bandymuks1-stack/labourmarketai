@@ -150,52 +150,104 @@ describe("revoke migration 20260722160000", () => {
     }
   });
 
-  it("re-grants authenticated on everything it revokes", () => {
-    // Load-bearing: RLS policy expressions are privilege-checked against the
-    // querying role, so a revoke without a re-grant is an outage for logged-in
-    // users, not a hardening step.
-    const revoked = [
-      ...revokeStatements.matchAll(
-        /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\(/gi,
-      ),
-    ].map((m) => m[1].toLowerCase());
-
-    expect(revoked.length, "migration revokes nothing").toBeGreaterThan(0);
-
-    const granted = new Set(
+  it("revokes exactly the 43 in-scope functions", () => {
+    const revoked = new Set(
       [
         ...revokeStatements.matchAll(
-          /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\([^)]*\)\s*to\s+([^;]+);/gi,
+          /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\(/gi,
         ),
-      ]
-        .filter((m) => /authenticated/i.test(m[2]))
-        .map((m) => m[1].toLowerCase()),
+      ].map((m) => m[1].toLowerCase()),
     );
-
-    for (const name of new Set(revoked)) {
-      expect(
-        granted.has(name),
-        `public.${name} is revoked from PUBLIC but never re-granted to authenticated — this would break RLS for logged-in users`,
-      ).toBe(true);
-    }
+    expect(revoked.size).toBe(43);
   });
 
-  it("revokes from anon explicitly, not just from PUBLIC", () => {
-    // Revoking PUBLIC alone is not enough if a direct `anon=X` grant also exists;
-    // both paths have to be closed or the fix is cosmetic.
-    const revokeTargets = [
+  it("grants authenticated ONLY to the 8 that would otherwise lose access", () => {
+    // Verified against production `proacl` before the migration was written:
+    // these 8 have `proacl IS NULL`, so `authenticated` reaches them only by
+    // inheriting PUBLIC. The other 25 authenticated-only functions already hold
+    // a direct `authenticated=X` grant and must NOT be re-granted — re-granting
+    // what already exists hides which functions actually depend on this change.
+    // The 9 trigger functions and the 1 dead function get no grant at all.
+    const PUBLIC_ONLY_TODAY = [
+      "can_access_match",
+      "is_admin",
+      "is_employer",
+      "manages_organization",
+      "owns_agency",
+      "owns_company",
+      "owns_worker",
+      "profile_role",
+    ].sort();
+
+    const granted = [
       ...revokeStatements.matchAll(
-        /revoke\s+execute\s+on\s+function\s+public\.[a-z0-9_]+\s*\([^)]*\)\s+from\s+([^;]+);/gi,
+        /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\([^)]*\)\s*to\s+([^;]+);/gi,
+      ),
+    ].map((m) => ({ name: m[1].toLowerCase(), to: m[2].trim() }));
+
+    expect(granted.map((g) => g.name).sort()).toEqual(PUBLIC_ONLY_TODAY);
+  });
+
+  it("grants nothing to service_role", () => {
+    // service_role holds `rolbypassrls`, so RLS never evaluates for it and the
+    // predicate helpers cannot be needed. The only non-test service-role code in
+    // the repo performs plain table operations with zero .rpc() calls. Adding a
+    // service_role grant here would be unjustified privilege, and is outside the
+    // approved scope.
+    const grantTargets = [
+      ...revokeStatements.matchAll(
+        /grant\s+execute\s+on\s+function\s+public\.[a-z0-9_]+\s*\([^)]*\)\s*to\s+([^;]+);/gi,
       ),
     ].map((m) => m[1]);
 
-    expect(revokeTargets.length).toBeGreaterThan(0);
-    for (const target of revokeTargets) {
+    for (const target of grantTargets) {
       expect(
-        /\bpublic\b/i.test(target) && /\banon\b/i.test(target),
-        `revoke target "${target.trim()}" must name both public and anon`,
-      ).toBe(true);
+        /service_role/i.test(target),
+        `grant target "${target}" must not include service_role`,
+      ).toBe(false);
+      expect(
+        /\banon\b|\bpublic\b/i.test(target),
+        `grant target "${target}" must never re-open anon/PUBLIC`,
+      ).toBe(false);
     }
+  });
+
+  it("contains only grant statements — no DDL, no DML, no wildcards", () => {
+    // The approved scope is grants only. Anything else in this file is a scope
+    // violation regardless of how benign it looks.
+    const FORBIDDEN: ReadonlyArray<[RegExp, string]> = [
+      [/create\s+(or\s+replace\s+)?function/i, "CREATE OR REPLACE FUNCTION"],
+      [/\bdrop\s+(function|table|policy|trigger)/i, "DROP"],
+      [/\balter\s+table\b/i, "ALTER TABLE"],
+      [/^\s*(insert|update|delete)\s+/im, "DML"],
+      [/create\s+policy|alter\s+policy|create\s+trigger/i, "policy/trigger change"],
+      [/on\s+all\s+functions\s+in\s+schema/i, "wildcard/schema-wide grant"],
+      [/alter\s+default\s+privileges/i, "ALTER DEFAULT PRIVILEGES"],
+    ];
+    for (const [pattern, label] of FORBIDDEN) {
+      expect(
+        pattern.test(revokeStatements),
+        `migration contains a forbidden ${label} statement`,
+      ).toBe(false);
+    }
+  });
+
+  it("revokes every in-scope function from BOTH public and anon", () => {
+    // Revoking PUBLIC alone is not enough if a direct `anon=X` grant also exists;
+    // both paths must be closed per function or the fix is cosmetic.
+    const fromPublic = new Set<string>();
+    const fromAnon = new Set<string>();
+
+    for (const m of revokeStatements.matchAll(
+      /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\([^)]*\)\s+from\s+([^;]+);/gi,
+    )) {
+      const name = m[1].toLowerCase();
+      if (/\bpublic\b/i.test(m[2])) fromPublic.add(name);
+      if (/\banon\b/i.test(m[2])) fromAnon.add(name);
+    }
+
+    expect(fromPublic.size).toBe(43);
+    expect([...fromPublic].sort()).toEqual([...fromAnon].sort());
   });
 
   it("fails closed inside the transaction on an identity check, not a count", () => {
@@ -210,20 +262,35 @@ describe("revoke migration 20260722160000", () => {
     ).toBe(false);
   });
 
-  it("ships with a rollback that admits what restoring PUBLIC means", () => {
-    const rollback = readFileSync(
-      join(
-        REPO_ROOT,
-        "supabase",
-        "rollbacks",
-        REVOKE_MIGRATION.replace(/\.sql$/, ".down.sql"),
+  it("ships a rollback that can never re-open anon or PUBLIC", () => {
+    // Owner directive: an automatic rollback may NOT re-grant PUBLIC or anon.
+    // A rollback script that quietly restored the default PUBLIC grant would be
+    // the worst failure mode available — it runs under incident time pressure
+    // and looks routine, while re-creating the exact P0 mechanism.
+    const rollback = statementsOnly(
+      readFileSync(
+        join(
+          REPO_ROOT,
+          "supabase",
+          "rollbacks",
+          REVOKE_MIGRATION.replace(/\.sql$/, ".down.sql"),
+        ),
+        "utf-8",
       ),
-      "utf-8",
     );
-    expect(rollback).toMatch(/grant\s+execute\s+on\s+function/i);
-    // The rollback re-opens the exact hole the migration closes. If that is not
-    // written down, someone will run it during an incident believing it is inert.
-    expect(rollback).toMatch(/re-open|reopen|exploitable|P0/i);
+
+    for (const m of rollback.matchAll(
+      /grant\s+execute\s+on\s+function\s+public\.[a-z0-9_]+\s*\([^)]*\)\s*to\s+([^;]+);/gi,
+    )) {
+      expect(
+        /\banon\b|\bpublic\b/i.test(m[1]),
+        `rollback grants to "${m[1].trim()}" — it may never restore anon or PUBLIC`,
+      ).toBe(false);
+    }
+
+    // It must still repair the one thing the forward migration added, so a lost
+    // helper grant has a supported targeted remedy.
+    expect(rollback).toMatch(/to\s+authenticated\s*;/i);
   });
 });
 

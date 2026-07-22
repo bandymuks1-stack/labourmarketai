@@ -384,53 +384,127 @@ migration is applied. It is not a rubber stamp.
 ## 8. Proposed migration — exact scope
 
 `supabase/migrations/20260722160000_secdef_anon_reach_revoke_v1.sql` —
-**DRAFT, NOT APPLIED.**
+**owner-approved 2026-07-22 under a strictly-bounded scope.**
 
 **Does:** for each of the **43** non-allowlisted signatures,
-`REVOKE EXECUTE … FROM public, anon` then `GRANT EXECUTE … TO authenticated, service_role`.
-Ends with an in-transaction assertion that the resulting anon-reachable set is
-*exactly* the four allowlisted signatures — an identity comparison, never a count —
-and a second assertion that none of the four was broken.
+`REVOKE EXECUTE … FROM public` and `REVOKE EXECUTE … FROM anon`. Then
+`GRANT EXECUTE … TO authenticated` on **exactly 8** functions — and only those.
 
-**Does not:** touch the 4 public RPCs; alter any function body; alter any table,
-policy, column or row; drop anything.
+**Does not:** touch the 4 public RPCs; grant anything to `service_role`; grant
+anything to the 9 trigger functions or the dead one; alter any function body;
+alter any table, policy, column or row; drop anything; use any wildcard or
+schema-wide grant.
 
-**Why both grants are re-issued.** `authenticated` and `service_role` currently hold
-EXECUTE *through the very PUBLIC grant being revoked*. Omitting the re-grant would
-turn this into an outage — RLS policy expressions are privilege-checked against the
-querying role, so every policy calling `is_admin()`, `owns_worker()` etc. would fail
-for logged-in users. This is the single largest risk in the change and it is handled
-explicitly.
+### 8.0 The `authenticated` re-grant is deliberately NOT uniform
+
+This is the correction that mattered most, and it came from checking `proacl`
+per function rather than assuming:
+
+| Sub-group | n | `authenticated` today | Action |
+|---|---:|---|---|
+| Mutating RPCs + 3 helpers with a direct `authenticated=X` grant | **25** | direct grant | revoke PUBLIC/anon **only** — no grant |
+| Helpers with `proacl IS NULL` (reach `authenticated` *only* via PUBLIC) | **8** | inherited from PUBLIC | revoke **and** explicit `GRANT … TO authenticated` |
+| Trigger-only | **9** | inherited from PUBLIC | revoke only, **no grant** |
+| Dead (`owns_customer`) | **1** | inherited from PUBLIC | revoke only, **no grant** |
+
+The 8 requiring a grant: `can_access_match(m uuid)`, `is_admin()`,
+`is_employer()`, `manages_organization(org uuid)`, `owns_agency(a uuid)`,
+`owns_company(c uuid)`, `owns_worker(w uuid)`, `profile_role()`.
+
+Omitting those 8 would be an **outage**: RLS policy expressions are
+privilege-checked against the querying role, so every policy calling `is_admin()`,
+`owns_worker()`, `manages_organization()` would stop evaluating for logged-in
+users. Conversely, re-granting the other 25 would be noise that hides which
+functions actually depend on this migration.
+
+### 8.0.1 Why no `service_role` grant
+
+None of the 43 holds a direct `service_role=X` grant — `service_role` also reaches
+them only via PUBLIC, so this migration removes that too. Verified safe two ways:
+
+1. `service_role` has **`rolbypassrls = true`**, so RLS never evaluates for it and
+   the predicate helpers can never be required.
+2. The only non-test service-role code in the repo — `lib/sales/lead-intake.ts` and
+   `app/api/leads/route.ts` — performs plain table operations on `leads`,
+   `waitlist` and `customer_requests` with **zero `.rpc()` calls**.
+
+### 8.0.2 Trigger-only functions confirmed against production
+
+All 9 are attached to exactly one trigger each — `public.companies`,
+`public.organizations`, `public.workers`, `public.profiles`, `auth.users`,
+`public.journal_entry_confirmations`, `public.learning_review_queue`,
+`public.agencies`, `public.companies` — with no direct call site. EXECUTE is
+checked at `CREATE TRIGGER` time, not at fire time, so revoking cannot break a
+write, and they are **not** granted to `authenticated` for convenience.
+
+### 8.0.3 Pre-apply matrix (owner gate requirement)
+
+Expected post-apply state, per group, by exact signature — established from live
+`proacl` before the migration was written:
+
+| Group | n | PUBLIC after | anon after | authenticated after |
+|---|---:|---:|---:|---:|
+| intentionally public | 4 | unchanged (per contract) | **4/4** | unchanged (per contract) |
+| authenticated only | 33 | **0/33** | **0/33** | **33/33** (25 keep direct grant, 8 newly granted) |
+| trigger only | 9 | **0/9** | **0/9** | **0/9** — no grant, none justified |
+| dead or unknown | 1 | **0/1** | **0/1** | **0/1** — no grant, none justified |
+
+Supporting facts, all verified against production:
+
+- all 43 exact signatures exist, each resolving to exactly one function
+  (no overload ambiguity) — asserted continuously by PROOF 3;
+- all 4 allowlist signatures preserved — PROOF 2;
+- the checker fails on a rogue anon/PUBLIC grant — negative control run;
+- the checker fails on an allowlist signature change — condition `[C2]`;
+- the checker fails when documentation falsely marks a GAP as protected —
+  negative control run;
+- the checker passes again after each injected defect is reverted.
 
 ### 8.1 Regression tests
 
 - `supabase/tests/20260722160000_secdef_anon_reach_revoke_verification.sql` —
-  8 proofs, run **before and after** the apply. Two are behavioural (actually
+  **10 proofs**, run **before and after** the apply. Two are behavioural (actually
   becoming `anon` and expecting `42501`), not merely catalog assertions. Reports via
   a **result set**, not `RAISE NOTICE` — deliberately fixing the transport problem
   #846 had to work around by hand at the owner gate. Ends in `ROLLBACK`; writes nothing.
-- Expected **before**: PROOF 1 and PROOF 4 **FAIL** (43 leaked) — that failure *is*
-  the current state being reproduced. Expected **after**: all 8 **PASS**.
-- `apps/web/lib/guards/secdef-anon-allowlist.test.ts` — 9/9 passing.
+- Expected **before**: PROOF 1, 4 and 9 **FAIL** — that failure *is* the current
+  state being reproduced. Expected **after**: all 10 **PASS**.
+- Proof coverage maps to the approved matrix: PROOF 5 is the 33/33 outage check,
+  PROOF 9 asserts the 9 trigger + 1 dead functions hold **no** anon/authenticated
+  grant, PROOF 10 asserts all 9 triggers are still attached, PROOF 3 asserts all 47
+  exact signatures resolve to exactly one function (no overload confusion).
+- `apps/web/lib/guards/secdef-anon-allowlist.test.ts` — **12/12 passing**, including
+  scope assertions: exactly 43 revoked, exactly 8 granted, nothing to `service_role`,
+  no DDL/DML/wildcards, and a rollback that can never re-open anon or PUBLIC.
 
 ### 8.2 Possible product impact
 
 | Surface | Impact |
 |---|---|
 | Anonymous visitors | **None.** No anon call site exists for any of the 43, and no anon-readable table's RLS depends on them. |
-| Logged-in users | **None,** provided the `authenticated` re-grant applies — asserted by PROOF 5 and by the static guard's "re-grants authenticated on everything it revokes" test. |
+| Logged-in users | **None,** provided the 8 explicit `authenticated` grants apply — asserted in-transaction by the migration itself and by PROOF 5 (33/33). |
+| `service_role` jobs | **None.** Loses EXECUTE via PUBLIC, but has `rolbypassrls` and no `.rpc()` call site. |
 | Public business profiles | **None.** Untouched; PROOF 2 and PROOF 7 verify they still serve anon. |
 | Public company-need intake | **None.** Untouched; PROOF 8 verifies the table stays sealed. |
-| Trigger-driven writes | **None.** EXECUTE is checked at `CREATE TRIGGER` time, not at fire time. |
-| `service_role` jobs | **None.** Re-granted explicitly. |
+| Trigger-driven writes | **None.** EXECUTE is checked at `CREATE TRIGGER` time, not at fire time; PROOF 10 confirms all 9 stay attached. |
 
 ### 8.3 Rollback
 
-`supabase/rollbacks/20260722160000_secdef_anon_reach_revoke_v1.down.sql` restores
-the `PUBLIC` grant on all 43. It states plainly that running it **re-opens the exact
-hole** the migration closes, and recommends re-granting a single function instead if
-an incident occurs. The forward migration is grant-only — nothing created, nothing
-dropped, no body or data changed — so there is no data to restore.
+`supabase/rollbacks/20260722160000_secdef_anon_reach_revoke_v1.down.sql`
+**deliberately does not reverse the security change.** Per owner directive, an
+automatic rollback may not re-grant `PUBLIC`, may not re-grant `anon`, and may not
+restore the 47 anon-reachable functions. That constraint is *encoded*, not merely
+documented: the static guard fails if any rollback grant names anon or PUBLIC.
+
+The forward migration created nothing, dropped nothing, altered no table, policy,
+trigger or body, and wrote no data — so there is no state to restore. Its only
+additive change is the 8 `authenticated` grants, and the rollback re-asserts exactly
+those (idempotent), which repairs the single realistic failure mode without
+re-opening anonymous access.
+
+**The only supported remediation** if a legitimate logged-in path returns `42501` is
+a targeted `GRANT EXECUTE ON FUNCTION public.<name>(<exact identity args>) TO
+authenticated;` for that one signature — never widening to PUBLIC or anon.
 
 ---
 
