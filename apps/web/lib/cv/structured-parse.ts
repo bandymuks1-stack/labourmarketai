@@ -100,11 +100,29 @@ const MAX_LINE = 300;
 // ── Lexicons (lt / en / ru / de / nl — the active locale set) ────────────────
 
 const YEAR = "(?:19|20)\\d{2}";
+const MONTH = "(?:0[1-9]|1[0-2])";
+const DAY = "(?:0[1-9]|[12]\\d|3[01])";
+/** A period endpoint as CVs actually write it: "2021", "2021-03", "2021.03",
+ *  "2021/03", "2021-03-15", month-first "03/2021" or day-first "15.03.2021".
+ *  Only the YEAR is ever extracted as data (the proposal contract is
+ *  year-granular) — but month/day parts must be RECOGNISED, otherwise
+ *  "2021-03 - 2024-11" neither parses as a range nor strips cleanly, and the
+ *  saved title keeps residue like "03 - -11 - …" while both years are
+ *  silently lost. */
+const MONTH_FIRST = `(?:(?:${DAY}\\s?[./-]\\s?)?${MONTH}\\s?[./-]\\s?)?`;
+const MONTH_AFTER = `(?:\\s?[./-]\\s?${MONTH}(?:\\s?[./-]\\s?${DAY})?(?!\\d))?`;
+const YEAR_MONTH = `${MONTH_FIRST}(${YEAR})${MONTH_AFTER}`;
 const RANGE_END =
-  "(?:(?:19|20)\\d{2}|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|наст\\.?|настоящее время)";
+  `(?:${MONTH_FIRST}(?:19|20)\\d{2}${MONTH_AFTER}` +
+  "|dabar|šiuo metu|iki dabar|now|present|current|heute|heden|наст\\.?|настоящее время)";
 const YEAR_RANGE_RE = new RegExp(
-  `(${YEAR})\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
+  `${YEAR_MONTH}\\s*(?:[–—-]|iki|to|until|bis|tot|по|до)\\s*(${RANGE_END})`,
   "i",
+);
+/** Standalone date tokens left over once the range fragment is removed. */
+const YEAR_MONTH_TOKEN_RE = new RegExp(
+  `(?:\\b${DAY}\\s?[./-]\\s?)?(?:\\b${MONTH}\\s?[./-]\\s?)?\\b${YEAR}\\b${MONTH_AFTER}`,
+  "g",
 );
 const CURRENT_RE =
   /dabar|šiuo metu|now|present|current|heute|heden|наст|настоящее/i;
@@ -203,7 +221,10 @@ function parseYearRange(line: string): {
   }
   const startYear = Number.parseInt(m[1], 10);
   const isCurrent = CURRENT_RE.test(m[2]);
-  const endYear = isCurrent ? null : Number.parseInt(m[2], 10);
+  // The end token may carry a month ("2024-11" / "11/2024") — extract the year.
+  const endYearMatch = isCurrent ? null : new RegExp(`(${YEAR})`).exec(m[2]);
+  const endYear = isCurrent || !endYearMatch ? null : Number.parseInt(endYearMatch[1], 10);
+  if (!isCurrent && endYear === null) return null;
   if (endYear !== null && Number.isNaN(endYear)) return null;
   if (endYear !== null && endYear < startYear) return null;
   return { startYear, endYear, isCurrent };
@@ -218,7 +239,7 @@ function firstYear(line: string): number | null {
 function stripDates(line: string): string {
   return line
     .replace(YEAR_RANGE_RE, " ")
-    .replace(new RegExp(`\\b${YEAR}\\b`, "g"), " ")
+    .replace(YEAR_MONTH_TOKEN_RE, " ")
     .replace(/\s{2,}/g, " ")
     .replace(/^[\s,;·—–-]+|[\s,;·—–-]+$/g, "")
     .trim();

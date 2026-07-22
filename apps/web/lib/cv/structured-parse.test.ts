@@ -132,4 +132,81 @@ describe("parseCvSections", () => {
     expect(p.languages.find((l) => l.lang === "en")?.level).toBe("C1");
     expect(p.availability.map((h) => h.key)).toContain("willingToRelocate");
   });
+
+  // Production repro (worker E2E, 2026-07-22): a CV line using year-month
+  // periods ("2021-03 - 2024-11") lost BOTH years and saved the corrupted
+  // title "03 - -11 - Murininkas, …" into engagement_contexts, and the second
+  // experience line (no company-form marker) produced no proposal at all.
+  describe("year-month period formats", () => {
+    it("parses 'YYYY-MM - YYYY-MM' ranges and keeps the title clean", () => {
+      const p = parseCvSections(
+        "2021-03 - 2024-11 - Murininkas, UAB Statybos testas, Vilnius",
+      );
+      expect(p.workHistory).toHaveLength(1);
+      const w = p.workHistory[0];
+      expect(w.title).toBe("Murininkas, UAB Statybos testas, Vilnius");
+      expect(w.startYear).toBe(2021);
+      expect(w.endYear).toBe(2024);
+      expect(w.isCurrent).toBe(false);
+      expect(w.confidence).toBe("high"); // range + company marker
+    });
+
+    it("proposes a year-month experience line even without a company marker", () => {
+      const p = parseCvSections(
+        "2018-05 - 2021-02 - Pagalbinis darbininkas, statybos objektai, Kaunas",
+      );
+      expect(p.workHistory).toHaveLength(1);
+      const w = p.workHistory[0];
+      expect(w.title).toBe("Pagalbinis darbininkas, statybos objektai, Kaunas");
+      expect(w.startYear).toBe(2018);
+      expect(w.endYear).toBe(2021);
+    });
+
+    it("parses month-first 'MM/YYYY – MM/YYYY' and dotted 'YYYY.MM' ranges", () => {
+      const monthFirst = parseCvSections("03/2019 – 11/2022 Elektrikas, AB Testo energija");
+      expect(monthFirst.workHistory).toHaveLength(1);
+      expect(monthFirst.workHistory[0].startYear).toBe(2019);
+      expect(monthFirst.workHistory[0].endYear).toBe(2022);
+      expect(monthFirst.workHistory[0].title).toBe("Elektrikas, AB Testo energija");
+
+      const dotted = parseCvSections("2020.06 - dabar - Suvirintojas, UAB Metalo testas");
+      expect(dotted.workHistory).toHaveLength(1);
+      expect(dotted.workHistory[0].startYear).toBe(2020);
+      expect(dotted.workHistory[0].endYear).toBeNull();
+      expect(dotted.workHistory[0].isCurrent).toBe(true);
+      expect(dotted.workHistory[0].title).toBe("Suvirintojas, UAB Metalo testas");
+    });
+
+    it("keeps plain year ranges working exactly as before (regression)", () => {
+      const p = parseCvSections("UAB Statyba — mūrininkas 2019–2022");
+      expect(p.workHistory).toHaveLength(1);
+      expect(p.workHistory[0].startYear).toBe(2019);
+      expect(p.workHistory[0].endYear).toBe(2022);
+      expect(p.workHistory[0].title).toBe("UAB Statyba — mūrininkas");
+    });
+
+    it("parses full-date ranges (YYYY-MM-DD and day-first DD.MM.YYYY)", () => {
+      const iso = parseCvSections(
+        "2021-03-15 - 2024-11-30 - Murininkas, UAB Statybos testas, Vilnius",
+      );
+      expect(iso.workHistory).toHaveLength(1);
+      expect(iso.workHistory[0].startYear).toBe(2021);
+      expect(iso.workHistory[0].endYear).toBe(2024);
+      expect(iso.workHistory[0].title).toBe("Murininkas, UAB Statybos testas, Vilnius");
+
+      const dayFirst = parseCvSections("15.03.2021 – 20.11.2024 Dažytojas, UAB Spalvos testas");
+      expect(dayFirst.workHistory).toHaveLength(1);
+      expect(dayFirst.workHistory[0].startYear).toBe(2021);
+      expect(dayFirst.workHistory[0].endYear).toBe(2024);
+      expect(dayFirst.workHistory[0].title).toBe("Dažytojas, UAB Spalvos testas");
+    });
+
+    it("never mistakes a plain 'YYYY-YYYY' range for a year-month token", () => {
+      const p = parseCvSections("2019-2022 Mūrininkas, UAB Statybos testas");
+      expect(p.workHistory).toHaveLength(1);
+      expect(p.workHistory[0].startYear).toBe(2019);
+      expect(p.workHistory[0].endYear).toBe(2022);
+      expect(p.workHistory[0].title).toBe("Mūrininkas, UAB Statybos testas");
+    });
+  });
 });
