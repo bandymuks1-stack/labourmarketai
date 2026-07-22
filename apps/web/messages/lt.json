@@ -3435,7 +3435,7 @@
     "legalNotice": {
       "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
       "googleLogin": "Jei paskyros dar neturite, tęsiant su „Google“ ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "controller": "Jūsų paskyros duomenų valdytojas — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
+      "controller": "Jūsų paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
     },
     "errors": {
       "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunk vietoj registracijos.",
