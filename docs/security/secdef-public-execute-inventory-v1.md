@@ -176,11 +176,44 @@ any of these four.
 1. Class B (3 functions): add an explicit unauthenticated rejection, then revoke PUBLIC.
 2. Classes C, D, E (40 functions): revoke PUBLIC per exact signature, keeping the 4 in
    class F explicitly granted to `anon`.
-3. Add a standing guard: a catalog assertion that the count of anon-executable
-   `SECURITY DEFINER` functions in `public` equals exactly 4, so any future migration that
-   reintroduces a PUBLIC grant fails CI.
+3. **Add a standing catalog guard built on an explicit ALLOWLIST — never on a count.**
+
+   > **Owner correction, 2026-07-22.** An earlier draft of this section proposed asserting
+   > that *"the count of anon-executable `SECURITY DEFINER` functions equals exactly 4"*.
+   > **That design is unsafe and must not be used.** A count is not an identity check: if a
+   > future migration exposed a fifth dangerous function while a legitimate public one was
+   > removed or renamed in the same change, the count would still read 4 and the guard
+   > would go green while a new hole was open.
+
+   The correct guard asserts the **exact set**, by schema-qualified name and argument
+   signature:
+
+   ```sql
+   -- must return zero rows
+   select p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' as unexpected
+   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and p.prosecdef
+     and has_function_privilege('anon', p.oid, 'EXECUTE')
+     and (p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')') not in (
+       -- REVIEWED ANON RPC ALLOWLIST — every entry needs a written justification
+       'submit_company_need_public_v1(...)',
+       'get_public_business_profile_v1(p_slug text)',
+       'get_public_business_listings_v1(p_org_id uuid)',
+       'get_public_business_services_v1(p_org_id uuid)'
+     );
+   ```
+
+   Properties the guard must have: (a) a **set** comparison, not a cardinality one;
+   (b) keyed on the **full identity signature**, so an overload cannot slip in under an
+   allowlisted name; (c) failing **in both directions** — an unexpected addition *and* the
+   disappearance of an allowlisted entry both warrant a look; (d) each allowlist entry
+   carries a one-line reason, so adding one is a deliberate, reviewable act.
+
 4. Adopt a migration convention: every `grant execute … to authenticated` must be preceded
    by `revoke execute … from public` for the same signature.
 
 Item 3 is the durable fix. Without it this class of defect will recur — it already
-recurred across two independent migrations five months apart.
+recurred across two independent migrations five months apart. Implement it in the
+follow-up loop described in `docs/security/secdef-remaining-47-audit-plan-v1.md`, **not**
+in the P0 hotfix PR.

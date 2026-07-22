@@ -102,8 +102,21 @@ begin
     case when v_pass then 'PASS' else 'FAIL' end, v_count;
 
   -- ====================================================================
-  -- PROOF 2 — an unauthenticated caller (auth.uid() IS NULL) cannot bypass.
-  --           This is the exact defect. State is compared before/after.
+  -- PROOF 2 — `anon` cannot mutate. State is compared before/after.
+  --
+  -- SCOPE OF THIS PROOF — read carefully, it is narrower than it looks.
+  --   PRE-apply  : anon HAS execute, so the call enters the body and the
+  --                NULL-unsafe check lets it through — this FAILS, and that
+  --                failure is the reproduction of the defect.
+  --   POST-apply : anon has NO execute, so the call is refused by the
+  --                PRIVILEGE check and never enters the function body.
+  --                Post-apply this proves the ACL layer ONLY. It does NOT
+  --                exercise the new `auth.uid() is null` guard.
+  --
+  --   The in-body guard is proven separately by PROOF 10, which calls through
+  --   a role that CAN execute with the JWT identity unset. Both layers matter:
+  --   PROOF 2 = reachability removed, PROOF 10 = defence-in-depth intact.
+  --   (Distinction raised by Codex review of PR #845.)
   -- ====================================================================
   select status into v_status from public.marketplace_listings where id = v_listing;
   begin
@@ -117,7 +130,7 @@ begin
   select status into v_title from public.marketplace_listings where id = v_listing;
   v_pass := (v_err <> 'NO_ERROR') and (v_title = v_status) and (v_title = 'draft');
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 2 (anon cannot mutate; state unchanged)     = %  [err=% status: %->%]',
+  raise notice 'PROOF 2 (anon blocked at the ACL; state unchanged)= %  [err=% status: %->%]',
     case when v_pass then 'PASS' else 'FAIL' end, v_err, v_status, v_title;
 
   -- ====================================================================

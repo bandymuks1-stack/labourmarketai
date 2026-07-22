@@ -272,6 +272,21 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     expect(proof10).toMatch(/set_config\('request\.jwt\.claims',\s*''/);
   });
 
+  it("does not overclaim what the anon-role proofs demonstrate post-apply", () => {
+    // Codex review: post-apply, an `anon` call is refused by the PRIVILEGE
+    // check and never enters the body, so it cannot prove the in-body guard.
+    // PROOF 2 must say so and defer to PROOF 10 rather than claim it proves
+    // "the exact defect".
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    const proof2 = verification.slice(
+      verification.indexOf("PROOF 2"),
+      verification.indexOf("PROOF 3"),
+    );
+    expect(proof2).toMatch(/does NOT exercise|ACL layer ONLY/i);
+    expect(proof2).toMatch(/PROOF 10/);
+    expect(proof2).not.toMatch(/This is the exact defect/i);
+  });
+
   it("states the corrected pre-apply expectation (not the wrong '1-8 all fail')", () => {
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
     expect(verification).toMatch(/EXPECTED FAIL\s*:\s*1,\s*2,\s*6,\s*7,\s*8,\s*10/);
