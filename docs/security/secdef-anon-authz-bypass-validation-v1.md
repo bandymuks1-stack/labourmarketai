@@ -141,7 +141,7 @@ The proof is written and shipped, ready to run:
 | 4 | the legitimate owner **can** still act (no functional regression) |
 | 5 | a non-existent id is not answered as authorized |
 | 6 | content (title) is unchanged after a rejected UPDATE |
-| 7 | the other four RPCs also refuse `anon`, and rows stay intact |
+| 7 | the other **five** RPCs also refuse `anon` (`delete_proposal_v1`, `set_proposal_status_v1`, `set_contract_status_v1`, `delete_marketplace_listing_v1`, `delete_contract_v1`), and rows stay intact. Together with PROOF 6 (`update_`) and PROOF 10 (`set_marketplace_listing_status_`) this gives anon coverage of **all seven** |
 | 8 | catalog: no `PUBLIC` or `anon` entry in any of the seven ACLs |
 | 9 | catalog: `authenticated` retains EXECUTE on all seven (product contract) |
 | **10** | **the in-body guard itself** — a role that *can* execute (`authenticated`) with the JWT identity **unset**, so `auth.uid()` is NULL; must be refused with the row unchanged |

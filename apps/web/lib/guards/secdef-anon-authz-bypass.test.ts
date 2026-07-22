@@ -355,6 +355,32 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     expect(runbook).toMatch(/All TEN proofs must PASS/i);
   });
 
+  it("no owner-gate document instructs the operator to record fewer than ten proofs", () => {
+    // Codex round 7: the ledger still told the operator to run and record "the 9
+    // runtime proofs". That is a false-negative in the ACCEPTANCE EVIDENCE — an
+    // operator following it would omit PROOF 10, the only proof of the in-body
+    // guard, and the incomplete record would look complete. This tightens the
+    // existing doc-consistency assertion above; it is not a new general guard.
+    for (const doc of [
+      "docs/security/secdef-anon-authz-bypass-validation-v1.md",
+      "docs/APPLIED_LEDGER.md",
+    ]) {
+      const text = readFileSync(join(REPO_ROOT, doc), "utf-8");
+      const scope = doc.endsWith("APPLIED_LEDGER.md")
+        ? text.slice(
+            text.indexOf("CORRECTION 2026-07-22"),
+            text.indexOf("CORRECTION 2026-07-22") + 6000,
+          )
+        : text;
+      expect(scope, `${doc} must not cite a stale proof count`).not.toMatch(
+        /\b(nine|9)\s+(runtime\s+)?proofs\b/i,
+      );
+      expect(scope, `${doc} must not describe PROOF 7 as four RPCs`).not.toMatch(
+        /other\s+four\s+RPCs/i,
+      );
+    }
+  });
+
   it("PROOF 2 is catalog-only — it issues no RPC call at all", () => {
     // Resolution of the repeatedly-raised review point: rather than keep
     // explaining that an anon RPC call can only prove reachability, the call was
