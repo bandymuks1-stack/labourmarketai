@@ -184,10 +184,24 @@ are applied manually via Supabase MCP `apply_migration` — **never** `supabase 
 **Order of operations:**
 
 1. **Reproduce first.** Run `supabase/tests/20260722120000_secdef_anon_authz_bypass_verification.sql`
-   against production. Expect proofs 1–8 to FAIL. Record the output.
+   against production and record the output. Expect **exactly**:
+
+   | | Proofs |
+   |---|---|
+   | **FAIL** (the defect) | **1, 2, 6, 7, 8, 10** |
+   | **PASS** (correct even while vulnerable) | **3, 4, 5, 9** |
+
+   A PASS on 3, 4, 5 or 9 is **expected and is not a problem** — 3 because a
+   non-NULL *wrong* uid still trips the old `<>` comparison; 4 because the owner is
+   legitimately allowed; 5 because the old function raises `listing not found` for an
+   unknown id, which the predicate accepts as a refusal; 9 because `authenticated`
+   already holds EXECUTE. **If any of 1, 2, 6, 7, 8, 10 unexpectedly PASSES, stop** —
+   the production state is not what this fix was written against.
 2. **Apply.** Supabase MCP `apply_migration`, name
    `20260722120000_secdef_anon_authz_bypass_fix_v1`, body = the migration file verbatim.
-3. **Verify.** Re-run the same script. **All nine proofs must PASS.** Record the output.
+3. **Verify.** Re-run the same script. **All TEN proofs must PASS.** Record the output.
+   Proof 10 is part of the acceptance criterion — it is the only proof that exercises
+   the in-body `auth.uid() is null` guard rather than the ACL.
 4. **Confirm the ACLs directly:**
 
 ```sql

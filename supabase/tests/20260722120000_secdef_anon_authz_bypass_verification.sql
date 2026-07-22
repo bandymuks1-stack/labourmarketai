@@ -50,6 +50,8 @@ declare
   v_contract   uuid;
   v_proposal   uuid;
   v_listing    uuid;
+  v_listing10  uuid;
+  v_err2       text;
   v_status     text;
   v_title      text;
   v_count      int;
@@ -303,25 +305,63 @@ begin
   -- true),''), (nullif(current_setting('request.jwt.claims', true),'')::jsonb
   -- ->> 'sub'))::uuid` — an empty setting is safely NULL.
   --
-  -- Pre-apply this FAILS (old code falls through and mutates the row);
-  -- post-apply it must PASS with the row untouched.
+  -- It has TWO parts, because "an exception was raised" is not enough:
+  --   10a  a MISSING id, asserting WHICH error is raised. This isolates the
+  --        explicit guard from the ownership comparison, and is independent of
+  --        every earlier fixture.
+  --   10b  a REAL row from its OWN fresh fixture, asserting unchanged state.
+  --
+  -- Pre-apply BOTH fail (10a gets 'listing not found' because the lookup runs
+  -- first; 10b is mutated because the NULL-unsafe comparison falls through).
+  -- Post-apply both must raise 'not authorized' with the row untouched.
+  -- (Both refinements came from Codex review of PR #845.)
   -- ====================================================================
-  select status into v_status from public.marketplace_listings where id = v_listing;
+  -- 10a ISOLATES THE GUARD by using a NON-EXISTENT id and asserting WHICH error
+  -- is raised. This is what distinguishes the explicit guard from the ownership
+  -- comparison — an assertion of "some exception + unchanged state" would pass
+  -- even if the guard were deleted, because `v_owner is distinct from NULL` is
+  -- TRUE and would raise 'not authorized' anyway.
+  --     guard PRESENT -> 'not authorized'   (raised BEFORE the owner lookup)
+  --     guard ABSENT  -> 'listing not found' (the lookup ran first)
+  -- Using a missing id also makes this proof independent of every earlier
+  -- fixture — necessary because in the VULNERABLE pre-apply run PROOF 7 really
+  -- does delete v_listing as anon, which would otherwise give PROOF 10
+  -- 'listing not found' and a FAIL for the wrong reason.
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims', '', true);
     perform set_config('request.jwt.claim.sub', '', true);
-    perform public.set_marketplace_listing_status_v1(v_listing, 'closed');
+    perform public.set_marketplace_listing_status_v1(gen_random_uuid(), 'closed');
     v_err := 'NO_ERROR';
   exception when others then
-    v_err := sqlstate;
+    v_err := sqlerrm;
   end;
   reset role;
-  select status into v_title from public.marketplace_listings where id = v_listing;
-  v_pass := (v_err <> 'NO_ERROR') and (v_title = v_status);
+
+  -- 10b asserts unchanged state on a REAL row, using its OWN fresh fixture
+  -- created here so no earlier proof can have deleted it.
+  insert into public.marketplace_listings
+      (owner_id, listing_kind, category, title, status)
+    values (v_owner, 'sale', 'tools', 'P0 verification listing 10', 'draft')
+    returning id into v_listing10;
+  begin
+    set local role authenticated;
+    perform set_config('request.jwt.claims', '', true);
+    perform set_config('request.jwt.claim.sub', '', true);
+    perform public.set_marketplace_listing_status_v1(v_listing10, 'closed');
+    v_err2 := 'NO_ERROR';
+  exception when others then
+    v_err2 := sqlerrm;
+  end;
+  reset role;
+  select status into v_title from public.marketplace_listings where id = v_listing10;
+
+  v_pass := (v_err = 'not authorized')
+        and (v_err2 = 'not authorized')
+        and (v_title = 'draft');
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 10 (NULL identity blocked BY THE GUARD, not the ACL) = %  [err=% status: %->%]',
-    case when v_pass then 'PASS' else 'FAIL' end, v_err, v_status, v_title;
+  raise notice 'PROOF 10 (explicit NULL guard fires BEFORE the lookup)= %  [missing-id err=% | real-row err=% status=%]',
+    case when v_pass then 'PASS' else 'FAIL' end, v_err, v_err2, v_title;
 
   -- --------------------------------------------------------------------
   raise notice '=====================================================';

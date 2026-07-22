@@ -71,6 +71,17 @@ function statementsOnly(sql: string): string {
     .join("\n");
 }
 
+/** The PROOF 10 section only. Anchored on its banner rather than on the first
+ *  occurrence of the string "PROOF 10", because PROOF 2's comment legitimately
+ *  cross-references PROOF 10 — anchoring on that would swallow PROOF 2..9 and
+ *  make these assertions meaningless. */
+function proof10Block(verification: string): string {
+  const anchor = "PROOF 10 — THE GUARD ITSELF";
+  const start = verification.indexOf(anchor);
+  expect(start, "PROOF 10 banner present").toBeGreaterThan(-1);
+  return verification.slice(start);
+}
+
 /** Body of one `create or replace function public.<name>(...) ... $function$;` block. */
 function bodyOf(sql: string, name: string): string {
   const start = sql.indexOf(`create or replace function public.${name}(`);
@@ -267,9 +278,47 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     // Proof 10 must therefore use a role that CAN execute while leaving the JWT
     // identity unset, so auth.uid() is NULL and the guard is the only barrier.
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    const proof10 = verification.slice(verification.indexOf("PROOF 10"));
+    const proof10 = proof10Block(verification);
     expect(proof10).toMatch(/set local role authenticated/i);
     expect(proof10).toMatch(/set_config\('request\.jwt\.claims',\s*''/);
+  });
+
+  it("PROOF 10 isolates the guard by asserting WHICH error, on a missing id", () => {
+    // Codex round 2: asserting only "an exception + unchanged state" would still
+    // pass if the explicit `auth.uid() is null` guard were deleted, because
+    // `v_owner is distinct from NULL` is TRUE and raises 'not authorized' anyway.
+    // Discriminating on a MISSING id separates the two:
+    //   guard present -> 'not authorized'    (fires before the owner lookup)
+    //   guard absent  -> 'listing not found' (the lookup ran first)
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    const proof10 = proof10Block(verification);
+    expect(proof10).toMatch(/gen_random_uuid\(\)/);
+    expect(proof10).toMatch(/sqlerrm/);
+    expect(proof10).toMatch(/v_err\s*=\s*'not authorized'/);
+    // and it must NOT rely on sqlstate alone — both paths raise P0001
+    expect(proof10).not.toMatch(/v_err\s*:=\s*sqlstate/);
+  });
+
+  it("PROOF 10 uses its own fixture, so PROOF 7 cannot destroy it pre-apply", () => {
+    // Codex round 2: in the vulnerable pre-apply run PROOF 7 successfully deletes
+    // v_listing as anon, so a PROOF 10 that reused it would report FAIL for the
+    // wrong reason ('listing not found') without reproducing the guard defect.
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    const proof10 = proof10Block(verification);
+    expect(proof10).toMatch(/insert into public\.marketplace_listings/);
+    expect(proof10).toMatch(/v_listing10/);
+  });
+
+  it("the apply runbook states the corrected matrix and requires all TEN proofs", () => {
+    // Codex round 2: the authoritative operator procedure in §6 still carried the
+    // old "1-8 fail / nine pass" wording, contradicting the corrected matrix.
+    const runbook = readFileSync(
+      join(REPO_ROOT, "docs/security/secdef-anon-authz-bypass-validation-v1.md"),
+      "utf-8",
+    );
+    expect(runbook).not.toMatch(/Expect proofs 1[–-]8 to FAIL/i);
+    expect(runbook).not.toMatch(/All nine proofs must PASS/i);
+    expect(runbook).toMatch(/All TEN proofs must PASS/i);
   });
 
   it("does not overclaim what the anon-role proofs demonstrate post-apply", () => {
