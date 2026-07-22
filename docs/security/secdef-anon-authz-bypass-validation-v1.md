@@ -128,7 +128,7 @@ The proof is written and shipped, ready to run:
 | Proof | Asserts |
 |---|---|
 | 1 | `anon` holds no EXECUTE on any of the seven |
-| 2 | an unauthenticated caller cannot mutate — **row state compared before/after**, not just the exception |
+| 2 | **catalog, by exact identity signature** — no `anon` EXECUTE on any of the seven, and all seven signatures still exist (so a typo or signature drift cannot make it pass vacuously). **Issues no RPC call by design** — see the note below |
 | 3 | an authenticated non-owner cannot UPDATE or DELETE — state and row count compared |
 | 4 | the legitimate owner **can** still act (no functional regression) |
 | 5 | a non-existent id is not answered as authorized |
@@ -142,13 +142,33 @@ The script runs inside one transaction ending in `ROLLBACK`, contains no `COMMIT
 only rows it creates itself, and finishes with a row-count query proving it left nothing
 behind.
 
-> **Proof 10 was added after Codex review of this PR.** Proofs 2/5/6/7 call as `anon` —
-> but *after* the migration `anon` holds no EXECUTE, so those calls are refused by the
-> **privilege** check and never enter the function body. They therefore cannot demonstrate
-> that the new `auth.uid() is null` guard works. Proof 10 closes that gap by using an
-> executable role with a NULL identity, which is the only way to exercise the guard
-> behaviourally. `auth.uid()` resolves an empty setting to NULL via
+> **Division of labour between the proofs — settled after four Codex review rounds.**
+>
+> - **Catalog proofs (no RPC call): 1, 2, 8, 9.**
+> - **Behavioural proofs (real RPC calls): 3, 4, 5, 6, 7, 10.**
+> - **PROOF 10 is the one and only discriminating proof of the in-body
+>   `auth.uid() is null` guard.** No other proof claims to test it.
+>
+> Why: after the migration `anon` holds no EXECUTE, so *any* anon RPC call is refused by
+> the **privilege** check and never enters the function body — it can only ever demonstrate
+> reachability, never the guard. Rather than keep documenting that caveat on a call that
+> duplicated PROOF 10's subject without its discriminating power, **the RPC call was
+> removed from PROOF 2 entirely.** PROOF 2 is now a pure catalog check, made stronger than
+> PROOF 1 by resolving each of the seven *exact identity signatures* (PROOF 1 matches by
+> name, so an overload would escape it) and by asserting all seven still exist.
+>
+> PROOFS 6 and 7 keep their anon calls because they cover the **reachability of the other
+> six functions** — a distinct property, not a second attempt at the guard.
+>
+> PROOF 10 uses an executable role with a NULL identity, which is the only way to exercise
+> the guard behaviourally, and discriminates on *which* error via a missing id so it cannot
+> pass if the guard were deleted. `auth.uid()` resolves an empty setting to NULL via
 > `nullif(current_setting(...), '')`, verified against the live `auth.uid()` definition.
+>
+> Each proof is delimited in the script by a unique `>>>PROOF_n_BEGIN` / `<<<PROOF_n_END`
+> marker pair, and the guard test extracts blocks by those exact boundaries — never by
+> scanning for the first occurrence of a shared substring, which previously caused several
+> assertions to pass vacuously.
 
 **Run it twice and record both outputs.**
 

@@ -9,6 +9,18 @@
 --   TEXT; this script proves DATABASE BEHAVIOUR. Both are required — neither
 --   substitutes for the other.
 --
+-- DIVISION OF LABOUR BETWEEN THE PROOFS (settled after Codex review of PR #845)
+--   CATALOG proofs (no RPC call at all): 1, 2, 8, 9.
+--   BEHAVIOURAL proofs (real RPC calls): 3, 4, 5, 6, 7, 10.
+--   *** PROOF 10 is the ONE AND ONLY discriminating proof of the in-body
+--       `auth.uid() is null` guard. *** No other proof claims to test it.
+--   An `anon` caller loses EXECUTE after the migration, so any anon RPC call is
+--   refused by the PRIVILEGE check and can only ever demonstrate reachability,
+--   never the in-body guard. PROOF 2 therefore performs NO RPC call — it is a
+--   pure catalog privilege check. PROOFS 6 and 7 keep their anon calls because
+--   they cover the reachability of the OTHER six functions, which is a distinct
+--   property, not a second attempt at the guard.
+--
 -- SAFETY CONTRACT — verified against the live catalog on 2026-07-22
 --   * ONE transaction, ending in ROLLBACK. There is no COMMIT anywhere.
 --   * NO DDL. No CREATE / ALTER / DROP / TRUNCATE / GRANT / REVOKE.
@@ -26,18 +38,14 @@
 --     as owner/non-owner identities and are never modified. No identity is
 --     created.
 --   * State is compared BEFORE and AFTER every rejected attempt that targets a
---     real row (PROOFS 2, 3, 4, 6, 7, 10b), so a silently-succeeding call
---     cannot pass as a refusal. PROOFS 5 and 10a deliberately target a
---     non-existent id and therefore assert on the ERROR IDENTITY instead —
---     for 10a that discrimination is the whole point of the proof.
+--     real row (PROOFS 3, 4, 6, 7, 10b), so a silently-succeeding call cannot
+--     pass as a refusal. PROOFS 5 and 10a deliberately target a non-existent id
+--     and therefore assert on the ERROR IDENTITY instead — for 10a that
+--     discrimination is the whole point of the proof.
 --
 -- HOW TO RUN
 --   Supabase Dashboard → SQL Editor, or psql as a superuser/postgres role.
 --   Run the ENTIRE file as one script. Read the NOTICE output.
---
--- HOW TO READ THE RESULT
---   Every proof prints `PROOF n ... = PASS` or `= FAIL`. Any FAIL means the fix
---   is not effective — stop and do not proceed.
 --
 -- WHEN TO RUN — AND EXACTLY WHAT TO EXPECT
 --   1. BEFORE the production apply, against the VULNERABLE state:
@@ -50,8 +58,12 @@
 --       EXECUTE.)  Those six failures ARE the reproduction of the defect.
 --   2. AFTER the production apply → all 10 proofs must PASS.
 --   Record both outputs in the task log (AGENTS.md §Migrations (d)).
---   Corrected after Codex review of PR #845 — the earlier "1–8 all fail"
---   expectation was wrong and would have made the two runs incomparable.
+--
+-- BLOCK MARKERS
+--   Each proof is delimited by a unique `>>>PROOF_n_BEGIN` / `<<<PROOF_n_END`
+--   marker pair so the guard test can extract an exact block instead of
+--   scanning for the first occurrence of a common substring (an earlier guard
+--   bug did exactly that and asserted vacuously across several proofs).
 
 begin;
 
@@ -63,13 +75,25 @@ declare
   v_proposal   uuid;
   v_listing    uuid;
   v_listing10  uuid;
-  v_err2       text;
   v_status     text;
   v_title      text;
   v_count      int;
+  v_present    int;
   v_pass       boolean;
   v_err        text;
+  v_err2       text;
   v_fails      int := 0;
+  -- The seven target functions, by EXACT identity signature as reported by
+  -- pg_get_function_identity_arguments in production.
+  k_sigs       text[] := array[
+    'delete_contract_v1(p_contract_id uuid)',
+    'set_contract_status_v1(p_contract_id uuid, p_status text)',
+    'delete_proposal_v1(p_proposal_id uuid)',
+    'set_proposal_status_v1(p_proposal_id uuid, p_status text, p_rejection_reason text)',
+    'delete_marketplace_listing_v1(p_id uuid)',
+    'set_marketplace_listing_status_v1(p_id uuid, p_status text)',
+    'update_marketplace_listing_v1(p_id uuid, p_title text, p_category text, p_listing_kind text, p_description text, p_location_country text, p_location_label text, p_price_text text)'
+  ];
 begin
   -- --------------------------------------------------------------------
   -- Fixtures: two DISTINCT existing profiles. We never create identities.
@@ -83,7 +107,6 @@ begin
 
   raise notice '--- fixtures: owner=% other=% ---', v_owner, v_other;
 
-  -- Seed one row per table, owned by v_owner. Rolled back at the end.
   insert into public.contracts (owner_id, title, status)
     values (v_owner, 'P0 verification contract', 'draft')
     returning id into v_contract;
@@ -97,9 +120,8 @@ begin
     values (v_owner, 'sale', 'tools', 'P0 verification listing', 'draft')
     returning id into v_listing;
 
-  -- ====================================================================
-  -- PROOF 1 — anon holds no EXECUTE privilege on any of the seven
-  -- ====================================================================
+  -- >>>PROOF_1_BEGIN
+  -- PROOF 1 — CATALOG. No function matched by NAME is anon-executable.
   select count(*) into v_count
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
@@ -112,44 +134,47 @@ begin
     and has_function_privilege('anon', p.oid, 'EXECUTE');
   v_pass := (v_count = 0);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 1 (anon has no EXECUTE on the 7)            = %  [anon-executable: %]',
+  raise notice 'PROOF 1  (no anon EXECUTE, matched by name)        = %  [anon-executable: %]',
     case when v_pass then 'PASS' else 'FAIL' end, v_count;
+  -- <<<PROOF_1_END
 
-  -- ====================================================================
-  -- PROOF 2 — `anon` cannot mutate. State is compared before/after.
+  -- >>>PROOF_2_BEGIN
+  -- PROOF 2 — CATALOG, BY EXACT IDENTITY SIGNATURE.
   --
-  -- SCOPE OF THIS PROOF — read carefully, it is narrower than it looks.
-  --   PRE-apply  : anon HAS execute, so the call enters the body and the
-  --                NULL-unsafe check lets it through — this FAILS, and that
-  --                failure is the reproduction of the defect.
-  --   POST-apply : anon has NO execute, so the call is refused by the
-  --                PRIVILEGE check and never enters the function body.
-  --                Post-apply this proves the ACL layer ONLY. It does NOT
-  --                exercise the new `auth.uid() is null` guard.
+  --   THIS PROOF PERFORMS NO RPC CALL, BY DESIGN.
+  --   After the migration `anon` has no EXECUTE, so an anon RPC call is refused
+  --   by the privilege check and never enters the function body; it could only
+  --   ever demonstrate reachability. Testing the in-body guard is PROOF 10's
+  --   job, and PROOF 10's alone. An earlier revision of this proof did issue an
+  --   anon call, which duplicated PROOF 10's subject without its discriminating
+  --   power; the call has been removed rather than re-explained.
   --
-  --   The in-body guard is proven separately by PROOF 10, which calls through
-  --   a role that CAN execute with the JWT identity unset. Both layers matter:
-  --   PROOF 2 = reachability removed, PROOF 10 = defence-in-depth intact.
-  --   (Distinction raised by Codex review of PR #845.)
-  -- ====================================================================
-  select status into v_status from public.marketplace_listings where id = v_listing;
-  begin
-    set local role anon;
-    perform public.set_marketplace_listing_status_v1(v_listing, 'closed');
-    v_err := 'NO_ERROR';
-  exception when others then
-    v_err := sqlstate;
-  end;
-  reset role;
-  select status into v_title from public.marketplace_listings where id = v_listing;
-  v_pass := (v_err <> 'NO_ERROR') and (v_title = v_status) and (v_title = 'draft');
+  --   What this adds over PROOF 1: PROOF 1 matches by NAME, so an overload with
+  --   a different argument list would escape it. This resolves each of the
+  --   seven EXACT signatures and additionally asserts that all seven still
+  --   exist — so a typo or a signature change cannot make the proof pass
+  --   vacuously.
+  select count(*) into v_present
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and (p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')') = any (k_sigs);
+
+  select count(*) into v_count
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and (p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')') = any (k_sigs)
+    and has_function_privilege('anon', p.oid, 'EXECUTE');
+
+  v_pass := (v_present = 7) and (v_count = 0);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 2 (anon blocked at the ACL; state unchanged)= %  [err=% status: %->%]',
-    case when v_pass then 'PASS' else 'FAIL' end, v_err, v_status, v_title;
+  raise notice 'PROOF 2  (no anon EXECUTE, by exact signature)     = %  [signatures found: %/7, anon-executable: %]',
+    case when v_pass then 'PASS' else 'FAIL' end, v_present, v_count;
+  -- <<<PROOF_2_END
 
-  -- ====================================================================
-  -- PROOF 3 — an authenticated NON-OWNER cannot UPDATE or DELETE
-  -- ====================================================================
+  -- >>>PROOF_3_BEGIN
+  -- PROOF 3 — BEHAVIOURAL. An authenticated NON-OWNER cannot UPDATE or DELETE.
   select status into v_status from public.marketplace_listings where id = v_listing;
   begin
     set local role authenticated;
@@ -179,13 +204,13 @@ begin
         and (v_title = v_status)
         and ((select count(*) from public.contracts where id = v_contract) = v_count);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 3 (non-owner cannot UPDATE/DELETE)          = %  [err=% status: %->% contract_rows=%]',
+  raise notice 'PROOF 3  (non-owner cannot UPDATE/DELETE)          = %  [err=% status: %->% contract_rows=%]',
     case when v_pass then 'PASS' else 'FAIL' end, v_err, v_status, v_title,
     (select count(*) from public.contracts where id = v_contract);
+  -- <<<PROOF_3_END
 
-  -- ====================================================================
-  -- PROOF 4 — the LEGITIMATE OWNER can still perform the allowed action
-  -- ====================================================================
+  -- >>>PROOF_4_BEGIN
+  -- PROOF 4 — BEHAVIOURAL. The LEGITIMATE OWNER can still act (no regression).
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims',
@@ -200,14 +225,12 @@ begin
   select status into v_title from public.marketplace_listings where id = v_listing;
   v_pass := (v_err = 'NO_ERROR') and (v_title = 'active');
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 4 (owner CAN act — no functional regression)= %  [err=% status=%]',
+  raise notice 'PROOF 4  (owner CAN act — no functional regression)= %  [err=% status=%]',
     case when v_pass then 'PASS' else 'FAIL' end, v_err, v_title;
+  -- <<<PROOF_4_END
 
-  -- ====================================================================
-  -- PROOF 5 — a non-existent id is NEVER answered as if authorized.
-  --           An anon call against a random id must be refused on identity,
-  --           not silently accepted as a no-op.
-  -- ====================================================================
+  -- >>>PROOF_5_BEGIN
+  -- PROOF 5 — BEHAVIOURAL. A non-existent id is never answered as authorized.
   begin
     set local role anon;
     perform public.set_marketplace_listing_status_v1(gen_random_uuid(), 'closed');
@@ -218,13 +241,14 @@ begin
   reset role;
   v_pass := (v_err <> 'NO_ERROR');
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 5 (unknown id not treated as authorized)    = %  [err=%]',
+  raise notice 'PROOF 5  (unknown id not treated as authorized)    = %  [err=%]',
     case when v_pass then 'PASS' else 'FAIL' end, v_err;
+  -- <<<PROOF_5_END
 
-  -- ====================================================================
-  -- PROOF 6 — content is unchanged after a rejected UPDATE attempt
-  --           (verifies the field-level write path, not just status)
-  -- ====================================================================
+  -- >>>PROOF_6_BEGIN
+  -- PROOF 6 — BEHAVIOURAL. Field-level content is unchanged after a rejected
+  --           UPDATE. Covers update_marketplace_listing_v1's write path, which
+  --           no other proof touches.
   select title into v_status from public.marketplace_listings where id = v_listing;
   begin
     set local role anon;
@@ -236,12 +260,14 @@ begin
   select title into v_title from public.marketplace_listings where id = v_listing;
   v_pass := (v_title = v_status);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 6 (content unchanged after rejection)       = %  [title: % -> %]',
+  raise notice 'PROOF 6  (content unchanged after rejection)       = %  [title: % -> %]',
     case when v_pass then 'PASS' else 'FAIL' end, v_status, v_title;
+  -- <<<PROOF_6_END
 
-  -- ====================================================================
-  -- PROOF 7 — the remaining four functions also refuse an anon caller
-  -- ====================================================================
+  -- >>>PROOF_7_BEGIN
+  -- PROOF 7 — BEHAVIOURAL. Reachability of the OTHER four functions. This is a
+  --           distinct property from the in-body guard (PROOF 10) — it asserts
+  --           that no anon caller reaches these write paths at all.
   v_pass := true;
   begin set local role anon; perform public.delete_proposal_v1(v_proposal);
     v_pass := false; exception when others then null; end;
@@ -261,12 +287,12 @@ begin
         and (select status from public.proposals where id = v_proposal) = 'draft'
         and (select status from public.contracts where id = v_contract) = 'draft';
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 7 (other 4 RPCs refuse anon; rows intact)   = %',
+  raise notice 'PROOF 7  (other 4 RPCs refuse anon; rows intact)   = %',
     case when v_pass then 'PASS' else 'FAIL' end;
+  -- <<<PROOF_7_END
 
-  -- ====================================================================
-  -- PROOF 8 — catalog: PUBLIC and anon privileges are false for all seven
-  -- ====================================================================
+  -- >>>PROOF_8_BEGIN
+  -- PROOF 8 — CATALOG. No PUBLIC or anon entry in any of the seven ACLs.
   select count(*) into v_count
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
@@ -281,12 +307,12 @@ begin
       or array_to_string(coalesce(p.proacl, '{}'), ',') like '%anon=X%');
   v_pass := (v_count = 0);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 8 (no PUBLIC/anon entry in any of the 7 ACLs)= %  [offending: %]',
+  raise notice 'PROOF 8  (no PUBLIC/anon entry in the 7 ACLs)      = %  [offending: %]',
     case when v_pass then 'PASS' else 'FAIL' end, v_count;
+  -- <<<PROOF_8_END
 
-  -- ====================================================================
-  -- PROOF 9 — authenticated retains EXECUTE on all seven (product contract)
-  -- ====================================================================
+  -- >>>PROOF_9_BEGIN
+  -- PROOF 9 — CATALOG. `authenticated` retains EXECUTE on all seven.
   select count(*) into v_count
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
@@ -299,46 +325,33 @@ begin
     and has_function_privilege('authenticated', p.oid, 'EXECUTE');
   v_pass := (v_count = 7);
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 9 (authenticated keeps EXECUTE on all 7)    = %  [granted: %/7]',
+  raise notice 'PROOF 9  (authenticated keeps EXECUTE on all 7)    = %  [granted: %/7]',
     case when v_pass then 'PASS' else 'FAIL' end, v_count;
+  -- <<<PROOF_9_END
 
-  -- ====================================================================
-  -- PROOF 10 — THE GUARD ITSELF (added after Codex review of PR #845).
+  -- >>>PROOF_10_BEGIN
+  -- PROOF 10 — THE ONLY DISCRIMINATING PROOF OF THE IN-BODY NULL GUARD.
   --
-  -- Proofs 2/5/6/7 call as `anon`. AFTER the migration `anon` has no EXECUTE,
-  -- so those calls are refused by the PRIVILEGE check and never enter the
-  -- function body — they therefore cannot demonstrate that the new
-  -- `auth.uid() is null` guard works. This proof closes that gap: it uses a
-  -- role that CAN execute (`authenticated`) while leaving the JWT identity
-  -- UNSET, so auth.uid() is NULL and the in-body guard is the only thing
-  -- standing between the caller and the write.
-  --
+  -- It calls through a role that CAN execute (`authenticated`) with the JWT
+  -- identity UNSET, so auth.uid() is NULL and the guard is the only barrier.
   -- auth.uid() is `coalesce(nullif(current_setting('request.jwt.claim.sub',
   -- true),''), (nullif(current_setting('request.jwt.claims', true),'')::jsonb
   -- ->> 'sub'))::uuid` — an empty setting is safely NULL.
   --
-  -- It has TWO parts, because "an exception was raised" is not enough:
-  --   10a  a MISSING id, asserting WHICH error is raised. This isolates the
-  --        explicit guard from the ownership comparison, and is independent of
-  --        every earlier fixture.
+  -- TWO parts, because "an exception was raised" is not enough:
+  --   10a  a MISSING id, asserting WHICH error is raised. Without this, the
+  --        proof would still pass if the explicit guard were deleted, because
+  --        `v_owner is distinct from NULL` is TRUE and raises 'not authorized'
+  --        anyway.
+  --            guard PRESENT -> 'not authorized'    (raised BEFORE the lookup)
+  --            guard ABSENT  -> 'listing not found' (the lookup ran first)
+  --        Using a missing id also makes 10a independent of every fixture.
   --   10b  a REAL row from its OWN fresh fixture, asserting unchanged state.
+  --        The fixture is created here because in the VULNERABLE pre-apply run
+  --        PROOF 7 really does delete v_listing as anon.
   --
-  -- Pre-apply BOTH fail (10a gets 'listing not found' because the lookup runs
-  -- first; 10b is mutated because the NULL-unsafe comparison falls through).
-  -- Post-apply both must raise 'not authorized' with the row untouched.
-  -- (Both refinements came from Codex review of PR #845.)
-  -- ====================================================================
-  -- 10a ISOLATES THE GUARD by using a NON-EXISTENT id and asserting WHICH error
-  -- is raised. This is what distinguishes the explicit guard from the ownership
-  -- comparison — an assertion of "some exception + unchanged state" would pass
-  -- even if the guard were deleted, because `v_owner is distinct from NULL` is
-  -- TRUE and would raise 'not authorized' anyway.
-  --     guard PRESENT -> 'not authorized'   (raised BEFORE the owner lookup)
-  --     guard ABSENT  -> 'listing not found' (the lookup ran first)
-  -- Using a missing id also makes this proof independent of every earlier
-  -- fixture — necessary because in the VULNERABLE pre-apply run PROOF 7 really
-  -- does delete v_listing as anon, which would otherwise give PROOF 10
-  -- 'listing not found' and a FAIL for the wrong reason.
+  -- Pre-apply BOTH fail; post-apply both must raise 'not authorized' with the
+  -- row untouched.
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims', '', true);
@@ -350,8 +363,6 @@ begin
   end;
   reset role;
 
-  -- 10b asserts unchanged state on a REAL row, using its OWN fresh fixture
-  -- created here so no earlier proof can have deleted it.
   insert into public.marketplace_listings
       (owner_id, listing_kind, category, title, status)
     values (v_owner, 'sale', 'tools', 'P0 verification listing 10', 'draft')
@@ -372,10 +383,10 @@ begin
         and (v_err2 = 'not authorized')
         and (v_title = 'draft');
   if not v_pass then v_fails := v_fails + 1; end if;
-  raise notice 'PROOF 10 (explicit NULL guard fires BEFORE the lookup)= %  [missing-id err=% | real-row err=% status=%]',
+  raise notice 'PROOF 10 (NULL guard fires BEFORE the owner lookup)= %  [missing-id err=% | real-row err=% status=%]',
     case when v_pass then 'PASS' else 'FAIL' end, v_err, v_err2, v_title;
+  -- <<<PROOF_10_END
 
-  -- --------------------------------------------------------------------
   raise notice '=====================================================';
   if v_fails = 0 then
     raise notice 'RESULT: ALL 10 PROOFS PASS';
@@ -385,8 +396,7 @@ begin
   raise notice '=====================================================';
 end $$;
 
--- PROOF (transactional): everything above is discarded. Re-run the row counts
--- after this ROLLBACK to confirm the verification left nothing behind.
+-- Everything above is discarded. The counts below confirm it left nothing.
 rollback;
 
 -- Post-run confirmation — expected: the three counts are unchanged from before.

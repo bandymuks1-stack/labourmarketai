@@ -71,15 +71,24 @@ function statementsOnly(sql: string): string {
     .join("\n");
 }
 
-/** The PROOF 10 section only. Anchored on its banner rather than on the first
- *  occurrence of the string "PROOF 10", because PROOF 2's comment legitimately
- *  cross-references PROOF 10 — anchoring on that would swallow PROOF 2..9 and
- *  make these assertions meaningless. */
-function proof10Block(verification: string): string {
-  const anchor = "PROOF 10 — THE GUARD ITSELF";
-  const start = verification.indexOf(anchor);
-  expect(start, "PROOF 10 banner present").toBeGreaterThan(-1);
-  return verification.slice(start);
+/** Extract exactly one PROOF block, delimited by its unique marker pair.
+ *
+ *  NEVER slice on `indexOf("PROOF n")` — proof bodies legitimately mention each
+ *  other in prose, so the first match can land in a different block and the
+ *  assertions then pass vacuously across everything after it. That bug was real
+ *  in an earlier revision of this guard. Both markers must appear exactly once.
+ */
+function proofBlock(verification: string, n: number): string {
+  const open = `>>>PROOF_${n}_BEGIN`;
+  const close = `<<<PROOF_${n}_END`;
+  const opens = verification.split(open).length - 1;
+  const closes = verification.split(close).length - 1;
+  expect(opens, `${open} appears exactly once`).toBe(1);
+  expect(closes, `${close} appears exactly once`).toBe(1);
+  const start = verification.indexOf(open);
+  const end = verification.indexOf(close);
+  expect(end, `${close} follows ${open}`).toBeGreaterThan(start);
+  return verification.slice(start + open.length, end);
 }
 
 /** Body of one `create or replace function public.<name>(...) ... $function$;` block. */
@@ -278,7 +287,7 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     // Proof 10 must therefore use a role that CAN execute while leaving the JWT
     // identity unset, so auth.uid() is NULL and the guard is the only barrier.
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    const proof10 = proof10Block(verification);
+    const proof10 = proofBlock(verification, 10);
     expect(proof10).toMatch(/set local role authenticated/i);
     expect(proof10).toMatch(/set_config\('request\.jwt\.claims',\s*''/);
   });
@@ -291,7 +300,7 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     //   guard present -> 'not authorized'    (fires before the owner lookup)
     //   guard absent  -> 'listing not found' (the lookup ran first)
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    const proof10 = proof10Block(verification);
+    const proof10 = proofBlock(verification, 10);
     expect(proof10).toMatch(/gen_random_uuid\(\)/);
     expect(proof10).toMatch(/sqlerrm/);
     expect(proof10).toMatch(/v_err\s*=\s*'not authorized'/);
@@ -304,7 +313,7 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     // v_listing as anon, so a PROOF 10 that reused it would report FAIL for the
     // wrong reason ('listing not found') without reproducing the guard defect.
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    const proof10 = proof10Block(verification);
+    const proof10 = proofBlock(verification, 10);
     expect(proof10).toMatch(/insert into public\.marketplace_listings/);
     expect(proof10).toMatch(/v_listing10/);
   });
@@ -321,19 +330,50 @@ describe("20260722120000 — behavioural verification script is shipped", () => 
     expect(runbook).toMatch(/All TEN proofs must PASS/i);
   });
 
-  it("does not overclaim what the anon-role proofs demonstrate post-apply", () => {
-    // Codex review: post-apply, an `anon` call is refused by the PRIVILEGE
-    // check and never enters the body, so it cannot prove the in-body guard.
-    // PROOF 2 must say so and defer to PROOF 10 rather than claim it proves
-    // "the exact defect".
+  it("PROOF 2 is catalog-only — it issues no RPC call at all", () => {
+    // Resolution of the repeatedly-raised review point: rather than keep
+    // explaining that an anon RPC call can only prove reachability, the call was
+    // REMOVED from PROOF 2. PROOF 2 is now a pure catalog privilege check keyed
+    // on the exact identity signature, and PROOF 10 is the sole behavioural
+    // proof of the in-body NULL guard. No ambiguity is left to argue about.
     const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
-    const proof2 = verification.slice(
-      verification.indexOf("PROOF 2"),
-      verification.indexOf("PROOF 3"),
-    );
-    expect(proof2).toMatch(/does NOT exercise|ACL layer ONLY/i);
-    expect(proof2).toMatch(/PROOF 10/);
-    expect(proof2).not.toMatch(/This is the exact defect/i);
+    const proof2 = proofBlock(verification, 2);
+    expect(proof2).not.toMatch(/set local role/i);
+    expect(proof2).not.toMatch(/\bperform\s+public\./i);
+    // and it must be signature-exact, which is what it adds over PROOF 1
+    expect(proof2).toMatch(/pg_get_function_identity_arguments/);
+    expect(proof2).toMatch(/k_sigs/);
+  });
+
+  it("PROOF 10 is the only proof that calls with a NULL identity", () => {
+    // Exactly one block may set an executable role with the JWT identity unset.
+    // If a second one appears, the "one discriminating guard proof" contract has
+    // been broken and the reviewer ambiguity would return.
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    // The distinguishing property is not "claims were set to ''" — PROOFS 3 and
+    // 4 legitimately do that to RESET after using a real identity. It is
+    // "assumes the authenticated role and never supplies a `sub` claim".
+    const nullIdentityBlocks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((n) => {
+      const b = proofBlock(verification, n);
+      return (
+        /set local role authenticated/i.test(b) &&
+        !/json_build_object\('sub'/.test(b)
+      );
+    });
+    expect(nullIdentityBlocks).toEqual([10]);
+  });
+
+  it("every proof block is delimited exactly once, in order", () => {
+    const verification = readFileSync(join(REPO_ROOT, VERIFICATION), "utf-8");
+    let previousEnd = -1;
+    for (let n = 1; n <= 10; n += 1) {
+      proofBlock(verification, n); // asserts the marker pair is unique
+      const start = verification.indexOf(`>>>PROOF_${n}_BEGIN`);
+      expect(start, `PROOF ${n} starts after PROOF ${n - 1} ends`).toBeGreaterThan(
+        previousEnd,
+      );
+      previousEnd = verification.indexOf(`<<<PROOF_${n}_END`);
+    }
   });
 
   it("states the corrected pre-apply expectation (not the wrong '1-8 all fail')", () => {
