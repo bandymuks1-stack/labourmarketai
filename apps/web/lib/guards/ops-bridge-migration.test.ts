@@ -402,6 +402,11 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 161 -> 162 for the P0 anon SECURITY DEFINER authorization-bypass
     // fix (20260722120000) — function bodies + EXECUTE grants only, paired
     // rollback, RED / human-gated, ships UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 162/);
+    // Bumped 162 -> 163 for the P0 follow-up revoke of anonymous reachability
+    // on the remaining 43 SECURITY DEFINER functions (20260722160000) —
+    // EXECUTE grants only, no function body touched, paired rollback, RED and
+    // deliberately NOT human-gate-annotated because the owner has not approved
+    // it. Ships UNAPPLIED.
+    expect(guard).toMatch(/SPRINT_BASELINE = 163/);
   });
 });
