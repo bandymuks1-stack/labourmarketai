@@ -2,9 +2,11 @@
 -- Verification harness for 20260722160000_secdef_anon_reach_revoke_v1.sql
 --
 -- Run it TWICE and record BOTH runs:
---   * BEFORE the apply — PROOF 1, 4 and 9 must FAIL (43 functions anon-reachable
---     and PUBLIC-granted; trigger/dead functions still granted). That failure IS
---     the current defect being reproduced.
+--   * BEFORE the apply — PROOF 1, 4, 9 AND 6 must FAIL. 1/4/9 because 43 functions
+--     are anon-reachable and PUBLIC-granted and the trigger/dead ones are still
+--     granted; 6 because anon genuinely still REACHES is_admin, owns_company and
+--     create_contract_v1 through PUBLIC today. All four failures ARE the current
+--     defect being reproduced — a pre-apply run showing only three is incomplete.
 --   * AFTER the apply  — ALL proofs must PASS.
 --
 -- A verification that never tested the unauthenticated case is exactly what let
@@ -38,8 +40,11 @@
 -- present in the first draft of BOTH this harness and the migration, and was
 -- caught only because the owner gate mandates a pre-apply run.
 --
--- Everything runs inside a transaction that ends in ROLLBACK. It writes nothing.
--- Safe against production.
+-- Everything runs inside a transaction that ends in ROLLBACK, so NOTHING PERSISTS.
+-- Note the precise claim: writes are rolled back, not absent. PROOF 6 genuinely
+-- attempts an INSERT into public.contracts on the pre-apply run (that attempt is
+-- the proof), which consumes sequence/uuid values and fires any write-side
+-- trigger. Safe against production, but "writes nothing" would be untrue.
 -- =====================================================================
 
 begin;
@@ -111,6 +116,12 @@ select p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' as s
  where n.nspname = 'public' and p.prosecdef
    and has_function_privilege('anon', p.oid, 'EXECUTE');
 
+-- =====================================================================
+-- PART A — CATALOG PROOFS (1-5, 8-10).
+-- Pure catalog reads. This is the part that runs over Supabase MCP
+-- `execute_sql` and the part used at the owner gate.
+-- =====================================================================
+
 -- PROOF 1 — no non-allowlisted SECURITY DEFINER function is anon-reachable.
 insert into _verdict
 select 1, 'no non-allowlisted function is anon-reachable',
@@ -175,6 +186,13 @@ select 5, 'authenticated retains EXECUTE on all 33 authenticated-only functions'
         and has_function_privilege('authenticated', p.oid, 'EXECUTE')
    );
 
+-- =====================================================================
+-- PART B — BEHAVIOURAL PROOFS (6-7).
+-- These use DO blocks and `set_config`, so they need a session-capable client
+-- such as `psql -f`. They will NOT run over the MCP channel. Skipping them
+-- leaves the HARNESS row reporting "OK (PART A only)" rather than BROKEN.
+-- =====================================================================
+
 -- PROOF 6 — BEHAVIOURAL. Become `anon` and call three revoked functions.
 --           Catalog agreement is not the same as the server saying no.
 do $$
@@ -233,6 +251,10 @@ begin
   end;
 end $$;
 
+-- =====================================================================
+-- PART A (continued) — catalog proofs 8-10.
+-- =====================================================================
+
 -- PROOF 8 — the public intake table stays sealed. submit_company_need_public_v1
 --           is only safe because a submitter cannot read the table back.
 insert into _verdict
@@ -281,11 +303,23 @@ select 10, 'all 9 trigger functions remain attached to a trigger',
    );
 
 -- Harness integrity, then the report.
+-- Integrity row. It must be satisfiable on BOTH supported paths, or the operator
+-- learns to ignore the one row whose job is to detect a truncated run:
+--   PART A only (the MCP owner-gate path) -> 8 verdicts, seqs 6 and 7 absent
+--   PART A + PART B (psql)                -> 10 verdicts
+-- Any other shape is a genuinely truncated run.
 insert into _verdict
 select 0, 'HARNESS',
-       case when count(*) = 10 and count(distinct seq) = 10
-                 and count(*) filter (where status is null) = 0
-            then 'OK' else 'BROKEN' end,
+       case
+         when count(*) filter (where seq in (6,7)) = 0
+              and count(*) = 8 and count(distinct seq) = 8
+              and count(*) filter (where status is null) = 0
+           then 'OK (PART A only — behavioural proofs 6,7 not run)'
+         when count(*) = 10 and count(distinct seq) = 10
+              and count(*) filter (where status is null) = 0
+           then 'OK (PART A + PART B)'
+         else 'BROKEN'
+       end,
        count(*) || ' verdicts, ' || count(*) filter (where status = 'FAIL') || ' FAIL'
   from _verdict where seq > 0;
 

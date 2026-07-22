@@ -508,6 +508,45 @@ authenticated;` for that one signature — never widening to PUBLIC or anon.
 
 ---
 
+## 8.5 Concentrated security review — outcome
+
+One focused review was run against the migration, rollback, harness, allowlist,
+guard and checker (owner-gate requirement). Verdicts on the migration itself were
+clean: revokes cover all 43 from both `public` and `anon` with no double-coverage;
+exactly the 8 GRANTs, no more; nothing outside the approved scope; every signature
+matches the defining `CREATE FUNCTION` source in name, order and canonical type
+spelling; no `regprocedure` cast in executable SQL; rollback never grants anon or
+PUBLIC.
+
+It returned **CHANGES REQUESTED** on guard and harness *quality*, all five of which
+were fixed before merge:
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | The migration-scan guard matched allowlist entries by `startsWith(name + "(")`, so a **different overload** of an allowlisted name (e.g. `get_public_business_profile_v1(p_slug text, p_debug boolean)`) could be granted to anon and pass — the exact name-vs-signature conflation the file forbids | Compares full normalized `name(args)` signatures. Negative control confirms the overload is now rejected |
+| 2 | The static guard asserted `revoked.size === 43` — a **count of names**, in a file whose header says neither half may ever assert a count. A swapped function or mistyped argument list stayed green | Replaced with set-equality against `secdef-revoke-scope.ts` (43 exact signatures). Negative control: changing `owns_company(c uuid)` → `(x uuid)` now fails |
+| 3 | The harness integrity row required 10 verdicts, but the documented owner-gate path (PART A over MCP) produces 8 — so every real run printed `HARNESS = BROKEN`, training the operator to ignore the row that detects truncated runs | Integrity row accepts both shapes explicitly; PART A / PART B are now real, labelled sections in the file |
+| 4 | `check:anon-secdef-allowlist` was registered but wired into **no workflow**, while the guard called it "the authoritative gate". It also defaulted `DB_URL` to localhost and printed PASS without naming the host — a forgotten variable produced a confident green about an empty local database | Wired into `quality.yml`. Silent default removed: it now exits 2 without `DB_URL`, and prints the target host/database on both PASS and FAIL |
+| 5 | Pre-apply expectation listed proofs 1/4/9 but omitted **PROOF 6**, which must also fail pre-apply; and "It writes nothing" was untrue — PROOF 6 genuinely attempts an INSERT (rolled back) | Both corrected in the header |
+
+Finding 4 was not merely a review nit: **wiring the checker into required CI was
+item 3 of the approved scope, and I had missed it.**
+
+Two review notes were accepted and deliberately deferred rather than fixed here,
+because both would widen a grant-only change: PROOF 8 asserts RLS-enabled and
+no-anon-SELECT but does not assert the zero-policy count that the allowlist cites
+as its containment argument; and the live checker exempts allowlisted functions
+from the PUBLIC-grant check (PUBLIC is strictly broader than anon).
+
+### 8.5.1 Live gate is wired but NOT yet active
+
+`quality.yml` runs the live checker only when `secrets.SUPABASE_DB_URL` exists.
+A new secret is an owner-only gate, so the step currently emits a GitHub **warning**
+saying the live half did not run, instead of a green tick. Adding that read-only
+secret is an outstanding owner action; until then the static half alone is enforced.
+
+---
+
 ## 9. Owner gate — what is NOT done
 
 Completed under the existing read-only authorisation: production analysis,

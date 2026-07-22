@@ -38,9 +38,37 @@ import {
   signatureOf,
 } from "../apps/web/lib/security/anon-secdef-allowlist.ts";
 
-const DB_URL =
-  process.env.DB_URL ??
-  "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+/**
+ * NO SILENT DEFAULT. An earlier revision defaulted to the well-known local
+ * Supabase URL, which meant a forgotten `DB_URL` produced a confident
+ * "PASS — matches the reviewed allowlist exactly" about an empty local database
+ * that an operator could reasonably read as a statement about production.
+ * A security gate that passes when it checked nothing is worse than no gate.
+ */
+const DB_URL = process.env.DB_URL;
+if (!DB_URL) {
+  console.error(
+    [
+      "check-anon-secdef-allowlist: DB_URL is not set.",
+      "This guard asserts something about a REAL database and refuses to guess which one.",
+      "  local:      DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres pnpm check:anon-secdef-allowlist",
+      "  production: DB_URL=<production connection string> pnpm check:anon-secdef-allowlist",
+    ].join("\n"),
+  );
+  process.exit(2);
+}
+
+/** Host/database being asserted about, printed on BOTH pass and fail so a result
+ *  can never be mistaken for a statement about a different environment. */
+function describeTarget(url: string): string {
+  try {
+    const u = new URL(url.replace(/^postgres(ql)?:/, "http:"));
+    return `${u.hostname}:${u.port || "5432"}${u.pathname || ""}`;
+  } catch {
+    return "(unparseable DB_URL)";
+  }
+}
+const TARGET = describeTarget(DB_URL);
 
 type Row = {
   sig: string;
@@ -169,6 +197,7 @@ async function main(): Promise<void> {
 
     // --- Reporting --------------------------------------------------------
     const anonReachable = rows.filter((r) => r.anon_exec);
+    notes.push(`target: ${TARGET}`);
     notes.push(
       `checked ${rows.length} SECURITY DEFINER function(s) in schema public`,
     );

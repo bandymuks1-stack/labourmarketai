@@ -6,6 +6,11 @@ import {
   ANON_SECDEF_ALLOWED_SIGNATURES,
   signatureOf,
 } from "../security/anon-secdef-allowlist";
+import {
+  SECDEF_GRANT_SIGNATURES,
+  SECDEF_REVOKE_SIGNATURES,
+  normalizeSignature,
+} from "../security/secdef-revoke-scope";
 
 /**
  * RECURRENCE GUARD — anonymous reachability of SECURITY DEFINER functions.
@@ -32,7 +37,10 @@ import {
  *
  * NEITHER HALF MAY EVER ASSERT A COUNT. "47 anon-reachable functions" is not a
  * security property: swap one function for another and the number is unchanged
- * while the risk is not. Identity is the contract.
+ * while the risk is not. Identity is the contract — every assertion here compares
+ * FULL `name(identity args)` signatures, via `secdef-revoke-scope.ts`. An earlier
+ * revision of this file asserted `revoked.size === 43`, which is a count of names
+ * and would have stayed green through exactly the substitution described above.
  */
 
 const REPO_ROOT = join(process.cwd(), "..", "..");
@@ -150,42 +158,47 @@ describe("revoke migration 20260722160000", () => {
     }
   });
 
-  it("revokes exactly the 43 in-scope functions", () => {
+  it("revokes exactly the in-scope signature SET, not a matching count", () => {
+    // Set equality on FULL signatures. A count of names would stay green if one
+    // function were swapped for another or an argument list were mistyped —
+    // which is the exact name-vs-signature conflation this guard exists to stop.
     const revoked = new Set(
       [
         ...revokeStatements.matchAll(
-          /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\(/gi,
+          /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+\s*\([^)]*\))\s+from/gi,
         ),
-      ].map((m) => m[1].toLowerCase()),
+      ].map((m) => normalizeSignature(m[1])),
     );
-    expect(revoked.size).toBe(43);
+
+    const expected = new Set(SECDEF_REVOKE_SIGNATURES);
+    const missing = [...expected].filter((s) => !revoked.has(s));
+    const unexpected = [...revoked].filter((s) => !expected.has(s));
+
+    expect(missing, `not revoked: ${missing.join(" | ")}`).toEqual([]);
+    expect(unexpected, `revoked but out of scope: ${unexpected.join(" | ")}`).toEqual([]);
   });
 
-  it("grants authenticated ONLY to the 8 that would otherwise lose access", () => {
+  it("grants authenticated ONLY to the signatures that would otherwise lose access", () => {
     // Verified against production `proacl` before the migration was written:
-    // these 8 have `proacl IS NULL`, so `authenticated` reaches them only by
+    // these have `proacl IS NULL`, so `authenticated` reaches them only by
     // inheriting PUBLIC. The other 25 authenticated-only functions already hold
     // a direct `authenticated=X` grant and must NOT be re-granted — re-granting
     // what already exists hides which functions actually depend on this change.
     // The 9 trigger functions and the 1 dead function get no grant at all.
-    const PUBLIC_ONLY_TODAY = [
-      "can_access_match",
-      "is_admin",
-      "is_employer",
-      "manages_organization",
-      "owns_agency",
-      "owns_company",
-      "owns_worker",
-      "profile_role",
-    ].sort();
+    const granted = new Set(
+      [
+        ...revokeStatements.matchAll(
+          /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+\s*\([^)]*\))\s*to\s+[^;]+;/gi,
+        ),
+      ].map((m) => normalizeSignature(m[1])),
+    );
 
-    const granted = [
-      ...revokeStatements.matchAll(
-        /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\([^)]*\)\s*to\s+([^;]+);/gi,
-      ),
-    ].map((m) => ({ name: m[1].toLowerCase(), to: m[2].trim() }));
+    const expected = new Set(SECDEF_GRANT_SIGNATURES);
+    const missing = [...expected].filter((s) => !granted.has(s));
+    const unexpected = [...granted].filter((s) => !expected.has(s));
 
-    expect(granted.map((g) => g.name).sort()).toEqual(PUBLIC_ONLY_TODAY);
+    expect(missing, `missing grant: ${missing.join(" | ")}`).toEqual([]);
+    expect(unexpected, `unauthorized grant: ${unexpected.join(" | ")}`).toEqual([]);
   });
 
   it("grants nothing to service_role", () => {
@@ -232,22 +245,23 @@ describe("revoke migration 20260722160000", () => {
     }
   });
 
-  it("revokes every in-scope function from BOTH public and anon", () => {
+  it("revokes every in-scope signature from BOTH public and anon", () => {
     // Revoking PUBLIC alone is not enough if a direct `anon=X` grant also exists;
-    // both paths must be closed per function or the fix is cosmetic.
+    // both paths must be closed per signature or the fix is cosmetic.
     const fromPublic = new Set<string>();
     const fromAnon = new Set<string>();
 
     for (const m of revokeStatements.matchAll(
-      /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\([^)]*\)\s+from\s+([^;]+);/gi,
+      /revoke\s+execute\s+on\s+function\s+public\.([a-z0-9_]+\s*\([^)]*\))\s+from\s+([^;]+);/gi,
     )) {
-      const name = m[1].toLowerCase();
-      if (/\bpublic\b/i.test(m[2])) fromPublic.add(name);
-      if (/\banon\b/i.test(m[2])) fromAnon.add(name);
+      const sig = normalizeSignature(m[1]);
+      if (/\bpublic\b/i.test(m[2])) fromPublic.add(sig);
+      if (/\banon\b/i.test(m[2])) fromAnon.add(sig);
     }
 
-    expect(fromPublic.size).toBe(43);
-    expect([...fromPublic].sort()).toEqual([...fromAnon].sort());
+    const expected = [...SECDEF_REVOKE_SIGNATURES].sort();
+    expect([...fromPublic].sort()).toEqual(expected);
+    expect([...fromAnon].sort()).toEqual(expected);
   });
 
   it("fails closed inside the transaction on an identity check, not a count", () => {
@@ -311,19 +325,26 @@ describe("no new migration may re-open anonymous reachability", () => {
       );
 
       for (const match of sql.matchAll(
-        /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+)\s*\(([^)]*)\)\s*to\s+([^;]+);/gi,
+        /grant\s+execute\s+on\s+function\s+public\.([a-z0-9_]+\s*\([^)]*\))\s*to\s+([^;]+);/gi,
       )) {
-        const [, name, , grantees] = match;
+        const [, rawSignature, grantees] = match;
         const opensToAnon =
           /\banon\b/i.test(grantees) || /\bpublic\b/i.test(grantees);
         if (!opensToAnon) continue;
 
-        const allowlisted = [...ANON_SECDEF_ALLOWED_SIGNATURES].some((sig) =>
-          sig.startsWith(`${name.toLowerCase()}(`),
+        // Compare the FULL signature. Matching on the name alone would let a
+        // future migration grant anon on a *different overload* of an
+        // allowlisted name — e.g. adding
+        // `get_public_business_profile_v1(p_slug text, p_debug boolean)` — and
+        // sail through the guard. `foo(uuid)` and `foo(uuid, text)` are
+        // different grants with different blast radii.
+        const signature = normalizeSignature(rawSignature);
+        const allowlisted = [...ANON_SECDEF_ALLOWED_SIGNATURES].some(
+          (sig) => normalizeSignature(sig) === signature,
         );
         if (!allowlisted) {
           offences.push(
-            `${file}: grants EXECUTE on public.${name} to "${grantees.trim()}" but it is not on the anon allowlist`,
+            `${file}: grants EXECUTE on public.${rawSignature.replace(/\s+/g, " ").trim()} to "${grantees.trim()}" but that exact signature is not on the anon allowlist`,
           );
         }
       }
