@@ -123,6 +123,80 @@ remains byte-identical.
 > `docs/security/secdef-remaining-47-audit-plan-v1.md`. The recurrence guard specified
 > there must be a reviewed exact-identity-signature **allowlist**, never a count.
 
+### ✅ APPLIED TO PROD — `20260722160000_secdef_anon_reach_revoke_v1`
+
+| Field | Value |
+|---|---|
+| Applied | **2026-07-22**, ledger version `20260722093138`, recorded as `secdef_anon_reach_revoke_v1` |
+| Method | Supabase MCP `apply_migration` (never `supabase db push`) |
+| PR | #847, squash-merged as **`d9d7d7ff7a0d78451197c265cc2a8b8ab92562f9`** |
+| Reviewed PR HEAD | `4f96492377c87a1e2f221cf18fa22fdcfc0b1318` |
+| Migration sha256 | `88ea8ef5a8a98cd5da7ea3ba24407a8b3e234c0be4052bc5f22376b086f6a286` |
+| Rollback | `supabase/rollbacks/20260722160000_secdef_anon_reach_revoke_v1.down.sql`, sha256 `4f02aabb016c45e94f5f46a686a58f1103acc37500cc8e922ff899821cad6d88` |
+| Owner gate | Approved 2026-07-22, "APPROVED WITH STRICT SCOPE" |
+
+**What it did.** Removed the leftover default `PUBLIC` EXECUTE grant — the root cause
+of the 2026-07-22 P0 — from **43** `SECURITY DEFINER` functions, plus an explicit
+`REVOKE ... FROM anon` on each. Granted `authenticated` on exactly **8** of them, the
+only ones whose `proacl` was NULL and which therefore reached `authenticated` solely by
+inheriting PUBLIC. Grant-only: no function body, table, policy, trigger or row touched,
+nothing created, nothing dropped.
+
+**Pre-apply run (recorded, defect reproduced).** PROOF 1 **FAIL** 43 leaked · PROOF 4
+**FAIL** 43 with PUBLIC · PROOF 9 **FAIL** 10 of 10 still granted · PROOF 6 **FAIL**
+(anon reached `is_admin`, `owns_company`, `create_contract_v1`). PROOFs 2, 3, 5, 10 PASS.
+Exactly the predicted matrix.
+
+**The pre-apply run earned its keep.** It caught a defect in the migration itself: both
+the migration assertions and the harness resolved functions via
+`('public.'||sig)::regprocedure`. That cast accepts ARGUMENT TYPES ONLY, so
+`owns_company(c uuid)` raises `42601` — the migration would have aborted on apply. Both
+now join `pg_proc` on the identity string. A post-apply-only verification would have hit
+this as an unexplained mid-gate failure.
+
+**Post-apply verification (recorded).** All catalog proofs PASS:
+
+| Check | Result |
+|---|---|
+| anon-reachable `SECURITY DEFINER` in `public` | **47 → 4** |
+| remaining 4 match the allowlist exactly | **PASS** (by signature identity) |
+| the 43: PUBLIC `=X` in ACL | **0/43** |
+| the 43: anon EXECUTE | **0/43** |
+| the 33 authenticated-only: authenticated EXECUTE | **33/33** |
+| the 9 trigger-only + 1 dead: anon or authenticated grant | **0/10** |
+| the 9 trigger functions still attached | **9/9** |
+| all 47 signatures resolve to exactly one function | **PASS** (no overload ambiguity) |
+
+**Post-apply behavioural (recorded, transaction aborted).** As `anon` with
+`auth.uid()=NULL`: `is_admin`, `owns_company`, `create_contract_v1`, `handle_new_user`
+all **42501**. Public paths intact: all three business getters returned rows without
+error, `submit_company_need_public_v1` still accepted an anonymous submission, and
+`company_need_public_intakes` remained **unreadable by anon (42501)**.
+
+**Authenticated smoke (recorded, transaction aborted).** As a real logged-in profile:
+all 8 newly-granted helpers executed, and every RLS-protected surface still read —
+`projects=5`, `journal_entries=32`, `workers=27`, `companies=6`, `assets=0`,
+`defects=0`, `marketplace_listings=0`. No permission errors. No outage.
+
+**Data unchanged.** `contracts=0 proposals=0 marketplace_listings=0
+company_need_public_intakes=1 profiles=27 projects=5 journal_entries=32` — identical
+before and after. Every probe ended in `ROLLBACK`.
+
+**Independent corroboration.** Supabase's own security advisor now reports
+`anon_security_definer_function_executable` = **4**, down from 47.
+
+> ⚠️ **Still open, deliberately out of this migration's scope:** the lookup-before-
+> authorization existence oracle in 9 functions (same shape as the P0); no rate limit or
+> dedupe on `submit_company_need_public_v1`; the three create RPCs still defended only by
+> a `NOT NULL` constraint rather than an authorization check; dead
+> `public.owns_customer(c uuid)` revoked but not dropped. Separately, the advisor reports
+> **183** `authenticated_security_definer_function_executable` — a much larger surface
+> that has never been audited.
+
+**Rollback is deliberately not a reversal.** Per owner directive it may never re-grant
+PUBLIC or anon; it only re-asserts the 8 `authenticated` grants. The guard enforces this,
+so a future edit cannot quietly turn it back into a hole-reopener.
+
 | Repo file | Ledger version | Applied (UTC) | Approved by | What it did |
 |---|---|---|---|---|
 | `20260530120000_drop_legacy_threads_messages.sql` | `20260530120000` | 2026-05-30 | DI | Dropped the unused legacy `threads` + `messages` tables (0 rows) + `can_access_thread()`; `conversations*` is canonical. |
