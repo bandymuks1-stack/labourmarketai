@@ -20,6 +20,7 @@
     "check:primary-route-smoke": "pnpm -C apps/web check:primary-route-smoke",
     "check:i18n-debt": "pnpm -C apps/web check:i18n-debt",
     "check:public-seo-indexing": "pnpm -C apps/web check:public-seo-indexing",
+    "check:anon-secdef-allowlist": "pnpm -C apps/web exec tsx ../../scripts/check-anon-secdef-allowlist.mts",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw --schema public > apps/web/lib/supabase/types.ts",
     "db:fixtures:local": "pnpm -C apps/web db:fixtures:local",
