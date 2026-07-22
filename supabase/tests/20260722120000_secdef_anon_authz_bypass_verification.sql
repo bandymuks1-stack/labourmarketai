@@ -4,20 +4,32 @@
 -- ============================================================================
 --
 -- WHAT THIS IS
---   Nine proofs that the fix actually holds at runtime. Static guard tests
+--   TEN proofs that the fix actually holds at runtime. Static guard tests
 --   (apps/web/lib/guards/secdef-anon-authz-bypass.test.ts) pin the migration
 --   TEXT; this script proves DATABASE BEHAVIOUR. Both are required — neither
 --   substitutes for the other.
 --
--- SAFETY CONTRACT
---   * The whole script runs inside ONE transaction that ends in ROLLBACK.
---     There is no COMMIT anywhere. Nothing it creates survives.
---   * It writes only to public.contracts / public.proposals /
---     public.marketplace_listings, and only rows it created itself.
---   * It asserts the row state BEFORE and AFTER every rejected attempt, so a
---     silently-succeeding call cannot pass as a refusal. Checking the exception
---     text alone is explicitly NOT sufficient.
---   * It never reads or modifies any pre-existing row.
+-- SAFETY CONTRACT — verified against the live catalog on 2026-07-22
+--   * ONE transaction, ending in ROLLBACK. There is no COMMIT anywhere.
+--   * NO DDL. No CREATE / ALTER / DROP / TRUNCATE / GRANT / REVOKE.
+--   * NO SEQUENCES. All three tables key on `id default gen_random_uuid()`
+--     (confirmed via pg_attrdef), so nothing survives the rollback the way a
+--     sequence advance would.
+--   * NO TRIGGERS on public.contracts / public.proposals /
+--     public.marketplace_listings (confirmed via pg_trigger, excluding
+--     internal FK triggers) — so no audit row, no pg_notify, no cascade.
+--   * NO external side effects: no HTTP, webhook, email, queue, storage,
+--     dblink, pg_notify or COPY.
+--   * It writes ONLY rows it created itself, identified by ids captured in
+--     local variables. It never targets an id it did not generate.
+--   * public.profiles is READ-ONLY here: two existing profile ids are borrowed
+--     as owner/non-owner identities and are never modified. No identity is
+--     created.
+--   * State is compared BEFORE and AFTER every rejected attempt that targets a
+--     real row (PROOFS 2, 3, 4, 6, 7, 10b), so a silently-succeeding call
+--     cannot pass as a refusal. PROOFS 5 and 10a deliberately target a
+--     non-existent id and therefore assert on the ERROR IDENTITY instead —
+--     for 10a that discrimination is the whole point of the proof.
 --
 -- HOW TO RUN
 --   Supabase Dashboard → SQL Editor, or psql as a superuser/postgres role.
