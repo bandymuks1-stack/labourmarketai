@@ -10,13 +10,33 @@
 -- A verification that never tested the unauthenticated case is exactly what let
 -- the 2026-07-22 P0 ship. Do not accept a post-apply-only run.
 --
--- TRANSPORT NOTE (learned on PR #846)
--- -----------------------------------
--- This harness reports through a RESULT SET, not `raise notice`. The Supabase
--- MCP `execute_sql` channel discards notices, which previously forced a one-off
--- read-back wrapper to be hand-written at the owner gate. Send this whole file
--- as one multi-statement query and the final SELECT comes back, so the harness
--- that ships is the harness that runs.
+-- TRANSPORT NOTE (learned on PR #846, then corrected by actually testing it)
+-- ------------------------------------------------------------------------
+-- This harness reports through a RESULT SET, not `raise notice`, because the
+-- Supabase MCP `execute_sql` channel discards notices — that is what forced a
+-- one-off read-back wrapper to be hand-written at the #846 owner gate.
+--
+-- HOW TO RUN IT, precisely:
+--
+--   * PART A (catalog proofs 1-5, 8-10) is a SINGLE self-contained statement.
+--     It runs anywhere, including through Supabase MCP `execute_sql`. This is
+--     the part used at the owner gate, and it is the part that ships.
+--
+--   * PART B (behavioural proofs 6-7) uses DO blocks and `set_config`, and
+--     needs a session-capable client such as `psql -f`. VERIFIED: the MCP
+--     channel cannot run this file as one multi-statement script — temp tables
+--     and DO blocks in the same submission fail with 42601. An earlier draft of
+--     this header claimed otherwise; that claim was wrong and is corrected here
+--     rather than quietly left in place.
+--
+-- SIGNATURE RESOLUTION: functions are resolved by JOINING pg_proc on the
+-- identity string, never by casting to `regprocedure`. `regprocedure` input
+-- accepts ARGUMENT TYPES ONLY — `public.owns_company(uuid)` parses,
+-- `public.owns_company(c uuid)` raises 42601 `invalid type name`. The signatures
+-- pinned here are in `pg_get_function_identity_arguments` form (name + type), so
+-- a regprocedure cast would break every proof that touches them. This defect was
+-- present in the first draft of BOTH this harness and the migration, and was
+-- caught only because the owner gate mandates a pre-apply run.
 --
 -- Everything runs inside a transaction that ends in ROLLBACK. It writes nothing.
 -- Safe against production.
@@ -148,7 +168,12 @@ select 5, 'authenticated retains EXECUTE on all 33 authenticated-only functions'
             else 'LOST: ' || string_agg(sig, ', ' order by sig) end
   from _scope s
  where s.grp = 'AUTHED'
-   and not has_function_privilege('authenticated', ('public.' || s.sig)::regprocedure, 'EXECUTE');
+   and not exists (
+     select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = s.sig
+        and has_function_privilege('authenticated', p.oid, 'EXECUTE')
+   );
 
 -- PROOF 6 — BEHAVIOURAL. Become `anon` and call three revoked functions.
 --           Catalog agreement is not the same as the server saying no.
@@ -228,8 +253,13 @@ select 9, 'trigger-only (9) + dead (1) hold no anon/authenticated grant',
             else 'still granted: ' || string_agg(sig, ', ' order by sig) end
   from _scope s
  where s.grp in ('TRIGGER','DEAD')
-   and (has_function_privilege('authenticated', ('public.' || s.sig)::regprocedure, 'EXECUTE')
-        or has_function_privilege('anon', ('public.' || s.sig)::regprocedure, 'EXECUTE'));
+   and exists (
+     select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = s.sig
+        and (has_function_privilege('authenticated', p.oid, 'EXECUTE')
+             or has_function_privilege('anon', p.oid, 'EXECUTE'))
+   );
 
 -- PROOF 10 — every trigger function is still attached to a trigger. Proves the
 --            revoke did not detach anything and that "trigger-only" is a fact
@@ -243,7 +273,11 @@ select 10, 'all 9 trigger functions remain attached to a trigger',
  where s.grp = 'TRIGGER'
    and not exists (
      select 1 from pg_trigger t
-      where t.tgfoid = ('public.' || s.sig)::regprocedure and not t.tgisinternal
+      join pg_proc p on p.oid = t.tgfoid
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = s.sig
+        and not t.tgisinternal
    );
 
 -- Harness integrity, then the report.

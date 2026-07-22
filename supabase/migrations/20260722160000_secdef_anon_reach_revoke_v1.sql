@@ -247,6 +247,12 @@ revoke execute on function public.mirror_company_to_org() from anon;
 --    resulting state matches the approved matrix EXACTLY, by signature
 --    identity. Never a count: a swap preserving the number would still abort.
 -- ---------------------------------------------------------------------
+-- NOTE ON THE ASSERTIONS BELOW: they resolve functions by JOINING pg_proc on the
+-- identity string, never by casting to `regprocedure`. `regprocedure` input accepts
+-- ARGUMENT TYPES ONLY -- `public.owns_company(uuid)` parses, `public.owns_company(c
+-- uuid)` raises 42601 `invalid type name`. Since this file pins signatures in
+-- `pg_get_function_identity_arguments` form (name + type), a regprocedure cast would
+-- abort the migration. Caught by the mandatory pre-apply harness run.
 do $$
 declare
   v_bad text;
@@ -325,7 +331,12 @@ begin
     ('transfer_asset_assignment_v1(p_assignment_id uuid, p_new_project_id uuid, p_new_worker_id uuid, p_note text)'),
     ('update_project_stage_v1(p_stage_id uuid, p_name text, p_status text, p_stage_order integer, p_planned_start date, p_planned_end date, p_actual_start date, p_actual_end date, p_blocked_reason text, p_completion_criteria text)')
   ) as t(sig)
-  where not has_function_privilege('authenticated', ('public.' || t.sig)::regprocedure, 'EXECUTE');
+  where not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = t.sig
+       and has_function_privilege('authenticated', p.oid, 'EXECUTE')
+  );
   if v_bad is not null then
     raise exception 'authenticated LOST EXECUTE on authenticated-only function(s): %', v_bad;
   end if;
@@ -340,8 +351,13 @@ begin
     ('learning_review_queue_guard_stale()'), ('mirror_agency_to_org()'),
     ('mirror_company_to_org()'), ('owns_customer(c uuid)')
   ) as t(sig)
-  where has_function_privilege('authenticated', ('public.' || t.sig)::regprocedure, 'EXECUTE')
-     or has_function_privilege('anon', ('public.' || t.sig)::regprocedure, 'EXECUTE');
+  where exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = t.sig
+       and (has_function_privilege('authenticated', p.oid, 'EXECUTE')
+            or has_function_privilege('anon', p.oid, 'EXECUTE'))
+  );
   if v_bad is not null then
     raise exception 'trigger-only/dead function(s) unexpectedly still granted: %', v_bad;
   end if;
