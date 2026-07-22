@@ -88,5 +88,32 @@ jobs:
       - name: i18n debt ratchet
         run: pnpm check:i18n-debt
 
+      # Anon SECURITY DEFINER allowlist — LIVE half.
+      #
+      # The static half already runs above inside `pnpm -F web test`
+      # (apps/web/lib/guards/secdef-anon-allowlist.test.ts) and is a hard gate.
+      # But static analysis provably cannot see the defect class this exists for:
+      # the 2026-07-22 P0 was a leftover default PUBLIC EXECUTE grant that no
+      # migration diff revealed. Only the catalog shows it, so only a live check
+      # is authoritative.
+      #
+      # This step needs a database connection string, and a new secret is an
+      # OWNER-ONLY gate. Until the owner adds `SUPABASE_DB_URL`, the step reports
+      # loudly that the live gate is NOT active rather than printing a green tick
+      # — a gate that passes without checking anything is worse than no gate.
+      # The checker itself refuses to run without DB_URL (exit 2); it no longer
+      # defaults to localhost, which could make an empty local database look like
+      # a statement about production.
+      - name: Anon SECURITY DEFINER allowlist (live catalog gate)
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "${DB_URL}" ]; then
+            echo "::warning title=Live secdef gate NOT active::secrets.SUPABASE_DB_URL is not configured, so the anon SECURITY DEFINER allowlist was NOT verified against a real catalog. The static half ran and passed. Owner action required to activate this gate: add a read-only SUPABASE_DB_URL secret."
+            echo "SKIPPED — no SUPABASE_DB_URL secret. Static half ran; live half did NOT."
+            exit 0
+          fi
+          pnpm check:anon-secdef-allowlist
+
       - name: Build (env-independent; Vercel remains deploy authority)
         run: pnpm -F web build

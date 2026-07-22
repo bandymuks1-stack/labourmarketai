@@ -328,6 +328,12 @@ describe("NO new DB migration in this PR", () => {
     // fix (20260722120000_secdef_anon_authz_bypass_fix_v1, paired rollback).
     // RED / human-gated, ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(162);
+    // Bumped 162 -> 163 for the P0 follow-up revoke of anonymous reachability
+    // on the remaining 43 SECURITY DEFINER functions
+    // (20260722160000_secdef_anon_reach_revoke_v1, paired rollback). RED,
+    // ships UNAPPLIED and deliberately NOT human-gate-annotated — the owner
+    // has not approved it. Grant-only: no table, policy or body is touched,
+    // and still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(163);
   });
 });

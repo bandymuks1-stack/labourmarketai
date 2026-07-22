@@ -1844,7 +1844,14 @@ describe("no migration files added by this sprint", () => {
     // `v_owner <> auth.uid()` check in 7 RPCs (contracts / proposals /
     // marketplace listings) and revokes their inherited PUBLIC EXECUTE grant.
     // No table, row, policy or trigger is touched.
-    const SPRINT_BASELINE = 162;
+    // Bumped 162 -> 163 for the P0 follow-up
+    // (20260722160000_secdef_anon_reach_revoke_v1). RED; ships UNAPPLIED with
+    // a paired rollback and deliberately WITHOUT `@human-gate-approved`, since
+    // the owner has not approved it — RED is the intended state. Grant-only:
+    // revokes the leftover PUBLIC/anon EXECUTE on the 43 non-allowlisted
+    // SECURITY DEFINER functions and re-grants authenticated + service_role.
+    // No table, row, policy, trigger or function body is touched.
+    const SPRINT_BASELINE = 163;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
