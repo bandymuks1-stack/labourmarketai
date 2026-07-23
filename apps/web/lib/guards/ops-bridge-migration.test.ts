@@ -411,6 +411,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260723053000_contact_demand_owner_v1) — function-only read RPC,
     // paired rollback, human-gated (owner-instructed annotation 2026-07-23
     // after the green security matrix), ships UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 164/);
+    // Bumped 164 -> 165 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1) — new engagement table +
+    // four RPCs, paired rollback, RED (deliberately NOT human-gate-annotated),
+    // ships UNAPPLIED; closes the accepted-booking → project-assignment P1.
+    expect(guard).toMatch(/SPRINT_BASELINE = 165/);
   });
 });

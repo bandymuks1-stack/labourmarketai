@@ -5338,7 +5338,9 @@
       "assigned": "Priskirta",
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
-      "fromRoster": "Priskirti darbuotoją šiam objektui"
+      "fromRoster": "Priskirti darbuotoją šiam objektui",
+      "rosterGroup": "Komandos nariai",
+      "engagementGroup": "Priimto pasiūlymo kandidatai"
     },
     "model": {
       "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs.",

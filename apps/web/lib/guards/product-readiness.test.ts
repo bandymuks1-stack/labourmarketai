@@ -1862,7 +1862,16 @@ describe("no migration files added by this sprint", () => {
     // dies 42501 under the allowlisted service_role grants posture, so
     // "Parašyti darbdaviui" failed for every worker. Until applied the app
     // feature-detects → "needs_migration".
-    const SPRINT_BASELINE = 164;
+    // Bumped 164 -> 165 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1, paired rollback). Closes
+    // the 2026-07-23 employer full-E2E P1 dead-end: an ACCEPTED booking now
+    // mints a limited, auditable company↔worker engagement (new RLS-closed
+    // table, writes RPC-only) and the project-assign gate accepts roster OR
+    // active engagement — caller_manages_worker and every other roster
+    // surface untouched. RED and deliberately NOT human-gate-annotated (the
+    // owner has not approved it); ships UNAPPLIED, app feature-detects →
+    // honest "needs_migration" engagement state until applied.
+    const SPRINT_BASELINE = 165;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

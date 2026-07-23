@@ -339,6 +339,11 @@ describe("NO new DB migration in this PR", () => {
     // read RPC, human-gated (owner-instructed annotation 2026-07-23 after the
     // green security matrix), ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(164);
+    // Bumped 164 -> 165 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1, paired rollback). New
+    // engagement table + four RPCs closing the accepted-booking →
+    // project-assignment P1; RED, deliberately NOT human-gate-annotated,
+    // ships UNAPPLIED; still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(165);
   });
 });

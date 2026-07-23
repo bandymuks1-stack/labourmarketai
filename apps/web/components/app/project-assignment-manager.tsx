@@ -10,6 +10,7 @@ import {
 } from "@/lib/projects/actions";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
 import type { ManagedWorker } from "@/lib/instructions/instructions";
+import type { EngagementWorker } from "@/lib/projects/booking-engagement-workers";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -56,6 +57,9 @@ export interface ProjectManagerLabels {
   sending: string;
   assignFromRoster: string;
   openBoard: string;
+  /** Booking-engagement bridge v1 — the picker's two DISTINCT origins. */
+  rosterGroupLabel: string;
+  engagementGroupLabel: string;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -87,10 +91,16 @@ function resultError(r: ProjectActionResult | null, l: ProjectManagerLabels) {
 export function ProjectAssignmentManager({
   projects,
   workers,
+  engagementWorkers = [],
   labels,
 }: {
   projects: ProjectWithAssignments[];
   workers: ManagedWorker[];
+  /** Accepted-booking engagement candidates (booking-engagement bridge v1) —
+   *  rendered as a SEPARATE, clearly-labelled group so a team/roster member
+   *  is never conflated with an accepted-proposal candidate. Empty until the
+   *  owner applies migration 20260723120000 (honest degradation). */
+  engagementWorkers?: EngagementWorker[];
   labels: ProjectManagerLabels;
 }) {
   const [createState, createAction, creating] = useActionState<
@@ -132,7 +142,7 @@ export function ProjectAssignmentManager({
         <p className="card-border p-4 text-sm text-text-secondary" data-testid="projects-empty">
           {labels.noProjects}
         </p>
-      ) : workers.length === 0 ? (
+      ) : workers.length === 0 && engagementWorkers.length === 0 ? (
         <p className="card-border p-4 text-sm text-text-secondary">{labels.noWorkers}</p>
       ) : (
         <form id="assign-worker" action={assignAction} className="card-border flex flex-col gap-3 p-5" data-testid="project-assign">
@@ -152,9 +162,25 @@ export function ProjectAssignmentManager({
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.workerLabel}</span>
             <select name="worker_profile_id" defaultValue="" required className={field}>
               <option value="" disabled>{labels.workerPlaceholder}</option>
-              {workers.map((w) => (
-                <option key={w.profileId} value={w.profileId}>{w.name}</option>
-              ))}
+              {workers.length > 0 && (
+                <optgroup label={labels.rosterGroupLabel} data-testid="assign-roster-group">
+                  {workers.map((w) => (
+                    <option key={w.profileId} value={w.profileId}>{w.name}</option>
+                  ))}
+                </optgroup>
+              )}
+              {engagementWorkers.length > 0 && (
+                <optgroup
+                  label={labels.engagementGroupLabel}
+                  data-testid="assign-engagement-group"
+                >
+                  {engagementWorkers.map((w) => (
+                    <option key={w.engagementId} value={w.workerProfileId}>
+                      {w.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </label>
           <div className="flex items-center gap-3">
