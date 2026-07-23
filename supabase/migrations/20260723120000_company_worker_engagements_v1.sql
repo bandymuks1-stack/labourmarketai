@@ -64,11 +64,37 @@
 --      ends the engagement (status='ended', ended_at, ended_by). No delete —
 --      the row IS the audit record.
 --
+-- COMPANY ORIGIN (deterministic, never a guess): the engagement's company is
+-- derived from the booking's CANONICAL chain — booking_requests.request_id
+-- (NOT NULL FK) → customer_requests.profile_id (the demand owner; the
+-- propose RPC guarantees it equals booking.owner_id, and v3 re-verifies) →
+-- companies.profile_id. The repo canon treats profile→company as unique
+-- (callerCompanyId uses maybeSingle); if a demand-owner profile ever owns
+-- MULTIPLE companies, v3 refuses to guess and returns the honest
+-- 'ambiguous_company' non-mint state (the accept itself always stands).
+-- There is NO created_at ordering and NO LIMIT-1 company pick anywhere.
+--
+-- GDPR / AUDIT MODEL (option A — issue #856 compatibility, NOT its fix):
+--   * worker_id is NULLABLE with ON DELETE SET NULL; created_by / ended_by
+--     (→ profiles) are ON DELETE SET NULL — this table can never block a
+--     worker/profile erasure.
+--   * subject_key (random uuid minted at creation, derived from nothing) is
+--     the surviving pseudonymized audit subject: after erasure the row still
+--     proves WHICH booking created WHICH company engagement WHEN, with no
+--     identifiable subject left.
+--   * A DETACHED row (worker_id IS NULL) grants NOTHING: the assign helper
+--     and the picker RPC both require worker_id IS NOT NULL — active project
+--     rights can never survive subject detachment.
+--   * RETENTION: engagement rows are kept as non-identifying audit lineage
+--     (company-side business record). The future #856 erasure flow may end
+--     detached rows (status='ended') but never needs to delete them.
+--
 -- ABUSE BOUNDS: all ownership checks are caller-bound (auth.uid()) and
 -- NULL-safe (`is distinct from`); no client-supplied company_id/worker_id is
--- trusted anywhere — the engagement is derived server-side from the booking
--- row; engagement grants nothing outside the project-assign gate; one active
--- engagement per pair; one engagement per booking, ever.
+-- trusted anywhere — the engagement is derived server-side from the booking's
+-- canonical origin chain; engagement grants nothing outside the
+-- project-assign gate; one active engagement per pair; one engagement per
+-- booking, ever.
 --
 -- COMPATIBILITY / BACKFILL: none — new table ships empty; v1/v2 booking RPCs
 -- keep working unchanged; the app calls v3 and falls back to v1 on
@@ -99,6 +125,15 @@
 --   As an unrelated authenticated user:
 --     select * from public.company_worker_engagements;                  -- 0 rows
 --   As anon: every new function → permission denied.
+--   GDPR detach simulation (in a ROLLED-BACK transaction):
+--     begin;
+--       delete from public.workers where id = '<engagement worker id>';
+--         -- succeeds (no FK blocker); engagement row remains,
+--         -- worker_id IS NULL, subject_key intact
+--       select public.caller_has_booking_engagement_for_project(
+--         '<old worker id>', '<project id>');                           -- false
+--       select count(*) from public.list_booking_engagement_workers_v1(); -- 0
+--     rollback;
 --   + APPLIED_LEDGER.md row.
 --
 -- ROLLBACK: paired supabase/rollbacks/
@@ -114,7 +149,17 @@ begin;
 create table if not exists public.company_worker_engagements (
   id                uuid primary key default gen_random_uuid(),
   company_id        uuid not null references public.companies(id) on delete cascade,
-  worker_id         uuid not null references public.workers(id)   on delete cascade,
+  -- GDPR model A (issue #856 compatibility): the worker link is NULLABLE and
+  -- detaches on worker deletion (ON DELETE SET NULL) — this table must never
+  -- become another erasure blocker. The pseudonymized subject_key below is
+  -- the surviving, non-identifying audit provenance; a DETACHED row grants
+  -- NOTHING (every authorization/list path requires worker_id IS NOT NULL).
+  worker_id         uuid references public.workers(id) on delete set null,
+  -- Non-identifying audit subject reference: a random uuid minted at
+  -- engagement creation, NOT derived from any worker/profile id. Survives
+  -- worker erasure so the engagement's audit lineage (which booking, which
+  -- company, when) stays intact without an identifiable subject.
+  subject_key       uuid not null default gen_random_uuid(),
   -- Provenance: the exact accepted booking this engagement came from.
   -- RESTRICT: the audit origin cannot be silently deleted from under the
   -- engagement; removing a booking requires removing its engagement first.
@@ -123,10 +168,11 @@ create table if not exists public.company_worker_engagements (
                       check (status in ('active','ended')),
   started_at        timestamptz not null default now(),
   ended_at          timestamptz,
-  ended_by          uuid references public.profiles(id),
+  -- Actor references detach on profile erasure (never block a deletion).
+  ended_by          uuid references public.profiles(id) on delete set null,
   created_at        timestamptz not null default now(),
-  -- The accepting worker's profile (the actor whose accept created the row).
-  created_by        uuid not null references public.profiles(id),
+  -- The accepting worker's profile at mint time (detaches on erasure).
+  created_by        uuid references public.profiles(id) on delete set null,
   -- One engagement per booking, ever (idempotency anchor for RPC retries).
   unique (source_booking_id)
 );
@@ -137,7 +183,8 @@ create unique index if not exists company_worker_engagements_active_pair_idx
   where status = 'active';
 
 create index if not exists company_worker_engagements_worker_idx
-  on public.company_worker_engagements (worker_id);
+  on public.company_worker_engagements (worker_id)
+  where worker_id is not null;
 create index if not exists company_worker_engagements_company_idx
   on public.company_worker_engagements (company_id);
 
@@ -181,6 +228,8 @@ declare
   v_kind text := nullif(trim(coalesce(p_reason_kind, '')), '');
   v_note text := nullif(trim(coalesce(p_reason_note, '')), '');
   v_company uuid;
+  v_demand_owner uuid;
+  v_company_count integer := 0;
   v_engagement text := null;
 begin
   if uid is null then
@@ -244,18 +293,41 @@ begin
 
   -- Engagement: SAME transaction as the accept — an accepted booking is never
   -- left without its engagement record. Everything below is derived from the
-  -- booking row server-side; no client-supplied company/worker id exists.
+  -- booking's CANONICAL origin chain server-side (booking.request_id →
+  -- customer_requests.profile_id → companies); no client-supplied
+  -- company/worker id exists and no implicit pick among companies is ever
+  -- made — an ambiguous owner is an honest non-mint, never a guess.
   if p_decision = 'accepted' then
-    select c.id into v_company
-      from public.companies c
-     where c.profile_id = br.owner_id
-     order by c.created_at asc
-     limit 1;
+    -- The booking's demand row is mandatory (request_id NOT NULL) and the
+    -- propose RPC guarantees the demand owner IS the booking owner; verify
+    -- the invariant instead of trusting it.
+    select cr.profile_id into v_demand_owner
+      from public.customer_requests cr
+     where cr.id = br.request_id;
 
-    if v_company is null then
-      -- Honest partial: the proposing profile has no company row — the
-      -- accept stands, the engagement layer reports it truthfully.
+    select count(*) into v_company_count
+      from public.companies c
+     where c.profile_id = v_demand_owner;
+
+    if v_demand_owner is null
+       or v_demand_owner is distinct from br.owner_id
+       or v_company_count = 0 then
+      -- Honest partial: no resolvable canonical company origin — the accept
+      -- stands, the engagement layer reports it truthfully.
       v_engagement := 'no_company';
+    elsif v_company_count > 1 then
+      -- The demand-owner profile owns MULTIPLE companies and the demand row
+      -- carries no company binding — refusing to guess (repo canon treats
+      -- profile→company as unique; see callerCompanyId's maybeSingle).
+      v_engagement := 'ambiguous_company';
+    else
+      select c.id into v_company
+        from public.companies c
+       where c.profile_id = v_demand_owner;
+    end if;
+
+    if v_engagement is not null then
+      null; -- already resolved to an honest non-mint state above
     elsif exists (
       select 1 from public.company_worker_engagements e
        where e.source_booking_id = br.id
@@ -309,7 +381,8 @@ as $$
       join public.companies     c on c.id = e.company_id
       join public.projects      p on p.id = p_project_id
       join public.organizations o on o.id = p.organization_id
-     where e.worker_id = p_worker_id
+     where e.worker_id is not null
+       and e.worker_id = p_worker_id
        and e.status = 'active'
        and c.profile_id is not distinct from auth.uid()
        and o.legacy_company_id is not distinct from e.company_id
@@ -404,7 +477,8 @@ as $$
     from public.company_worker_engagements e
     join public.companies c on c.id = e.company_id
     join public.workers   w on w.id = e.worker_id
-   where e.status = 'active'
+   where e.worker_id is not null
+     and e.status = 'active'
      and c.profile_id is not distinct from auth.uid()
    order by e.started_at desc;
 $$;

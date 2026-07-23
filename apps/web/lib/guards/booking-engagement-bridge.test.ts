@@ -62,9 +62,34 @@ describe("engagement table — limited, auditable, idempotent by construction", 
     const m = migration();
     expect(m).toMatch(/check \(status in \('active','ended'\)\)/);
     expect(m).toMatch(/source_booking_id uuid not null references public\.booking_requests\(id\) on delete restrict/);
-    for (const col of ["started_at", "ended_at", "ended_by", "created_at", "created_by"]) {
+    for (const col of ["started_at", "ended_at", "ended_by", "created_at", "created_by", "subject_key"]) {
       expect(m, `column ${col}`).toMatch(new RegExp(`\\b${col}\\b`));
     }
+  });
+
+  it("GDPR model A: no FK in this table can ever block a worker/profile erasure", () => {
+    const m = migration();
+    // worker link detaches, never blocks (issue #856 compatibility).
+    expect(m).toMatch(/worker_id\s+uuid references public\.workers\(id\) on delete set null/);
+    // actor references detach too — no NO-ACTION profiles FK anywhere here.
+    expect(m).toMatch(/ended_by\s+uuid references public\.profiles\(id\) on delete set null/);
+    expect(m).toMatch(/created_by\s+uuid references public\.profiles\(id\) on delete set null/);
+    // The ONLY restrictive FK is the booking provenance anchor.
+    const restricts = m.match(/on delete restrict/g) ?? [];
+    expect(restricts.length).toBe(1);
+    // No cascade into workers/profiles and no NOT NULL worker binding left.
+    expect(m).not.toMatch(/worker_id\s+uuid not null/);
+    // Pseudonymized surviving subject: random, derived from nothing.
+    expect(m).toMatch(/subject_key\s+uuid not null default gen_random_uuid\(\)/);
+  });
+
+  it("a DETACHED engagement (worker erased) grants nothing anywhere", () => {
+    const assign = fnBody(migration(), "caller_has_booking_engagement_for_project");
+    expect(assign).toMatch(/e\.worker_id is not null/);
+    const list = fnBody(migration(), "list_booking_engagement_workers_v1");
+    expect(list).toMatch(/e\.worker_id is not null/);
+    // The picker also inner-joins workers — a NULL worker can never surface.
+    expect(list).toMatch(/join public\.workers\s+w on w\.id = e\.worker_id/);
   });
 
   it("idempotency anchors: one engagement per booking + one ACTIVE per pair", () => {
@@ -114,12 +139,27 @@ describe("respond_booking_request_v3 — v2 semantics + transactional engagement
     expect(acceptedCheck).toBeGreaterThan(-1);
   });
 
-  it("derives company/worker server-side from the booking row — no client ids", () => {
+  it("derives the company from the booking's CANONICAL chain — no client ids", () => {
     const body = fnBody(migration(), "respond_booking_request_v3");
-    expect(body).toMatch(/c\.profile_id = br\.owner_id/);
+    // booking.request_id → customer_requests.profile_id → companies.
+    expect(body).toMatch(/from public\.customer_requests cr\s*\n\s*where cr\.id = br\.request_id/);
+    expect(body).toMatch(/c\.profile_id = v_demand_owner/);
+    // The demand-owner ↔ booking-owner invariant is VERIFIED, not trusted.
+    expect(body).toMatch(/v_demand_owner is distinct from br\.owner_id/);
     expect(body).toMatch(/values \(v_company, br\.worker_id, br\.id, uid\)/);
     // The function signature takes NO company_id / worker_id parameters.
     expect(body.slice(0, body.indexOf("returns"))).not.toMatch(/p_company_id|p_worker_id/);
+  });
+
+  it("NEVER picks a company implicitly: no created_at ordering, no LIMIT pick, ambiguity is an honest non-mint", () => {
+    const body = fnBody(migration(), "respond_booking_request_v3");
+    expect(body).not.toMatch(/order by c\.created_at/);
+    expect(body).not.toMatch(/limit 1/);
+    // Multiple owner companies → explicit refusal, never a guess.
+    expect(body).toMatch(/v_company_count > 1/);
+    expect(body).toMatch(/'ambiguous_company'/);
+    // Zero companies / broken invariant → honest no_company.
+    expect(body).toMatch(/v_company_count = 0/);
   });
 
   it("retry paths are explicit no-ops: already_recorded / already_active", () => {
