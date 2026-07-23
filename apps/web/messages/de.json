@@ -9844,6 +9844,66 @@
       "closed": "Geschlossen"
     }
   },
+  "agencyBridge": {
+    "title": "Kundenunternehmen",
+    "subtitle": "Verbinden Sie sich mit einem echten Kundenunternehmen, sehen Sie nur die geteilten Anfragen und bieten Sie einen Ihrer aktiven Roster-Mitarbeiter an.",
+    "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
+    "gatedBody": "Die Kundenbrücke ist bereit, aber noch nicht aktiviert.",
+    "connectionsHeading": "Verbindungen",
+    "inviteEmailLabel": "Kunden-E-Mail",
+    "inviteButton": "Kunden einladen",
+    "revokeButton": "Verbindung widerrufen",
+    "noConnections": "Noch keine Verbindungen. Laden Sie einen Kunden per E-Mail ein.",
+    "sharedHeading": "Mit Ihnen geteilte Anfragen",
+    "noShared": "Noch kein Kunde hat eine Anfrage geteilt.",
+    "workerLabel": "Ihr Roster-Mitarbeiter",
+    "workerPlaceholder": "Mitarbeiter wählen…",
+    "offerButton": "Kandidat anbieten",
+    "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter hinzu.",
+    "progressHeading": "Ihre Angebote",
+    "noOffers": "Noch keine Angebote.",
+    "withdrawButton": "Angebot zurückziehen",
+    "openScouting": "Scouting öffnen",
+    "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "status": {
+      "pending": "Ausstehend",
+      "active": "Aktiv",
+      "declined": "Abgelehnt",
+      "revoked": "Widerrufen"
+    },
+    "stage": {
+      "offered": "Angeboten",
+      "reviewed": "Geprüft",
+      "contacted": "Kontaktiert",
+      "rejected": "Abgelehnt",
+      "booking_started": "Buchung gestartet",
+      "accepted": "Buchung angenommen"
+    }
+  },
+  "clientBridge": {
+    "title": "Personalagenturen",
+    "subtitle": "Akzeptieren Sie eine Personalagentur, mit der Sie arbeiten möchten, teilen Sie bestimmte Anfragen und prüfen Sie die vorgeschlagenen Kandidaten auf Ihrer eigenen Scouting-Seite.",
+    "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
+    "gatedBody": "Die Agenturbrücke ist bereit, aber noch nicht aktiviert.",
+    "invitesHeading": "Verbindungseinladungen",
+    "noInvites": "Keine ausstehenden Einladungen.",
+    "acceptButton": "Annehmen",
+    "declineButton": "Ablehnen",
+    "activeHeading": "Verbundene Agenturen",
+    "noActive": "Noch keine verbundenen Agenturen.",
+    "revokeButton": "Trennen",
+    "shareLabel": "Anfrage teilen",
+    "sharePlaceholder": "Anfrage wählen…",
+    "shareButton": "Teilen",
+    "noDemands": "Erstellen Sie zuerst eine Anfrage, dann können Sie sie teilen.",
+    "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "fromAgency": "Von"
+  },
+  "scoutingAgencyOffers": {
+    "title": "Von der Agentur vorgeschlagene Kandidaten",
+    "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
+    "via": "Über"
+  },
   "cvSections": {
     "grid": {
       "title": "Vollständigkeit des Lebenslaufs",

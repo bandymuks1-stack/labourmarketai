@@ -9844,6 +9844,66 @@
       "closed": "Closed"
     }
   },
+  "agencyBridge": {
+    "title": "Client companies",
+    "subtitle": "Connect with a real client company, see only the requests they share, and offer one of your active roster workers.",
+    "gatedHeading": "Prepared — owner activation pending",
+    "gatedBody": "The client bridge is ready but not switched on yet.",
+    "connectionsHeading": "Connections",
+    "inviteEmailLabel": "Client email",
+    "inviteButton": "Invite client",
+    "revokeButton": "Revoke connection",
+    "noConnections": "No connections yet. Invite a client by email.",
+    "sharedHeading": "Requests shared with you",
+    "noShared": "No client has shared a request yet.",
+    "workerLabel": "Your roster worker",
+    "workerPlaceholder": "Choose a worker…",
+    "offerButton": "Offer candidate",
+    "noRoster": "Add an active worker to your roster first.",
+    "progressHeading": "Your offers",
+    "noOffers": "No offers yet.",
+    "withdrawButton": "Withdraw offer",
+    "openScouting": "Open scouting",
+    "errorLabel": "Something went wrong. Try again.",
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "declined": "Declined",
+      "revoked": "Revoked"
+    },
+    "stage": {
+      "offered": "Offered",
+      "reviewed": "Reviewed",
+      "contacted": "Contacted",
+      "rejected": "Rejected",
+      "booking_started": "Booking started",
+      "accepted": "Booking accepted"
+    }
+  },
+  "clientBridge": {
+    "title": "Staffing agencies",
+    "subtitle": "Accept a staffing agency you want to work with, share specific requests, and review the candidates they propose on your own scouting page.",
+    "gatedHeading": "Prepared — owner activation pending",
+    "gatedBody": "The agency bridge is ready but not switched on yet.",
+    "invitesHeading": "Connection invites",
+    "noInvites": "No pending invites.",
+    "acceptButton": "Accept",
+    "declineButton": "Decline",
+    "activeHeading": "Connected agencies",
+    "noActive": "No connected agencies yet.",
+    "revokeButton": "Disconnect",
+    "shareLabel": "Share a request",
+    "sharePlaceholder": "Choose a request…",
+    "shareButton": "Share",
+    "noDemands": "Create a request first, then you can share it.",
+    "errorLabel": "Something went wrong. Try again.",
+    "fromAgency": "From"
+  },
+  "scoutingAgencyOffers": {
+    "title": "Agency-proposed candidates",
+    "subtitle": "A connected staffing agency proposed these workers for this request. Review, contact, or book them with the same controls below.",
+    "via": "Via"
+  },
   "cvSections": {
     "grid": {
       "title": "CV completeness",
