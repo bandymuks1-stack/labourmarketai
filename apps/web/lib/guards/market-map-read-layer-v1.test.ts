@@ -336,8 +336,9 @@ describe("NO new DB migration in this PR", () => {
     // and still no migration from the market-map read layer.
     // Bumped 163 -> 164 for the worker contact-employer owner-resolution RPC
     // (20260723053000_contact_demand_owner_v1, paired rollback). Function-only
-    // read RPC, RED / human-gated, ships UNAPPLIED; still no migration from
-    // the market-map read layer.
+    // read RPC, human-gated (owner-instructed annotation 2026-07-23 after the
+    // green security matrix), ships UNAPPLIED; still no migration from the
+    // market-map read layer.
     expect(count).toBeLessThanOrEqual(164);
   });
 });

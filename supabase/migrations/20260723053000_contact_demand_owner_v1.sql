@@ -41,12 +41,33 @@
 --   As a worker WITH an active interest signal on an open verified demand:
 --     select * from contact_demand_owner_v1('<request uuid>');
 --       -- 1 row, owner_profile_id NOT null, demand_open=true, company_verified=true
---   As the same worker after withdrawing the signal:
---     select * from contact_demand_owner_v1('<request uuid>');
---       -- 1 row, owner_profile_id NULL (flags still honest)
---   As a worker with NO signal on that demand: owner_profile_id NULL.
---   As anon: ERROR 42501.
+--   As the same worker after withdrawing the signal: 0 rows (no standing —
+--     indistinguishable from a nonexistent id; no existence oracle).
+--   As a worker with NO signal on that demand: 0 rows (same reason).
+--   As anon: permission denied (no EXECUTE grant).
 --   + APPLIED_LEDGER.md row.
+--
+-- OWNER-GATE SECURITY MATRIX (2026-07-23): the owner instructed a final
+-- 9-point verification before annotation. It ran in ONE rolled-back
+-- transaction against production (zero residue verified afterwards) and
+-- came back fully green: anon rejected (no EXECUTE); authenticated worker
+-- without a signal gets 0 rows even though other workers' signals exist on
+-- the demand; the legitimate signal holder receives exactly the owner id +
+-- title with honest flags; a non-submitted demand and an unverified company
+-- both yield owner NULL; self-contact yields owner NULL; a nonexistent id
+-- returns 0 rows — indistinguishable from the no-standing case (no
+-- existence oracle); the function is STABLE (cannot write), SECURITY
+-- DEFINER, search_path pinned to public, single overload, ACL =
+-- {postgres, authenticated=EXECUTE} with no PUBLIC and no anon entry; the
+-- anon-reachable SECURITY DEFINER surface stays exactly the 4 pre-existing
+-- allowlisted functions. All comparisons are IS DISTINCT FROM (never a
+-- bare <>), and auth.uid() IS NULL is rejected before any lookup.
+--
+-- @human-gate-approved — TIER: owner-gated (SECURITY DEFINER function +
+-- EXECUTE grant = RED-class). The OWNER explicitly instructed adding this
+-- annotation on 2026-07-23 conditional on the matrix above being green
+-- (it is). The annotation downgrades the CI finding only — the OWNER
+-- still applies this migration manually via Supabase MCP apply_migration.
 -- ============================================================================
 
 begin;
@@ -80,18 +101,20 @@ begin
   return query
   select
     -- The owner id (and title) are revealed to the SERVER ACTION only when
-    -- every gate holds; otherwise NULL while the flags stay honest.
+    -- every gate holds; otherwise NULL while the flags stay honest. All
+    -- inequality checks use IS DISTINCT FROM (NULL-safe by construction —
+    -- the P0 secdef lesson: never a bare <> in a SECURITY DEFINER gate).
     case
       when s.ok and cr.status = 'submitted'
            and c.verification_status = 'verified'
-           and cr.profile_id <> uid
+           and cr.profile_id is distinct from uid
         then cr.profile_id
       else null
     end as owner_profile_id,
     case
       when s.ok and cr.status = 'submitted'
            and c.verification_status = 'verified'
-           and cr.profile_id <> uid
+           and cr.profile_id is distinct from uid
         then left(coalesce(cr.title, ''), 120)
       else null
     end as demand_title,
@@ -106,10 +129,15 @@ begin
         from public.demand_interest_signals dis
        where dis.request_id = cr.id
          and dis.worker_id = v_worker
-         and dis.status <> 'withdrawn'
+         and dis.status is distinct from 'withdrawn'
     ) as ok
   ) s
-  where cr.id = p_request_id;
+  -- Existence-oracle closure: a row comes back ONLY when the caller holds
+  -- their own active signal on this demand. A caller with no standing gets
+  -- ZERO rows whether the demand exists or not — probing a guessed uuid
+  -- reveals nothing (the P2 existence-oracle class from the secdef audit).
+  where cr.id = p_request_id
+    and s.ok;
 end $$;
 
 revoke all on function public.contact_demand_owner_v1(uuid) from public;

@@ -409,7 +409,8 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // it. Ships UNAPPLIED.
     // Bumped 163 -> 164 for the worker contact-employer owner-resolution RPC
     // (20260723053000_contact_demand_owner_v1) — function-only read RPC,
-    // paired rollback, RED / human-gated, ships UNAPPLIED.
+    // paired rollback, human-gated (owner-instructed annotation 2026-07-23
+    // after the green security matrix), ships UNAPPLIED.
     expect(guard).toMatch(/SPRINT_BASELINE = 164/);
   });
 });
