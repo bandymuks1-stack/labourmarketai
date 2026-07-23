@@ -9842,6 +9842,66 @@
       "closed": "Uždaryta"
     }
   },
+  "agencyBridge": {
+    "title": "Klientų įmonės",
+    "subtitle": "Prisijunkite prie realios kliento įmonės, matykite tik jos pasidalintus poreikius ir pasiūlykite vieną iš savo aktyvių darbuotojų.",
+    "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
+    "gatedBody": "Kliento tiltas paruoštas, bet dar neįjungtas.",
+    "connectionsHeading": "Ryšiai",
+    "inviteEmailLabel": "Kliento el. paštas",
+    "inviteButton": "Pakviesti klientą",
+    "revokeButton": "Nutraukti ryšį",
+    "noConnections": "Kol kas ryšių nėra. Pakvieskite klientą el. paštu.",
+    "sharedHeading": "Jums pasidalinti poreikiai",
+    "noShared": "Nė vienas klientas dar nepasidalino poreikiu.",
+    "workerLabel": "Jūsų darbuotojas",
+    "workerPlaceholder": "Pasirinkite darbuotoją…",
+    "offerButton": "Pasiūlyti kandidatą",
+    "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į komandą.",
+    "progressHeading": "Jūsų pasiūlymai",
+    "noOffers": "Kol kas pasiūlymų nėra.",
+    "withdrawButton": "Atšaukti pasiūlymą",
+    "openScouting": "Atverti žvalgybą",
+    "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
+    "status": {
+      "pending": "Laukiama",
+      "active": "Aktyvus",
+      "declined": "Atmestas",
+      "revoked": "Nutrauktas"
+    },
+    "stage": {
+      "offered": "Pasiūlyta",
+      "reviewed": "Peržiūrėta",
+      "contacted": "Susisiekta",
+      "rejected": "Atmesta",
+      "booking_started": "Pradėta rezervacija",
+      "accepted": "Rezervacija priimta"
+    }
+  },
+  "clientBridge": {
+    "title": "Personalo agentūros",
+    "subtitle": "Priimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.",
+    "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
+    "gatedBody": "Agentūros tiltas paruoštas, bet dar neįjungtas.",
+    "invitesHeading": "Ryšio kvietimai",
+    "noInvites": "Laukiančių kvietimų nėra.",
+    "acceptButton": "Priimti",
+    "declineButton": "Atmesti",
+    "activeHeading": "Prijungtos agentūros",
+    "noActive": "Kol kas prijungtų agentūrų nėra.",
+    "revokeButton": "Atjungti",
+    "shareLabel": "Pasidalinti poreikiu",
+    "sharePlaceholder": "Pasirinkite poreikį…",
+    "shareButton": "Pasidalinti",
+    "noDemands": "Pirmiausia sukurkite poreikį, tada galėsite juo pasidalinti.",
+    "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
+    "fromAgency": "Nuo"
+  },
+  "scoutingAgencyOffers": {
+    "title": "Agentūros pasiūlyti kandidatai",
+    "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėkite, susisiekite arba rezervuokite juos tais pačiais valdikliais žemiau.",
+    "via": "Per"
+  },
   "cvSections": {
     "grid": {
       "title": "CV užpildymas",

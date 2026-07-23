@@ -339,6 +339,9 @@ describe("NO new DB migration in this PR", () => {
     // read RPC, human-gated (owner-instructed annotation 2026-07-23 after the
     // green security matrix), ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(164);
+    // Bumped 164 -> 165 for the REAL two-subject agency->client bridge
+    // (20260723180000_agency_real_client_bridge_v1, issue #859); owner-gated
+    // DRAFT, RED CI by design, UNAPPLIED; no migration from the read layer.
+    expect(count).toBeLessThanOrEqual(165);
   });
 });

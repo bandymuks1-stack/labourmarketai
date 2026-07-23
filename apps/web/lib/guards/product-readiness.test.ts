@@ -1862,7 +1862,12 @@ describe("no migration files added by this sprint", () => {
     // dies 42501 under the allowlisted service_role grants posture, so
     // "Parašyti darbdaviui" failed for every worker. Until applied the app
     // feature-detects → "needs_migration".
-    const SPRINT_BASELINE = 164;
+    // Bumped 164 -> 165 for the REAL two-subject agency->client bridge
+    // (20260723180000_agency_real_client_bridge_v1, issue #859, paired
+    // rollback). Three additive tables + 11 SECURITY DEFINER RPCs, zero
+    // changes to existing objects. OWNER-GATED DRAFT, NO @human-gate-approved
+    // (RED CI by design), ships UNAPPLIED.
+    const SPRINT_BASELINE = 165;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -88,7 +88,13 @@ describe("staffing-agency mode is a typed view on the company room", () => {
     const agencyImports =
       companyPage.match(/@\/lib\/agency\/[a-z-]+/g) ?? [];
     for (const imp of agencyImports) {
-      expect(["@/lib/agency/clients", "@/lib/agency/clients-model", "@/lib/agency/clients-actions"]).toContain(imp);
+      expect([
+        "@/lib/agency/clients",
+        "@/lib/agency/clients-model",
+        "@/lib/agency/clients-actions",
+        // real two-subject bridge (issue #859) — read service imported by the page
+        "@/lib/agency/bridge-read",
+      ]).toContain(imp);
     }
     // The components the company room mounts stay clean too.
     for (const comp of [
