@@ -45,7 +45,7 @@ export type PilotEventResult =
   | "info";
 
 export type RecordPilotEventResult =
-  | { ok: true; id: string }
+  | { ok: true }
   | { ok: false; code: PilotEventErrorCode; message: string };
 
 export type PilotEventErrorCode =
@@ -161,47 +161,46 @@ export async function recordTelemetryEvent(
   // `pnpm db:types` is re-run after 0020 is applied. Cast supabase.from
   // through `any` so the static name check passes — RLS still enforces
   // row-level ownership + admin-only SELECT at runtime.
+  //
+  // INSERT ONLY — never chain a select after this insert. A chained select
+  // makes PostgREST issue `INSERT … RETURNING`, and Postgres applies the
+  // table's SELECT policy to the RETURNING rows. `pilot_events_select` is
+  // admin-only (0020), so a RETURNING insert from any non-admin (every
+  // worker/company/anon caller) fails 42501 and the event row is LOST —
+  // this silently dropped all non-admin telemetry in production.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fromAny = (supabase as any).from.bind(supabase) as (
     name: string,
   ) => {
-    insert: (row: Record<string, unknown>) => {
-      select: (cols: string) => {
-        single: () => Promise<{
-          data: { id: string } | null;
-          error: { message?: string } | null;
-        }>;
-      };
-    };
+    insert: (
+      row: Record<string, unknown>,
+    ) => Promise<{ error: { message?: string } | null }>;
   };
 
-  const { data: row, error } = await fromAny("pilot_events")
-    .insert({
-      profile_id: profileId,
-      session_id: sessionId,
-      route,
-      locale,
-      event_name: eventName,
-      task_name: taskName,
-      task_step: taskStep,
-      duration_ms: durationMs,
-      result,
-      error_code: errorCode,
-      metadata: sanitizedMetadata,
-      app_version: appVersion,
-    })
-    .select("id")
-    .single();
+  const { error } = await fromAny("pilot_events").insert({
+    profile_id: profileId,
+    session_id: sessionId,
+    route,
+    locale,
+    event_name: eventName,
+    task_name: taskName,
+    task_step: taskStep,
+    duration_ms: durationMs,
+    result,
+    error_code: errorCode,
+    metadata: sanitizedMetadata,
+    app_version: appVersion,
+  });
 
-  if (error || !row) {
-    console.error("[pilot-events] insert failed:", error?.message);
+  if (error) {
+    console.error("[pilot-events] insert failed:", error.message);
     return {
       ok: false,
       code: "insert_failed",
-      message: `pilot_events insert rejected: ${error?.message ?? "unknown"}`,
+      message: `pilot_events insert rejected: ${error.message ?? "unknown"}`,
     };
   }
-  return { ok: true, id: row.id as string };
+  return { ok: true };
 }
 
 /** Build a safe metadata object: allowlist keys, cap string values,
