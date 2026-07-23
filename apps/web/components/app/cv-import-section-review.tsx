@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import {
   hasAnyProposal,
+  type CvDatePart,
   type CvSectionProposals,
 } from "@/lib/cv/structured-parse";
 import {
@@ -179,6 +180,26 @@ export function CvImportSectionReview({
       ? `${start ?? ""}–${isCurrent ? "…" : (end ?? "")}`
       : null;
 
+  // Honest period label: show the precision the CV actually stated
+  // ("2021-03 – 2024-11", "2021-03-15 – …"), never widen it to bare years.
+  const datePartLabel = (p: CvDatePart | null | undefined): string => {
+    if (!p) return "";
+    const mm = p.month !== null ? `-${String(p.month).padStart(2, "0")}` : "";
+    const dd = p.day !== null ? `-${String(p.day).padStart(2, "0")}` : "";
+    return `${p.year}${mm}${dd}`;
+  };
+  const periodLabel = (w: {
+    startYear: number | null;
+    endYear: number | null;
+    start?: CvDatePart | null;
+    end?: CvDatePart | null;
+    isCurrent: boolean;
+  }) => {
+    if (!w.start && !w.end)
+      return yearsLabel(w.startYear, w.endYear, w.isCurrent);
+    return `${datePartLabel(w.start)}–${w.isCurrent ? "…" : datePartLabel(w.end)}`;
+  };
+
   return (
     <section
       className="card-border flex flex-col gap-4 p-4"
@@ -200,13 +221,15 @@ export function CvImportSectionReview({
             ctx={rowCtx}
             itemKey={`wh-${i}`}
             label={w.title}
-            sub={yearsLabel(w.startYear, w.endYear, w.isCurrent)}
+            sub={periodLabel(w)}
             aiOrigin={i >= merged.aiStart.workHistory}
             onConfirm={() =>
               confirmCvWorkHistoryAction({
                 title: w.title,
                 startYear: w.startYear,
                 endYear: w.endYear,
+                start: w.start ?? null,
+                end: w.end ?? null,
                 isCurrent: w.isCurrent,
               })
             }
