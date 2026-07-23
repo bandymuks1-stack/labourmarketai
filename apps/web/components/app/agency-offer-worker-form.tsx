@@ -34,6 +34,7 @@ import {
 export interface AgencyOfferLabels {
   readonly title: string;
   readonly subtitle: string;
+  readonly internalNote: string;
   readonly distinctionNote: string;
   readonly gatedHeading: string;
   readonly gatedBody: string;
@@ -122,6 +123,16 @@ export function AgencyOfferWorkerForm({
           {labels.title}
         </h2>
         <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+        {/* Honest scope banner: this is an INTERNAL agency tool. The "client"
+            is the agency's own CRM record, not a platform account, and no real
+            external client reviews here — that is a separate, not-yet-built
+            step. Pinned by lib/guards/agency-candidate-offer.test.ts. */}
+        <p
+          className="mt-1 rounded-md border border-brand-blue/40 bg-brand-blue/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="agency-offer-internal-note"
+        >
+          {labels.internalNote}
+        </p>
         <p
           className="mt-1 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-muted"
           data-testid="agency-offer-distinction"

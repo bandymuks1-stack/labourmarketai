@@ -1672,8 +1672,8 @@
             "note": "Pridėkite arba pakvieskite savo darbuotojus komandos skiltyje žemiau."
           },
           "offer": {
-          "label": "Pasiūlyti darbuotoją klientui",
-          "note": "Pasiūlykite vieną iš savo aktyvių komandos darbuotojų kaip kandidatą kliento poreikiui — tai nėra darbo jėgos paklausa."
+          "label": "Vidinis kandidatų žurnalas",
+          "note": "Užfiksuokite vieną iš savo aktyvių darbuotojų kaip kandidatą vienam iš savo poreikių. Tik vidinis sekimas — klientas čia neperžiūri."
         },
           "scouting": {
             "label": "Darbuotojų žvalgyba",
@@ -9843,23 +9843,24 @@
     }
   },
   "agencyOffer": {
-    "title": "Pasiūlyti darbuotoją klientui",
-    "subtitle": "Pasiūlykite vieną iš savo aktyvių komandos darbuotojų kaip kandidatą vienam iš su klientu susietų poreikių.",
-    "distinctionNote": "Tai nėra „ieškome darbuotojų“ vedlys. Čia siūlote savo darbuotoją kliento poreikiui; kandidatas peržiūrimas ir rezervuojamas to poreikio žvalgybos puslapyje.",
+    "title": "Vidinis kandidatų žurnalas",
+    "subtitle": "Sekite, kuriuos savo aktyvius darbuotojus rengiate kiekvienam savo poreikiui — vidinis agentūros įrankis.",
+    "internalNote": "Klientas čia reiškia jūsų pačių privatų CRM įrašą, ne platformos paskyrą. Niekam nieko nesiunčiama ir joks išorinis klientas to neperžiūri — reali kliento peržiūra yra atskiras, dar nesukurtas žingsnis.",
+    "distinctionNote": "Tai nėra užklausos vedlys: jis niekada nekuria darbo jėgos poreikio. Jis tik užfiksuoja darbuotoją prie vieno iš jūsų poreikių jūsų pačių sekimui.",
     "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
-    "gatedBody": "Kandidatų pasiūlymai paruošti, bet dar neįjungti.",
-    "needLabel": "Kliento poreikis",
+    "gatedBody": "Kandidatų fiksavimas paruoštas, bet dar neįjungtas.",
+    "needLabel": "Jūsų poreikis",
     "needPlaceholder": "Pasirinkite poreikį…",
-    "workerLabel": "Jūsų komandos darbuotojas",
+    "workerLabel": "Jūsų darbuotojas",
     "workerPlaceholder": "Pasirinkite darbuotoją…",
     "noteLabel": "Pastaba (nebūtina)",
-    "submitButton": "Pasiūlyti kaip kandidatą",
-    "offersHeading": "Pasiūlyti kandidatai",
-    "offersEmpty": "Kol kas nėra kandidatų pasiūlymų.",
-    "withdrawButton": "Atšaukti pasiūlymą",
-    "openScouting": "Peržiūrėti žvalgyboje",
-    "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į savo komandą, tada galėsite jį pasiūlyti.",
-    "noNeeds": "Pirmiausia sukurkite poreikį klientui, tada galėsite pasiūlyti darbuotoją.",
+    "submitButton": "Užfiksuoti kandidatą",
+    "offersHeading": "Užfiksuoti kandidatai",
+    "offersEmpty": "Kol kas kandidatų neužfiksuota.",
+    "withdrawButton": "Pašalinti įrašą",
+    "openScouting": "Atverti žvalgybą",
+    "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į komandą, tada galėsite jį užfiksuoti.",
+    "noNeeds": "Pirmiausia sukurkite poreikį, tada galėsite užfiksuoti kandidatą.",
     "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
     "notRosterLabel": "Tas darbuotojas nėra aktyvus jūsų komandos narys.",
     "notFoundLabel": "Toks poreikis nerastas arba jis ne jūsų."

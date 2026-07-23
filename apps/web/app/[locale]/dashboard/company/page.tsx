@@ -262,6 +262,7 @@ export default async function CompanyDashboardPage({
     ? {
         title: tAgencyOffer("title"),
         subtitle: tAgencyOffer("subtitle"),
+        internalNote: tAgencyOffer("internalNote"),
         distinctionNote: tAgencyOffer("distinctionNote"),
         gatedHeading: tAgencyOffer("gatedHeading"),
         gatedBody: tAgencyOffer("gatedBody"),

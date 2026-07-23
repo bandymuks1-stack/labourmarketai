@@ -1672,8 +1672,8 @@
             "note": "Add or invite your own workers in the team section below."
           },
           "offer": {
-          "label": "Offer a worker to a client",
-          "note": "Propose one of your active roster workers as a candidate for a client's need — this is not a labour demand."
+          "label": "Internal candidate log",
+          "note": "Log one of your active roster workers as a candidate for one of your own needs. Internal tracking only — no client review here."
         },
           "scouting": {
             "label": "Worker scouting",
@@ -9843,23 +9843,24 @@
     }
   },
   "agencyOffer": {
-    "title": "Offer a worker to a client",
-    "subtitle": "Propose one of your own active roster workers as a candidate for one of your client-linked needs.",
-    "distinctionNote": "This is not the “we are looking for workers” wizard. Here you offer your own worker for a client's need; the candidate is reviewed and booked on that need's scouting page.",
+    "title": "Internal candidate log",
+    "subtitle": "Track which of your active roster workers you are lining up for each of your own needs — an internal agency tool.",
+    "internalNote": "A client here means your own private CRM record, not a platform account. Nothing is sent to anyone and no external client reviews these — real client review is a separate, not-yet-built step.",
+    "distinctionNote": "This is not the demand-intake wizard: it never creates a labour demand. It only records a roster worker against one of your own needs, for your own tracking.",
     "gatedHeading": "Prepared — owner activation pending",
-    "gatedBody": "Candidate offers are ready but not switched on yet.",
-    "needLabel": "Client's need",
+    "gatedBody": "Candidate logging is ready but not switched on yet.",
+    "needLabel": "Your need",
     "needPlaceholder": "Choose a need…",
     "workerLabel": "Your roster worker",
     "workerPlaceholder": "Choose a worker…",
     "noteLabel": "Note (optional)",
-    "submitButton": "Offer as candidate",
-    "offersHeading": "Offered candidates",
-    "offersEmpty": "No candidate offers yet.",
-    "withdrawButton": "Withdraw offer",
-    "openScouting": "Review on scouting",
-    "noRoster": "Add an active worker to your roster first, then you can offer them.",
-    "noNeeds": "Create a need for a client first, then you can offer a worker for it.",
+    "submitButton": "Log candidate",
+    "offersHeading": "Logged candidates",
+    "offersEmpty": "No candidates logged yet.",
+    "withdrawButton": "Remove entry",
+    "openScouting": "Open scouting",
+    "noRoster": "Add an active worker to your roster first, then you can log them.",
+    "noNeeds": "Create a need first, then you can log a candidate for it.",
     "errorLabel": "Something went wrong. Try again.",
     "notRosterLabel": "That worker is not an active member of your roster.",
     "notFoundLabel": "That need was not found or is not yours."

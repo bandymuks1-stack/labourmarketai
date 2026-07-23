@@ -1672,8 +1672,8 @@
             "note": "Voeg je eigen werknemers toe of nodig ze uit in het teamgedeelte hieronder."
           },
           "offer": {
-          "label": "Werknemer aan een klant aanbieden",
-          "note": "Stel een van uw actieve rosterwerknemers voor als kandidaat voor de behoefte van een klant — dit is geen personeelsaanvraag."
+          "label": "Interne kandidatenlog",
+          "note": "Leg een van uw actieve rosterwerknemers vast als kandidaat voor een van uw eigen behoeften. Alleen interne administratie — geen klantbeoordeling hier."
         },
           "scouting": {
             "label": "Werknemersscouting",
@@ -9843,23 +9843,24 @@
     }
   },
   "agencyOffer": {
-    "title": "Werknemer aan een klant aanbieden",
-    "subtitle": "Stel een van uw eigen actieve rosterwerknemers voor als kandidaat voor een van uw aan een klant gekoppelde behoeften.",
-    "distinctionNote": "Dit is niet de wizard ‘we zoeken werknemers’. Hier biedt u uw eigen werknemer aan voor de behoefte van een klant; de kandidaat wordt beoordeeld en geboekt op de scoutingpagina van die behoefte.",
+    "title": "Interne kandidatenlog",
+    "subtitle": "Houd bij welke van uw actieve rosterwerknemers u voor welke van uw eigen behoeften klaarzet — een intern bureauhulpmiddel.",
+    "internalNote": "Een klant is hier uw eigen privé-CRM-record, geen platformaccount. Er wordt niets naar iemand verzonden en geen enkele externe klant bekijkt dit — echte klantbeoordeling is een aparte, nog niet gebouwde stap.",
+    "distinctionNote": "Dit is niet de aanvraagwizard: hij maakt nooit een personeelsaanvraag. Hij legt alleen een werknemer vast bij een van uw behoeften, voor uw eigen administratie.",
     "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
-    "gatedBody": "Kandidaataanbiedingen zijn klaar maar nog niet ingeschakeld.",
-    "needLabel": "Behoefte van de klant",
+    "gatedBody": "Kandidaten vastleggen is klaar maar nog niet ingeschakeld.",
+    "needLabel": "Uw behoefte",
     "needPlaceholder": "Kies een behoefte…",
     "workerLabel": "Uw rosterwerknemer",
     "workerPlaceholder": "Kies een werknemer…",
     "noteLabel": "Notitie (optioneel)",
-    "submitButton": "Aanbieden als kandidaat",
-    "offersHeading": "Aangeboden kandidaten",
-    "offersEmpty": "Nog geen kandidaataanbiedingen.",
-    "withdrawButton": "Aanbieding intrekken",
-    "openScouting": "Bekijken in scouting",
-    "noRoster": "Voeg eerst een actieve werknemer toe aan uw roster, daarna kunt u die aanbieden.",
-    "noNeeds": "Maak eerst een behoefte voor een klant, daarna kunt u een werknemer aanbieden.",
+    "submitButton": "Kandidaat vastleggen",
+    "offersHeading": "Vastgelegde kandidaten",
+    "offersEmpty": "Nog geen kandidaten vastgelegd.",
+    "withdrawButton": "Vermelding verwijderen",
+    "openScouting": "Scouting openen",
+    "noRoster": "Voeg eerst een actieve werknemer toe aan uw roster, daarna kunt u die vastleggen.",
+    "noNeeds": "Maak eerst een behoefte, daarna kunt u een kandidaat vastleggen.",
     "errorLabel": "Er ging iets mis. Probeer opnieuw.",
     "notRosterLabel": "Die werknemer is geen actief lid van uw roster.",
     "notFoundLabel": "Die behoefte is niet gevonden of is niet van u."

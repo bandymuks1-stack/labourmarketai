@@ -3,8 +3,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Agency→client candidate-OFFER bridge guard (agency-client-bridge v1,
- * Direction A). Pins the four properties the slice must never regress:
+ * Agency INTERNAL candidate-CRM guard (Direction A). Owner decision
+ * 2026-07-23: this slice is an agency-internal candidate log, NOT an
+ * agency→real-client bridge — the "client" is the agency's own CRM record and
+ * the agency is the only actor. A real two-subject bridge is a separate P1.
+ * Pins the properties the slice must never regress:
  *
  *   1. renders ONLY under the staffing_agency company type — the offer form
  *      mounts exactly once inside the type conditional; no new dashboard route;
@@ -195,5 +198,42 @@ describe("4. no auto-communication of any kind", () => {
     );
     expect(slice).not.toMatch(/fetch\(/);
     expect(migration).not.toMatch(/notify|pg_net|net\.http|http_post/i);
+  });
+});
+
+describe("5. honest scope — internal CRM, NOT a real-client bridge", () => {
+  const en = JSON.parse(read("messages/en.json")) as {
+    agencyOffer?: Record<string, string>;
+  };
+  const lt = JSON.parse(read("messages/lt.json")) as {
+    agencyOffer?: Record<string, string>;
+  };
+
+  it("the form renders the internal-scope honesty banner", () => {
+    expect(form).toMatch(/data-testid="agency-offer-internal-note"/);
+    expect(form).toMatch(/labels\.internalNote/);
+  });
+
+  it("the copy states it is the agency's OWN record and no external client reviews", () => {
+    for (const j of [en, lt]) {
+      const note = (j.agencyOffer?.internalNote ?? "").toLowerCase();
+      expect(note).toBeTruthy();
+      // Names it as the agency's own CRM record, not a platform account.
+      expect(note).toMatch(/crm/);
+      expect(note).toMatch(/platform|platformos/);
+      // Says real client review is a separate / not-yet-built step.
+      expect(note).toMatch(/separate|atskir/);
+    }
+  });
+
+  it("the offer copy never claims to CLOSE a bridge or that a client reviews here", () => {
+    const en2 = JSON.stringify(en.agencyOffer ?? {}).toLowerCase();
+    const lt2 = JSON.stringify(lt.agencyOffer ?? {}).toLowerCase();
+    for (const blob of [en2, lt2]) {
+      expect(blob).not.toMatch(/closes? the .*bridge|uždaro.*tilt/);
+    }
+    // The migration header self-labels the scope honestly (not a real bridge).
+    expect(migration).toMatch(/NOT an agency→REAL-CLIENT bridge/i);
+    expect(migration).toMatch(/SEPARATE, not-yet-built P1/i);
   });
 });

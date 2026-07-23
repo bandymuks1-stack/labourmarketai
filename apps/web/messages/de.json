@@ -1672,8 +1672,8 @@
             "note": "Fügen Sie Ihre eigenen Arbeitskräfte im Teambereich unten hinzu oder laden Sie sie ein."
           },
           "offer": {
-          "label": "Mitarbeiter einem Kunden anbieten",
-          "note": "Schlagen Sie einen Ihrer aktiven Roster-Mitarbeiter als Kandidaten für den Bedarf eines Kunden vor — dies ist keine Personalanfrage."
+          "label": "Interner Kandidaten-Log",
+          "note": "Erfassen Sie einen Ihrer aktiven Roster-Mitarbeiter als Kandidaten für einen Ihrer eigenen Bedarfe. Nur interne Nachverfolgung — keine Kundenprüfung hier."
         },
           "scouting": {
             "label": "Arbeitskräfte-Scouting",
@@ -9843,23 +9843,24 @@
     }
   },
   "agencyOffer": {
-    "title": "Mitarbeiter einem Kunden anbieten",
-    "subtitle": "Schlagen Sie einen Ihrer eigenen aktiven Roster-Mitarbeiter als Kandidaten für einen Ihrer kundenverknüpften Bedarfe vor.",
-    "distinctionNote": "Dies ist nicht der Assistent „Wir suchen Mitarbeiter“. Hier bieten Sie Ihren eigenen Mitarbeiter für den Bedarf eines Kunden an; der Kandidat wird auf der Scouting-Seite dieses Bedarfs geprüft und gebucht.",
+    "title": "Interner Kandidaten-Log",
+    "subtitle": "Verfolgen Sie, welche Ihrer aktiven Roster-Mitarbeiter Sie für welchen Ihrer eigenen Bedarfe vorsehen — ein internes Agenturwerkzeug.",
+    "internalNote": "Ein Kunde ist hier Ihr eigener privater CRM-Eintrag, kein Plattformkonto. Es wird nichts an irgendjemanden gesendet und kein externer Kunde sieht dies — die echte Kundenprüfung ist ein separater, noch nicht gebauter Schritt.",
+    "distinctionNote": "Dies ist nicht der Anfrage-Assistent: er erstellt nie eine Personalanfrage. Er hält nur einen Mitarbeiter zu einem Ihrer Bedarfe fest — für Ihre eigene Nachverfolgung.",
     "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
-    "gatedBody": "Kandidatenangebote sind bereit, aber noch nicht aktiviert.",
-    "needLabel": "Bedarf des Kunden",
+    "gatedBody": "Die Kandidatenerfassung ist bereit, aber noch nicht aktiviert.",
+    "needLabel": "Ihr Bedarf",
     "needPlaceholder": "Bedarf wählen…",
     "workerLabel": "Ihr Roster-Mitarbeiter",
     "workerPlaceholder": "Mitarbeiter wählen…",
     "noteLabel": "Notiz (optional)",
-    "submitButton": "Als Kandidat anbieten",
-    "offersHeading": "Angebotene Kandidaten",
-    "offersEmpty": "Noch keine Kandidatenangebote.",
-    "withdrawButton": "Angebot zurückziehen",
-    "openScouting": "Im Scouting prüfen",
-    "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter zu Ihrem Roster hinzu, dann können Sie ihn anbieten.",
-    "noNeeds": "Erstellen Sie zuerst einen Bedarf für einen Kunden, dann können Sie einen Mitarbeiter dafür anbieten.",
+    "submitButton": "Kandidat erfassen",
+    "offersHeading": "Erfasste Kandidaten",
+    "offersEmpty": "Noch keine Kandidaten erfasst.",
+    "withdrawButton": "Eintrag entfernen",
+    "openScouting": "Scouting öffnen",
+    "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter zu Ihrem Roster hinzu, dann können Sie ihn erfassen.",
+    "noNeeds": "Erstellen Sie zuerst einen Bedarf, dann können Sie einen Kandidaten dafür erfassen.",
     "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "notRosterLabel": "Dieser Mitarbeiter ist kein aktives Mitglied Ihres Rosters.",
     "notFoundLabel": "Dieser Bedarf wurde nicht gefunden oder gehört nicht Ihnen."

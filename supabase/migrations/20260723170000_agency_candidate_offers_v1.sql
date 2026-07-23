@@ -9,14 +9,25 @@
 -- Never `db push`.
 -- ============================================================================
 --
--- agency_candidate_offers v1 — the missing agency→client CANDIDATE OFFER bridge
--- (canonical journey, Direction A). Closes the P1 "agency can label a client
--- and structure a need, but cannot actually OFFER one of its roster workers as
--- a candidate for that need" gap.
+-- agency_candidate_offers v1 — the agency's INTERNAL candidate CRM log
+-- (canonical journey, Direction A). Lets a staffing agency record, for its OWN
+-- operational tracking, which of its ACTIVE roster workers it is lining up for
+-- which of its OWN needs.
+--
+-- ██ SCOPE HONESTY (owner decision 2026-07-23) ██
+-- This is NOT an agency→REAL-CLIENT bridge. In this model the "client" is the
+-- agency's own private CRM record (agency_clients, sibling draft 20260713160000),
+-- NOT a real platform company/account; the need is a customer_requests row the
+-- AGENCY owns; and the agency itself is the only actor. No external client is
+-- invited, connected, or reviews anything here. A REAL two-subject bridge
+-- (real client company invited + consenting, client-owned customer_request,
+-- client-side review of the candidate) is a SEPARATE, not-yet-built P1 tracked
+-- in its own GitHub issue. Do not read this table as closing that bridge.
 --
 -- ██ HUMAN GATE — DO NOT APPLY WITHOUT EXPLICIT OWNER OK ██
--- Status: DRAFT / DEFERRED. Committed for review only. The consumer UI (the
--- staffing-agency "Pasiūlyti darbuotoją" form + offer list on the canonical
+-- Status: DRAFT / DEFERRED. Committed for review only, AND pending the owner
+-- separately confirming this internal CRM module is wanted now. The consumer UI
+-- (the staffing-agency internal candidate log on the canonical
 -- /dashboard/company workspace) detects the missing table/RPCs
 -- (42P01 / PGRST205 / 42883 / PGRST202) and shows an honest "prepared, owner
 -- activation pending" state until this is applied.
@@ -26,20 +37,18 @@
 -- legacy public.agencies table and creates NO second identity. It reuses:
 --   * companies                — the agency identity (owns_company gate);
 --   * company_workers          — the agency's OWN roster (status='active');
---   * customer_requests        — the canonical structured need the agency owns
---                                (and links to a client via agency_client_id
---                                from the sibling draft 20260713160000).
+--   * customer_requests        — the canonical structured need the agency owns.
 --
 -- WHAT THIS IS: one additive side table binding
---   (agency company, ACTIVE roster worker, the agency's OWN need) → an OFFER.
--- The offer is a candidate PROPOSAL, NEVER a new labour demand and NEVER a
--- match/booking. Booking stays the existing propose_booking_request path; an
--- accepted booking stays compatible with the PR #857 engagement bridge with no
--- migration here.
+--   (agency company, ACTIVE roster worker, the agency's OWN need) → a logged
+-- candidate entry. It is a private PROPOSAL/tracking record, NEVER a new labour
+-- demand and NEVER a match/booking. Booking stays the existing
+-- propose_booking_request path; an accepted booking stays compatible with the
+-- PR #857 engagement bridge with no migration here.
 --
--- WHAT THIS IS NOT: not a third identity, not an agency dashboard, not a
--- parallel candidate/demand/booking model, not a public worker catalogue, not
--- a marketplace for all agencies. No outbound action of any kind.
+-- WHAT THIS IS NOT: not a third identity, not an agency dashboard, not a real
+-- client connection, not a parallel candidate/demand/booking model, not a
+-- public worker catalogue, not a marketplace. No outbound action of any kind.
 --
 -- SECURITY (fail-closed):
 --   RLS SELECT: the agency that made the offer (owns_company(company_id)) OR
