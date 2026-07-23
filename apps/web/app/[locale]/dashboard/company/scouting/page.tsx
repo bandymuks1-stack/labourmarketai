@@ -4,6 +4,11 @@ import Link from "next/link";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
+import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+// Real two-subject bridge (issue #859): candidates a connected agency proposed
+// for THIS demand (which the client owns) — reviewed with the SAME canonical
+// controls below, keyed on (requestId, workerId).
+import { listOfferedCandidatesForRequest } from "@/lib/agency/bridge-read";
 import {
   hasActiveScoutFilters,
   parseScoutFilterParams,
@@ -98,6 +103,11 @@ export default async function CompanyScoutingPage({
   // still match via offline text recognition (honestly labeled below).
   const selected = request ?? demands.find((d) => d.structured)?.id ?? demands[0]?.id ?? null;
   const result = selected ? await runScouting(selected, requestedFilters) : null;
+  // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
+  // returns rows only to the request owner). Empty until the owner-gated bridge
+  // migration is applied.
+  const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  const tOffered = await getTranslations("scoutingAgencyOffers");
 
   // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
   // applied:false while the draft-gated model is not applied (honest note,
@@ -396,6 +406,73 @@ export default async function CompanyScoutingPage({
             </Link>
           ) : null}
         </div>
+      ) : null}
+
+      {result?.kind === "ok" && offeredCandidates.length > 0 ? (
+        <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
+          <header className="flex flex-col gap-1">
+            <h2 className="font-display text-base font-semibold text-text-primary">
+              {tOffered("title")}
+            </h2>
+            <p className="text-xs leading-relaxed text-text-secondary">{tOffered("subtitle")}</p>
+          </header>
+          <ul className="flex flex-col gap-3">
+            {offeredCandidates.map((oc) => (
+              <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                    {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
+                  </span>
+                  <span className="text-xs text-text-muted">{tOffered("via")}: {oc.agencyName}</span>
+                  {oc.note ? <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">{oc.note}</span> : null}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <RequestCommunicationButton
+                    locale={locale}
+                    requestId={result.demand.id}
+                    workerId={oc.workerId}
+                    labels={{
+                      button: t("request.button"), opening: t("request.opening"),
+                      opened: t("request.opened"), view: t("request.view"),
+                      error: t("request.error"), limitReached: t("request.limitReached"),
+                    }}
+                  />
+                  <ProposeBookingButton
+                    locale={locale}
+                    requestId={result.demand.id}
+                    workerId={oc.workerId}
+                    countryCode={null}
+                    labels={{
+                      open: t("booking.open"), startDate: t("booking.startDate"),
+                      note: t("booking.note"), send: t("booking.send"),
+                      sending: t("booking.sending"), sent: t("booking.sent"),
+                      unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                      error: t("booking.error"), cancel: t("booking.cancel"),
+                    }}
+                  />
+                  <ScoutingShortlistButtons
+                    locale={locale}
+                    requestId={result.demand.id}
+                    workerId={oc.workerId}
+                    current={null}
+                    currentNote={null}
+                    labels={{
+                      statuses: shortlistLabels,
+                      error: t("shortlistError"),
+                      note: {
+                        label: t("shortlistNote.label"), internalHint: t("shortlistNote.internalHint"),
+                        add: t("shortlistNote.add"), edit: t("shortlistNote.edit"),
+                        placeholder: t("shortlistNote.placeholder"), reasonTitle: t("shortlistNote.reasonTitle"),
+                        reasonPlaceholder: t("shortlistNote.reasonPlaceholder"), reasonRequired: t("shortlistNote.reasonRequired"),
+                        save: t("shortlistNote.save"), cancel: t("shortlistNote.cancel"),
+                      },
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (

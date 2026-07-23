@@ -411,6 +411,9 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260723053000_contact_demand_owner_v1) — function-only read RPC,
     // paired rollback, human-gated (owner-instructed annotation 2026-07-23
     // after the green security matrix), ships UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 164/);
+    // Bumped 164 -> 165 for the REAL two-subject agency->client bridge
+    // (20260723180000_agency_real_client_bridge_v1, issue #859); owner-gated
+    // DRAFT, RED CI by design, UNAPPLIED.
+    expect(guard).toMatch(/SPRINT_BASELINE = 165/);
   });
 });

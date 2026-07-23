@@ -9842,6 +9842,66 @@
       "closed": "Gesloten"
     }
   },
+  "agencyBridge": {
+    "title": "Klantbedrijven",
+    "subtitle": "Verbind met een echt klantbedrijf, zie alleen de gedeelde aanvragen en bied een van uw actieve rosterwerknemers aan.",
+    "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
+    "gatedBody": "De klantbrug is klaar maar nog niet ingeschakeld.",
+    "connectionsHeading": "Verbindingen",
+    "inviteEmailLabel": "E-mail van klant",
+    "inviteButton": "Klant uitnodigen",
+    "revokeButton": "Verbinding intrekken",
+    "noConnections": "Nog geen verbindingen. Nodig een klant uit per e-mail.",
+    "sharedHeading": "Met u gedeelde aanvragen",
+    "noShared": "Nog geen klant heeft een aanvraag gedeeld.",
+    "workerLabel": "Uw rosterwerknemer",
+    "workerPlaceholder": "Kies een werknemer…",
+    "offerButton": "Kandidaat aanbieden",
+    "noRoster": "Voeg eerst een actieve werknemer toe.",
+    "progressHeading": "Uw aanbiedingen",
+    "noOffers": "Nog geen aanbiedingen.",
+    "withdrawButton": "Aanbieding intrekken",
+    "openScouting": "Scouting openen",
+    "errorLabel": "Er ging iets mis. Probeer opnieuw.",
+    "status": {
+      "pending": "In afwachting",
+      "active": "Actief",
+      "declined": "Geweigerd",
+      "revoked": "Ingetrokken"
+    },
+    "stage": {
+      "offered": "Aangeboden",
+      "reviewed": "Beoordeeld",
+      "contacted": "Gecontacteerd",
+      "rejected": "Afgewezen",
+      "booking_started": "Boeking gestart",
+      "accepted": "Boeking geaccepteerd"
+    }
+  },
+  "clientBridge": {
+    "title": "Uitzendbureaus",
+    "subtitle": "Accepteer een uitzendbureau waarmee u wilt werken, deel specifieke aanvragen en beoordeel de voorgestelde kandidaten op uw eigen scoutingpagina.",
+    "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
+    "gatedBody": "De bureaubrug is klaar maar nog niet ingeschakeld.",
+    "invitesHeading": "Verbindingsuitnodigingen",
+    "noInvites": "Geen openstaande uitnodigingen.",
+    "acceptButton": "Accepteren",
+    "declineButton": "Weigeren",
+    "activeHeading": "Verbonden bureaus",
+    "noActive": "Nog geen verbonden bureaus.",
+    "revokeButton": "Verbreken",
+    "shareLabel": "Aanvraag delen",
+    "sharePlaceholder": "Kies een aanvraag…",
+    "shareButton": "Delen",
+    "noDemands": "Maak eerst een aanvraag, daarna kunt u die delen.",
+    "errorLabel": "Er ging iets mis. Probeer opnieuw.",
+    "fromAgency": "Van"
+  },
+  "scoutingAgencyOffers": {
+    "title": "Door bureau voorgestelde kandidaten",
+    "subtitle": "Een verbonden uitzendbureau stelde deze werknemers voor deze aanvraag voor. Beoordeel, contacteer of boek ze met dezelfde bedieningselementen hieronder.",
+    "via": "Via"
+  },
   "cvSections": {
     "grid": {
       "title": "Volledigheid van je cv",

@@ -19,6 +19,16 @@ import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
+import { AgencyBridgeSection } from "@/components/app/agency-bridge-section";
+import { ClientAgencyBridgeSection } from "@/components/app/client-agency-bridge-section";
+// Real two-subject agency->client bridge (issue #859): connection + share +
+// candidate offer between a staffing agency and a REAL separate client company.
+import {
+  listAgencyConnections,
+  listMyConnectionInvites,
+  listSharedRequestsForAgency,
+  listAgencyOfferProgress,
+} from "@/lib/agency/bridge-read";
 // Client-management module ONLY (reuses customers-investigation outcome +
 // canonical customer_requests) — never the legacy lib/agency pool world.
 import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
@@ -147,6 +157,18 @@ export default async function CompanyDashboardPage({
   const claimableIntakes = await listClaimablePublicIntakes();
 
   const ownCompany = await getOwnCompany();
+  // Real two-subject bridge (issue #859): agency side reads its connections /
+  // shared requests / offer progress; the non-agency company side reads its
+  // inbound connection invites. Both degrade to needs-migration honestly.
+  const isCompanyOwner = !!companyRow;
+  const bridgeConnections =
+    isStaffingAgency && ownCompany ? await listAgencyConnections(ownCompany.id) : null;
+  const bridgeShared = isStaffingAgency ? await listSharedRequestsForAgency() : null;
+  const bridgeProgress = isStaffingAgency ? await listAgencyOfferProgress() : null;
+  const clientInvites =
+    isCompanyOwner && !isStaffingAgency ? await listMyConnectionInvites() : null;
+  const clientDemands =
+    isCompanyOwner && !isStaffingAgency ? await listAgencyDemands() : null;
   const workersResult = ownCompany
     ? await listActiveCompanyWorkers(ownCompany.id)
     : ({ kind: "ok", rows: [] } as const);
@@ -247,6 +269,58 @@ export default async function CompanyDashboardPage({
         },
       }
     : null;
+  // Real two-subject bridge labels (issue #859).
+  const tAB = isStaffingAgency ? await getTranslations("agencyBridge") : null;
+  const agencyBridgeLabels = tAB
+    ? {
+        title: tAB("title"), subtitle: tAB("subtitle"),
+        gatedHeading: tAB("gatedHeading"), gatedBody: tAB("gatedBody"),
+        connectionsHeading: tAB("connectionsHeading"), inviteEmailLabel: tAB("inviteEmailLabel"),
+        inviteButton: tAB("inviteButton"), revokeButton: tAB("revokeButton"),
+        noConnections: tAB("noConnections"), sharedHeading: tAB("sharedHeading"),
+        noShared: tAB("noShared"), workerLabel: tAB("workerLabel"),
+        workerPlaceholder: tAB("workerPlaceholder"), offerButton: tAB("offerButton"),
+        noRoster: tAB("noRoster"), progressHeading: tAB("progressHeading"),
+        noOffers: tAB("noOffers"), withdrawButton: tAB("withdrawButton"),
+        openScouting: tAB("openScouting"), errorLabel: tAB("errorLabel"),
+        statusLabels: {
+          pending: tAB("status.pending"), active: tAB("status.active"),
+          declined: tAB("status.declined"), revoked: tAB("status.revoked"),
+        },
+        stageLabels: {
+          offered: tAB("stage.offered"), reviewed: tAB("stage.reviewed"),
+          contacted: tAB("stage.contacted"), rejected: tAB("stage.rejected"),
+          booking_started: tAB("stage.booking_started"), accepted: tAB("stage.accepted"),
+        },
+      }
+    : null;
+  const tCB = isCompanyOwner && !isStaffingAgency ? await getTranslations("clientBridge") : null;
+  const clientBridgeLabels = tCB
+    ? {
+        title: tCB("title"), subtitle: tCB("subtitle"),
+        gatedHeading: tCB("gatedHeading"), gatedBody: tCB("gatedBody"),
+        invitesHeading: tCB("invitesHeading"), noInvites: tCB("noInvites"),
+        acceptButton: tCB("acceptButton"), declineButton: tCB("declineButton"),
+        activeHeading: tCB("activeHeading"), noActive: tCB("noActive"),
+        revokeButton: tCB("revokeButton"), shareLabel: tCB("shareLabel"),
+        sharePlaceholder: tCB("sharePlaceholder"), shareButton: tCB("shareButton"),
+        noDemands: tCB("noDemands"), errorLabel: tCB("errorLabel"),
+        fromAgency: tCB("fromAgency"),
+      }
+    : null;
+  const bridgeRosterOptions =
+    isStaffingAgency && workersResult.kind === "ok"
+      ? workersResult.rows
+          .filter((w) => w.status === "active")
+          .map((w) => ({
+            workerId: w.workerId,
+            label: w.displayName ?? (w.email ? w.email.split("@")[0] : `#${w.workerId.slice(0, 6)}`),
+          }))
+      : [];
+  const clientBridgeDemands =
+    clientDemands?.kind === "ok"
+      ? clientDemands.rows.map((d) => ({ id: d.id, title: d.title }))
+      : [];
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
@@ -788,7 +862,34 @@ export default async function CompanyDashboardPage({
             labels={agencyClientsLabels}
           />
         ) : null}
+        {/* REAL two-subject bridge (issue #859) — agency side: invite a REAL
+            client company, see only shared requests, offer a roster worker,
+            watch the derived review stage. Owner-gated migration → honest
+            gated state until applied. */}
+        {bridgeConnections && bridgeShared && bridgeProgress && agencyBridgeLabels && ownCompany ? (
+          <AgencyBridgeSection
+            agencyCompanyId={ownCompany.id}
+            connections={bridgeConnections}
+            shared={bridgeShared}
+            progress={bridgeProgress}
+            roster={bridgeRosterOptions}
+            labels={agencyBridgeLabels}
+            locale={locale}
+          />
+        ) : null}
         </>
+      ) : null}
+
+      {/* REAL two-subject bridge — client side: a real (non-agency) company
+          accepts a staffing agency's connection, shares specific OWN requests,
+          and reviews proposed candidates on its OWN scouting surface. */}
+      {companyRow && companyRow.companyType !== "staffing_agency" && clientInvites && clientBridgeLabels && ownCompany ? (
+        <ClientAgencyBridgeSection
+          invites={clientInvites}
+          clientCompanyId={ownCompany.id}
+          demands={clientBridgeDemands}
+          labels={clientBridgeLabels}
+        />
       ) : null}
 
       {companyRow ? (
