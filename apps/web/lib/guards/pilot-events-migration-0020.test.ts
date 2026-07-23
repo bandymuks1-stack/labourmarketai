@@ -150,6 +150,15 @@ describe("recordTelemetryEvent server action — privacy contract", () => {
     expect(action).toMatch(/SCALAR_VALUE_MAX/);
     expect(action).toMatch(/METADATA_BYTE_MAX/);
   });
+
+  it("inserts WITHOUT a chained .select() — RETURNING would hit the admin-only SELECT policy", () => {
+    // `.insert(...).select(...)` makes PostgREST issue `INSERT … RETURNING`,
+    // and Postgres applies the SELECT policy (`is_admin()` only, 0020) to the
+    // RETURNING rows — every non-admin insert then fails 42501 and the event
+    // is silently lost (this happened in production: only admin rows landed).
+    expect(action).not.toMatch(/\.select\(/);
+    expect(action).not.toMatch(/\.single\(/);
+  });
 });
 
 describe("task helper — fire-and-forget + no continuous tracking", () => {
