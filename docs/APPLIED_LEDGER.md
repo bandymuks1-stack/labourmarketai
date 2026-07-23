@@ -63,6 +63,55 @@ functions — 3 with no authorization logic at all, 40 that currently fail close
 should never have been reachable, and the 4 that are intentionally public. Full
 classification: `docs/security/secdef-public-execute-inventory-v1.md`.
 
+### ✅ APPLIED TO PROD — `20260723053000_contact_demand_owner_v1`
+
+| Field | Value |
+|---|---|
+| Applied | **2026-07-23** via Supabase MCP `apply_migration`, name `20260723053000_contact_demand_owner_v1` (`{"success":true}`) |
+| Method | Supabase MCP `apply_migration` (never `supabase db push`) |
+| PR | #853, squash-merged as **`edc4e43dc85fa0a6fb389e66c873e8f612612547`** |
+| Reviewed PR HEAD | `e2da19dc3c7980fac01c217af9b682b79f40d50b` (merged with `--match-head-commit`) |
+| Migration sha256 | `eaf846175af66ae10d6e658cd3a18e162b23682973a9c953aa8ce7387c6027d7` |
+| Rollback | `supabase/rollbacks/20260723053000_contact_demand_owner_v1.down.sql`, sha256 `81318ebda93148275d2c33de1fdd54ca4fdcd0e63a3d5d7b0a81168a17885afe` |
+| Owner gate | Approved 2026-07-23 — matrix-conditional `@human-gate-approved`, owner-instructed apply |
+
+**What it did.** Created one `STABLE SECURITY DEFINER` read RPC
+`contact_demand_owner_v1(uuid)` that resolves a demand owner for the worker
+"Parašyti darbdaviui" flow. Fixes a real break: `contactEmployerAction` used the
+service-role client to read `customer_requests`/`companies`, but production
+allowlists service_role table grants (those tables excluded) → `42501`, so the
+flow failed for **every** worker. Function-only; **no** table/policy/trigger/grant
+change beyond `REVOKE ALL FROM public` + `GRANT EXECUTE TO authenticated` on the
+new function itself. `search_path=public` pinned; all inequality checks
+`IS DISTINCT FROM` (never bare `<>`); existence-oracle closed (`... AND s.ok`).
+
+**Owner-gate security matrix (pre-apply, one rolled-back prod transaction, all green).**
+anon rejected (no EXECUTE) · no-signal worker 0 rows even with others' signals on
+the demand · legit signal holder → exactly owner id + title, flags true · closed
+demand → owner NULL · unverified company → owner NULL · self-contact → owner NULL ·
+nonexistent id 0 rows (indistinguishable from no-standing) · STABLE+secdef+
+search_path+single overload+ACL `{postgres,authenticated=EXECUTE}` · anon secdef
+surface stays the 4 allowlisted functions. Zero residue verified after rollback.
+
+**Post-apply verification (recorded, catalog + behavioural).**
+
+| Check | Result |
+|---|---|
+| function ACL — PUBLIC (`=X`) present | **absent** |
+| function ACL — anon EXECUTE | **absent** |
+| function ACL — authenticated EXECUTE | **present** (`{postgres=X/postgres,authenticated=X/postgres}`) |
+| `search_path` | **`search_path=public`** |
+| anon-reachable `SECURITY DEFINER` in `public` | **still exactly 4** (business getters + `submit_company_need_public_v1`) |
+| existing-demand-without-own-signal vs nonexistent-demand (authenticated, live fn) | **both 0 rows — no existence oracle** |
+
+**Post-apply behavioural E2E (production, marked disposable worker, cleaned after).**
+Full journey green: apply (express interest) → **Parašyti darbdaviui → thread opened**
+(`/dashboard/communication/<id>`, direct conversation, 2 participants) → worker's
+first message sent + visible → **persists after reload** → interest status visible on
+the board (`IŠSIŲSTA`). All test data (worker, conversation, participants, message,
+interest signal, 14 pilot_events + 3 anon rows) deleted; verified **0 orphans**,
+`pilot_events` back to baseline 224, mason demand back to 2 interest rows.
+
 ### ✅ APPLIED TO PROD — `20260722120000_secdef_anon_authz_bypass_fix_v1`
 
 | Field | Value |
