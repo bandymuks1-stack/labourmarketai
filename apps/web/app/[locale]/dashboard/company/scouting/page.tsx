@@ -756,8 +756,11 @@ export default async function CompanyScoutingPage({
                     workerId={c.workerId}
                     initialStatus={result.interestByWorker[c.workerId]}
                     labels={{
-                      statusLabel: (s) =>
-                        t.has(`ack.status.${s}`) ? t(`ack.status.${s}` as never) : s,
+                      statusLabels: Object.fromEntries(
+                        ["interested", "reviewed", "contacted"]
+                          .filter((s) => t.has(`ack.status.${s}`))
+                          .map((s) => [s, t(`ack.status.${s}` as never)]),
+                      ),
                       markReviewed: t("ack.markReviewed"),
                       markContacted: t("ack.markContacted"),
                       internalNote: t("ack.internalNote"),
