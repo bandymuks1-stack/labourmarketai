@@ -407,6 +407,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // EXECUTE grants only, no function body touched, paired rollback, RED and
     // deliberately NOT human-gate-annotated because the owner has not approved
     // it. Ships UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 163/);
+    // Bumped 163 -> 164 for the worker contact-employer owner-resolution RPC
+    // (20260723053000_contact_demand_owner_v1) — function-only read RPC,
+    // paired rollback, human-gated (owner-instructed annotation 2026-07-23
+    // after the green security matrix), ships UNAPPLIED.
+    expect(guard).toMatch(/SPRINT_BASELINE = 164/);
   });
 });

@@ -9,9 +9,13 @@ import { join } from "node:path";
  * The action (lib/opportunities/contact-employer.ts) is the ONLY place a
  * worker can turn their interest signal into a real thread. This guard pins:
  *   1. the caller's OWN facts (worker row + own interest signal) are
- *      verified under the caller's RLS session BEFORE any service-role read;
- *   2. the service-role read resolves ONLY the demand owner and never
- *      returns a profile id to the caller;
+ *      verified under the caller's RLS session BEFORE the owner resolution;
+ *   2. the owner resolution goes through the gated SECURITY DEFINER RPC
+ *      contact_demand_owner_v1 — NEVER the service-role client (production
+ *      allowlists service_role table grants; the admin-client read failed
+ *      42501 for every worker, 2026-07-23 E2E first break) — and never
+ *      returns a profile id to the caller; the missing RPC is
+ *      feature-detected as the honest "needs_migration";
  *   3. the same visibility gate as the worker board (submitted + verified
  *      company) is enforced through the pure eligibility function;
  *   4. the §8.1 grant used is allowed_demand_interest (the real relationship),
@@ -30,20 +34,30 @@ describe("worker contact-employer action — order + default-closed", () => {
     expect(src).toMatch(/import "server-only"/);
   });
 
-  it("verifies the caller's own signal BEFORE the service-role read", () => {
+  it("verifies the caller's own signal BEFORE the owner-resolution RPC", () => {
     const ownSignalIdx = src.indexOf("demand_interest_signals");
-    const adminIdx = src.indexOf("createAdminClient()");
+    const rpcIdx = src.indexOf('rpc("contact_demand_owner_v1"');
     expect(ownSignalIdx).toBeGreaterThan(-1);
-    expect(adminIdx).toBeGreaterThan(-1);
-    expect(ownSignalIdx).toBeLessThan(adminIdx);
+    expect(rpcIdx).toBeGreaterThan(-1);
+    expect(ownSignalIdx).toBeLessThan(rpcIdx);
     // Withdrawn signals never pass.
     expect(src).toMatch(/signalStatus !== "withdrawn"/);
   });
 
+  it("never uses the service-role client — owner resolution is the gated RPC", () => {
+    // service_role table grants are a deliberate allowlist in production;
+    // an admin-client read of customer_requests/companies dies with 42501.
+    expect(src).not.toMatch(/createAdminClient/);
+    expect(src).not.toMatch(/@\/lib\/supabase\/admin/);
+    // The missing RPC degrades honestly, never as a generic error.
+    expect(src).toMatch(/"needs_migration"/);
+    expect(src).toMatch(/42883|PGRST202/);
+  });
+
   it("routes the decision through the pure eligibility gate", () => {
     expect(src).toMatch(/evaluateWorkerContactRequest\(/);
-    expect(src).toMatch(/demandOpen: demand\.status === "submitted"/);
-    expect(src).toMatch(/verification_status === "verified"/);
+    expect(src).toMatch(/demandOpen: row\.demand_open/);
+    expect(src).toMatch(/companyVerified: row\.company_verified/);
   });
 
   it("never returns a profile id to the caller", () => {
