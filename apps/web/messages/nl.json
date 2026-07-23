@@ -1672,9 +1672,9 @@
             "note": "Voeg je eigen werknemers toe of nodig ze uit in het teamgedeelte hieronder."
           },
           "offer": {
-            "label": "Werknemers aanbieden",
-            "note": "Dien een personeelsaanbod in via de aanvraagwizard — het wordt opgeslagen als een aanbod van het uitzendbureau."
-          },
+          "label": "Werknemer aan een klant aanbieden",
+          "note": "Stel een van uw actieve rosterwerknemers voor als kandidaat voor de behoefte van een klant — dit is geen personeelsaanvraag."
+        },
           "scouting": {
             "label": "Werknemersscouting",
             "note": "Voer scouting uit op je ingediende behoeften en zet geanonimiseerde kandidaten op de shortlist."
@@ -9841,6 +9841,28 @@
       "approved": "Goedgekeurd",
       "closed": "Gesloten"
     }
+  },
+  "agencyOffer": {
+    "title": "Werknemer aan een klant aanbieden",
+    "subtitle": "Stel een van uw eigen actieve rosterwerknemers voor als kandidaat voor een van uw aan een klant gekoppelde behoeften.",
+    "distinctionNote": "Dit is niet de wizard ‘we zoeken werknemers’. Hier biedt u uw eigen werknemer aan voor de behoefte van een klant; de kandidaat wordt beoordeeld en geboekt op de scoutingpagina van die behoefte.",
+    "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
+    "gatedBody": "Kandidaataanbiedingen zijn klaar maar nog niet ingeschakeld.",
+    "needLabel": "Behoefte van de klant",
+    "needPlaceholder": "Kies een behoefte…",
+    "workerLabel": "Uw rosterwerknemer",
+    "workerPlaceholder": "Kies een werknemer…",
+    "noteLabel": "Notitie (optioneel)",
+    "submitButton": "Aanbieden als kandidaat",
+    "offersHeading": "Aangeboden kandidaten",
+    "offersEmpty": "Nog geen kandidaataanbiedingen.",
+    "withdrawButton": "Aanbieding intrekken",
+    "openScouting": "Bekijken in scouting",
+    "noRoster": "Voeg eerst een actieve werknemer toe aan uw roster, daarna kunt u die aanbieden.",
+    "noNeeds": "Maak eerst een behoefte voor een klant, daarna kunt u een werknemer aanbieden.",
+    "errorLabel": "Er ging iets mis. Probeer opnieuw.",
+    "notRosterLabel": "Die werknemer is geen actief lid van uw roster.",
+    "notFoundLabel": "Die behoefte is niet gevonden of is niet van u."
   },
   "cvSections": {
     "grid": {

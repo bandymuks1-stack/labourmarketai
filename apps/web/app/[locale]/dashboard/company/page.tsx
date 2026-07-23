@@ -19,9 +19,13 @@ import { DemandDraftForm } from "@/components/app/demand-draft-form";
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
+import { AgencyOfferWorkerForm } from "@/components/app/agency-offer-worker-form";
 // Client-management module ONLY (reuses customers-investigation outcome +
 // canonical customer_requests) — never the legacy lib/agency pool world.
 import { listAgencyClients, listAgencyDemands } from "@/lib/agency/clients";
+// Candidate-offer bridge (agency offers its OWN active roster worker as a
+// candidate for its OWN client-linked need) — additive side table, gated.
+import { listAgencyCandidateOffers } from "@/lib/agency/candidate-offers";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
@@ -138,6 +142,9 @@ export default async function CompanyDashboardPage({
   const isStaffingAgency = companyRow?.companyType === "staffing_agency";
   const agencyClientsState = isStaffingAgency ? await listAgencyClients() : null;
   const agencyDemandsState = isStaffingAgency ? await listAgencyDemands() : null;
+  const agencyOffersState = isStaffingAgency
+    ? await listAgencyCandidateOffers()
+    : null;
 
   const tWorkers = await getTranslations("roleDashboards.company.workers");
   const existingDraft = await getDemandDraft("company_request");
@@ -247,11 +254,60 @@ export default async function CompanyDashboardPage({
         },
       }
     : null;
+  // Candidate-offer bridge labels — resolved only in staffing-agency mode.
+  const tAgencyOffer = isStaffingAgency
+    ? await getTranslations("agencyOffer")
+    : null;
+  const agencyOfferLabels = tAgencyOffer
+    ? {
+        title: tAgencyOffer("title"),
+        subtitle: tAgencyOffer("subtitle"),
+        distinctionNote: tAgencyOffer("distinctionNote"),
+        gatedHeading: tAgencyOffer("gatedHeading"),
+        gatedBody: tAgencyOffer("gatedBody"),
+        needLabel: tAgencyOffer("needLabel"),
+        needPlaceholder: tAgencyOffer("needPlaceholder"),
+        workerLabel: tAgencyOffer("workerLabel"),
+        workerPlaceholder: tAgencyOffer("workerPlaceholder"),
+        noteLabel: tAgencyOffer("noteLabel"),
+        submitButton: tAgencyOffer("submitButton"),
+        offersHeading: tAgencyOffer("offersHeading"),
+        offersEmpty: tAgencyOffer("offersEmpty"),
+        withdrawButton: tAgencyOffer("withdrawButton"),
+        openScouting: tAgencyOffer("openScouting"),
+        noRoster: tAgencyOffer("noRoster"),
+        noNeeds: tAgencyOffer("noNeeds"),
+        errorLabel: tAgencyOffer("errorLabel"),
+        notRosterLabel: tAgencyOffer("notRosterLabel"),
+        notFoundLabel: tAgencyOffer("notFoundLabel"),
+      }
+    : null;
   // Slice 1 — operational status counts from existing data (read-back only).
   const acceptedCount = workersResult.kind === "ok" ? workersResult.rows.length : 0;
   // Slice 9 — per-worker work-readiness SIGNALS (not a rating), computed from
   // existing RLS-readable data (worker_skills + journal_entries + reviewable set).
   const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
+  // Candidate-offer pickers: ONLY the agency's OWN active roster workers
+  // (company_workers.status='active' — never a paused/removed one) and the
+  // agency's OWN needs. The submit RPC re-checks every rule server-side.
+  const agencyRosterOptions = isStaffingAgency
+    ? activeWorkerRows
+        .filter((w) => w.status === "active")
+        .map((w) => ({
+          workerId: w.workerId,
+          label:
+            w.displayName ??
+            (w.email ? w.email.split("@")[0] : `#${w.workerId.slice(0, 6)}`),
+        }))
+    : [];
+  const agencyNeedOptions =
+    isStaffingAgency && agencyDemandsState?.kind === "ok"
+      ? agencyDemandsState.rows.map((d) => ({
+          requestId: d.id,
+          title: d.title,
+          clientId: d.agencyClientId,
+        }))
+      : [];
   const readinessMap = await getWorkerReadiness(
     activeWorkerRows.map((w) => w.workerId),
   );
@@ -721,18 +777,20 @@ export default async function CompanyDashboardPage({
             {[
               {
                 key: "roster",
-                href: "/dashboard/company#company-team" as string | null,
+                href: "/dashboard/company#company-team",
               },
               {
-                // The demand wizard renders only in the ORG dashboard branch;
-                // the action switches the active workspace first so the
-                // anchor target always exists (audit PR4).
+                // "Offer our worker to a client" — the real candidate-offer
+                // form below (#agency-offer). This is NOT the demand wizard:
+                // it never creates a labour demand. The two intents are kept
+                // distinct so "offer a worker" can never mean "look for
+                // workers" again.
                 key: "offer",
-                href: null as string | null,
+                href: "/dashboard/company#agency-offer",
               },
               {
                 key: "scouting",
-                href: "/dashboard/company/scouting" as string | null,
+                href: "/dashboard/company/scouting",
               },
             ].map((a) => {
               const body = (
@@ -747,7 +805,7 @@ export default async function CompanyDashboardPage({
               );
               const className =
                 "flex min-h-[3.25rem] w-full flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:border-brand-blue";
-              return a.href ? (
+              return (
                 <Link
                   key={a.key}
                   href={a.href as "/dashboard"}
@@ -756,16 +814,6 @@ export default async function CompanyDashboardPage({
                 >
                   {body}
                 </Link>
-              ) : (
-                <form key={a.key} action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
-                  <button
-                    type="submit"
-                    data-testid={`company-agency-mode-action-${a.key}`}
-                    className={className}
-                  >
-                    {body}
-                  </button>
-                </form>
               );
             })}
           </div>
@@ -786,6 +834,19 @@ export default async function CompanyDashboardPage({
             demands={agencyDemandsState}
             locale={locale}
             labels={agencyClientsLabels}
+          />
+        ) : null}
+        {/* Candidate OFFER bridge: offer a roster worker for a client-linked
+            need. Replaces the old demand-intake redirect; review + booking stay
+            on the existing per-need scouting surface (link only). */}
+        {agencyOffersState && agencyOfferLabels ? (
+          <AgencyOfferWorkerForm
+            id="agency-offer"
+            offers={agencyOffersState}
+            rosterOptions={agencyRosterOptions}
+            needOptions={agencyNeedOptions}
+            locale={locale}
+            labels={agencyOfferLabels}
           />
         ) : null}
         </>

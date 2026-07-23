@@ -1862,7 +1862,15 @@ describe("no migration files added by this sprint", () => {
     // dies 42501 under the allowlisted service_role grants posture, so
     // "Parašyti darbdaviui" failed for every worker. Until applied the app
     // feature-detects → "needs_migration".
-    const SPRINT_BASELINE = 164;
+    // Bumped 164 -> 165 for the agency->client candidate OFFER bridge
+    // (20260723170000_agency_candidate_offers_v1, paired rollback). ONE
+    // additive side table `agency_candidate_offers` + two SECURITY DEFINER
+    // write RPCs (submit/withdraw), zero changes to existing objects.
+    // OWNER-GATED DRAFT with NO @human-gate-approved (owner has not approved) —
+    // migration-safety CI is RED by design; ships UNAPPLIED. Until applied the
+    // "Pasiūlyti darbuotoją klientui" offer form feature-detects →
+    // "needs-migration".
+    const SPRINT_BASELINE = 165;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

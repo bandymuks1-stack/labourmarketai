@@ -1672,9 +1672,9 @@
             "note": "Pridėkite arba pakvieskite savo darbuotojus komandos skiltyje žemiau."
           },
           "offer": {
-            "label": "Pasiūlyti darbuotojus",
-            "note": "Pateikite darbo jėgos pasiūlymą per užklausos vedlį — jis išsaugomas kaip agentūros pasiūlymas."
-          },
+          "label": "Pasiūlyti darbuotoją klientui",
+          "note": "Pasiūlykite vieną iš savo aktyvių komandos darbuotojų kaip kandidatą kliento poreikiui — tai nėra darbo jėgos paklausa."
+        },
           "scouting": {
             "label": "Darbuotojų žvalgyba",
             "note": "Paleiskite žvalgybą pagal savo pateiktus poreikius ir sudarykite anoniminių kandidatų sąrašą."
@@ -9841,6 +9841,28 @@
       "approved": "Patvirtinta",
       "closed": "Uždaryta"
     }
+  },
+  "agencyOffer": {
+    "title": "Pasiūlyti darbuotoją klientui",
+    "subtitle": "Pasiūlykite vieną iš savo aktyvių komandos darbuotojų kaip kandidatą vienam iš su klientu susietų poreikių.",
+    "distinctionNote": "Tai nėra „ieškome darbuotojų“ vedlys. Čia siūlote savo darbuotoją kliento poreikiui; kandidatas peržiūrimas ir rezervuojamas to poreikio žvalgybos puslapyje.",
+    "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
+    "gatedBody": "Kandidatų pasiūlymai paruošti, bet dar neįjungti.",
+    "needLabel": "Kliento poreikis",
+    "needPlaceholder": "Pasirinkite poreikį…",
+    "workerLabel": "Jūsų komandos darbuotojas",
+    "workerPlaceholder": "Pasirinkite darbuotoją…",
+    "noteLabel": "Pastaba (nebūtina)",
+    "submitButton": "Pasiūlyti kaip kandidatą",
+    "offersHeading": "Pasiūlyti kandidatai",
+    "offersEmpty": "Kol kas nėra kandidatų pasiūlymų.",
+    "withdrawButton": "Atšaukti pasiūlymą",
+    "openScouting": "Peržiūrėti žvalgyboje",
+    "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į savo komandą, tada galėsite jį pasiūlyti.",
+    "noNeeds": "Pirmiausia sukurkite poreikį klientui, tada galėsite pasiūlyti darbuotoją.",
+    "errorLabel": "Kažkas nepavyko. Bandykite dar kartą.",
+    "notRosterLabel": "Tas darbuotojas nėra aktyvus jūsų komandos narys.",
+    "notFoundLabel": "Toks poreikis nerastas arba jis ne jūsų."
   },
   "cvSections": {
     "grid": {

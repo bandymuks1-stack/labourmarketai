@@ -1672,9 +1672,9 @@
             "note": "Fügen Sie Ihre eigenen Arbeitskräfte im Teambereich unten hinzu oder laden Sie sie ein."
           },
           "offer": {
-            "label": "Arbeitskräfte anbieten",
-            "note": "Reichen Sie ein Arbeitskräfte-Angebot über den Anfrage-Assistenten ein — es wird als Agenturangebot gespeichert."
-          },
+          "label": "Mitarbeiter einem Kunden anbieten",
+          "note": "Schlagen Sie einen Ihrer aktiven Roster-Mitarbeiter als Kandidaten für den Bedarf eines Kunden vor — dies ist keine Personalanfrage."
+        },
           "scouting": {
             "label": "Arbeitskräfte-Scouting",
             "note": "Führen Sie Scouting über Ihre eingereichten Bedarfe durch und setzen Sie anonymisierte Kandidaten auf die Shortlist."
@@ -9841,6 +9841,28 @@
       "approved": "Genehmigt",
       "closed": "Geschlossen"
     }
+  },
+  "agencyOffer": {
+    "title": "Mitarbeiter einem Kunden anbieten",
+    "subtitle": "Schlagen Sie einen Ihrer eigenen aktiven Roster-Mitarbeiter als Kandidaten für einen Ihrer kundenverknüpften Bedarfe vor.",
+    "distinctionNote": "Dies ist nicht der Assistent „Wir suchen Mitarbeiter“. Hier bieten Sie Ihren eigenen Mitarbeiter für den Bedarf eines Kunden an; der Kandidat wird auf der Scouting-Seite dieses Bedarfs geprüft und gebucht.",
+    "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
+    "gatedBody": "Kandidatenangebote sind bereit, aber noch nicht aktiviert.",
+    "needLabel": "Bedarf des Kunden",
+    "needPlaceholder": "Bedarf wählen…",
+    "workerLabel": "Ihr Roster-Mitarbeiter",
+    "workerPlaceholder": "Mitarbeiter wählen…",
+    "noteLabel": "Notiz (optional)",
+    "submitButton": "Als Kandidat anbieten",
+    "offersHeading": "Angebotene Kandidaten",
+    "offersEmpty": "Noch keine Kandidatenangebote.",
+    "withdrawButton": "Angebot zurückziehen",
+    "openScouting": "Im Scouting prüfen",
+    "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter zu Ihrem Roster hinzu, dann können Sie ihn anbieten.",
+    "noNeeds": "Erstellen Sie zuerst einen Bedarf für einen Kunden, dann können Sie einen Mitarbeiter dafür anbieten.",
+    "errorLabel": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "notRosterLabel": "Dieser Mitarbeiter ist kein aktives Mitglied Ihres Rosters.",
+    "notFoundLabel": "Dieser Bedarf wurde nicht gefunden oder gehört nicht Ihnen."
   },
   "cvSections": {
     "grid": {

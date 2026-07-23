@@ -339,6 +339,11 @@ describe("NO new DB migration in this PR", () => {
     // read RPC, human-gated (owner-instructed annotation 2026-07-23 after the
     // green security matrix), ships UNAPPLIED; still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(164);
+    // Bumped 164 -> 165 for the agency->client candidate OFFER bridge
+    // (20260723170000_agency_candidate_offers_v1, paired rollback). ONE
+    // additive side table + two SECURITY DEFINER write RPCs; OWNER-GATED DRAFT
+    // with NO @human-gate-approved (RED CI by design), ships UNAPPLIED; still
+    // no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(165);
   });
 });

@@ -1672,9 +1672,9 @@
             "note": "Add or invite your own workers in the team section below."
           },
           "offer": {
-            "label": "Offer workers",
-            "note": "Submit a workforce offer through the request wizard — it is saved as an agency offer."
-          },
+          "label": "Offer a worker to a client",
+          "note": "Propose one of your active roster workers as a candidate for a client's need — this is not a labour demand."
+        },
           "scouting": {
             "label": "Worker scouting",
             "note": "Run scouting over your submitted needs and shortlist anonymized candidates."
@@ -9841,6 +9841,28 @@
       "approved": "Approved",
       "closed": "Closed"
     }
+  },
+  "agencyOffer": {
+    "title": "Offer a worker to a client",
+    "subtitle": "Propose one of your own active roster workers as a candidate for one of your client-linked needs.",
+    "distinctionNote": "This is not the “we are looking for workers” wizard. Here you offer your own worker for a client's need; the candidate is reviewed and booked on that need's scouting page.",
+    "gatedHeading": "Prepared — owner activation pending",
+    "gatedBody": "Candidate offers are ready but not switched on yet.",
+    "needLabel": "Client's need",
+    "needPlaceholder": "Choose a need…",
+    "workerLabel": "Your roster worker",
+    "workerPlaceholder": "Choose a worker…",
+    "noteLabel": "Note (optional)",
+    "submitButton": "Offer as candidate",
+    "offersHeading": "Offered candidates",
+    "offersEmpty": "No candidate offers yet.",
+    "withdrawButton": "Withdraw offer",
+    "openScouting": "Review on scouting",
+    "noRoster": "Add an active worker to your roster first, then you can offer them.",
+    "noNeeds": "Create a need for a client first, then you can offer a worker for it.",
+    "errorLabel": "Something went wrong. Try again.",
+    "notRosterLabel": "That worker is not an active member of your roster.",
+    "notFoundLabel": "That need was not found or is not yours."
   },
   "cvSections": {
     "grid": {

@@ -120,9 +120,13 @@ describe("6. company 'submit for real' works for every held-role user", () => {
   it("no raw link into the branch-dependent #demand-intake anchor remains", () => {
     expect(page).not.toMatch(/href=\{"\/dashboard#demand-intake"/);
   });
-  it("both entry points go through the workspace-switching action", () => {
+  it("the demand-intake entry point goes through the workspace-switching action", () => {
+    // The agency "offer" action no longer routes here (it now opens the real
+    // candidate-OFFER form #agency-offer — agency-client-bridge v1); the
+    // remaining demand-intake entry point is the DemandDraftForm. So the page
+    // references the action at least twice: the import + that one form.
     const matches = page.match(/openDemandIntakeAsCompanyAction/g) ?? [];
-    expect(matches.length).toBeGreaterThanOrEqual(3); // import + 2 forms
+    expect(matches.length).toBeGreaterThanOrEqual(2); // import + demand form
     const action = read("lib/company/demand-intake-navigation.ts");
     expect(action).toMatch(/switchActiveRole\("company"\)/);
     expect(action).toMatch(/#demand-intake/);

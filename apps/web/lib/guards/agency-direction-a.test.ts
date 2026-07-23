@@ -69,11 +69,12 @@ describe("staffing-agency mode is a typed view on the company room", () => {
       );
     }
     // Each action targets an existing canonical surface — no new panels.
-    // "offer" goes through the workspace-switching server action (audit PR4:
-    // a raw /dashboard#demand-intake link dead-ended for held-company users
-    // whose active role was worker; the wizard renders only in the org branch).
+    // "offer" now opens the real candidate-OFFER form (#agency-offer): the
+    // agency offers its OWN roster worker for a client's need. It is NO LONGER
+    // the demand-intake wizard (which meant "we are LOOKING FOR workers" and
+    // conflated the two intents — the P1 this bridge closes).
     expect(companyPage).toMatch(/\/dashboard\/company#company-team/);
-    expect(companyPage).toMatch(/openDemandIntakeAsCompanyAction/);
+    expect(companyPage).toMatch(/\/dashboard\/company#agency-offer/);
     expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
   });
 
@@ -88,7 +89,14 @@ describe("staffing-agency mode is a typed view on the company room", () => {
     const agencyImports =
       companyPage.match(/@\/lib\/agency\/[a-z-]+/g) ?? [];
     for (const imp of agencyImports) {
-      expect(["@/lib/agency/clients", "@/lib/agency/clients-model", "@/lib/agency/clients-actions"]).toContain(imp);
+      expect([
+        "@/lib/agency/clients",
+        "@/lib/agency/clients-model",
+        "@/lib/agency/clients-actions",
+        // agency→client candidate-offer bridge (read service; the write
+        // actions + model are imported by the offer component, not this page).
+        "@/lib/agency/candidate-offers",
+      ]).toContain(imp);
     }
     // The components the company room mounts stay clean too.
     for (const comp of [
