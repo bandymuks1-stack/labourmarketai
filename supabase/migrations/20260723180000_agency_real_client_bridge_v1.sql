@@ -443,8 +443,14 @@ begin
      request_id, worker_id, status, note, created_by)
   values
     (v_conn, p_request_share_id, v_agency, v_client, v_request, p_worker_id, 'offered', v_note, v_uid)
+  -- A re-offer re-binds to the CURRENT active share/connection (a stale row
+  -- from a previously revoked connection must never keep the old provenance).
   on conflict (agency_company_id, request_id, worker_id) where (status = 'offered')
-  do update set note = coalesce(excluded.note, public.agency_candidate_offers.note), updated_at = now()
+  do update set connection_id     = excluded.connection_id,
+                request_share_id  = excluded.request_share_id,
+                client_company_id = excluded.client_company_id,
+                note              = coalesce(excluded.note, public.agency_candidate_offers.note),
+                updated_at        = now()
   returning id into v_id;
   return v_id;
 end;

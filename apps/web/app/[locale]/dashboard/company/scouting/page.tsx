@@ -408,7 +408,7 @@ export default async function CompanyScoutingPage({
         </div>
       ) : null}
 
-      {result?.kind === "ok" && offeredCandidates.length > 0 ? (
+      {selected && offeredCandidates.length > 0 ? (
         <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-agency-offers">
           <header className="flex flex-col gap-1">
             <h2 className="font-display text-base font-semibold text-text-primary">
@@ -429,7 +429,7 @@ export default async function CompanyScoutingPage({
                 <div className="flex flex-col gap-2">
                   <RequestCommunicationButton
                     locale={locale}
-                    requestId={result.demand.id}
+                    requestId={selected}
                     workerId={oc.workerId}
                     labels={{
                       button: t("request.button"), opening: t("request.opening"),
@@ -439,7 +439,7 @@ export default async function CompanyScoutingPage({
                   />
                   <ProposeBookingButton
                     locale={locale}
-                    requestId={result.demand.id}
+                    requestId={selected}
                     workerId={oc.workerId}
                     countryCode={null}
                     labels={{
@@ -452,7 +452,7 @@ export default async function CompanyScoutingPage({
                   />
                   <ScoutingShortlistButtons
                     locale={locale}
-                    requestId={result.demand.id}
+                    requestId={selected}
                     workerId={oc.workerId}
                     current={null}
                     currentNote={null}
