@@ -342,6 +342,11 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 164 -> 165 for the REAL two-subject agency->client bridge
     // (20260723180000_agency_real_client_bridge_v1, issue #859); owner-gated
     // DRAFT, RED CI by design, UNAPPLIED; no migration from the read layer.
-    expect(count).toBeLessThanOrEqual(165);
+    // Bumped 165 -> 166 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1, paired rollback). New
+    // engagement table + four RPCs closing the accepted-booking →
+    // project-assignment P1; RED, deliberately NOT human-gate-annotated,
+    // ships UNAPPLIED; still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(166);
   });
 });

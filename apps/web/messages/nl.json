@@ -5338,7 +5338,9 @@
       "assigned": "Toegewezen",
       "notAuthorized": "Je kunt alleen werknemers uit je eigen ploeg toewijzen aan je eigen projecten.",
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
-      "fromRoster": "Een werknemer aan dit object toewijzen"
+      "fromRoster": "Een werknemer aan dit object toewijzen",
+      "rosterGroup": "Teamleden",
+      "engagementGroup": "Kandidaten met geaccepteerd voorstel"
     },
     "model": {
       "note": "Dit bord volgt het werkmodel van het platform: spelerskaarten van werknemers worden toegewezen aan objecten (projecten), en jij beheert de toewijzingen.",

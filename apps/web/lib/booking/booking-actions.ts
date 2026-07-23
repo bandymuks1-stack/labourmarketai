@@ -59,6 +59,13 @@ export type BookingActionResult =
        *  reason (honest partial — the UI says the reason was not saved).
        *  Undefined = no reason was chosen (plain v1 path, unchanged). */
       reasonStored?: boolean;
+      /** Accepted-booking engagement outcome (booking-engagement bridge v1).
+       *  Present ONLY on an accept: what the v3 RPC did in the SAME
+       *  transaction ("created" | "already_active" | "already_recorded" |
+       *  "no_company"), or "needs_migration" when the owner-gated v3 RPC is
+       *  not installed yet and the accept completed via the v1 RPC WITHOUT
+       *  an engagement (honest partial). Undefined on declines. */
+      engagement?: string;
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
@@ -204,6 +211,33 @@ export async function respondBookingAction(input: {
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
     return { kind: "ok", status: input.decision, reasonStored: false };
+  }
+
+  if (input.decision === "accepted") {
+    // v3 first — accept + engagement in ONE DB transaction (booking-engagement
+    // bridge v1). If the owner-gated v3 RPC is not installed yet, fall back to
+    // the v1 RPC: the ACCEPT is never lost, and the result carries the honest
+    // "needs_migration" engagement state instead of pretending.
+    const v3 = await asAny(supabase).rpc("respond_booking_request_v3", {
+      p_booking_id: input.bookingId,
+      p_decision: "accepted",
+      p_reason_kind: "",
+      p_reason_note: "",
+    });
+    if (!v3.error) {
+      const engagement =
+        (v3.data as { engagement?: string } | null)?.engagement ?? "created";
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      return { kind: "ok", status: "accepted", engagement };
+    }
+    if (!isAbsentFunction(v3.error)) return classify(v3.error);
+    const v1 = await asAny(supabase).rpc("respond_booking_request", {
+      p_booking_id: input.bookingId,
+      p_decision: "accepted",
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    return { kind: "ok", status: "accepted", engagement: "needs_migration" };
   }
 
   const { error } = await asAny(supabase).rpc("respond_booking_request", {

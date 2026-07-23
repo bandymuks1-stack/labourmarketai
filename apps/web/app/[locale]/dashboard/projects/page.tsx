@@ -7,6 +7,7 @@ import { CompanyActionNextActions } from "@/components/app/company-action-next-a
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { listManagedWorkers } from "@/lib/instructions/instructions";
+import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
   ProjectAssignmentManager,
   type ProjectManagerLabels,
@@ -106,9 +107,13 @@ export default async function ProjectsPage({
     );
   }
 
-  const [projects, workers] = await Promise.all([
+  const [projects, workers, engagementResult] = await Promise.all([
     listProjectMap(),
     listManagedWorkers(),
+    // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
+    // never merged into the roster read; empty + honest until the owner
+    // applies migration 20260723120000.
+    listBookingEngagementWorkers(),
   ]);
   const withAssignments = await Promise.all(
     projects.map(async (p) => ({
@@ -143,6 +148,8 @@ export default async function ProjectsPage({
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
     openBoard: t("map.openArena"),
+    rosterGroupLabel: t("assign.rosterGroup"),
+    engagementGroupLabel: t("assign.engagementGroup"),
   };
 
   return (
@@ -202,6 +209,7 @@ export default async function ProjectsPage({
         <ProjectAssignmentManager
           projects={withAssignments}
           workers={workers}
+          engagementWorkers={[...engagementResult.workers]}
           labels={labels}
         />
       </section>

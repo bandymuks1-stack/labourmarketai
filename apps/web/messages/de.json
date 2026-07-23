@@ -5338,7 +5338,9 @@
       "assigned": "Zugewiesen",
       "notAuthorized": "Sie können nur Arbeitskräfte aus Ihrem Team Ihren eigenen Projekten zuweisen.",
       "noWorkers": "Sie haben noch keine zuweisbaren Arbeitskräfte in Ihrem Team.",
-      "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen"
+      "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen",
+      "rosterGroup": "Teammitglieder",
+      "engagementGroup": "Kandidaten mit angenommenem Angebot"
     },
     "model": {
       "note": "Dieses Board folgt dem Betriebsmodell der Plattform: Spielerkarten von Arbeitskräften werden Objekten (Projekten) zugewiesen, und Sie verwalten die Zuweisungen.",

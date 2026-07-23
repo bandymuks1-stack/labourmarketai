@@ -1867,7 +1867,12 @@ describe("no migration files added by this sprint", () => {
     // rollback). Three additive tables + 11 SECURITY DEFINER RPCs, zero
     // changes to existing objects. OWNER-GATED DRAFT, NO @human-gate-approved
     // (RED CI by design), ships UNAPPLIED.
-    const SPRINT_BASELINE = 165;
+    // Bumped 165 -> 166 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1, paired rollback). Closes
+    // the accepted-booking → project-assignment P1: new engagement table +
+    // four RPCs, one narrowly widened assign gate, zero changes to existing
+    // objects otherwise. RED, NOT @human-gate-approved, ships UNAPPLIED.
+    const SPRINT_BASELINE = 166;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

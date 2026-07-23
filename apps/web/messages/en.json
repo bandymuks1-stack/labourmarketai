@@ -5338,7 +5338,9 @@
       "assigned": "Assigned",
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet.",
-      "fromRoster": "Assign a worker to this object"
+      "fromRoster": "Assign a worker to this object",
+      "rosterGroup": "Team members",
+      "engagementGroup": "Accepted-proposal candidates"
     },
     "model": {
       "note": "This board follows the platform's operating model: worker player cards are assigned to objects (projects), and you manage the assignments.",

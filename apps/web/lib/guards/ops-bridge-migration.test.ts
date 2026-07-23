@@ -414,6 +414,10 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // Bumped 164 -> 165 for the REAL two-subject agency->client bridge
     // (20260723180000_agency_real_client_bridge_v1, issue #859); owner-gated
     // DRAFT, RED CI by design, UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 165/);
+    // Bumped 165 -> 166 for the booking-engagement bridge
+    // (20260723120000_company_worker_engagements_v1) — new engagement table +
+    // four RPCs, paired rollback, RED and deliberately NOT
+    // human-gate-annotated. Ships UNAPPLIED.
+    expect(guard).toMatch(/SPRINT_BASELINE = 166/);
   });
 });
