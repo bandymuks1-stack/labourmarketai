@@ -221,16 +221,18 @@ audit.
   form. No chat table, nothing outbound.
 
 - **2026-07-13 — `lib/opportunities/contact-employer.ts`** (canonical-journey
-  P1 worker→employer conversation open). After the caller's OWN facts held
-  under their RLS session (own worker row + own active `demand_interest_signals`
-  row), ONE service-role read resolves the demand owner and the
-  verified-company gate (`customer_requests` / `companies` are owner-scoped
-  by design, so a worker cannot read them directly — this is the app-side
-  equivalent of a SECURITY DEFINER RPC). The owner's profile id never
-  reaches the browser; the conversation opens through the gated 0021
-  backend (`getOrCreateDirectConversation`, rate caps + §8.1
-  `allowed_demand_interest` grant) under the CALLER's session, never
-  service-role. No chat table is touched with the admin client.
+  P1 worker→employer conversation open). REMOVED FROM THIS LIST 2026-07-23:
+  the service-role read of `customer_requests` / `companies` never worked in
+  production — service_role table grants are a deliberate allowlist (billing /
+  esco / lmc / intel) that excludes those tables, so the read died 42501 and
+  "Parašyti darbdaviui" failed for every worker (worker-application E2E first
+  break). The owner resolution now lives in the gated SECURITY DEFINER RPC
+  `contact_demand_owner_v1` (owner-gated migration `20260723053000`, ships
+  UNAPPLIED; the action feature-detects the missing RPC → honest
+  `needs_migration`). The action no longer imports the admin client at all;
+  the conversation still opens through the gated 0021 backend
+  (`getOrCreateDirectConversation`, rate caps + §8.1
+  `allowed_demand_interest` grant) under the CALLER's session.
 
 - **2026-07-14 — `lib/ai/runtime/audit-store.ts`** (AI Router v1 append-only
   run audit). Best-effort INSERT of one `ai_runs` row per LIVE internal AI

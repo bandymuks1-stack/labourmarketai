@@ -215,14 +215,11 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    'converted' after the owner-scoped save_demand_draft RPC (caller
     //    session, RLS) created the draft. Touches no chat table, exposes no
     //    third-party data, sends nothing outbound.
-    //  - lib/opportunities/contact-employer.ts — canonical-journey P1
-    //    worker→employer open. After the caller's OWN facts held under
-    //    their RLS session (worker row + own active interest signal), one
-    //    service-role read resolves the demand owner + verified-company
-    //    gate (customer_requests/companies are owner-scoped by design, so
-    //    a worker cannot read them directly). The owner's profile id never
-    //    reaches the browser; the conversation itself opens through the
-    //    gated 0021 backend (rate caps + §8.1 grant), never service-role.
+    //    (2026-07-23: lib/opportunities/contact-employer.ts LEFT this list —
+    //    its service-role owner read died 42501 under the allowlisted
+    //    service_role grants posture; the owner resolution moved into the
+    //    gated SECURITY DEFINER RPC contact_demand_owner_v1, so the action
+    //    no longer touches the admin client at all.)
     //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
     //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
     //    COUNT for the daily-run budget. ai_runs by design carries NO
@@ -245,7 +242,6 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/ai/runtime/audit-store.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
-      "lib/opportunities/contact-employer.ts",
       "lib/sales/lead-intake.ts",
     ]);
   });

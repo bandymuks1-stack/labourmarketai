@@ -1851,7 +1851,16 @@ describe("no migration files added by this sprint", () => {
     // revokes the leftover PUBLIC/anon EXECUTE on the 43 non-allowlisted
     // SECURITY DEFINER functions and re-grants authenticated + service_role.
     // No table, row, policy, trigger or function body is touched.
-    const SPRINT_BASELINE = 163;
+    // Bumped 163 -> 164 for the worker contact-employer owner-resolution RPC
+    // (20260723053000_contact_demand_owner_v1, paired rollback). Function-only
+    // read RPC (no table/policy/grant widening; EXECUTE to authenticated).
+    // RED / human-gated, ships UNAPPLIED and deliberately WITHOUT
+    // `@human-gate-approved` — the owner has not approved it yet. Fixes the
+    // 2026-07-23 worker E2E break: the action's service-role read of
+    // customer_requests/companies dies 42501 under the allowlisted
+    // service_role grants posture, so "Parašyti darbdaviui" failed for every
+    // worker. Until applied the app feature-detects → "needs_migration".
+    const SPRINT_BASELINE = 164;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
