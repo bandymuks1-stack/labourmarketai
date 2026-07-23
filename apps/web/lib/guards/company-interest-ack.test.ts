@@ -164,4 +164,24 @@ describe("no external sending; honest internal-only copy", () => {
     expect(page).toMatch(/result\.interestByWorker\[c\.workerId\]\s*\?[\s\S]{0,80}CompanyInterestAck/);
     expect(page).not.toMatch(/mailto:|apply now/i);
   });
+
+  it("no function props cross the server→client boundary into CompanyInterestAck", () => {
+    // 2026-07-23 employer-response E2E first break: the server page passed
+    // `statusLabel: (s) => …` into the "use client" ack component. RSC cannot
+    // serialize a function prop, so the WHOLE scouting page crashed the first
+    // time any interest signal rendered — the company could never see an
+    // interested candidate. Labels must stay a plain serializable map.
+    const component = read("components/app/company-interest-ack.tsx");
+    expect(component).toMatch(/statusLabels:\s*Record<string,\s*string>/);
+    expect(component).not.toMatch(/statusLabel\??:\s*\(/);
+
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    const ackCall = page.slice(page.indexOf("<CompanyInterestAck"));
+    const labelsBlock = ackCall.slice(0, ackCall.indexOf("/>"));
+    // The label value must be the serializable map, never a function-valued
+    // `statusLabel:` prop. (Arrows are fine only when EXECUTED server-side,
+    // e.g. inside Object.fromEntries — what matters is the prop value type.)
+    expect(labelsBlock).not.toMatch(/statusLabel:\s*\(/);
+    expect(labelsBlock).toMatch(/statusLabels:\s*Object\.fromEntries/);
+  });
 });

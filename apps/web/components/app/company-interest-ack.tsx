@@ -32,7 +32,12 @@ export function CompanyInterestAck({
   workerId: string;
   initialStatus: string;
   labels: {
-    statusLabel: (status: string) => string;
+    /** Plain status → label map. A function prop here is a server-render
+     *  crash: this is a client component, and RSC cannot serialize functions
+     *  passed from the server page — the whole scouting page dies the first
+     *  time an interest signal renders. Unknown statuses fall back to the
+     *  raw status string. */
+    statusLabels: Record<string, string>;
     markReviewed: string;
     markContacted: string;
     internalNote: string;
@@ -75,7 +80,7 @@ export function CompanyInterestAck({
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
-          {labels.statusLabel(status)}
+          {labels.statusLabels[status] ?? status}
         </span>
         {status !== "reviewed" && status !== "contacted" ? (
           <button
