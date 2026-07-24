@@ -19,7 +19,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const HUB_DIR = join(ROOT, "components", "app", "premium-hub");
-const PAGE = join(ROOT, "app", "[locale]", "dashboard", "page.tsx");
+const PAGE = join(ROOT, "app", "[locale]", "dashboard", "advanced", "page.tsx");
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("premium hub is backed by real data, never concept fixtures", () => {
@@ -41,7 +41,7 @@ describe("premium hub is backed by real data, never concept fixtures", () => {
       pageSrc.includes("PREMIUM_HUB_PREVIEW") ||
       pageSrc.includes("premium-hub-fixtures")
     ) {
-      offenders.push("app/[locale]/dashboard/page.tsx");
+      offenders.push("app/[locale]/dashboard/advanced/page.tsx");
     }
     expect(offenders, `fixture references found in: ${offenders.join(", ")}`).toEqual(
       [],

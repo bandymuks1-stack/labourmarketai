@@ -208,7 +208,7 @@ describe("server-side dashboard card preferences", () => {
   });
 
   it("the overview passes per-context server prefs to BOTH grid render sites", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     // Wagon 2: the prefs read is kicked off BEFORE the main batch (overlapped
     // promise chained off the request-cached session profile) — still strictly
     // per-(profile, context): worker → person, everything else → company.

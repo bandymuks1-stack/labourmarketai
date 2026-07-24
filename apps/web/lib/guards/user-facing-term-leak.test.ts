@@ -86,7 +86,7 @@ describe("no internal/technical term leaks in user-facing copy", () => {
 describe("admin subtree is structurally gated (fail-closed)", () => {
   it("dashboard/admin has a layout that calls requireSuperadmin", () => {
     const layout = readFileSync(
-      join(APP_ROOT, "app/[locale]/dashboard/(full)/admin/layout.tsx"),
+      join(APP_ROOT, "app/[locale]/dashboard/admin/layout.tsx"),
       "utf8",
     );
     expect(layout).toMatch(/requireSuperadmin/);

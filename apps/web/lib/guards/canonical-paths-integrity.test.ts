@@ -48,9 +48,7 @@ function rel(abs: string): string {
   return abs.slice(APP_ROOT.length + 1).split("\\").join("/");
 }
 
-// Account lives in the Advanced-mode `(full)` route group (URL unchanged:
-// /dashboard/account) after the conversation-first layout split.
-const ACCOUNT_PAGE = "app/[locale]/dashboard/(full)/account/page.tsx";
+const ACCOUNT_PAGE = "app/[locale]/dashboard/account/page.tsx";
 
 // ── 1. Account role status: one vocabulary, admin never "Ruošiama" ─────────
 
@@ -165,9 +163,7 @@ describe("Guard: exactly one canonical CV upload surface", () => {
 
 describe("Guard: canonical Profile/CV route is reachable", () => {
   it("the canonical profile page exists", () => {
-    // Profile is a simple-mode destination in the `(panels)` route group
-    // (URL unchanged: /dashboard/profile).
-    expect(existsSync(join(APP_ROOT, "app/[locale]/dashboard/(panels)/profile/page.tsx"))).toBe(true);
+    expect(existsSync(join(APP_ROOT, "app/[locale]/dashboard/profile/page.tsx"))).toBe(true);
   });
 
   it("the account page links to the canonical /dashboard/profile", () => {

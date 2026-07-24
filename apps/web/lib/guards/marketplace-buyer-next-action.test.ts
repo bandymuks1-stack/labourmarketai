@@ -33,7 +33,7 @@ describe("getOutgoingRequestSummary is an honest real-status summary", () => {
 });
 
 describe("the dashboard renders the buyer status card honestly", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("computes the summary via the marketplace helper", () => {
     // Called inside the page's parallel batch (P0 latency audit); the result

@@ -197,14 +197,14 @@ describe("4 · every roster action resolves to a REAL existing route/action", ()
     expect(manager).toContain('data-testid="roster-operations-link"');
     expect(manager).toMatch(/href=\{`\/dashboard\/projects\/\$\{p\.id\}\/operations`\}/);
     expect(
-      existsSync(join(APP, "app/[locale]/dashboard/(full)/projects/[id]/operations/page.tsx")),
+      existsSync(join(APP, "app/[locale]/dashboard/projects/[id]/operations/page.tsx")),
     ).toBe(true);
   });
 
   it("visibility gates are unchanged: both surfaces stay manager-only", () => {
     for (const src of [
       projectsPage,
-      read("app/[locale]/dashboard/(full)/projects/[id]/operations/page.tsx"),
+      read("app/[locale]/dashboard/projects/[id]/operations/page.tsx"),
     ]) {
       expect(src).toMatch(/MANAGER_ROLES = new Set<Role>\(\["company", "agency"\]\)/);
       expect(src).toMatch(/MANAGER_ROLES\.has\(role\)/);
@@ -221,7 +221,7 @@ describe("5 · no game layer, no duplicate system, league stays admin-gated", ()
   });
 
   it("league remains ONLY the admin market-intelligence page (no public league route)", () => {
-    expect(existsSync(join(APP, "app/[locale]/dashboard/(full)/admin/league/page.tsx"))).toBe(true);
+    expect(existsSync(join(APP, "app/[locale]/dashboard/admin/league/page.tsx"))).toBe(true);
     expect(existsSync(join(APP, "app/[locale]/dashboard/league"))).toBe(false);
     expect(existsSync(join(APP, "app/[locale]/(marketing)/league"))).toBe(false);
   });

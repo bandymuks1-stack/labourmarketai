@@ -27,7 +27,7 @@ import { DASHBOARD_MODULES } from "@/lib/dashboard/dashboard-module-registry";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const PAGE = read("app/[locale]/dashboard/page.tsx");
+const PAGE = read("app/[locale]/dashboard/advanced/page.tsx");
 const WORKER = PAGE.slice(PAGE.indexOf("── Worker:"));
 
 function count(haystack: string, needle: string): number {

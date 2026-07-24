@@ -91,7 +91,7 @@ describe("4. booking responses are visible, never silent", () => {
     expect(countOwnerResponsesSince(rows as never, "not-a-date")).toBe(0);
   });
   it("the dashboard renders the count-gated responses card into both branches", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/data-testid="dashboard-booking-responses-next-action"/);
     expect(page).toMatch(/"\/dashboard\/bookings"/);
     // Org branch: mounted directly. Worker branch (D-01 duplicate removal,

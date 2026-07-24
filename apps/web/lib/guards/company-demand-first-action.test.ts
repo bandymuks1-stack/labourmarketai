@@ -38,7 +38,7 @@ describe("company draft → real request bridge (F-D1)", () => {
   });
 
   it("the wizard section carries the demand-intake anchor", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/id="demand-intake"/);
     expect(page).toMatch(/data-testid="demand-intake-section"/);
   });

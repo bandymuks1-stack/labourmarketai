@@ -5,10 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { listMyBookings } from "@/lib/booking/booking-actions";
+import { ConversationChat } from "@/components/app/conversation/chat/conversation-chat";
 import {
-  ConversationChat,
-  type ChatLabels,
-} from "@/components/app/conversation/chat/conversation-chat";
+  resolveChatLabels,
+  resolveWorkLogLabels,
+} from "@/components/app/conversation/chat/labels";
 import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
 import type { BookingOffer } from "@/components/app/conversation/conversation-shell";
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -19,11 +20,11 @@ import type { ActiveLocale } from "@/lib/i18n/config";
  * profile / booking flows). The card control room now lives at
  * `/dashboard/advanced` (Advanced mode).
  *
- * The wide module navbar is NOT hidden with an overlay any more: the thin
- * `dashboard/layout.tsx` renders no chrome, and the full chrome lives in the
- * `(full)` route group — so simple mode simply never mounts it. The chat
- * supplies its own simple-mode header + bottom nav (the 5-item nav). Advanced
- * mode is the one escape hatch. Deterministic (LLM off).
+ * The wide module navbar is NOT hidden with an overlay any more: the layout's
+ * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is absent,
+ * not painted over), so the chat fills the viewport and supplies its own
+ * simple-mode header + bottom nav (the 5-item nav). Advanced mode is the one
+ * escape hatch. Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,
@@ -43,8 +44,10 @@ export default async function DashboardHomePage({
   const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
 
   const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
-  const t = await getTranslations("conversation.chat");
-  const labels = resolveChatLabels(t);
+  const labels = resolveChatLabels(await getTranslations("conversation.chat"));
+  const workLogLabels = resolveWorkLogLabels(
+    await getTranslations("conversation.worklog"),
+  );
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -53,23 +56,11 @@ export default async function DashboardHomePage({
     <ConversationChat
       locale={locale as ActiveLocale}
       labels={labels}
+      workLogLabels={workLogLabels}
       bookingOffers={offers}
       bookingLabels={bookingLabels}
     />
   );
-}
-
-function resolveChatLabels(t: Awaited<ReturnType<typeof getTranslations>>): ChatLabels {
-  const keys = [
-    "headerTitle", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
-    "composerPlaceholder", "send", "attach", "greeting",
-    "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
-    "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
-    "fallback", "userCv", "userProfile", "userOffers", "userJobs",
-  ] as const;
-  const out = {} as Record<(typeof keys)[number], string>;
-  for (const k of keys) out[k] = t(k);
-  return out as ChatLabels;
 }
 
 async function loadBookingOffers(

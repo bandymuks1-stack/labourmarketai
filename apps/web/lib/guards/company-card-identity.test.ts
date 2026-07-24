@@ -22,7 +22,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const identity = read("components/app/identity-actions.tsx");
-const dashboard = read("app/[locale]/dashboard/page.tsx");
+const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
 
 describe("active company name is the card title", () => {
   it("title falls back to the generic label ONLY when no name exists", () => {

@@ -128,7 +128,7 @@ describe("5. empty profile gets honest next actions (never a percentage)", () =>
     expect(hub).toMatch(/\/dashboard#work-card/);
     expect(hub).toMatch(/profile-hub-opportunities-link/);
     // The deep-link target exists on the dashboard.
-    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/id="work-card"/);
+    expect(read("app/[locale]/dashboard/advanced/page.tsx")).toMatch(/id="work-card"/);
   });
 });
 

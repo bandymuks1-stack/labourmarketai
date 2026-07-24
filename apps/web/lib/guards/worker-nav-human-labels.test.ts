@@ -18,7 +18,7 @@ const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 const tabs = (j: Record<string, unknown>) =>
   ((j.auth as { dashboard: { tabs: Record<string, string> } }).dashboard).tabs;
-const DASH = "app/[locale]/dashboard/page.tsx";
+const DASH = "app/[locale]/dashboard/advanced/page.tsx";
 
 describe("primary nav uses human, action-first labels (not module words)", () => {
   it("LT primary tabs read as erdvė / žemėlapis / darbo žurnalas / žinutės", () => {

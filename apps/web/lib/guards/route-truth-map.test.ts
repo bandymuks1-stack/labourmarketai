@@ -188,15 +188,7 @@ function findPages(dir: string, acc: string[] = []): string[] {
 }
 
 const dashboardPages = findPages(join(APP_DIR, "dashboard")).map((p) =>
-  relative(APP_DIR, p)
-    .split(sep)
-    .slice(0, -1)
-    // Route groups (parenthesized folders like `(full)` / `(panels)`) are
-    // URL-invisible in the App Router — strip them so the derived key is the
-    // real URL path. The conversation-first layout splits the dashboard into
-    // `(full)` (Advanced chrome) and `(panels)` (simple-mode shell) groups.
-    .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")))
-    .join("/"),
+  relative(APP_DIR, p).split(sep).slice(0, -1).join("/"),
 );
 
 describe("route truth map — every dashboard route is deliberately classified", () => {

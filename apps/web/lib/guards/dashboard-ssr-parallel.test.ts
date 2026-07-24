@@ -55,7 +55,7 @@ describe("Guard: dashboard layout parallelizes profile + profile_roles reads", (
 });
 
 describe("Guard: dashboard overview parallelizes worker reads", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("uses Promise.all for worker_professions + worker_skills + journal_entries", () => {
     expect(page).toMatch(

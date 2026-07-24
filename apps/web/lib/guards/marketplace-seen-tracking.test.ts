@@ -151,7 +151,7 @@ describe("server helpers are rollout-safe + visit marks seen", () => {
 });
 
 describe("dashboard renders count-gated 'new' markers (no fake unread)", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("computes both new counts via the marketplace helper", () => {
     // Called inside the page's parallel batch (P0 latency audit); both counts

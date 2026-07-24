@@ -68,7 +68,7 @@ describe("3. readiness incomplete rows act", () => {
     // WorkCard was removed (dedup v1); the `id="work-card"` anchor (the profile
     // hub's availability-pillar deep-link target) now wraps the hub person block
     // that carries the folded state-aware editor.
-    const dashPage = read("app/[locale]/dashboard/page.tsx");
+    const dashPage = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(dashPage).toMatch(/id="work-card"/);
   });
 });

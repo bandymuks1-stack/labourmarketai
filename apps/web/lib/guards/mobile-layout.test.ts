@@ -40,8 +40,11 @@ describe("mobile layout invariants", () => {
 
     it("main element clears the fixed bottom nav with safe-area padding", () => {
       // The dashboard <main> must include env(safe-area-inset-bottom) in pb
-      // so the BottomNav cannot occlude content on iOS.
-      expect(src).toMatch(/pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\]/);
+      // so the BottomNav cannot occlude content on iOS. The <main> lives in the
+      // chrome selector (which picks the per-route shell); its safe-area padding
+      // is asserted there.
+      const chrome = read("components/app/dashboard-chrome.tsx");
+      expect(chrome).toMatch(/pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\]/);
     });
   });
 

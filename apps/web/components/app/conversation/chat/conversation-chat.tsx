@@ -11,8 +11,23 @@ import {
   WorkerBookingAction,
   type BookingActionLabels,
 } from "@/components/app/conversation/worker-booking-action";
+import {
+  WorkerWorkLogFlow,
+  type WorkLogLabels,
+} from "@/components/app/conversation/worker-worklog-flow";
 import { getWorkerForm } from "@/lib/conversation/worker-forms";
+import { classifyIntent } from "@/lib/conversation/intent-router";
+import { extractWorkLog } from "@/lib/conversation/worklog-extract";
+import { findWorkForChat } from "@/lib/conversation/find-work";
 import type { BookingOffer } from "@/components/app/conversation/conversation-shell";
+
+/** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
+ *  takes `today` as a param so it stays pure). */
+function todayIso(): string {
+  const d = new Date();
+  const p = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
 
 export type ChatLabels = {
   headerTitle: string;
@@ -42,6 +57,15 @@ export type ChatLabels = {
   userProfile: string;
   userOffers: string;
   userJobs: string;
+  // Orchestrator intent responses (deterministic; honest where a real
+  // mechanism does not yet exist).
+  clarifyWorkLog: string;
+  calendarHint: string;
+  reminderBlocked: string;
+  translateBlocked: string;
+  writeEmployerHint: string;
+  nextActionAnswer: string;
+  resumeAnswer: string;
 };
 
 let uid = 0;
@@ -61,6 +85,7 @@ const nid = () => `m${uid++}`;
  */
 export function ConversationChat({
   labels,
+  workLogLabels,
   locale,
   bookingOffers = [],
   bookingLabels = null,
@@ -68,6 +93,7 @@ export function ConversationChat({
   mobile = false,
 }: {
   labels: ChatLabels;
+  workLogLabels: WorkLogLabels;
   locale: string;
   bookingOffers?: BookingOffer[];
   bookingLabels?: BookingActionLabels | null;
@@ -144,6 +170,51 @@ export function ConversationChat({
     [locale, assistant, labels.fallback, starterChips, pushEmbed],
   );
 
+  /** Real employer/opportunity search — its own typing lifecycle (async). */
+  const startFindWork = useCallback(() => {
+    setTyping(true);
+    findWorkForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "matches") {
+          pushMessage({
+            id: nid(),
+            role: "assistant",
+            kind: "employer-match",
+            intro: res.intro,
+            matches: res.matches,
+          });
+        } else {
+          assistant(res.message, starterChips);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.fallback, starterChips);
+      });
+  }, [pushMessage, assistant, starterChips, labels.fallback]);
+
+  /** Work-log from a natural sentence → real journal save (deterministic). */
+  const startWorkLog = useCallback(
+    (text: string) => {
+      const draft = extractWorkLog(text, todayIso());
+      if (!draft.hasSignal) {
+        // Data unclear → ask ONE concrete question (brief §3).
+        assistant(labels.clarifyWorkLog);
+        return;
+      }
+      pushEmbed(
+        <WorkerWorkLogFlow
+          draft={draft}
+          locale={locale}
+          labels={workLogLabels}
+          onClose={() => assistant(labels.fallback, starterChips)}
+        />,
+      );
+    },
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.fallback, starterChips],
+  );
+
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
@@ -185,7 +256,8 @@ export function ConversationChat({
           break;
         case "jobs":
           user(labels.userJobs);
-          withTyping(() => assistant(labels.jobsAnswer, starterChips));
+          // Real search now, not a canned answer.
+          startFindWork();
           break;
         default:
           if (chip.id.startsWith("f:")) {
@@ -193,21 +265,58 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork],
   );
 
   const handleSend = useCallback(
     (text: string) => {
       user(text);
-      const q = text.toLowerCase();
+      const { intent } = classifyIntent(text);
+      // find-work runs a real async server search with its own typing cue.
+      if (intent === "find-work") {
+        startFindWork();
+        return;
+      }
       withTyping(() => {
-        if (/cv|gyvenimo|резюме|lebenslauf/.test(q)) handleChip({ id: "cv", label: "" });
-        else if (/pasiūlym|offer|booking|предложен|angebot/.test(q)) handleChip({ id: "offers", label: "" });
-        else if (/profil|įgūd|kalb|patirt|skill|profile/.test(q)) handleChip({ id: "profile", label: "" });
-        else assistant(labels.fallback, starterChips);
+        switch (intent) {
+          case "cv":
+            handleChip({ id: "cv", label: "" });
+            break;
+          case "offers":
+            handleChip({ id: "offers", label: "" });
+            break;
+          case "profile":
+            handleChip({ id: "profile", label: "" });
+            break;
+          case "log-work":
+            startWorkLog(text);
+            break;
+          case "calendar-view":
+            assistant(labels.calendarHint, starterChips);
+            break;
+          case "reminder":
+            // No scheduler exists — never a fake reminder (honest degradation).
+            assistant(labels.reminderBlocked, starterChips);
+            break;
+          case "translate":
+            // No real translation engine — never a fake translation.
+            assistant(labels.translateBlocked, starterChips);
+            break;
+          case "write-employer":
+            assistant(labels.writeEmployerHint, starterChips);
+            break;
+          case "next-action":
+            assistant(labels.nextActionAnswer, starterChips);
+            break;
+          case "resume":
+            assistant(labels.resumeAnswer, starterChips);
+            break;
+          default:
+            assistant(labels.fallback, starterChips);
+        }
       });
     },
-    [user, withTyping, handleChip, assistant, labels.fallback, starterChips],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog],
   );
 
   const nav = {

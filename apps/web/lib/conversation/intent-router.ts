@@ -44,10 +44,21 @@ export type IntentMatch = {
 type Pattern = { re: RegExp; weight: number };
 type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
 
-/** Build a word/phrase pattern. `\b` word boundaries are ASCII-only, so for
- *  non-ASCII stems we match a leading boundary loosely (start or non-letter). */
+/**
+ * A Unicode-aware word boundary. JS `\b` is ASCII-only, so it misfires at every
+ * non-ASCII boundary (Lithuanian ąčęėįšųūž, Cyrillic): `darbą\b` never matches
+ * after `ą`, and `\bcv\b` still lets `zxcv` match. This asserts a real
+ * letter↔non-letter transition using Unicode letter/number classes (requires
+ * the `u` flag), so short stems like `cv`/`job` stay properly bounded across
+ * every launch language.
+ */
+const UB =
+  "(?:(?<![\\p{L}\\p{N}])(?=[\\p{L}\\p{N}])|(?<=[\\p{L}\\p{N}])(?![\\p{L}\\p{N}]))";
+
+/** Build a word/phrase pattern, translating each ASCII `\b` in the source into
+ *  the Unicode-safe boundary `UB` before compiling. */
 function p(source: string, weight = 1): Pattern {
-  return { re: new RegExp(source, "iu"), weight };
+  return { re: new RegExp(source.replace(/\\b/g, UB), "iu"), weight };
 }
 
 /**
@@ -64,13 +75,13 @@ const RULES: IntentRule[] = [
       p("\\bdirbau\\b", 3),
       p("\\bdirbome\\b", 3),
       p("\\bworked\\b", 3),
-      p("\\bработал", 3),
+      p("работал", 3),
       p("\\bgewerkt\\b", 3), // nl
       p("\\bgearbeitet\\b", 3), // de
       // an explicit worked-time span "nuo 8 iki 17", "from 8 to 5", "с 8 до 17"
       p("\\bnuo\\s*\\d{1,2}\\D{0,4}iki\\s*\\d{1,2}", 3),
       p("\\bfrom\\s*\\d{1,2}\\D{0,4}to\\s*\\d{1,2}", 3),
-      p("\\bс\\s*\\d{1,2}\\D{0,4}до\\s*\\d{1,2}", 3),
+      p("с\\s*\\d{1,2}\\D{0,4}до\\s*\\d{1,2}", 3),
       // "8 valandas / hours / часов"
       p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час)", 2),
       // break / lunch minutes
@@ -88,11 +99,11 @@ const RULES: IntentRule[] = [
       p("\\bieškau\\b", 3),
       p("\\bieškok\\b", 3),
       p("(find|look(ing)?\\s+for)\\s+(me\\s+)?(a\\s+)?(job|work)", 3),
-      p("\\bнайди\\b", 3),
-      p("\\bищу\\b", 3),
+      p("найди", 3),
+      p("ищу", 3),
       p("(darbo|darbą)\\b", 1),
       p("\\bjob\\b", 1),
-      p("\\bработу\\b", 2),
+      p("работу", 2),
       p("\\bvacancy|vacature|vakans", 1),
       // "in the Netherlands / country" — a search location
       p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
@@ -104,8 +115,8 @@ const RULES: IntentRule[] = [
       p("\\bišversk\\b", 3),
       p("\\bversti\\b", 2),
       p("\\btranslate\\b", 3),
-      p("\\bпереведи\\b", 3),
-      p("\\bперевод\\b", 2),
+      p("переведи", 3),
+      p("перевод", 2),
       p("\\bvertimą\\b", 2),
       p("(į|to|на)\\s+(olandų|nyderland|dutch|nederlands|немецк|anglų|english)", 1),
     ],
@@ -116,8 +127,8 @@ const RULES: IntentRule[] = [
       p("\\bparašyk\\b", 3),
       p("\\bparašok\\b", 2),
       p("(write|send|message)\\s+(to\\s+)?(this\\s+)?(employer|company|them)", 3),
-      p("\\bнапиши\\b", 3),
-      p("\\bсообщение\\b", 1),
+      p("напиши", 3),
+      p("сообщение", 1),
       p("(šiai\\s+įmonei|darbdaviui|to\\s+the\\s+employer|работодател)", 2),
       p("\\bžinut", 1),
     ],
@@ -129,8 +140,8 @@ const RULES: IntentRule[] = [
       p("\\bpriminim", 2),
       p("\\bremind\\b", 3),
       p("\\breminder\\b", 2),
-      p("\\bнапомни\\b", 3),
-      p("\\bнапоминани", 2),
+      p("напомни", 3),
+      p("напоминани", 2),
     ],
   },
   {
@@ -139,11 +150,11 @@ const RULES: IntentRule[] = [
       p("(kada|when).{0,20}(susitikim|meeting|pamain|shift|event|įvyk)", 3),
       p("\\bkalendor", 3),
       p("\\bcalendar\\b", 3),
-      p("\\bкалендар", 3),
+      p("календар", 3),
       p("(mano|šios savaitės|today'?s|this week'?s)\\s+(plan|tvarkaraš|schedule|расписани)", 2),
       p("\\bsusitikim", 1),
       p("\\bmeeting\\b", 1),
-      p("\\bпланы\\b", 1),
+      p("планы", 1),
     ],
   },
   {
@@ -151,7 +162,7 @@ const RULES: IntentRule[] = [
     patterns: [
       p("\\bcv\\b", 3),
       p("(gyvenimo\\s+apraš|curriculum|résumé|resume)", 3),
-      p("\\bрезюме\\b", 3),
+      p("резюме", 3),
       p("\\blebenslauf\\b", 3),
       p("(įkelk|upload|загрузи|прикрепи)\\s+.{0,10}(cv|резюме)", 2),
     ],
@@ -163,7 +174,7 @@ const RULES: IntentRule[] = [
       p("\\bprofile\\b", 2),
       p("\\bįgūd", 2),
       p("\\bskill", 2),
-      p("\\bнавык", 2),
+      p("навык", 2),
       p("(pridėk|add|добавь)\\s+.{0,12}(kalb|language|язык|patirt|experience|опыт|išsilavin|education|образовани)", 2),
       p("\\bkalb(a|ą|as|os)\\b", 1),
       p("\\blanguage", 1),
@@ -175,7 +186,7 @@ const RULES: IntentRule[] = [
       p("\\bpasiūlym", 3),
       p("\\boffer", 3),
       p("\\bbooking\\b", 2),
-      p("\\bпредложени", 3),
+      p("предложени", 3),
       p("\\bangebot\\b", 2),
       p("(ką\\s+man\\s+siūlo|what.{0,8}offered|что.{0,8}предлага)", 2),
     ],
@@ -185,7 +196,7 @@ const RULES: IntentRule[] = [
     patterns: [
       p("(ką\\s+dar|ką\\s+man).{0,20}(padaryti|daryti|reikia)", 3),
       p("(what|what'?s)\\s+(next|else|left|should\\s+i\\s+do)", 3),
-      p("\\bчто\\s+(дальше|ещё|еще)\\b", 3),
+      p("что\\s+(дальше|ещё|еще)\\b", 3),
       p("\\bnext\\s+step", 2),
       p("\\bkitas\\s+žingsn", 2),
     ],
@@ -195,7 +206,7 @@ const RULES: IntentRule[] = [
     patterns: [
       p("(kur\\s+(aš\\s+)?sustojau|kur\\s+likau|kur\\s+baigiau)", 3),
       p("(where\\s+(did\\s+)?i\\s+(stop|leave\\s+off|left\\s+off))", 3),
-      p("\\bна\\s+чём\\s+я\\s+остановил", 3),
+      p("на\\s+чём\\s+я\\s+остановил", 3),
       p("\\bcontinue\\b", 1),
       p("\\btęsti\\b", 1),
     ],

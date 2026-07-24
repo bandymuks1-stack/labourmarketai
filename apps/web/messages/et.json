@@ -3004,6 +3004,10 @@
         "addAchievement": {
           "label": "[EN] Add achievement or certificate",
           "description": "[EN] Add an achievement or a declared certificate."
+        },
+        "logWork": {
+          "label": "[EN] Log work time",
+          "description": "[EN] Record what and when you worked — it goes to your work journal."
         }
       },
       "company": {
@@ -3181,7 +3185,52 @@
       "navChat": "[EN] Chat",
       "navMessages": "[EN] Messages",
       "navCalendar": "[EN] Calendar",
-      "navProfile": "[EN] Profile"
+      "navProfile": "[EN] Profile",
+      "clarifyWorkLog": "[EN] Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
+      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
+      "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
+      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "nextActionAnswer": "[EN] In short: strengthen your profile (CV, skills), then review offers. Where shall we start?",
+      "resumeAnswer": "[EN] Let's pick up with your profile and job search. What would you like — CV, profile, or offers?",
+      "userLogWork": "[EN] Log work time",
+      "userFindWork": "[EN] Find work"
+    },
+    "worklog": {
+      "understood": "[EN] Here's what I understood — save it?",
+      "loading": "[EN] Loading…",
+      "noContext": "[EN] To log work time you first need a work context (an organization or project). Set one up and come back.",
+      "noContextCta": "[EN] Set up a work context",
+      "noWorker": "[EN] No worker profile found. Enable the worker role in account settings.",
+      "notAuthed": "[EN] Session ended. Please sign in again.",
+      "labelDate": "[EN] Date",
+      "labelTime": "[EN] Time",
+      "labelBreak": "[EN] Break",
+      "labelHours": "[EN] Worked",
+      "labelSite": "[EN] Site",
+      "labelNotes": "[EN] What you did (the entry evidence)",
+      "labelContext": "[EN] Work context",
+      "save": "[EN] Save",
+      "cancel": "[EN] Edit",
+      "working": "[EN] Saving…",
+      "confirmTitle": "[EN] Confirm the entry?",
+      "saved": "[EN] Entry saved to your work journal.",
+      "errorGeneric": "[EN] Couldn't save. Please try again.",
+      "minutesUnit": "[EN] min"
+    },
+    "findWork": {
+      "intro": "[EN] I found {count} suitable options. Best matches:",
+      "introOne": "[EN] I found 1 suitable option:",
+      "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I'll let you know when one appears.",
+      "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
+      "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "fitStrong": "[EN] Strong fit",
+      "fitPossible": "[EN] Possible fit",
+      "fitWeak": "[EN] Weak fit",
+      "fitInsufficient": "[EN] Not enough data",
+      "skillBasis": "[EN] Matches {pct}% of this job's skills: {matched} of {total}, {confirmed} confirmed",
+      "locationReason": "[EN] Location: {location}",
+      "roleReason": "[EN] Need: {role}"
     }
   }
 }

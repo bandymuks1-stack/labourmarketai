@@ -16,7 +16,7 @@ const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
 
 const MODULE = "lib/opportunities/adjacent-directions.ts";
 const CARD = "components/app/dashboard/opportunity-directions-card.tsx";
-const DASHBOARD = "app/[locale]/dashboard/page.tsx";
+const DASHBOARD = "app/[locale]/dashboard/advanced/page.tsx";
 const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
 const REQUIRED_KEYS = [
   "heading",
@@ -76,8 +76,8 @@ describe("7. CTAs route only to existing pages", () => {
     const src = read(CARD);
     expect(src).toContain('"/dashboard/opportunities"');
     expect(src).toContain('"/dashboard/profile"');
-    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/(full)/opportunities/page.tsx"))).toBe(true);
-    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/(panels)/profile/page.tsx"))).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/opportunities/page.tsx"))).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/profile/page.tsx"))).toBe(true);
   });
 });
 

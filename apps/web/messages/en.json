@@ -10821,6 +10821,10 @@
         "addAchievement": {
           "label": "Add achievement or certificate",
           "description": "Add an achievement or a declared certificate."
+        },
+        "logWork": {
+          "label": "Log work time",
+          "description": "Record what and when you worked — it goes to your work journal."
         }
       },
       "company": {
@@ -10998,7 +11002,52 @@
       "navChat": "Chat",
       "navMessages": "Messages",
       "navCalendar": "Calendar",
-      "navProfile": "Profile"
+      "navProfile": "Profile",
+      "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
+      "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
+      "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
+      "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "nextActionAnswer": "In short: strengthen your profile (CV, skills), then review offers. Where shall we start?",
+      "resumeAnswer": "Let's pick up with your profile and job search. What would you like — CV, profile, or offers?",
+      "userLogWork": "Log work time",
+      "userFindWork": "Find work"
+    },
+    "worklog": {
+      "understood": "Here's what I understood — save it?",
+      "loading": "Loading…",
+      "noContext": "To log work time you first need a work context (an organization or project). Set one up and come back.",
+      "noContextCta": "Set up a work context",
+      "noWorker": "No worker profile found. Enable the worker role in account settings.",
+      "notAuthed": "Session ended. Please sign in again.",
+      "labelDate": "Date",
+      "labelTime": "Time",
+      "labelBreak": "Break",
+      "labelHours": "Worked",
+      "labelSite": "Site",
+      "labelNotes": "What you did (the entry evidence)",
+      "labelContext": "Work context",
+      "save": "Save",
+      "cancel": "Edit",
+      "working": "Saving…",
+      "confirmTitle": "Confirm the entry?",
+      "saved": "Entry saved to your work journal.",
+      "errorGeneric": "Couldn't save. Please try again.",
+      "minutesUnit": "min"
+    },
+    "findWork": {
+      "intro": "I found {count} suitable options. Best matches:",
+      "introOne": "I found 1 suitable option:",
+      "emptyState": "I didn't find any active openings matching your criteria right now. I'll let you know when one appears.",
+      "blockedNoWorker": "To search for work, enable the worker role in account settings.",
+      "blockedNoAccess": "The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "fitStrong": "Strong fit",
+      "fitPossible": "Possible fit",
+      "fitWeak": "Weak fit",
+      "fitInsufficient": "Not enough data",
+      "skillBasis": "Matches {pct}% of this job's skills: {matched} of {total}, {confirmed} confirmed",
+      "locationReason": "Location: {location}",
+      "roleReason": "Need: {role}"
     }
   }
 }

@@ -177,7 +177,7 @@ describe("photo report discoverability (owner smoke finding)", () => {
     // (getPersonalGallery), never a second upload system. Photos are added
     // only through journal entries.
     const galleryPage = readFileSync(
-      join(ROOT, "app/[locale]/dashboard/(full)/gallery/page.tsx"),
+      join(ROOT, "app/[locale]/dashboard/gallery/page.tsx"),
       "utf8",
     );
     expect(galleryPage).toMatch(/getPersonalGallery/);

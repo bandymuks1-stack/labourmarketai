@@ -12,7 +12,7 @@ import { join } from "node:path";
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
-const dashboard = read("app/[locale]/dashboard/page.tsx");
+const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
 const account = read("app/[locale]/dashboard/account/page.tsx");
 const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
 const company = read("app/[locale]/dashboard/company/page.tsx");

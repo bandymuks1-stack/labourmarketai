@@ -47,7 +47,7 @@ describe("identity/action workspace component", () => {
   });
 
   it("is surfaced on the main dashboard (compact, focused entry)", () => {
-    const dashboard = read("app/[locale]/dashboard/page.tsx");
+    const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
     // Owner smoke #3 (2026-07-05): the entry now also carries the ACTIVE
     // company name so the card is never a generic "Jūsų įmonė".
     expect(dashboard).toMatch(

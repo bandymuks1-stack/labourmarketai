@@ -218,7 +218,7 @@ describe("seen model — rendering a recommendation IS the read event", () => {
   });
 
   it("the dashboard overview mounts the card (worker daily surface)", () => {
-    const overview = read("app/[locale]/dashboard/page.tsx");
+    const overview = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(overview).toMatch(/<JobRecommendationsCard/);
   });
 

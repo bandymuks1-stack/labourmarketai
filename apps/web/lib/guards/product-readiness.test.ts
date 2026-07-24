@@ -175,7 +175,9 @@ describe("account page marks roles from a single honest status source", () => {
 
 describe("dashboard layout keeps bottom safe spacing", () => {
   it("<main> uses pb-[calc(...+env(safe-area-inset-bottom))]", () => {
-    const txt = readWeb("app/[locale]/dashboard/layout.tsx");
+    // The <main> lives in the per-route chrome selector now; its safe-area
+    // bottom padding is asserted there.
+    const txt = readWeb("components/app/dashboard-chrome.tsx");
     expect(txt).toMatch(/pb-\[calc\([^\]]*env\(safe-area-inset-bottom\)/);
   });
 });
@@ -198,7 +200,7 @@ describe("dashboard first-use guidance", () => {
     // Action-first IA v1: first-use guidance moved from a separate panel into
     // the MyZone control room (real readiness status + fast actions). The home
     // no longer stacks a separate first-use panel.
-    const txt = readWeb("app/[locale]/dashboard/page.tsx");
+    const txt = readWeb("app/[locale]/dashboard/advanced/page.tsx");
     expect(txt).toMatch(/<MyZone\b/);
     expect(txt).toMatch(/incomplete=\{isFirstUse\}/);
   });

@@ -3,6 +3,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { designGalleryEnabled } from "@/lib/env";
 import { ConversationChat, type ChatLabels } from "@/components/app/conversation/chat/conversation-chat";
+import {
+  resolveChatLabels,
+  resolveWorkLogLabels,
+} from "@/components/app/conversation/chat/labels";
 import type { ChatMessage } from "@/components/app/conversation/chat/types";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
@@ -25,8 +29,10 @@ export default async function ConversationDesignPreview({
   setRequestLocale(locale);
   if (!designGalleryEnabled) notFound();
 
-  const t = await getTranslations("conversation.chat");
-  const labels = resolveChatLabels(t);
+  const labels = resolveChatLabels(await getTranslations("conversation.chat"));
+  const workLogLabels = resolveWorkLogLabels(
+    await getTranslations("conversation.worklog"),
+  );
   const script = sampleThread(labels);
 
   // Mobile preview: render the phone layout (bottom nav, no desktop tabs) inside
@@ -36,26 +42,13 @@ export default async function ConversationDesignPreview({
     return (
       <div className="flex min-h-[100dvh] items-start justify-center bg-ink-800 pt-1">
         <div className="h-[560px] w-[330px] overflow-hidden rounded-[2rem] border-4 border-ink-600 shadow-2xl">
-          <ConversationChat locale={locale as ActiveLocale} labels={labels} script={script} mobile />
+          <ConversationChat locale={locale as ActiveLocale} labels={labels} workLogLabels={workLogLabels} script={script} mobile />
         </div>
       </div>
     );
   }
 
-  return <ConversationChat locale={locale as ActiveLocale} labels={labels} script={script} />;
-}
-
-function resolveChatLabels(t: Awaited<ReturnType<typeof getTranslations>>): ChatLabels {
-  const keys = [
-    "headerTitle", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
-    "composerPlaceholder", "send", "attach", "greeting",
-    "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
-    "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
-    "fallback", "userCv", "userProfile", "userOffers", "userJobs",
-  ] as const;
-  const out = {} as Record<(typeof keys)[number], string>;
-  for (const k of keys) out[k] = t(k);
-  return out as ChatLabels;
+  return <ConversationChat locale={locale as ActiveLocale} labels={labels} workLogLabels={workLogLabels} script={script} />;
 }
 
 /** Illustrative sample thread covering every message type (dev preview only). */

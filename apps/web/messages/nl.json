@@ -10821,6 +10821,10 @@
         "addAchievement": {
           "label": "Prestatie of certificaat toevoegen",
           "description": "Voeg een prestatie of opgegeven certificaat toe."
+        },
+        "logWork": {
+          "label": "Werktijd vastleggen",
+          "description": "Leg vast wat en wanneer je hebt gewerkt — de vermelding gaat naar je werkjournaal."
         }
       },
       "company": {
@@ -10998,7 +11002,52 @@
       "navChat": "Chat",
       "navMessages": "Berichten",
       "navCalendar": "Agenda",
-      "navProfile": "Profiel"
+      "navProfile": "Profiel",
+      "clarifyWorkLog": "Op welke dag en hoe lang heb je gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
+      "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
+      "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
+      "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
+      "nextActionAnswer": "Kort: versterk je profiel (CV, vaardigheden), bekijk dan aanbiedingen. Waar beginnen we?",
+      "resumeAnswer": "Laten we verdergaan met je profiel en de zoektocht. Wat wil je — CV, profiel of aanbiedingen?",
+      "userLogWork": "Werktijd vastleggen",
+      "userFindWork": "Werk zoeken"
+    },
+    "worklog": {
+      "understood": "Dit heb ik begrepen — opslaan?",
+      "loading": "Laden…",
+      "noContext": "Om werktijd vast te leggen heb je eerst een werkcontext (organisatie of project) nodig. Stel er een in en kom terug.",
+      "noContextCta": "Werkcontext instellen",
+      "noWorker": "Geen werknemersprofiel gevonden. Schakel de werknemersrol in bij accountinstellingen.",
+      "notAuthed": "Sessie beëindigd. Log opnieuw in.",
+      "labelDate": "Datum",
+      "labelTime": "Tijd",
+      "labelBreak": "Pauze",
+      "labelHours": "Gewerkt",
+      "labelSite": "Locatie",
+      "labelNotes": "Wat je hebt gedaan (het bewijs)",
+      "labelContext": "Werkcontext",
+      "save": "Opslaan",
+      "cancel": "Bewerken",
+      "working": "Opslaan…",
+      "confirmTitle": "Vermelding bevestigen?",
+      "saved": "Vermelding opgeslagen in je werkjournaal.",
+      "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
+      "minutesUnit": "min"
+    },
+    "findWork": {
+      "intro": "Ik vond {count} passende opties. Beste matches:",
+      "introOne": "Ik vond 1 passende optie:",
+      "emptyState": "Op dit moment vond ik geen actieve vacatures die aan je criteria voldoen. Ik laat het weten zodra er een verschijnt.",
+      "blockedNoWorker": "Om werk te zoeken, schakel de werknemersrol in bij accountinstellingen.",
+      "blockedNoAccess": "De vacaturelijst is nog niet ingeschakeld in deze omgeving. Zodra dat zo is, toon ik echte behoeften.",
+      "fitStrong": "Sterke match",
+      "fitPossible": "Mogelijke match",
+      "fitWeak": "Zwakke match",
+      "fitInsufficient": "Onvoldoende gegevens",
+      "skillBasis": "Komt overeen met {pct}% van de vaardigheden voor deze baan: {matched} van {total}, waarvan {confirmed} bevestigd",
+      "locationReason": "Locatie: {location}",
+      "roleReason": "Behoefte: {role}"
     }
   }
 }

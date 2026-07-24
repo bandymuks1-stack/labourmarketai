@@ -29,7 +29,9 @@ function read(rel: string): string {
 }
 
 const ROOM_PAGES = [
-  "page.tsx",
+  // The card-overview home moved to Advanced mode; `/dashboard` is now the
+  // conversation surface (its own interaction contract).
+  "advanced/page.tsx",
   "account/page.tsx",
   "profile/page.tsx",
   "buyer/page.tsx",
@@ -145,7 +147,8 @@ describe("Guard: at most one primary action per room (page level)", () => {
     // (slice role-next-action-simplicity-v1): one role-based gradient CTA,
     // mounted from the page. Assert it's mounted and the gradient lives in a
     // real interactive element inside that component.
-    const page = read(`${DASH}/page.tsx`);
+    // The card-overview home (with its Next Action CTA) is now Advanced mode.
+    const page = read(`${DASH}/advanced/page.tsx`);
     expect(page).toMatch(/<DashboardNextAction\b/);
     const src = read("components/app/dashboard-next-action.tsx");
     const idx = src.indexOf("from-brand-blue to-brand-cyan");

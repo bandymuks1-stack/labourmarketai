@@ -10821,6 +10821,10 @@
         "addAchievement": {
           "label": "Pridėti pasiekimą ar sertifikatą",
           "description": "Pridėk pasiekimą arba deklaruotą sertifikatą."
+        },
+        "logWork": {
+          "label": "Įrašyti darbo laiką",
+          "description": "Užrašyk, ką ir kada dirbai — įrašas patenka į darbo žurnalą."
         }
       },
       "company": {
@@ -10998,7 +11002,52 @@
       "navChat": "Pokalbis",
       "navMessages": "Žinutės",
       "navCalendar": "Kalendorius",
-      "navProfile": "Profilis"
+      "navProfile": "Profilis",
+      "clarifyWorkLog": "Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.",
+      "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
+      "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
+      "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
+      "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
+      "nextActionAnswer": "Trumpai: sustiprink profilį (CV, įgūdžiai), tada peržiūrėk pasiūlymus. Nuo ko pradedam?",
+      "resumeAnswer": "Tęskim nuo profilio ir darbo paieškos. Ką norėtum daryti — CV, profilis ar pasiūlymai?",
+      "userLogWork": "Įrašyti darbo laiką",
+      "userFindWork": "Ieškau darbo"
+    },
+    "worklog": {
+      "understood": "Supratau taip — išsaugoti?",
+      "loading": "Kraunama…",
+      "noContext": "Kad įrašyčiau darbo laiką, pirmiausia reikia darbo konteksto (organizacijos ar projekto). Nustatyk jį ir grįžk.",
+      "noContextCta": "Nustatyti darbo kontekstą",
+      "noWorker": "Nerastas darbuotojo profilis. Įjunk darbuotojo vaidmenį paskyros nustatymuose.",
+      "notAuthed": "Sesija nutrūko. Prisijunk iš naujo.",
+      "labelDate": "Data",
+      "labelTime": "Laikas",
+      "labelBreak": "Pertrauka",
+      "labelHours": "Darbo laikas",
+      "labelSite": "Objektas",
+      "labelNotes": "Ką dirbai (įrašo įrodymas)",
+      "labelContext": "Darbo kontekstas",
+      "save": "Išsaugoti",
+      "cancel": "Taisyti",
+      "working": "Saugoma…",
+      "confirmTitle": "Patvirtinti įrašą?",
+      "saved": "Įrašas išsaugotas darbo žurnale.",
+      "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
+      "minutesUnit": "min"
+    },
+    "findWork": {
+      "intro": "Radau {count} tinkamų variantų. Geriausi atitikimai:",
+      "introOne": "Radau 1 tinkamą variantą:",
+      "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Kai atsiras, pranešiu.",
+      "blockedNoWorker": "Kad ieškočiau darbo, įjunk darbuotojo vaidmenį paskyros nustatymuose.",
+      "blockedNoAccess": "Darbo pasiūlymų sąrašas dar neįjungtas šioje aplinkoje. Kai bus, parodysiu tikrus poreikius.",
+      "fitStrong": "Stiprus atitikimas",
+      "fitPossible": "Galimas atitikimas",
+      "fitWeak": "Silpnas atitikimas",
+      "fitInsufficient": "Trūksta duomenų",
+      "skillBasis": "Atitinka {pct}% šio darbo įgūdžių: {matched} iš {total}, iš jų {confirmed} patvirtinti",
+      "locationReason": "Vieta: {location}",
+      "roleReason": "Poreikis: {role}"
     }
   }
 }

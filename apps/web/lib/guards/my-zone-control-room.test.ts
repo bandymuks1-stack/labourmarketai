@@ -22,7 +22,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const PAGE = read("app/[locale]/dashboard/page.tsx");
+const PAGE = read("app/[locale]/dashboard/advanced/page.tsx");
 const COMP = read("components/app/my-zone.tsx");
 // Strip comments: honest source comments (e.g. "no preview/sample actions")
 // document the ABSENCE of fakery and must not trip the wording scans below.

@@ -30,7 +30,7 @@ describe("the real pending-booking count is honest (0 on any non-ok state)", () 
 
 describe("bookings surface under Žinutės, count-gated — never a fake badge", () => {
   const comm = read("app/[locale]/dashboard/communication/page.tsx");
-  const dash = read("app/[locale]/dashboard/page.tsx");
+  const dash = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("Žinutės shows a booking link ONLY when pendingBookings > 0", () => {
     expect(comm).toMatch(/getPendingIncomingBookingCount/);

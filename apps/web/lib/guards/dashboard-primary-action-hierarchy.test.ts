@@ -26,7 +26,7 @@ import { activeLocales } from "@/lib/i18n/config";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const PAGE = read("app/[locale]/dashboard/page.tsx");
+const PAGE = read("app/[locale]/dashboard/advanced/page.tsx");
 const WORKER = PAGE.slice(PAGE.indexOf("── Worker:"));
 const ORG = PAGE.slice(
   PAGE.indexOf('if (role !== "worker")'),

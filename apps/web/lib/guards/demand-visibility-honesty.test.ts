@@ -24,7 +24,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
     const readback = read("components/app/demand-requests-readback.tsx");
     expect(readback).toMatch(/workerVisibilityNote/);
     expect(readback).toMatch(/demand-readback-worker-visibility-note/);
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/workerVisibilityNote: tReadback\("workerVisibilityNote"\)/);
   });
 

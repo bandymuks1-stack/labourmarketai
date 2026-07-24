@@ -17,7 +17,7 @@ function read(rel: string): string {
 
 describe("dashboard surfaces the chain entry points", () => {
   it("the dashboard keeps the org chain entry points + a Next Action in both branches", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(
       /from\s+["']@\/components\/app\/dashboard-chain-actions["']/,
     );
@@ -65,7 +65,7 @@ describe("dashboard surfaces the chain entry points", () => {
   });
 
   it("the accept-invitation surface is mounted on the dashboard too", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/<WorkerInvitationsCard\b/);
   });
 });

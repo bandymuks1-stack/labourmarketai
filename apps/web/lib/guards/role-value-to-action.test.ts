@@ -72,7 +72,7 @@ describe("changed value statements resolve honestly in every active locale", () 
 
 describe("each value line sits next to its REAL action", () => {
   it("the journal value line is attached to the real journal composer action", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     // MyZone's firstEntry missing-item deep-links the composer — the promise
     // and the action share one surface.
     expect(page).toContain('href: "/dashboard/journal#journal-composer"');
@@ -82,7 +82,7 @@ describe("each value line sits next to its REAL action", () => {
   });
 
   it("the profile value line is attached to the real profile edit action", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toContain('href: "/dashboard/profile#profile-edit"');
   });
 
@@ -96,7 +96,7 @@ describe("each value line sits next to its REAL action", () => {
   });
 
   it("the company need value line sits on the real demand intake", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toContain('data-testid="demand-intake-section"');
   });
 

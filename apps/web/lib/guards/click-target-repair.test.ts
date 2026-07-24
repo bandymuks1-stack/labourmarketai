@@ -93,7 +93,7 @@ describe("5. role gate never bounces silently", () => {
     expect(gate).toMatch(/\?notice=needs_\$\{expectedRole\}_role/);
   });
   it("the dashboard renders the notice banner with a connected next action", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/data-testid="dashboard-role-notice"/);
     expect(page).toMatch(/roleNotice\.cta/);
   });

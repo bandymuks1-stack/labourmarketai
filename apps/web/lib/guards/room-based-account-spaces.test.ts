@@ -18,7 +18,7 @@ const en = JSON.parse(read("messages/en.json"));
 
 describe("current-space header makes the active space obvious + focused", () => {
   const comp = read("components/app/current-space-header.tsx");
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
   it("maps every role to exactly one space", () => {
     for (const role of ["worker", "company", "agency", "customer"]) {
       expect(comp).toMatch(new RegExp(`${role}:\\s*"(profile|company|agency|buyer)"`));
@@ -95,7 +95,7 @@ describe("spaces stay separated", () => {
 });
 
 describe("active /dashboard room shows only the current space (no cross-space soup)", () => {
-  const dashboard = read("app/[locale]/dashboard/page.tsx");
+  const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
   const account = read("app/[locale]/dashboard/account/page.tsx");
   it("the active dashboard room renders NO all-roles catalogue as permanent content", () => {
     expect(dashboard).not.toMatch(/<RoleCatalogueGrid\b/);

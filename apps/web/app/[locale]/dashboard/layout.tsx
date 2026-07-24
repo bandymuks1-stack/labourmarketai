@@ -1,13 +1,23 @@
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
 
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { BottomNav } from "@/components/app/bottom-nav";
+import { DashboardTabs } from "@/components/app/dashboard-tabs";
+import { HeaderSearch } from "@/components/app/header-search";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
+import { NotificationPanel } from "@/components/app/notification-panel";
+import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
+import { AccountMenu } from "@/components/app/account-menu";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
+import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
@@ -22,24 +32,22 @@ import { createClient } from "@/lib/supabase/server";
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
 /**
- * Thin authenticated shell for the whole `/dashboard` tree (route-group root).
+ * Authenticated shell for the whole `/dashboard` tree.
  *
- * This layer resolves user + profile + roles ONCE, server-side, and hands them
- * to the client `AuthProvider` so every downstream widget (RoleSwitcher,
- * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync — but
- * it renders NO chrome of its own. The two chromes live in the child route
- * groups:
- *   - `(full)/layout.tsx`   → the wide module dashboard (Advanced mode + every
- *                             specialized module route) — the previous full
- *                             chrome, verbatim, so nothing is lost.
- *   - `(panels)/layout.tsx` → the simple-mode shell (5-item nav) for the human
- *                             message threads, calendar and profile.
- *   - `page.tsx` (root)     → the conversation home, a self-contained full-height
- *                             chat that supplies its own simple-mode header/nav.
+ * Resolves user + profile + roles ONCE, server-side, and hands them to the
+ * client `AuthProvider` so every downstream widget (RoleSwitcher,
+ * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
+ * chrome itself is chosen per-route by the client `<DashboardChrome>`:
+ *   - `/dashboard`                              → conversation (bare; the chat
+ *                                                  supplies its own simple nav)
+ *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
+ *   - every other module route (incl. `/advanced`) → the full Advanced chrome
  *
- * This replaces the previous `fixed inset-0` overlay trick: the conversation no
- * longer paints over a still-mounted wide navbar — the wide navbar simply is not
- * in the tree for simple mode. Doctrine §18 (real, not overlay illusions).
+ * This is the real replacement for the previous `fixed inset-0` overlay: the
+ * wide navbar is not painted over in simple mode — it is simply never rendered
+ * there (its DOM is absent), while Advanced mode keeps the full chrome verbatim.
+ * No route files move, so the dashboard file-path contract the guard suite pins
+ * stays intact. Doctrine §18 (real, not overlay illusions).
  */
 export default async function DashboardLayout({
   children,
@@ -125,6 +133,58 @@ export default async function DashboardLayout({
     }
   }
 
+  // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
+  // to the client chrome selector (which needs no data fetch of its own).
+  const tChat = await getTranslations("conversation.chat");
+  const tFooter = await getTranslations("footer");
+  const nav: ConversationNavLabels = {
+    chat: tChat("navChat"),
+    messages: tChat("navMessages"),
+    calendar: tChat("navCalendar"),
+    profile: tChat("navProfile"),
+    advanced: tChat("advanced"),
+  };
+
+  // Full (Advanced-mode) chrome, authored here so the shell contract the guard
+  // suite pins (logo → /dashboard, DashboardTabs, AccountMenu, BottomNav, the
+  // Rexora credit) stays in the layout source. `<DashboardChrome>` renders these
+  // slots only on module routes; simple mode never mounts them.
+  const fullHeader = (
+    <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
+      <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
+        {/* App-shell logo links to the dashboard, NOT the public home. */}
+        <Link
+          href="/dashboard"
+          className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
+        >
+          LabourMarket<span className="text-gradient-accent">.ai</span>
+        </Link>
+        <DashboardTabs className="hidden md:flex" />
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+          <HeaderSearch />
+          <LocaleSwitcher className="hidden md:flex" />
+          <NotificationPanel />
+          <RoleSwitcher />
+          <AccountMenu />
+        </div>
+      </div>
+    </header>
+  );
+  const rexora = (
+    // Created by Rexora — quiet product credit (owner directive, 2026-07-14).
+    // Pinned by legal-entity-truth.test.ts.
+    <div className="mt-10 text-center">
+      <a
+        href="https://aiprocessautomation.eu"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+      >
+        {tFooter("rexora")}
+      </a>
+    </div>
+  );
+
   return (
     <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
       <AuthProvider
@@ -145,14 +205,21 @@ export default async function DashboardLayout({
       >
         {/* Streamed notification spine: same single source, off the TTFB
           critical path. Hydrates the bell + nav badges via the auth context as
-          soon as the derived signals resolve. Lives at the thin root so BOTH
-          chromes (full + simple) share the one spine. */}
+          soon as the derived signals resolve. Shared by every chrome mode. */}
         <Suspense fallback={null}>
           <SpineStream activeRole={activeRole} />
         </Suspense>
         <SessionTelemetry />
         <AmbientGlow />
-        {children}
+        <DashboardChrome
+          nav={nav}
+          headerTitle={tChat("headerTitle")}
+          fullHeader={fullHeader}
+          fullBottomNav={<BottomNav />}
+          rexora={rexora}
+        >
+          {children}
+        </DashboardChrome>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />
       </AuthProvider>
