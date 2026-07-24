@@ -10760,7 +10760,9 @@
       "confirmStrong": "This is an important step. Are you sure?",
       "confirmCta": "Confirm",
       "cancelCta": "Cancel",
-      "nothingPending": "Nothing needs your action right now."
+      "nothingPending": "Nothing needs your action right now.",
+      "needsResponseTitle": "Needs your response",
+      "openHere": "Open here"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10813,14 @@
         "whatNext": {
           "label": "What should I do next?",
           "description": "See your recommended next step."
+        },
+        "addEducation": {
+          "label": "Add education",
+          "description": "Add a school or programme you studied."
+        },
+        "addAchievement": {
+          "label": "Add achievement or certificate",
+          "description": "Add an achievement or a declared certificate."
         }
       },
       "company": {
@@ -10864,6 +10874,101 @@
           "label": "Who is waiting for me?",
           "description": "See what needs your action."
         }
+      }
+    },
+    "booking": {
+      "offerTitle": "Job offer",
+      "confirmAcceptTitle": "Accept this offer?",
+      "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmDeclineTitle": "Decline this offer?",
+      "confirmCta": "Yes, confirm",
+      "cancelCta": "Cancel",
+      "working": "Working…",
+      "errorStale": "This offer changed since you opened it. Please reopen and try again."
+    },
+    "forms": {
+      "fields": {
+        "language": "Language",
+        "level": "Level",
+        "jobTitle": "Job title",
+        "jobTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
+        "startMonth": "Start month",
+        "startYear": "Start year",
+        "endMonth": "End month",
+        "endYear": "End year",
+        "mm": "MM",
+        "yyyy": "YYYY",
+        "ongoing": "I work / study here now",
+        "institution": "Institution",
+        "institutionPlaceholder": "e.g. Vilnius College, technical training centre",
+        "program": "Programme / field",
+        "programPlaceholder": "e.g. nursing, electrical, accounting, software",
+        "educationType": "Type",
+        "achievementTitle": "Title",
+        "achievementKind": "Kind",
+        "year": "Year",
+        "description": "Description (optional)",
+        "availability": "Availability",
+        "notStated": "Not stated",
+        "locationCountry": "Your country",
+        "countryCodePlaceholder": "e.g. LT",
+        "preferredCountries": "Preferred countries",
+        "preferredCountriesPlaceholder": "e.g. NL, DE",
+        "salaryMin": "Salary from (€)",
+        "salaryMinPlaceholder": "1500",
+        "salaryMax": "Salary to (€)",
+        "salaryMaxPlaceholder": "2500",
+        "willingToRelocate": "Willing to relocate?",
+        "hasTransport": "Have your own transport?",
+        "needsAccommodation": "Need accommodation?",
+        "availabilityNote": "Note (optional)",
+        "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations"
+      },
+      "availability": {
+        "available": "Available",
+        "busy": "Busy",
+        "unavailable": "Unavailable"
+      },
+      "achievementKind": {
+        "achievement": "Achievement",
+        "certificate": "Certificate"
+      },
+      "tristate": {
+        "yes": "Yes",
+        "no": "No",
+        "notStated": "—"
+      },
+      "ui": {
+        "reviewTitle": "Review before saving",
+        "continue": "Continue",
+        "save": "Save",
+        "back": "Back",
+        "cancel": "Cancel",
+        "working": "Saving…",
+        "saved": "Saved.",
+        "addAnother": "Add another",
+        "errorGeneric": "Could not save. Please try again.",
+        "errorInvalid": "Please check the fields and try again.",
+        "errorNeedsMigration": "This isn't enabled yet. Please try later.",
+        "errorConflict": "This value already differs. Open advanced mode to replace it."
+      }
+    },
+    "cv": {
+      "title": "Import your CV",
+      "intro": "Upload a PDF, DOCX or TXT. We read it on your device path and show what we found — you confirm what to save. Nothing is stored until you confirm.",
+      "noneFound": "We could not read structured entries from this file. You can add them manually below.",
+      "close": "Close"
+    },
+    "journal": {
+      "title": "Your activity",
+      "completeness": "Profile {pct}% complete",
+      "empty": "No activity yet. Pick an action above to begin.",
+      "events": {
+        "languageAdded": "Added a language",
+        "educationAdded": "Added education",
+        "achievementAdded": "Added an achievement or certificate",
+        "workHistoryAdded": "Added work experience",
+        "skillsConfirmed": "Confirmed skills"
       }
     }
   }

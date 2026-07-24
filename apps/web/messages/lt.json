@@ -10760,7 +10760,9 @@
       "confirmStrong": "Tai svarbus žingsnis. Ar tikrai?",
       "confirmCta": "Patvirtinti",
       "cancelCta": "Atšaukti",
-      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo."
+      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo.",
+      "needsResponseTitle": "Laukia tavo atsakymo",
+      "openHere": "Atidaryti čia"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10813,14 @@
         "whatNext": {
           "label": "Ką daryti toliau?",
           "description": "Pamatyk rekomenduojamą kitą žingsnį."
+        },
+        "addEducation": {
+          "label": "Pridėti išsilavinimą",
+          "description": "Pridėk mokyklą ar programą, kurią baigei."
+        },
+        "addAchievement": {
+          "label": "Pridėti pasiekimą ar sertifikatą",
+          "description": "Pridėk pasiekimą arba deklaruotą sertifikatą."
         }
       },
       "company": {
@@ -10864,6 +10874,101 @@
           "label": "Kas laukia mano veiksmo?",
           "description": "Pamatyk, kas laukia tavo veiksmo."
         }
+      }
+    },
+    "booking": {
+      "offerTitle": "Darbo pasiūlymas",
+      "confirmAcceptTitle": "Priimti šį pasiūlymą?",
+      "confirmAcceptBody": "Priėmimas patvirtina įsipareigojimą darbdaviui — tai tvirtas žingsnis, ne juodraštis.",
+      "confirmDeclineTitle": "Atmesti šį pasiūlymą?",
+      "confirmCta": "Taip, patvirtinti",
+      "cancelCta": "Atšaukti",
+      "working": "Vykdoma…",
+      "errorStale": "Šis pasiūlymas pasikeitė nuo atidarymo. Atidaryk iš naujo ir bandyk dar kartą."
+    },
+    "forms": {
+      "fields": {
+        "language": "Kalba",
+        "level": "Lygis",
+        "jobTitle": "Pareigos",
+        "jobTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlininkas, programuotojas",
+        "startMonth": "Pradžios mėnuo",
+        "startYear": "Pradžios metai",
+        "endMonth": "Pabaigos mėnuo",
+        "endYear": "Pabaigos metai",
+        "mm": "MM",
+        "yyyy": "YYYY",
+        "ongoing": "Dirbu / mokausi iki dabar",
+        "institution": "Įstaiga",
+        "institutionPlaceholder": "Pvz., Vilniaus kolegija, profesinio mokymo centras",
+        "program": "Programa / sritis",
+        "programPlaceholder": "Pvz., slauga, elektrotechnika, apskaita, programų inžinerija",
+        "educationType": "Tipas",
+        "achievementTitle": "Pavadinimas",
+        "achievementKind": "Rūšis",
+        "year": "Metai",
+        "description": "Aprašymas (nebūtina)",
+        "availability": "Prieinamumas",
+        "notStated": "Nenurodyta",
+        "locationCountry": "Tavo šalis",
+        "countryCodePlaceholder": "Pvz., LT",
+        "preferredCountries": "Norimos šalys",
+        "preferredCountriesPlaceholder": "Pvz., NL, DE",
+        "salaryMin": "Atlygis nuo (€)",
+        "salaryMinPlaceholder": "1500",
+        "salaryMax": "Atlygis iki (€)",
+        "salaryMaxPlaceholder": "2500",
+        "willingToRelocate": "Ar sutinki persikelti?",
+        "hasTransport": "Ar turi savo transportą?",
+        "needsAccommodation": "Ar reikia apgyvendinimo?",
+        "availabilityNote": "Pastaba (nebūtina)",
+        "availabilityNotePlaceholder": "Pvz., laisvas nuo rugpjūčio, mieliau 2 savaičių pamainos"
+      },
+      "availability": {
+        "available": "Laisvas",
+        "busy": "Užimtas",
+        "unavailable": "Neprieinamas"
+      },
+      "achievementKind": {
+        "achievement": "Pasiekimas",
+        "certificate": "Sertifikatas"
+      },
+      "tristate": {
+        "yes": "Taip",
+        "no": "Ne",
+        "notStated": "—"
+      },
+      "ui": {
+        "reviewTitle": "Peržiūrėk prieš išsaugant",
+        "continue": "Tęsti",
+        "save": "Išsaugoti",
+        "back": "Atgal",
+        "cancel": "Atšaukti",
+        "working": "Saugoma…",
+        "saved": "Išsaugota.",
+        "addAnother": "Pridėti dar",
+        "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
+        "errorInvalid": "Patikrink laukus ir bandyk dar kartą.",
+        "errorNeedsMigration": "Ši funkcija dar neįjungta. Bandyk vėliau.",
+        "errorConflict": "Ši reikšmė jau skiriasi. Atidaryk išplėstinį režimą, kad pakeistum."
+      }
+    },
+    "cv": {
+      "title": "Įkelk savo CV",
+      "intro": "Įkelk PDF, DOCX ar TXT. Perskaitysim ir parodysim, ką radom — tu patvirtinsi, ką išsaugoti. Nieko nesaugom, kol nepatvirtini.",
+      "noneFound": "Nepavyko nuskaityti struktūrizuotų įrašų. Gali pridėti rankiniu būdu žemiau.",
+      "close": "Uždaryti"
+    },
+    "journal": {
+      "title": "Tavo veikla",
+      "completeness": "Profilis užpildytas {pct}%",
+      "empty": "Kol kas nėra veiklos. Pasirink veiksmą viršuje.",
+      "events": {
+        "languageAdded": "Pridėta kalba",
+        "educationAdded": "Pridėtas išsilavinimas",
+        "achievementAdded": "Pridėtas pasiekimas ar sertifikatas",
+        "workHistoryAdded": "Pridėta darbo patirtis",
+        "skillsConfirmed": "Patvirtinti įgūdžiai"
       }
     }
   }

@@ -10760,7 +10760,9 @@
       "confirmStrong": "Dit is een belangrijke stap. Weet je het zeker?",
       "confirmCta": "Bevestigen",
       "cancelCta": "Annuleren",
-      "nothingPending": "Er is nu niets dat jouw actie nodig heeft."
+      "nothingPending": "Er is nu niets dat jouw actie nodig heeft.",
+      "needsResponseTitle": "Wacht op je reactie",
+      "openHere": "Hier openen"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10813,14 @@
         "whatNext": {
           "label": "Wat nu?",
           "description": "Bekijk je aanbevolen volgende stap."
+        },
+        "addEducation": {
+          "label": "Opleiding toevoegen",
+          "description": "Voeg een school of opleiding toe die je volgde."
+        },
+        "addAchievement": {
+          "label": "Prestatie of certificaat toevoegen",
+          "description": "Voeg een prestatie of opgegeven certificaat toe."
         }
       },
       "company": {
@@ -10864,6 +10874,101 @@
           "label": "Wie wacht op mij?",
           "description": "Bekijk wat jouw actie nodig heeft."
         }
+      }
+    },
+    "booking": {
+      "offerTitle": "Vacature-aanbod",
+      "confirmAcceptTitle": "Dit aanbod accepteren?",
+      "confirmAcceptBody": "Accepteren bevestigt je opdracht bij de werkgever — een vaste stap, geen concept.",
+      "confirmDeclineTitle": "Dit aanbod weigeren?",
+      "confirmCta": "Ja, bevestigen",
+      "cancelCta": "Annuleren",
+      "working": "Bezig…",
+      "errorStale": "Dit aanbod is gewijzigd sinds je het opende. Open opnieuw en probeer het nogmaals."
+    },
+    "forms": {
+      "fields": {
+        "language": "Taal",
+        "level": "Niveau",
+        "jobTitle": "Functie",
+        "jobTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
+        "startMonth": "Startmaand",
+        "startYear": "Startjaar",
+        "endMonth": "Eindmaand",
+        "endYear": "Eindjaar",
+        "mm": "MM",
+        "yyyy": "JJJJ",
+        "ongoing": "Ik werk / studeer hier nu",
+        "institution": "Instelling",
+        "institutionPlaceholder": "Bijv. hogeschool, opleidingscentrum",
+        "program": "Opleiding / vakgebied",
+        "programPlaceholder": "Bijv. verpleegkunde, elektro, boekhouding, software",
+        "educationType": "Type",
+        "achievementTitle": "Titel",
+        "achievementKind": "Soort",
+        "year": "Jaar",
+        "description": "Beschrijving (optioneel)",
+        "availability": "Beschikbaarheid",
+        "notStated": "Niet opgegeven",
+        "locationCountry": "Jouw land",
+        "countryCodePlaceholder": "Bijv. LT",
+        "preferredCountries": "Voorkeurslanden",
+        "preferredCountriesPlaceholder": "Bijv. NL, DE",
+        "salaryMin": "Loon vanaf (€)",
+        "salaryMinPlaceholder": "1500",
+        "salaryMax": "Loon tot (€)",
+        "salaryMaxPlaceholder": "2500",
+        "willingToRelocate": "Bereid te verhuizen?",
+        "hasTransport": "Eigen vervoer?",
+        "needsAccommodation": "Huisvesting nodig?",
+        "availabilityNote": "Notitie (optioneel)",
+        "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties"
+      },
+      "availability": {
+        "available": "Beschikbaar",
+        "busy": "Bezet",
+        "unavailable": "Niet beschikbaar"
+      },
+      "achievementKind": {
+        "achievement": "Prestatie",
+        "certificate": "Certificaat"
+      },
+      "tristate": {
+        "yes": "Ja",
+        "no": "Nee",
+        "notStated": "—"
+      },
+      "ui": {
+        "reviewTitle": "Controleer voor opslaan",
+        "continue": "Doorgaan",
+        "save": "Opslaan",
+        "back": "Terug",
+        "cancel": "Annuleren",
+        "working": "Opslaan…",
+        "saved": "Opgeslagen.",
+        "addAnother": "Nog een toevoegen",
+        "errorGeneric": "Opslaan mislukt. Probeer opnieuw.",
+        "errorInvalid": "Controleer de velden en probeer opnieuw.",
+        "errorNeedsMigration": "Nog niet ingeschakeld. Probeer later.",
+        "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen."
+      }
+    },
+    "cv": {
+      "title": "Importeer je cv",
+      "intro": "Upload een PDF, DOCX of TXT. We lezen het en tonen wat we vonden — jij bevestigt wat te bewaren. Niets wordt opgeslagen tot je bevestigt.",
+      "noneFound": "We konden geen gestructureerde items lezen. Voeg ze hieronder handmatig toe.",
+      "close": "Sluiten"
+    },
+    "journal": {
+      "title": "Jouw activiteit",
+      "completeness": "Profiel {pct}% compleet",
+      "empty": "Nog geen activiteit. Kies hierboven een actie.",
+      "events": {
+        "languageAdded": "Taal toegevoegd",
+        "educationAdded": "Opleiding toegevoegd",
+        "achievementAdded": "Prestatie of certificaat toegevoegd",
+        "workHistoryAdded": "Werkervaring toegevoegd",
+        "skillsConfirmed": "Vaardigheden bevestigd"
       }
     }
   }

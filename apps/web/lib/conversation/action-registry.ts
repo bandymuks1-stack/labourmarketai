@@ -173,6 +173,32 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "rest", method: "POST", ref: "/api/workers/:id/skills" },
   },
   {
+    id: "worker.add-education",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.addEducation.label",
+    descriptionKey: "conversation.actions.worker.addEducation.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: true, // worker_education table
+    telemetryEvent: E.profileSaved,
+    advancedRoute: "/dashboard/profile",
+    handler: { kind: "server_action", ref: "saveWorkerEducationAction" },
+  },
+  {
+    id: "worker.add-achievement",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.addAchievement.label",
+    descriptionKey: "conversation.actions.worker.addAchievement.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: true, // worker_achievements table
+    telemetryEvent: E.profileSaved,
+    advancedRoute: "/dashboard/profile",
+    handler: { kind: "server_action", ref: "saveWorkerAchievementAction" },
+  },
+  {
     id: "worker.save-work-card",
     subject: "worker",
     allowedRoles: ["worker"],

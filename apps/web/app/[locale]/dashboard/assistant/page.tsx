@@ -17,7 +17,11 @@ import {
 import {
   ConversationShell,
   type ShellAction,
+  type BookingOffer,
 } from "@/components/app/conversation/conversation-shell";
+import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
+import { listMyBookings } from "@/lib/booking/booking-actions";
+import { getWorkerActivity, type WorkerActivity } from "@/lib/conversation/worker-activity";
 import type { CommandAudience } from "@/lib/navigation/command-registry";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
@@ -85,6 +89,20 @@ export default async function AssistantPage({
     advancedRoute: a.advancedRoute,
   }));
 
+  // Actionable, conversation-first booking offers (worker only) — the highest
+  // priority "needs your response" items, executed inline via the dispatcher.
+  const { offers: bookingOffers, labels: bookingLabels } = await loadBookingOffers(
+    activeRole,
+    heldRoles,
+  );
+
+  // Human-readable activity + profile completeness (worker) — derived from the
+  // worker's own canonical rows (server-derived continuity, no new store).
+  const activity: WorkerActivity | null =
+    activeRole === "worker" && heldRoles.has("worker")
+      ? await getWorkerActivity(user.id)
+      : null;
+
   return (
     <ConversationShell
       locale={locale as ActiveLocale}
@@ -92,8 +110,66 @@ export default async function AssistantPage({
       suggested={suggested}
       continueHref={continueHref}
       continueLabel={continueLabel}
+      bookingOffers={bookingOffers}
+      bookingLabels={bookingLabels}
+      activity={activity}
     />
   );
+}
+
+/** Load the worker's incoming PROPOSED booking offers + their localized labels.
+ *  Empty (and labels null) for non-workers or on any read issue — honest empty. */
+async function loadBookingOffers(
+  activeRole: Role,
+  heldRoles: ReadonlySet<Role>,
+): Promise<{ offers: BookingOffer[]; labels: BookingActionLabels | null }> {
+  if (!heldRoles.has("worker") || activeRole !== "worker") {
+    return { offers: [], labels: null };
+  }
+  let offers: BookingOffer[] = [];
+  try {
+    const res = await listMyBookings();
+    if (res.kind === "ok") {
+      offers = res.incoming
+        .filter((b) => b.status === "proposed")
+        .slice(0, 5)
+        .map((b) => {
+          const period =
+            b.startDate || b.expectedEndDate
+              ? [b.startDate, b.expectedEndDate].filter(Boolean).join(" — ")
+              : null;
+          return {
+            bookingId: b.id,
+            title: b.roleText ?? "",
+            subtitle: period,
+          };
+        });
+    }
+  } catch {
+    return { offers: [], labels: null };
+  }
+  if (offers.length === 0) return { offers: [], labels: null };
+
+  const tB = await getTranslations("bookings.actions");
+  const tC = await getTranslations("conversation.booking");
+  const labels: BookingActionLabels = {
+    offerFrom: tC("offerTitle"),
+    period: "{start} — {end}",
+    accept: tB("accept"),
+    decline: tB("decline"),
+    confirmAcceptTitle: tC("confirmAcceptTitle"),
+    confirmAcceptBody: tC("confirmAcceptBody"),
+    confirmDeclineTitle: tC("confirmDeclineTitle"),
+    confirmCta: tC("confirmCta"),
+    cancelCta: tC("cancelCta"),
+    working: tC("working"),
+    acceptedResult: tB("accepted"),
+    declinedResult: tB("declined"),
+    errorGeneric: tB("error"),
+    errorStale: tC("errorStale"),
+    errorConflict: tB("conflict"),
+  };
+  return { offers, labels };
 }
 
 /** Sort key: the active role's own actions first, reads before writes within. */

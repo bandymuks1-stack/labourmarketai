@@ -2943,7 +2943,9 @@
       "confirmStrong": "[EN] This is an important step. Are you sure?",
       "confirmCta": "[EN] Confirm",
       "cancelCta": "[EN] Cancel",
-      "nothingPending": "[EN] Nothing needs your action right now."
+      "nothingPending": "[EN] Nothing needs your action right now.",
+      "needsResponseTitle": "[EN] Needs your response",
+      "openHere": "[EN] Open here"
     },
     "actions": {
       "worker": {
@@ -2994,6 +2996,14 @@
         "whatNext": {
           "label": "[EN] What should I do next?",
           "description": "[EN] See your recommended next step."
+        },
+        "addEducation": {
+          "label": "[EN] Add education",
+          "description": "[EN] Add a school or programme you studied."
+        },
+        "addAchievement": {
+          "label": "[EN] Add achievement or certificate",
+          "description": "[EN] Add an achievement or a declared certificate."
         }
       },
       "company": {
@@ -3047,6 +3057,101 @@
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
         }
+      }
+    },
+    "booking": {
+      "offerTitle": "[EN] Job offer",
+      "confirmAcceptTitle": "[EN] Accept this offer?",
+      "confirmAcceptBody": "[EN] Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmDeclineTitle": "[EN] Decline this offer?",
+      "confirmCta": "[EN] Yes, confirm",
+      "cancelCta": "[EN] Cancel",
+      "working": "[EN] Working…",
+      "errorStale": "[EN] This offer changed since you opened it. Please reopen and try again."
+    },
+    "forms": {
+      "fields": {
+        "language": "[EN] Language",
+        "level": "[EN] Level",
+        "jobTitle": "[EN] Job title",
+        "jobTitlePlaceholder": "[EN] e.g. welder, nurse, warehouse worker, developer",
+        "startMonth": "[EN] Start month",
+        "startYear": "[EN] Start year",
+        "endMonth": "[EN] End month",
+        "endYear": "[EN] End year",
+        "mm": "[EN] MM",
+        "yyyy": "[EN] YYYY",
+        "ongoing": "[EN] I work / study here now",
+        "institution": "[EN] Institution",
+        "institutionPlaceholder": "[EN] e.g. Vilnius College, technical training centre",
+        "program": "[EN] Programme / field",
+        "programPlaceholder": "[EN] e.g. nursing, electrical, accounting, software",
+        "educationType": "[EN] Type",
+        "achievementTitle": "[EN] Title",
+        "achievementKind": "[EN] Kind",
+        "year": "[EN] Year",
+        "description": "[EN] Description (optional)",
+        "availability": "[EN] Availability",
+        "notStated": "[EN] Not stated",
+        "locationCountry": "[EN] Your country",
+        "countryCodePlaceholder": "[EN] e.g. LT",
+        "preferredCountries": "[EN] Preferred countries",
+        "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
+        "salaryMin": "[EN] Salary from (€)",
+        "salaryMinPlaceholder": "[EN] 1500",
+        "salaryMax": "[EN] Salary to (€)",
+        "salaryMaxPlaceholder": "[EN] 2500",
+        "willingToRelocate": "[EN] Willing to relocate?",
+        "hasTransport": "[EN] Have your own transport?",
+        "needsAccommodation": "[EN] Need accommodation?",
+        "availabilityNote": "[EN] Note (optional)",
+        "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations"
+      },
+      "availability": {
+        "available": "[EN] Available",
+        "busy": "[EN] Busy",
+        "unavailable": "[EN] Unavailable"
+      },
+      "achievementKind": {
+        "achievement": "[EN] Achievement",
+        "certificate": "[EN] Certificate"
+      },
+      "tristate": {
+        "yes": "[EN] Yes",
+        "no": "[EN] No",
+        "notStated": "[EN] —"
+      },
+      "ui": {
+        "reviewTitle": "[EN] Review before saving",
+        "continue": "[EN] Continue",
+        "save": "[EN] Save",
+        "back": "[EN] Back",
+        "cancel": "[EN] Cancel",
+        "working": "[EN] Saving…",
+        "saved": "[EN] Saved.",
+        "addAnother": "[EN] Add another",
+        "errorGeneric": "[EN] Could not save. Please try again.",
+        "errorInvalid": "[EN] Please check the fields and try again.",
+        "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
+        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+      }
+    },
+    "cv": {
+      "title": "[EN] Import your CV",
+      "intro": "[EN] Upload a PDF, DOCX or TXT. We read it on your device path and show what we found — you confirm what to save. Nothing is stored until you confirm.",
+      "noneFound": "[EN] We could not read structured entries from this file. You can add them manually below.",
+      "close": "[EN] Close"
+    },
+    "journal": {
+      "title": "[EN] Your activity",
+      "completeness": "[EN] Profile {pct}% complete",
+      "empty": "[EN] No activity yet. Pick an action above to begin.",
+      "events": {
+        "languageAdded": "[EN] Added a language",
+        "educationAdded": "[EN] Added education",
+        "achievementAdded": "[EN] Added an achievement or certificate",
+        "workHistoryAdded": "[EN] Added work experience",
+        "skillsConfirmed": "[EN] Confirmed skills"
       }
     }
   }

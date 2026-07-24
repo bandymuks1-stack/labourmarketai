@@ -12,6 +12,21 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { ConfirmationTier } from "@/lib/conversation/action-registry";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  WorkerBookingAction,
+  type BookingActionLabels,
+} from "@/components/app/conversation/worker-booking-action";
+import { InlineActionForm } from "@/components/app/conversation/inline-action-form";
+import { WorkerCvFlow } from "@/components/app/conversation/worker-cv-flow";
+import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
+import type { WorkerActivity } from "@/lib/conversation/worker-activity";
+
+/** A worker's incoming booking offer, executed inline in the shell. */
+export type BookingOffer = {
+  bookingId: string;
+  title: string; // roleText (may be empty → generic offer label used)
+  subtitle: string | null; // period line
+};
 
 /** Serializable view of a registry action passed from the server page. */
 export type ShellAction = {
@@ -46,6 +61,9 @@ export function ConversationShell({
   suggested,
   continueHref,
   continueLabel,
+  bookingOffers = [],
+  bookingLabels = null,
+  activity = null,
 }: {
   locale: ActiveLocale;
   audiences: CommandAudience[];
@@ -54,11 +72,20 @@ export function ConversationShell({
   continueHref: string | null;
   /** Human label for the continue step (already localized), or null. */
   continueLabel: string | null;
+  /** Incoming booking offers to accept/decline inline (worker). */
+  bookingOffers?: BookingOffer[];
+  /** Localized labels for the inline booking flow (null when no offers). */
+  bookingLabels?: BookingActionLabels | null;
+  /** Worker activity + completeness (worker only), or null. */
+  activity?: WorkerActivity | null;
 }) {
   const t = useTranslations("conversation.shell");
   const tActions = useTranslations("conversation.actions");
+  const tJournal = useTranslations("conversation.journal");
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [activeForm, setActiveForm] = useState<WorkerFormSpec | null>(null);
+  const [showCv, setShowCv] = useState(false);
 
   const audienceSet = useMemo(
     () => new Set<CommandAudience>(audiences),
@@ -82,6 +109,28 @@ export function ConversationShell({
         </h1>
         <p className="text-sm text-text-secondary">{t("greeting")}</p>
       </header>
+
+      {/* Profile completeness — server-derived from the worker's own rows */}
+      {activity && (
+        <div className="flex flex-col gap-1.5" data-testid="conversation-completeness">
+          <div className="flex items-center justify-between text-[11px] text-text-muted">
+            <span>{tJournal("completeness", { pct: activity.completenessPct })}</span>
+            <span className="font-mono">
+              {activity.stepsDone}/{activity.stepsTotal}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-700">
+            <div
+              className="h-full rounded-full bg-brand-blue transition-all"
+              style={{ width: `${activity.completenessPct}%` }}
+              role="progressbar"
+              aria-valuenow={activity.completenessPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Command input — deterministic intent via the existing command registry */}
       <div className="flex flex-col gap-2">
@@ -138,6 +187,41 @@ export function ConversationShell({
         </section>
       )}
 
+      {/* Needs your response — incoming booking offers, executed inline */}
+      {bookingOffers.length > 0 && bookingLabels && (
+        <section className="flex flex-col gap-2" data-testid="conversation-booking-offers">
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-brand-orange">
+            {t("needsResponseTitle")}
+          </h2>
+          <div className="flex flex-col gap-2">
+            {bookingOffers.map((o) => (
+              <WorkerBookingAction
+                key={o.bookingId}
+                bookingId={o.bookingId}
+                locale={locale}
+                title={o.title || bookingLabels.offerFrom}
+                subtitle={o.subtitle}
+                labels={bookingLabels}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* CV import — runs inline in the conversation (deterministic parse). */}
+      {showCv && (
+        <section>
+          <WorkerCvFlow onClose={() => setShowCv(false)} />
+        </section>
+      )}
+
+      {/* Inline action form — a form-backed action runs IN the conversation. */}
+      {activeForm && (
+        <section data-testid="conversation-active-form">
+          <InlineActionForm spec={activeForm} locale={locale} onClose={() => setActiveForm(null)} />
+        </section>
+      )}
+
       {/* Suggested actions for this person's roles */}
       <section className="flex flex-col gap-2">
         <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">
@@ -147,36 +231,73 @@ export function ConversationShell({
           <p className="text-sm text-text-muted">{t("nothingPending")}</p>
         ) : (
           <ul className="flex flex-col gap-2" data-testid="conversation-suggested">
-            {suggested.map((a) => (
-              <li key={a.id}>
-                <button
-                  type="button"
-                  onClick={() => go(a.advancedRoute, FUNNEL_EVENTS.ctaClicked)}
-                  data-testid={`conversation-action-${a.id}`}
-                  className="flex w-full items-start justify-between gap-3 rounded-lg border border-ink-600 bg-surface-1/40 px-4 py-3 text-left hover:border-brand-blue"
-                >
-                  <span className="flex flex-col gap-0.5">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-                      <span
-                        aria-hidden
-                        className={`inline-block size-2 flex-none rounded-full ${TIER_DOT[a.confirmation]}`}
-                      />
-                      {tActions(`${a.subject}.${keyTail(a.labelKey)}.label`)}
+            {suggested.map((a) => {
+              const form = getWorkerForm(a.id);
+              const inlineable = Boolean(form) || a.id === "worker.upload-cv";
+              return (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trackFunnel(FUNNEL_EVENTS.ctaClicked, { surface: "conversation" });
+                      if (a.id === "worker.upload-cv") {
+                        setShowCv(true);
+                        setActiveForm(null);
+                      } else if (form) {
+                        setActiveForm(form);
+                        setShowCv(false);
+                      } else {
+                        go(a.advancedRoute, FUNNEL_EVENTS.ctaClicked);
+                      }
+                    }}
+                    data-testid={`conversation-action-${a.id}`}
+                    className="flex w-full items-start justify-between gap-3 rounded-lg border border-ink-600 bg-surface-1/40 px-4 py-3 text-left hover:border-brand-blue"
+                  >
+                    <span className="flex flex-col gap-0.5">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+                        <span
+                          aria-hidden
+                          className={`inline-block size-2 flex-none rounded-full ${TIER_DOT[a.confirmation]}`}
+                        />
+                        {tActions(`${a.subject}.${keyTail(a.labelKey)}.label`)}
+                      </span>
+                      <span className="text-xs text-text-secondary">
+                        {tActions(`${a.subject}.${keyTail(a.labelKey)}.description`)}
+                      </span>
                     </span>
-                    <span className="text-xs text-text-secondary">
-                      {tActions(`${a.subject}.${keyTail(a.labelKey)}.description`)}
+                    <span className="mt-0.5 inline-flex flex-none items-center gap-1 text-xs font-semibold text-brand-blue">
+                      {inlineable ? t("openHere") : t("openAdvanced")}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                     </span>
-                  </span>
-                  <span className="mt-0.5 inline-flex flex-none items-center gap-1 text-xs font-semibold text-brand-blue">
-                    {t("openAdvanced")}
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                  </span>
-                </button>
-              </li>
-            ))}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
+
+      {/* Work journal — human-readable activity from the worker's own rows */}
+      {activity && activity.events.length > 0 && (
+        <section className="flex flex-col gap-2" data-testid="conversation-journal">
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {tJournal("title")}
+          </h2>
+          <ul className="flex flex-col gap-1.5">
+            {activity.events.map((e) => (
+              <li
+                key={`${e.key}-${e.at}`}
+                className="flex items-center justify-between gap-3 rounded-md border border-ink-600 px-3 py-2 text-sm"
+              >
+                <span className="text-text-primary">{tJournal(`events.${e.key}`)}</span>
+                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  {new Date(e.at).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Advanced mode — always available, never hidden */}
       <section className="flex items-center justify-between gap-3 rounded-lg border border-ink-600 px-4 py-3">
