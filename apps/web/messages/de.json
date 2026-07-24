@@ -10742,5 +10742,129 @@
         "ctaCompanyNeedHelp": "Das öffentliche Formular erhält nur Ihre Arbeitskräftezahl und das Land — keine Preise und keine Beschreibungen."
       }
     }
+  },
+  "conversation": {
+    "shell": {
+      "title": "Assistent",
+      "greeting": "Was möchtest du tun?",
+      "suggestedTitle": "Für dich empfohlen",
+      "continueTitle": "Mach weiter, wo du warst",
+      "continueCta": "Weiter",
+      "commandPlaceholder": "Schreib, was du tun willst…",
+      "noResults": "Keine passende Aktion. Öffne den erweiterten Modus.",
+      "advancedToggle": "Erweiterter Modus",
+      "advancedHint": "Alle Bildschirme und Werkzeuge",
+      "openAdvanced": "Öffnen",
+      "previewNote": "Neuer Assistent — noch nicht Standard. Erweiterter Modus bleibt verfügbar.",
+      "confirmTitle": "Bestätigen",
+      "confirmStrong": "Das ist ein wichtiger Schritt. Bist du sicher?",
+      "confirmCta": "Bestätigen",
+      "cancelCta": "Abbrechen",
+      "nothingPending": "Derzeit erfordert nichts deine Aktion."
+    },
+    "actions": {
+      "worker": {
+        "completeOnboarding": {
+          "label": "Registrierung abschließen",
+          "description": "Wähle Rolle, Name und Land, um die Registrierung abzuschließen."
+        },
+        "uploadCv": {
+          "label": "Lebenslauf hochladen",
+          "description": "Füge einen PDF-, DOCX- oder TXT-Lebenslauf hinzu — wir lesen, du bestätigst."
+        },
+        "completeProfile": {
+          "label": "Profil vervollständigen",
+          "description": "Fülle die noch fehlenden Teile deines Profils aus."
+        },
+        "addWorkHistory": {
+          "label": "Berufserfahrung hinzufügen",
+          "description": "Füge eine Tätigkeit mit Start- und Endmonat/Jahr hinzu (oder laufend)."
+        },
+        "addLanguage": {
+          "label": "Sprache hinzufügen",
+          "description": "Gib eine Sprache und dein Niveau an."
+        },
+        "saveSkills": {
+          "label": "Fähigkeiten wählen",
+          "description": "Wähle die Fähigkeiten deiner Arbeitsrichtung."
+        },
+        "saveWorkCard": {
+          "label": "Verfügbarkeit & Lohn",
+          "description": "Lege Verfügbarkeit, Standort und Lohnspanne fest."
+        },
+        "savePreferences": {
+          "label": "Arbeitspräferenzen",
+          "description": "Umzug, Transport, Schichten und Vertragspräferenzen."
+        },
+        "reviewBookings": {
+          "label": "Angebote ansehen",
+          "description": "Sieh dir die an dich gesendeten Angebote an."
+        },
+        "respondBooking": {
+          "label": "Angebot annehmen oder ablehnen",
+          "description": "Annahme bestätigt das Engagement — ein wichtiger Schritt."
+        },
+        "expressInterest": {
+          "label": "Interesse zeigen",
+          "description": "Teile einem Arbeitgeber dein Interesse mit."
+        },
+        "whatNext": {
+          "label": "Was als Nächstes?",
+          "description": "Sieh deinen empfohlenen nächsten Schritt."
+        }
+      },
+      "company": {
+        "createDemand": {
+          "label": "Personalbedarf erstellen",
+          "description": "Beschreibe, welche Arbeitskräfte du brauchst."
+        },
+        "reviewCandidates": {
+          "label": "Kandidaten ansehen",
+          "description": "Sieh Arbeitskräfte zu deinem Bedarf."
+        },
+        "shortlistCandidate": {
+          "label": "Auf die Auswahlliste",
+          "description": "Markiere eine Arbeitskraft: interessiert, gemerkt oder unpassend."
+        },
+        "contactWorker": {
+          "label": "Arbeitskraft kontaktieren",
+          "description": "Öffne ein Gespräch mit einer Person der Auswahlliste."
+        },
+        "proposeBooking": {
+          "label": "Buchung vorschlagen",
+          "description": "Sende einer Arbeitskraft ein Arbeitsangebot."
+        },
+        "assignWorker": {
+          "label": "Arbeitskraft zuweisen",
+          "description": "Verknüpfe eine akzeptierte Person mit einem Projekt — wichtig."
+        },
+        "whoWaits": {
+          "label": "Wer wartet auf mich?",
+          "description": "Sieh, was deine Aktion braucht."
+        }
+      },
+      "agency": {
+        "reviewClients": {
+          "label": "Kunden ansehen",
+          "description": "Sieh deine Kundenunternehmen."
+        },
+        "inviteClient": {
+          "label": "Kunden einladen",
+          "description": "Lade ein Unternehmen ein, sich mit deiner Agentur zu verbinden."
+        },
+        "proposeCandidate": {
+          "label": "Kandidat vorschlagen",
+          "description": "Biete eine Arbeitskraft für einen geteilten Bedarf an."
+        },
+        "offerStatus": {
+          "label": "Angebotsstatus",
+          "description": "Sieh den Fortschritt deiner vorgeschlagenen Kandidaten."
+        },
+        "whoWaits": {
+          "label": "Wer wartet auf mich?",
+          "description": "Sieh, was deine Aktion braucht."
+        }
+      }
+    }
   }
 }

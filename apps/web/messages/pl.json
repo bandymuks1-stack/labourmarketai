@@ -2925,5 +2925,129 @@
   },
   "learning": {
     "staleEntry": "Wpis został zmieniony lub usunięty — ten element nie jest już aktualny."
+  },
+  "conversation": {
+    "shell": {
+      "title": "[EN] Assistant",
+      "greeting": "[EN] What would you like to do?",
+      "suggestedTitle": "[EN] Suggested for you",
+      "continueTitle": "[EN] Continue where you left off",
+      "continueCta": "[EN] Continue",
+      "commandPlaceholder": "[EN] Type what you want to do…",
+      "noResults": "[EN] No matching action. Open advanced mode to find it.",
+      "advancedToggle": "[EN] Advanced mode",
+      "advancedHint": "[EN] All screens and tools",
+      "openAdvanced": "[EN] Open",
+      "previewNote": "[EN] New assistant — not yet the default. Advanced mode stays fully available.",
+      "confirmTitle": "[EN] Please confirm",
+      "confirmStrong": "[EN] This is an important step. Are you sure?",
+      "confirmCta": "[EN] Confirm",
+      "cancelCta": "[EN] Cancel",
+      "nothingPending": "[EN] Nothing needs your action right now."
+    },
+    "actions": {
+      "worker": {
+        "completeOnboarding": {
+          "label": "[EN] Finish sign-up",
+          "description": "[EN] Pick your role, name and country to finish registration."
+        },
+        "uploadCv": {
+          "label": "[EN] Upload your CV",
+          "description": "[EN] Add a PDF, DOCX or TXT CV — we read it, you confirm what to save."
+        },
+        "completeProfile": {
+          "label": "[EN] Complete your profile",
+          "description": "[EN] Fill in the parts of your profile that are still missing."
+        },
+        "addWorkHistory": {
+          "label": "[EN] Add work experience",
+          "description": "[EN] Add a job with its start and end month/year (or ongoing)."
+        },
+        "addLanguage": {
+          "label": "[EN] Add a language",
+          "description": "[EN] State a language you speak and your level."
+        },
+        "saveSkills": {
+          "label": "[EN] Choose your skills",
+          "description": "[EN] Select the skills for your work direction."
+        },
+        "saveWorkCard": {
+          "label": "[EN] Set availability & pay",
+          "description": "[EN] Set when you are available, your location and pay range."
+        },
+        "savePreferences": {
+          "label": "[EN] Set work preferences",
+          "description": "[EN] Relocation, transport, shifts and contract preferences."
+        },
+        "reviewBookings": {
+          "label": "[EN] Review offers",
+          "description": "[EN] See job offers sent to you."
+        },
+        "respondBooking": {
+          "label": "[EN] Accept or decline an offer",
+          "description": "[EN] Accepting confirms the engagement — a strong step."
+        },
+        "expressInterest": {
+          "label": "[EN] Express interest",
+          "description": "[EN] Tell an employer you are interested in their demand."
+        },
+        "whatNext": {
+          "label": "[EN] What should I do next?",
+          "description": "[EN] See your recommended next step."
+        }
+      },
+      "company": {
+        "createDemand": {
+          "label": "[EN] Create a labour demand",
+          "description": "[EN] Describe the workers you need."
+        },
+        "reviewCandidates": {
+          "label": "[EN] Review candidates",
+          "description": "[EN] See workers matched to your demand."
+        },
+        "shortlistCandidate": {
+          "label": "[EN] Shortlist a candidate",
+          "description": "[EN] Mark a worker as interested, saved or not a fit."
+        },
+        "contactWorker": {
+          "label": "[EN] Contact a worker",
+          "description": "[EN] Open an in-app conversation with a shortlisted worker."
+        },
+        "proposeBooking": {
+          "label": "[EN] Propose a booking",
+          "description": "[EN] Send a job proposal to a worker."
+        },
+        "assignWorker": {
+          "label": "[EN] Assign a worker to a project",
+          "description": "[EN] Bind an accepted worker to a project — a strong step."
+        },
+        "whoWaits": {
+          "label": "[EN] Who is waiting for me?",
+          "description": "[EN] See what needs your action."
+        }
+      },
+      "agency": {
+        "reviewClients": {
+          "label": "[EN] Review clients",
+          "description": "[EN] See your client companies."
+        },
+        "inviteClient": {
+          "label": "[EN] Invite a client",
+          "description": "[EN] Invite a company to connect with your agency."
+        },
+        "proposeCandidate": {
+          "label": "[EN] Propose a candidate",
+          "description": "[EN] Offer a roster worker for a shared demand."
+        },
+        "offerStatus": {
+          "label": "[EN] Offer status",
+          "description": "[EN] See how your proposed candidates are progressing."
+        },
+        "whoWaits": {
+          "label": "[EN] Who is waiting for me?",
+          "description": "[EN] See what needs your action."
+        }
+      }
+    }
   }
 }

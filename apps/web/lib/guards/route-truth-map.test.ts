@@ -39,6 +39,7 @@ const CLASSIFICATION: Record<string, string> = {
   // summaries over existing RLS reads, plus the HONEST provider state card.
   // No generation is wired (provider unconfigured + audit store gated).
   "dashboard/assist": "REAL_LAUNCH_SURFACE",
+  "dashboard/assistant": "REAL_LAUNCH_SURFACE",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",
   "dashboard/candidates": "REAL_LAUNCH_SURFACE",
   "dashboard/communication": "REAL_LAUNCH_SURFACE",

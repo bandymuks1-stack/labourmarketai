@@ -57,6 +57,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "companyNeed",
   "companyOps",
   "companySwitcher",
+  "conversation",
   "cv",
   "cvExport",
   "cvImport",

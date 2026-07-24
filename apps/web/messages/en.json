@@ -10742,5 +10742,129 @@
         "ctaCompanyNeedHelp": "The public form receives only your worker count and country — no prices and no descriptions are passed."
       }
     }
+  },
+  "conversation": {
+    "shell": {
+      "title": "Assistant",
+      "greeting": "What would you like to do?",
+      "suggestedTitle": "Suggested for you",
+      "continueTitle": "Continue where you left off",
+      "continueCta": "Continue",
+      "commandPlaceholder": "Type what you want to do…",
+      "noResults": "No matching action. Open advanced mode to find it.",
+      "advancedToggle": "Advanced mode",
+      "advancedHint": "All screens and tools",
+      "openAdvanced": "Open",
+      "previewNote": "New assistant — not yet the default. Advanced mode stays fully available.",
+      "confirmTitle": "Please confirm",
+      "confirmStrong": "This is an important step. Are you sure?",
+      "confirmCta": "Confirm",
+      "cancelCta": "Cancel",
+      "nothingPending": "Nothing needs your action right now."
+    },
+    "actions": {
+      "worker": {
+        "completeOnboarding": {
+          "label": "Finish sign-up",
+          "description": "Pick your role, name and country to finish registration."
+        },
+        "uploadCv": {
+          "label": "Upload your CV",
+          "description": "Add a PDF, DOCX or TXT CV — we read it, you confirm what to save."
+        },
+        "completeProfile": {
+          "label": "Complete your profile",
+          "description": "Fill in the parts of your profile that are still missing."
+        },
+        "addWorkHistory": {
+          "label": "Add work experience",
+          "description": "Add a job with its start and end month/year (or ongoing)."
+        },
+        "addLanguage": {
+          "label": "Add a language",
+          "description": "State a language you speak and your level."
+        },
+        "saveSkills": {
+          "label": "Choose your skills",
+          "description": "Select the skills for your work direction."
+        },
+        "saveWorkCard": {
+          "label": "Set availability & pay",
+          "description": "Set when you are available, your location and pay range."
+        },
+        "savePreferences": {
+          "label": "Set work preferences",
+          "description": "Relocation, transport, shifts and contract preferences."
+        },
+        "reviewBookings": {
+          "label": "Review offers",
+          "description": "See job offers sent to you."
+        },
+        "respondBooking": {
+          "label": "Accept or decline an offer",
+          "description": "Accepting confirms the engagement — a strong step."
+        },
+        "expressInterest": {
+          "label": "Express interest",
+          "description": "Tell an employer you are interested in their demand."
+        },
+        "whatNext": {
+          "label": "What should I do next?",
+          "description": "See your recommended next step."
+        }
+      },
+      "company": {
+        "createDemand": {
+          "label": "Create a labour demand",
+          "description": "Describe the workers you need."
+        },
+        "reviewCandidates": {
+          "label": "Review candidates",
+          "description": "See workers matched to your demand."
+        },
+        "shortlistCandidate": {
+          "label": "Shortlist a candidate",
+          "description": "Mark a worker as interested, saved or not a fit."
+        },
+        "contactWorker": {
+          "label": "Contact a worker",
+          "description": "Open an in-app conversation with a shortlisted worker."
+        },
+        "proposeBooking": {
+          "label": "Propose a booking",
+          "description": "Send a job proposal to a worker."
+        },
+        "assignWorker": {
+          "label": "Assign a worker to a project",
+          "description": "Bind an accepted worker to a project — a strong step."
+        },
+        "whoWaits": {
+          "label": "Who is waiting for me?",
+          "description": "See what needs your action."
+        }
+      },
+      "agency": {
+        "reviewClients": {
+          "label": "Review clients",
+          "description": "See your client companies."
+        },
+        "inviteClient": {
+          "label": "Invite a client",
+          "description": "Invite a company to connect with your agency."
+        },
+        "proposeCandidate": {
+          "label": "Propose a candidate",
+          "description": "Offer a roster worker for a shared demand."
+        },
+        "offerStatus": {
+          "label": "Offer status",
+          "description": "See how your proposed candidates are progressing."
+        },
+        "whoWaits": {
+          "label": "Who is waiting for me?",
+          "description": "See what needs your action."
+        }
+      }
+    }
   }
 }
