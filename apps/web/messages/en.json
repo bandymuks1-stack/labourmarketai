@@ -10994,7 +10994,11 @@
       "userCv": "I'll upload my CV",
       "userProfile": "Complete my profile",
       "userOffers": "View my offers",
-      "userJobs": "I'm looking for work"
+      "userJobs": "I'm looking for work",
+      "navChat": "Chat",
+      "navMessages": "Messages",
+      "navCalendar": "Calendar",
+      "navProfile": "Profile"
     }
   }
 }

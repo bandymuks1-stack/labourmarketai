@@ -15,10 +15,13 @@ import type { ActiveLocale } from "@/lib/i18n/config";
  */
 export default async function ConversationDesignPreview({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ frame?: string }>;
 }) {
   const { locale } = await params;
+  const { frame } = await searchParams;
   setRequestLocale(locale);
   if (!designGalleryEnabled) notFound();
 
@@ -26,12 +29,26 @@ export default async function ConversationDesignPreview({
   const labels = resolveChatLabels(t);
   const script = sampleThread(labels);
 
+  // Mobile preview: render the phone layout (bottom nav, no desktop tabs) inside
+  // a 390×812 phone frame so a real mobile screenshot can be captured even when
+  // the viewport cannot be narrowed.
+  if (frame === "mobile") {
+    return (
+      <div className="flex min-h-[100dvh] items-start justify-center bg-ink-800 pt-1">
+        <div className="h-[560px] w-[330px] overflow-hidden rounded-[2rem] border-4 border-ink-600 shadow-2xl">
+          <ConversationChat locale={locale as ActiveLocale} labels={labels} script={script} mobile />
+        </div>
+      </div>
+    );
+  }
+
   return <ConversationChat locale={locale as ActiveLocale} labels={labels} script={script} />;
 }
 
 function resolveChatLabels(t: Awaited<ReturnType<typeof getTranslations>>): ChatLabels {
   const keys = [
-    "headerTitle", "advanced", "composerPlaceholder", "send", "attach", "greeting",
+    "headerTitle", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
+    "composerPlaceholder", "send", "attach", "greeting",
     "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
     "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
     "fallback", "userCv", "userProfile", "userOffers", "userJobs",

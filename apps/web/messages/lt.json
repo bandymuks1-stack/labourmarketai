@@ -10994,7 +10994,11 @@
       "userCv": "Įkelsiu CV",
       "userProfile": "Užbaigti profilį",
       "userOffers": "Peržiūrėti pasiūlymus",
-      "userJobs": "Ieškau darbo"
+      "userJobs": "Ieškau darbo",
+      "navChat": "Pokalbis",
+      "navMessages": "Žinutės",
+      "navCalendar": "Kalendorius",
+      "navProfile": "Profilis"
     }
   }
 }

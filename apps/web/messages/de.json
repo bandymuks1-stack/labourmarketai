@@ -10994,7 +10994,11 @@
       "userCv": "Ich lade meinen Lebenslauf hoch",
       "userProfile": "Profil vervollständigen",
       "userOffers": "Meine Angebote ansehen",
-      "userJobs": "Ich suche Arbeit"
+      "userJobs": "Ich suche Arbeit",
+      "navChat": "Chat",
+      "navMessages": "Nachrichten",
+      "navCalendar": "Kalender",
+      "navProfile": "Profil"
     }
   }
 }

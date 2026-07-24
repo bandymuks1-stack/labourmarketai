@@ -10994,7 +10994,11 @@
       "userCv": "Ik upload mijn cv",
       "userProfile": "Profiel voltooien",
       "userOffers": "Mijn aanbiedingen bekijken",
-      "userJobs": "Ik zoek werk"
+      "userJobs": "Ik zoek werk",
+      "navChat": "Chat",
+      "navMessages": "Berichten",
+      "navCalendar": "Agenda",
+      "navProfile": "Profiel"
     }
   }
 }

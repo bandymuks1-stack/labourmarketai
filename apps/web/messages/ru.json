@@ -10994,7 +10994,11 @@
       "userCv": "Загружу резюме",
       "userProfile": "Заполнить профиль",
       "userOffers": "Посмотреть предложения",
-      "userJobs": "Ищу работу"
+      "userJobs": "Ищу работу",
+      "navChat": "Чат",
+      "navMessages": "Сообщения",
+      "navCalendar": "Календарь",
+      "navProfile": "Профиль"
     }
   }
 }

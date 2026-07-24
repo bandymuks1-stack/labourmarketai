@@ -58,7 +58,8 @@ export default async function DashboardHomePage({
 
 function resolveChatLabels(t: Awaited<ReturnType<typeof getTranslations>>): ChatLabels {
   const keys = [
-    "headerTitle", "advanced", "composerPlaceholder", "send", "attach", "greeting",
+    "headerTitle", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
+    "composerPlaceholder", "send", "attach", "greeting",
     "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
     "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
     "fallback", "userCv", "userProfile", "userOffers", "userJobs",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
-import { ConversationHeader } from "./conversation-header";
+import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
@@ -17,6 +17,10 @@ import type { BookingOffer } from "@/components/app/conversation/conversation-sh
 export type ChatLabels = {
   headerTitle: string;
   advanced: string;
+  navChat: string;
+  navMessages: string;
+  navCalendar: string;
+  navProfile: string;
   composerPlaceholder: string;
   send: string;
   attach: string;
@@ -61,12 +65,15 @@ export function ConversationChat({
   bookingOffers = [],
   bookingLabels = null,
   script,
+  mobile = false,
 }: {
   labels: ChatLabels;
   locale: string;
   bookingOffers?: BookingOffer[];
   bookingLabels?: BookingActionLabels | null;
   script?: ChatMessage[];
+  /** Force the phone layout — used by the mobile design preview frame. */
+  mobile?: boolean;
 }) {
   const starterChips: ChoiceChip[] = useMemo(
     () => [
@@ -203,9 +210,17 @@ export function ConversationChat({
     [user, withTyping, handleChip, assistant, labels.fallback, starterChips],
   );
 
+  const nav = {
+    chat: labels.navChat,
+    messages: labels.navMessages,
+    calendar: labels.navCalendar,
+    profile: labels.navProfile,
+    advanced: labels.advanced,
+  };
+
   return (
-    <div className="flex h-[100dvh] flex-col bg-ink-900" data-testid="conversation-chat">
-      <ConversationHeader title={labels.headerTitle} advancedLabel={labels.advanced} />
+    <div className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`} data-testid="conversation-chat">
+      <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
       <ConversationThread
         items={items}
         typing={typing}
@@ -222,6 +237,7 @@ export function ConversationChat({
         onSend={handleSend}
         onAttach={() => handleChip({ id: "cv", label: "" })}
       />
+      <ConversationBottomNav nav={nav} mobile={mobile} />
     </div>
   );
 }

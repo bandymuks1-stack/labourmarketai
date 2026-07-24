@@ -3177,7 +3177,11 @@
       "userCv": "[EN] I'll upload my CV",
       "userProfile": "[EN] Complete my profile",
       "userOffers": "[EN] View my offers",
-      "userJobs": "[EN] I'm looking for work"
+      "userJobs": "[EN] I'm looking for work",
+      "navChat": "[EN] Chat",
+      "navMessages": "[EN] Messages",
+      "navCalendar": "[EN] Calendar",
+      "navProfile": "[EN] Profile"
     }
   }
 }
