@@ -10742,5 +10742,129 @@
         "ctaCompanyNeedHelp": "Het publieke formulier ontvangt alleen je aantal werknemers en land — geen prijzen en geen beschrijvingen."
       }
     }
+  },
+  "conversation": {
+    "shell": {
+      "title": "Assistent",
+      "greeting": "Wat wil je doen?",
+      "suggestedTitle": "Aanbevolen voor jou",
+      "continueTitle": "Ga verder waar je was",
+      "continueCta": "Doorgaan",
+      "commandPlaceholder": "Typ wat je wilt doen…",
+      "noResults": "Geen passende actie. Open de geavanceerde modus.",
+      "advancedToggle": "Geavanceerde modus",
+      "advancedHint": "Alle schermen en tools",
+      "openAdvanced": "Openen",
+      "previewNote": "Nieuwe assistent — nog niet standaard. Geavanceerde modus blijft beschikbaar.",
+      "confirmTitle": "Bevestig",
+      "confirmStrong": "Dit is een belangrijke stap. Weet je het zeker?",
+      "confirmCta": "Bevestigen",
+      "cancelCta": "Annuleren",
+      "nothingPending": "Er is nu niets dat jouw actie nodig heeft."
+    },
+    "actions": {
+      "worker": {
+        "completeOnboarding": {
+          "label": "Aanmelding voltooien",
+          "description": "Kies je rol, naam en land om de registratie te voltooien."
+        },
+        "uploadCv": {
+          "label": "CV uploaden",
+          "description": "Voeg een PDF-, DOCX- of TXT-cv toe — wij lezen het, jij bevestigt wat te bewaren."
+        },
+        "completeProfile": {
+          "label": "Profiel voltooien",
+          "description": "Vul de ontbrekende delen van je profiel in."
+        },
+        "addWorkHistory": {
+          "label": "Werkervaring toevoegen",
+          "description": "Voeg een baan toe met begin- en eindmaand/jaar (of lopend)."
+        },
+        "addLanguage": {
+          "label": "Taal toevoegen",
+          "description": "Geef een taal op die je spreekt en je niveau."
+        },
+        "saveSkills": {
+          "label": "Vaardigheden kiezen",
+          "description": "Selecteer de vaardigheden voor je werkrichting."
+        },
+        "saveWorkCard": {
+          "label": "Beschikbaarheid & loon",
+          "description": "Stel je beschikbaarheid, locatie en loonbereik in."
+        },
+        "savePreferences": {
+          "label": "Werkvoorkeuren instellen",
+          "description": "Verhuizing, vervoer, diensten en contractvoorkeuren."
+        },
+        "reviewBookings": {
+          "label": "Aanbiedingen bekijken",
+          "description": "Bekijk de aan jou verstuurde vacatures."
+        },
+        "respondBooking": {
+          "label": "Aanbod accepteren of weigeren",
+          "description": "Accepteren bevestigt de opdracht — een belangrijke stap."
+        },
+        "expressInterest": {
+          "label": "Interesse tonen",
+          "description": "Laat een werkgever weten dat je interesse hebt."
+        },
+        "whatNext": {
+          "label": "Wat nu?",
+          "description": "Bekijk je aanbevolen volgende stap."
+        }
+      },
+      "company": {
+        "createDemand": {
+          "label": "Personeelsvraag maken",
+          "description": "Beschrijf welke werknemers je nodig hebt."
+        },
+        "reviewCandidates": {
+          "label": "Kandidaten bekijken",
+          "description": "Bekijk werknemers die bij je vraag passen."
+        },
+        "shortlistCandidate": {
+          "label": "Op shortlist zetten",
+          "description": "Markeer een werknemer als interessant, bewaard of niet passend."
+        },
+        "contactWorker": {
+          "label": "Werknemer contacteren",
+          "description": "Open een gesprek met een werknemer op de shortlist."
+        },
+        "proposeBooking": {
+          "label": "Boeking voorstellen",
+          "description": "Stuur een werkvoorstel naar een werknemer."
+        },
+        "assignWorker": {
+          "label": "Werknemer aan project koppelen",
+          "description": "Koppel een geaccepteerde werknemer aan een project — belangrijk."
+        },
+        "whoWaits": {
+          "label": "Wie wacht op mij?",
+          "description": "Bekijk wat jouw actie nodig heeft."
+        }
+      },
+      "agency": {
+        "reviewClients": {
+          "label": "Klanten bekijken",
+          "description": "Bekijk je klantbedrijven."
+        },
+        "inviteClient": {
+          "label": "Klant uitnodigen",
+          "description": "Nodig een bedrijf uit om met je bureau te verbinden."
+        },
+        "proposeCandidate": {
+          "label": "Kandidaat voorstellen",
+          "description": "Bied een werknemer aan voor een gedeelde vraag."
+        },
+        "offerStatus": {
+          "label": "Aanbodstatus",
+          "description": "Bekijk de voortgang van je voorgestelde kandidaten."
+        },
+        "whoWaits": {
+          "label": "Wie wacht op mij?",
+          "description": "Bekijk wat jouw actie nodig heeft."
+        }
+      }
+    }
   }
 }

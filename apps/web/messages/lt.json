@@ -10742,5 +10742,129 @@
         "ctaCompanyNeedHelp": "Viešoji forma gauna tik darbuotojų skaičių ir šalį — jokios kainos ir aprašymai neperduodami."
       }
     }
+  },
+  "conversation": {
+    "shell": {
+      "title": "Asistentas",
+      "greeting": "Ką norėtum padaryti?",
+      "suggestedTitle": "Siūloma tau",
+      "continueTitle": "Tęsk, kur sustojai",
+      "continueCta": "Tęsti",
+      "commandPlaceholder": "Parašyk, ką nori padaryti…",
+      "noResults": "Nėra tinkamo veiksmo. Atidaryk išplėstinį režimą.",
+      "advancedToggle": "Išplėstinis režimas",
+      "advancedHint": "Visi ekranai ir įrankiai",
+      "openAdvanced": "Atidaryti",
+      "previewNote": "Naujas asistentas — dar ne numatytasis. Išplėstinis režimas visada pasiekiamas.",
+      "confirmTitle": "Patvirtink",
+      "confirmStrong": "Tai svarbus žingsnis. Ar tikrai?",
+      "confirmCta": "Patvirtinti",
+      "cancelCta": "Atšaukti",
+      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo."
+    },
+    "actions": {
+      "worker": {
+        "completeOnboarding": {
+          "label": "Užbaigti registraciją",
+          "description": "Pasirink vaidmenį, vardą ir šalį, kad užbaigtum registraciją."
+        },
+        "uploadCv": {
+          "label": "Įkelti CV",
+          "description": "Pridėk PDF, DOCX ar TXT CV — perskaitysim, tu patvirtinsi, ką išsaugoti."
+        },
+        "completeProfile": {
+          "label": "Užbaigti profilį",
+          "description": "Užpildyk trūkstamas profilio dalis."
+        },
+        "addWorkHistory": {
+          "label": "Pridėti darbo patirtį",
+          "description": "Pridėk darbą su pradžios ir pabaigos mėnesiu/metais (arba iki dabar)."
+        },
+        "addLanguage": {
+          "label": "Pridėti kalbą",
+          "description": "Nurodyk kalbą, kurią moki, ir lygį."
+        },
+        "saveSkills": {
+          "label": "Pasirinkti įgūdžius",
+          "description": "Pažymėk savo darbo krypties įgūdžius."
+        },
+        "saveWorkCard": {
+          "label": "Nurodyti prieinamumą ir atlygį",
+          "description": "Nurodyk, kada esi laisvas, lokaciją ir atlygio ribas."
+        },
+        "savePreferences": {
+          "label": "Nurodyti darbo pageidavimus",
+          "description": "Persikėlimas, transportas, pamainos ir sutarties pageidavimai."
+        },
+        "reviewBookings": {
+          "label": "Peržiūrėti pasiūlymus",
+          "description": "Pamatyk tau atsiųstus darbo pasiūlymus."
+        },
+        "respondBooking": {
+          "label": "Priimti ar atmesti pasiūlymą",
+          "description": "Priėmimas patvirtina įsipareigojimą — svarbus žingsnis."
+        },
+        "expressInterest": {
+          "label": "Pareikšti susidomėjimą",
+          "description": "Pranešk darbdaviui, kad domiesi jo poreikiu."
+        },
+        "whatNext": {
+          "label": "Ką daryti toliau?",
+          "description": "Pamatyk rekomenduojamą kitą žingsnį."
+        }
+      },
+      "company": {
+        "createDemand": {
+          "label": "Sukurti darbo poreikį",
+          "description": "Aprašyk, kokių darbuotojų reikia."
+        },
+        "reviewCandidates": {
+          "label": "Peržiūrėti kandidatus",
+          "description": "Pamatyk tavo poreikiui tinkančius darbuotojus."
+        },
+        "shortlistCandidate": {
+          "label": "Įtraukti į trumpąjį sąrašą",
+          "description": "Pažymėk darbuotoją: domina, išsaugotas ar netinka."
+        },
+        "contactWorker": {
+          "label": "Susisiekti su darbuotoju",
+          "description": "Atidaryk pokalbį su trumpojo sąrašo darbuotoju."
+        },
+        "proposeBooking": {
+          "label": "Pasiūlyti rezervaciją",
+          "description": "Išsiųsk darbo pasiūlymą darbuotojui."
+        },
+        "assignWorker": {
+          "label": "Priskirti darbuotoją projektui",
+          "description": "Susiek priimtą darbuotoją su projektu — svarbus žingsnis."
+        },
+        "whoWaits": {
+          "label": "Kas laukia mano veiksmo?",
+          "description": "Pamatyk, kas laukia tavo veiksmo."
+        }
+      },
+      "agency": {
+        "reviewClients": {
+          "label": "Peržiūrėti klientus",
+          "description": "Pamatyk savo klientų įmones."
+        },
+        "inviteClient": {
+          "label": "Pakviesti klientą",
+          "description": "Pakviesk įmonę susisieti su tavo agentūra."
+        },
+        "proposeCandidate": {
+          "label": "Pasiūlyti kandidatą",
+          "description": "Pasiūlyk savo darbuotoją bendram poreikiui."
+        },
+        "offerStatus": {
+          "label": "Pasiūlymų būsena",
+          "description": "Pamatyk, kaip sekasi tavo pasiūlytiems kandidatams."
+        },
+        "whoWaits": {
+          "label": "Kas laukia mano veiksmo?",
+          "description": "Pamatyk, kas laukia tavo veiksmo."
+        }
+      }
+    }
   }
 }
