@@ -10,6 +10,7 @@ import {
   deleteProfileSkillClaimAction,
   saveProfileSkillClaimsAction,
 } from "@/lib/profile/profile-skill-claims-actions";
+import { confirmCvWorkHistoryAction } from "@/lib/profile/cv-section-import-actions";
 import type {
   EngagementCard,
   SkillDot,
@@ -114,6 +115,84 @@ export function CapabilityProfileSection({
         .catch((e: unknown) => {
           console.error("[capability-profile] add failed", e);
           setError(t("addError"));
+        });
+    });
+  }
+
+  // ── Manual work-experience entry (Worker Launch Readiness v1) ─────────────
+  // A worker WITHOUT a CV file had no way to type a job + month/year period —
+  // work history could only arrive from a CV import or the journal. This small
+  // form writes through the SAME already-applied canonical RPC the CV import
+  // uses (save_self_declared_work_history_v1, via confirmCvWorkHistoryAction),
+  // so it is a pure UI wrapper — no new table, no new RPC, no migration.
+  const [expTitle, setExpTitle] = useState("");
+  const [expStartYear, setExpStartYear] = useState("");
+  const [expStartMonth, setExpStartMonth] = useState("");
+  const [expEndYear, setExpEndYear] = useState("");
+  const [expEndMonth, setExpEndMonth] = useState("");
+  const [expCurrent, setExpCurrent] = useState(false);
+  const [expError, setExpError] = useState<string | null>(null);
+  const [isSavingExp, startSaveExp] = useTransition();
+
+  function toYear(v: string): number | null {
+    const n = Number.parseInt(v, 10);
+    return Number.isInteger(n) && n >= 1900 && n <= 2100 ? n : null;
+  }
+  function toMonth(v: string): number | null {
+    const n = Number.parseInt(v, 10);
+    return Number.isInteger(n) && n >= 1 && n <= 12 ? n : null;
+  }
+
+  function addExperience() {
+    const title = expTitle.trim();
+    setExpError(null);
+    if (title.length < 3) {
+      setExpError(t("expInvalid"));
+      return;
+    }
+    const startYear = toYear(expStartYear);
+    if (startYear === null) {
+      setExpError(t("expInvalid"));
+      return;
+    }
+    const endYear = expCurrent ? null : toYear(expEndYear);
+    if (!expCurrent && endYear === null) {
+      setExpError(t("expInvalid"));
+      return;
+    }
+    const startPart = { year: startYear, month: toMonth(expStartMonth), day: null };
+    const endPart = expCurrent
+      ? null
+      : { year: endYear as number, month: toMonth(expEndMonth), day: null };
+    startSaveExp(() => {
+      confirmCvWorkHistoryAction({
+        title,
+        startYear,
+        endYear,
+        start: startPart,
+        end: endPart,
+        isCurrent: expCurrent,
+      })
+        .then((res) => {
+          if (res.ok) {
+            setExpTitle("");
+            setExpStartYear("");
+            setExpStartMonth("");
+            setExpEndYear("");
+            setExpEndMonth("");
+            setExpCurrent(false);
+            router.refresh();
+          } else if (res.code === "needs_migration") {
+            setExpError(t("expNeedsMigration"));
+          } else if (res.code === "invalid") {
+            setExpError(t("expInvalid"));
+          } else {
+            setExpError(t("expError"));
+          }
+        })
+        .catch((e: unknown) => {
+          console.error("[capability-profile] add experience failed", e);
+          setExpError(t("expError"));
         });
     });
   }
@@ -328,6 +407,111 @@ export function CapabilityProfileSection({
           </ul>
         </div>
       )}
+
+      {/* Manual work-experience entry — always available so a worker with no
+          CV file can still record a job with a month/year period. Writes via
+          the same canonical RPC as the CV import (no migration). */}
+      <details className="flex flex-col gap-3 rounded-md border border-border-subtle bg-surface-1/40">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <span aria-hidden>+</span>
+          {t("addExperienceTitle")}
+        </summary>
+        <div className="flex flex-col gap-3 px-3 pb-3" data-testid="add-experience-form">
+          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+            {t("expTitleLabel")}
+            <input
+              type="text"
+              value={expTitle}
+              maxLength={200}
+              onChange={(e) => setExpTitle(e.target.value)}
+              placeholder={t("expTitlePlaceholder")}
+              data-testid="add-experience-title"
+              className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+            />
+          </label>
+          <div className="flex flex-wrap gap-3">
+            <label className="flex flex-1 flex-col gap-1 text-[11px] text-text-muted">
+              {t("expStartLabel")}
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={12}
+                  value={expStartMonth}
+                  onChange={(e) => setExpStartMonth(e.target.value)}
+                  placeholder={t("expMonthPlaceholder")}
+                  aria-label={t("expStartLabel")}
+                  className="w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                />
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1900}
+                  max={2100}
+                  value={expStartYear}
+                  onChange={(e) => setExpStartYear(e.target.value)}
+                  placeholder={t("expYearPlaceholder")}
+                  aria-label={t("expStartLabel")}
+                  className="w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                />
+              </div>
+            </label>
+            <label className="flex flex-1 flex-col gap-1 text-[11px] text-text-muted">
+              {t("expEndLabel")}
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={12}
+                  value={expEndMonth}
+                  disabled={expCurrent}
+                  onChange={(e) => setExpEndMonth(e.target.value)}
+                  placeholder={t("expMonthPlaceholder")}
+                  aria-label={t("expEndLabel")}
+                  className="w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
+                />
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1900}
+                  max={2100}
+                  value={expEndYear}
+                  disabled={expCurrent}
+                  onChange={(e) => setExpEndYear(e.target.value)}
+                  placeholder={t("expYearPlaceholder")}
+                  aria-label={t("expEndLabel")}
+                  className="w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
+                />
+              </div>
+            </label>
+          </div>
+          <label className="flex items-center gap-2 text-[11px] text-text-secondary">
+            <input
+              type="checkbox"
+              checked={expCurrent}
+              onChange={(e) => setExpCurrent(e.target.checked)}
+              data-testid="add-experience-current"
+            />
+            {t("expOngoing")}
+          </label>
+          {expError && (
+            <p role="alert" className="text-xs text-state-danger">
+              {expError}
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={isSavingExp}
+            onClick={addExperience}
+            data-testid="add-experience-save"
+            className="w-fit rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-50"
+          >
+            {isSavingExp ? t("expSaving") : t("expSave")}
+          </button>
+        </div>
+      </details>
     </section>
   );
 }

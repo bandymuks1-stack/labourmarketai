@@ -12,7 +12,7 @@ import { mapAuthError } from "@/lib/auth-errors";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { cn } from "@/lib/utils";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { markSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import {
   captureFirstTouchAttribution,
   getFirstTouchAttribution,
@@ -41,7 +41,9 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "signing" | "error" | "check_email"
+  >("idle");
   const [error, setError] = useState<string | null>(null);
   // When a returning user lands on /signup by mistake, Supabase returns
   // `user_already_exists`. We surface a one-click "Login instead" CTA
@@ -91,7 +93,7 @@ export function SignupForm() {
       const supabase = createClient();
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const { error: err } = await supabase.auth.signUp({
+      const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
@@ -102,9 +104,20 @@ export function SignupForm() {
         },
       });
       if (err) throw err;
-      // Confirm email OFF → session is live. Land on the unified
-      // onboarding, propagating `next` so onboarding completion can fall
-      // back to the user's original destination.
+      // Defensive: if "Confirm email" is ever toggled ON, signUp returns NO
+      // session (and no error). Without this branch the form would redirect to
+      // /onboarding, which bounces an unauthenticated user back to /login with
+      // no message — a silent registration dead-end gated on a single Supabase
+      // toggle. Show an explicit "check your email" state instead.
+      if (!data.session) {
+        setStatus("check_email");
+        return;
+      }
+      // Confirm email OFF → session is live. Mark this session as a fresh
+      // signup so the first authed surface emits `signup_completed`, then land
+      // on the unified onboarding, propagating `next` so onboarding completion
+      // can fall back to the user's original destination.
+      markSignupPending("email");
       const onboardingPath = nextParam
         ? `/onboarding?next=${encodeURIComponent(nextPath)}`
         : "/onboarding";
@@ -129,6 +142,27 @@ export function SignupForm() {
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
+  // Confirm-email state: signUp returned no session (Supabase "Confirm email"
+  // is ON). Tell the user to verify instead of silently bouncing to login.
+  if (status === "check_email") {
+    return (
+      <div className="flex flex-col gap-4" role="status" data-testid="signup-check-email">
+        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+          {t("check_email_title")}
+        </h1>
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {t("check_email_body", { email: email.trim() })}
+        </p>
+        <Link
+          href="/auth/login"
+          className="text-sm text-brand-blue hover:text-brand-cyan"
+        >
+          {t("login_link")} →
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
       <header>
@@ -150,6 +184,7 @@ export function SignupForm() {
         errorLabel={t("error_generic")}
         disabled={disabled}
         nextPath={nextPath}
+        context="signup"
       />
 
       <div className="flex items-center gap-3" aria-hidden>

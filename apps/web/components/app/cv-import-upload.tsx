@@ -7,6 +7,8 @@ import {
   extractCvFile,
   type CvExtractClientResult,
 } from "@/lib/cv/cv-import-client";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * CV file import — REAL upload + text-extraction primitive.
@@ -57,9 +59,16 @@ export function CvImportUpload({
     setError(null);
     setPickedName(file.name);
     setBusy(true);
+    // Funnel: a real CV import attempt began. Bounded surface label only —
+    // NEVER the filename or any file content (Worker Launch Readiness v1).
+    trackFunnel(FUNNEL_EVENTS.cvUploadStarted, { surface: "cv_import" });
     try {
       const result = await extractCvFile(file);
       if (result.ok) {
+        trackFunnel(FUNNEL_EVENTS.cvUploadSucceeded, {
+          surface: "cv_import",
+          success: true,
+        });
         onExtracted(result.text);
       } else {
         setError(messageFor(result.code));

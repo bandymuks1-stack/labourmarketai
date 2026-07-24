@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { consumeSignupPending, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
@@ -33,6 +33,16 @@ export function SessionTelemetry() {
       }
     } catch {
       /* sessionStorage unavailable — skip silently */
+    }
+
+    // signup_completed — fires exactly once, only when THIS session is a
+    // fresh signup (a one-shot flag set by the signup surfaces). A returning
+    // login never set the flag, so it is never mis-counted as a signup.
+    // Read-and-clear guarantees single emission across dashboard/onboarding
+    // mounts. surface = 'email' | 'google' (bounded label, no PII).
+    const signupSurface = consumeSignupPending();
+    if (signupSurface) {
+      trackFunnel(FUNNEL_EVENTS.signupCompleted, { surface: signupSurface });
     }
 
     // return_visit_detected — last-seen day differs from today.

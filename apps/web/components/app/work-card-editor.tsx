@@ -273,8 +273,9 @@ export function WorkCardEditor({
                   name="salary_min"
                   min={0}
                   inputMode="numeric"
+                  placeholder="1500"
                   defaultValue={values.salaryMin ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs">
@@ -286,8 +287,9 @@ export function WorkCardEditor({
                   name="salary_max"
                   min={0}
                   inputMode="numeric"
+                  placeholder="2500"
                   defaultValue={values.salaryMax ?? ""}
-                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
                 />
               </label>
             </div>

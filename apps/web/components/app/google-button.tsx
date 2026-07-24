@@ -10,8 +10,12 @@ import {
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
 import { sha256Hex } from "@/lib/auth/google-id-token";
-import { recordEvent, trackFunnel } from "@/lib/telemetry/task";
+import { markSignupPending, recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  captureFirstTouchAttribution,
+  getFirstTouchAttribution,
+} from "@/lib/telemetry/attribution";
 
 /** Public OAuth client id — inlined at build time. When set, the
  *  first-party Google Identity Services (GIS) ID-token flow is active
@@ -90,6 +94,7 @@ export function GoogleButton({
   errorLabel,
   disabled,
   nextPath,
+  context = "login",
 }: {
   label: string;
   redirectingLabel: string;
@@ -98,6 +103,11 @@ export function GoogleButton({
   /** Already-sanitised internal path (see `getSafeReturnPath`). When set,
    *  the auth exchange routes the user here on success. */
   nextPath?: string;
+  /** Which surface hosts this button. In "signup" context the press is a
+   *  registration attempt (emits `registration_started` with first-touch
+   *  attribution) and a NEW user landing on /onboarding is marked so the
+   *  first authed surface emits `signup_completed`. Default "login". */
+  context?: "signup" | "login";
 }) {
   const locale = useLocale();
   const tAuth = useTranslations("auth.login");
@@ -130,6 +140,16 @@ export function GoogleButton({
       try {
         if (!response?.credential) throw new Error("no_credential");
         trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
+        // In signup context this press is a registration attempt — mirror the
+        // email path so Google signups are counted in the acquisition funnel
+        // with first-touch campaign attribution (idempotent capture).
+        if (context === "signup") {
+          captureFirstTouchAttribution();
+          trackFunnel(FUNNEL_EVENTS.registrationStarted, {
+            surface: "google",
+            ...getFirstTouchAttribution(),
+          });
+        }
         recordEvent("google_id_token_start", { provider: "google", trace });
         const res = await fetch(
           `/api/auth/google?locale=${encodeURIComponent(locale)}`,
@@ -154,6 +174,14 @@ export function GoogleButton({
           throw new Error(out?.error ?? `http_${res.status}`);
         }
         recordEvent("google_id_token_success", { provider: "google", trace });
+        // A new / un-onboarded user is routed to /onboarding. In signup
+        // context that means a fresh registration completed — mark it so the
+        // first authed surface emits `signup_completed` exactly once. An
+        // already-onboarded returning user is routed elsewhere and is never
+        // mis-counted as a signup.
+        if (context === "signup" && out.next.includes("/onboarding")) {
+          markSignupPending("google");
+        }
         // Full navigation so server components render with the fresh
         // session cookies.
         window.location.assign(out.next);
@@ -175,7 +203,7 @@ export function GoogleButton({
         setFailed(true);
       }
     },
-    [locale, nextPath],
+    [locale, nextPath, context],
   );
 
   // First-party mode: hash the nonce, load the GIS script, render

@@ -1551,7 +1551,20 @@
     "manualAddPlaceholder": "bijv. Engelse taal",
     "manualAddButton": "Toevoegen",
     "manualAdding": "Toevoegen…",
-    "addError": "Toevoegen is niet gelukt. Probeer het opnieuw."
+    "addError": "Toevoegen is niet gelukt. Probeer het opnieuw.",
+    "addExperienceTitle": "Werkervaring toevoegen",
+    "expTitleLabel": "Functie",
+    "expTitlePlaceholder": "Bijv. lasser, verpleegkundige, magazijnmedewerker, ontwikkelaar",
+    "expStartLabel": "Van (maand / jaar)",
+    "expEndLabel": "Tot (maand / jaar)",
+    "expOngoing": "Ik werk hier nu",
+    "expMonthPlaceholder": "MM",
+    "expYearPlaceholder": "JJJJ",
+    "expSave": "Ervaring opslaan",
+    "expSaving": "Opslaan…",
+    "expInvalid": "Vul een functie en minstens het startjaar in.",
+    "expNeedsMigration": "Deze functie is nog niet ingeschakeld. Probeer het later.",
+    "expError": "Opslaan mislukt. Probeer het opnieuw."
   },
   "roleDashboards": {
     "company": {
@@ -3484,7 +3497,9 @@
       "error_password_mismatch": "Wachtwoorden komen niet overeen.",
       "error_password_uppercase": "Wachtwoord moet een hoofdletter bevatten.",
       "error_password_number": "Wachtwoord moet een cijfer bevatten.",
-      "error_password_special": "Wachtwoord moet een speciaal teken bevatten."
+      "error_password_special": "Wachtwoord moet een speciaal teken bevatten.",
+      "check_email_title": "Bevestig je e-mail",
+      "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien."
     },
     "login": {
       "headline": "Inloggen",
@@ -4326,7 +4341,7 @@
         },
         {
           "title": "Kansen over de grens",
-          "desc": "NL, DK, DE, SE, NO en meer."
+          "desc": "Gemaakt voor grensoverschrijdend werk in heel Europa."
         },
         {
           "title": "Direct contact met de werkgever",
@@ -4708,7 +4723,7 @@
         }
       ],
       "screenshot": "Werknemer-avatarflow",
-      "cta": "Begin nu"
+      "cta": "Maak gratis profiel"
     },
     "companies": {
       "eyebrow": "Voor bedrijven",
@@ -9944,7 +9959,10 @@
       "error": "Opslaan mislukt. Probeer opnieuw.",
       "invalid": "Ongeldige waarde.",
       "limit": "Limiet bereikt.",
-      "selfStated": "Door jou ingevuld."
+      "selfStated": "Door jou ingevuld.",
+      "institutionPlaceholder": "Bijv. hogeschool, opleidingscentrum",
+      "programPlaceholder": "Bijv. verpleegkunde, elektro, boekhouding, software",
+      "yearPlaceholder": "JJJJ"
     },
     "educationTypes": {
       "primary": "Basisschool",

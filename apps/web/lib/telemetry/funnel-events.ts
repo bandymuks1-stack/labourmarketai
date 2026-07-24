@@ -67,6 +67,21 @@ export const FUNNEL_EVENTS = {
   serviceRequestStarted: "service_request_started",
   serviceRequestSent: "service_request_sent",
   returnVisitDetected: "return_visit_detected",
+  // ── Worker signup-completion + CV + booking funnel (Worker Launch
+  //    Readiness v1). Closes the gaps between registration_started and the
+  //    later activation events so a paid worker-ad campaign is measurable
+  //    end-to-end. All carry ONLY bounded scalars already on the allowlist
+  //    (surface / success / role_context) — no new metadata key, no schema
+  //    or RLS change, no third-party tracker, no PII.
+  //    signup_completed fires once when a NEW signup first reaches an
+  //    authenticated surface (distinguished from a returning login via a
+  //    one-shot pending flag set at signup time — see lib/telemetry/task.ts).
+  signupCompleted: "signup_completed",
+  cvUploadStarted: "cv_upload_started",
+  cvUploadSucceeded: "cv_upload_succeeded",
+  bookingViewed: "booking_viewed",
+  bookingAccepted: "booking_accepted",
+  bookingDeclined: "booking_declined",
 } as const;
 
 export type FunnelEventName = (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];

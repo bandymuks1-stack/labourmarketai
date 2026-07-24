@@ -65,6 +65,14 @@ const EXPECTED_EVENTS = [
   "service_request_started",
   "service_request_sent",
   "return_visit_detected",
+  // ── Worker signup-completion + CV + booking funnel (Worker Launch
+  //    Readiness v1). Bounded scalars only; no PII, no schema change.
+  "signup_completed",
+  "cv_upload_started",
+  "cv_upload_succeeded",
+  "booking_viewed",
+  "booking_accepted",
+  "booking_declined",
 ] as const;
 
 describe("activation funnel — event registry", () => {
@@ -178,7 +186,7 @@ describe("activation funnel — key surfaces emit their events", () => {
   const cases: Array<{ file: string; mustContain: string[] }> = [
     {
       file: "components/app/session-telemetry.tsx",
-      mustContain: ["loginSucceeded", "returnVisitDetected"],
+      mustContain: ["loginSucceeded", "returnVisitDetected", "signupCompleted"],
     },
     {
       file: "components/app/login-form.tsx",
@@ -186,7 +194,21 @@ describe("activation funnel — key surfaces emit their events", () => {
     },
     {
       file: "components/app/google-button.tsx",
-      mustContain: ["loginStarted"],
+      mustContain: ["loginStarted", "registrationStarted"],
+    },
+    // ── Worker signup-completion + CV + booking funnel (Worker Launch
+    //    Readiness v1). Bounded scalars only; no PII, no schema change.
+    {
+      file: "components/app/cv-import-upload.tsx",
+      mustContain: ["cvUploadStarted", "cvUploadSucceeded"],
+    },
+    {
+      file: "components/app/booking-respond-buttons.tsx",
+      mustContain: ["bookingAccepted", "bookingDeclined"],
+    },
+    {
+      file: "components/app/mark-bookings-seen.tsx",
+      mustContain: ["bookingViewed"],
     },
     {
       file: "components/app/onboarding-wizard.tsx",

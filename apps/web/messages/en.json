@@ -1551,7 +1551,20 @@
     "manualAddPlaceholder": "e.g. English language",
     "manualAddButton": "Add",
     "manualAdding": "Adding…",
-    "addError": "Could not add. Please try again."
+    "addError": "Could not add. Please try again.",
+    "addExperienceTitle": "Add work experience",
+    "expTitleLabel": "Job title",
+    "expTitlePlaceholder": "e.g. welder, nurse, warehouse worker, developer",
+    "expStartLabel": "From (month / year)",
+    "expEndLabel": "To (month / year)",
+    "expOngoing": "I work here now",
+    "expMonthPlaceholder": "MM",
+    "expYearPlaceholder": "YYYY",
+    "expSave": "Save experience",
+    "expSaving": "Saving…",
+    "expInvalid": "Enter a job title and at least the start year.",
+    "expNeedsMigration": "This feature isn't enabled yet. Please try later.",
+    "expError": "Could not save. Please try again."
   },
   "roleDashboards": {
     "company": {
@@ -3484,7 +3497,9 @@
       "error_password_mismatch": "Passwords don't match.",
       "error_password_uppercase": "Password must include an uppercase letter.",
       "error_password_number": "Password must include a number.",
-      "error_password_special": "Password must include a special character."
+      "error_password_special": "Password must include a special character.",
+      "check_email_title": "Confirm your email",
+      "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account."
     },
     "login": {
       "headline": "Sign in",
@@ -4326,7 +4341,7 @@
         },
         {
           "title": "Cross-border opportunities",
-          "desc": "NL, DK, DE, SE, NO and more."
+          "desc": "Built for cross-border work across Europe."
         },
         {
           "title": "Direct employer contact",
@@ -4708,7 +4723,7 @@
         }
       ],
       "screenshot": "Worker avatar flow",
-      "cta": "Start now"
+      "cta": "Create free profile"
     },
     "companies": {
       "eyebrow": "For companies",
@@ -9944,7 +9959,10 @@
       "error": "Could not save. Try again.",
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
-      "selfStated": "Entered by you."
+      "selfStated": "Entered by you.",
+      "institutionPlaceholder": "e.g. Vilnius College, technical training centre",
+      "programPlaceholder": "e.g. nursing, electrical, accounting, software",
+      "yearPlaceholder": "YYYY"
     },
     "educationTypes": {
       "primary": "Primary school",

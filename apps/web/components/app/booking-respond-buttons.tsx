@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { respondBookingAction } from "@/lib/booking/booking-actions";
 import { DECLINE_REASON_KINDS, REASON_NOTE_MAX } from "@/lib/booking/booking-state";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Worker accept/decline for a proposed booking (Stage 6). The worker is the
@@ -58,6 +60,15 @@ export function BookingRespondButtons({
         reasonNote: decision === "declined" ? reasonNote : null,
       });
       if (res.kind === "ok") {
+        // Funnel: the worker acted on an offer. Fire-and-forget, bounded
+        // scalars only (no booking id, no counterparty) — Worker Launch
+        // Readiness v1. Does not alter the accept/decline flow (#857).
+        trackFunnel(
+          decision === "accepted"
+            ? FUNNEL_EVENTS.bookingAccepted
+            : FUNNEL_EVENTS.bookingDeclined,
+          { surface: "booking", success: true },
+        );
         setState({ kind: "done", status: decision, reasonStored: res.reasonStored });
         router.refresh();
       } else if (res.kind === "conflict") {

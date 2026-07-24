@@ -223,3 +223,38 @@ export function trackFunnel(
   if (isNonProductionHost()) enriched.preview_host = true;
   fire(eventName, "info", { metadata: enriched });
 }
+
+// ── Signup-completion pending flag (Worker Launch Readiness v1) ──────────────
+// A brand-new signup and a returning login both land on an authenticated
+// surface, so `login_succeeded` alone cannot tell them apart. The signup
+// surfaces set this one-shot flag; SessionTelemetry consumes it exactly once
+// when the user first reaches an authed page and emits `signup_completed`.
+// The value is a bounded surface label ('email' | 'google') — never PII.
+const SIGNUP_PENDING_KEY = "lm.funnel.signup_pending";
+
+/** Mark that the current session is a fresh signup, so the next authed
+ *  surface can emit `signup_completed`. Bounded surface label only. */
+export function markSignupPending(surface: "email" | "google"): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(SIGNUP_PENDING_KEY, surface);
+  } catch {
+    /* localStorage unavailable — signup_completed simply won't fire */
+  }
+}
+
+/** Read-and-clear the signup-pending flag. Returns the surface label if a
+ *  signup is pending (fires `signup_completed` once), else null. */
+export function consumeSignupPending(): "email" | "google" | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const v = window.localStorage.getItem(SIGNUP_PENDING_KEY);
+    if (v === "email" || v === "google") {
+      window.localStorage.removeItem(SIGNUP_PENDING_KEY);
+      return v;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}

@@ -237,7 +237,8 @@ export function WorkerEducationSection({
                     value={form.institution}
                     maxLength={200}
                     onChange={(e) => setForm({ ...form, institution: e.target.value })}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    placeholder={t("institutionPlaceholder")}
+                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                     data-testid="worker-education-institution"
                   />
                 </div>
@@ -248,7 +249,8 @@ export function WorkerEducationSection({
                     value={form.program}
                     maxLength={200}
                     onChange={(e) => setForm({ ...form, program: e.target.value })}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    placeholder={t("programPlaceholder")}
+                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -272,7 +274,8 @@ export function WorkerEducationSection({
                       max={2100}
                       value={form.startYear}
                       onChange={(e) => setForm({ ...form, startYear: e.target.value })}
-                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                      placeholder={t("yearPlaceholder")}
+                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -285,7 +288,8 @@ export function WorkerEducationSection({
                       value={form.endYear}
                       disabled={form.isCurrent}
                       onChange={(e) => setForm({ ...form, endYear: e.target.value })}
-                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue disabled:opacity-50"
+                      placeholder={t("yearPlaceholder")}
+                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-50"
                     />
                   </div>
                 </div>
