@@ -21,6 +21,7 @@ import {
 } from "@/components/app/conversation/conversation-shell";
 import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
 import { listMyBookings } from "@/lib/booking/booking-actions";
+import { getWorkerActivity, type WorkerActivity } from "@/lib/conversation/worker-activity";
 import type { CommandAudience } from "@/lib/navigation/command-registry";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
@@ -95,6 +96,13 @@ export default async function AssistantPage({
     heldRoles,
   );
 
+  // Human-readable activity + profile completeness (worker) — derived from the
+  // worker's own canonical rows (server-derived continuity, no new store).
+  const activity: WorkerActivity | null =
+    activeRole === "worker" && heldRoles.has("worker")
+      ? await getWorkerActivity(user.id)
+      : null;
+
   return (
     <ConversationShell
       locale={locale as ActiveLocale}
@@ -104,6 +112,7 @@ export default async function AssistantPage({
       continueLabel={continueLabel}
       bookingOffers={bookingOffers}
       bookingLabels={bookingLabels}
+      activity={activity}
     />
   );
 }

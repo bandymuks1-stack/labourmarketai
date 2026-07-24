@@ -10761,7 +10761,8 @@
       "confirmCta": "Bestätigen",
       "cancelCta": "Abbrechen",
       "nothingPending": "Derzeit erfordert nichts deine Aktion.",
-      "needsResponseTitle": "Wartet auf deine Antwort"
+      "needsResponseTitle": "Wartet auf deine Antwort",
+      "openHere": "Hier öffnen"
     },
     "actions": {
       "worker": {
@@ -10884,6 +10885,91 @@
       "cancelCta": "Abbrechen",
       "working": "Wird ausgeführt…",
       "errorStale": "Dieses Angebot hat sich seit dem Öffnen geändert. Bitte erneut öffnen und versuchen."
+    },
+    "forms": {
+      "fields": {
+        "language": "Sprache",
+        "level": "Niveau",
+        "jobTitle": "Position",
+        "jobTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
+        "startMonth": "Startmonat",
+        "startYear": "Startjahr",
+        "endMonth": "Endmonat",
+        "endYear": "Endjahr",
+        "mm": "MM",
+        "yyyy": "JJJJ",
+        "ongoing": "Ich arbeite / studiere derzeit hier",
+        "institution": "Einrichtung",
+        "institutionPlaceholder": "z. B. Hochschule, Berufsbildungszentrum",
+        "program": "Programm / Fachgebiet",
+        "programPlaceholder": "z. B. Pflege, Elektro, Buchhaltung, Software",
+        "educationType": "Art",
+        "achievementTitle": "Titel",
+        "achievementKind": "Art",
+        "year": "Jahr",
+        "description": "Beschreibung (optional)",
+        "availability": "Verfügbarkeit",
+        "notStated": "Nicht angegeben",
+        "locationCountry": "Dein Land",
+        "countryCodePlaceholder": "z. B. LT",
+        "preferredCountries": "Wunschländer",
+        "preferredCountriesPlaceholder": "z. B. NL, DE",
+        "salaryMin": "Lohn ab (€)",
+        "salaryMinPlaceholder": "1500",
+        "salaryMax": "Lohn bis (€)",
+        "salaryMaxPlaceholder": "2500",
+        "willingToRelocate": "Umzugsbereit?",
+        "hasTransport": "Eigenes Fahrzeug?",
+        "needsAccommodation": "Unterkunft nötig?",
+        "availabilityNote": "Notiz (optional)",
+        "availabilityNotePlaceholder": "z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen"
+      },
+      "availability": {
+        "available": "Verfügbar",
+        "busy": "Beschäftigt",
+        "unavailable": "Nicht verfügbar"
+      },
+      "achievementKind": {
+        "achievement": "Erfolg",
+        "certificate": "Zertifikat"
+      },
+      "tristate": {
+        "yes": "Ja",
+        "no": "Nein",
+        "notStated": "—"
+      },
+      "ui": {
+        "reviewTitle": "Vor dem Speichern prüfen",
+        "continue": "Weiter",
+        "save": "Speichern",
+        "back": "Zurück",
+        "cancel": "Abbrechen",
+        "working": "Speichern…",
+        "saved": "Gespeichert.",
+        "addAnother": "Weiteres hinzufügen",
+        "errorGeneric": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+        "errorInvalid": "Bitte Felder prüfen und erneut versuchen.",
+        "errorNeedsMigration": "Noch nicht aktiviert. Bitte später.",
+        "errorConflict": "Dieser Wert weicht bereits ab. Öffne den erweiterten Modus zum Ersetzen."
+      }
+    },
+    "cv": {
+      "title": "Importiere deinen Lebenslauf",
+      "intro": "Lade eine PDF, DOCX oder TXT hoch. Wir lesen sie und zeigen die Funde — du bestätigst, was gespeichert wird. Nichts wird gespeichert, bis du bestätigst.",
+      "noneFound": "Wir konnten keine strukturierten Einträge lesen. Du kannst sie unten manuell hinzufügen.",
+      "close": "Schließen"
+    },
+    "journal": {
+      "title": "Deine Aktivität",
+      "completeness": "Profil zu {pct}% ausgefüllt",
+      "empty": "Noch keine Aktivität. Wähle oben eine Aktion.",
+      "events": {
+        "languageAdded": "Sprache hinzugefügt",
+        "educationAdded": "Ausbildung hinzugefügt",
+        "achievementAdded": "Erfolg oder Zertifikat hinzugefügt",
+        "workHistoryAdded": "Berufserfahrung hinzugefügt",
+        "skillsConfirmed": "Fähigkeiten bestätigt"
+      }
     }
   }
 }

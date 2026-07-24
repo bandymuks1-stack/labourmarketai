@@ -10761,7 +10761,8 @@
       "confirmCta": "Подтвердить",
       "cancelCta": "Отмена",
       "nothingPending": "Сейчас ничего не требует вашего действия.",
-      "needsResponseTitle": "Требует вашего ответа"
+      "needsResponseTitle": "Требует вашего ответа",
+      "openHere": "Открыть здесь"
     },
     "actions": {
       "worker": {
@@ -10884,6 +10885,91 @@
       "cancelCta": "Отмена",
       "working": "Выполняется…",
       "errorStale": "Это предложение изменилось с момента открытия. Откройте заново и повторите."
+    },
+    "forms": {
+      "fields": {
+        "language": "Язык",
+        "level": "Уровень",
+        "jobTitle": "Должность",
+        "jobTitlePlaceholder": "Напр., сварщик, медсестра, кладовщик, программист",
+        "startMonth": "Месяц начала",
+        "startYear": "Год начала",
+        "endMonth": "Месяц окончания",
+        "endYear": "Год окончания",
+        "mm": "ММ",
+        "yyyy": "ГГГГ",
+        "ongoing": "Работаю / учусь по настоящее время",
+        "institution": "Учебное заведение",
+        "institutionPlaceholder": "Напр., колледж, центр профобучения",
+        "program": "Программа / область",
+        "programPlaceholder": "Напр., сестринское дело, электрика, бухгалтерия, разработка",
+        "educationType": "Тип",
+        "achievementTitle": "Название",
+        "achievementKind": "Вид",
+        "year": "Год",
+        "description": "Описание (необязательно)",
+        "availability": "Доступность",
+        "notStated": "Не указано",
+        "locationCountry": "Ваша страна",
+        "countryCodePlaceholder": "Напр., LT",
+        "preferredCountries": "Желаемые страны",
+        "preferredCountriesPlaceholder": "Напр., NL, DE",
+        "salaryMin": "Оплата от (€)",
+        "salaryMinPlaceholder": "1500",
+        "salaryMax": "Оплата до (€)",
+        "salaryMaxPlaceholder": "2500",
+        "willingToRelocate": "Готовы к переезду?",
+        "hasTransport": "Есть свой транспорт?",
+        "needsAccommodation": "Нужно жильё?",
+        "availabilityNote": "Заметка (необязательно)",
+        "availabilityNotePlaceholder": "Напр., свободен с августа, предпочитаю 2-недельные вахты"
+      },
+      "availability": {
+        "available": "Доступен",
+        "busy": "Занят",
+        "unavailable": "Недоступен"
+      },
+      "achievementKind": {
+        "achievement": "Достижение",
+        "certificate": "Сертификат"
+      },
+      "tristate": {
+        "yes": "Да",
+        "no": "Нет",
+        "notStated": "—"
+      },
+      "ui": {
+        "reviewTitle": "Проверьте перед сохранением",
+        "continue": "Продолжить",
+        "save": "Сохранить",
+        "back": "Назад",
+        "cancel": "Отмена",
+        "working": "Сохранение…",
+        "saved": "Сохранено.",
+        "addAnother": "Добавить ещё",
+        "errorGeneric": "Не удалось сохранить. Попробуйте ещё раз.",
+        "errorInvalid": "Проверьте поля и повторите.",
+        "errorNeedsMigration": "Функция пока не включена. Попробуйте позже.",
+        "errorConflict": "Значение уже отличается. Откройте расширенный режим для замены."
+      }
+    },
+    "cv": {
+      "title": "Загрузите резюме",
+      "intro": "Загрузите PDF, DOCX или TXT. Мы прочитаем и покажем найденное — вы подтвердите, что сохранить. Ничего не сохраняется до подтверждения.",
+      "noneFound": "Не удалось распознать структурированные записи. Можно добавить вручную ниже.",
+      "close": "Закрыть"
+    },
+    "journal": {
+      "title": "Ваша активность",
+      "completeness": "Профиль заполнен на {pct}%",
+      "empty": "Пока нет активности. Выберите действие выше.",
+      "events": {
+        "languageAdded": "Добавлен язык",
+        "educationAdded": "Добавлено образование",
+        "achievementAdded": "Добавлено достижение или сертификат",
+        "workHistoryAdded": "Добавлен опыт работы",
+        "skillsConfirmed": "Подтверждены навыки"
+      }
     }
   }
 }

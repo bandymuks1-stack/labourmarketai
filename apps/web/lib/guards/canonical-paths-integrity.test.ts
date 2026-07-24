@@ -104,6 +104,11 @@ const CV_MOUNT_ALLOWLIST = new Set([
   "components/app/profession-skills-picker.tsx", // canonical: skills picker → CvImportUpload
   "components/app/profile-text-first-flow.tsx", // canonical: text-first flow → CvInputPanel
   "app/[locale]/design/text-first/preview.tsx", // dev-only design catalogue
+  // Conversation-first CV flow (Phase B): NOT a parallel flow — it mounts the
+  // SAME canonical CvImportUpload primitive, parses with the SAME parseCvSections,
+  // and persists through the SAME CvImportSectionReview + confirmCv* canonical
+  // actions. It is the canonical CV flow surfaced in the assistant, not a copy.
+  "components/app/conversation/worker-cv-flow.tsx",
 ]);
 
 const allTsx = [

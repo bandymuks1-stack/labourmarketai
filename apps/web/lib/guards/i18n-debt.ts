@@ -82,10 +82,13 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // namespace — shell UI strings + action registry labels/descriptions).
   // MEASURED 899 at worker-conversation-journey (+4: add-education +
   // add-achievement worker action labels/descriptions).
-  // MEASURED 908 at worker-conversation-journey booking flow (+9: the inline
-  // booking confirm strings `conversation.booking.*` + `shell.needsResponseTitle`
-  // land in all 11 locales; lt/en/ru/nl/de translated, da [EN] until human).
-  da: 908,
+  // MEASURED 908 at worker-conversation-journey booking flow (+9).
+  // MEASURED 964 at worker-conversation-journey inline forms (+56).
+  // MEASURED 968 at worker-conversation-journey CV flow (+4).
+  // MEASURED 976 at worker-conversation-journey journal (+8: `conversation.journal.*`
+  // activity + completeness strings land in all 11 locales; lt/en/ru/nl/de
+  // translated, da [EN] until human translation).
+  da: 976,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an
