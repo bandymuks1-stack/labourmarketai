@@ -12,6 +12,17 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { ConfirmationTier } from "@/lib/conversation/action-registry";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  WorkerBookingAction,
+  type BookingActionLabels,
+} from "@/components/app/conversation/worker-booking-action";
+
+/** A worker's incoming booking offer, executed inline in the shell. */
+export type BookingOffer = {
+  bookingId: string;
+  title: string; // roleText (may be empty → generic offer label used)
+  subtitle: string | null; // period line
+};
 
 /** Serializable view of a registry action passed from the server page. */
 export type ShellAction = {
@@ -46,6 +57,8 @@ export function ConversationShell({
   suggested,
   continueHref,
   continueLabel,
+  bookingOffers = [],
+  bookingLabels = null,
 }: {
   locale: ActiveLocale;
   audiences: CommandAudience[];
@@ -54,6 +67,10 @@ export function ConversationShell({
   continueHref: string | null;
   /** Human label for the continue step (already localized), or null. */
   continueLabel: string | null;
+  /** Incoming booking offers to accept/decline inline (worker). */
+  bookingOffers?: BookingOffer[];
+  /** Localized labels for the inline booking flow (null when no offers). */
+  bookingLabels?: BookingActionLabels | null;
 }) {
   const t = useTranslations("conversation.shell");
   const tActions = useTranslations("conversation.actions");
@@ -135,6 +152,27 @@ export function ConversationShell({
               {t("continueCta")} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </span>
           </button>
+        </section>
+      )}
+
+      {/* Needs your response — incoming booking offers, executed inline */}
+      {bookingOffers.length > 0 && bookingLabels && (
+        <section className="flex flex-col gap-2" data-testid="conversation-booking-offers">
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-brand-orange">
+            {t("needsResponseTitle")}
+          </h2>
+          <div className="flex flex-col gap-2">
+            {bookingOffers.map((o) => (
+              <WorkerBookingAction
+                key={o.bookingId}
+                bookingId={o.bookingId}
+                locale={locale}
+                title={o.title || bookingLabels.offerFrom}
+                subtitle={o.subtitle}
+                labels={bookingLabels}
+              />
+            ))}
+          </div>
         </section>
       )}
 

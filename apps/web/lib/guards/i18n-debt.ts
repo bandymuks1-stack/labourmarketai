@@ -79,9 +79,13 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // ownerDecision — lands in all 11 locales; en/lt/ru translated, da/de
   // [EN] until human translation).
   // MEASURED 895 at conversation-control-foundation (+52: the `conversation`
-  // namespace — shell UI strings + action registry labels/descriptions — lands
-  // in all 11 locales; lt/en/ru/nl/de translated, da [EN] until human translation).
-  da: 895,
+  // namespace — shell UI strings + action registry labels/descriptions).
+  // MEASURED 899 at worker-conversation-journey (+4: add-education +
+  // add-achievement worker action labels/descriptions).
+  // MEASURED 908 at worker-conversation-journey booking flow (+9: the inline
+  // booking confirm strings `conversation.booking.*` + `shell.needsResponseTitle`
+  // land in all 11 locales; lt/en/ru/nl/de translated, da [EN] until human).
+  da: 908,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

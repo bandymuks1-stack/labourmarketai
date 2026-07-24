@@ -2943,7 +2943,8 @@
       "confirmStrong": "[EN] This is an important step. Are you sure?",
       "confirmCta": "[EN] Confirm",
       "cancelCta": "[EN] Cancel",
-      "nothingPending": "[EN] Nothing needs your action right now."
+      "nothingPending": "[EN] Nothing needs your action right now.",
+      "needsResponseTitle": "[EN] Needs your response"
     },
     "actions": {
       "worker": {
@@ -2994,6 +2995,14 @@
         "whatNext": {
           "label": "[EN] What should I do next?",
           "description": "[EN] See your recommended next step."
+        },
+        "addEducation": {
+          "label": "[EN] Add education",
+          "description": "[EN] Add a school or programme you studied."
+        },
+        "addAchievement": {
+          "label": "[EN] Add achievement or certificate",
+          "description": "[EN] Add an achievement or a declared certificate."
         }
       },
       "company": {
@@ -3048,6 +3057,16 @@
           "description": "[EN] See what needs your action."
         }
       }
+    },
+    "booking": {
+      "offerTitle": "[EN] Job offer",
+      "confirmAcceptTitle": "[EN] Accept this offer?",
+      "confirmAcceptBody": "[EN] Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmDeclineTitle": "[EN] Decline this offer?",
+      "confirmCta": "[EN] Yes, confirm",
+      "cancelCta": "[EN] Cancel",
+      "working": "[EN] Working…",
+      "errorStale": "[EN] This offer changed since you opened it. Please reopen and try again."
     }
   }
 }

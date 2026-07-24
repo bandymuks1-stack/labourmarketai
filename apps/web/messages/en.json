@@ -10760,7 +10760,8 @@
       "confirmStrong": "This is an important step. Are you sure?",
       "confirmCta": "Confirm",
       "cancelCta": "Cancel",
-      "nothingPending": "Nothing needs your action right now."
+      "nothingPending": "Nothing needs your action right now.",
+      "needsResponseTitle": "Needs your response"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10812,14 @@
         "whatNext": {
           "label": "What should I do next?",
           "description": "See your recommended next step."
+        },
+        "addEducation": {
+          "label": "Add education",
+          "description": "Add a school or programme you studied."
+        },
+        "addAchievement": {
+          "label": "Add achievement or certificate",
+          "description": "Add an achievement or a declared certificate."
         }
       },
       "company": {
@@ -10865,6 +10874,16 @@
           "description": "See what needs your action."
         }
       }
+    },
+    "booking": {
+      "offerTitle": "Job offer",
+      "confirmAcceptTitle": "Accept this offer?",
+      "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmDeclineTitle": "Decline this offer?",
+      "confirmCta": "Yes, confirm",
+      "cancelCta": "Cancel",
+      "working": "Working…",
+      "errorStale": "This offer changed since you opened it. Please reopen and try again."
     }
   }
 }

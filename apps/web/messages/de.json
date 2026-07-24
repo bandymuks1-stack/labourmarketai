@@ -10760,7 +10760,8 @@
       "confirmStrong": "Das ist ein wichtiger Schritt. Bist du sicher?",
       "confirmCta": "Bestätigen",
       "cancelCta": "Abbrechen",
-      "nothingPending": "Derzeit erfordert nichts deine Aktion."
+      "nothingPending": "Derzeit erfordert nichts deine Aktion.",
+      "needsResponseTitle": "Wartet auf deine Antwort"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10812,14 @@
         "whatNext": {
           "label": "Was als Nächstes?",
           "description": "Sieh deinen empfohlenen nächsten Schritt."
+        },
+        "addEducation": {
+          "label": "Ausbildung hinzufügen",
+          "description": "Füge eine Schule oder Ausbildung hinzu."
+        },
+        "addAchievement": {
+          "label": "Erfolg oder Zertifikat hinzufügen",
+          "description": "Füge einen Erfolg oder ein angegebenes Zertifikat hinzu."
         }
       },
       "company": {
@@ -10865,6 +10874,16 @@
           "description": "Sieh, was deine Aktion braucht."
         }
       }
+    },
+    "booking": {
+      "offerTitle": "Stellenangebot",
+      "confirmAcceptTitle": "Dieses Angebot annehmen?",
+      "confirmAcceptBody": "Die Annahme bestätigt dein Engagement beim Arbeitgeber — ein fester Schritt, kein Entwurf.",
+      "confirmDeclineTitle": "Dieses Angebot ablehnen?",
+      "confirmCta": "Ja, bestätigen",
+      "cancelCta": "Abbrechen",
+      "working": "Wird ausgeführt…",
+      "errorStale": "Dieses Angebot hat sich seit dem Öffnen geändert. Bitte erneut öffnen und versuchen."
     }
   }
 }

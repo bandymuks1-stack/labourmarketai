@@ -10760,7 +10760,8 @@
       "confirmStrong": "Tai svarbus žingsnis. Ar tikrai?",
       "confirmCta": "Patvirtinti",
       "cancelCta": "Atšaukti",
-      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo."
+      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo.",
+      "needsResponseTitle": "Laukia tavo atsakymo"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10812,14 @@
         "whatNext": {
           "label": "Ką daryti toliau?",
           "description": "Pamatyk rekomenduojamą kitą žingsnį."
+        },
+        "addEducation": {
+          "label": "Pridėti išsilavinimą",
+          "description": "Pridėk mokyklą ar programą, kurią baigei."
+        },
+        "addAchievement": {
+          "label": "Pridėti pasiekimą ar sertifikatą",
+          "description": "Pridėk pasiekimą arba deklaruotą sertifikatą."
         }
       },
       "company": {
@@ -10865,6 +10874,16 @@
           "description": "Pamatyk, kas laukia tavo veiksmo."
         }
       }
+    },
+    "booking": {
+      "offerTitle": "Darbo pasiūlymas",
+      "confirmAcceptTitle": "Priimti šį pasiūlymą?",
+      "confirmAcceptBody": "Priėmimas patvirtina įsipareigojimą darbdaviui — tai tvirtas žingsnis, ne juodraštis.",
+      "confirmDeclineTitle": "Atmesti šį pasiūlymą?",
+      "confirmCta": "Taip, patvirtinti",
+      "cancelCta": "Atšaukti",
+      "working": "Vykdoma…",
+      "errorStale": "Šis pasiūlymas pasikeitė nuo atidarymo. Atidaryk iš naujo ir bandyk dar kartą."
     }
   }
 }

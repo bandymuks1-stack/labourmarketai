@@ -10760,7 +10760,8 @@
       "confirmStrong": "Dit is een belangrijke stap. Weet je het zeker?",
       "confirmCta": "Bevestigen",
       "cancelCta": "Annuleren",
-      "nothingPending": "Er is nu niets dat jouw actie nodig heeft."
+      "nothingPending": "Er is nu niets dat jouw actie nodig heeft.",
+      "needsResponseTitle": "Wacht op je reactie"
     },
     "actions": {
       "worker": {
@@ -10811,6 +10812,14 @@
         "whatNext": {
           "label": "Wat nu?",
           "description": "Bekijk je aanbevolen volgende stap."
+        },
+        "addEducation": {
+          "label": "Opleiding toevoegen",
+          "description": "Voeg een school of opleiding toe die je volgde."
+        },
+        "addAchievement": {
+          "label": "Prestatie of certificaat toevoegen",
+          "description": "Voeg een prestatie of opgegeven certificaat toe."
         }
       },
       "company": {
@@ -10865,6 +10874,16 @@
           "description": "Bekijk wat jouw actie nodig heeft."
         }
       }
+    },
+    "booking": {
+      "offerTitle": "Vacature-aanbod",
+      "confirmAcceptTitle": "Dit aanbod accepteren?",
+      "confirmAcceptBody": "Accepteren bevestigt je opdracht bij de werkgever — een vaste stap, geen concept.",
+      "confirmDeclineTitle": "Dit aanbod weigeren?",
+      "confirmCta": "Ja, bevestigen",
+      "cancelCta": "Annuleren",
+      "working": "Bezig…",
+      "errorStale": "Dit aanbod is gewijzigd sinds je het opende. Open opnieuw en probeer het nogmaals."
     }
   }
 }
