@@ -10970,6 +10970,31 @@
         "workHistoryAdded": "Added work experience",
         "skillsConfirmed": "Confirmed skills"
       }
+    },
+    "chat": {
+      "headerTitle": "LabourMarket",
+      "advanced": "Advanced mode",
+      "composerPlaceholder": "Write what you need…",
+      "send": "Send",
+      "attach": "Attach a file",
+      "greeting": "Hi. How can I help you today?",
+      "chipCv": "Upload CV",
+      "chipJobs": "I'm looking for work",
+      "chipProfile": "Complete my profile",
+      "chipOffers": "View offers",
+      "profileQuestion": "Sure — what would you like to add?",
+      "chipLang": "A language",
+      "chipExp": "Work experience",
+      "chipEdu": "Education",
+      "chipCard": "Availability & pay",
+      "chipPrefs": "Preferences",
+      "jobsAnswer": "I'll help you get discovered by employers. First let's make your profile strong — upload your CV or add your experience, and I'll take it from there.",
+      "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
+      "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
+      "userCv": "I'll upload my CV",
+      "userProfile": "Complete my profile",
+      "userOffers": "View my offers",
+      "userJobs": "I'm looking for work"
     }
   }
 }

@@ -4,32 +4,20 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
-import {
-  workerNextAction,
-  managerNextAction,
-  customerNextAction,
-  type NextAction,
-} from "@/lib/dashboard/next-action";
-import {
-  actionsForRoles,
-  type ConversationActionDescriptor,
-} from "@/lib/conversation/action-registry";
-import {
-  ConversationShell,
-  type ShellAction,
-  type BookingOffer,
-} from "@/components/app/conversation/conversation-shell";
-import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
 import { listMyBookings } from "@/lib/booking/booking-actions";
-import { getWorkerActivity, type WorkerActivity } from "@/lib/conversation/worker-activity";
-import type { CommandAudience } from "@/lib/navigation/command-registry";
+import {
+  ConversationChat,
+  type ChatLabels,
+} from "@/components/app/conversation/chat/conversation-chat";
+import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
+import type { BookingOffer } from "@/components/app/conversation/conversation-shell";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
 /**
- * Conversation-first control surface (foundation v1). A deterministic,
- * role-aware entry that reuses the canonical next-action engine + command
- * registry and routes to the existing Advanced-mode screens. No LLM, no new
- * data system, no migration. See docs/architecture/CONVERSATION_CONTROL_ARCHITECTURE_v1.md.
+ * Conversation-first control surface — the REAL chat window. The whole screen
+ * is one conversation (greeting → starter chips → dialogue with inline CV /
+ * profile / booking flows as messages), not dashboard cards. Deterministic
+ * (LLM off), reuses the safe Phase B backend. Advanced mode stays one tap away.
  */
 export default async function AssistantPage({
   params,
@@ -48,84 +36,36 @@ export default async function AssistantPage({
   const session = await getSessionProfile();
   const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
 
-  // Held roles (catalogue) — RLS-scoped. Default to the active role on any read
-  // issue so the surface still renders honestly.
-  let heldRoles = new Set<Role>([activeRole]);
-  try {
-    const { data: rows } = await supabase
-      .from("profile_roles")
-      .select("role")
-      .eq("profile_id", user.id)
-      .eq("is_active", true);
-    const set = new Set<Role>((rows ?? []).map((r) => r.role as Role));
-    if (set.size > 0) heldRoles = set;
-  } catch {
-    /* keep the active-role default */
-  }
-
-  // Command-finder audiences derived from held roles (display-only filter).
-  const audiences: CommandAudience[] = ["public"];
-  if (heldRoles.has("worker")) audiences.push("worker");
-  if (heldRoles.has("company") || heldRoles.has("agency")) audiences.push("company");
-
-  // Canonical "continue where you left off" — derived, never a new store.
-  const { href: continueHref, label: continueLabel } = await deriveContinue(
-    supabase,
-    user.id,
-    activeRole,
-  );
-
-  // Suggested actions: role-filtered registry, active-role subject first, capped.
-  const forRoles = actionsForRoles(heldRoles);
-  const ordered = [...forRoles].sort(
-    (a, b) => rank(a, activeRole) - rank(b, activeRole),
-  );
-  const suggested: ShellAction[] = ordered.slice(0, 8).map((a) => ({
-    id: a.id,
-    subject: a.subject,
-    labelKey: a.labelKey,
-    descriptionKey: a.descriptionKey,
-    confirmation: a.confirmation,
-    advancedRoute: a.advancedRoute,
-  }));
-
-  // Actionable, conversation-first booking offers (worker only) — the highest
-  // priority "needs your response" items, executed inline via the dispatcher.
-  const { offers: bookingOffers, labels: bookingLabels } = await loadBookingOffers(
-    activeRole,
-    heldRoles,
-  );
-
-  // Human-readable activity + profile completeness (worker) — derived from the
-  // worker's own canonical rows (server-derived continuity, no new store).
-  const activity: WorkerActivity | null =
-    activeRole === "worker" && heldRoles.has("worker")
-      ? await getWorkerActivity(user.id)
-      : null;
+  const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
+  const t = await getTranslations("conversation.chat");
+  const labels = resolveChatLabels(t);
 
   return (
-    <ConversationShell
+    <ConversationChat
       locale={locale as ActiveLocale}
-      audiences={audiences}
-      suggested={suggested}
-      continueHref={continueHref}
-      continueLabel={continueLabel}
-      bookingOffers={bookingOffers}
+      labels={labels}
+      bookingOffers={offers}
       bookingLabels={bookingLabels}
-      activity={activity}
     />
   );
 }
 
-/** Load the worker's incoming PROPOSED booking offers + their localized labels.
- *  Empty (and labels null) for non-workers or on any read issue — honest empty. */
+function resolveChatLabels(t: Awaited<ReturnType<typeof getTranslations>>): ChatLabels {
+  const keys = [
+    "headerTitle", "advanced", "composerPlaceholder", "send", "attach", "greeting",
+    "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
+    "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
+    "fallback", "userCv", "userProfile", "userOffers", "userJobs",
+  ] as const;
+  const out = {} as Record<(typeof keys)[number], string>;
+  for (const k of keys) out[k] = t(k);
+  return out as ChatLabels;
+}
+
 async function loadBookingOffers(
   activeRole: Role,
-  heldRoles: ReadonlySet<Role>,
 ): Promise<{ offers: BookingOffer[]; labels: BookingActionLabels | null }> {
-  if (!heldRoles.has("worker") || activeRole !== "worker") {
-    return { offers: [], labels: null };
-  }
+  if (activeRole !== "worker") return { offers: [], labels: null };
   let offers: BookingOffer[] = [];
   try {
     const res = await listMyBookings();
@@ -133,93 +73,39 @@ async function loadBookingOffers(
       offers = res.incoming
         .filter((b) => b.status === "proposed")
         .slice(0, 5)
-        .map((b) => {
-          const period =
+        .map((b) => ({
+          bookingId: b.id,
+          title: b.roleText ?? "",
+          subtitle:
             b.startDate || b.expectedEndDate
               ? [b.startDate, b.expectedEndDate].filter(Boolean).join(" — ")
-              : null;
-          return {
-            bookingId: b.id,
-            title: b.roleText ?? "",
-            subtitle: period,
-          };
-        });
+              : null,
+        }));
     }
   } catch {
     return { offers: [], labels: null };
   }
   if (offers.length === 0) return { offers: [], labels: null };
-
   const tB = await getTranslations("bookings.actions");
   const tC = await getTranslations("conversation.booking");
-  const labels: BookingActionLabels = {
-    offerFrom: tC("offerTitle"),
-    period: "{start} — {end}",
-    accept: tB("accept"),
-    decline: tB("decline"),
-    confirmAcceptTitle: tC("confirmAcceptTitle"),
-    confirmAcceptBody: tC("confirmAcceptBody"),
-    confirmDeclineTitle: tC("confirmDeclineTitle"),
-    confirmCta: tC("confirmCta"),
-    cancelCta: tC("cancelCta"),
-    working: tC("working"),
-    acceptedResult: tB("accepted"),
-    declinedResult: tB("declined"),
-    errorGeneric: tB("error"),
-    errorStale: tC("errorStale"),
-    errorConflict: tB("conflict"),
+  return {
+    offers,
+    labels: {
+      offerFrom: tC("offerTitle"),
+      period: "{start} — {end}",
+      accept: tB("accept"),
+      decline: tB("decline"),
+      confirmAcceptTitle: tC("confirmAcceptTitle"),
+      confirmAcceptBody: tC("confirmAcceptBody"),
+      confirmDeclineTitle: tC("confirmDeclineTitle"),
+      confirmCta: tC("confirmCta"),
+      cancelCta: tC("cancelCta"),
+      working: tC("working"),
+      acceptedResult: tB("accepted"),
+      declinedResult: tB("declined"),
+      errorGeneric: tB("error"),
+      errorStale: tC("errorStale"),
+      errorConflict: tB("conflict"),
+    },
   };
-  return { offers, labels };
-}
-
-/** Sort key: the active role's own actions first, reads before writes within. */
-function rank(a: ConversationActionDescriptor, active: Role): number {
-  const subjectRank = a.subject === active ? 0 : 1;
-  const tierRank =
-    a.confirmation === "read" ? 0 : a.confirmation === "reversible_write" ? 1 : 2;
-  return subjectRank * 10 + tierRank;
-}
-
-/** Best-effort derivation of the canonical next step. Everything is wrapped so a
- *  read failure degrades to "no continue card" rather than an error page. */
-async function deriveContinue(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  activeRole: Role,
-): Promise<{ href: string | null; label: string | null }> {
-  let action: NextAction | null = null;
-  try {
-    if (activeRole === "worker") {
-      const { data: worker } = await supabase
-        .from("workers")
-        .select("id")
-        .eq("profile_id", userId)
-        .maybeSingle();
-      const hasProfile = !!worker?.id;
-      let entriesTotal = 0;
-      if (worker?.id) {
-        const { count } = await supabase
-          .from("journal_entries")
-          .select("id", { count: "exact", head: true })
-          .eq("worker_id", worker.id);
-        entriesTotal = count ?? 0;
-      }
-      // confirmedCount defaults to entriesTotal so we never falsely show a
-      // "waiting for a human" step from this lightweight surface.
-      action = workerNextAction({ hasProfile, entriesTotal, confirmedCount: entriesTotal });
-    } else if (activeRole === "company" || activeRole === "agency") {
-      action = managerNextAction(activeRole, 0);
-    } else {
-      action = customerNextAction();
-    }
-  } catch {
-    return { href: null, label: null };
-  }
-  if (!action) return { href: null, label: null };
-  try {
-    const t = await getTranslations("auth.dashboard.nextAction");
-    return { href: action.href, label: t(`${action.key}.title`) };
-  } catch {
-    return { href: action.href, label: null };
-  }
 }

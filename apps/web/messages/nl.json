@@ -10970,6 +10970,31 @@
         "workHistoryAdded": "Werkervaring toegevoegd",
         "skillsConfirmed": "Vaardigheden bevestigd"
       }
+    },
+    "chat": {
+      "headerTitle": "LabourMarket",
+      "advanced": "Geavanceerde modus",
+      "composerPlaceholder": "Schrijf wat je nodig hebt…",
+      "send": "Verzenden",
+      "attach": "Bestand bijvoegen",
+      "greeting": "Hoi. Hoe kan ik je vandaag helpen?",
+      "chipCv": "CV uploaden",
+      "chipJobs": "Ik zoek werk",
+      "chipProfile": "Profiel voltooien",
+      "chipOffers": "Aanbiedingen bekijken",
+      "profileQuestion": "Prima — wat wil je toevoegen?",
+      "chipLang": "Een taal",
+      "chipExp": "Werkervaring",
+      "chipEdu": "Opleiding",
+      "chipCard": "Beschikbaarheid & loon",
+      "chipPrefs": "Voorkeuren",
+      "jobsAnswer": "Ik help je gevonden te worden door werkgevers. Laten we eerst je profiel sterk maken — upload je cv of voeg ervaring toe.",
+      "offersEmpty": "Je hebt nog geen aanbiedingen. Zodra je profiel klaar is, kunnen werkgevers je aanbiedingen sturen.",
+      "fallback": "Ik kan je helpen met je cv, profiel en aanbiedingen. Wat wil je doen?",
+      "userCv": "Ik upload mijn cv",
+      "userProfile": "Profiel voltooien",
+      "userOffers": "Mijn aanbiedingen bekijken",
+      "userJobs": "Ik zoek werk"
     }
   }
 }

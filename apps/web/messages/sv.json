@@ -3153,6 +3153,31 @@
         "workHistoryAdded": "[EN] Added work experience",
         "skillsConfirmed": "[EN] Confirmed skills"
       }
+    },
+    "chat": {
+      "headerTitle": "[EN] LabourMarket",
+      "advanced": "[EN] Advanced mode",
+      "composerPlaceholder": "[EN] Write what you need…",
+      "send": "[EN] Send",
+      "attach": "[EN] Attach a file",
+      "greeting": "[EN] Hi. How can I help you today?",
+      "chipCv": "[EN] Upload CV",
+      "chipJobs": "[EN] I'm looking for work",
+      "chipProfile": "[EN] Complete my profile",
+      "chipOffers": "[EN] View offers",
+      "profileQuestion": "[EN] Sure — what would you like to add?",
+      "chipLang": "[EN] A language",
+      "chipExp": "[EN] Work experience",
+      "chipEdu": "[EN] Education",
+      "chipCard": "[EN] Availability & pay",
+      "chipPrefs": "[EN] Preferences",
+      "jobsAnswer": "[EN] I'll help you get discovered by employers. First let's make your profile strong — upload your CV or add your experience, and I'll take it from there.",
+      "offersEmpty": "[EN] You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
+      "fallback": "[EN] I can help you with your CV, your profile, and job offers. What would you like to do?",
+      "userCv": "[EN] I'll upload my CV",
+      "userProfile": "[EN] Complete my profile",
+      "userOffers": "[EN] View my offers",
+      "userJobs": "[EN] I'm looking for work"
     }
   }
 }

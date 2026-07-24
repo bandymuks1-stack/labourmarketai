@@ -10970,6 +10970,31 @@
         "workHistoryAdded": "Pridėta darbo patirtis",
         "skillsConfirmed": "Patvirtinti įgūdžiai"
       }
+    },
+    "chat": {
+      "headerTitle": "LabourMarket",
+      "advanced": "Išplėstinis valdymas",
+      "composerPlaceholder": "Parašyk, ko tau reikia…",
+      "send": "Siųsti",
+      "attach": "Prisegti failą",
+      "greeting": "Labas. Kuo šiandien galiu padėti?",
+      "chipCv": "Įkelti CV",
+      "chipJobs": "Ieškau darbo",
+      "chipProfile": "Užbaigti profilį",
+      "chipOffers": "Peržiūrėti pasiūlymus",
+      "profileQuestion": "Gerai — ką norėtum pridėti?",
+      "chipLang": "Kalbą",
+      "chipExp": "Darbo patirtį",
+      "chipEdu": "Išsilavinimą",
+      "chipCard": "Prieinamumą ir atlygį",
+      "chipPrefs": "Pageidavimus",
+      "jobsAnswer": "Padėsiu, kad tave pastebėtų darbdaviai. Pirmiausia sustiprinkim profilį — įkelk CV arba pridėk patirtį, o toliau pasirūpinsiu.",
+      "offersEmpty": "Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia.",
+      "fallback": "Galiu padėti su CV, profiliu ir darbo pasiūlymais. Ką norėtum daryti?",
+      "userCv": "Įkelsiu CV",
+      "userProfile": "Užbaigti profilį",
+      "userOffers": "Peržiūrėti pasiūlymus",
+      "userJobs": "Ieškau darbo"
     }
   }
 }

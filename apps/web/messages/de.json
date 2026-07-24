@@ -10970,6 +10970,31 @@
         "workHistoryAdded": "Berufserfahrung hinzugefügt",
         "skillsConfirmed": "Fähigkeiten bestätigt"
       }
+    },
+    "chat": {
+      "headerTitle": "LabourMarket",
+      "advanced": "Erweiterter Modus",
+      "composerPlaceholder": "Schreib, was du brauchst…",
+      "send": "Senden",
+      "attach": "Datei anhängen",
+      "greeting": "Hallo. Wie kann ich dir heute helfen?",
+      "chipCv": "Lebenslauf hochladen",
+      "chipJobs": "Ich suche Arbeit",
+      "chipProfile": "Profil vervollständigen",
+      "chipOffers": "Angebote ansehen",
+      "profileQuestion": "Gerne — was möchtest du hinzufügen?",
+      "chipLang": "Eine Sprache",
+      "chipExp": "Berufserfahrung",
+      "chipEdu": "Ausbildung",
+      "chipCard": "Verfügbarkeit & Lohn",
+      "chipPrefs": "Präferenzen",
+      "jobsAnswer": "Ich helfe dir, von Arbeitgebern gefunden zu werden. Machen wir zuerst dein Profil stark — lade deinen Lebenslauf hoch oder füge Erfahrung hinzu.",
+      "offersEmpty": "Du hast noch keine Angebote. Sobald dein Profil fertig ist, können Arbeitgeber dir Angebote senden.",
+      "fallback": "Ich kann dir mit Lebenslauf, Profil und Angeboten helfen. Was möchtest du tun?",
+      "userCv": "Ich lade meinen Lebenslauf hoch",
+      "userProfile": "Profil vervollständigen",
+      "userOffers": "Meine Angebote ansehen",
+      "userJobs": "Ich suche Arbeit"
     }
   }
 }
