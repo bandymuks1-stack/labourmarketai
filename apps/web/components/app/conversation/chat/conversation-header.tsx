@@ -30,7 +30,7 @@ export function ConversationHeader({
           <User className="size-4" aria-hidden />
         </button>
         <Link
-          href="/dashboard"
+          href="/dashboard/advanced"
           data-testid="chat-advanced-link"
           className="ml-1 flex items-center gap-1.5 rounded-full border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
         >
