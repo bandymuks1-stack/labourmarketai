@@ -243,9 +243,61 @@ revoke execute on function public.mirror_company_to_org() from public;
 revoke execute on function public.mirror_company_to_org() from anon;
 
 -- ---------------------------------------------------------------------
+-- 4b. Baseline-independent closure (local-reset reproducibility fix).
+--     ROOT CAUSE this addresses: production reaches the approved matrix
+--     because the platform baseline already lacks the default PUBLIC EXECUTE
+--     on functions created OUTSIDE this migration's hand-analysed 43-function
+--     delta (no migration in the chain runs ALTER DEFAULT PRIVILEGES). A FRESH
+--     database built by a plain `supabase db reset` has NO such hardening, so
+--     every other SECURITY DEFINER function keeps Postgres's default PUBLIC
+--     (hence anon) EXECUTE, and the fail-closed assertion in §5 — written
+--     against the production end-state — cannot hold. The chain was therefore
+--     NOT reproducible on a clean local DB.
+--
+--     This block makes the migration the CANONICAL closure point instead of
+--     relying on an out-of-band platform baseline: it revokes EXECUTE from
+--     PUBLIC + anon on EVERY public SECURITY DEFINER function EXCEPT the four
+--     intentionally-public RPCs (the same allowlist §5 asserts). Properties:
+--       * PRODUCTION: idempotent no-op — those grants are already absent, so
+--         re-running (if it ever were) changes nothing and the ledger is
+--         untouched; production is NOT re-applied (version already recorded).
+--       * FRESH DB: enforces the exact same end-state deterministically.
+--       * It NEVER touches `authenticated`, `service_role` or `postgres`.
+--         `authenticated` access is preserved by the explicit grants above
+--         plus each function's own grant (proven: on production these
+--         functions already have PUBLIC revoked and authenticated still
+--         reaches them, so their authenticated path is an explicit grant, not
+--         PUBLIC inheritance — the only PUBLIC-only-for-authenticated cases are
+--         the 8 helpers granted in §2b, which run before this block).
+--     No environment switch, no weakening of the check: §5 still runs in full.
+-- ---------------------------------------------------------------------
+do $$
+declare
+  r record;
+begin
+  for r in
+    select p.oid::regprocedure as fn
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.prosecdef
+       and (p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')') not in (
+         'get_public_business_profile_v1(p_slug text)',
+         'get_public_business_listings_v1(p_org_id uuid)',
+         'get_public_business_services_v1(p_org_id uuid)',
+         'submit_company_need_public_v1(p_locale text, p_company_name text, p_contact_name text, p_contact_email text, p_contact_phone text, p_country text, p_city_region text, p_sector text, p_headcount integer, p_start_window text, p_expected_duration text, p_urgency text, p_accommodation text, p_transport_needed boolean, p_languages text, p_engagement_type text, p_description text, p_source_path text)'
+       )
+  loop
+    execute format('revoke execute on function %s from public, anon', r.fn::text);
+  end loop;
+end $$;
+
+-- ---------------------------------------------------------------------
 -- 5. Fail-closed assertion. The migration refuses to commit unless the
 --    resulting state matches the approved matrix EXACTLY, by signature
 --    identity. Never a count: a swap preserving the number would still abort.
+--    With §4b above, this assertion now holds identically on a fresh local
+--    reset and on the production grant model.
 -- ---------------------------------------------------------------------
 -- NOTE ON THE ASSERTIONS BELOW: they resolve functions by JOINING pg_proc on the
 -- identity string, never by casting to `regprocedure`. `regprocedure` input accepts
