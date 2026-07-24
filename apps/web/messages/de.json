@@ -1551,7 +1551,20 @@
     "manualAddPlaceholder": "z. B. Englische Sprache",
     "manualAddButton": "Hinzufügen",
     "manualAdding": "Wird hinzugefügt…",
-    "addError": "Konnte nicht hinzugefügt werden. Bitte versuchen Sie es erneut."
+    "addError": "Konnte nicht hinzugefügt werden. Bitte versuchen Sie es erneut.",
+    "addExperienceTitle": "Berufserfahrung hinzufügen",
+    "expTitleLabel": "Position",
+    "expTitlePlaceholder": "z. B. Schweißer, Krankenpfleger, Lagerarbeiter, Entwickler",
+    "expStartLabel": "Von (Monat / Jahr)",
+    "expEndLabel": "Bis (Monat / Jahr)",
+    "expOngoing": "Ich arbeite derzeit hier",
+    "expMonthPlaceholder": "MM",
+    "expYearPlaceholder": "JJJJ",
+    "expSave": "Erfahrung speichern",
+    "expSaving": "Speichern…",
+    "expInvalid": "Bitte Position und mindestens das Startjahr angeben.",
+    "expNeedsMigration": "Diese Funktion ist noch nicht aktiviert. Bitte später versuchen.",
+    "expError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
   },
   "roleDashboards": {
     "company": {
@@ -3484,7 +3497,9 @@
       "error_password_mismatch": "Die Passwörter stimmen nicht überein.",
       "error_password_uppercase": "Das Passwort muss einen Großbuchstaben enthalten.",
       "error_password_number": "Das Passwort muss eine Zahl enthalten.",
-      "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten."
+      "error_password_special": "Das Passwort muss ein Sonderzeichen enthalten.",
+      "check_email_title": "E-Mail bestätigen",
+      "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen."
     },
     "login": {
       "headline": "Anmelden",
@@ -4326,7 +4341,7 @@
         },
         {
           "title": "Chancen über Grenzen hinweg",
-          "desc": "NL, DK, DE, SE, NO und mehr."
+          "desc": "Für grenzüberschreitende Arbeit in ganz Europa."
         },
         {
           "title": "Direkter Kontakt zum Arbeitgeber",
@@ -4708,7 +4723,7 @@
         }
       ],
       "screenshot": "Avatar-Ablauf für Arbeitskräfte",
-      "cta": "Jetzt starten"
+      "cta": "Kostenloses Profil erstellen"
     },
     "companies": {
       "eyebrow": "Für Unternehmen",
@@ -9944,7 +9959,10 @@
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "invalid": "Ungültiger Wert.",
       "limit": "Limit erreicht.",
-      "selfStated": "Von Ihnen eingetragen."
+      "selfStated": "Von Ihnen eingetragen.",
+      "institutionPlaceholder": "z. B. Hochschule, Berufsbildungszentrum",
+      "programPlaceholder": "z. B. Pflege, Elektro, Buchhaltung, Softwareentwicklung",
+      "yearPlaceholder": "JJJJ"
     },
     "educationTypes": {
       "primary": "Grundschule",

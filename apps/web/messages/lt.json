@@ -1551,7 +1551,20 @@
     "manualAddPlaceholder": "Pvz., Anglų kalba",
     "manualAddButton": "Pridėti",
     "manualAdding": "Pridedama…",
-    "addError": "Nepavyko pridėti. Pabandykite dar kartą."
+    "addError": "Nepavyko pridėti. Pabandykite dar kartą.",
+    "addExperienceTitle": "Pridėti darbo patirtį",
+    "expTitleLabel": "Pareigos",
+    "expTitlePlaceholder": "Pvz., suvirintojas, slaugytoja, sandėlio darbuotojas, programuotojas",
+    "expStartLabel": "Nuo (mėnuo / metai)",
+    "expEndLabel": "Iki (mėnuo / metai)",
+    "expOngoing": "Dirbu iki dabar",
+    "expMonthPlaceholder": "MM",
+    "expYearPlaceholder": "YYYY",
+    "expSave": "Išsaugoti patirtį",
+    "expSaving": "Saugoma…",
+    "expInvalid": "Įveskite pareigas ir bent pradžios metus.",
+    "expNeedsMigration": "Ši funkcija dar neįjungta. Bandykite vėliau.",
+    "expError": "Nepavyko išsaugoti. Bandykite dar kartą."
   },
   "roleDashboards": {
     "company": {
@@ -3484,7 +3497,9 @@
       "error_password_mismatch": "Slaptažodžiai nesutampa.",
       "error_password_uppercase": "Slaptažodyje turi būti bent viena didžioji raidė.",
       "error_password_number": "Slaptažodyje turi būti bent vienas skaičius.",
-      "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis."
+      "error_password_special": "Slaptažodyje turi būti bent vienas specialusis simbolis.",
+      "check_email_title": "Patvirtinkite el. paštą",
+      "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją."
     },
     "login": {
       "headline": "Prisijungti",
@@ -4326,7 +4341,7 @@
         },
         {
           "title": "Tarpvalstybinės galimybės",
-          "desc": "NL, DK, DE, SE, NO ir kitos."
+          "desc": "Sukurta darbui visoje Europoje."
         },
         {
           "title": "Tiesioginis kontaktas su darbdaviu",
@@ -4708,7 +4723,7 @@
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
-      "cta": "Pradėti dabar"
+      "cta": "Sukurti nemokamą profilį"
     },
     "companies": {
       "eyebrow": "Įmonėms",
@@ -9944,7 +9959,10 @@
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
       "invalid": "Netinkama reikšmė.",
       "limit": "Pasiektas įrašų limitas.",
-      "selfStated": "Įrašyta jūsų pačių."
+      "selfStated": "Įrašyta jūsų pačių.",
+      "institutionPlaceholder": "Pvz., Vilniaus kolegija, profesinio mokymo centras",
+      "programPlaceholder": "Pvz., slauga, elektrotechnika, apskaita, programų inžinerija",
+      "yearPlaceholder": "YYYY"
     },
     "educationTypes": {
       "primary": "Pradinis",
