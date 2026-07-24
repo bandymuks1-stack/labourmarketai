@@ -1,7 +1,12 @@
 "use client";
 
-import { Bell, MessageSquare, Mail, Calendar, SlidersHorizontal } from "lucide-react";
-import { Link } from "@/lib/i18n/navigation";
+import { MessageSquare, Mail, Calendar, SlidersHorizontal } from "lucide-react";
+import { Link, usePathname } from "@/lib/i18n/navigation";
+import { useAuthOptional } from "@/lib/auth/context";
+import { NotificationPanel } from "@/components/app/notification-panel";
+import { AccountMenu } from "@/components/app/account-menu";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 export type ConversationNavLabels = {
   chat: string;
@@ -11,6 +16,26 @@ export type ConversationNavLabels = {
   advanced: string;
 };
 
+/** The five simple-mode destinations, in canonical order. `href` is matched
+ *  against the locale-stripped pathname so the active tab is correct on the
+ *  conversation home AND on the panel routes (communication/planning/profile)
+ *  that share this header via the (panels) simple shell. */
+const NAV = [
+  { key: "chat", href: "/dashboard", icon: MessageSquare },
+  { key: "messages", href: "/dashboard/communication", icon: Mail },
+  { key: "calendar", href: "/dashboard/planning", icon: Calendar },
+] as const;
+
+function useActiveHref(): string {
+  const pathname = usePathname();
+  // Longest-prefix match so /dashboard/communication beats /dashboard.
+  if (pathname.startsWith("/dashboard/communication")) return "/dashboard/communication";
+  if (pathname.startsWith("/dashboard/planning")) return "/dashboard/planning";
+  if (pathname.startsWith("/dashboard/profile")) return "/dashboard/profile";
+  if (pathname.startsWith("/dashboard/advanced")) return "/dashboard/advanced";
+  return "/dashboard";
+}
+
 /**
  * Simple-mode header. Conversation is the primary control, but the functions
  * that need a specialized view stay reachable: the header carries exactly the
@@ -18,6 +43,11 @@ export type ConversationNavLabels = {
  * Advanced. CV is reached via Profile / the chat, not a top-level tab. Human
  * message threads (Messages) are kept distinct from the AI chat (Chat).
  * On phones the tabs move to a fixed bottom nav (ConversationBottomNav).
+ *
+ * Real chrome is wired in (never a dead button): the bell is the shared
+ * `NotificationPanel`, the avatar links to the real profile with the user's real
+ * initials, and the account menu / locale switcher keep logout + language within
+ * reach in simple mode.
  */
 export function ConversationHeader({
   title,
@@ -29,6 +59,11 @@ export function ConversationHeader({
   /** Force the phone layout (used by the mobile design preview). */
   mobile?: boolean;
 }) {
+  const active = useActiveHref();
+  const auth = useAuthOptional();
+  const initials = personMonogram(auth?.profile?.full_name ?? null);
+  const label = (key: (typeof NAV)[number]["key"]) => nav[key];
+
   return (
     <header className="flex flex-none items-center justify-between gap-3 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur">
       <span className="flex items-center gap-2">
@@ -36,20 +71,35 @@ export function ConversationHeader({
         <span className={`text-sm font-semibold tracking-tight text-text-primary ${mobile ? "" : "hidden sm:inline"}`}>{title}</span>
       </span>
 
-      {/* Desktop simple-mode tabs — Chat active. Human message threads and the
-          AI chat are separate destinations. Hidden on phones (bottom nav). */}
+      {/* Desktop simple-mode tabs. Human message threads and the AI chat are
+          separate destinations. Hidden on phones (bottom nav). */}
       <nav className={`items-center gap-1 ${mobile ? "hidden" : "hidden md:flex"}`} aria-label={nav.chat}>
-        <NavTab href="/dashboard" label={nav.chat} icon={<MessageSquare className="size-4" aria-hidden />} active />
-        <NavTab href="/dashboard/communication" label={nav.messages} icon={<Mail className="size-4" aria-hidden />} />
-        <NavTab href="/dashboard/planning" label={nav.calendar} icon={<Calendar className="size-4" aria-hidden />} />
+        {NAV.map(({ key, href, icon: Icon }) => (
+          <NavTab
+            key={href}
+            href={href}
+            label={label(key)}
+            icon={<Icon className="size-4" aria-hidden />}
+            active={active === href}
+          />
+        ))}
       </nav>
 
       <div className="flex items-center gap-1">
-        <button type="button" aria-label="Notifications" className="flex size-9 items-center justify-center rounded-full text-text-muted hover:text-text-primary">
-          <Bell className="size-4" aria-hidden />
-        </button>
-        <Link href="/dashboard/profile" aria-label={nav.profile} data-testid="chat-profile-link" className="flex size-9 items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue">
-          <span className="text-xs font-semibold">JP</span>
+        {/* Real chrome renders only inside the authenticated app; the
+          provider-less dev preview keeps a lean header for screenshots. */}
+        {auth && <LocaleSwitcher className={mobile ? "hidden" : "hidden md:flex"} />}
+        {auth && <NotificationPanel />}
+        <Link
+          href="/dashboard/profile"
+          aria-label={nav.profile}
+          aria-current={active === "/dashboard/profile" ? "page" : undefined}
+          data-testid="chat-profile-link"
+          className={`flex size-9 items-center justify-center rounded-full border text-text-secondary hover:border-brand-blue hover:text-brand-blue ${
+            active === "/dashboard/profile" ? "border-brand-blue text-brand-blue" : "border-ink-500"
+          }`}
+        >
+          <span className="text-xs font-semibold">{initials}</span>
         </Link>
         <Link
           href="/dashboard/advanced"
@@ -59,6 +109,7 @@ export function ConversationHeader({
           <SlidersHorizontal className="size-3.5" aria-hidden />
           {nav.advanced}
         </Link>
+        {auth && <AccountMenu />}
       </div>
     </header>
   );
@@ -82,11 +133,14 @@ function NavTab({ href, label, icon, active }: { href: string; label: string; ic
 
 /** Mobile simple-mode bottom navigation — the 5 canonical destinations. */
 export function ConversationBottomNav({ nav, mobile = false }: { nav: ConversationNavLabels; mobile?: boolean }) {
+  const active = useActiveHref();
+  const auth = useAuthOptional();
+  const initials = personMonogram(auth?.profile?.full_name ?? null);
   const items = [
-    { href: "/dashboard", label: nav.chat, icon: <MessageSquare className="size-5" aria-hidden />, active: true },
+    { href: "/dashboard", label: nav.chat, icon: <MessageSquare className="size-5" aria-hidden /> },
     { href: "/dashboard/communication", label: nav.messages, icon: <Mail className="size-5" aria-hidden /> },
     { href: "/dashboard/planning", label: nav.calendar, icon: <Calendar className="size-5" aria-hidden /> },
-    { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-[10px] font-bold">JP</span> },
+    { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-[10px] font-bold">{initials}</span> },
     { href: "/dashboard/advanced", label: nav.advanced, icon: <SlidersHorizontal className="size-5" aria-hidden /> },
   ];
   return (
@@ -95,9 +149,9 @@ export function ConversationBottomNav({ nav, mobile = false }: { nav: Conversati
         <Link
           key={it.href}
           href={it.href}
-          aria-current={it.active ? "page" : undefined}
+          aria-current={active === it.href ? "page" : undefined}
           className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium ${
-            it.active ? "text-brand-blue" : "text-text-muted"
+            active === it.href ? "text-brand-blue" : "text-text-muted"
           }`}
         >
           {it.icon}

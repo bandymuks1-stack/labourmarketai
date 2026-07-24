@@ -214,3 +214,14 @@ export function useAuth(): AuthContextValue {
   if (!v) throw new Error("useAuth must be used inside <AuthProvider>");
   return v;
 }
+
+/**
+ * Non-throwing variant: returns null when rendered outside an `<AuthProvider>`.
+ * Used by surfaces that must render in BOTH the authenticated app (real auth
+ * context) and provider-less contexts such as the dev-only design gallery
+ * preview (`/design/conversation`), which renders the conversation shell to
+ * capture screenshots without a Supabase session.
+ */
+export function useAuthOptional(): AuthContextValue | null {
+  return useContext(AuthContext);
+}

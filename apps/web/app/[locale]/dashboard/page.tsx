@@ -17,9 +17,13 @@ import type { ActiveLocale } from "@/lib/i18n/config";
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
  * screen is one chat (greeting → starter chips → dialogue with inline CV /
  * profile / booking flows). The card control room now lives at
- * `/dashboard/advanced` (Advanced mode). Rendered as a full-viewport surface so
- * the ordinary worker never sees the wide module navbar; Advanced mode is the
- * one escape hatch in the chat header. Deterministic (LLM off).
+ * `/dashboard/advanced` (Advanced mode).
+ *
+ * The wide module navbar is NOT hidden with an overlay any more: the thin
+ * `dashboard/layout.tsx` renders no chrome, and the full chrome lives in the
+ * `(full)` route group — so simple mode simply never mounts it. The chat
+ * supplies its own simple-mode header + bottom nav (the 5-item nav). Advanced
+ * mode is the one escape hatch. Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,
@@ -42,17 +46,16 @@ export default async function DashboardHomePage({
   const t = await getTranslations("conversation.chat");
   const labels = resolveChatLabels(t);
 
-  // Full-viewport overlay: the ordinary user's dashboard IS the conversation,
-  // so it covers the shared dashboard chrome (which stays for Advanced mode).
+  // No overlay: the thin dashboard layout renders no chrome, so the chat simply
+  // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
+  // the (full) group and is never mounted here.
   return (
-    <div className="fixed inset-0 z-[60]">
-      <ConversationChat
-        locale={locale as ActiveLocale}
-        labels={labels}
-        bookingOffers={offers}
-        bookingLabels={bookingLabels}
-      />
-    </div>
+    <ConversationChat
+      locale={locale as ActiveLocale}
+      labels={labels}
+      bookingOffers={offers}
+      bookingLabels={bookingLabels}
+    />
   );
 }
 

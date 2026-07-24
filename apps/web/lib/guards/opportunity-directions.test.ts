@@ -76,8 +76,8 @@ describe("7. CTAs route only to existing pages", () => {
     const src = read(CARD);
     expect(src).toContain('"/dashboard/opportunities"');
     expect(src).toContain('"/dashboard/profile"');
-    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/opportunities/page.tsx"))).toBe(true);
-    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/profile/page.tsx"))).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/(full)/opportunities/page.tsx"))).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/[locale]/dashboard/(panels)/profile/page.tsx"))).toBe(true);
   });
 });
 
