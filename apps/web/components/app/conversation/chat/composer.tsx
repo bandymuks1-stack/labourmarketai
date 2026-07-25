@@ -35,7 +35,13 @@ export function Composer({
   }
 
   return (
-    <div className="border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur">
+    // `relative z-50` keeps the composer above the global language-feedback FAB
+    // (fixed, `z-40`, `bottom: calc(5rem + safe-area)`). On mobile the composer
+    // spans the full width, so its send button sits at the right edge — exactly
+    // under that FAB, which then intercepts the click. Desktop is unaffected
+    // because the row is `max-w-3xl` centred. Sending a message is the primary
+    // action here and must never lose a hit-test to a secondary affordance.
+    <div className="relative z-50 border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur">
       <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
         {onAttach && (
           <button
