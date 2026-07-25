@@ -1,0 +1,11 @@
+# These files are byte-exact evidence, not source code.
+#
+# `*_original-production-applied.sql` must hash to the SHA-256 recorded in
+# docs/APPLIED_LEDGER.md at apply time — that equality is the only proof the
+# preserved copy is genuine, and it is asserted by
+# apps/web/lib/guards/historical-migration-audit-trail.test.ts.
+#
+# `-text` disables all end-of-line normalisation so the working-tree bytes are
+# identical on every platform. Without it git would check these out as CRLF on
+# Windows, changing the hash and failing the integrity guard.
+*_original-production-applied.sql -text
