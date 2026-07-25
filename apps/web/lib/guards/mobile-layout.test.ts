@@ -110,12 +110,18 @@ describe("mobile layout invariants", () => {
       // The BottomNav is `md:hidden`, so the button must clear it on every
       // width below `md`. It must also include the iOS safe-area inset so it
       // never sits on the home indicator.
-      expect(src).toContain(
-        "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
-      );
+      //
+      // The offset is now read from `--feedback-fab-bottom` so a surface that
+      // owns the bottom of the viewport (the conversation composer) can push
+      // the button clear of its own controls instead of being overlapped by
+      // it. The DEFAULTS below are unchanged, which is what this test pins:
+      // every page that does not set the variable keeps exactly the previous
+      // geometry.
+      expect(src).toContain("calc(5rem+env(safe-area-inset-bottom))");
+      expect(src).toMatch(/bottom-\[var\(--feedback-fab-bottom,/);
       // IA cleanup v2 (#11): reduced to a low-profile button; desktop offset
-      // tightened to md:bottom-4.
-      expect(src).toMatch(/md:bottom-4/);
+      // tightened to 1rem (previously the literal `md:bottom-4`).
+      expect(src).toMatch(/md:bottom-\[var\(--feedback-fab-bottom,1rem\)\]/);
     });
 
     it("modal container fits a 360px viewport (max-w-md + p-4 backdrop)", () => {

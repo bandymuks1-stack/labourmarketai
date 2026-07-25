@@ -12,7 +12,7 @@ import {
   OpportunityStructuredSections,
   payText,
 } from "@/components/app/opportunity-structured-detail";
-import { MarkOpportunitiesSeen } from "@/components/app/mark-opportunities-seen";
+import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { RecentlyViewedStrip } from "@/components/app/recently-viewed-strip";
 import { WorkerSaveOpportunityButton } from "@/components/app/worker-save-opportunity-button";
 import {
@@ -40,7 +40,7 @@ import { TrustInsightCard } from "@/components/intelligence/trust-insight-card";
 import { buildOpportunityInsightRow } from "@/lib/intelligence/trust-card-model";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { getWorkerSalaryIntelligence } from "@/lib/intelligence/intelligence-read";
-import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
+import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import {
   activeFilterEntries,
   applyDiscoveryFilters,
@@ -102,7 +102,7 @@ export default async function OpportunitiesPage({
   const tlm = await getTranslations("labourMarket");
   const tSkill = await getTranslations("skillNames");
   const tsd = await getTranslations("structuredDemand");
-  const result = await loadWorkerOpportunities();
+  const result = await loadWorkerOpportunityBoard("opportunities_board");
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
   // ── Market context (Contextual Intelligence UI v1): the worker's OWN
@@ -318,16 +318,6 @@ export default async function OpportunitiesPage({
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "opportunities", role_context: "worker" }}
       />
-      {/* Recommendation seen markers (anti-spam): the board renders every
-          authorized open demand, so visiting IS the read event — the
-          aggregate "new matching jobs" spine signal clears here. Best-effort
-          no-op while the owner-gated worker_opportunity_seen store is
-          unapplied. */}
-      {result.kind === "ready" && result.opportunities.length > 0 && (
-        <MarkOpportunitiesSeen
-          requestIds={result.opportunities.map((o) => o.need.id)}
-        />
-      )}
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {t("title")}
@@ -564,7 +554,7 @@ export default async function OpportunitiesPage({
           ) : null}
 
           {/* ── Opportunities (approved supply routes only) ────────────── */}
-          {result.needsDataAccess ? (
+          {!result.capabilities.boardAvailable ? (
             <section
               className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
               data-testid="opportunities-pending"
@@ -633,7 +623,7 @@ export default async function OpportunitiesPage({
                   {/* ── Saved opportunities (P2-PR5, #723-compat) — rendered
                       ONLY when the owner-gated store exists. Private
                       bookmark: the hint says the company never sees it. */}
-                  {result.savedAvailable &&
+                  {result.capabilities.savedAvailable &&
                   (savedLive.length > 0 || savedStaleCount > 0) ? (
                     <section
                       className="flex flex-col gap-2 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
@@ -778,6 +768,14 @@ export default async function OpportunitiesPage({
                     </section>
                   ) : (
                     <ul className="flex flex-col gap-3" data-testid="opportunities-list">
+                      {/* Rendering IS the read event — and the board renders
+                          `filtered`, not everything the RPC returned. Marking
+                          the loaded set would silently retire matches the
+                          worker never saw behind an active filter. */}
+                      <OpportunitiesShownMarker
+                        surface="opportunities_board"
+                        requestIds={filtered.map((o) => o.need.id)}
+                      />
                       {filtered.map(({ need, fit, match, nextAction, interestStatus, structured, saved }) => (
                         <li
                           key={need.id}
@@ -808,7 +806,7 @@ export default async function OpportunitiesPage({
                               {/* Save toggle (#723-compat) — offered ONLY when
                                   the owner-gated store exists; absence means
                                   the control is simply not rendered. */}
-                              {result.savedAvailable ? (
+                              {result.capabilities.savedAvailable ? (
                                 <WorkerSaveOpportunityButton
                                   locale={locale}
                                   requestId={need.id}
@@ -1042,7 +1040,7 @@ export default async function OpportunitiesPage({
                           {/* Express interest — INTERNAL signal only (honest copy in
                               labels.internalNote). Offered ONLY when the owner-gated
                               interest table exists — never a dead button. */}
-                          {result.interestAvailable ? (
+                          {result.capabilities.interestAvailable ? (
                             <WorkerInterestButton
                               locale={locale}
                               requestId={need.id}

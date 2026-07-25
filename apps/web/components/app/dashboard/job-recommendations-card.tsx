@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { MarkOpportunitiesSeen } from "@/components/app/mark-opportunities-seen";
-import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
+import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
+import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 
 /**
@@ -29,11 +29,14 @@ import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
  * (invitations, privacy status).
  */
 export async function JobRecommendationsCard({ locale }: { locale: string }) {
-  const result = await getWorkerJobRecommendations({ limit: 3 });
+  const result = await loadWorkerOpportunityMatches({
+    surface: "dashboard_recommendations",
+    limit: 3,
+  });
   if (result.kind !== "ready") return null;
   // Honest invisibility while the gated worker-visibility RPC is unapplied:
   // there is no demand data at all, so "no matches" would be a false claim.
-  if (!result.boardAvailable) return null;
+  if (!result.capabilities.boardAvailable) return null;
 
   const t = await getTranslations("auth.dashboard.jobsCard");
   const tRec = await getTranslations("opportunities.recommendations");
@@ -52,7 +55,7 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
     val && tOpp.has(`urgency.${val}`) ? tOpp(`urgency.${val}` as never) : null;
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
-  const rows = result.recommendations;
+  const rows = result.matches;
   const boardHref = "/dashboard/opportunities" as "/dashboard";
 
   return (
@@ -89,8 +92,12 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
         </p>
       ) : (
         <>
-          {/* Rendering IS the read event: the shown rows stop being "new". */}
-          <MarkOpportunitiesSeen requestIds={rows.map((r) => r.requestId)} />
+          {/* Rendering IS the read event: the rows below — and only those —
+              stop being "new". `rows` is already the displayed slice. */}
+          <OpportunitiesShownMarker
+            surface="dashboard_recommendations"
+            requestIds={rows.map((r) => r.requestId)}
+          />
           <ul className="flex flex-col divide-y divide-border/40">
             {rows.map((r) => {
               const location = [r.locationLabel, countryLabel(r.country)]
