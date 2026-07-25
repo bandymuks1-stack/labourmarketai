@@ -77,6 +77,9 @@ const env = {
   SUPABASE_SERVICE_ROLE_KEY: serviceKey,
   PORT,
   E2E_BASE_URL: `http://127.0.0.1:${PORT}`,
+  // Tells playwright.config.ts this run shares ONE dev server and ONE fixture
+  // database: single worker, no retries. See the comment in that file.
+  E2E_LOCAL_STACK: "1",
 };
 
 console.log(`Local stack confirmed (${apiUrl}). Running e2e on :${PORT}…`);

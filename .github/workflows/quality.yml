@@ -108,6 +108,7 @@ jobs:
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          set -euo pipefail
           if [ -z "${DB_URL}" ]; then
             echo "::warning title=Live secdef gate NOT active::secrets.SUPABASE_DB_URL is not configured, so the anon SECURITY DEFINER allowlist was NOT verified against a real catalog. The static half ran and passed. Owner action required to activate this gate: add a read-only SUPABASE_DB_URL secret."
             echo "SKIPPED — no SUPABASE_DB_URL secret. Static half ran; live half did NOT."

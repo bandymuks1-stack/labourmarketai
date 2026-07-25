@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Opt-in: documents the LOCAL-ONLY E2E overrides. Placeholders only — it holds
+# no key, and the guard in lib/testing/local-supabase-guard.ts refuses any
+# value that resolves to a cloud project. Mirrors the root .gitignore, which
+# likewise tracks .env.example by exception.
+!.env.e2e.local.example
 
 # vercel
 .vercel

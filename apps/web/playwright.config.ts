@@ -8,11 +8,29 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * Run: pnpm e2e
  */
+/**
+ * LOCAL-STACK RUNS ARE SERIAL, AND NEVER RETRIED.
+ *
+ * `scripts/e2e-local.ts` sets `E2E_LOCAL_STACK=1`. Those runs share ONE dev
+ * server on :3100 and ONE fixture database, so parallel workers contend for
+ * both. On 2026-07-25 three workers against one server made an authenticated
+ * spec time out waiting for a control to become editable — it looked exactly
+ * like a product defect, and the same spec passed on the first serial re-run.
+ * Contention must never be mistakable for a bug, so the local suite runs with
+ * a single worker.
+ *
+ * Retries are also disabled there: a retry that turns red into green hides a
+ * genuinely flaky product bug behind a passing report. A local failure should
+ * stay failed until someone explains it.
+ */
+const LOCAL_STACK = !!process.env.E2E_LOCAL_STACK;
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  fullyParallel: !LOCAL_STACK,
+  workers: LOCAL_STACK ? 1 : undefined,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: LOCAL_STACK ? 0 : process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000",

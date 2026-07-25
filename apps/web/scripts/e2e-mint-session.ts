@@ -1,61 +1,89 @@
 /**
- * Local-only helper: mint a real Supabase session for the owner's
- * existing user via the Admin API, then write Playwright storageState
- * with the session cookies in the `@supabase/ssr` format. Used by the
- * profile-text-skills-smoke e2e to drive a credentialed browser without
- * needing Google OAuth.
+ * Local-only helper: mint a real Supabase session for a LOCAL fixture user via
+ * the Admin API, then write Playwright storageState with the session cookies in
+ * the `@supabase/ssr` format. Lets the authenticated e2e specs drive a
+ * credentialed browser without Google OAuth.
+ *
+ * FAIL-CLOSED. This script previously read `apps/web/.env.local`, which points
+ * at the PRODUCTION project and carries a real service-role key — so running it
+ * as documented would have minted a session for a real user in production. It
+ * now refuses to touch anything that is not demonstrably the local stack:
+ *   * it never reads `.env.local`;
+ *   * the target comes from `E2E_SUPABASE_*` or `npx supabase status` only;
+ *   * `assertLocalSupabaseTarget` rejects non-loopback hosts, `supabase.co`,
+ *     the production project ref, any non-allowlisted origin, and any Supabase
+ *     Cloud key — refusing with REFUSED_NON_LOCAL_E2E_SESSION_MINT;
+ *   * it additionally probes `<url>/auth/v1/health` so the Admin API call can
+ *     only reach a GoTrue that is actually running locally;
+ *   * it never prints a key.
+ *
+ * It cannot create or modify a cloud user.
  *
  * NOT a production script. NOT a build step. Run on demand:
  *
- *   E2E_OWNER_EMAIL=you@example.com \
- *     pnpm tsx scripts/e2e-mint-session.ts
- *
- * Requires NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
- * SUPABASE_SERVICE_ROLE_KEY in .env.local.
+ *   E2E_OWNER_EMAIL=dev.worker@local.test pnpm tsx scripts/e2e-mint-session.ts
  *
  * Writes: tests/e2e/.storage-state.json (gitignored).
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import {
+  NonLocalTargetError,
+  REFUSAL_CODE,
+} from "../lib/testing/local-supabase-guard";
+import {
+  describeLocalTarget,
+  resolveLocalSupabaseEnv,
+} from "../lib/testing/local-supabase-env";
 
-function loadEnvLocal(): void {
-  const file = join(process.cwd(), ".env.local");
-  if (!existsSync(file)) return;
-  for (const raw of readFileSync(file, "utf8").split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-    const eq = line.indexOf("=");
-    if (eq === -1) continue;
-    const key = line.slice(0, eq).trim();
-    let val = line.slice(eq + 1).trim();
-    if (val.startsWith("<")) continue;
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1);
-    }
-    if (process.env[key] === undefined) process.env[key] = val;
+const REPO_ROOT = join(__dirname, "..", "..", "..");
+
+/**
+ * Confirm a LOCAL GoTrue is actually answering before we call the Admin API.
+ * The origin is already allowlisted; this proves something local is listening
+ * rather than the request silently going somewhere else.
+ */
+async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
+  const health = `${url.replace(/\/$/, "")}/auth/v1/health`;
+  let res: Response;
+  try {
+    res = await fetch(health, { headers: { apikey: anonKey } });
+  } catch (err) {
+    throw new NonLocalTargetError(
+      `local GoTrue is not reachable at ${health} ` +
+        `(${err instanceof Error ? err.message : String(err)}). ` +
+        "Start the stack with `npx supabase start`.",
+    );
+  }
+  if (!res.ok) {
+    throw new NonLocalTargetError(
+      `local GoTrue health check at ${health} returned ${res.status}.`,
+    );
   }
 }
 
 async function main(): Promise<void> {
-  loadEnvLocal();
+  const local = resolveLocalSupabaseEnv(REPO_ROOT);
+  const { url, anonKey, serviceKey } = local;
+  // Host + project ref only — never a key.
+  console.log(`[e2e-mint] ${describeLocalTarget(local)}`);
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  await assertLocalGoTrue(url, anonKey);
+
   const email = process.env.E2E_OWNER_EMAIL;
-  if (!url || !anonKey || !serviceKey) {
+  if (!email) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL / ANON_KEY / SUPABASE_SERVICE_ROLE_KEY",
+      "Set E2E_OWNER_EMAIL=<user@…> before running (use a LOCAL fixture user, " +
+        "e.g. dev.worker@local.test — never a production account)",
     );
   }
-  if (!email) {
-    throw new Error("Set E2E_OWNER_EMAIL=<user@…> before running");
-  }
 
+  // The cookie name must match what `@supabase/ssr` derives IN THE BROWSER, so
+  // keep this formula byte-identical to the original: `new URL(url).host` keeps
+  // the port, so `http://127.0.0.1:54321` yields `127` and the cookie is
+  // `sb-127-auth-token`. Do NOT substitute the guard's `target.projectRef` —
+  // that value is for logging only and would produce a different name.
   const projectRef = new URL(url).host.split(".")[0];
 
   const admin = createClient(url, serviceKey, {
@@ -170,6 +198,16 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("[e2e-mint] FAILED:", (err as Error).message);
+  const message = (err as Error).message ?? String(err);
+  if (err instanceof NonLocalTargetError) {
+    // The refusal code is the grep-able contract for this failure mode.
+    console.error(`[e2e-mint] ${message}`);
+    console.error(
+      `[e2e-mint] ${REFUSAL_CODE} — no session was minted and no user was ` +
+        "created or modified.",
+    );
+    process.exit(1);
+  }
+  console.error("[e2e-mint] FAILED:", message);
   process.exit(1);
 });

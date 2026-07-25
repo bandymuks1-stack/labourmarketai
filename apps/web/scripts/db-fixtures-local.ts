@@ -2,143 +2,223 @@
  * pnpm db:fixtures:local — apply supabase/dev-fixtures.sql to a LOCAL
  * Supabase instance only.
  *
- * HARD GUARD (brief §10.2): refuses to run unless the configured Supabase
- * URL points at a local instance. This keeps throwaway test rows out of the
- * Supabase Cloud project, which must stay real-data-only.
+ * HARD GUARD (brief §10.2): refuses to run unless the target is demonstrably
+ * the local stack. See `lib/testing/local-supabase-guard.ts`.
+ *
+ * WHY THIS WAS REWRITTEN (2026-07-25). The previous version spawned
+ * `psql <url> -v ON_ERROR_STOP=1 -f <path>`. The `psql` on Windows' PATH treats
+ * the trailing arguments as positional, prints
+ * `extra command-line argument "..." ignored`, applies NOTHING — and exits 0.
+ * The script checked the exit status, saw 0, and printed
+ * "Dev fixtures applied to the local instance." while `auth.users` was still 0.
+ * A green run therefore proved nothing, and the e2e suite ran against an empty
+ * database.
+ *
+ * Two changes make that impossible now:
+ *   1. the SQL is fed through STDIN (`-f -`), which no psql build can silently
+ *      mis-parse, and the container client is preferred because it is
+ *      deterministic;
+ *   2. the script ASSERTS the resulting row counts and exits 1 on any mismatch.
+ *      Success is printed only after those assertions pass — process exit
+ *      status is never treated as proof of work done.
  *
  * Run with cwd = apps/web (pnpm -C apps/web db:fixtures:local).
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import {
+  NonLocalTargetError,
+  assertLocalSupabaseTarget,
+} from "../lib/testing/local-supabase-guard";
+import {
+  describeLocalTarget,
+  resolveLocalSupabaseEnv,
+} from "../lib/testing/local-supabase-env";
 
-/** Minimal .env.local loader (tsx does not auto-load dotenv files). */
-function loadEnvLocal(): void {
-  const candidates = [
-    join(process.cwd(), ".env.local"),
-    join(process.cwd(), "..", "..", ".env.local"),
-  ];
-  for (const file of candidates) {
-    if (!existsSync(file)) continue;
-    for (const raw of readFileSync(file, "utf8").split(/\r?\n/)) {
-      const line = raw.trim();
-      if (!line || line.startsWith("#")) continue;
-      const eq = line.indexOf("=");
-      if (eq === -1) continue;
-      const key = line.slice(0, eq).trim();
-      let val = line.slice(eq + 1).trim();
-      if (val.startsWith("<")) continue; // unfilled .env.example placeholder
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      )
-        val = val.slice(1, -1);
-      if (process.env[key] === undefined) process.env[key] = val;
-    }
-  }
+const REPO_ROOT = join(__dirname, "..", "..", "..");
+const DB_CONTAINER = "supabase_db_labourmarketai";
+
+/**
+ * Row counts `supabase/dev-fixtures.sql` must produce. Asserted after apply —
+ * these are the contract the e2e suite depends on. `workers` is the worker
+ * profile table (there is no `worker_profiles` relation in this schema).
+ */
+export const EXPECTED_FIXTURE_COUNTS: Record<string, number> = {
+  "auth.users": 3,
+  "public.profiles": 3,
+  "public.workers": 3,
+  "public.companies": 1,
+};
+
+/** Result of one psql attempt, normalised. */
+type PsqlRun = { ok: boolean; status: number | null; stderr: string };
+
+function runPsqlViaContainer(sql: Buffer): PsqlRun {
+  const res = spawnSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      DB_CONTAINER,
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-f",
+      "-",
+    ],
+    { input: sql, encoding: "buffer" },
+  );
+  const stderr = res.stderr?.toString() ?? "";
+  return { ok: !res.error && res.status === 0, status: res.status, stderr };
 }
 
-function isLocalHost(host: string): boolean {
-  return (
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host === "0.0.0.0" ||
-    host === "[::1]" ||
-    host === "::1" ||
-    host.endsWith(".local")
+function runPsqlViaHost(sql: Buffer, dbUrl: string): PsqlRun {
+  // STDIN (`-f -`) rather than a path: a client that mis-parses positional
+  // arguments cannot silently skip the file.
+  const res = spawnSync(
+    "psql",
+    [dbUrl, "-v", "ON_ERROR_STOP=1", "-f", "-"],
+    { input: sql, encoding: "buffer" },
   );
+  const stderr = res.stderr?.toString() ?? "";
+  return { ok: !res.error && res.status === 0, status: res.status, stderr };
+}
+
+/** Query one count via the container's psql. Returns null when unreadable. */
+function countRows(relation: string): number | null {
+  const res = spawnSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      DB_CONTAINER,
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+      "-qtA",
+      "-c",
+      `select count(*) from ${relation};`,
+    ],
+    { encoding: "utf8" },
+  );
+  if (res.error || res.status !== 0) return null;
+  const n = Number.parseInt((res.stdout ?? "").trim(), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Verify the fixtures actually landed. Exits 1 on ANY mismatch — this, not the
+ * psql exit status, is what makes a green run meaningful.
+ */
+export function assertFixtureCounts(
+  read: (relation: string) => number | null = countRows,
+  expected: Record<string, number> = EXPECTED_FIXTURE_COUNTS,
+): { ok: boolean; failures: string[]; observed: Record<string, number | null> } {
+  const failures: string[] = [];
+  const observed: Record<string, number | null> = {};
+  for (const [relation, want] of Object.entries(expected)) {
+    const got = read(relation);
+    observed[relation] = got;
+    if (got === null) {
+      failures.push(`${relation}: could not be read`);
+    } else if (got !== want) {
+      failures.push(`${relation}: expected ${want}, got ${got}`);
+    }
+  }
+  return { ok: failures.length === 0, failures, observed };
 }
 
 function main(): void {
-  loadEnvLocal();
-  const url =
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-
-  if (!url) {
-    console.error(
-      "Refusing: no Supabase URL found. Set SUPABASE_URL (or " +
-        "NEXT_PUBLIC_SUPABASE_URL) to a LOCAL instance in .env.local first.",
-    );
-    process.exit(1);
-  }
-
-  let host: string;
+  // Prove the stack is local BEFORE touching anything. Never reads .env.local.
+  let local;
   try {
-    host = new URL(url).hostname;
-  } catch {
-    console.error(`Refusing: "${url}" is not a valid URL.`);
-    process.exit(1);
-    return;
+    local = resolveLocalSupabaseEnv(REPO_ROOT);
+  } catch (err) {
+    if (err instanceof NonLocalTargetError) {
+      console.error(`Refusing to apply dev fixtures: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
   }
+  // Re-assert explicitly so the intent is visible at the call site too.
+  assertLocalSupabaseTarget({
+    url: local.url,
+    anonKey: local.anonKey,
+    serviceKey: local.serviceKey,
+  });
+  console.log(`[fixtures] ${describeLocalTarget(local)}`);
 
-  if (!isLocalHost(host)) {
-    console.error(
-      `Refusing to apply dev fixtures: Supabase URL host "${host}" is not ` +
-        "local. dev-fixtures.sql is LOCAL-ONLY and must never touch the " +
-        "Supabase Cloud project (brief §10.2).",
-    );
-    process.exit(1);
-  }
-
-  const sqlPath = join(
-    process.cwd(),
-    "..",
-    "..",
-    "supabase",
-    "dev-fixtures.sql",
-  );
+  const sqlPath = join(REPO_ROOT, "supabase", "dev-fixtures.sql");
   if (!existsSync(sqlPath)) {
     console.error(`dev-fixtures.sql not found at ${sqlPath}`);
     process.exit(1);
   }
+  const sql = readFileSync(sqlPath);
 
   const dbUrl =
     process.env.SUPABASE_DB_URL ??
     "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 
-  console.log(`Local instance confirmed (${host}). Applying dev fixtures…`);
-  const res = spawnSync(
-    "psql",
-    [dbUrl, "-v", "ON_ERROR_STOP=1", "-f", sqlPath],
-    { stdio: "inherit" },
-  );
-
-  if (res.error && (res.error as NodeJS.ErrnoException).code === "ENOENT") {
-    // No host psql (common on Windows) — fall back to the psql inside the
-    // local Supabase db container, feeding the SQL through stdin.
-    console.log("`psql` not on PATH — using the supabase db container…");
-    const viaDocker = spawnSync(
-      "docker",
-      [
-        "exec",
-        "-i",
-        "supabase_db_labourmarketai",
-        "psql",
-        "-U",
-        "postgres",
-        "-d",
-        "postgres",
-        "-v",
-        "ON_ERROR_STOP=1",
-        "-f",
-        "-",
-      ],
-      { input: readFileSync(sqlPath), stdio: ["pipe", "inherit", "inherit"] },
+  console.log("[fixtures] applying dev-fixtures.sql…");
+  // Container first: deterministic, and it is running whenever the local stack
+  // is up. The host client is only a fallback.
+  let run = runPsqlViaContainer(sql);
+  let via = "container";
+  if (!run.ok) {
+    console.log(
+      `[fixtures] container psql unavailable or failed (status=${run.status}); ` +
+        "trying host psql via stdin…",
     );
-    if (viaDocker.error || viaDocker.status !== 0) {
-      console.error(
-        "Container fallback failed too. Install the PostgreSQL client, or " +
-          "apply manually:\n" +
-          `  psql "${dbUrl}" -f supabase/dev-fixtures.sql\n` +
-          "(ensure `supabase start` is running first).",
-      );
-      process.exit(viaDocker.status ?? 1);
-    }
-    console.log("Dev fixtures applied to the local instance (via container).");
-    return;
+    run = runPsqlViaHost(sql, dbUrl);
+    via = "host";
   }
-  if (res.status !== 0) process.exit(res.status ?? 1);
-  console.log("Dev fixtures applied to the local instance.");
+
+  if (run.stderr.trim()) {
+    console.error(`[fixtures] psql stderr (${via}):\n${run.stderr.trim()}`);
+  }
+  // A client that ignored its arguments is a failure even at status 0.
+  if (/extra command-line argument/i.test(run.stderr)) {
+    console.error(
+      "[fixtures] FAILED: the psql client ignored its arguments — the SQL was " +
+        "NOT applied. This is the defect that previously produced a false " +
+        "success. Install a compatible PostgreSQL client or start the local " +
+        "stack so the container client can be used.",
+    );
+    process.exit(1);
+  }
+  if (!run.ok) {
+    console.error(
+      `[fixtures] FAILED: psql (${via}) exited with status ${run.status}.`,
+    );
+    process.exit(1);
+  }
+
+  const { ok, failures, observed } = assertFixtureCounts();
+  console.log(
+    "[fixtures] observed row counts: " +
+      Object.entries(observed)
+        .map(([r, n]) => `${r}=${n ?? "?"}`)
+        .join(" "),
+  );
+  if (!ok) {
+    console.error(
+      "[fixtures] FAILED: post-apply assertions did not hold:\n  " +
+        failures.join("\n  ") +
+        "\nThe fixtures were NOT applied correctly. Refusing to report success.",
+    );
+    process.exit(1);
+  }
+
+  // Only now — after the data is proven present — may we claim success.
+  console.log(`Dev fixtures applied to the local instance (via ${via}).`);
 }
 
-main();
+// Guard the import used by unit tests: only run when invoked as a script.
+if (require.main === module) main();
