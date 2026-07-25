@@ -52,6 +52,12 @@ const SUPABASE_REF_ALLOWLIST = new Set([
   "lib/guards/product-readiness.test.ts",
   "lib/guards/public-brand-name.test.ts",
   "lib/guards/single-domain-origin.test.ts",
+  // Local-only test helpers. These must name the production ref in order to
+  // REFUSE it — a local session-mint or fixture run that resolves to it is
+  // rejected before any request is made. Neither file is imported by app code,
+  // so nothing user-facing can leak the ref through them.
+  "lib/testing/local-supabase-guard.ts",
+  "lib/testing/local-supabase-guard.test.ts",
 ]);
 
 const SUPABASE_REF = /gorgitwvdzxbnaxhrsrw/;

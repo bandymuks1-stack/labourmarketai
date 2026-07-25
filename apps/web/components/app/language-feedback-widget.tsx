@@ -95,7 +95,22 @@ export function LanguageFeedbackWidget() {
           recordEvent("language_feedback_opened");
           setOpen(true);
         }}
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-subtle bg-surface-1/70 text-xs text-text-muted opacity-60 shadow-sm backdrop-blur transition hover:border-brand-blue hover:text-text-primary hover:opacity-100 md:bottom-4"
+        /* The bottom offset reads `--feedback-fab-bottom` so a surface that
+           owns the bottom of the viewport can push this button clear of its
+           own controls. Each fallback reproduces the previous value exactly
+           (5rem + safe-area on mobile, 1rem from `md:` up), so every existing
+           page is unchanged. Arbitrary Tailwind values are used rather than an
+           inline `style`, because an inline style would beat the `md:`
+           breakpoint and pin the desktop button at the mobile offset.
+
+           WHY IT IS A VARIABLE. A fixed `z-40` button pinned 5rem from the
+           bottom sat directly on top of the conversation composer's send
+           button on mobile, where the composer spans the full width — the FAB
+           silently intercepted the click. Raising the composer's z-index fixes
+           the click but buries the FAB, leaving an interactive control visible
+           and unreachable. Neither control may lose: a surface with a bottom
+           bar sets this variable to its own height so both stay usable. */
+        className="fixed right-3 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-subtle bg-surface-1/70 text-xs text-text-muted opacity-60 shadow-sm backdrop-blur transition bottom-[var(--feedback-fab-bottom,calc(5rem+env(safe-area-inset-bottom)))] hover:border-brand-blue hover:text-text-primary hover:opacity-100 md:bottom-[var(--feedback-fab-bottom,1rem)]"
         data-testid="language-feedback-open"
         aria-label={t("openAria")}
         title={t("openLabel")}
