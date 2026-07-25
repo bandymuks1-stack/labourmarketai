@@ -262,3 +262,148 @@ describe("rule 4 — every declared surface is really wired", () => {
     }
   });
 });
+
+/**
+ * Rule 5 — the conversation layer is inside the boundary.
+ *
+ * `lib/conversation/**` is neither `app/**` nor `components/**`, so rules 1–4
+ * never saw it. The conversation is the PRIMARY work journal, which makes it
+ * the surface most likely to grow its own marketplace — the invariant
+ * `CONVERSATION_AND_UI_SHARE_DOMAIN_USE_CASES` exists precisely to stop that.
+ *
+ * These rules constrain marketplace vocabulary only. Unrelated conversation
+ * capabilities (intent routing, work-log extraction, forms, dispatch) are
+ * untouched: nothing outside a marketplace path has any reason to name the
+ * match engine, the recommendation derivation, or the seen store.
+ */
+describe("rule 5 — the conversation layer shares the marketplace use case", () => {
+  const CONVERSATION_DIR = join(APP_ROOT, "lib", "conversation");
+  const conversationFiles = (): string[] => walk(CONVERSATION_DIR);
+  const codeOf = (p: string): string =>
+    read(p)
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+
+  it("never loads the board itself — it goes through the use case", () => {
+    const offenders = conversationFiles()
+      .filter((p) => /\bloadWorkerOpportunities\s*\(/.test(codeOf(p)))
+      .map(rel);
+    expect(
+      offenders,
+      "the conversation must call lib/marketplace, not the loader",
+    ).toEqual([]);
+  });
+
+  it("never ranks or derives marketplace results itself", () => {
+    const offenders = conversationFiles()
+      .filter((p) =>
+        /\b(compareMatches|matchWorkerToNeed|deriveJobRecommendations|countUnseenRecommendations)\s*\(/.test(
+          codeOf(p),
+        ),
+      )
+      .map(rel);
+    expect(
+      offenders,
+      "ranking and derivation belong to the use case and the pure domain",
+    ).toEqual([]);
+  });
+
+  it("never reaches the seen repository, the store or a driver code", () => {
+    for (const p of conversationFiles()) {
+      const src = read(p);
+      expect(src, rel(p)).not.toMatch(
+        /from\s+["']@\/lib\/opportunities\/seen["']/,
+      );
+      expect(src, rel(p)).not.toMatch(
+        /worker_opportunity_seen|mark_worker_opportunities_seen_v1/,
+      );
+      expect(codeOf(p), rel(p)).not.toMatch(DRIVER_CODES);
+    }
+  });
+
+  it("never builds an opportunity id out of a list position", () => {
+    // A positional id cannot open an opportunity, cannot be reported as shown,
+    // and cannot later carry provenance — it is the tell-tale of a surface that
+    // never received the real demand id.
+    const POSITIONAL_ID =
+      /\bid:\s*(?:`\$\{\s*(?:i|idx|index|n|pos|position)\s*\}`|String\(\s*(?:i|idx|index|pos|position)\s*\)|(?:i|idx|index|pos|position)\.toString\(\))/;
+    const offenders = conversationFiles()
+      .filter((p) => POSITIONAL_ID.test(codeOf(p)))
+      .map(rel);
+    expect(
+      offenders,
+      "an opportunity id must be the real demand id from the use case",
+    ).toEqual([]);
+  });
+
+  it("the conversation's find-work path really imports the canonical use case", () => {
+    // Locate the conversation module that PRODUCES marketplace results by what
+    // it does — it deals in chat matches AND actually runs something — rather
+    // than by a hard-coded filename. A pure contract/type module names the same
+    // shapes but performs no work, so it is correctly not a producer.
+    const marketplaceModules = conversationFiles().filter((p) => {
+      const src = read(p);
+      return (
+        /ChatEmployerMatch|FindWorkResult/.test(src) &&
+        /\basync\s+function\b/.test(src)
+      );
+    });
+    expect(
+      marketplaceModules.length,
+      "expected a conversation module that produces marketplace matches",
+    ).toBeGreaterThan(0);
+    for (const p of marketplaceModules) {
+      expect(read(p), rel(p)).toMatch(
+        /from\s+["']@\/lib\/marketplace\/worker-opportunities["']/,
+      );
+      expect(read(p), rel(p)).toMatch(/surface:\s*["']conversation["']/);
+    }
+  });
+
+  it("the conversation reports the SAME array it renders", () => {
+    // The strongest available static form of "shown, not loaded" for the chat:
+    // the marker's `requestIds` and the rendered card list must be built from
+    // one and the same message array. Two different expressions is precisely
+    // how a surface starts reporting rows it never drew.
+    const mounts = shownMarkerUsages().filter((u) =>
+      /surface=(?:"conversation"|\{"conversation"\})/.test(u.props),
+    );
+    expect(
+      mounts.length,
+      "the conversation surface must mount the shown-marker",
+    ).toBeGreaterThan(0);
+
+    for (const u of mounts) {
+      const ids = /requestIds=\{([\s\S]*?)\}\s*$/.exec(u.props.trim());
+      expect(ids, `${u.file}: marker must pass requestIds`).not.toBeNull();
+      const expr = ids![1];
+      // The array being reported…
+      const reported = /([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\.map\(/.exec(
+        expr,
+      );
+      expect(reported, `${u.file}: requestIds must map an array`).not.toBeNull();
+      const arrayName = reported![1];
+      // …must be the same array the cards are drawn from in that file. The
+      // marker's OWN element is stripped first: leaving it in would let the
+      // rule satisfy itself from the very line it is meant to check.
+      const src = read(join(APP_ROOT, u.file)).replace(
+        /<OpportunitiesShownMarker\b[\s\S]*?\/>/g,
+        " ",
+      );
+      expect(
+        src.includes(`{${arrayName}.map(`),
+        `${u.file}: marker reports "${arrayName}" but the cards are rendered from a different array`,
+      ).toBe(true);
+    }
+  });
+
+  it("no aggregate score or bare percentage is assembled in the conversation", () => {
+    for (const p of conversationFiles()) {
+      const src = codeOf(p);
+      expect(src, rel(p)).not.toMatch(/\b(aiScore|overallScore|matchScore)\b/);
+      // A percentage may only travel inside the canonical basis, which the use
+      // case produces — the conversation must not interpolate one itself.
+      expect(src, rel(p)).not.toMatch(/\bpct:\s*[a-zA-Z]/);
+    }
+  });
+});
