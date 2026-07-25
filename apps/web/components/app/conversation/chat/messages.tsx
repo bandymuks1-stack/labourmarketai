@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, FileText, Sparkles, Languages, Clock, Building2 } from "lucide-react";
+import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import type { ChatMessage, ChoiceChip } from "./types";
 
 /** Callbacks the thread wires into interactive messages. */
@@ -177,6 +178,16 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
       <div className="flex gap-2" data-testid="msg-employer-match">
         <Avatar />
         <div className="max-w-[92%] flex-1">
+          {/* Rendering IS the read event (canonical decision §10). The cards
+              below are exactly what the human sees, so exactly these real
+              demand ids are reported — never the wider set the board loaded.
+              An empty `matches` renders no card and mounts no marker. */}
+          {m.matches.length > 0 && (
+            <OpportunitiesShownMarker
+              surface="conversation"
+              requestIds={m.matches.map((match) => match.id)}
+            />
+          )}
           <div className="rounded-2xl rounded-tl-sm bg-surface-1/70 px-4 py-2.5 text-sm text-text-primary">{m.intro}</div>
           <div className="mt-2 flex flex-col gap-2">
             {m.matches.map((e) => (
