@@ -73,6 +73,16 @@ classification: `docs/security/secdef-public-execute-inventory-v1.md`.
 | Reviewed PR HEAD | `e2da19dc3c7980fac01c217af9b682b79f40d50b` (merged with `--match-head-commit`) |
 | Migration sha256 | `eaf846175af66ae10d6e658cd3a18e162b23682973a9c953aa8ce7387c6027d7` |
 | Rollback | `supabase/rollbacks/20260723053000_contact_demand_owner_v1.down.sql`, sha256 `81318ebda93148275d2c33de1fdd54ca4fdcd0e63a3d5d7b0a81168a17885afe` |
+
+> **⚠ FILE AMENDED AFTER APPLY (2026-07-25, PR #865).** One statement added:
+> `revoke execute on function public.contact_demand_owner_v1(uuid) from anon`.
+> Without it a clean `supabase db reset` left this function anon-reachable (a
+> fifth anon-reachable SECURITY DEFINER function), because the local Supabase
+> baseline grants `anon` EXPLICITLY and the file revoked only PUBLIC. New SHA-256
+> `38bb9c05ffa727f897485bb1bc5f62236a234db008f63c1955391766ffb30fab`. **Production
+> runtime state and this ledger version are UNCHANGED — not re-applied**; on the
+> production grant model the added revoke is a no-op. Original bytes preserved at
+> `docs/audits/migrations/20260723053000_original-production-applied.sql`.
 | Owner gate | Approved 2026-07-23 — matrix-conditional `@human-gate-approved`, owner-instructed apply |
 
 **What it did.** Created one `STABLE SECURITY DEFINER` read RPC
@@ -183,6 +193,16 @@ remains byte-identical.
 | Migration sha256 | `88ea8ef5a8a98cd5da7ea3ba24407a8b3e234c0be4052bc5f22376b086f6a286` |
 | Rollback | `supabase/rollbacks/20260722160000_secdef_anon_reach_revoke_v1.down.sql`, sha256 `4f02aabb016c45e94f5f46a686a58f1103acc37500cc8e922ff899821cad6d88` |
 | Owner gate | Approved 2026-07-22, "APPROVED WITH STRICT SCOPE" |
+
+> **⚠ FILE AMENDED AFTER APPLY (2026-07-25, PR #865).** The repo file no longer
+> matches what production executed: it now carries §4b/§4c/§4d, which make a clean
+> `supabase db reset` reproduce this end-state. New SHA-256
+> `991640deb81d2fe74228227e5d29af75464dbab44927452e2b282688b244971d`; the applied
+> SHA-256 above is unchanged and still describes production. **Production runtime
+> state and this ledger version are UNCHANGED — the migration was NOT re-applied.**
+> The original bytes are preserved at
+> `docs/audits/migrations/20260722160000_original-production-applied.sql`; rationale
+> and risk wording in `docs/audits/migrations/README.md`.
 
 **What it did.** Removed the leftover default `PUBLIC` EXECUTE grant — the root cause
 of the 2026-07-22 P0 — from **43** `SECURITY DEFINER` functions, plus an explicit

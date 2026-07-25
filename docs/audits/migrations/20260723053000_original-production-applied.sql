@@ -141,21 +141,6 @@ begin
 end $$;
 
 revoke all on function public.contact_demand_owner_v1(uuid) from public;
--- Explicit anon revoke (local-reset reproducibility, 2026-07-25).
--- On PRODUCTION this is an idempotent no-op: that database has no
--- ALTER DEFAULT PRIVILEGES for functions (proven by the `proacl IS NULL`
--- functions handled in 20260722160000 §2b), so anon reached functions only
--- through the default PUBLIC grant that the line above already removes —
--- and production is not re-applied in any case.
--- On a FRESH local stack the Supabase bootstrap grants EXECUTE to anon
--- EXPLICITLY on every function created in `public`, so `REVOKE ... FROM
--- PUBLIC` alone leaves `anon=X` in place. Without this line a clean
--- `supabase db reset` ends with FIVE anon-reachable SECURITY DEFINER
--- functions instead of the four allowlisted ones, contradicting this file's
--- own header ("As anon: permission denied (no EXECUTE grant)").
--- The function body is fail-closed regardless (it raises 42501 when
--- auth.uid() is null), so this closes a grant-posture gap, not a data leak.
-revoke execute on function public.contact_demand_owner_v1(uuid) from anon;
 grant execute on function public.contact_demand_owner_v1(uuid) to authenticated;
 
 commit;
