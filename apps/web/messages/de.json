@@ -11045,7 +11045,6 @@
       "fitPossible": "Mögliche Übereinstimmung",
       "fitWeak": "Schwache Übereinstimmung",
       "fitInsufficient": "Nicht genug Daten",
-      "skillBasis": "Passt zu {pct}% der Fähigkeiten dieser Stelle: {matched} von {total}, davon {confirmed} bestätigt",
       "locationReason": "Ort: {location}",
       "roleReason": "Bedarf: {role}"
     }

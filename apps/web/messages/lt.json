@@ -11045,7 +11045,6 @@
       "fitPossible": "Galimas atitikimas",
       "fitWeak": "Silpnas atitikimas",
       "fitInsufficient": "Trūksta duomenų",
-      "skillBasis": "Atitinka {pct}% šio darbo įgūdžių: {matched} iš {total}, iš jų {confirmed} patvirtinti",
       "locationReason": "Vieta: {location}",
       "roleReason": "Poreikis: {role}"
     }

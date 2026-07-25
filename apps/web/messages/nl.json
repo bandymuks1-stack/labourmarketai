@@ -11045,7 +11045,6 @@
       "fitPossible": "Mogelijke match",
       "fitWeak": "Zwakke match",
       "fitInsufficient": "Onvoldoende gegevens",
-      "skillBasis": "Komt overeen met {pct}% van de vaardigheden voor deze baan: {matched} van {total}, waarvan {confirmed} bevestigd",
       "locationReason": "Locatie: {location}",
       "roleReason": "Behoefte: {role}"
     }

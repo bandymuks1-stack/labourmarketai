@@ -3228,7 +3228,6 @@
       "fitPossible": "[EN] Possible fit",
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
-      "skillBasis": "[EN] Matches {pct}% of this job's skills: {matched} of {total}, {confirmed} confirmed",
       "locationReason": "[EN] Location: {location}",
       "roleReason": "[EN] Need: {role}"
     }

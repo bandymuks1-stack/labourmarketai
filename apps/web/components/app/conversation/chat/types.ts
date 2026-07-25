@@ -11,9 +11,14 @@ export type Role = "assistant" | "user" | "system";
 export type ChoiceChip = { id: string; label: string };
 
 export type EmployerMatch = {
+  /** The REAL demand id from the canonical marketplace use case
+   *  (`JobRecommendation.requestId`) — never a list index. It doubles as the
+   *  React key and as the id the shown-marker reports. */
   id: string;
   name: string;
-  /** Bounded, human reason bullets (why this fits) — never a raw score. */
+  /** Bounded, human reason bullets (why this fits) — never a raw score. The
+   *  first bullet is the canonical §19 basis line (matched / total counts with
+   *  the confirmed share), identical to every other marketplace surface. */
   reasons: string[];
   fitLabel: string; // e.g. "Strong fit"
 };

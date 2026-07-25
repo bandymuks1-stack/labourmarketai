@@ -11045,7 +11045,6 @@
       "fitPossible": "Possible fit",
       "fitWeak": "Weak fit",
       "fitInsufficient": "Not enough data",
-      "skillBasis": "Matches {pct}% of this job's skills: {matched} of {total}, {confirmed} confirmed",
       "locationReason": "Location: {location}",
       "roleReason": "Need: {role}"
     }

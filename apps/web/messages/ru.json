@@ -11045,7 +11045,6 @@
       "fitPossible": "Возможное соответствие",
       "fitWeak": "Слабое соответствие",
       "fitInsufficient": "Недостаточно данных",
-      "skillBasis": "Соответствует {pct}% навыков: {matched} из {total}, из них {confirmed} подтверждено",
       "locationReason": "Место: {location}",
       "roleReason": "Потребность: {role}"
     }

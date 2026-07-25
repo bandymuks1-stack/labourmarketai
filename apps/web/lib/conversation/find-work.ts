@@ -2,35 +2,43 @@
 
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { loadWorkerOpportunities } from "@/lib/opportunities/load-worker-opportunities";
-import { compareMatches, type MatchStatus } from "@/lib/market/match-v1";
+import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
+import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
+import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import {
+  CONVERSATION_FIND_WORK_LIMIT,
+  type ChatEmployerMatch,
+  type FindWorkResult,
+} from "./find-work-contract";
 
 /**
- * Conversation "find work" — REAL employer/opportunity matches for the chat.
+ * Conversation "find work" — a THIN presentation adapter over the canonical
+ * marketplace use case.
  *
- * Delegates to the canonical `loadWorkerOpportunities()` (own-data, RLS-scoped,
- * SECURITY DEFINER board RPC over verified companies' `customer_requests`) and
- * maps the top matches into chat cards. It NEVER fabricates a company or a need:
- * an empty board yields an honest empty message; an unapplied board RPC yields
- * an honest blocked message. All fit reasons carry their §19 basis (X of Y
- * skills, Z confirmed) — never a bare score, never a global person rating.
+ * Owner decision: docs/owner-decisions/work-journal-conversation-architecture-v1.md
+ * (`CONVERSATION_AND_UI_SHARE_DOMAIN_USE_CASES`); integration record:
+ * docs/handoffs/2026-07-25_864_conversation_marketplace_integration.md.
+ *
+ * This module does NOT load, filter, rank, score or explain anything of its
+ * own. `loadWorkerOpportunityMatches` already returned rows that are:
+ *   - authorized (own-data, RLS-scoped, gated board RPC),
+ *   - ranked by the ONE shared §19 comparator,
+ *   - limited to the display slice, and
+ *   - explained by their own §19 basis (matched / total / confirmed counts).
+ *
+ * All this adapter does is localize those facts into chat-card strings and
+ * carry the REAL demand id forward, so the chat can open the opportunity and
+ * report exactly what it showed. There is no percentage computed here, no
+ * aggregate score anywhere, and no invented company, need or salary: an empty
+ * board yields an honest empty message and an unapplied board RPC yields an
+ * honest blocked message.
  */
 
-export type ChatEmployerMatch = {
-  id: string;
-  name: string;
-  fitLabel: string;
-  reasons: string[];
-};
-
-export type FindWorkResult =
-  | { kind: "matches"; intro: string; matches: ChatEmployerMatch[] }
-  | { kind: "empty"; message: string }
-  | { kind: "blocked"; message: string };
-
-function fitKey(status: MatchStatus): string {
+/** Canonical match status → the conversation's localized fit label. A label
+ *  lookup, not a recomputation: `status` comes straight from the use case. */
+function fitKey(status: JobRecommendation["status"]): string {
   switch (status) {
     case "strong":
       return "fitStrong";
@@ -43,49 +51,57 @@ function fitKey(status: MatchStatus): string {
   }
 }
 
+export type { ChatEmployerMatch, FindWorkResult } from "./find-work-contract";
+
 export async function findWorkForChat(): Promise<FindWorkResult> {
   const t = await getTranslations("conversation.findWork");
-  const res = await loadWorkerOpportunities();
+  const view = await loadWorkerOpportunityMatches({
+    surface: "conversation",
+    limit: CONVERSATION_FIND_WORK_LIMIT,
+  });
 
-  if (res.kind === "no-worker") {
+  if (view.kind !== "ready") {
     return { kind: "blocked", message: t("blockedNoWorker") };
   }
-  if (res.needsDataAccess) {
+  // Honest blocked state: without the gated worker-visibility RPC there is no
+  // demand data at all, so "no matches" would be a false claim.
+  if (!view.capabilities.boardAvailable) {
     return { kind: "blocked", message: t("blockedNoAccess") };
   }
-  if (res.opportunities.length === 0) {
+  if (view.matches.length === 0) {
     return { kind: "empty", message: t("emptyState") };
   }
 
-  const top = [...res.opportunities]
-    .sort((a, b) => compareMatches(a.match, b.match))
-    .slice(0, 3);
+  // The canonical §19 basis line — the SAME localized form the dashboard card
+  // and the journal block render, so one demand reads identically everywhere.
+  const tRec = await getTranslations("opportunities.recommendations");
+  const tOpp = await getTranslations("opportunities");
+  const tlm = await getTranslations("labourMarket");
+  const workLabels = buildWorkTypeLabelMap(await getLocale());
 
-  const matches: ChatEmployerMatch[] = top.map((card, i) => {
-    const need = card.need;
-    const m = card.match;
-    const reasons: string[] = [];
-    if (m.skillFit) {
-      reasons.push(
-        t("skillBasis", {
-          pct: m.skillFit.pct,
-          matched: m.skillFit.matchedTotal,
-          total: m.skillFit.needTotal,
-          confirmed: m.skillFit.matchedConfirmed,
-        }),
-      );
-    }
-    const location = need.locationLabel ?? need.country ?? null;
+  const roleLabel = (slug: string | null): string =>
+    (slug && workLabels[slug]) || tOpp("fieldRoleUnknown");
+
+  // Order is the use case's order — no sort, no slice.
+  const matches: ChatEmployerMatch[] = view.matches.map((m) => {
+    const reasons: string[] = [
+      tRec("basisCompact", {
+        matched: m.basis.matchedTotal,
+        total: m.basis.needTotal,
+        confirmed: m.basis.matchedConfirmed,
+      }),
+    ];
+    const country =
+      m.country && tlm.has(`countryNames.${m.country}`)
+        ? (tlm(`countryNames.${m.country}`) as string)
+        : m.country;
+    const location = m.locationLabel ?? country ?? null;
     if (location) reasons.push(t("locationReason", { location }));
-    if (need.roleText) reasons.push(t("roleReason", { role: need.roleText }));
-
-    const name =
-      need.companyName ??
-      (need.roleText ? need.roleText.replace(/[_-]+/g, " ") : t("fitPossible"));
+    if (m.roleSlug) reasons.push(t("roleReason", { role: roleLabel(m.roleSlug) }));
 
     return {
-      id: `${i}`,
-      name,
+      id: m.requestId,
+      name: m.companyName ?? roleLabel(m.roleSlug),
       fitLabel: t(fitKey(m.status)),
       reasons: reasons.slice(0, 3),
     };
@@ -93,7 +109,10 @@ export async function findWorkForChat(): Promise<FindWorkResult> {
 
   return {
     kind: "matches",
-    intro: matches.length === 1 ? t("introOne") : t("intro", { count: matches.length }),
+    intro:
+      matches.length === 1
+        ? t("introOne")
+        : t("intro", { count: matches.length }),
     matches,
   };
 }
