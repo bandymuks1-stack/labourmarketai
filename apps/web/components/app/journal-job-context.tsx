@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { MarkOpportunitiesSeen } from "@/components/app/mark-opportunities-seen";
+import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { createClient } from "@/lib/supabase/server";
-import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
+import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
 import {
   journalConnections,
   type JobRecommendation,
@@ -35,9 +35,12 @@ export async function JournalJobContext({
   workerId: string;
   locale: string;
 }) {
-  const result = await getWorkerJobRecommendations({ limit: 10 });
-  if (result.kind !== "ready" || !result.boardAvailable) return null;
-  if (result.recommendations.length === 0) return null;
+  const result = await loadWorkerOpportunityMatches({
+    surface: "journal_context",
+    limit: 10,
+  });
+  if (result.kind !== "ready" || !result.capabilities.boardAvailable) return null;
+  if (result.matches.length === 0) return null;
 
   const supabase = await createClient();
 
@@ -114,7 +117,7 @@ export async function JournalJobContext({
     rec: JobRecommendation;
     connection: ReturnType<typeof journalConnections>[number];
   }[] = [];
-  for (const rec of result.recommendations) {
+  for (const rec of result.matches) {
     const conns = journalConnections(rec, recentSkillSlugs);
     if (conns.length > 0) connected.push({ rec, connection: conns[0] });
     if (connected.length === 2) break;
@@ -135,8 +138,10 @@ export async function JournalJobContext({
       className="order-6 card-border flex flex-col gap-2 p-4"
       data-testid="journal-job-context"
     >
-      {/* Rendering IS the read event for the shown recommendations. */}
-      <MarkOpportunitiesSeen
+      {/* Rendering IS the read event — and only the (at most 2) CONNECTED
+          rows below are rendered, never the 10 that were loaded. */}
+      <OpportunitiesShownMarker
+        surface="journal_context"
         requestIds={connected.map((c) => c.rec.requestId)}
       />
       <h2 className="font-display text-base font-semibold tracking-tight text-text-primary">

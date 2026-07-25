@@ -18,7 +18,11 @@ import {
   ConversationShell,
   type ShellAction,
   type BookingOffer,
+  type ConversationMatch,
+  type ConversationMatchLabels,
 } from "@/components/app/conversation/conversation-shell";
+import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
+import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
 import { listMyBookings } from "@/lib/booking/booking-actions";
 import { getWorkerActivity, type WorkerActivity } from "@/lib/conversation/worker-activity";
@@ -103,6 +107,15 @@ export default async function AssistantPage({
       ? await getWorkerActivity(user.id)
       : null;
 
+  // Opportunities IN the conversation — through the canonical marketplace use
+  // case, so the conversation shows the same ranked, §19-explained matches as
+  // the structured board and reports the same shown-state.
+  const { matches, matchLabels } = await loadConversationMatches(
+    locale,
+    activeRole,
+    heldRoles,
+  );
+
   return (
     <ConversationShell
       locale={locale as ActiveLocale}
@@ -113,9 +126,87 @@ export default async function AssistantPage({
       bookingOffers={bookingOffers}
       bookingLabels={bookingLabels}
       activity={activity}
+      matches={matches}
+      matchLabels={matchLabels}
     />
   );
 }
+
+/** Top opportunities for the conversation, straight from the canonical
+ *  marketplace use case. The conversation does NOT load, filter, rank or
+ *  explain anything of its own — it renders what the use case returned and the
+ *  shell reports exactly those rows as shown.
+ *
+ *  Honest empties: no worker, an unapplied worker-visibility RPC, or zero
+ *  recommendable matches all yield no block at all rather than an empty state
+ *  claiming something about data that cannot exist yet. */
+async function loadConversationMatches(
+  locale: string,
+  activeRole: Role,
+  heldRoles: ReadonlySet<Role>,
+): Promise<{
+  matches: ConversationMatch[];
+  matchLabels: ConversationMatchLabels | null;
+}> {
+  if (!heldRoles.has("worker") || activeRole !== "worker") {
+    return { matches: [], matchLabels: null };
+  }
+  const view = await loadWorkerOpportunityMatches({
+    surface: "conversation",
+    limit: CONVERSATION_MATCH_LIMIT,
+  });
+  if (view.kind !== "ready" || !view.capabilities.boardAvailable) {
+    return { matches: [], matchLabels: null };
+  }
+  if (view.matches.length === 0) return { matches: [], matchLabels: null };
+
+  const tCard = await getTranslations("auth.dashboard.jobsCard");
+  const tRec = await getTranslations("opportunities.recommendations");
+  const tOpp = await getTranslations("opportunities");
+  const tlm = await getTranslations("labourMarket");
+  const workLabels = buildWorkTypeLabelMap(locale);
+
+  const matches: ConversationMatch[] = view.matches.map((m) => {
+    const country =
+      m.country && tlm.has(`countryNames.${m.country}`)
+        ? tlm(`countryNames.${m.country}`)
+        : m.country;
+    const start =
+      m.startPeriod && tOpp.has(`urgency.${m.startPeriod}`)
+        ? (tOpp(`urgency.${m.startPeriod}` as never) as string)
+        : null;
+    const metaLine =
+      [m.locationLabel, country, start].filter(Boolean).join(" · ") || null;
+    return {
+      requestId: m.requestId,
+      title: (m.roleSlug && workLabels[m.roleSlug]) || tOpp("fieldRoleUnknown"),
+      metaLine,
+      // §19: counts + confirmed share together, never a bare % and never a
+      // person-level score.
+      basisLine: tRec("basisCompact", {
+        matched: m.basis.matchedTotal,
+        total: m.basis.needTotal,
+        confirmed: m.basis.matchedConfirmed,
+      }),
+      isNew: m.isNew,
+    };
+  });
+
+  return {
+    matches,
+    matchLabels: {
+      title: tCard("title"),
+      newBadge: tRec("newBadge"),
+      viewAll: tCard("viewAll"),
+      boardRoute: "/dashboard/opportunities",
+    },
+  };
+}
+
+/** How many opportunities the conversation shows before deferring to the
+ *  board. Kept small on purpose: the conversation is the primary work journal,
+ *  not a listing screen. */
+const CONVERSATION_MATCH_LIMIT = 3;
 
 /** Load the worker's incoming PROPOSED booking offers + their localized labels.
  *  Empty (and labels null) for non-workers or on any read issue — honest empty. */

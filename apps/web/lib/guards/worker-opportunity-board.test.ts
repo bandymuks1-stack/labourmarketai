@@ -204,7 +204,8 @@ describe("9. no fake verification / trust", () => {
     // with the honest internal-signal copy. Anything beyond it stays banned.
     expect(page).not.toMatch(/apply now|contactCompany|applyCta|mailto:/i);
     expect(page).toMatch(/data-next-action/);
-    expect(page).toMatch(/result\.interestAvailable\s*\?/);
+    // Stage B: capability flags travel in the canonical marketplace view.
+    expect(page).toMatch(/result\.capabilities\.interestAvailable\s*\?/);
     expect(page).toMatch(/WorkerInterestButton/);
     expect(page).toMatch(/internalNote/);
   });

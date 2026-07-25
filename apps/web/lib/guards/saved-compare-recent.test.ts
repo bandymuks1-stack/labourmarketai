@@ -73,17 +73,17 @@ describe("saved-opportunities lib — pinned to the #723 draft migration", () =>
 // ── 2. Feature-absent → toggle not rendered (honest invisibility) ────────────
 
 describe("save toggle — rendered ONLY when the owner-gated store exists", () => {
-  it("the page gates <WorkerSaveOpportunityButton> on result.savedAvailable", () => {
+  it("the page gates <WorkerSaveOpportunityButton> on the canonical savedAvailable capability", () => {
     const page = read("app/[locale]/dashboard/opportunities/page.tsx");
     // The ONLY mount of the toggle sits directly inside the savedAvailable
     // conditional — absence is invisibility, not a broken button.
     expect(page).toMatch(
-      /result\.savedAvailable \? \([\s\S]{0,200}<WorkerSaveOpportunityButton/,
+      /result\.capabilities\.savedAvailable \? \([\s\S]{0,200}<WorkerSaveOpportunityButton/,
     );
     const mounts = page.match(/<WorkerSaveOpportunityButton/g) ?? [];
     expect(mounts).toHaveLength(1);
     // The saved section is gated on the same server-side feature detection.
-    expect(page).toContain("result.savedAvailable &&");
+    expect(page).toContain("result.capabilities.savedAvailable &&");
     expect(page).toContain('data-testid="opportunities-saved"');
     expect(page).toContain('data-testid="opportunities-saved-stale"');
   });

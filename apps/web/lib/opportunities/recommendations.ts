@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { loadWorkerOpportunities } from "./load-worker-opportunities";
-import { listMyOpportunitySeen } from "./seen";
+import { readMyOpportunitySeen, toSeenState } from "./seen";
 import {
   countUnseenRecommendations,
   deriveJobRecommendations,
@@ -40,6 +40,10 @@ export type WorkerJobRecommendationsResult =
       readonly boardAvailable: boolean;
       /** True only once the owner-gated seen store is applied. */
       readonly seenAvailable: boolean;
+      /** True when the seen read failed for a reason OTHER than the store
+       *  being unapplied — i.e. something is actually broken. Kept distinct so
+       *  a real outage can never masquerade as the approved degradation. */
+      readonly seenReadDegraded: boolean;
       /** ALL recommendable matches, best first (shared §19 comparator). */
       readonly all: readonly JobRecommendation[];
       /** Unseen recommendations — the aggregate spine count. 0 while the
@@ -58,12 +62,14 @@ const loadRecommendationsResult = cache(
     } = await supabase.auth.getUser();
     if (!user) return { kind: "no-worker" };
 
-    const seen = await listMyOpportunitySeen(supabase, user.id);
+    const seenResult = await readMyOpportunitySeen(supabase, user.id);
+    const seen = toSeenState(seenResult);
     const all = deriveJobRecommendations(board.opportunities, seen, Date.now());
     return {
       kind: "ready",
       boardAvailable: !board.needsDataAccess,
       seenAvailable: seen.available,
+      seenReadDegraded: seenResult.kind === "unexpected_error",
       all,
       newCount: seen.available ? countUnseenRecommendations(all) : 0,
     };
@@ -76,6 +82,7 @@ export interface WorkerJobRecommendations {
   readonly kind: "ready";
   readonly boardAvailable: boolean;
   readonly seenAvailable: boolean;
+  readonly seenReadDegraded: boolean;
   /** Top N recommendations (default 3), best first. */
   readonly recommendations: readonly JobRecommendation[];
   /** Total recommendable matches behind the top-N slice. */
@@ -95,20 +102,14 @@ export async function getWorkerJobRecommendations(options?: {
     kind: "ready",
     boardAvailable: result.boardAvailable,
     seenAvailable: result.seenAvailable,
+    seenReadDegraded: result.seenReadDegraded,
     recommendations: result.all.slice(0, limit),
     totalRecommendable: result.all.length,
     newCount: result.newCount,
   };
 }
 
-/** The aggregate spine count — unseen recommendable matches. DEFENSIVE:
- *  returns 0 on any failure / non-worker / absent gated store, so the auth
- *  shell can never break (or fabricate attention) on this read. */
-export async function getNewJobMatchCount(): Promise<number> {
-  try {
-    const result = await loadRecommendationsResult();
-    return result.kind === "ready" ? result.newCount : 0;
-  } catch {
-    return 0;
-  }
-}
+/* The aggregate spine count moved to the canonical marketplace use case
+ * (`lib/marketplace/worker-opportunities.ts` → getNewMarketplaceMatchCount).
+ * Keeping a second entrypoint here would give the same attention signal two
+ * identities — exactly the duplication Stage B removes. */

@@ -17,6 +17,7 @@ import {
   type BookingActionLabels,
 } from "@/components/app/conversation/worker-booking-action";
 import { InlineActionForm } from "@/components/app/conversation/inline-action-form";
+import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { WorkerCvFlow } from "@/components/app/conversation/worker-cv-flow";
 import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import type { WorkerActivity } from "@/lib/conversation/worker-activity";
@@ -26,6 +27,29 @@ export type BookingOffer = {
   bookingId: string;
   title: string; // roleText (may be empty → generic offer label used)
   subtitle: string | null; // period line
+};
+
+/** One opportunity the conversation puts in front of the worker. Every field
+ *  is already localized and already explained by the server through the
+ *  canonical marketplace use case — the shell never ranks, never scores and
+ *  never invents a company or a need. */
+export type ConversationMatch = {
+  requestId: string;
+  title: string;
+  /** Location / start line, or null when the demand states neither. */
+  metaLine: string | null;
+  /** §19 canonical basis — matched/total counts WITH the confirmed share.
+   *  A bare percentage or an aggregate "AI score" must never appear here. */
+  basisLine: string;
+  isNew: boolean;
+};
+
+/** Localized chrome for the matches block (null when there is nothing to show). */
+export type ConversationMatchLabels = {
+  title: string;
+  newBadge: string;
+  viewAll: string;
+  boardRoute: string;
 };
 
 /** Serializable view of a registry action passed from the server page. */
@@ -64,6 +88,8 @@ export function ConversationShell({
   bookingOffers = [],
   bookingLabels = null,
   activity = null,
+  matches = [],
+  matchLabels = null,
 }: {
   locale: ActiveLocale;
   audiences: CommandAudience[];
@@ -78,6 +104,11 @@ export function ConversationShell({
   bookingLabels?: BookingActionLabels | null;
   /** Worker activity + completeness (worker only), or null. */
   activity?: WorkerActivity | null;
+  /** Opportunities to show in the conversation — from the canonical
+   *  marketplace use case, already ranked and explained. */
+  matches?: ConversationMatch[];
+  /** Localized chrome for the matches block (null when there is none). */
+  matchLabels?: ConversationMatchLabels | null;
 }) {
   const t = useTranslations("conversation.shell");
   const tActions = useTranslations("conversation.actions");
@@ -205,6 +236,65 @@ export function ConversationShell({
               />
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Opportunities, IN the conversation. Same canonical marketplace use
+          case, same ranking, same §19 explanations and the same shown-state
+          contract as the structured board — the conversation is not allowed a
+          marketplace of its own (canonical decision:
+          CONVERSATION_AND_UI_SHARE_DOMAIN_USE_CASES). */}
+      {matches.length > 0 && matchLabels && (
+        <section className="flex flex-col gap-2" data-testid="conversation-matches">
+          {/* Rendering IS the read event — exactly these rows, nothing more. */}
+          <OpportunitiesShownMarker
+            surface="conversation"
+            requestIds={matches.map((m) => m.requestId)}
+          />
+          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            {matchLabels.title}
+          </h2>
+          <ul className="flex flex-col divide-y divide-border/40">
+            {matches.map((m) => (
+              <li key={m.requestId} className="py-2 first:pt-0 last:pb-0">
+                <Link
+                  href={matchLabels.boardRoute as "/dashboard"}
+                  data-testid={`conversation-match-${m.requestId}`}
+                  className="flex flex-col gap-0.5 rounded-md p-1 transition-colors hover:bg-ink-800/40"
+                >
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {m.title}
+                    </span>
+                    {m.isNew && (
+                      <span
+                        className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-cyan"
+                        data-testid="conversation-match-new"
+                      >
+                        {matchLabels.newBadge}
+                      </span>
+                    )}
+                  </span>
+                  {m.metaLine && (
+                    <span className="text-xs text-text-muted">{m.metaLine}</span>
+                  )}
+                  <span
+                    className="text-xs text-text-secondary"
+                    data-testid="conversation-match-basis"
+                  >
+                    {m.basisLine}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={matchLabels.boardRoute as "/dashboard"}
+            data-testid="conversation-matches-view-all"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          >
+            {matchLabels.viewAll} →
+          </Link>
         </section>
       )}
 

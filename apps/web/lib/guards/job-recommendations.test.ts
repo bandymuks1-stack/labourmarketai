@@ -172,12 +172,12 @@ describe("aggregate anti-spam notification (one signal, never per-job rows)", ()
     expect(moduleAttentionSignalsAreValid(m)).toBe(true);
   });
 
-  it("the spine count loads from the ONE recommendation read model", () => {
+  it("the spine count loads from the ONE canonical marketplace use case", () => {
     const spine = read("lib/notifications/spine.ts");
     expect(spine).toMatch(
-      /import \{ getNewJobMatchCount \} from "@\/lib\/opportunities\/recommendations"/,
+      /import \{ getNewMarketplaceMatchCount \} from "@\/lib\/marketplace\/worker-opportunities"/,
     );
-    expect(spine).toMatch(/getNewJobMatchCount\(\)/);
+    expect(spine).toMatch(/getNewMarketplaceMatchCount\(\)/);
   });
 
   it("the read model reuses the canonical pipeline — no second engine", () => {
@@ -195,23 +195,22 @@ describe("aggregate anti-spam notification (one signal, never per-job rows)", ()
   });
 });
 
-describe("seen model — rendering a recommendation IS the read event", () => {
-  it("the opportunities board marks every rendered row seen on visit", () => {
+describe("shown model — rendering a recommendation IS the read event", () => {
+  /* Stage B: the shown/seen path is owned by the canonical marketplace use
+   * case. The surface-by-surface wiring and the "shown, never merely loaded"
+   * rule live in canonical-marketplace-use-case.test.ts; these cases only pin
+   * that each recommendation surface still reports what it rendered. */
+  it("the opportunities board reports the rows it actually renders", () => {
     const page = read("app/[locale]/dashboard/opportunities/page.tsx");
-    expect(page).toMatch(/<MarkOpportunitiesSeen/);
+    expect(page).toMatch(/<OpportunitiesShownMarker/);
   });
 
-  it("the dashboard card and the journal block mark their shown rows seen", () => {
-    expect(CARD).toMatch(/<MarkOpportunitiesSeen/);
-    expect(JOURNAL_BLOCK).toMatch(/<MarkOpportunitiesSeen/);
+  it("the dashboard card and the journal block report their shown rows", () => {
+    expect(CARD).toMatch(/<OpportunitiesShownMarker/);
+    expect(JOURNAL_BLOCK).toMatch(/<OpportunitiesShownMarker/);
   });
 
-  it("MarkOpportunitiesSeen actually calls the seen action → gated RPC", () => {
-    const cmp = read("components/app/mark-opportunities-seen.tsx");
-    expect(cmp).toMatch(
-      /import \{ markOpportunitiesSeenAction \} from "@\/lib\/opportunities\/seen-actions"/,
-    );
-    expect(cmp).toMatch(/markOpportunitiesSeenAction\(/);
+  it("the store vocabulary lives ONLY in the repository", () => {
     const lib = read("lib/opportunities/seen.ts");
     expect(lib).toMatch(/mark_worker_opportunities_seen_v1/);
     expect(lib).toMatch(/worker_opportunity_seen/);
