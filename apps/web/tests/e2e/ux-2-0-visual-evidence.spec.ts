@@ -333,6 +333,9 @@ test.describe("navigation discovery", () => {
   });
 
   test("deep links and browser back/forward still work", async ({ page }) => {
+    // Planning and Communication are both heavy panels compiled on demand by
+    // the dev server, and this test visits each of them twice.
+    test.setTimeout(180_000);
     // Deep link straight into a simple-shell panel.
     await page.goto("/lt/dashboard/planning", { waitUntil: "domcontentloaded" });
     expect(new URL(page.url()).pathname).toContain("/dashboard/planning");

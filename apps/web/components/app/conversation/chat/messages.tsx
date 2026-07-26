@@ -121,6 +121,73 @@ function ProfileGrowth({
   );
 }
 
+/**
+ * An assistant turn: who is speaking, then whatever they are saying.
+ *
+ * Repeated verbatim in seven branches before this. Extracted because the
+ * duplication was purely STRUCTURAL — identical markup, no per-variant
+ * behaviour — so one place now decides avatar placement and the gutter.
+ * Deliberately NOT given a `variant` prop: what differs between turns is the
+ * BODY, and hiding that behind a flag is how a component becomes unreadable.
+ */
+function AssistantTurn({
+  testId,
+  children,
+}: {
+  testId: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-2.5" data-testid={testId}>
+      <Avatar />
+      {children}
+    </div>
+  );
+}
+
+/** The measure every assistant turn shares — a readable column that structured
+ *  cards may fill completely. */
+const TURN_WIDTH = "min-w-0 max-w-[46rem] flex-1";
+
+/**
+ * A structured result rendered as an OBJECT rather than as speech: the bordered
+ * card the confirmation, work-log, translation and profile-summary turns share.
+ *
+ * `tone` is the only variation, and it is semantic (a caution surface for an
+ * irreversible confirmation) rather than a style switch.
+ */
+function CardBody({
+  tone = "neutral",
+  title,
+  icon,
+  children,
+}: {
+  tone?: "neutral" | "caution";
+  /** Rendered as the card's `<h3>` in the display face. Omit for a card whose
+   *  first line is already prose (the profile summary). */
+  title?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`${TURN_WIDTH} rounded-card border p-4 ${
+        tone === "caution"
+          ? "border-state-warning/40 bg-state-warning/5"
+          : "border-ink-500 bg-surface-1/70"
+      }`}
+    >
+      {title !== undefined && (
+        <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
+          {icon}
+          {title}
+        </h3>
+      )}
+      {children}
+    </div>
+  );
+}
+
 export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }) {
   // ── the opening turn — the screen's one real heading ─────────────────────
   // 22px on phones / 28px from `sm:` up, display face, no bubble. This is the
@@ -188,36 +255,32 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── assistant text (with optional chips) ─────────────────────────────────
   if (m.role === "assistant" && m.kind === "text") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-assistant">
-        <Avatar />
+      <AssistantTurn testId="msg-assistant">
         <div className="min-w-0 max-w-[46rem] pt-0.5">
           <div className="text-body text-text-primary">{m.text}</div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
-      </div>
+      </AssistantTurn>
     );
   }
 
   // ── assistant structured question ────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "question") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-question">
-        <Avatar />
+      <AssistantTurn testId="msg-question">
         <div className="min-w-0 max-w-[46rem] pt-0.5">
           <div className="text-body text-text-primary">{m.text}</div>
           <Chips chips={m.chips} onChip={h.onChip} />
         </div>
-      </div>
+      </AssistantTurn>
     );
   }
 
   // ── confirmation card in stream ──────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "confirmation") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-confirmation">
-        <Avatar />
-        <div className={`min-w-0 max-w-[46rem] flex-1 rounded-card border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
-          <h3 className="font-display text-card-title font-semibold text-text-primary">{m.title}</h3>
+      <AssistantTurn testId="msg-confirmation">
+        <CardBody tone={m.strong ? "caution" : "neutral"} title={m.title}>
           {m.confirmedText ? (
             <p className="ua-confirmed mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
               <Check {...iconInline()} aria-hidden /> {m.confirmedText}
@@ -240,8 +303,8 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               </ChatActionRow>
             </>
           )}
-        </div>
-      </div>
+        </CardBody>
+      </AssistantTurn>
     );
   }
 
@@ -249,12 +312,11 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "assistant" && m.kind === "worklog") {
     const d = m.draft;
     return (
-      <div className="flex gap-2.5" data-testid="msg-worklog">
-        <Avatar />
-        <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
-          <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
-            <Clock {...iconControl("flex-none text-brand-blue")} aria-hidden /> {m.title}
-          </h3>
+      <AssistantTurn testId="msg-worklog">
+        <CardBody
+          title={m.title}
+          icon={<Clock {...iconControl("flex-none text-brand-blue")} aria-hidden />}
+        >
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-basis">
             <Row k={m.fieldLabels.date} v={d.date} />
             <Row k={m.fieldLabels.time} v={`${d.start}–${d.end}`} />
@@ -278,17 +340,16 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               {m.cancelLabel}
             </ChatAction>
           </ChatActionRow>
-        </div>
-      </div>
+        </CardBody>
+      </AssistantTurn>
     );
   }
 
   // ── employer match card ──────────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "employer-match") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-employer-match">
-        <Avatar />
-        <div className="min-w-0 max-w-[46rem] flex-1">
+      <AssistantTurn testId="msg-employer-match">
+        <div className={TURN_WIDTH}>
           {/* Rendering IS the read event (canonical decision §10). The cards
               below are exactly what the human sees, so exactly these real
               demand ids are reported — never the wider set the board loaded.
@@ -344,7 +405,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
             ))}
           </div>
         </div>
-      </div>
+      </AssistantTurn>
     );
   }
 
@@ -356,9 +417,8 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // is one tap from being fixed.
   if (m.role === "assistant" && m.kind === "profile-summary") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-profile-summary">
-        <Avatar />
-        <div className="min-w-0 max-w-[46rem] flex-1">
+      <AssistantTurn testId="msg-profile-summary">
+        <div className={TURN_WIDTH}>
           <div className="rounded-card border border-ink-500 bg-surface-1/70 p-4">
             <p className="text-body text-text-primary">{m.intro}</p>
             <ProfileGrowth
@@ -403,19 +463,18 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
           </div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
-      </div>
+      </AssistantTurn>
     );
   }
 
   // ── translation preview card ─────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "translation") {
     return (
-      <div className="flex gap-2.5" data-testid="msg-translation">
-        <Avatar />
-        <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
-          <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
-            <Languages {...iconControl("flex-none text-brand-blue")} aria-hidden /> {m.recipient} · {m.channelLabel}
-          </h3>
+      <AssistantTurn testId="msg-translation">
+        <CardBody
+          title={`${m.recipient} · ${m.channelLabel}`}
+          icon={<Languages {...iconControl("flex-none text-brand-blue")} aria-hidden />}
+        >
           <div className="mt-2 flex flex-col gap-2">
             <div>
               <p className="font-mono text-meta uppercase tracking-label text-text-muted">{m.originalLabel}</p>
@@ -434,8 +493,8 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               {m.cancelLabel}
             </ChatAction>
           </ChatActionRow>
-        </div>
-      </div>
+        </CardBody>
+      </AssistantTurn>
     );
   }
 

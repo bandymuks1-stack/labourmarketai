@@ -38,6 +38,21 @@ function variant(kind: string, role: "assistant" | "user" = "assistant"): string
   return messages.slice(start, next === -1 ? undefined : next);
 }
 
+/**
+ * The source of one top-level function declaration, sliced to the next one.
+ *
+ * A regex ending at the first line-initial `}` stops at the brace that closes
+ * the props type annotation, so it captures only the signature — and every
+ * assertion against the body then silently passes on an empty string.
+ */
+function declarationOf(src: string, name: string): string {
+  const start = src.indexOf(`function ${name}(`);
+  if (start === -1) return "";
+  const rest = src.slice(start + 1);
+  const next = rest.search(/\n(?:export )?function /);
+  return next === -1 ? src.slice(start) : src.slice(start, start + 1 + next);
+}
+
 describe("speech is unboxed, objects are carded", () => {
   it("assistant speech carries no bubble background", () => {
     for (const kind of ["text", "question"]) {
@@ -55,14 +70,27 @@ describe("speech is unboxed, objects are carded", () => {
   });
 
   it("structured results stay inside a card — they are objects, not speech", () => {
-    for (const kind of ["confirmation", "worklog", "translation", "profile-summary"]) {
-      expect(variant(kind), `${kind}: keeps its card`).toMatch(/rounded-card/);
+    // Stage 8 moved the shared shell into `CardBody`, so the card is now
+    // guaranteed in ONE place instead of repeated per variant. Assert the
+    // outcome: the shell really draws a card, and each structured variant uses
+    // it (profile-summary composes its own because its chips sit outside).
+    const cardBody = declarationOf(messages, "CardBody");
+    expect(cardBody, "the shared shell draws the card").toMatch(/rounded-card/);
+    for (const kind of ["confirmation", "worklog", "translation"]) {
+      expect(variant(kind), `${kind}: uses the shared card shell`).toMatch(/<CardBody/);
     }
+    expect(variant("profile-summary"), "summary keeps a card of its own").toMatch(
+      /rounded-card/,
+    );
   });
 
   it("the assistant identity survives unboxing", () => {
+    // The avatar moved into `AssistantTurn`, so identity is now structural
+    // rather than copy-pasted — every turn that uses the wrapper gets it.
+    const turn = declarationOf(messages, "AssistantTurn");
+    expect(turn, "the wrapper shows who is speaking").toMatch(/<Avatar \/>/);
     for (const kind of ["text", "question"]) {
-      expect(variant(kind), `${kind}: still shows who is speaking`).toMatch(/<Avatar \/>/);
+      expect(variant(kind), `${kind}: uses the wrapper`).toMatch(/<AssistantTurn/);
     }
   });
 });

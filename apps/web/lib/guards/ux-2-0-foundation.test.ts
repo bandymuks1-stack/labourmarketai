@@ -50,6 +50,21 @@ const codeOf = (relPath: string): string =>
     .replace(/\/\*[\s\S]*?\*\//g, " ")
     .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
+/**
+ * The source of one top-level function declaration, sliced to the next one.
+ *
+ * A naive `function X\(([\s\S]*?)\n}` regex stops at the `}) {` that closes the
+ * props type annotation, so it captured only the signature and every assertion
+ * against the body silently passed on an empty string.
+ */
+function declarationOf(src: string, name: string): string {
+  const start = src.indexOf(`function ${name}(`);
+  if (start === -1) return "";
+  const rest = src.slice(start + 1);
+  const next = rest.search(/\n(?:export )?function /);
+  return next === -1 ? src.slice(start) : src.slice(start, start + 1 + next);
+}
+
 describe("radius ladder is monotonic", () => {
   it("every step is strictly larger than the one before", () => {
     const values = RADII_LADDER.map((k) => ({ k, v: parseFloat(radii[k]) }));
@@ -164,8 +179,17 @@ describe("the primary screen has a document outline", () => {
   });
 
   it("structured card titles are headings, not paragraphs", () => {
+    // Stage 8 centralised the card shell, so there is ONE h3 that every
+    // structured card inherits rather than three copies to keep in step. That
+    // is a stronger guarantee, so assert the shell instead of a repeat count.
     const messages = codeOf("components/app/conversation/chat/messages.tsx");
-    expect((messages.match(/<h3\b/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    const cardBody = declarationOf(messages, "CardBody");
+    expect(cardBody, "the shared card renders a heading").toMatch(/<h3\b/);
+    expect(cardBody, "in the display face at card-title scale").toMatch(
+      /font-display[\s\S]{0,80}text-card-title/,
+    );
+    // …and no card title regressed to a paragraph.
+    expect(messages).not.toMatch(/<p[^>]*text-card-title/);
   });
 
   it("the display face is actually used on the surface it was loaded for", () => {
