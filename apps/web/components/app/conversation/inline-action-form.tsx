@@ -93,7 +93,8 @@ export function InlineActionForm({
   if (phase.kind === "done") {
     return (
       <div
-        className="flex items-center justify-between gap-3 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3"
+        // A REAL status change just landed — the one place the spring belongs.
+        className="ua-confirmed flex items-center justify-between gap-3 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3"
         data-testid="inline-action-done"
       >
         <span className="text-sm font-semibold text-state-success">

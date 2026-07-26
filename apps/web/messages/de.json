@@ -11041,7 +11041,11 @@
       "introCompleteNext": "In deinem Profil fehlt nichts. Weiter: Arbeitsangebote ansehen oder Arbeitszeit erfassen.",
       "lastActivity": "Letzte Änderung: {event} — {date}",
       "blockedNoWorker": "Dieses Konto hat kein Arbeitnehmerprofil, hier gibt es also nichts zusammenzufassen.",
-      "blockedNotSignedIn": "Deine Sitzung ist beendet. Bitte melde dich erneut an."
+      "blockedNotSignedIn": "Deine Sitzung ist beendet. Bitte melde dich erneut an.",
+      "progress": "{done} von {total}",
+      "progressAria": "Profil-Grundangaben: {done} von {total} gespeichert",
+      "doneWord": "Gespeichert",
+      "missingWord": "Fehlt noch"
     }
   }
 }

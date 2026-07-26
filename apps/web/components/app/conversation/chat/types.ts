@@ -107,6 +107,18 @@ export type ChatMessage =
       done: string[];
       /** Concrete facts still missing — named, never a bare percentage. */
       missing: string[];
+      /** Server-supplied counts. The card RENDERS these; it never counts the
+       *  arrays, so the bar can never disagree with the server. */
+      stepsDone: number;
+      stepsTotal: number;
+      /** Localized "{done} / {total}" readout + the progress group's a11y name,
+       *  resolved server-side so the card holds no copy of its own. */
+      progressLabel: string;
+      progressAriaLabel: string;
+      /** Localized "saved" / "missing" words — the TEXT signal that makes the
+       *  segments readable without perceiving colour. */
+      doneWord: string;
+      missingWord: string;
       /** Honest last-activity line, or null when there is no activity yet. */
       lastActivity: string | null;
       chips?: ChoiceChip[];

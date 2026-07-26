@@ -11041,7 +11041,11 @@
       "introCompleteNext": "Er ontbreekt niets in je profiel. Volgende stap: bekijk werkkansen of leg je werktijd vast.",
       "lastActivity": "Laatste wijziging: {event} — {date}",
       "blockedNoWorker": "Dit account heeft geen werknemersprofiel, dus er valt hier niets samen te vatten.",
-      "blockedNotSignedIn": "Je sessie is beëindigd. Log opnieuw in."
+      "blockedNotSignedIn": "Je sessie is beëindigd. Log opnieuw in.",
+      "progress": "{done} van {total}",
+      "progressAria": "Basisgegevens profiel: {done} van {total} opgeslagen",
+      "doneWord": "Opgeslagen",
+      "missingWord": "Ontbreekt nog"
     }
   }
 }

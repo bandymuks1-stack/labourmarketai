@@ -56,6 +56,71 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
   );
 }
 
+/**
+ * Profile growth — the fix for the one DESIGN_SOUL test the audit found
+ * FAILING ("profilis atrodo kaip auganti gyvybė, ne kaip forma").
+ *
+ * It was a flat list where confirming something changed one icon's colour.
+ * Now the saved checkpoints visibly accumulate into a five-segment bar.
+ *
+ * HONEST BY CONSTRUCTION:
+ *   • the counts are the SERVER's (`stepsDone` / `stepsTotal`) — this renders
+ *     them and never counts the arrays, so the bar cannot disagree with the
+ *     read model;
+ *   • no percentage is shown or computed (the player-card contract forbids one);
+ *   • no streak, points, level, badge, confetti or sound;
+ *   • a segment carries THREE signals — fill, shape (solid vs dashed outline)
+ *     and the adjacent named lists — so colour is never the only indicator;
+ *   • `role="progressbar"` with `aria-valuetext` gives a screen reader the real
+ *     "4 of 5", not a decorative graphic;
+ *   • the bar is deliberately NOT animated: the card is rebuilt on every turn,
+ *     so animating here would celebrate on every render rather than on a real
+ *     status change. The one-shot `ua-confirmed` stays where a change actually
+ *     happens — the save confirmation.
+ */
+function ProfileGrowth({
+  done,
+  total,
+  label,
+  ariaLabel,
+}: {
+  done: number;
+  total: number;
+  label: string;
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      className="mt-3 flex items-center gap-3"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={done}
+      aria-valuetext={ariaLabel}
+      data-testid="profile-growth"
+      data-done={done}
+      data-total={total}
+    >
+      <span className="flex flex-1 gap-1" aria-hidden>
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            key={i}
+            data-filled={i < done ? "true" : "false"}
+            className={`h-1.5 flex-1 rounded-full ${
+              i < done
+                ? "bg-trust-accent"
+                : "border border-dashed border-ink-500 bg-transparent"
+            }`}
+          />
+        ))}
+      </span>
+      <span className="flex-none font-mono text-meta tabular-nums text-text-secondary">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }) {
   // ── the opening turn — the screen's one real heading ─────────────────────
   // 22px on phones / 28px from `sm:` up, display face, no bubble. This is the
@@ -296,8 +361,19 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
         <div className="min-w-0 max-w-[46rem] flex-1">
           <div className="rounded-card border border-ink-500 bg-surface-1/70 p-4">
             <p className="text-body text-text-primary">{m.intro}</p>
+            <ProfileGrowth
+              done={m.stepsDone}
+              total={m.stepsTotal}
+              label={m.progressLabel}
+              ariaLabel={m.progressAriaLabel}
+            />
             {m.done.length > 0 && (
-              <ul className="mt-2.5 flex flex-col gap-1" data-testid="profile-summary-done">
+              <p className="mt-3.5 font-mono text-meta uppercase tracking-label text-text-muted">
+                {m.doneWord}
+              </p>
+            )}
+            {m.done.length > 0 && (
+              <ul className="mt-1.5 flex flex-col gap-1" data-testid="profile-summary-done">
                 {m.done.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-support text-text-secondary">
                     <Check {...iconInline("mt-0.5 flex-none text-state-success")} aria-hidden /> {d}
@@ -306,7 +382,12 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               </ul>
             )}
             {m.missing.length > 0 && (
-              <ul className="mt-2 flex flex-col gap-1" data-testid="profile-summary-missing">
+              <p className="mt-3 font-mono text-meta uppercase tracking-label text-text-muted">
+                {m.missingWord}
+              </p>
+            )}
+            {m.missing.length > 0 && (
+              <ul className="mt-1.5 flex flex-col gap-1" data-testid="profile-summary-missing">
                 {m.missing.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-support text-text-muted">
                     <CircleDashed {...iconInline("mt-0.5 flex-none text-state-warning")} aria-hidden /> {d}

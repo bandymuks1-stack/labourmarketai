@@ -11041,7 +11041,11 @@
       "introCompleteNext": "Profilyje nieko netrūksta. Toliau: peržiūrėk darbo galimybes arba užfiksuok darbo laiką.",
       "lastActivity": "Paskutinis pakeitimas: {event} — {date}",
       "blockedNoWorker": "Ši paskyra neturi darbuotojo profilio, todėl čia nėra ko apibendrinti.",
-      "blockedNotSignedIn": "Sesija baigėsi. Prisijunk iš naujo."
+      "blockedNotSignedIn": "Sesija baigėsi. Prisijunk iš naujo.",
+      "progress": "{done} iš {total}",
+      "progressAria": "Profilio esminės dalys: išsaugota {done} iš {total}",
+      "doneWord": "Išsaugota",
+      "missingWord": "Dar trūksta"
     }
   }
 }

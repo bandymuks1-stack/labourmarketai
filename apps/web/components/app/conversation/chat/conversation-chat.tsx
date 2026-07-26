@@ -139,6 +139,7 @@ export function ConversationChat({
    * invented one.
    */
   const t = useTranslations("conversation.chat");
+  const tSummary = useTranslations("conversation.summary");
   const auth = useAuthOptional();
   const firstName = useMemo(() => {
     const full = auth?.profile?.full_name?.trim();
@@ -280,6 +281,19 @@ export function ConversationChat({
               intro: res.intro,
               done: res.done,
               missing: res.missing,
+              // Counts and copy come from the server; the card renders them.
+              stepsDone: res.stepsDone,
+              stepsTotal: res.stepsTotal,
+              progressLabel: tSummary("progress", {
+                done: res.stepsDone,
+                total: res.stepsTotal,
+              }),
+              progressAriaLabel: tSummary("progressAria", {
+                done: res.stepsDone,
+                total: res.stepsTotal,
+              }),
+              doneWord: tSummary("doneWord"),
+              missingWord: tSummary("missingWord"),
               lastActivity: res.lastActivity,
               chips:
                 res.missing.length > 0
@@ -297,7 +311,7 @@ export function ConversationChat({
           assistant(labels.fallback, starterChips);
         });
     },
-    [pushMessage, assistant, starterChips, profileChips, labels.fallback],
+    [pushMessage, assistant, starterChips, profileChips, labels.fallback, tSummary],
   );
 
   /** Work-log from a natural sentence → real journal save (deterministic). */

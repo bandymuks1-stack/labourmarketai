@@ -3224,7 +3224,11 @@
       "introCompleteNext": "[EN] Nothing is missing from your profile. Next: look at work opportunities, or log your work time.",
       "lastActivity": "[EN] Last change: {event} — {date}",
       "blockedNoWorker": "[EN] This account has no worker profile, so there is nothing for me to summarise here.",
-      "blockedNotSignedIn": "[EN] Your session ended. Please sign in again."
+      "blockedNotSignedIn": "[EN] Your session ended. Please sign in again.",
+      "progress": "[EN] {done} of {total}",
+      "progressAria": "[EN] Profile essentials: {done} of {total} saved",
+      "doneWord": "[EN] Saved",
+      "missingWord": "[EN] Still missing"
     }
   }
 }

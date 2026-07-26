@@ -36,6 +36,14 @@ export type ChatProfileSummary =
        *  matching action simply offers no recommendation rather than inventing
        *  one. */
       missingKeys: WorkerProfileStep[];
+      /** Checkpoints really saved, straight from the read model.
+       *
+       *  Sent explicitly rather than left for the UI to derive from
+       *  `done.length`: two places computing the same number is exactly how a
+       *  progress bar starts disagreeing with the server it is reporting. The
+       *  UI renders these; it never counts. */
+      stepsDone: number;
+      stepsTotal: number;
       /** Honest last-activity line, or null when there is no activity yet. */
       lastActivity: string | null;
     }

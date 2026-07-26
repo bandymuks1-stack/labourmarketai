@@ -72,6 +72,9 @@ export async function loadProfileSummaryForChat(
     done,
     missing,
     missingKeys,
+    // The read model's own counts — not recomputed here either.
+    stepsDone: activity.stepsDone,
+    stepsTotal: activity.stepsTotal,
     lastActivity: await lastActivityLine(activity.events[0] ?? null),
   };
 }

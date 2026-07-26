@@ -183,6 +183,112 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("profile growth", () => {
+  test("the bar agrees with the server and is readable without colour", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    await page.getByTestId("chat-chip-profile").click();
+    const card = page.getByTestId("msg-profile-summary").last();
+    await expect(card).toBeVisible({ timeout: 30_000 });
+    const bar = card.getByTestId("profile-growth");
+    await expect(bar).toBeVisible();
+
+    const state = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="profile-growth"]') as HTMLElement;
+      const segs = [...el.querySelectorAll<HTMLElement>("[data-filled]")];
+      const doneList = document.querySelector('[data-testid="profile-summary-done"]');
+      const missingList = document.querySelector('[data-testid="profile-summary-missing"]');
+      return {
+        done: Number(el.dataset.done),
+        total: Number(el.dataset.total),
+        role: el.getAttribute("role"),
+        valueNow: Number(el.getAttribute("aria-valuenow")),
+        valueMax: Number(el.getAttribute("aria-valuemax")),
+        valueText: el.getAttribute("aria-valuetext"),
+        filled: segs.filter((x) => x.dataset.filled === "true").length,
+        segments: segs.length,
+        // shape difference, not only colour
+        emptyDashed: segs
+          .filter((x) => x.dataset.filled === "false")
+          .every((x) => getComputedStyle(x).borderStyle === "dashed"),
+        doneItems: doneList ? doneList.querySelectorAll("li").length : 0,
+        missingItems: missingList ? missingList.querySelectorAll("li").length : 0,
+        focusableInside: el.querySelectorAll("a,button,[tabindex]").length,
+      };
+    });
+
+    test.info().annotations.push({
+      type: "evidence",
+      description: `growth ${state.done}/${state.total} filled=${state.filled} valueText="${state.valueText}"`,
+    });
+
+    // The bar renders the SERVER's numbers…
+    expect(state.role).toBe("progressbar");
+    expect(state.valueNow).toBe(state.done);
+    expect(state.valueMax).toBe(state.total);
+    expect(state.valueText, "screen readers get the real count").toContain(String(state.done));
+    // …and the segments agree with them exactly.
+    expect(state.segments).toBe(state.total);
+    expect(state.filled).toBe(state.done);
+    // …and with the named lists, so nothing can claim more than is saved.
+    expect(state.doneItems).toBe(state.done);
+    expect(state.missingItems).toBe(state.total - state.done);
+    // shape carries the state too
+    expect(state.emptyDashed, "unfilled segments are dashed, not just paler").toBe(true);
+    // a readout, never a control
+    expect(state.focusableInside).toBe(0);
+
+    await shot(page, `profile-${state.done}-of-${state.total}`, "light", "desktop");
+  });
+
+  test("no percentage or gamification reaches the screen", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+    await page.getByTestId("chat-chip-profile").click();
+    const card = page.getByTestId("msg-profile-summary").last();
+    await expect(card).toBeVisible({ timeout: 30_000 });
+
+    const text = (await card.innerText()).toLowerCase();
+    expect(text).not.toMatch(/\d+\s*%/);
+    // WORD boundaries, not substrings: "atlygis" (Lithuanian for *pay*) legally
+    // contains "lygis" (level), and a naive `toContain` fails on real copy.
+    for (const banned of ["streak", "xp", "lygis", "level", "taškai", "points", "badge"]) {
+      // `String.raw` is required here: inside a normal template literal `\p`
+      // collapses to `p`, so the class silently became `[^p{L}]` and matched the
+      // "t" in "atlygis" — a check that looked strict and asserted nothing.
+      expect(text, `must not show "${banned}" as a word`).not.toMatch(
+        new RegExp(String.raw`(^|[^\p{L}])` + banned + String.raw`([^\p{L}]|$)`, "u"),
+      );
+    }
+  });
+
+  test("the growth bar does not animate under reduced motion", async ({ browser }) => {
+    const ctx = await browser.newContext({
+      storageState: STORAGE_STATE,
+      reducedMotion: "reduce",
+    });
+    const page = await ctx.newPage();
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+    await page.getByTestId("chat-chip-profile").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    const animations = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="profile-growth"]')!;
+      return [el, ...el.querySelectorAll("*")].map((n) => getComputedStyle(n).animationName);
+    });
+    for (const a of animations) expect(a).toBe("none");
+    await page.screenshot({
+      path: test.info().outputPath("profile-growth-reduced-motion__light__desktop.png"),
+    });
+    await ctx.close();
+  });
+});
+
 test.describe("navigation discovery", () => {
   /** Every route the brief's matrix names, plus the role-restricted ones. */
   const ROUTES = [
