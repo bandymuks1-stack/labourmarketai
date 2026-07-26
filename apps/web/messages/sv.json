@@ -3153,6 +3153,7 @@
       "send": "[EN] Send",
       "attach": "[EN] Attach a file",
       "greeting": "[EN] Hi. How can I help you today?",
+      "greetingNamed": "[EN] Hi, {name}. How can I help you today?",
       "chipCv": "[EN] Upload CV",
       "chipJobs": "[EN] I'm looking for work",
       "chipProfile": "[EN] Complete my profile",

@@ -63,7 +63,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
           <AssistantMark size="sm" />
           {m.assistantName}
         </p>
-        <h1 className="max-w-[26ch] text-balance font-display text-title font-bold text-text-primary sm:text-title-lg">
+        <h1 className="max-w-[30ch] text-balance font-display text-title font-bold text-text-primary sm:text-title-lg">
           {m.text}
         </h1>
         {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
@@ -115,12 +115,10 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── assistant text (with optional chips) ─────────────────────────────────
   if (m.role === "assistant" && m.kind === "text") {
     return (
-      <div className="flex gap-2" data-testid="msg-assistant">
+      <div className="flex gap-2.5" data-testid="msg-assistant">
         <Avatar />
-        <div className="max-w-[85%]">
-          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">
-            {m.text}
-          </div>
+        <div className="min-w-0 max-w-[46rem] pt-0.5">
+          <div className="text-body text-text-primary">{m.text}</div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </div>
@@ -130,12 +128,10 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── assistant structured question ────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "question") {
     return (
-      <div className="flex gap-2" data-testid="msg-question">
+      <div className="flex gap-2.5" data-testid="msg-question">
         <Avatar />
-        <div className="max-w-[85%]">
-          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">
-            {m.text}
-          </div>
+        <div className="min-w-0 max-w-[46rem] pt-0.5">
+          <div className="text-body text-text-primary">{m.text}</div>
           <Chips chips={m.chips} onChip={h.onChip} />
         </div>
       </div>
@@ -145,9 +141,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── confirmation card in stream ──────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "confirmation") {
     return (
-      <div className="flex gap-2" data-testid="msg-confirmation">
+      <div className="flex gap-2.5" data-testid="msg-confirmation">
         <Avatar />
-        <div className={`max-w-[92%] flex-1 rounded-card border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
+        <div className={`min-w-0 max-w-[46rem] flex-1 rounded-card border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
           <h3 className="font-display text-card-title font-semibold text-text-primary">{m.title}</h3>
           {m.confirmedText ? (
             <p className="ua-confirmed mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
@@ -175,9 +171,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "assistant" && m.kind === "worklog") {
     const d = m.draft;
     return (
-      <div className="flex gap-2" data-testid="msg-worklog">
+      <div className="flex gap-2.5" data-testid="msg-worklog">
         <Avatar />
-        <div className="max-w-[92%] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
+        <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
           <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
             <Clock className="size-5 flex-none text-brand-blue" aria-hidden /> {m.title}
           </h3>
@@ -208,9 +204,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── employer match card ──────────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "employer-match") {
     return (
-      <div className="flex gap-2" data-testid="msg-employer-match">
+      <div className="flex gap-2.5" data-testid="msg-employer-match">
         <Avatar />
-        <div className="max-w-[92%] flex-1">
+        <div className="min-w-0 max-w-[46rem] flex-1">
           {/* Rendering IS the read event (canonical decision §10). The cards
               below are exactly what the human sees, so exactly these real
               demand ids are reported — never the wider set the board loaded.
@@ -221,7 +217,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               requestIds={m.matches.map((match) => match.id)}
             />
           )}
-          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">{m.intro}</div>
+          <div className="text-body text-text-primary">{m.intro}</div>
           <div className="mt-2 flex flex-col gap-2">
             {m.matches.map((e) => (
               <div key={e.id} className="rounded-card border border-ink-500 bg-ink-800/60 p-3.5">
@@ -278,9 +274,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // is one tap from being fixed.
   if (m.role === "assistant" && m.kind === "profile-summary") {
     return (
-      <div className="flex gap-2" data-testid="msg-profile-summary">
+      <div className="flex gap-2.5" data-testid="msg-profile-summary">
         <Avatar />
-        <div className="max-w-[92%] flex-1">
+        <div className="min-w-0 max-w-[46rem] flex-1">
           <div className="rounded-card border border-ink-500 bg-surface-1/70 p-4">
             <p className="text-body text-text-primary">{m.intro}</p>
             {m.done.length > 0 && (
@@ -316,9 +312,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── translation preview card ─────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "translation") {
     return (
-      <div className="flex gap-2" data-testid="msg-translation">
+      <div className="flex gap-2.5" data-testid="msg-translation">
         <Avatar />
-        <div className="max-w-[92%] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
+        <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
           <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
             <Languages className="size-5 flex-none text-brand-blue" aria-hidden /> {m.recipient} · {m.channelLabel}
           </h3>
@@ -355,9 +351,9 @@ function Row({ k, v }: { k: string; v: string }) {
 
 export function TypingIndicator() {
   return (
-    <div className="flex gap-2" data-testid="chat-typing">
+    <div className="flex gap-2.5" data-testid="chat-typing">
       <Avatar />
-      <div className="flex items-center gap-1 rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-3">
+      <div className="flex items-center gap-1 py-3">
         {[0, 1, 2].map((i) => (
           <span
             key={i}

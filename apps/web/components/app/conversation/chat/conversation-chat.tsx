@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
@@ -110,6 +112,30 @@ export function ConversationChat({
     [labels],
   );
 
+  /**
+   * The greeting says the user's name when the product already knows it.
+   *
+   * "Hi. How can I help you today?" is a search box pretending to be a
+   * conversation — it proves the system knows nothing about you. The name is
+   * ALREADY in the client auth context (the header renders initials from it),
+   * so this costs no new query, no new API and no page-load work; it is the
+   * same fact, used once more. No name → the neutral greeting, never an
+   * invented one.
+   */
+  const t = useTranslations("conversation.chat");
+  const auth = useAuthOptional();
+  const firstName = useMemo(() => {
+    const full = auth?.profile?.full_name?.trim();
+    if (!full) return null;
+    const first = full.split(/\s+/)[0];
+    // Guard against a pasted paragraph or an email fragment in the name field.
+    return first && first.length <= 24 ? first : null;
+  }, [auth?.profile?.full_name]);
+
+  const greetingText = firstName
+    ? t("greetingNamed", { name: firstName })
+    : labels.greeting;
+
   const initial: ThreadItem[] = useMemo(() => {
     if (script) return script.map((message) => ({ id: message.id, message }));
     return [
@@ -120,13 +146,13 @@ export function ConversationChat({
           role: "assistant",
           // The opening turn is the screen's page title, not a chat bubble.
           kind: "greeting",
-          text: labels.greeting,
+          text: greetingText,
           assistantName: labels.assistantName,
           chips: starterChips,
         } as ChatMessage,
       },
     ];
-  }, [script, labels.greeting, labels.assistantName, starterChips]);
+  }, [script, greetingText, labels.assistantName, starterChips]);
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);

@@ -22,7 +22,11 @@ const WORKLOG_KEYS = [
   "errorGeneric", "minutesUnit",
 ] as const;
 
-/** Resolve the flat chat label bag from a `conversation.chat`-scoped translator. */
+/** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.
+ *
+ *  `greetingNamed` carries a `{name}` placeholder, so it is resolved separately
+ *  by the caller that actually knows the name — it must never be rendered with
+ *  the raw placeholder showing. */
 export function resolveChatLabels(t: T): ChatLabels {
   const out = {} as Record<(typeof CHAT_KEYS)[number], string>;
   for (const k of CHAT_KEYS) out[k] = t(k);

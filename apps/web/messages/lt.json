@@ -10970,6 +10970,7 @@
       "send": "Siųsti",
       "attach": "Prisegti failą",
       "greeting": "Labas. Kuo šiandien galiu padėti?",
+      "greetingNamed": "Labas, {name}. Kuo šiandien galiu padėti?",
       "chipCv": "Įkelti CV",
       "chipJobs": "Ieškau darbo",
       "chipProfile": "Užbaigti profilį",

@@ -10970,6 +10970,7 @@
       "send": "Verzenden",
       "attach": "Bestand bijvoegen",
       "greeting": "Hoi. Hoe kan ik je vandaag helpen?",
+      "greetingNamed": "Hoi, {name}. Waarmee kan ik je vandaag helpen?",
       "chipCv": "CV uploaden",
       "chipJobs": "Ik zoek werk",
       "chipProfile": "Profiel voltooien",

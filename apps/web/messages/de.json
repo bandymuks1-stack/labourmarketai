@@ -10970,6 +10970,7 @@
       "send": "Senden",
       "attach": "Datei anhängen",
       "greeting": "Hallo. Wie kann ich dir heute helfen?",
+      "greetingNamed": "Hallo, {name}. Wie kann ich dir heute helfen?",
       "chipCv": "Lebenslauf hochladen",
       "chipJobs": "Ich suche Arbeit",
       "chipProfile": "Profil vervollständigen",

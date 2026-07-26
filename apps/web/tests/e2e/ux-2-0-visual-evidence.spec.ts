@@ -183,6 +183,91 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("conversation composition", () => {
+  test("the opening state is centred, then becomes a top-anchored stream", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    const thread = page.getByTestId("conversation-thread");
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    await expect(thread).toHaveAttribute("data-opening", "true");
+    const centred = await page.getByTestId("msg-greeting").boundingBox();
+    const vp = page.viewportSize()!;
+    // The greeting should sit around the middle, not jammed under the header.
+    expect(centred!.y, "greeting is vertically composed").toBeGreaterThan(vp.height * 0.18);
+    await shot(page, "opening-centred", "light", "desktop");
+
+    await page.getByTestId("composer-input").fill("Ką dar turiu padaryti?");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+    await expect(thread).not.toHaveAttribute("data-opening", "true");
+    const anchored = await page.getByTestId("msg-greeting").boundingBox();
+    expect(anchored!.y, "the stream anchors to the top once it has content").toBeLessThan(
+      centred!.y,
+    );
+    await shot(page, "stream-anchored", "light", "desktop");
+  });
+
+  test("assistant speech is unboxed; the user's turn keeps its bubble", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    // "primink rytoj" → an honest refusal, which is a plain assistant TEXT turn.
+    await page.getByTestId("composer-input").fill("Primink man rytoj 8 val.");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-assistant").last()).toBeVisible({ timeout: 30_000 });
+
+    const paint = await page.evaluate(() => {
+      const bg = (sel: string): string | null => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const inner = el.querySelector("div");
+        return inner ? getComputedStyle(inner).backgroundColor : null;
+      };
+      const userEl = document.querySelector('[data-testid="msg-user"] > div');
+      return {
+        assistantBg: bg('[data-testid="msg-assistant"]:last-of-type'),
+        userBg: userEl ? getComputedStyle(userEl).backgroundColor : null,
+        userRadius: userEl
+          ? Math.round(parseFloat(getComputedStyle(userEl).borderTopLeftRadius))
+          : null,
+      };
+    });
+    // Assistant prose: transparent ground. User: a real filled bubble.
+    expect(paint.assistantBg, "assistant speech must not be boxed").toMatch(
+      /rgba\(0, 0, 0, 0\)|transparent/,
+    );
+    expect(paint.userBg, "user speech keeps its bubble").not.toMatch(
+      /rgba\(0, 0, 0, 0\)|transparent/,
+    );
+    expect(paint.userRadius!, "and the soft bubble radius").toBeGreaterThanOrEqual(24);
+    await shot(page, "unboxed-assistant-speech", "light", "desktop");
+  });
+
+  test("the greeting uses the real name when the product knows it", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const greeting = page.getByTestId("msg-greeting");
+    const text = await greeting.innerText();
+    // Never the raw ICU placeholder, and never an invented name.
+    expect(text).not.toContain("{name}");
+    const name = await page.evaluate(
+      () =>
+        document
+          .querySelector('[data-testid="chat-profile-link"]')
+          ?.textContent?.trim() ?? "",
+    );
+    test.info().annotations.push({
+      type: "evidence",
+      description: `greeting="${text.replace(/\n/g, " | ")}" initials="${name}"`,
+    });
+    await shot(page, "greeting-named", "light", "desktop");
+  });
+});
+
 test.describe("presence and motion", () => {
   test("the assistant has a named, consistent identity", async ({ page }) => {
     await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
