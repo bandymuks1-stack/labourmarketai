@@ -33,6 +33,7 @@ function todayIso(): string {
 
 export type ChatLabels = {
   headerTitle: string;
+  assistantName: string;
   advanced: string;
   navChat: string;
   navMessages: string;
@@ -120,11 +121,12 @@ export function ConversationChat({
           // The opening turn is the screen's page title, not a chat bubble.
           kind: "greeting",
           text: labels.greeting,
+          assistantName: labels.assistantName,
           chips: starterChips,
         } as ChatMessage,
       },
     ];
-  }, [script, labels.greeting, starterChips]);
+  }, [script, labels.greeting, labels.assistantName, starterChips]);
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);

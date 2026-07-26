@@ -10964,6 +10964,7 @@
     },
     "chat": {
       "headerTitle": "LabourMarket",
+      "assistantName": "LabourMarket AI",
       "advanced": "Erweiterter Modus",
       "composerPlaceholder": "Schreib, was du brauchst…",
       "send": "Senden",

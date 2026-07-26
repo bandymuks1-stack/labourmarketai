@@ -47,7 +47,16 @@ export type ChatMessage =
    * assistant turn is `kind: "text"` at body scale, so exactly one heading
    * exists per thread.
    */
-  | { id: string; role: "assistant"; kind: "greeting"; text: string; at?: string; chips?: ChoiceChip[] }
+  | {
+      id: string;
+      role: "assistant";
+      kind: "greeting";
+      text: string;
+      /** The assistant's display name, shown once above the title. */
+      assistantName: string;
+      at?: string;
+      chips?: ChoiceChip[];
+    }
   | { id: string; role: "assistant"; kind: "text"; text: string; at?: string; chips?: ChoiceChip[] }
   | { id: string; role: "user"; kind: "text"; text: string; at?: string }
   | { id: string; role: "system"; kind: "result"; ok: boolean; text: string; at?: string }

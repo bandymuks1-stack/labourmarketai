@@ -34,13 +34,15 @@ export function ConversationThread({
     <div className="flex-1 overflow-y-auto" data-testid="conversation-thread">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-6">
         {items.length === 0 && emptyState}
-        {items.map((it) =>
-          "embed" in it ? (
-            <div key={it.id}>{it.embed}</div>
-          ) : (
-            <ChatMessageView key={it.id} m={it.message} h={handlers} />
-          ),
-        )}
+        {/* `ua-msg-in` animates ONLY transform + opacity, and a CSS animation
+            runs on mount — so a newly appended turn rises into place while the
+            turns above it keep their exact position (no layout shift, nothing
+            re-animates on re-render because React reuses those DOM nodes). */}
+        {items.map((it) => (
+          <div key={it.id} className="ua-msg-in">
+            {"embed" in it ? it.embed : <ChatMessageView m={it.message} h={handlers} />}
+          </div>
+        ))}
         {typing && <TypingIndicator />}
         <div ref={endRef} />
       </div>

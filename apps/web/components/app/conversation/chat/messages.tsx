@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, FileText, Sparkles, Languages, Clock, Building2, CircleDashed } from "lucide-react";
+import { Check, FileText, Languages, Clock, Building2, CircleDashed } from "lucide-react";
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
+import { AssistantMark } from "./assistant-identity";
 import type { ChatMessage, ChoiceChip } from "./types";
 
 /** Callbacks the thread wires into interactive messages. */
@@ -24,12 +25,9 @@ const FIT_BADGE: Record<string, string> = {
   insufficient: "bg-ink-700 text-text-muted",
 };
 
+/** Who is speaking. The same product mark in every assistant turn. */
 function Avatar() {
-  return (
-    <span className="mt-0.5 flex size-7 flex-none items-center justify-center rounded-full bg-brand-blue/15 text-brand-blue">
-      <Sparkles className="size-3.5" aria-hidden />
-    </span>
-  );
+  return <AssistantMark className="mt-0.5" />;
 }
 
 function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip) => void }) {
@@ -41,7 +39,7 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
           type="button"
           onClick={() => onChip(c)}
           data-testid={`chat-chip-${c.id}`}
-          className="min-h-11 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
+          className="ua-press min-h-11 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
         >
           {c.label}
         </button>
@@ -59,6 +57,12 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "assistant" && m.kind === "greeting") {
     return (
       <div className="flex flex-col gap-4" data-testid="msg-greeting">
+        {/* Who is speaking, stated once. The same mark every assistant turn
+            wears, so the stream and the header are visibly one identity. */}
+        <p className="flex items-center gap-2 text-meta font-medium uppercase tracking-label text-text-muted">
+          <AssistantMark size="sm" />
+          {m.assistantName}
+        </p>
         <h1 className="max-w-[26ch] text-balance font-display text-title font-bold text-text-primary sm:text-title-lg">
           {m.text}
         </h1>
@@ -94,7 +98,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── system result / error — subtle centered line ─────────────────────────
   if (m.role === "system" && m.kind === "result") {
     return (
-      <div className="flex items-center gap-2 px-1 text-basis" data-testid="msg-result">
+      <div className="ua-confirmed flex items-center gap-2 px-1 text-basis" data-testid="msg-result">
         <Check className={`size-3.5 flex-none ${m.ok ? "text-state-success" : "text-state-danger"}`} aria-hidden />
         <span className={m.ok ? "text-state-success" : "text-state-danger"}>{m.text}</span>
       </div>
@@ -146,17 +150,17 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
         <div className={`max-w-[92%] flex-1 rounded-card border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
           <h3 className="font-display text-card-title font-semibold text-text-primary">{m.title}</h3>
           {m.confirmedText ? (
-            <p className="mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
+            <p className="ua-confirmed mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
               <Check className="size-3.5" aria-hidden /> {m.confirmedText}
             </p>
           ) : (
             <>
               {m.body && <p className="mt-1.5 text-support text-text-secondary">{m.body}</p>}
               <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-confirm-yes" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
+                <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-confirm-yes" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
                   {m.confirmLabel}
                 </button>
-                <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">
+                <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">
                   {m.cancelLabel}
                 </button>
               </div>
@@ -193,8 +197,8 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
             </div>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-worklog-save" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
+            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-worklog-save" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
+            <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
           </div>
         </div>
       </div>
@@ -329,8 +333,8 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-translation-send" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
+            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-translation-send" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
+            <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
           </div>
         </div>
       </div>
@@ -355,7 +359,11 @@ export function TypingIndicator() {
       <Avatar />
       <div className="flex items-center gap-1 rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-3">
         {[0, 1, 2].map((i) => (
-          <span key={i} className="size-1.5 animate-pulse rounded-full bg-text-muted" style={{ animationDelay: `${i * 150}ms` }} />
+          <span
+            key={i}
+            className="ua-dot size-1.5 rounded-full bg-text-muted"
+            style={{ animationDelay: `${i * 160}ms` }}
+          />
         ))}
       </div>
     </div>

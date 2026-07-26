@@ -183,6 +183,87 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("presence and motion", () => {
+  test("the assistant has a named, consistent identity", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    // Named once, above the title.
+    const greeting = page.getByTestId("msg-greeting");
+    await expect(greeting).toContainText("LabourMarket AI");
+    await expect(greeting.getByTestId("assistant-mark")).toBeVisible();
+
+    // The SAME mark shows up on a real assistant turn.
+    await page.getByTestId("composer-input").fill("Ką dar turiu padaryti?");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+    expect(await page.getByTestId("assistant-mark").count()).toBeGreaterThanOrEqual(2);
+
+    await shot(page, "assistant-identity", "light", "desktop");
+  });
+
+  test("motion runs, and adds no layout shift", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    // The greeting's position must not move when a new turn animates in.
+    const before = await page.getByTestId("msg-greeting").boundingBox();
+    await page.getByTestId("composer-input").fill("Ką dar turiu padaryti?");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    const animated = await page.evaluate(() => {
+      const el = document.querySelector(".ua-msg-in");
+      if (!el) return null;
+      const s = getComputedStyle(el);
+      return { name: s.animationName, duration: s.animationDuration };
+    });
+    expect(animated?.name, "an entering turn animates").toBe("ua-msg-in");
+    expect(animated?.duration).not.toBe("0s");
+
+    const after = await page.getByTestId("msg-greeting").boundingBox();
+    expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0)), "no layout shift").toBeLessThanOrEqual(1);
+  });
+
+  test("prefers-reduced-motion disables every animation", async ({ browser }) => {
+    const ctx = await browser.newContext({
+      storageState: STORAGE_STATE,
+      reducedMotion: "reduce",
+    });
+    const page = await ctx.newPage();
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+    await page.getByTestId("composer-input").fill("Ką dar turiu padaryti?");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    const motion = await page.evaluate(() => {
+      const out: { cls: string; name: string }[] = [];
+      for (const cls of ["ua-msg-in", "ua-dot", "ua-confirmed"]) {
+        for (const el of document.querySelectorAll(`.${cls}`)) {
+          out.push({ cls, name: getComputedStyle(el).animationName });
+        }
+      }
+      return out;
+    });
+    expect(motion.length, "there should be motion classes present to check").toBeGreaterThan(0);
+    for (const m of motion) {
+      expect(m.name, `${m.cls} must not animate under reduced motion`).toBe("none");
+    }
+
+    // …and the content is still fully readable — motion was never the signal.
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible();
+    await page.screenshot({
+      path: test.info().outputPath("reduced-motion__light__desktop.png"),
+      fullPage: false,
+    });
+    await ctx.close();
+  });
+});
+
 test.describe("theme resolution matrix", () => {
   /** Read the resolved theme plus the page background actually painted. */
   async function resolved(page: Page) {

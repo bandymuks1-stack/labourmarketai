@@ -3147,6 +3147,7 @@
     },
     "chat": {
       "headerTitle": "[EN] LabourMarket",
+      "assistantName": "LabourMarket AI",
       "advanced": "[EN] Advanced mode",
       "composerPlaceholder": "[EN] Write what you need…",
       "send": "[EN] Send",
