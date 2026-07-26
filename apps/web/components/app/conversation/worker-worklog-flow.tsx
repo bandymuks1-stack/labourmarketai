@@ -152,7 +152,7 @@ export function WorkerWorkLogFlow({
   // ── loading ───────────────────────────────────────────────────────────────
   if (phase.kind === "loading") {
     return (
-      <div className="rounded-lg border border-ink-600 bg-surface-1/40 px-4 py-3 text-xs text-text-muted" data-testid="worklog-loading">
+      <div className="rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support text-text-muted" data-testid="worklog-loading">
         {labels.loading}
       </div>
     );
@@ -161,10 +161,10 @@ export function WorkerWorkLogFlow({
   // ── honest blocker (real precondition, no fake save) ───────────────────────
   if (phase.kind === "blocked") {
     return (
-      <div className="rounded-lg border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-sm text-text-primary" data-testid="worklog-blocked">
+      <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-sm text-text-primary" data-testid="worklog-blocked">
         <p>{phase.reason === "no-context" ? labels.noContext : phase.reason === "no-worker" ? labels.noWorker : labels.notAuthed}</p>
         {phase.reason === "no-context" && (
-          <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-9 items-center rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20">
+          <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-9 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
             {labels.noContextCta}
           </Link>
         )}
@@ -175,7 +175,7 @@ export function WorkerWorkLogFlow({
   // ── done ────────────────────────────────────────────────────────────────────
   if (phase.kind === "done") {
     return (
-      <div className="rounded-lg border border-state-success/40 bg-state-success/5 px-4 py-3 text-sm font-semibold text-state-success" data-testid="worklog-done">
+      <div className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-sm font-semibold text-state-success" data-testid="worklog-done">
         {labels.saved}
       </div>
     );
@@ -184,13 +184,13 @@ export function WorkerWorkLogFlow({
   const confirming = phase.kind === "confirm";
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-surface-1/40 p-4" data-testid="worklog-flow">
+    <div className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4" data-testid="worklog-flow">
       <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
         <Clock className="size-4 text-brand-blue" aria-hidden /> {labels.understood}
       </p>
 
       {/* Parse summary — read-only display of what was understood. */}
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-support">
         <Field label={labels.labelDate}>
           <input
             type="date"
@@ -198,7 +198,7 @@ export function WorkerWorkLogFlow({
             disabled={confirming || pending}
             onChange={(e) => setWorkDate(e.target.value)}
             data-testid="worklog-date"
-            className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+            className="w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
           />
         </Field>
         {draft.start && draft.end && (
@@ -210,7 +210,7 @@ export function WorkerWorkLogFlow({
         {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
       </dl>
 
-      <label className="flex flex-col gap-1 text-xs">
+      <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
         <input
           type="text"
@@ -218,11 +218,11 @@ export function WorkerWorkLogFlow({
           disabled={confirming || pending}
           onChange={(e) => setSite(e.target.value)}
           data-testid="worklog-site"
-          className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-xs text-text-primary"
+          className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs">
+      <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelNotes}</span>
         <textarea
           value={notes}
@@ -230,19 +230,19 @@ export function WorkerWorkLogFlow({
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
           data-testid="worklog-notes"
-          className="resize-none rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-xs text-text-primary"
+          className="resize-none rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
         />
       </label>
 
       {engagements.length > 1 && (
-        <label className="flex flex-col gap-1 text-xs">
+        <label className="flex flex-col gap-1 text-support">
           <span className="text-text-muted">{labels.labelContext}</span>
           <select
             value={engagementId}
             disabled={confirming || pending}
             onChange={(e) => setEngagementId(e.target.value)}
             data-testid="worklog-context"
-            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-xs text-text-primary"
+            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
           >
             {engagements.map((e) => (
               <option key={e.id} value={e.id}>
@@ -254,24 +254,24 @@ export function WorkerWorkLogFlow({
       )}
 
       {confirming ? (
-        <div className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-3">
-          <p className="text-sm font-semibold text-text-primary">{labels.confirmTitle}</p>
+        <div className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3">
+          <p className="font-display text-card-title font-semibold text-text-primary">{labels.confirmTitle}</p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" disabled={pending} onClick={confirm} data-testid="worklog-confirm" className="inline-flex min-h-11 items-center justify-center rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
+            <button type="button" disabled={pending} onClick={confirm} data-testid="worklog-confirm" className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
               {pending ? labels.working : labels.save}
             </button>
-            <button type="button" disabled={pending} onClick={() => setPhase({ kind: "ready", token: null })} className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
+            <button type="button" disabled={pending} onClick={() => setPhase({ kind: "ready", token: null })} className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
               {labels.cancel}
             </button>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={pending} onClick={beginConfirm} data-testid="worklog-save" className="inline-flex min-h-11 items-center justify-center rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
+          <button type="button" disabled={pending} onClick={beginConfirm} data-testid="worklog-save" className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
             {labels.save}
           </button>
           {onClose && (
-            <button type="button" disabled={pending} onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
+            <button type="button" disabled={pending} onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
               {labels.cancel}
             </button>
           )}
@@ -279,7 +279,7 @@ export function WorkerWorkLogFlow({
       )}
 
       {phase.kind === "error" && (
-        <p role="alert" className="text-xs text-state-danger" data-testid="worklog-error">
+        <p role="alert" className="text-support text-state-danger" data-testid="worklog-error">
           {phase.message}
         </p>
       )}

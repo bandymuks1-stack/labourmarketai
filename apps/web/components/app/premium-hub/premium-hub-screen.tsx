@@ -81,7 +81,7 @@ export async function PremiumHubScreen({
   if (embedded) {
     return (
       <div
-        className="rounded-3xl border border-ink-600 bg-gradient-to-b from-ink-800/50 to-ink-900/30 p-4 shadow-card sm:p-6"
+        className="rounded-xl border border-ink-600 bg-gradient-to-b from-ink-800/50 to-ink-900/30 p-4 shadow-card sm:p-6"
         data-testid="premium-hub-screen"
       >
         {grid}
@@ -103,7 +103,7 @@ export async function PremiumHubScreen({
         </p>
       </header>
 
-      <div className="rounded-3xl border border-ink-600 bg-gradient-to-b from-ink-800/50 to-ink-900/30 p-4 shadow-card sm:p-6">
+      <div className="rounded-xl border border-ink-600 bg-gradient-to-b from-ink-800/50 to-ink-900/30 p-4 shadow-card sm:p-6">
         {grid}
       </div>
     </div>

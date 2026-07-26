@@ -154,7 +154,7 @@ export default async function WorkOpportunitiesPage({
           {STEPS.map((s) => (
             <li
               key={pick(s.title, "en")}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 {pick(s.title, l)}
@@ -175,7 +175,7 @@ export default async function WorkOpportunitiesPage({
           {workerProblems.map((p) => (
             <li
               key={p.key}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 “{pick(p.question, l)}”

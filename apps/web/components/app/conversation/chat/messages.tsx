@@ -41,7 +41,7 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
           type="button"
           onClick={() => onChip(c)}
           data-testid={`chat-chip-${c.id}`}
-          className="min-h-9 rounded-full border border-ink-500 bg-ink-800 px-3 text-xs font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
+          className="min-h-11 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
         >
           {c.label}
         </button>
@@ -51,11 +51,27 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
 }
 
 export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }) {
+  // ── the opening turn — the screen's one real heading ─────────────────────
+  // 22px on phones / 28px from `sm:` up, display face, no bubble. This is the
+  // page title, so it is an <h1>: the conversation carried ZERO headings
+  // before, leaving screen readers without a document outline and sighted
+  // users without any type scale at all.
+  if (m.role === "assistant" && m.kind === "greeting") {
+    return (
+      <div className="flex flex-col gap-4" data-testid="msg-greeting">
+        <h1 className="max-w-[26ch] text-balance font-display text-title font-bold text-text-primary sm:text-title-lg">
+          {m.text}
+        </h1>
+        {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
+      </div>
+    );
+  }
+
   // ── user text — right-aligned bubble ────────────────────────────────────
   if (m.role === "user" && m.kind === "text") {
     return (
       <div className="flex justify-end" data-testid="msg-user">
-        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand-blue/15 px-4 py-2.5 text-sm text-text-primary">
+        <div className="max-w-[85%] rounded-bubble rounded-br-md bg-brand-blue/15 px-4 py-2.5 text-body text-text-primary">
           {m.text}
         </div>
       </div>
@@ -66,7 +82,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "user" && m.kind === "file") {
     return (
       <div className="flex justify-end" data-testid="msg-file">
-        <div className="flex max-w-[85%] items-center gap-2 rounded-2xl rounded-br-sm border border-ink-500 bg-ink-800 px-4 py-2.5 text-sm text-text-primary">
+        <div className="flex max-w-[85%] items-center gap-2 rounded-bubble rounded-br-md border border-ink-500 bg-ink-800 px-4 py-2.5 text-body text-text-primary">
           <FileText className="size-4 flex-none text-text-muted" aria-hidden />
           <span className="truncate">{m.fileName}</span>
           {m.status === "read" && <Check className="size-4 flex-none text-state-success" aria-hidden />}
@@ -78,7 +94,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── system result / error — subtle centered line ─────────────────────────
   if (m.role === "system" && m.kind === "result") {
     return (
-      <div className="flex items-center gap-2 px-1 text-xs" data-testid="msg-result">
+      <div className="flex items-center gap-2 px-1 text-basis" data-testid="msg-result">
         <Check className={`size-3.5 flex-none ${m.ok ? "text-state-success" : "text-state-danger"}`} aria-hidden />
         <span className={m.ok ? "text-state-success" : "text-state-danger"}>{m.text}</span>
       </div>
@@ -86,7 +102,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   }
   if (m.role === "system" && m.kind === "error") {
     return (
-      <div className="rounded-lg border border-state-danger/30 bg-state-danger/5 px-3 py-2 text-xs text-state-danger" role="alert" data-testid="msg-error">
+      <div className="rounded-card border border-state-danger/30 bg-state-danger/5 px-3 py-2 text-support text-state-danger" role="alert" data-testid="msg-error">
         {m.text}
       </div>
     );
@@ -98,7 +114,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
       <div className="flex gap-2" data-testid="msg-assistant">
         <Avatar />
         <div className="max-w-[85%]">
-          <div className="rounded-2xl rounded-tl-sm bg-surface-1/70 px-4 py-2.5 text-sm leading-relaxed text-text-primary">
+          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">
             {m.text}
           </div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
@@ -113,7 +129,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
       <div className="flex gap-2" data-testid="msg-question">
         <Avatar />
         <div className="max-w-[85%]">
-          <div className="rounded-2xl rounded-tl-sm bg-surface-1/70 px-4 py-2.5 text-sm text-text-primary">
+          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">
             {m.text}
           </div>
           <Chips chips={m.chips} onChip={h.onChip} />
@@ -127,20 +143,20 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
     return (
       <div className="flex gap-2" data-testid="msg-confirmation">
         <Avatar />
-        <div className={`max-w-[92%] flex-1 rounded-2xl rounded-tl-sm border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
-          <p className="text-sm font-semibold text-text-primary">{m.title}</p>
+        <div className={`max-w-[92%] flex-1 rounded-card border p-4 ${m.strong ? "border-state-warning/40 bg-state-warning/5" : "border-ink-500 bg-surface-1/70"}`}>
+          <h3 className="font-display text-card-title font-semibold text-text-primary">{m.title}</h3>
           {m.confirmedText ? (
-            <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-state-success">
+            <p className="mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
               <Check className="size-3.5" aria-hidden /> {m.confirmedText}
             </p>
           ) : (
             <>
-              {m.body && <p className="mt-1 text-xs leading-relaxed text-text-secondary">{m.body}</p>}
+              {m.body && <p className="mt-1.5 text-support text-text-secondary">{m.body}</p>}
               <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-confirm-yes" className="min-h-10 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20">
+                <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-confirm-yes" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
                   {m.confirmLabel}
                 </button>
-                <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-10 rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700">
+                <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">
                   {m.cancelLabel}
                 </button>
               </div>
@@ -157,11 +173,11 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
     return (
       <div className="flex gap-2" data-testid="msg-worklog">
         <Avatar />
-        <div className="max-w-[92%] flex-1 rounded-2xl rounded-tl-sm border border-ink-500 bg-surface-1/70 p-4">
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-            <Clock className="size-4 text-brand-blue" aria-hidden /> {m.title}
-          </p>
-          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+        <div className="max-w-[92%] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
+          <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
+            <Clock className="size-5 flex-none text-brand-blue" aria-hidden /> {m.title}
+          </h3>
+          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-basis">
             <Row k={m.fieldLabels.date} v={d.date} />
             <Row k={m.fieldLabels.time} v={`${d.start}–${d.end}`} />
             <Row k={m.fieldLabels.break} v={`${d.breakMinutes} min`} />
@@ -172,13 +188,13 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
           {d.skills && d.skills.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {d.skills.map((s) => (
-                <span key={s} className="rounded-full bg-ink-700 px-2 py-0.5 text-[10px] text-text-secondary">{s}</span>
+                <span key={s} className="rounded-full bg-ink-700 px-2.5 py-0.5 text-meta text-text-secondary">{s}</span>
               ))}
             </div>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-worklog-save" className="min-h-10 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-10 rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
+            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-worklog-save" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
+            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
           </div>
         </div>
       </div>
@@ -201,17 +217,17 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               requestIds={m.matches.map((match) => match.id)}
             />
           )}
-          <div className="rounded-2xl rounded-tl-sm bg-surface-1/70 px-4 py-2.5 text-sm text-text-primary">{m.intro}</div>
+          <div className="rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-2.5 text-body text-text-primary">{m.intro}</div>
           <div className="mt-2 flex flex-col gap-2">
             {m.matches.map((e) => (
-              <div key={e.id} className="rounded-xl border border-ink-500 bg-ink-800/60 p-3">
+              <div key={e.id} className="rounded-card border border-ink-500 bg-ink-800/60 p-3.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                    <Building2 className="size-4 text-brand-blue" aria-hidden /> {e.name}
+                  <span className="flex items-center gap-2 font-display text-card-title font-semibold text-text-primary">
+                    <Building2 className="size-5 flex-none text-brand-blue" aria-hidden /> {e.name}
                   </span>
                   <span
                     data-fit-status={e.fitStatus}
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${FIT_BADGE[e.fitStatus] ?? FIT_BADGE.insufficient}`}
+                    className={`rounded-full px-2.5 py-0.5 text-meta font-semibold ${FIT_BADGE[e.fitStatus] ?? FIT_BADGE.insufficient}`}
                   >
                     {e.fitLabel}
                   </span>
@@ -221,7 +237,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
                     // Neutral bullets: these are FACTS about the demand (the
                     // §19 basis, its location, its role) — a green tick would
                     // read as "you meet this", which the basis may deny.
-                    <li key={i} className="flex items-start gap-1.5 text-xs text-text-secondary">
+                    <li key={i} className="flex items-start gap-2 text-basis text-text-secondary">
                       <span className="mt-1.5 size-1 flex-none rounded-full bg-text-muted" aria-hidden /> {r}
                     </li>
                   ))}
@@ -261,12 +277,12 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
       <div className="flex gap-2" data-testid="msg-profile-summary">
         <Avatar />
         <div className="max-w-[92%] flex-1">
-          <div className="rounded-2xl rounded-tl-sm border border-ink-500 bg-surface-1/70 p-4">
-            <p className="text-sm leading-relaxed text-text-primary">{m.intro}</p>
+          <div className="rounded-card border border-ink-500 bg-surface-1/70 p-4">
+            <p className="text-body text-text-primary">{m.intro}</p>
             {m.done.length > 0 && (
               <ul className="mt-2.5 flex flex-col gap-1" data-testid="profile-summary-done">
                 {m.done.map((d) => (
-                  <li key={d} className="flex items-start gap-1.5 text-xs text-text-secondary">
+                  <li key={d} className="flex items-start gap-2 text-support text-text-secondary">
                     <Check className="mt-0.5 size-3.5 flex-none text-state-success" aria-hidden /> {d}
                   </li>
                 ))}
@@ -275,14 +291,14 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
             {m.missing.length > 0 && (
               <ul className="mt-2 flex flex-col gap-1" data-testid="profile-summary-missing">
                 {m.missing.map((d) => (
-                  <li key={d} className="flex items-start gap-1.5 text-xs text-text-muted">
+                  <li key={d} className="flex items-start gap-2 text-support text-text-muted">
                     <CircleDashed className="mt-0.5 size-3.5 flex-none text-state-warning" aria-hidden /> {d}
                   </li>
                 ))}
               </ul>
             )}
             {m.lastActivity && (
-              <p className="mt-3 flex items-center gap-1.5 border-t border-ink-600 pt-2.5 text-[11px] text-text-muted" data-testid="profile-summary-last">
+              <p className="mt-3.5 flex items-center gap-1.5 border-t border-ink-600 pt-3 text-meta text-text-muted" data-testid="profile-summary-last">
                 <Clock className="size-3 flex-none" aria-hidden /> {m.lastActivity}
               </p>
             )}
@@ -298,23 +314,23 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
     return (
       <div className="flex gap-2" data-testid="msg-translation">
         <Avatar />
-        <div className="max-w-[92%] flex-1 rounded-2xl rounded-tl-sm border border-ink-500 bg-surface-1/70 p-4">
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-            <Languages className="size-4 text-brand-blue" aria-hidden /> {m.recipient} · {m.channelLabel}
-          </p>
+        <div className="max-w-[92%] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
+          <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
+            <Languages className="size-5 flex-none text-brand-blue" aria-hidden /> {m.recipient} · {m.channelLabel}
+          </h3>
           <div className="mt-2 flex flex-col gap-2">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{m.originalLabel}</p>
-              <p className="text-sm text-text-primary">{m.original}</p>
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">{m.originalLabel}</p>
+              <p className="text-body text-text-primary">{m.original}</p>
             </div>
-            <div className="rounded-md border border-ink-600 bg-ink-800/60 p-2">
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{m.translatedLabel}</p>
-              <p className="text-sm text-text-primary">{m.translated}</p>
+            <div className="rounded-control border border-ink-600 bg-ink-800/60 p-2.5">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">{m.translatedLabel}</p>
+              <p className="text-body text-text-primary">{m.translated}</p>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-translation-send" className="min-h-10 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-10 rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
+            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-translation-send" className="min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
+            <button type="button" onClick={() => h.onCancel(m.id)} className="min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
           </div>
         </div>
       </div>
@@ -337,7 +353,7 @@ export function TypingIndicator() {
   return (
     <div className="flex gap-2" data-testid="chat-typing">
       <Avatar />
-      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-surface-1/70 px-4 py-3">
+      <div className="flex items-center gap-1 rounded-bubble rounded-tl-md bg-surface-1/70 px-4 py-3">
         {[0, 1, 2].map((i) => (
           <span key={i} className="size-1.5 animate-pulse rounded-full bg-text-muted" style={{ animationDelay: `${i * 150}ms` }} />
         ))}

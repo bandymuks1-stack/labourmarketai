@@ -66,7 +66,7 @@ export function Composer({
           }}
           placeholder={placeholder}
           data-testid="composer-input"
-          className="max-h-40 min-h-[44px] w-full resize-none rounded-2xl border border-ink-500 bg-ink-800 px-4 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+          className="max-h-40 min-h-[44px] w-full resize-none rounded-bubble border border-ink-500 bg-ink-800 px-4 py-3 text-body text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
         />
         <button
           type="button"

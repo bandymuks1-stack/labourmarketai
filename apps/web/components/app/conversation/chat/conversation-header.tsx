@@ -67,8 +67,8 @@ export function ConversationHeader({
   return (
     <header className="flex flex-none items-center justify-between gap-3 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur">
       <span className="flex items-center gap-2">
-        <span className="flex size-6 items-center justify-center rounded-md bg-brand-blue text-[11px] font-bold text-white">L</span>
-        <span className={`text-sm font-semibold tracking-tight text-text-primary ${mobile ? "" : "hidden sm:inline"}`}>{title}</span>
+        <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-white">L</span>
+        <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "" : "hidden sm:inline"}`}>{title}</span>
       </span>
 
       {/* Desktop simple-mode tabs. Human message threads and the AI chat are
@@ -95,16 +95,16 @@ export function ConversationHeader({
           aria-label={nav.profile}
           aria-current={active === "/dashboard/profile" ? "page" : undefined}
           data-testid="chat-profile-link"
-          className={`flex size-9 items-center justify-center rounded-full border text-text-secondary hover:border-brand-blue hover:text-brand-blue ${
+          className={`flex size-11 items-center justify-center rounded-full border text-text-secondary hover:border-brand-blue hover:text-brand-blue ${
             active === "/dashboard/profile" ? "border-brand-blue text-brand-blue" : "border-ink-500"
           }`}
         >
-          <span className="text-xs font-semibold">{initials}</span>
+          <span className="text-support font-semibold">{initials}</span>
         </Link>
         <Link
           href="/dashboard/advanced"
           data-testid="chat-advanced-link"
-          className={`ml-1 items-center gap-1.5 rounded-full border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue ${mobile ? "hidden" : "hidden md:flex"}`}
+          className={`ml-1 min-h-11 items-center gap-1.5 rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue ${mobile ? "hidden" : "hidden md:flex"}`}
         >
           <SlidersHorizontal className="size-3.5" aria-hidden />
           {nav.advanced}
@@ -121,7 +121,7 @@ function NavTab({ href, label, icon, active }: { href: string; label: string; ic
       href={href}
       data-testid={`nav-${label}`}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+      className={`flex min-h-11 items-center gap-1.5 rounded-full px-3.5 text-support font-medium ${
         active ? "bg-brand-blue/15 text-brand-blue" : "text-text-secondary hover:text-text-primary"
       }`}
     >
@@ -140,7 +140,7 @@ export function ConversationBottomNav({ nav, mobile = false }: { nav: Conversati
     { href: "/dashboard", label: nav.chat, icon: <MessageSquare className="size-5" aria-hidden /> },
     { href: "/dashboard/communication", label: nav.messages, icon: <Mail className="size-5" aria-hidden /> },
     { href: "/dashboard/planning", label: nav.calendar, icon: <Calendar className="size-5" aria-hidden /> },
-    { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-[10px] font-bold">{initials}</span> },
+    { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-meta font-bold">{initials}</span> },
     { href: "/dashboard/advanced", label: nav.advanced, icon: <SlidersHorizontal className="size-5" aria-hidden /> },
   ];
   return (
@@ -150,7 +150,7 @@ export function ConversationBottomNav({ nav, mobile = false }: { nav: Conversati
           key={it.href}
           href={it.href}
           aria-current={active === it.href ? "page" : undefined}
-          className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium ${
+          className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-meta font-medium ${
             active === it.href ? "text-brand-blue" : "text-text-muted"
           }`}
         >

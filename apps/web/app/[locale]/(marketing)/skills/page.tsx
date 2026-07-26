@@ -145,7 +145,7 @@ export default async function SkillsPage({
           {CARDS.map((c) => (
             <li
               key={pick(c.title, "en")}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 {pick(c.title, l)}
@@ -166,7 +166,7 @@ export default async function SkillsPage({
           {skillProblems.map((p) => (
             <li
               key={p.key}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 “{pick(p.question, l)}”

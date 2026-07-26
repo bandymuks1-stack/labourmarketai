@@ -160,7 +160,7 @@ export default async function ProfessionsPage({
           {SEO_ACTORS.map((a) => (
             <li
               key={a.key}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 {pick(a.label, l)}
@@ -181,7 +181,7 @@ export default async function ProfessionsPage({
           {SEO_PROBLEMS.map((p) => (
             <li
               key={p.key}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 “{pick(p.question, l)}”

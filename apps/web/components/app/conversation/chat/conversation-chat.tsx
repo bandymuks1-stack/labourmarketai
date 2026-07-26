@@ -117,7 +117,8 @@ export function ConversationChat({
         message: {
           id: nid(),
           role: "assistant",
-          kind: "text",
+          // The opening turn is the screen's page title, not a chat bubble.
+          kind: "greeting",
           text: labels.greeting,
           chips: starterChips,
         } as ChatMessage,

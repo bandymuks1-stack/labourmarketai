@@ -202,7 +202,7 @@ export function WorkerPlayerCard({
               data-testid="player-card-avatar-photo"
               loading="lazy"
               className={cn(
-                "h-14 w-14 shrink-0 rounded-2xl border object-cover",
+                "h-14 w-14 shrink-0 rounded-card border object-cover",
                 "border-ink-500",
               )}
             />
@@ -211,7 +211,7 @@ export function WorkerPlayerCard({
               aria-hidden
               data-testid="player-card-avatar-monogram"
               className={cn(
-                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+                "flex h-14 w-14 shrink-0 items-center justify-center rounded-card border bg-ink-700 font-display text-lg font-bold text-text-primary",
                 "border-ink-500",
               )}
             >
