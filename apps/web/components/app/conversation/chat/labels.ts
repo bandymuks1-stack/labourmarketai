@@ -8,11 +8,11 @@ type T = Awaited<ReturnType<typeof getTranslations>>;
 const CHAT_KEYS = [
   "headerTitle", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
   "composerPlaceholder", "send", "attach", "greeting",
-  "chipCv", "chipJobs", "chipProfile", "chipOffers", "profileQuestion", "chipLang",
-  "chipExp", "chipEdu", "chipCard", "chipPrefs", "jobsAnswer", "offersEmpty",
+  "chipCv", "chipJobs", "chipProfile", "chipOffers", "chipLang",
+  "chipExp", "chipEdu", "chipCard", "chipPrefs", "offersEmpty",
   "fallback", "userCv", "userProfile", "userOffers", "userJobs",
   "clarifyWorkLog", "calendarHint", "reminderBlocked", "translateBlocked",
-  "writeEmployerHint", "nextActionAnswer", "resumeAnswer",
+  "writeEmployerHint",
 ] as const;
 
 const WORKLOG_KEYS = [

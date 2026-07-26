@@ -7,6 +7,7 @@ import {
   resolveChatLabels,
   resolveWorkLogLabels,
 } from "@/components/app/conversation/chat/labels";
+import type { WorkLogLabels } from "@/components/app/conversation/worker-worklog-flow";
 import type { ChatMessage } from "@/components/app/conversation/chat/types";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
@@ -33,7 +34,7 @@ export default async function ConversationDesignPreview({
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
   );
-  const script = sampleThread(labels);
+  const script = sampleThread(labels, workLogLabels);
 
   // Mobile preview: render the phone layout (bottom nav, no desktop tabs) inside
   // a 390×812 phone frame so a real mobile screenshot can be captured even when
@@ -52,7 +53,10 @@ export default async function ConversationDesignPreview({
 }
 
 /** Illustrative sample thread covering every message type (dev preview only). */
-function sampleThread(labels: ChatLabels): ChatMessage[] {
+function sampleThread(
+  labels: ChatLabels,
+  workLog: WorkLogLabels,
+): ChatMessage[] {
   return [
     { id: "s1", role: "assistant", kind: "text", text: labels.greeting, chips: [
       { id: "cv", label: labels.chipCv }, { id: "jobs", label: labels.chipJobs },
@@ -60,13 +64,16 @@ function sampleThread(labels: ChatLabels): ChatMessage[] {
     ] },
     { id: "s2", role: "user", kind: "text", text: "Ieškau darbo Nyderlanduose." },
     { id: "s3", role: "assistant", kind: "employer-match", intro: "Radau 3 tinkamus variantus. Geriausias atitikimas:", matches: [
-      { id: "e1", name: "De Vries Bouw B.V.", fitLabel: "Stiprus atitikimas", reasons: ["Ieško tavo profesijos (suvirintojas)", "Atlygis atitinka tavo lūkesčius", "Pradžia rugpjūtį tinka", "Pakanka anglų kalbos"] },
-      { id: "e2", name: "Rotterdam Staal", fitLabel: "Geras atitikimas", reasons: ["Reikia MIG/MAG įgūdžių", "Netoli tavo norimos lokacijos"] },
+      { id: "e1", name: "De Vries Bouw B.V.", fitLabel: "Stiprus atitikimas", fitStatus: "strong", interestStatus: null, reasons: ["Ieško tavo profesijos (suvirintojas)", "Atlygis atitinka tavo lūkesčius", "Pradžia rugpjūtį tinka", "Pakanka anglų kalbos"] },
+      { id: "e2", name: "Rotterdam Staal", fitLabel: "Galimas atitikimas", fitStatus: "possible", interestStatus: "interested", reasons: ["Reikia MIG/MAG įgūdžių", "Netoli tavo norimos lokacijos"] },
     ] },
     { id: "s4", role: "user", kind: "text", text: "Šiandien dirbau 8 valandas objekte Roterdame, montavau langus." },
     { id: "s5", role: "assistant", kind: "worklog", title: "Supratau taip — išsaugoti?", draft: {
       date: "2026-07-24", start: "08:00", end: "17:00", breakMinutes: 45, hoursLabel: "8 val. 15 min.",
       task: "Langų montavimas", project: "Roterdamas", skills: ["Langų montavimas", "Matavimas"],
+    }, fieldLabels: {
+      date: workLog.labelDate, time: workLog.labelTime, break: workLog.labelBreak,
+      hours: workLog.labelHours, task: workLog.labelNotes, site: workLog.labelSite,
     }, confirmLabel: "Išsaugoti", cancelLabel: "Taisyti" },
     { id: "s6", role: "system", kind: "result", ok: true, text: "Įrašas išsaugotas darbo žurnale." },
     { id: "s7", role: "user", kind: "text", text: "Parašyk šiai įmonei, kad galiu pradėti rugpjūčio 5 d." },

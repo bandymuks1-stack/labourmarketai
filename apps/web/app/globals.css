@@ -84,6 +84,32 @@ body {
   overflow-x: hidden;
 }
 
+/**
+ * Conversation surface — lift the global language-feedback FAB above the
+ * chat's own bottom stack.
+ *
+ * `language-feedback-widget` reads `--feedback-fab-bottom` precisely so that
+ * "a surface with a bottom bar sets this variable to its own height". The
+ * conversation home has TWO stacked bottom elements (the composer, plus the
+ * 5-item nav on mobile) and the composer takes `z-50` to win the hit-test — so
+ * without this the FAB sits underneath it: visible, and permanently
+ * unclickable. The FAB is a SIBLING of the chrome, so the flag lives on
+ * <html> (set by DashboardChrome) rather than on the chat subtree, which a
+ * custom property could never cascade out of.
+ *
+ * Mobile: nav (~4.3rem) + composer (~4.25rem). Desktop: composer only — the
+ * nav is `md:hidden` there.
+ */
+html[data-surface="conversation"] {
+  --feedback-fab-bottom: calc(9.25rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  html[data-surface="conversation"] {
+    --feedback-fab-bottom: 5.25rem;
+  }
+}
+
 body {
   background: rgb(var(--c-ink-900));
   color: rgb(var(--c-text-primary));

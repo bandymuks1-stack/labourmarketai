@@ -10744,26 +10744,6 @@
     }
   },
   "conversation": {
-    "shell": {
-      "title": "Asistentas",
-      "greeting": "Ką norėtum padaryti?",
-      "suggestedTitle": "Siūloma tau",
-      "continueTitle": "Tęsk, kur sustojai",
-      "continueCta": "Tęsti",
-      "commandPlaceholder": "Parašyk, ką nori padaryti…",
-      "noResults": "Nėra tinkamo veiksmo. Atidaryk išplėstinį režimą.",
-      "advancedToggle": "Išplėstinis režimas",
-      "advancedHint": "Visi ekranai ir įrankiai",
-      "openAdvanced": "Atidaryti",
-      "previewNote": "Naujas asistentas — dar ne numatytasis. Išplėstinis režimas visada pasiekiamas.",
-      "confirmTitle": "Patvirtink",
-      "confirmStrong": "Tai svarbus žingsnis. Ar tikrai?",
-      "confirmCta": "Patvirtinti",
-      "cancelCta": "Atšaukti",
-      "nothingPending": "Šiuo metu niekas nelaukia tavo veiksmo.",
-      "needsResponseTitle": "Laukia tavo atsakymo",
-      "openHere": "Atidaryti čia"
-    },
     "actions": {
       "worker": {
         "completeOnboarding": {
@@ -10973,6 +10953,13 @@
         "achievementAdded": "Pridėtas pasiekimas ar sertifikatas",
         "workHistoryAdded": "Pridėta darbo patirtis",
         "skillsConfirmed": "Patvirtinti įgūdžiai"
+      },
+      "steps": {
+        "about": "Apie tave",
+        "skills": "Įgūdžiai",
+        "languages": "Kalbos",
+        "availability": "Pasiekiamumas ir atlygis",
+        "workHistory": "Darbo patirtis"
       }
     },
     "chat": {
@@ -10986,13 +10973,11 @@
       "chipJobs": "Ieškau darbo",
       "chipProfile": "Užbaigti profilį",
       "chipOffers": "Peržiūrėti pasiūlymus",
-      "profileQuestion": "Gerai — ką norėtum pridėti?",
       "chipLang": "Kalbą",
       "chipExp": "Darbo patirtį",
       "chipEdu": "Išsilavinimą",
       "chipCard": "Prieinamumą ir atlygį",
       "chipPrefs": "Pageidavimus",
-      "jobsAnswer": "Padėsiu, kad tave pastebėtų darbdaviai. Pirmiausia sustiprinkim profilį — įkelk CV arba pridėk patirtį, o toliau pasirūpinsiu.",
       "offersEmpty": "Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia.",
       "fallback": "Galiu padėti su CV, profiliu ir darbo pasiūlymais. Ką norėtum daryti?",
       "userCv": "Įkelsiu CV",
@@ -11008,8 +10993,6 @@
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
-      "nextActionAnswer": "Trumpai: sustiprink profilį (CV, įgūdžiai), tada peržiūrėk pasiūlymus. Nuo ko pradedam?",
-      "resumeAnswer": "Tęskim nuo profilio ir darbo paieškos. Ką norėtum daryti — CV, profilis ar pasiūlymai?",
       "userLogWork": "Įrašyti darbo laiką",
       "userFindWork": "Ieškau darbo"
     },
@@ -11038,7 +11021,7 @@
     "findWork": {
       "intro": "Radau {count} tinkamų variantų. Geriausi atitikimai:",
       "introOne": "Radau 1 tinkamą variantą:",
-      "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Kai atsiras, pranešiu.",
+      "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Pranešimų mechanizmo dar nėra, todėl nežadu pranešti — paklausk vėliau arba papildyk profilį, kad atitiktų daugiau poreikių.",
       "blockedNoWorker": "Kad ieškočiau darbo, įjunk darbuotojo vaidmenį paskyros nustatymuose.",
       "blockedNoAccess": "Darbo pasiūlymų sąrašas dar neįjungtas šioje aplinkoje. Kai bus, parodysiu tikrus poreikius.",
       "fitStrong": "Stiprus atitikimas",
@@ -11047,6 +11030,16 @@
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
       "roleReason": "Poreikis: {role}"
+    },
+    "summary": {
+      "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",
+      "introNext": "Išsaugota {done} iš {total} esminių dalių. Štai ko dar trūksta:",
+      "introResume": "Štai kur sustojai — išsaugota {done} iš {total} esminių dalių.",
+      "introComplete": "Tavo profilyje yra viskas, ką tikrinu. Darbdaviai mato pilną kortelę.",
+      "introCompleteNext": "Profilyje nieko netrūksta. Toliau: peržiūrėk darbo galimybes arba užfiksuok darbo laiką.",
+      "lastActivity": "Paskutinis pakeitimas: {event} — {date}",
+      "blockedNoWorker": "Ši paskyra neturi darbuotojo profilio, todėl čia nėra ko apibendrinti.",
+      "blockedNotSignedIn": "Sesija baigėsi. Prisijunk iš naujo."
     }
   }
 }

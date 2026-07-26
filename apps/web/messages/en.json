@@ -10744,26 +10744,6 @@
     }
   },
   "conversation": {
-    "shell": {
-      "title": "Assistant",
-      "greeting": "What would you like to do?",
-      "suggestedTitle": "Suggested for you",
-      "continueTitle": "Continue where you left off",
-      "continueCta": "Continue",
-      "commandPlaceholder": "Type what you want to do…",
-      "noResults": "No matching action. Open advanced mode to find it.",
-      "advancedToggle": "Advanced mode",
-      "advancedHint": "All screens and tools",
-      "openAdvanced": "Open",
-      "previewNote": "New assistant — not yet the default. Advanced mode stays fully available.",
-      "confirmTitle": "Please confirm",
-      "confirmStrong": "This is an important step. Are you sure?",
-      "confirmCta": "Confirm",
-      "cancelCta": "Cancel",
-      "nothingPending": "Nothing needs your action right now.",
-      "needsResponseTitle": "Needs your response",
-      "openHere": "Open here"
-    },
     "actions": {
       "worker": {
         "completeOnboarding": {
@@ -10973,6 +10953,13 @@
         "achievementAdded": "Added an achievement or certificate",
         "workHistoryAdded": "Added work experience",
         "skillsConfirmed": "Confirmed skills"
+      },
+      "steps": {
+        "about": "About you",
+        "skills": "Skills",
+        "languages": "Languages",
+        "availability": "Availability and pay",
+        "workHistory": "Work experience"
       }
     },
     "chat": {
@@ -10986,13 +10973,11 @@
       "chipJobs": "I'm looking for work",
       "chipProfile": "Complete my profile",
       "chipOffers": "View offers",
-      "profileQuestion": "Sure — what would you like to add?",
       "chipLang": "A language",
       "chipExp": "Work experience",
       "chipEdu": "Education",
       "chipCard": "Availability & pay",
       "chipPrefs": "Preferences",
-      "jobsAnswer": "I'll help you get discovered by employers. First let's make your profile strong — upload your CV or add your experience, and I'll take it from there.",
       "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
       "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "I'll upload my CV",
@@ -11008,8 +10993,6 @@
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
-      "nextActionAnswer": "In short: strengthen your profile (CV, skills), then review offers. Where shall we start?",
-      "resumeAnswer": "Let's pick up with your profile and job search. What would you like — CV, profile, or offers?",
       "userLogWork": "Log work time",
       "userFindWork": "Find work"
     },
@@ -11038,7 +11021,7 @@
     "findWork": {
       "intro": "I found {count} suitable options. Best matches:",
       "introOne": "I found 1 suitable option:",
-      "emptyState": "I didn't find any active openings matching your criteria right now. I'll let you know when one appears.",
+      "emptyState": "I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "To search for work, enable the worker role in account settings.",
       "blockedNoAccess": "The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
       "fitStrong": "Strong fit",
@@ -11047,6 +11030,16 @@
       "fitInsufficient": "Not enough data",
       "locationReason": "Location: {location}",
       "roleReason": "Need: {role}"
+    },
+    "summary": {
+      "introProfile": "Here's your profile as it stands: {done} of {total} essentials are saved.",
+      "introNext": "{done} of {total} essentials are saved. Here's what's still missing:",
+      "introResume": "Here's where you left off — {done} of {total} essentials are saved.",
+      "introComplete": "Your profile has everything I check for. Employers see a complete card.",
+      "introCompleteNext": "Nothing is missing from your profile. Next: look at work opportunities, or log your work time.",
+      "lastActivity": "Last change: {event} — {date}",
+      "blockedNoWorker": "This account has no worker profile, so there is nothing for me to summarise here.",
+      "blockedNotSignedIn": "Your session ended. Please sign in again."
     }
   }
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, FileText, Sparkles, Languages, Clock, Building2 } from "lucide-react";
+import { Check, FileText, Sparkles, Languages, Clock, Building2, CircleDashed } from "lucide-react";
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
+import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import type { ChatMessage, ChoiceChip } from "./types";
 
 /** Callbacks the thread wires into interactive messages. */
@@ -9,6 +10,18 @@ export type MessageHandlers = {
   onChip: (chip: ChoiceChip) => void;
   onConfirm: (messageId: string) => void;
   onCancel: (messageId: string) => void;
+};
+
+/**
+ * Badge colour follows the CANONICAL match status, never a flat "success".
+ * A weak fit painted success-green tells the worker the opposite of what the
+ * use case computed — the colour has to carry the same fact as the label.
+ */
+const FIT_BADGE: Record<string, string> = {
+  strong: "bg-state-success/10 text-state-success",
+  possible: "bg-brand-blue/10 text-brand-blue",
+  weak: "bg-state-warning/10 text-state-warning",
+  insufficient: "bg-ink-700 text-text-muted",
 };
 
 function Avatar() {
@@ -149,12 +162,12 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
             <Clock className="size-4 text-brand-blue" aria-hidden /> {m.title}
           </p>
           <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-            <Row k="Data / Date" v={d.date} />
-            <Row k="Laikas / Time" v={`${d.start}–${d.end}`} />
-            <Row k="Pertrauka / Break" v={`${d.breakMinutes} min`} />
-            <Row k="Trukmė / Hours" v={d.hoursLabel} />
-            {d.task && <Row k="Darbas / Task" v={d.task} />}
-            {d.project && <Row k="Objektas / Site" v={d.project} />}
+            <Row k={m.fieldLabels.date} v={d.date} />
+            <Row k={m.fieldLabels.time} v={`${d.start}–${d.end}`} />
+            <Row k={m.fieldLabels.break} v={`${d.breakMinutes} min`} />
+            <Row k={m.fieldLabels.hours} v={d.hoursLabel} />
+            {d.task && <Row k={m.fieldLabels.task} v={d.task} />}
+            {d.project && <Row k={m.fieldLabels.site} v={d.project} />}
           </dl>
           {d.skills && d.skills.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
@@ -196,18 +209,85 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
                   <span className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
                     <Building2 className="size-4 text-brand-blue" aria-hidden /> {e.name}
                   </span>
-                  <span className="rounded-full bg-state-success/10 px-2 py-0.5 text-[10px] font-semibold text-state-success">{e.fitLabel}</span>
+                  <span
+                    data-fit-status={e.fitStatus}
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${FIT_BADGE[e.fitStatus] ?? FIT_BADGE.insufficient}`}
+                  >
+                    {e.fitLabel}
+                  </span>
                 </div>
                 <ul className="mt-1.5 flex flex-col gap-0.5">
                   {e.reasons.map((r, i) => (
+                    // Neutral bullets: these are FACTS about the demand (the
+                    // §19 basis, its location, its role) — a green tick would
+                    // read as "you meet this", which the basis may deny.
                     <li key={i} className="flex items-start gap-1.5 text-xs text-text-secondary">
-                      <Check className="mt-0.5 size-3 flex-none text-state-success" aria-hidden /> {r}
+                      <span className="mt-1.5 size-1 flex-none rounded-full bg-text-muted" aria-hidden /> {r}
                     </li>
                   ))}
                 </ul>
+                {/* The match must be ACTIONABLE, not a read-only card. This is
+                    the SAME canonical control the opportunities board renders —
+                    one interest state machine, one write path, one honest scope
+                    note. Rendered only when the owner-gated interest table
+                    exists (labels present); otherwise the card stays read-only
+                    rather than showing a button that cannot work. */}
+                {m.interestLabels && m.locale ? (
+                  <div className="mt-2.5 border-t border-ink-600 pt-2.5">
+                    <WorkerInterestButton
+                      locale={m.locale}
+                      requestId={e.id}
+                      initialStatus={e.interestStatus}
+                      labels={m.interestLabels}
+                    />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── profile summary card ─────────────────────────────────────────────────
+  // Server-derived from the worker's OWN canonical rows (the same read model
+  // the Phase B conversation shell uses). Concrete facts only: what is saved,
+  // what is still missing, and the real last activity. No fabricated signal —
+  // and the chips below are the existing profile actions, so "what's missing"
+  // is one tap from being fixed.
+  if (m.role === "assistant" && m.kind === "profile-summary") {
+    return (
+      <div className="flex gap-2" data-testid="msg-profile-summary">
+        <Avatar />
+        <div className="max-w-[92%] flex-1">
+          <div className="rounded-2xl rounded-tl-sm border border-ink-500 bg-surface-1/70 p-4">
+            <p className="text-sm leading-relaxed text-text-primary">{m.intro}</p>
+            {m.done.length > 0 && (
+              <ul className="mt-2.5 flex flex-col gap-1" data-testid="profile-summary-done">
+                {m.done.map((d) => (
+                  <li key={d} className="flex items-start gap-1.5 text-xs text-text-secondary">
+                    <Check className="mt-0.5 size-3.5 flex-none text-state-success" aria-hidden /> {d}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {m.missing.length > 0 && (
+              <ul className="mt-2 flex flex-col gap-1" data-testid="profile-summary-missing">
+                {m.missing.map((d) => (
+                  <li key={d} className="flex items-start gap-1.5 text-xs text-text-muted">
+                    <CircleDashed className="mt-0.5 size-3.5 flex-none text-state-warning" aria-hidden /> {d}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {m.lastActivity && (
+              <p className="mt-3 flex items-center gap-1.5 border-t border-ink-600 pt-2.5 text-[11px] text-text-muted" data-testid="profile-summary-last">
+                <Clock className="size-3 flex-none" aria-hidden /> {m.lastActivity}
+              </p>
+            )}
+          </div>
+          {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </div>
     );

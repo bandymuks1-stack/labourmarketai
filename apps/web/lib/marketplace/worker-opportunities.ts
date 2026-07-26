@@ -99,7 +99,19 @@ export type MarketplaceMatchesView =
       readonly surface: MarketplaceSurface;
       readonly capabilities: Pick<
         MarketplaceCapabilities,
-        "boardAvailable" | "seenAvailable" | "seenReadDegraded"
+        | "boardAvailable"
+        | "seenAvailable"
+        | "seenReadDegraded"
+        | "interestAvailable"
+      >;
+      /** The worker's OWN interest status per demand id — the same rows the
+       *  full board view already exposes, so a COMPACT surface can offer the
+       *  canonical interest control instead of dead-ending on a read-only
+       *  card. An absent key means "no signal"; nothing is defaulted here. The
+       *  WRITE stays at its single canonical entrypoint
+       *  (`lib/opportunities/interest-actions.ts`). */
+      readonly interestStatusByRequestId: Readonly<
+        Record<string, MyInterestViewRow["status"]>
       >;
       /** Top-N explained matches, best first. */
       readonly matches: readonly JobRecommendation[];
@@ -156,7 +168,9 @@ export async function loadWorkerOpportunityMatches(input: {
       boardAvailable: result.boardAvailable,
       seenAvailable: result.seenAvailable,
       seenReadDegraded: result.seenReadDegraded,
+      interestAvailable: result.interestAvailable,
     },
+    interestStatusByRequestId: result.interestStatusByRequestId,
     matches: result.recommendations,
     totalRecommendable: result.totalRecommendable,
     newCount: result.newCount,

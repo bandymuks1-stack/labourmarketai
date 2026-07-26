@@ -10,6 +10,7 @@ import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
   CONVERSATION_FIND_WORK_LIMIT,
   type ChatEmployerMatch,
+  type ChatInterestLabels,
   type FindWorkResult,
 } from "./find-work-contract";
 
@@ -34,6 +35,14 @@ import {
  * aggregate score anywhere, and no invented company, need or salary: an empty
  * board yields an honest empty message and an unapplied board RPC yields an
  * honest blocked message.
+ *
+ * ACTIONABILITY (P0 fix): a match the worker cannot act on is a dead end, so
+ * each card carries the worker's OWN canonical interest status plus the label
+ * bag for the EXISTING `WorkerInterestButton`. The chat renders that same
+ * component the opportunities board renders — one interest state machine, one
+ * write path (`lib/opportunities/interest-actions.ts`), one honest scope note.
+ * When the owner-gated interest table is absent the labels are `null` and the
+ * cards stay read-only rather than showing a dead button.
  */
 
 /** Canonical match status → the conversation's localized fit label. A label
@@ -103,7 +112,10 @@ export async function findWorkForChat(): Promise<FindWorkResult> {
       id: m.requestId,
       name: m.companyName ?? roleLabel(m.roleSlug),
       fitLabel: t(fitKey(m.status)),
+      fitStatus: m.status,
       reasons: reasons.slice(0, 3),
+      // Straight from the use case. Absent key = no signal, not "not interested".
+      interestStatus: view.interestStatusByRequestId[m.requestId] ?? null,
     };
   });
 
@@ -114,5 +126,27 @@ export async function findWorkForChat(): Promise<FindWorkResult> {
         ? t("introOne")
         : t("intro", { count: matches.length }),
     matches,
+    interestLabels: view.capabilities.interestAvailable
+      ? await resolveInterestLabels()
+      : null,
+  };
+}
+
+/** The canonical `WorkerInterestButton` copy, resolved once per turn from the
+ *  SAME `opportunities.interest.*` namespace the board uses — the chat invents
+ *  no interest wording of its own. */
+async function resolveInterestLabels(): Promise<ChatInterestLabels> {
+  const t = await getTranslations("opportunities.interest");
+  return {
+    express: t("express"),
+    sent: t("sent"),
+    reviewed: t("reviewed"),
+    contacted: t("contacted"),
+    withdraw: t("withdraw"),
+    internalNote: t("internalNote"),
+    error: t("error"),
+    contactedLink: t("contactedLink"),
+    contactEmployer: t("contactEmployer"),
+    contactError: t("contactError"),
   };
 }

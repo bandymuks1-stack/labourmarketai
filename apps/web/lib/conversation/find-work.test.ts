@@ -82,7 +82,9 @@ function ready(matches: Record<string, unknown>[], over: Record<string, unknown>
       boardAvailable: true,
       seenAvailable: false,
       seenReadDegraded: false,
+      interestAvailable: true,
     },
+    interestStatusByRequestId: {},
     matches,
     totalRecommendable: matches.length,
     newCount: matches.length,
@@ -122,6 +124,7 @@ describe("delegation to the canonical use case", () => {
           boardAvailable: false,
           seenAvailable: false,
           seenReadDegraded: false,
+          interestAvailable: true,
         },
       }),
     );
@@ -233,6 +236,48 @@ describe("explainability is the canonical §19 basis", () => {
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
     expect(res.matches[0].name).toBe("Suvirintojas");
+  });
+});
+
+describe("the match is actionable through the canonical interest path", () => {
+  it("carries the worker's OWN interest status, straight from the use case", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([rec(ID.a), rec(ID.b)], {
+        interestStatusByRequestId: { [ID.a]: "interested" },
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.matches[0].interestStatus).toBe("interested");
+    // No signal must stay NULL — never defaulted into a concrete status.
+    expect(res.matches[1].interestStatus).toBeNull();
+  });
+
+  it("resolves the canonical interest copy — no chat-private wording", async () => {
+    loadMatchesMock.mockResolvedValue(ready([rec(ID.a)]));
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.interestLabels).not.toBeNull();
+    // The SAME namespace the opportunities board renders.
+    expect(res.interestLabels?.express).toBe("opportunities.interest.express");
+    expect(res.interestLabels?.internalNote).toBe("opportunities.interest.internalNote");
+  });
+
+  it("offers NO control when the owner-gated interest table is absent", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([rec(ID.a)], {
+        capabilities: {
+          boardAvailable: true,
+          seenAvailable: false,
+          seenReadDegraded: false,
+          interestAvailable: false,
+        },
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    // A dead button is a fake capability — the cards stay read-only instead.
+    expect(res.interestLabels).toBeNull();
   });
 });
 

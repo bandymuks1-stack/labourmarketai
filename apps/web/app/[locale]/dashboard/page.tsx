@@ -10,8 +10,10 @@ import {
   resolveChatLabels,
   resolveWorkLogLabels,
 } from "@/components/app/conversation/chat/labels";
-import type { BookingActionLabels } from "@/components/app/conversation/worker-booking-action";
-import type { BookingOffer } from "@/components/app/conversation/conversation-shell";
+import type {
+  BookingActionLabels,
+  BookingOffer,
+} from "@/components/app/conversation/worker-booking-action";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
 /**

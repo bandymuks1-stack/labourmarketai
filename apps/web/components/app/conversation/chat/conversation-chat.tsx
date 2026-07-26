@@ -10,6 +10,7 @@ import { WorkerCvFlow } from "@/components/app/conversation/worker-cv-flow";
 import {
   WorkerBookingAction,
   type BookingActionLabels,
+  type BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
 import {
   WorkerWorkLogFlow,
@@ -19,7 +20,8 @@ import { getWorkerForm } from "@/lib/conversation/worker-forms";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
-import type { BookingOffer } from "@/components/app/conversation/conversation-shell";
+import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
+import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -44,13 +46,11 @@ export type ChatLabels = {
   chipJobs: string;
   chipProfile: string;
   chipOffers: string;
-  profileQuestion: string;
   chipLang: string;
   chipExp: string;
   chipEdu: string;
   chipCard: string;
   chipPrefs: string;
-  jobsAnswer: string;
   offersEmpty: string;
   fallback: string;
   userCv: string;
@@ -64,8 +64,6 @@ export type ChatLabels = {
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
-  nextActionAnswer: string;
-  resumeAnswer: string;
 };
 
 let uid = 0;
@@ -183,6 +181,10 @@ export function ConversationChat({
             kind: "employer-match",
             intro: res.intro,
             matches: res.matches,
+            // Carried so each card can render the CANONICAL interest control;
+            // null labels ⇒ the interest table is absent ⇒ read-only cards.
+            locale,
+            interestLabels: res.interestLabels,
           });
         } else {
           assistant(res.message, starterChips);
@@ -192,7 +194,55 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.fallback, starterChips);
       });
-  }, [pushMessage, assistant, starterChips, labels.fallback]);
+  }, [pushMessage, assistant, starterChips, labels.fallback, locale]);
+
+  const profileChips: ChoiceChip[] = useMemo(
+    () => [
+      { id: "f:worker.add-language", label: labels.chipLang },
+      { id: "f:worker.add-work-history", label: labels.chipExp },
+      { id: "f:worker.add-education", label: labels.chipEdu },
+      { id: "f:worker.save-work-card", label: labels.chipCard },
+      { id: "f:worker.save-preferences", label: labels.chipPrefs },
+    ],
+    [labels.chipLang, labels.chipExp, labels.chipEdu, labels.chipCard, labels.chipPrefs],
+  );
+
+  /**
+   * "Show my profile" / "what's left?" / "where did I stop?" — one REAL
+   * server-derived answer, three openings. Because the facts are re-read every
+   * turn, the same answer is correct after a reload and after a fresh login:
+   * the chat's continuity is the user's persisted state, not a remembered
+   * script. The follow-up chips are the existing profile actions, so what is
+   * missing is one tap from being fixed.
+   */
+  const startProfileSummary = useCallback(
+    (variant: ProfileSummaryVariant) => {
+      setTyping(true);
+      loadProfileSummaryForChat(variant)
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "summary") {
+            pushMessage({
+              id: nid(),
+              role: "assistant",
+              kind: "profile-summary",
+              intro: res.intro,
+              done: res.done,
+              missing: res.missing,
+              lastActivity: res.lastActivity,
+              chips: res.missing.length > 0 ? profileChips : starterChips,
+            });
+          } else {
+            assistant(res.message, starterChips);
+          }
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.fallback, starterChips);
+        });
+    },
+    [pushMessage, assistant, starterChips, profileChips, labels.fallback],
+  );
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
@@ -224,15 +274,8 @@ export function ConversationChat({
           break;
         case "profile":
           user(labels.userProfile);
-          withTyping(() =>
-            assistant(labels.profileQuestion, [
-              { id: "f:worker.add-language", label: labels.chipLang },
-              { id: "f:worker.add-work-history", label: labels.chipExp },
-              { id: "f:worker.add-education", label: labels.chipEdu },
-              { id: "f:worker.save-work-card", label: labels.chipCard },
-              { id: "f:worker.save-preferences", label: labels.chipPrefs },
-            ]),
-          );
+          // Real state first, then the actions — not a blind menu.
+          startProfileSummary("profile");
           break;
         case "offers":
           user(labels.userOffers);
@@ -265,16 +308,22 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary],
   );
 
   const handleSend = useCallback(
     (text: string) => {
       user(text);
       const { intent } = classifyIntent(text);
-      // find-work runs a real async server search with its own typing cue.
+      // These run a real async server read with their own typing cue.
       if (intent === "find-work") {
         startFindWork();
+        return;
+      }
+      if (intent === "profile" || intent === "next-action" || intent === "resume") {
+        startProfileSummary(
+          intent === "profile" ? "profile" : intent === "next-action" ? "next" : "resume",
+        );
         return;
       }
       withTyping(() => {
@@ -284,9 +333,6 @@ export function ConversationChat({
             break;
           case "offers":
             handleChip({ id: "offers", label: "" });
-            break;
-          case "profile":
-            handleChip({ id: "profile", label: "" });
             break;
           case "log-work":
             startWorkLog(text);
@@ -305,18 +351,12 @@ export function ConversationChat({
           case "write-employer":
             assistant(labels.writeEmployerHint, starterChips);
             break;
-          case "next-action":
-            assistant(labels.nextActionAnswer, starterChips);
-            break;
-          case "resume":
-            assistant(labels.resumeAnswer, starterChips);
-            break;
           default:
             assistant(labels.fallback, starterChips);
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary],
   );
 
   const nav = {

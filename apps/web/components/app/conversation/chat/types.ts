@@ -6,22 +6,28 @@
  * surface is a single conversation.
  */
 
+import type {
+  ChatEmployerMatch,
+  ChatInterestLabels,
+} from "@/lib/conversation/find-work-contract";
+
 export type Role = "assistant" | "user" | "system";
 
 export type ChoiceChip = { id: string; label: string };
 
-export type EmployerMatch = {
-  /** The REAL demand id from the canonical marketplace use case
-   *  (`JobRecommendation.requestId`) — never a list index. It doubles as the
-   *  React key and as the id the shown-marker reports. */
-  id: string;
-  name: string;
-  /** Bounded, human reason bullets (why this fits) — never a raw score. The
-   *  first bullet is the canonical §19 basis line (matched / total counts with
-   *  the confirmed share), identical to every other marketplace surface. */
-  reasons: string[];
-  fitLabel: string; // e.g. "Strong fit"
-};
+/**
+ * An employer-match card IS the canonical adapter's output — the same object,
+ * not a look-alike. Re-declaring the shape here is exactly how a presentation
+ * copy of a domain result starts drifting; the alias makes that impossible.
+ *
+ * It carries the REAL demand id (`JobRecommendation.requestId`, never a list
+ * index — it doubles as the React key and as the id the shown-marker reports),
+ * the bounded human reason bullets (the first is the canonical §19 basis line,
+ * identical on every marketplace surface, never a raw score), and the worker's
+ * own interest status.
+ */
+export type EmployerMatch = ChatEmployerMatch;
+export type InterestLabels = ChatInterestLabels;
 
 export type WorkLogDraft = {
   date: string;
@@ -53,7 +59,33 @@ export type ChatMessage =
     }
   | { id: string; role: "user"; kind: "file"; fileName: string; status: "uploading" | "read" | "error"; note?: string; at?: string }
   | { id: string; role: "assistant"; kind: "question"; text: string; chips: ChoiceChip[]; at?: string }
-  | { id: string; role: "assistant"; kind: "employer-match"; intro: string; matches: EmployerMatch[]; at?: string }
+  | {
+      id: string;
+      role: "assistant";
+      kind: "employer-match";
+      intro: string;
+      matches: EmployerMatch[];
+      /** Locale + capability come from the server turn. `interestLabels: null`
+       *  means the owner-gated interest table is absent, so the cards stay
+       *  read-only — never a dead button. */
+      locale?: string;
+      interestLabels?: InterestLabels | null;
+      at?: string;
+    }
+  | {
+      id: string;
+      role: "assistant";
+      kind: "profile-summary";
+      intro: string;
+      /** Concrete facts already saved on the worker's canonical rows. */
+      done: string[];
+      /** Concrete facts still missing — named, never a bare percentage. */
+      missing: string[];
+      /** Honest last-activity line, or null when there is no activity yet. */
+      lastActivity: string | null;
+      chips?: ChoiceChip[];
+      at?: string;
+    }
   | {
       id: string;
       role: "assistant";
@@ -74,7 +106,19 @@ export type ChatMessage =
       kind: "worklog";
       title: string;
       draft: WorkLogDraft;
+      /** Localized field captions (`conversation.worklog.label*`) — the card
+       *  bakes in no product copy of its own. */
+      fieldLabels: WorkLogFieldLabels;
       confirmLabel: string;
       cancelLabel: string;
       at?: string;
     };
+
+export type WorkLogFieldLabels = {
+  date: string;
+  time: string;
+  break: string;
+  hours: string;
+  task: string;
+  site: string;
+};

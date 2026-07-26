@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { loadWorkerOpportunities } from "./load-worker-opportunities";
+import type { InterestStatus } from "./interest-snapshot";
 import { readMyOpportunitySeen, toSeenState } from "./seen";
 import {
   countUnseenRecommendations,
@@ -44,6 +45,14 @@ export type WorkerJobRecommendationsResult =
        *  being unapplied — i.e. something is actually broken. Kept distinct so
        *  a real outage can never masquerade as the approved degradation. */
       readonly seenReadDegraded: boolean;
+      /** True only once the owner-gated interest table is applied. While it is
+       *  false a surface must offer NO interest control — a dead button is a
+       *  fake capability. */
+      readonly interestAvailable: boolean;
+      /** The worker's OWN interest status per demand id, exactly as the board
+       *  read already returned it. A demand with no signal is simply absent —
+       *  nothing is defaulted or invented. */
+      readonly interestStatusByRequestId: Readonly<Record<string, InterestStatus>>;
       /** ALL recommendable matches, best first (shared §19 comparator). */
       readonly all: readonly JobRecommendation[];
       /** Unseen recommendations — the aggregate spine count. 0 while the
@@ -65,11 +74,21 @@ const loadRecommendationsResult = cache(
     const seenResult = await readMyOpportunitySeen(supabase, user.id);
     const seen = toSeenState(seenResult);
     const all = deriveJobRecommendations(board.opportunities, seen, Date.now());
+    // The board read already fetched the worker's own interest rows; indexing
+    // them here costs no extra query and keeps the compact read model able to
+    // answer "have I already signalled interest in this one?" without any
+    // surface reaching for a second source.
+    const interestStatusByRequestId: Record<string, InterestStatus> = {};
+    for (const row of board.myInterestRows) {
+      interestStatusByRequestId[row.requestId] = row.status;
+    }
     return {
       kind: "ready",
       boardAvailable: !board.needsDataAccess,
       seenAvailable: seen.available,
       seenReadDegraded: seenResult.kind === "unexpected_error",
+      interestAvailable: board.interestAvailable,
+      interestStatusByRequestId,
       all,
       newCount: seen.available ? countUnseenRecommendations(all) : 0,
     };
@@ -83,6 +102,8 @@ export interface WorkerJobRecommendations {
   readonly boardAvailable: boolean;
   readonly seenAvailable: boolean;
   readonly seenReadDegraded: boolean;
+  readonly interestAvailable: boolean;
+  readonly interestStatusByRequestId: Readonly<Record<string, InterestStatus>>;
   /** Top N recommendations (default 3), best first. */
   readonly recommendations: readonly JobRecommendation[];
   /** Total recommendable matches behind the top-N slice. */
@@ -103,6 +124,8 @@ export async function getWorkerJobRecommendations(options?: {
     boardAvailable: result.boardAvailable,
     seenAvailable: result.seenAvailable,
     seenReadDegraded: result.seenReadDegraded,
+    interestAvailable: result.interestAvailable,
+    interestStatusByRequestId: result.interestStatusByRequestId,
     recommendations: result.all.slice(0, limit),
     totalRecommendable: result.all.length,
     newCount: result.newCount,

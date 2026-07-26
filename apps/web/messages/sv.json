@@ -2927,26 +2927,6 @@
     "staleEntry": "Posten har ändrats eller raderats — det här objektet är inte längre aktuellt."
   },
   "conversation": {
-    "shell": {
-      "title": "[EN] Assistant",
-      "greeting": "[EN] What would you like to do?",
-      "suggestedTitle": "[EN] Suggested for you",
-      "continueTitle": "[EN] Continue where you left off",
-      "continueCta": "[EN] Continue",
-      "commandPlaceholder": "[EN] Type what you want to do…",
-      "noResults": "[EN] No matching action. Open advanced mode to find it.",
-      "advancedToggle": "[EN] Advanced mode",
-      "advancedHint": "[EN] All screens and tools",
-      "openAdvanced": "[EN] Open",
-      "previewNote": "[EN] New assistant — not yet the default. Advanced mode stays fully available.",
-      "confirmTitle": "[EN] Please confirm",
-      "confirmStrong": "[EN] This is an important step. Are you sure?",
-      "confirmCta": "[EN] Confirm",
-      "cancelCta": "[EN] Cancel",
-      "nothingPending": "[EN] Nothing needs your action right now.",
-      "needsResponseTitle": "[EN] Needs your response",
-      "openHere": "[EN] Open here"
-    },
     "actions": {
       "worker": {
         "completeOnboarding": {
@@ -3156,6 +3136,13 @@
         "achievementAdded": "[EN] Added an achievement or certificate",
         "workHistoryAdded": "[EN] Added work experience",
         "skillsConfirmed": "[EN] Confirmed skills"
+      },
+      "steps": {
+        "about": "[EN] About you",
+        "skills": "[EN] Skills",
+        "languages": "[EN] Languages",
+        "availability": "[EN] Availability and pay",
+        "workHistory": "[EN] Work experience"
       }
     },
     "chat": {
@@ -3169,13 +3156,11 @@
       "chipJobs": "[EN] I'm looking for work",
       "chipProfile": "[EN] Complete my profile",
       "chipOffers": "[EN] View offers",
-      "profileQuestion": "[EN] Sure — what would you like to add?",
       "chipLang": "[EN] A language",
       "chipExp": "[EN] Work experience",
       "chipEdu": "[EN] Education",
       "chipCard": "[EN] Availability & pay",
       "chipPrefs": "[EN] Preferences",
-      "jobsAnswer": "[EN] I'll help you get discovered by employers. First let's make your profile strong — upload your CV or add your experience, and I'll take it from there.",
       "offersEmpty": "[EN] You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
       "fallback": "[EN] I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "[EN] I'll upload my CV",
@@ -3191,8 +3176,6 @@
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
-      "nextActionAnswer": "[EN] In short: strengthen your profile (CV, skills), then review offers. Where shall we start?",
-      "resumeAnswer": "[EN] Let's pick up with your profile and job search. What would you like — CV, profile, or offers?",
       "userLogWork": "[EN] Log work time",
       "userFindWork": "[EN] Find work"
     },
@@ -3221,7 +3204,7 @@
     "findWork": {
       "intro": "[EN] I found {count} suitable options. Best matches:",
       "introOne": "[EN] I found 1 suitable option:",
-      "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I'll let you know when one appears.",
+      "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
       "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
       "fitStrong": "[EN] Strong fit",
@@ -3230,6 +3213,16 @@
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
       "roleReason": "[EN] Need: {role}"
+    },
+    "summary": {
+      "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
+      "introNext": "[EN] {done} of {total} essentials are saved. Here's what's still missing:",
+      "introResume": "[EN] Here's where you left off — {done} of {total} essentials are saved.",
+      "introComplete": "[EN] Your profile has everything I check for. Employers see a complete card.",
+      "introCompleteNext": "[EN] Nothing is missing from your profile. Next: look at work opportunities, or log your work time.",
+      "lastActivity": "[EN] Last change: {event} — {date}",
+      "blockedNoWorker": "[EN] This account has no worker profile, so there is nothing for me to summarise here.",
+      "blockedNotSignedIn": "[EN] Your session ended. Please sign in again."
     }
   }
 }

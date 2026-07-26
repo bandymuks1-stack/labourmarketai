@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "@/lib/i18n/navigation";
 import {
   ConversationHeader,
@@ -63,6 +64,20 @@ export function DashboardChrome({
   rexora: React.ReactNode;
 }) {
   const mode = modeFor(usePathname());
+
+  // Flag the conversation surface on <html> so globals.css can lift the global
+  // language-feedback FAB above the chat's composer + bottom nav. The FAB is a
+  // SIBLING of this component, so a custom property set on the chat subtree
+  // would never reach it — and without the lift the composer's `z-50` buries
+  // an interactive control that stays visible but unclickable.
+  useEffect(() => {
+    if (mode !== "conversation") return;
+    const root = document.documentElement;
+    root.dataset.surface = "conversation";
+    return () => {
+      delete root.dataset.surface;
+    };
+  }, [mode]);
 
   // Conversation: bare — the chat is self-contained (h-[100dvh], own nav).
   if (mode === "conversation") return <>{children}</>;

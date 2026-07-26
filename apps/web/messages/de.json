@@ -10744,26 +10744,6 @@
     }
   },
   "conversation": {
-    "shell": {
-      "title": "Assistent",
-      "greeting": "Was möchtest du tun?",
-      "suggestedTitle": "Für dich empfohlen",
-      "continueTitle": "Mach weiter, wo du warst",
-      "continueCta": "Weiter",
-      "commandPlaceholder": "Schreib, was du tun willst…",
-      "noResults": "Keine passende Aktion. Öffne den erweiterten Modus.",
-      "advancedToggle": "Erweiterter Modus",
-      "advancedHint": "Alle Bildschirme und Werkzeuge",
-      "openAdvanced": "Öffnen",
-      "previewNote": "Neuer Assistent — noch nicht Standard. Erweiterter Modus bleibt verfügbar.",
-      "confirmTitle": "Bestätigen",
-      "confirmStrong": "Das ist ein wichtiger Schritt. Bist du sicher?",
-      "confirmCta": "Bestätigen",
-      "cancelCta": "Abbrechen",
-      "nothingPending": "Derzeit erfordert nichts deine Aktion.",
-      "needsResponseTitle": "Wartet auf deine Antwort",
-      "openHere": "Hier öffnen"
-    },
     "actions": {
       "worker": {
         "completeOnboarding": {
@@ -10973,6 +10953,13 @@
         "achievementAdded": "Erfolg oder Zertifikat hinzugefügt",
         "workHistoryAdded": "Berufserfahrung hinzugefügt",
         "skillsConfirmed": "Fähigkeiten bestätigt"
+      },
+      "steps": {
+        "about": "Über dich",
+        "skills": "Fähigkeiten",
+        "languages": "Sprachen",
+        "availability": "Verfügbarkeit und Bezahlung",
+        "workHistory": "Berufserfahrung"
       }
     },
     "chat": {
@@ -10986,13 +10973,11 @@
       "chipJobs": "Ich suche Arbeit",
       "chipProfile": "Profil vervollständigen",
       "chipOffers": "Angebote ansehen",
-      "profileQuestion": "Gerne — was möchtest du hinzufügen?",
       "chipLang": "Eine Sprache",
       "chipExp": "Berufserfahrung",
       "chipEdu": "Ausbildung",
       "chipCard": "Verfügbarkeit & Lohn",
       "chipPrefs": "Präferenzen",
-      "jobsAnswer": "Ich helfe dir, von Arbeitgebern gefunden zu werden. Machen wir zuerst dein Profil stark — lade deinen Lebenslauf hoch oder füge Erfahrung hinzu.",
       "offersEmpty": "Du hast noch keine Angebote. Sobald dein Profil fertig ist, können Arbeitgeber dir Angebote senden.",
       "fallback": "Ich kann dir mit Lebenslauf, Profil und Angeboten helfen. Was möchtest du tun?",
       "userCv": "Ich lade meinen Lebenslauf hoch",
@@ -11008,8 +10993,6 @@
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
-      "nextActionAnswer": "Kurz: Stärke dein Profil (CV, Fähigkeiten), dann sieh dir Angebote an. Womit fangen wir an?",
-      "resumeAnswer": "Machen wir mit deinem Profil und der Jobsuche weiter. Was möchtest du — CV, Profil oder Angebote?",
       "userLogWork": "Arbeitszeit erfassen",
       "userFindWork": "Arbeit suchen"
     },
@@ -11038,7 +11021,7 @@
     "findWork": {
       "intro": "Ich habe {count} passende Optionen gefunden. Beste Treffer:",
       "introOne": "Ich habe 1 passende Option gefunden:",
-      "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu deinen Kriterien passen. Ich melde mich, sobald eines erscheint.",
+      "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu deinen Kriterien passen. Es gibt noch keine Benachrichtigungen, deshalb verspreche ich keine — frag später noch einmal oder ergänze dein Profil, damit mehr Bedarfe passen.",
       "blockedNoWorker": "Um Arbeit zu suchen, aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
       "blockedNoAccess": "Die Angebotsliste ist in dieser Umgebung noch nicht aktiviert. Sobald sie es ist, zeige ich echte Bedarfe.",
       "fitStrong": "Starke Übereinstimmung",
@@ -11047,6 +11030,16 @@
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
       "roleReason": "Bedarf: {role}"
+    },
+    "summary": {
+      "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",
+      "introNext": "{done} von {total} Grundangaben sind gespeichert. Das fehlt noch:",
+      "introResume": "Hier bist du stehen geblieben — {done} von {total} Grundangaben sind gespeichert.",
+      "introComplete": "Dein Profil enthält alles, was ich prüfe. Arbeitgeber sehen eine vollständige Karte.",
+      "introCompleteNext": "In deinem Profil fehlt nichts. Weiter: Arbeitsangebote ansehen oder Arbeitszeit erfassen.",
+      "lastActivity": "Letzte Änderung: {event} — {date}",
+      "blockedNoWorker": "Dieses Konto hat kein Arbeitnehmerprofil, hier gibt es also nichts zusammenzufassen.",
+      "blockedNotSignedIn": "Deine Sitzung ist beendet. Bitte melde dich erneut an."
     }
   }
 }

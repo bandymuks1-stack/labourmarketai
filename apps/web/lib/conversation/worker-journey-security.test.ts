@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -65,15 +65,24 @@ describe("conversation telemetry carries no PII", () => {
 });
 
 describe("deterministic surface does not depend on the LLM", () => {
-  const shell = read("components/app/conversation/conversation-shell.tsx");
-  const page = read("app/[locale]/dashboard/assistant/page.tsx");
-  it("shell + page never import an AI runtime / provider", () => {
-    for (const src of [shell, page]) {
+  // Pinned on the surface that actually SHIPS. The orphaned `conversation-shell`
+  // this used to read was deleted once `/dashboard` became the real chat: an
+  // invariant asserted against a component no route renders proves nothing.
+  const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+  const page = read("app/[locale]/dashboard/page.tsx");
+  it("chat + page never import an AI runtime / provider", () => {
+    for (const src of [chat, page]) {
       expect(src).not.toMatch(/from\s+["']@\/lib\/ai\//);
       expect(src).not.toMatch(/runAiAgent|getAiRuntimeConfig|resolveAiRuntimeConfig/);
     }
   });
-  it("intent resolution uses the deterministic command matcher", () => {
-    expect(shell).toMatch(/matchCommands\(/);
+  it("intent resolution is the deterministic router, not a model call", () => {
+    expect(chat).toMatch(/classifyIntent\(/);
+  });
+  it("there is exactly ONE conversation surface — no orphaned second shell", () => {
+    // A dead parallel surface is how two conversation products start.
+    expect(existsSync(join(APP_ROOT, "components/app/conversation/conversation-shell.tsx"))).toBe(
+      false,
+    );
   });
 });
