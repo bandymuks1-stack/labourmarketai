@@ -162,7 +162,7 @@ export function WorkerWorkLogFlow({
   // ── honest blocker (real precondition, no fake save) ───────────────────────
   if (phase.kind === "blocked") {
     return (
-      <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-sm text-text-primary" data-testid="worklog-blocked">
+      <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support text-text-primary" data-testid="worklog-blocked">
         <p>{phase.reason === "no-context" ? labels.noContext : phase.reason === "no-worker" ? labels.noWorker : labels.notAuthed}</p>
         {phase.reason === "no-context" && (
           <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
@@ -176,7 +176,7 @@ export function WorkerWorkLogFlow({
   // ── done ────────────────────────────────────────────────────────────────────
   if (phase.kind === "done") {
     return (
-      <div className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-sm font-semibold text-state-success" data-testid="worklog-done">
+      <div className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support font-semibold text-state-success" data-testid="worklog-done">
         {labels.saved}
       </div>
     );
@@ -186,7 +186,7 @@ export function WorkerWorkLogFlow({
 
   return (
     <div className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4" data-testid="worklog-flow">
-      <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+      <p className="flex items-center gap-1.5 text-support font-semibold text-text-primary">
         <Clock className="size-4 text-brand-blue" aria-hidden /> {labels.understood}
       </p>
 

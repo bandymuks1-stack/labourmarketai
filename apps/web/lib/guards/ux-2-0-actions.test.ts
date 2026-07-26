@@ -236,6 +236,37 @@ describe("touch targets stay at 44px", () => {
     expect(composer, "composer buttons").toMatch(/size-11/);
   });
 
+it("form inputs reach 16px, so iOS never auto-zooms the page on focus", () => {
+    // Safari on iOS zooms the viewport when a focused input's font-size is
+    // below 16px. It is a mobile-usability defect, not a typography nicety.
+    const form = read("components/app/conversation/inline-action-form.tsx");
+    const inputCls = /const inputCls =[\s\S]*?"([^"]+)"/.exec(form)?.[1] ?? "";
+    expect(inputCls, "inputCls must be found").toBeTruthy();
+    expect(inputCls, "16px input text").toContain("text-body");
+    expect(inputCls, "44px input height").toContain("min-h-11");
+  });
+
+  it("no text-sm survives on the conversation — every size is a ladder role", () => {
+    const offenders = conversationFiles()
+      .filter((p) => /text-sm/.test(read(rel(p))))
+      .map(rel);
+    expect(offenders, "use text-body/support/basis/meta").toEqual([]);
+  });
+
+  it("text-only affordances still carry a 44px row", () => {
+    // A bare text button ("Close", "Add another") has no intrinsic height, so
+    // the `min-h-` sweep above cannot see it — these are named explicitly.
+    for (const [file, marker] of [
+      ["components/app/conversation/worker-cv-flow.tsx", "conversation.cv close"],
+      ["components/app/conversation/inline-action-form.tsx", "addAnother"],
+    ] as const) {
+      const src = read(file);
+      expect(src, `${file}: ${marker} needs a 44px row`).toMatch(
+        /min-h-11[^"]*text-support|text-support[^"]*min-h-11/,
+      );
+    }
+  });
+
   it("no interactive element on the surface drops to a sub-44px height", () => {
     const offenders: string[] = [];
     for (const p of conversationFiles()) {

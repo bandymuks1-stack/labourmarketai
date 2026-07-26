@@ -37,6 +37,7 @@ function todayIso(): string {
 export type ChatLabels = {
   headerTitle: string;
   assistantName: string;
+  speakerYou: string;
   advanced: string;
   navChat: string;
   navMessages: string;
@@ -447,6 +448,7 @@ export function ConversationChat({
           onChip: handleChip,
           onConfirm: () => {},
           onCancel: () => {},
+          speakers: { assistant: labels.assistantName, user: labels.speakerYou },
         }}
       />
       <Composer

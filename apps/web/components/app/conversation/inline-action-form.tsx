@@ -40,8 +40,11 @@ export function InlineActionForm({
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [saving, start] = useTransition();
 
+  // `text-body` (16px) is not only the reading size — iOS Safari AUTO-ZOOMS any
+  // input whose font-size is below 16px, which yanks the whole page on focus.
+  // `min-h-11` gives the field the same 44px target as every other control.
   const inputCls =
-    "w-full rounded-control border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+    "min-h-11 w-full rounded-control border border-ink-500 bg-ink-800 px-3 py-2 text-body text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   function set(name: string, v: string | boolean) {
     setValues((prev) => ({ ...prev, [name]: v }));
@@ -97,13 +100,13 @@ export function InlineActionForm({
         className="ua-confirmed flex items-center justify-between gap-3 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3"
         data-testid="inline-action-done"
       >
-        <span className="text-sm font-semibold text-state-success">
+        <span className="text-support font-semibold text-state-success">
           {t("conversation.forms.ui.saved")}
         </span>
         <button
           type="button"
           onClick={onClose}
-          className="text-support font-semibold text-brand-blue hover:underline"
+          className="ua-press -mr-2 inline-flex min-h-11 items-center rounded-control px-2 text-support font-semibold text-brand-blue hover:underline"
         >
           {t("conversation.forms.ui.addAnother")}
         </button>
@@ -123,7 +126,7 @@ export function InlineActionForm({
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("conversation.forms.ui.reviewTitle")}
           </p>
-          <dl className="flex flex-col gap-1 rounded-control border border-ink-600 p-3 text-sm">
+          <dl className="flex flex-col gap-1 rounded-control border border-ink-600 p-3 text-support">
             {spec.fields
               .filter((f) => {
                 const v = values[f.name];
@@ -200,12 +203,15 @@ function Field({
   const label = t(f.labelKey);
   if (f.kind === "checkbox") {
     return (
-      <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <label className="flex min-h-11 items-center gap-2 text-support text-text-secondary">
         <input
           type="checkbox"
           checked={value === true}
           onChange={(e) => onChange(f.name, e.target.checked)}
           data-testid={`field-${f.name}`}
+          // A native checkbox renders ~13px; the wrapping label carries the
+          // 44px row and this scales the box itself to a usable size.
+          className="size-5 flex-none accent-brand-blue"
         />
         {label}
       </label>

@@ -110,7 +110,7 @@ export function WorkerBookingAction({
   if (phase.kind === "done") {
     return (
       <div
-        className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-sm font-semibold text-state-success"
+        className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support font-semibold text-state-success"
         data-testid="conversation-booking-done"
       >
         {phase.status === "accepted" ? labels.acceptedResult : labels.declinedResult}

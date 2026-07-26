@@ -183,6 +183,63 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("screen-reader semantics", () => {
+  test("the thread is a log and every turn names its speaker", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    // The chip, not a typed sentence: the deterministic router matches on real
+    // Lithuanian ("Ką"), so a diacritic-free test string would correctly fail
+    // to classify and this test would be asserting the fallback path instead.
+    await page.getByTestId("chat-chip-profile").click();
+    await expect(page.getByTestId("msg-user").last()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    const a11y = await page.evaluate(() => {
+      const thread = document.querySelector('[data-testid="conversation-thread"]')!;
+      const srText = (sel: string): string[] =>
+        [...document.querySelectorAll(sel)].map(
+          (el) => el.querySelector(".sr-only")?.textContent?.trim() ?? "",
+        );
+      const growth = document.querySelector('[data-testid="profile-growth"]');
+      return {
+        threadRole: thread.getAttribute("role"),
+        threadLive: thread.getAttribute("aria-live"),
+        threadRelevant: thread.getAttribute("aria-relevant"),
+        userSpeakers: srText('[data-testid="msg-user"]'),
+        assistantSpeakers: srText('[data-testid="msg-profile-summary"]'),
+        h1Count: document.querySelectorAll("h1").length,
+        growthValueText: growth?.getAttribute("aria-valuetext") ?? null,
+        // A visually-hidden label must be hidden VISUALLY but not from AT.
+        srIsClipped: (() => {
+          const el = document.querySelector(".sr-only");
+          if (!el) return false;
+          const r = el.getBoundingClientRect();
+          return r.width <= 1 && r.height <= 1;
+        })(),
+      };
+    });
+
+    test.info().annotations.push({
+      type: "evidence",
+      description: `role=${a11y.threadRole} live=${a11y.threadLive} user="${a11y.userSpeakers.join("|")}" assistant="${a11y.assistantSpeakers.join("|")}" growth="${a11y.growthValueText}"`,
+    });
+
+    expect(a11y.threadRole).toBe("log");
+    expect(a11y.threadLive).toBe("polite");
+    expect(a11y.threadRelevant).toBe("additions");
+    expect(a11y.userSpeakers.every((v) => v.length > 0), "user turns are named").toBe(true);
+    expect(a11y.assistantSpeakers.every((v) => v.length > 0), "assistant turns are named").toBe(
+      true,
+    );
+    expect(a11y.assistantSpeakers[0]).toContain("LabourMarket AI");
+    expect(a11y.h1Count, "one document title").toBe(1);
+    expect(a11y.growthValueText, "the bar speaks its real value").toBeTruthy();
+    expect(a11y.srIsClipped, "sr-only must be visually clipped, not merely small").toBe(true);
+  });
+});
+
 test.describe("profile growth", () => {
   test("the bar agrees with the server and is readable without colour", async ({ page }) => {
     await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });

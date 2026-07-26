@@ -159,3 +159,41 @@ describe("the greeting knows who it is talking to — honestly", () => {
     }
   });
 });
+
+describe("assistive tech can follow the conversation", () => {
+  it("every turn announces WHO is speaking", () => {
+    // The avatar mark is decoration (`aria-hidden`), so without a text label a
+    // screen reader cannot tell an assistant turn from the user's own.
+    const turn = declarationOf(messages, "AssistantTurn");
+    expect(turn, "the wrapper carries a visually-hidden speaker name").toMatch(
+      /sr-only[\s\S]{0,40}\{speaker\}/,
+    );
+    // …and the user's own turns do the same.
+    expect(variant("text", "user")).toMatch(/sr-only[\s\S]{0,60}speakers\.user/);
+  });
+
+  it("the speaker names are localized, never hard-coded", () => {
+    expect(messages).toMatch(/h\.speakers\.assistant/);
+    expect(messages).toMatch(/h\.speakers\.user/);
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/speakers: \{ assistant: labels\.assistantName, user: labels\.speakerYou \}/);
+    for (const locale of ["lt", "en", "ru"]) {
+      const doc = JSON.parse(read(`messages/${locale}.json`)) as {
+        conversation: { chat: { speakerYou?: string } };
+      };
+      expect(doc.conversation.chat.speakerYou, `${locale}.speakerYou`).toBeTruthy();
+    }
+  });
+
+  it("the thread is a log, so arriving turns are announced", () => {
+    expect(thread).toMatch(/role="log"/);
+    expect(thread).toMatch(/aria-live="polite"/);
+    // Only ADDITIONS — re-announcing the whole thread on every turn would be
+    // unusable.
+    expect(thread).toMatch(/aria-relevant="additions"/);
+  });
+
+  it("the typing indicator is a live status, not a silent animation", () => {
+    expect(messages).toMatch(/role="status"[\s\S]{0,60}chat-typing/);
+  });
+});

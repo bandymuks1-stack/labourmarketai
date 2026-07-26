@@ -45,7 +45,7 @@ export function WorkerCvFlow({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="text-support font-medium text-text-muted hover:text-text-secondary"
+          className="ua-press -mr-2 inline-flex min-h-11 items-center rounded-control px-2 text-support font-medium text-text-muted hover:text-text-secondary"
         >
           {t("close")}
         </button>

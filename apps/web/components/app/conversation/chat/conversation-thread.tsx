@@ -63,6 +63,11 @@ export function ConversationThread({
   return (
     <div
       className={`flex flex-1 flex-col overflow-y-auto ${isOpening ? "justify-center" : ""}`}
+      // A conversation is a log: `role="log"` makes assistive tech announce
+      // arriving turns instead of leaving the user to discover them.
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions"
       data-testid="conversation-thread"
       data-opening={isOpening ? "true" : undefined}
     >

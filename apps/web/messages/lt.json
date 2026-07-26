@@ -10965,6 +10965,7 @@
     "chat": {
       "headerTitle": "LabourMarket",
       "assistantName": "LabourMarket AI",
+      "speakerYou": "Tu",
       "advanced": "Išplėstinis valdymas",
       "composerPlaceholder": "Parašyk, ko tau reikia…",
       "send": "Siųsti",

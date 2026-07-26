@@ -13,6 +13,8 @@ export type MessageHandlers = {
   onChip: (chip: ChoiceChip) => void;
   onConfirm: (messageId: string) => void;
   onCancel: (messageId: string) => void;
+  /** Localized speaker names, announced per turn to assistive tech only. */
+  speakers: { assistant: string; user: string };
 };
 
 /**
@@ -132,14 +134,20 @@ function ProfileGrowth({
  */
 function AssistantTurn({
   testId,
+  speaker,
   children,
 }: {
   testId: string;
+  /** The assistant's name, announced once per turn to assistive tech. The
+   *  avatar mark is `aria-hidden` (it is decoration), so without this a screen
+   *  reader cannot tell an assistant turn from the user's own. */
+  speaker: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex gap-2.5" data-testid={testId}>
       <Avatar />
+      <span className="sr-only">{speaker}</span>
       {children}
     </div>
   );
@@ -215,6 +223,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "user" && m.kind === "text") {
     return (
       <div className="flex justify-end" data-testid="msg-user">
+        <span className="sr-only">{h.speakers.user}</span>
         <div className="max-w-[85%] rounded-bubble rounded-br-md bg-brand-blue/15 px-4 py-2.5 text-body text-text-primary">
           {m.text}
         </div>
@@ -226,6 +235,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "user" && m.kind === "file") {
     return (
       <div className="flex justify-end" data-testid="msg-file">
+        <span className="sr-only">{h.speakers.user}</span>
         <div className="flex max-w-[85%] items-center gap-2 rounded-bubble rounded-br-md border border-ink-500 bg-ink-800 px-4 py-2.5 text-body text-text-primary">
           <FileText {...iconInline("flex-none text-text-muted")} aria-hidden />
           <span className="truncate">{m.fileName}</span>
@@ -255,7 +265,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── assistant text (with optional chips) ─────────────────────────────────
   if (m.role === "assistant" && m.kind === "text") {
     return (
-      <AssistantTurn testId="msg-assistant">
+      <AssistantTurn testId="msg-assistant" speaker={h.speakers.assistant}>
         <div className="min-w-0 max-w-[46rem] pt-0.5">
           <div className="text-body text-text-primary">{m.text}</div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
@@ -267,7 +277,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── assistant structured question ────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "question") {
     return (
-      <AssistantTurn testId="msg-question">
+      <AssistantTurn testId="msg-question" speaker={h.speakers.assistant}>
         <div className="min-w-0 max-w-[46rem] pt-0.5">
           <div className="text-body text-text-primary">{m.text}</div>
           <Chips chips={m.chips} onChip={h.onChip} />
@@ -279,7 +289,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── confirmation card in stream ──────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "confirmation") {
     return (
-      <AssistantTurn testId="msg-confirmation">
+      <AssistantTurn testId="msg-confirmation" speaker={h.speakers.assistant}>
         <CardBody tone={m.strong ? "caution" : "neutral"} title={m.title}>
           {m.confirmedText ? (
             <p className="ua-confirmed mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
@@ -312,7 +322,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "assistant" && m.kind === "worklog") {
     const d = m.draft;
     return (
-      <AssistantTurn testId="msg-worklog">
+      <AssistantTurn testId="msg-worklog" speaker={h.speakers.assistant}>
         <CardBody
           title={m.title}
           icon={<Clock {...iconControl("flex-none text-brand-blue")} aria-hidden />}
@@ -348,7 +358,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── employer match card ──────────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "employer-match") {
     return (
-      <AssistantTurn testId="msg-employer-match">
+      <AssistantTurn testId="msg-employer-match" speaker={h.speakers.assistant}>
         <div className={TURN_WIDTH}>
           {/* Rendering IS the read event (canonical decision §10). The cards
               below are exactly what the human sees, so exactly these real
@@ -417,7 +427,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // is one tap from being fixed.
   if (m.role === "assistant" && m.kind === "profile-summary") {
     return (
-      <AssistantTurn testId="msg-profile-summary">
+      <AssistantTurn testId="msg-profile-summary" speaker={h.speakers.assistant}>
         <div className={TURN_WIDTH}>
           <div className="rounded-card border border-ink-500 bg-surface-1/70 p-4">
             <p className="text-body text-text-primary">{m.intro}</p>
@@ -470,7 +480,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   // ── translation preview card ─────────────────────────────────────────────
   if (m.role === "assistant" && m.kind === "translation") {
     return (
-      <AssistantTurn testId="msg-translation">
+      <AssistantTurn testId="msg-translation" speaker={h.speakers.assistant}>
         <CardBody
           title={`${m.recipient} · ${m.channelLabel}`}
           icon={<Languages {...iconControl("flex-none text-brand-blue")} aria-hidden />}
@@ -512,7 +522,7 @@ function Row({ k, v }: { k: string; v: string }) {
 
 export function TypingIndicator() {
   return (
-    <div className="flex gap-2.5" data-testid="chat-typing">
+    <div className="flex gap-2.5" role="status" aria-live="polite" data-testid="chat-typing">
       <Avatar />
       <div className="flex items-center gap-1 py-3">
         {[0, 1, 2].map((i) => (
