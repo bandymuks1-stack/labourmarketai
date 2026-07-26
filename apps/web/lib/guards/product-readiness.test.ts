@@ -593,15 +593,15 @@ describe("catalogue-driven primary nav", () => {
   it("navigation.ts derives tabs from getVisiblePrimaryFeatures()", () => {
     const txt = readWeb("lib/config/navigation.ts");
     expect(txt).toMatch(/getVisiblePrimaryFeatures/);
-    expect(txt).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(txt).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(txt).toMatch(/TAB_META/);
   });
 
   it("BottomNav + DashboardTabs read VISIBLE_PRIMARY_NAV_ITEMS", () => {
     const bn = readWeb("components/app/bottom-nav.tsx");
     const dt = readWeb("components/app/dashboard-tabs.tsx");
-    expect(bn).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(dt).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(bn).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(dt).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
     // No hardcoded TABS arrays left behind.
     expect(bn).not.toMatch(/^const TABS\s*=/m);
     expect(dt).not.toMatch(/^const TABS\s*=/m);

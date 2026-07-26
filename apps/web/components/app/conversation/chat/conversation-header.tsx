@@ -4,6 +4,7 @@ import { MessageSquare, Mail, Calendar, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { useAuthOptional } from "@/lib/auth/context";
+import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -93,6 +94,17 @@ export function ConversationHeader({
       <div className="flex items-center gap-1">
         {/* Real chrome renders only inside the authenticated app; the
           provider-less dev preview keeps a lean header for screenshots. */}
+        {/* The SAME universal command search the Advanced header mounts — one
+            registry, one deterministic matcher, one role filter, one shortcut.
+            It was previously only reachable from Advanced pages, so the
+            chat-first home had no way to reach the other 40 destinations
+            without leaving for the module navbar first. */}
+        {auth && (
+          <HeaderSearch
+            testId="chat-command-search"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          />
+        )}
         {auth && <LocaleSwitcher className={mobile ? "hidden" : "hidden md:flex"} />}
         {/* Appearance is a first-class control, not a setting buried two clicks
             deep in the avatar menu: light is now the default, so the way BACK to

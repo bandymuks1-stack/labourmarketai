@@ -17,10 +17,21 @@ import { CommandFinder } from "@/components/app/command-finder";
  * on the dashboard home the embedded finder keeps its own shortcut, so the
  * two mounts never fight over the key.
  */
-export function HeaderSearch() {
+export function HeaderSearch({
+  className,
+  testId = "header-search-button",
+}: {
+  /** Lets a host header match its own control sizing (e.g. the conversation
+   *  header's 44px row) without forking the component. */
+  className?: string;
+  /** Distinguishes the mount point in tests. The Advanced header's id is the
+   *  default so existing guards keep pointing at the same control. */
+  testId?: string;
+} = {}) {
   const t = useTranslations("commandFinder");
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -47,15 +58,64 @@ export function HeaderSearch() {
     return () => window.clearTimeout(id);
   }, [open]);
 
+  /**
+   * FOCUS RETURN. Closing a modal without moving focus back to what opened it
+   * dumps a keyboard user at the top of the document — they lose their place
+   * entirely. Skipped on the very first render so mounting the header does not
+   * steal focus.
+   */
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (wasOpen.current && !open) triggerRef.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
+
+  /**
+   * FOCUS TRAP. While the dialog is open, Tab must cycle inside it. Without
+   * this, Tab walks straight out into the page behind the overlay — visually
+   * hidden, still focusable, and completely disorienting.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = [
+        ...panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ].filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !panel.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !panel.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onTab, true);
+    return () => document.removeEventListener("keydown", onTab, true);
+  }, [open]);
+
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t("title")}
         aria-haspopup="dialog"
-        data-testid="header-search-button"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        aria-expanded={open}
+        data-testid={testId}
+        className={
+          className ??
+          "inline-flex h-9 w-9 items-center justify-center rounded-control border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        }
       >
         <Search aria-hidden className="h-4 w-4" strokeWidth={1.75} />
       </button>

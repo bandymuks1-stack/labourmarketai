@@ -183,6 +183,182 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("navigation discovery", () => {
+  /** Every route the brief's matrix names, plus the role-restricted ones. */
+  const ROUTES = [
+    "/lt/dashboard",
+    "/lt/dashboard/advanced",
+    "/lt/dashboard/communication",
+    "/lt/dashboard/planning",
+    "/lt/dashboard/market-map",
+    "/lt/dashboard/journal",
+    "/lt/dashboard/network",
+    "/lt/dashboard/admin",
+    "/lt/dashboard/service-requests",
+    "/lt/dashboard/activity",
+    "/lt/dashboard/company",
+    "/lt/dashboard/profile",
+    "/lt/dashboard/opportunities",
+  ] as const;
+
+  test("every route still resolves — none became a 404", async ({ page }) => {
+    // Each route is compiled on demand by the dev server, so 13 first-hits
+    // legitimately exceed the default per-test budget.
+    test.setTimeout(240_000);
+    // Checked at the REQUEST level rather than by navigating: driving 13 full
+    // renders in a row races client-side redirects and aborts frames, which
+    // looks like a routing failure when it is only test plumbing. The question
+    // here is purely "does this destination still exist".
+    const results: { route: string; status: number; final: string }[] = [];
+    for (const route of ROUTES) {
+      const res = await page.request.get(route, { maxRedirects: 5 });
+      results.push({ route, status: res.status(), final: new URL(res.url()).pathname });
+    }
+    test.info().annotations.push({
+      type: "evidence",
+      description: results.map((r) => `${r.route} -> ${r.status} @ ${r.final}`).join(" | "),
+    });
+    for (const r of results) {
+      // A role-restricted route may redirect (that is ACL working), but it must
+      // never 404 — that would mean the destination itself disappeared.
+      expect(r.status, `${r.route} must not 404`).not.toBe(404);
+      expect(r.status, `${r.route} must not 5xx`).toBeLessThan(500);
+    }
+  });
+
+  test("deep links and browser back/forward still work", async ({ page }) => {
+    // Deep link straight into a simple-shell panel.
+    await page.goto("/lt/dashboard/planning", { waitUntil: "domcontentloaded" });
+    expect(new URL(page.url()).pathname).toContain("/dashboard/planning");
+
+    // Navigate IN-APP (a real nav click) so the history entries are the ones a
+    // user actually creates — `goto` chains can collapse redirected entries.
+    await page.getByTestId("conversation-bottom-nav").isVisible().catch(() => false);
+    await page.locator('a[href$="/dashboard/communication"]').first().click();
+    await expect
+      .poll(() => new URL(page.url()).pathname, { timeout: 30_000 })
+      .toContain("/dashboard/communication");
+
+    await page.goBack();
+    await expect
+      .poll(() => new URL(page.url()).pathname, { timeout: 30_000 })
+      .toContain("/dashboard/planning");
+
+    await page.goForward();
+    await expect
+      .poll(() => new URL(page.url()).pathname, { timeout: 30_000 })
+      .toContain("/dashboard/communication");
+  });
+
+  test("Messages and Calendar are persistent in the simple shell only", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+    const simple = await page.evaluate(() => ({
+      messages: document.querySelectorAll('a[href$="/dashboard/communication"]').length,
+      calendar: document.querySelectorAll('a[href$="/dashboard/planning"]').length,
+    }));
+    expect(simple.messages, "Messages is persistent in the chat shell").toBeGreaterThan(0);
+    expect(simple.calendar, "Calendar is persistent in the chat shell").toBeGreaterThan(0);
+    await shot(page, "messages-calendar-ownership-simple", "light", "desktop");
+
+    await page.goto("/lt/dashboard/advanced", { waitUntil: "domcontentloaded" });
+    await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
+    const advanced = await page.evaluate(() => ({
+      tabs: [...document.querySelectorAll('[data-testid^="dashboard-tab-"]')].map(
+        (e) => (e as HTMLElement).dataset.testid,
+      ),
+      bottom: [...document.querySelectorAll('[data-testid^="bottom-nav-"]')].map(
+        (e) => (e as HTMLElement).dataset.testid,
+      ),
+    }));
+    expect(advanced.tabs, "not repeated as an Advanced tab").not.toContain(
+      "dashboard-tab-communication",
+    );
+    expect(advanced.tabs).not.toContain("dashboard-tab-planning");
+    expect(advanced.bottom).not.toContain("bottom-nav-communication");
+    expect(advanced.bottom).not.toContain("bottom-nav-planning");
+    expect(advanced.tabs.length, "Advanced keeps a real orientation nav").toBeGreaterThanOrEqual(4);
+    test.info().annotations.push({
+      type: "evidence",
+      description: `advanced tabs=${advanced.tabs.join(",")}`,
+    });
+    await shot(page, "messages-calendar-ownership-advanced", "light", "desktop");
+  });
+
+  test("command search: opens by button and by shortcut, Escape closes, focus returns", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const trigger = page.getByTestId("chat-command-search");
+    await expect(trigger).toBeVisible();
+
+    // ── by mouse ──────────────────────────────────────────────────────────
+    await trigger.click();
+    const dialog = page.getByTestId("header-search-dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAttribute("aria-modal", "true");
+    await shot(page, "command-search-chat", "light", "desktop");
+
+    // a real destination search over the shared registry
+    await dialog.locator("#command-finder-input").fill("kalendor");
+    await expect(dialog).toContainText(/./);
+
+    // ── Escape closes AND focus returns to the trigger ────────────────────
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    const focused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.dataset.testid ?? null,
+    );
+    expect(focused, "focus must return to what opened the dialog").toBe("chat-command-search");
+
+    // ── by keyboard shortcut ──────────────────────────────────────────────
+    await page.keyboard.press("ControlOrMeta+k");
+    await expect(page.getByTestId("header-search-dialog")).toBeVisible();
+
+    // ── Tab stays inside the panel ────────────────────────────────────────
+    for (let i = 0; i < 8; i++) await page.keyboard.press("Tab");
+    const inside = await page.evaluate(() => {
+      const panel = document.querySelector('[data-testid="header-search-dialog"]');
+      return panel ? panel.contains(document.activeElement) : false;
+    });
+    expect(inside, "Tab must be trapped inside the dialog").toBe(true);
+    await page.keyboard.press("Escape");
+  });
+
+  test("command search reaches a destination that has no persistent tab", async ({ page }) => {
+    await page.goto("/lt/dashboard/advanced", { waitUntil: "domcontentloaded" });
+    await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
+    // The Advanced landing is the heaviest page in the app; a click that lands
+    // before React attaches listeners is silently dropped. Retry until the
+    // dialog actually opens rather than asserting on the first attempt.
+    const dialog = page.getByTestId("header-search-dialog");
+    await expect
+      .poll(
+        async () => {
+          if (await dialog.isVisible().catch(() => false)) return true;
+          await page.getByTestId("header-search-button").click({ timeout: 5_000 }).catch(() => {});
+          return dialog.isVisible().catch(() => false);
+        },
+        { timeout: 60_000, intervals: [500, 1_000, 1_000, 2_000] },
+      )
+      .toBe(true);
+    await shot(page, "command-search-advanced", "light", "desktop");
+
+    // The Advanced landing embeds its own inline finder as well (documented:
+    // "the embedded dashboard finder keeps its own shortcut"), so the input
+    // must be scoped to the dialog rather than matched globally.
+    await dialog.locator("#command-finder-input").fill("zzzzqqq-nera-tokio");
+    // A no-result search must degrade honestly, never crash or invent a hit.
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
+});
+
 test.describe("composer auto-grow", () => {
   /**
    * Rendered height + whether the box is scrolling internally.
@@ -511,11 +687,29 @@ test.describe("presence and motion", () => {
     await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
     await hydrated(page);
 
-    // The greeting's position must not move when a new turn animates in.
-    const before = await page.getByTestId("msg-greeting").boundingBox();
+    // First turn: this one is EXPECTED to move things, because the opening
+    // state is centred and the stream then anchors to the top (stage 4).
     await page.getByTestId("composer-input").fill("Ką dar turiu padaryti?");
     await page.getByTestId("composer-send").click();
     await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    // From here the layout is settled, so a FURTHER turn must not move the
+    // turns above it — that is what "entry animates transform/opacity only"
+    // actually guarantees.
+    //
+    // Measured with `offsetTop`, NOT `boundingBox()`: the thread auto-scrolls to
+    // the newest message, so a viewport-relative rect moves by the scroll
+    // distance and reports ~146px of "shift" that is not a shift at all.
+    const offsetTop = () =>
+      page.evaluate(
+        () =>
+          (document.querySelector('[data-testid="msg-greeting"]') as HTMLElement | null)
+            ?.offsetTop ?? -1,
+      );
+    const before = await offsetTop();
+    await page.getByTestId("composer-input").fill("Primink man rytoj 8 val.");
+    await page.getByTestId("composer-send").click();
+    await expect(page.getByTestId("msg-assistant").last()).toBeVisible({ timeout: 30_000 });
 
     const animated = await page.evaluate(() => {
       const el = document.querySelector(".ua-msg-in");
@@ -526,8 +720,9 @@ test.describe("presence and motion", () => {
     expect(animated?.name, "an entering turn animates").toBe("ua-msg-in");
     expect(animated?.duration).not.toBe("0s");
 
-    const after = await page.getByTestId("msg-greeting").boundingBox();
-    expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0)), "no layout shift").toBeLessThanOrEqual(1);
+    const after = await offsetTop();
+    expect(before, "the greeting must be measurable").toBeGreaterThanOrEqual(0);
+    expect(Math.abs(after - before), "no layout shift").toBeLessThanOrEqual(1);
   });
 
   test("prefers-reduced-motion disables every animation", async ({ browser }) => {

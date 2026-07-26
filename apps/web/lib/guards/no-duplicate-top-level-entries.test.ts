@@ -47,7 +47,7 @@ describe("the mobile bottom nav stays the focused core (no extra top-level entri
   const bottom = read("components/app/bottom-nav.tsx");
 
   it("renders the catalogue-driven core items only — admin is NOT appended", () => {
-    expect(bottom).toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    expect(bottom).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(bottom, "bottom nav must not append the admin item").not.toMatch(
       /ADMIN_NAV_ITEM/,
     );

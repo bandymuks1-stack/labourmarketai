@@ -126,6 +126,44 @@ export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
   getVisiblePrimaryNavItems();
 
 /**
+ * Features whose PERSISTENT navigation belongs to the simple (conversation)
+ * shell, and which therefore do not repeat in the Advanced module navbar.
+ *
+ * WHY THESE TWO. `/dashboard/communication` and `/dashboard/planning` already
+ * RENDER in the simple chrome — `DashboardChrome`'s PANEL_PREFIXES routes them
+ * there — so the Advanced navbar was advertising two destinations that
+ * immediately switch the user into the other shell. They were also the only
+ * items duplicated as persistent nav in BOTH shells, which is what made the
+ * product feel like two navigation systems bolted together.
+ *
+ * NOTHING IS HIDDEN OR REMOVED:
+ *   • the routes are unchanged and still deep-linkable;
+ *   • they remain PERSISTENT nav items in the simple shell (header tabs on
+ *     desktop, bottom nav on phones) — which is now the default home's chrome;
+ *   • from Advanced they are one keystroke away in the universal command
+ *     search, the same registry every other destination uses;
+ *   • `VISIBLE_PRIMARY_NAV_ITEMS` is deliberately NOT filtered, so the
+ *     catalogue stays the single source of truth and the F14/F15 decision
+ *     ("planning and network are primary modules") still holds — this is a
+ *     presentation-level de-duplication, not a demotion.
+ *
+ * `network` is NOT in this set: it has no simple-shell entry, so removing it
+ * from the Advanced navbar would genuinely reduce its reachability.
+ */
+export const SIMPLE_SHELL_OWNED_NAV_IDS: readonly (FeatureKey | "admin")[] = [
+  "communication",
+  "planning",
+];
+
+/** The Advanced module navbar's items: the catalogue minus the destinations the
+ *  simple shell owns persistently. */
+export function getAdvancedNavItems(): readonly NavItem[] {
+  return VISIBLE_PRIMARY_NAV_ITEMS.filter(
+    (i) => !SIMPLE_SHELL_OWNED_NAV_IDS.includes(i.id),
+  );
+}
+
+/**
  * Admin nav item. NOT sourced from the feature catalogue — admin is a
  * permission dimension, not a product feature (see dashboard layout's
  * `deriveIsAdmin`). The nav components append it ONLY when the auth context
