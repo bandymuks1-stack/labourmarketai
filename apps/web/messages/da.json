@@ -3147,11 +3147,14 @@
     },
     "chat": {
       "headerTitle": "[EN] LabourMarket",
+      "assistantName": "LabourMarket AI",
+      "speakerYou": "[EN] You",
       "advanced": "[EN] Advanced mode",
       "composerPlaceholder": "[EN] Write what you need…",
       "send": "[EN] Send",
       "attach": "[EN] Attach a file",
       "greeting": "[EN] Hi. How can I help you today?",
+      "greetingNamed": "[EN] Hi, {name}. How can I help you today?",
       "chipCv": "[EN] Upload CV",
       "chipJobs": "[EN] I'm looking for work",
       "chipProfile": "[EN] Complete my profile",
@@ -3222,7 +3225,11 @@
       "introCompleteNext": "[EN] Nothing is missing from your profile. Next: look at work opportunities, or log your work time.",
       "lastActivity": "[EN] Last change: {event} — {date}",
       "blockedNoWorker": "[EN] This account has no worker profile, so there is nothing for me to summarise here.",
-      "blockedNotSignedIn": "[EN] Your session ended. Please sign in again."
+      "blockedNotSignedIn": "[EN] Your session ended. Please sign in again.",
+      "progress": "[EN] {done} of {total}",
+      "progressAria": "[EN] Profile essentials: {done} of {total} saved",
+      "doneWord": "[EN] Saved",
+      "missingWord": "[EN] Still missing"
     }
   }
 }

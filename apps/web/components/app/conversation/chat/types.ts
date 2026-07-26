@@ -13,7 +13,17 @@ import type {
 
 export type Role = "assistant" | "user" | "system";
 
-export type ChoiceChip = { id: string; label: string };
+export type ChoiceChip = {
+  id: string;
+  label: string;
+  /** `true` marks the ONE recommended choice in a row.
+   *
+   *  Set only when the SERVER supplied a concrete next step (the first missing
+   *  profile checkpoint). When there is no real priority every chip stays
+   *  neutral — a recommendation is never invented to make the row look
+   *  designed. */
+  recommended?: boolean;
+};
 
 /**
  * An employer-match card IS the canonical adapter's output — the same object,
@@ -41,6 +51,22 @@ export type WorkLogDraft = {
 };
 
 export type ChatMessage =
+  /**
+   * The opening turn. Rendered as the screen's real `<h1>` at the title scale
+   * in the display face — the conversation's one page title. Every other
+   * assistant turn is `kind: "text"` at body scale, so exactly one heading
+   * exists per thread.
+   */
+  | {
+      id: string;
+      role: "assistant";
+      kind: "greeting";
+      text: string;
+      /** The assistant's display name, shown once above the title. */
+      assistantName: string;
+      at?: string;
+      chips?: ChoiceChip[];
+    }
   | { id: string; role: "assistant"; kind: "text"; text: string; at?: string; chips?: ChoiceChip[] }
   | { id: string; role: "user"; kind: "text"; text: string; at?: string }
   | { id: string; role: "system"; kind: "result"; ok: boolean; text: string; at?: string }
@@ -81,6 +107,18 @@ export type ChatMessage =
       done: string[];
       /** Concrete facts still missing — named, never a bare percentage. */
       missing: string[];
+      /** Server-supplied counts. The card RENDERS these; it never counts the
+       *  arrays, so the bar can never disagree with the server. */
+      stepsDone: number;
+      stepsTotal: number;
+      /** Localized "{done} / {total}" readout + the progress group's a11y name,
+       *  resolved server-side so the card holds no copy of its own. */
+      progressLabel: string;
+      progressAriaLabel: string;
+      /** Localized "saved" / "missing" words — the TEXT signal that makes the
+       *  segments readable without perceiving colour. */
+      doneWord: string;
+      missingWord: string;
       /** Honest last-activity line, or null when there is no activity yet. */
       lastActivity: string | null;
       chips?: ChoiceChip[];

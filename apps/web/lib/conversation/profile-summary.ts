@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   WORKER_PROFILE_STEPS,
   getWorkerActivity,
+  type WorkerProfileStep,
 } from "@/lib/conversation/worker-activity";
 import type {
   ChatProfileSummary,
@@ -55,8 +56,14 @@ export async function loadProfileSummaryForChat(
   const tSteps = await getTranslations("conversation.journal.steps");
   const done: string[] = [];
   const missing: string[] = [];
+  const missingKeys: WorkerProfileStep[] = [];
   for (const step of WORKER_PROFILE_STEPS) {
-    (activity.steps[step] ? done : missing).push(tSteps(step));
+    if (activity.steps[step]) {
+      done.push(tSteps(step));
+    } else {
+      missing.push(tSteps(step));
+      missingKeys.push(step);
+    }
   }
 
   return {
@@ -64,6 +71,10 @@ export async function loadProfileSummaryForChat(
     intro: introFor(variant, activity.stepsDone, activity.stepsTotal, missing.length, t),
     done,
     missing,
+    missingKeys,
+    // The read model's own counts — not recomputed here either.
+    stepsDone: activity.stepsDone,
+    stepsTotal: activity.stepsTotal,
     lastActivity: await lastActivityLine(activity.events[0] ?? null),
   };
 }

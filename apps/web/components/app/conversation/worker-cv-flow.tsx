@@ -37,25 +37,25 @@ export function WorkerCvFlow({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-surface-1/40 px-4 py-3"
+      className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3"
       data-testid="conversation-cv-flow"
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-text-primary">{t("title")}</h3>
+        <h3 className="font-display text-card-title font-semibold text-text-primary">{t("title")}</h3>
         <button
           type="button"
           onClick={onClose}
-          className="text-xs font-medium text-text-muted hover:text-text-secondary"
+          className="ua-press -mr-2 inline-flex min-h-11 items-center rounded-control px-2 text-support font-medium text-text-muted hover:text-text-secondary"
         >
           {t("close")}
         </button>
       </div>
-      <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
+      <p className="text-support leading-relaxed text-text-secondary">{t("intro")}</p>
 
       <CvImportUpload onExtracted={onExtracted} />
 
       {parsedEmpty && (
-        <p className="text-xs text-text-muted" role="status" data-testid="conversation-cv-empty">
+        <p className="text-support text-text-muted" role="status" data-testid="conversation-cv-empty">
           {t("noneFound")}
         </p>
       )}

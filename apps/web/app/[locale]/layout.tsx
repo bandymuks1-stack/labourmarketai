@@ -117,12 +117,14 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* No-flash theme bootstrap: apply the saved theme before paint so the
-            dark↔light token swap never flickers. Default is dark (:root). */}
+        {/* No-flash theme bootstrap: resolve the theme before paint so the
+            light↔dark token swap never flickers. LIGHT is the product default
+            (`:root`), so the attribute is always stamped to a definite value —
+            every reader (toggles, ThemeReapply, tests) sees one truth. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+              "(function(){try{var s=localStorage.getItem('theme');var t=s==='dark'?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();",
           }}
         />
       </head>

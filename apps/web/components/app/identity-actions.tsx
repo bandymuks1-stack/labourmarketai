@@ -121,7 +121,7 @@ function CompanyChannel({
   createCta: string;
   compact: boolean;
 }) {
-  const blockCls = `flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
+  const blockCls = `flex flex-col gap-3 rounded-card border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
   return (
     <div className={blockCls} data-testid="identity-company">
       <header className="flex items-center gap-2">
@@ -199,7 +199,7 @@ export async function IdentityActions({
   readonly focusRole?: Role;
 }) {
   const t = await getTranslations("identityActions");
-  const blockCls = `flex flex-col gap-3 rounded-2xl border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
+  const blockCls = `flex flex-col gap-3 rounded-card border border-border-subtle bg-ink-800/20 ${compact ? "p-4" : "p-5"}`;
   // Real identity first: the card title IS the active company name; the
   // generic label survives only for the honest no-company state. With a real
   // name shown, the subtitle explains what the card is — even in compact

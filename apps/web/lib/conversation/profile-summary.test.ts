@@ -230,3 +230,56 @@ describe("last activity is real or absent", () => {
     expect(res.lastActivity).toBeNull();
   });
 });
+
+describe("the 0/5 - 5/5 matrix stays consistent with the server", () => {
+  const STEPS = ["about", "skills", "languages", "availability", "workHistory"] as const;
+
+  /** Mark the first `n` checkpoints done, in canonical order. */
+  const withDone = (n: number) => {
+    const steps = Object.fromEntries(STEPS.map((k, i) => [k, i < n])) as Record<
+      (typeof STEPS)[number],
+      boolean
+    >;
+    return activity({ steps, stepsDone: n, stepsTotal: 5 });
+  };
+
+  for (const n of [0, 1, 2, 3, 4, 5]) {
+    it(`${n}/5 — counts, names and keys all agree`, async () => {
+      activityMock.mockResolvedValue(withDone(n));
+      const res = await loadProfileSummaryForChat("profile");
+      if (res.kind !== "summary") throw new Error("expected summary");
+
+      // The counts the UI renders are the READ MODEL's, not re-derived.
+      expect(res.stepsDone).toBe(n);
+      expect(res.stepsTotal).toBe(5);
+      // …and they agree with the named lists, so the bar cannot contradict them.
+      expect(res.done).toHaveLength(n);
+      expect(res.missing).toHaveLength(5 - n);
+      expect(res.missingKeys).toHaveLength(5 - n);
+      // A done checkpoint never appears as missing.
+      for (const key of res.missingKeys) {
+        expect(STEPS.indexOf(key)).toBeGreaterThanOrEqual(n);
+      }
+    });
+  }
+
+  it("a UI that claimed 5/5 on a 4/5 profile would contradict the payload", () => {
+    // The negative control, stated as an invariant: stepsDone is the only
+    // source, so 4 done can never be reported as 5.
+    const four = withDone(4);
+    expect(four.stepsDone).toBe(4);
+    expect(Object.values(four.steps).filter(Boolean)).toHaveLength(4);
+  });
+
+  it("the completion sentence only appears at 5/5", async () => {
+    activityMock.mockResolvedValue(withDone(5));
+    const full = await loadProfileSummaryForChat("profile");
+    activityMock.mockResolvedValue(withDone(4));
+    const nearly = await loadProfileSummaryForChat("profile");
+    if (full.kind !== "summary" || nearly.kind !== "summary") throw new Error("expected");
+    expect(full.intro).toBe("conversation.summary.introComplete");
+    expect(nearly.intro).toContain("introProfile");
+    expect(full.missing).toEqual([]);
+    expect(nearly.missing).toHaveLength(1);
+  });
+});

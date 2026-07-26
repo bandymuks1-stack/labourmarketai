@@ -24,7 +24,7 @@ export function SkillsReviewBanner({
   if (count <= 0) return null;
   return (
     <section
-      className="flex flex-col gap-2 rounded-2xl border border-state-warning/40 bg-state-warning/5 p-4"
+      className="flex flex-col gap-2 rounded-card border border-state-warning/40 bg-state-warning/5 p-4"
       data-testid="skills-review-banner"
     >
       <h2 className="flex items-center gap-2 font-display text-base font-semibold text-text-primary">

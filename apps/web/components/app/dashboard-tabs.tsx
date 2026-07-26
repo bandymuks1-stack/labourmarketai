@@ -2,10 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import {
-  ADMIN_NAV_ITEM,
-  VISIBLE_PRIMARY_NAV_ITEMS,
-} from "@/lib/config/navigation";
+import { ADMIN_NAV_ITEM, getAdvancedNavItems } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import { useAuth } from "@/lib/auth/context";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
@@ -34,10 +31,11 @@ export function DashboardTabs({
   badges = badges ?? (spineBadges as Partial<Record<FeatureKey, number>>);
   // Admin is a permission dimension, not a catalogue feature — append the
   // admin tab only for admins who haven't hidden admin chrome.
-  const items =
-    isAdmin && !adminUiHidden
-      ? [...VISIBLE_PRIMARY_NAV_ITEMS, ADMIN_NAV_ITEM]
-      : VISIBLE_PRIMARY_NAV_ITEMS;
+  // `getAdvancedNavItems()` is the catalogue minus the destinations the simple
+  // shell owns persistently (Messages, Calendar) — they render in that shell
+  // anyway and stay reachable here through the universal command search.
+  const primary = getAdvancedNavItems();
+  const items = isAdmin && !adminUiHidden ? [...primary, ADMIN_NAV_ITEM] : primary;
   return (
     <nav
       aria-label="Dashboard sections"

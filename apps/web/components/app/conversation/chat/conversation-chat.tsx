@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
@@ -22,6 +24,7 @@ import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
+import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -33,6 +36,8 @@ function todayIso(): string {
 
 export type ChatLabels = {
   headerTitle: string;
+  assistantName: string;
+  speakerYou: string;
   advanced: string;
   navChat: string;
   navMessages: string;
@@ -64,6 +69,21 @@ export type ChatLabels = {
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
+};
+
+/**
+ * Which profile action genuinely fixes which checkpoint.
+ *
+ * Deliberately PARTIAL. `about` and `skills` have no chip in this row — about
+ * text is edited on the profile screen and skills are recognised from the CV or
+ * the work journal — so when one of those is the first gap the row simply
+ * offers no recommendation. That is the honest outcome: a recommendation exists
+ * only where a listed action really closes the gap the server reported.
+ */
+const CHIP_FOR_STEP: Partial<Record<WorkerProfileStep, string>> = {
+  languages: "f:worker.add-language",
+  workHistory: "f:worker.add-work-history",
+  availability: "f:worker.save-work-card",
 };
 
 let uid = 0;
@@ -109,6 +129,31 @@ export function ConversationChat({
     [labels],
   );
 
+  /**
+   * The greeting says the user's name when the product already knows it.
+   *
+   * "Hi. How can I help you today?" is a search box pretending to be a
+   * conversation — it proves the system knows nothing about you. The name is
+   * ALREADY in the client auth context (the header renders initials from it),
+   * so this costs no new query, no new API and no page-load work; it is the
+   * same fact, used once more. No name → the neutral greeting, never an
+   * invented one.
+   */
+  const t = useTranslations("conversation.chat");
+  const tSummary = useTranslations("conversation.summary");
+  const auth = useAuthOptional();
+  const firstName = useMemo(() => {
+    const full = auth?.profile?.full_name?.trim();
+    if (!full) return null;
+    const first = full.split(/\s+/)[0];
+    // Guard against a pasted paragraph or an email fragment in the name field.
+    return first && first.length <= 24 ? first : null;
+  }, [auth?.profile?.full_name]);
+
+  const greetingText = firstName
+    ? t("greetingNamed", { name: firstName })
+    : labels.greeting;
+
   const initial: ThreadItem[] = useMemo(() => {
     if (script) return script.map((message) => ({ id: message.id, message }));
     return [
@@ -117,13 +162,15 @@ export function ConversationChat({
         message: {
           id: nid(),
           role: "assistant",
-          kind: "text",
-          text: labels.greeting,
+          // The opening turn is the screen's page title, not a chat bubble.
+          kind: "greeting",
+          text: greetingText,
+          assistantName: labels.assistantName,
           chips: starterChips,
         } as ChatMessage,
       },
     ];
-  }, [script, labels.greeting, starterChips]);
+  }, [script, greetingText, labels.assistantName, starterChips]);
 
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
@@ -222,6 +269,12 @@ export function ConversationChat({
         .then((res) => {
           setTyping(false);
           if (res.kind === "summary") {
+            // The recommended chip is the one that closes the FIRST gap the
+            // server reported — its ordering, its data. No match (about /
+            // skills have no chip here) means no recommendation at all.
+            const recommendedId = res.missingKeys
+              .map((step) => CHIP_FOR_STEP[step])
+              .find((id): id is string => Boolean(id));
             pushMessage({
               id: nid(),
               role: "assistant",
@@ -229,8 +282,26 @@ export function ConversationChat({
               intro: res.intro,
               done: res.done,
               missing: res.missing,
+              // Counts and copy come from the server; the card renders them.
+              stepsDone: res.stepsDone,
+              stepsTotal: res.stepsTotal,
+              progressLabel: tSummary("progress", {
+                done: res.stepsDone,
+                total: res.stepsTotal,
+              }),
+              progressAriaLabel: tSummary("progressAria", {
+                done: res.stepsDone,
+                total: res.stepsTotal,
+              }),
+              doneWord: tSummary("doneWord"),
+              missingWord: tSummary("missingWord"),
               lastActivity: res.lastActivity,
-              chips: res.missing.length > 0 ? profileChips : starterChips,
+              chips:
+                res.missing.length > 0
+                  ? profileChips.map((c) =>
+                      c.id === recommendedId ? { ...c, recommended: true } : c,
+                    )
+                  : starterChips,
             });
           } else {
             assistant(res.message, starterChips);
@@ -241,7 +312,7 @@ export function ConversationChat({
           assistant(labels.fallback, starterChips);
         });
     },
-    [pushMessage, assistant, starterChips, profileChips, labels.fallback],
+    [pushMessage, assistant, starterChips, profileChips, labels.fallback, tSummary],
   );
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
@@ -377,6 +448,7 @@ export function ConversationChat({
           onChip: handleChip,
           onConfirm: () => {},
           onCancel: () => {},
+          speakers: { assistant: labels.assistantName, user: labels.speakerYou },
         }}
       />
       <Composer

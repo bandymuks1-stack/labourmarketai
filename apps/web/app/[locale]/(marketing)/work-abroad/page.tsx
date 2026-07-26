@@ -57,7 +57,7 @@ export default async function WorkAbroadPage({
           {steps.map((s, i) => (
             <li
               key={i}
-              className="rounded-2xl border border-border-subtle bg-surface-1 p-5"
+              className="rounded-card border border-border-subtle bg-surface-1 p-5"
             >
               <h3 className="font-display text-base font-semibold text-text-primary">
                 {s.title}
@@ -89,7 +89,7 @@ export default async function WorkAbroadPage({
             ))}
           </ul>
         </div>
-        <div className="rounded-2xl border border-border-subtle bg-surface-1 p-6">
+        <div className="rounded-card border border-border-subtle bg-surface-1 p-6">
           <h2 className="font-display text-xl font-bold text-text-primary">
             {t("directionsTitle")}
           </h2>

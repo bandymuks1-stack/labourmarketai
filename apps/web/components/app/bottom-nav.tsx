@@ -16,7 +16,7 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import {
-  VISIBLE_PRIMARY_NAV_ITEMS,
+  getAdvancedNavItems,
   type NavIconKey,
 } from "@/lib/config/navigation";
 import type { FeatureKey } from "@/lib/config/feature-availability";
@@ -63,11 +63,15 @@ export function BottomNav({
   const pathname = usePathname();
   const { badges: spineBadges } = useAuth();
   badges = badges ?? (spineBadges as Partial<Record<FeatureKey, number>>);
-  // Mobile bottom nav stays the focused catalogue-driven core (currently
-  // Apžvalga / Žemėlapis / Žurnalas / Žinutės) — no Admin tab here (it crowds
-  // the small bar). Admin remains reachable for admins via the header account
-  // dropdown + the desktop tabs.
-  const items = VISIBLE_PRIMARY_NAV_ITEMS;
+  // Mobile bottom nav stays the focused catalogue-driven core — no Admin tab
+  // here (it crowds the small bar). Admin remains reachable for admins via the
+  // header account dropdown + the desktop tabs.
+  //
+  // Same de-duplication as the desktop tabs: Messages and Calendar are the
+  // simple shell's persistent nav (they render in that chrome), so repeating
+  // them here made the phone show two competing navigation systems. Both stay
+  // deep-linkable and one keystroke away in the universal command search.
+  const items = getAdvancedNavItems();
 
   return (
     <nav

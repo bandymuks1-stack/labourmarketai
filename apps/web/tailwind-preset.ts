@@ -1,6 +1,21 @@
 import type { Config } from "tailwindcss";
 import { colors, gradients, motion, radii, shadows, typography } from "./tokens";
 
+type FontSizeEntry = [
+  fontSize: string,
+  configuration: { lineHeight?: string; letterSpacing?: string },
+];
+
+/** Clone the readonly semantic type ladder into the mutable tuples Tailwind's
+ *  `Config` type requires. Keeps `tokens/typography.ts` the single source. */
+function fontSizeScale(): Record<string, FontSizeEntry> {
+  const out: Record<string, FontSizeEntry> = {};
+  for (const [role, [size, config]] of Object.entries(typography.fontSize)) {
+    out[role] = [size, { ...config }];
+  }
+  return out;
+}
+
 /**
  * Brand token preset — the ONLY place tokens map into Tailwind.
  * Components use these classes; no raw hex anywhere in components (brief §1.6).
@@ -41,6 +56,12 @@ const preset = {
         tightest: typography.letterSpacing.tightest,
         label: typography.letterSpacing.label,
       },
+      // Semantic type ladder (UX 2.0) → `text-body`, `text-basis`, `text-title`…
+      // EXTENDS Tailwind's numeric sizes rather than replacing them, so no
+      // existing surface shifts; new work names the ROLE instead of a size.
+      // The tokens are `as const` (readonly tuples); Tailwind's Config wants
+      // mutable ones, so they are cloned rather than cast away.
+      fontSize: fontSizeScale(),
       // Motion tokens → `duration-fast`, `ease-spring`, … (TASK 06). The single
       // timing/easing source; resolves to the CSS vars in globals.css.
       transitionDuration: { ...motion.duration },

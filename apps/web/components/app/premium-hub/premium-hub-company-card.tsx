@@ -75,7 +75,7 @@ export async function PremiumHubCompanyCard({ company }: { company: CompanyVM })
         <div className="flex items-center gap-4">
           <div
             aria-hidden
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-brand-blue/40 bg-gradient-to-br from-brand-blue/20 to-brand-violet/10"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-card border border-brand-blue/40 bg-gradient-to-br from-brand-blue/20 to-brand-violet/10"
           >
             <Building2 className="h-6 w-6 text-brand-blue" strokeWidth={1.75} aria-hidden />
           </div>

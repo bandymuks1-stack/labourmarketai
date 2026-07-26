@@ -11,6 +11,8 @@
  * describes how the conversation renders them.
  */
 
+import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
+
 /** Which question the summary is answering. The FACTS are identical in all
  *  three cases — only the opening line differs, because "show my profile",
  *  "what's left to do" and "where did I stop" are the same real state seen
@@ -26,6 +28,22 @@ export type ChatProfileSummary =
       /** Localized names of the checkpoints still missing — named concretely,
        *  never reduced to a bare percentage. */
       missing: string[];
+      /** The SAME missing checkpoints as stable keys, in canonical order.
+       *
+       *  Carried so a surface can mark the action that fixes the first real gap
+       *  as its recommended one. This is the server's own ordering of the
+       *  worker's own rows — nothing here is a heuristic, and a surface with no
+       *  matching action simply offers no recommendation rather than inventing
+       *  one. */
+      missingKeys: WorkerProfileStep[];
+      /** Checkpoints really saved, straight from the read model.
+       *
+       *  Sent explicitly rather than left for the UI to derive from
+       *  `done.length`: two places computing the same number is exactly how a
+       *  progress bar starts disagreeing with the server it is reporting. The
+       *  UI renders these; it never counts. */
+      stepsDone: number;
+      stepsTotal: number;
       /** Honest last-activity line, or null when there is no activity yet. */
       lastActivity: string | null;
     }

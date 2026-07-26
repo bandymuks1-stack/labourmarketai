@@ -9,6 +9,7 @@ import {
   type WorkerFormSpec,
 } from "@/lib/conversation/worker-forms";
 import { dispatchWorkerAction } from "@/lib/conversation/dispatch";
+import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -39,8 +40,11 @@ export function InlineActionForm({
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [saving, start] = useTransition();
 
+  // `text-body` (16px) is not only the reading size — iOS Safari AUTO-ZOOMS any
+  // input whose font-size is below 16px, which yanks the whole page on focus.
+  // `min-h-11` gives the field the same 44px target as every other control.
   const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+    "min-h-11 w-full rounded-control border border-ink-500 bg-ink-800 px-3 py-2 text-body text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   function set(name: string, v: string | boolean) {
     setValues((prev) => ({ ...prev, [name]: v }));
@@ -92,16 +96,17 @@ export function InlineActionForm({
   if (phase.kind === "done") {
     return (
       <div
-        className="flex items-center justify-between gap-3 rounded-lg border border-state-success/40 bg-state-success/5 px-4 py-3"
+        // A REAL status change just landed — the one place the spring belongs.
+        className="ua-confirmed flex items-center justify-between gap-3 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3"
         data-testid="inline-action-done"
       >
-        <span className="text-sm font-semibold text-state-success">
+        <span className="text-support font-semibold text-state-success">
           {t("conversation.forms.ui.saved")}
         </span>
         <button
           type="button"
           onClick={onClose}
-          className="text-xs font-semibold text-brand-blue hover:underline"
+          className="ua-press -mr-2 inline-flex min-h-11 items-center rounded-control px-2 text-support font-semibold text-brand-blue hover:underline"
         >
           {t("conversation.forms.ui.addAnother")}
         </button>
@@ -111,17 +116,17 @@ export function InlineActionForm({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-lg border border-ink-600 bg-surface-1/40 px-4 py-3"
+      className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3"
       data-testid={`inline-action-form-${spec.actionId}`}
     >
-      <h3 className="text-sm font-semibold text-text-primary">{t(spec.titleKey)}</h3>
+      <h3 className="font-display text-card-title font-semibold text-text-primary">{t(spec.titleKey)}</h3>
 
       {phase.kind === "review" ? (
         <div className="flex flex-col gap-2" data-testid="inline-action-review">
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("conversation.forms.ui.reviewTitle")}
           </p>
-          <dl className="flex flex-col gap-1 rounded-md border border-ink-600 p-3 text-sm">
+          <dl className="flex flex-col gap-1 rounded-control border border-ink-600 p-3 text-support">
             {spec.fields
               .filter((f) => {
                 const v = values[f.name];
@@ -134,53 +139,35 @@ export function InlineActionForm({
                 </div>
               ))}
           </dl>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={save}
-              data-testid="inline-action-save"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50"
-            >
+          <ChatActionRow>
+            {/* `loading` renders a spinner and sets aria-busy, so "saving" is
+                distinguishable from "disabled" without perceiving colour. */}
+            <ChatAction tone="primary" loading={saving} testId="inline-action-save" onClick={save}>
               {saving ? t("conversation.forms.ui.working") : t("conversation.forms.ui.save")}
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => setPhase({ kind: "form" })}
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50"
-            >
+            </ChatAction>
+            <ChatAction tone="secondary" disabled={saving} onClick={() => setPhase({ kind: "form" })}>
               {t("conversation.forms.ui.back")}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {spec.fields.map((f) => (
             <Field key={f.name} f={f} value={values[f.name]} onChange={set} t={t} inputCls={inputCls} />
           ))}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={toReview}
-              data-testid="inline-action-continue"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-brand-blue/50 bg-brand-blue/10 px-4 text-xs font-semibold text-brand-blue hover:bg-brand-blue/20"
-            >
+          <ChatActionRow>
+            <ChatAction tone="primary" testId="inline-action-continue" onClick={toReview}>
               {t("conversation.forms.ui.continue")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink-500 px-4 text-xs font-medium text-text-secondary hover:bg-ink-700"
-            >
+            </ChatAction>
+            <ChatAction tone="secondary" onClick={onClose}>
               {t("conversation.forms.ui.cancel")}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       )}
 
       {phase.kind === "error" && (
-        <p role="alert" aria-live="polite" className="text-xs text-state-danger" data-testid="inline-action-error">
+        <p role="alert" aria-live="polite" className="text-support text-state-danger" data-testid="inline-action-error">
           {phase.message}
         </p>
       )}
@@ -216,12 +203,15 @@ function Field({
   const label = t(f.labelKey);
   if (f.kind === "checkbox") {
     return (
-      <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <label className="flex min-h-11 items-center gap-2 text-support text-text-secondary">
         <input
           type="checkbox"
           checked={value === true}
           onChange={(e) => onChange(f.name, e.target.checked)}
           data-testid={`field-${f.name}`}
+          // A native checkbox renders ~13px; the wrapping label carries the
+          // 44px row and this scales the box itself to a usable size.
+          className="size-5 flex-none accent-brand-blue"
         />
         {label}
       </label>
@@ -231,7 +221,7 @@ function Field({
     const cur = typeof value === "string" ? value : "";
     return (
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] text-text-muted">{label}</span>
+        <span className="text-meta text-text-muted">{label}</span>
         <div className="flex gap-1" role="group" aria-label={label}>
           {(["yes", "no"] as const).map((opt) => (
             <button
@@ -240,7 +230,7 @@ function Field({
               onClick={() => onChange(f.name, cur === opt ? "not_stated" : opt)}
               aria-pressed={cur === opt}
               data-testid={`field-${f.name}-${opt}`}
-              className={`min-h-11 flex-1 rounded-md border px-3 text-xs font-medium ${
+              className={`min-h-11 flex-1 rounded-control border px-3 text-support font-medium ${
                 cur === opt
                   ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
                   : "border-ink-500 text-text-secondary hover:bg-ink-700"
@@ -255,7 +245,7 @@ function Field({
   }
   if (f.kind === "select") {
     return (
-      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
         {label}
         <select
           value={typeof value === "string" ? value : ""}
@@ -275,7 +265,7 @@ function Field({
   }
   if (f.kind === "textarea") {
     return (
-      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
         {label}
         <textarea
           rows={3}
@@ -291,7 +281,7 @@ function Field({
   }
   // text | number
   return (
-    <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+    <label className="flex flex-col gap-1 text-meta text-text-muted">
       {label}
       <input
         type={f.kind === "number" ? "number" : "text"}

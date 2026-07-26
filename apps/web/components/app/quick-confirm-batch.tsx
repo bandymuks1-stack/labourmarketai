@@ -131,7 +131,7 @@ export function QuickConfirmBatch({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-ink-900/70 backdrop-blur-sm"
           />
-          <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 p-4 shadow-card md:max-w-lg md:rounded-2xl md:border">
+          <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 p-4 shadow-card md:max-w-lg md:rounded-card md:border">
             <p className="font-display text-base font-semibold text-text-primary">
               {t("inbox.quick.batchSummaryTitle")}
             </p>
