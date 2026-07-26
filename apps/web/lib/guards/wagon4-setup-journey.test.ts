@@ -61,7 +61,7 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
     const profile = read("app/[locale]/dashboard/profile/page.tsx");
     expect(profile).toMatch(/id="profile-edit"/);
     expect(profile).toMatch(/id="cv-availability"/);
-    const dashboard = read("app/[locale]/dashboard/page.tsx");
+    const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(dashboard).toMatch(/id="work-card"/);
   });
 });

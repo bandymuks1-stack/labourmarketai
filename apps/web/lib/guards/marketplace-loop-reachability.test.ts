@@ -64,7 +64,7 @@ describe("the control-room grid exposes always-on access to both loop halves", (
   });
 
   it("the grid renders in BOTH the org and worker branches", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect((page.match(/<DashboardModuleGrid\b/g) ?? []).length).toBe(2);
   });
 
@@ -93,7 +93,7 @@ describe("the control-room grid exposes always-on access to both loop halves", (
   });
 
   it("never the doctrine-killed /discover", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).not.toMatch(/\/dashboard\/discover/);
   });
 });

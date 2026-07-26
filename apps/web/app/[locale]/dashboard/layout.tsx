@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import {
-  getMessages,
-  getTranslations,
-  setRequestLocale,
-} from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { Suspense } from "react";
+
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { BottomNav } from "@/components/app/bottom-nav";
@@ -14,8 +12,12 @@ import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widge
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { SpineStream } from "@/components/app/spine-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
+import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
@@ -24,17 +26,29 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getOwnCompany } from "@/lib/company/company-setup";
-import { Link } from "@/lib/i18n/navigation";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
-import { Suspense } from "react";
-import { SpineStream } from "@/components/app/spine-stream";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
-/** Authenticated shell for the /dashboard tree. Fetches user + profile +
- *  roles server-side once and hands them to the client AuthProvider so
- *  child widgets (RoleSwitcher, NotificationPanel) stay in sync. */
+/**
+ * Authenticated shell for the whole `/dashboard` tree.
+ *
+ * Resolves user + profile + roles ONCE, server-side, and hands them to the
+ * client `AuthProvider` so every downstream widget (RoleSwitcher,
+ * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
+ * chrome itself is chosen per-route by the client `<DashboardChrome>`:
+ *   - `/dashboard`                              → conversation (bare; the chat
+ *                                                  supplies its own simple nav)
+ *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
+ *   - every other module route (incl. `/advanced`) → the full Advanced chrome
+ *
+ * This is the real replacement for the previous `fixed inset-0` overlay: the
+ * wide navbar is not painted over in simple mode — it is simply never rendered
+ * there (its DOM is absent), while Advanced mode keeps the full chrome verbatim.
+ * No route files move, so the dashboard file-path contract the guard suite pins
+ * stays intact. Doctrine §18 (real, not overlay illusions).
+ */
 export default async function DashboardLayout({
   children,
   params,
@@ -44,21 +58,15 @@ export default async function DashboardLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const footerT = await getTranslations("footer");
 
   const layoutStart = Date.now();
   const supabase = await createClient();
 
   // P0 auth-performance: NOTHING awaits serially before the batch. The
   // memoized getUser fires inside the same Promise.all as the session
-  // profile, the roles read (chained off getUser — profiles.id === auth
-  // user id) and the notification spine, so the layout costs ONE parallel
-  // stage instead of getUser → batch → tail. (Wagon 2 note still holds:
-  // the profile row comes from the ONE request-cached session-profile
-  // reader shared with the overview page and the premium hub. Avoid
-  // writing the literal slash-star sequence in this comment: the
-  // project's source-level guards run a comment-stripping regex that
-  // treats it as a block comment opener.)
+  // profile and the roles read (chained off getUser — profiles.id === auth
+  // user id), so the layout costs ONE parallel stage. (The profile row comes
+  // from the ONE request-cached session-profile reader shared with the pages.)
   const userPromise = supabase.auth.getUser();
   const rolesPromise: Promise<{ data: { role: string }[] | null }> =
     userPromise.then(async ({ data: { user } }) =>
@@ -70,13 +78,6 @@ export default async function DashboardLayout({
             .eq("is_active", true)
         : { data: null },
     );
-  // Notification spine v1 → STREAMED (P0 perf): the spine batch (8 derived
-  // signal helpers; slowest ≈ the full job-recommendation model) measured
-  // 850-1290 ms and used to gate the layout render on EVERY navigation. It
-  // now resolves inside <Suspense> via <SpineStream> below — the shell
-  // paints immediately, the bell + nav badges hydrate when the SAME single
-  // spine source resolves. The overview page still awaits its own
-  // request-cached getSpineCounts() for the module cards (shared promise).
   const [userRes, session, rolesRes] = await Promise.all([
     userPromise,
     getSessionProfile(),
@@ -86,8 +87,6 @@ export default async function DashboardLayout({
   if (!user) redirect(`/${locale}/auth/login`);
   const profile = session.profile;
   const rolesRows = rolesRes.data;
-  // Non-secret observability (P0 perf): total layout data time per
-  // navigation, visible in Vercel function logs. No ids, no user data.
   console.info("[perf] dashboard-layout", {
     ms: Date.now() - layoutStart,
   });
@@ -97,36 +96,20 @@ export default async function DashboardLayout({
   const roles = (rolesRows ?? [])
     .map((r) => r.role)
     .filter((r): r is Role => ROLES.has(r as Role));
-  // Admin is NOT a workspace role (the role catalogue only knows worker/
-  // company/agency/customer/preparing-roles). Permission and workspace
-  // are independent dimensions: admin lives on a SEPARATE signal so
-  // that switching workspaces (worker -> company) never strips admin
-  // in the UI. See `deriveIsAdmin` for the dual signal — active_role
-  // OR a `profile_roles` row tagged 'admin'. The SQL helper
-  // `public.is_admin()` still reads only `active_role` for the RLS
-  // bypass; full schema decoupling is a follow-up migration.
+  // Admin is NOT a workspace role — it lives on a separate signal so switching
+  // workspaces never strips admin in the UI. See `deriveIsAdmin`.
   const isAdmin = deriveIsAdmin({
     activeRole: profile.active_role,
     profileRoles: rolesRows ?? [],
   });
-  // Display-only admin-UI preference (Fix D) — never a permission change.
   const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
   const activeRole = ROLES.has(profile.active_role as Role)
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
 
-  // Company identity → surface WHICH organization is active in the header so
-  // switching person ↔ company is unambiguous. Read-only, RLS-scoped;
-  // resolved ONLY for the company identity (the person identity skips the
-  // queries). Null — never a fabricated name — when no company row exists
-  // yet, so the header only claims an org when one is real.
-  //
-  // Company architecture v1: the ACTIVE organization now comes from the
-  // membership-validated server pointer (profiles.active_organization_id,
-  // owner-gated migration). A multi-company profile gets the org list for
-  // the header switcher; while the migration is unapplied (or the org read
-  // model is absent) we fall back to the legacy single-company read exactly
-  // as before — no switcher, honest single-company behaviour.
+  // Company identity → surface WHICH organization is active. Read-only,
+  // RLS-scoped; resolved ONLY for the company identity. Null (never fabricated)
+  // when no company row exists yet.
   let activeOrgName: string | null = null;
   let organizations: SwitchableOrganization[] = [];
   let activeOrganizationId: string | null = null;
@@ -135,8 +118,6 @@ export default async function DashboardLayout({
     if (orgContext.activeOrganization) {
       activeOrgName = orgContext.activeOrganization.name;
       activeOrganizationId = orgContext.activeOrganizationId;
-      // The switcher list is populated ONLY when switching can really
-      // persist (pointer column applied) AND there is more than one org.
       if (orgContext.canSwitch) {
         organizations = orgContext.organizations.map((o) => ({
           id: o.id,
@@ -152,16 +133,59 @@ export default async function DashboardLayout({
     }
   }
 
-  // Derived-signal notifications (audit PR5 → spine v1) now arrive via the
-  // STREAMED <SpineStream> below: the bell still states only what is REALLY
-  // true (same signal catalogue, same single spine source) — it just no
-  // longer gates the shell's first paint.
+  // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
+  // to the client chrome selector (which needs no data fetch of its own).
+  const tChat = await getTranslations("conversation.chat");
+  const tFooter = await getTranslations("footer");
+  const nav: ConversationNavLabels = {
+    chat: tChat("navChat"),
+    messages: tChat("navMessages"),
+    calendar: tChat("navCalendar"),
+    profile: tChat("navProfile"),
+    advanced: tChat("advanced"),
+  };
+
+  // Full (Advanced-mode) chrome, authored here so the shell contract the guard
+  // suite pins (logo → /dashboard, DashboardTabs, AccountMenu, BottomNav, the
+  // Rexora credit) stays in the layout source. `<DashboardChrome>` renders these
+  // slots only on module routes; simple mode never mounts them.
+  const fullHeader = (
+    <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
+      <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
+        {/* App-shell logo links to the dashboard, NOT the public home. */}
+        <Link
+          href="/dashboard"
+          className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
+        >
+          LabourMarket<span className="text-gradient-accent">.ai</span>
+        </Link>
+        <DashboardTabs className="hidden md:flex" />
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+          <HeaderSearch />
+          <LocaleSwitcher className="hidden md:flex" />
+          <NotificationPanel />
+          <RoleSwitcher />
+          <AccountMenu />
+        </div>
+      </div>
+    </header>
+  );
+  const rexora = (
+    // Created by Rexora — quiet product credit (owner directive, 2026-07-14).
+    // Pinned by legal-entity-truth.test.ts.
+    <div className="mt-10 text-center">
+      <a
+        href="https://aiprocessautomation.eu"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+      >
+        {tFooter("rexora")}
+      </a>
+    </div>
+  );
+
   return (
-    /* Performance Reality Audit v2 (route-group provider subsetting): the
-       dashboard tree renders the dynamic whole-tree useTranslations()
-       consumers (bottom nav, module grid, tabs), so it ships the FULL union
-       client pick — exactly what the root layout shipped before v2, i.e. no
-       change for authenticated documents; public routes no longer pay it. */
     <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
       <AuthProvider
         initial={{
@@ -179,71 +203,25 @@ export default async function DashboardLayout({
           activeOrganizationId,
         }}
       >
-        <div className="relative min-h-screen">
-          {/* Streamed notification spine: same single source, off the TTFB
-            critical path. Hydrates the bell + nav badges via the auth
-            context as soon as the derived signals resolve. */}
-          <Suspense fallback={null}>
-            <SpineStream activeRole={activeRole} />
-          </Suspense>
-          <SessionTelemetry />
-          <AmbientGlow />
-          <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-            <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
-              {/* App-shell logo links to the dashboard, NOT the public home —
-                clicking it inside the authenticated app keeps the user in
-                their workspace (never bounce to the marketing site / out of
-                the session). The public marketing logo still points to "/". */}
-              <Link
-                href="/dashboard"
-                className="min-w-0 shrink truncate font-display text-lg font-bold tracking-tightest text-text-primary"
-              >
-                LabourMarket<span className="text-gradient-accent">.ai</span>
-              </Link>
-              <DashboardTabs className="hidden md:flex" />
-              <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
-                {/* Universal OS search (owner UX recovery v1) — the ONE
-                  CommandFinder, reachable from every dashboard page. */}
-                <HeaderSearch />
-                <LocaleSwitcher className="hidden md:flex" />
-                <NotificationPanel />
-                <RoleSwitcher />
-                <AccountMenu />
-              </div>
-            </div>
-          </header>
-          {/* Mobile safe bottom — clears the fixed bottom nav (h-16) PLUS an
-            extra rem for breathing room so form CTAs (Patvirtinti įrašą /
-            Pridėti) never sit flush against the nav (Mobile UX §3-§4). */}
-          {/* Owner UX recovery v1: tighter shell padding (py-10 → py-6,
-            px-6 → px-4) — less empty frame, more content per screen. The
-            mobile safe bottom (fixed nav clearance) is unchanged. */}
-          <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-            {children}
-            {/* Created by Rexora — quiet product credit (owner directive,
-              2026-07-14, URL approved: https://aiprocessautomation.eu).
-              Lives INSIDE <main> so it scrolls with content and inherits the
-              mobile bottom-nav clearance padding above — it can never sit
-              under or collide with the fixed BottomNav. Deliberately the
-              subtlest text tier (text-xs, muted). Pinned by
-              legal-entity-truth.test.ts. */}
-            <div className="mt-10 text-center">
-              <a
-                href="https://aiprocessautomation.eu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-              >
-                {footerT("rexora")}
-              </a>
-            </div>
-          </main>
-          <BottomNav />
-          {/* v1 tester language-feedback widget. Mounted INSIDE the auth
-            shell so it's only visible to authenticated sessions — the
-            inbox is also admin-only via RLS, so this is double-gated. */}
-          <LanguageFeedbackWidget />
-        </div>
+        {/* Streamed notification spine: same single source, off the TTFB
+          critical path. Hydrates the bell + nav badges via the auth context as
+          soon as the derived signals resolve. Shared by every chrome mode. */}
+        <Suspense fallback={null}>
+          <SpineStream activeRole={activeRole} />
+        </Suspense>
+        <SessionTelemetry />
+        <AmbientGlow />
+        <DashboardChrome
+          nav={nav}
+          headerTitle={tChat("headerTitle")}
+          fullHeader={fullHeader}
+          fullBottomNav={<BottomNav />}
+          rexora={rexora}
+        >
+          {children}
+        </DashboardChrome>
+        {/* v1 tester language-feedback widget — authenticated sessions only. */}
+        <LanguageFeedbackWidget />
       </AuthProvider>
     </NextIntlClientProvider>
   );

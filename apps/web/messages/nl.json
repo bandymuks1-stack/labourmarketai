@@ -10744,26 +10744,6 @@
     }
   },
   "conversation": {
-    "shell": {
-      "title": "Assistent",
-      "greeting": "Wat wil je doen?",
-      "suggestedTitle": "Aanbevolen voor jou",
-      "continueTitle": "Ga verder waar je was",
-      "continueCta": "Doorgaan",
-      "commandPlaceholder": "Typ wat je wilt doen…",
-      "noResults": "Geen passende actie. Open de geavanceerde modus.",
-      "advancedToggle": "Geavanceerde modus",
-      "advancedHint": "Alle schermen en tools",
-      "openAdvanced": "Openen",
-      "previewNote": "Nieuwe assistent — nog niet standaard. Geavanceerde modus blijft beschikbaar.",
-      "confirmTitle": "Bevestig",
-      "confirmStrong": "Dit is een belangrijke stap. Weet je het zeker?",
-      "confirmCta": "Bevestigen",
-      "cancelCta": "Annuleren",
-      "nothingPending": "Er is nu niets dat jouw actie nodig heeft.",
-      "needsResponseTitle": "Wacht op je reactie",
-      "openHere": "Hier openen"
-    },
     "actions": {
       "worker": {
         "completeOnboarding": {
@@ -10821,6 +10801,10 @@
         "addAchievement": {
           "label": "Prestatie of certificaat toevoegen",
           "description": "Voeg een prestatie of opgegeven certificaat toe."
+        },
+        "logWork": {
+          "label": "Werktijd vastleggen",
+          "description": "Leg vast wat en wanneer je hebt gewerkt — de vermelding gaat naar je werkjournaal."
         }
       },
       "company": {
@@ -10969,7 +10953,93 @@
         "achievementAdded": "Prestatie of certificaat toegevoegd",
         "workHistoryAdded": "Werkervaring toegevoegd",
         "skillsConfirmed": "Vaardigheden bevestigd"
+      },
+      "steps": {
+        "about": "Over jou",
+        "skills": "Vaardigheden",
+        "languages": "Talen",
+        "availability": "Beschikbaarheid en loon",
+        "workHistory": "Werkervaring"
       }
+    },
+    "chat": {
+      "headerTitle": "LabourMarket",
+      "advanced": "Geavanceerde modus",
+      "composerPlaceholder": "Schrijf wat je nodig hebt…",
+      "send": "Verzenden",
+      "attach": "Bestand bijvoegen",
+      "greeting": "Hoi. Hoe kan ik je vandaag helpen?",
+      "chipCv": "CV uploaden",
+      "chipJobs": "Ik zoek werk",
+      "chipProfile": "Profiel voltooien",
+      "chipOffers": "Aanbiedingen bekijken",
+      "chipLang": "Een taal",
+      "chipExp": "Werkervaring",
+      "chipEdu": "Opleiding",
+      "chipCard": "Beschikbaarheid & loon",
+      "chipPrefs": "Voorkeuren",
+      "offersEmpty": "Je hebt nog geen aanbiedingen. Zodra je profiel klaar is, kunnen werkgevers je aanbiedingen sturen.",
+      "fallback": "Ik kan je helpen met je cv, profiel en aanbiedingen. Wat wil je doen?",
+      "userCv": "Ik upload mijn cv",
+      "userProfile": "Profiel voltooien",
+      "userOffers": "Mijn aanbiedingen bekijken",
+      "userJobs": "Ik zoek werk",
+      "navChat": "Chat",
+      "navMessages": "Berichten",
+      "navCalendar": "Agenda",
+      "navProfile": "Profiel",
+      "clarifyWorkLog": "Op welke dag en hoe lang heb je gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
+      "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
+      "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
+      "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
+      "userLogWork": "Werktijd vastleggen",
+      "userFindWork": "Werk zoeken"
+    },
+    "worklog": {
+      "understood": "Dit heb ik begrepen — opslaan?",
+      "loading": "Laden…",
+      "noContext": "Om werktijd vast te leggen heb je eerst een werkcontext (organisatie of project) nodig. Stel er een in en kom terug.",
+      "noContextCta": "Werkcontext instellen",
+      "noWorker": "Geen werknemersprofiel gevonden. Schakel de werknemersrol in bij accountinstellingen.",
+      "notAuthed": "Sessie beëindigd. Log opnieuw in.",
+      "labelDate": "Datum",
+      "labelTime": "Tijd",
+      "labelBreak": "Pauze",
+      "labelHours": "Gewerkt",
+      "labelSite": "Locatie",
+      "labelNotes": "Wat je hebt gedaan (het bewijs)",
+      "labelContext": "Werkcontext",
+      "save": "Opslaan",
+      "cancel": "Bewerken",
+      "working": "Opslaan…",
+      "confirmTitle": "Vermelding bevestigen?",
+      "saved": "Vermelding opgeslagen in je werkjournaal.",
+      "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
+      "minutesUnit": "min"
+    },
+    "findWork": {
+      "intro": "Ik vond {count} passende opties. Beste matches:",
+      "introOne": "Ik vond 1 passende optie:",
+      "emptyState": "Op dit moment vond ik geen actieve vacatures die aan je criteria voldoen. Er zijn nog geen meldingen, dus dat beloof ik niet — vraag het later opnieuw of vul je profiel aan zodat meer behoeften passen.",
+      "blockedNoWorker": "Om werk te zoeken, schakel de werknemersrol in bij accountinstellingen.",
+      "blockedNoAccess": "De vacaturelijst is nog niet ingeschakeld in deze omgeving. Zodra dat zo is, toon ik echte behoeften.",
+      "fitStrong": "Sterke match",
+      "fitPossible": "Mogelijke match",
+      "fitWeak": "Zwakke match",
+      "fitInsufficient": "Onvoldoende gegevens",
+      "locationReason": "Locatie: {location}",
+      "roleReason": "Behoefte: {role}"
+    },
+    "summary": {
+      "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",
+      "introNext": "{done} van {total} basisgegevens zijn opgeslagen. Dit ontbreekt nog:",
+      "introResume": "Hier ben je gebleven — {done} van {total} basisgegevens zijn opgeslagen.",
+      "introComplete": "Je profiel bevat alles wat ik controleer. Werkgevers zien een volledige kaart.",
+      "introCompleteNext": "Er ontbreekt niets in je profiel. Volgende stap: bekijk werkkansen of leg je werktijd vast.",
+      "lastActivity": "Laatste wijziging: {event} — {date}",
+      "blockedNoWorker": "Dit account heeft geen werknemersprofiel, dus er valt hier niets samen te vatten.",
+      "blockedNotSignedIn": "Je sessie is beëindigd. Log opnieuw in."
     }
   }
 }

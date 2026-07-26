@@ -267,7 +267,7 @@ describe("4. attention is spine-only (real counts, never a parallel number)", ()
 });
 
 describe("5. the registry is the single source (no duplicate hard-coded islands)", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
   // Strip comments first — honest source comments may NAME the removed
   // pattern ("the former marketplaceAccess cards") without tripping the scan.
   const pageCode = page

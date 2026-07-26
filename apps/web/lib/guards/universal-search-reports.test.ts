@@ -72,7 +72,7 @@ const SEARCH_ROUTE_REL = "app/api/dashboard-search/route.ts";
 const FINDER_REL = "components/app/command-finder.tsx";
 // NOTE (canonical-user-journey v1): the unlinked /dashboard/search router page
 // was removed — the ONE CommandFinder is embedded on /dashboard itself.
-const DASHBOARD_PAGE_REL = "app/[locale]/dashboard/page.tsx";
+const DASHBOARD_PAGE_REL = "app/[locale]/dashboard/advanced/page.tsx";
 const HUB_READS_REL = "lib/reports/reports-hub.ts";
 const HUB_PAGE_REL = "app/[locale]/dashboard/reports/page.tsx";
 

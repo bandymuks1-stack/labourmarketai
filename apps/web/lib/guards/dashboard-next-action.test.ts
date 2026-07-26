@@ -91,7 +91,7 @@ describe("every action points at a real in-app route (no fake/disabled target)",
 // ── 2. One primary CTA per surface ──────────────────────────────────────────
 
 describe("the dashboard surfaces a single primary Next Action CTA", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
   const cmp = read("components/app/dashboard-next-action.tsx");
 
   it("the dashboard mounts <DashboardNextAction>", () => {

@@ -19,7 +19,7 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 // the ONE dashboard module registry, rendered by the registry-driven grid
 // in both branches. The bridge is now pinned at the registry level.
 const REGISTRY = read("lib/dashboard/dashboard-module-registry.ts");
-const DASH = read("app/[locale]/dashboard/page.tsx");
+const DASH = read("app/[locale]/dashboard/advanced/page.tsx");
 
 describe("the hub carries BOTH halves of the one supply/demand system", () => {
   it("supply half: offer + discover modules", () => {

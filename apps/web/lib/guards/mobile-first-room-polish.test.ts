@@ -13,7 +13,7 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
 describe("the overview no longer crams a journey stepper on mobile", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
   // dashboard-active-role-overview-v1: the heavy stage-rail was removed so the
   // first screen leads with one clear next action, not a desktop stepper.
   it("the compressed journey rail is gone", () => {
@@ -34,7 +34,7 @@ describe("room primary action is a full-width tap target on mobile", () => {
 
 describe("no broad redesign / no logic change", () => {
   it("the worker entry keeps its folded next action and the org entry its next action", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     // WorkCard was removed (dedup v1); the worker's state-aware next action +
     // inline editor now live in the hub person block via workEditor.
     expect(page).toMatch(/workEditor=\{workEditor\}/);

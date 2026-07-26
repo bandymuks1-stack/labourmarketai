@@ -18,7 +18,7 @@ const code = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
 
 const form = read("components/app/demand-request-button.tsx");
-const page = read("app/[locale]/dashboard/page.tsx");
+const page = read("app/[locale]/dashboard/advanced/page.tsx");
 const helper = read("lib/demand/demand-request.ts");
 const readback = read("components/app/demand-requests-readback.tsx");
 const requestsLib = read("lib/buyer/customer-requests.ts");

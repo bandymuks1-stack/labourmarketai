@@ -32,7 +32,7 @@ describe("getPendingIncomingRequestCount is an honest, open-only count", () => {
 });
 
 describe("the dashboard surfaces the request loop as a count-gated next action", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("computes the pending count via the request-cached spine (same marketplace helper)", () => {
     // P0 latency audit: the page takes the count from the request-cached

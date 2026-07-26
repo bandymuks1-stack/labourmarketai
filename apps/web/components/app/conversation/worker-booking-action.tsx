@@ -6,6 +6,15 @@ import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversat
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
+/** A worker's incoming booking offer, executed inline in the conversation.
+ *  Declared beside the component that consumes it (it previously lived in the
+ *  now-deleted `conversation-shell`, an orphaned second conversation surface). */
+export type BookingOffer = {
+  bookingId: string;
+  title: string; // roleText (may be empty → generic offer label used)
+  subtitle: string | null; // period line
+};
+
 export type BookingActionLabels = {
   offerFrom: string; // "Offer from {name}"
   period: string; // "{start} — {end}"

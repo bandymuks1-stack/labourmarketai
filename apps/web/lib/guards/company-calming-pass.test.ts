@@ -12,7 +12,7 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
-const page = read("app/[locale]/dashboard/page.tsx");
+const page = read("app/[locale]/dashboard/advanced/page.tsx");
 const note = (j: Record<string, unknown>) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (j as any).auth.dashboard.wow.flow.company.calmNote as string;

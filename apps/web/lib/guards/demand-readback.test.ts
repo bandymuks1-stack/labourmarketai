@@ -19,7 +19,7 @@ function read(rel: string): string {
 }
 
 describe("Guard: overview wires the canonical demand read-back", () => {
-  const page = read("app/[locale]/dashboard/page.tsx");
+  const page = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("imports the canonical read-back query + the read-back component", () => {
     expect(page).toMatch(

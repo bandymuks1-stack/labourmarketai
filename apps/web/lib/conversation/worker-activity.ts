@@ -21,14 +21,48 @@ export type ActivityEvent = {
   count?: number;
 };
 
+/** The five honest profile checkpoints, in the order the conversation reports
+ *  them. Each maps to a real presence check below and to an i18n key under
+ *  `conversation.journal.steps.*` — so a surface can NAME what is still
+ *  missing instead of showing only a bare percentage. */
+export const WORKER_PROFILE_STEPS = [
+  "about",
+  "skills",
+  "languages",
+  "availability",
+  "workHistory",
+] as const;
+export type WorkerProfileStep = (typeof WORKER_PROFILE_STEPS)[number];
+
 export type WorkerActivity = {
+  /** False when this account has no worker row at all — the surface must say
+   *  so honestly instead of reporting "0 of 5 done" for a company account. */
+  hasWorkerProfile: boolean;
   completenessPct: number; // 0..100
   stepsDone: number;
   stepsTotal: number;
+  /** Per-checkpoint truth, derived from the worker's own rows. Never guessed:
+   *  a failed read yields "not done", never a fabricated "done". */
+  steps: Readonly<Record<WorkerProfileStep, boolean>>;
   events: ActivityEvent[];
 };
 
-const EMPTY: WorkerActivity = { completenessPct: 0, stepsDone: 0, stepsTotal: 5, events: [] };
+const NO_STEPS: Readonly<Record<WorkerProfileStep, boolean>> = Object.freeze({
+  about: false,
+  skills: false,
+  languages: false,
+  availability: false,
+  workHistory: false,
+});
+
+const EMPTY: WorkerActivity = {
+  hasWorkerProfile: false,
+  completenessPct: 0,
+  stepsDone: 0,
+  stepsTotal: WORKER_PROFILE_STEPS.length,
+  steps: NO_STEPS,
+  events: [],
+};
 
 /** Coarse day bucket for dedupe (YYYY-MM-DD from an ISO string). */
 function day(iso: string | null | undefined): string {
@@ -68,13 +102,14 @@ export async function getWorkerActivity(userId: string): Promise<WorkerActivity>
     const engRows = (engagements.data ?? []) as { id: string; created_at: string; title: string | null }[];
 
     // Completeness — 5 honest checkpoints from real presence.
-    const checks = [
-      Boolean((profile?.profile_text as string | null)?.trim()),
-      skillRows.length > 0,
-      langRows.length > 0,
-      Boolean(worker?.availability_status),
-      engRows.length > 0,
-    ];
+    const steps: Record<WorkerProfileStep, boolean> = {
+      about: Boolean((profile?.profile_text as string | null)?.trim()),
+      skills: skillRows.length > 0,
+      languages: langRows.length > 0,
+      availability: Boolean(worker?.availability_status),
+      workHistory: engRows.length > 0,
+    };
+    const checks = WORKER_PROFILE_STEPS.map((s) => steps[s]);
     const stepsDone = checks.filter(Boolean).length;
     const completenessPct = Math.round((stepsDone / checks.length) * 100);
 
@@ -97,7 +132,14 @@ export async function getWorkerActivity(userId: string): Promise<WorkerActivity>
       .sort((a, b) => (a.at < b.at ? 1 : -1))
       .slice(0, 6);
 
-    return { completenessPct, stepsDone, stepsTotal: checks.length, events };
+    return {
+      hasWorkerProfile: Boolean(workerId),
+      completenessPct,
+      stepsDone,
+      stepsTotal: checks.length,
+      steps,
+      events,
+    };
   } catch {
     return EMPTY;
   }

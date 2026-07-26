@@ -264,6 +264,19 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "expressInterestAction" },
   },
   {
+    id: "worker.log-work",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.logWork.label",
+    descriptionKey: "conversation.actions.worker.logWork.description",
+    confirmation: "important_write", // saves an append-only journal entry after explicit confirm
+    precondition: "has_worker_row",
+    migrationSensitive: true, // create_journal_entry_full RPC
+    telemetryEvent: E.journalEntrySaved,
+    advancedRoute: "/dashboard/journal",
+    handler: { kind: "server_action", ref: "createJournalEntry" },
+  },
+  {
     id: "worker.what-next",
     subject: "worker",
     allowedRoles: ["worker"],

@@ -183,7 +183,7 @@ describe("visiting the destination IS the read event", () => {
     expect(spine).toMatch(
       /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
     );
-    const overview = read("app/[locale]/dashboard/page.tsx");
+    const overview = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(overview).toMatch(
       /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
     );

@@ -38,6 +38,7 @@ const CLASSIFICATION: Record<string, string> = {
   // AI assistance centre (control room PR J) — deterministic attention +
   // summaries over existing RLS reads, plus the HONEST provider state card.
   // No generation is wired (provider unconfigured + audit store gated).
+  "dashboard/advanced": "REAL_LAUNCH_SURFACE",
   "dashboard/assist": "REAL_LAUNCH_SURFACE",
   "dashboard/assistant": "REAL_LAUNCH_SURFACE",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",

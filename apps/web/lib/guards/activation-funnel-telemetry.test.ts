@@ -252,7 +252,7 @@ describe("activation funnel — key surfaces emit their events", () => {
       mustContain: ["companyDemandActionClicked"],
     },
     {
-      file: "app/[locale]/dashboard/page.tsx",
+      file: "app/[locale]/dashboard/advanced/page.tsx",
       mustContain: ["dashboardViewed", "firstActionCardViewed"],
     },
     {

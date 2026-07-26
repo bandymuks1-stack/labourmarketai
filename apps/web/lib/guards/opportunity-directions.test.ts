@@ -16,7 +16,7 @@ const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
 
 const MODULE = "lib/opportunities/adjacent-directions.ts";
 const CARD = "components/app/dashboard/opportunity-directions-card.tsx";
-const DASHBOARD = "app/[locale]/dashboard/page.tsx";
+const DASHBOARD = "app/[locale]/dashboard/advanced/page.tsx";
 const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
 const REQUIRED_KEYS = [
   "heading",

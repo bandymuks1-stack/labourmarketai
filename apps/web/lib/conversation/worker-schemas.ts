@@ -86,6 +86,21 @@ export const workerExpressInterestSchema = z.object({
   note: z.string().trim().max(500).nullable().optional(),
 });
 
+/**
+ * Log a work-journal entry from the conversation. `notes` is the worker's own
+ * words (the entry evidence → journal `original_text`); `engagementContextId`
+ * pins it to a real work context (doctrine §5.5, required by the canonical
+ * `create_journal_entry_full` RPC). `workDate`/`siteName` become real metrics.
+ * Times/hours are NOT sent as separate claims — they already live in the notes;
+ * the client shows them only as a parse preview to confirm.
+ */
+export const workerLogWorkSchema = z.object({
+  engagementContextId: uuid,
+  notes: z.string().trim().min(3).max(4000),
+  workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+  siteName: z.string().trim().max(200).nullable().optional(),
+});
+
 /** Map of action id → schema for the executable worker actions. */
 export const WORKER_ACTION_SCHEMAS = {
   "worker.add-work-history": workerAddWorkHistorySchema,
@@ -96,6 +111,7 @@ export const WORKER_ACTION_SCHEMAS = {
   "worker.save-preferences": workerSavePreferencesSchema,
   "worker.respond-booking": workerRespondBookingSchema,
   "worker.express-interest": workerExpressInterestSchema,
+  "worker.log-work": workerLogWorkSchema,
 } as const;
 
 export type WorkerActionId = keyof typeof WORKER_ACTION_SCHEMAS;

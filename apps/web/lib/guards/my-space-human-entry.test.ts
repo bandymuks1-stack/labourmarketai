@@ -31,7 +31,7 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 
-const DASH_PAGE = "app/[locale]/dashboard/page.tsx";
+const DASH_PAGE = "app/[locale]/dashboard/advanced/page.tsx";
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
 describe("worker entry opens with the state-aware work card (folded into the hub)", () => {

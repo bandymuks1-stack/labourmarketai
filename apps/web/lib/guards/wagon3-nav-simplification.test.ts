@@ -84,7 +84,7 @@ describe("Wagon 3 — route consolidation redirects stay canonical", () => {
 
 describe("Wagon 3 — org overview keeps the owner's task order (compact home v1)", () => {
   it("responses → next action → planning status lead; readback + market context stay in the fold", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     // Work inside the org branch only (starts at the compact-home-v1 order note).
     const orgBranch = page.slice(page.indexOf("Compact home v1 (owner directive"));
     expect(orgBranch.length).toBeGreaterThan(100);
@@ -115,7 +115,7 @@ describe("Wagon 3 — org overview keeps the owner's task order (compact home v1
   });
 
   it("the workforce-need readback renders exactly once on the overview", () => {
-    const page = read("app/[locale]/dashboard/page.tsx");
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(
       (page.match(/<DemandRequestsReadback/g) ?? []).length,
     ).toBe(1);

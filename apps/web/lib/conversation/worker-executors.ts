@@ -8,6 +8,7 @@ import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions
 import { saveWorkerAchievementAction } from "@/lib/worker/worker-achievements-actions";
 import { respondBookingAction } from "@/lib/booking/booking-actions";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
+import { createJournalEntry } from "@/lib/journal/actions";
 import { z } from "zod";
 
 import {
@@ -173,5 +174,24 @@ export const WORKER_EXECUTORS: {
   "worker.express-interest": async (input, ctx) => {
     const r = await expressInterestAction(ctx.locale, input.requestId, input.note ?? null);
     return r.kind === "ok" ? { ok: true, data: { status: r.status } } : { ok: false, code: mapKind(r.kind) };
+  },
+
+  "worker.log-work": async (input, ctx) => {
+    // Delegate to the canonical journal save (create_journal_entry_full,
+    // append-only + hash-chained). `notes` is the evidence text; date + site
+    // become metrics. Skills are recognized from the notes by the journal's own
+    // pipeline — this executor declares nothing.
+    const r = await createJournalEntry(
+      fd({
+        locale: ctx.locale,
+        engagement_context_id: input.engagementContextId,
+        notes: input.notes,
+        work_date: input.workDate,
+        site_name: input.siteName ?? "",
+      }),
+    );
+    return r.ok
+      ? { ok: true, data: { entryId: r.entryId } }
+      : { ok: false, code: r.code, message: r.message };
   },
 };

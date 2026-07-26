@@ -128,7 +128,7 @@ describe("honest incompleteness — never a fake zero total", () => {
 describe("every CTA resolves to a real route", () => {
   it("the dashboard bridge targets the existing anchored demand intake", () => {
     expect(component).toContain("/dashboard#demand-intake");
-    const dashboard = read("app/[locale]/dashboard/page.tsx");
+    const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(dashboard).toContain('id="demand-intake"');
   });
   it("the anonymous bridge targets the existing public company-need page", () => {

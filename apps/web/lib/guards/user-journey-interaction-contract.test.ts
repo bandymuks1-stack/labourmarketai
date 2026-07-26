@@ -22,7 +22,7 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const board = read("components/app/project-operations-board.tsx");
 const opsPage = read("app/[locale]/dashboard/projects/[id]/operations/page.tsx");
 const myZone = read("components/app/my-zone.tsx");
-const dashboard = read("app/[locale]/dashboard/page.tsx");
+const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
 const profilePage = read("app/[locale]/dashboard/profile/page.tsx");
 const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
 

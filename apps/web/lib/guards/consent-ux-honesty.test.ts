@@ -14,7 +14,7 @@ const read = (p: string) => readFileSync(join(web, p), "utf8");
 const consentComponent = read("components/app/discoverability-consent.tsx");
 const statusCard = read("components/app/privacy-status-card.tsx");
 const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
-const dashboardPage = read("app/[locale]/dashboard/page.tsx");
+const dashboardPage = read("app/[locale]/dashboard/advanced/page.tsx");
 const signupForm = read("components/app/signup-form.tsx");
 const actions = read("lib/privacy/discoverability-actions.ts");
 const preview = read("lib/privacy/discoverability-preview.ts");
