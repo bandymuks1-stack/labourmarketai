@@ -26,7 +26,7 @@ export default async function NotFound() {
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+            "(function(){try{var s=localStorage.getItem('theme');var t=s==='dark'?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();",
         }}
       />
       <ThemeReapply />

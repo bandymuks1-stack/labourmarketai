@@ -17,24 +17,26 @@ import { useEffect } from "react";
  * MutationObserver that restores it the moment anything removes the
  * attribute — observer callbacks run before the next paint, so the user
  * never sees the wrong theme. Same storage contract as ThemeToggle:
- * the single shared localStorage "theme" key, dark default. Deliberate
+ * the single shared localStorage "theme" key, LIGHT default. Deliberate
  * theme CHANGES keep working: the observer only reacts when the attribute
  * is missing — a user toggle sets the attribute, never removes it.
  */
 export function ThemeReapply() {
   useEffect(() => {
-    const saved = (): string | null => {
+    // Resolves to the PRODUCT DEFAULT (light) rather than null, so a stripped
+    // attribute is always restored to a definite value — the same resolution
+    // the pre-paint bootstrap performs.
+    const saved = (): "light" | "dark" => {
       try {
-        const t = localStorage.getItem("theme");
-        return t === "light" || t === "dark" ? t : null;
+        return localStorage.getItem("theme") === "dark" ? "dark" : "light";
       } catch {
-        return null; /* no storage → stay on the dark default */
+        return "light"; /* no storage → the product default */
       }
     };
 
     const apply = () => {
       const t = saved();
-      if (t && document.documentElement.dataset.theme !== t) {
+      if (document.documentElement.dataset.theme !== t) {
         document.documentElement.dataset.theme = t;
       }
     };

@@ -36,10 +36,11 @@ export function AccountMenu() {
   // exact storage contract of <ThemeToggle/> (dataset.theme + localStorage
   // "theme" — a shared, never locale-keyed key; the no-flash bootstrap in
   // app/[locale]/layout.tsx replays it) — same mechanism, one more surface.
-  const [theme, setThemeState] = useState<"dark" | "light">("dark");
+  // LIGHT is the product default, so an absent attribute means light.
+  const [theme, setThemeState] = useState<"dark" | "light">("light");
   useEffect(() => {
     const current = document.documentElement.dataset.theme;
-    setThemeState(current === "light" ? "light" : "dark");
+    setThemeState(current === "dark" ? "dark" : "light");
   }, []);
   const nextTheme: "dark" | "light" = theme === "light" ? "dark" : "light";
   function toggleTheme() {

@@ -183,6 +183,120 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("theme resolution matrix", () => {
+  /** Read the resolved theme plus the page background actually painted. */
+  async function resolved(page: Page) {
+    return page.evaluate(() => ({
+      attr: document.documentElement.dataset.theme ?? null,
+      scheme: getComputedStyle(document.documentElement).colorScheme,
+      pageBg: getComputedStyle(document.body).backgroundColor,
+      toggleVisible: !!document.querySelector('[data-testid="chat-theme-toggle"]'),
+    }));
+  }
+  /** Rough "is this a light surface" test on the painted background. */
+  const isLight = (rgb: string): boolean => {
+    const [r, g, b] = (rgb.match(/\d+/g) ?? ["0", "0", "0"]).map(Number);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.5;
+  };
+
+  test("no stored preference → LIGHT (the product default)", async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.removeItem("theme");
+      } catch {
+        /* ignore */
+      }
+    });
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    const r = await resolved(page);
+    expect(r.attr, "bootstrap stamps a definite theme").toBe("light");
+    expect(r.scheme).toBe("light");
+    expect(isLight(r.pageBg), `page bg ${r.pageBg} must be light`).toBe(true);
+    expect(r.toggleVisible, "the way back to dark must be visible").toBe(true);
+    await shot(page, "theme-default-no-preference", "light", "desktop");
+  });
+
+  test("stored DARK is honoured, never overwritten", async ({ page }) => {
+    await useTheme(page, "dark");
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    const r = await resolved(page);
+    expect(r.attr).toBe("dark");
+    expect(r.scheme).toBe("dark");
+    expect(isLight(r.pageBg), `page bg ${r.pageBg} must be dark`).toBe(false);
+    await shot(page, "theme-stored-dark", "dark", "desktop");
+  });
+
+  test("stored LIGHT is honoured", async ({ page }) => {
+    await useTheme(page, "light");
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    const r = await resolved(page);
+    expect(r.attr).toBe("light");
+    expect(isLight(r.pageBg)).toBe(true);
+  });
+
+  test("a system dark preference does NOT override the product default", async ({ browser }) => {
+    // Documented owner rule: the product ships light unless the USER chose dark.
+    const ctx = await browser.newContext({
+      storageState: STORAGE_STATE,
+      colorScheme: "dark",
+    });
+    const page = await ctx.newPage();
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    const r = await resolved(page);
+    expect(r.attr, "OS dark must not win over the product default").toBe("light");
+    await ctx.close();
+  });
+
+  test("no flash: the theme is resolved before the first paint", async ({ page }) => {
+    await useTheme(page, "dark");
+    // Sample the resolved theme at the very first script execution point in the
+    // document — if the bootstrap ran pre-paint, the attribute is already set.
+    const early: string[] = [];
+    await page.addInitScript(() => {
+      // Records the state as soon as <head> scripts have run.
+      document.addEventListener("DOMContentLoaded", () => {
+        (window as unknown as { __earlyTheme?: string }).__earlyTheme =
+          document.documentElement.dataset.theme ?? "none";
+      });
+    });
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    const earlyTheme = await page.evaluate(
+      () => (window as unknown as { __earlyTheme?: string }).__earlyTheme ?? "none",
+    );
+    early.push(earlyTheme);
+    expect(earlyTheme, "theme must be stamped before DOMContentLoaded").toBe("dark");
+
+    // …and it survives hydration.
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    expect((await resolved(page)).attr).toBe("dark");
+  });
+
+  test("the toggle round-trips and persists", async ({ page }) => {
+    // Deliberately NOT `useTheme()` here: that seeds localStorage via
+    // addInitScript, which re-runs on the reload below and would overwrite the
+    // very value the toggle just stored. Starting from the light DEFAULT is
+    // both simpler and closer to a real first-time user.
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    await page.getByTestId("chat-theme-toggle").click();
+    await expect
+      .poll(async () => (await resolved(page)).attr, { timeout: 10_000 })
+      .toBe("dark");
+    expect(await page.evaluate(() => window.localStorage.getItem("theme"))).toBe("dark");
+
+    // Survives a full reload — the stored choice, not a session flag.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    expect((await resolved(page)).attr).toBe("dark");
+  });
+});
+
 test.describe("long-text capacity (LT / EN / RU)", () => {
   for (const locale of ["lt", "en", "ru"] as const) {
     test(`greeting and cards survive ${locale.toUpperCase()} string lengths`, async ({ page }) => {

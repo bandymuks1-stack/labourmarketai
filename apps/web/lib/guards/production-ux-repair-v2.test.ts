@@ -75,7 +75,13 @@ describe("F1 — public header theme toggle", () => {
     const toggle = read("components/ui/theme-toggle-icon.tsx");
     expect(toggle).toMatch(/localStorage\.setItem\("theme"/);
     expect(toggle).toMatch(/dataset\.theme/);
-    expect(toggle).toMatch(/data-testid="public-theme-toggle"/);
+    // The test id became a PROP when UX 2.0 reused this ONE toggle in the
+    // conversation header as well (light is now the default, so the way back to
+    // dark must be visible inside the app, not only on the public site). The
+    // public header's id is the DEFAULT, so that surface is unchanged — assert
+    // the default plus the wiring, not a literal attribute that moved.
+    expect(toggle).toMatch(/testId\s*=\s*"public-theme-toggle"/);
+    expect(toggle).toMatch(/data-testid=\{testId\}/);
   });
 });
 

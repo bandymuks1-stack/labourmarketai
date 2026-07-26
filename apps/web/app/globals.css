@@ -4,19 +4,101 @@
 
 /*
  * Industrial Intelligence — token→CSS bridge (brief §8 + TASK 06 theme layer).
- * The semantic colours live here as RGB CHANNEL triplets ("R G B"); tokens/colors.ts
- * resolves each to rgb(var(--c-*) / <alpha-value>). Swapping dark→light (or any
- * rebrand) changes ONLY these variables — zero component edits. Dark = :root;
- * light = [data-theme="light"]. The motion variables are the single source of
- * timing/easing (tokens/motion.ts mirrors them for Tailwind).
+ * The semantic colours live here as RGB CHANNEL triplets ("R G B");
+ * tokens/colors.ts resolves each to rgb(var(--c-*) / <alpha-value>). Swapping
+ * light↔dark (or any rebrand) changes ONLY these variables — zero component
+ * edits. The motion variables are the single source of timing/easing
+ * (tokens/motion.ts mirrors them for Tailwind).
+ *
+ * LIGHT IS THE PRODUCT DEFAULT (UX 2.0, owner direction).
+ *
+ * It used to be dark: `:root` carried the dark palette and light lived behind
+ * `[data-theme="light"]`, which no new user ever reached. The primary worker
+ * persona uses a phone outdoors in daylight, where a #06070D ground is the
+ * worst possible surface, and dark-first also reads as "developer tool" to a
+ * non-technical audience. So the two blocks swapped roles:
+ *
+ *   :root  /  [data-theme="light"]  →  LIGHT   (default; no script needed)
+ *   [data-theme="dark"]             →  DARK    (opt-in, fully supported)
+ *
+ * Dark is NOT second class — it keeps every token, including the ones the old
+ * light block used to inherit, and is regression-tested alongside light.
+ * Because the DEFAULT now needs no attribute at all, there is one fewer
+ * pre-paint flash path than before, not one more.
  */
+
+/* Theme-independent tokens — identical in both palettes. */
 :root {
+  /* tier — player-card ratings (shared; not part of the light/dark swap) */
+  --c-tier-diamond: 91 224 255;
+  --c-tier-silver: 198 205 216;
+  --c-tier-bronze: 199 137 90;
+
+  /* motion tokens (single source; mirrored in tokens/motion.ts) */
+  --motion-instant: 90ms;
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── LIGHT — the product default ─────────────────────────────────────────── */
+:root,
+:root[data-theme="light"] {
+  /* ink — surfaces (light: warm-neutral page, white cards) */
+  --c-ink-900: 244 246 251; /* page bg */
+  --c-ink-800: 255 255 255; /* card bg */
+  --c-ink-700: 237 240 246;
+  --c-ink-600: 190 195 205; /* decorative hairlines — 1.64:1 on the page so a
+                               card edge is visible without becoming a rule */
+  --c-ink-500: 137 143 155; /* CONTROL boundaries (inputs, buttons, chips).
+                               WCAG 1.4.11 wants 3:1 for a boundary that is the
+                               only way to identify a control; the old
+                               188 196 212 measured 1.75:1 on white, so the
+                               composer's own outline was effectively invisible.
+                               Now 3.00:1 on card / 3.25:1 on page. */
+  /* brand — signal accents */
+  --c-brand-blue: 29 109 220; /* 4.55:1 on the page (was 4.41 — a real AA miss
+                                 for links/labels sitting on ink-900) */
+  --c-brand-cyan: 0 150 198;
+  --c-brand-violet: 106 69 240;
+  --c-brand-purple: 140 86 224;
+  --c-brand-orange: 224 84 8;
+  /* state */
+  --c-state-live: 0 168 86;
+  --c-state-success: 17 132 90;
+  --c-state-warning: 168 104 0;
+  --c-state-amber: 190 100 16;
+  --c-state-danger: 200 44 44;
+  /* text */
+  --c-text-primary: 11 13 23; /* near-black on light */
+  --c-text-secondary: 74 82 104;
+  --c-text-muted: 84 93 116; /* darkened (was 99 108 130) to clear AA 4.5:1 on the light page bg (ink-900) too, mirroring the dark-theme lift (audit PR-A) */
+  /* DESIGN_SOUL: the ONE semantic gold trust accent (alias of tier-gold).
+     Confirmed/trust/readiness highlights ONLY — never a gold palette. */
+  /* 4.54:1 on the page (was 176 122 0 = 3.73:1 on white — the confirmed/trust
+     accent failed AA in the theme that is now the default) */
+  --c-tier-gold: 150 104 0;
+  --c-trust-accent: 150 104 0;
+
+  color-scheme: light;
+}
+
+/* ── DARK — opt-in, fully supported ──────────────────────────────────────── */
+:root[data-theme="dark"] {
   /* ink — surfaces (dark: near-black, cool tint) */
   --c-ink-900: 6 7 13;
   --c-ink-800: 11 13 23;
   --c-ink-700: 16 19 31;
-  --c-ink-600: 26 30 46;
-  --c-ink-500: 37 42 61;
+  --c-ink-600: 26 30 46; /* decorative hairlines */
+  --c-ink-500: 82 93 135; /* CONTROL boundaries. Symmetric with the light fix:
+                             the old 37 42 61 measured 1.36:1 on a dark card,
+                             so the composer, chips and inputs had no visible
+                             edge in DARK either — a pre-existing WCAG 1.4.11
+                             miss the light-first work surfaced. Now 3.02:1 on
+                             card / 3.14:1 on page, and still clearly dimmer
+                             than text-muted so it reads as a border, not text. */
   /* brand — signal accents */
   --c-brand-blue: 62 139 255;
   --c-brand-cyan: 0 194 255;
@@ -33,49 +115,11 @@
   --c-text-primary: 244 246 251;
   --c-text-secondary: 155 163 184;
   --c-text-muted: 134 144 168; /* lifted again (was 110 120 146) so the pervasive 10-11px mono labels clear WCAG AA 4.5:1 on the lighter ink-800 / tinted (/40) panels too, not only on ink-900 (audit PR-A) */
-  /* tier — player-card ratings */
-  --c-tier-diamond: 91 224 255;
+  /* tier / trust — gold reads differently on a dark ground */
   --c-tier-gold: 255 200 87;
-  --c-tier-silver: 198 205 216;
-  --c-tier-bronze: 199 137 90;
-  /* DESIGN_SOUL: the ONE semantic gold trust accent (alias of tier-gold).
-     Confirmed/trust/readiness highlights ONLY — never a gold palette. */
   --c-trust-accent: 255 200 87;
 
-  /* motion tokens (single source; mirrored in tokens/motion.ts) */
-  --motion-instant: 90ms;
-  --motion-fast: 160ms;
-  --motion-base: 240ms;
-  --motion-slow: 420ms;
-  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
   color-scheme: dark;
-}
-
-/* LIGHT THEME — slots ready; swap is a token change only (no component edits). */
-:root[data-theme="light"] {
-  --c-ink-900: 244 246 251; /* page bg → light */
-  --c-ink-800: 255 255 255; /* card bg → white */
-  --c-ink-700: 237 240 246;
-  --c-ink-600: 214 219 230; /* borders */
-  --c-ink-500: 188 196 212;
-  --c-brand-blue: 30 111 224;
-  --c-brand-cyan: 0 150 198;
-  --c-brand-violet: 106 69 240;
-  --c-brand-purple: 140 86 224;
-  --c-brand-orange: 224 84 8;
-  --c-state-live: 0 168 86;
-  --c-state-success: 17 132 90;
-  --c-state-warning: 168 104 0;
-  --c-state-amber: 190 100 16;
-  --c-state-danger: 200 44 44;
-  --c-text-primary: 11 13 23; /* near-black on light */
-  --c-text-secondary: 74 82 104;
-  --c-text-muted: 84 93 116; /* darkened (was 99 108 130) to clear AA 4.5:1 on the light page bg (ink-900) too, mirroring the dark-theme lift (audit PR-A) */
-  --c-tier-gold: 176 122 0;
-  --c-trust-accent: 176 122 0;
-  color-scheme: light;
 }
 
 html,

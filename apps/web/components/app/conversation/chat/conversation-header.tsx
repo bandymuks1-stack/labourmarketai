@@ -1,11 +1,13 @@
 "use client";
 
 import { MessageSquare, Mail, Calendar, SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { useAuthOptional } from "@/lib/auth/context";
 import { NotificationPanel } from "@/components/app/notification-panel";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 export type ConversationNavLabels = {
@@ -63,6 +65,8 @@ export function ConversationHeader({
   const auth = useAuthOptional();
   const initials = personMonogram(auth?.profile?.full_name ?? null);
   const label = (key: (typeof NAV)[number]["key"]) => nav[key];
+  // Reuses the account menu's existing theme copy — no new i18n keys.
+  const tTheme = useTranslations("auth.dashboard.account.theme");
 
   return (
     <header className="flex flex-none items-center justify-between gap-3 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur">
@@ -89,6 +93,18 @@ export function ConversationHeader({
         {/* Real chrome renders only inside the authenticated app; the
           provider-less dev preview keeps a lean header for screenshots. */}
         {auth && <LocaleSwitcher className={mobile ? "hidden" : "hidden md:flex"} />}
+        {/* Appearance is a first-class control, not a setting buried two clicks
+            deep in the avatar menu: light is now the default, so the way BACK to
+            dark has to be visible on the product's primary screen. Still also
+            present in AccountMenu — this is a second entry point, not a second
+            implementation. */}
+        {auth && (
+          <ThemeToggleIcon
+            testId="chat-theme-toggle"
+            labels={{ toDark: tTheme("toDark"), toLight: tTheme("toLight") }}
+            className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+          />
+        )}
         {auth && <NotificationPanel />}
         <Link
           href="/dashboard/profile"
