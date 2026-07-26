@@ -1,12 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Paperclip, ArrowUp } from "lucide-react";
+
+import { iconControl } from "./icon-scale";
+
+/** Grow ceiling. Past this the textarea scrolls internally instead of eating
+ *  the thread — roughly nine lines at the 16px body size. */
+const MAX_HEIGHT = 200;
+
+/** Floor — the 44px touch-target minimum, enforced in JS rather than by a CSS
+ *  `min-height`.
+ *
+ *  With a CSS floor the FIRST `scrollHeight` read is inflated by it (a browser
+ *  reports `scrollHeight >= clientHeight`, and `clientHeight` obeys
+ *  `min-height`), so the box measured 52px on mount and 50px after the first
+ *  send — a visible 2px shrink the moment you sent your first message. One
+ *  source of truth removes the disagreement entirely. */
+const MIN_HEIGHT = 44;
 
 /**
  * Chat composer — the persistent bottom input of the conversation. Text box +
  * file attach + send. Sticky to the viewport bottom; the keyboard never covers
  * it (the layout keeps it in flow at the bottom of a flex column).
+ *
+ * AUTO-GROW. It used to be `rows={1}` with `max-h-40` and no height sync, so a
+ * four-line message scrolled inside a 44px box and the user could not see what
+ * they had written. The height is now driven off `scrollHeight` on every value
+ * change, capped at MAX_HEIGHT, after which the internal scrollbar takes over.
+ *
+ * The measurement runs in `useLayoutEffect` so it lands before paint — a plain
+ * `useEffect` would let the browser paint the un-grown box first and the field
+ * would visibly jump on every keystroke. Height is reset to `auto` before
+ * reading `scrollHeight`, because on an already-tall box that property reports
+ * the OLD height: without the reset the field could only ever grow, never
+ * shrink back when text is deleted or after a send. The 44px floor is applied
+ * in JS for the same reason — see MIN_HEIGHT.
  */
 export function Composer({
   placeholder,
@@ -26,22 +55,46 @@ export function Composer({
   onAttach?: () => void;
 }) {
   const [value, setValue] = useState("");
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const resize = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    // The app sets `box-sizing: border-box` globally, so an inline `height`
+    // INCLUDES the border while `scrollHeight` excludes it. Setting height =
+    // scrollHeight therefore lost the border on every cycle: the box measured
+    // 52px on mount and 50px after the first send. Add the border back and the
+    // measurement is stable across every resize.
+    const cs = getComputedStyle(el);
+    const border =
+      parseFloat(cs.borderTopWidth || "0") + parseFloat(cs.borderBottomWidth || "0");
+    const content = el.scrollHeight + border;
+    const next = Math.min(Math.max(content, MIN_HEIGHT), MAX_HEIGHT);
+    el.style.height = `${next}px`;
+    el.style.overflowY = content > MAX_HEIGHT ? "auto" : "hidden";
+  }, []);
+
+  // Before paint, on every value change — including the reset after a send.
+  useLayoutEffect(resize, [value, resize]);
+
+  // Measure the starting height once mounted rather than assuming it: the same
+  // component renders at different font sizes across breakpoints.
+  useEffect(resize, [resize]);
 
   function submit() {
     const t = value.trim();
     if (!t || disabled) return;
     onSend(t);
-    setValue("");
+    setValue(""); // the layout effect shrinks the box back to one line
   }
 
   return (
     // `relative z-50` keeps the composer above the global language-feedback FAB
-    // (fixed, `z-40`, `bottom: calc(5rem + safe-area)`). On mobile the composer
-    // spans the full width, so its send button sits at the right edge — exactly
-    // under that FAB, which then intercepts the click. Desktop is unaffected
-    // because the row is `max-w-3xl` centred. Sending a message is the primary
-    // action here and must never lose a hit-test to a secondary affordance.
-    <div className="relative z-50 border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur">
+    // (fixed, `z-40`, lifted by `--feedback-fab-bottom` on this surface).
+    // Sending a message is the primary action here and must never lose a
+    // hit-test to a secondary affordance.
+    <div className="relative z-50 flex-none border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur">
       <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
         {onAttach && (
           <button
@@ -49,16 +102,18 @@ export function Composer({
             onClick={() => onAttach()}
             aria-label={attachLabel}
             data-testid="composer-attach"
-            className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+            className="ua-press flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
           >
-            <Paperclip className="size-4" aria-hidden />
+            <Paperclip {...iconControl()} aria-hidden />
           </button>
         )}
         <textarea
+          ref={ref}
           rows={1}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
+            // Unchanged contract: Enter sends, Shift+Enter inserts a newline.
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               submit();
@@ -66,7 +121,7 @@ export function Composer({
           }}
           placeholder={placeholder}
           data-testid="composer-input"
-          className="max-h-40 min-h-[44px] w-full resize-none rounded-bubble border border-ink-500 bg-ink-800 px-4 py-3 text-body text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+          className="w-full resize-none rounded-bubble border border-ink-500 bg-ink-800 px-4 py-3 text-body text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
         />
         <button
           type="button"
@@ -74,9 +129,9 @@ export function Composer({
           disabled={disabled || value.trim().length === 0}
           aria-label={sendLabel}
           data-testid="composer-send"
-          className="flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-white transition-opacity hover:opacity-90 disabled:opacity-30"
+          className="ua-press flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <ArrowUp className="size-4" aria-hidden />
+          <ArrowUp {...iconControl()} aria-hidden />
         </button>
       </div>
     </div>

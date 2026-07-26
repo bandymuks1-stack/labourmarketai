@@ -5,6 +5,7 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 
 /** A worker's incoming booking offer, executed inline in the conversation.
  *  Declared beside the component that consumes it (it previously lived in the
@@ -143,47 +144,42 @@ export function WorkerBookingAction({
               {labels.confirmAcceptBody}
             </p>
           )}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={pending}
+          <ChatActionRow>
+            <ChatAction
+              tone="primary"
+              loading={pending}
+              testId="conversation-booking-confirm-cta"
               onClick={confirm}
-              data-testid="conversation-booking-confirm-cta"
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50"
             >
               {pending ? labels.working : labels.confirmCta}
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => setPhase({ kind: "idle" })}
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50"
-            >
+            </ChatAction>
+            <ChatAction tone="secondary" disabled={pending} onClick={() => setPhase({ kind: "idle" })}>
               {labels.cancelCta}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+        <ChatActionRow>
+          {/* Accepting is the recommended path; declining is the destructive
+              branch and carries the semantic danger tone — visible, but never
+              dressed up as the recommendation. */}
+          <ChatAction
+            tone="primary"
             disabled={pending}
+            testId="conversation-booking-accept"
             onClick={() => beginConfirm("accepted")}
-            data-testid="conversation-booking-accept"
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-control border border-state-success/50 bg-state-success/10 px-3 text-support font-semibold text-state-success hover:bg-state-success/20 disabled:opacity-50 sm:flex-none"
           >
             {labels.accept}
-          </button>
-          <button
-            type="button"
+          </ChatAction>
+          <ChatAction
+            tone="danger"
             disabled={pending}
+            testId="conversation-booking-decline"
             onClick={() => beginConfirm("declined")}
-            data-testid="conversation-booking-decline"
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-control border border-ink-500 px-3 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50 sm:flex-none"
           >
             {labels.decline}
-          </button>
-        </div>
+          </ChatAction>
+        </ChatActionRow>
       )}
 
       {phase.kind === "error" && (

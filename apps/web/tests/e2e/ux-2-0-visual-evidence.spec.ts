@@ -183,6 +183,224 @@ for (const theme of ["light", "dark"] as const) {
   }
 }
 
+test.describe("composer auto-grow", () => {
+  /**
+   * Rendered height + whether the box is scrolling internally.
+   *
+   * Waits for two consecutive identical readings first: the mount-time resize
+   * lands just after hydration, so a single immediate read can catch the
+   * pre-resize `min-height` and make a later comparison look like a bug.
+   */
+  async function box(page: Page) {
+    let last = -1;
+    await expect
+      .poll(
+        async () => {
+          const h = await page.evaluate(() =>
+            Math.round(
+              document
+                .querySelector('[data-testid="composer-input"]')!
+                .getBoundingClientRect().height,
+            ),
+          );
+          const settled = h === last;
+          last = h;
+          return settled;
+        },
+        { timeout: 5_000, intervals: [80, 80, 80, 80] },
+      )
+      .toBe(true);
+    return page.evaluate(() => {
+      const el = document.querySelector<HTMLTextAreaElement>(
+        '[data-testid="composer-input"]',
+      )!;
+      return {
+        height: Math.round(el.getBoundingClientRect().height),
+        overflowY: getComputedStyle(el).overflowY,
+        scrollable: el.scrollHeight > el.clientHeight + 1,
+      };
+    });
+  }
+
+  /** Type `n` hard-wrapped lines without submitting (Shift+Enter for newlines). */
+  async function typeLines(page: Page, n: number): Promise<void> {
+    const input = page.getByTestId("composer-input");
+    await input.click();
+    for (let i = 0; i < n; i++) {
+      await input.type(`eilute ${i + 1}`);
+      if (i < n - 1) await page.keyboard.press("Shift+Enter");
+    }
+  }
+
+  test("grows 1 -> 2 -> 4 -> 10+ lines, caps, then scrolls internally", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const one = await box(page);
+    expect(one.height, "one line starts at the 44px control height").toBeGreaterThanOrEqual(44);
+    expect(one.height, "and is not already tall").toBeLessThan(70);
+    await shot(page, "composer-1-line", "light", "desktop");
+
+    await typeLines(page, 2);
+    const two = await box(page);
+    expect(two.height, "2 lines is taller than 1").toBeGreaterThan(one.height);
+
+    await page.keyboard.press("Shift+Enter");
+    await page.getByTestId("composer-input").type("eilute 3");
+    await page.keyboard.press("Shift+Enter");
+    await page.getByTestId("composer-input").type("eilute 4");
+    const four = await box(page);
+    expect(four.height, "4 lines is taller than 2").toBeGreaterThan(two.height);
+    await shot(page, "composer-multiline", "light", "desktop");
+
+    for (let i = 5; i <= 14; i++) {
+      await page.keyboard.press("Shift+Enter");
+      await page.getByTestId("composer-input").type(`eilute ${i}`);
+    }
+    const many = await box(page);
+    expect(many.height, "capped at the ceiling").toBeLessThanOrEqual(200);
+    expect(many.height, "…and it really did reach the ceiling").toBeGreaterThanOrEqual(180);
+    expect(many.overflowY, "internal scroll takes over").toBe("auto");
+    expect(many.scrollable, "content exceeds the visible box").toBe(true);
+    await shot(page, "composer-max-height", "light", "desktop");
+
+    // The last message must still be reachable — the composer never eats it.
+    expect((await measure(page)).horizontalOverflow).toBeLessThanOrEqual(1);
+  });
+
+  test("Shift+Enter inserts a newline; Enter sends; height resets after send", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const start = await box(page);
+    await typeLines(page, 4);
+    const grown = await box(page);
+    expect(grown.height).toBeGreaterThan(start.height);
+    // Shift+Enter must NOT have submitted anything.
+    expect(await page.getByTestId("msg-user").count()).toBe(0);
+
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("msg-user").last()).toBeVisible({ timeout: 20_000 });
+
+    const reset = await box(page);
+    expect(reset.height, "the box returns to one line").toBeLessThan(grown.height);
+    expect(reset.height, "…and to the same one-line height it started at").toBe(start.height);
+    expect(reset.overflowY, "and stops scrolling internally").toBe("hidden");
+  });
+
+  test("send is disabled while empty and enabled once there is content", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const send = page.getByTestId("composer-send");
+    await expect(send).toBeDisabled();
+    await page.getByTestId("composer-input").fill("Sveiki");
+    await expect(send).toBeEnabled();
+    // Whitespace only must not enable it.
+    await page.getByTestId("composer-input").fill("   ");
+    await expect(send).toBeDisabled();
+
+    // The attach control opens the real CV flow (unchanged wiring).
+    await page.getByTestId("composer-attach").click();
+    await expect(page.getByTestId("conversation-cv-flow")).toBeVisible({ timeout: 20_000 });
+    await shot(page, "cv-import-entry", "light", "desktop");
+  });
+
+  test("mobile: grows with the on-screen keyboard viewport, no overflow", async ({ browser }) => {
+    // A shorter viewport stands in for the keyboard eating vertical space.
+    const ctx = await browser.newContext({
+      storageState: STORAGE_STATE,
+      viewport: { width: 390, height: 420 },
+    });
+    const page = await ctx.newPage();
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    const input = page.getByTestId("composer-input");
+    await input.click();
+    for (let i = 0; i < 6; i++) {
+      await input.type(`eilute ${i + 1}`);
+      if (i < 5) await page.keyboard.press("Shift+Enter");
+    }
+    // Still fully usable: the send button is on screen and clickable.
+    await expect(page.getByTestId("composer-send")).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+    await page.screenshot({
+      path: test.info().outputPath("composer-mobile-keyboard__light__mobile-390x420.png"),
+    });
+    await ctx.close();
+  });
+});
+
+test.describe("CTA hierarchy", () => {
+  test("a card offers one solid primary and a ghost secondary", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    // The profile row is the honest recommendation case: the server names the
+    // first missing checkpoint, so exactly one chip may be solid.
+    await page.getByTestId("chat-chip-profile").click();
+    await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 30_000 });
+
+    const chips = await page.evaluate(() => {
+      const out: { id: string; recommended: boolean; bg: string }[] = [];
+      for (const el of document.querySelectorAll<HTMLElement>('[data-testid^="chat-chip-"]')) {
+        out.push({
+          id: el.dataset.testid ?? "",
+          recommended: el.dataset.recommended === "true",
+          bg: getComputedStyle(el).backgroundColor,
+        });
+      }
+      return out;
+    });
+    const solid = chips.filter((c) => c.recommended);
+    expect(solid.length, "at most ONE recommendation per row").toBeLessThanOrEqual(1);
+    test.info().annotations.push({
+      type: "evidence",
+      description: `chips=${chips.length} recommended=${solid.map((c) => c.id).join(",") || "none (server named no closable gap)"}`,
+    });
+    await shot(page, "cta-primary-secondary", "light", "desktop");
+  });
+
+  test("keyboard focus is visible on the conversation controls", async ({ page }) => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("conversation-chat")).toBeVisible({ timeout: 30_000 });
+    await hydrated(page);
+
+    await page.keyboard.press("Tab");
+    for (let i = 0; i < 12; i++) {
+      const info = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        if (!el) return null;
+        const s = getComputedStyle(el);
+        return {
+          testid: el.dataset.testid ?? el.tagName,
+          outlineWidth: s.outlineWidth,
+          outlineStyle: s.outlineStyle,
+        };
+      });
+      if (info?.testid?.startsWith("chat-chip-")) {
+        expect(info.outlineStyle, "focus ring style").not.toBe("none");
+        expect(parseFloat(info.outlineWidth), "focus ring width").toBeGreaterThan(0);
+        await page.screenshot({
+          path: test.info().outputPath("keyboard-focus__light__desktop.png"),
+        });
+        return;
+      }
+      await page.keyboard.press("Tab");
+    }
+    throw new Error("never reached a chat chip by keyboard");
+  });
+});
+
 test.describe("conversation composition", () => {
   test("the opening state is centred, then becomes a top-anchored stream", async ({ page }) => {
     await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });

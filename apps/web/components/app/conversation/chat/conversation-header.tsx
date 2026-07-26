@@ -9,6 +9,7 @@ import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { iconControl } from "./icon-scale";
 
 export type ConversationNavLabels = {
   chat: string;
@@ -83,7 +84,7 @@ export function ConversationHeader({
             key={href}
             href={href}
             label={label(key)}
-            icon={<Icon className="size-4" aria-hidden />}
+            icon={<Icon {...iconControl()} aria-hidden />}
             active={active === href}
           />
         ))}
@@ -122,7 +123,7 @@ export function ConversationHeader({
           data-testid="chat-advanced-link"
           className={`ml-1 min-h-11 items-center gap-1.5 rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue ${mobile ? "hidden" : "hidden md:flex"}`}
         >
-          <SlidersHorizontal className="size-3.5" aria-hidden />
+          <SlidersHorizontal {...iconControl()} aria-hidden />
           {nav.advanced}
         </Link>
         {auth && <AccountMenu />}
@@ -153,11 +154,11 @@ export function ConversationBottomNav({ nav, mobile = false }: { nav: Conversati
   const auth = useAuthOptional();
   const initials = personMonogram(auth?.profile?.full_name ?? null);
   const items = [
-    { href: "/dashboard", label: nav.chat, icon: <MessageSquare className="size-5" aria-hidden /> },
-    { href: "/dashboard/communication", label: nav.messages, icon: <Mail className="size-5" aria-hidden /> },
-    { href: "/dashboard/planning", label: nav.calendar, icon: <Calendar className="size-5" aria-hidden /> },
+    { href: "/dashboard", label: nav.chat, icon: <MessageSquare {...iconControl()} aria-hidden /> },
+    { href: "/dashboard/communication", label: nav.messages, icon: <Mail {...iconControl()} aria-hidden /> },
+    { href: "/dashboard/planning", label: nav.calendar, icon: <Calendar {...iconControl()} aria-hidden /> },
     { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-meta font-bold">{initials}</span> },
-    { href: "/dashboard/advanced", label: nav.advanced, icon: <SlidersHorizontal className="size-5" aria-hidden /> },
+    { href: "/dashboard/advanced", label: nav.advanced, icon: <SlidersHorizontal {...iconControl()} aria-hidden /> },
   ];
   return (
     <nav className={`flex-none items-stretch border-t border-ink-600 bg-ink-900/95 ${mobile ? "flex" : "flex md:hidden"}`} aria-label={nav.chat} data-testid="conversation-bottom-nav">

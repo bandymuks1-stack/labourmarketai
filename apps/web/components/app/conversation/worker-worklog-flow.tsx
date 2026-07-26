@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { Clock } from "lucide-react";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
@@ -164,7 +165,7 @@ export function WorkerWorkLogFlow({
       <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-sm text-text-primary" data-testid="worklog-blocked">
         <p>{phase.reason === "no-context" ? labels.noContext : phase.reason === "no-worker" ? labels.noWorker : labels.notAuthed}</p>
         {phase.reason === "no-context" && (
-          <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-9 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
+          <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
             {labels.noContextCta}
           </Link>
         )}
@@ -256,26 +257,30 @@ export function WorkerWorkLogFlow({
       {confirming ? (
         <div className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3">
           <p className="font-display text-card-title font-semibold text-text-primary">{labels.confirmTitle}</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" disabled={pending} onClick={confirm} data-testid="worklog-confirm" className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
+          <ChatActionRow>
+            <ChatAction tone="primary" loading={pending} testId="worklog-confirm" onClick={confirm}>
               {pending ? labels.working : labels.save}
-            </button>
-            <button type="button" disabled={pending} onClick={() => setPhase({ kind: "ready", token: null })} className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
+            </ChatAction>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => setPhase({ kind: "ready", token: null })}
+            >
               {labels.cancel}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={pending} onClick={beginConfirm} data-testid="worklog-save" className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50">
+        <ChatActionRow>
+          <ChatAction tone="primary" disabled={pending} testId="worklog-save" onClick={beginConfirm}>
             {labels.save}
-          </button>
+          </ChatAction>
           {onClose && (
-            <button type="button" disabled={pending} onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50">
+            <ChatAction tone="secondary" disabled={pending} onClick={onClose}>
               {labels.cancel}
-            </button>
+            </ChatAction>
           )}
-        </div>
+        </ChatActionRow>
       )}
 
       {phase.kind === "error" && (

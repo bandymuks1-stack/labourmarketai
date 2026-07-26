@@ -13,7 +13,17 @@ import type {
 
 export type Role = "assistant" | "user" | "system";
 
-export type ChoiceChip = { id: string; label: string };
+export type ChoiceChip = {
+  id: string;
+  label: string;
+  /** `true` marks the ONE recommended choice in a row.
+   *
+   *  Set only when the SERVER supplied a concrete next step (the first missing
+   *  profile checkpoint). When there is no real priority every chip stays
+   *  neutral — a recommendation is never invented to make the row look
+   *  designed. */
+  recommended?: boolean;
+};
 
 /**
  * An employer-match card IS the canonical adapter's output — the same object,

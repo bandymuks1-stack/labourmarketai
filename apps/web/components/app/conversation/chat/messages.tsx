@@ -4,6 +4,8 @@ import { Check, FileText, Languages, Clock, Building2, CircleDashed } from "luci
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { AssistantMark } from "./assistant-identity";
+import { ChatAction, ChatActionRow } from "./chat-action";
+import { iconControl, iconInline } from "./icon-scale";
 import type { ChatMessage, ChoiceChip } from "./types";
 
 /** Callbacks the thread wires into interactive messages. */
@@ -39,7 +41,13 @@ function Chips({ chips, onChip }: { chips: ChoiceChip[]; onChip: (c: ChoiceChip)
           type="button"
           onClick={() => onChip(c)}
           data-testid={`chat-chip-${c.id}`}
-          className="ua-press min-h-11 rounded-full border border-ink-500 bg-ink-800 px-4 text-support font-medium text-text-primary hover:border-brand-blue hover:text-brand-blue"
+          data-recommended={c.recommended ? "true" : undefined}
+          className={`ua-press min-h-11 rounded-full px-4 text-support font-medium ${
+            c.recommended
+              ? // The ONE solid choice, and only when the server named a real gap.
+                "bg-brand-blue font-semibold text-white shadow-cta-glow hover:bg-brand-blue/90"
+              : "border border-ink-500 bg-ink-800 text-text-primary hover:border-brand-blue hover:text-brand-blue"
+          }`}
         >
           {c.label}
         </button>
@@ -87,9 +95,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
     return (
       <div className="flex justify-end" data-testid="msg-file">
         <div className="flex max-w-[85%] items-center gap-2 rounded-bubble rounded-br-md border border-ink-500 bg-ink-800 px-4 py-2.5 text-body text-text-primary">
-          <FileText className="size-4 flex-none text-text-muted" aria-hidden />
+          <FileText {...iconInline("flex-none text-text-muted")} aria-hidden />
           <span className="truncate">{m.fileName}</span>
-          {m.status === "read" && <Check className="size-4 flex-none text-state-success" aria-hidden />}
+          {m.status === "read" && <Check {...iconInline("flex-none text-state-success")} aria-hidden />}
         </div>
       </div>
     );
@@ -99,7 +107,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
   if (m.role === "system" && m.kind === "result") {
     return (
       <div className="ua-confirmed flex items-center gap-2 px-1 text-basis" data-testid="msg-result">
-        <Check className={`size-3.5 flex-none ${m.ok ? "text-state-success" : "text-state-danger"}`} aria-hidden />
+        <Check {...iconInline(`flex-none ${m.ok ? "text-state-success" : "text-state-danger"}`)} aria-hidden />
         <span className={m.ok ? "text-state-success" : "text-state-danger"}>{m.text}</span>
       </div>
     );
@@ -147,19 +155,24 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
           <h3 className="font-display text-card-title font-semibold text-text-primary">{m.title}</h3>
           {m.confirmedText ? (
             <p className="ua-confirmed mt-1.5 flex items-center gap-1.5 text-support font-semibold text-state-success">
-              <Check className="size-3.5" aria-hidden /> {m.confirmedText}
+              <Check {...iconInline()} aria-hidden /> {m.confirmedText}
             </p>
           ) : (
             <>
               {m.body && <p className="mt-1.5 text-support text-text-secondary">{m.body}</p>}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-confirm-yes" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
+              <ChatActionRow>
+                {/* One solid primary; the cancel is a ghost so it cannot read
+                    as an equally-weighted choice. A `strong` (irreversible)
+                    confirmation is still the recommended path — it is the
+                    warning-tinted CARD that carries the caution, not a
+                    de-emphasised button the user then cannot find. */}
+                <ChatAction tone="primary" testId="msg-confirm-yes" onClick={() => h.onConfirm(m.id)}>
                   {m.confirmLabel}
-                </button>
-                <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">
+                </ChatAction>
+                <ChatAction tone="secondary" onClick={() => h.onCancel(m.id)}>
                   {m.cancelLabel}
-                </button>
-              </div>
+                </ChatAction>
+              </ChatActionRow>
             </>
           )}
         </div>
@@ -175,7 +188,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
         <Avatar />
         <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
           <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
-            <Clock className="size-5 flex-none text-brand-blue" aria-hidden /> {m.title}
+            <Clock {...iconControl("flex-none text-brand-blue")} aria-hidden /> {m.title}
           </h3>
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-basis">
             <Row k={m.fieldLabels.date} v={d.date} />
@@ -192,10 +205,14 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               ))}
             </div>
           )}
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-worklog-save" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
-          </div>
+          <ChatActionRow>
+            <ChatAction tone="primary" testId="msg-worklog-save" onClick={() => h.onConfirm(m.id)}>
+              {m.confirmLabel}
+            </ChatAction>
+            <ChatAction tone="secondary" onClick={() => h.onCancel(m.id)}>
+              {m.cancelLabel}
+            </ChatAction>
+          </ChatActionRow>
         </div>
       </div>
     );
@@ -223,7 +240,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               <div key={e.id} className="rounded-card border border-ink-500 bg-ink-800/60 p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2 font-display text-card-title font-semibold text-text-primary">
-                    <Building2 className="size-5 flex-none text-brand-blue" aria-hidden /> {e.name}
+                    <Building2 {...iconControl("flex-none text-brand-blue")} aria-hidden /> {e.name}
                   </span>
                   <span
                     data-fit-status={e.fitStatus}
@@ -283,7 +300,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               <ul className="mt-2.5 flex flex-col gap-1" data-testid="profile-summary-done">
                 {m.done.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-support text-text-secondary">
-                    <Check className="mt-0.5 size-3.5 flex-none text-state-success" aria-hidden /> {d}
+                    <Check {...iconInline("mt-0.5 flex-none text-state-success")} aria-hidden /> {d}
                   </li>
                 ))}
               </ul>
@@ -292,14 +309,14 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               <ul className="mt-2 flex flex-col gap-1" data-testid="profile-summary-missing">
                 {m.missing.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-support text-text-muted">
-                    <CircleDashed className="mt-0.5 size-3.5 flex-none text-state-warning" aria-hidden /> {d}
+                    <CircleDashed {...iconInline("mt-0.5 flex-none text-state-warning")} aria-hidden /> {d}
                   </li>
                 ))}
               </ul>
             )}
             {m.lastActivity && (
               <p className="mt-3.5 flex items-center gap-1.5 border-t border-ink-600 pt-3 text-meta text-text-muted" data-testid="profile-summary-last">
-                <Clock className="size-3 flex-none" aria-hidden /> {m.lastActivity}
+                <Clock {...iconInline("flex-none")} aria-hidden /> {m.lastActivity}
               </p>
             )}
           </div>
@@ -316,7 +333,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
         <Avatar />
         <div className="min-w-0 max-w-[46rem] flex-1 rounded-card border border-ink-500 bg-surface-1/70 p-4">
           <h3 className="flex items-center gap-1.5 font-display text-card-title font-semibold text-text-primary">
-            <Languages className="size-5 flex-none text-brand-blue" aria-hidden /> {m.recipient} · {m.channelLabel}
+            <Languages {...iconControl("flex-none text-brand-blue")} aria-hidden /> {m.recipient} · {m.channelLabel}
           </h3>
           <div className="mt-2 flex flex-col gap-2">
             <div>
@@ -328,10 +345,14 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               <p className="text-body text-text-primary">{m.translated}</p>
             </div>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => h.onConfirm(m.id)} data-testid="msg-translation-send" className="ua-press min-h-11 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">{m.confirmLabel}</button>
-            <button type="button" onClick={() => h.onCancel(m.id)} className="ua-press min-h-11 rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700">{m.cancelLabel}</button>
-          </div>
+          <ChatActionRow>
+            <ChatAction tone="primary" testId="msg-translation-send" onClick={() => h.onConfirm(m.id)}>
+              {m.confirmLabel}
+            </ChatAction>
+            <ChatAction tone="secondary" onClick={() => h.onCancel(m.id)}>
+              {m.cancelLabel}
+            </ChatAction>
+          </ChatActionRow>
         </div>
       </div>
     );

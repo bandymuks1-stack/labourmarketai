@@ -24,6 +24,7 @@ import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
+import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -67,6 +68,21 @@ export type ChatLabels = {
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
+};
+
+/**
+ * Which profile action genuinely fixes which checkpoint.
+ *
+ * Deliberately PARTIAL. `about` and `skills` have no chip in this row — about
+ * text is edited on the profile screen and skills are recognised from the CV or
+ * the work journal — so when one of those is the first gap the row simply
+ * offers no recommendation. That is the honest outcome: a recommendation exists
+ * only where a listed action really closes the gap the server reported.
+ */
+const CHIP_FOR_STEP: Partial<Record<WorkerProfileStep, string>> = {
+  languages: "f:worker.add-language",
+  workHistory: "f:worker.add-work-history",
+  availability: "f:worker.save-work-card",
 };
 
 let uid = 0;
@@ -251,6 +267,12 @@ export function ConversationChat({
         .then((res) => {
           setTyping(false);
           if (res.kind === "summary") {
+            // The recommended chip is the one that closes the FIRST gap the
+            // server reported — its ordering, its data. No match (about /
+            // skills have no chip here) means no recommendation at all.
+            const recommendedId = res.missingKeys
+              .map((step) => CHIP_FOR_STEP[step])
+              .find((id): id is string => Boolean(id));
             pushMessage({
               id: nid(),
               role: "assistant",
@@ -259,7 +281,12 @@ export function ConversationChat({
               done: res.done,
               missing: res.missing,
               lastActivity: res.lastActivity,
-              chips: res.missing.length > 0 ? profileChips : starterChips,
+              chips:
+                res.missing.length > 0
+                  ? profileChips.map((c) =>
+                      c.id === recommendedId ? { ...c, recommended: true } : c,
+                    )
+                  : starterChips,
             });
           } else {
             assistant(res.message, starterChips);

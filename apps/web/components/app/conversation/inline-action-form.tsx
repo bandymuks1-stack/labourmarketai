@@ -9,6 +9,7 @@ import {
   type WorkerFormSpec,
 } from "@/lib/conversation/worker-forms";
 import { dispatchWorkerAction } from "@/lib/conversation/dispatch";
+import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -134,48 +135,30 @@ export function InlineActionForm({
                 </div>
               ))}
           </dl>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={save}
-              data-testid="inline-action-save"
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20 disabled:opacity-50"
-            >
+          <ChatActionRow>
+            {/* `loading` renders a spinner and sets aria-busy, so "saving" is
+                distinguishable from "disabled" without perceiving colour. */}
+            <ChatAction tone="primary" loading={saving} testId="inline-action-save" onClick={save}>
               {saving ? t("conversation.forms.ui.working") : t("conversation.forms.ui.save")}
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => setPhase({ kind: "form" })}
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700 disabled:opacity-50"
-            >
+            </ChatAction>
+            <ChatAction tone="secondary" disabled={saving} onClick={() => setPhase({ kind: "form" })}>
               {t("conversation.forms.ui.back")}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {spec.fields.map((f) => (
             <Field key={f.name} f={f} value={values[f.name]} onChange={set} t={t} inputCls={inputCls} />
           ))}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={toReview}
-              data-testid="inline-action-continue"
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-4 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
-            >
+          <ChatActionRow>
+            <ChatAction tone="primary" testId="inline-action-continue" onClick={toReview}>
               {t("conversation.forms.ui.continue")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex min-h-11 items-center justify-center rounded-control border border-ink-500 px-4 text-support font-medium text-text-secondary hover:bg-ink-700"
-            >
+            </ChatAction>
+            <ChatAction tone="secondary" onClick={onClose}>
               {t("conversation.forms.ui.cancel")}
-            </button>
-          </div>
+            </ChatAction>
+          </ChatActionRow>
         </div>
       )}
 
