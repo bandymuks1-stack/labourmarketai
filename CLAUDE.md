@@ -1,6 +1,9 @@
 # Agent Operating Contract — LabourMarket.ai / LABMA OS
 
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
+>
+> 🧭 Prieš planuojant ar įgyvendinant produkto funkcijas privaloma perskaityti
+> [`docs/product/LABOURMARKET_AI_CANONICAL_PRODUCT_VISION.md`](docs/product/LABOURMARKET_AI_CANONICAL_PRODUCT_VISION.md).
 
 ## Auto-commit policy
 
