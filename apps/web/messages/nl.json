@@ -11025,7 +11025,13 @@
       "confirmTitle": "Vermelding bevestigen?",
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
-      "minutesUnit": "min"
+      "minutesUnit": "min",
+      "addedSkillPrefix": "Vaardigheid toegevoegd",
+      "strengthenedSkillPrefix": "Vaardigheid versterkt",
+      "pendingConfirmPrefix": "Wacht op je bevestiging",
+      "cvUpdatedNote": "Je cv bevat nu de vaardigheden uit deze registratie.",
+      "matchingNote": "Vacature-aanbevelingen worden bij de volgende weergave herberekend op basis van je bijgewerkte vaardigheden.",
+      "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."
     },
     "findWork": {
       "intro": "Ik vond {count} passende opties. Beste matches:",

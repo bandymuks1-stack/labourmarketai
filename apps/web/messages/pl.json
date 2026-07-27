@@ -3208,7 +3208,13 @@
       "confirmTitle": "[EN] Confirm the entry?",
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
-      "minutesUnit": "[EN] min"
+      "minutesUnit": "[EN] min",
+      "addedSkillPrefix": "Dodano umiejętność",
+      "strengthenedSkillPrefix": "Wzmocniono umiejętność",
+      "pendingConfirmPrefix": "Czeka na Twoje potwierdzenie",
+      "cvUpdatedNote": "Twoje CV zostało uzupełnione o umiejętności z tego wpisu.",
+      "matchingNote": "Rekomendacje pracy są przeliczane na podstawie zaktualizowanych umiejętności przy następnym wyświetleniu.",
+      "pipelineFailedNote": "Rozpoznawanie umiejętności tym razem się nie powiodło — wpis został zapisany; rozpoznawanie można powtórzyć w dzienniku."
     },
     "findWork": {
       "intro": "[EN] I found {count} suitable options. Best matches:",
