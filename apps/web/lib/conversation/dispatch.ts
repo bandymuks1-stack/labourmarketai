@@ -49,14 +49,26 @@ export type PrepareResult =
  * `CONVERSATION_TOKEN_SECRET` is preferred so this purpose can hold its own key
  * rather than reusing the service-role key as HMAC material (key-purpose reuse
  * — a rotation of one should not silently invalidate the other). The
- * service-role / DB-password fallbacks keep existing deployments working, since
- * production already sets the former.
+ * service-role fallback keeps existing deployments working, since production
+ * already sets it.
+ *
+ * NO `SUPABASE_DB_PASSWORD` FALLBACK — removed after CodeQL flagged it
+ * (js/insufficient-password-hash, HIGH) on the first run of the scanning this
+ * same audit slice enabled.
+ *
+ * The alert's literal claim does not hold here: this is not password storage or
+ * verification, nothing derived is persisted or returned, and recovering the key
+ * from HMAC outputs is infeasible — so the offline-brute-force scenario the rule
+ * describes has no path. But the rule was pointing at something real in spirit.
+ * The other two inputs are high-entropy machine secrets (a dedicated key, or a
+ * 200+ character JWT), where one SHA-256 pass is a sound key derivation. A DB
+ * password is human-chosen and may carry far less entropy, and low-entropy
+ * material is exactly what single-pass hashing is wrong for. Rather than
+ * suppress the alert, the password-shaped secret is simply out of the
+ * key-derivation path — which is also one less purpose that credential serves.
  */
 function tokenSecret(): string {
-  const material =
-    env.CONVERSATION_TOKEN_SECRET ||
-    env.SUPABASE_SERVICE_ROLE_KEY ||
-    env.SUPABASE_DB_PASSWORD;
+  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
   if (!material) {
     throw new Error(
       "conversation confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
