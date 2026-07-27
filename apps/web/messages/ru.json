@@ -3595,6 +3595,8 @@
       },
       "display_name_label": "Отображаемое имя",
       "country_label": "Страна",
+      "country_placeholder": "Выберите страну",
+      "error_country_required": "Пожалуйста, выберите страну.",
       "back": "Назад",
       "saving": "Сохранение...",
       "error_name_required": "Пожалуйста, введите отображаемое имя.",

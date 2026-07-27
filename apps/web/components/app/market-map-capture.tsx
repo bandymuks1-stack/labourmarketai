@@ -84,6 +84,9 @@ export function MarketMapCapture({
   const [pPriority, setPPriority] = useState<string>("secondary");
   const [pNote, setPNote] = useState("");
   const [pVisibility, setPVisibility] = useState<string>("self_only");
+  // login-consent country — pre-filled from the EXISTING signal only (real
+  // stored data), never a hardcoded default country.
+  const [lCountry, setLCountry] = useState<string>(login?.countryCode ?? "");
   const [msg, setMsg] = useState<string | null>(null);
 
   const peopleRange = (d: OwnDemandRow): string | null => {
@@ -298,15 +301,34 @@ export function MarketMapCapture({
           {t("login.title")}
         </h3>
         <p className="text-xs leading-relaxed text-text-secondary">{t("login.note")}</p>
+        {/* NO silent country default (PR-G): a first-time consent must name a
+            REAL country — the server rejects a country-less first write instead
+            of recording Lithuania. Status-only changes on an existing signal
+            keep the stored country. */}
+        <label className="flex max-w-xs flex-col gap-1 text-xs text-text-secondary">
+          {t("preferred.country")}
+          <select
+            className={fieldCls}
+            value={lCountry}
+            onChange={(e) => setLCountry(e.target.value)}
+            data-testid="capture-login-country"
+          >
+            <option value="">{t("preferred.countryPlaceholder")}</option>
+            {MARKET_COUNTRIES.map((c) => (
+              <option key={c} value={c}>{countryName(c)}</option>
+            ))}
+          </select>
+        </label>
         <div className="flex flex-wrap items-center gap-2">
           {CONSENTS.map((c) => {
             const active = (login?.consentStatus ?? "not_requested") === c;
+            const needsCountry = c === "consented" && !lCountry && !login?.countryCode;
             return (
               <button
                 key={c}
                 type="button"
-                disabled={pending}
-                onClick={() => run(() => setLoginLocationConsentAction({ consentStatus: c, countryCode: login?.countryCode ?? undefined, granularity: "country" }))}
+                disabled={pending || needsCountry}
+                onClick={() => run(() => setLoginLocationConsentAction({ consentStatus: c, countryCode: lCountry || login?.countryCode || undefined, granularity: "country" }))}
                 className={`rounded-full border px-2.5 py-1 text-xs ${active ? "border-brand-blue bg-brand-blue/10 text-brand-blue" : "border-border-subtle bg-surface-1 text-text-secondary"}`}
                 data-testid={`capture-login-${c}`}
               >

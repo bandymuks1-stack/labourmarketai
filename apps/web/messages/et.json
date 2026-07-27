@@ -332,6 +332,8 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "country_placeholder": "Valige riik",
+      "error_country_required": "Palun valige riik.",
       "nextSteps": {
         "eyebrow": "Pärast seda — sinu tegelik profiil",
         "s1": "Impordi oma CV (valikuline), et profiil kiiremini täita",

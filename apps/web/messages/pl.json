@@ -332,6 +332,8 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "country_placeholder": "Wybierz kraj",
+      "error_country_required": "Proszę wybrać kraj.",
       "nextSteps": {
         "eyebrow": "Po tym kroku — Twój realny profil",
         "s1": "Zaimportuj CV (opcjonalnie), aby szybciej uzupełnić profil",

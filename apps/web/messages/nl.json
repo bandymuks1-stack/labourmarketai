@@ -3595,6 +3595,8 @@
       },
       "display_name_label": "Weergavenaam",
       "country_label": "Land",
+      "country_placeholder": "Kies je land",
+      "error_country_required": "Kies een land.",
       "back": "Terug",
       "saving": "Opslaan...",
       "error_name_required": "Voer een weergavenaam in.",

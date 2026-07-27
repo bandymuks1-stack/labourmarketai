@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { ACTIVE_MARKETS } from "@/lib/taxonomy/work-categories";
+import { countryDisplayName } from "@/lib/location/country-model";
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -17,22 +19,10 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  *  Internal identifiers stay within the DB Role contract. */
 const ROLE_CARDS: { key: Role }[] = [{ key: "worker" }, { key: "company" }];
 
-// The 9 launch markets, LT first (default).
-const COUNTRIES = ["LT", "LV", "EE", "NL", "DE", "DK", "NO", "SE", "PL"] as const;
-
-/** Show a worker a real country NAME in their own language, never a raw ISO
- *  code. Uses the browser's built-in localized region names (no new i18n keys,
- *  stays correct in every locale); falls back to the code only if the runtime
- *  lacks Intl.DisplayNames. Low cognitive load: the first screen must read like
- *  plain words, not database codes. */
-function countryName(code: string, locale: string): string {
-  try {
-    const dn = new Intl.DisplayNames([locale], { type: "region" });
-    return dn.of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
+// Country names come from the canonical global country model (Intl-backed,
+// localized, no hand-translated catalogue). The select offers the ACTIVE
+// markets — incl. GE and US — with NO pre-selected country (PR-G: no silent
+// Lithuania default; the user must actively choose).
 
 /** Person-first onboarding. Two steps: (1) pick one OR MORE roles (the same
  *  person can be a worker, run an agency, and buy services), (2) basic profile
@@ -52,7 +42,8 @@ export function OnboardingWizard({
   const [step, setStep] = useState<1 | 2>(1);
   const [roles, setRoles] = useState<Set<Role>>(() => new Set());
   const [displayName, setDisplayName] = useState(defaultName);
-  const [country, setCountry] = useState<string>("LT");
+  // No pre-selected country — the user chooses (placeholder until they do).
+  const [country, setCountry] = useState<string>("");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -84,6 +75,10 @@ export function OnboardingWizard({
     setError(null);
     if (!displayName.trim()) {
       setError(t("error_name_required"));
+      return;
+    }
+    if (!country) {
+      setError(t("error_country_required"));
       return;
     }
     const form = new FormData();
@@ -266,9 +261,12 @@ export function OnboardingWizard({
           required
           className={inputCls}
         >
-          {COUNTRIES.map((c) => (
+          <option value="" disabled>
+            {t("country_placeholder")}
+          </option>
+          {ACTIVE_MARKETS.map((c) => (
             <option key={c} value={c}>
-              {countryName(c, locale)}
+              {countryDisplayName(c, locale)}
             </option>
           ))}
         </select>
