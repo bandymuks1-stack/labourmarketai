@@ -1901,7 +1901,15 @@ describe("no migration files added by this sprint", () => {
     // `(v_owner is not null and v_owner = uid)`. Grants nothing, changes no
     // schema, only TIGHTENS authorization. @human-gate-approved acknowledges
     // the RED security-definer class; ships UNAPPLIED pending owner approval.
-    const SPRINT_BASELINE = 169;
+    // Bumped 169 -> 170 for the assistant-transcript adoption
+    // (20260727190000_assistant_transcript_v1, paired rollback). Adopts the
+    // 2026-07-24 proposal unchanged: owner-scoped, append-only, hash-chained
+    // AI-control transcript (3 tables + 3 gated SECURITY DEFINER RPCs,
+    // default-closed RLS, grants to authenticated only, anon revoked).
+    // @human-gate-approved acknowledges the RED class; ships UNAPPLIED
+    // pending owner approval. App adapter (lib/assistant/transcript.ts,
+    // PR #881) degrades honestly until applied.
+    const SPRINT_BASELINE = 170;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
