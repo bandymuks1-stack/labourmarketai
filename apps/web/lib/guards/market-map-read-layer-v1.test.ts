@@ -360,6 +360,13 @@ describe("NO new DB migration in this PR", () => {
     // let anon/authenticated/ci_secdef_audit create objects; single REVOKE,
     // grants nothing; human-gate-annotated, RED by design, ships UNAPPLIED.
     // Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(168);
+    // Bumped 168 -> 169 for the null-safe owner guards fix
+    // (20260727170000_null_safe_owner_guards_v1, paired rollback). Audit I-02:
+    // six SECURITY DEFINER functions recreated with `v_owner = uid` guards made
+    // null-safe (`v_owner is not null and ...`) against the dormant NULL-flip
+    // bypass on nullable organizations.owner_profile_id; guards only TIGHTEN,
+    // no schema/grant changes; human-gate-annotated, RED by design, ships
+    // UNAPPLIED. Still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(169);
   });
 });

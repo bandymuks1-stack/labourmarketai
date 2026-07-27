@@ -98,8 +98,17 @@ describe("teams migration — additive typed rows on the EXISTING organizations 
   });
 
   it("both function names are NEW to the repo — never defined by a prior migration", () => {
+    // 20260727170000_null_safe_owner_guards_v1.sql deliberately RECREATES
+    // get_team_capability_summary_v1 (byte-identical body, one guard line made
+    // null-safe) to close the audited I-02 NULL-flip authorization bypass
+    // (2026-07-27). That is an audited redefinition, not an accidental one —
+    // excluded here by name so the uniqueness pin keeps catching accidents.
+    const AUDITED_REDEFINITIONS = ["20260727170000_null_safe_owner_guards_v1.sql"];
     const others = readdirSync(MIGRATIONS_DIR).filter(
-      (f) => f.endsWith(".sql") && f !== MIGRATION_FILE,
+      (f) =>
+        f.endsWith(".sql") &&
+        f !== MIGRATION_FILE &&
+        !AUDITED_REDEFINITIONS.includes(f),
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {

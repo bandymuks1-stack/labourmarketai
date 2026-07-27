@@ -240,8 +240,18 @@ describe("team enquiries migration (20260716131000) — booking-pattern clone, n
   });
 
   it("all seven new function names are NEW to the repo — never defined by a prior migration", () => {
+    // 20260727170000_null_safe_owner_guards_v1.sql deliberately RECREATES
+    // save_team_details_v1 and respond_team_enquiry_v1 (byte-identical bodies,
+    // one guard line each made null-safe) to close the audited I-02 NULL-flip
+    // authorization bypass (2026-07-27). Audited redefinition, not accidental —
+    // excluded by name so the uniqueness pin keeps catching accidents.
+    const AUDITED_REDEFINITIONS = ["20260727170000_null_safe_owner_guards_v1.sql"];
     const others = readdirSync(MIGRATIONS_DIR).filter(
-      (f) => f.endsWith(".sql") && f !== DETAILS_FILE && f !== ENQUIRIES_FILE,
+      (f) =>
+        f.endsWith(".sql") &&
+        f !== DETAILS_FILE &&
+        f !== ENQUIRIES_FILE &&
+        !AUDITED_REDEFINITIONS.includes(f),
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {

@@ -1892,7 +1892,16 @@ describe("no migration files added by this sprint", () => {
     // grants nothing to anyone, USAGE untouched; prod dry-run proven
     // (BEGIN..ROLLBACK). @human-gate-approved acknowledges the RED
     // grant-surface class; ships UNAPPLIED pending owner approval.
-    const SPRINT_BASELINE = 168;
+    // Bumped 168 -> 169 for the null-safe owner guards fix
+    // (20260727170000_null_safe_owner_guards_v1, paired rollback). The
+    // 2026-07-27 I-02 audit found a dormant NULL-flip authorization bypass:
+    // negated guards comparing nullable organizations.owner_profile_id with
+    // `=` skip the deny branch when the owner is NULL. Six SECURITY DEFINER
+    // functions are recreated byte-identical except the guard becomes
+    // `(v_owner is not null and v_owner = uid)`. Grants nothing, changes no
+    // schema, only TIGHTENS authorization. @human-gate-approved acknowledges
+    // the RED security-definer class; ships UNAPPLIED pending owner approval.
+    const SPRINT_BASELINE = 169;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
