@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { Clock } from "lucide-react";
 import { Link, useRouter } from "@/lib/i18n/navigation";
@@ -34,14 +35,65 @@ export type WorkLogLabels = {
   saved: string;
   errorGeneric: string;
   minutesUnit: string;
+  // PR-C "what changed" — the completion message lists the REAL pipeline
+  // outcome (skills added / strengthened, candidates awaiting confirmation)
+  // plus the truthful CV + matching consequences.
+  addedSkillPrefix: string;
+  strengthenedSkillPrefix: string;
+  pendingConfirmPrefix: string;
+  cvUpdatedNote: string;
+  matchingNote: string;
+  pipelineFailedNote: string;
 };
+
+/** The subset of the awaited server pipeline result the chat surface shows.
+ *  Parsed defensively from the dispatcher's `data.skills` — anything missing
+ *  or malformed renders as "no outcome details", never as invented facts. */
+type WorkLogSkillsOutcome = {
+  status: "completed" | "partial" | "failed";
+  addedSkills: string[];
+  strengthenedSkills: string[];
+  pendingCandidates: { label: string; slug: string | null; kind: string }[];
+  cvUpdated: boolean;
+};
+
+function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
+  if (typeof data !== "object" || data === null) return null;
+  const s = (data as { skills?: unknown }).skills;
+  if (typeof s !== "object" || s === null) return null;
+  const o = s as Record<string, unknown>;
+  const status =
+    o.status === "completed" || o.status === "partial" || o.status === "failed"
+      ? o.status
+      : null;
+  if (!status) return null;
+  const strings = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  const candidates = Array.isArray(o.pendingCandidates)
+    ? o.pendingCandidates
+        .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
+        .map((c) => ({
+          label: typeof c.label === "string" ? c.label : "",
+          slug: typeof c.slug === "string" ? c.slug : null,
+          kind: typeof c.kind === "string" ? c.kind : "",
+        }))
+        .filter((c) => c.label.length > 0)
+    : [];
+  return {
+    status,
+    addedSkills: strings(o.addedSkills),
+    strengthenedSkills: strings(o.strengthenedSkills),
+    pendingCandidates: candidates,
+    cvUpdated: o.cvUpdated === true,
+  };
+}
 
 type Phase =
   | { kind: "loading" }
   | { kind: "blocked"; reason: "no-context" | "no-worker" | "not-authed" }
   | { kind: "ready"; token: null }
   | { kind: "confirm"; token: string }
-  | { kind: "done" }
+  | { kind: "done"; skills: WorkLogSkillsOutcome | null }
   | { kind: "error"; message: string };
 
 /**
@@ -79,6 +131,18 @@ export function WorkerWorkLogFlow({
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
   const [pending, start] = useTransition();
+  // Localized taxonomy skill names for the completion summary (slug → name,
+  // falling back to the raw slug so an uncatalogued name never blanks a fact).
+  const tSkill = useTranslations("skillNames");
+  const skillName = (slug: string): string => {
+    try {
+      const v = tSkill(slug);
+      if (v && v !== slug && !v.startsWith("skillNames.")) return v;
+    } catch {
+      /* fall through */
+    }
+    return slug;
+  };
 
   useEffect(() => {
     let alive = true;
@@ -142,7 +206,7 @@ export function WorkerWorkLogFlow({
           role_context: "worker",
           success: true,
         });
-        setPhase({ kind: "done" });
+        setPhase({ kind: "done", skills: parseSkillsOutcome(res.data) });
         router.refresh();
       } else {
         setPhase({ kind: "error", message: res.message || labels.errorGeneric });
@@ -173,11 +237,51 @@ export function WorkerWorkLogFlow({
     );
   }
 
-  // ── done ────────────────────────────────────────────────────────────────────
+  // ── done — the REAL "what changed" outcome (§7: facts only) ────────────────
   if (phase.kind === "done") {
+    const skills = phase.skills;
+    // Only genuinely confirmable candidates (fuzzy/ambiguous) — free-text
+    // claims are persisted as self-declared claims, not queued confirmations.
+    const awaiting =
+      skills?.pendingCandidates.filter((c) => c.kind !== "claim") ?? [];
+    const skillsTouched =
+      (skills?.addedSkills.length ?? 0) + (skills?.strengthenedSkills.length ?? 0) > 0;
     return (
-      <div className="rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support font-semibold text-state-success" data-testid="worklog-done">
-        {labels.saved}
+      <div className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support" data-testid="worklog-done">
+        <p className="font-semibold text-state-success">{labels.saved}</p>
+        {skills && (skillsTouched || awaiting.length > 0 || skills.status === "failed") && (
+          <ul className="flex flex-col gap-1 text-text-primary" data-testid="worklog-outcome">
+            {skills.addedSkills.map((slug) => (
+              <li key={`added-${slug}`} data-testid={`worklog-added-${slug}`}>
+                {labels.addedSkillPrefix}: {skillName(slug)}
+              </li>
+            ))}
+            {skills.strengthenedSkills.map((slug) => (
+              <li key={`str-${slug}`} data-testid={`worklog-strengthened-${slug}`}>
+                {labels.strengthenedSkillPrefix}: {skillName(slug)}
+              </li>
+            ))}
+            {awaiting.map((c) => (
+              <li key={`pend-${c.slug ?? c.label}`} className="text-text-muted" data-testid="worklog-pending-candidate">
+                {labels.pendingConfirmPrefix}: {c.slug ? skillName(c.slug) : c.label}
+              </li>
+            ))}
+            {skills.status === "failed" && (
+              <li className="text-text-muted">{labels.pipelineFailedNote}</li>
+            )}
+          </ul>
+        )}
+        {/* "CV papildytas" is truthful: the CV export derives directly from
+            worker_skills + journal_entry_skills rows this save just wrote. */}
+        {skills?.cvUpdated && (
+          <p className="text-text-muted" data-testid="worklog-cv-updated">{labels.cvUpdatedNote}</p>
+        )}
+        {/* Honest matching phrasing: recommendations are computed from the
+            worker's current skills at read time (no persisted score), so new
+            skills flow into the next computation — nothing is "pushed". */}
+        {skillsTouched && (
+          <p className="text-text-muted" data-testid="worklog-matching-note">{labels.matchingNote}</p>
+        )}
       </div>
     );
   }

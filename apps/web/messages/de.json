@@ -11045,7 +11045,13 @@
       "confirmTitle": "Eintrag bestätigen?",
       "saved": "Eintrag im Arbeitsjournal gespeichert.",
       "errorGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
-      "minutesUnit": "Min"
+      "minutesUnit": "Min",
+      "addedSkillPrefix": "Fähigkeit hinzugefügt",
+      "strengthenedSkillPrefix": "Fähigkeit gestärkt",
+      "pendingConfirmPrefix": "Wartet auf deine Bestätigung",
+      "cvUpdatedNote": "Dein Lebenslauf enthält jetzt die Fähigkeiten aus diesem Eintrag.",
+      "matchingNote": "Job-Empfehlungen werden beim nächsten Ansehen anhand deiner aktualisierten Fähigkeiten neu berechnet.",
+      "pipelineFailedNote": "Die Fähigkeits-Erkennung ist diesmal fehlgeschlagen — der Eintrag ist gespeichert; du kannst die Erkennung im Journal wiederholen."
     },
     "findWork": {
       "intro": "Ich habe {count} passende Optionen gefunden. Beste Treffer:",

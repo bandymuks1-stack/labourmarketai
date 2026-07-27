@@ -1884,7 +1884,15 @@ describe("no migration files added by this sprint", () => {
     // statement REMOVES privilege. @human-gate-approved (the annotation
     // acknowledges the RED grant-surface class; it is not a merge pass), ships
     // UNAPPLIED pending owner approval.
-    const SPRINT_BASELINE = 167;
+    // Bumped 167 -> 168 for journal_entry_skills link provenance
+    // (20260727180000_journal_entry_skill_provenance_v1, paired rollback).
+    // ONE additive nullable checked column recording write-time link origin
+    // ('recognized'/'confirmed'/'manual'); GREEN — no grants, no RLS change,
+    // no drops, no DML. Ships UNAPPLIED at merge; per the conditional
+    // prod-apply autonomy (governance 2026-06-12) a GREEN classification
+    // permits MCP apply_migration after merge. TS writes degrade honestly
+    // (retry unstamped on undefined_column) until it is applied.
+    const SPRINT_BASELINE = 168;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

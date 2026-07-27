@@ -11045,7 +11045,13 @@
       "confirmTitle": "Patvirtinti įrašą?",
       "saved": "Įrašas išsaugotas darbo žurnale.",
       "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
-      "minutesUnit": "min"
+      "minutesUnit": "min",
+      "addedSkillPrefix": "Pridėtas įgūdis",
+      "strengthenedSkillPrefix": "Sustiprintas įgūdis",
+      "pendingConfirmPrefix": "Laukia patvirtinimo",
+      "cvUpdatedNote": "CV papildytas šio įrašo įgūdžiais.",
+      "matchingNote": "Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint.",
+      "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
     },
     "findWork": {
       "intro": "Radau {count} tinkamų variantų. Geriausi atitikimai:",

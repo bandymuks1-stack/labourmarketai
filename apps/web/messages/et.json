@@ -3228,7 +3228,13 @@
       "confirmTitle": "[EN] Confirm the entry?",
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
-      "minutesUnit": "[EN] min"
+      "minutesUnit": "[EN] min",
+      "addedSkillPrefix": "Oskus lisatud",
+      "strengthenedSkillPrefix": "Oskus tugevdatud",
+      "pendingConfirmPrefix": "Ootab sinu kinnitust",
+      "cvUpdatedNote": "Sinu CV sisaldab nüüd selle sissekande oskusi.",
+      "matchingNote": "Töösoovitused arvutatakse uuendatud oskuste põhjal ümber järgmisel vaatamisel.",
+      "pipelineFailedNote": "Oskuste tuvastamine ebaõnnestus seekord — sissekanne on salvestatud; tuvastamist saab päevikus korrata."
     },
     "findWork": {
       "intro": "[EN] I found {count} suitable options. Best matches:",

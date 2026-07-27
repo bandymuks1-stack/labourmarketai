@@ -11045,7 +11045,13 @@
       "confirmTitle": "Confirm the entry?",
       "saved": "Entry saved to your work journal.",
       "errorGeneric": "Couldn't save. Please try again.",
-      "minutesUnit": "min"
+      "minutesUnit": "min",
+      "addedSkillPrefix": "Skill added",
+      "strengthenedSkillPrefix": "Skill strengthened",
+      "pendingConfirmPrefix": "Awaiting your confirmation",
+      "cvUpdatedNote": "Your CV now includes the skills from this entry.",
+      "matchingNote": "Job recommendations are recalculated from your updated skills the next time you view them.",
+      "pipelineFailedNote": "Skill recognition failed this time — the entry is saved; you can rerun recognition in the journal."
     },
     "findWork": {
       "intro": "I found {count} suitable options. Best matches:",

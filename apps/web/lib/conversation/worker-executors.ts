@@ -167,8 +167,27 @@ export const WORKER_EXECUTORS: {
         site_name: input.siteName ?? "",
       }),
     );
-    return r.ok
-      ? { ok: true, data: { entryId: r.entryId } }
-      : { ok: false, code: r.code, message: r.message };
+    if (!r.ok) return { ok: false, code: r.code, message: r.message };
+    // PR-C "what changed" visibility: pass the REAL awaited pipeline outcome
+    // through to the chat surface (a read-through of the canonical result —
+    // nothing computed or invented here; §7 the UI may only show these facts).
+    return {
+      ok: true,
+      data: {
+        entryId: r.entryId,
+        skills: {
+          status: r.skills.status,
+          addedSkills: r.skills.addedSkills.map((s) => s.slug),
+          strengthenedSkills: r.skills.strengthenedSkills.map((s) => s.slug),
+          // Confirmable candidates awaiting the worker (fuzzy/ambiguous/claim).
+          pendingCandidates: r.skills.candidates.map((c) => ({
+            label: c.label,
+            slug: c.slug ?? null,
+            kind: c.kind,
+          })),
+          cvUpdated: r.skills.cvUpdated,
+        },
+      },
+    };
   },
 });

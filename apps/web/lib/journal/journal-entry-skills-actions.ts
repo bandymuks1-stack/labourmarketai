@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
+import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 /**
@@ -88,8 +89,16 @@ export async function setJournalEntrySkillLinks(
       worker_id: worker.id,
       skill_id,
     }));
-    const ins = await linkTable().insert(rows);
-    if (ins.error) return { ok: false, code: "link_write_failed", message: ins.error.message };
+    // provenance 'manual': the worker explicitly picked which of THEIR OWN
+    // declared skills this entry supports (degrades unstamped pre-migration).
+    const ins = await writeEntrySkillLinks(supabase, rows, "manual", "insert");
+    if (ins.error) {
+      return {
+        ok: false,
+        code: "link_write_failed",
+        message: ins.error.message ?? "link_write_failed",
+      };
+    }
   }
 
   // Journal Evidence Auto-Recompute v1 (worker side, GREEN): derive the
@@ -175,22 +184,21 @@ export async function autoLinkRecognizedJournalSkills(
       .select("skill_id")
       .eq("worker_id", worker.id)
       .in("skill_id", skillIds);
-    const ownedIds = (owned ?? []).map((r) => r.skill_id);
+    const ownedIds = (owned ?? [])
+      .map((r) => r.skill_id)
+      .filter((id): id is string => typeof id === "string" && id.length > 0);
     if (ownedIds.length === 0) return { ok: true, linked: 0 };
 
-    // Additive insert; the (journal_entry_id, skill_id) unique constraint makes
+    // Additive upsert; the (journal_entry_id, skill_id) unique constraint makes
     // re-saves idempotent. ignoreDuplicates keeps any manual links intact.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const linkTable = () => (supabase as any).from("journal_entry_skills");
+    // provenance 'recognized': these links come from the deterministic
+    // recognition over the entry's own notes (degrades unstamped pre-migration).
     const rows = ownedIds.map((skill_id) => ({
       journal_entry_id: entryId,
       worker_id: worker.id,
       skill_id,
     }));
-    const ins = await linkTable().upsert(rows, {
-      onConflict: "journal_entry_id,skill_id",
-      ignoreDuplicates: true,
-    });
+    const ins = await writeEntrySkillLinks(supabase, rows, "recognized", "upsert");
     if (ins.error) return { ok: false };
 
     await applyWorkerSkillSourceReconcile(supabase, worker.id);

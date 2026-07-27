@@ -296,8 +296,14 @@ describe("legitimate flows — honest writes only", () => {
     const linkWrite = writePayloads.find(
       (w) => w.table === "journal_entry_skills",
     );
+    // PR-C: a worker-confirmed candidate stamps provenance 'confirmed'.
     expect(linkWrite?.rows).toEqual([
-      { journal_entry_id: "e-A", worker_id: "w1", skill_id: "s-repair" },
+      {
+        journal_entry_id: "e-A",
+        worker_id: "w1",
+        skill_id: "s-repair",
+        provenance: "confirmed",
+      },
     ]);
     expect(
       deletes.some((d) => d.table === "skill_candidate_clarifications"),

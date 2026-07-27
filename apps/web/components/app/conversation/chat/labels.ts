@@ -20,6 +20,9 @@ const WORKLOG_KEYS = [
   "labelDate", "labelTime", "labelBreak", "labelHours", "labelSite", "labelNotes",
   "labelContext", "save", "cancel", "working", "confirmTitle", "saved",
   "errorGeneric", "minutesUnit",
+  // PR-C "what changed" completion summary (real pipeline outcome only).
+  "addedSkillPrefix", "strengthenedSkillPrefix", "pendingConfirmPrefix",
+  "cvUpdatedNote", "matchingNote", "pipelineFailedNote",
 ] as const;
 
 /** Resolve the flat chat label bag from a `conversation.chat`-scoped translator.

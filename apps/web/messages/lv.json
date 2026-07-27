@@ -3228,7 +3228,13 @@
       "confirmTitle": "[EN] Confirm the entry?",
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
-      "minutesUnit": "[EN] min"
+      "minutesUnit": "[EN] min",
+      "addedSkillPrefix": "Pievienota prasme",
+      "strengthenedSkillPrefix": "Nostiprināta prasme",
+      "pendingConfirmPrefix": "Gaida tavu apstiprinājumu",
+      "cvUpdatedNote": "Tavs CV ir papildināts ar šī ieraksta prasmēm.",
+      "matchingNote": "Darba ieteikumi tiek pārrēķināti pēc atjauninātajām prasmēm nākamajā skatīšanās reizē.",
+      "pipelineFailedNote": "Prasmju atpazīšana šoreiz neizdevās — ieraksts ir saglabāts; atpazīšanu var atkārtot žurnālā."
     },
     "findWork": {
       "intro": "[EN] I found {count} suitable options. Best matches:",

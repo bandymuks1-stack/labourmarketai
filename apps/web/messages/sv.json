@@ -3228,7 +3228,13 @@
       "confirmTitle": "[EN] Confirm the entry?",
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
-      "minutesUnit": "[EN] min"
+      "minutesUnit": "[EN] min",
+      "addedSkillPrefix": "Färdighet tillagd",
+      "strengthenedSkillPrefix": "Färdighet stärkt",
+      "pendingConfirmPrefix": "Väntar på din bekräftelse",
+      "cvUpdatedNote": "Ditt CV innehåller nu färdigheterna från den här posten.",
+      "matchingNote": "Jobbrekommendationer räknas om utifrån dina uppdaterade färdigheter nästa gång du visar dem.",
+      "pipelineFailedNote": "Igenkänning av färdigheter misslyckades den här gången — posten är sparad; du kan köra igenkänningen igen i journalen."
     },
     "findWork": {
       "intro": "[EN] I found {count} suitable options. Best matches:",

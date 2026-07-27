@@ -13,11 +13,9 @@ import {
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
 import { formatDuration } from "@/lib/journal/format-duration";
-import {
-  groupLinkedSkillIdsByEntry,
-  type EntrySkillLinkRow,
-} from "@/lib/journal/journal-entry-skills";
+import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
+import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
 import { JournalSpreadsheetEntry } from "@/components/app/journal-spreadsheet-entry";
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
@@ -335,18 +333,15 @@ export default async function JournalPage({
 
   // Durable links read — gracefully no-ops if the migration is not applied yet
   // (mirrors the v3-column fallback below), so the page stays renderable.
+  // PR-C: the read now also carries each link's stored write-time origin,
+  // with an automatic pre-migration fallback (lib/journal/entry-skill-link-read).
   let linksByEntry = new Map<string, string[]>();
   let skillLinksReady = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const linkRes = await (supabase as any)
-    .from("journal_entry_skills")
-    .select("journal_entry_id, skill_id")
-    .eq("worker_id", worker.id);
-  if (!linkRes.error) {
+  const linkRead = await readWorkerEntrySkillLinks(supabase, worker.id);
+  const provenanceByEntry = linkRead.provenanceByEntry;
+  if (linkRead.ok) {
     skillLinksReady = true;
-    linksByEntry = groupLinkedSkillIdsByEntry(
-      (linkRes.data ?? []) as EntrySkillLinkRow[],
-    );
+    linksByEntry = groupLinkedSkillIdsByEntry(linkRead.rows);
   }
 
   // Entries with their metrics + confirmation status. The select reads the
@@ -1038,6 +1033,7 @@ export default async function JournalPage({
                         verifiedSkillIds,
                         recognizedSlugs,
                         recognizableSlugs,
+                        provenanceBySkillId: provenanceByEntry.get(e.id),
                       });
                       // "Sistema suprato" — the structured signals the current text
                       // produced (direction / quantity). The entry's LOCATION gets its

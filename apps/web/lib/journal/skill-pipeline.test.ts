@@ -267,8 +267,14 @@ describe("processJournalEntrySkills (v2)", () => {
     const linkWrite = writePayloads.find(
       (w) => w.table === "journal_entry_skills",
     );
+    // PR-C: pipeline links carry write-time provenance 'recognized'.
     expect(linkWrite?.rows).toEqual([
-      { journal_entry_id: "e1", worker_id: "w1", skill_id: "s1" },
+      {
+        journal_entry_id: "e1",
+        worker_id: "w1",
+        skill_id: "s1",
+        provenance: "recognized",
+      },
     ]);
     // no worker_skills insert for an already-declared skill
     expect(writePayloads.some((w) => w.table === "worker_skills")).toBe(false);
@@ -304,8 +310,14 @@ describe("processJournalEntrySkills (v2)", () => {
     const linkWrite = writePayloads.find(
       (w) => w.table === "journal_entry_skills",
     );
+    // PR-C: pipeline links carry write-time provenance 'recognized'.
     expect(linkWrite?.rows).toEqual([
-      { journal_entry_id: "e1", worker_id: "w1", skill_id: "s1" },
+      {
+        journal_entry_id: "e1",
+        worker_id: "w1",
+        skill_id: "s1",
+        provenance: "recognized",
+      },
     ]);
     // number of worker_skills rows written equals addedSkills length
     expect((skillWrite?.rows as unknown[]).length).toBe(
