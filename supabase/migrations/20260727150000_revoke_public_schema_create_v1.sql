@@ -1,0 +1,75 @@
+-- ============================================================================
+-- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
+-- Never `db push`.
+--
+-- 20260727150000 — revoke_public_schema_create_v1
+-- Security audit 2026-07-27: residual hygiene finding (public schema ACL).
+--
+-- @human-gate-approved
+--   Acknowledged RED because it contains a REVOKE statement, which the
+--   migration-safety gate classifies as a grant-surface change. The annotation
+--   makes CI pass; it does NOT authorise an automatic merge or apply. This
+--   migration TIGHTENS the privilege surface — it grants nothing to anyone.
+--
+-- ----------------------------------------------------------------------------
+-- FINDING — PUBLIC inherits CREATE on schema `public`
+-- ----------------------------------------------------------------------------
+-- The production catalog shows the `public` schema ACL as
+--
+--   {postgres=UC/postgres,=UC/postgres}
+--
+-- The second entry (`=UC/postgres`) is a grant to the PUBLIC pseudo-role, so
+-- EVERY role — including `anon`, `authenticated` and the CI audit role
+-- `ci_secdef_audit` — inherits CREATE on the schema and could create tables,
+-- functions or operators inside `public`. None of them has any legitimate DDL
+-- need: runtime app roles only ever call RPCs and read/write tables under RLS,
+-- and the CI audit role is read-only by design. A writable default schema for
+-- low-privilege roles is a classic lateral-movement / object-shadowing surface
+-- (e.g. planting a function that a later unqualified call resolves to).
+--
+-- EFFECT: only the implicit PUBLIC CREATE goes away. USAGE stays with PUBLIC,
+-- so nothing changes for reads or RPC calls. DDL keeps working for the roles
+-- that legitimately do it.
+--
+-- PREFLIGHT EVIDENCE (production dry-run 2026-07-27, BEGIN..ROLLBACK):
+--   before: nspacl = {postgres=UC/postgres,=UC/postgres}
+--           CREATE: anon=t authenticated=t ci_secdef_audit=t service_role=t
+--   after:  nspacl = {postgres=UC/postgres,=U/postgres}
+--           CREATE: anon=f authenticated=f ci_secdef_audit=f service_role=f
+--           CREATE: postgres=t (direct grant), supabase_admin=t (superuser)
+--           USAGE:  unchanged (=U/postgres keeps PUBLIC USAGE)
+--   No table, function, RPC, policy or row is touched. Migrations keep
+--   working: MCP apply_migration executes as `postgres`, which holds its own
+--   direct `UC` grant and is unaffected; `supabase_admin` bypasses ACLs.
+--
+-- ROLLBACK: supabase/rollbacks/20260727150000_revoke_public_schema_create_v1.down.sql
+-- ============================================================================
+
+begin;
+
+-- Idempotent: REVOKE of an absent privilege is a no-op, so re-running is safe
+-- (including on a clean local `supabase db reset`, where the same default
+-- PUBLIC grant exists and is removed the same way).
+revoke create on schema public from public;
+
+commit;
+
+-- ============================================================================
+-- POST-APPLY VERIFICATION (read-only; run in the SQL editor after applying)
+--
+--   select n.nspacl::text as acl,
+--          has_schema_privilege('anon','public','CREATE')            as anon_create,
+--          has_schema_privilege('authenticated','public','CREATE')   as authenticated_create,
+--          has_schema_privilege('ci_secdef_audit','public','CREATE') as ci_audit_create,
+--          has_schema_privilege('postgres','public','CREATE')        as postgres_create,
+--          has_schema_privilege('anon','public','USAGE')             as anon_usage,
+--          has_schema_privilege('authenticated','public','USAGE')    as authenticated_usage
+--     from pg_namespace n where n.nspname = 'public';
+--
+--   -- Expect: acl = {postgres=UC/postgres,=U/postgres}; all *_create false
+--   -- except postgres_create = true; both *_usage true.
+--
+-- FUNCTIONAL CHECK: app pages and RPCs are unaffected (no role the app uses
+-- performs DDL at runtime). CI's live secdef gate must still connect and read.
+-- ============================================================================
