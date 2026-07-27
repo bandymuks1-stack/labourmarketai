@@ -28,7 +28,12 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     ["workers", "/for-workers"],
     ["companies", "/for-companies"],
     ["agencies", "/for-agencies"],
+    // PR-H global landing: "how it works" + "partners" are REAL landing
+    // anchors (sections rendered by page.tsx; existence pinned by
+    // lib/guards/global-landing.test.ts) — not new routes, not dead links.
+    ["how", "/#how-it-works"],
     ["pricing", "/pricing"],
+    ["partners", "/#partners"],
     ["about", "/about"],
   ])("nav key %s links to %s", (key, href) => {
     expect(nav).toContain(`{ key: "${key}", href: "${href}"`);
@@ -48,11 +53,15 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
         // themeToDark/themeToLight: the public header theme toggle labels
         // (production UX repair v2, F1 — the public site previously had no
         // theme control at all).
+        // how/partners: PR-H global landing anchor links (Kaip veikia /
+        // Partneriams) — labels for real landing sections.
         [
           "about",
           "agencies",
           "companies",
+          "how",
           "login",
+          "partners",
           "pricing",
           "startNow",
           "themeToDark",
