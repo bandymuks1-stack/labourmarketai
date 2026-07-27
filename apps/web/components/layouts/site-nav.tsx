@@ -13,7 +13,15 @@ import { isVisionPublic } from "@/lib/config/vision-publication";
 // owner-authored PR after smoke PASSES.
 type LinkVisibility = "always" | "vision-gate";
 type NavLink = {
-  key: "workers" | "companies" | "agencies" | "pricing" | "about" | "vision";
+  key:
+    | "workers"
+    | "companies"
+    | "agencies"
+    | "how"
+    | "pricing"
+    | "partners"
+    | "about"
+    | "vision";
   href: string;
   visibility: LinkVisibility;
 };
@@ -21,11 +29,16 @@ type NavLink = {
 // Canonical public IA (nav/funnel consistency PR): every label names its
 // real destination — audience pages by audience, Kainos, Apie. No template
 // labels ("Solutions"/"Resources"/"Company") pointing at unrelated routes.
+// PR-H global landing: "How it works" and "Partners" point at REAL landing
+// anchors (#how-it-works / #partners — sections rendered by page.tsx); no
+// dead routes were created for them.
 const ALL_LINKS: readonly NavLink[] = [
   { key: "workers", href: "/for-workers", visibility: "always" },
   { key: "companies", href: "/for-companies", visibility: "always" },
   { key: "agencies", href: "/for-agencies", visibility: "always" },
+  { key: "how", href: "/#how-it-works", visibility: "always" },
   { key: "pricing", href: "/pricing", visibility: "always" },
+  { key: "partners", href: "/#partners", visibility: "always" },
   { key: "about", href: "/about", visibility: "always" },
   { key: "vision", href: "/vision", visibility: "vision-gate" },
 ];

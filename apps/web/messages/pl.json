@@ -641,7 +641,7 @@
   },
   "live": {
     "chip": {
-      "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
+      "text": "Kierunki pracy na całym świecie"
     },
     "clock": {
       "badge": "[EN] EU-N MARKET · LIVE"
@@ -673,6 +673,12 @@
       "matchesToday": "[EN] matches today",
       "projects": "[EN] projects",
       "workers": "[EN] workers"
+    },
+    "world": {
+      "caption": "Widok koncepcyjny — kierunki rynków, nie dane na żywo",
+      "legendTarget": "Kierunki rynków",
+      "legendContext": "Reszta świata",
+      "aria": "Kierunki pracy — mapa świata"
     }
   },
   "market": {
@@ -718,7 +724,9 @@
     "login": "[EN] Sign in",
     "startNow": "[EN] Start now",
     "themeToDark": "Ciemny motyw",
-    "themeToLight": "Jasny motyw"
+    "themeToLight": "Jasny motyw",
+    "how": "Jak to działa",
+    "partners": "Dla partnerów"
   },
   "pages": {
     "agencies": {
@@ -3270,6 +3278,111 @@
         "languages": "języki",
         "salary": "oczekiwaną stawkę"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Wartość dla każdej strony pracy",
+    "audienceValueTitle": "Co zyskuje każda grupa",
+    "how": {
+      "eyebrow": "Jak to działa",
+      "title": "Opowiedz raz — platforma utrzyma strukturę",
+      "subcopy": "LabourMarket.ai stawia rozmowę na pierwszym miejscu: ty opisujesz, AI przygotowuje strukturę, ty zatwierdzasz. Każdy krok staje się prawdziwym, trwałym zapisem.",
+      "s1t": "Opowiedz, co potrafisz",
+      "s1b": "Pisz lub mów własnymi słowami — doświadczenie, fachy, narzędzia, języki. Bez długich formularzy.",
+      "s2t": "AI buduje twój profil zawodowy",
+      "s2b": "Asystent zamienia twoje słowa w ustrukturyzowany profil i żywe CV, które rośnie, gdy pracujesz. Każdą zmianę zatwierdzasz ty.",
+      "s3t": "Możliwości znalezione i wyjaśnione",
+      "s3b": "Platforma porównuje twoje umiejętności z realnymi potrzebami i zawsze pokazuje podstawę: które umiejętności pasują i które z nich są potwierdzone.",
+      "s4t": "Działaj przez rozmowę",
+      "s4b": "Wyraź zainteresowanie, zapisz dzień pracy, odpowiedz na rezerwację — w tym samym czacie, zawsze z potwierdzeniem przed zapisaniem."
+    },
+    "conv": {
+      "eyebrow": "Rozmowa jako system operacyjny",
+      "title": "Jedno okno czatu prowadzi twoją pracę",
+      "subcopy": "Zamiast dziesiątek formularzy po prostu rozmawiasz. Asystent przygotowuje, ty zatwierdzasz — a każde działanie zostawia zapis, do którego możesz wrócić.",
+      "liveLabel": "Działa już dziś",
+      "comingLabel": "W przygotowaniu",
+      "conceptLabel": "Widok koncepcyjny — stylizowana ilustracja, nie prawdziwa rozmowa",
+      "c1": "Zaktualizować CV i profil",
+      "c2": "Zapisać dzień pracy",
+      "c3": "Znaleźć pracę i wyrazić zainteresowanie",
+      "c4": "Opublikować zapotrzebowanie na pracowników",
+      "c5": "Odpowiedzieć na rezerwację",
+      "c6": "Skontaktować się z pasującym kandydatem",
+      "k1": "Zamówić usługę",
+      "k2": "Generować dokumenty",
+      "k3": "Tworzyć automatyzacje",
+      "mockUser": "Dziś na budowie w Wilnie ułożyłem 40 m² płytek i skończyłem ściany łazienki.",
+      "mockAssistant": "Przygotowałem zapis dnia pracy: układanie płytek, 40 m², ściany łazienki ukończone. Zapisać w twoim dzienniku?",
+      "mockConfirm": "Potwierdź",
+      "mockEdit": "Edytuj"
+    },
+    "workers": {
+      "title": "Dla pracowników",
+      "lead": "Twoja historia pracy staje się żywym CV, które otwiera drzwi — gdziekolwiek jest praca.",
+      "i1": "CV rośnie z prawdziwej pracy — każdy zapisany i potwierdzony dzień je uzupełnia.",
+      "i2": "Bez wielokrotnego wypełniania formularzy: opowiedz raz i używaj wszędzie.",
+      "i3": "Umiejętności stają się widoczne i ustrukturyzowane, a nie pogrzebane w pliku.",
+      "i4": "Możliwości na różnych rynkach, a dopasowanie zawsze wyjaśnione.",
+      "i5": "Pracuj w swoim języku — platforma mówi w jedenastu.",
+      "cta": "Więcej dla pracowników"
+    },
+    "employers": {
+      "title": "Dla pracodawców",
+      "lead": "Opisz, kogo potrzebujesz, zwykłymi słowami — strukturę zrobi platforma.",
+      "i1": "Opublikuj potrzebę naturalnym językiem; stanie się ustrukturyzowanym, porównywalnym zapytaniem.",
+      "i2": "Zobacz wyjaśnione dopasowanie — które umiejętności pasują i które są potwierdzone — zamiast zgadywać ze stosów CV.",
+      "i3": "Publikacja potrzeby zajmuje minuty, nie dni.",
+      "i4": "Mniej administracji: potrzeby, kandydaci i rezerwacje w jednym miejscu.",
+      "i5": "Docieraj do pracowników na różnych rynkach i w różnych językach.",
+      "cta": "Więcej dla pracodawców"
+    },
+    "agencies": {
+      "title": "Dla agencji",
+      "lead": "Połącz portfel kandydatów i potrzeby pracodawców w jeden ustrukturyzowany przepływ.",
+      "i1": "Portfel kandydatów — ustrukturyzowany i aktualny w jednym miejscu.",
+      "i2": "Porównuj kandydatów z potrzebami pracodawców z wyjaśnioną podstawą.",
+      "i3": "Udostępniaj dane kandydatów zgodnie z prawem: dostęp jest nadawany jawnie, rejestrowany i odwoływalny.",
+      "i4": "Działaj na kilku rynkach i w kilku językach z jednego konta.",
+      "cta": "Więcej dla agencji"
+    },
+    "training": {
+      "title": "Dla instytucji szkoleniowych",
+      "lead": "Zobacz, czego naprawdę wymaga rynek pracy — i przygotuj na to studentów.",
+      "i1": "Sygnały popytu na umiejętności oparte na cytowanych publicznych źródłach rynku pracy.",
+      "i2": "Wykorzystuj dane o popycie przy tworzeniu i aktualizacji programów.",
+      "i3": "Studenci wychodzą z żywym CV, które rośnie od pierwszej praktyki.",
+      "i4": "Śledź popyt regionalny i międzynarodowy w jednym miejscu.",
+      "cta": "Zobacz dane rynku pracy"
+    },
+    "partners": {
+      "title": "Dla partnerów i instytucji",
+      "lead": "Platforma zbudowana dla zgodnej z prawem, przejrzystej współpracy.",
+      "i1": "Integracja oparta na jasnych, audytowalnych zapisach.",
+      "i2": "Pochodzenie by design: zapisy zachowują źródło, język i historię.",
+      "i3": "Kontrola prywatności i bezpieczeństwa: domyślnie zamknięta widoczność, jawne zgody, dziennik audytu.",
+      "i4": "Modele współpracy od partnerstw danych po wejście na rynek — porozmawiajmy.",
+      "cta": "O platformie"
+    },
+    "trust": {
+      "eyebrow": "Zaufanie i bezpieczeństwo",
+      "title": "Twoje zapisy pod twoją kontrolą",
+      "t1t": "Ty kontrolujesz swoje dane",
+      "t1b": "Treści są domyślnie zamknięte; dostęp to jawna zgoda, którą możesz cofnąć.",
+      "t2t": "Działania wymagają twojego potwierdzenia",
+      "t2b": "AI przygotowuje — ty zatwierdzasz. Nic nie jest zapisywane ani wysyłane bez ciebie.",
+      "t3t": "Audytowalna historia",
+      "t3b": "Wrażliwe działania są zapisywane w dzienniku audytu tylko do dopisywania.",
+      "t4t": "Wyjaśnione decyzje AI",
+      "t4b": "Każde dopasowanie pokazuje swoją podstawę, a każda ekstrakcja AI jest rejestrowana razem z tym, co zaakceptowałeś."
+    },
+    "cta": {
+      "title": "Zacznij tam, gdzie jesteś",
+      "subcopy": "Czworo drzwi do tej samej platformy — wybierz swoje.",
+      "worker": "Jestem pracownikiem",
+      "employer": "Jestem pracodawcą",
+      "agency": "Reprezentuję agencję",
+      "partner": "Chcę zostać partnerem"
     }
   }
 }

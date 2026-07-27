@@ -641,7 +641,7 @@
   },
   "live": {
     "chip": {
-      "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
+      "text": "Darba virzieni visā pasaulē"
     },
     "clock": {
       "badge": "[EN] EU-N MARKET · LIVE"
@@ -673,6 +673,12 @@
       "matchesToday": "[EN] matches today",
       "projects": "[EN] projects",
       "workers": "[EN] workers"
+    },
+    "world": {
+      "caption": "Konceptuāls skats — tirgus virzieni, ne tiešie dati",
+      "legendTarget": "Tirgus virzieni",
+      "legendContext": "Pārējā pasaule",
+      "aria": "Darba virzieni — pasaules karte"
     }
   },
   "market": {
@@ -718,7 +724,9 @@
     "login": "[EN] Sign in",
     "startNow": "[EN] Start now",
     "themeToDark": "Tumšais motīvs",
-    "themeToLight": "Gaišais motīvs"
+    "themeToLight": "Gaišais motīvs",
+    "how": "Kā tas darbojas",
+    "partners": "Partneriem"
   },
   "pages": {
     "agencies": {
@@ -3270,6 +3278,111 @@
         "languages": "valodas",
         "salary": "gaidāmo likmi"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Vērtība katrai darba pusei",
+    "audienceValueTitle": "Ko iegūst katra auditorija",
+    "how": {
+      "eyebrow": "Kā tas darbojas",
+      "title": "Pastāstiet vienreiz — platforma saglabā struktūru",
+      "subcopy": "LabourMarket.ai pamatā ir saruna: jūs aprakstāt, AI sagatavo struktūru, jūs apstiprināt. Katrs solis kļūst par īstu, paliekošu ierakstu.",
+      "s1t": "Pastāstiet, ko protat",
+      "s1b": "Rakstiet vai runājiet saviem vārdiem — pieredze, arodi, instrumenti, valodas. Nekādu garu formu.",
+      "s2t": "AI veido jūsu profesionālo profilu",
+      "s2b": "Asistents pārvērš jūsu vārdus strukturētā profilā un dzīvā CV, kas aug jums strādājot. Katru izmaiņu apstiprināt jūs.",
+      "s3t": "Iespējas atrastas un izskaidrotas",
+      "s3b": "Platforma salīdzina jūsu prasmes ar reālām vajadzībām un vienmēr parāda pamatu: kuras prasmes atbilst un kuras no tām ir apstiprinātas.",
+      "s4t": "Rīkojieties sarunā",
+      "s4b": "Izsakiet interesi, reģistrējiet darba dienu, atbildiet uz rezervāciju — tajā pašā čatā, vienmēr ar apstiprinājumu pirms saglabāšanas."
+    },
+    "conv": {
+      "eyebrow": "Saruna kā operētājsistēma",
+      "title": "Viens čata logs vada jūsu darbu",
+      "subcopy": "Desmitiem formu vietā jūs vienkārši runājat. Asistents sagatavo, jūs apstiprināt — un katra darbība atstāj ierakstu, pie kura var atgriezties.",
+      "liveLabel": "Darbojas jau šodien",
+      "comingLabel": "Tiek gatavots",
+      "conceptLabel": "Konceptuāls skats — stilizēta ilustrācija, ne īsta saruna",
+      "c1": "Atjaunināt CV un profilu",
+      "c2": "Reģistrēt darba dienu",
+      "c3": "Atrast darbu un izteikt interesi",
+      "c4": "Publicēt darbaspēka vajadzību",
+      "c5": "Atbildēt uz rezervāciju",
+      "c6": "Sazināties ar atbilstošu kandidātu",
+      "k1": "Pasūtīt pakalpojumu",
+      "k2": "Ģenerēt dokumentus",
+      "k3": "Veidot automatizācijas",
+      "mockUser": "Šodien Viļņas objektā ieklāju 40 m² flīžu un pabeidzu vannas istabas sienas.",
+      "mockAssistant": "Sagatavoju darba dienas ierakstu: flīzēšana, 40 m², vannas istabas sienas pabeigtas. Saglabāt jūsu žurnālā?",
+      "mockConfirm": "Apstiprināt",
+      "mockEdit": "Rediģēt"
+    },
+    "workers": {
+      "title": "Darbiniekiem",
+      "lead": "Jūsu darba vēsture kļūst par dzīvu CV, kas atver durvis — lai kur būtu darbs.",
+      "i1": "CV aug no īsta darba — katra reģistrētā un apstiprinātā diena to papildina.",
+      "i2": "Nekādas atkārtotas formu aizpildīšanas: pastāstiet vienreiz un izmantojiet visur.",
+      "i3": "Prasmes kļūst redzamas un strukturētas, nevis apraktas failā.",
+      "i4": "Iespējas dažādos tirgos, un atbilstība vienmēr izskaidrota.",
+      "i5": "Strādājiet savā valodā — platforma runā vienpadsmit.",
+      "cta": "Vairāk darbiniekiem"
+    },
+    "employers": {
+      "title": "Darba devējiem",
+      "lead": "Aprakstiet, kas jums vajadzīgs, vienkāršiem vārdiem — struktūru izveidos platforma.",
+      "i1": "Publicējiet vajadzību dabiskā valodā; tā kļūst par strukturētu, salīdzināmu pieprasījumu.",
+      "i2": "Skatiet izskaidrotu atbilstību — kuras prasmes atbilst un kuras ir apstiprinātas — nevis miniet no CV kaudzēm.",
+      "i3": "Vajadzības publicēšana aizņem minūtes, ne dienas.",
+      "i4": "Mazāk administrēšanas: vajadzības, kandidāti un rezervācijas vienuviet.",
+      "i5": "Sasniedziet darbiniekus dažādos tirgos un valodās.",
+      "cta": "Vairāk darba devējiem"
+    },
+    "agencies": {
+      "title": "Aģentūrām",
+      "lead": "Apvienojiet kandidātu portfeli un darba devēju vajadzības vienā strukturētā plūsmā.",
+      "i1": "Kandidātu portfelis — strukturēts un aktuāls vienuviet.",
+      "i2": "Salīdziniet kandidātus ar darba devēju vajadzībām ar izskaidrotu pamatu.",
+      "i3": "Kopīgojiet kandidātu datus likumīgi: piekļuve tiek piešķirta skaidri, reģistrēta un ir atsaucama.",
+      "i4": "Strādājiet vairākos tirgos un valodās no viena konta.",
+      "cta": "Vairāk aģentūrām"
+    },
+    "training": {
+      "title": "Mācību iestādēm",
+      "lead": "Redziet, ko darba tirgus patiešām prasa, — un sagatavojiet tam studentus.",
+      "i1": "Prasmju pieprasījuma signāli, kas balstīti citētos publiskos darba tirgus avotos.",
+      "i2": "Izmantojiet pieprasījuma datus, veidojot un atjauninot programmas.",
+      "i3": "Studenti aiziet ar dzīvu CV, kas aug no pirmās prakses.",
+      "i4": "Sekojiet reģionālajam un starptautiskajam pieprasījumam vienuviet.",
+      "cta": "Skatīt darba tirgus datus"
+    },
+    "partners": {
+      "title": "Partneriem un institūcijām",
+      "lead": "Platforma, kas veidota likumīgai, caurskatāmai sadarbībai.",
+      "i1": "Integrācija, kas balstīta skaidros, auditējamos ierakstos.",
+      "i2": "Izcelsme pēc būtības: ieraksti saglabā avotu, valodu un vēsturi.",
+      "i3": "Privātuma un drošības kontrole: pēc noklusējuma slēgta redzamība, skaidras atļaujas, audita žurnāls.",
+      "i4": "Sadarbības modeļi no datu partnerībām līdz ienākšanai tirgū — parunāsim.",
+      "cta": "Par platformu"
+    },
+    "trust": {
+      "eyebrow": "Uzticība un drošība",
+      "title": "Jūsu ieraksti — jūsu kontrolē",
+      "t1t": "Jūs pārvaldāt savus datus",
+      "t1b": "Saturs pēc noklusējuma ir slēgts; piekļuve ir skaidra atļauja, ko varat atsaukt.",
+      "t2t": "Darbībām vajadzīgs jūsu apstiprinājums",
+      "t2b": "AI sagatavo — jūs apstiprināt. Nekas netiek saglabāts vai nosūtīts bez jums.",
+      "t3t": "Auditējama vēsture",
+      "t3b": "Jutīgas darbības tiek fiksētas tikai papildināmā audita žurnālā.",
+      "t4t": "Izskaidroti AI lēmumi",
+      "t4b": "Katra atbilstība parāda savu pamatu, un katra AI izguve tiek reģistrēta kopā ar to, ko pieņēmāt."
+    },
+    "cta": {
+      "title": "Sāciet tur, kur esat",
+      "subcopy": "Četras durvis uz vienu platformu — izvēlieties savas.",
+      "worker": "Esmu darbinieks",
+      "employer": "Esmu darba devējs",
+      "agency": "Pārstāvu aģentūru",
+      "partner": "Vēlos kļūt par partneri"
     }
   }
 }

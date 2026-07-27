@@ -641,7 +641,7 @@
   },
   "live": {
     "chip": {
-      "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
+      "text": "Arbejdsretninger i hele verden"
     },
     "clock": {
       "badge": "[EN] EU-N MARKET · LIVE"
@@ -673,6 +673,12 @@
       "matchesToday": "[EN] matches today",
       "projects": "[EN] projects",
       "workers": "[EN] workers"
+    },
+    "world": {
+      "caption": "Konceptvisning — markedsretninger, ikke live-data",
+      "legendTarget": "Markedsretninger",
+      "legendContext": "Resten af verden",
+      "aria": "Arbejdsretninger — verdenskort"
     }
   },
   "market": {
@@ -718,7 +724,9 @@
     "login": "[EN] Sign in",
     "startNow": "[EN] Start now",
     "themeToDark": "Mørkt tema",
-    "themeToLight": "Lyst tema"
+    "themeToLight": "Lyst tema",
+    "how": "Sådan fungerer det",
+    "partners": "For partnere"
   },
   "pages": {
     "agencies": {
@@ -3270,6 +3278,111 @@
         "languages": "sprog",
         "salary": "forventet sats"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Værdi for alle sider af arbejdet",
+    "audienceValueTitle": "Hvad hver målgruppe får",
+    "how": {
+      "eyebrow": "Sådan fungerer det",
+      "title": "Fortæl det én gang — platformen holder det struktureret",
+      "subcopy": "LabourMarket.ai er samtale-først: du beskriver, AI udarbejder strukturen, du bekræfter. Hvert trin bliver en ægte, blivende registrering.",
+      "s1t": "Fortæl, hvad du kan",
+      "s1b": "Skriv eller tal med dine egne ord — erfaring, fag, værktøj, sprog. Ingen lange formularer.",
+      "s2t": "AI bygger din professionelle profil",
+      "s2b": "Assistenten omdanner dine ord til en struktureret profil og et levende CV, der vokser, mens du arbejder. Du bekræfter hver ændring.",
+      "s3t": "Muligheder fundet og forklaret",
+      "s3b": "Platformen sammenligner dine færdigheder med reelle behov og viser altid grundlaget: hvilke færdigheder matcher, og hvilke af dem er bekræftet.",
+      "s4t": "Handl gennem samtalen",
+      "s4b": "Vis interesse, registrér en arbejdsdag, svar på en booking — i samme chat, altid med en bekræftelse, før noget gemmes."
+    },
+    "conv": {
+      "eyebrow": "Samtalen som operativsystem",
+      "title": "Ét chatvindue styrer dit arbejde",
+      "subcopy": "I stedet for snesevis af formularer taler du bare. Assistenten udarbejder, du bekræfter — og hver handling efterlader en registrering, du kan vende tilbage til.",
+      "liveLabel": "Virker i dag",
+      "comingLabel": "Under forberedelse",
+      "conceptLabel": "Konceptvisning — stiliseret illustration, ikke en rigtig samtale",
+      "c1": "Opdatér CV og profil",
+      "c2": "Registrér en arbejdsdag",
+      "c3": "Find arbejde og vis interesse",
+      "c4": "Offentliggør et behov for arbejdskraft",
+      "c5": "Svar på en booking",
+      "c6": "Kontakt en matchende kandidat",
+      "k1": "Bestil en ydelse",
+      "k2": "Generér dokumenter",
+      "k3": "Opret automatiseringer",
+      "mockUser": "I dag lagde jeg 40 m² fliser på pladsen i Vilnius og gjorde badeværelsesvæggene færdige.",
+      "mockAssistant": "Jeg har udarbejdet en arbejdsdagsregistrering: flisearbejde, 40 m², badeværelsesvægge færdige. Skal den gemmes i din journal?",
+      "mockConfirm": "Bekræft",
+      "mockEdit": "Redigér"
+    },
+    "workers": {
+      "title": "For arbejdstagere",
+      "lead": "Din arbejdshistorik bliver et levende CV, der åbner døre — hvor end arbejdet er.",
+      "i1": "Dit CV vokser ud af rigtigt arbejde — hver registreret og bekræftet dag føjer til det.",
+      "i2": "Ingen gentagne formularer: fortæl det én gang og brug det overalt.",
+      "i3": "Dine færdigheder bliver synlige og strukturerede i stedet for begravet i en fil.",
+      "i4": "Muligheder på tværs af markeder, og matchet forklares altid.",
+      "i5": "Arbejd på dit eget sprog — platformen taler elleve.",
+      "cta": "Mere for arbejdstagere"
+    },
+    "employers": {
+      "title": "For arbejdsgivere",
+      "lead": "Beskriv med almindelige ord, hvem du har brug for — platformen strukturerer det.",
+      "i1": "Opret et behov i naturligt sprog; det bliver en struktureret, sammenlignelig forespørgsel.",
+      "i2": "Se forklaret match — hvilke færdigheder passer, og hvilke er bekræftet — i stedet for at gætte ud fra CV-bunker.",
+      "i3": "At offentliggøre et behov tager minutter, ikke dage.",
+      "i4": "Mindre administration: behov, kandidater og bookinger samlet ét sted.",
+      "i5": "Nå arbejdstagere på tværs af markeder og sprog.",
+      "cta": "Mere for arbejdsgivere"
+    },
+    "agencies": {
+      "title": "For bureauer",
+      "lead": "Saml din kandidatportefølje og arbejdsgivernes behov i ét struktureret flow.",
+      "i1": "Din kandidatportefølje — struktureret og opdateret ét sted.",
+      "i2": "Sammenlign kandidater med arbejdsgiverbehov med et forklaret grundlag.",
+      "i3": "Del kandidatdata lovligt: adgang gives eksplicit, logges og kan trækkes tilbage.",
+      "i4": "Arbejd på flere markeder og sprog fra én konto.",
+      "cta": "Mere for bureauer"
+    },
+    "training": {
+      "title": "For uddannelsesinstitutioner",
+      "lead": "Se, hvad arbejdsmarkedet faktisk efterspørger — og forbered de studerende på det.",
+      "i1": "Signaler om efterspørgsel på færdigheder baseret på citerede offentlige arbejdsmarkedskilder.",
+      "i2": "Brug efterspørgselsdata, når programmer udformes og opdateres.",
+      "i3": "Studerende går ud med et levende CV, der vokser fra første praktik.",
+      "i4": "Følg regional og international efterspørgsel ét sted.",
+      "cta": "Se arbejdsmarkedsdata"
+    },
+    "partners": {
+      "title": "For partnere & institutioner",
+      "lead": "En platform bygget til lovligt, gennemsigtigt samarbejde.",
+      "i1": "Integration bygget på klare, auditerbare registreringer.",
+      "i2": "Proveniens by design: registreringer bevarer oprindelse, sprog og historik.",
+      "i3": "Privatlivs- og sikkerhedskontroller: lukket synlighed som standard, eksplicitte tilladelser, en auditlog.",
+      "i4": "Samarbejdsmodeller fra datapartnerskaber til markedsindtræden — lad os tale sammen.",
+      "cta": "Om platformen"
+    },
+    "trust": {
+      "eyebrow": "Tillid & sikkerhed",
+      "title": "Dine registreringer, under din kontrol",
+      "t1t": "Du styrer dine data",
+      "t1b": "Indhold er lukket som standard; adgang er en eksplicit tilladelse, du kan trække tilbage.",
+      "t2t": "Handlinger kræver din bekræftelse",
+      "t2b": "AI udarbejder — du godkender. Intet gemmes eller sendes uden dig.",
+      "t3t": "Auditerbar historik",
+      "t3b": "Følsomme handlinger registreres i en auditlog, der kun kan tilføjes til.",
+      "t4t": "Forklarede AI-beslutninger",
+      "t4b": "Hvert match viser sit grundlag, og hver AI-udtrækning logges sammen med det, du accepterede."
+    },
+    "cta": {
+      "title": "Start der, hvor du er",
+      "subcopy": "Fire døre ind til samme platform — vælg din.",
+      "worker": "Jeg er arbejdstager",
+      "employer": "Jeg er arbejdsgiver",
+      "agency": "Jeg repræsenterer et bureau",
+      "partner": "Jeg vil være partner"
     }
   }
 }

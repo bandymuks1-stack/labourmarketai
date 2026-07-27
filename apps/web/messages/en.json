@@ -3320,7 +3320,7 @@
   },
   "live": {
     "chip": {
-      "text": "Work directions across Europe"
+      "text": "Work directions worldwide"
     },
     "clock": {
       "badge": "Northern & Baltic Europe"
@@ -3353,7 +3353,13 @@
       "active_markets": "Core directions (9)",
       "expansion_candidates": "Expansion candidates"
     },
-    "caption": "Work directions across the Baltics and Northern Europe"
+    "caption": "Work directions across the Baltics and Northern Europe",
+    "world": {
+      "caption": "Concept view — market directions, not live data",
+      "legendTarget": "Market directions",
+      "legendContext": "Wider world",
+      "aria": "Work directions — world map"
+    }
   },
   "company": {
     "score": {
@@ -4596,7 +4602,9 @@
     "login": "Sign in",
     "startNow": "Start now",
     "themeToDark": "Dark theme",
-    "themeToLight": "Light theme"
+    "themeToLight": "Light theme",
+    "how": "How it works",
+    "partners": "For partners"
   },
   "hero": {
     "chip": "General labour-market platform",
@@ -11087,6 +11095,111 @@
         "languages": "languages",
         "salary": "rate expectation"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Value for every side of work",
+    "audienceValueTitle": "What each audience gets",
+    "how": {
+      "eyebrow": "How it works",
+      "title": "Tell it once — the platform keeps it structured",
+      "subcopy": "LabourMarket.ai is conversation-first: you describe, AI drafts the structure, you confirm. Every step becomes a real, persisting record.",
+      "s1t": "Tell what you can do",
+      "s1b": "Write or speak in your own words — experience, trades, tools, languages. No long forms to fill.",
+      "s2t": "AI builds your professional profile",
+      "s2b": "The assistant turns your words into a structured profile and a living CV, and keeps it fresh as you work. You confirm every change.",
+      "s3t": "Opportunities found and explained",
+      "s3b": "The platform compares your skills with real needs and always shows the basis: which skills match and which of them are confirmed.",
+      "s4t": "Act through conversation",
+      "s4b": "Express interest, log a work day, answer a booking — in the same chat, always with a confirmation before anything is saved."
+    },
+    "conv": {
+      "eyebrow": "Conversation as the operating system",
+      "title": "One chat window runs your work",
+      "subcopy": "Instead of dozens of forms you simply talk. The assistant drafts, you confirm — and every action leaves a record you can revisit.",
+      "liveLabel": "Works today",
+      "comingLabel": "In preparation",
+      "conceptLabel": "Concept view — styled illustration, not a live conversation",
+      "c1": "Update your CV and profile",
+      "c2": "Log a work day",
+      "c3": "Find work and express interest",
+      "c4": "Publish a workforce need",
+      "c5": "Respond to a booking",
+      "c6": "Contact a matched candidate",
+      "k1": "Order a service",
+      "k2": "Generate documents",
+      "k3": "Create automations",
+      "mockUser": "Today I tiled 40 m² at the Vilnius site and finished the bathroom walls.",
+      "mockAssistant": "I drafted a work-day entry: tiling, 40 m², bathroom walls finished. Save it to your journal?",
+      "mockConfirm": "Confirm",
+      "mockEdit": "Edit"
+    },
+    "workers": {
+      "title": "For workers",
+      "lead": "Your work history becomes a living CV that opens doors — wherever the work is.",
+      "i1": "Your CV grows from real work — every logged and confirmed day adds to it.",
+      "i2": "No repeated form-filling: tell it once and reuse it everywhere.",
+      "i3": "Your skills become visible and structured instead of buried in a file.",
+      "i4": "Opportunities across markets, with the match always explained.",
+      "i5": "Work in your own language — the platform speaks eleven.",
+      "cta": "More for workers"
+    },
+    "employers": {
+      "title": "For employers",
+      "lead": "Describe who you need in plain words — the platform does the structuring.",
+      "i1": "Post a need in natural language; it becomes a structured, comparable request.",
+      "i2": "See explained fit — which skills match and which are confirmed — instead of guessing from CV piles.",
+      "i3": "Publishing a need takes minutes, not days.",
+      "i4": "Less admin: needs, candidates and bookings live in one place.",
+      "i5": "Reach workers across markets and languages.",
+      "cta": "More for employers"
+    },
+    "agencies": {
+      "title": "For agencies",
+      "lead": "Bring your candidate portfolio and employer needs into one structured flow.",
+      "i1": "Keep your candidate portfolio structured and up to date in one place.",
+      "i2": "Compare candidates against employer needs with an explained basis.",
+      "i3": "Share candidate data lawfully: access is granted explicitly, logged and revocable.",
+      "i4": "Operate across several markets and languages from one account.",
+      "cta": "More for agencies"
+    },
+    "training": {
+      "title": "For training institutions",
+      "lead": "See what the labour market actually asks for — and prepare students for it.",
+      "i1": "Skill-demand signals built on cited public labour-market sources.",
+      "i2": "Use demand data when shaping and updating programmes.",
+      "i3": "Students leave with a living CV that grows from their first practice.",
+      "i4": "Follow regional and international demand from one place.",
+      "cta": "See labour-market data"
+    },
+    "partners": {
+      "title": "For partners & institutions",
+      "lead": "A platform built for lawful, transparent collaboration.",
+      "i1": "Integration built on clear, auditable records.",
+      "i2": "Provenance by design: records keep their origin, language and history.",
+      "i3": "Privacy and security controls: closed-by-default visibility, explicit grants, an audit log.",
+      "i4": "Collaboration models from data partnerships to market entry — let's talk.",
+      "cta": "About the platform"
+    },
+    "trust": {
+      "eyebrow": "Trust & security",
+      "title": "Your records, under your control",
+      "t1t": "You control your data",
+      "t1b": "Content is closed by default; access is an explicit grant you can revoke.",
+      "t2t": "Actions need your confirmation",
+      "t2b": "AI drafts — you approve. Nothing is saved or sent without you.",
+      "t3t": "Auditable history",
+      "t3b": "Sensitive actions are recorded in an append-only audit log.",
+      "t4t": "Explained AI decisions",
+      "t4b": "Every match shows its basis, and every AI extraction is logged together with what you accepted."
+    },
+    "cta": {
+      "title": "Start where you are",
+      "subcopy": "Four doors into the same platform — pick yours.",
+      "worker": "I am a worker",
+      "employer": "I am an employer",
+      "agency": "I represent an agency",
+      "partner": "I want to become a partner"
     }
   }
 }
