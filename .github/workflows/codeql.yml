@@ -17,8 +17,13 @@ name: CodeQL
 on:
   push:
     branches: [main]
+  # NO `branches:` filter here, deliberately. With `branches: [main]` this
+  # workflow silently SKIPS any pull request whose base is not main — which is
+  # exactly what a stacked PR looks like (PR #871 was retargeted onto its parent
+  # branch and the scan stopped running, with no failure to notice). A security
+  # scanner that quietly does nothing is worse than one that is absent, because
+  # the checks list still looks complete. Run on every PR regardless of base.
   pull_request:
-    branches: [main]
   schedule:
     # Weekly, so newly published queries reach existing code that has not
     # changed. A push-only trigger never re-examines dormant code.
