@@ -97,12 +97,18 @@ const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "gothenburg", "göteborg", "malmö", "malmo"] },
   { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
   // Open-markets update 2026-07-17 — the six newly opened markets.
-  { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis"] },
+  { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis", "batumi", "kutaisi", "rustavi"] },
   { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp"] },
   { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille"] },
   { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia"] },
   { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz"] },
   { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel"] },
+  // PR-G global location model — the USA becomes a first-class market. Country
+  // words + major metros only (no 50-state needle list; note "georgia" above
+  // maps to the country GE, which sits earlier in this ordered rule list).
+  // NB matching is substring-based, so a bare "usa" needle is unsafe
+  // ("thousand" contains it) — dotted/full forms only.
+  { code: "US", needles: ["u.s.", "united states", "amerik", "америк", "сша", "штаты", "new york", "los angeles", "chicago", "houston", "miami", "dallas", "phoenix", "philadelphia", "atlanta", "seattle", "boston", "denver", "washington"] },
 ];
 
 const KNOWN_COUNTRIES = new Set<string>(MARKET_COUNTRIES);

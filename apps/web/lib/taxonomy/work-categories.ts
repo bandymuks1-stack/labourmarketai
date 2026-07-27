@@ -215,19 +215,32 @@ export function isConstructionWorkType(slug: string | undefined | null): boolean
   return !!slug && CONSTRUCTION_WORK_TYPE_SLUGS.includes(slug);
 }
 
-/** The ISO-3166 alpha-2 markets the platform serves (Baltic + Northern Europe,
- *  extended 2026-07-17 with the newly opened GE/BE/FR/ES/AT/CH markets).
- *  Used as the allowed country set for structured demand intake; display names
- *  come from the `labourMarket.countryNames` i18n catalogue. The DB column
- *  behind demand intake (`customer_requests.country`) is free text — no CHECK
- *  constraint — so this list needs no migration. */
-export const MARKET_COUNTRIES = [
+/** Tiered global country model (PR-G — global location model):
+ *
+ *  - `ACTIVE_MARKETS` — the ISO-3166 alpha-2 markets the platform actively
+ *    serves today (Baltic + Northern Europe core, the 2026-07-17 open markets
+ *    GE/BE/FR/ES/AT/CH, and the 2026-07 US market). Used as the allowed
+ *    country set for structured demand intake; display names come from the
+ *    `labourMarket.countryNames` i18n catalogue. The DB column behind demand
+ *    intake (`customer_requests.country`) is free text — no CHECK constraint —
+ *    so this list needs no migration.
+ *  - `ALL_ISO_COUNTRIES` (re-exported from lib/location/country-model) — every
+ *    officially assigned ISO country; the model supports all of them, nothing
+ *    may assume Europe or default to Lithuania.
+ */
+export { ALL_ISO_COUNTRIES, isIsoCountry } from "@/lib/location/country-model";
+
+export const ACTIVE_MARKETS = [
   "LT", "LV", "EE", "PL", "DE", "NL", "DK", "NO", "SE", "FI",
-  "GE", "BE", "FR", "ES", "AT", "CH",
+  "GE", "BE", "FR", "ES", "AT", "CH", "US",
 ] as const;
-export type MarketCountry = (typeof MARKET_COUNTRIES)[number];
+
+/** Back-compat alias — existing imports keep working; new code should prefer
+ *  the explicit tier name `ACTIVE_MARKETS`. */
+export const MARKET_COUNTRIES = ACTIVE_MARKETS;
+export type MarketCountry = (typeof ACTIVE_MARKETS)[number];
 export function isMarketCountry(code: string): code is MarketCountry {
-  return (MARKET_COUNTRIES as readonly string[]).includes(code);
+  return (ACTIVE_MARKETS as readonly string[]).includes(code);
 }
 
 /** Locale-aware slug → label map for every work type. Used where a stored
