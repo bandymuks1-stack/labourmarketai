@@ -3320,7 +3320,7 @@
   },
   "live": {
     "chip": {
-      "text": "Werkrichtingen in heel Europa"
+      "text": "Werkrichtingen wereldwijd"
     },
     "clock": {
       "badge": "Noord- & Baltisch Europa"
@@ -3353,7 +3353,13 @@
       "active_markets": "Kernrichtingen (9)",
       "expansion_candidates": "Uitbreidingskandidaten"
     },
-    "caption": "Werkrichtingen in de Baltische staten en Noord-Europa"
+    "caption": "Werkrichtingen in de Baltische staten en Noord-Europa",
+    "world": {
+      "caption": "Conceptweergave — marktrichtingen, geen live gegevens",
+      "legendTarget": "Marktrichtingen",
+      "legendContext": "Rest van de wereld",
+      "aria": "Werkrichtingen — wereldkaart"
+    }
   },
   "company": {
     "score": {
@@ -4596,7 +4602,9 @@
     "login": "Inloggen",
     "startNow": "Begin nu",
     "themeToDark": "Donker thema",
-    "themeToLight": "Licht thema"
+    "themeToLight": "Licht thema",
+    "how": "Hoe het werkt",
+    "partners": "Voor partners"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
@@ -11087,6 +11095,111 @@
         "languages": "talen",
         "salary": "tariefverwachting"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Waarde voor elke kant van werk",
+    "audienceValueTitle": "Wat elke doelgroep krijgt",
+    "how": {
+      "eyebrow": "Hoe het werkt",
+      "title": "Vertel het één keer — het platform houdt het gestructureerd",
+      "subcopy": "LabourMarket.ai is gesprek-eerst: jij beschrijft, AI stelt de structuur op, jij bevestigt. Elke stap wordt een echt, blijvend record.",
+      "s1t": "Vertel wat je kunt",
+      "s1b": "Schrijf of spreek in je eigen woorden — ervaring, vakken, gereedschap, talen. Geen lange formulieren.",
+      "s2t": "AI bouwt je professionele profiel",
+      "s2b": "De assistent zet je woorden om in een gestructureerd profiel en een levend CV, dat meegroeit terwijl je werkt. Jij bevestigt elke wijziging.",
+      "s3t": "Kansen gevonden en uitgelegd",
+      "s3b": "Het platform vergelijkt je vaardigheden met echte behoeften en toont altijd de basis: welke vaardigheden passen en welke daarvan bevestigd zijn.",
+      "s4t": "Handel via het gesprek",
+      "s4b": "Toon interesse, registreer een werkdag, beantwoord een boeking — in dezelfde chat, altijd met een bevestiging voordat iets wordt opgeslagen."
+    },
+    "conv": {
+      "eyebrow": "Het gesprek als besturingssysteem",
+      "title": "Eén chatvenster bestuurt je werk",
+      "subcopy": "In plaats van tientallen formulieren praat je gewoon. De assistent stelt op, jij bevestigt — en elke actie laat een record achter dat je kunt terugzien.",
+      "liveLabel": "Werkt vandaag al",
+      "comingLabel": "In voorbereiding",
+      "conceptLabel": "Conceptweergave — gestileerde illustratie, geen echt gesprek",
+      "c1": "CV en profiel bijwerken",
+      "c2": "Een werkdag registreren",
+      "c3": "Werk vinden en interesse tonen",
+      "c4": "Een personeelsbehoefte publiceren",
+      "c5": "Op een boeking reageren",
+      "c6": "Contact opnemen met een passende kandidaat",
+      "k1": "Een dienst bestellen",
+      "k2": "Documenten genereren",
+      "k3": "Automatiseringen maken",
+      "mockUser": "Vandaag heb ik op de locatie in Vilnius 40 m² getegeld en de badkamermuren afgewerkt.",
+      "mockAssistant": "Ik heb een werkdagrecord opgesteld: tegelen, 40 m², badkamermuren afgewerkt. Opslaan in je journaal?",
+      "mockConfirm": "Bevestigen",
+      "mockEdit": "Bewerken"
+    },
+    "workers": {
+      "title": "Voor werknemers",
+      "lead": "Je werkgeschiedenis wordt een levend CV dat deuren opent — waar het werk ook is.",
+      "i1": "Je CV groeit uit echt werk — elke geregistreerde en bevestigde dag vult het aan.",
+      "i2": "Geen herhaald formulieren invullen: vertel het één keer en gebruik het overal.",
+      "i3": "Je vaardigheden worden zichtbaar en gestructureerd in plaats van begraven in een bestand.",
+      "i4": "Kansen in meerdere markten, met een match die altijd wordt uitgelegd.",
+      "i5": "Werk in je eigen taal — het platform spreekt er elf.",
+      "cta": "Meer voor werknemers"
+    },
+    "employers": {
+      "title": "Voor werkgevers",
+      "lead": "Beschrijf wie je nodig hebt in gewone woorden — het platform structureert het.",
+      "i1": "Plaats een behoefte in natuurlijke taal; die wordt een gestructureerd, vergelijkbaar verzoek.",
+      "i2": "Zie uitgelegde geschiktheid — welke vaardigheden passen en welke bevestigd zijn — in plaats van gokken uit stapels CV's.",
+      "i3": "Een behoefte publiceren kost minuten, geen dagen.",
+      "i4": "Minder administratie: behoeften, kandidaten en boekingen op één plek.",
+      "i5": "Bereik werknemers in meerdere markten en talen.",
+      "cta": "Meer voor werkgevers"
+    },
+    "agencies": {
+      "title": "Voor bureaus",
+      "lead": "Breng je kandidatenportfolio en werkgeversbehoeften samen in één gestructureerde stroom.",
+      "i1": "Houd je kandidatenportfolio gestructureerd en actueel op één plek.",
+      "i2": "Vergelijk kandidaten met werkgeversbehoeften met een uitgelegde basis.",
+      "i3": "Deel kandidaatgegevens rechtmatig: toegang wordt expliciet verleend, geregistreerd en is intrekbaar.",
+      "i4": "Werk vanuit één account in meerdere markten en talen.",
+      "cta": "Meer voor bureaus"
+    },
+    "training": {
+      "title": "Voor opleidingsinstellingen",
+      "lead": "Zie wat de arbeidsmarkt werkelijk vraagt — en bereid studenten daarop voor.",
+      "i1": "Signalen over vaardighedenvraag op basis van geciteerde openbare arbeidsmarktbronnen.",
+      "i2": "Gebruik vraagdata bij het vormgeven en vernieuwen van programma's.",
+      "i3": "Studenten vertrekken met een levend CV dat groeit vanaf hun eerste praktijk.",
+      "i4": "Volg regionale en internationale vraag vanaf één plek.",
+      "cta": "Bekijk arbeidsmarktdata"
+    },
+    "partners": {
+      "title": "Voor partners & instellingen",
+      "lead": "Een platform gebouwd voor rechtmatige, transparante samenwerking.",
+      "i1": "Integratie op basis van heldere, auditeerbare records.",
+      "i2": "Records bewaren waar ze vandaan komen, hun taal en hun geschiedenis.",
+      "i3": "Privacy- en beveiligingscontroles: standaard gesloten zichtbaarheid, expliciete toestemmingen, een auditlog.",
+      "i4": "Samenwerkingsmodellen van datapartnerschappen tot markttoetreding — laten we praten.",
+      "cta": "Over het platform"
+    },
+    "trust": {
+      "eyebrow": "Vertrouwen & beveiliging",
+      "title": "Jouw records, onder jouw controle",
+      "t1t": "Jij beheert je gegevens",
+      "t1b": "Inhoud is standaard gesloten; toegang is een expliciete toestemming die je kunt intrekken.",
+      "t2t": "Acties vereisen jouw bevestiging",
+      "t2b": "AI stelt op — jij keurt goed. Niets wordt opgeslagen of verzonden zonder jou.",
+      "t3t": "Auditeerbare geschiedenis",
+      "t3b": "Gevoelige acties worden vastgelegd in een alleen-toevoegen auditlog.",
+      "t4t": "Uitgelegde AI-beslissingen",
+      "t4b": "Elke match laat zien waarom, en wat de AI uit je tekst las wordt bewaard samen met wat jij hebt geaccepteerd."
+    },
+    "cta": {
+      "title": "Begin waar je bent",
+      "subcopy": "Vier deuren naar hetzelfde platform — kies de jouwe.",
+      "worker": "Ik ben werknemer",
+      "employer": "Ik ben werkgever",
+      "agency": "Ik vertegenwoordig een bureau",
+      "partner": "Ik wil partner worden"
     }
   }
 }

@@ -3320,7 +3320,7 @@
   },
   "live": {
     "chip": {
-      "text": "Arbeitsrichtungen in ganz Europa"
+      "text": "Arbeitsrichtungen weltweit"
     },
     "clock": {
       "badge": "Nordeuropa & Baltikum"
@@ -3353,7 +3353,13 @@
       "active_markets": "Kernrichtungen (9)",
       "expansion_candidates": "Expansionskandidaten"
     },
-    "caption": "Arbeitsrichtungen im Baltikum und in Nordeuropa"
+    "caption": "Arbeitsrichtungen im Baltikum und in Nordeuropa",
+    "world": {
+      "caption": "Konzeptansicht — Marktrichtungen, keine Live-Daten",
+      "legendTarget": "Marktrichtungen",
+      "legendContext": "Übrige Welt",
+      "aria": "Arbeitsrichtungen — Weltkarte"
+    }
   },
   "company": {
     "score": {
@@ -4596,7 +4602,9 @@
     "login": "Anmelden",
     "startNow": "Jetzt starten",
     "themeToDark": "Dunkles Design",
-    "themeToLight": "Helles Design"
+    "themeToLight": "Helles Design",
+    "how": "So funktioniert es",
+    "partners": "Für Partner"
   },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
@@ -11087,6 +11095,111 @@
         "languages": "Sprachen",
         "salary": "erwarteten Satz"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Wert für jede Seite der Arbeit",
+    "audienceValueTitle": "Was jede Zielgruppe bekommt",
+    "how": {
+      "eyebrow": "So funktioniert es",
+      "title": "Einmal erzählen — die Plattform hält es strukturiert",
+      "subcopy": "LabourMarket.ai ist Gespräch-zuerst: Sie beschreiben, KI entwirft die Struktur, Sie bestätigen. Jeder Schritt wird zu einem echten, bleibenden Eintrag.",
+      "s1t": "Erzählen Sie, was Sie können",
+      "s1b": "Schreiben oder sprechen Sie in eigenen Worten — Erfahrung, Gewerke, Werkzeuge, Sprachen. Keine langen Formulare.",
+      "s2t": "KI baut Ihr berufliches Profil",
+      "s2b": "Der Assistent macht aus Ihren Worten ein strukturiertes Profil und einen lebendigen Lebenslauf, der mit Ihrer Arbeit wächst. Jede Änderung bestätigen Sie.",
+      "s3t": "Chancen gefunden und erklärt",
+      "s3b": "Die Plattform vergleicht Ihre Fähigkeiten mit echten Bedarfen und zeigt immer die Grundlage: welche Fähigkeiten passen und welche davon bestätigt sind.",
+      "s4t": "Handeln Sie im Gespräch",
+      "s4b": "Interesse zeigen, einen Arbeitstag erfassen, eine Buchung beantworten — im selben Chat, immer mit Bestätigung, bevor etwas gespeichert wird."
+    },
+    "conv": {
+      "eyebrow": "Das Gespräch als Betriebssystem",
+      "title": "Ein Chatfenster steuert Ihre Arbeit",
+      "subcopy": "Statt Dutzender Formulare reden Sie einfach. Der Assistent entwirft, Sie bestätigen — und jede Aktion hinterlässt einen nachvollziehbaren Eintrag.",
+      "liveLabel": "Funktioniert heute",
+      "comingLabel": "In Vorbereitung",
+      "conceptLabel": "Konzeptansicht — stilisierte Illustration, kein echtes Gespräch",
+      "c1": "Lebenslauf und Profil aktualisieren",
+      "c2": "Einen Arbeitstag erfassen",
+      "c3": "Arbeit finden und Interesse zeigen",
+      "c4": "Einen Personalbedarf veröffentlichen",
+      "c5": "Auf eine Buchung antworten",
+      "c6": "Passenden Kandidaten kontaktieren",
+      "k1": "Eine Dienstleistung bestellen",
+      "k2": "Dokumente generieren",
+      "k3": "Automatisierungen erstellen",
+      "mockUser": "Heute habe ich auf der Baustelle in Vilnius 40 m² gefliest und die Badezimmerwände fertiggestellt.",
+      "mockAssistant": "Ich habe einen Arbeitstag-Eintrag entworfen: Fliesen, 40 m², Badezimmerwände fertig. In Ihr Journal speichern?",
+      "mockConfirm": "Bestätigen",
+      "mockEdit": "Bearbeiten"
+    },
+    "workers": {
+      "title": "Für Arbeitskräfte",
+      "lead": "Ihre Arbeitshistorie wird ein lebendiger Lebenslauf, der Türen öffnet — wo immer die Arbeit ist.",
+      "i1": "Ihr Lebenslauf wächst aus echter Arbeit — jeder erfasste und bestätigte Tag ergänzt ihn.",
+      "i2": "Kein wiederholtes Formularausfüllen: einmal erzählen, überall verwenden.",
+      "i3": "Ihre Fähigkeiten werden sichtbar und strukturiert statt in einer Datei begraben.",
+      "i4": "Chancen in mehreren Märkten, die Passung wird immer erklärt.",
+      "i5": "Arbeiten Sie in Ihrer Sprache — die Plattform spricht elf.",
+      "cta": "Mehr für Arbeitskräfte"
+    },
+    "employers": {
+      "title": "Für Arbeitgeber",
+      "lead": "Beschreiben Sie in einfachen Worten, wen Sie brauchen — die Plattform strukturiert.",
+      "i1": "Bedarf in natürlicher Sprache erfassen; er wird eine strukturierte, vergleichbare Anfrage.",
+      "i2": "Erklärte Passung sehen — welche Fähigkeiten passen und welche bestätigt sind — statt aus CV-Stapeln zu raten.",
+      "i3": "Einen Bedarf zu veröffentlichen dauert Minuten, nicht Tage.",
+      "i4": "Weniger Verwaltung: Bedarfe, Kandidaten und Buchungen an einem Ort.",
+      "i5": "Erreichen Sie Arbeitskräfte über Märkte und Sprachen hinweg.",
+      "cta": "Mehr für Arbeitgeber"
+    },
+    "agencies": {
+      "title": "Für Agenturen",
+      "lead": "Bringen Sie Kandidatenportfolio und Arbeitgeberbedarfe in einen strukturierten Fluss.",
+      "i1": "Ihr Kandidatenportfolio strukturiert und aktuell an einem Ort.",
+      "i2": "Kandidaten mit Arbeitgeberbedarfen vergleichen — mit erklärter Grundlage.",
+      "i3": "Kandidatendaten rechtmäßig teilen: Zugriff wird explizit erteilt, protokolliert und ist widerrufbar.",
+      "i4": "Aus einem Konto in mehreren Märkten und Sprachen arbeiten.",
+      "cta": "Mehr für Agenturen"
+    },
+    "training": {
+      "title": "Für Bildungseinrichtungen",
+      "lead": "Sehen Sie, was der Arbeitsmarkt wirklich verlangt — und bereiten Sie Studierende darauf vor.",
+      "i1": "Signale zur Fähigkeiten-Nachfrage auf Basis zitierter öffentlicher Arbeitsmarktquellen.",
+      "i2": "Nachfragedaten beim Gestalten und Aktualisieren von Programmen nutzen.",
+      "i3": "Studierende gehen mit einem lebendigen Lebenslauf, der ab dem ersten Praktikum wächst.",
+      "i4": "Regionale und internationale Nachfrage an einem Ort verfolgen.",
+      "cta": "Arbeitsmarktdaten ansehen"
+    },
+    "partners": {
+      "title": "Für Partner & Institutionen",
+      "lead": "Eine Plattform für rechtmäßige, transparente Zusammenarbeit.",
+      "i1": "Integration auf Basis klarer, auditierbarer Einträge.",
+      "i2": "Einträge behalten, woher sie stammen, ihre Sprache und ihre Historie.",
+      "i3": "Datenschutz- und Sicherheitskontrollen: standardmäßig geschlossene Sichtbarkeit, explizite Freigaben, ein Audit-Log.",
+      "i4": "Kooperationsmodelle von Datenpartnerschaften bis Markteintritt — sprechen wir.",
+      "cta": "Über die Plattform"
+    },
+    "trust": {
+      "eyebrow": "Vertrauen & Sicherheit",
+      "title": "Ihre Einträge, unter Ihrer Kontrolle",
+      "t1t": "Sie kontrollieren Ihre Daten",
+      "t1b": "Inhalte sind standardmäßig geschlossen; Zugriff ist eine explizite, widerrufbare Freigabe.",
+      "t2t": "Aktionen brauchen Ihre Bestätigung",
+      "t2b": "KI entwirft — Sie genehmigen. Nichts wird ohne Sie gespeichert oder gesendet.",
+      "t3t": "Auditierbare Historie",
+      "t3b": "Sensible Aktionen werden in einem Nur-Anfügen-Audit-Log festgehalten.",
+      "t4t": "Erklärte KI-Entscheidungen",
+      "t4b": "Jede Passung zeigt warum, und was die KI aus Ihrem Text gelesen hat, wird zusammen mit dem gespeichert, was Sie akzeptiert haben."
+    },
+    "cta": {
+      "title": "Starten Sie dort, wo Sie sind",
+      "subcopy": "Vier Türen in dieselbe Plattform — wählen Sie Ihre.",
+      "worker": "Ich bin Arbeitskraft",
+      "employer": "Ich bin Arbeitgeber",
+      "agency": "Ich vertrete eine Agentur",
+      "partner": "Ich möchte Partner werden"
     }
   }
 }

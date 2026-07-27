@@ -641,7 +641,7 @@
   },
   "live": {
     "chip": {
-      "text": "[EN] PRE-ALPHA · Activity preview · Live market growing"
+      "text": "Töösuunad üle maailma"
     },
     "clock": {
       "badge": "[EN] EU-N MARKET · LIVE"
@@ -673,6 +673,12 @@
       "matchesToday": "[EN] matches today",
       "projects": "[EN] projects",
       "workers": "[EN] workers"
+    },
+    "world": {
+      "caption": "Kontseptuaalne vaade — turusuunad, mitte reaalajas andmed",
+      "legendTarget": "Turusuunad",
+      "legendContext": "Ülejäänud maailm",
+      "aria": "Töösuunad — maailmakaart"
     }
   },
   "market": {
@@ -718,7 +724,9 @@
     "login": "[EN] Sign in",
     "startNow": "[EN] Start now",
     "themeToDark": "Tume teema",
-    "themeToLight": "Hele teema"
+    "themeToLight": "Hele teema",
+    "how": "Kuidas see töötab",
+    "partners": "Partneritele"
   },
   "pages": {
     "agencies": {
@@ -3270,6 +3278,111 @@
         "languages": "keeled",
         "salary": "oodatava tariifi"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Väärtus igale töö osapoolele",
+    "audienceValueTitle": "Mida iga sihtrühm saab",
+    "how": {
+      "eyebrow": "Kuidas see töötab",
+      "title": "Räägi üks kord — platvorm hoiab struktuuri",
+      "subcopy": "LabourMarket.ai on vestlus-esmalt: sina kirjeldad, AI koostab struktuuri, sina kinnitad. Iga samm saab päris, püsivaks kirjeks.",
+      "s1t": "Räägi, mida oskad",
+      "s1b": "Kirjuta või räägi oma sõnadega — kogemus, ametid, tööriistad, keeled. Ei mingeid pikki vorme.",
+      "s2t": "AI ehitab sinu ametialase profiili",
+      "s2b": "Assistent muudab su sõnad struktureeritud profiiliks ja elavaks CV-ks, mis kasvab koos tööga. Iga muudatuse kinnitad sina.",
+      "s3t": "Võimalused leitud ja selgitatud",
+      "s3b": "Platvorm võrdleb sinu oskusi päris vajadustega ja näitab alati alust: millised oskused sobivad ja millised neist on kinnitatud.",
+      "s4t": "Tegutse vestluse kaudu",
+      "s4b": "Väljenda huvi, kirjenda tööpäev, vasta broneeringule — samas vestluses, alati kinnitusega enne salvestamist."
+    },
+    "conv": {
+      "eyebrow": "Vestlus kui operatsioonisüsteem",
+      "title": "Üks vestlusaken juhib sinu tööd",
+      "subcopy": "Kümnete vormide asemel lihtsalt räägid. Assistent koostab, sina kinnitad — ja iga tegevus jätab kirje, mille juurde saab naasta.",
+      "liveLabel": "Töötab juba täna",
+      "comingLabel": "Ettevalmistamisel",
+      "conceptLabel": "Kontseptuaalne vaade — stiliseeritud illustratsioon, mitte päris vestlus",
+      "c1": "Uuenda CV-d ja profiili",
+      "c2": "Kirjenda tööpäev",
+      "c3": "Leia tööd ja väljenda huvi",
+      "c4": "Avalda tööjõuvajadus",
+      "c5": "Vasta broneeringule",
+      "c6": "Võta ühendust sobiva kandidaadiga",
+      "k1": "Telli teenus",
+      "k2": "Genereeri dokumente",
+      "k3": "Loo automatiseeringuid",
+      "mockUser": "Täna panin Vilniuse objektil 40 m² plaate ja lõpetasin vannitoa seinad.",
+      "mockAssistant": "Koostasin tööpäeva kirje: plaatimine, 40 m², vannitoa seinad valmis. Kas salvestan sinu päevikusse?",
+      "mockConfirm": "Kinnita",
+      "mockEdit": "Muuda"
+    },
+    "workers": {
+      "title": "Töötajatele",
+      "lead": "Sinu tööajalugu saab elavaks CV-ks, mis avab uksi — kus iganes töö on.",
+      "i1": "CV kasvab päris tööst — iga kirjendatud ja kinnitatud päev täiendab seda.",
+      "i2": "Ei mingit korduvat vormide täitmist: räägi üks kord ja kasuta kõikjal.",
+      "i3": "Oskused muutuvad nähtavaks ja struktureerituks, mitte faili maetuks.",
+      "i4": "Võimalused eri turgudel, sobivus alati selgitatud.",
+      "i5": "Tööta oma keeles — platvorm räägib üheteistkümmet.",
+      "cta": "Rohkem töötajatele"
+    },
+    "employers": {
+      "title": "Tööandjatele",
+      "lead": "Kirjelda lihtsate sõnadega, keda vajad — struktuuri teeb platvorm.",
+      "i1": "Avalda vajadus loomulikus keeles; sellest saab struktureeritud, võrreldav päring.",
+      "i2": "Näe selgitatud sobivust — millised oskused sobivad ja millised on kinnitatud — selle asemel, et CV-virnadest arvata.",
+      "i3": "Vajaduse avaldamine võtab minuteid, mitte päevi.",
+      "i4": "Vähem haldust: vajadused, kandidaadid ja broneeringud ühes kohas.",
+      "i5": "Jõua töötajateni eri turgudel ja keeltes.",
+      "cta": "Rohkem tööandjatele"
+    },
+    "agencies": {
+      "title": "Agentuuridele",
+      "lead": "Too kandidaatide portfell ja tööandjate vajadused ühte struktureeritud voogu.",
+      "i1": "Kandidaatide portfell — struktureeritud ja ajakohane ühes kohas.",
+      "i2": "Võrdle kandidaate tööandjate vajadustega selgitatud alusel.",
+      "i3": "Jaga kandidaadiandmeid seaduslikult: ligipääs antakse selgelt, logitakse ja on tagasivõetav.",
+      "i4": "Tegutse mitmel turul ja mitmes keeles ühelt kontolt.",
+      "cta": "Rohkem agentuuridele"
+    },
+    "training": {
+      "title": "Õppeasutustele",
+      "lead": "Näe, mida tööturg tegelikult küsib — ja valmista õppurid selleks ette.",
+      "i1": "Oskuste nõudluse signaalid, mis põhinevad viidatud avalikel tööturuallikatel.",
+      "i2": "Kasuta nõudlusandmeid õppekavade kujundamisel ja uuendamisel.",
+      "i3": "Õppurid lahkuvad elava CV-ga, mis kasvab esimesest praktikast.",
+      "i4": "Jälgi piirkondlikku ja rahvusvahelist nõudlust ühest kohast.",
+      "cta": "Vaata tööturu andmeid"
+    },
+    "partners": {
+      "title": "Partneritele ja institutsioonidele",
+      "lead": "Platvorm, mis on loodud seaduslikuks ja läbipaistvaks koostööks.",
+      "i1": "Integratsioon selgetel, auditeeritavatel kirjetel.",
+      "i2": "Kirjed säilitavad, kust nad pärinevad, oma keele ja ajaloo.",
+      "i3": "Privaatsus- ja turvakontrollid: vaikimisi suletud nähtavus, selged load, auditilogi.",
+      "i4": "Koostöömudelid andmepartnerlustest turule sisenemiseni — räägime.",
+      "cta": "Platvormist"
+    },
+    "trust": {
+      "eyebrow": "Usaldus ja turvalisus",
+      "title": "Sinu kirjed, sinu kontrolli all",
+      "t1t": "Sina kontrollid oma andmeid",
+      "t1b": "Sisu on vaikimisi suletud; ligipääs on selge luba, mille saad tagasi võtta.",
+      "t2t": "Tegevused vajavad sinu kinnitust",
+      "t2b": "AI koostab — sina kiidad heaks. Midagi ei salvestata ega saadeta ilma sinuta.",
+      "t3t": "Auditeeritav ajalugu",
+      "t3b": "Tundlikud tegevused talletatakse ainult-lisatavas auditilogis.",
+      "t4t": "Selgitatud AI otsused",
+      "t4b": "Iga sobivus näitab, miks, ja see, mida AI sinu tekstist luges, salvestatakse koos sellega, mille sa vastu võtsid."
+    },
+    "cta": {
+      "title": "Alusta sealt, kus oled",
+      "subcopy": "Neli ust samale platvormile — vali oma.",
+      "worker": "Olen töötaja",
+      "employer": "Olen tööandja",
+      "agency": "Esindan agentuuri",
+      "partner": "Soovin saada partneriks"
     }
   }
 }

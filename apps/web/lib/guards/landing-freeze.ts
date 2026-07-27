@@ -19,11 +19,16 @@ import { join } from "node:path";
  * only inside the explicit landing real-data replacement work.
  */
 
-/** Paths relative to apps/web. The landing page + its full render tree. */
+/** Paths relative to apps/web. The landing page + its full render tree.
+ *  PR-H global landing (owner-directed landing replacement plan): the world
+ *  map + the new section components joined the render tree and are frozen
+ *  with it; live-map.tsx stays frozen (still in the repo, restorable). */
 export const FROZEN_LANDING_FILES = [
   "app/[locale]/(marketing)/page.tsx",
   "components/app/preview-chip.tsx",
   "components/app/live-map.tsx",
+  "components/app/live-world-map.tsx",
+  "components/app/world-geo.ts",
   "components/app/live-ticker.tsx",
   "components/app/market-counters.tsx",
   "components/app/player-card.tsx",
@@ -36,6 +41,12 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/market-pulse.tsx",
   "components/marketing/player-card-showcase.tsx",
   "components/marketing/labour-market-evidence.tsx",
+  "components/marketing/reveal.tsx",
+  "components/marketing/how-it-works-band.tsx",
+  "components/marketing/conversation-os-panel.tsx",
+  "components/marketing/audience-value-sections.tsx",
+  "components/marketing/trust-band.tsx",
+  "components/marketing/final-cta-band.tsx",
   "components/decor/constellation-bg.tsx",
   // Placeholder feed: landing demo values (counters, personas, board rows)
   // live here, so the whole governed file is part of the freeze.
@@ -51,6 +62,7 @@ export const FROZEN_LANDING_NAMESPACES = [
   "hero",
   "journey",
   "labourMarket",
+  "landing",
   "live",
   "map",
   "draft",

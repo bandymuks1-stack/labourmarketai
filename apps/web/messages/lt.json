@@ -3320,7 +3320,7 @@
   },
   "live": {
     "chip": {
-      "text": "Europos darbo kryptys"
+      "text": "Darbo kryptys visame pasaulyje"
     },
     "clock": {
       "badge": "Šiaurės ir Baltijos Europa"
@@ -3353,7 +3353,13 @@
       "active_markets": "Pagrindinės kryptys (9)",
       "expansion_candidates": "Plėtros kandidatės"
     },
-    "caption": "Baltijos ir Šiaurės Europos darbo kryptys"
+    "caption": "Baltijos ir Šiaurės Europos darbo kryptys",
+    "world": {
+      "caption": "Koncepcinis vaizdas — rinkos kryptys, ne gyvi duomenys",
+      "legendTarget": "Rinkos kryptys",
+      "legendContext": "Platesnis pasaulis",
+      "aria": "Darbo kryptys — pasaulio žemėlapis"
+    }
   },
   "company": {
     "score": {
@@ -4596,7 +4602,9 @@
     "login": "Prisijungti",
     "startNow": "Pradėti dabar",
     "themeToDark": "Tamsi tema",
-    "themeToLight": "Šviesi tema"
+    "themeToLight": "Šviesi tema",
+    "how": "Kaip veikia",
+    "partners": "Partneriams"
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
@@ -11087,6 +11095,111 @@
         "languages": "kalbas",
         "salary": "tarifo lūkestį"
       }
+    }
+  },
+  "landing": {
+    "audienceValueEyebrow": "Vertė kiekvienai pusei",
+    "audienceValueTitle": "Ką gauna kiekviena auditorija",
+    "how": {
+      "eyebrow": "Kaip veikia",
+      "title": "Papasakokite kartą — platforma išlaiko struktūrą",
+      "subcopy": "LabourMarket.ai pirmiausia yra pokalbis: jūs pasakojate, AI parengia struktūrą, jūs patvirtinate. Kiekvienas žingsnis tampa tikru, išliekančiu įrašu.",
+      "s1t": "Papasakokite, ką mokate",
+      "s1b": "Rašykite ar kalbėkite savais žodžiais — patirtis, darbai, įrankiai, kalbos. Jokių ilgų formų.",
+      "s2t": "AI sukuria jūsų profesinį profilį",
+      "s2b": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvu CV, kuris auga jums dirbant. Kiekvieną pakeitimą patvirtinate jūs.",
+      "s3t": "Galimybės surandamos ir paaiškinamos",
+      "s3b": "Platforma palygina jūsų įgūdžius su realiais poreikiais ir visada parodo pagrindą: kurie įgūdžiai atitinka ir kurie iš jų patvirtinti.",
+      "s4t": "Veikite per pokalbį",
+      "s4b": "Išreikškite susidomėjimą, užfiksuokite darbo dieną, atsakykite į užsakymą — tame pačiame pokalbyje, visada su patvirtinimu prieš įrašant."
+    },
+    "conv": {
+      "eyebrow": "Pokalbis kaip operacinė sistema",
+      "title": "Vienas pokalbio langas valdo jūsų darbą",
+      "subcopy": "Vietoje dešimčių formų — tiesiog kalbatės. Asistentas parengia, jūs patvirtinate, o kiekvienas veiksmas palieka įrašą, kurį galite peržiūrėti.",
+      "liveLabel": "Veikia jau dabar",
+      "comingLabel": "Ruošiama",
+      "conceptLabel": "Koncepcinis vaizdas — stilizuota iliustracija, ne tikras pokalbis",
+      "c1": "Atnaujinti CV ir profilį",
+      "c2": "Užfiksuoti darbo dieną",
+      "c3": "Rasti darbą ir išreikšti susidomėjimą",
+      "c4": "Paskelbti darbo jėgos poreikį",
+      "c5": "Atsakyti į užsakymą",
+      "c6": "Susisiekti su atitinkančiu kandidatu",
+      "k1": "Užsakyti paslaugą",
+      "k2": "Generuoti dokumentus",
+      "k3": "Kurti automatizacijas",
+      "mockUser": "Šiandien Vilniaus objekte išklijavau 40 m² plytelių ir užbaigiau vonios sienas.",
+      "mockAssistant": "Parengiau darbo dienos įrašą: plytelių klijavimas, 40 m², užbaigtos vonios sienos. Įrašyti į jūsų dienoraštį?",
+      "mockConfirm": "Patvirtinti",
+      "mockEdit": "Redaguoti"
+    },
+    "workers": {
+      "title": "Darbuotojams",
+      "lead": "Jūsų darbo istorija tampa gyvu CV, kuris atveria duris — kad ir kur būtų darbas.",
+      "i1": "CV auga iš realaus darbo — kiekviena užfiksuota ir patvirtinta diena jį papildo.",
+      "i2": "Jokio kartotinio formų pildymo: papasakojate kartą ir naudojate visur.",
+      "i3": "Įgūdžiai tampa matomi ir struktūruoti, o ne palaidoti faile.",
+      "i4": "Galimybės skirtingose rinkose, o atitiktis visada paaiškinta.",
+      "i5": "Dirbkite savo kalba — platforma kalba vienuolika kalbų.",
+      "cta": "Daugiau darbuotojams"
+    },
+    "employers": {
+      "title": "Darbdaviams",
+      "lead": "Aprašykite, ko jums reikia, paprastais žodžiais — struktūrą sukurs platforma.",
+      "i1": "Paskelbkite poreikį natūralia kalba; jis tampa struktūruota, palyginama užklausa.",
+      "i2": "Matykite paaiškintą atitiktį — kurie įgūdžiai atitinka ir kurie patvirtinti — užuot spėlioję iš CV krūvų.",
+      "i3": "Poreikio paskelbimas trunka minutes, ne dienas.",
+      "i4": "Mažiau administravimo: poreikiai, kandidatai ir užsakymai vienoje vietoje.",
+      "i5": "Pasiekite darbuotojus skirtingose rinkose ir kalbose.",
+      "cta": "Daugiau darbdaviams"
+    },
+    "agencies": {
+      "title": "Agentūroms",
+      "lead": "Sujunkite kandidatų portfelį ir darbdavių poreikius į vieną struktūruotą srautą.",
+      "i1": "Kandidatų portfelis — struktūruotas ir atnaujintas vienoje vietoje.",
+      "i2": "Lyginkite kandidatus su darbdavių poreikiais su paaiškintu pagrindu.",
+      "i3": "Dalinkitės kandidatų duomenimis teisėtai: prieiga suteikiama aiškiai, fiksuojama ir gali būti atšaukta.",
+      "i4": "Dirbkite keliose rinkose ir kalbomis iš vienos paskyros.",
+      "cta": "Daugiau agentūroms"
+    },
+    "training": {
+      "title": "Mokymo įstaigoms",
+      "lead": "Matykite, ko iš tiesų prašo darbo rinka — ir tam ruoškite studentus.",
+      "i1": "Įgūdžių paklausos signalai, grįsti cituojamais viešais darbo rinkos šaltiniais.",
+      "i2": "Naudokite paklausos duomenis formuodami ir atnaujindami programas.",
+      "i3": "Studentai išeina su gyvu CV, augančiu nuo pirmos praktikos.",
+      "i4": "Stebėkite regioninę ir tarptautinę paklausą vienoje vietoje.",
+      "cta": "Žiūrėti darbo rinkos duomenis"
+    },
+    "partners": {
+      "title": "Partneriams ir institucijoms",
+      "lead": "Platforma, sukurta teisėtam ir skaidriam bendradarbiavimui.",
+      "i1": "Integracija, grįsta aiškiais, audituojamais įrašais.",
+      "i2": "Įrašai išsaugo, iš kur jie atsirado, savo kalbą ir istoriją.",
+      "i3": "Privatumo ir saugumo kontrolė: uždaras matomumas pagal nutylėjimą, aiškūs leidimai, audito žurnalas.",
+      "i4": "Bendradarbiavimo modeliai nuo duomenų partnerysčių iki įėjimo į rinką — pasikalbėkime.",
+      "cta": "Apie platformą"
+    },
+    "trust": {
+      "eyebrow": "Pasitikėjimas ir saugumas",
+      "title": "Jūsų įrašai — jūsų kontrolėje",
+      "t1t": "Jūs valdote savo duomenis",
+      "t1b": "Turinys pagal nutylėjimą uždaras; prieiga — aiškus leidimas, kurį galite atšaukti.",
+      "t2t": "Veiksmams reikia jūsų patvirtinimo",
+      "t2b": "AI parengia — jūs patvirtinate. Niekas neįrašoma ir neišsiunčiama be jūsų.",
+      "t3t": "Audituojama istorija",
+      "t3b": "Jautrūs veiksmai fiksuojami tik pildomame audito žurnale.",
+      "t4t": "Paaiškinti AI sprendimai",
+      "t4b": "Kiekviena atitiktis rodo kodėl, o tai, ką AI perskaitė jūsų tekste, išsaugoma kartu su tuo, ką patvirtinote."
+    },
+    "cta": {
+      "title": "Pradėkite ten, kur esate",
+      "subcopy": "Ketverios durys į tą pačią platformą — pasirinkite savas.",
+      "worker": "Esu darbuotojas",
+      "employer": "Esu darbdavys",
+      "agency": "Atstovauju agentūrai",
+      "partner": "Noriu tapti partneriu"
     }
   }
 }
