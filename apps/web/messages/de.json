@@ -3595,6 +3595,8 @@
       },
       "display_name_label": "Anzeigename",
       "country_label": "Land",
+      "country_placeholder": "Land auswählen",
+      "error_country_required": "Bitte wählen Sie ein Land.",
       "back": "Zurück",
       "saving": "Wird gespeichert...",
       "error_name_required": "Bitte geben Sie einen Anzeigenamen ein.",

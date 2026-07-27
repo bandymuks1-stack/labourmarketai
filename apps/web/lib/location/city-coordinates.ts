@@ -11,6 +11,7 @@
  * "vieta nepatikslinta"), never a guessed nearby point.
  */
 import { foldText } from "@/lib/structuring/normalize";
+import { ALL_ISO_COUNTRIES, getCountryMeta } from "@/lib/location/country-model";
 
 export type LocationPrecision = "device" | "city" | "country" | "unset";
 
@@ -19,20 +20,19 @@ export interface CityCoord {
   readonly lng: number;
 }
 
-/** Country centroids (approximate) — used ONLY for an explicit country-only
- *  selection, always labelled approximate. */
-export const COUNTRY_CENTROID: Readonly<Record<string, CityCoord>> = {
-  LT: { lat: 55.2, lng: 23.9 },
-  LV: { lat: 56.9, lng: 24.9 },
-  EE: { lat: 58.9, lng: 25.6 },
-  PL: { lat: 52.07, lng: 19.48 },
-  DE: { lat: 51.16, lng: 10.45 },
-  NL: { lat: 52.13, lng: 5.29 },
-  DK: { lat: 56.0, lng: 9.5 },
-  NO: { lat: 60.8, lng: 9.0 },
-  SE: { lat: 62.0, lng: 15.5 },
-  FI: { lat: 63.0, lng: 26.0 },
-};
+/** Country centroids (approximate) for EVERY ISO-3166-1 alpha-2 country —
+ *  derived from the canonical country model (PR-G: no Europe-only subset).
+ *  Used ONLY for an explicit country-only selection, always labelled
+ *  approximate. */
+export const COUNTRY_CENTROID: Readonly<Record<string, CityCoord>> =
+  Object.freeze(
+    Object.fromEntries(
+      ALL_ISO_COUNTRIES.map((code) => {
+        const c = getCountryMeta(code)!.centroid;
+        return [code, { lat: c.lat, lng: c.lng }];
+      }),
+    ),
+  );
 
 /** City coordinates for major cities in active markets. Keyed by country. */
 const CITY_TABLE: Readonly<Record<string, ReadonlyArray<{ names: string[]; coord: CityCoord }>>> = {
@@ -83,6 +83,29 @@ const CITY_TABLE: Readonly<Record<string, ReadonlyArray<{ names: string[]; coord
     { names: ["gdansk", "gdańsk"], coord: { lat: 54.352, lng: 18.6466 } },
     { names: ["wroclaw", "wrocław"], coord: { lat: 51.1079, lng: 17.0385 } },
     { names: ["poznan", "poznań"], coord: { lat: 52.4064, lng: 16.9252 } },
+  ],
+  // Georgia — first-class market (PR-G global location model).
+  GE: [
+    { names: ["tbilisi", "tbilisis"], coord: { lat: 41.7151, lng: 44.8271 } },
+    { names: ["batumi"], coord: { lat: 41.6168, lng: 41.6367 } },
+    { names: ["kutaisi"], coord: { lat: 42.2679, lng: 42.6946 } },
+    { names: ["rustavi"], coord: { lat: 41.5495, lng: 44.993 } },
+  ],
+  // USA — first-class market (PR-G global location model). Major metros.
+  US: [
+    { names: ["new york", "new york city", "nyc"], coord: { lat: 40.7128, lng: -74.006 } },
+    { names: ["los angeles"], coord: { lat: 34.0522, lng: -118.2437 } },
+    { names: ["chicago"], coord: { lat: 41.8781, lng: -87.6298 } },
+    { names: ["houston"], coord: { lat: 29.7604, lng: -95.3698 } },
+    { names: ["miami"], coord: { lat: 25.7617, lng: -80.1918 } },
+    { names: ["dallas"], coord: { lat: 32.7767, lng: -96.797 } },
+    { names: ["phoenix"], coord: { lat: 33.4484, lng: -112.074 } },
+    { names: ["philadelphia"], coord: { lat: 39.9526, lng: -75.1652 } },
+    { names: ["atlanta"], coord: { lat: 33.749, lng: -84.388 } },
+    { names: ["seattle"], coord: { lat: 47.6062, lng: -122.3321 } },
+    { names: ["boston"], coord: { lat: 42.3601, lng: -71.0589 } },
+    { names: ["denver"], coord: { lat: 39.7392, lng: -104.9903 } },
+    { names: ["washington", "washington dc", "washington d.c."], coord: { lat: 38.9072, lng: -77.0369 } },
   ],
 };
 

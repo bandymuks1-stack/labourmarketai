@@ -198,18 +198,24 @@ export function CompanySetupForm({
         </span>
       </fieldset>
 
-      {/* Country is a SELECT over the seeded countries (default Lietuva) —
-          free text here used to crash with a raw FK error (owner smoke). */}
+      {/* Country is a SELECT over the seeded countries — free text here used
+          to crash with a raw FK error (owner smoke). NO silent default (PR-G):
+          with no saved country the select shows a placeholder and the user
+          must actively choose; an unchosen country posts as empty and the
+          server stores NULL (honest absence), never Lithuania. */}
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.country}</span>
         <select
           name="country"
-          defaultValue={existing?.country ?? "LT"}
+          defaultValue={existing?.country ?? ""}
           disabled={legalLocked}
           aria-disabled={legalLocked}
           className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-country"
         >
+          <option value="" disabled>
+            {labels.countryPlaceholder}
+          </option>
           {COMPANY_COUNTRY_CODES.map((code) => (
             <option key={code} value={code}>
               {labels.countryOptions[code] ?? code}

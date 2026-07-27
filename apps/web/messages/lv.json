@@ -332,6 +332,8 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "country_placeholder": "Izvēlieties valsti",
+      "error_country_required": "Lūdzu, izvēlieties valsti.",
       "nextSteps": {
         "eyebrow": "Pēc tam — tavs reālais profils",
         "s1": "Importē savu CV (pēc izvēles), lai ātrāk aizpildītu profilu",

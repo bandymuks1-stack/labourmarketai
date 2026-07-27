@@ -224,6 +224,12 @@ export interface LoginConsentInput {
  * Upsert the caller's single login-location signal. Stores ONLY an approximate
  * country/region/city + a consent status. There is no coordinate/address field
  * in the table, so an exact point can never be written here.
+ *
+ * NO silent country default (PR-G): `country_code` is NOT NULL in the table
+ * (20260617120000), so a row can only be written when a REAL country is known —
+ * either supplied by the caller or already on the caller's existing row
+ * (status-only updates). A first write without a country is rejected instead
+ * of being silently recorded as Lithuania.
  */
 export async function setLoginLocationConsent(input: LoginConsentInput): Promise<CaptureResult> {
   const consent = CONSENT.includes(input.consentStatus as never) ? input.consentStatus : null;
@@ -236,12 +242,24 @@ export async function setLoginLocationConsent(input: LoginConsentInput): Promise
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { kind: "unauthenticated" };
 
+  // Status-only update (e.g. revoke): keep the country already on the row.
+  let effectiveCountry = country;
+  if (!effectiveCountry) {
+    const { data: existing } = await asAny(supabase)
+      .from("consented_login_location_signals")
+      .select("country_code")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    effectiveCountry = (existing?.country_code as string | undefined) ?? null;
+  }
+  if (!effectiveCountry) return { kind: "invalid", message: "missing_country" };
+
   const { error } = await asAny(supabase)
     .from("consented_login_location_signals")
     .upsert(
       {
         profile_id: user.id,
-        country_code: country ?? "LT",
+        country_code: effectiveCountry,
         region: clampStr(input.region, 160),
         city: clampStr(input.city, 160),
         granularity,

@@ -26,9 +26,12 @@ import { resolveLocation } from "@/lib/location/city-coordinates";
  * docs/audits/market-map-long-term-map-strategy.md.
  */
 
-/** Sensible default view (served-markets region) before any location is set. */
-const DEFAULT_CENTER: [number, number] = [56.5, 17];
-const DEFAULT_ZOOM = 4;
+/** WORLD default view before any location is set (PR-G global location model:
+ *  the platform serves all ISO countries — no Europe-centred default). When a
+ *  country/city IS selected, `pointFor` zooms to it instead. Zoom 2 loads only
+ *  a handful of world tiles — no prefetching, OSM-usage friendly. */
+const DEFAULT_CENTER: [number, number] = [25, 15];
+const DEFAULT_ZOOM = 2;
 
 /** City-level resolution (city table → city coords; country-only → approximate
  *  centroid; unknown → no marker). City precision zooms in closer than an

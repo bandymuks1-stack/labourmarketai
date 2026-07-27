@@ -3595,6 +3595,8 @@
       },
       "display_name_label": "Display name",
       "country_label": "Country",
+      "country_placeholder": "Select your country",
+      "error_country_required": "Please choose a country.",
       "back": "Back",
       "saving": "Saving...",
       "error_name_required": "Please enter a display name.",

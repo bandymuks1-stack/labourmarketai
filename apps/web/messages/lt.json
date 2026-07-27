@@ -3595,6 +3595,8 @@
       },
       "display_name_label": "Rodomas vardas",
       "country_label": "Šalis",
+      "country_placeholder": "Pasirinkite šalį",
+      "error_country_required": "Pasirinkite šalį.",
       "back": "Atgal",
       "saving": "Saugoma...",
       "error_name_required": "Įvesk rodomą vardą.",

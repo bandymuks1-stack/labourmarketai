@@ -332,6 +332,8 @@
     "onboarding": {
       "back": "[EN] Back",
       "country_label": "[EN] Country",
+      "country_placeholder": "Velg land",
+      "error_country_required": "Vennligst velg et land.",
       "nextSteps": {
         "eyebrow": "Etter dette — din ekte profil",
         "s1": "Importer CV-en din (valgfritt) for å fylle ut profilen raskere",

@@ -31,6 +31,18 @@ export function getCountryReadiness(
   return COUNTRY_READINESS[country];
 }
 
+/**
+ * Global-safe lookup (PR-G): accepts ANY ISO country code and returns null
+ * where no researched readiness content exists (e.g. GE, US today). Callers
+ * must render null as an honest "no researched guidance yet" state — never
+ * fall back to another country's data and never invent content.
+ */
+export function getCountryReadinessOrNull(
+  country: string,
+): CountryReadiness | null {
+  return isReadinessCountry(country) ? COUNTRY_READINESS[country] : null;
+}
+
 /** Requirements for a country narrowed to one scope. */
 export function getRequirements(
   country: ReadinessCountry,
