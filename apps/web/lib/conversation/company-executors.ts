@@ -101,9 +101,11 @@ function mapBridge(r: BridgeActionState): ExecResult {
   };
 }
 
+// Frozen: the dispatcher indexes this record with a user-controlled action id
+// (behind an own-property guard) — the record itself must never be mutable.
 export const COMPANY_EXECUTORS: {
-  [Id in CompanyActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
-} = {
+  readonly [Id in CompanyActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
+} = Object.freeze({
   "company.create-demand": async (input) => {
     if (input.mode === "draft") {
       // Canonical draft leg (save_demand_draft RPC via lib/demand). The draft
@@ -228,4 +230,4 @@ export const COMPANY_EXECUTORS: {
         fd({ shareId: input.shareId, workerId: input.workerId, note: input.note ?? "" }),
       ),
     ),
-};
+});

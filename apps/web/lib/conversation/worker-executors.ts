@@ -40,9 +40,11 @@ export type { ExecCtx, ExecResult } from "@/lib/conversation/executor-contract";
 
 type Infer<Id extends WorkerActionId> = z.infer<(typeof WORKER_ACTION_SCHEMAS)[Id]>;
 
+// Frozen: the dispatcher indexes this record with a user-controlled action id
+// (behind an own-property guard) — the record itself must never be mutable.
 export const WORKER_EXECUTORS: {
-  [Id in WorkerActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
-} = {
+  readonly [Id in WorkerActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
+} = Object.freeze({
   "worker.add-work-history": async (input) => {
     const r = await confirmCvWorkHistoryAction({
       title: input.title,
@@ -169,4 +171,4 @@ export const WORKER_EXECUTORS: {
       ? { ok: true, data: { entryId: r.entryId } }
       : { ok: false, code: r.code, message: r.message };
   },
-};
+});

@@ -153,10 +153,35 @@ function isExecutable(actionId: string): actionId is ExecutableActionId {
   return isWorkerExecutable(actionId) || isCompanyExecutable(actionId);
 }
 
-function schemaOf(actionId: ExecutableActionId) {
-  return isWorkerExecutable(actionId)
-    ? WORKER_ACTION_SCHEMAS[actionId]
-    : COMPANY_ACTION_SCHEMAS[actionId as CompanyActionId];
+/** The one executor call signature the dispatcher needs: every concrete
+ *  executor narrows its `input` from the id-matched schema, so the safe common
+ *  signature takes the bottom type — the dispatcher may only pass data that
+ *  came out of the SAME id's schema (enforced by the lookups below). */
+type AnyExecutor = (input: never, ctx: { locale: string }) => Promise<ExecResult>;
+
+/** Own-property-guarded lookups (CodeQL js/unvalidated-dynamic-method-call):
+ *  a user-controlled `actionId` can only ever resolve to an OWN entry of the
+ *  frozen schema/executor records — never to an inherited member (e.g.
+ *  `constructor` / `toString`) and never to an unexpected callable. Unknown
+ *  ids resolve to `undefined` and the dispatcher answers `not_executable`. */
+function schemaOf(actionId: string) {
+  if (Object.prototype.hasOwnProperty.call(WORKER_ACTION_SCHEMAS, actionId)) {
+    return WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
+  }
+  if (Object.prototype.hasOwnProperty.call(COMPANY_ACTION_SCHEMAS, actionId)) {
+    return COMPANY_ACTION_SCHEMAS[actionId as CompanyActionId];
+  }
+  return undefined;
+}
+
+function executorOf(actionId: string): AnyExecutor | undefined {
+  if (Object.prototype.hasOwnProperty.call(WORKER_EXECUTORS, actionId)) {
+    return WORKER_EXECUTORS[actionId as WorkerActionId];
+  }
+  if (Object.prototype.hasOwnProperty.call(COMPANY_EXECUTORS, actionId)) {
+    return COMPANY_EXECUTORS[actionId as CompanyActionId];
+  }
+  return undefined;
 }
 
 /** Mint a confirmation token for an important/strong worker action, after
@@ -179,7 +204,8 @@ export async function prepareConfirmationAction(
     return { ok: false, code: "no_confirmation_needed" };
   }
 
-  const schema = schemaOf(actionId as ExecutableActionId);
+  const schema = schemaOf(actionId);
+  if (!schema) return { ok: false, code: "not_executable" };
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -215,7 +241,8 @@ export async function dispatchWorkerAction(
   // descriptor is defined here (authz.ok implies it).
   const desc = descriptor!;
 
-  const schema = schemaOf(actionId as ExecutableActionId);
+  const schema = schemaOf(actionId);
+  if (!schema) return { ok: false, code: "not_executable" };
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -240,9 +267,11 @@ export async function dispatchWorkerAction(
     }
   }
 
-  const executor = isWorkerExecutable(actionId)
-    ? WORKER_EXECUTORS[actionId]
-    : COMPANY_EXECUTORS[actionId as CompanyActionId];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (executor as any)(parsed.data, { locale: opts?.locale ?? "lt" });
+  const executor = executorOf(actionId);
+  if (!executor) return { ok: false, code: "not_executable" };
+  // `parsed.data` came out of the SAME id's schema (schemaOf/executorOf share
+  // the own-property key check), so this is the id-matched input by
+  // construction; `never` is the safe common parameter type, not a cast away
+  // from validation.
+  return executor(parsed.data as never, { locale: opts?.locale ?? "lt" });
 }
