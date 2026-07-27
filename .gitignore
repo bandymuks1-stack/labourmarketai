@@ -21,6 +21,22 @@ next-env.d.ts
 /runtime/
 /apps/web/runtime/
 
+# LIVE BROWSER PROFILES — security audit finding M-06.
+#
+# runtime/auth/ holds real Chrome profiles with the owner's logged-in session
+# (cookies, tokens, Local State). `/runtime/` above already covers them, BUT the
+# working convention in this repo is `git add -f` under runtime/ so that
+# runtime/audits/*.md can be tracked despite the blanket ignore — and `git add -f`
+# bypasses EVERY ignore rule, including this one. One careless `git add -f
+# runtime/` would publish live owner sessions to a PUBLIC repository.
+#
+# These entries are intent + defence in depth. The ENFORCEABLE control is
+# apps/web/lib/guards/no-tracked-browser-profiles.test.ts, which fails CI if any
+# such file ever becomes tracked. Ignore rules alone cannot stop `-f`.
+/runtime/auth/
+**/chrome-debug/
+**/owner-chrome-profile/
+
 # playwright / e2e local artifacts (never committed)
 /apps/web/tests/e2e/.storage-state.json
 /apps/web/test-results/

@@ -347,6 +347,13 @@ describe("NO new DB migration in this PR", () => {
     // engagement table + four RPCs closing the accepted-booking →
     // project-assignment P1; RED, deliberately NOT human-gate-annotated,
     // ships UNAPPLIED; still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(166);
+    // Bumped 166 -> 167 for the security-audit grant-hygiene migration
+    // (20260727120000_secdef_public_grant_hygiene_v1, paired rollback). Audit
+    // L-01 + L-08: revokes the residual default PUBLIC EXECUTE grant left on
+    // three SECURITY DEFINER functions by 20260719120000 (the exact idiom behind
+    // the 2026-07-22 P0) and pins one trigger's search_path. It only ever
+    // REMOVES privilege; human-gate-annotated, RED by design, ships UNAPPLIED.
+    // Still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(167);
   });
 });

@@ -1,0 +1,74 @@
+# CodeQL static analysis — security audit finding M-05.
+#
+# The audit found `code-scanning/alerts` returning "no analysis found": this repo
+# had NO static security analysis at all. It is PUBLIC, so CodeQL is free here —
+# nothing was blocked by the plan, it was simply never configured.
+#
+# WHY IT IS ITS OWN WORKFLOW. `quality.yml` is the required merge gate and is
+# deliberately fast and secret-free. CodeQL takes minutes and needs
+# `security-events: write`, so bolting it onto the gate would slow every PR and
+# widen the token scope of the one workflow that must stay minimal. Kept separate
+# it can also be made a required check later, as a deliberate owner decision.
+#
+# NOT a required check yet. Until the owner reviews the first results and adds it
+# to branch protection, a CodeQL finding does NOT block a merge.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  # NO `branches:` filter here, deliberately. With `branches: [main]` this
+  # workflow silently SKIPS any pull request whose base is not main — which is
+  # exactly what a stacked PR looks like (PR #871 was retargeted onto its parent
+  # branch and the scan stopped running, with no failure to notice). A security
+  # scanner that quietly does nothing is worse than one that is absent, because
+  # the checks list still looks complete. Run on every PR regardless of base.
+  pull_request:
+  schedule:
+    # Weekly, so newly published queries reach existing code that has not
+    # changed. A push-only trigger never re-examines dormant code.
+    - cron: "23 5 * * 1"
+
+# Least privilege, per job. `security-events: write` is what uploads the SARIF;
+# nothing here needs write access to repository contents.
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (javascript-typescript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      # Actions are pinned to full commit SHAs, not tags — audit L-10. A tag is
+      # mutable: whoever controls the action repo can repoint `v4` at new code
+      # and it runs here with this workflow's token. NOTE both pinned SHAs below
+      # were dereferenced from ANNOTATED tags; the tag-object SHA that
+      # `git/ref/tags` returns first is not a commit and would not run.
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        with:
+          languages: javascript-typescript
+          # `security-extended` adds the lower-severity security queries. This
+          # is a first baseline, so breadth is worth more than a short list.
+          queries: security-extended
+
+      # No build step: CodeQL analyses JS/TS from source. Deliberately NOT
+      # running `next build` here — that already happens in quality.yml, and
+      # repeating it would double CI time for no extra coverage.
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        with:
+          category: "/language:javascript-typescript"

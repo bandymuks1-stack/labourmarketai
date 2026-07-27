@@ -68,6 +68,67 @@ function resolveFormat(filename: string, mime?: string): CvFormat | null {
   return null;
 }
 
+/**
+ * Magic-byte check — security audit L-04.
+ *
+ * `resolveFormat` trusts the FILENAME EXTENSION first, so `payload.pdf` holding
+ * arbitrary bytes is handed straight to pdf.js, and `payload.docx` to mammoth's
+ * zip reader. Neither parser is a safe place to send content that only claims to
+ * be its format. This rejects the mismatch before a parser ever sees the bytes.
+ *
+ * `txt` is deliberately unchecked: plain text has no signature, and it is
+ * decoded with `TextDecoder`, not parsed.
+ */
+function magicBytesMatch(buffer: ArrayBuffer, format: CvFormat): boolean {
+  if (format === "txt") return true;
+  const head = new Uint8Array(buffer.slice(0, 4));
+  if (head.length < 4) return false;
+  if (format === "pdf") {
+    // "%PDF"
+    return head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46;
+  }
+  // DOCX is a ZIP container: "PK\x03\x04" (or the empty/spanned variants).
+  return (
+    head[0] === 0x50 &&
+    head[1] === 0x4b &&
+    (head[2] === 0x03 || head[2] === 0x05 || head[2] === 0x07)
+  );
+}
+
+/**
+ * Upper bound on extracted text — security audit L-03.
+ *
+ * A 5 MB DOCX is a zip: mammoth decompresses it in memory, so a high-ratio
+ * archive ("zip bomb") can expand to orders of magnitude more than the input
+ * cap. A pathological PDF can do the same through pdf.js. The input cap alone
+ * therefore does NOT bound the work. This caps the OUTPUT, which is what
+ * actually grows, and it is generous next to any real CV (~10k chars).
+ */
+const MAX_EXTRACTED_CHARS = 1_000_000;
+
+/**
+ * Wall-clock ceiling for a single parse — security audit L-03.
+ *
+ * Neither parser accepts a budget, so this races them. It does NOT kill the
+ * underlying work (JS has no thread cancellation), so a pathological file can
+ * still burn CPU in the background; what it prevents is the REQUEST hanging on
+ * it. Both parsers are auth-gated and run per-invocation on serverless, which is
+ * what keeps the residual bounded. Honest limitation, not a hard guarantee.
+ */
+const PARSE_TIMEOUT_MS = 10_000;
+
+function withTimeout<T>(work: Promise<T>, label: string): Promise<T> {
+  return Promise.race([
+    work,
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`cv-extract: ${label} exceeded ${PARSE_TIMEOUT_MS}ms`)),
+        PARSE_TIMEOUT_MS,
+      ).unref?.(),
+    ),
+  ]);
+}
+
 async function extractPdf(buffer: ArrayBuffer): Promise<string> {
   // unpdf bundles pdf.js and runs in the Node server runtime with no native
   // binaries. mergePages joins all pages into one text blob.
@@ -100,11 +161,21 @@ export async function extractCvText(
   const format = resolveFormat(filename, mime);
   if (!format) return { kind: "unsupported", ext: extOf(filename) || "?" };
 
+  // L-04: the declared format must match the actual bytes. Reported as
+  // `unsupported` (not `failed`) — the file genuinely is not what it claims.
+  if (!magicBytesMatch(buffer, format)) {
+    return { kind: "unsupported", ext: extOf(filename) || "?" };
+  }
+
   try {
     let raw: string;
-    if (format === "pdf") raw = await extractPdf(buffer);
-    else if (format === "docx") raw = await extractDocx(buffer);
+    if (format === "pdf") raw = await withTimeout(extractPdf(buffer), "pdf");
+    else if (format === "docx") raw = await withTimeout(extractDocx(buffer), "docx");
     else raw = new TextDecoder("utf-8").decode(buffer);
+
+    // L-03: bound the OUTPUT. A zip bomb passes the input cap and only reveals
+    // itself here, so truncate rather than carrying an unbounded string on.
+    if (raw.length > MAX_EXTRACTED_CHARS) raw = raw.slice(0, MAX_EXTRACTED_CHARS);
 
     const text = tidy(raw);
     if (text.length === 0) return { kind: "empty" };
