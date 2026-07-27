@@ -3,6 +3,7 @@ import {
   classifyEntrySkillSource,
   buildEntrySkillSources,
   needsReview,
+  parseEntrySkillProvenance,
   CLEAN_EVIDENCE_SOURCES,
 } from "./entry-skill-source";
 
@@ -37,6 +38,62 @@ describe("classifyEntrySkillSource — honest per-chip source", () => {
     expect(
       classifyEntrySkillSource({ linked: true, verified: false, recognizedFromText: false, recognizable: false }),
     ).toBe("manually_linked_to_entry");
+  });
+});
+
+describe("stored provenance (PR-C) is PREFERRED over the re-derivation", () => {
+  it("stored 'recognized' stays recognized even when today's recognizer disagrees", () => {
+    expect(
+      classifyEntrySkillSource({
+        linked: true, verified: false, recognizedFromText: false, recognizable: true,
+        storedProvenance: "recognized",
+      }),
+    ).toBe("recognized_from_text");
+  });
+
+  it("stored 'confirmed' (worker's one-tap decision) is a deliberate link, never stale", () => {
+    expect(
+      classifyEntrySkillSource({
+        linked: true, verified: false, recognizedFromText: false, recognizable: true,
+        storedProvenance: "confirmed",
+      }),
+    ).toBe("manually_linked_to_entry");
+  });
+
+  it("stored 'manual' is a deliberate link, never stale", () => {
+    expect(
+      classifyEntrySkillSource({
+        linked: true, verified: false, recognizedFromText: false, recognizable: true,
+        storedProvenance: "manual",
+      }),
+    ).toBe("manually_linked_to_entry");
+  });
+
+  it("verified (real human confirmation) still outranks stored provenance", () => {
+    expect(
+      classifyEntrySkillSource({
+        linked: true, verified: true, recognizedFromText: false, recognizable: true,
+        storedProvenance: "manual",
+      }),
+    ).toBe("confirmed_by_person");
+  });
+
+  it("NULL provenance (historic 'derived, pre-provenance' rows) keeps today's derivation", () => {
+    expect(
+      classifyEntrySkillSource({
+        linked: true, verified: false, recognizedFromText: false, recognizable: true,
+        storedProvenance: null,
+      }),
+    ).toBe("stale_needs_review");
+  });
+
+  it("parseEntrySkillProvenance trusts only the three known values", () => {
+    expect(parseEntrySkillProvenance("recognized")).toBe("recognized");
+    expect(parseEntrySkillProvenance("confirmed")).toBe("confirmed");
+    expect(parseEntrySkillProvenance("manual")).toBe("manual");
+    expect(parseEntrySkillProvenance("anything-else")).toBeNull();
+    expect(parseEntrySkillProvenance(null)).toBeNull();
+    expect(parseEntrySkillProvenance(undefined)).toBeNull();
   });
 });
 
@@ -86,5 +143,18 @@ describe("buildEntrySkillSources — wiring real signals", () => {
   });
   it("verified skill is confirmed_by_person", () => {
     expect(sources["id-verified"]).toBe("confirmed_by_person");
+  });
+
+  it("a stored provenance map rescues a link today's recognizer would flag", () => {
+    const withProvenance = buildEntrySkillSources({
+      linkedSkillIds: ["id-statyba", "id-pet"],
+      idToSlug,
+      verifiedSkillIds,
+      recognizedSlugs,
+      recognizableSlugs,
+      provenanceBySkillId: new Map([["id-statyba", "confirmed" as const]]),
+    });
+    expect(withProvenance["id-statyba"]).toBe("manually_linked_to_entry");
+    expect(withProvenance["id-pet"]).toBe("recognized_from_text");
   });
 });

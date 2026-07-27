@@ -14,6 +14,7 @@ import {
 import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
+import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 
 /**
  * Canonical server-side journal → skill pipeline (Universal Journal Recall,
@@ -538,10 +539,9 @@ export async function processJournalEntrySkills(opts: {
             worker_id: worker.id,
             skill_id: r.id,
           }));
-          const ins = await sb.from("journal_entry_skills").upsert(rows, {
-            onConflict: "journal_entry_id,skill_id",
-            ignoreDuplicates: true,
-          });
+          // provenance 'recognized': the pipeline linked these from the entry
+          // text (degrades to an unstamped write while the column is unapplied).
+          const ins = await writeEntrySkillLinks(sb, rows, "recognized", "upsert");
           if (ins.error) {
             logError(trace, "link_entry_skills", ins.error);
             writeFailures += 1;

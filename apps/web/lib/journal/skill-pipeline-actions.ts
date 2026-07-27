@@ -16,6 +16,7 @@ import {
   type JournalRecognitionResult,
 } from "@/lib/journal/journal-recognition";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
+import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 import { normalizeSkillLabel } from "@/lib/skills/candidate-skills";
 import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 import { foldText } from "@/lib/structuring/normalize";
@@ -327,15 +328,13 @@ async function addSkillAndLink(
     if (ins.error) return { ok: false, code: "write_failed" };
   }
 
-  const link = await sb.from("journal_entry_skills").upsert(
-    [
-      {
-        journal_entry_id: entryId,
-        worker_id: workerId,
-        skill_id: skill.id,
-      },
-    ],
-    { onConflict: "journal_entry_id,skill_id", ignoreDuplicates: true },
+  // provenance 'confirmed': this link exists because the WORKER explicitly
+  // confirmed a candidate on this entry (degrades unstamped pre-migration).
+  const link = await writeEntrySkillLinks(
+    sb,
+    [{ journal_entry_id: entryId, worker_id: workerId, skill_id: skill.id }],
+    "confirmed",
+    "upsert",
   );
   if (link.error) return { ok: false, code: "write_failed" };
 
