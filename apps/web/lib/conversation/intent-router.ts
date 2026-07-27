@@ -29,6 +29,7 @@ export type ConversationIntent =
   | "cv" // "įkelk šį CV" / "parodyk mano CV"
   | "profile" // "pridėk kalbą / įgūdį / patirtį"
   | "offers" // "ką man siūlo" — incoming booking offers
+  | "criteria" // "kokie kriterijai pas mane nurodyti?" — search-criteria readback
   | "next-action" // "ką dar turiu padaryti?"
   | "resume" // "kur sustojau?"
   | "unknown";
@@ -189,6 +190,21 @@ const RULES: IntentRule[] = [
       p("предложени", 3),
       p("\\bangebot\\b", 2),
       p("(ką\\s+man\\s+siūlo|what.{0,8}offered|что.{0,8}предлага)", 2),
+    ],
+  },
+  {
+    // MUST outrank `profile` and `find-work` for "kokie kriterijai …" — the
+    // stems are weighted 4 so a criteria question with the word "paieškos"
+    // (search) or "darbo" in it still lands here, not in find-work.
+    intent: "criteria",
+    patterns: [
+      p("\\bkriterij", 4),
+      p("\\bcriteria\\b", 4),
+      p("критери", 4),
+      p("(paieškos|search)\\s+(nustatym|settings|filtr)", 3),
+      p("(pagal\\s+ką\\s+(man\\s+)?ieško)", 3),
+      p("(what\\s+am\\s+i\\s+search(ing)?\\s+(by|with))", 3),
+      p("(по\\s+каким\\s+(параметрам|критериям))", 3),
     ],
   },
   {

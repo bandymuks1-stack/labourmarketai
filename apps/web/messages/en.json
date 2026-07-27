@@ -11047,6 +11047,40 @@
       "progressAria": "Profile essentials: {done} of {total} saved",
       "doneWord": "Saved",
       "missingWord": "Still missing"
+    },
+    "criteria": {
+      "intro": "Your current search criteria:",
+      "introEmpty": "You have no search criteria set yet.",
+      "blockedNoWorker": "I can only show search criteria for a worker profile. Create a worker profile first.",
+      "factSkills": "Skills",
+      "skillsCount": "{count, plural, one {# skill claim} other {# skill claims}}",
+      "factLanguages": "Languages",
+      "factCountries": "Preferred countries",
+      "factSalary": "Rate expectation (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "from €{min}",
+      "salaryTo": "up to €{max}",
+      "factAvailability": "Availability",
+      "availability": {
+        "available": "Available",
+        "busy": "Busy",
+        "unavailable": "Unavailable"
+      },
+      "factStart": "Can start from",
+      "factRelocate": "Willing to relocate",
+      "yes": "Yes",
+      "no": "No",
+      "factContract": "Preferred contract type",
+      "factDocuments": "Documents",
+      "documentsCount": "{count, plural, one {# document} other {# documents}}",
+      "missingIntro": "Matching would be more precise if you set:",
+      "missing": {
+        "skills": "skills",
+        "countries": "preferred countries",
+        "availability": "availability",
+        "languages": "languages",
+        "salary": "rate expectation"
+      }
     }
   }
 }

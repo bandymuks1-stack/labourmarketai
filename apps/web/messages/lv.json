@@ -3230,6 +3230,40 @@
       "progressAria": "[EN] Profile essentials: {done} of {total} saved",
       "doneWord": "[EN] Saved",
       "missingWord": "[EN] Still missing"
+    },
+    "criteria": {
+      "intro": "Tavi pašreizējie meklēšanas kritēriji:",
+      "introEmpty": "Meklēšanas kritēriji vēl nav norādīti.",
+      "blockedNoWorker": "Meklēšanas kritērijus varu parādīt tikai darbinieka profilam. Vispirms izveido darbinieka profilu.",
+      "factSkills": "Prasmes",
+      "skillsCount": "{count, plural, one {# prasmes ieraksts} other {# prasmju ieraksti}}",
+      "factLanguages": "Valodas",
+      "factCountries": "Vēlamās valstis",
+      "factSalary": "Gaidāmā likme (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "no €{min}",
+      "salaryTo": "līdz €{max}",
+      "factAvailability": "Pieejamība",
+      "availability": {
+        "available": "Pieejams",
+        "busy": "Aizņemts",
+        "unavailable": "Nav pieejams"
+      },
+      "factStart": "Var sākt no",
+      "factRelocate": "Gatavs pārcelties",
+      "yes": "Jā",
+      "no": "Nē",
+      "factContract": "Vēlamais līguma veids",
+      "factDocuments": "Dokumenti",
+      "documentsCount": "{count, plural, one {# dokuments} other {# dokumenti}}",
+      "missingIntro": "Atbilstība būs precīzāka, ja norādīsi:",
+      "missing": {
+        "skills": "prasmes",
+        "countries": "vēlamās valstis",
+        "availability": "pieejamību",
+        "languages": "valodas",
+        "salary": "gaidāmo likmi"
+      }
     }
   }
 }

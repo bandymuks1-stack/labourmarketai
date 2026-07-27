@@ -3230,6 +3230,40 @@
       "progressAria": "[EN] Profile essentials: {done} of {total} saved",
       "doneWord": "[EN] Saved",
       "missingWord": "[EN] Still missing"
+    },
+    "criteria": {
+      "intro": "Sinu praegused otsingukriteeriumid:",
+      "introEmpty": "Otsingukriteeriume pole veel määratud.",
+      "blockedNoWorker": "Otsingukriteeriume saan näidata ainult töötaja profiili puhul. Loo kõigepealt töötaja profiil.",
+      "factSkills": "Oskused",
+      "skillsCount": "{count, plural, one {# oskusekirje} other {# oskusekirjet}}",
+      "factLanguages": "Keeled",
+      "factCountries": "Eelistatud riigid",
+      "factSalary": "Oodatav tariif (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "alates €{min}",
+      "salaryTo": "kuni €{max}",
+      "factAvailability": "Saadavus",
+      "availability": {
+        "available": "Saadaval",
+        "busy": "Hõivatud",
+        "unavailable": "Pole saadaval"
+      },
+      "factStart": "Saab alustada alates",
+      "factRelocate": "Valmis kolima",
+      "yes": "Jah",
+      "no": "Ei",
+      "factContract": "Eelistatud lepingu tüüp",
+      "factDocuments": "Dokumendid",
+      "documentsCount": "{count, plural, one {# dokument} other {# dokumenti}}",
+      "missingIntro": "Sobitamine on täpsem, kui määrad:",
+      "missing": {
+        "skills": "oskused",
+        "countries": "eelistatud riigid",
+        "availability": "saadavuse",
+        "languages": "keeled",
+        "salary": "oodatava tariifi"
+      }
     }
   }
 }

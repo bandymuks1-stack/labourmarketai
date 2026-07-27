@@ -3230,6 +3230,40 @@
       "progressAria": "[EN] Profile essentials: {done} of {total} saved",
       "doneWord": "[EN] Saved",
       "missingWord": "[EN] Still missing"
+    },
+    "criteria": {
+      "intro": "Dine nåværende søkekriterier:",
+      "introEmpty": "Du har ikke angitt søkekriterier ennå.",
+      "blockedNoWorker": "Jeg kan bare vise søkekriterier for en arbeidstakerprofil. Opprett en arbeidstakerprofil først.",
+      "factSkills": "Ferdigheter",
+      "skillsCount": "{count, plural, one {# ferdighetsoppføring} other {# ferdighetsoppføringer}}",
+      "factLanguages": "Språk",
+      "factCountries": "Foretrukne land",
+      "factSalary": "Forventet sats (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "fra €{min}",
+      "salaryTo": "opptil €{max}",
+      "factAvailability": "Tilgjengelighet",
+      "availability": {
+        "available": "Ledig",
+        "busy": "Opptatt",
+        "unavailable": "Ikke tilgjengelig"
+      },
+      "factStart": "Kan starte fra",
+      "factRelocate": "Villig til å flytte",
+      "yes": "Ja",
+      "no": "Nei",
+      "factContract": "Foretrukket kontraktstype",
+      "factDocuments": "Dokumenter",
+      "documentsCount": "{count, plural, one {# dokument} other {# dokumenter}}",
+      "missingIntro": "Matchingen blir mer presis hvis du angir:",
+      "missing": {
+        "skills": "ferdigheter",
+        "countries": "foretrukne land",
+        "availability": "tilgjengelighet",
+        "languages": "språk",
+        "salary": "forventet sats"
+      }
     }
   }
 }

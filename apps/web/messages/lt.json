@@ -11047,6 +11047,40 @@
       "progressAria": "Profilio esminės dalys: išsaugota {done} iš {total}",
       "doneWord": "Išsaugota",
       "missingWord": "Dar trūksta"
+    },
+    "criteria": {
+      "intro": "Tavo dabartiniai paieškos kriterijai:",
+      "introEmpty": "Paieškos kriterijų dar nenurodei.",
+      "blockedNoWorker": "Paieškos kriterijus galiu parodyti tik darbuotojo profiliui. Pirmiausia susikurk darbuotojo profilį.",
+      "factSkills": "Įgūdžiai",
+      "skillsCount": "{count, plural, one {# įgūdžio įrašas} few {# įgūdžių įrašai} other {# įgūdžių įrašų}}",
+      "factLanguages": "Kalbos",
+      "factCountries": "Pageidaujamos šalys",
+      "factSalary": "Tarifo lūkestis (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "nuo €{min}",
+      "salaryTo": "iki €{max}",
+      "factAvailability": "Prieinamumas",
+      "availability": {
+        "available": "Laisvas",
+        "busy": "Užimtas",
+        "unavailable": "Nepasiekiamas"
+      },
+      "factStart": "Gali pradėti nuo",
+      "factRelocate": "Pasirengęs persikelti",
+      "yes": "Taip",
+      "no": "Ne",
+      "factContract": "Pageidaujamas sutarties tipas",
+      "factDocuments": "Dokumentai",
+      "documentsCount": "{count, plural, one {# dokumentas} few {# dokumentai} other {# dokumentų}}",
+      "missingIntro": "Atitikmenys būtų tikslesni, jei nurodytum:",
+      "missing": {
+        "skills": "įgūdžius",
+        "countries": "pageidaujamas šalis",
+        "availability": "prieinamumą",
+        "languages": "kalbas",
+        "salary": "tarifo lūkestį"
+      }
     }
   }
 }

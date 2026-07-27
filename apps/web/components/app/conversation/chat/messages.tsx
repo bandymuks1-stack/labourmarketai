@@ -267,7 +267,9 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
     return (
       <AssistantTurn testId="msg-assistant" speaker={h.speakers.assistant}>
         <div className="min-w-0 max-w-[46rem] pt-0.5">
-          <div className="text-body text-text-primary">{m.text}</div>
+          {/* pre-line: structured server readbacks (criteria, summaries) send
+              real newlines; collapsing them would mash facts into one line. */}
+          <div className="whitespace-pre-line text-body text-text-primary">{m.text}</div>
           {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </AssistantTurn>

@@ -11047,6 +11047,40 @@
       "progressAria": "Profil-Grundangaben: {done} von {total} gespeichert",
       "doneWord": "Gespeichert",
       "missingWord": "Fehlt noch"
+    },
+    "criteria": {
+      "intro": "Deine aktuellen Suchkriterien:",
+      "introEmpty": "Du hast noch keine Suchkriterien festgelegt.",
+      "blockedNoWorker": "Suchkriterien kann ich nur für ein Arbeitnehmerprofil anzeigen. Lege zuerst ein Arbeitnehmerprofil an.",
+      "factSkills": "Fähigkeiten",
+      "skillsCount": "{count, plural, one {# Fähigkeitsangabe} other {# Fähigkeitsangaben}}",
+      "factLanguages": "Sprachen",
+      "factCountries": "Bevorzugte Länder",
+      "factSalary": "Erwarteter Satz (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "ab €{min}",
+      "salaryTo": "bis €{max}",
+      "factAvailability": "Verfügbarkeit",
+      "availability": {
+        "available": "Verfügbar",
+        "busy": "Beschäftigt",
+        "unavailable": "Nicht verfügbar"
+      },
+      "factStart": "Kann beginnen ab",
+      "factRelocate": "Umzugsbereit",
+      "yes": "Ja",
+      "no": "Nein",
+      "factContract": "Bevorzugter Vertragstyp",
+      "factDocuments": "Dokumente",
+      "documentsCount": "{count, plural, one {# Dokument} other {# Dokumente}}",
+      "missingIntro": "Das Matching wird genauer, wenn du Folgendes angibst:",
+      "missing": {
+        "skills": "Fähigkeiten",
+        "countries": "bevorzugte Länder",
+        "availability": "Verfügbarkeit",
+        "languages": "Sprachen",
+        "salary": "erwarteten Satz"
+      }
     }
   }
 }
