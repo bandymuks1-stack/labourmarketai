@@ -11176,7 +11176,7 @@
       "title": "For partners & institutions",
       "lead": "A platform built for lawful, transparent collaboration.",
       "i1": "Integration built on clear, auditable records.",
-      "i2": "Provenance by design: records keep their origin, language and history.",
+      "i2": "Records keep where they came from, their language and their history.",
       "i3": "Privacy and security controls: closed-by-default visibility, explicit grants, an audit log.",
       "i4": "Collaboration models from data partnerships to market entry — let's talk.",
       "cta": "About the platform"
@@ -11191,7 +11191,7 @@
       "t3t": "Auditable history",
       "t3b": "Sensitive actions are recorded in an append-only audit log.",
       "t4t": "Explained AI decisions",
-      "t4b": "Every match shows its basis, and every AI extraction is logged together with what you accepted."
+      "t4b": "Every match shows why, and what the AI read from your text is saved together with what you accepted."
     },
     "cta": {
       "title": "Start where you are",

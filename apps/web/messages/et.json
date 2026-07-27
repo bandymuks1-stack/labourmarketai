@@ -3359,7 +3359,7 @@
       "title": "Partneritele ja institutsioonidele",
       "lead": "Platvorm, mis on loodud seaduslikuks ja läbipaistvaks koostööks.",
       "i1": "Integratsioon selgetel, auditeeritavatel kirjetel.",
-      "i2": "Päritolu juba disainis: kirjed säilitavad allika, keele ja ajaloo.",
+      "i2": "Kirjed säilitavad, kust nad pärinevad, oma keele ja ajaloo.",
       "i3": "Privaatsus- ja turvakontrollid: vaikimisi suletud nähtavus, selged load, auditilogi.",
       "i4": "Koostöömudelid andmepartnerlustest turule sisenemiseni — räägime.",
       "cta": "Platvormist"
@@ -3374,7 +3374,7 @@
       "t3t": "Auditeeritav ajalugu",
       "t3b": "Tundlikud tegevused talletatakse ainult-lisatavas auditilogis.",
       "t4t": "Selgitatud AI otsused",
-      "t4b": "Iga sobivus näitab oma alust ja iga AI väljavõte logitakse koos sellega, mille sa vastu võtsid."
+      "t4b": "Iga sobivus näitab, miks, ja see, mida AI sinu tekstist luges, salvestatakse koos sellega, mille sa vastu võtsid."
     },
     "cta": {
       "title": "Alusta sealt, kus oled",

@@ -3359,7 +3359,7 @@
       "title": "For partnere & institutioner",
       "lead": "En platform bygget til lovligt, gennemsigtigt samarbejde.",
       "i1": "Integration bygget på klare, auditerbare registreringer.",
-      "i2": "Proveniens by design: registreringer bevarer oprindelse, sprog og historik.",
+      "i2": "Registreringer bevarer, hvor de kommer fra, deres sprog og historik.",
       "i3": "Privatlivs- og sikkerhedskontroller: lukket synlighed som standard, eksplicitte tilladelser, en auditlog.",
       "i4": "Samarbejdsmodeller fra datapartnerskaber til markedsindtræden — lad os tale sammen.",
       "cta": "Om platformen"
@@ -3374,7 +3374,7 @@
       "t3t": "Auditerbar historik",
       "t3b": "Følsomme handlinger registreres i en auditlog, der kun kan tilføjes til.",
       "t4t": "Forklarede AI-beslutninger",
-      "t4b": "Hvert match viser sit grundlag, og hver AI-udtrækning logges sammen med det, du accepterede."
+      "t4b": "Hvert match viser hvorfor, og det, AI'en læste i din tekst, gemmes sammen med det, du accepterede."
     },
     "cta": {
       "title": "Start der, hvor du er",

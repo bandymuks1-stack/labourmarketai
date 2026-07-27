@@ -3359,7 +3359,7 @@
       "title": "For partnere og institusjoner",
       "lead": "En plattform bygget for lovlig, gjennomsiktig samarbeid.",
       "i1": "Integrasjon bygget på klare, reviderbare registreringer.",
-      "i2": "Proveniens by design: registreringer beholder opprinnelse, språk og historikk.",
+      "i2": "Registreringer beholder hvor de kommer fra, språket sitt og historikken.",
       "i3": "Personvern- og sikkerhetskontroller: lukket synlighet som standard, eksplisitte tillatelser, en revisjonslogg.",
       "i4": "Samarbeidsmodeller fra datapartnerskap til markedsinntreden — la oss snakke.",
       "cta": "Om plattformen"
@@ -3374,7 +3374,7 @@
       "t3t": "Reviderbar historikk",
       "t3b": "Sensitive handlinger registreres i en revisjonslogg som bare kan legges til.",
       "t4t": "Forklarte AI-beslutninger",
-      "t4b": "Hver match viser grunnlaget sitt, og hver AI-uttrekking logges sammen med det du godtok."
+      "t4b": "Hver match viser hvorfor, og det AI-en leste i teksten din, lagres sammen med det du godtok."
     },
     "cta": {
       "title": "Start der du er",

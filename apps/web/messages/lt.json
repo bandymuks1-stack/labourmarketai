@@ -11176,7 +11176,7 @@
       "title": "Partneriams ir institucijoms",
       "lead": "Platforma, sukurta teisėtam ir skaidriam bendradarbiavimui.",
       "i1": "Integracija, grįsta aiškiais, audituojamais įrašais.",
-      "i2": "Kilmė pagal dizainą: įrašai išsaugo savo šaltinį, kalbą ir istoriją.",
+      "i2": "Įrašai išsaugo, iš kur jie atsirado, savo kalbą ir istoriją.",
       "i3": "Privatumo ir saugumo kontrolė: uždaras matomumas pagal nutylėjimą, aiškūs leidimai, audito žurnalas.",
       "i4": "Bendradarbiavimo modeliai nuo duomenų partnerysčių iki įėjimo į rinką — pasikalbėkime.",
       "cta": "Apie platformą"
@@ -11191,7 +11191,7 @@
       "t3t": "Audituojama istorija",
       "t3b": "Jautrūs veiksmai fiksuojami tik pildomame audito žurnale.",
       "t4t": "Paaiškinti AI sprendimai",
-      "t4b": "Kiekviena atitiktis rodo savo pagrindą, o kiekvienas AI išrašas fiksuojamas kartu su tuo, ką patvirtinote."
+      "t4b": "Kiekviena atitiktis rodo kodėl, o tai, ką AI perskaitė jūsų tekste, išsaugoma kartu su tuo, ką patvirtinote."
     },
     "cta": {
       "title": "Pradėkite ten, kur esate",

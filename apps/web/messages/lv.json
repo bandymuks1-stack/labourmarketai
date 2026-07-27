@@ -3359,7 +3359,7 @@
       "title": "Partneriem un institūcijām",
       "lead": "Platforma, kas veidota likumīgai, caurskatāmai sadarbībai.",
       "i1": "Integrācija, kas balstīta skaidros, auditējamos ierakstos.",
-      "i2": "Izcelsme pēc būtības: ieraksti saglabā avotu, valodu un vēsturi.",
+      "i2": "Ieraksti saglabā, no kurienes tie radušies, savu valodu un vēsturi.",
       "i3": "Privātuma un drošības kontrole: pēc noklusējuma slēgta redzamība, skaidras atļaujas, audita žurnāls.",
       "i4": "Sadarbības modeļi no datu partnerībām līdz ienākšanai tirgū — parunāsim.",
       "cta": "Par platformu"
@@ -3374,7 +3374,7 @@
       "t3t": "Auditējama vēsture",
       "t3b": "Jutīgas darbības tiek fiksētas tikai papildināmā audita žurnālā.",
       "t4t": "Izskaidroti AI lēmumi",
-      "t4b": "Katra atbilstība parāda savu pamatu, un katra AI izguve tiek reģistrēta kopā ar to, ko pieņēmāt."
+      "t4b": "Katra atbilstība parāda, kāpēc, un tas, ko AI izlasīja jūsu tekstā, tiek saglabāts kopā ar to, ko pieņēmāt."
     },
     "cta": {
       "title": "Sāciet tur, kur esat",

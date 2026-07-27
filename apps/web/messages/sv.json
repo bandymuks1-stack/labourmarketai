@@ -3359,7 +3359,7 @@
       "title": "För partner & institutioner",
       "lead": "En plattform byggd för laglig, transparent samverkan.",
       "i1": "Integration byggd på tydliga, granskningsbara poster.",
-      "i2": "Proveniens by design: poster behåller ursprung, språk och historik.",
+      "i2": "Poster behåller varifrån de kommer, sitt språk och sin historik.",
       "i3": "Integritets- och säkerhetskontroller: stängd synlighet som standard, uttryckliga behörigheter, en granskningslogg.",
       "i4": "Samarbetsmodeller från datapartnerskap till marknadsinträde — låt oss prata.",
       "cta": "Om plattformen"
@@ -3374,7 +3374,7 @@
       "t3t": "Granskningsbar historik",
       "t3b": "Känsliga åtgärder registreras i en granskningslogg som bara kan utökas.",
       "t4t": "Förklarade AI-beslut",
-      "t4b": "Varje matchning visar sin grund, och varje AI-utvinning loggas tillsammans med det du godtog."
+      "t4b": "Varje matchning visar varför, och det AI:n läste i din text sparas tillsammans med det du godtog."
     },
     "cta": {
       "title": "Börja där du är",

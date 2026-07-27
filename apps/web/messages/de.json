@@ -11176,7 +11176,7 @@
       "title": "Für Partner & Institutionen",
       "lead": "Eine Plattform für rechtmäßige, transparente Zusammenarbeit.",
       "i1": "Integration auf Basis klarer, auditierbarer Einträge.",
-      "i2": "Herkunft by design: Einträge behalten Ursprung, Sprache und Historie.",
+      "i2": "Einträge behalten, woher sie stammen, ihre Sprache und ihre Historie.",
       "i3": "Datenschutz- und Sicherheitskontrollen: standardmäßig geschlossene Sichtbarkeit, explizite Freigaben, ein Audit-Log.",
       "i4": "Kooperationsmodelle von Datenpartnerschaften bis Markteintritt — sprechen wir.",
       "cta": "Über die Plattform"
@@ -11191,7 +11191,7 @@
       "t3t": "Auditierbare Historie",
       "t3b": "Sensible Aktionen werden in einem Nur-Anfügen-Audit-Log festgehalten.",
       "t4t": "Erklärte KI-Entscheidungen",
-      "t4b": "Jede Passung zeigt ihre Grundlage, und jede KI-Extraktion wird zusammen mit dem protokolliert, was Sie akzeptiert haben."
+      "t4b": "Jede Passung zeigt warum, und was die KI aus Ihrem Text gelesen hat, wird zusammen mit dem gespeichert, was Sie akzeptiert haben."
     },
     "cta": {
       "title": "Starten Sie dort, wo Sie sind",
