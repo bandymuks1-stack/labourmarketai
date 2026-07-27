@@ -14,13 +14,18 @@ export async function generateMetadata({
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PreviewChip } from "@/components/app/preview-chip";
-import { LiveMap } from "@/components/app/live-map";
+import { LiveWorldMap } from "@/components/app/live-world-map";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
 import { DraftBoard } from "@/components/marketing/draft-board";
 import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
+import { HowItWorksBand } from "@/components/marketing/how-it-works-band";
+import { ConversationOsPanel } from "@/components/marketing/conversation-os-panel";
+import { AudienceValueSections } from "@/components/marketing/audience-value-sections";
+import { TrustBand } from "@/components/marketing/trust-band";
+import { FinalCtaBand } from "@/components/marketing/final-cta-band";
 
 export default async function LandingPage({
   params,
@@ -30,7 +35,6 @@ export default async function LandingPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("hero");
-  const tj = await getTranslations("journey");
   const tlm = await getTranslations("labourMarket");
   const audienceKeys = [
     "aWorkers",
@@ -48,10 +52,10 @@ export default async function LandingPage({
     ["p3Title", "p3Body"],
     ["p4Title", "p4Body"],
   ] as const;
-  // Landing↔app journey band — the same stage rail the user meets inside the
-  // cockpit after signup (visual continuity). Honest product explanation of the
-  // real flow; no fake metrics, no fake matching (DEMO_TO_REAL_DATA_POLICY).
-  const journeyStages = [tj("s1"), tj("s2"), tj("s3"), tj("s4")];
+  // PR-H global landing: the former journey band (the in-app stage rail) is
+  // superseded by <HowItWorksBand/> — the conversation-first 4-step flow.
+  // The `journey.*` i18n keys stay in messages/*.json (used elsewhere and
+  // kept for a cheap restore).
 
   // Premium-impression cleanup v1: the `tr` (trusted) + `sec` (secondary)
   // namespaces are no longer rendered on this page (placeholder-only
@@ -127,12 +131,13 @@ export default async function LandingPage({
            */}
         </div>
 
-        {/* Hero right — live mission-control map (5b.2) */}
+        {/* Hero right — world directions map (PR-H global landing). Concept
+            visual, not live data — marked by the chip + on-map caption. */}
         <div className="relative">
           <div className="relative mb-5 flex items-start justify-between gap-4">
             <PreviewChip />
           </div>
-          <LiveMap />
+          <LiveWorldMap />
         </div>
       </section>
 
@@ -141,60 +146,11 @@ export default async function LandingPage({
         <LiveTicker />
       </div>
 
-      {/* ── Journey band — same action rail as the in-app cockpit ─────── */}
-      <section className="mt-16">
-        <div className="card-border wow-card p-6 sm:p-10">
-          <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
-            <span className="live-dot" aria-hidden />
-            {tj("eyebrow")}
-          </p>
-          <h2 className="mt-3 max-w-2xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
-            {tj("title")}
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
-            {tj("subcopy")}
-          </p>
+      {/* ── How it works — conversation-first 4-step flow (PR-H, A) ────── */}
+      <HowItWorksBand />
 
-          <ol className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-0">
-            {journeyStages.map((label, i) => (
-              <li
-                key={label}
-                className="flex flex-1 items-center gap-3 sm:flex-col sm:items-center sm:gap-0"
-              >
-                <div className="flex items-center gap-3 sm:w-full sm:gap-0">
-                  <span
-                    className={`hidden h-0.5 flex-1 rounded-full sm:block ${i === 0 ? "bg-transparent" : "stage-line"}`}
-                  />
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-mono text-xs font-semibold ${
-                      i === 0
-                        ? "stage-current border-brand-orange bg-brand-orange/15 text-brand-orange"
-                        : "border-brand-blue/40 bg-brand-blue/10 text-brand-blue"
-                    }`}
-                  >
-                    {i + 1}
-                  </span>
-                  <span
-                    className={`hidden h-0.5 flex-1 rounded-full sm:block ${i === journeyStages.length - 1 ? "bg-transparent" : "stage-line"}`}
-                  />
-                </div>
-                <span className="font-display text-sm font-semibold text-text-primary sm:mt-2 sm:text-center">
-                  {label}
-                </span>
-              </li>
-            ))}
-          </ol>
-
-          <Link
-            href="/auth/signup"
-            className="mt-8 block w-full sm:inline-block sm:w-auto"
-          >
-            <Button className="w-full rounded-xl sm:w-auto">
-              {t("ctaPrimary")} →
-            </Button>
-          </Link>
-        </div>
-      </section>
+      {/* ── Conversation as the operating system (PR-H, G) ─────────────── */}
+      <ConversationOsPanel />
 
       {/* ── Audience band — whole labour market, not construction-only ─── */}
       <section className="mt-16">
@@ -223,6 +179,10 @@ export default async function LandingPage({
           ))}
         </ul>
       </section>
+
+      {/* ── Audience value blocks — workers / employers / agencies /
+             training institutions / partners (PR-H, B–F) ───────────────── */}
+      <AudienceValueSections />
 
       {/* ── Why-now pillars ──────────────────────────────────────────── */}
       <section className="mt-16">
@@ -312,6 +272,12 @@ export default async function LandingPage({
 
       {/* ── Market Pulse (5b.4) ──────────────────────────────────────── */}
       <MarketPulse />
+
+      {/* ── Trust & security — verifiable claims only (PR-H, H) ────────── */}
+      <TrustBand />
+
+      {/* ── Final CTA band — four real doors, no dead links (PR-H, I) ──── */}
+      <FinalCtaBand />
 
       {/*
        * Premium-impression cleanup v1: the four-card "secondary" grid
