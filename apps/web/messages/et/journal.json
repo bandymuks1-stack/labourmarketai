@@ -219,5 +219,31 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Seda sissekannet on juba muudetud teises vahekaardis või seansis. Kui soovite siia sisestatud muudatused alles hoida, kopeerige kõigepealt oma tekst — lehe uuesti laadimisel lähevad need kaotsi ja seejärel muudate uusimat versiooni.",
     "conflictReload": "Laadi leht uuesti"
+  },
+  "errors": {
+    "sessionExpired": "Seanss on aegunud. Palun logige uuesti sisse.",
+    "noWorkerProfile": "Töötaja profiili ei leitud. Avage konto seaded ja lülitage töötaja roll sisse.",
+    "engagementRequired": "Valige töökontekst (organisatsioon või projekt), kuhu see sissekanne kuulub.",
+    "notesRequired": "Kirjeldage, mida tegite — vaba tekst on sissekande alus.",
+    "quantityInvalid": "Kogus peab olema mittenegatiivne arv.",
+    "unitSlugUnknown": "Ühikute registris veel puudub: {units}. Paluge administraatoril rakendada migratsioon 0017 (productivity_units seeme) ja proovige uuesti.",
+    "saveFailed": "Sissekande salvestamine ebaõnnestus: {reason}",
+    "unknownReason": "tundmatu viga",
+    "missingOldEntryId": "Muudetava sissekande identifikaator puudub.",
+    "oldEntryNotFound": "Muudetavat sissekannet ei leitud. Laadige leht uuesti.",
+    "entrySupersededElsewhere": "See sissekanne on juba mujal asendatud (teises vahekaardis või seansis). Laadige leht uuesti ja muutke sissekande uusimat versiooni.",
+    "skillSelectionInvalid": "Valitud oskust ei ole enam oskuste kataloogis. Eemaldage see loendist ja proovige uuesti salvestada — kõik muud muudatused on endiselt vormis.",
+    "updateFailed": "Sissekande uuendamine ebaõnnestus: {reason}",
+    "entryNotFound": "Sissekannet ei leitud.",
+    "deleteFailed": "Sissekande eemaldamine ebaõnnestus: {reason}",
+    "restoreFailed": "Sissekande taastamine ebaõnnestus: {reason}",
+    "rpcUnavailable": "Paranduste funktsioon ei ole selles keskkonnas veel rakendatud. Paluge administraatoril rakendada uusim päeviku migratsioon (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Sissekannet ei leitud (võimalik, et see on juba eemaldatud).",
+    "notOwner": "Teise inimese sissekannet ei saa muuta.",
+    "alreadyConfirmed": "Seda sissekannet ei saa enam eemaldada — teine osapool on selle juba läbi vaadanud. Kustutamise asemel saatke parandustaotlus.",
+    "cannotSupersedeDeleted": "Eemaldatud sissekannet ei saa muuta.",
+    "cannotRestoreSuperseded": "Seda sissekannet ei saa taastada — uuem versioon on selle juba asendanud.",
+    "cannotRestoreCorrectionConflict": "Seda sissekannet ei saa taastada — sama töö kohta on juba olemas teine kehtiv parandatud versioon.",
+    "metricsInsertFailed": "Sissekannet ei salvestatud täielikult: {reason}. Sissekanne lükati tagasi — proovige uuesti."
   }
 }

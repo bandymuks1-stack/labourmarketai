@@ -453,5 +453,31 @@
     "topicLabel": "Thema",
     "conflictNote": "Dieser Eintrag wurde bereits in einem anderen Tab oder einer anderen Sitzung geändert. Wenn Sie die hier eingegebenen Änderungen behalten möchten, kopieren Sie zuerst Ihren Text — beim Neuladen der Seite gehen sie verloren und Sie bearbeiten dann die neueste Version.",
     "conflictReload": "Seite neu laden"
+  },
+  "errors": {
+    "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "noWorkerProfile": "Kein Arbeitnehmerprofil gefunden. Öffne die Kontoeinstellungen und aktiviere die Arbeitnehmerrolle.",
+    "engagementRequired": "Wähle den Arbeitskontext (Organisation oder Projekt), zu dem dieser Eintrag gehört.",
+    "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Kern dieses Eintrags.",
+    "quantityInvalid": "Die Menge muss eine nicht negative Zahl sein.",
+    "unitSlugUnknown": "Noch nicht im Einheitenregister: {units}. Bitte einen Administrator, Migration 0017 (den productivity_units-Seed) anzuwenden, und versuche es erneut.",
+    "saveFailed": "Der Eintrag konnte nicht gespeichert werden: {reason}",
+    "unknownReason": "unbekannter Fehler",
+    "missingOldEntryId": "Die Kennung des zu ändernden Eintrags fehlt.",
+    "oldEntryNotFound": "Der zu ändernde Eintrag wurde nicht gefunden. Lade die Seite neu.",
+    "entrySupersededElsewhere": "Dieser Eintrag wurde bereits an anderer Stelle ersetzt (in einem anderen Tab oder einer anderen Sitzung). Lade die Seite neu und bearbeite die neueste Version.",
+    "skillSelectionInvalid": "Die ausgewählte Fähigkeit ist nicht mehr im Fähigkeitenkatalog. Entferne sie aus der Liste und versuche erneut zu speichern — alle anderen Änderungen sind noch im Formular.",
+    "updateFailed": "Der Eintrag konnte nicht aktualisiert werden: {reason}",
+    "entryNotFound": "Eintrag nicht gefunden.",
+    "deleteFailed": "Der Eintrag konnte nicht entfernt werden: {reason}",
+    "restoreFailed": "Der Eintrag konnte nicht wiederhergestellt werden: {reason}",
+    "rpcUnavailable": "Die Korrekturfunktion ist in dieser Umgebung noch nicht eingerichtet. Bitte einen Administrator, die neueste Journal-Migration anzuwenden (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Eintrag nicht gefunden (möglicherweise wurde er bereits entfernt).",
+    "notOwner": "Ein fremder Eintrag kann nicht geändert werden.",
+    "alreadyConfirmed": "Dieser Eintrag kann nicht mehr entfernt werden — eine andere Partei hat ihn bereits geprüft. Sende statt einer Löschung eine Korrekturanfrage.",
+    "cannotSupersedeDeleted": "Ein entfernter Eintrag kann nicht geändert werden.",
+    "cannotRestoreSuperseded": "Dieser Eintrag kann nicht wiederhergestellt werden — eine neuere Version hat ihn bereits ersetzt.",
+    "cannotRestoreCorrectionConflict": "Dieser Eintrag kann nicht wiederhergestellt werden — für dieselbe Arbeit existiert bereits eine andere aktuelle korrigierte Version.",
+    "metricsInsertFailed": "Der Eintrag wurde nicht vollständig gespeichert: {reason}. Der Eintrag wurde verworfen — bitte versuche es erneut."
   }
 }

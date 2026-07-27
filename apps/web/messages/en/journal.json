@@ -453,5 +453,31 @@
     "topicLabel": "Topic",
     "conflictNote": "This entry was already updated in another tab or session. If you want to keep the changes typed here, copy your text first — reloading the page will discard them and open the latest version for editing.",
     "conflictReload": "Reload page"
+  },
+  "errors": {
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "noWorkerProfile": "Worker profile not found. Open your account settings and enable the worker role.",
+    "engagementRequired": "Choose the work context (organization or project) this entry belongs to.",
+    "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
+    "quantityInvalid": "Quantity must be a non-negative number.",
+    "unitSlugUnknown": "Not yet in the unit registry: {units}. Ask an administrator to apply migration 0017 (the productivity_units seed), then try again.",
+    "saveFailed": "Failed to save the entry: {reason}",
+    "unknownReason": "unknown error",
+    "missingOldEntryId": "The identifier of the entry being edited is missing.",
+    "oldEntryNotFound": "The entry being edited was not found. Reload the page.",
+    "entrySupersededElsewhere": "This entry was already replaced elsewhere (in another tab or session). Reload the page and edit the latest version of the entry.",
+    "skillSelectionInvalid": "The selected skill is no longer in the skill catalog. Remove it from the list and try saving again — all other changes are still in the form.",
+    "updateFailed": "Failed to update the entry: {reason}",
+    "entryNotFound": "Entry not found.",
+    "deleteFailed": "Failed to remove the entry: {reason}",
+    "restoreFailed": "Failed to restore the entry: {reason}",
+    "rpcUnavailable": "The corrections function is not yet applied in this environment. Ask an administrator to apply the latest journal migration (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Entry not found (it may already have been removed).",
+    "notOwner": "You cannot modify an entry that belongs to someone else.",
+    "alreadyConfirmed": "This entry can no longer be removed — another party has already reviewed it. Send a correction request instead of deleting.",
+    "cannotSupersedeDeleted": "A removed entry cannot be edited.",
+    "cannotRestoreSuperseded": "This entry cannot be restored — a newer version has already replaced it.",
+    "cannotRestoreCorrectionConflict": "This entry cannot be restored — another live corrected version already exists for the same work.",
+    "metricsInsertFailed": "The entry was not saved completely: {reason}. The entry was discarded — please try again."
   }
 }

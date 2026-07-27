@@ -219,5 +219,31 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Denne oppføringen er allerede endret i en annen fane eller økt. Hvis du vil beholde endringene du har skrevet her, kopier teksten først — når siden lastes på nytt, går de tapt, og du redigerer deretter den nyeste versjonen.",
     "conflictReload": "Last siden på nytt"
+  },
+  "errors": {
+    "sessionExpired": "Økten er utløpt. Logg inn på nytt.",
+    "noWorkerProfile": "Fant ikke arbeidstakerprofil. Åpne kontoinnstillingene og aktiver arbeidstakerrollen.",
+    "engagementRequired": "Velg arbeidskonteksten (organisasjon eller prosjekt) som denne oppføringen hører til.",
+    "notesRequired": "Beskriv hva du jobbet med — friteksten er kjernen i oppføringen.",
+    "quantityInvalid": "Mengden må være et ikke-negativt tall.",
+    "unitSlugUnknown": "Finnes ennå ikke i enhetsregisteret: {units}. Be en administrator om å kjøre migrasjon 0017 (productivity_units-seedet), og prøv igjen.",
+    "saveFailed": "Kunne ikke lagre oppføringen: {reason}",
+    "unknownReason": "ukjent feil",
+    "missingOldEntryId": "Identifikatoren til oppføringen som endres mangler.",
+    "oldEntryNotFound": "Fant ikke oppføringen som endres. Last siden på nytt.",
+    "entrySupersededElsewhere": "Denne oppføringen er allerede erstattet et annet sted (i en annen fane eller økt). Last siden på nytt og rediger den nyeste versjonen.",
+    "skillSelectionInvalid": "Den valgte ferdigheten finnes ikke lenger i ferdighetskatalogen. Fjern den fra listen og prøv å lagre igjen — alle andre endringer er fortsatt i skjemaet.",
+    "updateFailed": "Kunne ikke oppdatere oppføringen: {reason}",
+    "entryNotFound": "Fant ikke oppføringen.",
+    "deleteFailed": "Kunne ikke fjerne oppføringen: {reason}",
+    "restoreFailed": "Kunne ikke gjenopprette oppføringen: {reason}",
+    "rpcUnavailable": "Korreksjonsfunksjonen er ennå ikke tatt i bruk i dette miljøet. Be en administrator om å kjøre den nyeste journalmigrasjonen (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Fant ikke oppføringen (den kan allerede være fjernet).",
+    "notOwner": "Du kan ikke endre en annens oppføring.",
+    "alreadyConfirmed": "Denne oppføringen kan ikke lenger fjernes — en annen part har allerede gjennomgått den. Send en korreksjonsforespørsel i stedet for å slette.",
+    "cannotSupersedeDeleted": "En fjernet oppføring kan ikke endres.",
+    "cannotRestoreSuperseded": "Denne oppføringen kan ikke gjenopprettes — en nyere versjon har allerede erstattet den.",
+    "cannotRestoreCorrectionConflict": "Denne oppføringen kan ikke gjenopprettes — det finnes allerede en annen gjeldende korrigert versjon for det samme arbeidet.",
+    "metricsInsertFailed": "Oppføringen ble ikke lagret fullstendig: {reason}. Oppføringen ble forkastet — prøv igjen."
   }
 }

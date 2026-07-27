@@ -219,5 +219,31 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Denne post er allerede blevet ændret i en anden fane eller session. Hvis du vil beholde de ændringer, du har skrevet her, så kopiér din tekst først — genindlæsning af siden sletter dem, og du redigerer derefter den nyeste version.",
     "conflictReload": "Genindlæs siden"
+  },
+  "errors": {
+    "sessionExpired": "Din session er udløbet. Log ind igen.",
+    "noWorkerProfile": "Medarbejderprofil ikke fundet. Åbn kontoindstillingerne og aktivér medarbejderrollen.",
+    "engagementRequired": "Vælg den arbejdskontekst (organisation eller projekt), som denne post hører til.",
+    "notesRequired": "Beskriv hvad du arbejdede med — friteksten er kernen i posten.",
+    "quantityInvalid": "Mængden skal være et ikke-negativt tal.",
+    "unitSlugUnknown": "Findes endnu ikke i enhedsregistret: {units}. Bed en administrator om at anvende migration 0017 (productivity_units-seedet), og prøv igen.",
+    "saveFailed": "Posten kunne ikke gemmes: {reason}",
+    "unknownReason": "ukendt fejl",
+    "missingOldEntryId": "Identifikatoren for posten, der ændres, mangler.",
+    "oldEntryNotFound": "Posten, der ændres, blev ikke fundet. Genindlæs siden.",
+    "entrySupersededElsewhere": "Denne post er allerede blevet erstattet et andet sted (i en anden fane eller session). Genindlæs siden og rediger den nyeste version.",
+    "skillSelectionInvalid": "Den valgte færdighed findes ikke længere i færdighedskataloget. Fjern den fra listen og prøv at gemme igen — alle andre ændringer er stadig i formularen.",
+    "updateFailed": "Posten kunne ikke opdateres: {reason}",
+    "entryNotFound": "Posten blev ikke fundet.",
+    "deleteFailed": "Posten kunne ikke fjernes: {reason}",
+    "restoreFailed": "Posten kunne ikke gendannes: {reason}",
+    "rpcUnavailable": "Rettelsesfunktionen er endnu ikke anvendt i dette miljø. Bed en administrator om at anvende den nyeste journalmigration (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Posten blev ikke fundet (den kan allerede være fjernet).",
+    "notOwner": "Du kan ikke ændre en andens post.",
+    "alreadyConfirmed": "Denne post kan ikke længere fjernes — en anden part har allerede gennemgået den. Send en rettelsesanmodning i stedet for at slette.",
+    "cannotSupersedeDeleted": "En fjernet post kan ikke ændres.",
+    "cannotRestoreSuperseded": "Denne post kan ikke gendannes — en nyere version har allerede erstattet den.",
+    "cannotRestoreCorrectionConflict": "Denne post kan ikke gendannes — der findes allerede en anden aktuel rettet version for det samme arbejde.",
+    "metricsInsertFailed": "Posten blev ikke gemt fuldstændigt: {reason}. Posten blev afvist — prøv igen."
   }
 }

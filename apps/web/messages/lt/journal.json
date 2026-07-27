@@ -453,5 +453,31 @@
     "topicLabel": "Tema",
     "conflictNote": "Šis įrašas jau buvo pakeistas kitame lange ar sesijoje. Jei norite išsaugoti čia įvestus pakeitimus, pirmiausia nusikopijuokite tekstą — perkrovus puslapį jie bus prarasti, o redaguoti galėsite naujausią versiją.",
     "conflictReload": "Perkrauti puslapį"
+  },
+  "errors": {
+    "sessionExpired": "Sesija nutrūko. Prisijunkite iš naujo.",
+    "noWorkerProfile": "Nerastas darbuotojo profilis. Atidarykite paskyros nustatymus ir įjunkite darbuotojo vaidmenį.",
+    "engagementRequired": "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
+    "notesRequired": "Aprašykite ką dirbote — laisvas tekstas yra įrašo pagrindas.",
+    "quantityInvalid": "Kiekis turi būti neneigiamas skaičius.",
+    "unitSlugUnknown": "Vieneto registre kol kas nėra: {units}. Paprašykite administratoriaus pritaikyti migraciją 0017 (productivity_units seedą), tada bandykite dar kartą.",
+    "saveFailed": "Įrašo išsaugoti nepavyko: {reason}",
+    "unknownReason": "nežinoma klaida",
+    "missingOldEntryId": "Trūksta keičiamo įrašo identifikatoriaus.",
+    "oldEntryNotFound": "Keičiamas įrašas nerastas. Perkraukite puslapį.",
+    "entrySupersededElsewhere": "Šis įrašas jau buvo pakeistas kitur (kitame lange ar sesijoje). Perkraukite puslapį ir redaguokite naujausią įrašo versiją.",
+    "skillSelectionInvalid": "Pasirinkto įgūdžio nebėra įgūdžių kataloge. Pašalinkite jį iš sąrašo ir bandykite išsaugoti dar kartą — visi kiti pakeitimai liko formoje.",
+    "updateFailed": "Įrašo atnaujinti nepavyko: {reason}",
+    "entryNotFound": "Įrašas nerastas.",
+    "deleteFailed": "Įrašo pašalinti nepavyko: {reason}",
+    "restoreFailed": "Įrašo atkurti nepavyko: {reason}",
+    "rpcUnavailable": "Pataisymų funkcija dar nepritaikyta šioje aplinkoje. Paprašykite administratoriaus pritaikyti naujausią žurnalo migraciją (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Įrašas nerastas (gali būti, kad jau buvo pašalintas).",
+    "notOwner": "Negalima keisti svetimo įrašo.",
+    "alreadyConfirmed": "Šio įrašo nebegalima pašalinti — jį jau peržiūrėjo kita šalis. Vietoje ištrynimo siųskite pataisymo prašymą.",
+    "cannotSupersedeDeleted": "Negalima keisti pašalinto įrašo.",
+    "cannotRestoreSuperseded": "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
+    "cannotRestoreCorrectionConflict": "Šio įrašo atkurti negalima — tam pačiam darbui jau yra kita aktuali pataisyta versija.",
+    "metricsInsertFailed": "Įrašas nebuvo išsaugotas pilnai: {reason}. Įrašas atmestas — bandykite dar kartą."
   }
 }

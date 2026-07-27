@@ -219,5 +219,31 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Den här posten har redan ändrats i en annan flik eller session. Om du vill behålla ändringarna du skrivit här, kopiera din text först — när sidan laddas om försvinner de, och därefter redigerar du den senaste versionen.",
     "conflictReload": "Ladda om sidan"
+  },
+  "errors": {
+    "sessionExpired": "Din session har gått ut. Logga in igen.",
+    "noWorkerProfile": "Ingen arbetarprofil hittades. Öppna kontoinställningarna och aktivera arbetarrollen.",
+    "engagementRequired": "Välj det arbetssammanhang (organisation eller projekt) som denna post tillhör.",
+    "notesRequired": "Beskriv vad du arbetade med — fritexten är kärnan i posten.",
+    "quantityInvalid": "Mängden måste vara ett icke-negativt tal.",
+    "unitSlugUnknown": "Finns ännu inte i enhetsregistret: {units}. Be en administratör tillämpa migration 0017 (productivity_units-seedet) och försök igen.",
+    "saveFailed": "Det gick inte att spara posten: {reason}",
+    "unknownReason": "okänt fel",
+    "missingOldEntryId": "Identifieraren för posten som ändras saknas.",
+    "oldEntryNotFound": "Posten som ändras hittades inte. Ladda om sidan.",
+    "entrySupersededElsewhere": "Denna post har redan ersatts någon annanstans (i en annan flik eller session). Ladda om sidan och redigera den senaste versionen.",
+    "skillSelectionInvalid": "Den valda färdigheten finns inte längre i färdighetskatalogen. Ta bort den från listan och försök spara igen — alla andra ändringar finns kvar i formuläret.",
+    "updateFailed": "Det gick inte att uppdatera posten: {reason}",
+    "entryNotFound": "Posten hittades inte.",
+    "deleteFailed": "Det gick inte att ta bort posten: {reason}",
+    "restoreFailed": "Det gick inte att återställa posten: {reason}",
+    "rpcUnavailable": "Korrigeringsfunktionen har ännu inte tillämpats i denna miljö. Be en administratör tillämpa den senaste journalmigrationen (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Posten hittades inte (den kan redan ha tagits bort).",
+    "notOwner": "Du kan inte ändra någon annans post.",
+    "alreadyConfirmed": "Denna post kan inte längre tas bort — en annan part har redan granskat den. Skicka en korrigeringsbegäran i stället för att radera.",
+    "cannotSupersedeDeleted": "En borttagen post kan inte ändras.",
+    "cannotRestoreSuperseded": "Denna post kan inte återställas — en nyare version har redan ersatt den.",
+    "cannotRestoreCorrectionConflict": "Denna post kan inte återställas — det finns redan en annan aktuell korrigerad version för samma arbete.",
+    "metricsInsertFailed": "Posten sparades inte fullständigt: {reason}. Posten förkastades — försök igen."
   }
 }

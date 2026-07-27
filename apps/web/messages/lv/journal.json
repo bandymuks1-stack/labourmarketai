@@ -219,5 +219,31 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Šis ieraksts jau ir mainīts citā cilnē vai sesijā. Ja vēlaties saglabāt šeit ievadītās izmaiņas, vispirms nokopējiet tekstu — pārlādējot lapu, tās tiks zaudētas, un pēc tam rediģēsiet jaunāko versiju.",
     "conflictReload": "Pārlādēt lapu"
+  },
+  "errors": {
+    "sessionExpired": "Sesija ir beigusies. Lūdzu, pierakstieties vēlreiz.",
+    "noWorkerProfile": "Darbinieka profils nav atrasts. Atveriet konta iestatījumus un ieslēdziet darbinieka lomu.",
+    "engagementRequired": "Izvēlieties darba kontekstu (organizāciju vai projektu), kuram pieder šis ieraksts.",
+    "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pamats.",
+    "quantityInvalid": "Daudzumam jābūt nenegatīvam skaitlim.",
+    "unitSlugUnknown": "Vienību reģistrā vēl nav: {units}. Palūdziet administratoram piemērot migrāciju 0017 (productivity_units sēklu) un mēģiniet vēlreiz.",
+    "saveFailed": "Neizdevās saglabāt ierakstu: {reason}",
+    "unknownReason": "nezināma kļūda",
+    "missingOldEntryId": "Trūkst maināmā ieraksta identifikatora.",
+    "oldEntryNotFound": "Maināmais ieraksts nav atrasts. Pārlādējiet lapu.",
+    "entrySupersededElsewhere": "Šis ieraksts jau ir aizstāts citur (citā cilnē vai sesijā). Pārlādējiet lapu un rediģējiet jaunāko ieraksta versiju.",
+    "skillSelectionInvalid": "Izvēlētās prasmes vairs nav prasmju katalogā. Noņemiet to no saraksta un mēģiniet saglabāt vēlreiz — visas pārējās izmaiņas palika formā.",
+    "updateFailed": "Neizdevās atjaunināt ierakstu: {reason}",
+    "entryNotFound": "Ieraksts nav atrasts.",
+    "deleteFailed": "Neizdevās noņemt ierakstu: {reason}",
+    "restoreFailed": "Neizdevās atjaunot ierakstu: {reason}",
+    "rpcUnavailable": "Labojumu funkcija šajā vidē vēl nav piemērota. Palūdziet administratoram piemērot jaunāko žurnāla migrāciju (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Ieraksts nav atrasts (iespējams, tas jau ir noņemts).",
+    "notOwner": "Nevar mainīt cita lietotāja ierakstu.",
+    "alreadyConfirmed": "Šo ierakstu vairs nevar noņemt — cita puse to jau ir izskatījusi. Dzēšanas vietā nosūtiet labojuma pieprasījumu.",
+    "cannotSupersedeDeleted": "Nevar mainīt noņemtu ierakstu.",
+    "cannotRestoreSuperseded": "Šo ierakstu nevar atjaunot — to jau ir aizstājusi jaunāka versija.",
+    "cannotRestoreCorrectionConflict": "Šo ierakstu nevar atjaunot — tam pašam darbam jau ir cita aktuāla labota versija.",
+    "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz."
   }
 }

@@ -25,6 +25,14 @@ vi.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => revalidatePathMock(...args),
 }));
 
+// The action localizes its error messages via next-intl (journal.errors.*);
+// outside a request there is no locale context, so mock the translator to
+// echo keys — these tests assert result CODES, never message copy.
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn(async () => "lt"),
+  getTranslations: vi.fn(async () => (key: string) => key),
+}));
+
 type PipelineCall = {
   entryId: string;
   text: string;

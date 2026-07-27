@@ -219,5 +219,31 @@
     "topicLabel": "Temat",
     "conflictNote": "Ten wpis został już zmieniony w innej karcie lub sesji. Jeśli chcesz zachować wpisane tu zmiany, najpierw skopiuj tekst — po odświeżeniu strony zostaną utracone, a edytować będziesz najnowszą wersję.",
     "conflictReload": "Odśwież stronę"
+  },
+  "errors": {
+    "sessionExpired": "Sesja wygasła. Zaloguj się ponownie.",
+    "noWorkerProfile": "Nie znaleziono profilu pracownika. Otwórz ustawienia konta i włącz rolę pracownika.",
+    "engagementRequired": "Wybierz kontekst pracy (organizację lub projekt), do którego należy ten wpis.",
+    "notesRequired": "Opisz, co robiłeś — wolny tekst jest podstawą tego wpisu.",
+    "quantityInvalid": "Ilość musi być liczbą nieujemną.",
+    "unitSlugUnknown": "Brak w rejestrze jednostek: {units}. Poproś administratora o zastosowanie migracji 0017 (seed productivity_units) i spróbuj ponownie.",
+    "saveFailed": "Nie udało się zapisać wpisu: {reason}",
+    "unknownReason": "nieznany błąd",
+    "missingOldEntryId": "Brak identyfikatora zmienianego wpisu.",
+    "oldEntryNotFound": "Nie znaleziono zmienianego wpisu. Odśwież stronę.",
+    "entrySupersededElsewhere": "Ten wpis został już zastąpiony w innym miejscu (w innej karcie lub sesji). Odśwież stronę i edytuj najnowszą wersję wpisu.",
+    "skillSelectionInvalid": "Wybranej umiejętności nie ma już w katalogu umiejętności. Usuń ją z listy i spróbuj zapisać ponownie — wszystkie pozostałe zmiany pozostały w formularzu.",
+    "updateFailed": "Nie udało się zaktualizować wpisu: {reason}",
+    "entryNotFound": "Nie znaleziono wpisu.",
+    "deleteFailed": "Nie udało się usunąć wpisu: {reason}",
+    "restoreFailed": "Nie udało się przywrócić wpisu: {reason}",
+    "rpcUnavailable": "Funkcja poprawek nie została jeszcze zastosowana w tym środowisku. Poproś administratora o zastosowanie najnowszej migracji dziennika (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Nie znaleziono wpisu (być może został już usunięty).",
+    "notOwner": "Nie można zmieniać cudzego wpisu.",
+    "alreadyConfirmed": "Tego wpisu nie można już usunąć — inna strona już go przejrzała. Zamiast usuwać, wyślij prośbę o poprawkę.",
+    "cannotSupersedeDeleted": "Nie można zmieniać usuniętego wpisu.",
+    "cannotRestoreSuperseded": "Tego wpisu nie można przywrócić — zastąpiła go już nowsza wersja.",
+    "cannotRestoreCorrectionConflict": "Tego wpisu nie można przywrócić — dla tej samej pracy istnieje już inna aktualna poprawiona wersja.",
+    "metricsInsertFailed": "Wpis nie został zapisany w całości: {reason}. Wpis został odrzucony — spróbuj ponownie."
   }
 }
