@@ -354,6 +354,12 @@ describe("NO new DB migration in this PR", () => {
     // the 2026-07-22 P0) and pins one trigger's search_path. It only ever
     // REMOVES privilege; human-gate-annotated, RED by design, ships UNAPPLIED.
     // Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(167);
+    // Bumped 167 -> 168 for the residual-hygiene schema revoke
+    // (20260727150000_revoke_public_schema_create_v1, paired rollback). Removes
+    // the implicit PUBLIC CREATE grant on schema public (`=UC/postgres`) that
+    // let anon/authenticated/ci_secdef_audit create objects; single REVOKE,
+    // grants nothing; human-gate-annotated, RED by design, ships UNAPPLIED.
+    // Still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(168);
   });
 });

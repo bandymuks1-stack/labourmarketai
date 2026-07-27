@@ -1884,7 +1884,15 @@ describe("no migration files added by this sprint", () => {
     // statement REMOVES privilege. @human-gate-approved (the annotation
     // acknowledges the RED grant-surface class; it is not a merge pass), ships
     // UNAPPLIED pending owner approval.
-    const SPRINT_BASELINE = 167;
+    // Bumped 167 -> 168 for the residual-hygiene schema revoke
+    // (20260727150000_revoke_public_schema_create_v1, paired rollback). The
+    // 2026-07-27 audit found the public schema ACL still carries the implicit
+    // PUBLIC CREATE grant (`=UC/postgres`), so anon/authenticated and the CI
+    // audit role could create objects in the app schema. One REVOKE statement,
+    // grants nothing to anyone, USAGE untouched; prod dry-run proven
+    // (BEGIN..ROLLBACK). @human-gate-approved acknowledges the RED
+    // grant-surface class; ships UNAPPLIED pending owner approval.
+    const SPRINT_BASELINE = 168;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
