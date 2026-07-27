@@ -28,6 +28,7 @@ import {
   appendAssistantTurn,
   loadAssistantThread,
 } from "@/lib/assistant/transcript";
+import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
 
@@ -200,16 +201,27 @@ export function ConversationChat({
         if (cancelled || !res.available) return;
         transcriptRef.current = { conversationId: res.conversationId, enabled: true };
         if (res.messages.length > 0) {
+          // ChatGPT-style history model: earlier turns arrive as ONE collapsed
+          // block above the active conversation — never an unbounded dump.
+          // The block pages backwards in chunks on demand (see HistoryBlock).
+          const restored = res.messages;
           setItems((prev) => [
-            ...res.messages.map((m) => ({
+            {
               id: nid(),
-              message: {
-                id: nid(),
-                role: m.role,
-                kind: "text",
-                text: m.text,
-              } as ChatMessage,
-            })),
+              embed: (
+                <HistoryBlock
+                  messages={restored}
+                  labels={{
+                    title: t("historyTitle"),
+                    countLabel: t("historyCount", { count: restored.length }),
+                    show: t("historyShow"),
+                    showMore: t("historyMore"),
+                    speakerAssistant: labels.assistantName,
+                    speakerYou: labels.speakerYou,
+                  }}
+                />
+              ),
+            },
             ...prev,
           ]);
         }
@@ -220,6 +232,8 @@ export function ConversationChat({
     return () => {
       cancelled = true;
     };
+    // labels/t are stable per locale; run once per surface mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [script]);
 
   const persistTurn = useCallback(
@@ -279,12 +293,30 @@ export function ConversationChat({
           <InlineActionForm
             spec={spec}
             locale={locale}
-            onClose={() => assistant(labels.fallback, starterChips)}
+            // Closing a profile form re-reads the REAL state: the summary that
+            // follows shows what actually changed and recommends the next gap —
+            // not a generic menu (contextual-CTA rule).
+            onClose={() => startProfileSummaryRef.current("profile")}
           />,
         );
       }
     },
-    [locale, assistant, labels.fallback, starterChips, pushEmbed],
+    [locale, pushEmbed],
+  );
+  /** Late-bound ref so openForm (declared earlier) can call the summary
+   *  (declared later) without a dependency cycle. */
+  const startProfileSummaryRef = useRef<
+    (v: ProfileSummaryVariant, opts?: { quiet?: boolean }) => void
+  >(() => {});
+
+  /** Contextual follow-ups after a search: change the criteria or review the
+   *  profile — the actions that actually alter the NEXT search result. */
+  const searchChips: ChoiceChip[] = useMemo(
+    () => [
+      { id: "f:worker.save-preferences", label: labels.chipPrefs },
+      { id: "profile", label: labels.chipProfile },
+    ],
+    [labels.chipPrefs, labels.chipProfile],
   );
 
   /** Real employer/opportunity search — its own typing lifecycle (async). */
@@ -306,14 +338,16 @@ export function ConversationChat({
             interestLabels: res.interestLabels,
           });
         } else {
-          assistant(res.message, starterChips);
+          // Empty/blocked: the useful next steps are the ones that change the
+          // outcome — criteria and profile — not the four-item menu.
+          assistant(res.message, searchChips);
         }
       })
       .catch(() => {
         setTyping(false);
         assistant(labels.fallback, starterChips);
       });
-  }, [pushMessage, assistant, starterChips, labels.fallback, locale]);
+  }, [pushMessage, assistant, searchChips, starterChips, labels.fallback, locale]);
 
   const profileChips: ChoiceChip[] = useMemo(
     () => [
@@ -335,7 +369,7 @@ export function ConversationChat({
    * missing is one tap from being fixed.
    */
   const startProfileSummary = useCallback(
-    (variant: ProfileSummaryVariant) => {
+    (variant: ProfileSummaryVariant, opts?: { quiet?: boolean }) => {
       setTyping(true);
       loadProfileSummaryForChat(variant)
         .then((res) => {
@@ -375,17 +409,36 @@ export function ConversationChat({
                     )
                   : starterChips,
             });
-          } else {
+          } else if (!opts?.quiet) {
             assistant(res.message, starterChips);
           }
         })
         .catch(() => {
           setTyping(false);
-          assistant(labels.fallback, starterChips);
+          if (!opts?.quiet) assistant(labels.fallback, starterChips);
         });
     },
     [pushMessage, assistant, starterChips, profileChips, labels.fallback, tSummary],
   );
+  startProfileSummaryRef.current = startProfileSummary;
+
+  /**
+   * State-aware opening: the first paint must not be an empty greeting when
+   * the product already KNOWS this user (doctrine §18 — the system may never
+   * pretend to know nothing it knows). One real server read on mount appends
+   * the same profile-summary card the "resume" intent produces: progress,
+   * what changed last, and the recommended next gap. Signed-out visitors and
+   * the design preview keep the plain greeting.
+   */
+  const openedWithStateRef = useRef(false);
+  useEffect(() => {
+    if (script || openedWithStateRef.current) return;
+    if (!auth?.profile) return; // signed-out: nothing real to show
+    openedWithStateRef.current = true;
+    // quiet: a company account (no worker profile) opens with the plain
+    // greeting instead of a wrong-audience message.
+    startProfileSummaryRef.current("resume", { quiet: true });
+  }, [script, auth?.profile]);
 
   /**
    * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's
@@ -435,11 +488,14 @@ export function ConversationChat({
           draft={draft}
           locale={locale}
           labels={workLogLabels}
-          onClose={() => assistant(labels.fallback, starterChips)}
+          // After a work log lands, show what actually changed (profile
+          // summary re-reads the real rows: new skills, updated activity) —
+          // the contextual follow-up, not the generic menu.
+          onClose={() => startProfileSummaryRef.current("resume")}
         />,
       );
     },
-    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.fallback, starterChips],
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog],
   );
 
   const handleChip = useCallback(
@@ -447,7 +503,9 @@ export function ConversationChat({
       switch (chip.id) {
         case "cv":
           user(labels.userCv);
-          withTyping(() => pushEmbed(<WorkerCvFlow onClose={() => assistant(labels.fallback, starterChips)} />));
+          // CV import ends with the refreshed REAL profile state, so the user
+          // sees what the import actually changed.
+          withTyping(() => pushEmbed(<WorkerCvFlow onClose={() => startProfileSummaryRef.current("profile")} />));
           break;
         case "profile":
           user(labels.userProfile);
@@ -470,7 +528,11 @@ export function ConversationChat({
                 ),
               );
             } else {
-              assistant(labels.offersEmpty, starterChips);
+              // No offers: the contextual next step is a search, not a menu.
+              assistant(labels.offersEmpty, [
+                { id: "jobs", label: labels.chipJobs },
+                { id: "profile", label: labels.chipProfile },
+              ]);
             }
           });
           break;
@@ -518,19 +580,23 @@ export function ConversationChat({
           case "log-work":
             startWorkLog(text);
             break;
+          // Honest blocked/hint answers explain themselves; repeating the same
+          // four-item menu under every one of them taught users to ignore the
+          // chips entirely. The menu stays where it is a menu: the greeting
+          // and the not-understood fallback.
           case "calendar-view":
-            assistant(labels.calendarHint, starterChips);
+            assistant(labels.calendarHint);
             break;
           case "reminder":
             // No scheduler exists — never a fake reminder (honest degradation).
-            assistant(labels.reminderBlocked, starterChips);
+            assistant(labels.reminderBlocked);
             break;
           case "translate":
             // No real translation engine — never a fake translation.
-            assistant(labels.translateBlocked, starterChips);
+            assistant(labels.translateBlocked);
             break;
           case "write-employer":
-            assistant(labels.writeEmployerHint, starterChips);
+            assistant(labels.writeEmployerHint);
             break;
           default:
             assistant(labels.fallback, starterChips);

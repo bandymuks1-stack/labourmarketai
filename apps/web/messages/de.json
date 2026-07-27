@@ -10999,7 +10999,11 @@
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
       "userLogWork": "Arbeitszeit erfassen",
-      "userFindWork": "Arbeit suchen"
+      "userFindWork": "Arbeit suchen",
+      "historyTitle": "Früheres Gespräch",
+      "historyCount": "{count, plural, one {# Nachricht} other {# Nachrichten}}",
+      "historyShow": "Anzeigen",
+      "historyMore": "Mehr anzeigen"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

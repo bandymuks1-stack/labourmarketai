@@ -3182,7 +3182,11 @@
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
       "userLogWork": "[EN] Log work time",
-      "userFindWork": "[EN] Find work"
+      "userFindWork": "[EN] Find work",
+      "historyTitle": "Tidligere samtale",
+      "historyCount": "{count, plural, one {# besked} other {# beskeder}}",
+      "historyShow": "Vis",
+      "historyMore": "Vis flere"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

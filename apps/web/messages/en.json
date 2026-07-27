@@ -10999,7 +10999,11 @@
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
       "userLogWork": "Log work time",
-      "userFindWork": "Find work"
+      "userFindWork": "Find work",
+      "historyTitle": "Earlier conversation",
+      "historyCount": "{count, plural, one {# message} other {# messages}}",
+      "historyShow": "Show",
+      "historyMore": "Show more"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
