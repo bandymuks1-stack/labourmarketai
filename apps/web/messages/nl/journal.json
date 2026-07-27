@@ -453,5 +453,31 @@
     "topicLabel": "Onderwerp",
     "conflictNote": "Deze registratie is al gewijzigd in een ander tabblad of een andere sessie. Wilt u de hier ingevoerde wijzigingen bewaren, kopieer dan eerst uw tekst — bij het herladen van de pagina gaan ze verloren en bewerkt u daarna de nieuwste versie.",
     "conflictReload": "Pagina herladen"
+  },
+  "errors": {
+    "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+    "noWorkerProfile": "Werknemersprofiel niet gevonden. Open je accountinstellingen en activeer de werknemersrol.",
+    "engagementRequired": "Kies de werkcontext (organisatie of project) waar deze registratie bij hoort.",
+    "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst is het bewijs van deze registratie.",
+    "quantityInvalid": "De hoeveelheid moet een niet-negatief getal zijn.",
+    "unitSlugUnknown": "Nog niet in het eenhedenregister: {units}. Vraag een beheerder migratie 0017 (de productivity_units-seed) toe te passen en probeer het opnieuw.",
+    "saveFailed": "Opslaan van de registratie is mislukt: {reason}",
+    "unknownReason": "onbekende fout",
+    "missingOldEntryId": "De identificatie van de te wijzigen registratie ontbreekt.",
+    "oldEntryNotFound": "De te wijzigen registratie is niet gevonden. Vernieuw de pagina.",
+    "entrySupersededElsewhere": "Deze registratie is al elders vervangen (in een ander tabblad of andere sessie). Vernieuw de pagina en bewerk de nieuwste versie.",
+    "skillSelectionInvalid": "De geselecteerde vaardigheid staat niet meer in de vaardighedencatalogus. Verwijder deze uit de lijst en probeer opnieuw op te slaan — alle andere wijzigingen staan nog in het formulier.",
+    "updateFailed": "Bijwerken van de registratie is mislukt: {reason}",
+    "entryNotFound": "Registratie niet gevonden.",
+    "deleteFailed": "Verwijderen van de registratie is mislukt: {reason}",
+    "restoreFailed": "Herstellen van de registratie is mislukt: {reason}",
+    "rpcUnavailable": "De correctiefunctie is in deze omgeving nog niet toegepast. Vraag een beheerder de nieuwste journaalmigratie toe te passen (0018 / 20260720100000).",
+    "entryNotFoundMaybeDeleted": "Registratie niet gevonden (mogelijk is deze al verwijderd).",
+    "notOwner": "Je kunt geen registratie van iemand anders wijzigen.",
+    "alreadyConfirmed": "Deze registratie kan niet meer worden verwijderd — een andere partij heeft deze al beoordeeld. Stuur een correctieverzoek in plaats van te verwijderen.",
+    "cannotSupersedeDeleted": "Een verwijderde registratie kan niet worden gewijzigd.",
+    "cannotRestoreSuperseded": "Deze registratie kan niet worden hersteld — een nieuwere versie heeft deze al vervangen.",
+    "cannotRestoreCorrectionConflict": "Deze registratie kan niet worden hersteld — voor hetzelfde werk bestaat al een andere actuele gecorrigeerde versie.",
+    "metricsInsertFailed": "De registratie is niet volledig opgeslagen: {reason}. De registratie is verworpen — probeer het opnieuw."
   }
 }

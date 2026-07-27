@@ -2,6 +2,7 @@
 
 import "server-only";
 import { createHash } from "node:crypto";
+import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -65,6 +66,12 @@ async function runSkillPipeline(opts: {
     return failedPipelineResult();
   }
 }
+
+/** Request-locale translator over the `journal.errors` namespace — the same
+ *  next-intl server pattern sibling actions use (e.g. skill-pipeline-actions,
+ *  conversation/find-work), so every locale gets its OWN error copy instead
+ *  of hardcoded Lithuanian. */
+type Translator = Awaited<ReturnType<typeof getTranslations>>;
 
 export type JournalSaveErrorCode =
   | "not_authenticated"
@@ -156,6 +163,7 @@ function parseFragments(raw: string | null): ParsedFragmentInput[] {
 export async function createJournalEntry(
   formData: FormData,
 ): Promise<CreateJournalEntryResult> {
+  const t = await getTranslations("journal.errors");
   const supabase = await createClient();
   const {
     data: { user },
@@ -164,7 +172,7 @@ export async function createJournalEntry(
     return {
       ok: false,
       code: "not_authenticated",
-      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+      message: t("sessionExpired"),
     };
   }
 
@@ -177,8 +185,7 @@ export async function createJournalEntry(
     return {
       ok: false,
       code: "no_worker_profile",
-      message:
-        "Nerastas darbuotojo profilis. Atidarykite paskyros nustatymus ir įjunkite darbuotojo vaidmenį.",
+      message: t("noWorkerProfile"),
     };
   }
 
@@ -208,22 +215,21 @@ export async function createJournalEntry(
     return {
       ok: false,
       code: "engagement_required",
-      message:
-        "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
+      message: t("engagementRequired"),
     };
   }
   if (!notes) {
     return {
       ok: false,
       code: "notes_required",
-      message: "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+      message: t("notesRequired"),
     };
   }
   if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
     return {
       ok: false,
       code: "quantity_invalid",
-      message: "Kiekis turi būti neneigiamas skaičius.",
+      message: t("quantityInvalid"),
     };
   }
 
@@ -283,10 +289,7 @@ export async function createJournalEntry(
       return {
         ok: false,
         code: "unit_slug_unknown",
-        message:
-          `Vieneto registre kol kas nėra: ${missing.join(", ")}. ` +
-          `Paprašykite administratoriaus pritaikyti migraciją 0017 ` +
-          `(productivity_units seedą), tada bandykite dar kartą.`,
+        message: t("unitSlugUnknown", { units: missing.join(", ") }),
       };
     }
   }
@@ -429,13 +432,15 @@ export async function createJournalEntry(
       return {
         ok: false,
         code: "entry_insert_failed",
-        message: `Įrašo išsaugoti nepavyko: ${rpcErr?.message ?? "nežinoma klaida"}`,
+        message: t("saveFailed", {
+          reason: rpcErr?.message ?? t("unknownReason"),
+        }),
       };
     }
     console.warn(
       "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0017.",
     );
-    const legacy = await legacyTwoStepSave(supabase, {
+    const legacy = await legacyTwoStepSave(supabase, t, {
       worker_id: worker.id,
       engagement_context_id: engagementId,
       entry_type_slug: hasStructured ? "hybrid" : "freeform",
@@ -502,11 +507,12 @@ export async function supersedeJournalEntry(
   oldEntryId: string,
   formData: FormData,
 ): Promise<CreateJournalEntryResult> {
+  const t = await getTranslations("journal.errors");
   if (!oldEntryId) {
     return {
       ok: false,
       code: "entry_insert_failed",
-      message: "Trūksta keičiamo įrašo identifikatoriaus.",
+      message: t("missingOldEntryId"),
     };
   }
   const supabase = await createClient();
@@ -517,7 +523,7 @@ export async function supersedeJournalEntry(
     return {
       ok: false,
       code: "not_authenticated",
-      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+      message: t("sessionExpired"),
     };
   }
 
@@ -545,22 +551,21 @@ export async function supersedeJournalEntry(
     return {
       ok: false,
       code: "engagement_required",
-      message:
-        "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
+      message: t("engagementRequired"),
     };
   }
   if (!notes) {
     return {
       ok: false,
       code: "notes_required",
-      message: "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+      message: t("notesRequired"),
     };
   }
   if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
     return {
       ok: false,
       code: "quantity_invalid",
-      message: "Kiekis turi būti neneigiamas skaičius.",
+      message: t("quantityInvalid"),
     };
   }
 
@@ -580,16 +585,14 @@ export async function supersedeJournalEntry(
     return {
       ok: false,
       code: "entry_insert_failed",
-      message: "Keičiamas įrašas nerastas. Perkraukite puslapį.",
+      message: t("oldEntryNotFound"),
     };
   }
   if (oldEntry.superseded_by || oldEntry.deleted_at) {
     return {
       ok: false,
       code: "entry_superseded",
-      message:
-        "Šis įrašas jau buvo pakeistas kitur (kitame lange ar sesijoje). " +
-        "Perkraukite puslapį ir redaguokite naujausią įrašo versiją.",
+      message: t("entrySupersededElsewhere"),
     };
   }
 
@@ -607,10 +610,7 @@ export async function supersedeJournalEntry(
       return {
         ok: false,
         code: "unit_slug_unknown",
-        message:
-          `Vieneto registre kol kas nėra: ${missing.join(", ")}. ` +
-          `Paprašykite administratoriaus pritaikyti migraciją 0017 ` +
-          `(productivity_units seedą), tada bandykite dar kartą.`,
+        message: t("unitSlugUnknown", { units: missing.join(", ") }),
       };
     }
   }
@@ -710,13 +710,12 @@ export async function supersedeJournalEntry(
       return {
         ok: false,
         code: "skill_selection_invalid",
-        message:
-          "Pasirinkto įgūdžio nebėra įgūdžių kataloge. Pašalinkite jį iš " +
-          "sąrašo ir bandykite išsaugoti dar kartą — visi kiti pakeitimai liko formoje.",
+        message: t("skillSelectionInvalid"),
       };
     }
     const mapped = mapJournalRpcError(
       error ?? { code: undefined, message: undefined },
+      t,
     );
     if (mapped) {
       // mapped is JournalLifecycleResult; convert to CreateJournalEntryResult.
@@ -734,7 +733,9 @@ export async function supersedeJournalEntry(
     return {
       ok: false,
       code: "entry_insert_failed",
-      message: `Įrašo atnaujinti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
+      message: t("updateFailed", {
+        reason: error?.message ?? t("unknownReason"),
+      }),
     };
   }
 
@@ -882,11 +883,12 @@ export async function softDeleteJournalEntry(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _locale: string,
 ): Promise<JournalLifecycleResult> {
+  const t = await getTranslations("journal.errors");
   if (!entryId) {
     return {
       ok: false,
       code: "entry_not_found",
-      message: "Įrašas nerastas.",
+      message: t("entryNotFound"),
     };
   }
   const supabase = await createClient();
@@ -897,7 +899,7 @@ export async function softDeleteJournalEntry(
     return {
       ok: false,
       code: "not_authenticated",
-      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+      message: t("sessionExpired"),
     };
   }
 
@@ -909,12 +911,12 @@ export async function softDeleteJournalEntry(
   )("journal_entry_soft_delete", { p_entry_id: entryId });
 
   if (error) {
-    const mapped = mapJournalRpcError(error);
+    const mapped = mapJournalRpcError(error, t);
     if (mapped) return mapped;
     return {
       ok: false,
       code: "unknown_error",
-      message: `Įrašo pašalinti nepavyko: ${error.message ?? "nežinoma klaida"}`,
+      message: t("deleteFailed", { reason: error.message ?? t("unknownReason") }),
     };
   }
 
@@ -934,11 +936,12 @@ export async function restoreJournalEntry(
   entryId: string,
   locale: string,
 ): Promise<JournalLifecycleResult> {
+  const t = await getTranslations("journal.errors");
   if (!entryId) {
     return {
       ok: false,
       code: "entry_not_found",
-      message: "Įrašas nerastas.",
+      message: t("entryNotFound"),
     };
   }
   const supabase = await createClient();
@@ -949,7 +952,7 @@ export async function restoreJournalEntry(
     return {
       ok: false,
       code: "not_authenticated",
-      message: "Sesija nutrūko. Prisijunkite iš naujo.",
+      message: t("sessionExpired"),
     };
   }
 
@@ -961,12 +964,12 @@ export async function restoreJournalEntry(
   )("journal_entry_restore", { p_entry_id: entryId });
 
   if (error) {
-    const mapped = mapJournalRpcError(error);
+    const mapped = mapJournalRpcError(error, t);
     if (mapped) return mapped;
     return {
       ok: false,
       code: "unknown_error",
-      message: `Įrašo atkurti nepavyko: ${error.message ?? "nežinoma klaida"}`,
+      message: t("restoreFailed", { reason: error.message ?? t("unknownReason") }),
     };
   }
 
@@ -990,10 +993,13 @@ export async function restoreJournalEntry(
   return { ok: true };
 }
 
-function mapJournalRpcError(err: {
-  code?: string;
-  message?: string;
-}): JournalLifecycleResult | null {
+function mapJournalRpcError(
+  err: {
+    code?: string;
+    message?: string;
+  },
+  t: Translator,
+): JournalLifecycleResult | null {
   // Postgres RAISE EXCEPTION lands in `message`; PostgREST also surfaces
   // SQLSTATE in `code` when available. We pattern-match the message body
   // so we don't depend on PostgREST passing the SQLSTATE unchanged.
@@ -1003,48 +1009,42 @@ function mapJournalRpcError(err: {
     return {
       ok: false,
       code: "rpc_unavailable",
-      message:
-        "Pataisymų funkcija dar nepritaikyta šioje aplinkoje. " +
-        "Paprašykite administratoriaus pritaikyti naujausią žurnalo " +
-        "migraciją (0018 / 20260720100000).",
+      message: t("rpcUnavailable"),
     };
   }
   if (text.includes("entry_not_found")) {
     return {
       ok: false,
       code: "entry_not_found",
-      message: "Įrašas nerastas (gali būti, kad jau buvo pašalintas).",
+      message: t("entryNotFoundMaybeDeleted"),
     };
   }
   if (text.includes("not_owner")) {
     return {
       ok: false,
       code: "not_owner",
-      message: "Negalima keisti svetimo įrašo.",
+      message: t("notOwner"),
     };
   }
   if (text.includes("already_confirmed_use_correction_request")) {
     return {
       ok: false,
       code: "already_confirmed",
-      message:
-        "Įrašas jau patvirtintas išorinio asmens — vietoje ištrynimo " +
-        "siųskite pataisymo prašymą.",
+      message: t("alreadyConfirmed"),
     };
   }
   if (text.includes("cannot_supersede_deleted")) {
     return {
       ok: false,
       code: "cannot_supersede_deleted",
-      message: "Negalima keisti pašalinto įrašo.",
+      message: t("cannotSupersedeDeleted"),
     };
   }
   if (text.includes("entry_superseded_cannot_restore")) {
     return {
       ok: false,
       code: "entry_superseded",
-      message:
-        "Šio įrašo atkurti negalima — jį jau pakeitė naujesnė versija.",
+      message: t("cannotRestoreSuperseded"),
     };
   }
   // W0 restore hardening: a competing live correction of the same original
@@ -1053,9 +1053,7 @@ function mapJournalRpcError(err: {
     return {
       ok: false,
       code: "entry_superseded",
-      message:
-        "Šio įrašo atkurti negalima — tam pačiam darbui jau yra kita " +
-        "aktuali pataisyta versija.",
+      message: t("cannotRestoreCorrectionConflict"),
     };
   }
   // W0 atomic supersede: the RPC row-lock rejected a stale/concurrent save.
@@ -1064,9 +1062,7 @@ function mapJournalRpcError(err: {
     return {
       ok: false,
       code: "entry_superseded",
-      message:
-        "Šis įrašas jau buvo pakeistas kitur (kitame lange ar sesijoje). " +
-        "Perkraukite puslapį ir redaguokite naujausią įrašo versiją.",
+      message: t("entrySupersededElsewhere"),
     };
   }
   return null;
@@ -1099,6 +1095,7 @@ function collectUnitSlugs(args: {
  *  surface the failure so the worker knows the entry leaked. */
 async function legacyTwoStepSave(
   supabase: Awaited<ReturnType<typeof createClient>>,
+  t: Translator,
   args: {
     worker_id: string;
     engagement_context_id: string;
@@ -1127,7 +1124,9 @@ async function legacyTwoStepSave(
     return {
       ok: false,
       code: "entry_insert_failed",
-      message: `Įrašo išsaugoti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
+      message: t("saveFailed", {
+        reason: error?.message ?? t("unknownReason"),
+      }),
     };
   }
   if (metrics.length === 0) return { ok: true, entryId: entry.id };
@@ -1142,9 +1141,7 @@ async function legacyTwoStepSave(
     return {
       ok: false,
       code: "metrics_insert_failed",
-      message:
-        `Įrašas nebuvo išsaugotas pilnai: ${mErr.message}. ` +
-        `Įrašas atmestas — bandykite dar kartą.`,
+      message: t("metricsInsertFailed", { reason: mErr.message }),
     };
   }
   return { ok: true, entryId: entry.id };
