@@ -19,7 +19,20 @@
  *     always directed to confirm with the competent authority.
  */
 
-/** Target markets for country readiness v1. */
+/**
+ * Any ISO-3166-1 alpha-2 country code (PR-G global location model). Readiness
+ * LOOKUPS accept the full ISO space; countries without researched entries get
+ * an honest "no researched guidance yet" result (see
+ * `getCountryReadinessOrNull` / `matrixRequirementRows` returning null/[] and
+ * the documents UI `requirementsKnown=false` state) — content is NEVER
+ * invented for uncurated countries.
+ */
+export type ReadinessCountryCode = string;
+
+/** The countries with genuinely researched, source-backed readiness content.
+ *  This stays a closed union: curated DATA exists only for these, and every
+ *  entry is guard-enforced (country-readiness-provenance.test.ts). Adding a
+ *  country here requires real researched requirements — never placeholders. */
 export type ReadinessCountry =
   | "LT" | "LV" | "EE" | "PL" | "DE" | "NL" | "DK" | "NO" | "SE" | "FI";
 
