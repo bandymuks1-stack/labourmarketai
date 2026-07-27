@@ -1874,7 +1874,17 @@ describe("no migration files added by this sprint", () => {
     // the accepted-booking → project-assignment P1: new engagement table +
     // four RPCs, one narrowly widened assign gate, zero changes to existing
     // objects otherwise. RED, NOT @human-gate-approved, ships UNAPPLIED.
-    const SPRINT_BASELINE = 166;
+    // Bumped 166 -> 167 for the security-audit grant-hygiene migration
+    // (20260727120000_secdef_public_grant_hygiene_v1, paired rollback). Audit
+    // L-01 + L-08: revokes the residual default PUBLIC EXECUTE grant that
+    // 20260719120000 left on three SECURITY DEFINER functions — the exact
+    // `GRANT ... TO authenticated` without `REVOKE ... FROM PUBLIC` idiom behind
+    // the 2026-07-22 P0 — and pins one trigger function's search_path. Contains
+    // NO create/alter of tables or policies and grants nothing to anyone: every
+    // statement REMOVES privilege. @human-gate-approved (the annotation
+    // acknowledges the RED grant-surface class; it is not a merge pass), ships
+    // UNAPPLIED pending owner approval.
+    const SPRINT_BASELINE = 167;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

@@ -9,6 +9,7 @@ import { publishedInCategory, publishedCategories } from "@/lib/answer-engine/pu
 import { buildStaticQuestionsMetadata, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
 import { activeLocales } from "@/lib/i18n/config";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 function isCategory(x: string): x is AnswerCategoryKey {
   return (ANSWER_CATEGORY_KEYS as readonly string[]).includes(x);
@@ -58,7 +59,7 @@ export default async function CategoryPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             breadcrumbJsonLd([
               { name: pickL(CHROME.breadcrumbHome, l), url: abs("") },
               { name: pickL(CHROME.breadcrumbQuestions, l), url: abs("/questions") },

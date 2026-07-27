@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import { getBillingConfig } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
@@ -32,7 +33,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "bad_request" }, { status: 400 });
   }
   const planKey = parsed.data.planKey;
-  const origin = new URL(req.url).origin;
+  /**
+   * Audit L-07: this was `new URL(req.url).origin`, i.e. derived from the Host
+   * header. A spoofed Host would place an attacker-chosen origin into the
+   * Stripe success/cancel redirect. Impact was limited (the redirect belongs to
+   * the attacker's own checkout session), but the return URL of a payment flow
+   * has no reason to be caller-controlled. The single-domain policy already
+   * says there is exactly one product origin — so use it.
+   */
+  const origin = CANONICAL_ORIGIN;
 
   const supabase = await createClient();
   const {

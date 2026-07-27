@@ -20,7 +20,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const APP = resolve(__dirname, "..", "..");
@@ -183,7 +183,14 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     };
     for (const r of roots) walk(join(APP, r), `/${r}`);
     // Audited service-role callers:
-    //  - app/api/leads/route.ts — the anon leads funnel (§17.2).
+    //  (2026-07-27: app/api/leads/route.ts LEFT this list — security audit
+    //   M-04. It was an UNAUTHENTICATED endpoint holding a service-role,
+    //   RLS-bypassing client with no rate limit, and its own comment called it
+    //   "currently dormant" while it stayed deployed and reachable. It had zero
+    //   callers — every other mention in the tree is prose explaining that it is
+    //   NOT used — so the route was deleted rather than rate-limited. The
+    //   `leads` TABLE and its superadmin-gated read path in
+    //   lib/sales/lead-intake.ts are untouched.)
     //  - lib/billing/subscription-store.ts — the Stripe TEST webhook write path.
     //    A webhook has NO user session (Stripe calls it), so service-role is the
     //    correct path for the billing tables, which by design carry NO
@@ -235,7 +242,6 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
-      "app/api/leads/route.ts",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
@@ -246,14 +252,21 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     ]);
   });
 
-  it("the anon leads funnel writes only `leads` — never a chat table", () => {
-    const src = read("app/api/leads/route.ts");
-    const tables = [...src.matchAll(/\.from\(["']([^"']+)["']\)/g)].map((m) => m[1]);
-    expect(tables.length).toBeGreaterThan(0);
-    for (const t of tables) {
-      expect(t).toBe("leads");
-      expect(t).not.toMatch(/conversation/);
-    }
+  /**
+   * Replaces "the anon leads funnel writes only `leads`" — security audit M-04.
+   * The funnel route is gone, so the stronger assertion is that it stays gone:
+   * an unauthenticated endpoint holding a service-role client must not be
+   * reintroduced. Re-adding the file is exactly the regression this catches.
+   */
+  it("the unauthenticated service-role leads funnel stays deleted (M-04)", () => {
+    expect(
+      existsSync(join(APP, "app/api/leads/route.ts")),
+      "app/api/leads/route.ts is back. It was removed by security audit M-04: an " +
+        "UNAUTHENTICATED route holding a service-role (RLS-bypassing) client with no " +
+        "rate limit and no callers. If an anonymous lead funnel is genuinely needed, " +
+        "it must use an anon RLS policy or a contained SECURITY DEFINER RPC plus a " +
+        "rate limit — not the admin client.",
+    ).toBe(false);
   });
 });
 

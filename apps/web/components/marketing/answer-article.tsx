@@ -23,6 +23,7 @@ import {
   breadcrumbJsonLd,
   organizationJsonLd,
 } from "@/lib/answer-engine/answer-seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 import { AnswerTrackedLink } from "@/components/marketing/answer-tracked-link";
 import { AnswerPageViewed } from "@/components/marketing/answer-analytics";
 
@@ -30,8 +31,10 @@ function JsonLd({ data }: { data: unknown }) {
   return (
     <script
       type="application/ld+json"
-      // JSON-LD is inert data, not executable markup.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // JSON-LD is inert DATA — but only once `<` is escaped. Plain
+      // JSON.stringify leaves `</script>` intact inside a string value, which
+      // closes the block early and executes the remainder (audit L-05).
+      dangerouslySetInnerHTML={{ __html: jsonLdScript(data) }}
     />
   );
 }

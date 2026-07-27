@@ -1,7 +1,9 @@
 import "server-only";
 
+import { headers } from "next/headers";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseClientEnv } from "@/lib/env";
+import { clientKeyFromHeaders, rateLimit } from "@/lib/security/rate-limit";
 
 /**
  * Anonymous structured company-demand persistence (v1).
@@ -45,7 +47,16 @@ export type PublicIntakeInput = {
 
 export type PublicIntakeResult =
   | { ok: true }
-  | { ok: false; code: "unavailable" | "invalid" | "error" };
+  | { ok: false; code: "unavailable" | "invalid" | "error" | "rate_limited" };
+
+/**
+ * Audit M-03. `lib/security/anon-secdef-allowlist.ts` documents this RPC's
+ * abuse posture as `GAP — ... NO database-level rate limit, NO
+ * duplicate-submission check, and NO per-IP or per-email throttle`, and notes
+ * "Any protection today lives in the application layer only". Until this, there
+ * was no application layer either. Rows are up to ~8 KB and carry employer PII.
+ */
+const RATE_LIMIT = { limit: 3, windowMs: 15 * 60 * 1000 } as const;
 
 /** Postgres SQLSTATEs that mean "backend not applied yet" → degrade honestly. */
 const NOT_APPLIED = new Set(["42883", "42P01"]);
@@ -55,6 +66,19 @@ const RPC_VALIDATION = "22023";
 export async function persistPublicCompanyNeed(
   input: PublicIntakeInput,
 ): Promise<PublicIntakeResult> {
+  // Throttle BEFORE touching Supabase, so a flood costs us nothing downstream.
+  try {
+    const decision = rateLimit({
+      name: "company-need-public-intake",
+      key: clientKeyFromHeaders(await headers()),
+      ...RATE_LIMIT,
+    });
+    if (decision.limited) return { ok: false, code: "rate_limited" };
+  } catch {
+    // `headers()` throws outside a request scope (e.g. a unit test importing
+    // this module). Never let the throttle itself break the submit path.
+  }
+
   let url: string;
   let anonKey: string;
   try {

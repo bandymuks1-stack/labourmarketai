@@ -20,8 +20,12 @@
  *   1. a SECURITY DEFINER function becomes anon-reachable and is not allowlisted;
  *   2. an allowlisted function's signature changes (drift is not a silent pass);
  *   3. an allowlisted function no longer exists (stale allowlist entry);
- *   4. PUBLIC (`=X`) is re-granted on a non-allowlisted function — the root cause
- *      itself, flagged even when `anon` has not yet been observed using it;
+ *   4. PUBLIC (`=X`) is present on ANY SECURITY DEFINER function — the root cause
+ *      itself, flagged even when `anon` has not yet been observed using it, and
+ *      INCLUDING allowlisted functions. Allowlisting grants anon reachability; it
+ *      says nothing about the implicit PUBLIC grant, which must be revoked
+ *      explicitly. Widened by the 2026-07-27 audit (L-01), which found the idiom
+ *      still live on three allowlisted functions that the narrower check passed;
  *   5. an allowlisted function has lost its anon grant (the public product broke);
  *   6. an allowlisted function carries no documented security contract.
  *
@@ -184,13 +188,36 @@ async function main(): Promise<void> {
         continue;
       }
 
-      if (row.public_in_acl && !isAllowed) {
+      if (row.public_in_acl) {
         // Reachability and the PUBLIC grant are reported separately on purpose:
         // a function can carry PUBLIC while anon is blocked by another means,
         // and that is still a latent hole waiting for the other means to change.
+        //
+        // BLIND SPOT CLOSED — security audit 2026-07-27, finding L-01.
+        // This condition used to read `row.public_in_acl && !isAllowed`, so a
+        // function that WAS allowlisted got a pass on carrying PUBLIC. The
+        // 2026-07-27 audit read the production catalog and found the root-cause
+        // idiom still live on exactly that class: three allowlisted functions
+        // (get_public_business_{profile,listings,services}_v1) still carried the
+        // leftover `=X/postgres` from 20260719120000, because it granted to
+        // `anon, authenticated` with no `REVOKE ... FROM PUBLIC`. The guard built
+        // to prevent recurrence of that idiom was blind to it wherever it
+        // already existed.
+        //
+        // Allowlisting says "anon MAY execute this". It does NOT say "and the
+        // implicit PUBLIC grant may stay" — those are different decisions, and
+        // conflating them is what let the pattern survive its own guard. PUBLIC
+        // is now flagged everywhere; the allowlist governs anon reachability
+        // only.
         fail(
           4,
-          `${row.sig} carries a PUBLIC (=X) EXECUTE grant while not allowlisted (acl: ${row.acl}).`,
+          `${row.sig} carries a PUBLIC (=X) EXECUTE grant (acl: ${row.acl}).` +
+            (isAllowed
+              ? " It IS allowlisted for anon, which is fine — but the implicit PUBLIC" +
+                " grant is a separate decision and must be revoked explicitly:" +
+                " `revoke execute on function ... from public;`. This is the exact" +
+                " idiom behind the 2026-07-22 P0."
+              : " It is not allowlisted."),
         );
       }
     }

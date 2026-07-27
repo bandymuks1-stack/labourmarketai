@@ -418,6 +418,28 @@ describe("ops-bridge migration 0030 is additive + safe", () => {
     // (20260723120000_company_worker_engagements_v1) — new engagement table +
     // four RPCs, paired rollback, RED and deliberately NOT
     // human-gate-annotated. Ships UNAPPLIED.
-    expect(guard).toMatch(/SPRINT_BASELINE = 166/);
+    // Bumped 166 -> 167 for the security-audit grant-hygiene migration
+    // (20260727120000_secdef_public_grant_hygiene_v1) — audit L-01 + L-08,
+    // revoke-only, paired rollback, human-gate-annotated, ships UNAPPLIED.
+    //
+    // ...and changed from an EXACT literal match to a numeric floor while doing
+    // so. This assertion exists to prove the baseline is high enough for
+    // migration 0030 to exist; pinning the exact number meant every unrelated,
+    // legitimate migration anywhere in the repo broke this test and had to
+    // update a second file in lockstep (that is why the 164 -> 165 -> 166 trail
+    // above exists). A floor keeps the real property — the baseline can never
+    // drop below what 0030 needs — without the false coupling. Lowering it still
+    // fails here, and an unexplained RAISE is still caught by the documented
+    // bump-comment convention in product-readiness.test.ts itself.
+    const baseline = Number(/SPRINT_BASELINE = (\d+)/.exec(guard)?.[1] ?? 0);
+    expect(
+      baseline,
+      "product-readiness.test.ts SPRINT_BASELINE not found — the migration-count " +
+        "baseline guard was renamed or removed, so nothing pins migration 0030 any more",
+    ).toBeGreaterThan(0);
+    expect(
+      baseline,
+      `SPRINT_BASELINE is ${baseline}, below the 166 that migration 0030 requires`,
+    ).toBeGreaterThanOrEqual(166);
   });
 });

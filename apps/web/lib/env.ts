@@ -42,6 +42,14 @@ const schema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
+  /**
+   * Dedicated HMAC key for conversation confirmation tokens (audit L-02).
+   * Optional: when unset, lib/conversation/dispatch.ts falls back to the
+   * service-role key and, failing that, REFUSES to sign — it no longer falls
+   * back to a hardcoded literal. Set this to stop reusing the service-role key
+   * for a second purpose.
+   */
+  CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
@@ -145,6 +153,7 @@ const parsed = schema.safeParse({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
+  CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,

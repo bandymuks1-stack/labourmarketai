@@ -6,6 +6,7 @@ import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
 import { buildStaticQuestionsMetadata, breadcrumbJsonLd, organizationJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export async function generateMetadata({
   params,
@@ -30,11 +31,11 @@ export default async function QuestionsHub({
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10" id="main-content">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             breadcrumbJsonLd([
               { name: pickL(CHROME.breadcrumbHome, l), url: abs("") },
               { name: pickL(CHROME.breadcrumbQuestions, l), url: abs("/questions") },

@@ -31,11 +31,38 @@ export type PrepareResult =
   | { ok: true; token: string; stateFingerprint: string }
   | { ok: false; code: string };
 
+/**
+ * HMAC key material for confirmation tokens. FAIL-CLOSED — security audit L-02.
+ *
+ * This used to end in an `||` fallback to a hardcoded dev literal. On a PUBLIC
+ * repository that literal is known to everyone, so any environment where neither
+ * secret was set signed confirmation tokens with a published constant. The
+ * blast radius was bounded (a token is bound to `userId`, which is re-checked
+ * against `auth.getUser()`, and the role + zod checks still ran, so it only let
+ * a user skip their OWN confirmation step) — but a consent gate whose key is
+ * public is not a gate, and "bounded" is not a reason to keep a published key.
+ *
+ * Now it throws instead. Refusing to mint a token is the safe direction: the
+ * caller surfaces an error and the action does not run. Silently signing with a
+ * known constant is the unsafe direction, and it looks identical to working.
+ *
+ * `CONVERSATION_TOKEN_SECRET` is preferred so this purpose can hold its own key
+ * rather than reusing the service-role key as HMAC material (key-purpose reuse
+ * — a rotation of one should not silently invalidate the other). The
+ * service-role / DB-password fallbacks keep existing deployments working, since
+ * production already sets the former.
+ */
 function tokenSecret(): string {
   const material =
+    env.CONVERSATION_TOKEN_SECRET ||
     env.SUPABASE_SERVICE_ROLE_KEY ||
-    env.SUPABASE_DB_PASSWORD ||
-    "dev-fallback-conversation-token-secret";
+    env.SUPABASE_DB_PASSWORD;
+  if (!material) {
+    throw new Error(
+      "conversation confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
+        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+    );
+  }
   return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
 }
 
