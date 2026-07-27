@@ -10814,6 +10814,18 @@
           "label": "Personalbedarf erstellen",
           "description": "Beschreibe, welche Arbeitskräfte du brauchst."
         },
+        "confirmNeed": {
+          "label": "Erkannte Fähigkeiten bestätigen",
+          "description": "Bestätigen Sie die aus Ihrem Bedarfstext erkannten Fähigkeiten — sie werden zum strukturierten Bedarf."
+        },
+        "closeDemand": {
+          "label": "Einen Bedarf schließen",
+          "description": "Nehmen Sie einen besetzten oder veralteten Bedarf vom Arbeitskräfte-Board."
+        },
+        "reopenDemand": {
+          "label": "Einen Bedarf wieder öffnen",
+          "description": "Machen Sie einen geschlossenen Bedarf wieder für Arbeitskräfte sichtbar."
+        },
         "reviewCandidates": {
           "label": "Kandidaten ansehen",
           "description": "Sieh Arbeitskräfte zu deinem Bedarf."

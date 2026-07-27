@@ -10814,6 +10814,18 @@
           "label": "Personeelsvraag maken",
           "description": "Beschrijf welke werknemers je nodig hebt."
         },
+        "confirmNeed": {
+          "label": "Herkende vaardigheden bevestigen",
+          "description": "Keur de vaardigheden goed die uit uw aanvraagtekst zijn herkend — ze worden de gestructureerde behoefte."
+        },
+        "closeDemand": {
+          "label": "Een aanvraag sluiten",
+          "description": "Haal een ingevulde of verouderde aanvraag van het werknemersbord."
+        },
+        "reopenDemand": {
+          "label": "Een aanvraag heropenen",
+          "description": "Maak een gesloten aanvraag weer zichtbaar voor werknemers."
+        },
         "reviewCandidates": {
           "label": "Kandidaten bekijken",
           "description": "Bekijk werknemers die bij je vraag passen."
