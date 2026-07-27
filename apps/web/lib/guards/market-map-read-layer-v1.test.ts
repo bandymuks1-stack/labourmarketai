@@ -354,6 +354,12 @@ describe("NO new DB migration in this PR", () => {
     // the 2026-07-22 P0) and pins one trigger's search_path. It only ever
     // REMOVES privilege; human-gate-annotated, RED by design, ships UNAPPLIED.
     // Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(167);
+    // Bumped 167 -> 168 for journal_entry_skills link provenance
+    // (20260727180000_journal_entry_skill_provenance_v1, paired rollback).
+    // ONE additive nullable checked column, GREEN (no grants, no RLS change,
+    // no drops, no DML), UNAPPLIED at merge; per the doctrine's conditional
+    // prod-apply autonomy a GREEN classification permits MCP apply_migration
+    // after merge. Still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(168);
   });
 });
