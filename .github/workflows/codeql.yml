@@ -69,6 +69,6 @@ jobs:
       # running `next build` here — that already happens in quality.yml, and
       # repeating it would double CI time for no extra coverage.
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@4187e74d05793876e9989daffde9c3e66b4acd07 # v3
+        uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         with:
           category: "/language:javascript-typescript"
