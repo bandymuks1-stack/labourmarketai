@@ -33,11 +33,26 @@ describe("dispatcher enforces confirmation + server-derived identity", () => {
   });
 
   it("validates every input with a zod schema before executing", () => {
-    expect(src).toMatch(/WORKER_ACTION_SCHEMAS\[/);
-    // PR-E: the employer-side executables are validated by the same gate.
-    expect(src).toMatch(/COMPANY_ACTION_SCHEMAS\[/);
+    // Both schema registries (worker + PR-E employer) feed the ONE Map the
+    // dispatcher validates through.
+    expect(src).toMatch(/Object\.entries\(WORKER_ACTION_SCHEMAS\)/);
+    expect(src).toMatch(/Object\.entries\(COMPANY_ACTION_SCHEMAS\)/);
+    expect(src).toMatch(/SCHEMA_MAP\.get\(/);
     expect(src).toMatch(/\.safeParse\(/);
     expect(src).toContain('code: "invalid"');
+  });
+
+  it("resolves schemas/executors via Map.get — never by bracket-indexing with a user-controlled id", () => {
+    // CodeQL js/unvalidated-dynamic-method-call: a user-controlled actionId
+    // must never index an object (prototype-chain / unexpected-callable
+    // hazard). The Maps are built from the frozen records at module load and
+    // unknown ids answer not_executable.
+    expect(src).toMatch(/EXECUTOR_MAP\.get\(/);
+    expect(src).not.toMatch(/WORKER_EXECUTORS\[/);
+    expect(src).not.toMatch(/COMPANY_EXECUTORS\[/);
+    expect(src).not.toMatch(/WORKER_ACTION_SCHEMAS\[/);
+    expect(src).not.toMatch(/COMPANY_ACTION_SCHEMAS\[/);
+    expect(src).toContain('code: "not_executable"');
   });
 
   it("re-checks authorization via the pure core (role gate) before executing", () => {

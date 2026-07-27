@@ -138,50 +138,49 @@ async function stateFingerprint(
 
 type ExecutableActionId = WorkerActionId | CompanyActionId;
 
-function isWorkerExecutable(actionId: string): actionId is WorkerActionId {
-  return Object.prototype.hasOwnProperty.call(WORKER_ACTION_SCHEMAS, actionId);
-}
+/** The one executor call signature the dispatcher needs: every concrete
+ *  executor narrows its `input` from the id-matched schema, so the safe common
+ *  signature takes the bottom type — the dispatcher may only pass data that
+ *  came out of the SAME id's schema (enforced by the Map lookups below). */
+type AnyExecutor = (input: never, ctx: { locale: string }) => Promise<ExecResult>;
 
-function isCompanyExecutable(actionId: string): actionId is CompanyActionId {
-  return Object.prototype.hasOwnProperty.call(COMPANY_ACTION_SCHEMAS, actionId);
-}
+/** The dispatcher only needs the validate seam of a schema. */
+type AnyActionSchema = {
+  safeParse(input: unknown): { success: true; data: unknown } | { success: false };
+};
+
+/**
+ * Module-scope Maps keyed by action id (CodeQL
+ * js/unvalidated-dynamic-method-call): a user-controlled `actionId` never
+ * bracket-indexes an object — `Map.get` can only ever return a value that was
+ * explicitly registered from the frozen WORKER_/COMPANY_ records at module
+ * load. No prototype chain, no inherited member, no unexpected callable.
+ * Unknown ids resolve to `undefined` → the dispatcher answers
+ * `not_executable`.
+ */
+const SCHEMA_MAP: ReadonlyMap<string, AnyActionSchema> = new Map<string, AnyActionSchema>([
+  ...Object.entries(WORKER_ACTION_SCHEMAS),
+  ...Object.entries(COMPANY_ACTION_SCHEMAS),
+]);
+
+const EXECUTOR_MAP: ReadonlyMap<string, AnyExecutor> = new Map<string, AnyExecutor>([
+  ...Object.entries(WORKER_EXECUTORS),
+  ...Object.entries(COMPANY_EXECUTORS),
+]);
 
 /** An action is executable iff it carries a registered schema + executor pair
  *  (worker OR employer side). Everything else stays deep-link-only and is
  *  rejected by dispatch-core as `not_executable`. */
 function isExecutable(actionId: string): actionId is ExecutableActionId {
-  return isWorkerExecutable(actionId) || isCompanyExecutable(actionId);
+  return SCHEMA_MAP.has(actionId) && EXECUTOR_MAP.has(actionId);
 }
 
-/** The one executor call signature the dispatcher needs: every concrete
- *  executor narrows its `input` from the id-matched schema, so the safe common
- *  signature takes the bottom type — the dispatcher may only pass data that
- *  came out of the SAME id's schema (enforced by the lookups below). */
-type AnyExecutor = (input: never, ctx: { locale: string }) => Promise<ExecResult>;
-
-/** Own-property-guarded lookups (CodeQL js/unvalidated-dynamic-method-call):
- *  a user-controlled `actionId` can only ever resolve to an OWN entry of the
- *  frozen schema/executor records — never to an inherited member (e.g.
- *  `constructor` / `toString`) and never to an unexpected callable. Unknown
- *  ids resolve to `undefined` and the dispatcher answers `not_executable`. */
-function schemaOf(actionId: string) {
-  if (Object.prototype.hasOwnProperty.call(WORKER_ACTION_SCHEMAS, actionId)) {
-    return WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
-  }
-  if (Object.prototype.hasOwnProperty.call(COMPANY_ACTION_SCHEMAS, actionId)) {
-    return COMPANY_ACTION_SCHEMAS[actionId as CompanyActionId];
-  }
-  return undefined;
+function schemaOf(actionId: string): AnyActionSchema | undefined {
+  return SCHEMA_MAP.get(actionId);
 }
 
 function executorOf(actionId: string): AnyExecutor | undefined {
-  if (Object.prototype.hasOwnProperty.call(WORKER_EXECUTORS, actionId)) {
-    return WORKER_EXECUTORS[actionId as WorkerActionId];
-  }
-  if (Object.prototype.hasOwnProperty.call(COMPANY_EXECUTORS, actionId)) {
-    return COMPANY_EXECUTORS[actionId as CompanyActionId];
-  }
-  return undefined;
+  return EXECUTOR_MAP.get(actionId);
 }
 
 /** Mint a confirmation token for an important/strong worker action, after
