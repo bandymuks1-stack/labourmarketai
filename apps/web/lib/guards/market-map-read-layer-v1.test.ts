@@ -367,6 +367,10 @@ describe("NO new DB migration in this PR", () => {
     // bypass on nullable organizations.owner_profile_id; guards only TIGHTEN,
     // no schema/grant changes; human-gate-annotated, RED by design, ships
     // UNAPPLIED. Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(169);
+    // Bumped 169 -> 170 for the assistant-transcript adoption
+    // (20260727190000_assistant_transcript_v1, paired rollback) - owner-gated
+    // RED draft, ships UNAPPLIED. Still no migration from the market-map
+    // read layer.
+    expect(count).toBeLessThanOrEqual(170);
   });
 });
