@@ -95,7 +95,10 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // `conversation.chat.*` strings, and `worker.logWork` action labels land in
   // all 11 locales; lt/en/ru/de/nl translated (de:0 / nl:0 ratchet intact),
   // da [EN] until human translation).
-  da: 1046,
+  // MEASURED 1052 at pr-e-employer-executors (+6: the company.confirmNeed /
+  // closeDemand / reopenDemand action labels+descriptions land in all 11
+  // locales; lt/en/ru/nl/de translated, da [EN] until human translation).
+  da: 1052,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

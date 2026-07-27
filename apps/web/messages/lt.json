@@ -10822,6 +10822,18 @@
           "label": "Sukurti darbo poreikį",
           "description": "Aprašyk, kokių darbuotojų reikia."
         },
+        "confirmNeed": {
+          "label": "Patvirtinti atpažintus įgūdžius",
+          "description": "Patvirtinkite iš poreikio teksto atpažintą įgūdžių rinkinį — jis taps struktūruotu poreikiu."
+        },
+        "closeDemand": {
+          "label": "Uždaryti poreikį",
+          "description": "Nuimkite užpildytą ar nebeaktualų poreikį nuo darbuotojų lentos."
+        },
+        "reopenDemand": {
+          "label": "Vėl atidaryti poreikį",
+          "description": "Padarykite uždarytą poreikį vėl matomą darbuotojams."
+        },
         "reviewCandidates": {
           "label": "Peržiūrėti kandidatus",
           "description": "Pamatyk tavo poreikiui tinkančius darbuotojus."

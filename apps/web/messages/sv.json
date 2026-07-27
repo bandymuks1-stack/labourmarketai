@@ -3005,6 +3005,18 @@
           "label": "[EN] Create a labour demand",
           "description": "[EN] Describe the workers you need."
         },
+        "confirmNeed": {
+          "label": "[EN] Confirm recognized skills",
+          "description": "[EN] Approve the skill set recognized from your demand text — it becomes the structured need."
+        },
+        "closeDemand": {
+          "label": "[EN] Close a demand",
+          "description": "[EN] Take a filled or stale demand off the worker board."
+        },
+        "reopenDemand": {
+          "label": "[EN] Reopen a demand",
+          "description": "[EN] Make a closed demand visible to workers again."
+        },
         "reviewCandidates": {
           "label": "[EN] Review candidates",
           "description": "[EN] See workers matched to your demand."

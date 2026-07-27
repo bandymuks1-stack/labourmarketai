@@ -15,6 +15,12 @@ import {
   WORKER_ACTION_SCHEMAS,
   type WorkerActionId,
 } from "@/lib/conversation/worker-schemas";
+import {
+  fd,
+  mapKind,
+  type ExecCtx,
+  type ExecResult,
+} from "@/lib/conversation/executor-contract";
 
 /**
  * Worker executors (Phase B). Each is a THIN adapter that validates nothing new
@@ -24,50 +30,21 @@ import {
  *
  * These NEVER touch the DB directly and NEVER re-implement domain logic; the
  * real write, authorization (RLS + the canonical RPC), and audit stay put.
+ *
+ * The shared result contract + adapter helpers live in `executor-contract.ts`
+ * (one convention for both executor maps); re-exported here for the existing
+ * importers.
  */
 
-export type ExecResult =
-  | { ok: true; data?: Record<string, unknown> }
-  | { ok: false; code: string; message?: string; existing?: string };
-
-export type ExecCtx = { locale: string };
-
-function fd(entries: Record<string, string | null | undefined>): FormData {
-  const f = new FormData();
-  for (const [k, v] of Object.entries(entries)) {
-    if (v != null) f.set(k, v);
-  }
-  return f;
-}
+export type { ExecCtx, ExecResult } from "@/lib/conversation/executor-contract";
 
 type Infer<Id extends WorkerActionId> = z.infer<(typeof WORKER_ACTION_SCHEMAS)[Id]>;
 
-/** Map booking `kind` / interest `kind` result tags to the common code set. */
-function mapKind(kind: string): string {
-  switch (kind) {
-    case "needs-migration":
-      return "needs_migration";
-    case "not-authed":
-      return "auth";
-    case "not-entitled":
-      return "not_authorized";
-    case "rate-limited":
-      return "rate_limited";
-    case "no-worker":
-    case "invalid":
-      return "invalid";
-    case "not-visible":
-      return "precondition";
-    case "conflict":
-      return "conflict";
-    default:
-      return "error";
-  }
-}
-
+// Frozen: the dispatcher indexes this record with a user-controlled action id
+// (behind an own-property guard) — the record itself must never be mutable.
 export const WORKER_EXECUTORS: {
-  [Id in WorkerActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
-} = {
+  readonly [Id in WorkerActionId]: (input: Infer<Id>, ctx: ExecCtx) => Promise<ExecResult>;
+} = Object.freeze({
   "worker.add-work-history": async (input) => {
     const r = await confirmCvWorkHistoryAction({
       title: input.title,
@@ -194,4 +171,4 @@ export const WORKER_EXECUTORS: {
       ? { ok: true, data: { entryId: r.entryId } }
       : { ok: false, code: r.code, message: r.message };
   },
-};
+});

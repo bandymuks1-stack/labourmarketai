@@ -12,7 +12,12 @@ import {
   WORKER_ACTION_SCHEMAS,
   type WorkerActionId,
 } from "@/lib/conversation/worker-schemas";
+import {
+  COMPANY_ACTION_SCHEMAS,
+  type CompanyActionId,
+} from "@/lib/conversation/company-schemas";
 import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
+import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
 import {
   canonicalInputHash,
   issueConfirmationToken,
@@ -20,9 +25,10 @@ import {
 } from "@/lib/conversation/confirmation-token";
 
 /**
- * Server dispatcher (Phase B) — the ONLY path that executes a conversation
- * worker action. It enforces, in order: authentication, role (held-roles) via
- * the pure core, zod input validation, a fresh one-time confirmation token for
+ * Server dispatcher (Phase B; employer executors added in PR-E) — the ONLY
+ * path that executes a conversation action (worker.* + company.* + agency.*).
+ * It enforces, in order: authentication, role (held-roles) via the pure core,
+ * zod input validation, a fresh one-time confirmation token for
  * important/strong tiers, then delegates to the canonical executor and returns
  * the REAL result. It never writes the DB itself and never fabricates success.
  */
@@ -130,8 +136,51 @@ async function stateFingerprint(
   return "n/a";
 }
 
-function isWorkerExecutable(actionId: string): actionId is WorkerActionId {
-  return Object.prototype.hasOwnProperty.call(WORKER_ACTION_SCHEMAS, actionId);
+type ExecutableActionId = WorkerActionId | CompanyActionId;
+
+/** The one executor call signature the dispatcher needs: every concrete
+ *  executor narrows its `input` from the id-matched schema, so the safe common
+ *  signature takes the bottom type — the dispatcher may only pass data that
+ *  came out of the SAME id's schema (enforced by the Map lookups below). */
+type AnyExecutor = (input: never, ctx: { locale: string }) => Promise<ExecResult>;
+
+/** The dispatcher only needs the validate seam of a schema. */
+type AnyActionSchema = {
+  safeParse(input: unknown): { success: true; data: unknown } | { success: false };
+};
+
+/**
+ * Module-scope Maps keyed by action id (CodeQL
+ * js/unvalidated-dynamic-method-call): a user-controlled `actionId` never
+ * bracket-indexes an object — `Map.get` can only ever return a value that was
+ * explicitly registered from the frozen WORKER_/COMPANY_ records at module
+ * load. No prototype chain, no inherited member, no unexpected callable.
+ * Unknown ids resolve to `undefined` → the dispatcher answers
+ * `not_executable`.
+ */
+const SCHEMA_MAP: ReadonlyMap<string, AnyActionSchema> = new Map<string, AnyActionSchema>([
+  ...Object.entries(WORKER_ACTION_SCHEMAS),
+  ...Object.entries(COMPANY_ACTION_SCHEMAS),
+]);
+
+const EXECUTOR_MAP: ReadonlyMap<string, AnyExecutor> = new Map<string, AnyExecutor>([
+  ...Object.entries(WORKER_EXECUTORS),
+  ...Object.entries(COMPANY_EXECUTORS),
+]);
+
+/** An action is executable iff it carries a registered schema + executor pair
+ *  (worker OR employer side). Everything else stays deep-link-only and is
+ *  rejected by dispatch-core as `not_executable`. */
+function isExecutable(actionId: string): actionId is ExecutableActionId {
+  return SCHEMA_MAP.has(actionId) && EXECUTOR_MAP.has(actionId);
+}
+
+function schemaOf(actionId: string): AnyActionSchema | undefined {
+  return SCHEMA_MAP.get(actionId);
+}
+
+function executorOf(actionId: string): AnyExecutor | undefined {
+  return EXECUTOR_MAP.get(actionId);
 }
 
 /** Mint a confirmation token for an important/strong worker action, after
@@ -148,13 +197,14 @@ export async function prepareConfirmationAction(
 
   const descriptor = getConversationAction(actionId);
   const held = await heldRolesOf(supabase, user.id);
-  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isWorkerExecutable(actionId) });
+  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   if (!descriptor || !requiresConfirmation(descriptor.confirmation)) {
     return { ok: false, code: "no_confirmation_needed" };
   }
 
-  const schema = WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
+  const schema = schemaOf(actionId);
+  if (!schema) return { ok: false, code: "not_executable" };
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -169,7 +219,9 @@ export async function prepareConfirmationAction(
   return { ok: true, token, stateFingerprint: fp };
 }
 
-/** Execute a worker conversation action end-to-end. */
+/** Execute a conversation action end-to-end (worker.* + company.* + agency.*).
+ *  The name predates the employer executors (PR-E) and is kept because the
+ *  existing client flows import it; it has always been the ONE dispatcher. */
 export async function dispatchWorkerAction(
   actionId: string,
   input: unknown,
@@ -183,12 +235,13 @@ export async function dispatchWorkerAction(
 
   const descriptor = getConversationAction(actionId);
   const held = await heldRolesOf(supabase, user.id);
-  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isWorkerExecutable(actionId) });
+  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   // descriptor is defined here (authz.ok implies it).
   const desc = descriptor!;
 
-  const schema = WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
+  const schema = schemaOf(actionId);
+  if (!schema) return { ok: false, code: "not_executable" };
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -213,7 +266,14 @@ export async function dispatchWorkerAction(
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executor = WORKER_EXECUTORS[actionId as WorkerActionId] as any;
-  return executor(parsed.data, { locale: opts?.locale ?? "lt" });
+  const executor = executorOf(actionId);
+  // typeof check (not just truthiness): the exact sanitizer CodeQL's
+  // js/unvalidated-dynamic-method-call recognizes for a callee resolved
+  // by a caller-supplied key - the call target is provably a function.
+  if (typeof executor !== "function") return { ok: false, code: "not_executable" };
+  // `parsed.data` came out of the SAME id's schema (schemaOf/executorOf share
+  // the own-property key check), so this is the id-matched input by
+  // construction; `never` is the safe common parameter type, not a cast away
+  // from validation.
+  return executor(parsed.data as never, { locale: opts?.locale ?? "lt" });
 }
