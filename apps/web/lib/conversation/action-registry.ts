@@ -305,6 +305,55 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "submitDemandRequestAction" },
   },
   {
+    // §19 explicit human act — confirm the offline-recognized skill set on the
+    // company's OWN demand. Canonical write: confirmRecognizedNeedAction
+    // (own-row update under the existing customer_requests RLS — no RPC).
+    id: "company.confirm-need",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.confirmNeed.label",
+    descriptionKey: "conversation.actions.company.confirmNeed.description",
+    confirmation: "important_write", // the whole point IS the explicit confirm
+    precondition: "authenticated", // demand rows key on profile_id
+    migrationSensitive: false,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "confirmRecognizedNeedAction" },
+  },
+  {
+    // Close the company's own demand — hidden from the worker board (its RPC
+    // serves status='submitted' only). Reversible via company.reopen-demand.
+    // NOTE: there is deliberately NO "publish" action — visibility is
+    // RLS/RPC-driven (submitted + verified-company gate), a separate honest
+    // state, never a fake publish switch (§7).
+    id: "company.close-demand",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.closeDemand.label",
+    descriptionKey: "conversation.actions.company.closeDemand.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: false,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "closeDemandAction" },
+  },
+  {
+    // Reopen a previously closed demand (back to submitted → worker-visible
+    // again through the same verified-company gate).
+    id: "company.reopen-demand",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.reopenDemand.label",
+    descriptionKey: "conversation.actions.company.reopenDemand.description",
+    confirmation: "reversible_write",
+    precondition: "authenticated",
+    migrationSensitive: false,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "reopenDemandAction" },
+  },
+  {
     id: "company.review-candidates",
     subject: "company",
     allowedRoles: ["company", "agency"],

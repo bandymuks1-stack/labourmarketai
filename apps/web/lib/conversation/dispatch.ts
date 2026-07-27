@@ -12,7 +12,12 @@ import {
   WORKER_ACTION_SCHEMAS,
   type WorkerActionId,
 } from "@/lib/conversation/worker-schemas";
+import {
+  COMPANY_ACTION_SCHEMAS,
+  type CompanyActionId,
+} from "@/lib/conversation/company-schemas";
 import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
+import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
 import {
   canonicalInputHash,
   issueConfirmationToken,
@@ -20,9 +25,10 @@ import {
 } from "@/lib/conversation/confirmation-token";
 
 /**
- * Server dispatcher (Phase B) — the ONLY path that executes a conversation
- * worker action. It enforces, in order: authentication, role (held-roles) via
- * the pure core, zod input validation, a fresh one-time confirmation token for
+ * Server dispatcher (Phase B; employer executors added in PR-E) — the ONLY
+ * path that executes a conversation action (worker.* + company.* + agency.*).
+ * It enforces, in order: authentication, role (held-roles) via the pure core,
+ * zod input validation, a fresh one-time confirmation token for
  * important/strong tiers, then delegates to the canonical executor and returns
  * the REAL result. It never writes the DB itself and never fabricates success.
  */
@@ -130,8 +136,27 @@ async function stateFingerprint(
   return "n/a";
 }
 
+type ExecutableActionId = WorkerActionId | CompanyActionId;
+
 function isWorkerExecutable(actionId: string): actionId is WorkerActionId {
   return Object.prototype.hasOwnProperty.call(WORKER_ACTION_SCHEMAS, actionId);
+}
+
+function isCompanyExecutable(actionId: string): actionId is CompanyActionId {
+  return Object.prototype.hasOwnProperty.call(COMPANY_ACTION_SCHEMAS, actionId);
+}
+
+/** An action is executable iff it carries a registered schema + executor pair
+ *  (worker OR employer side). Everything else stays deep-link-only and is
+ *  rejected by dispatch-core as `not_executable`. */
+function isExecutable(actionId: string): actionId is ExecutableActionId {
+  return isWorkerExecutable(actionId) || isCompanyExecutable(actionId);
+}
+
+function schemaOf(actionId: ExecutableActionId) {
+  return isWorkerExecutable(actionId)
+    ? WORKER_ACTION_SCHEMAS[actionId]
+    : COMPANY_ACTION_SCHEMAS[actionId as CompanyActionId];
 }
 
 /** Mint a confirmation token for an important/strong worker action, after
@@ -148,13 +173,13 @@ export async function prepareConfirmationAction(
 
   const descriptor = getConversationAction(actionId);
   const held = await heldRolesOf(supabase, user.id);
-  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isWorkerExecutable(actionId) });
+  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   if (!descriptor || !requiresConfirmation(descriptor.confirmation)) {
     return { ok: false, code: "no_confirmation_needed" };
   }
 
-  const schema = WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
+  const schema = schemaOf(actionId as ExecutableActionId);
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -169,7 +194,9 @@ export async function prepareConfirmationAction(
   return { ok: true, token, stateFingerprint: fp };
 }
 
-/** Execute a worker conversation action end-to-end. */
+/** Execute a conversation action end-to-end (worker.* + company.* + agency.*).
+ *  The name predates the employer executors (PR-E) and is kept because the
+ *  existing client flows import it; it has always been the ONE dispatcher. */
 export async function dispatchWorkerAction(
   actionId: string,
   input: unknown,
@@ -183,12 +210,12 @@ export async function dispatchWorkerAction(
 
   const descriptor = getConversationAction(actionId);
   const held = await heldRolesOf(supabase, user.id);
-  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isWorkerExecutable(actionId) });
+  const authz = authorizeDispatch({ descriptor, heldRoles: held, executable: isExecutable(actionId) });
   if (!authz.ok) return { ok: false, code: authz.code };
   // descriptor is defined here (authz.ok implies it).
   const desc = descriptor!;
 
-  const schema = WORKER_ACTION_SCHEMAS[actionId as WorkerActionId];
+  const schema = schemaOf(actionId as ExecutableActionId);
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "invalid" };
 
@@ -213,7 +240,9 @@ export async function dispatchWorkerAction(
     }
   }
 
+  const executor = isWorkerExecutable(actionId)
+    ? WORKER_EXECUTORS[actionId]
+    : COMPANY_EXECUTORS[actionId as CompanyActionId];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const executor = WORKER_EXECUTORS[actionId as WorkerActionId] as any;
-  return executor(parsed.data, { locale: opts?.locale ?? "lt" });
+  return (executor as any)(parsed.data, { locale: opts?.locale ?? "lt" });
 }
