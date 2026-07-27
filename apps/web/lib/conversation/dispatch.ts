@@ -267,7 +267,10 @@ export async function dispatchWorkerAction(
   }
 
   const executor = executorOf(actionId);
-  if (!executor) return { ok: false, code: "not_executable" };
+  // typeof check (not just truthiness): the exact sanitizer CodeQL's
+  // js/unvalidated-dynamic-method-call recognizes for a callee resolved
+  // by a caller-supplied key - the call target is provably a function.
+  if (typeof executor !== "function") return { ok: false, code: "not_executable" };
   // `parsed.data` came out of the SAME id's schema (schemaOf/executorOf share
   // the own-property key check), so this is the id-matched input by
   // construction; `never` is the safe common parameter type, not a cast away
