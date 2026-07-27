@@ -10999,7 +10999,11 @@
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
       "userLogWork": "Werktijd vastleggen",
-      "userFindWork": "Werk zoeken"
+      "userFindWork": "Werk zoeken",
+      "historyTitle": "Eerder gesprek",
+      "historyCount": "{count, plural, one {# bericht} other {# berichten}}",
+      "historyShow": "Tonen",
+      "historyMore": "Meer tonen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

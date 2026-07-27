@@ -10999,7 +10999,11 @@
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
       "userLogWork": "Įrašyti darbo laiką",
-      "userFindWork": "Ieškau darbo"
+      "userFindWork": "Ieškau darbo",
+      "historyTitle": "Ankstesnis pokalbis",
+      "historyCount": "{count, plural, one {# žinutė} few {# žinutės} other {# žinučių}}",
+      "historyShow": "Rodyti",
+      "historyMore": "Rodyti daugiau"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
