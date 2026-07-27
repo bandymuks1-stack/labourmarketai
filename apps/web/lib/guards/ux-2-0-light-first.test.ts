@@ -21,7 +21,11 @@ import { join } from "node:path";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf8");
+// Normalize CRLF → LF: the guard matches multi-line selector strings with \n,
+// which spuriously failed on Windows checkouts where git materialises CRLF.
+// Pure line-ending normalisation — every contract below is unchanged.
+const read = (rel: string): string =>
+  readFileSync(join(APP_ROOT, rel), "utf8").replace(/\r\n/g, "\n");
 
 const css = read("app/globals.css");
 
