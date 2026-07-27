@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
@@ -22,7 +22,12 @@ import { getWorkerForm } from "@/lib/conversation/worker-forms";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
+import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
+import {
+  appendAssistantTurn,
+  loadAssistantThread,
+} from "@/lib/assistant/transcript";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
 
@@ -175,6 +180,68 @@ export function ConversationChat({
   const [items, setItems] = useState<ThreadItem[]>(initial);
   const [typing, setTyping] = useState(false);
 
+  /**
+   * Transcript persistence (owner-gated schema). While the RED migration is
+   * unapplied `loadAssistantThread` reports unavailable and this surface stays
+   * session-only — no fake "saved" claims. Once applied: the last turns are
+   * restored above the greeting on mount, and every text turn is appended
+   * through the hash-chaining RPC. Fire-and-forget: a failed append never
+   * blocks the visible conversation and never fabricates a success.
+   */
+  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean }>({
+    conversationId: null,
+    enabled: false,
+  });
+  useEffect(() => {
+    if (script) return; // design preview: never touches real persistence
+    let cancelled = false;
+    loadAssistantThread()
+      .then((res) => {
+        if (cancelled || !res.available) return;
+        transcriptRef.current = { conversationId: res.conversationId, enabled: true };
+        if (res.messages.length > 0) {
+          setItems((prev) => [
+            ...res.messages.map((m) => ({
+              id: nid(),
+              message: {
+                id: nid(),
+                role: m.role,
+                kind: "text",
+                text: m.text,
+              } as ChatMessage,
+            })),
+            ...prev,
+          ]);
+        }
+      })
+      .catch(() => {
+        /* unavailable — honest session-only mode */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [script]);
+
+  const persistTurn = useCallback(
+    (role: "user" | "assistant", text: string) => {
+      const t = transcriptRef.current;
+      if (!t.enabled || !text.trim()) return;
+      appendAssistantTurn({
+        conversationId: t.conversationId,
+        role,
+        text,
+        language: locale,
+      })
+        .then((res) => {
+          if (res.available) transcriptRef.current.conversationId = res.conversationId;
+        })
+        .catch(() => {
+          /* degraded — nothing claimed */
+        });
+    },
+    [locale],
+  );
+
   const pushMessage = useCallback((message: ChatMessage) => {
     setItems((prev) => [...prev, { id: message.id, message }]);
   }, []);
@@ -182,13 +249,18 @@ export function ConversationChat({
     setItems((prev) => [...prev, { id: nid(), embed }]);
   }, []);
   const assistant = useCallback(
-    (text: string, chips?: ChoiceChip[]) =>
-      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips }),
-    [pushMessage],
+    (text: string, chips?: ChoiceChip[]) => {
+      pushMessage({ id: nid(), role: "assistant", kind: "text", text, chips });
+      persistTurn("assistant", text);
+    },
+    [pushMessage, persistTurn],
   );
   const user = useCallback(
-    (text: string) => pushMessage({ id: nid(), role: "user", kind: "text", text }),
-    [pushMessage],
+    (text: string) => {
+      pushMessage({ id: nid(), role: "user", kind: "text", text });
+      persistTurn("user", text);
+    },
+    [pushMessage, persistTurn],
   );
 
   const withTyping = useCallback((fn: () => void) => {
@@ -315,6 +387,40 @@ export function ConversationChat({
     [pushMessage, assistant, starterChips, profileChips, labels.fallback, tSummary],
   );
 
+  /**
+   * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's
+   * persisted search criteria (the same canonical columns matching consumes).
+   * Never a generic fallback: set criteria are listed, important unset ones
+   * are named, and the follow-up chip is the existing preferences form.
+   */
+  const startCriteria = useCallback(() => {
+    setTyping(true);
+    loadCriteriaSummaryForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "criteria") {
+          const lines = res.lines.map((l) => `${l.label}: ${l.value}`);
+          const missingBlock =
+            res.missingIntro && res.missing.length > 0
+              ? `\n${res.missingIntro}\n${res.missing.map((m) => `— ${m}`).join("\n")}`
+              : "";
+          assistant(
+            [res.intro, ...lines].join("\n") + missingBlock,
+            [
+              { id: "f:worker.save-preferences", label: labels.chipPrefs },
+              { id: "jobs", label: labels.chipJobs },
+            ],
+          );
+        } else {
+          assistant(res.message, starterChips);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.fallback, starterChips);
+      });
+  }, [assistant, starterChips, labels.fallback, labels.chipPrefs, labels.chipJobs]);
+
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string) => {
@@ -397,6 +503,10 @@ export function ConversationChat({
         );
         return;
       }
+      if (intent === "criteria") {
+        startCriteria();
+        return;
+      }
       withTyping(() => {
         switch (intent) {
           case "cv":
@@ -427,7 +537,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria],
   );
 
   const nav = {

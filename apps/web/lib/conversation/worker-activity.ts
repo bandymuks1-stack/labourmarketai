@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import type { CriteriaSnapshot } from "./criteria-summary-contract";
 
 /**
  * Worker activity + completeness read model (Phase B journal / continuity).
@@ -67,6 +68,57 @@ const EMPTY: WorkerActivity = {
 /** Coarse day bucket for dedupe (YYYY-MM-DD from an ISO string). */
 function day(iso: string | null | undefined): string {
   return (iso ?? "").slice(0, 10);
+}
+
+/**
+ * The worker's persisted SEARCH CRITERIA, read from the same canonical columns
+ * the matching engine consumes. Lives here (not in criteria-summary.ts) so the
+ * conversation keeps exactly ONE owner of worker-table reads — the delegation
+ * guard pins that. Returns null when the account has no worker row; a failed
+ * read yields an unset field, never a fabricated value.
+ */
+export async function getWorkerCriteriaSnapshot(
+  userId: string,
+): Promise<CriteriaSnapshot | null> {
+  const supabase = await createClient();
+  try {
+    const { data: worker } = await supabase
+      .from("workers")
+      .select(
+        "id, availability_status, available_from, preferred_countries, salary_min_eur, salary_max_eur, willing_to_relocate, preferred_contract_type",
+      )
+      .eq("profile_id", userId)
+      .maybeSingle();
+    if (!worker?.id) return null;
+
+    const [skills, languages, documents] = await Promise.all([
+      supabase
+        .from("profile_skill_claims")
+        .select("id", { count: "exact", head: true })
+        .eq("profile_id", userId),
+      supabase.from("worker_languages").select("lang").eq("worker_id", worker.id),
+      supabase
+        .from("worker_documents")
+        .select("id", { count: "exact", head: true })
+        .eq("worker_id", worker.id),
+    ]);
+
+    return {
+      hasWorkerProfile: true,
+      skillsCount: skills.count ?? 0,
+      languages: ((languages.data ?? []) as { lang: string }[]).map((l) => l.lang),
+      preferredCountries: (worker.preferred_countries as string[] | null) ?? [],
+      salaryMinEur: (worker.salary_min_eur as number | null) ?? null,
+      salaryMaxEur: (worker.salary_max_eur as number | null) ?? null,
+      availabilityStatus: (worker.availability_status as string | null) ?? null,
+      availableFrom: (worker.available_from as string | null) ?? null,
+      willingToRelocate: (worker.willing_to_relocate as boolean | null) ?? null,
+      preferredContractType: (worker.preferred_contract_type as string | null) ?? null,
+      documentsCount: documents.count ?? 0,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getWorkerActivity(userId: string): Promise<WorkerActivity> {

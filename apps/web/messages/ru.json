@@ -11047,6 +11047,40 @@
       "progressAria": "Основные разделы профиля: сохранено {done} из {total}",
       "doneWord": "Сохранено",
       "missingWord": "Ещё не хватает"
+    },
+    "criteria": {
+      "intro": "Твои текущие критерии поиска:",
+      "introEmpty": "Критерии поиска ещё не указаны.",
+      "blockedNoWorker": "Показать критерии поиска могу только для профиля работника. Сначала создай профиль работника.",
+      "factSkills": "Навыки",
+      "skillsCount": "{count, plural, one {# запись о навыке} few {# записи о навыках} other {# записей о навыках}}",
+      "factLanguages": "Языки",
+      "factCountries": "Предпочитаемые страны",
+      "factSalary": "Ожидаемая ставка (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "от €{min}",
+      "salaryTo": "до €{max}",
+      "factAvailability": "Доступность",
+      "availability": {
+        "available": "Свободен",
+        "busy": "Занят",
+        "unavailable": "Недоступен"
+      },
+      "factStart": "Может начать с",
+      "factRelocate": "Готов к переезду",
+      "yes": "Да",
+      "no": "Нет",
+      "factContract": "Предпочитаемый тип договора",
+      "factDocuments": "Документы",
+      "documentsCount": "{count, plural, one {# документ} few {# документа} other {# документов}}",
+      "missingIntro": "Подбор будет точнее, если указать:",
+      "missing": {
+        "skills": "навыки",
+        "countries": "предпочитаемые страны",
+        "availability": "доступность",
+        "languages": "языки",
+        "salary": "ожидаемую ставку"
+      }
     }
   }
 }

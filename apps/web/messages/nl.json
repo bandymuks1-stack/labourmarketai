@@ -11047,6 +11047,40 @@
       "progressAria": "Basisgegevens profiel: {done} van {total} opgeslagen",
       "doneWord": "Opgeslagen",
       "missingWord": "Ontbreekt nog"
+    },
+    "criteria": {
+      "intro": "Je huidige zoekcriteria:",
+      "introEmpty": "Je hebt nog geen zoekcriteria ingesteld.",
+      "blockedNoWorker": "Zoekcriteria kan ik alleen tonen voor een werknemersprofiel. Maak eerst een werknemersprofiel aan.",
+      "factSkills": "Vaardigheden",
+      "skillsCount": "{count, plural, one {# vaardigheidsclaim} other {# vaardigheidsclaims}}",
+      "factLanguages": "Talen",
+      "factCountries": "Voorkeurslanden",
+      "factSalary": "Tariefverwachting (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "vanaf €{min}",
+      "salaryTo": "tot €{max}",
+      "factAvailability": "Beschikbaarheid",
+      "availability": {
+        "available": "Beschikbaar",
+        "busy": "Bezet",
+        "unavailable": "Niet beschikbaar"
+      },
+      "factStart": "Kan starten vanaf",
+      "factRelocate": "Bereid te verhuizen",
+      "yes": "Ja",
+      "no": "Nee",
+      "factContract": "Gewenst contracttype",
+      "factDocuments": "Documenten",
+      "documentsCount": "{count, plural, one {# document} other {# documenten}}",
+      "missingIntro": "Matching wordt preciezer als je dit instelt:",
+      "missing": {
+        "skills": "vaardigheden",
+        "countries": "voorkeurslanden",
+        "availability": "beschikbaarheid",
+        "languages": "talen",
+        "salary": "tariefverwachting"
+      }
     }
   }
 }

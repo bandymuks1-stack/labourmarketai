@@ -3230,6 +3230,40 @@
       "progressAria": "[EN] Profile essentials: {done} of {total} saved",
       "doneWord": "[EN] Saved",
       "missingWord": "[EN] Still missing"
+    },
+    "criteria": {
+      "intro": "Twoje obecne kryteria wyszukiwania:",
+      "introEmpty": "Nie ustawiono jeszcze kryteriów wyszukiwania.",
+      "blockedNoWorker": "Kryteria wyszukiwania mogę pokazać tylko dla profilu pracownika. Najpierw utwórz profil pracownika.",
+      "factSkills": "Umiejętności",
+      "skillsCount": "{count, plural, one {# wpis o umiejętności} few {# wpisy o umiejętnościach} other {# wpisów o umiejętnościach}}",
+      "factLanguages": "Języki",
+      "factCountries": "Preferowane kraje",
+      "factSalary": "Oczekiwana stawka (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "od €{min}",
+      "salaryTo": "do €{max}",
+      "factAvailability": "Dostępność",
+      "availability": {
+        "available": "Dostępny",
+        "busy": "Zajęty",
+        "unavailable": "Niedostępny"
+      },
+      "factStart": "Może zacząć od",
+      "factRelocate": "Gotowy do przeprowadzki",
+      "yes": "Tak",
+      "no": "Nie",
+      "factContract": "Preferowany typ umowy",
+      "factDocuments": "Dokumenty",
+      "documentsCount": "{count, plural, one {# dokument} few {# dokumenty} other {# dokumentów}}",
+      "missingIntro": "Dopasowanie będzie dokładniejsze, jeśli ustawisz:",
+      "missing": {
+        "skills": "umiejętności",
+        "countries": "preferowane kraje",
+        "availability": "dostępność",
+        "languages": "języki",
+        "salary": "oczekiwaną stawkę"
+      }
     }
   }
 }

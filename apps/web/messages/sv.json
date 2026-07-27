@@ -3230,6 +3230,40 @@
       "progressAria": "[EN] Profile essentials: {done} of {total} saved",
       "doneWord": "[EN] Saved",
       "missingWord": "[EN] Still missing"
+    },
+    "criteria": {
+      "intro": "Dina nuvarande sökkriterier:",
+      "introEmpty": "Du har inte angett några sökkriterier ännu.",
+      "blockedNoWorker": "Jag kan bara visa sökkriterier för en arbetstagarprofil. Skapa en arbetstagarprofil först.",
+      "factSkills": "Färdigheter",
+      "skillsCount": "{count, plural, one {# färdighetspost} other {# färdighetsposter}}",
+      "factLanguages": "Språk",
+      "factCountries": "Föredragna länder",
+      "factSalary": "Förväntad taxa (€)",
+      "salaryRange": "€{min}–{max}",
+      "salaryFrom": "från €{min}",
+      "salaryTo": "upp till €{max}",
+      "factAvailability": "Tillgänglighet",
+      "availability": {
+        "available": "Tillgänglig",
+        "busy": "Upptagen",
+        "unavailable": "Inte tillgänglig"
+      },
+      "factStart": "Kan börja från",
+      "factRelocate": "Villig att flytta",
+      "yes": "Ja",
+      "no": "Nej",
+      "factContract": "Föredragen kontraktstyp",
+      "factDocuments": "Dokument",
+      "documentsCount": "{count, plural, one {# dokument} other {# dokument}}",
+      "missingIntro": "Matchningen blir mer exakt om du anger:",
+      "missing": {
+        "skills": "färdigheter",
+        "countries": "föredragna länder",
+        "availability": "tillgänglighet",
+        "languages": "språk",
+        "salary": "förväntad taxa"
+      }
     }
   }
 }

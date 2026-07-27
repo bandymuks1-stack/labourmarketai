@@ -35,6 +35,13 @@ describe("classifyIntent — brief example sentences", () => {
     expect(classifyIntent("qwerty zxcv").intent).toBe("unknown");
   });
 
+  it("criteria readback beats find-work even when the sentence mentions search", () => {
+    expect(classifyIntent("kokie kriterijai pas mane nurodyti?").intent).toBe("criteria");
+    expect(classifyIntent("kokie mano paieškos kriterijai").intent).toBe("criteria");
+    expect(classifyIntent("what criteria are set for my job search").intent).toBe("criteria");
+    expect(classifyIntent("какие критерии у меня указаны").intent).toBe("criteria");
+  });
+
   it("distinguishes logging work from seeking work", () => {
     // Past-tense + time span tips to log-work even though 'darbo' appears.
     expect(classifyIntent("vakar dirbau 8 valandas").intent).toBe("log-work");
