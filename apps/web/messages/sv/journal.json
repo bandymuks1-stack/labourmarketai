@@ -224,7 +224,7 @@
     "sessionExpired": "Din session har gått ut. Logga in igen.",
     "noWorkerProfile": "Ingen arbetarprofil hittades. Öppna kontoinställningarna och aktivera arbetarrollen.",
     "engagementRequired": "Välj det arbetssammanhang (organisation eller projekt) som denna post tillhör.",
-    "notesRequired": "Beskriv vad du arbetade med — fritexten är postens underlag.",
+    "notesRequired": "Beskriv vad du arbetade med — fritexten är kärnan i posten.",
     "quantityInvalid": "Mängden måste vara ett icke-negativt tal.",
     "unitSlugUnknown": "Finns ännu inte i enhetsregistret: {units}. Be en administratör tillämpa migration 0017 (productivity_units-seedet) och försök igen.",
     "saveFailed": "Det gick inte att spara posten: {reason}",

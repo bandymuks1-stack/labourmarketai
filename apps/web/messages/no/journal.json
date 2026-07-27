@@ -224,7 +224,7 @@
     "sessionExpired": "Økten er utløpt. Logg inn på nytt.",
     "noWorkerProfile": "Fant ikke arbeidstakerprofil. Åpne kontoinnstillingene og aktiver arbeidstakerrollen.",
     "engagementRequired": "Velg arbeidskonteksten (organisasjon eller prosjekt) som denne oppføringen hører til.",
-    "notesRequired": "Beskriv hva du jobbet med — friteksten er oppføringens dokumentasjon.",
+    "notesRequired": "Beskriv hva du jobbet med — friteksten er kjernen i oppføringen.",
     "quantityInvalid": "Mengden må være et ikke-negativt tall.",
     "unitSlugUnknown": "Finnes ennå ikke i enhetsregisteret: {units}. Be en administrator om å kjøre migrasjon 0017 (productivity_units-seedet), og prøv igjen.",
     "saveFailed": "Kunne ikke lagre oppføringen: {reason}",

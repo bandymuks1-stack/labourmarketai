@@ -224,7 +224,7 @@
     "sessionExpired": "Din session er udløbet. Log ind igen.",
     "noWorkerProfile": "Medarbejderprofil ikke fundet. Åbn kontoindstillingerne og aktivér medarbejderrollen.",
     "engagementRequired": "Vælg den arbejdskontekst (organisation eller projekt), som denne post hører til.",
-    "notesRequired": "Beskriv hvad du arbejdede med — friteksten er postens dokumentation.",
+    "notesRequired": "Beskriv hvad du arbejdede med — friteksten er kernen i posten.",
     "quantityInvalid": "Mængden skal være et ikke-negativt tal.",
     "unitSlugUnknown": "Findes endnu ikke i enhedsregistret: {units}. Bed en administrator om at anvende migration 0017 (productivity_units-seedet), og prøv igen.",
     "saveFailed": "Posten kunne ikke gemmes: {reason}",

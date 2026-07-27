@@ -224,7 +224,7 @@
     "sessionExpired": "Sesija ir beigusies. Lūdzu, pierakstieties vēlreiz.",
     "noWorkerProfile": "Darbinieka profils nav atrasts. Atveriet konta iestatījumus un ieslēdziet darbinieka lomu.",
     "engagementRequired": "Izvēlieties darba kontekstu (organizāciju vai projektu), kuram pieder šis ieraksts.",
-    "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pierādījums.",
+    "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pamats.",
     "quantityInvalid": "Daudzumam jābūt nenegatīvam skaitlim.",
     "unitSlugUnknown": "Vienību reģistrā vēl nav: {units}. Palūdziet administratoram piemērot migrāciju 0017 (productivity_units sēklu) un mēģiniet vēlreiz.",
     "saveFailed": "Neizdevās saglabāt ierakstu: {reason}",

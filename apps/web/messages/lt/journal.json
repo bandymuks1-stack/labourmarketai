@@ -458,7 +458,7 @@
     "sessionExpired": "Sesija nutrūko. Prisijunkite iš naujo.",
     "noWorkerProfile": "Nerastas darbuotojo profilis. Atidarykite paskyros nustatymus ir įjunkite darbuotojo vaidmenį.",
     "engagementRequired": "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
-    "notesRequired": "Aprašykite ką dirbote — laisvas tekstas yra įrašo įrodymas.",
+    "notesRequired": "Aprašykite ką dirbote — laisvas tekstas yra įrašo pagrindas.",
     "quantityInvalid": "Kiekis turi būti neneigiamas skaičius.",
     "unitSlugUnknown": "Vieneto registre kol kas nėra: {units}. Paprašykite administratoriaus pritaikyti migraciją 0017 (productivity_units seedą), tada bandykite dar kartą.",
     "saveFailed": "Įrašo išsaugoti nepavyko: {reason}",

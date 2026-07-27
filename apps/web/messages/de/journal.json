@@ -458,7 +458,7 @@
     "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
     "noWorkerProfile": "Kein Arbeitnehmerprofil gefunden. Öffne die Kontoeinstellungen und aktiviere die Arbeitnehmerrolle.",
     "engagementRequired": "Wähle den Arbeitskontext (Organisation oder Projekt), zu dem dieser Eintrag gehört.",
-    "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Nachweis dieses Eintrags.",
+    "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Kern dieses Eintrags.",
     "quantityInvalid": "Die Menge muss eine nicht negative Zahl sein.",
     "unitSlugUnknown": "Noch nicht im Einheitenregister: {units}. Bitte einen Administrator, Migration 0017 (den productivity_units-Seed) anzuwenden, und versuche es erneut.",
     "saveFailed": "Der Eintrag konnte nicht gespeichert werden: {reason}",

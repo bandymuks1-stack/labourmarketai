@@ -224,7 +224,7 @@
     "sessionExpired": "Seanss on aegunud. Palun logige uuesti sisse.",
     "noWorkerProfile": "Töötaja profiili ei leitud. Avage konto seaded ja lülitage töötaja roll sisse.",
     "engagementRequired": "Valige töökontekst (organisatsioon või projekt), kuhu see sissekanne kuulub.",
-    "notesRequired": "Kirjeldage, mida tegite — vaba tekst on sissekande tõend.",
+    "notesRequired": "Kirjeldage, mida tegite — vaba tekst on sissekande alus.",
     "quantityInvalid": "Kogus peab olema mittenegatiivne arv.",
     "unitSlugUnknown": "Ühikute registris veel puudub: {units}. Paluge administraatoril rakendada migratsioon 0017 (productivity_units seeme) ja proovige uuesti.",
     "saveFailed": "Sissekande salvestamine ebaõnnestus: {reason}",

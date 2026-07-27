@@ -458,7 +458,7 @@
     "sessionExpired": "Your session has expired. Please sign in again.",
     "noWorkerProfile": "Worker profile not found. Open your account settings and enable the worker role.",
     "engagementRequired": "Choose the work context (organization or project) this entry belongs to.",
-    "notesRequired": "Describe what you worked on — the free text is the evidence for this entry.",
+    "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
     "quantityInvalid": "Quantity must be a non-negative number.",
     "unitSlugUnknown": "Not yet in the unit registry: {units}. Ask an administrator to apply migration 0017 (the productivity_units seed), then try again.",
     "saveFailed": "Failed to save the entry: {reason}",

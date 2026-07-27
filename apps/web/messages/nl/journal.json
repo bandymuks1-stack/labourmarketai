@@ -458,7 +458,7 @@
     "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
     "noWorkerProfile": "Werknemersprofiel niet gevonden. Open je accountinstellingen en activeer de werknemersrol.",
     "engagementRequired": "Kies de werkcontext (organisatie of project) waar deze registratie bij hoort.",
-    "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst is het bewijs van deze registratie.",
+    "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst vormt de kern van deze registratie.",
     "quantityInvalid": "De hoeveelheid moet een niet-negatief getal zijn.",
     "unitSlugUnknown": "Nog niet in het eenhedenregister: {units}. Vraag een beheerder migratie 0017 (de productivity_units-seed) toe te passen en probeer het opnieuw.",
     "saveFailed": "Opslaan van de registratie is mislukt: {reason}",
