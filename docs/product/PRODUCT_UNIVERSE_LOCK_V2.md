@@ -102,6 +102,39 @@ four pillars**:
 
 ---
 
+## 2a. OBJECT ≡ ENTITY — one base model, one canonical term
+
+A world **Object** and a world **Entity** are the same thing. **`Entity` is the
+canonical architectural term** (`UNIFIED_WORLD_MODEL_V1`); "object" survives only
+as the map-layer word for the same rows.
+
+| Map-layer name | Canonical name |
+|---|---|
+| `object_id` | `entity_id` |
+| `object_type` | `entity_type` |
+| `custom_extensions` | `extensions` |
+
+The property list is defined **once**, here, in `UNIVERSAL_OBJECT_PROPERTIES`;
+`entity-model.ts` **imports** it and adds only what the entity layer contributes
+(`name`, `owner`). The object-specific semantics — `geometry`, `events` and the
+visualization contract — are entity semantics, carried on the same rows. There is
+no second base model.
+
+**Canonical question ownership** (so the same question is asked once, not five
+times):
+
+| Question | Canonical field | Owner |
+|---|---|---|
+| Can the World Map carry it without an architecture change? | `addableWithoutMapChange` | **this lock** |
+| Is it reflected on the World Map? | `reflectedOnMap` | `WORLD_STATE_UX_ARCHITECTURE_V1` |
+| Is it controlled by the AI? | `aiControlled` | `WORLD_STATE_UX_ARCHITECTURE_V1` |
+| Can the AI work with it without an architecture change? | `aiCanWorkWithIt` | `UNIFIED_WORLD_MODEL_V1` |
+| Is registering it enough? | `registrationIsEnough` | `UNIFIED_WORLD_MODEL_V1` |
+
+Every other lock **references** these fields instead of adding its own.
+
+---
+
 ## 3. The nine mandatory answers
 
 Every PR must answer all nine. **A "no" or "unknown" on a blocking question

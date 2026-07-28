@@ -14,6 +14,20 @@
  * That is a testable property, not a slogan — see `MAP_ARCHITECTURE_FILES` and
  * the `map_architecture_change` rule in the Product Gate.
  *
+ * ── OBJECT ≡ ENTITY ───────────────────────────────────────────────────────
+ * A world "Object" and a world "Entity" are THE SAME THING. `ENTITY` is the
+ * canonical architectural term (`UNIFIED_WORLD_MODEL_V1`); "object" survives
+ * only as the map-layer word for the same rows. This module therefore holds
+ * the SINGLE definition of the shared property set, and `entity-model.ts`
+ * imports it rather than restating it. Nothing here is a second base model.
+ *
+ * CANONICAL OWNERSHIP (so a question is asked once, not five times):
+ *   - this module owns `addableWithoutMapChange` — the one blocking question
+ *     "can the World Map carry it WITHOUT an architecture change?";
+ *   - `world-state.ts` owns `reflectedOnMap` and `aiControlled`;
+ *   - `entity-model.ts` owns `aiCanWorkWithIt` and `registrationIsEnough`.
+ * Every other lock REFERENCES these fields instead of adding its own.
+ *
  * Pure data. No IO.
  */
 
@@ -77,6 +91,12 @@ export function pillarIds(): readonly string[] {
 /**
  * The eighteen properties every world object must have. This is a CONTRACT the
  * object registry must satisfy — not a table definition, and not a type union.
+ *
+ * Because OBJECT ≡ ENTITY, this list is also the entity property set:
+ * `entity-model.ts` imports it and adds only what the entity layer contributes
+ * (`name`, `owner`). The map-layer names `object_id` / `object_type` and the
+ * canonical names `entity_id` / `entity_type` denote the same two fields —
+ * see `OBJECT_TO_ENTITY_ALIASES` there.
  */
 export const UNIVERSAL_OBJECT_PROPERTIES = [
   "object_id",
