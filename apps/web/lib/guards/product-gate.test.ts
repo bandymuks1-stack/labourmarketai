@@ -201,7 +201,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -231,7 +231,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -264,7 +264,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -295,7 +295,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -330,7 +330,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -514,7 +514,7 @@ describe("product vision lock — the highest product design authority", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -547,7 +547,7 @@ describe("product vision lock — the highest product design authority", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
-      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
+      newBehaviorIsEnough: true, newRelationshipIsEnough: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");

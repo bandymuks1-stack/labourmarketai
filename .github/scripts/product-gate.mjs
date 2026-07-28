@@ -500,12 +500,11 @@ function analyse(base) {
   {
     const regSrcB = read(REGISTRY);
     const blockB = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcB)?.[0] ?? "";
+    // Only the three this lock OWNS. The other three of the owner's six
+    // questions are judged once, by 6b (map) and 6f (entity type / AI).
     const BH = {
-      usesExistingEntityType: "new_entity_type_instead_of_behavior",
       newBehaviorIsEnough: "behavior_not_enough",
       newRelationshipIsEnough: "relationship_not_enough",
-      aiUsesItWithoutArchitectureChange: "ai_needs_architecture_change",
-      mapCanRenderIt: "map_cannot_render_it",
       worldStateCanControlIt: "world_state_cannot_control_it",
     };
     for (const decl of blockB.split(/\n\s*\{\s*\n/).slice(1)) {
@@ -514,7 +513,7 @@ function analyse(base) {
       for (const [field, code] of Object.entries(BH)) {
         if (!new RegExp(field + ":").test(decl)) {
           add("unanswered_universe_question", "A-01", id,
-            'does not answer "' + field + '" — ENTITY_BEHAVIOR_MODEL_V1 requires all six answers',
+            'does not answer "' + field + '" — ENTITY_BEHAVIOR_MODEL_V1 requires it',
             "certain");
         } else if (new RegExp(field + ":\\s*false").test(decl)) {
           add(code, "A-01", id,

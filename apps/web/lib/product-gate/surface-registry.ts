@@ -113,19 +113,18 @@ export interface SurfaceDeclaration {
   readonly createsNewRelationship: boolean;
   /** Can the AI work with this Entity? (blocking) */
   readonly aiCanWorkWithIt: boolean;
-  // ── The six behavior answers (ENTITY_BEHAVIOR_MODEL_V1, owner 2026-07-28) ──
+  // ── The behavior answers (ENTITY_BEHAVIOR_MODEL_V1, owner 2026-07-28) ─────
   // The world grows by CHANGING BEHAVIOR — not by new tables, modules or
-  // architectures. All six block; the last one escalates to REDESIGN.
-  /** Does it act on an existing Entity Type? */
-  readonly usesExistingEntityType: boolean;
-  /** Is adding a new Behavior enough? */
+  // architectures. All six of the owner's questions are still asked; three are
+  // answered by fields ABOVE, which their own locks own, so nothing is judged
+  // twice:
+  //   "existing Entity Type?"     → `needsNewEntityType`      (entity block)
+  //   "AI without arch. change?"  → `aiCanWorkWithIt`         (entity block)
+  //   "can the Map render it?"    → `addableWithoutMapChange` (universe block)
+  /** Is adding a new Behavior enough? (blocking) */
   readonly newBehaviorIsEnough: boolean;
-  /** Is adding a new Relationship enough? */
+  /** Is adding a new Relationship enough? (blocking) */
   readonly newRelationshipIsEnough: boolean;
-  /** Can the AI use it without an architecture change? */
-  readonly aiUsesItWithoutArchitectureChange: boolean;
-  /** Can the World Map render it? */
-  readonly mapCanRenderIt: boolean;
   /** Can World State control it? — false means REDESIGN, not review. */
   readonly worldStateCanControlIt: boolean;
 
