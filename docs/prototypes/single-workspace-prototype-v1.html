@@ -1,0 +1,1110 @@
+<title>Single Workspace — Navigation Prototype</title>
+
+<style>
+:root {
+  --ground: #0E1216;
+  --surface: #151B21;
+  --surface-2: #1B232B;
+  --line: #232C34;
+  --line-soft: #1C242B;
+  --text: #E6EDF3;
+  --text-2: #9FB0BD;
+  --text-3: #6B7C89;
+  --accent: #FF7A1A;
+  --accent-soft: rgba(255,122,26,.14);
+  --edge: #3FA7D6;
+  --ok: #4FB477;
+  --warn: #E8B23A;
+  --bad: #E05252;
+  --grid: rgba(63,167,214,.07);
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px;
+  --r1: 4px; --r2: 8px; --r3: 12px;
+  --fast: 120ms; --base: 240ms; --slow: 400ms;
+  --ease: cubic-bezier(.2,.6,.2,1);
+
+  --ui: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --ground: #F2F4F6; --surface: #FFFFFF; --surface-2: #F7F9FA;
+    --line: #D8DEE4; --line-soft: #E7ECEF;
+    --text: #10161B; --text-2: #55676F; --text-3: #7D8D97;
+    --accent: #D95E00; --accent-soft: rgba(217,94,0,.10);
+    --edge: #2A7FA8; --grid: rgba(42,127,168,.08);
+  }
+}
+:root[data-theme="light"] {
+  --ground: #F2F4F6; --surface: #FFFFFF; --surface-2: #F7F9FA;
+  --line: #D8DEE4; --line-soft: #E7ECEF;
+  --text: #10161B; --text-2: #55676F; --text-3: #7D8D97;
+  --accent: #D95E00; --accent-soft: rgba(217,94,0,.10);
+  --edge: #2A7FA8; --grid: rgba(42,127,168,.08);
+}
+:root[data-theme="dark"] {
+  --ground: #0E1216; --surface: #151B21; --surface-2: #1B232B;
+  --line: #232C34; --line-soft: #1C242B;
+  --text: #E6EDF3; --text-2: #9FB0BD; --text-3: #6B7C89;
+  --accent: #FF7A1A; --accent-soft: rgba(255,122,26,.14);
+  --edge: #3FA7D6; --grid: rgba(63,167,214,.07);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font: 400 14px/1.45 var(--ui);
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r1); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── frame ───────────────────────────────────────────────────────── */
+.app { height: 100vh; display: grid; grid-template-rows: 48px 1fr; }
+
+.status {
+  display: flex; align-items: center; gap: var(--s4);
+  padding: 0 var(--s4); border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.brand { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+.ai-state { display: flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--text-2); }
+.dot { width: 7px; height: 7px; border-radius: 999px; background: var(--text-3); flex: none; }
+.dot.live { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+.sbtn {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 5px var(--s3); border: 1px solid var(--line); border-radius: var(--r2);
+  color: var(--text-2); font-size: 13px; transition: border-color var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.sbtn:hover { border-color: var(--text-3); color: var(--text); }
+.spacer { flex: 1; }
+.kbd {
+  font-family: var(--mono); font-size: 11px; padding: 2px 5px;
+  border: 1px solid var(--line); border-radius: var(--r1); color: var(--text-3);
+}
+.badge {
+  font-family: var(--mono); font-size: 11px; min-width: 18px; height: 18px;
+  display: inline-grid; place-items: center; padding: 0 5px;
+  background: var(--accent); color: #0E1216; border-radius: 999px; font-weight: 600;
+}
+:root[data-theme="light"] .badge { color: #fff; }
+
+/* ── regions ─────────────────────────────────────────────────────── */
+.body { display: grid; grid-template-columns: var(--convW, 400px) 1fr var(--panelW, 400px); min-height: 0; }
+.body.rail { --convW: 56px; }
+.body.nopanel { --panelW: 0px; }
+
+.region { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--surface); }
+.region + .region { border-left: 1px solid var(--line); }
+.rhead {
+  height: 38px; flex: none; display: flex; align-items: center; gap: var(--s2);
+  padding: 0 var(--s3); border-bottom: 1px solid var(--line-soft);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.rhead .spacer { flex: 1; }
+.iconbtn { padding: 3px 7px; border-radius: var(--r1); color: var(--text-3); font-size: 12px; }
+.iconbtn:hover { background: var(--surface-2); color: var(--text); }
+
+/* conversation */
+.thread { flex: 1; overflow-y: auto; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s4); }
+.turn { display: flex; flex-direction: column; gap: var(--s2); max-width: 62ch; }
+.turn .who { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+.turn.user { align-self: flex-end; align-items: flex-end; }
+.bubble { background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: var(--r2); padding: var(--s3); }
+.turn.user .bubble { background: transparent; border-color: var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: var(--r2); padding: 5px var(--s3);
+  font-size: 13px; color: var(--text-2);
+  transition: border-color var(--fast) var(--ease), color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.chip:hover { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+.chip .t { font-family: var(--mono); font-size: 10px; color: var(--text-3); letter-spacing: .08em; }
+.ecard {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s3); align-items: center;
+  border: 1px solid var(--line); border-radius: var(--r2); padding: var(--s3); text-align: left; width: 100%;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ecard:hover { border-color: var(--accent); background: var(--accent-soft); }
+.ecard .glyph { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 999px; background: var(--surface-2); font-size: 14px; }
+.ecard .meta { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+.why { font-size: 12.5px; color: var(--text-2); display: flex; flex-direction: column; gap: 2px; margin-top: var(--s1); }
+.why .no { color: var(--warn); }
+.confirm {
+  border: 1px solid var(--accent); border-radius: var(--r2); padding: var(--s3);
+  background: var(--accent-soft); display: flex; flex-direction: column; gap: var(--s2);
+}
+.confirm .tier { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.row { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
+.primary {
+  background: var(--accent); color: #0E1216; font-weight: 600;
+  padding: 6px var(--s4); border-radius: var(--r2); font-size: 13px;
+}
+:root[data-theme="light"] .primary { color: #fff; }
+.ghost { padding: 6px var(--s3); border: 1px solid var(--line); border-radius: var(--r2); font-size: 13px; color: var(--text-2); }
+.ghost:hover { color: var(--text); border-color: var(--text-3); }
+.composer { flex: none; border-top: 1px solid var(--line-soft); padding: var(--s3); display: flex; gap: var(--s2); }
+.composer input {
+  flex: 1; background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+  border-radius: var(--r2); padding: 9px var(--s3); font: inherit;
+}
+.composer input::placeholder { color: var(--text-3); }
+.rail { display: flex; flex-direction: column; align-items: center; gap: var(--s4); padding-top: var(--s3); }
+
+/* map */
+.mapwrap { flex: 1; position: relative; min-height: 0; }
+#map { display: block; width: 100%; height: 100%; }
+.filters {
+  position: absolute; top: var(--s3); left: var(--s3); right: var(--s3);
+  display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; pointer-events: none;
+}
+.fchip {
+  pointer-events: auto; display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--text-2);
+}
+.fchip button { color: var(--text-3); }
+.fchip button:hover { color: var(--bad); }
+.count { margin-left: auto; pointer-events: auto; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+.hint {
+  position: absolute; bottom: var(--s3); left: var(--s3);
+  font-family: var(--mono); font-size: 11px; color: var(--text-3);
+}
+
+/* timeline */
+.timeline { flex: none; border-top: 1px solid var(--line); background: var(--surface); }
+.tl-head { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s3); }
+.tl-body { height: 92px; padding: 0 var(--s3) var(--s3); display: none; }
+.timeline.open .tl-body { display: block; }
+#tl { display: block; width: 100%; height: 100%; }
+
+/* panel */
+.tabs { display: flex; gap: 2px; padding: var(--s2) var(--s3) 0; border-bottom: 1px solid var(--line-soft); overflow-x: auto; }
+.tab {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 6px var(--s3); color: var(--text-3); border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.pbody { flex: 1; overflow-y: auto; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s4); }
+.ehead { display: grid; grid-template-columns: auto 1fr; gap: var(--s3); align-items: start; }
+.ehead .glyph { width: 40px; height: 40px; border-radius: 999px; background: var(--surface-2); display: grid; place-items: center; font-size: 18px; }
+.ehead h2 { margin: 0; font-size: 20px; line-height: 1.2; text-wrap: balance; }
+.ehead .sub { font-family: var(--mono); font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2);
+}
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+section.sec { display: flex; flex-direction: column; gap: var(--s2); }
+.sec > h3 {
+  margin: 0; font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--text-3);
+  padding-bottom: var(--s1); border-bottom: 1px solid var(--line-soft);
+}
+.kv { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); font-size: 13px; }
+.kv .k { color: var(--text-2); }
+.kv .v { font-family: var(--mono); font-size: 12px; }
+.relrow, .docrow, .actrow {
+  display: flex; align-items: center; gap: var(--s2); width: 100%; text-align: left;
+  padding: 7px var(--s2); border-radius: var(--r1); font-size: 13px; color: var(--text-2);
+}
+.relrow:hover, .docrow:hover { background: var(--surface-2); color: var(--text); }
+.pred { font-family: var(--mono); font-size: 11px; color: var(--edge); min-width: 92px; }
+.empty { color: var(--text-3); font-size: 13px; display: flex; flex-direction: column; gap: var(--s3); }
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 34px; }
+.spark i { flex: 1; background: var(--line); border-radius: 1px; display: block; }
+.spark i.ai { background: var(--accent); }
+.spark i.on { background: var(--edge); }
+
+/* command surface */
+.cmdk {
+  position: fixed; inset: 0; background: color-mix(in srgb, var(--ground) 72%, transparent);
+  display: none; align-items: flex-start; justify-content: center; padding-top: 12vh; z-index: 50;
+}
+.cmdk[open] { display: flex; }
+.cmdbox {
+  width: min(680px, 92vw); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r3); overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.4);
+}
+.cmdbox input { width: 100%; padding: var(--s4); background: none; border: 0; color: var(--text); font: 15px var(--ui); }
+.cmdbox input:focus { outline: none; }
+.cmdgroup { border-top: 1px solid var(--line-soft); padding: var(--s2) 0; }
+.cmdgroup h4 {
+  margin: 0; padding: var(--s1) var(--s4); font-family: var(--mono);
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3);
+}
+.cmdrow { display: flex; align-items: center; gap: var(--s3); width: 100%; padding: 8px var(--s4); text-align: left; font-size: 13.5px; }
+.cmdrow:hover, .cmdrow.sel { background: var(--accent-soft); }
+.cmdrow .m { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+/* state readout */
+.state {
+  position: fixed; right: 0; bottom: 0; width: min(420px, 96vw); max-height: 62vh;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r3) 0 0 0;
+  display: flex; flex-direction: column; z-index: 40; transform: translateY(calc(100% - 34px));
+  transition: transform var(--base) var(--ease);
+}
+.state[data-open="1"] { transform: translateY(0); }
+.state > button.sh {
+  height: 34px; flex: none; display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s3);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
+  border-bottom: 1px solid var(--line-soft);
+}
+.state .cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); padding: var(--s3); overflow: auto; }
+.state pre { margin: 0; font-family: var(--mono); font-size: 11px; line-height: 1.5; color: var(--text-2); white-space: pre-wrap; }
+.log { display: flex; flex-direction: column; gap: 3px; font-family: var(--mono); font-size: 11px; }
+.log b { color: var(--accent); font-weight: 600; }
+.log span { color: var(--text-3); }
+
+/* mobile simulation */
+.app.mobile .body { grid-template-columns: 1fr; }
+.app.mobile .region { display: none; }
+.app.mobile .region.active { display: flex; }
+.app.mobile .region + .region { border-left: 0; }
+.mobilebar { display: none; }
+.app.mobile .mobilebar {
+  display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line);
+  background: var(--surface); flex: none;
+}
+.app.mobile .mobilebar button { padding: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.app.mobile .mobilebar button[aria-pressed="true"] { color: var(--accent); }
+.app.mobile { max-width: 420px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.app.mobile .body { grid-template-rows: 1fr auto; }
+.peek {
+  display: none; border-top: 1px solid var(--line); padding: var(--s3);
+  align-items: center; gap: var(--s3); background: var(--surface-2);
+}
+.app.mobile .peek.on { display: flex; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0s !important; transition-duration: 0s !important; }
+}
+@media (max-width: 1100px) {
+  .body { grid-template-columns: 1fr; }
+  .region { display: none; }
+  .region.active { display: flex; }
+  .mobilebar { display: grid !important; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--line); background: var(--surface); }
+  .mobilebar button { padding: 10px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--text-3); }
+  .mobilebar button[aria-pressed="true"] { color: var(--accent); }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="status">
+    <span class="brand">LABMA · workspace</span>
+    <span class="ai-state"><span class="dot" id="aidot"></span><span id="aitext">AI idle</span></span>
+    <span class="spacer"></span>
+    <button class="sbtn" id="openCmd">Search entities, actions, filters <span class="kbd">⌘K</span></button>
+    <button class="sbtn" id="notifBtn">Notifications <span class="badge" id="unread">3</span></button>
+    <button class="sbtn" id="themeBtn">Theme</button>
+    <button class="sbtn" id="mobileBtn">Mobile</button>
+    <button class="sbtn" id="avatarBtn">◑ Rasa · dispatcher</button>
+  </header>
+
+  <div class="body" id="body">
+    <!-- AI CONVERSATION -->
+    <section class="region active" id="regionChat" aria-label="AI conversation">
+      <div class="rhead">
+        <span>AI conversation</span><span class="spacer"></span>
+        <button class="iconbtn" id="collapseChat" title="Collapse to rail — [">[</button>
+      </div>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <form class="composer" id="composer">
+        <input id="msg" placeholder="Ask anything — try: who can start Monday?" autocomplete="off" aria-label="Message the AI">
+        <button class="primary" type="submit">Send</button>
+      </form>
+    </section>
+
+    <!-- WORLD MAP -->
+    <section class="region active" id="regionMap" aria-label="World map">
+      <div class="rhead">
+        <span>World map</span>
+        <span class="spacer"></span>
+        <button class="iconbtn" id="layerRel" aria-pressed="true">relationships</button>
+        <button class="iconbtn" id="toggleTl">timeline ⌘T</button>
+      </div>
+      <div class="mapwrap">
+        <canvas id="map"></canvas>
+        <div class="filters" id="filters"></div>
+        <div class="hint mono">click select · double-click focus · space multi-select · arrows move</div>
+      </div>
+      <div class="timeline open" id="timeline">
+        <div class="tl-head">
+          <span class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Timeline</span>
+          <span class="mono" style="font-size:11px;color:var(--text-3)" id="tlRange">Jun — Sep</span>
+          <span class="spacer"></span>
+          <span class="mono" style="font-size:11px;color:var(--accent)">△ AI action</span>
+        </div>
+        <div class="tl-body"><canvas id="tl"></canvas></div>
+      </div>
+    </section>
+
+    <!-- CONTEXT PANEL -->
+    <section class="region active" id="regionPanel" aria-label="Context panel">
+      <div class="rhead">
+        <span>Context panel</span><span class="spacer"></span>
+        <button class="iconbtn" id="backEntity" title="Back — ⌘[">←</button>
+        <button class="iconbtn" id="collapsePanel" title="Collapse — ]">]</button>
+      </div>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="pbody" id="pbody"></div>
+    </section>
+  </div>
+
+  <div class="peek" id="peek"></div>
+  <nav class="mobilebar" id="mobilebar" aria-label="Workspace modes">
+    <button data-mode="chat" aria-pressed="true">Chat</button>
+    <button data-mode="map" aria-pressed="false">Map</button>
+    <button data-mode="panel" aria-pressed="false">Panel</button>
+  </nav>
+</div>
+
+<div class="cmdk" id="cmdk" role="dialog" aria-label="Command surface">
+  <div class="cmdbox">
+    <input id="cmdInput" placeholder="Search entities, filters, actions…" aria-label="Search">
+    <div id="cmdResults"></div>
+  </div>
+</div>
+
+<aside class="state" id="stateBox" data-open="0" aria-label="World State readout">
+  <button class="sh" id="stateToggle">World State · transition log <span class="spacer"></span><span id="stateChev">▲</span></button>
+  <div class="cols">
+    <div><pre id="stateJson"></pre></div>
+    <div class="log" id="log"></div>
+  </div>
+</aside>
+
+<script>
+"use strict";
+
+/* ── ENTITIES ─────────────────────────────────────────────────────────
+   One model. The renderer never switches on type — it reads attributes. */
+const ENTITIES = {
+  "person:jonas":   { type:"person", glyph:"👤", name:"Jonas Petraitis", status:"available", location:"Vilnius", owner:"self",
+                      x:.30, y:.42, roles:["candidate","employee"], skills:["welding","MIG","heights"],
+                      documents:["CV.pdf","welding-certificate.pdf"], history:[0,2,1,3,0,4,2,1,0,3,1,0] },
+  "person:rasa":    { type:"person", glyph:"👤", name:"Rasa Kazlauskaitė", status:"available", location:"Vilnius", owner:"self",
+                      x:.22, y:.60, roles:["candidate"], skills:["welding","TIG"],
+                      documents:["CV.pdf"], history:[0,1,0,2,1,0,3,1,2,0,1,1] },
+  "person:tomas":   { type:"person", glyph:"👤", name:"Tomas Vaitkus", status:"engaged", location:"Kaunas", owner:"self",
+                      x:.62, y:.28, roles:["employee"], skills:["carpentry"],
+                      documents:[], history:[1,1,2,0,0,1,0,2,1,1,0,0] },
+  "org:statyba":    { type:"organization", glyph:"🏢", name:"UAB Statyba", status:"verified", location:"Vilnius", owner:"A. Kazlauskas",
+                      x:.46, y:.52, roles:["employer","client","training_provider"],
+                      documents:["insurance.pdf"], history:[2,3,1,4,2,5,3,2,4,1,2,3] },
+  "project:zirmunai":{ type:"project", glyph:"🏗", name:"Žirmūnų renovation", status:"active", location:"Vilnius", owner:"UAB Statyba",
+                      x:.56, y:.66, phases:["prep","build","handover"],
+                      documents:["plan.pdf"], history:[0,1,3,4,4,5,4,3,2,2,1,0] },
+  "job:welder":     { type:"job", glyph:"🧰", name:"Welder — Vilnius site", status:"open", location:"Vilnius", owner:"UAB Statyba",
+                      x:.40, y:.74, requirements:["welding","heights","own transport"],
+                      documents:[], history:[0,0,1,2,3,2,1,1,0,0,0,0] },
+  "site:vilnius":   { type:"worksite", glyph:"📍", name:"Vilnius site", status:"active", location:"Vilnius", owner:"UAB Statyba",
+                      x:.72, y:.56, shifts:["day","evening"],
+                      documents:["safety.pdf"], history:[1,2,2,3,3,3,2,2,1,1,1,0] },
+  "doc:cert":       { type:"document", glyph:"📄", name:"welding-certificate.pdf", status:"verified", location:"—", owner:"Jonas Petraitis",
+                      x:.16, y:.30, documents:[], history:[0,0,0,1,0,0,0,0,0,0,0,0] }
+};
+
+const RELATIONSHIPS = [
+  ["org:statyba","employs","person:tomas"],
+  ["org:statyba","owns","project:zirmunai"],
+  ["project:zirmunai","located_at","site:vilnius"],
+  ["person:jonas","works_on","project:zirmunai"],
+  ["job:welder","located_at","site:vilnius"],
+  ["org:statyba","posted","job:welder"],
+  ["doc:cert","belongs_to","person:jonas"],
+  ["person:rasa","applied_to","job:welder"]
+];
+
+/* Behaviour is a BINDING of (type × behaviour × context) — never a switch. */
+const BEHAVIOURS = [
+  { type:"person", id:"Propose booking", tier:"important_write" },
+  { type:"person", id:"Open chat", tier:"read" },
+  { type:"person", id:"Add to project", tier:"reversible_write" },
+  { type:"organization", id:"Post a need", tier:"important_write" },
+  { type:"organization", id:"Invite worker", tier:"reversible_write" },
+  { type:"project", id:"Assign people", tier:"important_write" },
+  { type:"project", id:"Pause project", tier:"important_write" },
+  { type:"project", id:"Complete project", tier:"strong_irreversible" },
+  { type:"job", id:"Express interest", tier:"reversible_write" },
+  { type:"job", id:"Ask AI about fit", tier:"read" },
+  { type:"worksite", id:"Add people", tier:"important_write" },
+  { type:"worksite", id:"Report issue", tier:"reversible_write" },
+  { type:"document", id:"Download", tier:"read" },
+  { type:"document", id:"Revoke", tier:"strong_irreversible" }
+];
+const behavioursFor = (type) => BEHAVIOURS.filter(b => b.type === type);
+
+/* ── WORLD STATE — the nine locked slots. Nothing else is state. ───── */
+const world = {
+  active_avatar: "person:rasa",
+  active_entity: null,
+  selected_entities: [],
+  active_filters: {},
+  ai_goal: null,
+  context_panel: { view: "inspector", expanded: true, stack: [] },
+  map_state: { focus: null, layers: ["entities","relationships"], timeRange: "Jun — Sep" },
+  conversation_state: { thread: [], pending: null, unread: 3 },
+  active_actions: []
+};
+
+const LOG = [];
+let lastUndo = null;
+
+/* The ONLY way state changes. Every change is named and enumerable. */
+function transition(name, apply, meta = "") {
+  apply();
+  LOG.unshift({ name, meta, t: LOG.length });
+  if (LOG.length > 40) LOG.pop();
+  render();
+}
+
+/* ── AI ───────────────────────────────────────────────────────────── */
+function say(who, text, extras) {
+  world.conversation_state.thread.push(Object.assign({ who, text }, extras || {}));
+}
+
+function aiBusy(text, ms = 700) {
+  document.getElementById("aidot").classList.add("live");
+  document.getElementById("aitext").textContent = text;
+  setTimeout(() => {
+    document.getElementById("aidot").classList.remove("live");
+    document.getElementById("aitext").textContent = "AI idle";
+  }, ms);
+}
+
+function aiRespond(input) {
+  const q = input.toLowerCase();
+  aiBusy("AI working: reading the world…");
+
+  if (/monday|start|who can|welder|available/.test(q)) {
+    transition("SET_AI_GOAL", () => {
+      world.ai_goal = { verb: "find_people", params: { skill: "welding", when: "Monday" } };
+      world.active_filters.skill = "welding";
+      world.active_filters.location = "Vilnius";
+      say("ai", "Two people can start Monday in Vilnius. Both have welding confirmed; Jonas has worked this site before.", {
+        entities: ["person:jonas", "person:rasa"],
+        actions: [{ label: "Propose booking", tier: "important_write", target: "person:jonas" }, { label: "Compare", tier: "read" }]
+      });
+    }, "find_people · welding · Vilnius");
+    return;
+  }
+  if (/book|hire|propose/.test(q)) {
+    const target = world.active_entity && ENTITIES[world.active_entity].type === "person" ? world.active_entity : "person:jonas";
+    return proposeAction("Propose booking", "important_write", target);
+  }
+  if (/project|create/.test(q)) {
+    transition("SET_AI_GOAL", () => {
+      world.ai_goal = { verb: "draft_project" };
+      say("ai", "I drafted a project from what you said. Nothing is saved until you confirm.", {
+        entities: ["project:zirmunai"],
+        actions: [{ label: "Assign people", tier: "important_write", target: "project:zirmunai" }]
+      });
+    }, "draft_project");
+    return;
+  }
+  if (/cv|upload|document/.test(q)) {
+    transition("SET_AI_GOAL", () => {
+      world.ai_goal = { verb: "read_document" };
+      say("ai", "I read the certificate and found one skill I can link: welding. I will not add it until you confirm it.", {
+        entities: ["doc:cert"],
+        actions: [{ label: "Confirm skill", tier: "reversible_write", target: "person:jonas" }]
+      });
+    }, "read_document");
+    return;
+  }
+  transition("SET_AI_GOAL", () => {
+    world.ai_goal = { verb: "clarify" };
+    say("ai", "I need one thing to act: which entity do you mean? Pick it on the map, or search with ⌘K.", {
+      actions: [{ label: "Show my agenda", tier: "read" }]
+    });
+  }, "clarify");
+}
+
+function proposeAction(label, tier, target) {
+  transition("PROPOSE_ACTIONS", () => {
+    world.active_actions = [{ label, tier, target }];
+    if (tier === "read" || tier === "reversible_write") {
+      world.conversation_state.pending = null;
+      applyAction(label, tier, target, true);
+    } else {
+      world.conversation_state.pending = { label, tier, target };
+      say("ai", `“${label}” on ${ENTITIES[target] ? ENTITIES[target].name : "the selection"} needs your confirmation.`);
+    }
+  }, `${label} · ${tier}`);
+}
+
+function applyAction(label, tier, target, silent) {
+  const name = ENTITIES[target] ? ENTITIES[target].name : "the selection";
+  transition("EXECUTE_ACTION", () => {
+    world.conversation_state.pending = null;
+    world.active_actions = [];
+    if (target) { pushEntity(target); }
+    say("ai", `Done — ${label.toLowerCase()} on ${name}. It is on the timeline now.`, {
+      result: true, undo: tier !== "strong_irreversible"
+    });
+    lastUndo = tier !== "strong_irreversible" ? { label, name } : null;
+  }, `${label} → ${target || "—"}`);
+  if (!silent) aiBusy("AI working: applying…", 500);
+}
+
+/* ── transitions ─────────────────────────────────────────────────── */
+function pushEntity(id) {
+  if (world.active_entity && world.active_entity !== id) world.context_panel.stack.push(world.active_entity);
+  world.active_entity = id;
+}
+const selectEntity = (id) => transition("SELECT_ENTITY", () => { pushEntity(id); world.context_panel.view = "inspector"; }, id);
+const focusEntity = (id) => transition("FOCUS_ENTITY", () => { pushEntity(id); world.map_state.focus = id; world.context_panel.expanded = true; }, id);
+const setFilter  = (k, v) => transition("SET_FILTER", () => { world.active_filters[k] = v; }, `${k} = ${v}`);
+const clearFilter= (k) => transition("CLEAR_FILTERS", () => { delete world.active_filters[k]; }, k);
+const setView    = (v) => transition("SET_PANEL_VIEW", () => { world.context_panel.view = v; }, v);
+const multiSelect= (id) => transition("MULTI_SELECT", () => {
+  const i = world.selected_entities.indexOf(id);
+  if (i >= 0) world.selected_entities.splice(i, 1); else world.selected_entities.push(id);
+}, id);
+
+/* ── RENDER: every region is a pure function of world state ───────── */
+function render() { renderThread(); renderMap(); renderPanel(); renderFilters(); renderState(); renderPeek(); renderTimeline(); }
+
+function renderThread() {
+  const el = document.getElementById("thread");
+  el.innerHTML = "";
+  world.conversation_state.thread.forEach(t => {
+    const wrap = document.createElement("div");
+    wrap.className = "turn " + (t.who === "user" ? "user" : "");
+    wrap.innerHTML = `<span class="who">${t.who === "user" ? "you" : "AI"}</span>`;
+    const b = document.createElement("div");
+    b.className = "bubble";
+    b.innerHTML = `<div>${t.text}</div>`;
+    if (t.entities) {
+      const box = document.createElement("div");
+      box.style.cssText = "display:flex;flex-direction:column;gap:8px;margin-top:12px";
+      t.entities.forEach(id => {
+        const e = ENTITIES[id];
+        const c = document.createElement("button");
+        c.className = "ecard";
+        c.innerHTML = `<span class="glyph">${e.glyph}</span>
+          <span><span>${e.name}</span><br><span class="meta">${e.type} · ${e.location} · ${e.status}</span>
+          ${id === "person:jonas" ? '<span class="why"><span>welding ✓ · Vilnius ✓ · worked this site before ✓</span><span class="no">nights ✗ — declines night shifts</span></span>' : ""}</span>`;
+        c.onclick = () => selectEntity(id);
+        box.appendChild(c);
+      });
+      b.appendChild(box);
+    }
+    if (t.actions) {
+      const row = document.createElement("div");
+      row.className = "chips";
+      row.style.marginTop = "12px";
+      t.actions.forEach(a => {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.innerHTML = `▸ ${a.label} <span class="t">${a.tier.replace("_", " ")}</span>`;
+        btn.onclick = () => proposeAction(a.label, a.tier, a.target || world.active_entity);
+        row.appendChild(btn);
+      });
+      b.appendChild(row);
+    }
+    if (t.undo) {
+      const u = document.createElement("button");
+      u.className = "ghost";
+      u.style.marginTop = "10px";
+      u.textContent = "Undo";
+      u.onclick = () => transition("UNDO", () => { say("ai", "Undone. Nothing was sent."); }, "inverse");
+      b.appendChild(u);
+    }
+    wrap.appendChild(b);
+    el.appendChild(wrap);
+  });
+
+  const p = world.conversation_state.pending;
+  if (p) {
+    const c = document.createElement("div");
+    c.className = "confirm";
+    const irreversible = p.tier === "strong_irreversible";
+    c.innerHTML = `<span class="tier">${p.tier.replace("_", " ")} — confirm inline, never a dialog</span>
+      <div>${irreversible ? "This cannot be undone. " : ""}<b>${p.label}</b> on ${ENTITIES[p.target] ? ENTITIES[p.target].name : "selection"}.</div>`;
+    const row = document.createElement("div");
+    row.className = "row";
+    const yes = document.createElement("button");
+    yes.className = "primary";
+    yes.innerHTML = `Confirm <span class="kbd" style="border-color:rgba(0,0,0,.2)">⌘⏎</span>`;
+    yes.onclick = () => applyAction(p.label, p.tier, p.target);
+    const no = document.createElement("button");
+    no.className = "ghost"; no.textContent = "Cancel";
+    no.onclick = () => transition("CANCEL", () => { world.conversation_state.pending = null; world.active_actions = []; }, p.label);
+    row.append(yes, no);
+    c.appendChild(row);
+    el.appendChild(c);
+  }
+  el.scrollTop = el.scrollHeight;
+}
+
+/* map — canvas, renders BY TYPE from data, never a switch on type */
+const TYPE_COLOR = { person:"--edge", organization:"--text-2", project:"--ok", job:"--warn", worksite:"--text-2", document:"--text-3" };
+function cssv(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function renderMap() {
+  const cv = document.getElementById("map");
+  const wrap = cv.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  if (!w || !h) return;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+
+  g.strokeStyle = cssv("--grid"); g.lineWidth = 1;
+  for (let x = 0; x < w; x += 44) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, h); g.stroke(); }
+  for (let y = 0; y < h; y += 44) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(w, y + .5); g.stroke(); }
+
+  const pos = (id) => ({ x: ENTITIES[id].x * w, y: ENTITIES[id].y * h });
+  const passes = (id) => {
+    const e = ENTITIES[id], f = world.active_filters;
+    if (f.location && e.location !== f.location && e.location !== "—") return false;
+    if (f.skill && e.skills && !e.skills.includes(f.skill)) return false;
+    return true;
+  };
+
+  if (world.map_state.layers.includes("relationships")) {
+    RELATIONSHIPS.forEach(([a, pred, b]) => {
+      const A = pos(a), B = pos(b);
+      const active = world.active_entity === a || world.active_entity === b;
+      g.strokeStyle = active ? cssv("--edge") : cssv("--line");
+      g.lineWidth = active ? 1.6 : 1;
+      g.beginPath(); g.moveTo(A.x, A.y); g.lineTo(B.x, B.y); g.stroke();
+      if (active) {
+        g.fillStyle = cssv("--edge");
+        g.font = "10px " + cssv("--mono");
+        g.fillText(pred, (A.x + B.x) / 2 + 6, (A.y + B.y) / 2 - 4);
+      }
+    });
+  }
+
+  Object.keys(ENTITIES).forEach(id => {
+    const e = ENTITIES[id], p = pos(id);
+    const on = passes(id);
+    const isActive = world.active_entity === id;
+    const isSel = world.selected_entities.includes(id);
+    g.globalAlpha = on ? 1 : .22;                      // filtered out FADES, never vanishes
+    g.beginPath(); g.arc(p.x, p.y, isActive ? 13 : 9, 0, Math.PI * 2);
+    g.fillStyle = isActive ? cssv("--accent") : cssv(TYPE_COLOR[e.type] || "--text-2");
+    g.fill();
+    if (isSel) { g.strokeStyle = cssv("--edge"); g.lineWidth = 2; g.stroke(); }
+    if (isActive) {
+      g.beginPath(); g.arc(p.x, p.y, 20, 0, Math.PI * 2);
+      g.strokeStyle = cssv("--accent"); g.lineWidth = 1.5; g.stroke();
+    }
+    g.globalAlpha = on ? .95 : .3;
+    g.fillStyle = cssv("--text-2");
+    g.font = "11px " + cssv("--ui");
+    g.fillText(e.name, p.x + 16, p.y + 4);
+    g.globalAlpha = 1;
+  });
+}
+
+function renderFilters() {
+  const el = document.getElementById("filters");
+  const f = world.active_filters;
+  const keys = Object.keys(f);
+  const shown = Object.keys(ENTITIES).filter(id => {
+    const e = ENTITIES[id];
+    if (f.location && e.location !== f.location && e.location !== "—") return false;
+    if (f.skill && e.skills && !e.skills.includes(f.skill)) return false;
+    return true;
+  }).length;
+  el.innerHTML = keys.map(k =>
+    `<span class="fchip">${k} = ${f[k]} <button data-k="${k}" aria-label="Remove filter">✕</button></span>`).join("")
+    + `<span class="count">${shown} shown · ${Object.keys(ENTITIES).length - shown} filtered</span>`;
+  el.querySelectorAll("button[data-k]").forEach(b => b.onclick = () => clearFilter(b.dataset.k));
+}
+
+const VIEWS = ["inspector","agenda","journal","chat","insights","reports","settings"];
+function renderPanel() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  VIEWS.forEach(v => {
+    const b = document.createElement("button");
+    b.className = "tab"; b.role = "tab"; b.textContent = v;
+    b.setAttribute("aria-selected", world.context_panel.view === v);
+    b.onclick = () => setView(v);
+    tabs.appendChild(b);
+  });
+
+  const body = document.getElementById("pbody");
+  body.innerHTML = "";
+  const view = world.context_panel.view;
+
+  if (view !== "inspector") {
+    const map = {
+      agenda: ["Agenda", "3 bookings need an answer · 1 document expires in 6 days"],
+      journal: ["Journal", "12 entries this month, written by people — not generated."],
+      chat: ["Conversation", "Threads about the active entity live here, not on a separate page."],
+      insights: ["Insights", "Read-only observations. Nothing here acts on its own."],
+      reports: ["Reports", "A rendering of entity history over the selected time range."],
+      settings: ["Settings", "Account and privacy. Not work, so it is out of the work surface."]
+    }[view];
+    body.innerHTML = `<section class="sec"><h3>${map[0]}</h3><div class="empty">${map[1]}</div></section>`;
+    return;
+  }
+
+  const id = world.active_entity;
+  if (!id) {
+    body.innerHTML = `<div class="empty"><b>Nothing selected.</b>
+      <span>Select an entity on the map, ask the AI, or press ⌘K. This panel never shows placeholder content.</span></div>`;
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = "▸ Show my agenda";
+    b.onclick = () => setView("agenda");
+    body.appendChild(b);
+    return;
+  }
+
+  const e = ENTITIES[id];
+  const statusClass = ["available","verified","active","open"].includes(e.status) ? "ok" : "warn";
+  const head = document.createElement("div");
+  head.className = "ehead";
+  head.innerHTML = `<span class="glyph">${e.glyph}</span>
+    <span><h2>${e.name}</h2><div class="sub">${e.type} · ${e.location} · owner: ${e.owner}</div>
+    <div style="margin-top:8px"><span class="pill ${statusClass}">${e.status}</span></div></span>`;
+  body.appendChild(head);
+
+  const acts = document.createElement("section");
+  acts.className = "sec";
+  acts.innerHTML = `<h3>Quick actions · behaviours bound to this entity</h3>`;
+  const arow = document.createElement("div");
+  arow.className = "chips";
+  behavioursFor(e.type).forEach(b => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.innerHTML = `▸ ${b.id} <span class="t">${b.tier.replace("_", " ")}</span>`;
+    btn.onclick = () => proposeAction(b.id, b.tier, id);
+    arow.appendChild(btn);
+  });
+  acts.appendChild(arow);
+  body.appendChild(acts);
+
+  const tl = document.createElement("section");
+  tl.className = "sec";
+  tl.innerHTML = `<h3>Timeline</h3>`;
+  const sp = document.createElement("div");
+  sp.className = "spark";
+  e.history.forEach((v, i) => {
+    const bar = document.createElement("i");
+    bar.style.height = Math.max(3, v * 7) + "px";
+    if (i === 5) bar.className = "ai";
+    else if (v > 2) bar.className = "on";
+    sp.appendChild(bar);
+  });
+  tl.appendChild(sp);
+  const note = document.createElement("div");
+  note.style.cssText = "font-family:var(--mono);font-size:11px;color:var(--text-3)";
+  note.textContent = `${e.history.reduce((a, b) => a + b, 0)} events · △ marks an AI action`;
+  tl.appendChild(note);
+  body.appendChild(tl);
+
+  const rels = RELATIONSHIPS.filter(r => r[0] === id || r[2] === id);
+  const rs = document.createElement("section");
+  rs.className = "sec";
+  rs.innerHTML = `<h3>Related entities</h3>`;
+  if (!rels.length) rs.innerHTML += `<div class="empty">No relationships recorded yet.</div>`;
+  rels.forEach(([a, pred, b]) => {
+    const other = a === id ? b : a;
+    const btn = document.createElement("button");
+    btn.className = "relrow";
+    btn.innerHTML = `<span class="pred">${a === id ? pred : "◂ " + pred}</span>
+      <span>${ENTITIES[other].glyph} ${ENTITIES[other].name}</span>`;
+    btn.onclick = () => selectEntity(other);
+    rs.appendChild(btn);
+  });
+  body.appendChild(rs);
+
+  if (e.documents && e.documents.length) {
+    const ds = document.createElement("section");
+    ds.className = "sec";
+    ds.innerHTML = `<h3>Documents & media</h3>`;
+    e.documents.forEach(d => {
+      const btn = document.createElement("button");
+      btn.className = "docrow";
+      btn.innerHTML = `📎 ${d}`;
+      btn.onclick = () => { if (d.includes("welding")) selectEntity("doc:cert"); };
+      ds.appendChild(btn);
+    });
+    body.appendChild(ds);
+  }
+
+  const extras = [];
+  if (e.roles) extras.push(["roles", e.roles.join(" · ")]);
+  if (e.skills) extras.push(["skills", e.skills.join(" · ")]);
+  if (e.requirements) extras.push(["requirements", e.requirements.join(" · ")]);
+  if (e.phases) extras.push(["phases", e.phases.join(" → ")]);
+  if (e.shifts) extras.push(["shifts", e.shifts.join(" · ")]);
+  if (extras.length) {
+    const ex = document.createElement("section");
+    ex.className = "sec";
+    ex.innerHTML = `<h3>Extensions · declared, not coded</h3>` +
+      extras.map(([k, v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+    body.appendChild(ex);
+  }
+}
+
+function renderTimeline() {
+  const cv = document.getElementById("tl");
+  const wrap = cv.parentElement;
+  if (!wrap.clientWidth || !wrap.clientHeight) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+
+  const lanes = [["people", "--edge"], ["phases", "--ok"], ["docs", "--text-3"], ["AI", "--accent"]];
+  const id = world.active_entity;
+  const hist = id ? ENTITIES[id].history : [1,2,1,3,2,4,3,2,1,2,1,1];
+
+  lanes.forEach((lane, li) => {
+    const y = 16 + li * 20;
+    g.fillStyle = cssv("--text-3");
+    g.font = "10px " + cssv("--mono");
+    g.fillText(lane[0], 0, y + 3);
+    g.strokeStyle = cssv("--line-soft");
+    g.beginPath(); g.moveTo(46, y); g.lineTo(w, y); g.stroke();
+    hist.forEach((v, i) => {
+      if (li === 3 && i !== 5) return;
+      if (li !== 3 && v === 0) return;
+      const x = 46 + (i / (hist.length - 1)) * (w - 56);
+      g.fillStyle = cssv(lane[1]);
+      if (li === 3) {
+        g.beginPath(); g.moveTo(x, y - 5); g.lineTo(x + 4, y + 3); g.lineTo(x - 4, y + 3); g.closePath(); g.fill();
+      } else {
+        g.beginPath(); g.arc(x, y, li === 1 ? 3.5 : 2.6, 0, Math.PI * 2); g.fill();
+      }
+    });
+  });
+  g.fillStyle = cssv("--text-3");
+  g.font = "10px " + cssv("--mono");
+  ["Jun","Jul","Aug","Sep"].forEach((m, i) => g.fillText(m, 46 + i * ((w - 56) / 3.2), h - 3));
+}
+
+function renderState() {
+  const s = {
+    active_avatar: world.active_avatar,
+    active_entity: world.active_entity,
+    selected_entities: world.selected_entities,
+    active_filters: world.active_filters,
+    ai_goal: world.ai_goal,
+    context_panel: { view: world.context_panel.view, expanded: world.context_panel.expanded, stack: world.context_panel.stack.length },
+    map_state: world.map_state,
+    conversation_state: { turns: world.conversation_state.thread.length, pending: world.conversation_state.pending ? world.conversation_state.pending.label : null, unread: world.conversation_state.unread },
+    active_actions: world.active_actions.map(a => a.label)
+  };
+  document.getElementById("stateJson").textContent = JSON.stringify(s, null, 1);
+  document.getElementById("log").innerHTML = LOG.map(l => `<div><b>${l.name}</b> <span>${l.meta}</span></div>`).join("");
+  document.getElementById("unread").textContent = world.conversation_state.unread;
+}
+
+function renderPeek() {
+  const el = document.getElementById("peek");
+  const id = world.active_entity;
+  if (!id) { el.classList.remove("on"); el.innerHTML = ""; return; }
+  const e = ENTITIES[id];
+  el.classList.add("on");
+  el.innerHTML = `<span>${e.glyph}</span><span><b>${e.name}</b><br><span class="mono" style="font-size:11px;color:var(--text-3)">${e.type} · ${e.status}</span></span>`;
+}
+
+/* ── input ───────────────────────────────────────────────────────── */
+document.getElementById("map").addEventListener("click", (ev) => {
+  const r = ev.currentTarget.getBoundingClientRect();
+  const hit = hitTest(ev.clientX - r.left, ev.clientY - r.top, r);
+  if (!hit) return;
+  if (ev.shiftKey) multiSelect(hit); else selectEntity(hit);
+});
+document.getElementById("map").addEventListener("dblclick", (ev) => {
+  const r = ev.currentTarget.getBoundingClientRect();
+  const hit = hitTest(ev.clientX - r.left, ev.clientY - r.top, r);
+  if (hit) focusEntity(hit);
+});
+function hitTest(x, y, r) {
+  let best = null, bd = 24;
+  Object.keys(ENTITIES).forEach(id => {
+    const e = ENTITIES[id];
+    const d = Math.hypot(e.x * r.width - x, e.y * r.height - y);
+    if (d < bd) { bd = d; best = id; }
+  });
+  return best;
+}
+
+document.getElementById("composer").onsubmit = (ev) => {
+  ev.preventDefault();
+  const v = document.getElementById("msg").value.trim();
+  if (!v) return;
+  transition("USER_MESSAGE", () => say("user", v), v.slice(0, 28));
+  document.getElementById("msg").value = "";
+  setTimeout(() => aiRespond(v), 260);
+};
+
+/* command surface — the ONE permitted overlay */
+const cmdk = document.getElementById("cmdk");
+function openCmd() {
+  cmdk.setAttribute("open", "");
+  const i = document.getElementById("cmdInput");
+  i.value = ""; i.focus(); renderCmd("");
+}
+function closeCmd() { cmdk.removeAttribute("open"); }
+document.getElementById("openCmd").onclick = openCmd;
+cmdk.onclick = (e) => { if (e.target === cmdk) closeCmd(); };
+document.getElementById("cmdInput").oninput = (e) => renderCmd(e.target.value);
+
+function renderCmd(q) {
+  const ql = q.toLowerCase();
+  const ents = Object.keys(ENTITIES).filter(id => !ql || ENTITIES[id].name.toLowerCase().includes(ql) || ENTITIES[id].type.includes(ql));
+  const filters = [["location", "Vilnius"], ["location", "Kaunas"], ["skill", "welding"]]
+    .filter(([k, v]) => !ql || (k + v).toLowerCase().includes(ql));
+  const actions = [["Post a need for a welder in Vilnius", "org:statyba"]].filter(a => !ql || a[0].toLowerCase().includes(ql));
+  const box = document.getElementById("cmdResults");
+  box.innerHTML = "";
+  const group = (title, rows) => {
+    if (!rows.length) return;
+    const g = document.createElement("div");
+    g.className = "cmdgroup";
+    g.innerHTML = `<h4>${title}</h4>`;
+    rows.forEach(r => g.appendChild(r));
+    box.appendChild(g);
+  };
+  group("Entities", ents.slice(0, 5).map(id => {
+    const b = document.createElement("button");
+    b.className = "cmdrow";
+    b.innerHTML = `${ENTITIES[id].glyph} ${ENTITIES[id].name} <span class="m">${ENTITIES[id].type} · ⏎ select</span>`;
+    b.onclick = () => { closeCmd(); selectEntity(id); };
+    return b;
+  }));
+  group("Filters", filters.map(([k, v]) => {
+    const b = document.createElement("button");
+    b.className = "cmdrow";
+    b.innerHTML = `⚲ ${k} = ${v} <span class="m">applies to this view</span>`;
+    b.onclick = () => { closeCmd(); setFilter(k, v); };
+    return b;
+  }));
+  group("Actions", actions.map(([label, target]) => {
+    const b = document.createElement("button");
+    b.className = "cmdrow";
+    b.innerHTML = `▸ ${label} <span class="m">important write</span>`;
+    b.onclick = () => { closeCmd(); proposeAction("Post a need", "important_write", target); };
+    return b;
+  }));
+  if (!ents.length && !filters.length && !actions.length) {
+    box.innerHTML = `<div class="cmdgroup"><div style="padding:8px 16px;color:var(--text-3);font-size:13px">Nothing matches “${q}”. Search returns entities, filters and actions — never pages.</div></div>`;
+  }
+}
+
+/* keyboard */
+addEventListener("keydown", (e) => {
+  const meta = e.metaKey || e.ctrlKey;
+  if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); openCmd(); return; }
+  if (e.key === "Escape") {
+    if (cmdk.hasAttribute("open")) return closeCmd();
+    if (world.selected_entities.length) return transition("CLEAR_SELECTION", () => world.selected_entities = [], "esc 1");
+    if (Object.keys(world.active_filters).length) return transition("CLEAR_FILTERS", () => world.active_filters = {}, "esc 2");
+    if (world.active_entity) return transition("DESELECT", () => world.active_entity = null, "esc 3");
+  }
+  if (e.target.tagName === "INPUT") {
+    if (meta && e.key === "Enter" && world.conversation_state.pending) {
+      const p = world.conversation_state.pending;
+      applyAction(p.label, p.tier, p.target);
+    }
+    return;
+  }
+  if (meta && e.key === "Enter" && world.conversation_state.pending) {
+    const p = world.conversation_state.pending;
+    return applyAction(p.label, p.tier, p.target);
+  }
+  if (meta && e.key === "[") { e.preventDefault(); return backEntity(); }
+  if (meta && e.key.toLowerCase() === "t") { e.preventDefault(); return toggleTimeline(); }
+  if (e.key === "/" && meta) { e.preventDefault(); return document.getElementById("msg").focus(); }
+  if (e.key === "[") return toggleChat();
+  if (e.key === "]") return togglePanel();
+  if (["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"].includes(e.key)) {
+    e.preventDefault();
+    const ids = Object.keys(ENTITIES);
+    const i = ids.indexOf(world.active_entity);
+    const next = ids[(i + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1) + ids.length) % ids.length];
+    selectEntity(next);
+  }
+  if (e.key === " " && world.active_entity) { e.preventDefault(); multiSelect(world.active_entity); }
+});
+
+function backEntity() {
+  if (!world.context_panel.stack.length) return;
+  transition("PANEL_BACK", () => { world.active_entity = world.context_panel.stack.pop(); }, "entity back-stack");
+}
+function toggleChat()  { document.getElementById("body").classList.toggle("rail"); requestAnimationFrame(render); }
+function togglePanel() { document.getElementById("body").classList.toggle("nopanel"); requestAnimationFrame(render); }
+function toggleTimeline() { document.getElementById("timeline").classList.toggle("open"); requestAnimationFrame(render); }
+
+document.getElementById("collapseChat").onclick = toggleChat;
+document.getElementById("collapsePanel").onclick = togglePanel;
+document.getElementById("toggleTl").onclick = toggleTimeline;
+document.getElementById("backEntity").onclick = backEntity;
+document.getElementById("layerRel").onclick = (e) => {
+  const on = world.map_state.layers.includes("relationships");
+  transition("TOGGLE_LAYER", () => {
+    world.map_state.layers = on ? world.map_state.layers.filter(l => l !== "relationships") : [...world.map_state.layers, "relationships"];
+  }, "relationships " + (on ? "off" : "on"));
+  e.currentTarget.setAttribute("aria-pressed", String(!on));
+};
+document.getElementById("notifBtn").onclick = () => {
+  transition("SET_PANEL_VIEW", () => { world.context_panel.view = "agenda"; world.conversation_state.unread = 0; }, "notifications → panel view");
+};
+document.getElementById("themeBtn").onclick = () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "light" ? "dark" : cur === "dark" ? "light" :
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+  document.documentElement.setAttribute("data-theme", next);
+  requestAnimationFrame(render);
+};
+document.getElementById("mobileBtn").onclick = () => {
+  document.getElementById("app").classList.toggle("mobile");
+  requestAnimationFrame(render);
+};
+document.getElementById("avatarBtn").onclick = () => {
+  const next = world.active_avatar === "person:rasa" ? "person:jonas" : "person:rasa";
+  transition("SWITCH_AVATAR", () => {
+    world.active_avatar = next;
+    world.active_entity = null;          // switching persona clears what you were looking at
+    world.context_panel.stack = [];
+  }, ENTITIES[next].name);
+  document.getElementById("avatarBtn").textContent = "◑ " + ENTITIES[next].name.split(" ")[0] + " · dispatcher";
+};
+document.getElementById("stateToggle").onclick = () => {
+  const b = document.getElementById("stateBox");
+  const open = b.dataset.open === "1";
+  b.dataset.open = open ? "0" : "1";
+  document.getElementById("stateChev").textContent = open ? "▲" : "▼";
+};
+document.getElementById("mobilebar").onclick = (e) => {
+  const btn = e.target.closest("button[data-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.mode;
+  document.querySelectorAll("#mobilebar button").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+  const map = { chat: "regionChat", map: "regionMap", panel: "regionPanel" };
+  Object.values(map).forEach(id => document.getElementById(id).classList.remove("active"));
+  document.getElementById(map[mode]).classList.add("active");
+  requestAnimationFrame(render);
+};
+
+addEventListener("resize", () => { renderMap(); renderTimeline(); });
+
+/* seed: the AI speaks first */
+say("ai", "Good morning. Three bookings need your answer, and one certificate expires in six days.", {
+  actions: [{ label: "Review bookings", tier: "read" }, { label: "Show my agenda", tier: "read" }]
+});
+render();
+</script>
