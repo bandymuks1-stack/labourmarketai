@@ -23,6 +23,20 @@ import { fileURLToPath } from "node:url";
 
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
+  ENTITY_TYPES,
+  COMMON_ENTITY_ATTRIBUTES,
+  OBJECT_TO_ENTITY_ALIASES,
+  RELATIONSHIP_PREDICATES,
+  RELATIONSHIP_EXAMPLES,
+  WORLD_STATE_SLOTS,
+  MANDATORY_ENTITY_QUESTIONS,
+  PERSON_ROLES,
+  ORGANIZATION_ROLES_UNIFIED,
+  ENTITY_CONFORMANCE,
+  validateEntityAnswers,
+  isMultiRole,
+} from "../product-gate/entity-model";
+import {
   ORGANIZATION_ROLES,
   EMPLOYMENT_MODELS,
   ORCHESTRATION_ASSESSMENT,
@@ -168,6 +182,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -195,6 +211,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -225,6 +243,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -253,6 +273,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -285,6 +307,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -466,6 +490,8 @@ describe("product vision lock — the highest product design authority", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -496,6 +522,8 @@ describe("product vision lock — the highest product design authority", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");
@@ -905,5 +933,214 @@ describe("organization role orchestration — the chain may never break", () => 
 
   it("declares the five orchestration answers", () => {
     expect(MANDATORY_ORCHESTRATION_QUESTIONS).toHaveLength(5);
+  });
+});
+
+// ── 9. Unified world model — Entity is the only base thing ─────────────────
+
+describe("unified world model — one Entity, registered types", () => {
+  const LOCK = join(repoRoot, "docs", "product", "UNIFIED_WORLD_MODEL_V1.md");
+  const lock = () => readFileSync(LOCK, "utf8");
+
+  it("exists and records the decisive owner sentences 1:1", () => {
+    expect(existsSync(LOCK)).toBe(true);
+    const doc = lock();
+    for (const phrase of [
+      "Entity yra vienintelė bazinė pasaulio esybė",
+      "Pakanka jį užregistruoti",
+      "Roles yra dinaminiai priskyrimai",
+      "Pasaulis statomas ne lentelėmis, o ryšiais tarp Entity",
+      "atidarau Entity",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("declares the 16 minimum entity types, as an OPEN registry", () => {
+    expect(ENTITY_TYPES).toHaveLength(16);
+    const doc = lock();
+    for (const t of ENTITY_TYPES) {
+      expect(doc.toLowerCase(), `entity type ${t} not documented`).toContain(
+        t.replace(/_/g, " "),
+      );
+    }
+    // A future type must typecheck without editing the union.
+    const future: (typeof ENTITY_TYPES)[number] | (string & {}) = "insurance_policy";
+    expect(future).toBe("insurance_policy");
+  });
+
+  it("DERIVES its attributes from the one object-property definition", () => {
+    // Object === Entity. The shared set is defined once, in the universe lock;
+    // the entity layer adds only `name` and `owner`. If this ever restates the
+    // list instead of importing it, the count breaks and this test fails.
+    expect(COMMON_ENTITY_ATTRIBUTES).toHaveLength(
+      UNIVERSAL_OBJECT_PROPERTIES.length + 2,
+    );
+    // The object-specific semantics ride along under Entity, not beside it.
+    for (const carried of ["geometry", "events", "visibility"]) {
+      expect(COMMON_ENTITY_ATTRIBUTES, `${carried} lost in derivation`).toContain(carried);
+    }
+    expect(COMMON_ENTITY_ATTRIBUTES).toContain("name");
+    expect(COMMON_ENTITY_ATTRIBUTES).toContain("owner");
+    // No map-layer spelling survives in the canonical set.
+    for (const alias of Object.keys(OBJECT_TO_ENTITY_ALIASES)) {
+      expect(COMMON_ENTITY_ATTRIBUTES, `${alias} should be aliased away`).not.toContain(alias);
+    }
+    const doc = lock();
+    for (const a of COMMON_ENTITY_ATTRIBUTES) {
+      expect(doc.toLowerCase(), `attribute ${a} not documented`).toContain(
+        a.replace(/_/g, " "),
+      );
+    }
+  });
+
+  it("roles are dynamic assignments — many at once, never a type column", () => {
+    expect(PERSON_ROLES).toContain("candidate");
+    expect(PERSON_ROLES).toContain("employee");
+    expect(ORGANIZATION_ROLES_UNIFIED).toContain("employer");
+    expect(ORGANIZATION_ROLES_UNIFIED).toContain("client");
+    expect(
+      isMultiRole({ entityId: "p1", roles: ["candidate", "employee", "team_leader"] }),
+    ).toBe(true);
+  });
+
+  it("relationships are predicates between entities, and the examples survive", () => {
+    expect(RELATIONSHIP_PREDICATES).toContain("works_on");
+    expect(RELATIONSHIP_PREDICATES).toContain("represents");
+    expect(RELATIONSHIP_EXAMPLES).toHaveLength(6);
+    const doc = lock();
+    for (const r of RELATIONSHIP_EXAMPLES) {
+      expect(doc, `relationship ${r.predicate} not documented`).toContain(r.predicate);
+    }
+  });
+
+  it("World State holds exactly the owner's nine slots", () => {
+    expect(WORLD_STATE_SLOTS).toHaveLength(9);
+    expect(WORLD_STATE_SLOTS).toContain("active_avatar");
+    expect(WORLD_STATE_SLOTS).toContain("ai_goal");
+  });
+
+  it("BLOCKS a feature that is not entity-based", () => {
+    const codes = validateEntityAnswers("/x", {
+      usesEntity: false,
+      needsNewEntityType: false,
+      registrationIsEnough: true,
+      createsNewRole: false,
+      createsNewRelationship: false,
+      addableWithoutMapChange: true,
+      aiCanWorkWithIt: true,
+    }).map((p) => p.code);
+    expect(codes).toContain("not_entity_based");
+  });
+
+  it("BLOCKS when registration is NOT enough — the deciding question", () => {
+    const codes = validateEntityAnswers("/x", {
+      usesEntity: true,
+      needsNewEntityType: true,
+      registrationIsEnough: false,
+      createsNewRole: true,
+      createsNewRelationship: true,
+      addableWithoutMapChange: true,
+      aiCanWorkWithIt: true,
+    }).map((p) => p.code);
+    expect(codes).toContain("registration_not_enough");
+  });
+
+  it("ALLOWS a new type, role and relationship when registration suffices", () => {
+    // Growth is the point — only architecture change is forbidden.
+    expect(
+      validateEntityAnswers("/ok", {
+        usesEntity: true,
+        needsNewEntityType: true,
+        registrationIsEnough: true,
+        createsNewRole: true,
+        createsNewRelationship: true,
+        addableWithoutMapChange: true,
+        aiCanWorkWithIt: true,
+      }),
+    ).toEqual([]);
+  });
+
+  it("BLOCKS a new type the map cannot render automatically", () => {
+    const codes = validateEntityAnswers("/x", {
+      usesEntity: true,
+      needsNewEntityType: true,
+      registrationIsEnough: true,
+      createsNewRole: false,
+      createsNewRelationship: false,
+      addableWithoutMapChange: false,
+      aiCanWorkWithIt: true,
+    }).map((p) => p.code);
+    expect(codes).toContain("map_does_not_support_type");
+  });
+
+  it("BLOCKS an entity the AI cannot work with", () => {
+    const codes = validateEntityAnswers("/x", {
+      usesEntity: true,
+      needsNewEntityType: false,
+      registrationIsEnough: true,
+      createsNewRole: false,
+      createsNewRelationship: false,
+      addableWithoutMapChange: true,
+      aiCanWorkWithIt: false,
+    }).map((p) => p.code);
+    expect(codes).toContain("ai_cannot_work_with_entity");
+  });
+
+  it("is HONEST that the product is table-per-concept today", () => {
+    expect(ENTITY_CONFORMANCE.verdict).toBe("table_per_concept");
+    expect(ENTITY_CONFORMANCE.entityTableExists).toBe(false);
+    expect(ENTITY_CONFORMANCE.relationshipTableExists).toBe(false);
+    expect(ENTITY_CONFORMANCE.baseTables).toBeGreaterThan(100);
+    expect(ENTITY_CONFORMANCE.conceptsSplitAcrossTables.length).toBeGreaterThan(3);
+    expect(lock()).toMatch(/table-per-concept/i);
+    // The precedent must be named — it is what makes the plan credible.
+    expect(ENTITY_CONFORMANCE.precedent).toMatch(/organizations already unified/i);
+  });
+
+  it("declares the seven questions and a migration plan that executes nothing", () => {
+    expect(MANDATORY_ENTITY_QUESTIONS).toHaveLength(7);
+    const doc = lock();
+    expect(doc).toMatch(/E\.1/);
+    expect(doc).toMatch(/E\.8/);
+    expect(doc).toMatch(/No migration was executed/i);
+  });
+
+  it("registrationIsEnough is ENFORCED, not dormant", () => {
+    // The audit found these seven answers defined but wired to nothing.
+    const gate = readFileSync(join(repoRoot, ".github", "scripts", "product-gate.mjs"), "utf8");
+    for (const field of ["usesEntity", "registrationIsEnough", "aiCanWorkWithIt",
+      "needsNewEntityType", "createsNewRole", "createsNewRelationship"]) {
+      expect(gate, `the CI gate does not ask "${field}"`).toContain(field);
+    }
+    // ...and the declaration validator really refuses.
+    const reg = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "product-gate", "surface-registry.ts"), "utf8");
+    expect(reg).toContain("validateEntityAnswers");
+  });
+
+  it("asks the map question ONCE, under its canonical name", () => {
+    // `addableWithoutMapChange` (universe lock) is the only blocking map field.
+    expect(MANDATORY_ENTITY_QUESTIONS.map((q) => q.field)).toContain(
+      "addableWithoutMapChange",
+    );
+    const src = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "product-gate", "entity-model.ts"), "utf8");
+    expect(src, "a second map field was reintroduced").not.toContain("mapSupportsAutomatically");
+    // Roles and World State are imported, never redefined here.
+    expect(src).toContain('from "./organization-roles"');
+    expect(src).toContain('from "./world-state"');
+    expect(src).toContain('from "./universal-object-model"');
+  });
+
+  it("this slice really changed no schema", () => {
+    // The lock must not have smuggled a migration in with it.
+    const migrations = join(repoRoot, "supabase", "migrations");
+    const before = readdirSync(migrations).filter((f) => f.endsWith(".sql"));
+    // Precise: the tables THIS lock would introduce. A loose /entit/ match
+    // hits pre-existing files like 0026_customer_entity and *_identity_*.
+    expect(
+      before.some((f) => /entities|entity_relationships|entity_roles/i.test(f)),
+    ).toBe(false);
   });
 });
