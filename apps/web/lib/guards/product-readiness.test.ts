@@ -1897,7 +1897,11 @@ describe("no migration files added by this sprint", () => {
     // storage layer of the canonical usage & cost event model. RED class by
     // policy (it carries GRANT/REVOKE), human-gated, applied to prod via MCP
     // after owner approval.
-    const SPRINT_BASELINE = 169;
+    // Bumped 169 -> 170 for the usage_cost_events TRUNCATE guard
+    // (20260728140000) — found by the production proof run: a row-level
+    // trigger does not fire on TRUNCATE, so the owner could still empty the
+    // ledger. Additive statement-level trigger; applied to prod via MCP.
+    const SPRINT_BASELINE = 170;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

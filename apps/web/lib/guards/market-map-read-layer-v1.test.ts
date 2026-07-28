@@ -363,6 +363,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 168 -> 169: usage_cost_events v1 (20260728120000), the first
     // storage layer of the canonical usage & cost event model. The read layer
     // guarded here still adds no migration of its own.
-    expect(count).toBeLessThanOrEqual(169);
+    // Bumped 169 -> 170: usage_cost_events TRUNCATE guard (20260728140000).
+    expect(count).toBeLessThanOrEqual(170);
   });
 });

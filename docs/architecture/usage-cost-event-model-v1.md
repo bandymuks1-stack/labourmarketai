@@ -192,7 +192,16 @@ cannot compute** — every one except those that must remain ledger-derived.
 
 ## PART 10 — STORAGE (IMPLEMENTED — PR #899)
 
-**Applied to production.** One table was enough, exactly as designed:
+**Applied to production 2026-07-28.** One table was enough, exactly as designed.
+
+**Append-only is enforced on three paths, all proven against production:**
+`UPDATE` and `DELETE` are revoked from every role and blocked by a row-level
+`BEFORE UPDATE OR DELETE` trigger; `TRUNCATE` is blocked by a statement-level
+`BEFORE TRUNCATE` trigger (migration `20260728140000`) — **added because the
+production proof run showed a row-level trigger does not fire on TRUNCATE**, so
+the table owner could still have emptied the ledger in one statement. `DROP`
+remains possible and is the documented rollback path.
+
 
 ```
 usage_cost_events

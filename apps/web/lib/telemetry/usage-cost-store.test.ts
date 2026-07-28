@@ -150,6 +150,19 @@ describe("usage_cost_events — append-only", () => {
     expect(MIGRATION).toMatch(/append-only/i);
   });
 
+  it("TRUNCATE is blocked too — a row-level trigger does not fire on it", () => {
+    const guard = readFileSync(
+      join(repoRoot, "supabase", "migrations", "20260728140000_usage_cost_events_truncate_guard_v1.sql"),
+      "utf8",
+    );
+    expect(guard).toMatch(/before\s+truncate\s+on\s+public\.usage_cost_events/i);
+    expect(guard).toMatch(/for\s+each\s+statement/i);
+    expect(guard).toMatch(/TRUNCATE is not permitted/);
+    // Found by the production proof run, not by inspection — recorded so the
+    // reason survives the commit.
+    expect(guard).toMatch(/FOUND BY THE PRODUCTION PROOF RUN/i);
+  });
+
   it("the store exposes no update and no delete path at all", () => {
     const code = STORE_SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
     expect(code).not.toMatch(/\.update\(/);
