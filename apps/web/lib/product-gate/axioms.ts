@@ -37,9 +37,9 @@ export const AXIOMS: readonly Axiom[] = [
   {
     id: "A-01",
     rule:
-      "Chat-first is the primary interface. /dashboard IS the conversation; structured data is the editable result behind it, never the entry point.",
+      "AI-FIRST — not chat-first and not map-first. AI Conversation + World Map + Context Panel are ONE workspace; the AI changes World State instead of navigating the user to another page.",
     source:
-      "docs/product/LABOURMARKET_AI_CANONICAL_PRODUCT_VISION.md §15 + §14; PR #864 (chat-first /dashboard, LIVE)",
+      "docs/product/WORLD_STATE_UX_ARCHITECTURE_V1.md (owner 2026-07-28, supersedes the chat-first wording of the canonical vision §15 and PR #864)",
     enforcement: "machine",
     gateCheck:
       "A diff may not remove the conversation root, drop chat from the core nav, or add a second competing primary surface.",

@@ -21,6 +21,7 @@
 import type { AxiomId } from "./axioms";
 import type { WorldElementId } from "./world-elements";
 import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
+import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
 
 export type SurfaceKind =
   | "screen"
@@ -78,6 +79,15 @@ export interface SurfaceDeclaration {
   readonly hasHistory: boolean;
   /** Can it be added WITHOUT changing World Map architecture? (blocking) */
   readonly addableWithoutMapChange: boolean;
+
+  // ── The five world-state answers (WORLD_STATE_UX_ARCHITECTURE_V1) ─────────
+  // All five are blocking: "Jeigu bent vienas atsakymas yra 'ne', sprendimas
+  // laikomas neatitinkančiu PRODUCT_VISION_LOCK."
+  readonly changesWorldState: boolean;
+  readonly reflectedOnMap: boolean;
+  readonly aiControlled: boolean;
+  readonly usableWithoutLeavingWorkspace: boolean;
+  readonly needsNoNewPage: boolean;
 }
 
 /**
@@ -121,6 +131,11 @@ export type DeclarationViolation =
   | "unknown_pillar"
   | "not_registered_object_type"
   | "requires_map_architecture_change"
+  | "not_world_state_driven"
+  | "not_reflected_on_map"
+  | "not_ai_controlled"
+  | "requires_leaving_workspace"
+  | "requires_new_page"
   | "unknown_world_element"
   | "unanswered_vision_question"
   | "empty_purpose"
@@ -208,6 +223,15 @@ export function validateDeclarations(
 
     // The nine universe answers. A blocking "no" stops the PR (owner rule).
     for (const problem of validateUniverseAnswers(d.id, d as UniverseAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
+    }
+
+    // The five world-state answers. Any "no" breaks the vision lock.
+    for (const problem of validateWorldStateAnswers(d.id, d as WorldStateAnswers)) {
       problems.push({
         id: problem.id,
         code: problem.code as DeclarationViolation,

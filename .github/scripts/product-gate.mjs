@@ -410,6 +410,37 @@ function analyse(base) {
     }
   }
 
+  // 6c. WORLD STATE UX (owner refinement 2026-07-28) -----------------------
+  //     AI-first, ONE workspace, no page switching. All five answers are
+  //     blocking: "Jeigu bent vienas atsakymas yra 'ne', sprendimas laikomas
+  //     neatitinkančiu PRODUCT_VISION_LOCK."
+  {
+    const regSrcW = read(REGISTRY);
+    const blockW = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcW)?.[0] ?? "";
+    const WS = {
+      changesWorldState: "not_world_state_driven",
+      reflectedOnMap: "not_reflected_on_map",
+      aiControlled: "not_ai_controlled",
+      usableWithoutLeavingWorkspace: "requires_leaving_workspace",
+      needsNoNewPage: "requires_new_page",
+    };
+    for (const decl of blockW.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const [field, code] of Object.entries(WS)) {
+        if (!new RegExp(field + ":").test(decl)) {
+          add("unanswered_universe_question", "A-01", id,
+            'does not answer "' + field + '" — WORLD_STATE_UX_ARCHITECTURE_V1 requires all five answers',
+            "certain");
+        } else if (new RegExp(field + ":\\s*false").test(decl)) {
+          add(code, "A-01", id,
+            '"' + field + '" is false — AI-first, one workspace, no page switching',
+            "certain");
+        }
+      }
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
@@ -502,6 +533,12 @@ function selfTest() {
     ["screen", IS_SCREEN.test("apps/web/app/[locale]/dashboard/x/page.tsx")],
     ["route", routeOf("apps/web/app/[locale]/dashboard/x/page.tsx") === "/dashboard/x"],
     ["route_group", routeOf("apps/web/app/[locale]/(marketing)/pricing/page.tsx") === "/pricing"],
+    // Regression guard: a dynamically built regex must really match. CodeQL
+    // caught `field + ":\s*false"` written as `":\s*false"` in a string
+    // literal, where \s degrades to a plain "s" — the rule silently never
+    // fired. A gate rule that cannot fire is worse than no rule.
+    ["dynamic_false_regex", new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: false,")],
+    ["dynamic_false_regex_negative", !new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: true,")],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {
