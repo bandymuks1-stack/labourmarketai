@@ -22,6 +22,18 @@ import { fileURLToPath } from "node:url";
 
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
+  WORKSPACE_PARTS,
+  FORBIDDEN_SEPARATE_SCREENS,
+  FORBIDDEN_COMMIT_CONTROLS,
+  WORLD_STATE_EXAMPLES,
+  MANDATORY_WORLD_STATE_QUESTIONS,
+  AI_MAY_NEVER_CHANGE,
+  CONTEXT_PANEL_CONTENT,
+  UNIVERSAL_CONTEXT_DOMAINS,
+  WORKSPACE_ASSESSMENT,
+  validateWorldStateAnswers,
+} from "../product-gate/world-state";
+import {
   PILLARS,
   UNIVERSAL_OBJECT_PROPERTIES,
   MANDATORY_UNIVERSE_QUESTIONS,
@@ -140,6 +152,11 @@ describe("product gate — the declaration contract", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -162,6 +179,11 @@ describe("product gate — the declaration contract", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -187,6 +209,11 @@ describe("product gate — the declaration contract", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -210,6 +237,11 @@ describe("product gate — the declaration contract", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -237,6 +269,11 @@ describe("product gate — the declaration contract", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -413,6 +450,11 @@ describe("product vision lock — the highest product design authority", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -438,6 +480,11 @@ describe("product vision lock — the highest product design authority", () => {
       hasTimeline: true,
       hasHistory: true,
       addableWithoutMapChange: true,
+      changesWorldState: true,
+      reflectedOnMap: true,
+      aiControlled: true,
+      usableWithoutLeavingWorkspace: true,
+      needsNoNewPage: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");
@@ -594,5 +641,119 @@ describe("product universe lock v2 — one living world", () => {
     expect(plan).toMatch(/blocks Phases 2 and 4|Phase 0 blocks/i);
     expect(plan).toMatch(/registers a new object type/i);
     expect(plan).toMatch(/it is a module/i);
+  });
+});
+
+// ── 7. World State UX architecture (owner refinement, 2026-07-28) ──────────
+
+describe("world state UX — AI-first, one workspace, no page switching", () => {
+  const LOCK = join(repoRoot, "docs", "product", "WORLD_STATE_UX_ARCHITECTURE_V1.md");
+  const lock = () => readFileSync(LOCK, "utf8");
+
+  it("exists and CORRECTS the chat-first framing", () => {
+    expect(existsSync(LOCK)).toBe(true);
+    const doc = lock();
+    expect(doc).toContain("Tikslas yra AI-FIRST");
+    expect(doc).toMatch(/chat-first/i);
+    expect(doc).toMatch(/corrects/i);
+  });
+
+  it("records the decisive owner sentences 1:1", () => {
+    const doc = lock();
+    for (const phrase of [
+      "Tai nėra trys produktai. Tai vienas komponentas",
+      "AI keičia tik World State",
+      "Map yra pasaulio būsena",
+      "NEATIDAROMAS NAUJAS PUSLAPIS",
+      "iki atsijungimo nei karto nekeičia puslapio",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("A-01 is no longer chat-first — it is AI-first", () => {
+    const a01 = axiom("A-01");
+    expect(a01?.rule).toMatch(/AI-FIRST/);
+    expect(a01?.rule).not.toMatch(/^Chat-first/);
+    expect(a01?.source).toContain("WORLD_STATE_UX_ARCHITECTURE_V1");
+  });
+
+  it("declares ONE workspace of three parts, not three products", () => {
+    expect(WORKSPACE_PARTS).toEqual(["ai_conversation", "world_map", "context_panel"]);
+    expect(FORBIDDEN_SEPARATE_SCREENS).toEqual(["chat", "map", "search", "filter"]);
+    const doc = lock();
+    for (const p of WORKSPACE_PARTS) expect(doc.toLowerCase()).toContain(p.replace(/_/g, " "));
+  });
+
+  it("the AI may never change a page, a route or the workspace", () => {
+    expect([...AI_MAY_NEVER_CHANGE].sort()).toEqual(["page", "route", "workspace"]);
+    expect(lock()).toContain("AI nekeičia puslapių");
+  });
+
+  it("carries the owner's World State examples verbatim", () => {
+    expect(WORLD_STATE_EXAMPLES.length).toBeGreaterThanOrEqual(8);
+    const doc = lock();
+    for (const e of WORLD_STATE_EXAMPLES) {
+      expect(doc, `example missing: ${e.utterance}`).toContain(e.utterance);
+    }
+    // No commit control may ever exist.
+    expect(FORBIDDEN_COMMIT_CONTROLS).toContain("apply filters");
+    expect(doc).toContain('Jokių "Apply Filters"');
+  });
+
+  it("a click opens the Context Panel, and its content is specified", () => {
+    expect(CONTEXT_PANEL_CONTENT.length).toBeGreaterThanOrEqual(10);
+    expect(UNIVERSAL_CONTEXT_DOMAINS).toContain("ai_agents");
+  });
+
+  it("all five questions are blocking — any NO breaks the lock", () => {
+    expect(MANDATORY_WORLD_STATE_QUESTIONS).toHaveLength(5);
+    const ok = {
+      changesWorldState: true, reflectedOnMap: true, aiControlled: true,
+      usableWithoutLeavingWorkspace: true, needsNoNewPage: true,
+    };
+    expect(validateWorldStateAnswers("/ok", ok)).toEqual([]);
+    for (const field of Object.keys(ok) as (keyof typeof ok)[]) {
+      const bad = { ...ok, [field]: false };
+      expect(
+        validateWorldStateAnswers("/bad", bad).length,
+        `${field}=false must break the lock`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("BLOCKS a feature that needs a new page", () => {
+    const codes = validateWorldStateAnswers("/x", {
+      changesWorldState: true, reflectedOnMap: true, aiControlled: true,
+      usableWithoutLeavingWorkspace: false, needsNoNewPage: false,
+    }).map((p) => p.code);
+    expect(codes).toContain("requires_new_page");
+    expect(codes).toContain("requires_leaving_workspace");
+  });
+
+  it("is HONEST that the product is still page-based today", () => {
+    expect(WORKSPACE_ASSESSMENT.verdict).toBe("still_page_based");
+    expect(WORKSPACE_ASSESSMENT.worldStateEngineExists).toBe(false);
+    expect(WORKSPACE_ASSESSMENT.contextPanelExists).toBe(false);
+    expect(lock()).toMatch(/still page-based/i);
+  });
+
+  it("the gate implements the five world-state rules", () => {
+    const gateSrc = readFileSync(GATE, "utf8");
+    for (const code of [
+      "not_world_state_driven", "not_reflected_on_map", "not_ai_controlled",
+      "requires_leaving_workspace", "requires_new_page",
+    ]) {
+      expect(gateSrc, `${code} not implemented`).toContain(code);
+      expect(lock(), `${code} not documented`).toContain(code);
+    }
+  });
+
+  it("the consolidation map is corrected — the Map is not a surface to keep", () => {
+    const map = readFileSync(
+      join(repoRoot, "docs", "audits", "product-surface-consolidation-map-v1.md"),
+      "utf8",
+    );
+    expect(map).toMatch(/WORLD_STATE_UX_ARCHITECTURE_V1/);
   });
 });

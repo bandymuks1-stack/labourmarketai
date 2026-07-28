@@ -160,6 +160,13 @@ that **should hand off to chat once logged in** (P3, review).
 
 ## 3. CANONICAL SURFACE MAP
 
+> **CORRECTED 2026-07-28** by `docs/product/WORLD_STATE_UX_ARCHITECTURE_V1.md`
+> (owner): there is **no separate Map screen and no separate Chat screen**.
+> `/dashboard` and `/dashboard/market-map` below are listed as surfaces to keep,
+> which is wrong under the newer lock — both become **parts of ONE workspace**
+> (AI Conversation + World Map + Context Panel). The grouping and the
+> merge/remove verdicts stand; the framing of those two rows does not.
+
 ### 3.1 MUST REMAIN (the canonical spine)
 
 | Surface | Why it is canonical |
