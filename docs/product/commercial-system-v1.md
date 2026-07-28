@@ -5,6 +5,7 @@
 | Status | **CANONICAL.** No price, LMC rule, Stripe product or entitlement may exist outside this document and its machine-readable half |
 | Machine-readable half | `apps/web/lib/commercial/catalogue.ts` |
 | Enforced by | `apps/web/lib/guards/commercial-single-source.test.ts` (CI) |
+| Financial safety | **`docs/product/commercial-sustainability-v1.md` is BINDING on this catalogue.** No item here may become sellable without an assessed economic model — the Commercial Gate (`lib/guards/commercial-gate.test.ts`) fails the build otherwise |
 | Created | 2026-07-28 · branch `feat/canonical-commercial-system-v1` |
 | Supersedes as SOURCE | every other pricing/LMC/plan artefact in the repository — all listed in **Part VIII** and demoted to *reference only* |
 
