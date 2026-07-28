@@ -38,7 +38,9 @@ export const ORGANIZATION_ROLES = [
   "training_provider",
   "payroll_provider",
   "logistics_provider",
-  "verification_partner",
+  // Canonical name: the owner's later text (UNIFIED_WORLD_MODEL_V1) says
+  // "Verification Provider". One name, one role — see the doc §2.
+  "verification_provider",
   "project_operator",
 ] as const;
 
@@ -231,7 +233,7 @@ export interface OrchestrationAssessment {
  *     CLOSED CHECK: 'company' | 'agency' | 'team' | 'other';
  *   - 9 organizations exist, using 'company' and 'agency';
  *   - an organization therefore cannot hold two roles at once, and adding
- *     "payroll_provider" or "verification_partner" REQUIRES A MIGRATION;
+ *     "payroll_provider" or "verification_provider" REQUIRES A MIGRATION;
  *   - no employment-model concept exists anywhere (grep: 0 hits for
  *     employmentModel / employment_model / fulfilment / fulfillment);
  *   - no fulfilment-chain validation exists;

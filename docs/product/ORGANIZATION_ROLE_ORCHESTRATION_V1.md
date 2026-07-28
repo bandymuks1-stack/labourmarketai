@@ -62,7 +62,13 @@ Ten named roles, as a **registry** — never a closed type. One organization hol
 
 `employer` · `workforce_provider` · `talent_provider` · `client` ·
 `recruitment_partner` · `training_provider` · `payroll_provider` ·
-`logistics_provider` · `verification_partner` · `project_operator`
+`logistics_provider` · `verification_provider` · `project_operator`
+
+**This is the ONE organization-role vocabulary.** `UNIFIED_WORLD_MODEL_V1`
+imports it rather than defining a second list. One reconciliation was needed:
+the owner text above (2026-07-28) says *Verification Partner*, the later Unified
+World Model text says *Verification Provider*. **`verification_provider` is the
+canonical name** — same role, one spelling.
 
 **Adding a role must be data.** If connecting a new organization requires a
 migration, the architecture has failed the future-proof rule.
