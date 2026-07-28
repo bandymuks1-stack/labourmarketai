@@ -91,7 +91,9 @@ describe("product constitution — the supreme document", () => {
       machineEnforcedAxioms().length + heuristicAxioms().length + reviewOnlyAxioms().length,
     ).toBe(AXIOMS.length);
     expect(heuristicAxioms().length).toBeGreaterThan(0);
-    expect(reviewOnlyAxioms()).toEqual(["A-05"]);
+    // A-10 is review-only until the commercial system PRs land its machine
+    // half. An axiom that claims "machine" with no gate is a dormant check.
+    expect(reviewOnlyAxioms()).toEqual(["A-05", "A-10", "A-11", "A-12"]);
   });
 });
 

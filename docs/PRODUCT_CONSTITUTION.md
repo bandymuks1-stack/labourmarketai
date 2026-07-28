@@ -228,9 +228,9 @@ stay identical to this table).
 | **A-07** | The profile is a living work identity, not a form and not a log of completed actions. | this document §3 | heuristic |
 | **A-08** | One function has ONE home. | labour-market-os-constitution-v1 §1.1; canonical-paths + dashboard-duplicate guards | machine |
 | **A-09** | Every surface must locate itself on the canonical chain; a feature that cannot is out of scope. | labour-market-os-constitution-v1 §1 | machine |
-| **A-10** | One commercial catalogue: price, LMC rule, Stripe object, entitlement. | commercial-system-v1 | machine |
-| **A-11** | No feature launches without a known economic model. | commercial-sustainability-v1 (CSP-002, FSR-001/005) | machine |
-| **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | business-health-engine-v1 | machine |
+| **A-10** | One commercial catalogue: price, LMC rule, Stripe object, entitlement. | lmc-canonical-commercial-catalogue-v1 (#894) | review — machine half ships with #895/#896 |
+| **A-11** | No feature launches without a known economic model. | PR #896 (not yet merged) | review — machine half ships with #896 |
+| **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | PR #897 (not yet merged) | review — machine half ships with #897 |
 
 **Conflict rule (unchanged, restated):** where any other product, UX or
 architecture document conflicts with this constitution, **these win** — the

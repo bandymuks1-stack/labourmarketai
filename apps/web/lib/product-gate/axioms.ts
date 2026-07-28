@@ -116,26 +116,28 @@ export const AXIOMS: readonly Axiom[] = [
     id: "A-10",
     rule:
       "No new commercial surface without the commercial system: price, LMC rule, Stripe object and entitlement live in exactly one catalogue.",
-    source: "docs/product/commercial-system-v1.md; docs/product/commercial-sustainability-v1.md",
-    enforcement: "machine",
+    source: "docs/product/lmc-canonical-commercial-catalogue-v1.md (the merged canonical record, PR #894)",
+    enforcement: "review",
     gateCheck:
-      "Handled by the existing commercial-single-source + commercial-gate guards; the product gate defers to them.",
+      "HUMAN GATE until the commercial system ships. The machine half (commercial-single-source + commercial-gate) arrives with docs/product/commercial-system-v1.md in PR #895/#896; claiming machine enforcement before then would be a dormant check. The rule itself is unchanged and binding.",
   },
   {
     id: "A-11",
     rule:
       "No feature is launched without a known economic model (payer, unit cost, margin) — financial safety is a merge gate, not a review note.",
-    source: "docs/product/commercial-sustainability-v1.md (CSP-002, FSR-001, FSR-005)",
-    enforcement: "machine",
-    gateCheck: "Handled by the Commercial Gate; the product gate defers to it.",
+    source: "PR #896 — commercial sustainability v1 (CSP-002, FSR-001, FSR-005), not yet merged",
+    enforcement: "review",
+    gateCheck:
+      "HUMAN GATE until PR #896 merges and brings the Commercial Gate with it. The rule is binding now; claiming machine enforcement before its gate exists would be a dormant check.",
   },
   {
     id: "A-12",
     rule:
       "A metric or state that is not measured is reported as unmeasured — never as a zero, never as a reassuring default.",
-    source: "docs/product/business-health-engine-v1.md",
-    enforcement: "machine",
-    gateCheck: "Handled by the business-health guard; the product gate defers to it.",
+    source: "PR #897 — Business Health Engine v1, not yet merged",
+    enforcement: "review",
+    gateCheck:
+      "HUMAN GATE until PR #897 merges and brings the business-health guard with it. The honesty rule itself is binding now.",
   },
 ] as const;
 
