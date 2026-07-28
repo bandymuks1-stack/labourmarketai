@@ -22,6 +22,7 @@ import type { AxiomId } from "./axioms";
 import type { WorldElementId } from "./world-elements";
 import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
 import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
+import { validateEntityAnswers, type EntityAnswers } from "./entity-model";
 
 export type SurfaceKind =
   | "screen"
@@ -88,6 +89,25 @@ export interface SurfaceDeclaration {
   readonly aiControlled: boolean;
   readonly usableWithoutLeavingWorkspace: boolean;
   readonly needsNoNewPage: boolean;
+
+  // ── The entity answers (UNIFIED_WORLD_MODEL_V1, owner 2026-07-28) ─────────
+  // Entity is the only base thing in the world. Growth happens by REGISTRATION:
+  // `registrationIsEnough` is the mechanism, and it blocks. Needing a new type,
+  // role or relationship never blocks on its own — that is how the world grows.
+  // The map question is NOT repeated here: `addableWithoutMapChange` above is
+  // the canonical one, and the entity validator reads it.
+  /** Does it use Entity at all? (blocking) */
+  readonly usesEntity: boolean;
+  /** Does it need a new Entity Type? (never blocks — growth is allowed) */
+  readonly needsNewEntityType: boolean;
+  /** Is registering it enough? THE growth mechanism. (blocking) */
+  readonly registrationIsEnough: boolean;
+  /** Does it create a new Role? (never blocks — roles are dynamic) */
+  readonly createsNewRole: boolean;
+  /** Does it create a new Relationship? (never blocks — predicates register) */
+  readonly createsNewRelationship: boolean;
+  /** Can the AI work with this Entity? (blocking) */
+  readonly aiCanWorkWithIt: boolean;
 }
 
 /**
@@ -137,6 +157,11 @@ export type DeclarationViolation =
   | "requires_leaving_workspace"
   | "requires_new_page"
   | "unknown_world_element"
+  | "not_entity_based"
+  | "new_base_entity"
+  | "registration_not_enough"
+  | "map_does_not_support_type"
+  | "ai_cannot_work_with_entity"
   | "unanswered_vision_question"
   | "empty_purpose"
   | "empty_why_not_chat"
@@ -223,6 +248,15 @@ export function validateDeclarations(
 
     // The nine universe answers. A blocking "no" stops the PR (owner rule).
     for (const problem of validateUniverseAnswers(d.id, d as UniverseAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
+    }
+
+    // The entity answers. registrationIsEnough is the growth mechanism.
+    for (const problem of validateEntityAnswers(d.id, d as EntityAnswers)) {
       problems.push({
         id: problem.id,
         code: problem.code as DeclarationViolation,

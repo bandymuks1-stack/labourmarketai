@@ -441,6 +441,54 @@ function analyse(base) {
     }
   }
 
+  // 6f. UNIFIED WORLD MODEL (owner lock 2026-07-28) ------------------------
+  //     Entity is the only base thing in the world, and the world grows by
+  //     REGISTRATION: "Naujam Entity Type negali reikėti architektūros
+  //     pakeitimo. Pakanka jį užregistruoti."
+  //
+  //     Asymmetry, deliberately: needing a new TYPE, ROLE or RELATIONSHIP never
+  //     blocks — that is how the world grows. `registrationIsEnough` is what
+  //     blocks, and it is the ONLY growth mechanism. The map question is not
+  //     re-asked here; `addableWithoutMapChange` (6b) is the canonical one.
+  {
+    const regSrcE = read(REGISTRY);
+    const blockE = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcE)?.[0] ?? "";
+    const EN = {
+      usesEntity: "not_entity_based",
+      registrationIsEnough: "registration_not_enough",
+      aiCanWorkWithIt: "ai_cannot_work_with_entity",
+    };
+    const ASKED = ["usesEntity", "needsNewEntityType", "registrationIsEnough",
+      "createsNewRole", "createsNewRelationship", "aiCanWorkWithIt"];
+    for (const decl of blockE.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const field of ASKED) {
+        if (!new RegExp(field + ":").test(decl)) {
+          add("unanswered_universe_question", "A-09", id,
+            'does not answer "' + field + '" — UNIFIED_WORLD_MODEL_V1 requires all seven answers',
+            "certain");
+        }
+      }
+      for (const [field, code] of Object.entries(EN)) {
+        if (new RegExp(field + ":\\s*false").test(decl)) {
+          add(code, "A-09", id,
+            field === "registrationIsEnough"
+              ? '"registrationIsEnough" is false — registering the type/role/relationship is not enough, so an architecture change is required and the architecture is wrong'
+              : '"' + field + '" is false — Entity is the only base thing in the world',
+            "certain");
+        }
+      }
+      // A new entity type the map cannot carry without an architecture change.
+      if (new RegExp("needsNewEntityType" + ":\\s*true").test(decl) &&
+          new RegExp("addableWithoutMapChange" + ":\\s*false").test(decl)) {
+        add("map_does_not_support_type", "A-09", id,
+          "a new entity type that the World Map cannot carry without an architecture change",
+          "certain");
+      }
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));

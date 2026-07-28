@@ -14,8 +14,22 @@
  * This file defines the CONTRACT. It changes no database, no table, no UI and
  * no API — the owner was explicit, and the guard asserts it.
  *
+ * ── ONE DEFINITION PER CONCEPT ────────────────────────────────────────────
+ * OBJECT ≡ ENTITY. `Entity` is the canonical architectural term; the world
+ * "object" of `PRODUCT_UNIVERSE_LOCK_V2` is the same thing seen from the map
+ * layer. This file therefore IMPORTS rather than restates:
+ *   - the shared property set  ← `universal-object-model.ts`
+ *   - the organization roles   ← `organization-roles.ts`
+ *   - the World State slots    ← `world-state.ts`
+ * and it owns exactly two gate questions of its own: `registrationIsEnough`
+ * (the growth mechanism) and `aiCanWorkWithIt`.
+ *
  * Pure data + pure functions. No IO.
  */
+
+import { UNIVERSAL_OBJECT_PROPERTIES } from "./universal-object-model";
+import { ORGANIZATION_ROLES } from "./organization-roles";
+import { WORLD_STATE_SLOTS } from "./world-state";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. Entity types — a registry, never a closed union
@@ -51,28 +65,35 @@ export type EntityType = (typeof ENTITY_TYPES)[number] | (string & {});
 // 2. The common entity model — every entity has these
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Minimum attributes every Entity carries. Everything else is an extension. */
-export const COMMON_ENTITY_ATTRIBUTES = [
-  "entity_id",
-  "entity_type",
-  "name",
-  "status",
-  "location",
-  "timeline",
-  "history",
-  "relationships",
-  "permissions",
-  "owner",
-  "metadata",
-  "tags",
-  "documents",
-  "media",
-  "actions",
-  "visibility",
-  "extensions",
-] as const;
+/**
+ * The map-layer names and the canonical entity names for the SAME fields.
+ * Object ≡ Entity, so these are spellings, not separate properties.
+ */
+export const OBJECT_TO_ENTITY_ALIASES = {
+  object_id: "entity_id",
+  object_type: "entity_type",
+  custom_extensions: "extensions",
+} as const;
 
-export type CommonEntityAttribute = (typeof COMMON_ENTITY_ATTRIBUTES)[number];
+/**
+ * Minimum attributes every Entity carries. Everything else is an extension.
+ *
+ * DERIVED, never restated: the shared set comes from
+ * `UNIVERSAL_OBJECT_PROPERTIES` (the single definition, in the universe lock),
+ * renamed through `OBJECT_TO_ENTITY_ALIASES`. The entity layer contributes only
+ * `name` and `owner`. The object-specific semantics — `geometry`, `events` and
+ * the visualization contract — ride along unchanged, because they are entity
+ * semantics carried on the same rows.
+ */
+export const COMMON_ENTITY_ATTRIBUTES: readonly string[] = [
+  ...UNIVERSAL_OBJECT_PROPERTIES.map(
+    (p) => (OBJECT_TO_ENTITY_ALIASES as Record<string, string>)[p] ?? p,
+  ),
+  "name",
+  "owner",
+];
+
+export type CommonEntityAttribute = string;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 3. Roles — dynamic assignments, not types
@@ -95,16 +116,13 @@ export const PERSON_ROLES = [
   "partner",
 ] as const;
 
-export const ORGANIZATION_ROLES_UNIFIED = [
-  "employer",
-  "workforce_provider",
-  "client",
-  "training_provider",
-  "partner",
-  "logistics_provider",
-  "payroll_provider",
-  "verification_provider",
-] as const;
+/**
+ * NOT a second list. `ORGANIZATION_ROLE_ORCHESTRATION_V1` owns the organization
+ * role vocabulary; this is the same registry, re-exported under the name the
+ * entity layer uses. The owner's two texts named the verification role
+ * differently — `verification_provider` is the canonical spelling.
+ */
+export const ORGANIZATION_ROLES_UNIFIED = ORGANIZATION_ROLES;
 
 export type EntityRole = string;
 
@@ -162,18 +180,11 @@ export const RELATIONSHIP_EXAMPLES: readonly {
 // 5. World State — what it holds
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** The owner's list, verbatim in structure. The AI changes only this. */
-export const WORLD_STATE_SLOTS = [
-  "active_avatar",
-  "active_entity",
-  "selected_entities",
-  "active_filters",
-  "ai_goal",
-  "context_panel",
-  "map_state",
-  "conversation_state",
-  "active_actions",
-] as const;
+/**
+ * NOT a second definition. `WORLD_STATE_UX_ARCHITECTURE_V1` owns World State;
+ * the slots are defined there and re-exported here for the entity layer.
+ */
+export { WORLD_STATE_SLOTS };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 6. The seven mandatory answers
@@ -189,7 +200,10 @@ export const MANDATORY_ENTITY_QUESTIONS = [
   { field: "registrationIsEnough", question: "Is registering the new type enough?" },
   { field: "createsNewRole", question: "Does it create a new Role?", invert: true },
   { field: "createsNewRelationship", question: "Does it create a new Relationship?", invert: true },
-  { field: "mapSupportsAutomatically", question: "Is the new type automatically supported by World Map?" },
+  // The map question is asked ONCE, by the universe lock, under its canonical
+  // name `addableWithoutMapChange`. This lock references it; it does not add a
+  // second map field.
+  { field: "addableWithoutMapChange", question: "Is the new type automatically supported by World Map?" },
   { field: "aiCanWorkWithIt", question: "Can the AI work with this Entity?" },
 ] as const;
 
@@ -200,7 +214,8 @@ export interface EntityAnswers {
   readonly registrationIsEnough: boolean;
   readonly createsNewRole: boolean;
   readonly createsNewRelationship: boolean;
-  readonly mapSupportsAutomatically: boolean;
+  /** Canonical map question, owned by PRODUCT_UNIVERSE_LOCK_V2. Referenced here. */
+  readonly addableWithoutMapChange: boolean;
   readonly aiCanWorkWithIt: boolean;
 }
 
@@ -241,7 +256,7 @@ export function validateEntityAnswers(
         "registering the type/role/relationship is NOT enough — an architecture change is required, so the architecture is wrong",
     });
   }
-  if (a.needsNewEntityType && !a.mapSupportsAutomatically) {
+  if (a.needsNewEntityType && !a.addableWithoutMapChange) {
     out.push({
       id,
       code: "map_does_not_support_type",

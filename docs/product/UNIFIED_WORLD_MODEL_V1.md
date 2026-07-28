@@ -88,6 +88,34 @@ So the deciding question is not *"is anything new?"* but
 
 ---
 
+## 2a. ONE definition per concept — what this lock imports
+
+**Object ≡ Entity.** The world "object" of `PRODUCT_UNIVERSE_LOCK_V2` and the
+Entity of this lock are the same thing. **`Entity` is the canonical
+architectural term**; "object" survives only as the map-layer word.
+
+This lock therefore **imports** and does not restate:
+
+| Concept | Defined in | Used here as |
+|---|---|---|
+| the shared property set | `universal-object-model.ts` (`UNIVERSAL_OBJECT_PROPERTIES`) | `COMMON_ENTITY_ATTRIBUTES`, derived |
+| the organization roles | `organization-roles.ts` (`ORGANIZATION_ROLES`) | `ORGANIZATION_ROLES_UNIFIED`, re-export |
+| the World State slots | `world-state.ts` (`WORLD_STATE_SLOTS`) | re-export |
+
+The attribute set is **derived**: every object property, renamed through
+`OBJECT_TO_ENTITY_ALIASES` (`object_id`→`entity_id`, `object_type`→`entity_type`,
+`custom_extensions`→`extensions`), plus the two the entity layer contributes —
+**name** and **owner**. The object-specific semantics — **geometry**, **events**
+and the visibility/visualization contract — are entity semantics carried on the
+same rows, so they ride along unchanged.
+
+**Gate questions this lock owns:** `registrationIsEnough` (the growth mechanism)
+and `aiCanWorkWithIt`. The map question is **not** re-asked here — the canonical
+one is `addableWithoutMapChange`, owned by `PRODUCT_UNIVERSE_LOCK_V2`, and this
+lock's validator reads that field.
+
+---
+
 ## 3. CONFORMANCE AUDIT (verified against production, 2026-07-28)
 
 | Requirement | Today | Evidence |

@@ -25,6 +25,7 @@ import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREA
 import {
   ENTITY_TYPES,
   COMMON_ENTITY_ATTRIBUTES,
+  OBJECT_TO_ENTITY_ALIASES,
   RELATIONSHIP_PREDICATES,
   RELATIONSHIP_EXAMPLES,
   WORLD_STATE_SLOTS,
@@ -181,6 +182,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -208,6 +211,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -238,6 +243,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -266,6 +273,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -298,6 +307,8 @@ describe("product gate — the declaration contract", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -479,6 +490,8 @@ describe("product vision lock — the highest product design authority", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -509,6 +522,8 @@ describe("product vision lock — the highest product design authority", () => {
       aiControlled: true,
       usableWithoutLeavingWorkspace: true,
       needsNoNewPage: true,
+      usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
+      createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");
@@ -954,8 +969,23 @@ describe("unified world model — one Entity, registered types", () => {
     expect(future).toBe("insurance_policy");
   });
 
-  it("declares the 17 common attributes every entity carries", () => {
-    expect(COMMON_ENTITY_ATTRIBUTES).toHaveLength(17);
+  it("DERIVES its attributes from the one object-property definition", () => {
+    // Object === Entity. The shared set is defined once, in the universe lock;
+    // the entity layer adds only `name` and `owner`. If this ever restates the
+    // list instead of importing it, the count breaks and this test fails.
+    expect(COMMON_ENTITY_ATTRIBUTES).toHaveLength(
+      UNIVERSAL_OBJECT_PROPERTIES.length + 2,
+    );
+    // The object-specific semantics ride along under Entity, not beside it.
+    for (const carried of ["geometry", "events", "visibility"]) {
+      expect(COMMON_ENTITY_ATTRIBUTES, `${carried} lost in derivation`).toContain(carried);
+    }
+    expect(COMMON_ENTITY_ATTRIBUTES).toContain("name");
+    expect(COMMON_ENTITY_ATTRIBUTES).toContain("owner");
+    // No map-layer spelling survives in the canonical set.
+    for (const alias of Object.keys(OBJECT_TO_ENTITY_ALIASES)) {
+      expect(COMMON_ENTITY_ATTRIBUTES, `${alias} should be aliased away`).not.toContain(alias);
+    }
     const doc = lock();
     for (const a of COMMON_ENTITY_ATTRIBUTES) {
       expect(doc.toLowerCase(), `attribute ${a} not documented`).toContain(
@@ -997,7 +1027,7 @@ describe("unified world model — one Entity, registered types", () => {
       registrationIsEnough: true,
       createsNewRole: false,
       createsNewRelationship: false,
-      mapSupportsAutomatically: true,
+      addableWithoutMapChange: true,
       aiCanWorkWithIt: true,
     }).map((p) => p.code);
     expect(codes).toContain("not_entity_based");
@@ -1010,7 +1040,7 @@ describe("unified world model — one Entity, registered types", () => {
       registrationIsEnough: false,
       createsNewRole: true,
       createsNewRelationship: true,
-      mapSupportsAutomatically: true,
+      addableWithoutMapChange: true,
       aiCanWorkWithIt: true,
     }).map((p) => p.code);
     expect(codes).toContain("registration_not_enough");
@@ -1025,7 +1055,7 @@ describe("unified world model — one Entity, registered types", () => {
         registrationIsEnough: true,
         createsNewRole: true,
         createsNewRelationship: true,
-        mapSupportsAutomatically: true,
+        addableWithoutMapChange: true,
         aiCanWorkWithIt: true,
       }),
     ).toEqual([]);
@@ -1038,7 +1068,7 @@ describe("unified world model — one Entity, registered types", () => {
       registrationIsEnough: true,
       createsNewRole: false,
       createsNewRelationship: false,
-      mapSupportsAutomatically: false,
+      addableWithoutMapChange: false,
       aiCanWorkWithIt: true,
     }).map((p) => p.code);
     expect(codes).toContain("map_does_not_support_type");
@@ -1051,7 +1081,7 @@ describe("unified world model — one Entity, registered types", () => {
       registrationIsEnough: true,
       createsNewRole: false,
       createsNewRelationship: false,
-      mapSupportsAutomatically: true,
+      addableWithoutMapChange: true,
       aiCanWorkWithIt: false,
     }).map((p) => p.code);
     expect(codes).toContain("ai_cannot_work_with_entity");
@@ -1074,6 +1104,33 @@ describe("unified world model — one Entity, registered types", () => {
     expect(doc).toMatch(/E\.1/);
     expect(doc).toMatch(/E\.8/);
     expect(doc).toMatch(/No migration was executed/i);
+  });
+
+  it("registrationIsEnough is ENFORCED, not dormant", () => {
+    // The audit found these seven answers defined but wired to nothing.
+    const gate = readFileSync(join(repoRoot, ".github", "scripts", "product-gate.mjs"), "utf8");
+    for (const field of ["usesEntity", "registrationIsEnough", "aiCanWorkWithIt",
+      "needsNewEntityType", "createsNewRole", "createsNewRelationship"]) {
+      expect(gate, `the CI gate does not ask "${field}"`).toContain(field);
+    }
+    // ...and the declaration validator really refuses.
+    const reg = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "product-gate", "surface-registry.ts"), "utf8");
+    expect(reg).toContain("validateEntityAnswers");
+  });
+
+  it("asks the map question ONCE, under its canonical name", () => {
+    // `addableWithoutMapChange` (universe lock) is the only blocking map field.
+    expect(MANDATORY_ENTITY_QUESTIONS.map((q) => q.field)).toContain(
+      "addableWithoutMapChange",
+    );
+    const src = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "product-gate", "entity-model.ts"), "utf8");
+    expect(src, "a second map field was reintroduced").not.toContain("mapSupportsAutomatically");
+    // Roles and World State are imported, never redefined here.
+    expect(src).toContain('from "./organization-roles"');
+    expect(src).toContain('from "./world-state"');
+    expect(src).toContain('from "./universal-object-model"');
   });
 
   it("this slice really changed no schema", () => {
