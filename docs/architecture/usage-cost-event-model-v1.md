@@ -5,7 +5,10 @@
 | Status | **BINDING.** The single canonical event model for the whole platform |
 | Contract | `apps/web/lib/telemetry/usage-cost-event-model.ts` (types + registries + shape validation only) |
 | Enforced by | `apps/web/lib/guards/usage-cost-event-model.test.ts` (CI) |
-| Scope | **Architecture only.** **No migration, no table, no ingestion code, no API** — asserted by the guard, not promised |
+| Scope | Contract (PR #898) + **first storage layer (PR #899)**: table, RLS, append-only write path, idempotency, Business Health read model. Still **no emitters, no scheduler, no webhook, no UI** |
+| Storage | `supabase/migrations/20260728120000_usage_cost_events_v1.sql` · rollback `supabase/rollbacks/20260728120000_usage_cost_events_v1.down.sql` |
+| Write path | `apps/web/lib/telemetry/usage-cost-store.ts` (server-only, append-only) |
+| Read model | `apps/web/lib/commercial/business-health-read.ts` (read-only, no rollups) |
 | Created | 2026-07-28 · branch `feat/canonical-usage-cost-event-model-v1` |
 | Feeds | `docs/product/business-health-engine-v1.md` — the 26 metrics that today have no source |
 
@@ -187,9 +190,9 @@ cannot compute** — every one except those that must remain ledger-derived.
 
 ---
 
-## PART 10 — FUTURE STORAGE (design only — no migration in this PR)
+## PART 10 — STORAGE (IMPLEMENTED — PR #899)
 
-When the owner approves ingestion, **one table** is enough:
+**Applied to production.** One table was enough, exactly as designed:
 
 ```
 usage_cost_events
@@ -302,9 +305,9 @@ category of personal data.
 
 | Stage | What | Gate |
 |---|---|---|
-| **0** | This contract + document (**done, no migration**) | — |
-| **1** | One additive migration: `usage_cost_events` (append-only, RLS, service-role write) | owner-gated, RED class |
-| **2** | Server-side emitter for **AI calls only** — the highest-value cost, one call site | after stage 1 |
+| **0** | Contract + document — **DONE (PR #898)**, no migration | — |
+| **1** | One additive migration: `usage_cost_events` (append-only, RLS, service-role write) + the write path + the Business Health read model — **DONE (PR #899)**, applied to production | owner-gated, RED class |
+| **2** | Server-side emitter for **AI calls only** — the highest-value cost, one call site | **NEXT** — after stage 1 |
 | **3** | Emitters for OCR / storage / email — the next three real costs | measurement proves stage 2 works |
 | **4** | Supplier invoice import → `event_type='cost'` reconciliation | needs stage 2–3 data to reconcile against |
 | **5** | Revenue events on the existing billing webhook (pointer only) | after Stripe activation |
@@ -334,9 +337,16 @@ metric most likely to reveal a loss first.**
 - **Migrations reduced:** a new vendor, service, measure, product line or
   repricing needs **none**.
 
-**This PR contains no migration, no table, no ingestion code and no API** — and
-the guard asserts it, so the contract can be agreed before any storage decision
-is made.
+**PR #898 contained no migration, no table, no ingestion code and no API** —
+the contract was agreed before any storage decision.
+
+**PR #899 adds exactly one storage layer and nothing else:** the
+`usage_cost_events` table, its RLS, the append-only server write path, the
+idempotency contract and a read-only Business Health model. It ships **no
+emitter, no OCR/storage/email instrumentation, no revenue rollup, no invoice
+reconciliation, no pricing crawler, no billing import, no scheduler, no
+background job, no webhook and no UI** — and the contract module itself still
+carries no database dependency, which the guard continues to assert.
 
 ---
 

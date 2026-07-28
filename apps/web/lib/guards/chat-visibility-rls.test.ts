@@ -235,9 +235,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    path — the billing-webhook pattern. The row carries field NAMES +
     //    a bounded validated-output excerpt, never input content; touches
     //    no chat table, sends nothing outbound.
+    //  - lib/telemetry/usage-cost-store.ts — usage & cost event ledger
+    //    (20260728120000). APPEND-ONLY INSERT of one usage_cost_events row.
+    //    The table has NO insert policy for any client role by design, so the
+    //    service role is the only write path (same posture as ai_runs and the
+    //    billing webhook). Identity on the row is resolved SERVER-SIDE from
+    //    the caller's session — never accepted from a caller — and update /
+    //    delete are revoked from every role AND trigger-blocked, so this
+    //    caller structurally cannot mutate anything. Touches no chat table,
+    //    reads no third-party data, sends nothing outbound.
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
-    // ai_runs audit row (the reads write nothing at all).
+    // ai_runs audit row / the append-only usage_cost_events row (the reads
+    // write nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -249,6 +259,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
       "lib/sales/lead-intake.ts",
+      "lib/telemetry/usage-cost-store.ts",
     ]);
   });
 

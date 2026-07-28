@@ -246,3 +246,23 @@ audit.
   chat table, nothing outbound. Failures are logged and swallowed; the run
   outcome is unaffected. Pinned in the `chat-visibility-rls.test.ts` caller
   inventory.
+
+## Service-role caller added 2026-07-28 — `lib/telemetry/usage-cost-store.ts`
+
+The usage & cost event ledger (`usage_cost_events`, migration
+`20260728120000`) joins the allowlist of runtime `createAdminClient()` callers.
+
+Justification, on the same terms as `ai_runs` and the billing webhook:
+
+- the table has **no INSERT policy for any client role by design**, so the
+  service role is the only possible write path;
+- the write is a single **append-only INSERT**; `update` and `delete` are
+  revoked from every role AND blocked by a `BEFORE UPDATE OR DELETE` trigger,
+  so this caller structurally cannot mutate anything;
+- the row's identity (`profile_id`, `organization_id`, `workspace_id`) is
+  resolved **server-side from the caller's session** — it is never accepted
+  from a caller, and the input type has no field for it;
+- it touches **no chat table**, reads no third-party data and sends nothing
+  outbound;
+- reads of the ledger do NOT use the admin client: the Business Health read
+  model uses the caller's own session under the admin-only RLS policy.
