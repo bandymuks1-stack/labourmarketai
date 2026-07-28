@@ -171,6 +171,15 @@ const RULES: IntentRule[] = [
       p("\\bcalendar\\b", 3),
       p("календар", 3),
       p("(mano|šios savaitės|today'?s|this week'?s)\\s+(plan|tvarkaraš|schedule|расписани)", 2),
+      // Context Intelligence (rebuild phase 3): "what do I have to do TODAY"
+      // is the work-context readback, not a profile question. The pairing of
+      // a question word / doing-verb with the TODAY word is the signal —
+      // "šiandien dirbau…" (past tense, log-work) never matches these.
+      p("(ką|what|что).{0,30}(šiandien|today|сегодня)", 3),
+      p("(šiandien|today|сегодня).{0,30}(padaryti|daryti|nuveikti|to\\s+do|сделать|делать)", 3),
+      p("(dienos|šiandienos)\\s+plan", 3),
+      p("(my|мой)\\s+(plan|план)\\b", 2),
+      p("\\bmano\\s+planas\\b", 2),
       p("\\bsusitikim", 1),
       p("\\bmeeting\\b", 1),
       p("планы", 1),

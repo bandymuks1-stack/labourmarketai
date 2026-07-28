@@ -12,6 +12,7 @@ import {
   WORKSPACE_PERSONAL_DOT,
 } from "@/components/app/conversation/chat/workspace-chip";
 import { workspaceAccentIndex } from "@/lib/company/organization-switch";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
 import {
   EvidenceStatusStrip,
@@ -128,7 +129,25 @@ export default async function JournalPage({
       true,
   );
 
-  const engagements: JournalEngagement[] = (ecRows ?? []).map((e) => {
+  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
+  // default engagement — rows are ordered workspace-match first (stable sort
+  // keeps is_primary as the tie-break), and the composer defaults to the
+  // FIRST entry. The user re-picks only on real ambiguity.
+  const workspaceForDefault = await getWorkspaceContext("person");
+  const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
+  const ecOrdered = [...(ecRows ?? [])].sort(
+    (a, b) =>
+      Number(
+        ((b as { organization_id?: string | null }).organization_id ?? null) ===
+          activeWorkspaceOrgId,
+      ) -
+      Number(
+        ((a as { organization_id?: string | null }).organization_id ?? null) ===
+          activeWorkspaceOrgId,
+      ),
+  );
+
+  const engagements: JournalEngagement[] = ecOrdered.map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
@@ -163,7 +182,7 @@ export default async function JournalPage({
   // context label + the SAME deterministic accent hue the workspace chip uses
   // for that organization. One engagement → no chip (no ambiguity to solve).
   const engagementChips = new Map<string, { label: string; dot: string }>(
-    (ecRows ?? []).map((e, i) => {
+    ecOrdered.map((e, i) => {
       const orgId = (e as { organization_id?: string | null }).organization_id;
       return [
         e.id,

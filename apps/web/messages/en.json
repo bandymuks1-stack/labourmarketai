@@ -11063,7 +11063,12 @@
       "chipCandidates": "Candidates",
       "chipCompanyHub": "Company workspace",
       "companyDemandNext": "The need is recorded in your company workspace. What's next?",
-      "navJournal": "Journal"
+      "navJournal": "Journal",
+      "chipTasks": "Tasks",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# task is past its due date} other {# tasks are past their due date}} — worth reviewing.",
+      "suggestLogToday": "📝 You have an active booking today but no journal entry yet — log your work.",
+      "suggestReserveTomorrow": "📅 A deadline lands tomorrow and your calendar is nearly free — I recommend reserving time.",
+      "suggestReserveTomorrowNamed": "📅 Tomorrow is the deadline for “{label}” and your calendar is nearly free — I recommend reserving time."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

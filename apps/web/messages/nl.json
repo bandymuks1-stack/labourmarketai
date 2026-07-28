@@ -11063,7 +11063,12 @@
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Bedrijfsruimte",
       "companyDemandNext": "De behoefte is vastgelegd in je bedrijfsruimte. Wat nu?",
-      "navJournal": "Logboek"
+      "navJournal": "Logboek",
+      "chipTasks": "Taken",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# taak is over de deadline} other {# taken zijn over de deadline}} — de moeite waard om te bekijken.",
+      "suggestLogToday": "📝 Je hebt vandaag een actieve boeking maar nog geen logboekvermelding — leg je werk vast.",
+      "suggestReserveTomorrow": "📅 Morgen valt een deadline en je kalender is bijna vrij — ik raad aan tijd te reserveren.",
+      "suggestReserveTomorrowNamed": "📅 Morgen is de deadline voor “{label}” en je kalender is bijna vrij — ik raad aan tijd te reserveren."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

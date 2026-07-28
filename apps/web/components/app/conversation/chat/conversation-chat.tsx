@@ -25,7 +25,7 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
-import { loadAgendaSummary } from "@/lib/conversation/agenda-summary";
+import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -70,6 +70,7 @@ export type ChatLabels = {
   chipCandidates: string;
   chipCompanyHub: string;
   companyDemandNext: string;
+  chipTasks: string;
   chipLang: string;
   chipExp: string;
   chipEdu: string;
@@ -557,18 +558,32 @@ export function ConversationChat({
   );
 
   /**
-   * Real calendar readback (Time Engine W3): the SAME canonical projection
-   * /dashboard/planning renders, summarised into the conversation — including
-   * REAL conflicts. The full calendar stays one tap away (the hint line);
-   * the chat never grows a second calendar view.
+   * The ONE work-context readback (Context Intelligence, rebuild phase 3):
+   * the canonical calendar projection PLUS the deterministic context — real
+   * conflicts, overdue deadlines, and at most two rule-based next-step
+   * suggestions rendered through the EXISTING chip mechanisms. The full
+   * calendar stays one tap away; the chat never grows a second calendar view.
    */
   const startAgenda = useCallback(() => {
     setTyping(true);
-    loadAgendaSummary(locale)
+    loadContextBrief(locale)
       .then((res) => {
         setTyping(false);
         if (res.kind === "summary") {
-          assistant(`${res.text}\n\n${labels.calendarHint}`);
+          const chips: ChoiceChip[] = res.suggestions.map((s) =>
+            s.kind === "overdue-tasks"
+              ? { id: "link:/dashboard/tasks", label: labels.chipTasks }
+              : s.kind === "log-today"
+                ? { id: "logwork", label: labels.chipLogWork }
+                : {
+                    id: `link:/dashboard/planning?view=day&date=${s.day}`,
+                    label: labels.navCalendar,
+                  },
+          );
+          assistant(
+            `${res.text}\n\n${labels.calendarHint}`,
+            chips.length > 0 ? chips : undefined,
+          );
         } else {
           assistant(labels.calendarHint);
         }
@@ -577,7 +592,7 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.calendarHint);
       });
-  }, [assistant, locale, labels.calendarHint]);
+  }, [assistant, locale, labels.calendarHint, labels.chipTasks, labels.chipLogWork, labels.navCalendar]);
 
   const handleChip = useCallback(
     (chip: ChoiceChip) => {

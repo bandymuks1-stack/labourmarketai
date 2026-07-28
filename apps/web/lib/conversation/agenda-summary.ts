@@ -10,6 +10,11 @@ import {
   buildAgenda,
   visibleRange,
 } from "@/lib/planning/planning-model";
+import {
+  buildWorkContext,
+  deriveNextBestActions,
+  type NextBestAction,
+} from "@/lib/conversation/context-intelligence";
 
 /**
  * Conversation "show my calendar" — a THIN presentation adapter over the
@@ -32,17 +37,34 @@ import {
 
 export type AgendaChatResult =
   | { kind: "blocked" }
-  | { kind: "summary"; text: string; conflictCount: number };
+  | {
+      kind: "summary";
+      text: string;
+      conflictCount: number;
+      /** Context Intelligence (rebuild phase 3): the next logical steps the
+       *  REAL data supports — the client renders them as the EXISTING chip
+       *  mechanisms (logwork chip, link: chips). Empty = nothing to suggest. */
+      suggestions: NextBestAction[];
+    };
 
 /** Bounded output: the chat shows at most this many day lines. */
 const CHAT_AGENDA_DAY_LIMIT = 5;
 /** …and at most this many items per day line. */
 const CHAT_AGENDA_ITEMS_PER_DAY = 3;
 
-export async function loadAgendaSummary(
+/**
+ * The ONE conversation readback of the user's work context (Context
+ * Intelligence Engine, rebuild phase 3). Extends the W3 agenda summary with
+ * deterministic context: overdue tasks, the nearest deadline, and at most
+ * two rule-based next-step suggestions — every line traces to a real row
+ * the canonical reads returned. Replaces the plain agenda readback (one
+ * path, no duplicate).
+ */
+export async function loadContextBrief(
   locale: string,
 ): Promise<AgendaChatResult> {
-  const range = visibleRange("agenda", new Date().toISOString().slice(0, 10));
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const range = visibleRange("agenda", todayIso);
   const planning = await getPlanning({
     rangeStart: range.start,
     rangeEnd: range.end,
@@ -58,12 +80,32 @@ export async function loadAgendaSummary(
   const agenda = buildAgenda(planning.items, new Date(), PLANNING_WINDOW_DAYS);
   const conflictCount = agenda.conflicts.length;
 
+  // Context Intelligence: derive the deterministic work context + at most
+  // two next-step suggestions from the SAME already-read rows.
+  const workContext = buildWorkContext(planning.items, todayIso);
+  const suggestions = deriveNextBestActions(workContext, todayIso);
+
+  const suggestionLines = suggestions.map((s) => {
+    switch (s.kind) {
+      case "overdue-tasks":
+        return t("suggestOverdueTasks", { count: s.count });
+      case "log-today":
+        return t("suggestLogToday");
+      case "reserve-tomorrow":
+        return s.deadlineLabel
+          ? t("suggestReserveTomorrowNamed", { label: s.deadlineLabel })
+          : t("suggestReserveTomorrow");
+    }
+  });
+
   if (agenda.days.length === 0 && conflictCount === 0) {
     const empty =
       agenda.undated.length > 0
         ? `${t("agendaEmpty", { days: PLANNING_WINDOW_DAYS })} ${t("agendaUndated", { count: agenda.undated.length })}`
         : t("agendaEmpty", { days: PLANNING_WINDOW_DAYS });
-    return { kind: "summary", text: empty, conflictCount: 0 };
+    // Even an empty forward plan can carry a real signal (overdue tasks).
+    const text = [empty, ...suggestionLines].join("\n");
+    return { kind: "summary", text, conflictCount: 0, suggestions };
   }
 
   const dayFmt = new Intl.DateTimeFormat(locale, {
@@ -91,6 +133,7 @@ export async function loadAgendaSummary(
   const hiddenDays = agenda.days.length - CHAT_AGENDA_DAY_LIMIT;
   if (hiddenDays > 0) lines.push(t("agendaMoreDays", { count: hiddenDays }));
   if (conflictCount > 0) lines.push(t("agendaConflicts", { count: conflictCount }));
+  lines.push(...suggestionLines);
 
-  return { kind: "summary", text: lines.join("\n"), conflictCount };
+  return { kind: "summary", text: lines.join("\n"), conflictCount, suggestions };
 }

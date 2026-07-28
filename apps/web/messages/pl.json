@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandydaci",
       "chipCompanyHub": "Przestrzeń firmy",
       "companyDemandNext": "Zapotrzebowanie zapisano w przestrzeni firmy. Co dalej?",
-      "navJournal": "Dziennik"
+      "navJournal": "Dziennik",
+      "chipTasks": "Zadania",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# zadanie ma przekroczony termin} few {# zadania mają przekroczony termin} other {# zadań ma przekroczony termin}} — warto przejrzeć.",
+      "suggestLogToday": "📝 Masz dziś aktywną rezerwację, ale w dzienniku nie ma jeszcze wpisu — zapisz pracę.",
+      "suggestReserveTomorrow": "📅 Jutro mija termin, a kalendarz jest prawie wolny — polecam zarezerwować czas.",
+      "suggestReserveTomorrowNamed": "📅 Jutro termin: „{label}”, a kalendarz jest prawie wolny — polecam zarezerwować czas."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

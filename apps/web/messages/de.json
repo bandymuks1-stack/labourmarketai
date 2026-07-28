@@ -11063,7 +11063,12 @@
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Unternehmensbereich",
       "companyDemandNext": "Der Bedarf ist in deinem Unternehmensbereich erfasst. Was nun?",
-      "navJournal": "Journal"
+      "navJournal": "Journal",
+      "chipTasks": "Aufgaben",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# Aufgabe ist überfällig} other {# Aufgaben sind überfällig}} — einen Blick wert.",
+      "suggestLogToday": "📝 Du hast heute eine aktive Buchung, aber noch keinen Journaleintrag — erfasse deine Arbeit.",
+      "suggestReserveTomorrow": "📅 Morgen steht eine Frist an und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren.",
+      "suggestReserveTomorrowNamed": "📅 Morgen ist die Frist für „{label}“ und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
