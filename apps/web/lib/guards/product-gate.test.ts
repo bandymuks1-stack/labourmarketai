@@ -16,11 +16,22 @@
  */
 import { describe, it, expect } from "vitest";
 import { execFileSync } from "node:child_process";
+import { readdirSync } from "node:fs";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
+import {
+  ORGANIZATION_ROLES,
+  EMPLOYMENT_MODELS,
+  ORCHESTRATION_ASSESSMENT,
+  MANDATORY_ORCHESTRATION_QUESTIONS,
+  defaultEmploymentModel,
+  executableModels,
+  assignResponsibleOrganization,
+  validateFulfilmentChain,
+} from "../product-gate/organization-roles";
 import {
   WORKSPACE_PARTS,
   FORBIDDEN_SEPARATE_SCREENS,
@@ -755,5 +766,144 @@ describe("world state UX — AI-first, one workspace, no page switching", () => 
       "utf8",
     );
     expect(map).toMatch(/WORLD_STATE_UX_ARCHITECTURE_V1/);
+  });
+});
+
+// ── 8. Organization role orchestration (owner 2026-07-28) ──────────────────
+
+describe("organization role orchestration — the chain may never break", () => {
+  const LOCK = join(repoRoot, "docs", "product", "ORGANIZATION_ROLE_ORCHESTRATION_V1.md");
+  const lock = () => readFileSync(LOCK, "utf8");
+
+  it("exists and records the decisive owner sentences 1:1", () => {
+    expect(existsSync(LOCK)).toBe(true);
+    const doc = lock();
+    for (const phrase of [
+      "Labourmarket.ai yra rinkos orkestratorius",
+      "Konkrečių įmonių pavadinimai architektūroje nėra naudojami",
+      "Viena organizacija gali turėti kelis vaidmenis vienu metu",
+      "Tokia situacija laikoma architektūros klaida",
+      "Pakanka naujai organizacijai priskirti reikiamus vaidmenis",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("declares the ten roles as a registry, not a closed type", () => {
+    expect(ORGANIZATION_ROLES).toHaveLength(10);
+    const doc = lock();
+    for (const r of ORGANIZATION_ROLES) expect(doc).toContain(r);
+  });
+
+  it("has exactly one default employment model — an undecided client always has a path", () => {
+    expect(EMPLOYMENT_MODELS.filter((m) => m.isDefault)).toHaveLength(1);
+    expect(defaultEmploymentModel().id).toBe("intermediated_employment");
+  });
+
+  it("only reports models the platform can actually execute", () => {
+    expect(executableModels([])).toEqual([]);
+    const withProvider = executableModels([
+      { organizationId: "o1", roles: ["workforce_provider"] },
+      { organizationId: "o2", roles: ["client"] },
+    ]);
+    expect(withProvider.map((m) => m.id)).toContain("intermediated_employment");
+    expect(withProvider.map((m) => m.id)).not.toContain("direct_employment");
+  });
+
+  it("BLOCKS showing a candidate with no delivery path (real availability)", () => {
+    const breaks = validateFulfilmentChain({
+      candidateId: "c1",
+      clientOrganizationId: "o2",
+      model: null,
+      responsibleOrganizationId: null,
+      available: [],
+    }).map((b) => b.code);
+    expect(breaks).toContain("no_delivery_path");
+  });
+
+  it("BLOCKS agreement with nobody responsible (expectation consistency)", () => {
+    const breaks = validateFulfilmentChain({
+      candidateId: "c1",
+      clientOrganizationId: "o2",
+      model: defaultEmploymentModel(),
+      responsibleOrganizationId: null,
+      available: [
+        { organizationId: "o1", roles: ["workforce_provider"] },
+        { organizationId: "o2", roles: ["client"] },
+      ],
+    }).map((b) => b.code);
+    expect(breaks).toContain("no_responsible_organization");
+  });
+
+  it("BLOCKS a model the platform cannot execute (AI responsibility)", () => {
+    const direct = EMPLOYMENT_MODELS.find((m) => m.id === "direct_employment")!;
+    const breaks = validateFulfilmentChain({
+      candidateId: "c1",
+      clientOrganizationId: "o2",
+      model: direct,
+      responsibleOrganizationId: "o1",
+      available: [
+        { organizationId: "o1", roles: ["workforce_provider"] },
+        { organizationId: "o2", roles: ["client"] },
+      ],
+    }).map((b) => b.code);
+    expect(breaks).toContain("model_not_executable");
+  });
+
+  it("default orchestration assigns the responsible organization automatically", () => {
+    const available = [
+      { organizationId: "o1", roles: ["workforce_provider", "payroll_provider"] },
+      { organizationId: "o2", roles: ["client"] },
+    ];
+    const org = assignResponsibleOrganization(defaultEmploymentModel(), available);
+    expect(org).toBe("o1");
+    expect(
+      validateFulfilmentChain({
+        candidateId: "c1",
+        clientOrganizationId: "o2",
+        model: defaultEmploymentModel(),
+        responsibleOrganizationId: org,
+        available,
+      }),
+    ).toEqual([]);
+  });
+
+  it("one organization may hold several roles at once", () => {
+    const org = {
+      organizationId: "o1",
+      roles: ["workforce_provider", "training_provider", "payroll_provider"],
+    };
+    expect(org.roles.length).toBeGreaterThan(1);
+    expect(
+      assignResponsibleOrganization(defaultEmploymentModel(), [
+        org,
+        { organizationId: "o2", roles: ["client"] },
+      ]),
+    ).toBe("o1");
+  });
+
+  it("is HONEST that today the platform is a single-type directory", () => {
+    expect(ORCHESTRATION_ASSESSMENT.verdict).toBe("single_type_directory");
+    expect(ORCHESTRATION_ASSESSMENT.rolesAreMultiValued).toBe(false);
+    expect(ORCHESTRATION_ASSESSMENT.addingRoleNeedsMigration).toBe(true);
+    expect(ORCHESTRATION_ASSESSMENT.employmentModelExists).toBe(false);
+    expect(ORCHESTRATION_ASSESSMENT.architectureDependsOnEntityName).toBe(false);
+    expect(lock()).toMatch(/single-type organization directory/i);
+  });
+
+  it("no LOGIC depends on a specific legal entity name (legal copy may)", () => {
+    const logicDirs = ["lib/company", "lib/matching", "lib/booking", "lib/opportunities"];
+    for (const dir of logicDirs) {
+      const full = join(webRoot, dir);
+      if (!existsSync(full)) continue;
+      for (const f of readdirSync(full).filter((x) => x.endsWith(".ts") && !x.endsWith(".test.ts"))) {
+        const src = readFileSync(join(full, f), "utf8");
+        expect(src, `${dir}/${f} hardcodes a legal entity name`).not.toMatch(/Nonstop/i);
+      }
+    }
+  });
+
+  it("declares the five orchestration answers", () => {
+    expect(MANDATORY_ORCHESTRATION_QUESTIONS).toHaveLength(5);
   });
 });
