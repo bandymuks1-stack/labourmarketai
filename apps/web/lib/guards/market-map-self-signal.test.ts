@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -48,8 +49,7 @@ describe("market map is the primary 'Žemėlapis' nav surface", () => {
   });
 
   it("the Marketplace hub links to the market map (reachability)", () => {
-    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(hub).toMatch(/\/dashboard\/market-map/);
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 });
 

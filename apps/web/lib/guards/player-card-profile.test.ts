@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { existsSync, readFileSync, readdirSync, type Dirent } from "node:fs";
 import { join } from "node:path";
 
@@ -161,9 +162,8 @@ describe("7. preferred city stays worker-owned (§20)", () => {
 
 describe("8./9. one card system, no duplicate routes, mobile-safe", () => {
   it("the standalone player-card route stays a redirect (no second surface)", () => {
-    const route = read("app/[locale]/dashboard/player-card/page.tsx");
-    expect(route).toMatch(/redirect/);
-    expect(route.length).toBeLessThan(1500);
+    // W1: the redirect-only page file is gone; the redirect itself remains.
+    expect(isCanonicallyRedirected("/dashboard/player-card", "/dashboard/journal")).toBe(true);
   });
 
   it("exactly one profile page exists under the dashboard", () => {

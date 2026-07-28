@@ -36,7 +36,6 @@ const ROOM_PAGES = [
   "profile/page.tsx",
   "buyer/page.tsx",
   "company/page.tsx",
-  "agency/page.tsx",
   "journal/page.tsx",
 ] as const;
 

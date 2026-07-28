@@ -28,7 +28,6 @@ const CRITICAL_ROUTES: { path: string; label: string }[] = [
   { path: "app/[locale]/onboarding/page.tsx", label: "onboarding" },
   { path: "app/[locale]/dashboard/page.tsx", label: "worker dashboard" },
   { path: "app/[locale]/dashboard/profile/page.tsx", label: "profile" },
-  { path: "app/[locale]/dashboard/player-card/page.tsx", label: "player card" },
   { path: "app/[locale]/dashboard/journal/page.tsx", label: "work journal" },
   { path: "app/[locale]/dashboard/inbox/page.tsx", label: "manager inbox" },
   { path: "app/[locale]/dashboard/company/page.tsx", label: "company dashboard" },

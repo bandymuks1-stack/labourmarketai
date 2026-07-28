@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -76,9 +77,7 @@ describe("ONE unified map — personal & company are layers, not separate maps",
 
   it("there is ONE map engine on the page + the marketplace route redirects to it", () => {
     expect((page.match(/<MarketMapBase\b/g) ?? []).length).toBe(1);
-    const mk = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(mk).toMatch(/redirect\(/);
-    expect(mk).toMatch(/\/dashboard\/market-map/);
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 
   it("marker pin distinguishes person vs company (kind drives the shape)", () => {

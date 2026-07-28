@@ -42,7 +42,6 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/assist": "REAL_LAUNCH_SURFACE",
   // Rebuild W5: /dashboard/assistant has been a pure redirect to /dashboard
   // since the chat-first home landed (PR #864) — classified by what it IS.
-  "dashboard/assistant": "REDIRECT_STUB",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",
   "dashboard/candidates": "REAL_LAUNCH_SURFACE",
   "dashboard/communication": "REAL_LAUNCH_SURFACE",
@@ -152,8 +151,6 @@ const CLASSIFICATION: Record<string, string> = {
 
   // ── GATED_PREVIEW (guard-enforced zero inbound links) ─────────────────
   "dashboard/talent": "GATED_PREVIEW",
-  "dashboard/visual-os": "GATED_PREVIEW",
-  "dashboard/visual-os/agency": "GATED_PREVIEW",
   "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
   // NOTE (dashboard consolidation v1): the former GATED_PREVIEW `dashboard/hub`
   // route was REMOVED. The premium hub is now the canonical /dashboard lead
@@ -171,11 +168,6 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/buyer": "DUPLICATE_DRIFT",
   "dashboard/start/buyer": "DUPLICATE_DRIFT",
   "dashboard/market/recognize": "DUPLICATE_DRIFT",
-  "dashboard/marketplace": "REDIRECT_STUB",
-  "dashboard/player-card": "REDIRECT_STUB",
-  "dashboard/agency": "REDIRECT_STUB",
-  "dashboard/agency/pool": "REDIRECT_STUB",
-  "dashboard/start/agency": "REDIRECT_STUB",
 };
 
 const APP_DIR = join(process.cwd(), "app", "[locale]");

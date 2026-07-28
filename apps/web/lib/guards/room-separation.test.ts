@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -17,7 +18,7 @@ const account = read("app/[locale]/dashboard/account/page.tsx");
 const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
 const company = read("app/[locale]/dashboard/company/page.tsx");
 const profile = read("app/[locale]/dashboard/profile/page.tsx");
-const agency = read("app/[locale]/dashboard/agency/page.tsx");
+
 const journal = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("active /dashboard room stays focused", () => {
@@ -51,10 +52,10 @@ describe("/dashboard/account is settings only (marketplace IA cleanup)", () => {
 
 describe("agency room folded into the company room (Direction A, 2026-07-05)", () => {
   it("is a redirect stub to the canonical company workspace", () => {
-    expect(agency).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
+    expect(isCanonicallyRedirected("/dashboard/agency", "/dashboard/company")).toBe(true);
   });
   it("imports no buyer / private-person / catalogue blocks", () => {
-    expect(agency).not.toMatch(/BuyerRequestsSection|getOwnCustomer\b|listOwnCustomerRequests|RoleCatalogueGrid|FeatureAvailabilityGrid/);
+    // The page is deleted, so it can import nothing at all.
   });
 });
 

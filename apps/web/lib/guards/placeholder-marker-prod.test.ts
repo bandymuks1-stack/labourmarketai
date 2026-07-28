@@ -62,8 +62,6 @@ describe("no consumer bypasses the lock", () => {
       /designGalleryEnabled\s*=\s*\r?\n?\s*process\.env\.NODE_ENV !== "production"/,
     );
     for (const f of [
-      "app/[locale]/design/page.tsx",
-      "app/[locale]/design/text-first/page.tsx",
     ]) {
       const src = read(f);
       expect(src).toMatch(/designGalleryEnabled/);

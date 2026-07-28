@@ -78,7 +78,7 @@ export function managerNextAction(
   // workspace where the owner invites a worker / sees their team.
   return {
     key: "manager_invite",
-    href: role === "company" ? "/dashboard/company" : "/dashboard/agency",
+    href: "/dashboard/company",
   };
 }
 

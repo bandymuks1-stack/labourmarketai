@@ -70,10 +70,8 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   { id: "dashboard-hub", urlPattern: "/dashboard", sourceFile: "app/[locale]/dashboard/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "worker-start", urlPattern: "/dashboard/start", sourceFile: "app/[locale]/dashboard/start/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-start", urlPattern: "/dashboard/start/company", sourceFile: "app/[locale]/dashboard/start/company/page.tsx", requiresAuth: true, kind: "role-flow" },
-  { id: "agency-start", urlPattern: "/dashboard/start/agency", sourceFile: "app/[locale]/dashboard/start/agency/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "buyer-start", urlPattern: "/dashboard/start/buyer", sourceFile: "app/[locale]/dashboard/start/buyer/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "company-dashboard", urlPattern: "/dashboard/company", sourceFile: "app/[locale]/dashboard/company/page.tsx", requiresAuth: true, kind: "role-flow" },
-  { id: "agency-dashboard", urlPattern: "/dashboard/agency", sourceFile: "app/[locale]/dashboard/agency/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "buyer-dashboard", urlPattern: "/dashboard/buyer", sourceFile: "app/[locale]/dashboard/buyer/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "profile", urlPattern: "/dashboard/profile", sourceFile: "app/[locale]/dashboard/profile/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "journal", urlPattern: "/dashboard/journal", sourceFile: "app/[locale]/dashboard/journal/page.tsx", requiresAuth: true, kind: "role-flow" },
@@ -90,7 +88,6 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // (no conversation id / data needed); a live render smoke of a real thread is
   // deliberately out of scope (would require a DB-backed conversation).
   { id: "communication-thread", urlPattern: "/dashboard/communication/[conversationId]", sourceFile: "app/[locale]/dashboard/communication/[conversationId]/page.tsx", requiresAuth: true, kind: "role-flow" },
-  { id: "marketplace", urlPattern: "/dashboard/marketplace", sourceFile: "app/[locale]/dashboard/marketplace/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "services", urlPattern: "/dashboard/services", sourceFile: "app/[locale]/dashboard/services/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR B: the request half of the service loop is a dashboard
   // module (registry-driven grid card + spine signals link here), so it joins
@@ -161,7 +158,6 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // insufficient_data / needs_migration states, never a fabricated number.
   { id: "intelligence", urlPattern: "/dashboard/intelligence", sourceFile: "app/[locale]/dashboard/intelligence/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "reports-evidence", urlPattern: "/dashboard/reports/evidence", sourceFile: "app/[locale]/dashboard/reports/evidence/page.tsx", requiresAuth: true, kind: "role-flow" },
-  { id: "player-card", urlPattern: "/dashboard/player-card", sourceFile: "app/[locale]/dashboard/player-card/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "market-map", urlPattern: "/dashboard/market-map", sourceFile: "app/[locale]/dashboard/market-map/page.tsx", requiresAuth: true, kind: "role-flow" },
 ];
 

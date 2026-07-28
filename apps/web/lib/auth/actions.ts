@@ -131,7 +131,7 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   const ROLE_DASHBOARD: Record<Role, string> = {
     worker: `/${locale}/dashboard/profile#setup-journey`,
     company: `/${locale}/dashboard/company`,
-    agency: `/${locale}/dashboard/agency`,
+    agency: `/${locale}/dashboard/company`,
     customer: `/${locale}/dashboard/buyer`,
   };
   redirect(ROLE_DASHBOARD[primary]);

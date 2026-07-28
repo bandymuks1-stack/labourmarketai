@@ -139,7 +139,7 @@ export const LABOUR_MARKET_ROLES: readonly LabourMarketRole[] = [
     canBeAddedLater: false,
     primaryFeatureKey: "agency_workspace",
     primaryRoute: "/dashboard",
-    setupRoute: "/dashboard/start/agency",
+    setupRoute: "/dashboard/start/company",
     preparingReasonKey: "roles.preparingReason.default",
     safeToShowInRoleSurfaces: false,
     sortOrder: 30,

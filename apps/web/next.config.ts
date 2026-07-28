@@ -107,13 +107,34 @@ const SECURITY_HEADERS = [
   },
 ];
 
+
+/**
+ * W1 canonical-route redirects.
+ *
+ * These six paths used to exist as redirect-only `page.tsx` files whose entire
+ * body was `redirect(...)`. The route files are gone; the URLs are NOT. Moving
+ * them here keeps every external link, bookmark and old email working while
+ * removing six App Router entries, six RSC payloads and six build outputs.
+ *
+ * `permanent: true` (308) is correct: these are canonical moves, not
+ * experiments. The locale segment is preserved so /lt/... stays /lt/...
+ */
+const W1_CANONICAL_REDIRECTS = [
+  { source: "/:locale/dashboard/assistant", destination: "/:locale/dashboard", permanent: true },
+  { source: "/:locale/dashboard/marketplace", destination: "/:locale/dashboard/market-map", permanent: true },
+  { source: "/:locale/dashboard/player-card", destination: "/:locale/dashboard/journal", permanent: true },
+  { source: "/:locale/dashboard/agency", destination: "/:locale/dashboard/company", permanent: true },
+  { source: "/:locale/dashboard/agency/pool", destination: "/:locale/dashboard/company#company-team", permanent: true },
+  { source: "/:locale/dashboard/start/agency", destination: "/:locale/dashboard/start/company", permanent: true },
+] as const;
+
 const nextConfig: NextConfig = {
   // Cross-platform safety: Vercel builds on Linux. Keep config minimal.
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
   async redirects() {
-    return LEGACY_HOST_REDIRECTS;
+    return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS];
   },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];

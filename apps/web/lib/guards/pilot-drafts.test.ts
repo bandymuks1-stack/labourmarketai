@@ -237,7 +237,6 @@ describe("Guard: no public exposure / fake matching / billing in this slice", ()
     "lib/demand/demand-drafts-actions.ts",
     "components/app/demand-draft-form.tsx",
     "app/[locale]/dashboard/company/page.tsx",
-    "app/[locale]/dashboard/agency/page.tsx",
     "app/[locale]/dashboard/buyer/page.tsx",
   ];
 

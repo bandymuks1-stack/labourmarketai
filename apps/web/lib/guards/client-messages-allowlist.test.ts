@@ -295,7 +295,6 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "business",
       "cv",
       "dashboard",
-      "design",
       "invite",
       "onboarding",
     ]);
@@ -369,8 +368,9 @@ describe("each layout ships its pick, not the full tree", () => {
     }
   });
 
-  it("dashboard + design layouts ship the FULL client pick", () => {
-    for (const seg of ["dashboard", "design"]) {
+  it("the dashboard layout ships the FULL client pick", () => {
+    // W1 deleted the /design gallery, so "dashboard" is the whole list now.
+    for (const seg of ["dashboard"]) {
       expect(layoutSrc(seg, "layout.tsx")).toMatch(
         /NextIntlClientProvider[\s\S]{0,200}?messages=\{pickClientMessages\(\s*await getMessages\(\),?\s*\)\}/,
       );

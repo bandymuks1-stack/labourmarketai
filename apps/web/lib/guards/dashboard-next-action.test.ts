@@ -62,7 +62,7 @@ describe("managerNextAction is data-driven, customerNextAction is real", () => {
   });
   it("no pending → invite (workspace by role)", () => {
     expect(managerNextAction("company", 0)).toMatchObject({ key: "manager_invite", href: "/dashboard/company" });
-    expect(managerNextAction("agency", 0)).toMatchObject({ key: "manager_invite", href: "/dashboard/agency" });
+    expect(managerNextAction("agency", 0)).toMatchObject({ key: "manager_invite", href: "/dashboard/company" });
   });
   it("customer → real requests route", () => {
     expect(customerNextAction()).toMatchObject({ key: "customer_requests", href: "/dashboard/buyer" });

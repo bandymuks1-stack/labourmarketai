@@ -77,7 +77,7 @@ export const FEATURE_ENFORCEMENT: Readonly<
   },
   worker_basic_skills: {
     kind: "free_surface",
-    site: "app/[locale]/dashboard/player-card/page.tsx",
+    site: "app/[locale]/dashboard/profile/page.tsx",
   },
   readiness_checklist_countries: {
     kind: "declared_boundary_only",
