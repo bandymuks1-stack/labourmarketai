@@ -335,6 +335,81 @@ function analyse(base) {
     }
   }
 
+  // 6b. UNIVERSE LOCK V2 — the World Map is a PLATFORM ----------------------
+  //     "Naujas objektų tipas turi būti registruojamas, o ne reikalauti Map
+  //      perprojektavimo. Jeigu naujo objekto įdiegimui reikia keisti pačią
+  //      World Map architektūrą, architektūra laikoma neteisinga."
+  const MAP_ARCH_FILES = [
+    "apps/web/lib/market-map/spatial-entities.ts",
+    "apps/web/components/app/market-map-entity-layers.tsx",
+    "apps/web/components/app/market-map-base.tsx",
+  ];
+  for (const file of MAP_ARCH_FILES) {
+    if (!modified.includes(file) && !added.includes(file)) continue;
+    const plus = addedLines(base, file);
+    const addsKind = plus.some(
+      (l) =>
+        /SPATIAL_ENTITY_KINDS|SpatialEntityKind|SpatialRenderContract/.test(l) ||
+        /^\s*"[a-z_]+",\s*$/.test(l),
+    );
+    if (addsKind) {
+      add(
+        "map_architecture_change",
+        "A-09",
+        file,
+        "a world object type is being added by editing World Map architecture. The universe lock requires types to be REGISTERED, not hardcoded — if this edit is unavoidable, the architecture is wrong and must be fixed first",
+        "certain",
+      );
+    }
+  }
+
+  // The nine universe answers must be present, and a blocking "no" stops the PR.
+  {
+    const regSrcU = read(REGISTRY);
+    const blockU = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcU)?.[0] ?? "";
+    const UNIVERSE_FIELDS = [
+      "pillar",
+      "objectType",
+      "registeredInObjectModel",
+      "hasTimeline",
+      "hasHistory",
+      "addableWithoutMapChange",
+    ];
+    for (const decl of blockU.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const field of UNIVERSE_FIELDS) {
+        if (!new RegExp(field + ":").test(decl)) {
+          add(
+            "unanswered_universe_question",
+            "A-09",
+            id,
+            'does not answer "' + field + '" — PRODUCT_UNIVERSE_LOCK_V2 requires all nine answers',
+            "certain",
+          );
+        }
+      }
+      for (const field of [
+        "registeredInObjectModel",
+        "hasTimeline",
+        "hasHistory",
+        "addableWithoutMapChange",
+      ]) {
+        if (new RegExp(field + ":\\s*false").test(decl)) {
+          add(
+            field === "addableWithoutMapChange"
+              ? "requires_map_architecture_change"
+              : "not_registered_object_type",
+            "A-09",
+            id,
+            '"' + field + '" is false — the universe lock stops this PR for human review',
+            "certain",
+          );
+        }
+      }
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
