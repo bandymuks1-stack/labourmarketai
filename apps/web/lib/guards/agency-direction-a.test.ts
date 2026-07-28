@@ -125,9 +125,10 @@ describe("route-truth-map ratchet honoured", () => {
       "dashboard/agency/pool",
       "dashboard/start/agency",
     ]) {
-      expect(truthMap).not.toMatch(
-        new RegExp(`"${route.replace(/\//g, "\\/")}":`),
-      );
+      // Plain substring, not a hand-escaped RegExp: the routes are literals,
+      // and hand-rolled escaping is the exact defect CodeQL flags
+      // (js/incomplete-sanitization — backslashes are not escaped).
+      expect(truthMap).not.toContain(`"${route}":`);
     }
     expect(truthMap).toMatch(/toBeLessThanOrEqual\(4\)/);
     expect(truthMap).not.toMatch(/toBeLessThanOrEqual\(7\)/);
