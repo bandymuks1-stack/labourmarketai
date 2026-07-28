@@ -19,6 +19,11 @@
  * required now. This is the CONTRACT that future work must satisfy, so the
  * product cannot drift into a chat-first or a map-first shape.
  *
+ * SOLE OWNER OF WORLD STATE. World State is defined here and nowhere else:
+ * the structural slots (`WORLD_STATE_SLOTS`), the filter dimensions
+ * (`KNOWN_WORLD_STATE_DIMENSIONS`), and the two blocking questions this lock
+ * owns — `reflectedOnMap` and `aiControlled`. Other locks import them.
+ *
  * Pure data + pure functions. No IO.
  */
 
@@ -84,6 +89,30 @@ export const KNOWN_WORLD_STATE_DIMENSIONS = [
   "industry",
   "radius",
 ] as const;
+
+/**
+ * WHAT WORLD STATE HOLDS — the structural slots, as opposed to the filter
+ * DIMENSIONS above. This lock owns the World State concept, so the slots live
+ * here and every other lock imports them; `UNIFIED_WORLD_MODEL_V1` references
+ * this list rather than restating it.
+ *
+ * Owner text: "World State saugo: aktyvų Avatar; aktyvią Entity; pasirinktas
+ * Entity; aktyvius filtrus; AI tikslą; Context Panel; Map būseną; Conversation
+ * būseną; aktyvius veiksmus."
+ */
+export const WORLD_STATE_SLOTS = [
+  "active_avatar",
+  "active_entity",
+  "selected_entities",
+  "active_filters",
+  "ai_goal",
+  "context_panel",
+  "map_state",
+  "conversation_state",
+  "active_actions",
+] as const;
+
+export type WorldStateSlot = (typeof WORLD_STATE_SLOTS)[number];
 
 /**
  * What the AI may change, and what it may NEVER change. This is the whole

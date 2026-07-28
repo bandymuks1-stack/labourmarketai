@@ -190,3 +190,16 @@ selects an object, asks about it and acts on it **without a single navigation**.
 
 *Locked. Amended only by explicit owner decision recorded here. Nothing was
 rewritten, migrated or built by this slice.*
+
+---
+
+## World State is defined here, and only here
+
+The structural slots the owner named live in this lock's machine half
+(`WORLD_STATE_SLOTS`), together with the filter dimensions
+(`KNOWN_WORLD_STATE_DIMENSIONS`). `UNIFIED_WORLD_MODEL_V1` **imports** them and
+does not restate them — one concept, one definition.
+
+This lock is also the canonical owner of two gate questions: **`reflectedOnMap`**
+and **`aiControlled`**. Other locks reference these fields instead of adding
+their own map/AI question.
