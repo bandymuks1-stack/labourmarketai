@@ -40,7 +40,9 @@ const CLASSIFICATION: Record<string, string> = {
   // No generation is wired (provider unconfigured + audit store gated).
   "dashboard/advanced": "REAL_LAUNCH_SURFACE",
   "dashboard/assist": "REAL_LAUNCH_SURFACE",
-  "dashboard/assistant": "REAL_LAUNCH_SURFACE",
+  // Rebuild W5: /dashboard/assistant has been a pure redirect to /dashboard
+  // since the chat-first home landed (PR #864) — classified by what it IS.
+  "dashboard/assistant": "REDIRECT_STUB",
   "dashboard/bookings": "REAL_LAUNCH_SURFACE",
   "dashboard/candidates": "REAL_LAUNCH_SURFACE",
   "dashboard/communication": "REAL_LAUNCH_SURFACE",

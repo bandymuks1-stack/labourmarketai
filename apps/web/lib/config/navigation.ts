@@ -126,41 +126,45 @@ export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
   getVisiblePrimaryNavItems();
 
 /**
- * Features whose PERSISTENT navigation belongs to the simple (conversation)
- * shell, and which therefore do not repeat in the Advanced module navbar.
+ * THE ONE CORE WORK LOOP (rebuild W5). Both shells render the SAME core
+ * destinations, in the SAME order, from THIS single source:
  *
- * WHY THESE TWO. `/dashboard/communication` and `/dashboard/planning` already
- * RENDER in the simple chrome — `DashboardChrome`'s PANEL_PREFIXES routes them
- * there — so the Advanced navbar was advertising two destinations that
- * immediately switch the user into the other shell. They were also the only
- * items duplicated as persistent nav in BOTH shells, which is what made the
- * product feel like two navigation systems bolted together.
+ *   chat (overview) → journal → calendar → messages
  *
- * NOTHING IS HIDDEN OR REMOVED:
- *   • the routes are unchanged and still deep-linkable;
- *   • they remain PERSISTENT nav items in the simple shell (header tabs on
- *     desktop, bottom nav on phones) — which is now the default home's chrome;
- *   • from Advanced they are one keystroke away in the universal command
- *     search, the same registry every other destination uses;
- *   • `VISIBLE_PRIMARY_NAV_ITEMS` is deliberately NOT filtered, so the
- *     catalogue stays the single source of truth and the F14/F15 decision
- *     ("planning and network are primary modules") still holds — this is a
- *     presentation-level de-duplication, not a demotion.
- *
- * `network` is NOT in this set: it has no simple-shell entry, so removing it
- * from the Advanced navbar would genuinely reduce its reachability.
+ * This supersedes the UX 2.0 "single persistent owner" split
+ * (SIMPLE_SHELL_OWNED_NAV_IDS): giving each destination exactly one owning
+ * shell removed the literal duplication but kept TWO DIFFERENT nav systems —
+ * the real-user test showed people lose orientation when the primary tabs
+ * change between screens. One consistent core list everywhere is the fix the
+ * owner directed ("suvienodink Simple shell / Advanced shell"); the Advanced
+ * navbar simply adds its module extras (map, network) after the same core.
  */
-export const SIMPLE_SHELL_OWNED_NAV_IDS: readonly (FeatureKey | "admin")[] = [
-  "communication",
+export const CORE_NAV_IDS: readonly FeatureKey[] = [
+  "overview",
+  "journal_text_first",
   "planning",
+  "communication",
 ];
 
-/** The Advanced module navbar's items: the catalogue minus the destinations the
- *  simple shell owns persistently. */
+/** The shared core items — the simple shell renders exactly these (plus its
+ *  Advanced escape hatch); the Advanced navbar starts with them. */
+export function getCoreNavItems(): readonly NavItem[] {
+  const byId = new Map(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => [i.id, i] as const));
+  return CORE_NAV_IDS.flatMap((id) => {
+    const item = byId.get(id);
+    return item ? [item] : [];
+  });
+}
+
+/** The Advanced module navbar's items: the SAME core first, then the
+ *  module extras (map, network) the catalogue promotes. */
 export function getAdvancedNavItems(): readonly NavItem[] {
-  return VISIBLE_PRIMARY_NAV_ITEMS.filter(
-    (i) => !SIMPLE_SHELL_OWNED_NAV_IDS.includes(i.id),
-  );
+  const core = getCoreNavItems();
+  const coreIds = new Set(core.map((i) => i.id));
+  return [
+    ...core,
+    ...VISIBLE_PRIMARY_NAV_ITEMS.filter((i) => !coreIds.has(i.id)),
+  ];
 }
 
 /**

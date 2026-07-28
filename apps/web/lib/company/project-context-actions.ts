@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnCompany } from "@/lib/company/company-workers";
-import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organization-id";
+import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 
 /**
  * First safe company-side project/client CREATE flow (v1).
@@ -53,25 +53,17 @@ export async function createProjectContextAction(
 
   const supabase = await createClient();
 
-  // W10: bind the canonical organization at creation so the project is never
-  // left org-less (the stale state the W10 backfill corrected).
-  const organizationId = await resolveOrganizationIdForCompany(supabase, company.id);
-
-  // Insert the project context (RLS double-enforces owns_company(company_id)).
-  const { data: project, error } = await supabase
-    .from("projects")
-    .insert({
-      company_id: company.id,
-      organization_id: organizationId,
-      title: name,
-      city: location,
-      status: "draft",
-    })
-    .select("id")
-    .single();
-  if (error || !project?.id) {
-    return { ok: false, code: "error", message: error?.message };
+  // Rebuild W5: BOTH project-create entry points insert through the ONE core
+  // (validation + W10 org binding + insert shape live in exactly one place).
+  const created = await insertProjectForCompany(supabase, company.id, {
+    title: name,
+    city: location,
+  });
+  if (!created.ok) {
+    if (created.reason === "invalid_title") return { ok: false, code: "invalid_name" };
+    return { ok: false, code: "error", message: created.message };
   }
+  const project = { id: created.id };
 
   // Optional client record, linked to the just-created project. project_clients
   // is not in the generated Database type yet — cast (RLS still enforces

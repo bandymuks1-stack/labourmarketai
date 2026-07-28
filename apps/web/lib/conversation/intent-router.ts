@@ -29,6 +29,7 @@ export type ConversationIntent =
   | "cv" // "įkelk šį CV" / "parodyk mano CV"
   | "profile" // "pridėk kalbą / įgūdį / patirtį"
   | "offers" // "ką man siūlo" — incoming booking offers
+  | "need-workers" // "reikia darbuotojų" — employer demand intake (rebuild W4)
   | "criteria" // "kokie kriterijai pas mane nurodyti?" — search-criteria readback
   | "next-action" // "ką dar turiu padaryti?"
   | "resume" // "kur sustojau?"
@@ -91,6 +92,23 @@ const RULES: IntentRule[] = [
       p("(objekt|statyb|site|site\\b|стройк|объект)", 1),
       // explicit journal words
       p("(žurnal|įrašyk\\s+darb|log\\s+work|записать\\s+работу)", 2),
+    ],
+  },
+  {
+    // Employer demand (rebuild W4): "I need WORKERS" must beat "I'm looking
+    // for WORK" — the worker-plural stems carry the decisive weight, so
+    // "ieškau darbuotojų" routes here while "ieškau darbo" stays find-work.
+    intent: "need-workers",
+    patterns: [
+      p("darbuotoj", 4), // LT worker stem (darbuotojas/-ų/-o…)
+      p("\\bworkers\\b", 4),
+      p("работник", 4),
+      p("сотрудник", 4),
+      p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
+      p("(нанять|наним|найм)", 3),
+      p("\\breikia\\s+žmoni", 3), // "reikia žmonių"
+      p("(darbuotojų\\s+)?poreik", 2), // "darbuotojų poreikis"
+      p("\\bbrigad", 2), // team/brigade need
     ],
   },
   {

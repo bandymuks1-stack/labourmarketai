@@ -56,7 +56,9 @@ export async function DashboardChainActions({ role }: { role: Role }) {
   } else if (role === "customer") {
     actions = [
       {
-        href: "/dashboard/buyer",
+        // Rebuild W5: no live links into DUPLICATE_DRIFT routes — the buyer's
+        // requests live in the canonical company workspace.
+        href: "/dashboard/company",
         label: t("buyerRequests"),
         desc: t("buyerRequestsDesc"),
         testId: "chain-action-buyer-requests",

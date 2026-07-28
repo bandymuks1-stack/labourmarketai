@@ -23,6 +23,9 @@ import {
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
 
 /**
  * Server dispatcher (Phase B; employer executors added in PR-E) — the ONLY
@@ -142,7 +145,10 @@ type ExecutableActionId = WorkerActionId | CompanyActionId;
  *  executor narrows its `input` from the id-matched schema, so the safe common
  *  signature takes the bottom type — the dispatcher may only pass data that
  *  came out of the SAME id's schema (enforced by the Map lookups below). */
-type AnyExecutor = (input: never, ctx: { locale: string }) => Promise<ExecResult>;
+type AnyExecutor = (
+  input: never,
+  ctx: { locale: string; workspace?: ExecWorkspace },
+) => Promise<ExecResult>;
 
 /** The dispatcher only needs the validate seam of a schema. */
 type AnyActionSchema = {
@@ -271,9 +277,22 @@ export async function dispatchWorkerAction(
   // js/unvalidated-dynamic-method-call recognizes for a callee resolved
   // by a caller-supplied key - the call target is provably a function.
   if (typeof executor !== "function") return { ok: false, code: "not_executable" };
+
+  // Rebuild W4: every executor receives the ACTIVE WORKSPACE, resolved
+  // server-side from the canonical resolver (never client-supplied). Employer
+  // actions resolve with the company-identity fallback (first owned org while
+  // the pointer migration is unapplied); worker actions default personal.
+  const isEmployerAction =
+    actionId.startsWith("company.") || actionId.startsWith("agency.");
+  const ws = await getWorkspaceContext(isEmployerAction ? "company" : "person");
+  const workspace: ExecWorkspace = {
+    organizationId:
+      ws.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? null : ws.activeWorkspaceId,
+  };
+
   // `parsed.data` came out of the SAME id's schema (schemaOf/executorOf share
   // the own-property key check), so this is the id-matched input by
   // construction; `never` is the safe common parameter type, not a cast away
   // from validation.
-  return executor(parsed.data as never, { locale: opts?.locale ?? "lt" });
+  return executor(parsed.data as never, { locale: opts?.locale ?? "lt", workspace });
 }

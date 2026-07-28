@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageSquare, Mail, Calendar, SlidersHorizontal } from "lucide-react";
+import { MessageSquare, Mail, Calendar, NotebookPen, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { getCoreNavItems } from "@/lib/config/navigation";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { useAuthOptional } from "@/lib/auth/context";
 import { HeaderSearch } from "@/components/app/header-search";
@@ -15,27 +16,45 @@ import { iconControl } from "./icon-scale";
 
 export type ConversationNavLabels = {
   chat: string;
+  journal: string;
   messages: string;
   calendar: string;
   profile: string;
   advanced: string;
 };
 
-/** The five simple-mode destinations, in canonical order. `href` is matched
- *  against the locale-stripped pathname so the active tab is correct on the
- *  conversation home AND on the panel routes (communication/planning/profile)
- *  that share this header via the (panels) simple shell. */
-const NAV = [
-  { key: "chat", href: "/dashboard", icon: MessageSquare },
-  { key: "messages", href: "/dashboard/communication", icon: Mail },
-  { key: "calendar", href: "/dashboard/planning", icon: Calendar },
-] as const;
+/**
+ * The simple-mode destinations = THE ONE CORE WORK LOOP from the shared nav
+ * source (rebuild W5): chat → journal → calendar → messages. Hrefs and order
+ * come from `getCoreNavItems()` — the SAME list the Advanced navbar starts
+ * with — so the primary tabs never change identity between shells. Only the
+ * short labels are shell-local (the conversation label bag).
+ */
+const CORE_LABEL_KEY: Record<string, keyof ConversationNavLabels> = {
+  overview: "chat",
+  journal_text_first: "journal",
+  planning: "calendar",
+  communication: "messages",
+};
+const CORE_ICON: Record<keyof ConversationNavLabels, typeof MessageSquare> = {
+  chat: MessageSquare,
+  journal: NotebookPen,
+  calendar: Calendar,
+  messages: Mail,
+  profile: MessageSquare, // unused (profile renders the initials avatar)
+  advanced: SlidersHorizontal,
+};
+const NAV = getCoreNavItems().flatMap((item) => {
+  const key = CORE_LABEL_KEY[item.id];
+  return key ? [{ key, href: item.href, icon: CORE_ICON[key] }] : [];
+});
 
 function useActiveHref(): string {
   const pathname = usePathname();
   // Longest-prefix match so /dashboard/communication beats /dashboard.
   if (pathname.startsWith("/dashboard/communication")) return "/dashboard/communication";
   if (pathname.startsWith("/dashboard/planning")) return "/dashboard/planning";
+  if (pathname.startsWith("/dashboard/journal")) return "/dashboard/journal";
   if (pathname.startsWith("/dashboard/profile")) return "/dashboard/profile";
   if (pathname.startsWith("/dashboard/advanced")) return "/dashboard/advanced";
   return "/dashboard";
@@ -165,16 +184,18 @@ function NavTab({ href, label, icon, active }: { href: string; label: string; ic
   );
 }
 
-/** Mobile simple-mode bottom navigation — the 5 canonical destinations. */
+/** Mobile simple-mode bottom navigation — the SAME core loop as the desktop
+ *  tabs (chat · journal · calendar · messages) + the Advanced escape hatch.
+ *  Profile is NOT a bottom slot: the header avatar (always visible, incl.
+ *  mobile) is its one persistent entry — no duplicated navigation. */
 export function ConversationBottomNav({ nav, mobile = false }: { nav: ConversationNavLabels; mobile?: boolean }) {
   const active = useActiveHref();
-  const auth = useAuthOptional();
-  const initials = personMonogram(auth?.profile?.full_name ?? null);
   const items = [
-    { href: "/dashboard", label: nav.chat, icon: <MessageSquare {...iconControl()} aria-hidden /> },
-    { href: "/dashboard/communication", label: nav.messages, icon: <Mail {...iconControl()} aria-hidden /> },
-    { href: "/dashboard/planning", label: nav.calendar, icon: <Calendar {...iconControl()} aria-hidden /> },
-    { href: "/dashboard/profile", label: nav.profile, icon: <span className="flex size-5 items-center justify-center text-meta font-bold">{initials}</span> },
+    ...NAV.map(({ key, href, icon: Icon }) => ({
+      href,
+      label: nav[key],
+      icon: <Icon {...iconControl()} aria-hidden />,
+    })),
     { href: "/dashboard/advanced", label: nav.advanced, icon: <SlidersHorizontal {...iconControl()} aria-hidden /> },
   ];
   return (

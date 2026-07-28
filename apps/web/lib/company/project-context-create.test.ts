@@ -49,7 +49,9 @@ describe("3 — no billing/payment/env/auth/outbound surfaces touched", () => {
 describe("4 — create is scoped to the company/org context (server-resolved)", () => {
   it("resolves the company server-side and never trusts a client company id", () => {
     expect(actionCode).toMatch(/getOwnCompany\(\)/);
-    expect(actionCode).toMatch(/company_id: company\.id/);
+    // Rebuild W5: the insert itself moved into THE ONE create core; the
+    // server-resolved company id is what gets handed to it.
+    expect(actionCode).toMatch(/insertProjectForCompany\(supabase, company\.id/);
     // company_id is not read from formData.
     expect(actionCode).not.toMatch(/formData\.get\(["']company_id["']\)|formData\.get\(["']org/);
   });
@@ -72,12 +74,14 @@ describe("6 — no worker-side project mutation introduced", () => {
 });
 
 describe("7 — server-side validation rejects a missing project name", () => {
-  it("validates name length before any insert", () => {
+  it("validates name length before any insert (action + shared core)", () => {
     expect(actionCode).toMatch(/name\.length < NAME_MIN/);
     expect(actionCode).toMatch(/code: "invalid_name"/);
-    // validation occurs before the insert call
-    const validIdx = actionCode.indexOf('"invalid_name"');
-    const insertIdx = actionCode.indexOf('.from("projects")');
+    // Rebuild W5: the insert lives in the shared core, which validates the
+    // title BEFORE the insert — one rule for every entry point.
+    const core = read("lib/projects/create-project-core.ts");
+    const validIdx = core.indexOf('"invalid_title"');
+    const insertIdx = core.indexOf('.from("projects")');
     expect(validIdx).toBeGreaterThan(-1);
     expect(insertIdx).toBeGreaterThan(validIdx);
   });
@@ -92,10 +96,17 @@ describe("8 — project count/read state uses real data only", () => {
 });
 
 describe("create writes ONLY projects (+ optional project_clients), no service_role", () => {
-  it("inserts into projects and optionally project_clients, nothing else", () => {
+  it("inserts into projects (via the ONE core) and optionally project_clients, nothing else", () => {
+    // Rebuild W5: the projects insert lives in the shared core; the action
+    // itself touches only project_clients directly.
     const inserts = [...actionCode.matchAll(/\.from\("([a-z_]+)"\)/g)].map((m) => m[1]);
-    expect(new Set(inserts)).toEqual(new Set(["projects", "project_clients"]));
+    expect(new Set(inserts)).toEqual(new Set(["project_clients"]));
+    expect(actionCode).toMatch(/insertProjectForCompany/);
+    const core = read("lib/projects/create-project-core.ts");
+    const coreInserts = [...core.matchAll(/\.from\("([a-z_]+)"\)/g)].map((m) => m[1]);
+    expect(new Set(coreInserts)).toEqual(new Set(["projects"]));
     expect(actionCode).not.toMatch(/service_role|createServiceClient|admin client/i);
+    expect(core).not.toMatch(/service_role|createServiceClient/i);
   });
 });
 

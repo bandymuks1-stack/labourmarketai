@@ -23,6 +23,12 @@ export interface ManagedProject {
   id: string;
   title: string | null;
   city: string | null;
+  /** Workspace context (rebuild W6): which organization the project belongs
+   *  to — rendered as a labelled accent chip when the caller manages MORE
+   *  than one org, so a mixed list is never ambiguous. Null → legacy row
+   *  without an org binding (never fabricated). */
+  organizationId: string | null;
+  orgName: string | null;
 }
 
 export interface ProjectAssignment {
@@ -45,15 +51,28 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
 
   const res = await asAny(supabase)
     .from("projects")
-    .select("id, title, city")
+    .select(
+      "id, title, city, organization_id, organizations(display_name, legal_name)",
+    )
     .order("created_at", { ascending: false })
     .limit(100);
   if (res.error) return [];
-  type Row = { id: string; title: string | null; city: string | null };
+  type Row = {
+    id: string;
+    title: string | null;
+    city: string | null;
+    organization_id: string | null;
+    organizations: { display_name: string | null; legal_name: string | null } | null;
+  };
   return ((res.data ?? []) as Row[]).map((p) => ({
     id: p.id,
     title: p.title ?? null,
     city: p.city ?? null,
+    organizationId: p.organization_id ?? null,
+    orgName:
+      p.organizations?.display_name?.trim() ||
+      p.organizations?.legal_name?.trim() ||
+      null,
   }));
 }
 

@@ -149,6 +149,7 @@ export default async function DashboardLayout({
   const tFooter = await getTranslations("footer");
   const nav: ConversationNavLabels = {
     chat: tChat("navChat"),
+    journal: tChat("navJournal"),
     messages: tChat("navMessages"),
     calendar: tChat("navCalendar"),
     profile: tChat("navProfile"),

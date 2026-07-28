@@ -19,6 +19,9 @@ import {
   type WorkLogLabels,
 } from "@/components/app/conversation/worker-worklog-flow";
 import { getWorkerForm } from "@/lib/conversation/worker-forms";
+import { getCompanyForm } from "@/lib/conversation/company-forms";
+import { baseIdentityForRole } from "@/lib/config/roles";
+import { useRouter } from "@/lib/i18n/navigation";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
@@ -47,6 +50,7 @@ export type ChatLabels = {
   speakerYou: string;
   advanced: string;
   navChat: string;
+  navJournal: string;
   navMessages: string;
   navCalendar: string;
   navProfile: string;
@@ -60,6 +64,12 @@ export type ChatLabels = {
   chipOffers: string;
   chipLogWork: string;
   userLogWork: string;
+  chipAgenda: string;
+  userAgenda: string;
+  chipNeedWorkers: string;
+  chipCandidates: string;
+  chipCompanyHub: string;
+  companyDemandNext: string;
   chipLang: string;
   chipExp: string;
   chipEdu: string;
@@ -128,18 +138,39 @@ export function ConversationChat({
   /** Force the phone layout — used by the mobile design preview frame. */
   mobile?: boolean;
 }) {
+  const auth0 = useAuthOptional();
+  const router = useRouter();
+  /** The active base identity decides which WORK the greeting offers
+   *  (rebuild W4): an employer gets employer starters, a worker gets worker
+   *  starters — same window, same dispatcher, no second entry point. */
+  const identity = auth0?.activeRole
+    ? (baseIdentityForRole(auth0.activeRole) ?? "person")
+    : "person";
+
   const starterChips: ChoiceChip[] = useMemo(
-    () => [
-      // Logging work is the product's PRIMARY worker action (the journal is
-      // the spine) — it must be one tap from the greeting, not a sentence the
-      // deterministic router has to recognise (real-user workflow rebuild W3).
-      { id: "logwork", label: labels.chipLogWork },
-      { id: "cv", label: labels.chipCv },
-      { id: "jobs", label: labels.chipJobs },
-      { id: "profile", label: labels.chipProfile },
-      { id: "offers", label: labels.chipOffers },
-    ],
-    [labels],
+    () =>
+      identity === "company"
+        ? [
+            // The employer's primary action — the canonical demand intake as
+            // an inline conversation form (company.create-demand executor).
+            { id: "f:company.create-demand", label: labels.chipNeedWorkers },
+            { id: "agenda", label: labels.chipAgenda },
+            // Contextual navigation to the REAL canonical surfaces (not new
+            // entry points): candidate scouting and the company workspace.
+            { id: "link:/dashboard/company/scouting", label: labels.chipCandidates },
+            { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+          ]
+        : [
+            // Logging work is the product's PRIMARY worker action (the journal
+            // is the spine) — one tap from the greeting (rebuild W3).
+            { id: "logwork", label: labels.chipLogWork },
+            { id: "cv", label: labels.chipCv },
+            { id: "jobs", label: labels.chipJobs },
+            { id: "agenda", label: labels.chipAgenda },
+            { id: "profile", label: labels.chipProfile },
+            { id: "offers", label: labels.chipOffers },
+          ],
+    [labels, identity],
   );
 
   /**
@@ -292,23 +323,40 @@ export function ConversationChat({
     }, 350);
   }, []);
 
+  /** Contextual follow-up after the employer demand form: where the demand
+   *  lives + describe another need — real next steps, not a generic menu. */
+  const companyFollowup = useCallback(() => {
+    assistant(labels.companyDemandNext, [
+      { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+      { id: "f:company.create-demand", label: labels.chipNeedWorkers },
+    ]);
+  }, [assistant, labels.companyDemandNext, labels.chipCompanyHub, labels.chipNeedWorkers]);
+
   const openForm = useCallback(
     (actionId: string) => {
-      const spec = getWorkerForm(actionId);
+      // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
+      // specs share InlineActionForm + the canonical dispatcher.
+      const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
       if (spec) {
+        const isEmployer =
+          actionId.startsWith("company.") || actionId.startsWith("agency.");
         pushEmbed(
           <InlineActionForm
             spec={spec}
             locale={locale}
-            // Closing a profile form re-reads the REAL state: the summary that
-            // follows shows what actually changed and recommends the next gap —
-            // not a generic menu (contextual-CTA rule).
-            onClose={() => startProfileSummaryRef.current("profile")}
+            // Closing a form shows the contextual next step, never a generic
+            // menu: worker forms re-read the REAL profile state; the employer
+            // demand form offers the real demand follow-ups.
+            onClose={
+              isEmployer
+                ? companyFollowup
+                : () => startProfileSummaryRef.current("profile")
+            }
           />,
         );
       }
     },
-    [locale, pushEmbed],
+    [locale, pushEmbed, companyFollowup],
   );
   /** Late-bound ref so openForm (declared earlier) can call the summary
    *  (declared later) without a dependency cycle. */
@@ -441,11 +489,14 @@ export function ConversationChat({
   useEffect(() => {
     if (script || openedWithStateRef.current) return;
     if (!auth?.profile) return; // signed-out: nothing real to show
+    // Employer identity opens with the employer starters — the worker
+    // profile-summary read would be the wrong audience (rebuild W4).
+    if (identity !== "person") return;
     openedWithStateRef.current = true;
     // quiet: a company account (no worker profile) opens with the plain
     // greeting instead of a wrong-audience message.
     startProfileSummaryRef.current("resume", { quiet: true });
-  }, [script, auth?.profile]);
+  }, [script, auth?.profile, identity]);
 
   /**
    * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's
@@ -505,6 +556,29 @@ export function ConversationChat({
     [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog],
   );
 
+  /**
+   * Real calendar readback (Time Engine W3): the SAME canonical projection
+   * /dashboard/planning renders, summarised into the conversation — including
+   * REAL conflicts. The full calendar stays one tap away (the hint line);
+   * the chat never grows a second calendar view.
+   */
+  const startAgenda = useCallback(() => {
+    setTyping(true);
+    loadAgendaSummary(locale)
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "summary") {
+          assistant(`${res.text}\n\n${labels.calendarHint}`);
+        } else {
+          assistant(labels.calendarHint);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.calendarHint);
+      });
+  }, [assistant, locale, labels.calendarHint]);
+
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
@@ -513,6 +587,11 @@ export function ConversationChat({
           // Opens the SAME deterministic work-log flow the typed sentence
           // reaches; an empty draft asks the one concrete clarify question.
           withTyping(() => startWorkLog(""));
+          break;
+        case "agenda":
+          user(labels.userAgenda);
+          // The same canonical Time Engine readback the typed intent reaches.
+          startAgenda();
           break;
         case "cv":
           user(labels.userCv);
@@ -557,34 +636,16 @@ export function ConversationChat({
         default:
           if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
+          } else if (chip.id.startsWith("link:")) {
+            // Contextual navigation to a REAL canonical surface (rebuild W4)
+            // — the chat routes to the one existing screen, it never grows a
+            // duplicate view of it.
+            router.push(chip.id.slice(5) as "/dashboard");
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, router],
   );
-
-  /**
-   * Real calendar readback (Time Engine W3): the SAME canonical projection
-   * /dashboard/planning renders, summarised into the conversation — including
-   * REAL conflicts. The full calendar stays one tap away (the hint line);
-   * the chat never grows a second calendar view.
-   */
-  const startAgenda = useCallback(() => {
-    setTyping(true);
-    loadAgendaSummary(locale)
-      .then((res) => {
-        setTyping(false);
-        if (res.kind === "summary") {
-          assistant(`${res.text}\n\n${labels.calendarHint}`);
-        } else {
-          assistant(labels.calendarHint);
-        }
-      })
-      .catch(() => {
-        setTyping(false);
-        assistant(labels.calendarHint);
-      });
-  }, [assistant, locale, labels.calendarHint]);
 
   const handleSend = useCallback(
     (text: string) => {
@@ -616,6 +677,16 @@ export function ConversationChat({
           case "cv":
             handleChip({ id: "cv", label: "" });
             break;
+          case "need-workers":
+            // Employer demand (rebuild W4): the canonical intake as an inline
+            // form — for the employer identity only; a worker typing about
+            // workers gets the honest fallback, never a wrong-audience form.
+            if (identity === "company") {
+              openForm("company.create-demand");
+            } else {
+              assistant(labels.fallback, starterChips);
+            }
+            break;
           case "offers":
             handleChip({ id: "offers", label: "" });
             break;
@@ -642,11 +713,12 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, openForm, identity],
   );
 
   const nav = {
     chat: labels.navChat,
+    journal: labels.navJournal,
     messages: labels.navMessages,
     calendar: labels.navCalendar,
     profile: labels.navProfile,

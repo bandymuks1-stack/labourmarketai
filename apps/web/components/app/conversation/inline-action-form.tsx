@@ -8,7 +8,10 @@ import {
   type FormState,
   type WorkerFormSpec,
 } from "@/lib/conversation/worker-forms";
-import { dispatchWorkerAction } from "@/lib/conversation/dispatch";
+import {
+  dispatchWorkerAction,
+  prepareConfirmationAction,
+} from "@/lib/conversation/dispatch";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -70,7 +73,28 @@ export function InlineActionForm({
   function save() {
     start(async () => {
       const input = spec.build(values);
-      const res = await dispatchWorkerAction(spec.actionId, input, { locale });
+      // IMPORTANT/STRONG tiers (rebuild W4): the REVIEW step the user just
+      // confirmed is backed by a fresh one-time server token — the dispatcher
+      // refuses the write without it, and a stale/replayed token is rejected.
+      let confirmationToken: string | undefined;
+      if (spec.requiresConfirmation) {
+        const prep = await prepareConfirmationAction(spec.actionId, input);
+        if (!prep.ok) {
+          setPhase({
+            kind: "error",
+            message:
+              prep.code === "invalid"
+                ? t("conversation.forms.ui.errorInvalid")
+                : t("conversation.forms.ui.errorGeneric"),
+          });
+          return;
+        }
+        confirmationToken = prep.token;
+      }
+      const res = await dispatchWorkerAction(spec.actionId, input, {
+        locale,
+        confirmationToken,
+      });
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.profileSaved, {
           surface: "conversation",

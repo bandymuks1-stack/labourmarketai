@@ -6,12 +6,14 @@ import type { WorkLogLabels } from "@/components/app/conversation/worker-worklog
 type T = Awaited<ReturnType<typeof getTranslations>>;
 
 const CHAT_KEYS = [
-  "headerTitle", "assistantName", "speakerYou", "advanced", "navChat", "navMessages", "navCalendar", "navProfile",
+  "headerTitle", "assistantName", "speakerYou", "advanced", "navChat", "navJournal", "navMessages", "navCalendar", "navProfile",
   "composerPlaceholder", "send", "attach", "greeting",
   "chipCv", "chipJobs", "chipProfile", "chipOffers", "chipLang",
   "chipExp", "chipEdu", "chipCard", "chipPrefs", "offersEmpty",
   "fallback", "userCv", "userProfile", "userOffers", "userJobs",
   "chipLogWork", "userLogWork",
+  "chipAgenda", "userAgenda", "chipNeedWorkers", "chipCandidates",
+  "chipCompanyHub", "companyDemandNext",
   "clarifyWorkLog", "calendarHint", "reminderBlocked", "translateBlocked",
   "writeEmployerHint",
 ] as const;

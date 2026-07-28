@@ -4,6 +4,11 @@ import { MapPin, MessageSquare, Users } from "lucide-react";
 
 import type { ProjectMapCard } from "@/lib/projects/map";
 import { CountUp } from "@/components/app/today/count-up";
+import {
+  WORKSPACE_ACCENT_DOT,
+  WORKSPACE_PERSONAL_DOT,
+} from "@/components/app/conversation/chat/workspace-chip";
+import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 
 /**
  * Manager MAP (TASK 07 slice 2 — MAP → ARENA → DRAFT). The infrastructure
@@ -21,6 +26,12 @@ export async function ProjectMap({
 }) {
   const t = await getTranslations("projects.map");
   if (projects.length === 0) return null;
+
+  // Workspace context (rebuild W6): a manager of SEVERAL organizations sees
+  // which org each project belongs to — same deterministic accent hue as the
+  // workspace chip. One org → no chip (nothing ambiguous to label).
+  const distinctOrgs = new Set(projects.map((p) => p.organizationId ?? "—"));
+  const showOrg = distinctOrgs.size > 1;
 
   return (
     <section className="flex flex-col gap-3" data-testid="project-map">
@@ -42,6 +53,25 @@ export async function ProjectMap({
               <span className="font-display text-lg font-semibold tracking-tightest text-text-primary">
                 {p.title ?? t("untitled")}
               </span>
+              {showOrg && p.orgName ? (
+                <span
+                  className="inline-flex items-center gap-1.5 text-[11px] text-text-muted"
+                  data-testid={`project-org-context-${p.id}`}
+                >
+                  <span
+                    className={`size-2 flex-none rounded-full ${
+                      p.organizationId
+                        ? WORKSPACE_ACCENT_DOT[
+                            workspaceAccentIndex(p.organizationId) %
+                              WORKSPACE_ACCENT_DOT.length
+                          ]
+                        : WORKSPACE_PERSONAL_DOT
+                    }`}
+                    aria-hidden
+                  />
+                  {p.orgName}
+                </span>
+              ) : null}
               {p.city ? (
                 <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
