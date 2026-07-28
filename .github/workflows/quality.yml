@@ -88,6 +88,23 @@ jobs:
       - name: i18n debt ratchet
         run: pnpm check:i18n-debt
 
+      # Product Gate (Product Constitution enforcement, P0).
+      #
+      # Diffs the PR for NEW product surfaces (screens, menu items, dashboard
+      # elements, popups, modules, wizards, persistent cards). Each must be
+      # declared in apps/web/lib/product-gate/surface-registry.ts with its
+      # origin axiom, purpose, why-not-chat, why-not-existing-component and
+      # owner. Any automatic RED rule (docs/PRODUCT_CONSTITUTION.md 13.3) sets
+      # PRODUCT_REVIEW_REQUIRED and blocks the merge. Always writes
+      # PRODUCT_ARCHITECTURE_DIFF.md for the reviewer.
+      - name: Product gate (constitution enforcement)
+        run: node .github/scripts/product-gate.mjs
+        env:
+          BASE_SHA: origin/${{ github.base_ref || 'main' }}
+
+      - name: Product gate self-test (detectors must fire)
+        run: node .github/scripts/product-gate.mjs --self-test
+
       # Anon SECURITY DEFINER allowlist — LIVE half.
       #
       # The static half already runs above inside `pnpm -F web test`
