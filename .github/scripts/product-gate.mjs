@@ -432,7 +432,7 @@ function analyse(base) {
           add("unanswered_universe_question", "A-01", id,
             'does not answer "' + field + '" — WORLD_STATE_UX_ARCHITECTURE_V1 requires all five answers',
             "certain");
-        } else if (new RegExp(field + ":\s*false").test(decl)) {
+        } else if (new RegExp(field + ":\\s*false").test(decl)) {
           add(code, "A-01", id,
             '"' + field + '" is false — AI-first, one workspace, no page switching',
             "certain");
@@ -533,6 +533,12 @@ function selfTest() {
     ["screen", IS_SCREEN.test("apps/web/app/[locale]/dashboard/x/page.tsx")],
     ["route", routeOf("apps/web/app/[locale]/dashboard/x/page.tsx") === "/dashboard/x"],
     ["route_group", routeOf("apps/web/app/[locale]/(marketing)/pricing/page.tsx") === "/pricing"],
+    // Regression guard: a dynamically built regex must really match. CodeQL
+    // caught `field + ":\s*false"` written as `":\s*false"` in a string
+    // literal, where \s degrades to a plain "s" — the rule silently never
+    // fired. A gate rule that cannot fire is worse than no rule.
+    ["dynamic_false_regex", new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: false,")],
+    ["dynamic_false_regex_negative", !new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: true,")],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {
