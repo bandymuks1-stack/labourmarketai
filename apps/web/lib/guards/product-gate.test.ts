@@ -20,6 +20,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
   AXIOMS,
   axiom,
@@ -43,6 +44,8 @@ const repoRoot = resolve(webRoot, "..", "..");
 const CONSTITUTION = join(repoRoot, "docs", "PRODUCT_CONSTITUTION.md");
 const GATE = join(repoRoot, ".github", "scripts", "product-gate.mjs");
 const AUDIT = join(repoRoot, "docs", "audits", "product-constitution-audit-v1.md");
+const VISION_LOCK = join(repoRoot, "docs", "product", "PRODUCT_VISION_LOCK_V1.md");
+const ASSIGNMENT = join(repoRoot, "docs", "audits", "product-vision-surface-assignment-v1.md");
 
 const constitution = () => readFileSync(CONSTITUTION, "utf8");
 
@@ -114,8 +117,14 @@ describe("product gate — the declaration contract", () => {
       whyNotExistingComponent: "No existing surface renders a paginated PDF.",
       owner: "product owner",
       ownsAction: "view_signed_contract",
+      worldElement: "documents" as const,
+      whyNotExistingElement: "No existing element renders a paginated legal document.",
+      chatIntegration: "The conversation opens it and closes it when the user is done.",
+      avatarEffect: "The signed contract is attached to the avatar's document set.",
+      mapEffect: "None — a contract is not a place; it belongs to the avatar.",
+      journalRelation: "Signing is recorded as a journal event on the engagement.",
     };
-    expect(validateDeclarations([ok], axiomIds())).toEqual([]);
+    expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
 
   it("REJECTS a declaration that cannot answer why-not-chat", () => {
@@ -124,8 +133,14 @@ describe("product gate — the declaration contract", () => {
       purpose: "Some new screen for things",
       whyNotChat: "", whyNotExistingComponent: "Nothing else does it", owner: "someone",
       ownsAction: null,
+      worldElement: "documents" as const,
+      whyNotExistingElement: "No existing element renders a paginated legal document.",
+      chatIntegration: "The conversation opens it and closes it when the user is done.",
+      avatarEffect: "The signed contract is attached to the avatar's document set.",
+      mapEffect: "None — a contract is not a place; it belongs to the avatar.",
+      journalRelation: "Signing is recorded as a journal event on the engagement.",
     } as SurfaceDeclaration;
-    expect(validateDeclarations([bad], axiomIds()).map((p) => p.code)).toContain(
+    expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
     );
   });
@@ -137,8 +152,14 @@ describe("product gate — the declaration contract", () => {
       whyNotChat: "Because it is a spatial map, not a sentence.",
       whyNotExistingComponent: "No map surface exists yet.",
       owner: "product owner", ownsAction: null,
+      worldElement: "documents" as const,
+      whyNotExistingElement: "No existing element renders a paginated legal document.",
+      chatIntegration: "The conversation opens it and closes it when the user is done.",
+      avatarEffect: "The signed contract is attached to the avatar's document set.",
+      mapEffect: "None — a contract is not a place; it belongs to the avatar.",
+      journalRelation: "Signing is recorded as a journal event on the engagement.",
     } as SurfaceDeclaration;
-    expect(validateDeclarations([bad], axiomIds()).map((p) => p.code)).toContain("unknown_axiom");
+    expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
 
   it("REJECTS two surfaces owning the same action (A-08: one function, one home)", () => {
@@ -148,6 +169,12 @@ describe("product gate — the declaration contract", () => {
       whyNotChat: "It is the fallback for users who refuse the conversation.",
       whyNotExistingComponent: "The existing form is company-only.",
       owner: "product owner", ownsAction: "create_demand",
+      worldElement: "documents" as const,
+      whyNotExistingElement: "No existing element renders a paginated legal document.",
+      chatIntegration: "The conversation opens it and closes it when the user is done.",
+      avatarEffect: "The signed contract is attached to the avatar's document set.",
+      mapEffect: "None — a contract is not a place; it belongs to the avatar.",
+      journalRelation: "Signing is recorded as a journal event on the engagement.",
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -163,8 +190,14 @@ describe("product gate — the declaration contract", () => {
       whyNotChat: "A map cannot be a sentence.",
       whyNotExistingComponent: "No other map exists.",
       owner: "", ownsAction: null,
+      worldElement: "documents" as const,
+      whyNotExistingElement: "No existing element renders a paginated legal document.",
+      chatIntegration: "The conversation opens it and closes it when the user is done.",
+      avatarEffect: "The signed contract is attached to the avatar's document set.",
+      mapEffect: "None — a contract is not a place; it belongs to the avatar.",
+      journalRelation: "Signing is recorded as a journal event on the engagement.",
     };
-    const problems = validateDeclarations([d, d], axiomIds()).map((p) => p.code);
+    const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
     expect(problems).toContain("empty_owner");
   });
@@ -260,5 +293,113 @@ describe("product gate — the pre-existing baseline", () => {
     for (const m of doc.matchAll(/\bA-\d\d\b/g)) {
       expect(axiom(m[0]), `audit cites unknown axiom ${m[0]}`).not.toBeNull();
     }
+  });
+});
+
+// ── 5. The vision lock (owner text, 2026-07-28) ────────────────────────────
+
+describe("product vision lock — the highest product design authority", () => {
+  const lock = () => readFileSync(VISION_LOCK, "utf8");
+
+  it("exists and declares itself above the Product Constitution", () => {
+    expect(existsSync(VISION_LOCK)).toBe(true);
+    const doc = lock();
+    expect(doc).toMatch(/HIGHEST PRODUCT DESIGN AUTHORITY/i);
+    expect(doc).toContain("PRODUCT_CONSTITUTION.md");
+  });
+
+  it("records the owner text 1:1, not a paraphrase", () => {
+    const doc = lock();
+    // Sentences that decide product structure must survive verbatim.
+    for (const phrase of [
+      "Negali būti antro AI",
+      "Inbox nėra produktas",
+      "Bookings nėra produktas",
+      "Requests nėra produktas",
+      "Candidates nėra produktas",
+      "Map tampa pagrindiniu pasaulio atvaizdavimu",
+      "Objektai turi savo istoriją",
+      "Dashboard nėra darbo vieta",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("declares exactly the twelve world elements, matching the code", () => {
+    expect(WORLD_ELEMENTS).toHaveLength(12);
+    const doc = lock();
+    for (const e of WORLD_ELEMENTS) {
+      expect(doc, `${e.id} missing from the vision lock`).toContain(e.id);
+      expect(e.definition.length).toBeGreaterThan(30);
+    }
+    expect(new Set(worldElementIds()).size).toBe(12);
+  });
+
+  it("states the six mandatory questions and the prohibition list", () => {
+    const doc = lock();
+    expect(MANDATORY_PR_QUESTIONS).toHaveLength(6);
+    for (const f of ["worldElement", "whyNotExistingElement", "chatIntegration",
+                     "avatarEffect", "mapEffect", "journalRelation"]) {
+      expect(doc, `field ${f} not documented`).toContain(f);
+    }
+    expect(FORBIDDEN_CREATIONS.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("the gate enforces the six answers and refuses a second AI", () => {
+    const gateSrc = readFileSync(GATE, "utf8");
+    for (const code of ["unanswered_vision_question", "no_world_element", "second_ai"]) {
+      expect(gateSrc, `${code} not implemented`).toContain(code);
+      expect(lock(), `${code} not documented`).toContain(code);
+    }
+  });
+
+  it("REJECTS a declaration that names no valid world element", () => {
+    const bad = {
+      id: "/x", kind: "screen" as const, originAxiom: "A-09" as const,
+      purpose: "A surface that belongs to nothing in the world model",
+      whyNotChat: "It renders a spatial thing.",
+      whyNotExistingComponent: "Nothing else renders it.",
+      owner: "product owner", ownsAction: null,
+      worldElement: "not_an_element" as never,
+      whyNotExistingElement: "It is genuinely new territory for the product.",
+      chatIntegration: "The conversation opens and closes it.",
+      avatarEffect: "It attaches to the avatar's record.",
+      mapEffect: "It appears as a layer on the map.",
+      journalRelation: "It writes a journal event.",
+    } as SurfaceDeclaration;
+    expect(
+      validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
+    ).toContain("unknown_world_element");
+  });
+
+  it("REJECTS a declaration that leaves a vision question unanswered", () => {
+    const bad = {
+      id: "/y", kind: "screen" as const, originAxiom: "A-09" as const,
+      purpose: "A surface that answers only some of the questions",
+      whyNotChat: "It renders a spatial thing.",
+      whyNotExistingComponent: "Nothing else renders it.",
+      owner: "product owner", ownsAction: null,
+      worldElement: "objects" as const,
+      whyNotExistingElement: "Objects have no surface yet.",
+      chatIntegration: "The conversation opens it.",
+      avatarEffect: "",
+      mapEffect: "",
+      journalRelation: "It writes a journal event.",
+    } as SurfaceDeclaration;
+    const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
+    expect(codes).toContain("unanswered_vision_question");
+  });
+
+  it("every existing screen is assigned to an element, with a verdict", () => {
+    expect(existsSync(ASSIGNMENT)).toBe(true);
+    const doc = readFileSync(ASSIGNMENT, "utf8");
+    for (const v of ["KEEP", "CONSOLIDATE", "REMOVE"]) {
+      expect(doc, `verdict ${v} missing`).toContain(v);
+    }
+    // Every element must appear in the assignment, including the two gaps.
+    for (const e of WORLD_ELEMENTS) {
+      expect(doc, `element ${e.name} not assigned`).toContain(e.name);
+    }
+    expect(doc).toMatch(/GAP/);
   });
 });

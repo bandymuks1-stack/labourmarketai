@@ -19,6 +19,7 @@
  */
 
 import type { AxiomId } from "./axioms";
+import type { WorldElementId } from "./world-elements";
 
 export type SurfaceKind =
   | "screen"
@@ -48,6 +49,20 @@ export interface SurfaceDeclaration {
    * action (A-08). `null` = it owns no action (a pure read surface).
    */
   readonly ownsAction: string | null;
+
+  // ── The six mandatory answers (PRODUCT_VISION_LOCK_V1, owner 2026-07-28) ──
+  /** 1. Which core world element is being extended? */
+  readonly worldElement: WorldElementId;
+  /** 2. Why can an existing element not be used? */
+  readonly whyNotExistingElement: string;
+  /** 3. How does this integrate into the AI conversation? */
+  readonly chatIntegration: string;
+  /** 4. How is it reflected in the Avatar's state? */
+  readonly avatarEffect: string;
+  /** 5. How is it reflected in the World Map? */
+  readonly mapEffect: string;
+  /** 6. How is it related to the Work Journal? */
+  readonly journalRelation: string;
 }
 
 /**
@@ -88,6 +103,8 @@ export function surface(id: string): SurfaceDeclaration | null {
 
 export type DeclarationViolation =
   | "unknown_axiom"
+  | "unknown_world_element"
+  | "unanswered_vision_question"
   | "empty_purpose"
   | "empty_why_not_chat"
   | "empty_why_not_existing_component"
@@ -108,6 +125,7 @@ export interface DeclarationProblem {
 export function validateDeclarations(
   declarations: readonly SurfaceDeclaration[],
   knownAxiomIds: readonly string[],
+  knownWorldElementIds: readonly string[] = [],
 ): readonly DeclarationProblem[] {
   const problems: DeclarationProblem[] = [];
   const seenIds = new Set<string>();
@@ -146,6 +164,30 @@ export function validateDeclarations(
     if (d.owner.trim().length < 2) {
       problems.push({ id: d.id, code: "empty_owner", detail: "no accountable owner" });
     }
+    // The six mandatory vision answers. A blank is not an answer.
+    if (!knownWorldElementIds.includes(d.worldElement)) {
+      problems.push({
+        id: d.id,
+        code: "unknown_world_element",
+        detail: `"${d.worldElement}" is not one of the twelve world elements`,
+      });
+    }
+    for (const [field, value] of [
+      ["whyNotExistingElement", d.whyNotExistingElement],
+      ["chatIntegration", d.chatIntegration],
+      ["avatarEffect", d.avatarEffect],
+      ["mapEffect", d.mapEffect],
+      ["journalRelation", d.journalRelation],
+    ] as const) {
+      if (value.trim().length < 10) {
+        problems.push({
+          id: d.id,
+          code: "unanswered_vision_question",
+          detail: `${field} is unanswered — PRODUCT_VISION_LOCK_V1 requires all six answers`,
+        });
+      }
+    }
+
     if (d.ownsAction) {
       const existing = actionOwners.get(d.ownsAction);
       if (existing) {
