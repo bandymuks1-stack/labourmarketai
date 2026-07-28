@@ -35,6 +35,7 @@ const REGISTRY = "apps/web/lib/product-gate/surface-registry.ts";
 const AXIOMS = "apps/web/lib/product-gate/axioms.ts";
 const NAV = "apps/web/lib/config/navigation.ts";
 const MODULES = "apps/web/lib/dashboard/dashboard-module-registry.ts";
+const WORLD_ELEMENTS_FILE = "apps/web/lib/product-gate/world-elements.ts";
 const DIFF_OUT = "PRODUCT_ARCHITECTURE_DIFF.md";
 
 // ── detection patterns ──────────────────────────────────────────────────────
@@ -269,7 +270,72 @@ function analyse(base) {
     }
   }
 
-  // 6. REGISTRY SELF-CONSISTENCY -------------------------------------------
+  // 6. VISION LOCK (PRODUCT_VISION_LOCK_V1, owner 2026-07-28) ---------------
+  //    The six mandatory answers + the prohibition list. A surface that
+  //    extends none of the twelve world elements is a second product.
+  const VISION_FIELDS = [
+    "worldElement",
+    "whyNotExistingElement",
+    "chatIntegration",
+    "avatarEffect",
+    "mapEffect",
+    "journalRelation",
+  ];
+  {
+    const regSrcV = read(REGISTRY);
+    const blockV = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcV)?.[0] ?? "";
+    const elementsSrc = read(WORLD_ELEMENTS_FILE);
+    const knownElements = new Set(
+      [...elementsSrc.matchAll(/id:\s*"([a-z_]+)"/g)].map((m) => m[1]),
+    );
+    // Each declared surface must answer all six.
+    for (const decl of blockV.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const field of VISION_FIELDS) {
+        if (!new RegExp(`${field}:`).test(decl)) {
+          add(
+            "unanswered_vision_question",
+            "A-09",
+            id,
+            `does not answer "${field}" — PRODUCT_VISION_LOCK_V1 requires all six answers`,
+            "certain",
+          );
+        }
+      }
+      const el = /worldElement:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (el && !knownElements.has(el)) {
+        add(
+          "no_world_element",
+          "A-09",
+          id,
+          `"${el}" is not one of the twelve world elements — a surface that extends none of them is a second product`,
+          "certain",
+        );
+      }
+    }
+  }
+
+  // A SECOND AI is forbidden outright (AI Conversation element rule).
+  for (const file of added.filter((f) => IS_SCREEN.test(f) || IS_COMPONENT.test(f))) {
+    const src = read(file);
+    const id = IS_SCREEN.test(file) ? routeOf(file) : file.replace(/^apps\/web\//, "");
+    const looksLikeAssistant =
+      /assistant|copilot|agent/i.test(file) &&
+      /(chat|prompt|message)/i.test(src) &&
+      !/ConversationChat/.test(src);
+    if (looksLikeAssistant) {
+      add(
+        "second_ai",
+        "A-01",
+        id,
+        "a second assistant surface — the vision lock permits exactly one AI, and it is the conversation",
+        "heuristic",
+      );
+    }
+  }
+
+  // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
   const regSrc = read(REGISTRY);
