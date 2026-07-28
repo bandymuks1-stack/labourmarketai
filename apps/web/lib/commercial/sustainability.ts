@@ -148,14 +148,27 @@ export type CommercialItemKind =
 
 export type Payer = "worker" | "company" | "agency" | "platform";
 
-/** The four FSR-005 answers, plus what CSP-001/FSR-002/FSR-003 need. */
+/**
+ * The four FSR-005 answers, plus what CSP-001/FSR-002/FSR-003 need, plus the
+ * four fields the Business Health Engine requires to place a feature in the
+ * CEO economics table (`owner`, `revenueDriver`, `marginModel`,
+ * `commercialDecision` — see docs/product/business-health-engine-v1.md §3).
+ */
 export interface EconomicModel {
+  /** WHO is accountable for this feature's economics (a role, not a guess). */
+  readonly owner: string;
   /** WHO pays. `platform` = deliberately subsidised, and must say so below. */
   readonly payer: Payer;
   /** WHAT they pay for, in one concrete sentence. */
   readonly paidFor: string;
   /** WHAT consumes money when this is used (the real cost driver). */
   readonly costDriver: string;
+  /** WHAT produces revenue from it (the billable event or recurring term). */
+  readonly revenueDriver: string;
+  /** HOW the margin is made: one sentence a CEO can audit. */
+  readonly marginModel: string;
+  /** The recorded commercial decision authorising it (MOD id or decision ref). */
+  readonly commercialDecision: string;
   /** APPROXIMATE unit cost. FSR-001: may not be null once assessed. */
   readonly estimatedUnitCostCents: number | null;
   /** The unit the cost is expressed in ("per AI run", "per ad-month"). */
@@ -318,6 +331,7 @@ export type ViolationCode =
   | "missing_unit_cost"
   | "missing_margin"
   | "missing_payer_or_subject"
+  | "missing_business_health_fields"
   | "unlimited_without_abuse_limit"
   | "growth_scales_losses"
   | "negative_margin_without_subsidy"
@@ -402,6 +416,23 @@ export function violationsFor(
       code: "missing_payer_or_subject",
       principle: "FSR-005",
       detail: "What is paid for, or what the buyer receives, is not stated.",
+    });
+  }
+  // Business Health Engine §3: a feature with no accountable owner, no revenue
+  // driver, no margin model or no recorded commercial decision cannot be placed
+  // in the CEO economics table, so it may not go live either.
+  if (
+    m.owner.trim().length < 2 ||
+    m.revenueDriver.trim().length < 3 ||
+    m.marginModel.trim().length < 3 ||
+    m.commercialDecision.trim().length < 2
+  ) {
+    out.push({
+      item: ref,
+      code: "missing_business_health_fields",
+      principle: "CSP-002",
+      detail:
+        "Missing one of: owner, revenueDriver, marginModel, commercialDecision. The Business Health Engine cannot report on a feature whose economics have no accountable owner or stated margin model.",
     });
   }
   if (m.unlimitedClaim && !m.abuseLimitMechanism) {
