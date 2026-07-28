@@ -269,7 +269,8 @@
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Neturite teisės tai atlikti.",
       "error": "Įvyko klaida. Bandykite dar kartą."
-    }
+    },
+    "myEmpty": "Tau priskirtų įrankių ar technikos šiuo metu nėra."
   },
   "projectEconomics": {
     "title": "Biudžetas ir ekonomika",
@@ -10936,7 +10937,16 @@
         "hasTransport": "Ar turi savo transportą?",
         "needsAccommodation": "Ar reikia apgyvendinimo?",
         "availabilityNote": "Pastaba (nebūtina)",
-        "availabilityNotePlaceholder": "Pvz., laisvas nuo rugpjūčio, mieliau 2 savaičių pamainos"
+        "availabilityNotePlaceholder": "Pvz., laisvas nuo rugpjūčio, mieliau 2 savaičių pamainos",
+        "demandDescription": "Aprašykite poreikį",
+        "demandDescriptionPlaceholder": "Pvz.: reikia 4 mūrininkų Kaune nuo rugpjūčio, darbas 3 mėn., reikalinga patirtis",
+        "demandRole": "Pareigos / rolė",
+        "demandRolePlaceholder": "Pvz. mūrininkas",
+        "demandLocation": "Vieta",
+        "demandLocationPlaceholder": "Miestas ar regionas",
+        "teamSize": "Darbuotojų skaičius",
+        "urgency": "Skubumas",
+        "saveAsDraft": "Išsaugoti kaip juodraštį"
       },
       "availability": {
         "available": "Laisvas",
@@ -10965,6 +10975,11 @@
         "errorInvalid": "Patikrink laukus ir bandyk dar kartą.",
         "errorNeedsMigration": "Ši funkcija dar neįjungta. Bandyk vėliau.",
         "errorConflict": "Ši reikšmė jau skiriasi. Atidaryk išplėstinį režimą, kad pakeistum."
+      },
+      "urgency": {
+        "flexible": "Lankstu",
+        "thisWeek": "Šią savaitę",
+        "urgent": "Skubu"
       }
     },
     "cv": {
@@ -11041,7 +11056,14 @@
       "agendaUndated": "{count, plural, one {Dar # įrašas be datos.} few {Dar # įrašai be datos.} other {Dar # įrašų be datos.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… ir dar # diena su įrašais.} few {… ir dar # dienos su įrašais.} other {… ir dar # dienų su įrašais.}}",
-      "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių."
+      "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių.",
+      "chipAgenda": "Mano planas",
+      "userAgenda": "Parodyk mano planą",
+      "chipNeedWorkers": "Reikia darbuotojų",
+      "chipCandidates": "Kandidatai",
+      "chipCompanyHub": "Įmonės erdvė",
+      "companyDemandNext": "Poreikis įrašytas įmonės erdvėje. Kas toliau?",
+      "navJournal": "Žurnalas"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

@@ -3111,7 +3111,16 @@
         "hasTransport": "[EN] Have your own transport?",
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
-        "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations"
+        "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "demandDescription": "Beskriv behovet",
+        "demandDescriptionPlaceholder": "F.eks.: trenger 4 murere i Kaunas fra august, 3 måneders arbeid, erfaring kreves",
+        "demandRole": "Rolle",
+        "demandRolePlaceholder": "F.eks. murer",
+        "demandLocation": "Sted",
+        "demandLocationPlaceholder": "By eller region",
+        "teamSize": "Antall arbeidere",
+        "urgency": "Hastegrad",
+        "saveAsDraft": "Lagre som utkast"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3140,6 +3149,11 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+      },
+      "urgency": {
+        "flexible": "Fleksibel",
+        "thisWeek": "Denne uken",
+        "urgent": "Haster"
       }
     },
     "cv": {
@@ -3216,7 +3230,14 @@
       "agendaUndated": "{count, plural, one {# element til uten dato.} other {# elementer til uten dato.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… og # dag til med elementer.} other {… og # dager til med elementer.}}",
-      "agendaConflicts": "⚠ {count, plural, one {# overlappende forpliktelse funnet} other {# overlappende forpliktelser funnet}} — denne planen er fysisk umulig; sjekk kalenderen."
+      "agendaConflicts": "⚠ {count, plural, one {# overlappende forpliktelse funnet} other {# overlappende forpliktelser funnet}} — denne planen er fysisk umulig; sjekk kalenderen.",
+      "chipAgenda": "Min plan",
+      "userAgenda": "Vis planen min",
+      "chipNeedWorkers": "Jeg trenger arbeidere",
+      "chipCandidates": "Kandidater",
+      "chipCompanyHub": "Bedriftsområde",
+      "companyDemandNext": "Behovet er registrert i bedriftsområdet ditt. Hva nå?",
+      "navJournal": "Loggbok"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

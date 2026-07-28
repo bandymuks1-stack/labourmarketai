@@ -28,14 +28,17 @@ const ROLE_SPACE: Record<Role, "profile" | "company" | "agency" | "buyer"> = {
   customer: "buyer",
 };
 
-/** Each space's hub route — the workspace the chip opens. No new routes:
- *  these are the four existing room pages. The worker hub (/dashboard/profile)
- *  already links onward to the CV at /cv. */
+/** Each space's hub route — the workspace the chip opens. No new routes,
+ *  and NO stub hops (rebuild W5): the agency room is a REDIRECT_STUB and the
+ *  buyer room is DUPLICATE_DRIFT in the route truth map, so both spaces link
+ *  the canonical company workspace directly instead of bouncing through a
+ *  drifting route. The worker hub (/dashboard/profile) already links onward
+ *  to the CV at /cv. */
 const SPACE_ROUTE = {
   profile: "/dashboard/profile",
   company: "/dashboard/company",
-  agency: "/dashboard/agency",
-  buyer: "/dashboard/buyer",
+  agency: "/dashboard/company",
+  buyer: "/dashboard/company",
 } as const satisfies Record<(typeof ROLE_SPACE)[Role], string>;
 
 export async function CurrentSpaceHeader({ role }: { role: Role }) {

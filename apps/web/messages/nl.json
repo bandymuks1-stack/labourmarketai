@@ -269,7 +269,8 @@
       "auth": "Log opnieuw in.",
       "not_authorized": "Je mag dit niet doen.",
       "error": "Er ging iets mis. Probeer opnieuw."
-    }
+    },
+    "myEmpty": "Er zijn momenteel geen gereedschappen of apparatuur aan je toegewezen."
   },
   "projectEconomics": {
     "title": "Budget & economie",
@@ -10936,7 +10937,16 @@
         "hasTransport": "Eigen vervoer?",
         "needsAccommodation": "Huisvesting nodig?",
         "availabilityNote": "Notitie (optioneel)",
-        "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties"
+        "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties",
+        "demandDescription": "Beschrijf de behoefte",
+        "demandDescriptionPlaceholder": "Bijv.: 4 metselaars nodig in Kaunas vanaf augustus, 3 maanden werk, ervaring vereist",
+        "demandRole": "Functie",
+        "demandRolePlaceholder": "Bijv. metselaar",
+        "demandLocation": "Locatie",
+        "demandLocationPlaceholder": "Stad of regio",
+        "teamSize": "Aantal werknemers",
+        "urgency": "Urgentie",
+        "saveAsDraft": "Opslaan als concept"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -10965,6 +10975,11 @@
         "errorInvalid": "Controleer de velden en probeer opnieuw.",
         "errorNeedsMigration": "Nog niet ingeschakeld. Probeer later.",
         "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen."
+      },
+      "urgency": {
+        "flexible": "Flexibel",
+        "thisWeek": "Deze week",
+        "urgent": "Dringend"
       }
     },
     "cv": {
@@ -11041,7 +11056,14 @@
       "agendaUndated": "{count, plural, one {Nog # item zonder datum.} other {Nog # items zonder datum.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… en nog # dag met items.} other {… en nog # dagen met items.}}",
-      "agendaConflicts": "⚠ {count, plural, one {# overlappende verplichting gevonden} other {# overlappende verplichtingen gevonden}} — dit plan is fysiek onmogelijk; controleer de kalender."
+      "agendaConflicts": "⚠ {count, plural, one {# overlappende verplichting gevonden} other {# overlappende verplichtingen gevonden}} — dit plan is fysiek onmogelijk; controleer de kalender.",
+      "chipAgenda": "Mijn planning",
+      "userAgenda": "Toon mijn planning",
+      "chipNeedWorkers": "Ik zoek werknemers",
+      "chipCandidates": "Kandidaten",
+      "chipCompanyHub": "Bedrijfsruimte",
+      "companyDemandNext": "De behoefte is vastgelegd in je bedrijfsruimte. Wat nu?",
+      "navJournal": "Logboek"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

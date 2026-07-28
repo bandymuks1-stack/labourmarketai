@@ -4,9 +4,10 @@ import { join } from "node:path";
 
 import {
   ADMIN_NAV_ITEM,
-  SIMPLE_SHELL_OWNED_NAV_IDS,
+  CORE_NAV_IDS,
   VISIBLE_PRIMARY_NAV_ITEMS,
   getAdvancedNavItems,
+  getCoreNavItems,
 } from "@/lib/config/navigation";
 
 /**
@@ -91,45 +92,62 @@ describe("the command dialog is properly modal", () => {
   });
 });
 
-describe("Messages and Calendar have exactly ONE persistent owner", () => {
-  const SIMPLE_OWNED = ["communication", "planning"] as const;
+describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)", () => {
+  // Supersedes the earlier "single persistent owner" split: giving each
+  // destination one owning shell removed literal duplication but kept two
+  // DIFFERENT nav systems — the real-user test showed people lose
+  // orientation when the primary tabs change identity between screens.
+  // The owner-directed fix: one shared core list (chat → journal → calendar
+  // → messages) from ONE source, rendered by both shells.
 
-  it("the simple (conversation) shell is the owner", () => {
-    for (const id of SIMPLE_OWNED) {
-      const href = id === "communication" ? "/dashboard/communication" : "/dashboard/planning";
-      expect(chatHeader, `${id} in the simple header`).toContain(href);
+  it("the core is exactly chat → journal → calendar → messages, in order", () => {
+    expect([...CORE_NAV_IDS]).toEqual([
+      "overview",
+      "journal_text_first",
+      "planning",
+      "communication",
+    ]);
+    expect(getCoreNavItems().map((i) => i.id)).toEqual([...CORE_NAV_IDS]);
+  });
+
+  it("the simple shell renders the SAME core from the SAME source", () => {
+    expect(chatHeader).toMatch(/from "@\/lib\/config\/navigation"/);
+    expect(chatHeader).toMatch(/getCoreNavItems\(\)/);
+    // No hardcoded parallel href list for the core loop.
+    for (const item of getCoreNavItems()) {
+      if (item.href === "/dashboard") continue;
+      expect(chatHeader, `${item.href} matched by the active-tab logic`).toContain(item.href);
     }
   });
 
-  it("the Advanced navbars no longer repeat them", () => {
+  it("the Advanced navbars START with the same core, then the module extras", () => {
     const advanced = getAdvancedNavItems().map((i) => i.id);
-    for (const id of SIMPLE_OWNED) {
-      expect(advanced, `${id} must not be persistent in BOTH shells`).not.toContain(id);
-    }
-    // Both Advanced surfaces derive from the same de-duplicated list.
+    expect(advanced.slice(0, CORE_NAV_IDS.length)).toEqual([...CORE_NAV_IDS]);
+    expect(advanced).toContain("market_map");
+    expect(advanced).toContain("network");
+    // Both Advanced surfaces derive from the same list.
     expect(dashboardTabs).toMatch(/getAdvancedNavItems\(\)/);
     expect(bottomNav).toMatch(/getAdvancedNavItems\(\)/);
     expect(dashboardTabs).not.toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(bottomNav).not.toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
   });
 
-  it("the CATALOGUE is untouched — this is presentation, not a demotion", () => {
-    // F14/F15 is a standing owner decision: planning and network are primary
-    // modules. De-duplicating where a tab is DRAWN must not rewrite that.
+  it("the CATALOGUE stays the single source — no demotion", () => {
     const ids = VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id);
     expect(ids).toContain("planning");
     expect(ids).toContain("network");
     expect(ids).toContain("communication");
+    expect(ids).toContain("journal_text_first");
   });
 
-  it("network stays in Advanced — it has no simple-shell entry", () => {
-    expect(getAdvancedNavItems().map((i) => i.id)).toContain("network");
-    expect(SIMPLE_SHELL_OWNED_NAV_IDS).not.toContain("network");
+  it("the journal renders in the simple shell (the core loop never switches chrome)", () => {
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect(chrome).toMatch(/"\/dashboard\/journal"/);
   });
 
-  it("removing a tab never removes a route", () => {
-    for (const id of SIMPLE_OWNED) {
-      const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === id)!;
+  it("unifying tabs never removes a route", () => {
+    for (const item of getCoreNavItems()) {
+      if (item.href === "/dashboard") continue;
       const dir = item.href.replace("/dashboard/", "");
       expect(
         existsSync(join(APP_ROOT, "app", "[locale]", "dashboard", dir)),

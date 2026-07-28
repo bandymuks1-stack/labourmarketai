@@ -181,6 +181,21 @@ DB sluoksnis teisingas: `organizations` + `engagement_contexts` + `relationship_
 | Priminimų/vertimo intent'ai | NOT_IMPLEMENTED | NOT_IMPLEMENTED (roadmap PR-P / PR-O) |
 | Pokalbio persistencija | BLOCKED (RED) | BLOCKED (RED migracija, owner gate) |
 
+## 5a. Fazė 2 (W4–W6, 2026-07-28, šaka feat/real-user-workflow-rebuild-phase2)
+
+| Gebėjimas | Būsena po 2 fazės |
+|---|---|
+| ExecCtx.workspace (aktyvus kontekstas dispatch grandinėje) | IMPLEMENTED — dispatcher'is resolvina per `getWorkspaceContext` serveryje, niekada iš kliento |
+| Darbdavio poreikio intake pokalbyje | IMPLEMENTED — `company.create-demand` per tą pačią `InlineActionForm` + kanoninį dispatch, IMPORTANT tier su vienkartiniu confirmation token |
+| Role-aware pokalbis | IMPLEMENTED — darbdavio starter chips, `need-workers` intent (LT/EN/RU; „ieškau darbuotojų" ≠ „ieškau darbo"), `link:` kontekstinės nuorodos tik į kanoninius paviršius |
+| Kiti company/agency vykdikliai pokalbyje | PARTIAL — shortlist/contact/propose-booking/assign reikalauja request/worker id picker'ių (read-model follow-up); registruoti ir pasiekiami per kanonines scouting sąsajas |
+| Vienas nav abiejuose shell'uose | IMPLEMENTED — `CORE_NAV_IDS` (pokalbis → žurnalas → kalendorius → žinutės) iš vieno šaltinio; Advanced prideda map/network PO to paties branduolio; žurnalas renderinasi simple shell'e |
+| Negyvos nuorodos | IMPLEMENTED — space header/chain actions nebeveda į stub/drift (`/dashboard/agency`, `/dashboard/buyer`); `assistant` perklasifikuotas REDIRECT_STUB; `marketplace_hub` route → realus žemėlapis |
+| Vienas projekto kūrimo kelias | IMPLEMENTED — abu entry point'ai per `insertProjectForCompany` core (viena validacija, vienas W10 org binding) |
+| Workspace žymės mišriuose sąrašuose | PARTIAL — žurnalas (W1) + projektų žemėlapis + assets registras (tas pats deterministinis akcentas); tasks (nėra org stulpelio), žinutės, review queue, spine — dokumentuoti follow-up |
+| Automatinis duomenų SCOPING pagal aktyvų workspace | BLOCKED — reikalauja pointer migracijos 20260714210000 (owner gate); iki tol sąžiningas kelias yra ŽYMĖJIMAS, ne filtravimas (multi-org owner'is neprarastų matomumo be galimybės persijungti) |
+| Aktyvus projektas/objektas kaip pointer'is | NOT_IMPLEMENTED — nėra kanoninės saugyklos (owner-gated preferencijų migracija); kontekstas šiandien ateina iš engagement/žurnalo srautų |
+
 ## 6. Likusios bangos (šioje šakoje NEĮGYVENDINTA — sekantys PR)
 
 1. **W3 tęsinys:** company/agency pokalbio formos per kanoninį dispatch (10 vykdiklių jau parašyti);

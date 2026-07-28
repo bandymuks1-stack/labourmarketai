@@ -35,10 +35,14 @@ describe("generic starter chips appear only where a menu belongs", () => {
   });
 
   it("flow closings re-read REAL state instead of dropping back to the menu", () => {
-    // CV import, profile forms and the work log all end in a fresh
-    // profile-summary read — the user sees what actually changed.
-    const closings = CHAT.match(/onClose=\{\(\) => startProfileSummaryRef\.current\(/g) ?? [];
-    expect(closings.length).toBeGreaterThanOrEqual(3);
+    // CV import, worker forms and the work log all end in a fresh
+    // profile-summary read; the employer demand form (rebuild W4) ends in the
+    // demand-specific follow-up — the user always sees a contextual next
+    // step, never the generic menu.
+    const closings = CHAT.match(/startProfileSummaryRef\.current\(/g) ?? [];
+    expect(closings.length).toBeGreaterThanOrEqual(4);
+    expect(CHAT).toMatch(/isEmployer\s*\?\s*companyFollowup/);
+    expect(CHAT).toMatch(/assistant\(labels\.companyDemandNext/);
     expect(CHAT).not.toMatch(/onClose=\{\(\) => assistant\(labels\.fallback, starterChips\)/);
   });
 

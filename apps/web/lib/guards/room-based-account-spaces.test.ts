@@ -115,17 +115,18 @@ describe("active /dashboard room shows only the current space (no cross-space so
   });
   it("the current-space header opens the ACTIVE space's hub, never settings", () => {
     // Owner P0 2026-07-02: account is settings-only, so the header chip must
-    // NOT route there. It opens the active space's own hub (worker → profile,
-    // company → company, agency → agency, customer → buyer). Settings stays
-    // reachable via the avatar AccountMenu ("Nustatymai").
+    // NOT route there. Rebuild W5: the agency room is a REDIRECT_STUB and the
+    // buyer room is DUPLICATE_DRIFT — both spaces open the CANONICAL company
+    // workspace directly (no live links into stub/drift routes). Settings
+    // stays reachable via the avatar AccountMenu ("Nustatymai").
     const comp = read("components/app/current-space-header.tsx");
     expect(dashboard).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
     // no account route as a VALUE (the constraint comment may name the path)
     expect(comp).not.toMatch(/["'`]\/dashboard\/account["'`]/);
     expect(comp).toMatch(/profile: "\/dashboard\/profile"/);
     expect(comp).toMatch(/company: "\/dashboard\/company"/);
-    expect(comp).toMatch(/agency: "\/dashboard\/agency"/);
-    expect(comp).toMatch(/buyer: "\/dashboard\/buyer"/);
+    expect(comp).toMatch(/agency: "\/dashboard\/company"/);
+    expect(comp).toMatch(/buyer: "\/dashboard\/company"/);
   });
 });
 

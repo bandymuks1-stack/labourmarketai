@@ -24,10 +24,15 @@ export type FormState = Record<string, string | boolean>;
 
 export interface WorkerFormSpec {
   actionId: string;
-  titleKey: string; // conversation.actions.worker.<x>.label
+  titleKey: string; // conversation.actions.<side>.<x>.label
   fields: readonly FieldSpec[];
   /** Convert raw form state to the typed input the schema expects. */
   build: (s: FormState) => Record<string, unknown>;
+  /** IMPORTANT/STRONG-tier action (rebuild W4): the inline form mints a
+   *  one-time confirmation token (prepareConfirmationAction) right before
+   *  dispatch — the dispatcher rejects the write without it. Reversible
+   *  actions omit this and dispatch directly, exactly as before. */
+  requiresConfirmation?: boolean;
 }
 
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : "");

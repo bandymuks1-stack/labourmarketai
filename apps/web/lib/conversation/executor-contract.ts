@@ -10,7 +10,19 @@ export type ExecResult =
   | { ok: true; data?: Record<string, unknown> }
   | { ok: false; code: string; message?: string; existing?: string };
 
-export type ExecCtx = { locale: string };
+/**
+ * Workspace context carried into every executor (rebuild W4). Resolved
+ * SERVER-SIDE by the dispatcher from the canonical workspace resolver
+ * (`getWorkspaceContext` — engagement_contexts spine + the owner-gated
+ * active-organization pointer) — never trusted from the client. `null`
+ * organizationId = the personal workspace. Executors pass it through to
+ * canonical actions THAT ACCEPT an explicit organization; actions without
+ * an org parameter keep their own server-side resolution (one authority,
+ * no parallel resolution paths).
+ */
+export type ExecWorkspace = { organizationId: string | null };
+
+export type ExecCtx = { locale: string; workspace?: ExecWorkspace };
 
 /** Build a FormData for the canonical formData-shaped server actions. */
 export function fd(entries: Record<string, string | null | undefined>): FormData {

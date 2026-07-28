@@ -3111,7 +3111,16 @@
         "hasTransport": "[EN] Have your own transport?",
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
-        "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations"
+        "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "demandDescription": "Kirjelda vajadust",
+        "demandDescriptionPlaceholder": "Nt: vaja 4 müürseppa Kaunases alates augustist, töö 3 kuud, vajalik kogemus",
+        "demandRole": "Roll",
+        "demandRolePlaceholder": "Nt müürsepp",
+        "demandLocation": "Asukoht",
+        "demandLocationPlaceholder": "Linn või piirkond",
+        "teamSize": "Töötajate arv",
+        "urgency": "Kiireloomulisus",
+        "saveAsDraft": "Salvesta mustandina"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3140,6 +3149,11 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+      },
+      "urgency": {
+        "flexible": "Paindlik",
+        "thisWeek": "Sel nädalal",
+        "urgent": "Kiireloomuline"
       }
     },
     "cv": {
@@ -3216,7 +3230,14 @@
       "agendaUndated": "{count, plural, one {Veel # kuupäevata kirje.} other {Veel # kuupäevata kirjet.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… ja veel # päev kirjetega.} other {… ja veel # päeva kirjetega.}}",
-      "agendaConflicts": "⚠ {count, plural, one {Leiti # kattuv kohustus} other {Leiti # kattuvat kohustust}} — selline plaan on füüsiliselt võimatu; kontrolli kalendrit."
+      "agendaConflicts": "⚠ {count, plural, one {Leiti # kattuv kohustus} other {Leiti # kattuvat kohustust}} — selline plaan on füüsiliselt võimatu; kontrolli kalendrit.",
+      "chipAgenda": "Minu plaan",
+      "userAgenda": "Näita minu plaani",
+      "chipNeedWorkers": "Vajan töötajaid",
+      "chipCandidates": "Kandidaadid",
+      "chipCompanyHub": "Ettevõtte tööruum",
+      "companyDemandNext": "Vajadus on salvestatud ettevõtte tööruumis. Mis edasi?",
+      "navJournal": "Päevik"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

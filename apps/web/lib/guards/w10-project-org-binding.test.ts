@@ -29,13 +29,22 @@ describe("project creation binds the canonical organization_id", () => {
     expect(resolver).toMatch(/from\("organizations"\)/);
   });
 
+  it("THE ONE create core resolves and inserts organization_id (rebuild W5)", () => {
+    // Both entry points now insert through lib/projects/create-project-core —
+    // the W10 rule (never an org-less project) lives in exactly one place.
+    const core = read(join(APP, "lib", "projects", "create-project-core.ts"));
+    expect(core).toMatch(/resolveOrganizationIdForCompany/);
+    expect(core).toMatch(/\.from\("projects"\)[\s\S]{0,300}?organization_id/);
+  });
+
   for (const rel of CREATE_SITES) {
-    it(`${rel} resolves and inserts organization_id alongside company_id`, () => {
+    it(`${rel} inserts ONLY through the shared core (no drifted second path)`, () => {
       const src = read(join(APP, rel));
-      expect(src, `${rel} imports the resolver`).toMatch(/resolveOrganizationIdForCompany/);
-      // the insert into projects must carry organization_id
-      expect(src, `${rel} insert sets organization_id`).toMatch(
-        /\.from\("projects"\)[\s\S]{0,200}?organization_id/,
+      expect(src, `${rel} uses the core`).toMatch(/insertProjectForCompany/);
+      // No direct projects-insert outside the core — the two paths may never
+      // drift apart again.
+      expect(src, `${rel} has no direct projects insert`).not.toMatch(
+        /\.from\("projects"\)\s*\n?\s*\.insert/,
       );
     });
   }

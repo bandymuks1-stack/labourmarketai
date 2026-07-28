@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { callerCompanyId } from "./projects";
-import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organization-id";
+import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -52,34 +52,22 @@ export async function createProjectAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim() || null;
-  if (title.length === 0) return { ok: false, code: "invalid" };
 
   const companyId = await callerCompanyId();
   if (!companyId) return { ok: false, code: "no_company" };
 
-  // W10: bind the canonical organization at creation so the project is never
-  // left org-less (the stale state the W10 backfill corrected).
-  const organizationId = await resolveOrganizationIdForCompany(supabase, companyId);
-
-  const { data, error } = await asAny(supabase)
-    .from("projects")
-    .insert({
-      company_id: companyId,
-      organization_id: organizationId,
-      title: title.slice(0, 200),
-      city,
-      status: "draft",
-    })
-    .select("id")
-    .single();
-  if (error) {
-    if (migMissing(error.code)) return { ok: false, code: "needs_migration" };
-    if (error.code === "42501") return { ok: false, code: "not_authorized" };
-    console.error("[projects] create failed:", error.message);
-    return { ok: false, code: "error", message: error.message };
+  // Rebuild W5: BOTH project-create entry points insert through the ONE core
+  // (validation + W10 org binding + insert shape live in exactly one place).
+  const created = await insertProjectForCompany(supabase, companyId, { title, city });
+  if (!created.ok) {
+    if (created.reason === "invalid_title") return { ok: false, code: "invalid" };
+    if (migMissing(created.code)) return { ok: false, code: "needs_migration" };
+    if (created.code === "42501") return { ok: false, code: "not_authorized" };
+    console.error("[projects] create failed:", created.message);
+    return { ok: false, code: "error", message: created.message };
   }
   revalidatePath("/", "layout");
-  return { ok: true, id: data?.id };
+  return { ok: true, id: created.id };
 }
 
 export async function assignWorkerToProjectAction(

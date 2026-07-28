@@ -90,7 +90,10 @@ export const FEATURES: readonly FeatureConfig[] = [
     availability: "active",
     labelKey: "features.marketplace_hub.label",
     descriptionKey: "features.marketplace_hub.description",
-    primaryRoute: "/dashboard/marketplace",
+    // Rebuild W5: point at the REAL surface — /dashboard/marketplace is a
+    // REDIRECT_STUB to the market map; a catalogue route must never hop
+    // through a stub.
+    primaryRoute: "/dashboard/market-map",
     safeToShowInPrimaryNav: false,
   },
   {

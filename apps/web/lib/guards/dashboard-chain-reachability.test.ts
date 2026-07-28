@@ -47,7 +47,9 @@ describe("dashboard surfaces the chain entry points", () => {
       "/dashboard/company#company-team",
       "/dashboard/inbox",
       "/dashboard/journal",
-      "/dashboard/buyer",
+      // Rebuild W5: the customer chain links the CANONICAL company workspace
+      // — /dashboard/buyer is DUPLICATE_DRIFT and gets no live inbound links.
+      "/dashboard/company",
     ]) {
       expect(src.includes(`"${href}"`), `must link to ${href}`).toBe(true);
     }

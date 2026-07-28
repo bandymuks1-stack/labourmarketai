@@ -269,7 +269,8 @@
       "auth": "Please sign in again.",
       "not_authorized": "You are not allowed to do that.",
       "error": "Something went wrong. Please try again."
-    }
+    },
+    "myEmpty": "No tools or equipment are currently assigned to you."
   },
   "projectEconomics": {
     "title": "Budget & economics",
@@ -10936,7 +10937,16 @@
         "hasTransport": "Have your own transport?",
         "needsAccommodation": "Need accommodation?",
         "availabilityNote": "Note (optional)",
-        "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations"
+        "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations",
+        "demandDescription": "Describe the need",
+        "demandDescriptionPlaceholder": "E.g.: need 4 bricklayers in Kaunas from August, 3-month job, experience required",
+        "demandRole": "Role",
+        "demandRolePlaceholder": "E.g. bricklayer",
+        "demandLocation": "Location",
+        "demandLocationPlaceholder": "City or region",
+        "teamSize": "Number of workers",
+        "urgency": "Urgency",
+        "saveAsDraft": "Save as draft"
       },
       "availability": {
         "available": "Available",
@@ -10965,6 +10975,11 @@
         "errorInvalid": "Please check the fields and try again.",
         "errorNeedsMigration": "This isn't enabled yet. Please try later.",
         "errorConflict": "This value already differs. Open advanced mode to replace it."
+      },
+      "urgency": {
+        "flexible": "Flexible",
+        "thisWeek": "This week",
+        "urgent": "Urgent"
       }
     },
     "cv": {
@@ -11041,7 +11056,14 @@
       "agendaUndated": "{count, plural, one {# more item has no date.} other {# more items have no date.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… and # more day with items.} other {… and # more days with items.}}",
-      "agendaConflicts": "⚠ {count, plural, one {# overlapping commitment found} other {# overlapping commitments found}} — this plan is physically impossible; check the calendar."
+      "agendaConflicts": "⚠ {count, plural, one {# overlapping commitment found} other {# overlapping commitments found}} — this plan is physically impossible; check the calendar.",
+      "chipAgenda": "My plan",
+      "userAgenda": "Show my plan",
+      "chipNeedWorkers": "I need workers",
+      "chipCandidates": "Candidates",
+      "chipCompanyHub": "Company workspace",
+      "companyDemandNext": "The need is recorded in your company workspace. What's next?",
+      "navJournal": "Journal"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

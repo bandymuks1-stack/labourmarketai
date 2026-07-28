@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { WORKSPACE_ACCENT_DOT } from "@/components/app/conversation/chat/workspace-chip";
+import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 import {
   acknowledgeAssetAction,
   createAssetAction,
@@ -75,7 +77,12 @@ function AssetManagerRow({
   projects,
   workers,
   onDone,
+  orgLabel,
 }: {
+  /** Workspace context (rebuild W6): the owning org's name + accent, shown
+   *  ONLY when the caller manages more than one org (no chip when
+   *  unambiguous) — same rule as the journal stream and the project map. */
+  orgLabel?: { name: string; dot: string } | null;
   asset: AssetRow;
   projects: ProjectOption[];
   workers: WorkerOption[];
@@ -105,6 +112,12 @@ function AssetManagerRow({
         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${asset.availability === "available" ? "border-state-success/40 text-state-success" : "border-ink-500 text-text-muted"}`}>
           {t(`availability.${asset.availability}`)}
         </span>
+        {orgLabel ? (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-text-muted" data-testid={`asset-org-context-${asset.id}`}>
+            <span className={`size-2 flex-none rounded-full ${orgLabel.dot}`} aria-hidden />
+            {orgLabel.name}
+          </span>
+        ) : null}
       </div>
 
       {a ? (
@@ -199,9 +212,31 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
             <p className="text-sm text-text-secondary" data-testid="assets-empty">{t("empty")}</p>
           ) : (
             <ul className="flex flex-col gap-2" data-testid="assets-list">
-              {data.assets.map((asset) => (
-                <AssetManagerRow key={asset.id} asset={asset} projects={data.projects} workers={data.workers} onDone={report} />
-              ))}
+              {data.assets.map((asset) => {
+                const org =
+                  data.orgs.length > 1
+                    ? data.orgs.find((o) => o.id === asset.organizationId)
+                    : undefined;
+                return (
+                  <AssetManagerRow
+                    key={asset.id}
+                    asset={asset}
+                    projects={data.projects}
+                    workers={data.workers}
+                    onDone={report}
+                    orgLabel={
+                      org
+                        ? {
+                            name: org.name,
+                            dot: WORKSPACE_ACCENT_DOT[
+                              workspaceAccentIndex(org.id) % WORKSPACE_ACCENT_DOT.length
+                            ],
+                          }
+                        : null
+                    }
+                  />
+                );
+              })}
             </ul>
           )}
 
@@ -237,7 +272,18 @@ export function MyAssignedAssetsPanel({ data }: { data: MyAssignedAssets }) {
   const { msg, report } = useReport();
   const [pending, startTransition] = useTransition();
 
-  if (!data.applied || data.assignments.length === 0) return null;
+  // Rebuild W5 (audit A11): an APPLIED module with zero rows renders an
+  // honest empty state, never nothing — an invisible panel taught users the
+  // feature does not exist. Unapplied stays silent (the registry panel
+  // already explains pre-apply state once per page).
+  if (!data.applied) return null;
+  if (data.assignments.length === 0) {
+    return (
+      <p className="text-sm text-text-secondary" data-testid="my-assets-empty">
+        {t("myEmpty")}
+      </p>
+    );
+  }
 
   function ack(id: string) {
     startTransition(async () => {

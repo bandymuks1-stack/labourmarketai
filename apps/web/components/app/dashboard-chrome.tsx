@@ -35,6 +35,10 @@ const PANEL_PREFIXES = [
   "/dashboard/communication",
   "/dashboard/planning",
   "/dashboard/profile",
+  // Rebuild W5: the journal joins the simple shell — the whole core work loop
+  // (chat → journal → calendar → messages) now lives in ONE chrome, so the
+  // primary tabs never change identity mid-flow.
+  "/dashboard/journal",
 ];
 
 type Mode = "conversation" | "panel" | "full";

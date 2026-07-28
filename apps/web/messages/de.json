@@ -269,7 +269,8 @@
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie dürfen das nicht tun.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-    }
+    },
+    "myEmpty": "Dir sind derzeit keine Werkzeuge oder Geräte zugewiesen."
   },
   "projectEconomics": {
     "title": "Budget & Wirtschaftlichkeit",
@@ -10936,7 +10937,16 @@
         "hasTransport": "Eigenes Fahrzeug?",
         "needsAccommodation": "Unterkunft nötig?",
         "availabilityNote": "Notiz (optional)",
-        "availabilityNotePlaceholder": "z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen"
+        "availabilityNotePlaceholder": "z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen",
+        "demandDescription": "Beschreibe den Bedarf",
+        "demandDescriptionPlaceholder": "Z. B.: 4 Maurer in Kaunas ab August, 3 Monate, Erfahrung erforderlich",
+        "demandRole": "Rolle",
+        "demandRolePlaceholder": "Z. B. Maurer",
+        "demandLocation": "Ort",
+        "demandLocationPlaceholder": "Stadt oder Region",
+        "teamSize": "Anzahl der Arbeitskräfte",
+        "urgency": "Dringlichkeit",
+        "saveAsDraft": "Als Entwurf speichern"
       },
       "availability": {
         "available": "Verfügbar",
@@ -10965,6 +10975,11 @@
         "errorInvalid": "Bitte Felder prüfen und erneut versuchen.",
         "errorNeedsMigration": "Noch nicht aktiviert. Bitte später.",
         "errorConflict": "Dieser Wert weicht bereits ab. Öffne den erweiterten Modus zum Ersetzen."
+      },
+      "urgency": {
+        "flexible": "Flexibel",
+        "thisWeek": "Diese Woche",
+        "urgent": "Dringend"
       }
     },
     "cv": {
@@ -11041,7 +11056,14 @@
       "agendaUndated": "{count, plural, one {# weiterer Eintrag ohne Datum.} other {# weitere Einträge ohne Datum.}}",
       "agendaMore": "(+{count})",
       "agendaMoreDays": "{count, plural, one {… und # weiterer Tag mit Einträgen.} other {… und # weitere Tage mit Einträgen.}}",
-      "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender."
+      "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender.",
+      "chipAgenda": "Mein Plan",
+      "userAgenda": "Zeig meinen Plan",
+      "chipNeedWorkers": "Ich brauche Arbeitskräfte",
+      "chipCandidates": "Kandidaten",
+      "chipCompanyHub": "Unternehmensbereich",
+      "companyDemandNext": "Der Bedarf ist in deinem Unternehmensbereich erfasst. Was nun?",
+      "navJournal": "Journal"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
