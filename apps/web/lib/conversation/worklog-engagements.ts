@@ -3,6 +3,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -53,14 +54,16 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organizations(display_name, legal_name, organization_type)",
+      "id, relationship_slug, title, is_primary, organization_id, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
     .in("relationship_slug", WORKER_RELATIONSHIPS)
     .order("is_primary", { ascending: false });
 
-  const engagements: WorkLogEngagement[] = (ecRows ?? []).map((e) => {
+  const engagements: (WorkLogEngagement & { organizationId: string | null })[] = (
+    ecRows ?? []
+  ).map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
@@ -68,9 +71,35 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     } | null;
     const orgName = org?.display_name ?? org?.legal_name ?? null;
     const label = orgName ?? e.title ?? e.relationship_slug;
-    return { id: e.id, label, isPrimary: Boolean(e.is_primary) };
+    return {
+      id: e.id,
+      label,
+      isPrimary: Boolean(e.is_primary),
+      organizationId:
+        ((e as { organization_id?: string | null }).organization_id as
+          | string
+          | null) ?? null,
+    };
   });
 
   if (engagements.length === 0) return { kind: "no-context" };
-  return { kind: "ok", engagements };
+
+  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
+  // default context — the engagement belonging to the active workspace's org
+  // sorts FIRST (then is_primary, preserved by the stable sort), so the flow
+  // preselects the context the user is already working in and only ASKS when
+  // real ambiguity remains. Request-cached read; honest no-op when the
+  // workspace is personal or matches nothing.
+  const workspace = await getWorkspaceContext("person");
+  const activeOrgId = workspace.activeWorkspaceId;
+  const ordered = [...engagements].sort(
+    (a, b) =>
+      Number(b.organizationId === activeOrgId) -
+      Number(a.organizationId === activeOrgId),
+  );
+
+  return {
+    kind: "ok",
+    engagements: ordered.map(({ id, label, isPrimary }) => ({ id, label, isPrimary })),
+  };
 }

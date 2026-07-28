@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Virksomhedsområde",
       "companyDemandNext": "Behovet er registreret i dit virksomhedsområde. Hvad nu?",
-      "navJournal": "Logbog"
+      "navJournal": "Logbog",
+      "chipTasks": "Opgaver",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# opgave er over fristen} other {# opgaver er over fristen}} — værd at gennemgå.",
+      "suggestLogToday": "📝 Du har en aktiv booking i dag, men ingen journalpost endnu — registrér dit arbejde.",
+      "suggestReserveTomorrow": "📅 I morgen er der en frist, og din kalender er næsten fri — jeg anbefaler at reservere tid.",
+      "suggestReserveTomorrowNamed": "📅 I morgen er fristen for “{label}”, og din kalender er næsten fri — jeg anbefaler at reservere tid."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

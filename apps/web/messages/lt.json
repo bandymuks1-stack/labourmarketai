@@ -11063,7 +11063,12 @@
       "chipCandidates": "Kandidatai",
       "chipCompanyHub": "Įmonės erdvė",
       "companyDemandNext": "Poreikis įrašytas įmonės erdvėje. Kas toliau?",
-      "navJournal": "Žurnalas"
+      "navJournal": "Žurnalas",
+      "chipTasks": "Užduotys",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# užduoties terminas praėjęs} few {# užduočių terminai praėję} other {# užduočių terminai praėję}} — verta peržiūrėti.",
+      "suggestLogToday": "📝 Šiandien turi aktyvų užsakymą, bet žurnale įrašo dar nėra — užfiksuok darbą.",
+      "suggestReserveTomorrow": "📅 Rytoj artėja terminas, o kalendorius beveik laisvas — rekomenduoju rezervuoti laiko.",
+      "suggestReserveTomorrowNamed": "📅 Rytoj terminas: „{label}“, o kalendorius beveik laisvas — rekomenduoju rezervuoti laiko."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

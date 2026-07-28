@@ -186,8 +186,10 @@ export function JournalEntryComposer({
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const primaryId =
-    engagements.find((e) => e.isPrimary)?.id ?? engagements[0]?.id ?? "";
+  // Context Intelligence (rebuild phase 3): the page hands the list ordered
+  // ACTIVE-WORKSPACE-first (then primary) — the first entry IS the resolved
+  // default context, so the picker only matters on real ambiguity.
+  const primaryId = engagements[0]?.id ?? "";
   const today = new Date().toISOString().slice(0, 10);
 
   // EDIT-mode preload (v5): when editing, reconstruct the saved structured

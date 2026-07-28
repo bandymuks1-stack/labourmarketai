@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Bedriftsområde",
       "companyDemandNext": "Behovet er registrert i bedriftsområdet ditt. Hva nå?",
-      "navJournal": "Loggbok"
+      "navJournal": "Loggbok",
+      "chipTasks": "Oppgaver",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# oppgave er over fristen} other {# oppgaver er over fristen}} — verdt å se over.",
+      "suggestLogToday": "📝 Du har en aktiv booking i dag, men ingen journalføring ennå — registrer arbeidet ditt.",
+      "suggestReserveTomorrow": "📅 I morgen er det en frist, og kalenderen din er nesten ledig — jeg anbefaler å sette av tid.",
+      "suggestReserveTomorrowNamed": "📅 I morgen er fristen for “{label}”, og kalenderen din er nesten ledig — jeg anbefaler å sette av tid."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

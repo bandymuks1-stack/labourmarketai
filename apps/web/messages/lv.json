@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandidāti",
       "chipCompanyHub": "Uzņēmuma telpa",
       "companyDemandNext": "Vajadzība ir reģistrēta uzņēmuma telpā. Kas tālāk?",
-      "navJournal": "Žurnāls"
+      "navJournal": "Žurnāls",
+      "chipTasks": "Uzdevumi",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# uzdevumam termiņš ir pagājis} other {# uzdevumiem termiņš ir pagājis}} — vērts pārskatīt.",
+      "suggestLogToday": "📝 Šodien tev ir aktīva rezervācija, bet žurnālā ieraksta vēl nav — reģistrē darbu.",
+      "suggestReserveTomorrow": "📅 Rīt ir termiņš, un kalendārs ir gandrīz brīvs — iesaku rezervēt laiku.",
+      "suggestReserveTomorrowNamed": "📅 Rīt ir termiņš: “{label}”, un kalendārs ir gandrīz brīvs — iesaku rezervēt laiku."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

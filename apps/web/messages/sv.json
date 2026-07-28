@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandidater",
       "chipCompanyHub": "Företagsyta",
       "companyDemandNext": "Behovet är registrerat i din företagsyta. Vad händer nu?",
-      "navJournal": "Loggbok"
+      "navJournal": "Loggbok",
+      "chipTasks": "Uppgifter",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# uppgift har passerat sin deadline} other {# uppgifter har passerat sina deadlines}} — värt att se över.",
+      "suggestLogToday": "📝 Du har en aktiv bokning i dag men ingen journalpost ännu — registrera ditt arbete.",
+      "suggestReserveTomorrow": "📅 I morgon är det en deadline och din kalender är nästan ledig — jag rekommenderar att reservera tid.",
+      "suggestReserveTomorrowNamed": "📅 I morgon är deadline för “{label}” och din kalender är nästan ledig — jag rekommenderar att reservera tid."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

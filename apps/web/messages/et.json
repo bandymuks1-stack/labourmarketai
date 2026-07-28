@@ -3237,7 +3237,12 @@
       "chipCandidates": "Kandidaadid",
       "chipCompanyHub": "Ettevõtte tööruum",
       "companyDemandNext": "Vajadus on salvestatud ettevõtte tööruumis. Mis edasi?",
-      "navJournal": "Päevik"
+      "navJournal": "Päevik",
+      "chipTasks": "Ülesanded",
+      "suggestOverdueTasks": "⏰ {count, plural, one {# ülesande tähtaeg on möödas} other {# ülesande tähtaeg on möödas}} — tasub üle vaadata.",
+      "suggestLogToday": "📝 Sul on täna aktiivne broneering, kuid päevikus kannet veel pole — pane töö kirja.",
+      "suggestReserveTomorrow": "📅 Homme on tähtaeg ja kalender on peaaegu vaba — soovitan aega broneerida.",
+      "suggestReserveTomorrowNamed": "📅 Homme on tähtaeg: „{label}“ ja kalender on peaaegu vaba — soovitan aega broneerida."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

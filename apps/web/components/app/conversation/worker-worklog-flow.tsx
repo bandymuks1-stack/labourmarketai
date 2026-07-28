@@ -151,8 +151,11 @@ export function WorkerWorkLogFlow({
         if (!alive) return;
         if (res.kind === "ok") {
           setEngagements(res.engagements);
-          const primary = res.engagements.find((e) => e.isPrimary) ?? res.engagements[0];
-          setEngagementId(primary.id);
+          // Context Intelligence (rebuild phase 3): the server orders the
+          // list ACTIVE-WORKSPACE-first (then primary), so the first entry IS
+          // the resolved default context — the user re-picks only on real
+          // ambiguity, never re-states what the workspace already says.
+          setEngagementId(res.engagements[0].id);
           setPhase({ kind: "ready", token: null });
         } else if (res.kind === "no-context") {
           setPhase({ kind: "blocked", reason: "no-context" });
