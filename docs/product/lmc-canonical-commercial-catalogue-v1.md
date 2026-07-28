@@ -1,5 +1,7 @@
 # LMC Canonical Commercial Catalogue v1 — economics reconstruction
 
+> **REFERENCE ONLY — this is the reconstruction AUDIT that recovered the decisions. The catalogue itself now lives in `docs/product/commercial-system-v1.md`. Its `MDD-xx` ids were re-keyed there as `MOD-xx`.**
+
 | Field | Value |
 |---|---|
 | Date | 2026-07-28 |

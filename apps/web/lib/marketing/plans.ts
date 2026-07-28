@@ -1,3 +1,11 @@
+/**
+ * REFERENCE ONLY — the canonical commercial source is
+ * `docs/product/commercial-system-v1.md` + `lib/commercial/catalogue.ts`.
+ *
+ * Reference only: reads plan NAMES from public.plans for the marketing page. That table is orphaned (all prices NULL, no shared slug with the runtime contract) — its fate is MOD-02.
+ *
+ * Guarded by lib/guards/commercial-single-source.test.ts.
+ */
 import "server-only";
 
 export type PlanRow = {

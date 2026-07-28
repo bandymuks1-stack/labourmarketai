@@ -1,3 +1,11 @@
+/**
+ * REFERENCE ONLY — the canonical commercial source is
+ * `docs/product/commercial-system-v1.md` + `lib/commercial/catalogue.ts`.
+ *
+ * Reference only: this maps a plan key to the ENV VAR holding a Stripe Price id. It must never contain an amount.
+ *
+ * Guarded by lib/guards/commercial-single-source.test.ts.
+ */
 import "server-only";
 
 import { env } from "@/lib/env";

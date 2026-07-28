@@ -1,5 +1,7 @@
 # LMC Commercial System Train v1 — canonical train document
 
+> **REFERENCE ONLY — this document remains the BINDING provenance for the LMC unit, grants, lifecycle and flag policy, but the canonical commercial catalogue (plans, prices, top-ups, micro-features, entitlements) is now `docs/product/commercial-system-v1.md`. Where the two differ, the canonical document wins and this one must be corrected in the same PR.**
+
 Status: **Wagon 0 (this document) + Wagon 1 (ledger foundation) only.**
 Everything commercial ships **disabled**. No production migration, no Stripe
 activation, no LMC issued to any real user, no referral rewards, no emails.

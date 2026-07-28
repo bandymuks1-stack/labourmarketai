@@ -1,4 +1,12 @@
 /**
+ * REFERENCE ONLY — the canonical commercial source is
+ * `docs/product/commercial-system-v1.md` + `lib/commercial/catalogue.ts`.
+ *
+ * Runtime MIRROR: the entitlement SHAPE stays executable here (every gate imports it). Plan meaning, prices and names are canonical in the source above; nothing commercial may be added here.
+ *
+ * Guarded by lib/guards/commercial-single-source.test.ts.
+ */
+/**
  * Pre-payment PLAN BOUNDARY — source of truth (Stage 8).
  *
  * Describes what each plan WILL include when payments are later switched on.
