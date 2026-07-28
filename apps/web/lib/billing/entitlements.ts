@@ -6,6 +6,21 @@
  * request pilot access" state rather than charging or hard-blocking. The same
  * helpers will back real enforcement once the Stripe sprint flips
  * PAYMENTS_ENABLED.
+ *
+ * WHICH ENGINE TO WIRE (commercial readiness audit v1, finding F6).
+ * Two modules describe entitlement and they are NOT interchangeable:
+ *
+ *   - THIS module is the pure PLAN-BOUNDARY evaluator: "does plan X include
+ *     feature Y, and within what limit". `gateFeature`/`gateFeatureBySlug`
+ *     answer with pre-payment semantics (`payment_not_enabled`) and are
+ *     consumed by the readiness registry/guard, NOT by runtime enforcement.
+ *   - `entitlements-v1.ts` + `effective-entitlements.ts` are the RUNTIME
+ *     enforcement path: they join this boundary with the caller's real
+ *     subscription state. A server action or route that needs to allow or
+ *     refuse an action calls `hasFeature()` — never `gateFeature()`.
+ *
+ * Wiring a runtime gate to `gateFeature` would ignore subscription status
+ * entirely (it cannot see one), so a cancelled subscriber would keep access.
  */
 
 import {

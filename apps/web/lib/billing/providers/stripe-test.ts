@@ -11,6 +11,8 @@ import type {
   BillingWebhookEvent,
   CheckoutSessionInput,
   CheckoutSessionResult,
+  PortalSessionInput,
+  PortalSessionResult,
 } from "@/lib/billing/provider";
 
 /**
@@ -35,17 +37,53 @@ export function createStripeTestProvider(): BillingProvider {
       input: CheckoutSessionInput,
     ): Promise<CheckoutSessionResult> {
       try {
-        const session = await client().checkout.sessions.create({
-          mode: "subscription",
-          line_items: [{ price: input.priceId, quantity: 1 }],
+        const linkMetadata = {
+          plan_key: input.planKey,
           client_reference_id: input.clientReferenceId,
-          customer_email: input.customerEmail ?? undefined,
-          success_url: input.successUrl,
-          cancel_url: input.cancelUrl,
-          metadata: { plan_key: input.planKey, test_mode: "true" },
-        });
+          test_mode: "true",
+        };
+        const session = await client().checkout.sessions.create(
+          {
+            mode: "subscription",
+            line_items: [{ price: input.priceId, quantity: 1 }],
+            client_reference_id: input.clientReferenceId,
+            // Reuse the known customer when we have one; otherwise let Stripe
+            // create it from the email (both cannot be sent together).
+            ...(input.providerCustomerId
+              ? { customer: input.providerCustomerId }
+              : { customer_email: input.customerEmail ?? undefined }),
+            success_url: input.successUrl,
+            cancel_url: input.cancelUrl,
+            metadata: linkMetadata,
+            /**
+             * Session metadata is NOT copied onto the subscription. Without
+             * this block every customer.subscription.* event arrived with no
+             * owner and no plan, so the whole chain depended on
+             * checkout.session.completed winning a race it is not guaranteed
+             * to win — a paid subscriber could end up with no entitlement.
+             */
+            subscription_data: { metadata: linkMetadata },
+          },
+          // A double-clicked checkout must not create two subscriptions.
+          input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined,
+        );
         if (!session.url) return { ok: false, reason: "no_session_url" };
         return { ok: true, url: session.url, sessionId: session.id, testMode: true };
+      } catch (e) {
+        return { ok: false, reason: e instanceof Error ? e.message : "stripe_error" };
+      }
+    },
+
+    async createPortalSession(
+      input: PortalSessionInput,
+    ): Promise<PortalSessionResult> {
+      try {
+        const session = await client().billingPortal.sessions.create({
+          customer: input.providerCustomerId,
+          return_url: input.returnUrl,
+        });
+        if (!session.url) return { ok: false, reason: "no_portal_url" };
+        return { ok: true, url: session.url, testMode: true };
       } catch (e) {
         return { ok: false, reason: e instanceof Error ? e.message : "stripe_error" };
       }

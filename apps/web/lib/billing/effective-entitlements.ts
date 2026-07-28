@@ -36,6 +36,11 @@ function pickAudience(roles: readonly string[]): PlanAudience {
 
 export interface EffectiveEntitlements extends EntitlementContext {
   readonly profileId: string | null;
+  /** End of the paid period (ISO) — bounds the past_due grace window. */
+  readonly currentPeriodEnd?: string | null;
+  readonly cancelAtPeriodEnd?: boolean;
+  /** A real subscription exists and the portal can be opened for it. */
+  readonly canManageBilling?: boolean;
 }
 
 export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements> {
@@ -73,9 +78,13 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
   let subscriptionPlanKey: string | null = null;
   let subscriptionStatus: SubStatus | null = null;
   let manualOverridePlanKey: string | null = null;
+  let currentPeriodEnd: string | null = null;
+  let cancelAtPeriodEnd = false;
   const { data: subs, error } = await asAny(supabase)
     .from("billing_subscriptions")
-    .select("plan_key, status, provider_subscription_id, updated_at")
+    .select(
+      "plan_key, status, provider_subscription_id, current_period_end, cancel_at_period_end, updated_at",
+    )
     .eq("owner_id", user.id)
     .order("updated_at", { ascending: false });
   if (!error) {
@@ -93,6 +102,8 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
     if (real) {
       subscriptionPlanKey = real.plan_key ?? null;
       subscriptionStatus = (real.status as SubStatus) ?? null;
+      currentPeriodEnd = (real.current_period_end as string | null) ?? null;
+      cancelAtPeriodEnd = Boolean(real.cancel_at_period_end);
     }
   } else if (error.code !== RELATION_ABSENT) {
     // a non-absent error → stay free/permissive, never throw into a page
@@ -105,8 +116,15 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
     subscriptionPlanKey,
     subscriptionStatus,
     manualOverridePlanKey,
+    currentPeriodEnd,
   });
-  return { ...ctx, profileId: user.id };
+  return {
+    ...ctx,
+    profileId: user.id,
+    currentPeriodEnd,
+    cancelAtPeriodEnd,
+    canManageBilling: billingActive && Boolean(subscriptionPlanKey),
+  };
 }
 
 /** Server enforcement helper for routes/actions (not just UI hiding). */

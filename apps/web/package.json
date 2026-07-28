@@ -28,6 +28,7 @@
     "skills:evidence-report": "tsx scripts/skills-evidence-report.ts",
     "db:fixtures:local": "tsx scripts/db-fixtures-local.ts",
     "admin:promote": "tsx scripts/admin-promote.ts",
+    "lmc:expire-lots": "tsx scripts/lmc-expire-lots.ts",
     "admin:grant-superadmin": "tsx scripts/admin-grant-superadmin.ts",
     "generate-pilot-owner-brief": "tsx scripts/generate-pilot-owner-brief.ts",
     "generate-activation-report": "tsx scripts/generate-activation-report.ts",

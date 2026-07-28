@@ -17,10 +17,29 @@ export interface CheckoutSessionInput {
   readonly customerEmail?: string | null;
   readonly successUrl: string;
   readonly cancelUrl: string;
+  /**
+   * Reuse of an already-known provider customer, so a returning buyer does not
+   * accumulate duplicate Stripe customers (and their portal keeps working).
+   */
+  readonly providerCustomerId?: string | null;
+  /**
+   * Deterministic idempotency key. A double-clicked checkout must not create
+   * two subscriptions for the same user+plan.
+   */
+  readonly idempotencyKey?: string;
 }
 
 export type CheckoutSessionResult =
   | { ok: true; url: string; sessionId: string; testMode: true }
+  | { ok: false; reason: string };
+
+export interface PortalSessionInput {
+  readonly providerCustomerId: string;
+  readonly returnUrl: string;
+}
+
+export type PortalSessionResult =
+  | { ok: true; url: string; testMode: true }
   | { ok: false; reason: string };
 
 export interface BillingWebhookEvent {
@@ -37,6 +56,12 @@ export interface BillingProvider {
   createCheckoutSession(
     input: CheckoutSessionInput,
   ): Promise<CheckoutSessionResult>;
+  /**
+   * Customer self-service (cancel, update card, invoice history). Without this
+   * a subscriber has no in-product way to end the contract — an EU consumer
+   * requirement, not a nice-to-have.
+   */
+  createPortalSession(input: PortalSessionInput): Promise<PortalSessionResult>;
   /** Verify signature + parse. Throws on an invalid/forged signature. */
   constructWebhookEvent(
     payload: string,

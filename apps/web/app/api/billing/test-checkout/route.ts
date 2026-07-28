@@ -7,6 +7,7 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import { evaluateCheckoutRequest } from "@/lib/billing/checkout-core";
+import { getBillingCustomerId } from "@/lib/billing/subscription-store";
 
 /**
  * TEST checkout route (Stripe sprint PR3) — STRICTLY gated. A Stripe test
@@ -83,11 +84,22 @@ export async function POST(req: Request) {
   }
 
   const provider = await getBillingProvider();
+  // Reuse the known Stripe customer so a returning buyer keeps one customer
+  // record (and one working portal) instead of accumulating duplicates.
+  const providerCustomerId = await getBillingCustomerId(user.id);
   const result = await provider.createCheckoutSession({
     planKey,
     priceId,
     clientReferenceId: user.id,
     customerEmail: user.email ?? null,
+    providerCustomerId,
+    /**
+     * Deterministic per user+plan+price: a double-clicked "Subscribe" returns
+     * the SAME Stripe session instead of opening a second subscription. The
+     * price id is part of the key so a later price change still starts a new
+     * checkout rather than replaying the old one.
+     */
+    idempotencyKey: `checkout:${user.id}:${planKey}:${priceId}`,
     successUrl: `${origin}/dashboard/account?billing=test_success`,
     cancelUrl: `${origin}/pricing?billing=test_cancelled`,
   });

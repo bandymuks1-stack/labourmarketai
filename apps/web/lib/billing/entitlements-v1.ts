@@ -50,6 +50,13 @@ function freePlanFor(audience: PlanAudience): string {
   return "agency_pilot";
 }
 
+/**
+ * How long a `past_due` subscription keeps paid access after the period it
+ * failed to pay for has ended. Stripe's own dunning retries run inside this
+ * window; after it, access falls back to free instead of being granted forever.
+ */
+export const PAST_DUE_GRACE_DAYS = 7;
+
 export interface ResolveEntitlementsInput {
   /** Billing is in a valid Stripe test config (enforcement on). */
   readonly billingActive: boolean;
@@ -59,6 +66,25 @@ export interface ResolveEntitlementsInput {
   readonly subscriptionStatus: SubStatus | null;
   /** Admin-granted pilot access (no subscription required). */
   readonly manualOverridePlanKey: string | null;
+  /** End of the paid period (ISO) — bounds the past_due grace window. */
+  readonly currentPeriodEnd?: string | null;
+  /** Injected clock (tests); defaults to now. */
+  readonly now?: Date;
+}
+
+/**
+ * Is a past_due subscription still inside its bounded grace window?
+ * An unknown period end cannot be bounded here — grace is granted and Stripe's
+ * own dunning schedule ends it by moving the subscription to unpaid/canceled.
+ */
+export function withinPastDueGrace(
+  currentPeriodEnd: string | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  if (!currentPeriodEnd) return true;
+  const end = Date.parse(currentPeriodEnd);
+  if (Number.isNaN(end)) return true;
+  return now.getTime() <= end + PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000;
 }
 
 export function resolveEntitlements(
@@ -78,7 +104,9 @@ export function resolveEntitlements(
 
   const s = input.subscriptionStatus;
   const subActive = s === "active" || s === "trialing";
-  const subGrace = s === "past_due";
+  // Bounded: an open-ended past_due grace is indefinite free paid access.
+  const subGrace =
+    s === "past_due" && withinPastDueGrace(input.currentPeriodEnd, input.now);
 
   if (input.subscriptionPlanKey && (subActive || subGrace)) {
     return {

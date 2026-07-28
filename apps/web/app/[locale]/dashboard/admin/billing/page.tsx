@@ -11,6 +11,7 @@ import {
 } from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
+import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 
 /**
  * Admin billing center (Stripe sprint PR6). Shows the billing config state
@@ -202,6 +203,11 @@ export default async function AdminBillingPage({
           }}
         />
       </section>
+
+      {/* LMC ledger — live kill-switch state, outstanding credit liability and
+          the credit-a-tester path (the ledger had no application surface at
+          all until the commercial readiness audit). */}
+      <AdminLmcPanel locale={locale} />
 
       {/* Webhook events */}
       <section className="flex flex-col gap-2">

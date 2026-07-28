@@ -26,10 +26,12 @@ In Stripe **test mode** (toggle top-right), create 3 products + a recurring
 ## Step 2 — Webhook endpoint (test)
 
 Developers → Webhooks → Add endpoint:
-- URL: `https://labourmarketai.vercel.app/api/billing/webhook`
+- URL: `https://labourmarket.ai/api/billing/webhook`
 - Events: `checkout.session.completed`, `customer.subscription.created`,
   `customer.subscription.updated`, `customer.subscription.deleted`,
-  `invoice.payment_succeeded`, `invoice.payment_failed`
+  `invoice.paid`, `invoice.payment_succeeded`, `invoice.payment_failed`
+  (`invoice.paid` is the modern success event on the pinned API version —
+  subscribing to `invoice.payment_succeeded` alone can miss the payment)
 - Copy the **signing secret** (`whsec_…`) → `STRIPE_WEBHOOK_SECRET`.
 
 ## Step 3 — Env (TEST values, never committed)
@@ -53,7 +55,7 @@ Use ONLY `sk_test_`/`pk_test_`/`whsec_` (test). A live key fails the build by de
 
 ## Step 4 — Confirm test mode is on
 
-`curl -s -X POST https://labourmarketai.vercel.app/api/billing/test-checkout \
+`curl -s -X POST https://labourmarket.ai/api/billing/test-checkout \
   -H 'content-type: application/json' -d '{"planKey":"company_pilot"}'`
 - Before: `{"reason":"payments_disabled","testMode":false}` (disabled).
 - After test config: `{"reason":"not_authenticated"}` → **test mode is ON** (the
@@ -101,6 +103,41 @@ Stripe's sample objects; for owner/plan linkage use a real checkout from Step 5.
 - unknown plan / unauthenticated → reject. ✓ (checkout-core)
 - cancelled → entitlement removed; `invoice.payment_failed` → `past_due`. ✓
   (entitlements + DB probe)
+
+## Step 6 — Customer self-service (added by the commercial readiness audit)
+
+After a test subscription exists, open `/dashboard/account`:
+- the return from checkout is acknowledged (`?billing=test_success`);
+- the real subscription status + period end are shown;
+- **Manage billing** opens the Stripe **customer portal** — cancel, change card,
+  download invoices.
+
+Enable the portal once in Stripe: **Settings → Billing → Customer portal →**
+save a configuration (test mode). Without a saved configuration the portal API
+returns an error and the button reports it honestly instead of opening.
+
+### Cancel / re-subscribe check
+1. Cancel in the portal → `customer.subscription.deleted` → status `cancelled`
+   → the paid feature is refused again.
+2. Subscribe again with the same user+plan → a NEW Stripe subscription id
+   rebinds the same row → the feature works again. (Before the audit this hit
+   the `(owner_id, plan_key, provider)` unique index, the write was dropped, and
+   Stripe still received HTTP 200 — a paid-but-not-entitled customer.)
+
+## Step 7 — LMC credit for testers (separate from Stripe)
+
+Crediting LMC does NOT require Stripe. It requires the owner to switch
+`lmc_promotional_grants_enabled` on in `public.lmc_settings` (service-role only,
+via `lmc_set_flag_v1`). Until then the admin form at `/dashboard/admin/billing`
+refuses honestly with `lmc_promotional_grants_disabled` and credits nothing.
+
+Once on: `/dashboard/admin/billing` → **LMC ledger** → recipient email (a
+verified account), amount (≤ 1000 LMC), reason, campaign, expiry (≤ 365 days),
+idempotency key. A repeat with the same key returns the original grant instead
+of crediting twice.
+
+Schedule `pnpm -C apps/web lmc:expire-lots` (daily) so expired promotional
+credit is actually shed — the function had no caller at all before this audit.
 
 ## Hard line
 

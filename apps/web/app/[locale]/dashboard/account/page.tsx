@@ -18,6 +18,7 @@ import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
+import { AccountBillingSection } from "@/components/app/account-billing-section";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -32,11 +33,18 @@ import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
  */
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** `?billing=test_success|test_cancelled|portal_return` — the provider return. */
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const query = (await searchParams) ?? {};
+  const billingReturn = Array.isArray(query.billing)
+    ? (query.billing[0] ?? null)
+    : (query.billing ?? null);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
   const tRole = await getTranslations("auth.signup.role");
@@ -138,6 +146,11 @@ export default async function AccountPage({
           <span aria-hidden className="text-text-muted">→</span>
         </Link>
       </section>
+
+      {/* Real subscription state + the provider return acknowledgement.
+          Renders the honest disabled statement while payments are off; it
+          offers no purchase affordance of its own. */}
+      <AccountBillingSection billingReturn={billingReturn} />
 
       <section className="card-border p-5">
         <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">

@@ -3,6 +3,7 @@ import "server-only";
 import type {
   BillingProvider,
   CheckoutSessionResult,
+  PortalSessionResult,
 } from "@/lib/billing/provider";
 
 /**
@@ -15,6 +16,9 @@ export function noopProvider(): BillingProvider {
     id: "noop",
     active: false,
     async createCheckoutSession(): Promise<CheckoutSessionResult> {
+      return { ok: false, reason: "payments_disabled" };
+    },
+    async createPortalSession(): Promise<PortalSessionResult> {
       return { ok: false, reason: "payments_disabled" };
     },
     async constructWebhookEvent() {

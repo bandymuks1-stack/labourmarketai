@@ -11264,5 +11264,87 @@
       "agency": "Ich vertrete eine Agentur",
       "partner": "Ich möchte Partner werden"
     }
+  },
+  "accountBilling": {
+    "title": "Abonnement",
+    "testBadge": "TESTMODUS",
+    "disabled": "Zahlungen sind nicht aktiviert. Hier wird nichts abgebucht und keine Karte gespeichert.",
+    "none": "Kein Abonnement. Du nutzt den kostenlosen Plan.",
+    "planLabel": "Plan",
+    "statusLabel": "Status",
+    "periodEnd": "Aktueller Zeitraum endet am {date}",
+    "cancelAtPeriodEnd": "Der Zugang endet mit dem aktuellen Zeitraum — es wird nicht erneut abgebucht.",
+    "graceNotice": "Die letzte Zahlung ist fehlgeschlagen. Der Zugang bleibt kurz bestehen, während der Anbieter es erneut versucht.",
+    "status": {
+      "none": "Kein Abonnement",
+      "incomplete": "Nicht abgeschlossen",
+      "trialing": "Testphase",
+      "active": "Aktiv",
+      "past_due": "Zahlung überfällig",
+      "unpaid": "Unbezahlt",
+      "cancelled": "Gekündigt",
+      "expired": "Abgelaufen"
+    },
+    "manage": {
+      "open": "Abrechnung verwalten",
+      "opening": "Wird geöffnet…",
+      "error": "Öffnen fehlgeschlagen",
+      "hint": "Kündigen, Karte ändern oder Rechnungen herunterladen."
+    },
+    "returned": {
+      "success": "Bezahlvorgang im Testmodus abgeschlossen. Dein Abonnement wird aktualisiert, sobald der Anbieter bestätigt.",
+      "cancelled": "Bezahlvorgang abgebrochen. Es wurde nichts abgebucht.",
+      "portal": "Du bist aus dem Abrechnungsportal zurück."
+    },
+    "credit": {
+      "title": "Plattformguthaben",
+      "amount": "{amount} LMC verfügbar",
+      "note": "LMC ist internes Plattformguthaben (1 LMC = 1 EUR Guthaben). Es ist kein Bargeld, nicht auszahlbar und keine Geldanlage.",
+      "frozen": "Das Ausgeben von Guthaben ist noch nicht aktiviert, dieses Guthaben ist derzeit nicht nutzbar.",
+      "expiring": "{amount} LMC sind abgelaufen und nicht mehr nutzbar."
+    }
+  },
+  "adminLmc": {
+    "title": "LMC-Hauptbuch",
+    "intro": "Internes Plattformguthaben (1 LMC = 1 EUR Guthaben). Nicht auszahlbar, keine Geldanlage, kein E-Geld-Anspruch. Jeder Schalter unten wird aus der Datenbank gelesen, nicht aus dem Code.",
+    "unavailable": "Das LMC-Hauptbuch ist von hier nicht lesbar (nicht angewendet, oder du bist kein Admin). Es werden keine Zahlen gezeigt statt Nullen, die wie Fakten aussehen.",
+    "on": "an",
+    "off": "aus",
+    "spendFrozen": "Das Ausgeben ist eingefroren: ausgegebenes Guthaben ist erst nutzbar, wenn lmc_spending_enabled aktiviert ist.",
+    "policy": {
+      "admin": "Admin",
+      "owner_only": "nur Eigentümer",
+      "system_locked": "gesperrt"
+    },
+    "liability": {
+      "outstanding": "Ausstehend",
+      "promotional": "Promo",
+      "purchased": "Gekauft",
+      "accounts": "Konten",
+      "note": "Ausstehendes LMC ist abgegrenzter Umsatz: jedes Guthaben ist ein Euro, den ein Kunde ausgeben kann, statt zu zahlen."
+    },
+    "grant": {
+      "email": "E-Mail des Empfängers (bestätigtes Konto)",
+      "amount": "LMC",
+      "reason": "Grund",
+      "campaign": "Kampagne",
+      "expiryDays": "Läuft ab in (Tagen)",
+      "key": "Idempotenz-Schlüssel",
+      "submit": "LMC gutschreiben",
+      "submitting": "Wird gutgeschrieben…",
+      "granted": "Gutgeschrieben",
+      "replay": "Mit diesem Schlüssel wurde bereits gutgeschrieben — nichts doppelt hinzugefügt",
+      "disabledHint": "Promo-Gutschriften sind in der Datenbank ausgeschaltet. Das Hauptbuch lehnt diese Gutschrift ab, bis der Eigentümer lmc_promotional_grants_enabled aktiviert.",
+      "reasons": {
+        "grants_disabled": "Abgelehnt: Promo-Gutschriften sind ausgeschaltet",
+        "not_admin": "Abgelehnt: Adminrechte erforderlich",
+        "recipient_not_found": "Kein bestätigtes Konto mit dieser E-Mail",
+        "invalid_amount": "Ungültiger Betrag (max. 1000 LMC pro Gutschrift)",
+        "invalid_expiry": "Ungültige Gültigkeit (erforderlich, max. 365 Tage)",
+        "idempotency_conflict": "Dieser Schlüssel wurde bereits mit anderen Angaben verwendet",
+        "ledger_absent": "Das LMC-Hauptbuch ist nicht verfügbar",
+        "error": "Fehlgeschlagen"
+      }
+    }
   }
 }

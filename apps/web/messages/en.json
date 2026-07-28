@@ -11264,5 +11264,87 @@
       "agency": "I represent an agency",
       "partner": "I want to become a partner"
     }
+  },
+  "accountBilling": {
+    "title": "Subscription",
+    "testBadge": "TEST MODE",
+    "disabled": "Payments are not enabled. Nothing can be charged here and no card is stored.",
+    "none": "No subscription. You are on the free plan.",
+    "planLabel": "Plan",
+    "statusLabel": "Status",
+    "periodEnd": "Current period ends {date}",
+    "cancelAtPeriodEnd": "Access ends when the current period ends — you will not be charged again.",
+    "graceNotice": "The last payment did not go through. Access continues for a short grace period while the provider retries.",
+    "status": {
+      "none": "No subscription",
+      "incomplete": "Not finished",
+      "trialing": "Trial",
+      "active": "Active",
+      "past_due": "Payment overdue",
+      "unpaid": "Unpaid",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "manage": {
+      "open": "Manage billing",
+      "opening": "Opening…",
+      "error": "Could not open billing",
+      "hint": "Cancel, change your card or download invoices."
+    },
+    "returned": {
+      "success": "Checkout finished in test mode. Your subscription updates as soon as the provider confirms it.",
+      "cancelled": "Checkout was cancelled. Nothing was charged.",
+      "portal": "You are back from the billing portal."
+    },
+    "credit": {
+      "title": "Platform credit",
+      "amount": "{amount} LMC available",
+      "note": "LMC is internal platform credit (1 LMC = 1 EUR of credit). It is not cash, not withdrawable and not an investment.",
+      "frozen": "Spending credit is not switched on yet, so this balance cannot be used at the moment.",
+      "expiring": "{amount} LMC has already expired and is no longer usable."
+    }
+  },
+  "adminLmc": {
+    "title": "LMC ledger",
+    "intro": "Internal platform credit (1 LMC = 1 EUR of credit). Not withdrawable, not an investment, not an electronic-money claim. Every switch below is read from the database, not from code.",
+    "unavailable": "The LMC ledger is not readable from here (not applied, or you are not an admin). No numbers are shown, rather than zeros that look like facts.",
+    "on": "on",
+    "off": "off",
+    "spendFrozen": "Spending is frozen: issued credit cannot be used until lmc_spending_enabled is turned on.",
+    "policy": {
+      "admin": "admin",
+      "owner_only": "owner only",
+      "system_locked": "locked"
+    },
+    "liability": {
+      "outstanding": "Outstanding",
+      "promotional": "Promotional",
+      "purchased": "Purchased",
+      "accounts": "Accounts",
+      "note": "Outstanding LMC is deferred revenue: each credit is a euro a customer can spend instead of paying."
+    },
+    "grant": {
+      "email": "Recipient email (verified account)",
+      "amount": "LMC",
+      "reason": "Reason",
+      "campaign": "Campaign",
+      "expiryDays": "Expires in (days)",
+      "key": "Idempotency key",
+      "submit": "Credit LMC",
+      "submitting": "Crediting…",
+      "granted": "Credited",
+      "replay": "Already credited with this key — nothing was added twice",
+      "disabledHint": "Promotional grants are switched off in the database. The ledger will refuse this credit until the owner turns lmc_promotional_grants_enabled on.",
+      "reasons": {
+        "grants_disabled": "Refused: promotional grants are switched off",
+        "not_admin": "Refused: admin rights required",
+        "recipient_not_found": "No verified account with that email",
+        "invalid_amount": "Invalid amount (max 1000 LMC per grant)",
+        "invalid_expiry": "Invalid expiry (required, max 365 days)",
+        "idempotency_conflict": "That key was already used with different details",
+        "ledger_absent": "The LMC ledger is not available",
+        "error": "Failed"
+      }
+    }
   }
 }

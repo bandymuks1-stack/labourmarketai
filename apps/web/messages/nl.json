@@ -11264,5 +11264,87 @@
       "agency": "Ik vertegenwoordig een bureau",
       "partner": "Ik wil partner worden"
     }
+  },
+  "accountBilling": {
+    "title": "Abonnement",
+    "testBadge": "TESTMODUS",
+    "disabled": "Betalingen staan niet aan. Er wordt hier niets afgeschreven en er wordt geen kaart bewaard.",
+    "none": "Geen abonnement. Je gebruikt het gratis plan.",
+    "planLabel": "Plan",
+    "statusLabel": "Status",
+    "periodEnd": "Huidige periode eindigt op {date}",
+    "cancelAtPeriodEnd": "De toegang stopt aan het einde van de huidige periode — er volgt geen nieuwe afschrijving.",
+    "graceNotice": "De laatste betaling is mislukt. De toegang blijft kort actief terwijl de provider het opnieuw probeert.",
+    "status": {
+      "none": "Geen abonnement",
+      "incomplete": "Niet afgerond",
+      "trialing": "Proefperiode",
+      "active": "Actief",
+      "past_due": "Betaling te laat",
+      "unpaid": "Niet betaald",
+      "cancelled": "Geannuleerd",
+      "expired": "Verlopen"
+    },
+    "manage": {
+      "open": "Facturatie beheren",
+      "opening": "Openen…",
+      "error": "Openen mislukt",
+      "hint": "Opzeggen, kaart wijzigen of facturen downloaden."
+    },
+    "returned": {
+      "success": "Afrekenen afgerond in testmodus. Je abonnement wordt bijgewerkt zodra de provider het bevestigt.",
+      "cancelled": "Afrekenen geannuleerd. Er is niets afgeschreven.",
+      "portal": "Je bent terug uit het facturatieportaal."
+    },
+    "credit": {
+      "title": "Platformtegoed",
+      "amount": "{amount} LMC beschikbaar",
+      "note": "LMC is intern platformtegoed (1 LMC = 1 EUR tegoed). Het is geen geld, niet opneembaar en geen belegging.",
+      "frozen": "Het besteden van tegoed staat nog niet aan, dus dit saldo kan nu niet worden gebruikt.",
+      "expiring": "{amount} LMC is verlopen en kan niet meer worden gebruikt."
+    }
+  },
+  "adminLmc": {
+    "title": "LMC-grootboek",
+    "intro": "Intern platformtegoed (1 LMC = 1 EUR tegoed). Niet opneembaar, geen belegging, geen aanspraak op elektronisch geld. Elke schakelaar hieronder komt uit de database, niet uit de code.",
+    "unavailable": "Het LMC-grootboek is hier niet leesbaar (niet toegepast, of je bent geen beheerder). Er worden geen cijfers getoond in plaats van nullen die op feiten lijken.",
+    "on": "aan",
+    "off": "uit",
+    "spendFrozen": "Besteden is bevroren: uitgegeven tegoed kan pas worden gebruikt als lmc_spending_enabled aanstaat.",
+    "policy": {
+      "admin": "beheerder",
+      "owner_only": "alleen eigenaar",
+      "system_locked": "vergrendeld"
+    },
+    "liability": {
+      "outstanding": "Uitstaand",
+      "promotional": "Promotioneel",
+      "purchased": "Gekocht",
+      "accounts": "Rekeningen",
+      "note": "Uitstaand LMC is uitgestelde omzet: elk tegoed is een euro die een klant kan besteden in plaats van te betalen."
+    },
+    "grant": {
+      "email": "E-mail ontvanger (geverifieerd account)",
+      "amount": "LMC",
+      "reason": "Reden",
+      "campaign": "Campagne",
+      "expiryDays": "Verloopt over (dagen)",
+      "key": "Idempotentiesleutel",
+      "submit": "LMC toekennen",
+      "submitting": "Bezig…",
+      "granted": "Toegekend",
+      "replay": "Met deze sleutel is al toegekend — er is niets dubbel toegevoegd",
+      "disabledHint": "Promotionele toekenningen staan uit in de database. Het grootboek weigert dit tegoed totdat de eigenaar lmc_promotional_grants_enabled aanzet.",
+      "reasons": {
+        "grants_disabled": "Geweigerd: promotionele toekenningen staan uit",
+        "not_admin": "Geweigerd: beheerdersrechten vereist",
+        "recipient_not_found": "Geen geverifieerd account met dat e-mailadres",
+        "invalid_amount": "Ongeldig bedrag (max. 1000 LMC per toekenning)",
+        "invalid_expiry": "Ongeldige vervaldatum (verplicht, max. 365 dagen)",
+        "idempotency_conflict": "Die sleutel is al gebruikt met andere gegevens",
+        "ledger_absent": "Het LMC-grootboek is niet beschikbaar",
+        "error": "Mislukt"
+      }
+    }
   }
 }

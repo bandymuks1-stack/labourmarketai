@@ -11264,5 +11264,87 @@
       "agency": "Atstovauju agentūrai",
       "partner": "Noriu tapti partneriu"
     }
+  },
+  "accountBilling": {
+    "title": "Prenumerata",
+    "testBadge": "TESTINIS REŽIMAS",
+    "disabled": "Mokėjimai neįjungti. Čia niekas neapmokestinama ir kortelės duomenys nesaugomi.",
+    "none": "Prenumeratos nėra. Naudojatės nemokamu planu.",
+    "planLabel": "Planas",
+    "statusLabel": "Būsena",
+    "periodEnd": "Dabartinis laikotarpis baigiasi {date}",
+    "cancelAtPeriodEnd": "Prieiga baigsis pasibaigus dabartiniam laikotarpiui — daugiau nebus nuskaičiuota.",
+    "graceNotice": "Paskutinis mokėjimas nepavyko. Prieiga trumpam lieka aktyvi, kol tiekėjas kartoja bandymą.",
+    "status": {
+      "none": "Prenumeratos nėra",
+      "incomplete": "Nebaigta",
+      "trialing": "Bandomasis laikotarpis",
+      "active": "Aktyvi",
+      "past_due": "Vėluoja mokėjimas",
+      "unpaid": "Neapmokėta",
+      "cancelled": "Atšaukta",
+      "expired": "Pasibaigusi"
+    },
+    "manage": {
+      "open": "Tvarkyti mokėjimus",
+      "opening": "Atidaroma…",
+      "error": "Nepavyko atidaryti",
+      "hint": "Atšaukti, pakeisti kortelę arba atsisiųsti sąskaitas."
+    },
+    "returned": {
+      "success": "Apmokėjimas baigtas testiniu režimu. Prenumerata atsinaujins, kai tiekėjas patvirtins.",
+      "cancelled": "Apmokėjimas atšauktas. Niekas nenuskaičiuota.",
+      "portal": "Grįžote iš mokėjimų portalo."
+    },
+    "credit": {
+      "title": "Platformos kreditas",
+      "amount": "Turite {amount} LMC",
+      "note": "LMC yra vidinis platformos kreditas (1 LMC = 1 EUR kredito). Tai ne pinigai, jų negalima išgryninti ir tai nėra investicija.",
+      "frozen": "Kredito naudojimas dar neįjungtas, todėl šiuo metu jo panaudoti negalima.",
+      "expiring": "{amount} LMC jau nustojo galioti ir nebegali būti naudojama."
+    }
+  },
+  "adminLmc": {
+    "title": "LMC registras",
+    "intro": "Vidiniai platformos kreditai (1 LMC = 1 EUR kredito). Neišgryninama, ne investicija, ne elektroninių pinigų reikalavimas. Visi jungikliai rodomi iš duomenų bazės, ne iš kodo.",
+    "unavailable": "LMC registro iš čia perskaityti nepavyko (nepritaikytas arba neturite administratoriaus teisių). Skaičiai nerodomi, kad nuliai neatrodytų kaip faktai.",
+    "on": "įjungta",
+    "off": "išjungta",
+    "spendFrozen": "Išlaidavimas užšaldytas: išduoto kredito naudoti negalima, kol neįjungtas lmc_spending_enabled.",
+    "policy": {
+      "admin": "administratorius",
+      "owner_only": "tik savininkas",
+      "system_locked": "užrakinta"
+    },
+    "liability": {
+      "outstanding": "Neišnaudota",
+      "promotional": "Reklaminiai",
+      "purchased": "Nupirkti",
+      "accounts": "Sąskaitos",
+      "note": "Neišnaudotas LMC yra atidėtos pajamos: kiekvienas kreditas — euras, kurį klientas gali išleisti vietoje mokėjimo."
+    },
+    "grant": {
+      "email": "Gavėjo el. paštas (patvirtinta paskyra)",
+      "amount": "LMC",
+      "reason": "Priežastis",
+      "campaign": "Kampanija",
+      "expiryDays": "Galioja (dienų)",
+      "key": "Idempotencijos raktas",
+      "submit": "Įskaityti LMC",
+      "submitting": "Įskaitoma…",
+      "granted": "Įskaityta",
+      "replay": "Su šiuo raktu jau įskaityta — antrą kartą nepridėta",
+      "disabledHint": "Reklaminiai kreditai duomenų bazėje išjungti. Registras atmes šį įskaitymą, kol savininkas neįjungs lmc_promotional_grants_enabled.",
+      "reasons": {
+        "grants_disabled": "Atmesta: reklaminiai kreditai išjungti",
+        "not_admin": "Atmesta: reikia administratoriaus teisių",
+        "recipient_not_found": "Nėra patvirtintos paskyros su tokiu el. paštu",
+        "invalid_amount": "Netinkama suma (daugiausia 1000 LMC vienam įskaitymui)",
+        "invalid_expiry": "Netinkamas galiojimas (privalomas, daugiausia 365 dienos)",
+        "idempotency_conflict": "Šis raktas jau naudotas su kitais duomenimis",
+        "ledger_absent": "LMC registras nepasiekiamas",
+        "error": "Nepavyko"
+      }
+    }
   }
 }
