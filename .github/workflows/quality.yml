@@ -88,6 +88,17 @@ jobs:
       - name: i18n debt ratchet
         run: pnpm check:i18n-debt
 
+      # Commercial Gate (financial safety v1): RED when a commercial item is
+      # sellable — or newly added — without an assessed economic model, or when
+      # an assessed model breaks a financial-safety rule (unknown unit cost,
+      # unbounded "unlimited", growth that scales losses, a subsidy funded by
+      # future investment). The same logic also runs inside `pnpm -F web test`
+      # (lib/guards/commercial-gate.test.ts); this step exists so the failure
+      # reads as a commercial decision, not a unit-test failure.
+      # Contract: docs/product/commercial-sustainability-v1.md
+      - name: Commercial gate (financial safety)
+        run: pnpm -F web check:commercial-gate
+
       # Anon SECURITY DEFINER allowlist — LIVE half.
       #
       # The static half already runs above inside `pnpm -F web test`
