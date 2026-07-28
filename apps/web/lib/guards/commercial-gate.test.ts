@@ -40,9 +40,13 @@ const DOC = join(repoRoot, "docs", "product", "commercial-sustainability-v1.md")
 
 /** A complete, compliant model — the shape each negative control mutates. */
 const SOUND: EconomicModel = {
+  owner: "commercial owner",
   payer: "company",
   paidFor: "One promoted job advertisement for 30 days",
   costDriver: "ad serving + moderation review",
+  revenueDriver: "one-off LMC spend per advertisement",
+  marginModel: "fixed LMC price above the per-ad serving + moderation cost",
+  commercialDecision: "MOD-18",
   estimatedUnitCostCents: 120,
   costUnit: "per ad-month",
   costScalesWithUsage: true,
