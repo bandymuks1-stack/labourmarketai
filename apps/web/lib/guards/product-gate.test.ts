@@ -25,6 +25,9 @@ import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREA
 import {
   BEHAVIOR_BINDINGS,
   MANDATORY_BEHAVIOR_QUESTIONS,
+  WAIVABLE_FIELDS,
+  validateWaiver,
+  isWaived,
   WORLD_SEMANTIC_TRIAD,
   AI_SELECTS,
   AI_NEVER_SELECTS,
@@ -1173,11 +1176,8 @@ describe("entity behavior model — behavior, not new tables", () => {
   const lock = () => readFileSync(LOCK, "utf8");
 
   const OK = {
-    usesExistingEntityType: true,
     newBehaviorIsEnough: true,
     newRelationshipIsEnough: true,
-    aiUsesItWithoutArchitectureChange: true,
-    mapCanRenderIt: true,
     worldStateCanControlIt: true,
   };
 
@@ -1251,12 +1251,33 @@ describe("entity behavior model — behavior, not new tables", () => {
     expect(validateBehaviorAnswers("/ok", OK)).toEqual([]);
   });
 
-  it("BLOCKS a new entity type used where a behavior would do", () => {
-    const codes = validateBehaviorAnswers("/x", {
-      ...OK,
-      usesExistingEntityType: false,
-    }).map((p) => p.code);
-    expect(codes).toContain("new_entity_type_instead_of_behavior");
+  it("does NOT re-judge a question another lock already owns", () => {
+    // A new entity type is judged ONCE, by UNIFIED_WORLD_MODEL_V1, through
+    // registrationIsEnough. This lock used to block on the same fact with the
+    // opposite verdict; two verdicts on one fact is how a gate contradicts
+    // itself, so the duplicate is gone.
+    const owned = MANDATORY_BEHAVIOR_QUESTIONS.filter(
+      (q) => q.ownedBy === "ENTITY_BEHAVIOR_MODEL_V1",
+    ).map((q) => q.field);
+    expect(owned).toEqual([
+      "newBehaviorIsEnough",
+      "newRelationshipIsEnough",
+      "worldStateCanControlIt",
+    ]);
+    // The referenced ones name their real owner, and are not re-asked here.
+    const referenced = MANDATORY_BEHAVIOR_QUESTIONS.filter(
+      (q) => q.ownedBy !== "ENTITY_BEHAVIOR_MODEL_V1",
+    );
+    expect(referenced.map((q) => q.field)).toEqual([
+      "needsNewEntityType",
+      "aiCanWorkWithIt",
+      "addableWithoutMapChange",
+    ]);
+    const src = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "product-gate", "behavior-model.ts"), "utf8");
+    for (const gone of ["usesExistingEntityType", "mapCanRenderIt", "aiUsesItWithoutArchitectureChange"]) {
+      expect(src, `${gone} was reintroduced as a duplicate field`).not.toContain(gone);
+    }
   });
 
   it("BLOCKS when a behavior or a relationship is not enough", () => {
@@ -1268,16 +1289,39 @@ describe("entity behavior model — behavior, not new tables", () => {
     ).toContain("relationship_not_enough");
   });
 
-  it("BLOCKS when the AI or the map would need an architecture change", () => {
+  it("the TRANSITIONAL WAIVER is approved, narrow and self-expiring", () => {
+    const w = {
+      reason: "World State does not exist yet; the honest answer is not-yet.",
+      fields: ["worldStateCanControlIt"] as const,
+      enablingStep: "B.6" as const,
+      ownerApproval: "owner 2026-07-28",
+    };
+    // Valid only while the enabling architecture does NOT exist.
+    expect(validateWaiver("/x", w, false)).toEqual([]);
+    expect(isWaived("worldStateCanControlIt", w, false)).toBe(true);
+
+    // It EXPIRES BY ITSELF once E.7 / B.6 ship — no date, no promise.
+    expect(validateWaiver("/x", w, true).map((p) => p.code)).toContain("waiver_expired");
+    expect(isWaived("worldStateCanControlIt", w, true)).toBe(false);
+
+    // Unapproved is not a waiver.
     expect(
-      validateBehaviorAnswers("/x", {
-        ...OK,
-        aiUsesItWithoutArchitectureChange: false,
-      }).map((p) => p.code),
-    ).toContain("ai_needs_architecture_change");
-    expect(
-      validateBehaviorAnswers("/x", { ...OK, mapCanRenderIt: false }).map((p) => p.code),
-    ).toContain("map_cannot_render_it");
+      validateWaiver("/x", { ...w, ownerApproval: "" }, false).map((p) => p.code),
+    ).toContain("waiver_not_approved");
+    expect(isWaived("worldStateCanControlIt", { ...w, ownerApproval: "" }, false)).toBe(false);
+
+    // And it can NEVER excuse the growth mechanism or entity-ness.
+    for (const forbidden of ["registrationIsEnough", "usesEntity", "newBehaviorIsEnough"]) {
+      expect(WAIVABLE_FIELDS as readonly string[]).not.toContain(forbidden);
+      expect(
+        validateWaiver("/x", { ...w, fields: [forbidden] as never }, false).map((p) => p.code),
+      ).toContain("waiver_covers_unwaivable_field");
+    }
+    // The gate computes expiry from the CODE, not from a date.
+    const gate = readFileSync(join(repoRoot, ".github", "scripts", "product-gate.mjs"), "utf8");
+    expect(gate).toContain("SPATIAL_KINDS_FILE");
+    expect(gate).toContain("waiver_expired");
+    expect(gate).toContain("transitional_waiver_in_use");
   });
 
   it("ESCALATES the last question to REDESIGN, not review", () => {
@@ -1285,9 +1329,9 @@ describe("entity behavior model — behavior, not new tables", () => {
     expect(v.map((p) => p.code)).toContain("world_state_cannot_control_it");
     expect(requiresRedesign(v)).toBe(true);
     // Every other failure is blocking, but is NOT a redesign trigger.
-    expect(requiresRedesign(validateBehaviorAnswers("/x", { ...OK, mapCanRenderIt: false }))).toBe(
-      false,
-    );
+    expect(
+      requiresRedesign(validateBehaviorAnswers("/x", { ...OK, newBehaviorIsEnough: false })),
+    ).toBe(false);
   });
 
   it("declares all six mandatory questions, and the gate enforces each", () => {

@@ -164,14 +164,50 @@ PR.
 
 ## 6. The six mandatory answers
 
-| # | Question | Field | Code when false |
-|---|---|---|---|
-| 1 | Does it use an existing Entity Type? | `usesExistingEntityType` | `new_entity_type_instead_of_behavior` |
-| 2 | Is adding a new Behavior enough? | `newBehaviorIsEnough` | `behavior_not_enough` |
-| 3 | Is adding a new Relationship enough? | `newRelationshipIsEnough` | `relationship_not_enough` |
-| 4 | Can the AI use it without an architecture change? | `aiUsesItWithoutArchitectureChange` | `ai_needs_architecture_change` |
-| 5 | Can the World Map render it? | `mapCanRenderIt` | `map_cannot_render_it` |
-| 6 | **Can World State control it?** | `worldStateCanControlIt` | `world_state_cannot_control_it` → **REDESIGN** |
+All six questions are still asked. Three are answered by fields **this lock
+owns**; three are answered by the **canonical field of the lock that already owns
+that question**, so no fact is judged twice.
+
+| # | Question | Canonical field | Owned by | Code when false |
+|---|---|---|---|---|
+| 1 | Does it use an existing Entity Type? | `needsNewEntityType` | UNIFIED_WORLD_MODEL_V1 | *(never blocks — growth is allowed)* |
+| 2 | Is adding a new Behavior enough? | `newBehaviorIsEnough` | **this lock** | `behavior_not_enough` |
+| 3 | Is adding a new Relationship enough? | `newRelationshipIsEnough` | **this lock** | `relationship_not_enough` |
+| 4 | Can the AI use it without an architecture change? | `aiCanWorkWithIt` | UNIFIED_WORLD_MODEL_V1 | `ai_cannot_work_with_entity` |
+| 5 | Can the World Map render it? | `addableWithoutMapChange` | PRODUCT_UNIVERSE_LOCK_V2 | `requires_map_architecture_change` |
+| 6 | **Can World State control it?** | `worldStateCanControlIt` | **this lock** | `world_state_cannot_control_it` → **REDESIGN** |
+
+**Why Q1 changed owner.** This lock used to block whenever a new Entity Type
+appeared, while `UNIFIED_WORLD_MODEL_V1` says a new type never blocks on its own.
+One fact, two locks, opposite verdicts. The Unified World Model wins: growth is
+allowed, and **`registrationIsEnough` is the single mechanism** that decides.
+Q2 and Q3 are that same mechanism applied to the other two registries — register
+a behavior, register a relationship — which is why they stay here and still block.
+
+---
+
+## 7. The TRANSITIONAL WAIVER — honest until E.7 / B.6 exist
+
+Four locks now ask whether the World Map carries a surface and whether World
+State controls it. Until **E.7** (map platform) and **B.6** (behavior binding)
+ship, the honest answer for a real surface is *not yet* — and every lock says
+nothing has to be rewritten today. Without a transition, the only green path
+would be to answer untruthfully.
+
+So a declaration may carry **one** `transitionalWaiver`:
+
+| Property | Rule |
+|---|---|
+| `ownerApproval` | **Required.** An unapproved waiver is just an unanswered question |
+| `fields` | Only `reflectedOnMap`, `addableWithoutMapChange`, `worldStateCanControlIt` |
+| `enablingStep` | `E.7` or `B.6` — the work that makes it unnecessary |
+| Expiry | **Automatic.** The gate computes readiness *from the code*: when the map stops being a closed per-kind union, every waiver becomes `waiver_expired` |
+| Visibility | Always reported as `transitional_waiver_in_use` — a waived PR is never silently green |
+
+**It can never excuse** `usesEntity`, `registrationIsEnough`, `newBehaviorIsEnough`
+or `newRelationshipIsEnough`. Those are what keep the world one world; only the
+*readiness* answers may wait, because only they depend on architecture that does
+not exist yet.
 
 ---
 

@@ -188,21 +188,37 @@ export const AI_NEVER_SELECTS = ["page", "module"] as const;
 // 3. The six mandatory answers
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * The owner's six questions. Three are answered by fields this lock OWNS; three
+ * are answered by the canonical fields of earlier locks, which this lock
+ * REFERENCES rather than asking again:
+ *
+ *   Q1 "existing Entity Type?"      → `needsNewEntityType`      (UNIFIED_WORLD_MODEL_V1)
+ *   Q4 "AI without arch. change?"   → `aiCanWorkWithIt`         (UNIFIED_WORLD_MODEL_V1)
+ *   Q5 "can the Map render it?"     → `addableWithoutMapChange` (PRODUCT_UNIVERSE_LOCK_V2)
+ *
+ * Q1 mattered: this lock used to block when a new entity type appeared, while
+ * the Unified World Model says a new type never blocks on its own. Two locks,
+ * one fact, opposite verdicts. The Unified World Model wins — growth is allowed,
+ * and `registrationIsEnough` is the single mechanism that decides. Adding a
+ * BEHAVIOR or a RELATIONSHIP is that same mechanism applied to the other two
+ * registries, which is why Q2 and Q3 remain here and still block.
+ */
 export const MANDATORY_BEHAVIOR_QUESTIONS = [
-  { field: "usesExistingEntityType", question: "Does it use an existing Entity Type?" },
-  { field: "newBehaviorIsEnough", question: "Is adding a new Behavior enough?" },
-  { field: "newRelationshipIsEnough", question: "Is adding a new Relationship enough?" },
-  { field: "aiUsesItWithoutArchitectureChange", question: "Can the AI use it without an architecture change?" },
-  { field: "mapCanRenderIt", question: "Can the World Map render it?" },
-  { field: "worldStateCanControlIt", question: "Can World State control it?" },
+  { field: "needsNewEntityType", question: "Does it use an existing Entity Type?", ownedBy: "UNIFIED_WORLD_MODEL_V1" },
+  { field: "newBehaviorIsEnough", question: "Is adding a new Behavior enough?", ownedBy: "ENTITY_BEHAVIOR_MODEL_V1" },
+  { field: "newRelationshipIsEnough", question: "Is adding a new Relationship enough?", ownedBy: "ENTITY_BEHAVIOR_MODEL_V1" },
+  { field: "aiCanWorkWithIt", question: "Can the AI use it without an architecture change?", ownedBy: "UNIFIED_WORLD_MODEL_V1" },
+  { field: "addableWithoutMapChange", question: "Can the World Map render it?", ownedBy: "PRODUCT_UNIVERSE_LOCK_V2" },
+  { field: "worldStateCanControlIt", question: "Can World State control it?", ownedBy: "ENTITY_BEHAVIOR_MODEL_V1" },
 ] as const;
 
 export interface BehaviorAnswers {
-  readonly usesExistingEntityType: boolean;
+  /** Owned by this lock: registering a BEHAVIOR must be enough. */
   readonly newBehaviorIsEnough: boolean;
+  /** Owned by this lock: registering a RELATIONSHIP must be enough. */
   readonly newRelationshipIsEnough: boolean;
-  readonly aiUsesItWithoutArchitectureChange: boolean;
-  readonly mapCanRenderIt: boolean;
+  /** Owned by this lock, and the owner's escalation: false ⇒ REDESIGN. */
   readonly worldStateCanControlIt: boolean;
 }
 
@@ -242,12 +258,6 @@ export function validateBehaviorAnswers(
   const push = (code: BehaviorProblem, detail: string, redesignRequired = false) =>
     out.push({ id, code, detail, redesignRequired });
 
-  if (!a.usesExistingEntityType) {
-    push(
-      "new_entity_type_instead_of_behavior",
-      "it introduces a new Entity Type where a Behavior on an existing type would do — the world grows by behavior, not by new base things",
-    );
-  }
   if (!a.newBehaviorIsEnough) {
     push(
       "behavior_not_enough",
@@ -260,18 +270,10 @@ export function validateBehaviorAnswers(
       "adding a Relationship is NOT enough — a new table or module is being introduced instead",
     );
   }
-  if (!a.aiUsesItWithoutArchitectureChange) {
-    push(
-      "ai_needs_architecture_change",
-      "the AI cannot use it without an architecture change — special-case logic for one entity type is exactly what the lock forbids",
-    );
-  }
-  if (!a.mapCanRenderIt) {
-    push(
-      "map_cannot_render_it",
-      "the World Map cannot render it — the map must draw an Entity by type, never know what the thing is",
-    );
-  }
+  // Q1, Q4 and Q5 are NOT re-checked here. `needsNewEntityType`,
+  // `aiCanWorkWithIt` and `addableWithoutMapChange` are enforced once, by the
+  // locks that own them. Re-checking would be a duplicate verdict, and two
+  // verdicts on one fact is how a gate starts contradicting itself.
   if (!a.worldStateCanControlIt) {
     push(
       "world_state_cannot_control_it",
@@ -366,3 +368,105 @@ export const BEHAVIOR_CONFORMANCE = {
   strongestExistingFoundation:
     "lib/conversation/action-registry.ts is already declarative, LLM-proposable-but-not-executable, and precondition-aware — it needs re-keying from Role to (entity, context), not replacing.",
 } as const;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. The TRANSITIONAL WAIVER — the only way to be honest before E.7 / B.6
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * THE PROBLEM IT SOLVES. Four locks now ask a surface whether the World Map
+ * carries it, whether World State controls it, and whether it lives in one
+ * workspace. Until E.7 / B.6 ship — the map platform and the behavior binding —
+ * the honest answer for a real surface is "not yet". Without a transition, the
+ * only green path would be to answer untruthfully, and the locks explicitly say
+ * nothing has to be rewritten today.
+ *
+ * WHAT IT IS NOT. It is not a bypass. It cannot excuse the questions that keep
+ * the world one world:
+ *   - `usesEntity`            — you may not stop being entity-based;
+ *   - `registrationIsEnough`  — the growth mechanism is never waived;
+ *   - `newBehaviorIsEnough` / `newRelationshipIsEnough`.
+ * Only the three READINESS answers below may be waived, because only they
+ * depend on architecture that does not exist yet.
+ */
+export const WAIVABLE_FIELDS = [
+  "reflectedOnMap",
+  "addableWithoutMapChange",
+  "worldStateCanControlIt",
+] as const;
+
+export type WaivableField = (typeof WAIVABLE_FIELDS)[number];
+
+/** The enabling steps. When one ships, the waivers that cite it expire. */
+export const ENABLING_STEPS = ["E.7", "B.6"] as const;
+export type EnablingStep = (typeof ENABLING_STEPS)[number];
+
+export interface TransitionalWaiver {
+  /** Why the honest answer is "not yet". Prose, not a checkbox. */
+  readonly reason: string;
+  /** Exactly which readiness answers it covers. Nothing else is excused. */
+  readonly fields: readonly WaivableField[];
+  /** The work whose arrival makes this waiver unnecessary. */
+  readonly enablingStep: EnablingStep;
+  /** Owner sign-off. An empty string is not an approval. */
+  readonly ownerApproval: string;
+}
+
+export type WaiverProblem =
+  | "waiver_not_approved"
+  | "waiver_covers_unwaivable_field"
+  | "waiver_expired";
+
+/**
+ * Validate a waiver against the world as it actually is.
+ *
+ * `enablingArchitectureExists` is computed by the Product Gate from the CODE —
+ * not from a date and not from a promise: when the World Map stops being a
+ * closed per-kind union, the waiver has nothing left to excuse and must go.
+ * That is what makes this expire automatically instead of quietly becoming
+ * permanent.
+ */
+export function validateWaiver(
+  id: string,
+  w: TransitionalWaiver,
+  enablingArchitectureExists: boolean,
+): readonly { id: string; code: WaiverProblem; detail: string }[] {
+  const out: { id: string; code: WaiverProblem; detail: string }[] = [];
+
+  if (w.ownerApproval.trim().length < 3) {
+    out.push({
+      id,
+      code: "waiver_not_approved",
+      detail:
+        "a transitional waiver needs explicit owner approval recorded on the declaration — an unapproved waiver is just an unanswered question",
+    });
+  }
+  for (const f of w.fields) {
+    if (!(WAIVABLE_FIELDS as readonly string[]).includes(f)) {
+      out.push({
+        id,
+        code: "waiver_covers_unwaivable_field",
+        detail: `"${f}" may never be waived — only map/World-State READINESS answers can be, never whether the thing is an Entity or whether registering it is enough`,
+      });
+    }
+  }
+  if (enablingArchitectureExists) {
+    out.push({
+      id,
+      code: "waiver_expired",
+      detail: `${w.enablingStep} has shipped — the waiver has expired and must be removed, and the readiness answers must now be true`,
+    });
+  }
+  return out;
+}
+
+/** A declaration is only excused for the fields its approved waiver names. */
+export function isWaived(
+  field: string,
+  w: TransitionalWaiver | undefined,
+  enablingArchitectureExists: boolean,
+): boolean {
+  if (!w || enablingArchitectureExists) return false;
+  if (w.ownerApproval.trim().length < 3) return false;
+  return (w.fields as readonly string[]).includes(field);
+}

@@ -23,7 +23,11 @@ import type { WorldElementId } from "./world-elements";
 import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
 import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
 import { validateEntityAnswers, type EntityAnswers } from "./entity-model";
-import { validateBehaviorAnswers, type BehaviorAnswers } from "./behavior-model";
+import {
+  validateBehaviorAnswers,
+  type BehaviorAnswers,
+  type TransitionalWaiver,
+} from "./behavior-model";
 
 export type SurfaceKind =
   | "screen"
@@ -124,6 +128,15 @@ export interface SurfaceDeclaration {
   readonly mapCanRenderIt: boolean;
   /** Can World State control it? — false means REDESIGN, not review. */
   readonly worldStateCanControlIt: boolean;
+
+  /**
+   * TEMPORARY, owner-approved, self-expiring. Present only while the enabling
+   * architecture (E.7 map platform / B.6 behavior binding) does not exist. It
+   * may excuse ONLY the readiness answers in `WAIVABLE_FIELDS`; it can never
+   * excuse `usesEntity` or `registrationIsEnough`, and the Product Gate turns
+   * it into a hard error the moment the enabling architecture ships.
+   */
+  readonly transitionalWaiver?: TransitionalWaiver;
 }
 
 /**
@@ -191,6 +204,9 @@ export type DeclarationViolation =
   | "empty_why_not_existing_component"
   | "empty_owner"
   | "duplicate_id"
+  | "waiver_not_approved"
+  | "waiver_covers_unwaivable_field"
+  | "waiver_expired"
   | "duplicate_action";
 
 export interface DeclarationProblem {

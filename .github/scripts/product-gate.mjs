@@ -54,6 +54,7 @@ const DASHBOARD_LIKE = /\/dashboard\/(overview|home|control|visual-os|start|hub|
 const JOURNAL_MODULE = /\/dashboard\/journal\//;
 // ENTITY_BEHAVIOR_MODEL_V1: a per-actor-type executor module is a special case.
 const EXECUTOR_MODULE = /lib\/conversation\/[a-z-]+-executors\.ts$/;
+const SPATIAL_KINDS_FILE = "apps/web/lib/market-map/spatial-entities.ts";
 
 // ── git helpers ─────────────────────────────────────────────────────────────
 
@@ -539,6 +540,59 @@ function analyse(base) {
     }
   }
 
+  // 6g. TRANSITIONAL WAIVERS (audit correction 5) --------------------------
+  //     The readiness questions (map / World State) cannot honestly be answered
+  //     "yes" before E.7 / B.6 exist. A waiver is the ONLY honest way through,
+  //     and it is deliberately hard to abuse:
+  //       - it needs recorded owner approval;
+  //       - it may name only WAIVABLE_FIELDS — never usesEntity, never
+  //         registrationIsEnough;
+  //       - it EXPIRES BY ITSELF: readiness is computed from the code below,
+  //         so once the map stops being a closed per-kind union the waiver
+  //         becomes a hard error instead of a quiet permanent bypass;
+  //       - it is always reported, so a waived PR is never silently green.
+  {
+    const spatial = read(SPATIAL_KINDS_FILE);
+    // E.7 / B.6 have shipped when the map no longer enumerates a closed set of
+    // kinds — i.e. it renders an entity BY TYPE instead of knowing the types.
+    const closedKindUnion = /SPATIAL_ENTITY_KINDS\s*=\s*\[/.test(spatial);
+    const enablingArchitectureExists = spatial !== "" && !closedKindUnion;
+
+    const regSrcW2 = read(REGISTRY);
+    const blockW2 = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcW2)?.[0] ?? "";
+    const WAIVABLE = ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"];
+
+    for (const decl of blockW2.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id || !/transitionalWaiver:/.test(decl)) continue;
+
+      const approval = /ownerApproval:\s*["'`]([^"'`]*)["'`]/.exec(decl)?.[1] ?? "";
+      if (approval.trim().length < 3) {
+        add("waiver_not_approved", "A-09", id,
+          "a transitional waiver without recorded owner approval is just an unanswered question",
+          "certain");
+      }
+      const fieldsSrc = /fields:\s*\[([^\]]*)\]/.exec(decl)?.[1] ?? "";
+      for (const f of [...fieldsSrc.matchAll(/["'`]([a-zA-Z]+)["'`]/g)].map((m) => m[1])) {
+        if (!WAIVABLE.includes(f)) {
+          add("waiver_covers_unwaivable_field", "A-09", id,
+            '"' + f + '" may never be waived — a waiver covers map/World-State readiness only, never whether the thing is an Entity or whether registering it is enough',
+            "certain");
+        }
+      }
+      if (enablingArchitectureExists) {
+        add("waiver_expired", "A-09", id,
+          "the enabling architecture (E.7 / B.6) has shipped — this waiver has expired and must be removed",
+          "certain");
+      } else {
+        // Never silent: a waived surface is always visible to the reviewer.
+        add("transitional_waiver_in_use", "A-09", id,
+          "readiness answers are waived until E.7 / B.6 ship — owner-approved, and this PR stays a human gate",
+          "review");
+      }
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
@@ -642,6 +696,11 @@ function selfTest() {
     ["behavior_false_regex_negative", !new RegExp("worldStateCanControlIt" + ":\\s*false").test("  worldStateCanControlIt: true,")],
     ["special_case_executor", EXECUTOR_MODULE.test("apps/web/lib/conversation/customer-executors.ts")],
     ["special_case_executor_negative", !EXECUTOR_MODULE.test("apps/web/lib/conversation/executor-contract.ts")],
+    // Transitional waiver: the expiry predicate must really flip.
+    ["waiver_expiry_before", /SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export const SPATIAL_ENTITY_KINDS = [")],
+    ["waiver_expiry_after", !/SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export function renderEntityByType(e) {}")],
+    ["waiver_field_allowlist", ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("worldStateCanControlIt")],
+    ["waiver_field_allowlist_negative", !["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("registrationIsEnough")],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {
