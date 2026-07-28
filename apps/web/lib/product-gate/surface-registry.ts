@@ -23,6 +23,11 @@ import type { WorldElementId } from "./world-elements";
 import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
 import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
 import { validateEntityAnswers, type EntityAnswers } from "./entity-model";
+import {
+  validateBehaviorAnswers,
+  type BehaviorAnswers,
+  type TransitionalWaiver,
+} from "./behavior-model";
 
 export type SurfaceKind =
   | "screen"
@@ -108,6 +113,29 @@ export interface SurfaceDeclaration {
   readonly createsNewRelationship: boolean;
   /** Can the AI work with this Entity? (blocking) */
   readonly aiCanWorkWithIt: boolean;
+  // ── The behavior answers (ENTITY_BEHAVIOR_MODEL_V1, owner 2026-07-28) ─────
+  // The world grows by CHANGING BEHAVIOR — not by new tables, modules or
+  // architectures. All six of the owner's questions are still asked; three are
+  // answered by fields ABOVE, which their own locks own, so nothing is judged
+  // twice:
+  //   "existing Entity Type?"     → `needsNewEntityType`      (entity block)
+  //   "AI without arch. change?"  → `aiCanWorkWithIt`         (entity block)
+  //   "can the Map render it?"    → `addableWithoutMapChange` (universe block)
+  /** Is adding a new Behavior enough? (blocking) */
+  readonly newBehaviorIsEnough: boolean;
+  /** Is adding a new Relationship enough? (blocking) */
+  readonly newRelationshipIsEnough: boolean;
+  /** Can World State control it? — false means REDESIGN, not review. */
+  readonly worldStateCanControlIt: boolean;
+
+  /**
+   * TEMPORARY, owner-approved, self-expiring. Present only while the enabling
+   * architecture (E.7 map platform / B.6 behavior binding) does not exist. It
+   * may excuse ONLY the readiness answers in `WAIVABLE_FIELDS`; it can never
+   * excuse `usesEntity` or `registrationIsEnough`, and the Product Gate turns
+   * it into a hard error the moment the enabling architecture ships.
+   */
+  readonly transitionalWaiver?: TransitionalWaiver;
 }
 
 /**
@@ -162,12 +190,22 @@ export type DeclarationViolation =
   | "registration_not_enough"
   | "map_does_not_support_type"
   | "ai_cannot_work_with_entity"
+  | "new_entity_type_instead_of_behavior"
+  | "behavior_not_enough"
+  | "relationship_not_enough"
+  | "ai_needs_architecture_change"
+  | "map_cannot_render_it"
+  | "world_state_cannot_control_it"
+  | "special_case_for_entity_type"
   | "unanswered_vision_question"
   | "empty_purpose"
   | "empty_why_not_chat"
   | "empty_why_not_existing_component"
   | "empty_owner"
   | "duplicate_id"
+  | "waiver_not_approved"
+  | "waiver_covers_unwaivable_field"
+  | "waiver_expired"
   | "duplicate_action";
 
 export interface DeclarationProblem {
@@ -270,6 +308,17 @@ export function validateDeclarations(
         id: problem.id,
         code: problem.code as DeclarationViolation,
         detail: problem.detail,
+      });
+    }
+
+    // The six behavior answers. The last one escalates to REDESIGN.
+    for (const problem of validateBehaviorAnswers(d.id, d as BehaviorAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.redesignRequired
+          ? `${problem.detail} — REDESIGN REQUIRED`
+          : problem.detail,
       });
     }
 

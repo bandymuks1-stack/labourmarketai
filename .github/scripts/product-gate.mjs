@@ -52,6 +52,9 @@ const CHAT_ROOT = "apps/web/app/[locale]/dashboard/page.tsx";
 /** A screen that behaves as a primary/dashboard surface. */
 const DASHBOARD_LIKE = /\/dashboard\/(overview|home|control|visual-os|start|hub|main)\//;
 const JOURNAL_MODULE = /\/dashboard\/journal\//;
+// ENTITY_BEHAVIOR_MODEL_V1: a per-actor-type executor module is a special case.
+const EXECUTOR_MODULE = /lib\/conversation\/[a-z-]+-executors\.ts$/;
+const SPATIAL_KINDS_FILE = "apps/web/lib/market-map/spatial-entities.ts";
 
 // ── git helpers ─────────────────────────────────────────────────────────────
 
@@ -489,6 +492,106 @@ function analyse(base) {
     }
   }
 
+  // 6d. ENTITY BEHAVIOR (owner lock 2026-07-28) ----------------------------
+  //     The world grows by CHANGING BEHAVIOR — not by new tables, modules or
+  //     architectures. All six answers block. The last one escalates:
+  //     "Jeigu atsakymas į paskutinį klausimą yra 'ne', sprendimas turi būti
+  //     perprojektuotas." — redesign, not review.
+  {
+    const regSrcB = read(REGISTRY);
+    const blockB = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcB)?.[0] ?? "";
+    // Only the three this lock OWNS. The other three of the owner's six
+    // questions are judged once, by 6b (map) and 6f (entity type / AI).
+    const BH = {
+      newBehaviorIsEnough: "behavior_not_enough",
+      newRelationshipIsEnough: "relationship_not_enough",
+      worldStateCanControlIt: "world_state_cannot_control_it",
+    };
+    for (const decl of blockB.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const [field, code] of Object.entries(BH)) {
+        if (!new RegExp(field + ":").test(decl)) {
+          add("unanswered_universe_question", "A-01", id,
+            'does not answer "' + field + '" — ENTITY_BEHAVIOR_MODEL_V1 requires it',
+            "certain");
+        } else if (new RegExp(field + ":\\s*false").test(decl)) {
+          add(code, "A-01", id,
+            field === "worldStateCanControlIt"
+              ? '"worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed'
+              : '"' + field + '" is false — the world grows by behavior, not by new tables, modules or architectures',
+            "certain");
+        }
+      }
+    }
+  }
+
+  // 6e. SPECIAL CASES IN CODE (owner rule: NO SPECIAL CASES) ---------------
+  //     A new per-actor-type executor module is the exact shape the lock
+  //     forbids: "Negalima kurti architektūros, kur vienam Entity Type reikia
+  //     specialios logikos." Today worker-executors + company-executors already
+  //     exist (recorded in the audit); a THIRD one is a new special case.
+  for (const f of [...added]) {
+    if (EXECUTOR_MODULE.test(f)) {
+      add("special_case_for_entity_type", "A-01", f,
+        "a new per-actor-type executor module — behavior must be a binding on an entity, not a module per type",
+        "certain");
+    }
+  }
+
+  // 6g. TRANSITIONAL WAIVERS (audit correction 5) --------------------------
+  //     The readiness questions (map / World State) cannot honestly be answered
+  //     "yes" before E.7 / B.6 exist. A waiver is the ONLY honest way through,
+  //     and it is deliberately hard to abuse:
+  //       - it needs recorded owner approval;
+  //       - it may name only WAIVABLE_FIELDS — never usesEntity, never
+  //         registrationIsEnough;
+  //       - it EXPIRES BY ITSELF: readiness is computed from the code below,
+  //         so once the map stops being a closed per-kind union the waiver
+  //         becomes a hard error instead of a quiet permanent bypass;
+  //       - it is always reported, so a waived PR is never silently green.
+  {
+    const spatial = read(SPATIAL_KINDS_FILE);
+    // E.7 / B.6 have shipped when the map no longer enumerates a closed set of
+    // kinds — i.e. it renders an entity BY TYPE instead of knowing the types.
+    const closedKindUnion = /SPATIAL_ENTITY_KINDS\s*=\s*\[/.test(spatial);
+    const enablingArchitectureExists = spatial !== "" && !closedKindUnion;
+
+    const regSrcW2 = read(REGISTRY);
+    const blockW2 = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcW2)?.[0] ?? "";
+    const WAIVABLE = ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"];
+
+    for (const decl of blockW2.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id || !/transitionalWaiver:/.test(decl)) continue;
+
+      const approval = /ownerApproval:\s*["'`]([^"'`]*)["'`]/.exec(decl)?.[1] ?? "";
+      if (approval.trim().length < 3) {
+        add("waiver_not_approved", "A-09", id,
+          "a transitional waiver without recorded owner approval is just an unanswered question",
+          "certain");
+      }
+      const fieldsSrc = /fields:\s*\[([^\]]*)\]/.exec(decl)?.[1] ?? "";
+      for (const f of [...fieldsSrc.matchAll(/["'`]([a-zA-Z]+)["'`]/g)].map((m) => m[1])) {
+        if (!WAIVABLE.includes(f)) {
+          add("waiver_covers_unwaivable_field", "A-09", id,
+            '"' + f + '" may never be waived — a waiver covers map/World-State readiness only, never whether the thing is an Entity or whether registering it is enough',
+            "certain");
+        }
+      }
+      if (enablingArchitectureExists) {
+        add("waiver_expired", "A-09", id,
+          "the enabling architecture (E.7 / B.6) has shipped — this waiver has expired and must be removed",
+          "certain");
+      } else {
+        // Never silent: a waived surface is always visible to the reviewer.
+        add("transitional_waiver_in_use", "A-09", id,
+          "readiness answers are waived until E.7 / B.6 ship — owner-approved, and this PR stays a human gate",
+          "review");
+      }
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
@@ -587,6 +690,16 @@ function selfTest() {
     // fired. A gate rule that cannot fire is worse than no rule.
     ["dynamic_false_regex", new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: false,")],
     ["dynamic_false_regex_negative", !new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: true,")],
+    // ENTITY_BEHAVIOR_MODEL_V1 detectors.
+    ["behavior_false_regex", new RegExp("worldStateCanControlIt" + ":\\s*false").test("  worldStateCanControlIt: false,")],
+    ["behavior_false_regex_negative", !new RegExp("worldStateCanControlIt" + ":\\s*false").test("  worldStateCanControlIt: true,")],
+    ["special_case_executor", EXECUTOR_MODULE.test("apps/web/lib/conversation/customer-executors.ts")],
+    ["special_case_executor_negative", !EXECUTOR_MODULE.test("apps/web/lib/conversation/executor-contract.ts")],
+    // Transitional waiver: the expiry predicate must really flip.
+    ["waiver_expiry_before", /SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export const SPATIAL_ENTITY_KINDS = [")],
+    ["waiver_expiry_after", !/SPATIAL_ENTITY_KINDS\s*=\s*\[/.test("export function renderEntityByType(e) {}")],
+    ["waiver_field_allowlist", ["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("worldStateCanControlIt")],
+    ["waiver_field_allowlist_negative", !["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"].includes("registrationIsEnough")],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {
