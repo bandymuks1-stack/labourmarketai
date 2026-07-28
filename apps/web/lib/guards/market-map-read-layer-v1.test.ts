@@ -360,6 +360,9 @@ describe("NO new DB migration in this PR", () => {
     // no drops, no DML), UNAPPLIED at merge; per the doctrine's conditional
     // prod-apply autonomy a GREEN classification permits MCP apply_migration
     // after merge. Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(168);
+    // Bumped 168 -> 169: usage_cost_events v1 (20260728120000), the first
+    // storage layer of the canonical usage & cost event model. The read layer
+    // guarded here still adds no migration of its own.
+    expect(count).toBeLessThanOrEqual(169);
   });
 });

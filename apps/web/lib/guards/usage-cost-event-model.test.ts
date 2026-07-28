@@ -117,12 +117,14 @@ describe("usage & cost event model — ships no ingestion, no API, no DB", () =>
     expect(code).not.toMatch(/\.insert\(/);
   });
 
-  it("no migration was added by this slice", () => {
-    // The contract must be agreeable before any storage decision.
-    const migrations = join(repoRoot, "supabase", "migrations");
-    expect(existsSync(migrations)).toBe(true);
-    const added = readFileSync(DOC, "utf8");
-    expect(added).toMatch(/no migration|No migration|NO MIGRATION/);
+  it("the CONTRACT stays database-free even now that storage exists (PR #899)", () => {
+    // Storage landed in a separate module (lib/telemetry/usage-cost-store.ts).
+    // The contract itself must never acquire a DB dependency, so it stays
+    // importable from a guard, a script or a pure test.
+    expect(code).not.toMatch(/usage_cost_events/);
+    const store = join(webRoot, "lib", "telemetry", "usage-cost-store.ts");
+    expect(existsSync(store), "the write path must live in its own module").toBe(true);
+    expect(readFileSync(store, "utf8")).toMatch(/server-only/);
   });
 });
 

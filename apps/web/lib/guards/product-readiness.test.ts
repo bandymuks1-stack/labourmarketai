@@ -1892,7 +1892,12 @@ describe("no migration files added by this sprint", () => {
     // prod-apply autonomy (governance 2026-06-12) a GREEN classification
     // permits MCP apply_migration after merge. TS writes degrade honestly
     // (retry unstamped on undefined_column) until it is applied.
-    const SPRINT_BASELINE = 168;
+    // Bumped 168 -> 169 for usage_cost_events v1 (20260728120000): ONE
+    // additive append-only table + trigger + 5 indexes + RLS, the first
+    // storage layer of the canonical usage & cost event model. RED class by
+    // policy (it carries GRANT/REVOKE), human-gated, applied to prod via MCP
+    // after owner approval.
+    const SPRINT_BASELINE = 169;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
