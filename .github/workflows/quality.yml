@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # The Product Gate diffs the PR against its base, so the base ref must
+          # exist locally. The default shallow checkout has no origin/main.
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
@@ -98,9 +102,10 @@ jobs:
       # PRODUCT_REVIEW_REQUIRED and blocks the merge. Always writes
       # PRODUCT_ARCHITECTURE_DIFF.md for the reviewer.
       - name: Product gate (constitution enforcement)
-        run: node .github/scripts/product-gate.mjs
-        env:
-          BASE_SHA: origin/${{ github.base_ref || 'main' }}
+        run: |
+          BASE_REF="${{ github.base_ref || 'main' }}"
+          git fetch --no-tags origin "$BASE_REF"
+          BASE_SHA="origin/$BASE_REF" node .github/scripts/product-gate.mjs
 
       - name: Product gate self-test (detectors must fire)
         run: node .github/scripts/product-gate.mjs --self-test
