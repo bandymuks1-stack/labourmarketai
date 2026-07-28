@@ -208,6 +208,95 @@ policies above carry their required pinned phrases.
 
 ---
 
+## 12. Axiom register (consolidated 2026-07-28 — no new rules)
+
+Every axiom below already existed in a merged canonical document. This register
+adds no vision; it gives each rule a **stable id** so a CI gate can point at it
+instead of a human remembering which of ~40 product documents applies.
+
+Machine-readable half: `apps/web/lib/product-gate/axioms.ts` (guard-pinned to
+stay identical to this table).
+
+| id | Axiom | Source (already decided) | Held by |
+|---|---|---|---|
+| **A-01** | Chat-first is the primary interface. `/dashboard` IS the conversation; structured data is the editable result behind it, never the entry point. | Canonical vision §15/§14; PR #864 | machine |
+| **A-02** | ONE canonical underlying system: every entry path normalises into the same canonical objects; no duplicate objects, no re-entering data another path captured. | labour-market-os-constitution-v1 §1.1 | machine |
+| **A-03** | ONE core work loop everywhere: chat → journal → calendar → messages. A second parallel navigation system is the defect this prevents. | `lib/config/navigation.ts` CORE_NAV_IDS (rebuild W5) | machine |
+| **A-04** | Multiple entry points, suggestions not coercion, progressive completion — no mandatory long wizard, no blocked path. | labour-market-os-constitution-v1 §1.1 | heuristic |
+| **A-05** | Non-locking role / intention; one user, multiple activity spaces. | this document §1, §2 | review |
+| **A-06** | No fake anything — no fake AI, matching, verification, jobs, candidates or companies. | this document §5, §9; doctrine §7, §18 | machine |
+| **A-07** | The profile is a living work identity, not a form and not a log of completed actions. | this document §3 | heuristic |
+| **A-08** | One function has ONE home. | labour-market-os-constitution-v1 §1.1; canonical-paths + dashboard-duplicate guards | machine |
+| **A-09** | Every surface must locate itself on the canonical chain; a feature that cannot is out of scope. | labour-market-os-constitution-v1 §1 | machine |
+| **A-10** | One commercial catalogue: price, LMC rule, Stripe object, entitlement. | lmc-canonical-commercial-catalogue-v1 (#894) | review — machine half ships with #895/#896 |
+| **A-11** | No feature launches without a known economic model. | PR #896 (not yet merged) | review — machine half ships with #896 |
+| **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | PR #897 (not yet merged) | review — machine half ships with #897 |
+
+**Conflict rule (unchanged, restated):** where any other product, UX or
+architecture document conflicts with this constitution, **these win** — the
+other document is the defect.
+
+---
+
+## 13. Product Gate (enforcement, 2026-07-28)
+
+### 13.1 What it is
+
+`.github/scripts/product-gate.mjs`, run on every PR in the `quality` workflow.
+It diffs the PR and looks for NEW product surfaces: **screens, menu items,
+dashboard elements, popups, modules, wizards and persistent cards**.
+
+### 13.2 What every new element must declare
+
+In `apps/web/lib/product-gate/surface-registry.ts`, five answers:
+
+| Field | Question it answers |
+|---|---|
+| `origin_axiom` | which axiom PERMITS this to exist |
+| `purpose` | what it is for, in one concrete sentence |
+| `why_not_chat` | why a conversation cannot do this job |
+| `why_not_existing_component` | why an existing component cannot carry it |
+| `owner` | who is accountable |
+
+A surface nobody can justify in five short sentences is a surface that should
+not exist. A blank answer is not a declaration.
+
+### 13.3 Automatic RED rules
+
+CI fails — status **`PRODUCT_REVIEW_REQUIRED`**, merge blocked — when a diff:
+
+| Rule code | Fires when | Axiom | Certainty |
+|---|---|---|---|
+| `second_dashboard` | another dashboard-like primary surface appears | A-01 | certain |
+| `new_journal_module` | another Journal module surface appears | A-08 | certain |
+| `new_persistent_menu` | a persistent nav item is added undeclared | A-03 | certain |
+| `duplicate_action` | two surfaces claim the same canonical action | A-08 | certain |
+| `profile_shows_completed_action` | a profile surface renders completed-action state | A-07 | heuristic |
+| `wizard_replaceable_by_chat` | a wizard/stepper appears that a conversation could carry | A-04 | heuristic |
+| `form_replaceable_by_dialog` | a form screen appears that the AI dialog could carry | A-04 | heuristic |
+| `chat_importance_reduced` | chat leaves the core nav, or the conversation root loses its chat | A-01 | certain |
+| `undeclared_surface` | any new surface has no declaration | A-09 | certain |
+| `unknown_axiom` | a declaration cites an axiom that does not exist | A-09 | certain |
+
+`heuristic` findings still block. The reviewer either declares the surface or
+removes it — the gate never decides taste, it only refuses silence.
+
+### 13.4 Architecture diff
+
+Every run writes **`PRODUCT_ARCHITECTURE_DIFF.md`**: what appeared, why it
+appeared, why it cannot be a conversation, which axiom permits it, and which
+rules were checked — so a reviewer never has to reconstruct that from a diff.
+
+### 13.5 Baseline
+
+Everything that existed on **2026-07-28** is grandfathered: this enforcement PR
+fixes nothing and redesigns nothing (that was its explicit scope). The known
+conflicts in that baseline are recorded, with priorities, in
+`docs/audits/product-constitution-audit-v1.md`. **Grandfathered means
+un-audited, not approved.**
+
+---
+
 ## Hard "do not" list (product)
 
 No billing, payments, production deploy, DNS, env, Supabase migrations, RLS/RPC

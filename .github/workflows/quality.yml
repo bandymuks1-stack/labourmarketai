@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # The Product Gate diffs the PR against its base, so the base ref must
+          # exist locally. The default shallow checkout has no origin/main.
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
@@ -87,6 +91,24 @@ jobs:
       # above the committed baseline (never on existing debt).
       - name: i18n debt ratchet
         run: pnpm check:i18n-debt
+
+      # Product Gate (Product Constitution enforcement, P0).
+      #
+      # Diffs the PR for NEW product surfaces (screens, menu items, dashboard
+      # elements, popups, modules, wizards, persistent cards). Each must be
+      # declared in apps/web/lib/product-gate/surface-registry.ts with its
+      # origin axiom, purpose, why-not-chat, why-not-existing-component and
+      # owner. Any automatic RED rule (docs/PRODUCT_CONSTITUTION.md 13.3) sets
+      # PRODUCT_REVIEW_REQUIRED and blocks the merge. Always writes
+      # PRODUCT_ARCHITECTURE_DIFF.md for the reviewer.
+      - name: Product gate (constitution enforcement)
+        run: |
+          BASE_REF="${{ github.base_ref || 'main' }}"
+          git fetch --no-tags origin "$BASE_REF"
+          BASE_SHA="origin/$BASE_REF" node .github/scripts/product-gate.mjs
+
+      - name: Product gate self-test (detectors must fire)
+        run: node .github/scripts/product-gate.mjs --self-test
 
       # Anon SECURITY DEFINER allowlist — LIVE half.
       #
