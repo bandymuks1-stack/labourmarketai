@@ -52,6 +52,8 @@ const CHAT_ROOT = "apps/web/app/[locale]/dashboard/page.tsx";
 /** A screen that behaves as a primary/dashboard surface. */
 const DASHBOARD_LIKE = /\/dashboard\/(overview|home|control|visual-os|start|hub|main)\//;
 const JOURNAL_MODULE = /\/dashboard\/journal\//;
+// ENTITY_BEHAVIOR_MODEL_V1: a per-actor-type executor module is a special case.
+const EXECUTOR_MODULE = /lib\/conversation\/[a-z-]+-executors\.ts$/;
 
 // ── git helpers ─────────────────────────────────────────────────────────────
 
@@ -489,6 +491,54 @@ function analyse(base) {
     }
   }
 
+  // 6d. ENTITY BEHAVIOR (owner lock 2026-07-28) ----------------------------
+  //     The world grows by CHANGING BEHAVIOR — not by new tables, modules or
+  //     architectures. All six answers block. The last one escalates:
+  //     "Jeigu atsakymas į paskutinį klausimą yra 'ne', sprendimas turi būti
+  //     perprojektuotas." — redesign, not review.
+  {
+    const regSrcB = read(REGISTRY);
+    const blockB = /PRODUCT_SURFACES[\s\S]*?\n\] as const;/.exec(regSrcB)?.[0] ?? "";
+    const BH = {
+      usesExistingEntityType: "new_entity_type_instead_of_behavior",
+      newBehaviorIsEnough: "behavior_not_enough",
+      newRelationshipIsEnough: "relationship_not_enough",
+      aiUsesItWithoutArchitectureChange: "ai_needs_architecture_change",
+      mapCanRenderIt: "map_cannot_render_it",
+      worldStateCanControlIt: "world_state_cannot_control_it",
+    };
+    for (const decl of blockB.split(/\n\s*\{\s*\n/).slice(1)) {
+      const id = /id:\s*["'`]([^"'`]+)["'`]/.exec(decl)?.[1];
+      if (!id) continue;
+      for (const [field, code] of Object.entries(BH)) {
+        if (!new RegExp(field + ":").test(decl)) {
+          add("unanswered_universe_question", "A-01", id,
+            'does not answer "' + field + '" — ENTITY_BEHAVIOR_MODEL_V1 requires all six answers',
+            "certain");
+        } else if (new RegExp(field + ":\\s*false").test(decl)) {
+          add(code, "A-01", id,
+            field === "worldStateCanControlIt"
+              ? '"worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed'
+              : '"' + field + '" is false — the world grows by behavior, not by new tables, modules or architectures',
+            "certain");
+        }
+      }
+    }
+  }
+
+  // 6e. SPECIAL CASES IN CODE (owner rule: NO SPECIAL CASES) ---------------
+  //     A new per-actor-type executor module is the exact shape the lock
+  //     forbids: "Negalima kurti architektūros, kur vienam Entity Type reikia
+  //     specialios logikos." Today worker-executors + company-executors already
+  //     exist (recorded in the audit); a THIRD one is a new special case.
+  for (const f of [...added]) {
+    if (EXECUTOR_MODULE.test(f)) {
+      add("special_case_for_entity_type", "A-01", f,
+        "a new per-actor-type executor module — behavior must be a binding on an entity, not a module per type",
+        "certain");
+    }
+  }
+
   // 7. REGISTRY SELF-CONSISTENCY -------------------------------------------
   const axiomSrc = read(AXIOMS);
   const knownAxioms = new Set([...axiomSrc.matchAll(/id:\s*"(A-\d\d)"/g)].map((m) => m[1]));
@@ -587,6 +637,11 @@ function selfTest() {
     // fired. A gate rule that cannot fire is worse than no rule.
     ["dynamic_false_regex", new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: false,")],
     ["dynamic_false_regex_negative", !new RegExp("needsNoNewPage" + ":\\s*false").test("  needsNoNewPage: true,")],
+    // ENTITY_BEHAVIOR_MODEL_V1 detectors.
+    ["behavior_false_regex", new RegExp("worldStateCanControlIt" + ":\\s*false").test("  worldStateCanControlIt: false,")],
+    ["behavior_false_regex_negative", !new RegExp("worldStateCanControlIt" + ":\\s*false").test("  worldStateCanControlIt: true,")],
+    ["special_case_executor", EXECUTOR_MODULE.test("apps/web/lib/conversation/customer-executors.ts")],
+    ["special_case_executor_negative", !EXECUTOR_MODULE.test("apps/web/lib/conversation/executor-contract.ts")],
   ];
   const failed = cases.filter(([, ok]) => !ok).map(([n]) => n);
   if (failed.length > 0) {

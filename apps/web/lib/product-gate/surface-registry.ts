@@ -23,6 +23,7 @@ import type { WorldElementId } from "./world-elements";
 import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
 import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
 import { validateEntityAnswers, type EntityAnswers } from "./entity-model";
+import { validateBehaviorAnswers, type BehaviorAnswers } from "./behavior-model";
 
 export type SurfaceKind =
   | "screen"
@@ -108,6 +109,21 @@ export interface SurfaceDeclaration {
   readonly createsNewRelationship: boolean;
   /** Can the AI work with this Entity? (blocking) */
   readonly aiCanWorkWithIt: boolean;
+  // ── The six behavior answers (ENTITY_BEHAVIOR_MODEL_V1, owner 2026-07-28) ──
+  // The world grows by CHANGING BEHAVIOR — not by new tables, modules or
+  // architectures. All six block; the last one escalates to REDESIGN.
+  /** Does it act on an existing Entity Type? */
+  readonly usesExistingEntityType: boolean;
+  /** Is adding a new Behavior enough? */
+  readonly newBehaviorIsEnough: boolean;
+  /** Is adding a new Relationship enough? */
+  readonly newRelationshipIsEnough: boolean;
+  /** Can the AI use it without an architecture change? */
+  readonly aiUsesItWithoutArchitectureChange: boolean;
+  /** Can the World Map render it? */
+  readonly mapCanRenderIt: boolean;
+  /** Can World State control it? — false means REDESIGN, not review. */
+  readonly worldStateCanControlIt: boolean;
 }
 
 /**
@@ -162,6 +178,13 @@ export type DeclarationViolation =
   | "registration_not_enough"
   | "map_does_not_support_type"
   | "ai_cannot_work_with_entity"
+  | "new_entity_type_instead_of_behavior"
+  | "behavior_not_enough"
+  | "relationship_not_enough"
+  | "ai_needs_architecture_change"
+  | "map_cannot_render_it"
+  | "world_state_cannot_control_it"
+  | "special_case_for_entity_type"
   | "unanswered_vision_question"
   | "empty_purpose"
   | "empty_why_not_chat"
@@ -270,6 +293,17 @@ export function validateDeclarations(
         id: problem.id,
         code: problem.code as DeclarationViolation,
         detail: problem.detail,
+      });
+    }
+
+    // The six behavior answers. The last one escalates to REDESIGN.
+    for (const problem of validateBehaviorAnswers(d.id, d as BehaviorAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.redesignRequired
+          ? `${problem.detail} — REDESIGN REQUIRED`
+          : problem.detail,
       });
     }
 

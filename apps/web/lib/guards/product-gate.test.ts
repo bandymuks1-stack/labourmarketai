@@ -23,6 +23,20 @@ import { fileURLToPath } from "node:url";
 
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
+  BEHAVIOR_BINDINGS,
+  MANDATORY_BEHAVIOR_QUESTIONS,
+  WORLD_SEMANTIC_TRIAD,
+  AI_SELECTS,
+  AI_NEVER_SELECTS,
+  SPECIAL_CASE_AUDIT,
+  BEHAVIOR_CONFORMANCE,
+  behaviorsFor,
+  isContextual,
+  registerBehavior,
+  validateBehaviorAnswers,
+  requiresRedesign,
+} from "../product-gate/behavior-model";
+import {
   ENTITY_TYPES,
   COMMON_ENTITY_ATTRIBUTES,
   OBJECT_TO_ENTITY_ALIASES,
@@ -184,6 +198,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -213,6 +228,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -245,6 +261,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -275,6 +292,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -309,6 +327,7 @@ describe("product gate — the declaration contract", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -492,6 +511,7 @@ describe("product vision lock — the highest product design authority", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -524,6 +544,7 @@ describe("product vision lock — the highest product design authority", () => {
       needsNoNewPage: true,
       usesEntity: true, needsNewEntityType: false, registrationIsEnough: true,
       createsNewRole: false, createsNewRelationship: false, aiCanWorkWithIt: true,
+      usesExistingEntityType: true, newBehaviorIsEnough: true, newRelationshipIsEnough: true, aiUsesItWithoutArchitectureChange: true, mapCanRenderIt: true, worldStateCanControlIt: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");
@@ -1142,5 +1163,184 @@ describe("unified world model — one Entity, registered types", () => {
     expect(
       before.some((f) => /entities|entity_relationships|entity_roles/i.test(f)),
     ).toBe(false);
+  });
+});
+
+// -- 10. Entity behavior model -- the world grows by behavior ----------------
+
+describe("entity behavior model — behavior, not new tables", () => {
+  const LOCK = join(repoRoot, "docs", "product", "ENTITY_BEHAVIOR_MODEL_V1.md");
+  const lock = () => readFileSync(LOCK, "utf8");
+
+  const OK = {
+    usesExistingEntityType: true,
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    aiUsesItWithoutArchitectureChange: true,
+    mapCanRenderIt: true,
+    worldStateCanControlIt: true,
+  };
+
+  it("exists and records the decisive owner sentences 1:1", () => {
+    expect(existsSync(LOCK)).toBe(true);
+    const doc = lock();
+    for (const phrase of [
+      "Entity Behavior nusako",
+      "AI nusprendžia, KURIS elgesys taikomas konkrečioje situacijoje",
+      "Todėl elgsena negali būti užkoduota vienoje lentelėje ar viename enum",
+      "AI nesirenka puslapių. AI nesirenka modulių",
+      "Negalima kurti architektūros, kur vienam Entity Type reikia specialios logikos",
+      "Jeigu naujam Entity Type reikia naujos architektūros, sprendimas laikomas neteisingu",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("locks the semantic triad — type / behavior / relationship / AI", () => {
+    expect(WORLD_SEMANTIC_TRIAD).toHaveLength(4);
+    expect(WORLD_SEMANTIC_TRIAD.map((t) => t.answers)).toEqual([
+      "what it is",
+      "what it can do",
+      "who it is linked to",
+      "which behavior applies right now",
+    ]);
+  });
+
+  it("seeds every behavior the owner named, for every entity type named", () => {
+    const doc = lock();
+    for (const b of BEHAVIOR_BINDINGS) {
+      expect(doc, `behavior ${b.behavior} not documented`).toContain(b.behavior);
+    }
+    for (const t of ["organization", "person", "project", "worksite", "ai_agent"]) {
+      expect(
+        BEHAVIOR_BINDINGS.some((b) => b.entityType === t),
+        `entity type ${t} has no seeded behavior`,
+      ).toBe(true);
+    }
+  });
+
+  it("behavior is CONTEXTUAL — the same entity differs by context", () => {
+    const asCandidate = behaviorsFor("person", "as_candidate");
+    const asLeader = behaviorsFor("person", "as_team_leader");
+    expect(asCandidate).toContain("apply");
+    expect(asCandidate).not.toContain("lead_team");
+    expect(asLeader).toContain("lead_team");
+    expect(isContextual("person", "as_candidate", "as_team_leader")).toBe(true);
+  });
+
+  it("registering a behavior is DATA — no union edit, no migration", () => {
+    const before = behaviorsFor("vehicle");
+    expect(before).toEqual([]);
+    const grown = registerBehavior(BEHAVIOR_BINDINGS, {
+      entityType: "vehicle",
+      behavior: "transport_crew",
+      context: "any",
+    });
+    expect(behaviorsFor("vehicle", "any", grown)).toEqual(["transport_crew"]);
+    // A type the registry has never seen resolves through the SAME code path.
+    expect(behaviorsFor("insurance_policy", "any", grown)).toEqual([]);
+  });
+
+  it("the AI selects entities, relationships, behaviors and actions — never pages", () => {
+    expect(AI_SELECTS).toHaveLength(4);
+    expect(AI_NEVER_SELECTS).toContain("page");
+    expect(AI_NEVER_SELECTS).toContain("module");
+  });
+
+  it("ALLOWS growth: a new behavior and relationship on an existing type", () => {
+    expect(validateBehaviorAnswers("/ok", OK)).toEqual([]);
+  });
+
+  it("BLOCKS a new entity type used where a behavior would do", () => {
+    const codes = validateBehaviorAnswers("/x", {
+      ...OK,
+      usesExistingEntityType: false,
+    }).map((p) => p.code);
+    expect(codes).toContain("new_entity_type_instead_of_behavior");
+  });
+
+  it("BLOCKS when a behavior or a relationship is not enough", () => {
+    expect(
+      validateBehaviorAnswers("/x", { ...OK, newBehaviorIsEnough: false }).map((p) => p.code),
+    ).toContain("behavior_not_enough");
+    expect(
+      validateBehaviorAnswers("/x", { ...OK, newRelationshipIsEnough: false }).map((p) => p.code),
+    ).toContain("relationship_not_enough");
+  });
+
+  it("BLOCKS when the AI or the map would need an architecture change", () => {
+    expect(
+      validateBehaviorAnswers("/x", {
+        ...OK,
+        aiUsesItWithoutArchitectureChange: false,
+      }).map((p) => p.code),
+    ).toContain("ai_needs_architecture_change");
+    expect(
+      validateBehaviorAnswers("/x", { ...OK, mapCanRenderIt: false }).map((p) => p.code),
+    ).toContain("map_cannot_render_it");
+  });
+
+  it("ESCALATES the last question to REDESIGN, not review", () => {
+    const v = validateBehaviorAnswers("/x", { ...OK, worldStateCanControlIt: false });
+    expect(v.map((p) => p.code)).toContain("world_state_cannot_control_it");
+    expect(requiresRedesign(v)).toBe(true);
+    // Every other failure is blocking, but is NOT a redesign trigger.
+    expect(requiresRedesign(validateBehaviorAnswers("/x", { ...OK, mapCanRenderIt: false }))).toBe(
+      false,
+    );
+  });
+
+  it("declares all six mandatory questions, and the gate enforces each", () => {
+    expect(MANDATORY_BEHAVIOR_QUESTIONS).toHaveLength(6);
+    const gate = readFileSync(join(repoRoot, ".github", "scripts", "product-gate.mjs"), "utf8");
+    for (const q of MANDATORY_BEHAVIOR_QUESTIONS) {
+      expect(gate, `gate does not enforce ${q.field}`).toContain(q.field);
+    }
+  });
+
+  it("is HONEST that the product is special-case-per-actor-type today", () => {
+    expect(BEHAVIOR_CONFORMANCE.behaviorLayerExists).toBe(false);
+    expect(BEHAVIOR_CONFORMANCE.behaviorsAreContextual).toBe(false);
+    expect(BEHAVIOR_CONFORMANCE.actionsKeyedTo).toBe("rbac_role");
+    expect(BEHAVIOR_CONFORMANCE.verdict).toBe("special_case_per_actor_type");
+    // Every action is anchored to a page today -- that is the AI selecting pages.
+    expect(BEHAVIOR_CONFORMANCE.actionsAnchoredToAPage).toBe(
+      BEHAVIOR_CONFORMANCE.conversationActions,
+    );
+    expect(BEHAVIOR_CONFORMANCE.actorTypesWithoutBehaviors).toContain("customer");
+    expect(SPECIAL_CASE_AUDIT.length).toBeGreaterThanOrEqual(7);
+    for (const c of SPECIAL_CASE_AUDIT) {
+      expect(c.evidence.length, `${c.area} has no evidence`).toBeGreaterThan(30);
+    }
+    // The audit must name the foundation worth keeping, not only the faults.
+    expect(BEHAVIOR_CONFORMANCE.strongestExistingFoundation).toContain("action-registry");
+  });
+
+  it("the audit's claims still hold against the real source", () => {
+    const registry = readFileSync(
+      join(repoRoot, "apps", "web", "lib", "conversation", "action-registry.ts"),
+      "utf8",
+    );
+    // Keyed to RBAC Role, not to an entity.
+    expect(registry).toContain("subject: Role");
+    // Every descriptor is anchored to a page.
+    // Count the DESCRIPTORS, not the interface field declaration.
+    const routes = registry.split('advancedRoute: "').length - 1;
+    expect(routes).toBe(BEHAVIOR_CONFORMANCE.conversationActions);
+    // Preconditions still name types directly.
+    expect(registry).toContain("has_worker_row");
+    expect(registry).toContain("has_company");
+    // The per-actor-type executor split still exists.
+    expect(existsSync(join(repoRoot, "apps", "web", "lib", "conversation", "worker-executors.ts"))).toBe(true);
+    expect(existsSync(join(repoRoot, "apps", "web", "lib", "conversation", "company-executors.ts"))).toBe(true);
+  });
+
+  it("ships a migration plan and changes nothing functional", () => {
+    const doc = lock();
+    expect(doc).toContain("B.1");
+    expect(doc).toContain("B.7");
+    expect(doc).toContain("No functional change was made");
+    // Three locks name ONE piece of work -- it must be stated, not duplicated.
+    expect(doc).toContain("same job");
   });
 });
