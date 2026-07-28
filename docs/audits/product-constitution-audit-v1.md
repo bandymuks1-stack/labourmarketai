@@ -20,6 +20,14 @@
 
 ---
 
+> **SEVERITY CORRECTED 2026-07-28** by the full route inventory
+> (`docs/audits/product-surface-consolidation-map-v1.md` §0):
+> `/dashboard/visual-os` (and `/visual-os/agency`, `/talent`) are
+> `requireSuperadmin`-gated and redirect non-admins — **no user can reach
+> them**. PC-01 therefore drops **P1 → P3** and PC-02 **P2 → P3**: both are
+> internal-surface questions, not chat-first violations. The registry-absence
+> facts stand; the severity did not.
+
 ## Findings
 
 Certainty is stated for each: **certain** = verified from the file/registry;
