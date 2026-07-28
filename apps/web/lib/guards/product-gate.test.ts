@@ -22,6 +22,17 @@ import { fileURLToPath } from "node:url";
 
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
+  PILLARS,
+  UNIVERSAL_OBJECT_PROPERTIES,
+  MANDATORY_UNIVERSE_QUESTIONS,
+  MAP_ARCHITECTURE_FILES,
+  MAP_PLATFORM_ASSESSMENT,
+  EXAMPLE_OBJECT_TYPES,
+  LIVE_WORLD_CAPABILITIES,
+  validateUniverseAnswers,
+  pillarIds,
+} from "../product-gate/universal-object-model";
+import {
   AXIOMS,
   axiom,
   axiomIds,
@@ -123,6 +134,12 @@ describe("product gate — the declaration contract", () => {
       avatarEffect: "The signed contract is attached to the avatar's document set.",
       mapEffect: "None — a contract is not a place; it belongs to the avatar.",
       journalRelation: "Signing is recorded as a journal event on the engagement.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     };
     expect(validateDeclarations([ok], axiomIds(), worldElementIds())).toEqual([]);
   });
@@ -139,6 +156,12 @@ describe("product gate — the declaration contract", () => {
       avatarEffect: "The signed contract is attached to the avatar's document set.",
       mapEffect: "None — a contract is not a place; it belongs to the avatar.",
       journalRelation: "Signing is recorded as a journal event on the engagement.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain(
       "empty_why_not_chat",
@@ -158,6 +181,12 @@ describe("product gate — the declaration contract", () => {
       avatarEffect: "The signed contract is attached to the avatar's document set.",
       mapEffect: "None — a contract is not a place; it belongs to the avatar.",
       journalRelation: "Signing is recorded as a journal event on the engagement.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     } as SurfaceDeclaration;
     expect(validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code)).toContain("unknown_axiom");
   });
@@ -175,6 +204,12 @@ describe("product gate — the declaration contract", () => {
       avatarEffect: "The signed contract is attached to the avatar's document set.",
       mapEffect: "None — a contract is not a place; it belongs to the avatar.",
       journalRelation: "Signing is recorded as a journal event on the engagement.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     };
     const problems = validateDeclarations(
       [{ ...base, id: "/a" }, { ...base, id: "/b" }],
@@ -196,6 +231,12 @@ describe("product gate — the declaration contract", () => {
       avatarEffect: "The signed contract is attached to the avatar's document set.",
       mapEffect: "None — a contract is not a place; it belongs to the avatar.",
       journalRelation: "Signing is recorded as a journal event on the engagement.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     };
     const problems = validateDeclarations([d, d], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(problems).toContain("duplicate_id");
@@ -366,6 +407,12 @@ describe("product vision lock — the highest product design authority", () => {
       avatarEffect: "It attaches to the avatar's record.",
       mapEffect: "It appears as a layer on the map.",
       journalRelation: "It writes a journal event.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     } as SurfaceDeclaration;
     expect(
       validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code),
@@ -385,6 +432,12 @@ describe("product vision lock — the highest product design authority", () => {
       avatarEffect: "",
       mapEffect: "",
       journalRelation: "It writes a journal event.",
+      pillar: "avatar",
+      objectType: "avatar",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
     } as SurfaceDeclaration;
     const codes = validateDeclarations([bad], axiomIds(), worldElementIds()).map((p) => p.code);
     expect(codes).toContain("unanswered_vision_question");
@@ -401,5 +454,145 @@ describe("product vision lock — the highest product design authority", () => {
       expect(doc, `element ${e.name} not assigned`).toContain(e.name);
     }
     expect(doc).toMatch(/GAP/);
+  });
+});
+
+// ── 6. The universe lock V2 (owner text, 2026-07-28) ───────────────────────
+
+describe("product universe lock v2 — one living world", () => {
+  const LOCK = join(repoRoot, "docs", "product", "PRODUCT_UNIVERSE_LOCK_V2.md");
+  const PLAN = join(repoRoot, "docs", "product", "one-world-execution-plan-v1.md");
+  const lock = () => readFileSync(LOCK, "utf8");
+
+  it("exists, is the highest authority, and supersedes V1 without deleting it", () => {
+    expect(existsSync(LOCK)).toBe(true);
+    const doc = lock();
+    expect(doc).toMatch(/HIGHEST PRODUCT AUTHORITY/i);
+    expect(doc).toContain("PRODUCT_VISION_LOCK_V1");
+    expect(doc).toMatch(/Nothing was removed/i);
+  });
+
+  it("records the decisive owner sentences 1:1", () => {
+    const doc = lock();
+    for (const phrase of [
+      "Produktas yra vienas gyvas pasaulis",
+      "Map nėra modulis",
+      "turi būti registruojamas",
+      "architektūra laikoma neteisinga",
+      "Objektų tipai nėra užkoduojami logikoje",
+      "Vienas AI",
+      "Dashboard nėra darbo vieta",
+    ]) {
+      expect(doc, `owner phrase missing: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("declares exactly four pillars, and every V1 element lives under one", () => {
+    expect(PILLARS).toHaveLength(4);
+    expect([...pillarIds()].sort()).toEqual(
+      ["ai_conversation", "avatar", "work_journal", "world_map"],
+    );
+    const covered = new Set(PILLARS.flatMap((p) => p.elements));
+    for (const e of WORLD_ELEMENTS) {
+      expect(covered.has(e.id), `${e.id} belongs to no pillar`).toBe(true);
+    }
+  });
+
+  it("carries the full Universal Object Model and the nine questions", () => {
+    expect(UNIVERSAL_OBJECT_PROPERTIES.length).toBeGreaterThanOrEqual(17);
+    expect(MANDATORY_UNIVERSE_QUESTIONS).toHaveLength(9);
+    expect(MANDATORY_UNIVERSE_QUESTIONS.filter((q) => q.blocking).length).toBe(6);
+    expect(EXAMPLE_OBJECT_TYPES.length).toBeGreaterThanOrEqual(16);
+    expect(LIVE_WORLD_CAPABILITIES).toContain("accumulate_history");
+    const doc = lock();
+    for (const p of UNIVERSAL_OBJECT_PROPERTIES) {
+      const human = p.replace(/_/g, " ");
+      expect(doc.toLowerCase(), `UOM property ${p} not documented`).toContain(human);
+    }
+  });
+
+  it("is HONEST that the map is not yet a platform", () => {
+    // The lock must not claim an architecture the code does not have.
+    expect(MAP_PLATFORM_ASSESSMENT.verdict).toBe("not_yet_a_platform");
+    expect(MAP_PLATFORM_ASSESSMENT.newTypeNeedsMapEdit).toBe(true);
+    expect(lock()).toMatch(/not yet a platform/i);
+    // And the assessment must name real files.
+    for (const f of MAP_ARCHITECTURE_FILES) {
+      expect(existsSync(join(repoRoot, f)), `map architecture file missing: ${f}`).toBe(true);
+    }
+  });
+
+  it("BLOCKS a surface that needs the map re-architected", () => {
+    const problems = validateUniverseAnswers("/x", {
+      pillar: "world_map",
+      objectType: "construction_site",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: false,
+    });
+    expect(problems.map((p) => p.code)).toContain("requires_map_architecture_change");
+  });
+
+  it("BLOCKS an unregistered object type and a missing timeline/history", () => {
+    const problems = validateUniverseAnswers("/y", {
+      pillar: "world_map",
+      objectType: "vehicle",
+      registeredInObjectModel: false,
+      hasTimeline: false,
+      hasHistory: true,
+      addableWithoutMapChange: true,
+    }).map((p) => p.code);
+    expect(problems).toContain("not_registered_object_type");
+    expect(problems).toContain("unanswered_universe_question");
+  });
+
+  it("BLOCKS a pillar that is not one of the four", () => {
+    const problems = validateUniverseAnswers("/z", {
+      pillar: "reporting",
+      objectType: "project",
+      registeredInObjectModel: true,
+      hasTimeline: true,
+      hasHistory: true,
+      addableWithoutMapChange: true,
+    }).map((p) => p.code);
+    expect(problems).toContain("unknown_pillar");
+  });
+
+  it("ACCEPTS a fully compliant world extension", () => {
+    expect(
+      validateUniverseAnswers("/ok", {
+        pillar: "world_map",
+        objectType: "training",
+        registeredInObjectModel: true,
+        hasTimeline: true,
+        hasHistory: true,
+        addableWithoutMapChange: true,
+      }),
+    ).toEqual([]);
+  });
+
+  it("the gate implements the map-as-platform rule", () => {
+    const gateSrc = readFileSync(GATE, "utf8");
+    for (const code of [
+      "map_architecture_change",
+      "not_registered_object_type",
+      "requires_map_architecture_change",
+      "unanswered_universe_question",
+    ]) {
+      expect(gateSrc, `${code} not implemented`).toContain(code);
+      expect(lock(), `${code} not documented`).toContain(code);
+    }
+    // It must watch the real architecture files.
+    for (const f of MAP_ARCHITECTURE_FILES) expect(gateSrc).toContain(f);
+  });
+
+  it("the execution plan grows ONE world, and phase 0 blocks the rest", () => {
+    expect(existsSync(PLAN)).toBe(true);
+    const plan = readFileSync(PLAN, "utf8");
+    expect(plan).toMatch(/Phase 0/);
+    expect(plan).toMatch(/blocks Phases 2 and 4|Phase 0 blocks/i);
+    expect(plan).toMatch(/registers a new object type/i);
+    expect(plan).toMatch(/it is a module/i);
   });
 });

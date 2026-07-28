@@ -20,6 +20,7 @@
 
 import type { AxiomId } from "./axioms";
 import type { WorldElementId } from "./world-elements";
+import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
 
 export type SurfaceKind =
   | "screen"
@@ -63,6 +64,20 @@ export interface SurfaceDeclaration {
   readonly mapEffect: string;
   /** 6. How is it related to the Work Journal? */
   readonly journalRelation: string;
+
+  // ── The nine universe answers (PRODUCT_UNIVERSE_LOCK_V2, owner 2026-07-28) ─
+  /** Which of the four pillars is extended. */
+  readonly pillar: string;
+  /** Which world object type it acts on. */
+  readonly objectType: string;
+  /** Is that type registered in the Universal Object Model? (blocking) */
+  readonly registeredInObjectModel: boolean;
+  /** Does the object have a Timeline? (blocking) */
+  readonly hasTimeline: boolean;
+  /** Does the object have History? (blocking) */
+  readonly hasHistory: boolean;
+  /** Can it be added WITHOUT changing World Map architecture? (blocking) */
+  readonly addableWithoutMapChange: boolean;
 }
 
 /**
@@ -103,6 +118,9 @@ export function surface(id: string): SurfaceDeclaration | null {
 
 export type DeclarationViolation =
   | "unknown_axiom"
+  | "unknown_pillar"
+  | "not_registered_object_type"
+  | "requires_map_architecture_change"
   | "unknown_world_element"
   | "unanswered_vision_question"
   | "empty_purpose"
@@ -186,6 +204,15 @@ export function validateDeclarations(
           detail: `${field} is unanswered — PRODUCT_VISION_LOCK_V1 requires all six answers`,
         });
       }
+    }
+
+    // The nine universe answers. A blocking "no" stops the PR (owner rule).
+    for (const problem of validateUniverseAnswers(d.id, d as UniverseAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
     }
 
     if (d.ownsAction) {
