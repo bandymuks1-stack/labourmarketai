@@ -23,7 +23,10 @@ import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { baseIdentityForRole } from "@/lib/config/roles";
-import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import {
+  getActiveOrganizationContext,
+  getWorkspaceContext,
+} from "@/lib/company/active-organization";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -107,13 +110,20 @@ export default async function DashboardLayout({
     ? (profile.active_role as Role)
     : (roles[0] ?? null);
 
+  // Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
+  // for EVERY identity — personal space + every org membership from the
+  // canonical engagement_contexts spine. The reads are request-cached, so the
+  // company-identity block below reuses the same underlying queries.
+  const identity = activeRole ? baseIdentityForRole(activeRole) : null;
+  const workspace = await getWorkspaceContext(identity);
+
   // Company identity → surface WHICH organization is active. Read-only,
   // RLS-scoped; resolved ONLY for the company identity. Null (never fabricated)
   // when no company row exists yet.
   let activeOrgName: string | null = null;
   let organizations: SwitchableOrganization[] = [];
   let activeOrganizationId: string | null = null;
-  if (activeRole && baseIdentityForRole(activeRole) === "company") {
+  if (identity === "company") {
     const orgContext = await getActiveOrganizationContext();
     if (orgContext.activeOrganization) {
       activeOrgName = orgContext.activeOrganization.name;
@@ -201,6 +211,9 @@ export default async function DashboardLayout({
           activeOrgName,
           organizations,
           activeOrganizationId,
+          workspaces: [...workspace.workspaces],
+          activeWorkspaceId: workspace.activeWorkspaceId,
+          workspacePointerAvailable: workspace.pointerAvailable,
         }}
       >
         {/* Streamed notification spine: same single source, off the TTFB

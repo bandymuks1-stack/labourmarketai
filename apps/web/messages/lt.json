@@ -8896,7 +8896,9 @@
       "task": "Užduotis",
       "journal": "Žurnalas",
       "finance": "Finansai",
-      "invitation": "Kvietimas"
+      "invitation": "Kvietimas",
+      "absence": "Atostogos",
+      "stage": "Etapai"
     },
     "sourceNotes": {
       "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
@@ -8908,7 +8910,11 @@
       "financeUnavailable": "Finansų įrašai dar neįjungti — mokėjimų terminai prisijungs prie plano, kai bus įjungtas finansų sluoksnis.",
       "financeError": "Finansų įrašų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
       "invitationUnavailable": "Kvietimai dar neįjungti — kvietimų terminai prisijungs prie plano, kai bus įjungtas kvietimų sluoksnis.",
-      "invitationError": "Kvietimų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai."
+      "invitationError": "Kvietimų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
+      "absenceUnavailable": "Atostogų modulis dar neįjungtas šioje aplinkoje.",
+      "absenceError": "Atostogų įrašų nepavyko perskaityti — planas rodomas be jų.",
+      "stageUnavailable": "Projektų etapų modulis dar neįjungtas šioje aplinkoje.",
+      "stageError": "Projektų etapų nepavyko perskaityti — planas rodomas be jų."
     },
     "week": {
       "label": "Artimiausios 7 dienos"
@@ -8939,7 +8945,9 @@
       "task": "Užduotis",
       "journal": "Darbo įrašas",
       "finance": "Finansų įrašas",
-      "invitation": "Kvietimas"
+      "invitation": "Kvietimas",
+      "absence": "Atostogos / nedarbingumas",
+      "stage": "Projekto etapas"
     },
     "projectStatus": {
       "draft": "Juodraštis",
@@ -11018,12 +11026,22 @@
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
-      "userLogWork": "Įrašyti darbo laiką",
+      "userLogWork": "Noriu užfiksuoti darbą",
       "userFindWork": "Ieškau darbo",
       "historyTitle": "Ankstesnis pokalbis",
       "historyCount": "{count, plural, one {# žinutė} few {# žinutės} other {# žinučių}}",
       "historyShow": "Rodyti",
-      "historyMore": "Rodyti daugiau"
+      "historyMore": "Rodyti daugiau",
+      "workspaceLabel": "Darbo erdvė",
+      "workspacePersonal": "Asmeninė erdvė",
+      "workspaceSwitchSoon": "Erdvės perjungimas dar neįjungtas — kol kas rodomas aktyvus kontekstas.",
+      "chipLogWork": "Užfiksuoti darbą",
+      "agendaTitle": "Artimiausių {days} d. planas:",
+      "agendaEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
+      "agendaUndated": "{count, plural, one {Dar # įrašas be datos.} few {Dar # įrašai be datos.} other {Dar # įrašų be datos.}}",
+      "agendaMore": "(+{count})",
+      "agendaMoreDays": "{count, plural, one {… ir dar # diena su įrašais.} few {… ir dar # dienos su įrašais.} other {… ir dar # dienų su įrašais.}}",
+      "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -11045,7 +11063,7 @@
       "confirmTitle": "Patvirtinti įrašą?",
       "saved": "Įrašas išsaugotas darbo žurnale.",
       "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
-      "minutesUnit": "min",
+      "minutesUnit": "min",
       "addedSkillPrefix": "Pridėtas įgūdis",
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",

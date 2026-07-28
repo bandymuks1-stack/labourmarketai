@@ -10,6 +10,7 @@ import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { WorkspaceChip } from "./workspace-chip";
 import { iconControl } from "./icon-scale";
 
 export type ConversationNavLabels = {
@@ -72,9 +73,13 @@ export function ConversationHeader({
 
   return (
     <header className="flex flex-none items-center justify-between gap-3 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur">
-      <span className="flex items-center gap-2">
+      <span className="flex min-w-0 items-center gap-2">
         <span className="flex size-6 flex-none items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-white">L</span>
-        <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "" : "hidden sm:inline"}`}>{title}</span>
+        <span className={`font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden lg:inline"}`}>{title}</span>
+        {/* The ACTIVE WORKSPACE, always visible beside the conversation —
+            the user must never have to guess which work context they are in
+            (real-user workflow rebuild W1). */}
+        {auth && <WorkspaceChip />}
       </span>
 
       {/* Desktop simple-mode tabs. Human message threads and the AI chat are

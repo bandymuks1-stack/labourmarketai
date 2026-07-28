@@ -62,6 +62,9 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   journal: "border-brand-cyan/40 text-brand-cyan",
   finance: "border-state-warning/40 text-state-warning",
   invitation: "border-brand-purple/40 text-brand-purple",
+  // Time Engine W2: the W6/W7 sources joined the canonical calendar.
+  absence: "border-state-amber/40 text-state-amber",
+  stage: "border-brand-violet/40 text-brand-violet",
 };
 
 /** Canonical href — omits defaults so the clean URL stays canonical. */
@@ -702,6 +705,30 @@ function SourceNotes({
     notes.push({
       key: "sourceNotes.invitationError",
       testid: "planning-source-note-invitation-error",
+    });
+  }
+  if (sources.absence.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.absenceUnavailable",
+      testid: "planning-source-note-absence",
+    });
+  }
+  if (sources.absence.status === "error") {
+    notes.push({
+      key: "sourceNotes.absenceError",
+      testid: "planning-source-note-absence-error",
+    });
+  }
+  if (sources.stage.status === "unavailable") {
+    notes.push({
+      key: "sourceNotes.stageUnavailable",
+      testid: "planning-source-note-stage",
+    });
+  }
+  if (sources.stage.status === "error") {
+    notes.push({
+      key: "sourceNotes.stageError",
+      testid: "planning-source-note-stage-error",
     });
   }
   // journal "workers-only" is silent by design: a company owner without a
