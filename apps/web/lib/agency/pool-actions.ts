@@ -25,7 +25,7 @@ export async function markCanOfferAction(
   if (requestId === "") return { outcome: "error" };
   const outcome = await markAgencyCanOffer(requestId, note);
   if (outcome === "marked") {
-    revalidatePath(`/${locale}/dashboard/agency/pool`);
+    revalidatePath(`/${locale}/dashboard/company`);
   }
   return { outcome };
 }

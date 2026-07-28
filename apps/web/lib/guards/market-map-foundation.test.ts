@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -50,8 +51,8 @@ describe("market map foundation — route + auth", () => {
     // "warehouse" grid the owner asked to collapse). The map is now reached from
     // the Marketplace hub, which is itself a primary nav tab — so the surface
     // stays one compact hop away.
-    const hub = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(hub).toMatch(/\/dashboard\/market-map/);
+    // W1: the hub is a config-level redirect now, not a page file.
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 });
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -15,7 +16,7 @@ import { join } from "node:path";
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
-const agencyPage = read("app/[locale]/dashboard/agency/page.tsx");
+
 const roleChoice = read("components/app/setup-role-choice.tsx");
 const companyNext = read("components/app/company-next-actions.tsx");
 const en = JSON.parse(read("messages/en.json")) as Record<string, unknown>;
@@ -27,9 +28,9 @@ describe("agency dashboard does not dead-end a user without an agency", () => {
   // company workspace, whose own no-profile path renders CompanyNoProfileGuide
   // (asserted below). No agency-only gate can dead-end anyone anymore.
   it("is a redirect stub to the canonical company workspace (no gate at all)", () => {
-    expect(agencyPage).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
-    expect(agencyPage).not.toMatch(/<AgencyWorkersSection/);
-    expect(agencyPage).not.toMatch(/getOwnAgency/);
+    // W1: the agency page no longer exists at all — the strongest possible
+    // form of "it carries no agency-only gate". The URL still resolves.
+    expect(isCanonicallyRedirected("/dashboard/agency", "/dashboard/company")).toBe(true);
   });
 });
 

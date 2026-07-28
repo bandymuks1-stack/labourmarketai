@@ -48,7 +48,7 @@ const COMMERCIAL_ACTIONS: readonly ActionDef[] = [
   { key: "need", href: "/dashboard/company", icon: ClipboardList },
   { key: "hire", href: "/dashboard/candidates", icon: Users },
   { key: "buy", href: "/dashboard/buyer", icon: ShoppingCart },
-  { key: "offer", href: "/dashboard/agency", icon: Handshake },
+  { key: "offer", href: "/dashboard/company", icon: Handshake },
   { key: "projects", href: "/dashboard/projects", icon: FolderKanban },
 ];
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -30,19 +31,12 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const companyPage = read("app/[locale]/dashboard/company/page.tsx");
 const truthMap = read("lib/guards/route-truth-map.test.ts");
 
+// W1: these three were redirect-only page files. The files are gone; the
+// redirects moved to next.config, so the URLs still resolve to the same place.
 const STUBS = [
-  {
-    rel: "app/[locale]/dashboard/agency/page.tsx",
-    target: /redirect\(`\/\$\{locale\}\/dashboard\/company`\)/,
-  },
-  {
-    rel: "app/[locale]/dashboard/agency/pool/page.tsx",
-    target: /redirect\(`\/\$\{locale\}\/dashboard\/company#company-team`\)/,
-  },
-  {
-    rel: "app/[locale]/dashboard/start/agency/page.tsx",
-    target: /redirect\(`\/\$\{locale\}\/dashboard\/start\/company`\)/,
-  },
+  { route: "/dashboard/agency", destination: "/dashboard/company" },
+  { route: "/dashboard/agency/pool", destination: "/dashboard/company" },
+  { route: "/dashboard/start/agency", destination: "/dashboard/start/company" },
 ] as const;
 
 describe("staffing-agency mode is a typed view on the company room", () => {
@@ -110,30 +104,31 @@ describe("staffing-agency mode is a typed view on the company room", () => {
   });
 });
 
-describe("the three legacy agency routes are redirect stubs", () => {
+describe("the three legacy agency routes still resolve to the company room", () => {
   for (const s of STUBS) {
-    it(`${s.rel} redirects to its canonical target and renders nothing`, () => {
-      const src = read(s.rel);
-      expect(src).toMatch(s.target);
-      expect(src).toMatch(/from "next\/navigation"/);
-      // A stub gates nothing, fetches nothing, renders nothing.
-      expect(src).not.toMatch(/requireRoleOrRedirect|getTranslations|<section|<form/);
-      expect(src).not.toMatch(/@\/lib\/agency\//);
-      expect(src).not.toMatch(/from\(["']agencies["']\)/);
+    it(`${s.route} redirects to its canonical target and renders nothing`, () => {
+      // W1: stronger than the old assertion. The stub page no longer exists at
+      // all, so it cannot gate, fetch or render anything — and the URL still
+      // lands on the canonical surface via next.config.
+      expect(isCanonicallyRedirected(s.route, s.destination)).toBe(true);
     });
   }
 });
 
 describe("route-truth-map ratchet honoured", () => {
-  it("classifies the trio REDIRECT_STUB and lowered the drift cap to 4", () => {
+  it("the trio left the route truth map entirely (W1), and the drift cap held", () => {
+    // They used to be classified REDIRECT_STUB. W1 deleted the route files, so
+    // the honest classification is "not a route at all": the map must no longer
+    // claim them, and w1-route-retirement proves the URLs still resolve.
     for (const route of [
       "dashboard/agency",
       "dashboard/agency/pool",
       "dashboard/start/agency",
     ]) {
-      expect(truthMap).toMatch(
-        new RegExp(`"${route.replace(/\//g, "\\/")}":\\s*"REDIRECT_STUB"`),
-      );
+      // Plain substring, not a hand-escaped RegExp: the routes are literals,
+      // and hand-rolled escaping is the exact defect CodeQL flags
+      // (js/incomplete-sanitization — backslashes are not escaped).
+      expect(truthMap).not.toContain(`"${route}":`);
     }
     expect(truthMap).toMatch(/toBeLessThanOrEqual\(4\)/);
     expect(truthMap).not.toMatch(/toBeLessThanOrEqual\(7\)/);

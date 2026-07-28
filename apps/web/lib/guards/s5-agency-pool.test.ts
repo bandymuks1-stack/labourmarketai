@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -21,7 +22,7 @@ const stripSql = (s: string) =>
   s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
 
 const lib = read("lib/agency/pool.ts");
-const page = read("app/[locale]/dashboard/agency/pool/page.tsx");
+
 const actions = read("lib/agency/pool-actions.ts");
 const migration = readRepo(
   "supabase/migrations/20260611150000_s5_agency_demand_visibility.sql",
@@ -48,10 +49,8 @@ describe("pool visibility boundary — own agency only", () => {
   // The lib boundary assertions above stay — lib/agency is untouched until
   // the owner-gated agencies→companies data task.
   it("the pool route is a redirect stub to the canonical company roster", () => {
-    expect(page).toMatch(
-      /redirect\(`\/\$\{locale\}\/dashboard\/company#company-team`\)/,
-    );
-    expect(page).not.toMatch(/getAgencyPool|CanOfferButton/);
+    // W1: the pool page is retired — it can contain nothing at all.
+    expect(isCanonicallyRedirected("/dashboard/agency/pool", "/dashboard/company")).toBe(true);
   });
 });
 
@@ -116,7 +115,7 @@ describe("pool copy exists in all 10 locales and the room is reachable", () => {
   it("the legacy agency dashboard route redirects into the company room", () => {
     // Direction A: the pool is reached through the canonical company
     // workspace; the legacy dashboard no longer links a separate pool room.
-    const dash = read("app/[locale]/dashboard/agency/page.tsx");
-    expect(dash).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
+    // W1: the agency dashboard page is retired; see w1-route-retirement.
+    expect(isCanonicallyRedirected("/dashboard/agency", "/dashboard/company")).toBe(true);
   });
 });

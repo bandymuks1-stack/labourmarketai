@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -81,9 +82,9 @@ export function JournalEntryRow({
   }
 
   function onDelete() {
+    // W2: confirmation happens inline, in place, before this runs. No blocking
+    // dialog — see components/ui/InlineConfirm.
     recordEvent("journal_delete_clicked");
-    const confirmed = window.confirm(t("entry.deleteConfirm"));
-    if (!confirmed) return;
     setError(null);
     startTransition(async () => {
       const result = await softDeleteJournalEntry(entryId, locale);
@@ -182,16 +183,17 @@ export function JournalEntryRow({
                   {t("entry.edit")} →
                 </Link>
               )}
-              <button
-                type="button"
-                onClick={onDelete}
+              <InlineConfirm
+                label={pending ? t("entry.deleting") : t("entry.delete")}
+                question={t("entry.deleteConfirm")}
+                confirmLabel={t("entry.delete")}
+                cancelLabel={t("compactEdit.cancel")}
+                tier="important_write"
                 disabled={pending}
-                aria-busy={pending || undefined}
+                onConfirm={onDelete}
                 className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-state-danger disabled:opacity-50 disabled:cursor-not-allowed"
-                data-testid={`journal-entry-delete-${entryId}`}
-              >
-                {pending ? t("entry.deleting") : t("entry.delete")}
-              </button>
+                testId={`journal-entry-delete-${entryId}`}
+              />
             </>
           ) : (
             <span className="inline-flex min-h-[2.75rem] items-center font-mono text-[10px] uppercase tracking-label text-text-muted">

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -27,19 +27,16 @@ describe("conversation: no sample data on the production route", () => {
     expect(prodPage).not.toMatch(/De Vries|Rotterdam Staal/i);
   });
 
-  it("the sample thread lives only in the dev-gated design preview", () => {
-    const preview = read("design/conversation/page.tsx");
-    // The sample thread exists here (illustrative) …
-    expect(preview).toMatch(/sampleThread/);
-    // … and this route is gated so it never renders in production.
-    expect(preview).toMatch(/designGalleryEnabled/);
-    expect(preview).toMatch(/notFound\(\)/);
+  it("the sample thread has nowhere left to live (W1 deleted the preview)", () => {
+    // The dev-gated preview used to be the ONE permitted home for the sample
+    // thread. W1 deleted it, so the exception is gone entirely — a stronger
+    // guarantee than "it is gated".
+    expect(existsSync(join(APP, "design"))).toBe(false);
   });
 
-  it("the fabricated employer names appear ONLY behind the dev gate", () => {
-    // Any file that mentions the sample employer must also be the dev preview
-    // (or a test). This is a coarse but effective drift alarm.
-    const preview = read("design/conversation/page.tsx");
-    expect(preview).toMatch(/De Vries Bouw/); // it's the sample here, on purpose
+  it("the fabricated employer names have no home left in the product", () => {
+    // W1 deleted the dev preview that used to hold them; the scan above now
+    // covers the whole tree with no permitted exception.
+    expect(existsSync(join(APP, "design"))).toBe(false);
   });
 });

@@ -26,7 +26,11 @@ function walk(dir: string): string[] {
 const CONVERSATION_FILES = [
   ...walk(join(APP_ROOT, "lib", "conversation")),
   ...walk(join(APP_ROOT, "components", "app", "conversation")),
-  ...walk(join(APP_ROOT, "app", "[locale]", "dashboard", "assistant")),
+  // W1: /dashboard/assistant was a redirect-only alias of /dashboard and is
+  // retired; the conversation root itself is scanned via the two dirs above.
+  ...walk(join(APP_ROOT, "app", "[locale]", "dashboard")).filter((f) =>
+    f.includes("conversation"),
+  ),
 ];
 
 describe("conversation layer performs no direct data write", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -61,23 +62,17 @@ describe("Wagon 3 — primary nav stays plain-language in every locale", () => {
 });
 
 describe("Wagon 3 — route consolidation redirects stay canonical", () => {
-  const REDIRECT_STUBS: ReadonlyArray<{ file: string; target: RegExp }> = [
-    {
-      file: "app/[locale]/dashboard/marketplace/page.tsx",
-      target: /redirect\(`\/\$\{locale\}\/dashboard\/market-map`\)/,
-    },
-    {
-      file: "app/[locale]/dashboard/player-card/page.tsx",
-      target: /redirect\(`\/\$\{locale\}\/dashboard\/journal`\)/,
-    },
-    {
-      file: "app/[locale]/dashboard/agency/page.tsx",
-      target: /redirect\(.*\/dashboard\/company/,
-    },
+  // W1: these were redirect-only page files. The files are gone; the redirects
+  // moved to next.config, so the URLs still resolve. Same intent, one less
+  // App Router entry each.
+  const REDIRECT_STUBS: ReadonlyArray<{ route: string; destination: string }> = [
+    { route: "/dashboard/marketplace", destination: "/dashboard/market-map" },
+    { route: "/dashboard/player-card", destination: "/dashboard/journal" },
+    { route: "/dashboard/agency", destination: "/dashboard/company" },
   ];
-  for (const { file, target } of REDIRECT_STUBS) {
-    it(`${file} still redirects to its canonical surface`, () => {
-      expect(read(file)).toMatch(target);
+  for (const { route, destination } of REDIRECT_STUBS) {
+    it(`${route} still redirects to its canonical surface`, () => {
+      expect(isCanonicallyRedirected(route, destination)).toBe(true);
     });
   }
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
@@ -32,9 +33,8 @@ describe("market map is exposed in the command centers + dashboard", () => {
   });
 
   it("the secondary marketplace route redirects to the map (no competing surface)", () => {
-    const mk = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(mk).toMatch(/redirect\(/);
-    expect(mk).toMatch(/\/dashboard\/market-map/);
+    // W1: same intent, new mechanism — the redirect lives in next.config.
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 
   it("the opportunities surface links to the market map", () => {

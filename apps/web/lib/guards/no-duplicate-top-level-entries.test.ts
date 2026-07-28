@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -78,9 +79,7 @@ describe("one canonical market map (no separate/competing map products)", () => 
   });
 
   it("/dashboard/marketplace redirects to the one map (not a competing surface)", () => {
-    const mk = read("app/[locale]/dashboard/marketplace/page.tsx");
-    expect(mk).toMatch(/redirect\(/);
-    expect(mk).toMatch(/\/dashboard\/market-map/);
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 });
 

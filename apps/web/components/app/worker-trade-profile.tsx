@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -146,20 +147,20 @@ export function WorkerTradeProfile({
                     </span>
                   </button>
                   {!d.isPrimary && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (window.confirm(t("removeConfirm", { name: d.name }))) {
-                          if (editId === d.id) setEditId(currentProfessionId);
-                          run(() => removeWorkerDirection(d.id));
-                        }
-                      }}
+                    <InlineConfirm
+                      label="✕"
+                      question={t("removeConfirm", { name: d.name })}
+                      confirmLabel={t("removeDirection")}
+                      cancelLabel={t("keepDirection")}
+                      tier="important_write"
                       disabled={pending}
-                      aria-label={`${t("removeDirection")} ${d.name}`}
+                      onConfirm={() => {
+                        if (editId === d.id) setEditId(currentProfessionId);
+                        run(() => removeWorkerDirection(d.id));
+                      }}
                       className="flex-none rounded-md px-1.5 py-0.5 text-text-muted transition-colors hover:bg-state-danger/10 hover:text-state-danger"
-                    >
-                      ✕
-                    </button>
+                      testId={`worker-direction-remove-${d.id}`}
+                    />
                   )}
                 </div>
               );

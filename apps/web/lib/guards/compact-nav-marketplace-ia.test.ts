@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -29,7 +30,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
 const MAP = "app/[locale]/dashboard/market-map/page.tsx";
-const MARKETPLACE = "app/[locale]/dashboard/marketplace/page.tsx";
+
 
 describe("the global nav is the compact, map-first set, in order", () => {
   it("primary nav ids = overview, market_map, journal_text_first, communication, planning, network (production UX repair v2 F14/F15: the calendar and the network are core modules and must be findable through normal navigation)", () => {
@@ -125,8 +126,7 @@ describe("the map is the primary surface; marketplace is secondary", () => {
   });
 
   it("/dashboard/marketplace is secondary — redirects to the map", () => {
-    const mk = read(MARKETPLACE);
-    expect(mk).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/market-map`\)/);
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
   });
 });
 

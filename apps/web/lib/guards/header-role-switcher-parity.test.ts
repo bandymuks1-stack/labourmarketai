@@ -73,7 +73,7 @@ describe("Guard: roleSwitcherTargetForRole routes start-available / partial role
     const t = roleSwitcherTargetForRole(ROLE_BY_ID.agency, false);
     expect(t.kind).toBe("navigate");
     if (t.kind === "navigate") {
-      expect(t.route).toBe("/dashboard/start/agency");
+      expect(t.route).toBe("/dashboard/start/company");
     }
   });
 

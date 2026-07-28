@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineConfirmBar } from "@/components/ui/InlineConfirm";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -45,17 +46,23 @@ export function JournalEntryEditLauncher({
 }) {
   const t = useTranslations("journal");
   const [open, setOpen] = useState(false);
+  // W2: closing with unsaved changes raises an INLINE confirmation inside the
+  // sheet — never a blocking browser prompt stacked on top of a panel.
+  const [discardArmed, setDiscardArmed] = useState(false);
   // Dirty flag reported by the compact editor — close paths confirm first.
   const dirtyRef = useRef(false);
 
   function requestClose(): void {
-    if (
-      dirtyRef.current &&
-      !window.confirm(t("compactEdit.confirmDiscard"))
-    ) {
+    if (dirtyRef.current) {
+      setDiscardArmed(true);
       return;
     }
+    close();
+  }
+
+  function close(): void {
     dirtyRef.current = false;
+    setDiscardArmed(false);
     setOpen(false);
   }
 
@@ -79,6 +86,17 @@ export function JournalEntryEditLauncher({
           onClose={requestClose}
           testId={`journal-edit-sheet-${entry.id}`}
         >
+          {discardArmed && (
+            <InlineConfirmBar
+              question={t("compactEdit.confirmDiscard")}
+              confirmLabel={t("compactEdit.close")}
+              cancelLabel={t("compactEdit.cancel")}
+              tier="important_write"
+              onConfirm={close}
+              onCancel={() => setDiscardArmed(false)}
+              testId={`journal-edit-discard-${entry.id}`}
+            />
+          )}
           <JournalEntryCompactEditor
             // Fresh mount per open so the edit always starts from the entry's
             // saved state (same remount rule the page-level edit flow pins).

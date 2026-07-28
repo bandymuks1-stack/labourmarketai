@@ -19,7 +19,6 @@ const ROOM_PAGES = [
   "app/[locale]/dashboard/profile/page.tsx",
   "app/[locale]/dashboard/buyer/page.tsx",
   "app/[locale]/dashboard/company/page.tsx",
-  "app/[locale]/dashboard/agency/page.tsx",
   "app/[locale]/dashboard/journal/page.tsx",
 ] as const;
 

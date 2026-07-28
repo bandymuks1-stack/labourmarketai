@@ -99,7 +99,6 @@ describe("§18 Realumo principas — the removed surfaces stay removed", () => {
     "app/[locale]/dashboard/page.tsx",
     "app/[locale]/dashboard/layout.tsx",
     "app/[locale]/dashboard/company/page.tsx",
-    "app/[locale]/dashboard/agency/page.tsx",
     "app/[locale]/dashboard/buyer/page.tsx",
   ];
   for (const rel of pages) {

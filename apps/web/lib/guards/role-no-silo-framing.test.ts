@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -95,7 +96,7 @@ describe("two-identity / action model (Asmuo vs Įmonė)", () => {
 
 describe("company action rooms (buyer/agency) read as actions under Įmonė", () => {
   const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
-  const agency = read("app/[locale]/dashboard/agency/page.tsx");
+  // W1: the agency page is retired — /dashboard/agency → /dashboard/company.
   const COMPANY = /Įmonė|Company|Компани/i;
 
   it("buyer page shows a company-context breadcrumb + a back-to-action-center link", () => {
@@ -109,7 +110,7 @@ describe("company action rooms (buyer/agency) read as actions under Įmonė", ()
   it("agency room is no silo at all — a redirect stub under the company (Direction A)", () => {
     // The strongest anti-silo statement: the agency route renders nothing of
     // its own; it folds into the canonical company workspace.
-    expect(agency).toMatch(/redirect\(`\/\$\{locale\}\/dashboard\/company`\)/);
+    expect(isCanonicallyRedirected("/dashboard/agency", "/dashboard/company")).toBe(true);
   });
 
   for (const locale of ACTIVE) {
