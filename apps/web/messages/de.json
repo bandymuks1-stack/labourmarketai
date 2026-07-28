@@ -8896,7 +8896,9 @@
       "task": "Aufgabe",
       "journal": "Journal",
       "finance": "Finanzen",
-      "invitation": "Einladung"
+      "invitation": "Einladung",
+      "absence": "Urlaub",
+      "stage": "Phasen"
     },
     "sourceNotes": {
       "bookingUnavailable": "Buchungen sind noch nicht verfügbar — sie erscheinen im Plan, sobald die Buchungsebene aktiviert ist.",
@@ -8908,7 +8910,11 @@
       "financeUnavailable": "Finanzeinträge sind noch nicht aktiviert — Zahlungsfristen erscheinen im Plan, sobald die Finanzebene aktiviert ist.",
       "financeError": "Finanzeinträge konnten gerade nicht geladen werden. Der Rest des Plans wird wie gewohnt angezeigt.",
       "invitationUnavailable": "Einladungen sind noch nicht aktiviert — Einladungsfristen erscheinen im Plan, sobald die Einladungsebene aktiviert ist.",
-      "invitationError": "Einladungen konnten gerade nicht geladen werden. Der Rest des Plans wird wie gewohnt angezeigt."
+      "invitationError": "Einladungen konnten gerade nicht geladen werden. Der Rest des Plans wird wie gewohnt angezeigt.",
+      "absenceUnavailable": "Das Urlaubsmodul ist in dieser Umgebung noch nicht aktiviert.",
+      "absenceError": "Urlaubseinträge konnten nicht gelesen werden — der Plan wird ohne sie angezeigt.",
+      "stageUnavailable": "Das Projektphasen-Modul ist in dieser Umgebung noch nicht aktiviert.",
+      "stageError": "Projektphasen konnten nicht gelesen werden — der Plan wird ohne sie angezeigt."
     },
     "week": {
       "label": "Nächste 7 Tage"
@@ -8939,7 +8945,9 @@
       "task": "Aufgabe",
       "journal": "Arbeitseintrag",
       "finance": "Finanzeintrag",
-      "invitation": "Einladung"
+      "invitation": "Einladung",
+      "absence": "Urlaub / Abwesenheit",
+      "stage": "Projektphase"
     },
     "projectStatus": {
       "draft": "Entwurf",
@@ -11018,12 +11026,22 @@
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
-      "userLogWork": "Arbeitszeit erfassen",
+      "userLogWork": "Ich möchte meine Arbeit erfassen",
       "userFindWork": "Arbeit suchen",
       "historyTitle": "Früheres Gespräch",
       "historyCount": "{count, plural, one {# Nachricht} other {# Nachrichten}}",
       "historyShow": "Anzeigen",
-      "historyMore": "Mehr anzeigen"
+      "historyMore": "Mehr anzeigen",
+      "workspaceLabel": "Arbeitsbereich",
+      "workspacePersonal": "Persönlicher Bereich",
+      "workspaceSwitchSoon": "Der Wechsel des Arbeitsbereichs ist noch nicht verfügbar — vorerst wird der aktive Kontext angezeigt.",
+      "chipLogWork": "Arbeit erfassen",
+      "agendaTitle": "Dein Plan für die nächsten {days} Tage:",
+      "agendaEmpty": "Für die nächsten {days} Tage ist nichts geplant.",
+      "agendaUndated": "{count, plural, one {# weiterer Eintrag ohne Datum.} other {# weitere Einträge ohne Datum.}}",
+      "agendaMore": "(+{count})",
+      "agendaMoreDays": "{count, plural, one {… und # weiterer Tag mit Einträgen.} other {… und # weitere Tage mit Einträgen.}}",
+      "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11045,7 +11063,7 @@
       "confirmTitle": "Eintrag bestätigen?",
       "saved": "Eintrag im Arbeitsjournal gespeichert.",
       "errorGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
-      "minutesUnit": "Min",
+      "minutesUnit": "Min",
       "addedSkillPrefix": "Fähigkeit hinzugefügt",
       "strengthenedSkillPrefix": "Fähigkeit gestärkt",
       "pendingConfirmPrefix": "Wartet auf deine Bestätigung",

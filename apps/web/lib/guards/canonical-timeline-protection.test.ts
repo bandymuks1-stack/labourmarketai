@@ -65,13 +65,20 @@ const rel = (p: string): string => relative(ROOT, p).replaceAll("\\", "/");
 describe("one canonical calendar — the view builders have exactly one consumer", () => {
   const BUILDERS = /build(Agenda|MonthGrid|WeekView|YearOverview)/;
 
-  it("only the planning page and the planning model itself touch the calendar builders", () => {
+  it("only the planning page, the planning model and the chat agenda ADAPTER touch the calendar builders", () => {
+    // Time Engine W3 (real-user workflow rebuild): the conversation may
+    // SUMMARISE the canonical projection (`lib/conversation/agenda-summary.ts`
+    // — text lines over buildAgenda, delegating to getPlanning) so the chat
+    // can answer "what is my plan?" with real data. It renders NO calendar
+    // view of its own and reads NO table of its own — the one-calendar rule
+    // stands: any NEW consumer beyond these three still fails this guard.
     const consumers = allSourceFiles()
       .filter((p) => BUILDERS.test(readFileSync(p, "utf8")))
       .map(rel)
       .sort();
     expect(consumers).toEqual([
       "app/[locale]/dashboard/planning/page.tsx",
+      "lib/conversation/agenda-summary.ts",
       "lib/planning/planning-model.ts",
     ]);
   });

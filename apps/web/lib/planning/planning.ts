@@ -12,13 +12,17 @@ import {
   listInvitationsForMe,
   listMySentInvitations,
 } from "@/lib/invitations/network";
+import { getMyAbsences } from "@/lib/leave/absences";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 import {
   PLANNING_PROJECT_READ_LIMIT,
   combineInvitationItems,
   hrefForSource,
+  projectAbsenceItem,
   projectFinanceItem,
   projectIncomingInvitationItem,
   projectSentInvitationItem,
+  projectStageItem,
   statusKeyForSource,
   toIsoDay,
   type PlanningItem,
@@ -76,6 +80,10 @@ export interface PlanningSources {
   /** ONE combined state for both invitation directions (sent + incoming) —
    *  the projection dedupes overlapping scopes into single items. */
   readonly invitation: PlanningSourceState;
+  /** Time Engine W2: the caller's own leave/absence bands (W7 model). */
+  readonly absence: PlanningSourceState;
+  /** Time Engine W2: dated stages of visible projects (W6 model). */
+  readonly stage: PlanningSourceState;
 }
 
 export type PlanningReadResult =
@@ -134,12 +142,88 @@ async function readBookingItems(): Promise<{
   return { state: { status: "ok", count: items.length }, items };
 }
 
+/**
+ * The caller's OWN assigned-project date bands (Time Engine W2) — the
+ * worker-side dated read the calendar contract listed as a blocker. Own
+ * assignments only (`project_worker_assignments.worker_id = own worker`),
+ * project rows under the projects RLS the worker pages already read. These
+ * items carry roleContext "assigned", which makes the ALREADY-SHIPPED
+ * conflict branch in isConflictEligible reachable for the first time.
+ */
+async function readAssignedProjectItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+  projectRefs: { id: string; title: string | null }[];
+}> {
+  const workerId = await getOwnWorkerId();
+  if (!workerId) {
+    return { state: { status: "ok", count: 0 }, items: [], projectRefs: [] };
+  }
+  const supabase = await createClient();
+  const assignRes = await asAny(supabase)
+    .from("project_worker_assignments")
+    .select("project_id, status")
+    .eq("worker_id", workerId)
+    .eq("status", "active")
+    .limit(PLANNING_PROJECT_READ_LIMIT);
+  if (assignRes.error) {
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
+  }
+  const ids = [
+    ...new Set(
+      ((assignRes.data ?? []) as { project_id: string }[]).map(
+        (a) => a.project_id,
+      ),
+    ),
+  ];
+  if (ids.length === 0) {
+    return { state: { status: "ok", count: 0 }, items: [], projectRefs: [] };
+  }
+  const res = await asAny(supabase)
+    .from("projects")
+    .select("id, title, city, start_date, end_date, status")
+    .in("id", ids)
+    .in("status", [...PLANNED_PROJECT_STATUSES])
+    .limit(PLANNING_PROJECT_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
+  }
+  type Row = {
+    id: string;
+    title: string | null;
+    city: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    status: string;
+  };
+  const rows = (res.data ?? []) as Row[];
+  const items: PlanningItem[] = rows.map((p) => ({
+    id: `project:${p.id}`,
+    sourceType: "project" as const,
+    sourceId: p.id,
+    label: p.title?.trim() ? p.title : null,
+    detail: p.city?.trim() ? p.city : null,
+    startDate: toIsoDay(p.start_date),
+    endDate: toIsoDay(p.end_date),
+    status: p.status,
+    statusKey: statusKeyForSource("project", p.status),
+    href: hrefForSource("project", p.id),
+    roleContext: "assigned" as const,
+  }));
+  return {
+    state: { status: "ok", count: items.length },
+    items,
+    projectRefs: rows.map((p) => ({ id: p.id, title: p.title })),
+  };
+}
+
 async function readProjectItems(): Promise<{
   state: PlanningSourceState;
   items: PlanningItem[];
+  projectRefs: { id: string; title: string | null }[];
 }> {
-  // Managers only, honestly: no worker-side "my assigned projects" dated
-  // read exists yet (documented blocker in the canonical-calendar contract).
+  // Manager-side date bands. (The worker-side assigned read now exists too —
+  // readAssignedProjectItems above; getPlanning merges both, assigned wins.)
   // Scope = the caller's legacy company channel PLUS the organizations the
   // caller owns — both reads stay under the projects RLS (fail-closed).
   const supabase = await createClient();
@@ -160,7 +244,11 @@ async function readProjectItems(): Promise<{
   );
 
   if (!companyId && ownedOrgIds.length === 0) {
-    return { state: { status: "managers-only", count: 0 }, items: [] };
+    return {
+      state: { status: "managers-only", count: 0 },
+      items: [],
+      projectRefs: [],
+    };
   }
 
   const orFilter = [
@@ -179,7 +267,7 @@ async function readProjectItems(): Promise<{
     .order("created_at", { ascending: false })
     .limit(PLANNING_PROJECT_READ_LIMIT);
   if (res.error) {
-    return { state: { status: "error", count: 0 }, items: [] };
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
   }
 
   type Row = {
@@ -191,25 +279,115 @@ async function readProjectItems(): Promise<{
     status: string;
   };
   const seen = new Set<string>();
-  const items: PlanningItem[] = ((res.data ?? []) as Row[])
-    .filter((p) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return (PLANNED_PROJECT_STATUSES as readonly string[]).includes(p.status);
-    })
-    .map((p) => ({
-      id: `project:${p.id}`,
-      sourceType: "project" as const,
-      sourceId: p.id,
-      label: p.title?.trim() ? p.title : null,
-      detail: p.city?.trim() ? p.city : null,
-      startDate: toIsoDay(p.start_date),
-      endDate: toIsoDay(p.end_date),
-      status: p.status,
-      statusKey: statusKeyForSource("project", p.status),
-      href: hrefForSource("project", p.id),
-      roleContext: "managed" as const,
-    }));
+  const rows = ((res.data ?? []) as Row[]).filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return (PLANNED_PROJECT_STATUSES as readonly string[]).includes(p.status);
+  });
+  const items: PlanningItem[] = rows.map((p) => ({
+    id: `project:${p.id}`,
+    sourceType: "project" as const,
+    sourceId: p.id,
+    label: p.title?.trim() ? p.title : null,
+    detail: p.city?.trim() ? p.city : null,
+    startDate: toIsoDay(p.start_date),
+    endDate: toIsoDay(p.end_date),
+    status: p.status,
+    statusKey: statusKeyForSource("project", p.status),
+    href: hrefForSource("project", p.id),
+    roleContext: "managed" as const,
+  }));
+  return {
+    state: { status: "ok", count: items.length },
+    items,
+    projectRefs: rows.map((p) => ({ id: p.id, title: p.title })),
+  };
+}
+
+/**
+ * The caller's own leave/absence bands (Time Engine W2). Reuses the W7
+ * surface's OWN read (`getMyAbsences` — worker-scoped RLS) and the pure
+ * `projectAbsenceItem` mapper. Approved absences join conflict detection —
+ * approved leave overlapping an accepted booking is a real impossible plan.
+ */
+async function readAbsenceItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await getMyAbsences();
+  if (!result.applied) {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const items: PlanningItem[] = [];
+  for (const absence of result.absences) {
+    const item = projectAbsenceItem({
+      id: absence.id,
+      startDate: absence.startDate,
+      endDate: absence.endDate,
+      status: absence.status,
+    });
+    if (item) items.push(item);
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+/** Bounded stage read across the visible projects (managed + assigned). */
+const PLANNING_STAGE_READ_LIMIT = 300;
+
+/**
+ * Dated stages of the projects the caller can already see (Time Engine W2).
+ * Scope = the SAME project ids the project sources returned — no wider read,
+ * `project_stages` RLS (manager or actively assigned worker) still applies
+ * row-level. Date semantics come from the pure `projectStageItem` mapper
+ * (actual overrides planned — identical to the stage gantt).
+ */
+async function readStageItems(
+  projectRefs: readonly { id: string; title: string | null }[],
+): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+  if (projectRefs.length === 0) {
+    return { state: { status: "ok", count: 0 }, items: [] };
+  }
+  const supabase = await createClient();
+  const titleById = new Map(projectRefs.map((p) => [p.id, p.title] as const));
+  const res = await asAny(supabase)
+    .from("project_stages")
+    .select(
+      "id, project_id, name, status, planned_start, planned_end, actual_start, actual_end",
+    )
+    .in("project_id", [...titleById.keys()])
+    .limit(PLANNING_STAGE_READ_LIMIT);
+  if (res.error) {
+    const code = (res.error as { code?: string }).code;
+    if (code === "42P01" || code === "42703") {
+      return { state: { status: "unavailable", count: 0 }, items: [] };
+    }
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  type Row = {
+    id: string;
+    project_id: string;
+    name: string;
+    status: string;
+    planned_start: string | null;
+    planned_end: string | null;
+    actual_start: string | null;
+    actual_end: string | null;
+  };
+  const items: PlanningItem[] = [];
+  for (const row of (res.data ?? []) as Row[]) {
+    const item = projectStageItem({
+      id: row.id,
+      projectId: row.project_id,
+      projectTitle: titleById.get(row.project_id) ?? null,
+      name: row.name,
+      status: row.status,
+      plannedStart: row.planned_start,
+      plannedEnd: row.planned_end,
+      actualStart: row.actual_start,
+      actualEnd: row.actual_end,
+    });
+    if (item) items.push(item);
+  }
   return { state: { status: "ok", count: items.length }, items };
 }
 
@@ -393,8 +571,12 @@ export interface PlanningRange {
 }
 
 /**
- * The caller's combined planning read — one auth check, six independent
- * RLS-scoped sources in parallel, each degrading on its own.
+ * The caller's combined planning read — one auth check, eight RLS-scoped
+ * sources, each degrading on its own. Project bands merge BOTH directions:
+ * the manager-side scope and the caller's own assignments — when the same
+ * project appears in both, the ASSIGNED item wins (it is the personal
+ * commitment that participates in conflict detection). Stages read over the
+ * union of visible project ids (chained — never a wider scope).
  */
 export async function getPlanning(
   range?: PlanningRange,
@@ -410,33 +592,71 @@ export async function getPlanning(
   const rangeEnd =
     range && range.rangeEnd >= rangeStart ? range.rangeEnd : rangeStart;
 
-  const [booking, project, task, journal, finance, invitation] =
+  const managedPromise = readProjectItems();
+  const assignedPromise = readAssignedProjectItems();
+  const stagePromise = Promise.all([managedPromise, assignedPromise]).then(
+    ([managed, assigned]) => {
+      const refs = new Map<string, { id: string; title: string | null }>();
+      for (const p of [...managed.projectRefs, ...assigned.projectRefs]) {
+        if (!refs.has(p.id)) refs.set(p.id, p);
+      }
+      return readStageItems([...refs.values()]);
+    },
+  );
+
+  const [booking, managed, assigned, stage, task, journal, finance, invitation, absence] =
     await Promise.all([
       readBookingItems(),
-      readProjectItems(),
+      managedPromise,
+      assignedPromise,
+      stagePromise,
       readTaskItems(),
       readJournalItems(user.id, rangeStart, rangeEnd),
       readFinanceItems(today),
       readInvitationItems(),
+      readAbsenceItems(),
     ]);
+
+  // Merge project directions — assigned (personal commitment) wins on id
+  // collision, so conflict detection sees the caller's own band exactly once.
+  const assignedIds = new Set(assigned.items.map((i) => i.id));
+  const projectItems = [
+    ...assigned.items,
+    ...managed.items.filter((i) => !assignedIds.has(i.id)),
+  ];
+  const projectState: PlanningSourceState =
+    managed.state.status === "managers-only" &&
+    (assigned.state.status !== "ok" || assigned.items.length === 0)
+      ? managed.state
+      : {
+          status:
+            managed.state.status === "error" || assigned.state.status === "error"
+              ? "error"
+              : "ok",
+          count: projectItems.length,
+        };
 
   return {
     status: "ok",
     items: [
       ...booking.items,
-      ...project.items,
+      ...projectItems,
+      ...stage.items,
       ...task.items,
       ...journal.items,
       ...finance.items,
       ...invitation.items,
+      ...absence.items,
     ],
     sources: {
       booking: booking.state,
-      project: project.state,
+      project: projectState,
       task: task.state,
       journal: journal.state,
       finance: finance.state,
       invitation: invitation.state,
+      absence: absence.state,
+      stage: stage.state,
     },
   };
 }

@@ -14,8 +14,15 @@ import {
   switchActiveRole as switchActiveRoleAction,
   type Role,
 } from "@/lib/auth/actions";
-import { switchActiveOrganization as switchActiveOrganizationAction } from "@/lib/company/organization-actions";
-import type { SwitchableOrganization } from "@/lib/company/organization-switch";
+import {
+  clearActiveOrganization as clearActiveOrganizationAction,
+  switchActiveOrganization as switchActiveOrganizationAction,
+} from "@/lib/company/organization-actions";
+import {
+  PERSONAL_WORKSPACE_ID,
+  type SwitchableOrganization,
+  type WorkspaceInfo,
+} from "@/lib/company/organization-switch";
 
 export type Notification = {
   id: string;
@@ -68,6 +75,20 @@ type AuthState = {
    */
   organizations?: SwitchableOrganization[];
   activeOrganizationId?: string | null;
+  /**
+   * Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
+   * for EVERY identity — the personal space plus every organization the person
+   * owns, manages or works for (server-resolved from the canonical
+   * engagement_contexts spine). Display + orientation only: it never fabricates
+   * a membership, and switching persists server-side via the same
+   * active-organization pointer (honestly unavailable until the owner-gated
+   * migration is applied).
+   */
+  workspaces?: WorkspaceInfo[];
+  /** PERSONAL_WORKSPACE_ID or a membership-validated org id. */
+  activeWorkspaceId?: string | null;
+  /** False → the workspace chip is an indicator only (no switch offered). */
+  workspacePointerAvailable?: boolean;
   notifications: Notification[];
 };
 
@@ -80,6 +101,10 @@ type AuthContextValue = AuthState & {
   addRole: (role: Role) => Promise<void>;
   /** Switch the ACTIVE organization (server-side pointer, then refresh). */
   switchOrganization: (organizationId: string) => Promise<void>;
+  /** Switch the ACTIVE workspace — PERSONAL_WORKSPACE_ID clears the pointer,
+   *  an org id delegates to switchOrganization. Server-validated, honest
+   *  no-op on failure. */
+  switchWorkspace: (workspaceId: string) => Promise<void>;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
   /** Streamed-spine hydration hook (SpineHydrator only). */
@@ -139,6 +164,17 @@ export function AuthProvider({
     [router],
   );
 
+  const switchWorkspace = useCallback(
+    async (workspaceId: string) => {
+      const result =
+        workspaceId === PERSONAL_WORKSPACE_ID
+          ? await clearActiveOrganizationAction()
+          : await switchActiveOrganizationAction(workspaceId);
+      if (result.ok) router.refresh();
+    },
+    [router],
+  );
+
   const markAsRead = useCallback((id: string) => {
     setNotifications((cur) =>
       cur.map((n) =>
@@ -176,11 +212,15 @@ export function AuthProvider({
       activeOrgName: initial.activeOrgName ?? null,
       organizations: initial.organizations ?? [],
       activeOrganizationId: initial.activeOrganizationId ?? null,
+      workspaces: initial.workspaces ?? [],
+      activeWorkspaceId: initial.activeWorkspaceId ?? null,
+      workspacePointerAvailable: initial.workspacePointerAvailable ?? false,
       notifications,
       badges,
       switchRole,
       addRole,
       switchOrganization,
+      switchWorkspace,
       markAsRead,
       markAllRead,
       applySpine,
@@ -195,11 +235,15 @@ export function AuthProvider({
       initial.activeOrgName,
       initial.organizations,
       initial.activeOrganizationId,
+      initial.workspaces,
+      initial.activeWorkspaceId,
+      initial.workspacePointerAvailable,
       notifications,
       badges,
       switchRole,
       addRole,
       switchOrganization,
+      switchWorkspace,
       markAsRead,
       markAllRead,
       applySpine,

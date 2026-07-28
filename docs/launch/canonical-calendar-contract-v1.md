@@ -50,15 +50,22 @@ reschedule moves the SAME source row.
 ## Conflicts
 
 Unchanged real semantics: inclusive `daterange '[]' &&` overlap, mirroring
-the booking accept guard; only the caller's own accepted incoming bookings
-and own assigned projects compete. Server-side enforcement stays in
+the booking accept guard; the caller's own accepted incoming bookings, own
+assigned projects and own APPROVED absences compete (Time Engine W2 —
+approved leave overlapping an accepted booking is a physically impossible
+plan and is flagged). Server-side enforcement stays in
 `respond_booking_request` (23P01). The UI invents no conflicts.
+
+> **Updated 2026-07-28 (Time Engine W2, real-user workflow rebuild):** the
+> W6/W7 models shipped AND were applied to production after this contract
+> was written. `worker_absences` (source `absence`) and `project_stages`
+> (source `stage`, actual-overrides-planned exactly like the gantt) now
+> project into the canonical calendar, and the worker-side assigned-project
+> dated read exists (`readAssignedProjectItems` — the `assigned` conflict
+> context is populated). Guard: `lib/guards/planning-time-engine-w2.test.ts`.
 
 ## Sources with NO real model — documented blockers (not simulated)
 
-- **Leave / vacation / sickness** — no table exists. Additive model
-  possible later (`worker_absences`: worker_id, kind, start/end, RLS
-  owner+manager) — a separate owner-gated slice.
 - **Meetings / appointments** — no model.
 - **Holidays** — no trusted source model.
 - **Availability windows / shifts / rosters** — only static preference
@@ -69,13 +76,13 @@ and own assigned projects compete. Server-side enforcement stays in
   schema change (owner-gated).
 - **Instruction due dates** — instructions are `conversation_messages`
   rows with no deadline column.
-- **Worker-side assigned-project dates** — assignment rows exist but no
-  worker-facing dated read; the `assigned` conflict context stays
-  defined-but-unpopulated (honest per-source note).
+- **Journal work_date** — the real work day lives as an EAV text metric
+  (`journal_entry_metrics.work_date`); the calendar plots `created_at`
+  until the column promotion (owner-gated follow-up) lands.
 
 The calendar is therefore NOT called complete: it is the canonical surface
-with 4 real sources live and the remaining sources explicitly blocked on
-real models.
+with the live sources listed above and the remaining sources explicitly
+blocked on real models.
 
 ## Access & separation
 

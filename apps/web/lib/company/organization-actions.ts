@@ -79,3 +79,36 @@ export async function switchActiveOrganization(
   revalidatePath("/", "layout");
   return { ok: true };
 }
+
+/**
+ * Switch back to the PERSONAL workspace (real-user workflow rebuild W1) —
+ * clears the active-organization pointer. Same honest degradation contract as
+ * switchActiveOrganization: while the owner-gated migration is unapplied the
+ * UPDATE fails with 42703 → { ok: false, code: "needs-migration" } and
+ * nothing is faked client-side.
+ */
+export async function clearActiveOrganization(): Promise<SwitchOrganizationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "not-authenticated" };
+
+  const { error } = await asAny(supabase)
+    .from("profiles")
+    .update({ active_organization_id: null })
+    .eq("id", user.id);
+  if (error) {
+    if (error.code === UNDEFINED_COLUMN_CODE) {
+      return { ok: false, code: "needs-migration" };
+    }
+    console.error("[clearActiveOrganization] update failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return { ok: false, code: "error" };
+  }
+
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

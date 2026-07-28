@@ -33,6 +33,8 @@ export const PLANNING_SOURCE_TYPES = [
   "journal",
   "finance",
   "invitation",
+  "absence",
+  "stage",
 ] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
 
@@ -114,6 +116,14 @@ export function hrefForSource(
     case "invitation":
       // Both directions live on the network surface (sent list + incoming).
       return "/dashboard/network";
+    case "absence":
+      // List-anchored — the absence lifecycle lives on its own surface.
+      return "/dashboard/absences";
+    case "stage":
+      // A stage belongs to a project; the PURE mapper builds the real
+      // project-operations href from the project id (this generic fallback
+      // only anchors the projects surface).
+      return "/dashboard/projects";
   }
 }
 
@@ -144,6 +154,12 @@ export function statusKeyForSource(
     case "invitation":
       // Reuses the network surface's invitation lifecycle copy.
       return `network.sent.status.${status}`;
+    case "absence":
+      // Reuses the absences surface's own lifecycle copy (W7 model).
+      return `absences.statuses.${status}`;
+    case "stage":
+      // Reuses the project-stages panel's own lifecycle copy (W6 model).
+      return `projectStages.statuses.${status}`;
   }
 }
 
@@ -222,11 +238,15 @@ export interface PlanningConflict {
  * A record participates in conflict detection only when it is a dated
  * personal commitment of the caller:
  *  - an ACCEPTED booking where the caller is the worker (incoming) — the
- *    exact rows the accept guard compares server-side, or
- *  - a project the caller is personally assigned to.
- * Proposals, declined/withdrawn/expired bookings, the company's outgoing
- * rows (different workers) and managed project bands never conflict here —
- * flagging them would invent a problem no real record proves.
+ *    exact rows the accept guard compares server-side,
+ *  - a project the caller is personally assigned to, or
+ *  - an APPROVED absence of the caller (Time Engine W2: approved leave and
+ *    an accepted booking on the same days is a real, physically impossible
+ *    plan — the calendar must surface it, since no DB guard does yet).
+ * Proposals, declined/withdrawn/expired bookings, REQUESTED (not yet
+ * approved) absences, the company's outgoing rows (different workers),
+ * managed project bands and project stages never conflict here — flagging
+ * them would invent a problem no real record proves.
  */
 export function isConflictEligible(item: PlanningItem): boolean {
   if (!item.startDate) return false;
@@ -235,6 +255,9 @@ export function isConflictEligible(item: PlanningItem): boolean {
   }
   if (item.sourceType === "project") {
     return item.roleContext === "assigned";
+  }
+  if (item.sourceType === "absence") {
+    return item.status === "approved";
   }
   return false;
 }
@@ -768,4 +791,103 @@ export function combineInvitationItems(
     merged.push(item);
   }
   return merged;
+}
+
+/* ------------------------------------------------------------------ */
+/* Source projections — absences & project stages (Time Engine W2).    */
+/* The applied W6/W7 tables finally join the ONE canonical calendar    */
+/* instead of living as orphaned per-module date views.                */
+/* ------------------------------------------------------------------ */
+
+/** The absence fields the calendar sees (worker_absences, W7 model). */
+export interface AbsencePlanningInput {
+  readonly id: string;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly status: string;
+}
+
+/** Absence lifecycle states that belong on a FORWARD plan — a requested
+ *  absence is a pending intention, an approved one is a commitment;
+ *  rejected/cancelled rows are history and stay on the absences surface. */
+export const PLANNED_ABSENCE_STATUSES = ["requested", "approved"] as const;
+
+/** ONE calendar item per planned absence at its real date band. The label
+ *  stays null (the page renders the honest source fallback noun) — absence
+ *  TYPE detail lives on the absences surface under its own copy. */
+export function projectAbsenceItem(
+  row: AbsencePlanningInput,
+): PlanningItem | null {
+  if (!(PLANNED_ABSENCE_STATUSES as readonly string[]).includes(row.status)) {
+    return null;
+  }
+  const start = toIsoDay(row.startDate);
+  if (!start) return null;
+  return {
+    id: `absence:${row.id}`,
+    sourceType: "absence",
+    sourceId: row.id,
+    label: null,
+    detail: null,
+    startDate: start,
+    endDate: toIsoDay(row.endDate),
+    status: row.status,
+    statusKey: statusKeyForSource("absence", row.status),
+    href: hrefForSource("absence", row.id),
+    roleContext: "mine",
+  };
+}
+
+/** The stage fields the calendar sees (project_stages, W6 model). */
+export interface StagePlanningInput {
+  readonly id: string;
+  readonly projectId: string;
+  /** Real project title for the detail line (null → no invented copy). */
+  readonly projectTitle: string | null;
+  readonly name: string;
+  readonly status: string;
+  readonly plannedStart: string | null;
+  readonly plannedEnd: string | null;
+  readonly actualStart: string | null;
+  readonly actualEnd: string | null;
+}
+
+/** Stage lifecycle states with calendar meaning — cancelled stages are
+ *  history; done stages keep their band (a finished phase is a fact). */
+const PLANNED_STAGE_STATUSES = new Set([
+  "planned",
+  "in_progress",
+  "blocked",
+  "done",
+]);
+
+/**
+ * ONE calendar item per dated stage. Date semantics mirror the stage gantt
+ * exactly (lib/projects/stage-gantt.ts): ACTUAL dates override PLANNED ones
+ * — the calendar and the gantt may never disagree about the same row. A
+ * stage with no date at all is skipped (it has no calendar meaning; it
+ * stays on the operations panel), never parked in "undated".
+ */
+export function projectStageItem(
+  row: StagePlanningInput,
+): PlanningItem | null {
+  if (!PLANNED_STAGE_STATUSES.has(row.status)) return null;
+  const start = toIsoDay(row.actualStart) ?? toIsoDay(row.plannedStart);
+  const end = toIsoDay(row.actualEnd) ?? toIsoDay(row.plannedEnd);
+  if (!start && !end) return null;
+  return {
+    id: `stage:${row.id}`,
+    sourceType: "stage",
+    sourceId: row.id,
+    label: row.name.trim() ? row.name : null,
+    detail: row.projectTitle?.trim() ? row.projectTitle : null,
+    startDate: start ?? end,
+    endDate: end,
+    status: row.status,
+    statusKey: statusKeyForSource("stage", row.status),
+    // The stage's REAL home — the project operations centre, not a
+    // planning-local detail page.
+    href: `/dashboard/projects/${row.projectId}/operations`,
+    roleContext: "managed",
+  };
 }

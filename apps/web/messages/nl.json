@@ -8896,7 +8896,9 @@
       "task": "Taak",
       "journal": "Journaal",
       "finance": "Financiën",
-      "invitation": "Uitnodiging"
+      "invitation": "Uitnodiging",
+      "absence": "Verlof",
+      "stage": "Fasen"
     },
     "sourceNotes": {
       "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
@@ -8908,7 +8910,11 @@
       "financeUnavailable": "Financiële records zijn nog niet ingeschakeld — betaaltermijnen sluiten aan bij het plan zodra de financiële laag is ingeschakeld.",
       "financeError": "Financiële records konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven.",
       "invitationUnavailable": "Uitnodigingen zijn nog niet ingeschakeld — uitnodigingstermijnen sluiten aan bij het plan zodra de uitnodigingenlaag is ingeschakeld.",
-      "invitationError": "Uitnodigingen konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven."
+      "invitationError": "Uitnodigingen konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven.",
+      "absenceUnavailable": "De verlofmodule is in deze omgeving nog niet ingeschakeld.",
+      "absenceError": "Verlofrecords konden niet worden gelezen — het plan wordt zonder deze getoond.",
+      "stageUnavailable": "De projectfasenmodule is in deze omgeving nog niet ingeschakeld.",
+      "stageError": "Projectfasen konden niet worden gelezen — het plan wordt zonder deze getoond."
     },
     "week": {
       "label": "Komende 7 dagen"
@@ -8939,7 +8945,9 @@
       "task": "Taak",
       "journal": "Werkregistratie",
       "finance": "Financieel record",
-      "invitation": "Uitnodiging"
+      "invitation": "Uitnodiging",
+      "absence": "Verlof / afwezigheid",
+      "stage": "Projectfase"
     },
     "projectStatus": {
       "draft": "Concept",
@@ -11018,12 +11026,22 @@
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
-      "userLogWork": "Werktijd vastleggen",
+      "userLogWork": "Ik wil mijn werk vastleggen",
       "userFindWork": "Werk zoeken",
       "historyTitle": "Eerder gesprek",
       "historyCount": "{count, plural, one {# bericht} other {# berichten}}",
       "historyShow": "Tonen",
-      "historyMore": "Meer tonen"
+      "historyMore": "Meer tonen",
+      "workspaceLabel": "Werkruimte",
+      "workspacePersonal": "Persoonlijke ruimte",
+      "workspaceSwitchSoon": "Wisselen van werkruimte is nog niet beschikbaar — voorlopig wordt de actieve context getoond.",
+      "chipLogWork": "Werk vastleggen",
+      "agendaTitle": "Je planning voor de komende {days} dagen:",
+      "agendaEmpty": "Er is niets gepland voor de komende {days} dagen.",
+      "agendaUndated": "{count, plural, one {Nog # item zonder datum.} other {Nog # items zonder datum.}}",
+      "agendaMore": "(+{count})",
+      "agendaMoreDays": "{count, plural, one {… en nog # dag met items.} other {… en nog # dagen met items.}}",
+      "agendaConflicts": "⚠ {count, plural, one {# overlappende verplichting gevonden} other {# overlappende verplichtingen gevonden}} — dit plan is fysiek onmogelijk; controleer de kalender."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -11045,7 +11063,7 @@
       "confirmTitle": "Vermelding bevestigen?",
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
-      "minutesUnit": "min",
+      "minutesUnit": "min",
       "addedSkillPrefix": "Vaardigheid toegevoegd",
       "strengthenedSkillPrefix": "Vaardigheid versterkt",
       "pendingConfirmPrefix": "Wacht op je bevestiging",

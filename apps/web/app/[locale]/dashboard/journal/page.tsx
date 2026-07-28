@@ -7,6 +7,11 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import {
+  WORKSPACE_ACCENT_DOT,
+  WORKSPACE_PERSONAL_DOT,
+} from "@/components/app/conversation/chat/workspace-chip";
+import { workspaceAccentIndex } from "@/lib/company/organization-switch";
 import { JournalEntryEditLauncher } from "@/components/app/journal-entry-edit-launcher";
 import {
   EvidenceStatusStrip,
@@ -108,7 +113,7 @@ export default async function JournalPage({
   const { data: ecRows } = await supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, journal_review_enabled, organizations(display_name, legal_name, organization_type)",
+      "id, relationship_slug, title, is_primary, journal_review_enabled, organization_id, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", user.id)
     .eq("status", "active")
@@ -152,6 +157,27 @@ export default async function JournalPage({
       isPrimary: e.is_primary,
     };
   });
+
+  // Workspace context chips (real-user workflow rebuild W1): a worker with
+  // SEVERAL engagements reads their mixed stream with an explicit per-entry
+  // context label + the SAME deterministic accent hue the workspace chip uses
+  // for that organization. One engagement → no chip (no ambiguity to solve).
+  const engagementChips = new Map<string, { label: string; dot: string }>(
+    (ecRows ?? []).map((e, i) => {
+      const orgId = (e as { organization_id?: string | null }).organization_id;
+      return [
+        e.id,
+        {
+          label: engagements[i]?.label ?? "—",
+          dot: orgId
+            ? WORKSPACE_ACCENT_DOT[
+                workspaceAccentIndex(orgId) % WORKSPACE_ACCENT_DOT.length
+              ]
+            : WORKSPACE_PERSONAL_DOT,
+        },
+      ];
+    }),
+  );
 
   if (!worker || engagements.length === 0) {
     // Fix C — distinguish the REAL reason there is no writable context, so
@@ -1111,6 +1137,24 @@ export default async function JournalPage({
                                 </span>
                               ) : null}
                             </p>
+                            {/* Workspace context (rebuild W1): a MULTI-engagement
+                                worker sees which company/relationship each entry
+                                belongs to — same accent hue as the workspace chip.
+                                One engagement → no chip (nothing ambiguous). */}
+                            {engagements.length > 1 &&
+                              e.engagement_context_id &&
+                              engagementChips.has(e.engagement_context_id) && (
+                                <p
+                                  className="flex items-center gap-1.5 text-[11px] text-text-muted"
+                                  data-testid={`journal-entry-context-${e.id}`}
+                                >
+                                  <span
+                                    className={`size-2 flex-none rounded-full ${engagementChips.get(e.engagement_context_id)!.dot}`}
+                                    aria-hidden
+                                  />
+                                  {engagementChips.get(e.engagement_context_id)!.label}
+                                </p>
+                              )}
                           </div>
                           {/* 2 · Sistema suprato — current signals from the current
                         text. Plain labelled values, never a badge wall. */}

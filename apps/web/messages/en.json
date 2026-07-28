@@ -8896,7 +8896,9 @@
       "task": "Task",
       "journal": "Journal",
       "finance": "Finance",
-      "invitation": "Invitation"
+      "invitation": "Invitation",
+      "absence": "Leave",
+      "stage": "Stages"
     },
     "sourceNotes": {
       "bookingUnavailable": "Bookings are not available yet — they join the plan once the booking layer is switched on.",
@@ -8908,7 +8910,11 @@
       "financeUnavailable": "Finance records are not enabled yet — payment deadlines will join the plan once the finance layer is enabled.",
       "financeError": "Finance records could not be loaded right now. The rest of the plan renders as usual.",
       "invitationUnavailable": "Invitations are not enabled yet — invitation deadlines will join the plan once the invitations layer is enabled.",
-      "invitationError": "Invitations could not be loaded right now. The rest of the plan renders as usual."
+      "invitationError": "Invitations could not be loaded right now. The rest of the plan renders as usual.",
+      "absenceUnavailable": "The leave module isn't enabled in this environment yet.",
+      "absenceError": "Leave records couldn't be read — the plan is shown without them.",
+      "stageUnavailable": "The project-stages module isn't enabled in this environment yet.",
+      "stageError": "Project stages couldn't be read — the plan is shown without them."
     },
     "week": {
       "label": "Next 7 days"
@@ -8939,7 +8945,9 @@
       "task": "Task",
       "journal": "Work entry",
       "finance": "Finance record",
-      "invitation": "Invitation"
+      "invitation": "Invitation",
+      "absence": "Leave / absence",
+      "stage": "Project stage"
     },
     "projectStatus": {
       "draft": "Draft",
@@ -11018,12 +11026,22 @@
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
-      "userLogWork": "Log work time",
+      "userLogWork": "I want to log my work",
       "userFindWork": "Find work",
       "historyTitle": "Earlier conversation",
       "historyCount": "{count, plural, one {# message} other {# messages}}",
       "historyShow": "Show",
-      "historyMore": "Show more"
+      "historyMore": "Show more",
+      "workspaceLabel": "Workspace",
+      "workspacePersonal": "Personal space",
+      "workspaceSwitchSoon": "Workspace switching isn't enabled yet — this shows your active context for now.",
+      "chipLogWork": "Log work",
+      "agendaTitle": "Your plan for the next {days} days:",
+      "agendaEmpty": "Nothing is planned for the next {days} days.",
+      "agendaUndated": "{count, plural, one {# more item has no date.} other {# more items have no date.}}",
+      "agendaMore": "(+{count})",
+      "agendaMoreDays": "{count, plural, one {… and # more day with items.} other {… and # more days with items.}}",
+      "agendaConflicts": "⚠ {count, plural, one {# overlapping commitment found} other {# overlapping commitments found}} — this plan is physically impossible; check the calendar."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -11045,7 +11063,7 @@
       "confirmTitle": "Confirm the entry?",
       "saved": "Entry saved to your work journal.",
       "errorGeneric": "Couldn't save. Please try again.",
-      "minutesUnit": "min",
+      "minutesUnit": "min",
       "addedSkillPrefix": "Skill added",
       "strengthenedSkillPrefix": "Skill strengthened",
       "pendingConfirmPrefix": "Awaiting your confirmation",

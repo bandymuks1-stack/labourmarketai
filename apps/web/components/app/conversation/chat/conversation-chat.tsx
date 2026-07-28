@@ -22,6 +22,7 @@ import { getWorkerForm } from "@/lib/conversation/worker-forms";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
+import { loadAgendaSummary } from "@/lib/conversation/agenda-summary";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -57,6 +58,8 @@ export type ChatLabels = {
   chipJobs: string;
   chipProfile: string;
   chipOffers: string;
+  chipLogWork: string;
+  userLogWork: string;
   chipLang: string;
   chipExp: string;
   chipEdu: string;
@@ -127,6 +130,10 @@ export function ConversationChat({
 }) {
   const starterChips: ChoiceChip[] = useMemo(
     () => [
+      // Logging work is the product's PRIMARY worker action (the journal is
+      // the spine) — it must be one tap from the greeting, not a sentence the
+      // deterministic router has to recognise (real-user workflow rebuild W3).
+      { id: "logwork", label: labels.chipLogWork },
       { id: "cv", label: labels.chipCv },
       { id: "jobs", label: labels.chipJobs },
       { id: "profile", label: labels.chipProfile },
@@ -501,6 +508,12 @@ export function ConversationChat({
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
+        case "logwork":
+          user(labels.userLogWork);
+          // Opens the SAME deterministic work-log flow the typed sentence
+          // reaches; an empty draft asks the one concrete clarify question.
+          withTyping(() => startWorkLog(""));
+          break;
         case "cv":
           user(labels.userCv);
           // CV import ends with the refreshed REAL profile state, so the user
@@ -547,8 +560,31 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog],
   );
+
+  /**
+   * Real calendar readback (Time Engine W3): the SAME canonical projection
+   * /dashboard/planning renders, summarised into the conversation — including
+   * REAL conflicts. The full calendar stays one tap away (the hint line);
+   * the chat never grows a second calendar view.
+   */
+  const startAgenda = useCallback(() => {
+    setTyping(true);
+    loadAgendaSummary(locale)
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "summary") {
+          assistant(`${res.text}\n\n${labels.calendarHint}`);
+        } else {
+          assistant(labels.calendarHint);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.calendarHint);
+      });
+  }, [assistant, locale, labels.calendarHint]);
 
   const handleSend = useCallback(
     (text: string) => {
@@ -569,6 +605,12 @@ export function ConversationChat({
         startCriteria();
         return;
       }
+      if (intent === "calendar-view") {
+        // Real agenda readback from the canonical Time Engine (async, own
+        // typing cue) — no longer a bare navigation hint.
+        startAgenda();
+        return;
+      }
       withTyping(() => {
         switch (intent) {
           case "cv":
@@ -584,9 +626,6 @@ export function ConversationChat({
           // four-item menu under every one of them taught users to ignore the
           // chips entirely. The menu stays where it is a menu: the greeting
           // and the not-understood fallback.
-          case "calendar-view":
-            assistant(labels.calendarHint);
-            break;
           case "reminder":
             // No scheduler exists — never a fake reminder (honest degradation).
             assistant(labels.reminderBlocked);
@@ -603,7 +642,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda],
   );
 
   const nav = {

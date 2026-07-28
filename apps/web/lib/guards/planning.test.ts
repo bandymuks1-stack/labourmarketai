@@ -113,18 +113,34 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
     expect(COMPOSE).toMatch(/from "@\/lib\/invitations\/network"/);
   });
 
-  it("direct table reads are the known bounded set (projects/orgs/workers/journal)", () => {
+  it("direct table reads are the known bounded set (projects/orgs/workers/journal/assignments/stages)", () => {
     const froms = [...COMPOSE.matchAll(/\.from\("([a-z0-9_]+)"\)/g)].map(
       (m) => m[1],
     );
     // projects (the table the project libs already read), organizations
-    // (owned-org scope), workers (own worker id) and journal_entries (own
-    // dated facts) — every read RLS-scoped and bounded.
+    // (owned-org scope), workers (own worker id), journal_entries (own dated
+    // facts), project_worker_assignments (Time Engine W2: the caller's OWN
+    // assignments — unlocks the "assigned" conflict context) and
+    // project_stages (W6 bands over the ALREADY-visible project ids only) —
+    // every read RLS-scoped and bounded. Absences deliberately do NOT appear
+    // here: they reuse the W7 surface's own read (getMyAbsences).
     expect(new Set(froms)).toEqual(
-      new Set(["projects", "organizations", "workers", "journal_entries"]),
+      new Set([
+        "projects",
+        "organizations",
+        "workers",
+        "journal_entries",
+        "project_worker_assignments",
+        "project_stages",
+      ]),
     );
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_PROJECT_READ_LIMIT\)/);
     expect(COMPOSE).toMatch(/\.limit\(PLANNING_JOURNAL_READ_LIMIT\)/);
+    expect(COMPOSE).toMatch(/\.limit\(PLANNING_STAGE_READ_LIMIT\)/);
+    // The absence source reuses the W7 read — never a duplicate query.
+    expect(COMPOSE).toMatch(
+      /import \{ getMyAbsences \} from "@\/lib\/leave\/absences"/,
+    );
     expect(PLANNING_PROJECT_READ_LIMIT).toBeLessThanOrEqual(200);
     // Journal facts: own worker only, soft-deleted and superseded excluded.
     expect(COMPOSE).toMatch(/\.is\("deleted_at", null\)/);
@@ -326,7 +342,10 @@ describe("4. the agenda is pure, forward-looking date math", () => {
 });
 
 describe("5. real sources only — nothing that does not exist is simulated", () => {
-  it("exactly booking / project / task / journal / finance / invitation (plan + fact sources)", () => {
+  it("exactly booking / project / task / journal / finance / invitation / absence / stage", () => {
+    // Time Engine W2: the APPLIED W6/W7 tables (project_stages,
+    // worker_absences) finally project into the ONE canonical calendar —
+    // they are real, live models, not simulations.
     expect([...PLANNING_SOURCE_TYPES]).toEqual([
       "booking",
       "project",
@@ -334,6 +353,8 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
       "journal",
       "finance",
       "invitation",
+      "absence",
+      "stage",
     ]);
   });
 
