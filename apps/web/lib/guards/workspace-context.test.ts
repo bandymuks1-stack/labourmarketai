@@ -73,9 +73,24 @@ describe("workspace chip — always-visible context beside the conversation", ()
     expect(chip).not.toMatch(/rgb\(\s*\d/); // no raw rgb literals
   });
 
-  it("degrades honestly while the pointer migration is unapplied", () => {
-    expect(chip).toMatch(/workspaceSwitchSoon/);
-    expect(chip).toMatch(/pointerAvailable/);
+  it("switching is REAL for every session — no disabled-switch production text (owner audit P0.1)", () => {
+    // The pick always dispatches through the server action…
+    expect(chip).toMatch(/switchWorkspace\(id\)/);
+    // …and no "not enabled yet" copy can render anywhere.
+    expect(chip).not.toMatch(/workspaceSwitchSoon/);
+    // Unnamed organizations get a localized fallback, never a dash row.
+    expect(chip).toMatch(/workspaceUnnamed/);
+  });
+
+  it("the switch actions write the server-side session pointer (httpOnly cookie), never localStorage", () => {
+    const actions = read("lib/company/organization-actions.ts");
+    expect(actions).toMatch(/ACTIVE_WORKSPACE_COOKIE/);
+    expect(actions).toMatch(/httpOnly: true/);
+    expect(actions).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
+    // Membership is validated BEFORE the cookie is written.
+    expect(actions).toMatch(/isMember/);
+    const resolver = read("lib/company/active-organization.ts");
+    expect(resolver).toMatch(/readSessionWorkspacePointer/);
   });
 
   it("never fabricates a workspace — renders nothing without server data", () => {
@@ -98,7 +113,9 @@ describe("workspace chip — i18n parity across every locale", () => {
       const messages = read(`messages/${locale}.json`);
       expect(messages).toMatch(/"workspaceLabel"/);
       expect(messages).toMatch(/"workspacePersonal"/);
-      expect(messages).toMatch(/"workspaceSwitchSoon"/);
+      expect(messages).toMatch(/"workspaceUnnamed"/);
+      // The disabled-switch production text is gone for good (P0.1).
+      expect(messages).not.toMatch(/"workspaceSwitchSoon"/);
     });
   }
 });

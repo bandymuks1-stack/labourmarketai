@@ -3259,7 +3259,7 @@
       "historyMore": "Vis flere",
       "workspaceLabel": "Arbeidsområde",
       "workspacePersonal": "Personlig område",
-      "workspaceSwitchSoon": "Bytte av arbeidsområde er ikke aktivert ennå — foreløpig vises den aktive konteksten.",
+      "workspaceUnnamed": "Bedriftsarbeidsområde",
       "chipLogWork": "Registrer arbeid",
       "agendaTitle": "Planen din for de neste {days} dagene:",
       "agendaEmpty": "Ingenting er planlagt for de neste {days} dagene.",

@@ -3259,7 +3259,7 @@
       "historyMore": "Vis flere",
       "workspaceLabel": "Arbejdsområde",
       "workspacePersonal": "Personligt område",
-      "workspaceSwitchSoon": "Skift af arbejdsområde er endnu ikke aktiveret — indtil videre vises den aktive kontekst.",
+      "workspaceUnnamed": "Virksomhedsarbejdsområde",
       "chipLogWork": "Registrér arbejde",
       "agendaTitle": "Din plan for de næste {days} dage:",
       "agendaEmpty": "Der er intet planlagt for de næste {days} dage.",

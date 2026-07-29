@@ -11069,7 +11069,7 @@
       "historyMore": "Show more",
       "workspaceLabel": "Workspace",
       "workspacePersonal": "Personal space",
-      "workspaceSwitchSoon": "Workspace switching isn't enabled yet — this shows your active context for now.",
+      "workspaceUnnamed": "Company workspace",
       "chipLogWork": "Log work",
       "agendaTitle": "Your plan for the next {days} days:",
       "agendaEmpty": "Nothing is planned for the next {days} days.",

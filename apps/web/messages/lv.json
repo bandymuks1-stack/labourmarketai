@@ -3259,7 +3259,7 @@
       "historyMore": "Rādīt vairāk",
       "workspaceLabel": "Darba telpa",
       "workspacePersonal": "Personīgā telpa",
-      "workspaceSwitchSoon": "Darba telpas pārslēgšana vēl nav iespējota — pagaidām tiek rādīts aktīvais konteksts.",
+      "workspaceUnnamed": "Uzņēmuma darbtelpa",
       "chipLogWork": "Reģistrēt darbu",
       "agendaTitle": "Tavs plāns nākamajām {days} dienām:",
       "agendaEmpty": "Nākamajām {days} dienām nekas nav ieplānots.",

@@ -11069,7 +11069,7 @@
       "historyMore": "Mehr anzeigen",
       "workspaceLabel": "Arbeitsbereich",
       "workspacePersonal": "Persönlicher Bereich",
-      "workspaceSwitchSoon": "Der Wechsel des Arbeitsbereichs ist noch nicht verfügbar — vorerst wird der aktive Kontext angezeigt.",
+      "workspaceUnnamed": "Unternehmens-Arbeitsbereich",
       "chipLogWork": "Arbeit erfassen",
       "agendaTitle": "Dein Plan für die nächsten {days} Tage:",
       "agendaEmpty": "Für die nächsten {days} Tage ist nichts geplant.",

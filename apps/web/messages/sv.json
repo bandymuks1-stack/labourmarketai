@@ -3259,7 +3259,7 @@
       "historyMore": "Visa fler",
       "workspaceLabel": "Arbetsyta",
       "workspacePersonal": "Personlig yta",
-      "workspaceSwitchSoon": "Byte av arbetsyta är inte aktiverat ännu — tills vidare visas den aktiva kontexten.",
+      "workspaceUnnamed": "Företagsarbetsyta",
       "chipLogWork": "Registrera arbete",
       "agendaTitle": "Din plan för de kommande {days} dagarna:",
       "agendaEmpty": "Inget är planerat för de kommande {days} dagarna.",

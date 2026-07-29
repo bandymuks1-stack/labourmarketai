@@ -22,9 +22,11 @@ import { iconControl } from "./icon-scale";
  *   - the membership list is server-resolved from the canonical
  *     engagement_contexts spine (never fabricated);
  *   - a switcher menu renders ONLY for a real multi-workspace person;
- *   - while the owner-gated active-organization migration is unapplied,
- *     switching is honestly unavailable: the menu states so instead of
- *     faking a context change.
+ *   - switching is REAL for every session (owner audit P0.1): the pick goes
+ *     through the membership-validated server actions, which set the
+ *     server-side session pointer (httpOnly cookie) and, once the owner-gated
+ *     migration lands, the durable DB pointer too. No "not enabled yet"
+ *     production text exists any more.
  *
  * Accent: each org maps deterministically onto one of the EXISTING brand
  * tokens (no new palette — doctrine frontend constraints); the personal
@@ -61,15 +63,14 @@ export function WorkspaceChip() {
 
   const workspaces = auth?.workspaces ?? [];
   const activeWorkspaceId = auth?.activeWorkspaceId ?? PERSONAL_WORKSPACE_ID;
-  const pointerAvailable = auth?.workspacePointerAvailable ?? false;
   const switchWorkspace = auth?.switchWorkspace;
 
   const onPick = useCallback(
     async (id: string) => {
       if (detailsRef.current) detailsRef.current.open = false;
-      if (pointerAvailable && switchWorkspace) await switchWorkspace(id);
+      if (switchWorkspace) await switchWorkspace(id);
     },
-    [pointerAvailable, switchWorkspace],
+    [switchWorkspace],
   );
 
   if (!auth || workspaces.length === 0) return null;
@@ -77,7 +78,10 @@ export function WorkspaceChip() {
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
   const nameOf = (w: WorkspaceInfo) =>
-    w.kind === "personal" ? t("workspacePersonal") : w.name;
+    w.kind === "personal"
+      ? t("workspacePersonal")
+      : // Unnamed organization → localized fallback, never a dash row.
+        w.name || t("workspaceUnnamed");
 
   // Single-workspace person → a pure indicator, no fake multi-tenancy chrome.
   if (workspaces.length === 1) {
@@ -115,52 +119,27 @@ export function WorkspaceChip() {
         <ul className="flex flex-col gap-0.5">
           {workspaces.map((w) => {
             const isActive = w.id === active.id;
-            const row = (
-              <>
-                <span className={`size-2 flex-none rounded-full ${dotClass(w)}`} aria-hidden />
-                <span className="min-w-0 flex-1 truncate text-left">{nameOf(w)}</span>
-                {isActive && <Check {...iconControl()} aria-hidden className="flex-none text-brand-blue" />}
-              </>
-            );
             return (
               <li key={w.id}>
-                {pointerAvailable ? (
-                  <button
-                    type="button"
-                    data-testid={`workspace-option-${w.id}`}
-                    aria-current={isActive ? "true" : undefined}
-                    onClick={() => void onPick(w.id)}
-                    className={`flex w-full min-h-11 items-center gap-2 rounded px-2 text-support ${
-                      isActive
-                        ? "bg-brand-blue/10 text-text-primary"
-                        : "text-text-secondary hover:bg-ink-700 hover:text-text-primary"
-                    }`}
-                  >
-                    {row}
-                  </button>
-                ) : (
-                  <span
-                    data-testid={`workspace-option-${w.id}`}
-                    aria-current={isActive ? "true" : undefined}
-                    className={`flex w-full min-h-11 items-center gap-2 rounded px-2 text-support ${
-                      isActive ? "bg-brand-blue/10 text-text-primary" : "text-text-secondary"
-                    }`}
-                  >
-                    {row}
-                  </span>
-                )}
+                <button
+                  type="button"
+                  data-testid={`workspace-option-${w.id}`}
+                  aria-current={isActive ? "true" : undefined}
+                  onClick={() => void onPick(w.id)}
+                  className={`flex w-full min-h-11 items-center gap-2 rounded px-2 text-support ${
+                    isActive
+                      ? "bg-brand-blue/10 text-text-primary"
+                      : "text-text-secondary hover:bg-ink-700 hover:text-text-primary"
+                  }`}
+                >
+                  <span className={`size-2 flex-none rounded-full ${dotClass(w)}`} aria-hidden />
+                  <span className="min-w-0 flex-1 truncate text-left">{nameOf(w)}</span>
+                  {isActive && <Check {...iconControl()} aria-hidden className="flex-none text-brand-blue" />}
+                </button>
               </li>
             );
           })}
         </ul>
-        {!pointerAvailable && (
-          <p
-            data-testid="workspace-switch-unavailable"
-            className="mt-1 border-t border-ink-600 px-2 pb-0.5 pt-1.5 text-meta text-text-muted"
-          >
-            {t("workspaceSwitchSoon")}
-          </p>
-        )}
       </div>
     </details>
   );

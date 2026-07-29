@@ -3259,7 +3259,7 @@
       "historyMore": "Näita rohkem",
       "workspaceLabel": "Tööruum",
       "workspacePersonal": "Isiklik ruum",
-      "workspaceSwitchSoon": "Tööruumi vahetamine pole veel lubatud — praegu kuvatakse aktiivne kontekst.",
+      "workspaceUnnamed": "Ettevõtte tööruum",
       "chipLogWork": "Salvesta töö",
       "agendaTitle": "Sinu plaan järgmiseks {days} päevaks:",
       "agendaEmpty": "Järgmiseks {days} päevaks pole midagi plaanitud.",
