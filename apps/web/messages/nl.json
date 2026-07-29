@@ -9012,6 +9012,18 @@
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",
       "journal": "Uitgevoerd werk vastleggen"
+    },
+    "meta": {
+      "workspace": "Werkruimte",
+      "project": "Project",
+      "place": "Plaats",
+      "organization": "Organisatie",
+      "counterpart": "Persoon",
+      "unit": {
+        "hours": "u",
+        "minutes": "min",
+        "days": "d"
+      }
     }
   },
   "workforcePlanning": {

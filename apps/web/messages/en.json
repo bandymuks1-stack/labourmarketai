@@ -9012,6 +9012,18 @@
       "bookings": "Propose a booking",
       "tasks": "Create a task",
       "journal": "Record completed work"
+    },
+    "meta": {
+      "workspace": "Workspace",
+      "project": "Project",
+      "place": "Place",
+      "organization": "Organization",
+      "counterpart": "Person",
+      "unit": {
+        "hours": "h",
+        "minutes": "min",
+        "days": "d"
+      }
     }
   },
   "workforcePlanning": {

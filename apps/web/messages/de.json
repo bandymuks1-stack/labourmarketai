@@ -9012,6 +9012,18 @@
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",
       "journal": "Erledigte Arbeit erfassen"
+    },
+    "meta": {
+      "workspace": "Arbeitsbereich",
+      "project": "Projekt",
+      "place": "Ort",
+      "organization": "Organisation",
+      "counterpart": "Person",
+      "unit": {
+        "hours": "Std.",
+        "minutes": "Min.",
+        "days": "T"
+      }
     }
   },
   "workforcePlanning": {

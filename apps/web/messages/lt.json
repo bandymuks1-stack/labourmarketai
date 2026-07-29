@@ -9012,6 +9012,18 @@
       "bookings": "Pasiūlyti rezervaciją",
       "tasks": "Sukurti užduotį",
       "journal": "Įrašyti atliktą darbą"
+    },
+    "meta": {
+      "workspace": "Erdvė",
+      "project": "Projektas",
+      "place": "Vieta",
+      "organization": "Organizacija",
+      "counterpart": "Susijęs žmogus",
+      "unit": {
+        "hours": "val.",
+        "minutes": "min.",
+        "days": "d."
+      }
     }
   },
   "workforcePlanning": {

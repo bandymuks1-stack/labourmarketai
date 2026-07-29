@@ -14,10 +14,14 @@ import {
 } from "@/lib/invitations/network";
 import { getMyAbsences } from "@/lib/leave/absences";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { TIME_UNIT_SLUGS } from "@/lib/journal/edit-entry";
 import {
   PLANNING_PROJECT_READ_LIMIT,
+  clockTime,
   combineInvitationItems,
+  daySpanDays,
   hrefForSource,
+  planningMeta,
   projectAbsenceItem,
   projectFinanceItem,
   projectIncomingInvitationItem,
@@ -136,6 +140,13 @@ async function readBookingItems(): Promise<{
         statusKey: statusKeyForSource("booking", row.status),
         href: hrefForSource("booking", row.id),
         roleContext,
+        // §7.1: a booking states its place (country) and its day span; the
+        // counterpart name is NOT read here — contact identity stays behind
+        // the platform's own disclosure flow (§20).
+        ...planningMeta({
+          place: row.locationCountry,
+          duration: daySpanDays(toIsoDay(row.startDate), toIsoDay(row.expectedEndDate)),
+        }),
       });
     }
   }
@@ -209,6 +220,13 @@ async function readAssignedProjectItems(): Promise<{
     statusKey: statusKeyForSource("project", p.status),
     href: hrefForSource("project", p.id),
     roleContext: "assigned" as const,
+    // §7.1: the project IS the project context; its city is the place and
+    // the band is the duration.
+    ...planningMeta({
+      project: p.title,
+      place: p.city,
+      duration: daySpanDays(toIsoDay(p.start_date), toIsoDay(p.end_date)),
+    }),
   }));
   return {
     state: { status: "ok", count: items.length },
@@ -296,6 +314,11 @@ async function readProjectItems(): Promise<{
     statusKey: statusKeyForSource("project", p.status),
     href: hrefForSource("project", p.id),
     roleContext: "managed" as const,
+    ...planningMeta({
+      project: p.title,
+      place: p.city,
+      duration: daySpanDays(toIsoDay(p.start_date), toIsoDay(p.end_date)),
+    }),
   }));
   return {
     state: { status: "ok", count: items.length },
@@ -421,6 +444,8 @@ async function readTaskItems(): Promise<{
       statusKey: statusKeyForSource("task", task.status),
       href: hrefForSource("task", task.id),
       roleContext: "mine",
+      // A due-dated task carries its real clock time when one was set.
+      ...planningMeta({ startTime: clockTime(task.dueAt) }),
     });
   }
   const state: PlanningSourceState = result.error
@@ -456,7 +481,9 @@ async function readJournalItems(
 
   const res = await asAny(supabase)
     .from("journal_entries")
-    .select("id, original_text, created_at, deleted_at, superseded_by, correction_of")
+    .select(
+      "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id",
+    )
     .eq("worker_id", workerRes.data.id)
     .is("deleted_at", null)
     .is("superseded_by", null)
@@ -473,6 +500,7 @@ async function readJournalItems(
     original_text: string | null;
     created_at: string;
     correction_of: string | null;
+    engagement_context_id: string | null;
   };
   // ONE ACTIVE ENTRY PER CHAIN (owner audit P0.7). Editing a CONFIRMED entry
   // creates a correction row whose `correction_of` points at the original —
@@ -484,8 +512,80 @@ async function readJournalItems(
   const correctedIds = new Set(
     rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
   );
-  const items: PlanningItem[] = rows
-    .filter((e) => !correctedIds.has(e.id))
+  // §7.1 THE FULL FIELD SET for the source the owner reads most. Two
+  // bounded, RLS-scoped follow-up reads over the SAME entry ids: the entry's
+  // own metrics (real hours + site name, written by the save action) and the
+  // entry's engagement context (the workspace/organization it was logged
+  // against). A failed follow-up degrades to null meta — the entry still
+  // renders, it just says less (never something invented).
+  const liveRows = rows.filter((e) => !correctedIds.has(e.id));
+  const entryIds = liveRows.map((e) => e.id);
+  const metricsByEntry = new Map<string, { hours: string | null; site: string | null }>();
+  const orgByEngagement = new Map<string, string | null>();
+  if (entryIds.length > 0) {
+    const [metricsRes, ecRes] = await Promise.all([
+      asAny(supabase)
+        .from("journal_entry_metrics")
+        .select("journal_entry_id, metric_slug, value_text, value_numeric, unit_slug")
+        .in("journal_entry_id", entryIds)
+        .limit(PLANNING_JOURNAL_READ_LIMIT * 8),
+      (async () => {
+        const ecIds = [
+          ...new Set(
+            liveRows
+              .map((e) => e.engagement_context_id)
+              .filter((v): v is string => Boolean(v)),
+          ),
+        ];
+        if (ecIds.length === 0) return { data: [], error: null };
+        return asAny(supabase)
+          .from("engagement_contexts")
+          .select("id, organizations(display_name, legal_name)")
+          .in("id", ecIds);
+      })(),
+    ]);
+    if (!metricsRes.error) {
+      type MetricRow = {
+        journal_entry_id: string;
+        metric_slug: string;
+        value_text: string | null;
+        value_numeric: number | null;
+        unit_slug: string | null;
+      };
+      for (const m of (metricsRes.data ?? []) as MetricRow[]) {
+        const cur = metricsByEntry.get(m.journal_entry_id) ?? { hours: null, site: null };
+        if (m.metric_slug === "site_name" && m.value_text?.trim()) {
+          cur.site = m.value_text.trim();
+        }
+        // A TIME unit on the quantity metric means the number IS a duration.
+        if (
+          m.metric_slug === "quantity" &&
+          m.unit_slug !== null &&
+          TIME_UNIT_SLUGS.has(m.unit_slug) &&
+          typeof m.value_numeric === "number"
+        ) {
+          cur.hours = `${m.value_numeric}|${m.unit_slug}`;
+        }
+        metricsByEntry.set(m.journal_entry_id, cur);
+      }
+    }
+    if (!ecRes.error) {
+      type EcRow = {
+        id: string;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      };
+      for (const ec of (ecRes.data ?? []) as EcRow[]) {
+        orgByEngagement.set(
+          ec.id,
+          ec.organizations?.display_name?.trim() ||
+            ec.organizations?.legal_name?.trim() ||
+            null,
+        );
+      }
+    }
+  }
+
+  const items: PlanningItem[] = liveRows
     .map((e) => {
     const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
     return {
@@ -497,6 +597,19 @@ async function readJournalItems(
       startDate: toIsoDay(e.created_at),
       endDate: null,
       status: "recorded",
+      ...(() => {
+        const m = metricsByEntry.get(e.id);
+        const org = e.engagement_context_id
+          ? (orgByEngagement.get(e.engagement_context_id) ?? null)
+          : null;
+        return planningMeta({
+          startTime: clockTime(e.created_at),
+          duration: m?.hours ?? null,
+          workspace: org,
+          organization: org,
+          place: m?.site ?? null,
+        });
+      })(),
       statusKey: statusKeyForSource("journal", "recorded"),
       href: hrefForSource("journal", e.id),
       roleContext: "mine" as const,

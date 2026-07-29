@@ -9012,6 +9012,18 @@
       "bookings": "Предложить бронирование",
       "tasks": "Создать задачу",
       "journal": "Записать выполненную работу"
+    },
+    "meta": {
+      "workspace": "Пространство",
+      "project": "Проект",
+      "place": "Место",
+      "organization": "Организация",
+      "counterpart": "Человек",
+      "unit": {
+        "hours": "ч",
+        "minutes": "мин",
+        "days": "д"
+      }
     }
   },
   "workforcePlanning": {

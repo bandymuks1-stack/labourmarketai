@@ -156,6 +156,25 @@ export default async function PlanningPage({
   const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
   const fmtShort = (dayIso: string) => shortFmt.format(utc(dayIso));
 
+  /**
+   * Localized duration. Two honest shapes only, both from real source data:
+   * `"<n>|<unit>"` (the journal's own quantity metric with a TIME unit) and
+   * a bare day count (an inclusive date band). Anything else is dropped
+   * rather than rendered as an unlabelled number.
+   */
+  function durationLabel(raw: string): string | null {
+    if (raw.includes("|")) {
+      const [value, unit] = raw.split("|", 2);
+      const n = Number(value);
+      if (!Number.isFinite(n)) return null;
+      const key = `meta.unit.${unit}`;
+      return t.has(key) ? `${n} ${t(key)}` : null;
+    }
+    const days = Number(raw);
+    if (!Number.isFinite(days)) return null;
+    return `${days} ${t("meta.unit.days")}`;
+  }
+
   function ItemRow({ item }: { item: PlanningItem }) {
     const conflict = conflictIds.has(item.id);
     const contextKey =
@@ -200,10 +219,66 @@ export default async function PlanningPage({
             ) : (
               <span>{t("undated.title")}</span>
             )}
+            {/* §7.1 TIME + DURATION — real clock time when the source stored
+                one, real length when the source recorded one. */}
+            {item.startTime ? (
+              <span data-testid={`planning-time-${item.id}`}>{item.startTime}</span>
+            ) : null}
+            {item.duration ? (
+              <span data-testid={`planning-duration-${item.id}`}>
+                {durationLabel(item.duration)}
+              </span>
+            ) : null}
             <span>{tAll(item.statusKey)}</span>
+            <span>{t(`source.${item.sourceType}`)}</span>
             {item.detail ? <span>{item.detail}</span> : null}
             {contextKey ? <span>{t(contextKey)}</span> : null}
           </span>
+          {/* §7.1 THE WORK CONTEXT ROW — workspace · project · place ·
+              organization · counterpart. Rendered only for the fields the
+              source really carries; a row with none of them shows nothing
+              extra rather than a line of dashes. */}
+          {[item.workspace, item.project, item.place, item.organization, item.counterpart].some(
+            Boolean,
+          ) ? (
+            <span
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-secondary"
+              data-testid={`planning-context-${item.id}`}
+            >
+              {item.workspace ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.workspace")}: </span>
+                  {item.workspace}
+                </span>
+              ) : null}
+              {/* The project name is not repeated when it is already the row's
+                  own title (project rows) or its detail line (stages). */}
+              {item.project && item.project !== item.label && item.project !== item.detail ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.project")}: </span>
+                  {item.project}
+                </span>
+              ) : null}
+              {item.place && item.place !== item.detail ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.place")}: </span>
+                  {item.place}
+                </span>
+              ) : null}
+              {item.organization && item.organization !== item.workspace ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.organization")}: </span>
+                  {item.organization}
+                </span>
+              ) : null}
+              {item.counterpart ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.counterpart")}: </span>
+                  {item.counterpart}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
         </Link>
       </li>
     );
