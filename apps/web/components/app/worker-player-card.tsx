@@ -1,4 +1,5 @@
 import {
+  MapPin,
   Shield,
   CalendarCheck2,
   Sparkle,
@@ -54,6 +55,24 @@ export interface PlayerCardLabels {
   /** "Available from {date}" with a locale-formatted date, or null when no
    *  available-from date is set. Real `workers.available_from` only. */
   availabilityFrom: string | null;
+  /** §5.2 LOCATION — resolved country NAME for the worker's stated country
+   *  code, or null when no location is stated. Country precision only. */
+  locationName: string | null;
+  /** §5.2 DOCUMENTS — resolved status line, or null when the documents
+   *  surface is unavailable for this account (honest absence). */
+  documentsLabel: string | null;
+  documentsValue: string | null;
+  /** §5.2 REPUTATION — what other people really confirmed about this work.
+   *  `reputationValue` is null when nothing has been confirmed yet, and the
+   *  empty copy states that instead of showing a zero as a verdict. */
+  reputationLabel: string;
+  reputationValue: string | null;
+  reputationEmpty: string;
+  reputationHint: string;
+  /** §5.2 WORK HISTORY — section label + the two fallbacks it may need. */
+  workHistoryLabel: string;
+  workHistoryUnnamed: string;
+  workHistoryCurrent: string;
   verifiedTitle: string;
   verifiedEmpty: string;
   journalSupportedLabel: string;
@@ -292,6 +311,17 @@ export function WorkerPlayerCard({
             {labels.availabilityFrom}
           </span>
         ) : null}
+        {/* §5.2 LOCATION — the worker's own stated country, country
+            precision only (the card never implies an address). */}
+        {labels.locationName ? (
+          <span
+            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-[11px] text-text-secondary"
+            data-testid="player-card-location"
+          >
+            <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+            {labels.locationName}
+          </span>
+        ) : null}
         <span
           className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
           data-testid="player-card-workcard"
@@ -373,6 +403,71 @@ export function WorkerPlayerCard({
           hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
           href="/dashboard/communication"
         />
+      </div>
+
+      {/* ── §5.2 WORK HISTORY — WHERE the work happened, from the canonical
+            engagement spine. Newest first, bounded to the most recent few:
+            the card states a history, it does not become a CV page. An empty
+            history renders nothing (it is a fact, not a gap to pad). */}
+      {card.workHistory.length > 0 ? (
+        <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {labels.workHistoryLabel}
+          </span>
+          <ul className="flex flex-col gap-1">
+            {card.workHistory.slice(0, 3).map((h) => (
+              <li
+                key={h.id}
+                className="flex flex-wrap items-baseline gap-x-2 text-[13px] text-text-primary"
+              >
+                <span className="font-medium">
+                  {h.organizationName ?? h.title ?? labels.workHistoryUnnamed}
+                </span>
+                {h.startedAt ? (
+                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    {h.startedAt}
+                    {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {/* ── §5.2 DOCUMENTS + REPUTATION ──────────────────────────────────
+            Two facts other people actually care about, both from real rows:
+            how many of the worker's documents are currently valid (with the
+            genuinely-expiring ones called out), and what other people have
+            really CONFIRMED about this work. There is no universal human
+            score here and no medal tier — a reputation with nothing
+            confirmed yet says exactly that. */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {labels.documentsLabel && labels.documentsValue ? (
+          <div
+            className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+            data-testid="player-card-documents"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              {labels.documentsLabel}
+            </span>
+            <span className="text-sm text-text-primary">{labels.documentsValue}</span>
+          </div>
+        ) : null}
+        <div
+          className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+          data-testid="player-card-reputation"
+        >
+          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            {labels.reputationLabel}
+          </span>
+          <span className="text-sm text-text-primary">
+            {labels.reputationValue ?? labels.reputationEmpty}
+          </span>
+          <span className="text-[11px] leading-relaxed text-text-muted">
+            {labels.reputationHint}
+          </span>
+        </div>
       </div>
 
       {/* ── Thermometer (S4) — owner-locked formula; a number ONLY when both

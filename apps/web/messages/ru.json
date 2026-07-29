@@ -6774,7 +6774,17 @@
       "opportunityUnavailable": "Открытые заявки вашему аккаунту пока недоступны, поэтому это не измерялось.",
       "opportunityNoWorker": "Это измеряется, когда у вас есть профиль работника.",
       "closestBasis": "Ближайшая — {what}: совпадает {matched} из {required} требуемых навыков, {confirmed} с записью руководителя."
-    }
+    },
+    "documentsLabel": "Документы",
+    "documentsValue": "{valid} действующих",
+    "documentsValueExpiring": "{valid} действующих · {expiring} скоро истекают",
+    "reputationLabel": "Отклик других",
+    "reputationValue": "{count, plural, one {# ваша запись отмечена как точная} few {# ваши записи отмечены как точные} other {# ваших записей отмечено как точные}}",
+    "reputationEmpty": "Другие пока ничего не отметили в ваших записях.",
+    "reputationHint": "Только реальные отклики руководителей или заказчиков. Никакой общей оценки человека.",
+    "workHistoryLabel": "История работы",
+    "workHistoryUnnamed": "Рабочий контекст",
+    "workHistoryCurrent": "сейчас"
   },
   "skillClarify": {
     "title": "Мои навыки",

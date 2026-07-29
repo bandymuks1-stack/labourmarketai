@@ -11,6 +11,10 @@ import {
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
 import { listAttentionInstructions } from "@/lib/instructions/instructions";
+import {
+  deriveDocumentStatus,
+  listMyDocuments,
+} from "@/lib/documents/readiness";
 import { getOwnWorkHistory } from "./work-history";
 import type { WorkHistoryEntry } from "./work-history-model";
 
@@ -65,6 +69,13 @@ export interface WorkerPlayerCard {
   /** Manager-confirmed skills (worker_skills.verified = true) — the ONLY
    *  skills the card may visually celebrate. Empty when none are confirmed. */
   verifiedSkills: VerifiedSkillBadge[];
+  /** §5.2 LOCATION — the worker's own stated country code (ISO-2), or null.
+   *  Country precision only: the card never implies an address. */
+  locationCountry: string | null;
+  /** §5.2 DOCUMENTS — real counts from the worker's OWN document records.
+   *  `null` when the documents surface is unavailable for this account
+   *  (honest absence, never a zeroed-out fake summary). */
+  documents: { total: number; expiring: number } | null;
   /** Manager confirmations on the worker's own journal entries. */
   managerConfirmations: number;
   /** Saved availability status slug (workers.availability_status), or null. */
@@ -240,6 +251,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     managerConfirmations,
     professionSlug,
     latestEntry,
+    documents,
   ] = await Promise.all([
     // RC3 skills truth: ONE declared population (claims ∪ catalogued skills).
     declaredSkillsUnionCount(supabase, user.id, workerId ? skillRows : []),
@@ -290,6 +302,23 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
           .then((r: { data: { created_at: string } | null }) => r.data)
           .catch(() => null)
       : Promise.resolve(null),
+    // §5.2 DOCUMENTS — the worker's OWN records through the documents
+    // surface's own reader (metadata only, never a file). Any non-ok state
+    // (disabled / no worker / needs-migration / error) yields null so the
+    // card says nothing rather than showing a fabricated "0 documents".
+    listMyDocuments()
+      .then((res) => {
+        if (res.kind !== "ok") return null;
+        const now = new Date();
+        // The SAME pure deriver the documents surface uses — the card and
+        // that page can never disagree about a document's state.
+        const statuses = res.documents.map((d) => deriveDocumentStatus(d, now));
+        return {
+          total: statuses.filter((st) => st === "ready" || st === "expiring").length,
+          expiring: statuses.filter((st) => st === "expiring").length,
+        };
+      })
+      .catch(() => null),
   ]);
 
   return {
@@ -307,5 +336,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     professionSlug: professionSlug ?? null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
     workHistory,
+    locationCountry: worker?.current_location_country ?? null,
+    documents,
   };
 });

@@ -6774,7 +6774,17 @@
       "opportunityUnavailable": "Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "This is measured once you have a worker profile.",
       "closestBasis": "Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
-    }
+    },
+    "documentsLabel": "Documents",
+    "documentsValue": "{valid} valid",
+    "documentsValueExpiring": "{valid} valid · {expiring} expiring soon",
+    "reputationLabel": "Response from others",
+    "reputationValue": "{count, plural, one {# of your records marked as accurate} other {# of your records marked as accurate}}",
+    "reputationEmpty": "Nobody has marked anything on your records yet.",
+    "reputationHint": "Real manager or client responses only. No overall human score.",
+    "workHistoryLabel": "Work history",
+    "workHistoryUnnamed": "Work context",
+    "workHistoryCurrent": "now"
   },
   "skillClarify": {
     "title": "My skills",

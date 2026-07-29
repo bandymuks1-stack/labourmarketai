@@ -6774,7 +6774,17 @@
       "opportunityUnavailable": "Open aanvragen zijn nog niet beschikbaar voor je account, dus dit is niet gemeten.",
       "opportunityNoWorker": "Dit wordt gemeten zodra je een werknemersprofiel hebt.",
       "closestBasis": "Dichtstbij — {what}: komt overeen met {matched} van {required} gevraagde vaardigheden, {confirmed} met een registratie van een leidinggevende."
-    }
+    },
+    "documentsLabel": "Documenten",
+    "documentsValue": "{valid} geldig",
+    "documentsValueExpiring": "{valid} geldig · {expiring} verlopen binnenkort",
+    "reputationLabel": "Reactie van anderen",
+    "reputationValue": "{count, plural, one {# van je registraties gemarkeerd als juist} other {# van je registraties gemarkeerd als juist}}",
+    "reputationEmpty": "Niemand heeft nog iets in je registraties gemarkeerd.",
+    "reputationHint": "Alleen echte reacties van managers of klanten. Geen totaalscore voor een mens.",
+    "workHistoryLabel": "Werkgeschiedenis",
+    "workHistoryUnnamed": "Werkcontext",
+    "workHistoryCurrent": "nu"
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",

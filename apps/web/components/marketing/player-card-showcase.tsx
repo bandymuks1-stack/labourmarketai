@@ -38,6 +38,9 @@ export async function PlayerCardShowcase() {
     availabilityStatus: "available",
     availableFrom: null,
     professionSlug: "cook",
+    // §5.2 on the landing too — the SAME fields the signed-in card shows.
+    locationCountry: "LT",
+    documents: { total: 3, expiring: 0 },
     latestEvidenceAt: "2026-07-21T09:00:00Z",
     workHistory: [
       {

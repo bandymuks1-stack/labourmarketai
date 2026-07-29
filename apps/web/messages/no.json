@@ -1670,7 +1670,17 @@
         "evidence": "[EN] Add a work entry",
         "workCard": "[EN] Submit card"
       }
-    }
+    },
+    "documentsLabel": "[EN] Documents",
+    "documentsValue": "{valid} valid",
+    "documentsValueExpiring": "{valid} valid · {expiring} expiring soon",
+    "reputationLabel": "[EN] Response from others",
+    "reputationValue": "{count, plural, one {# of your records marked as accurate} other {# of your records marked as accurate}}",
+    "reputationEmpty": "[EN] Nobody has marked anything on your records yet.",
+    "reputationHint": "[EN] Real manager or client responses only. No overall human score.",
+    "workHistoryLabel": "[EN] Work history",
+    "workHistoryUnnamed": "[EN] Work context",
+    "workHistoryCurrent": "[EN] now"
   },
   "projects": {
     "map": {

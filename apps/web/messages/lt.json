@@ -6774,7 +6774,17 @@
       "opportunityUnavailable": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl tai nebuvo išmatuota.",
       "opportunityNoWorker": "Tai išmatuojama, kai turi darbuotojo profilį.",
       "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu."
-    }
+    },
+    "documentsLabel": "Dokumentai",
+    "documentsValue": "{valid} galiojantys",
+    "documentsValueExpiring": "{valid} galiojantys · {expiring} greitai baigiasi",
+    "reputationLabel": "Kitų atsakas",
+    "reputationValue": "{count, plural, one {# tavo įrašas pažymėtas kaip tikslus} few {# tavo įrašai pažymėti kaip tikslūs} other {# tavo įrašų pažymėta kaip tikslūs}}",
+    "reputationEmpty": "Kiti dar nieko nepažymėjo tavo įrašuose.",
+    "reputationHint": "Tik realūs vadovų ar užsakovų atsakymai. Jokio bendro žmogaus balo.",
+    "workHistoryLabel": "Darbo istorija",
+    "workHistoryUnnamed": "Darbo kontekstas",
+    "workHistoryCurrent": "dabar"
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

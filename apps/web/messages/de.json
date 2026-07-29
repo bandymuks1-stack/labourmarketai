@@ -6774,7 +6774,17 @@
       "opportunityUnavailable": "Offene Anfragen sind für dein Konto noch nicht verfügbar, deshalb wurde das nicht gemessen.",
       "opportunityNoWorker": "Das wird gemessen, sobald du ein Arbeitnehmerprofil hast.",
       "closestBasis": "Am nächsten — {what}: passt bei {matched} von {required} geforderten Fähigkeiten, {confirmed} mit einem Eintrag der Führungskraft."
-    }
+    },
+    "documentsLabel": "Dokumente",
+    "documentsValue": "{valid} gültig",
+    "documentsValueExpiring": "{valid} gültig · {expiring} laufen bald ab",
+    "reputationLabel": "Rückmeldung anderer",
+    "reputationValue": "{count, plural, one {# deiner Einträge als korrekt markiert} other {# deiner Einträge als korrekt markiert}}",
+    "reputationEmpty": "Noch hat niemand etwas in deinen Einträgen markiert.",
+    "reputationHint": "Nur echte Rückmeldungen von Vorgesetzten oder Kunden. Keine Gesamtbewertung eines Menschen.",
+    "workHistoryLabel": "Arbeitshistorie",
+    "workHistoryUnnamed": "Arbeitskontext",
+    "workHistoryCurrent": "jetzt"
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",
