@@ -98,7 +98,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1052 at pr-e-employer-executors (+6: the company.confirmNeed /
   // closeDemand / reopenDemand action labels+descriptions land in all 11
   // locales; lt/en/ru/nl/de translated, da [EN] until human translation).
-  da: 1052,
+  // MEASURED 1062 at W5 slice 1 (+10: the `playerCard.live` copy — missing-data
+  // list, work history, journal-backed evidence line and the opportunity signal
+  // — lands in all 11 locales; lt/en/ru/nl/de translated (de:0 / nl:0 ratchet
+  // intact), da [EN] until human translation).
+  da: 1062,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

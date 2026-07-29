@@ -19,6 +19,7 @@ const EMPTY: WorkerPlayerCard = {
   availableFrom: null,
   professionSlug: null,
   latestEvidenceAt: null,
+  workHistory: [],
 };
 
 describe("deriveWorkerReadiness — honest signals, never a fabricated score", () => {

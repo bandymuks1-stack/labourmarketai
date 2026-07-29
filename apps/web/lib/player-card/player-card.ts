@@ -11,6 +11,8 @@ import {
   type WorkerSkillRow,
 } from "@/lib/data/worker-core";
 import { listAttentionInstructions } from "@/lib/instructions/instructions";
+import { getOwnWorkHistory } from "./work-history";
+import type { WorkHistoryEntry } from "./work-history-model";
 
 /**
  * Worker player-card (slice worker-player-card-v1, re-skinned by TASK 07 slice
@@ -73,6 +75,13 @@ export interface WorkerPlayerCard {
   professionSlug: string | null;
   /** ISO timestamp of the newest live journal entry — the latest work proof. */
   latestEvidenceAt: string | null;
+  /**
+   * Real work history from the canonical `engagement_contexts` spine (W5) —
+   * WHERE the work happened, which the card previously could not say. Newest
+   * first, own data only, bounded. Empty means "no engagements recorded",
+   * which is a fact; it is never padded with an example.
+   */
+  workHistory: readonly WorkHistoryEntry[];
 }
 
 async function safeCount(
@@ -209,10 +218,13 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
   // readers (@/lib/data/worker-core) shared with every other per-navigation
   // consumer — this module previously issued its own `workers` select plus
   // three separate `worker_skills` queries per navigation.
-  const [session, worker, skillRows] = await Promise.all([
+  const [session, worker, skillRows, workHistory] = await Promise.all([
     getSessionProfile(),
     getWorkerCoreRow(),
     getWorkerSkillRows(),
+    // W5: the engagement spine, request-cached like every other core read, so
+    // the four card consumers still cost ONE computation per request.
+    getOwnWorkHistory(),
   ]);
   const profile = session.profile;
 
@@ -294,5 +306,6 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     availableFrom: worker?.available_from ?? null,
     professionSlug: professionSlug ?? null,
     latestEvidenceAt: latestEntry?.created_at ?? null,
+    workHistory,
   };
 });

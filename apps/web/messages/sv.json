@@ -1618,7 +1618,24 @@
     "journalSupportedLabel": "Stöds av journal",
     "journalSupportedHint": "Färdigheter som dina arbetsjournalposter stöder — starkare än självdeklarerat; väntar på chefens bekräftelse.",
     "latestEvidenceLabel": "[EN] Latest records",
-    "latestEvidenceEmpty": "[EN] No records entries yet — your first journal entry will be the first."
+    "latestEvidenceEmpty": "[EN] No records entries yet — your first journal entry will be the first.",
+    "live": {
+      "missingTitle": "[EN] Still missing",
+      "missingNone": "[EN] Nothing essential is missing.",
+      "historyTitle": "[EN] Where you have worked",
+      "historyEmpty": "[EN] No engagements are recorded yet.",
+      "orgUnknown": "[EN] (organization not shown)",
+      "dateUnknown": "[EN] (no start date)",
+      "current": "[EN] current",
+      "currentCount": "[EN] {count} running now.",
+      "evidenceTitle": "[EN] What your records show",
+      "evidenceLine": "[EN] {declared} skills declared · {journal} backed by your journal · {confirmed} recorded by a manager · {entries} journal entries.",
+      "opportunityTitle": "[EN] Opportunities matching you",
+      "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
+      "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
+      "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+    }
   },
   "projects": {
     "map": {

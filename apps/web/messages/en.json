@@ -6739,7 +6739,24 @@
     "journalSupportedHint": "Skills your work-journal entries back up.",
     "latestEvidenceLabel": "Latest records",
     "latestEvidenceEmpty": "No records entries yet — your first journal entry will be the first.",
-    "availabilityFrom": "Available from {date}"
+    "availabilityFrom": "Available from {date}",
+    "live": {
+      "missingTitle": "Still missing",
+      "missingNone": "Nothing essential is missing.",
+      "historyTitle": "Where you have worked",
+      "historyEmpty": "No engagements are recorded yet.",
+      "orgUnknown": "(organization not shown)",
+      "dateUnknown": "(no start date)",
+      "current": "current",
+      "currentCount": "{count} running now.",
+      "evidenceTitle": "What your records show",
+      "evidenceLine": "{declared} skills declared · {journal} backed by your journal · {confirmed} recorded by a manager · {entries} journal entries.",
+      "opportunityTitle": "Opportunities matching you",
+      "opportunityCount": "{count} currently visible opportunities match your profile.",
+      "opportunityUnavailable": "Open demands are not available to your account yet, so this has not been measured.",
+      "opportunityNoWorker": "This is measured once you have a worker profile.",
+      "closestBasis": "Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+    }
   },
   "skillClarify": {
     "title": "My skills",

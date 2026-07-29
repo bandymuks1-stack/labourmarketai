@@ -17,6 +17,7 @@ const EMPTY: WorkerPlayerCard = {
   availableFrom: null,
   professionSlug: null,
   latestEvidenceAt: null,
+  workHistory: [],
 };
 
 describe("readinessNextSteps — every unmet signal gets a real next step", () => {
