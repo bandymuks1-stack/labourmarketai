@@ -17,7 +17,7 @@
 import "server-only";
 import { AI_ASSIST_ENABLED, AI_ASSIST_FLAGS } from "@/lib/config/ai";
 import { getAiProvider } from "@/lib/ai/provider";
-import { parseAiSuggestion } from "@/lib/ai/schemas";
+import { parseAiSuggestion } from "@/lib/ai/legacy-assist-schemas";
 import type {
   EstimateClarifyInput,
   EstimateClarifyResult,
