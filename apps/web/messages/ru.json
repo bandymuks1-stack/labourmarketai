@@ -11382,6 +11382,7 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "требования выведены",
       "demandUnstructured": "требования ещё не выведены",
+      "scoutingNotInWorkspaceYet": "Поиск кандидатов по одной из них пока не работает внутри рабочего пространства, поэтому я останавливаюсь здесь, а не отправляю вас куда-то.",
       "ctxWorkspace": "Рабочее пространство: {name}.",
       "ctxWorkspaceUnknown": "Не удалось прочитать, в каком пространстве вы находитесь.",
       "ctxCompany": "Компания: {name}.",
@@ -11394,8 +11395,7 @@
       "personalWorkspace": "ваше личное пространство",
       "unnamedOrganization": "(организация без названия)",
       "chipLogWork": "Записать работу",
-      "chipCreateDemand": "Описать потребность",
-      "chipScouting": "Открыть поиск кандидатов"
+      "chipCreateDemand": "Описать потребность"
     },
     "project": {
       "fieldStatus": "Статус",

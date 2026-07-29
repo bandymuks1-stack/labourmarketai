@@ -11382,6 +11382,7 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "eisen afgeleid",
       "demandUnstructured": "nog geen afgeleide eisen",
+      "scoutingNotInWorkspaceYet": "Kandidaten zoeken voor één ervan werkt nog niet binnen de werkruimte, dus ik stop hier in plaats van je ergens heen te sturen.",
       "ctxWorkspace": "Werkruimte: {name}.",
       "ctxWorkspaceUnknown": "Ik kon niet lezen in welke werkruimte je zit.",
       "ctxCompany": "Bedrijf: {name}.",
@@ -11394,8 +11395,7 @@
       "personalWorkspace": "je persoonlijke ruimte",
       "unnamedOrganization": "(organisatie zonder naam)",
       "chipLogWork": "Werk vastleggen",
-      "chipCreateDemand": "Behoefte beschrijven",
-      "chipScouting": "Kandidaten openen"
+      "chipCreateDemand": "Behoefte beschrijven"
     },
     "project": {
       "fieldStatus": "Status",

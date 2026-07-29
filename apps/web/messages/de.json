@@ -11382,6 +11382,7 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "Anforderungen abgeleitet",
       "demandUnstructured": "noch keine abgeleiteten Anforderungen",
+      "scoutingNotInWorkspaceYet": "Die Kandidatensuche zu einer davon läuft noch nicht innerhalb des Arbeitsbereichs, deshalb höre ich hier auf, statt dich woandershin zu schicken.",
       "ctxWorkspace": "Arbeitsbereich: {name}.",
       "ctxWorkspaceUnknown": "Ich konnte nicht lesen, in welchem Arbeitsbereich du bist.",
       "ctxCompany": "Unternehmen: {name}.",
@@ -11394,8 +11395,7 @@
       "personalWorkspace": "dein persönlicher Bereich",
       "unnamedOrganization": "(Organisation ohne Namen)",
       "chipLogWork": "Arbeit eintragen",
-      "chipCreateDemand": "Bedarf beschreiben",
-      "chipScouting": "Kandidatensuche öffnen"
+      "chipCreateDemand": "Bedarf beschreiben"
     },
     "project": {
       "fieldStatus": "Status",

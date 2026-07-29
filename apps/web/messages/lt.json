@@ -11382,6 +11382,7 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "reikalavimai išvesti",
       "demandUnstructured": "reikalavimų dar neišvesta",
+      "scoutingNotInWorkspaceYet": "Kandidatų paieška pagal vieną iš jų kol kas nevyksta darbo erdvėje, todėl čia sustoju, o ne siunčiu tave kitur.",
       "ctxWorkspace": "Darbo erdvė: {name}.",
       "ctxWorkspaceUnknown": "Nepavyko perskaityti, kurioje darbo erdvėje esi.",
       "ctxCompany": "Įmonė: {name}.",
@@ -11394,8 +11395,7 @@
       "personalWorkspace": "tavo asmeninė erdvė",
       "unnamedOrganization": "(organizacija be pavadinimo)",
       "chipLogWork": "Užrašyti darbą",
-      "chipCreateDemand": "Aprašyti poreikį",
-      "chipScouting": "Atverti kandidatų paiešką"
+      "chipCreateDemand": "Aprašyti poreikį"
     },
     "project": {
       "fieldStatus": "Būsena",
