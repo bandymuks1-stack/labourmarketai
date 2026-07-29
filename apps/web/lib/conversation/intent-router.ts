@@ -68,10 +68,38 @@ export const UNICODE_WORD_BOUNDARY =
 
 const UB = UNICODE_WORD_BOUNDARY;
 
-/** Build a word/phrase pattern, translating each ASCII `\b` in the source into
- *  the Unicode-safe boundary `UB` before compiling. */
+/**
+ * DIACRITIC FOLDING — found in production during the owner-acceptance
+ * verification (§16): a Lithuanian user typing "Parodyk zinutes" instead of
+ * "Parodyk žinutes" hit the generic fallback, because every LT pattern here
+ * demanded the diacritic. On phone keyboards and on many desktop layouts
+ * typing without diacritics is the NORM, not an edge case, so the router
+ * matched a spelling most people do not use.
+ *
+ * The fix folds BOTH sides: the incoming sentence and the pattern source are
+ * reduced to their base letters before matching, so `žurnalas` and `zurnalas`
+ * are the same word to the router — while the message catalogue keeps the
+ * correct spelling everywhere the user READS it.
+ *
+ * NFD + combining-mark strip covers Lithuanian (ąčęėįšųūž), Latvian,
+ * Estonian, Polish and German umlauts. Two letters need an explicit map
+ * because they are not decomposable: `ł` and `ø`. Cyrillic `ё`→`е` is folded
+ * for the same reason (it is routinely typed as `е`).
+ */
+function fold(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/ł/gi, "l")
+    .replace(/ø/gi, "o")
+    .replace(/ё/gi, "е")
+    .toLowerCase();
+}
+
+/** Build a word/phrase pattern. The source is DIACRITIC-FOLDED (so it matches
+ *  the folded query) and each ASCII `\b` becomes the Unicode-safe boundary. */
 function p(source: string, weight = 1): Pattern {
-  return { re: new RegExp(source.replace(/\\b/g, UB), "iu"), weight };
+  return { re: new RegExp(fold(source).replace(/\\b/g, UB), "iu"), weight };
 }
 
 /**
@@ -385,7 +413,10 @@ const RULES: IntentRule[] = [
  * fallback + starter chips (never a fabricated action).
  */
 export function classifyIntent(text: string): IntentMatch {
-  const q = (text ?? "").toLowerCase();
+  // Folded to base letters so a sentence typed WITHOUT diacritics — the norm
+  // on most keyboards — reaches exactly the same intent as one typed with
+  // them. `fold` also lowercases.
+  const q = fold(text ?? "");
   if (!q.trim()) return { intent: "unknown", score: 0, matched: [] };
 
   let best: IntentMatch = { intent: "unknown", score: 0, matched: [] };

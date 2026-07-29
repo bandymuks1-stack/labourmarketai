@@ -49,3 +49,33 @@ describe("classifyIntent — brief example sentences", () => {
     expect(classifyIntent("noriu rasti darbą Vokietijoje").intent).toBe("find-work");
   });
 });
+
+/**
+ * DIACRITIC-FREE TYPING (owner-acceptance §16 production finding A-12).
+ * Lithuanian typed without diacritics must reach the SAME intent — on most
+ * keyboards that is how people actually write.
+ */
+describe("diacritic folding — LT without diacritics reaches the same intent", () => {
+  const pairs: ReadonlyArray<readonly [string, string]> = [
+    ["Parodyk žinutes", "Parodyk zinutes"],
+    ["Parodyk mano kortelę", "Parodyk mano kortele"],
+    ["Kiek valandų dirbau šiandien?", "Kiek valandu dirbau siandien?"],
+    ["Šiandien dirbau nuo 8 iki 17", "Siandien dirbau nuo 8 iki 17"],
+    ["Kokių įgūdžių man trūksta?", "Kokiu igudziu man truksta?"],
+    ["Parodyk paskutinius žurnalo įrašus", "Parodyk paskutinius zurnalo irasus"],
+    ["Kokie kriterijai pas mane nurodyti?", "Kokie kriterijai pas mane nurodyti?"],
+    ["Ieškau darbo", "Ieskau darbo"],
+  ];
+  for (const [withD, withoutD] of pairs) {
+    it(`"${withoutD}" classifies like "${withD}"`, () => {
+      const a = classifyIntent(withD);
+      const b = classifyIntent(withoutD);
+      expect(b.intent).toBe(a.intent);
+      expect(a.intent).not.toBe("unknown");
+    });
+  }
+
+  it("folding never turns an unrelated sentence into a false match", () => {
+    expect(classifyIntent("labas").intent).toBe("unknown");
+  });
+});

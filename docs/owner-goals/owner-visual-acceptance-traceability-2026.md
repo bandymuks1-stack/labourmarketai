@@ -64,6 +64,7 @@
 | A-8 | Dviguba įrašo konfirmacija („išsaugoti?" → „Patvirtinti įrašą?") | Fixas ruošiamas | 4.3 |
 | A-9 | Žurnalo įrašo meta „Vieta: labourmarket.ai" (beprasmė vieta) | ATVIRA | 6.2 |
 | A-10 | Overlay z-index nepakanka: header `backdrop-blur` sukuria stacking kontekstą su `z-index: auto`, todėl joks z jo viduje neužtikrina viršenybės prieš puslapio turinį | IŠSPRĘSTA architektūriškai (vienas portal root, c13af477; production patvirtinta) | P0.3 |
+| A-12 | Lietuviški intentai reikalavo diakritikų: „Parodyk zinutes" (be ž) nukrisdavo į fallback, nors „Parodyk žinutes" veikė. Rasta §16 production patikroje | IŠSPRĘSTA: `fold()` normalizuoja ir užklausą, ir šablonus (NFD + ł/ø/ё), 9 nauji testai | 4.2 / §16 |
 | A-11 | „Kiek valandų dirbau?" atsako įrašų sąrašu, nesuskaičiuoja valandų sumos | ATVIRA — produkte nėra valandų ledger'io (`figuresNoHoursLedger`); dabartinis atsakymas sąžiningas, bet ne pilnas | 4.2 |
 
 ## LIKĘ BLOKATORIAI (galutiniam verdiktui)
