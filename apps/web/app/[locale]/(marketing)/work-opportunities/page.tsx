@@ -135,7 +135,7 @@ export default async function WorkOpportunitiesPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
       <header className="max-w-3xl">
-        <p className="font-mono text-[11px] uppercase tracking-label text-brand-blue">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
           {pick(INTRO.eyebrow, l)}
         </p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tightest text-text-primary sm:text-5xl">

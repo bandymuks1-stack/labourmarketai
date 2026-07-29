@@ -88,19 +88,19 @@ export function CvEngagementCards({
                     )}
                     {c.orgName}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-text-secondary">
+                  <p className="mt-0.5 text-meta text-text-secondary">
                     {tRel(c.relationship)}
                     {c.title ? ` · ${c.title}` : ""}
                   </p>
                 </div>
                 {c.isPrimary && (
-                  <span className="flex-none rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                  <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
                     {t("primary")}
                   </span>
                 )}
               </div>
               {start && (
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <p className="mt-1 font-mono text-meta uppercase tracking-label text-text-muted">
                   {start} — {end}
                 </p>
               )}
@@ -134,7 +134,7 @@ export function CvEngagementCards({
                           return (
                             <span
                               className={cn(
-                                "rounded-full border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
+                                "rounded-full border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label",
                                 confirmed
                                   ? "verified-pop border-state-success/40 bg-state-success/10 text-state-success"
                                   : journal
@@ -152,7 +152,7 @@ export function CvEngagementCards({
                           );
                         })()}
                         {s.isCore && (
-                          <span className="rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                          <span className="rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
                             {t("primary")}
                           </span>
                         )}

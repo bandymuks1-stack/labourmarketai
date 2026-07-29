@@ -244,7 +244,7 @@ export function CapabilityProfileSection({
         }}
       >
         <label className="flex flex-1 min-w-[10rem] flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("manualAddLabel")}
           </span>
           <input
@@ -337,19 +337,19 @@ export function CapabilityProfileSection({
                         )}
                         {c.orgName}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-text-secondary">
+                      <p className="mt-0.5 text-meta text-text-secondary">
                         {tRel(c.relationship)}
                         {c.title ? ` · ${c.title}` : ""}
                       </p>
                     </div>
                     {c.isPrimary && (
-                      <span className="flex-none rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                      <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
                         {tEng("primary")}
                       </span>
                     )}
                   </div>
                   {start && (
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <p className="mt-1 font-mono text-meta uppercase tracking-label text-text-muted">
                       {start} — {end}
                     </p>
                   )}
@@ -367,7 +367,7 @@ export function CapabilityProfileSection({
                         ({ group, items }) => (
                           <div key={group} className="flex flex-col gap-1.5">
                             <p
-                              className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                              className="font-mono text-meta uppercase tracking-label text-text-muted"
                               data-skill-group={group}
                             >
                               {tGroups(skillGroupLabelKey(group))}
@@ -389,7 +389,7 @@ export function CapabilityProfileSection({
                                     {s.name}
                                   </span>
                                   {s.isCore && (
-                                    <span className="flex-none rounded-sm px-1 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                                    <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
                                       {tEng("primary")}
                                     </span>
                                   )}
@@ -412,12 +412,12 @@ export function CapabilityProfileSection({
           CV file can still record a job with a month/year period. Writes via
           the same canonical RPC as the CV import (no migration). */}
       <details className="flex flex-col gap-3 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
           <span aria-hidden>+</span>
           {t("addExperienceTitle")}
         </summary>
         <div className="flex flex-col gap-3 px-3 pb-3" data-testid="add-experience-form">
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("expTitleLabel")}
             <input
               type="text"
@@ -430,7 +430,7 @@ export function CapabilityProfileSection({
             />
           </label>
           <div className="flex flex-wrap gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-[11px] text-text-muted">
+            <label className="flex flex-1 flex-col gap-1 text-meta text-text-muted">
               {t("expStartLabel")}
               <div className="flex gap-2">
                 <input
@@ -457,7 +457,7 @@ export function CapabilityProfileSection({
                 />
               </div>
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-[11px] text-text-muted">
+            <label className="flex flex-1 flex-col gap-1 text-meta text-text-muted">
               {t("expEndLabel")}
               <div className="flex gap-2">
                 <input
@@ -487,7 +487,7 @@ export function CapabilityProfileSection({
               </div>
             </label>
           </div>
-          <label className="flex items-center gap-2 text-[11px] text-text-secondary">
+          <label className="flex items-center gap-2 text-meta text-text-secondary">
             <input
               type="checkbox"
               checked={expCurrent}

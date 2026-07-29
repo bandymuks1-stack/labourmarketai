@@ -32,7 +32,7 @@ export async function LabourMarketEvidence() {
 
   return (
     <section className="mt-16" data-testid="labour-market-evidence">
-      <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+      <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
         <span className="live-dot" aria-hidden />
         {t("evidenceEyebrow")}
       </p>
@@ -49,10 +49,10 @@ export async function LabourMarketEvidence() {
           return (
             <Card key={e.id} className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                   {t(CLAIM_BADGE[e.claimType])}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`evidence.${e.id}.region`)}
                 </span>
               </div>
@@ -74,7 +74,7 @@ export async function LabourMarketEvidence() {
 
               {/* Provenance — always visible, never optional. Labels + values
                   localized; only the date + the real source href are neutral. */}
-              <dl className="mt-auto grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-ink-600 pt-3 text-[11px] text-text-muted">
+              <dl className="mt-auto grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-ink-600 pt-3 text-meta text-text-muted">
                 <dt className="font-mono uppercase tracking-label">{t("fieldSource")}</dt>
                 <dd>
                   <a
@@ -91,7 +91,7 @@ export async function LabourMarketEvidence() {
                 <dt className="font-mono uppercase tracking-label">{t("fieldLastChecked")}</dt>
                 <dd>{e.lastChecked}</dd>
               </dl>
-              <p className="text-[10px] leading-relaxed text-text-muted">
+              <p className="text-meta leading-relaxed text-text-muted">
                 {t(`evidence.${e.id}.methodNote`)}
               </p>
             </Card>
@@ -99,7 +99,7 @@ export async function LabourMarketEvidence() {
         })}
       </div>
 
-      <p className="mt-5 max-w-3xl text-[11px] leading-relaxed text-text-muted">
+      <p className="mt-5 max-w-3xl text-meta leading-relaxed text-text-muted">
         {t("evidenceDisclaimer")}
       </p>
     </section>

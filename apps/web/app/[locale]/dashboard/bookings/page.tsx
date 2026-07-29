@@ -71,7 +71,7 @@ export default async function BookingsPage({
           the "new responses" dashboard/bell markers (audit PR5). */}
       <MarkBookingsSeen />
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -318,7 +318,7 @@ function PlanningConnections({
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
       data-testid="bookings-connections"
     >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
@@ -418,7 +418,7 @@ function Section({
                       countdown, never an auto-close promise. */}
                   {row.responseDeadlineDate ? (
                     <span
-                      className="inline-flex w-fit items-center rounded-sm border border-ink-500 bg-ink-800/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                      className="inline-flex w-fit items-center rounded-sm border border-ink-500 bg-ink-800/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                       data-testid="booking-deadline-chip"
                     >
                       {t("deadline.respondBy", { date: row.responseDeadlineDate })}
@@ -437,7 +437,7 @@ function Section({
                     scrolling) and sit inline on wider screens. */}
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                   <span
-                    className={`self-start rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label sm:self-center ${
+                    className={`self-start rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label sm:self-center ${
                       isDerivedProposedState(display)
                         ? DERIVED_TONE[display]
                         : STATUS_TONE[row.status]

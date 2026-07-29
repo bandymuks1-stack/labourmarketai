@@ -73,7 +73,7 @@ function StatusChip({
 }) {
   return (
     <span
-      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-label ${TONE_CLASS[demandStatusTone(status)]}`}
+      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE_CLASS[demandStatusTone(status)]}`}
       data-testid="agency-client-demand-status"
     >
       {labels.statuses[status] ?? status}
@@ -162,7 +162,7 @@ export function AgencyClientsSection({
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
           data-testid="agency-clients-gated"
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
             {labels.gatedHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">{labels.gatedBody}</p>
@@ -247,7 +247,7 @@ export function AgencyClientsSection({
               Next action per row: assign to a client (or open scouting). */}
           {unassigned.length > 0 && (
             <div className="flex flex-col gap-2" data-testid="agency-clients-unassigned">
-              <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {clientRows.length > 0
                   ? labels.unassignedHeading
                   : labels.demandsHeading}
@@ -314,7 +314,7 @@ export function AgencyClientsSection({
             className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3"
             data-testid="agency-client-add-form"
           >
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels.addHeading}
             </h3>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
@@ -389,7 +389,7 @@ export function AgencyClientsSection({
           agency path is usable — rows are honestly "not yet linkable". */}
       {gated && (
         <div className="flex flex-col gap-2" data-testid="agency-clients-gated-demands">
-          <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.demandsHeading}
           </h3>
           <p className="text-xs text-text-muted">{labels.notLinkable}</p>

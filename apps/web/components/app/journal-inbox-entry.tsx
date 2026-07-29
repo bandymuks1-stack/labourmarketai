@@ -171,7 +171,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <p className="font-display text-sm font-semibold text-text-primary">
             {entry.workerName}
           </p>
-          <p className="mt-0.5 text-[11px] text-text-muted">
+          <p className="mt-0.5 text-meta text-text-muted">
             {new Date(entry.createdAt).toLocaleDateString(locale)}
           </p>
         </div>
@@ -182,7 +182,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
       </p>
 
       {entry.metrics.length > 0 && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-text-muted">
           {entry.metrics.map((m) => (
             <span key={m.label}>
               <span className="uppercase tracking-label">{m.label}:</span> {m.value}
@@ -201,12 +201,12 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           data-testid={`inbox-recognized-${entry.id}`}
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("inbox.recognizedWorks")}
             </span>
-            <span className="text-[10px] text-text-muted">· {t("inbox.suggestedFromEntry")}</span>
+            <span className="text-meta text-text-muted">· {t("inbox.suggestedFromEntry")}</span>
             <span
-              className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${
+              className={`ml-auto rounded-full px-2 py-0.5 text-meta font-medium ${
                 entry.certainty === "clear"
                   ? "bg-state-success/10 text-state-success"
                   : "bg-state-warning/10 text-state-warning"
@@ -220,11 +220,11 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           <ul className="flex flex-col gap-1.5">
             {entry.recognized.map((s) => (
               <li key={s.slug} className="flex flex-col gap-0.5">
-                <span className="w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue">
+                <span className="w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue">
                   {s.name}
                 </span>
                 {s.evidence && (
-                  <span className="pl-1 text-[10px] text-text-muted break-words">
+                  <span className="pl-1 text-meta text-text-muted break-words">
                     {t("inbox.evidenceLabel")}: “{s.evidence}”
                   </span>
                 )}
@@ -232,7 +232,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             ))}
           </ul>
           {entry.hours && (
-            <p className="text-[11px] text-text-secondary">
+            <p className="text-meta text-text-secondary">
               {t("inbox.hoursLabel")}: {entry.hours.value} {entry.hours.unit}{" "}
               <span
                 className={
@@ -244,14 +244,14 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             </p>
           )}
           {entry.needsClarification && (
-            <p className="text-[10px] leading-relaxed text-state-warning">
+            <p className="text-meta leading-relaxed text-state-warning">
               {t("inbox.clarifyHint")}
             </p>
           )}
         </div>
       ) : declaredUnverified.length === 0 && alreadyVerified.length === 0 ? (
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid={`inbox-no-recognition-${entry.id}`}
         >
           {t("inbox.noSkillsRecognized")} {t("inbox.writeConcreteWorks")}
@@ -261,13 +261,13 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
       {/* Skills already verified on this worker (context for the reviewer). */}
       {alreadyVerified.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("inbox.alreadyVerified")}
           </span>
           {alreadyVerified.map((s) => (
             <span
               key={s.id}
-              className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
+              className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
             >
               ✓ {s.name}
             </span>
@@ -330,7 +330,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
           avoid overloading the open forms. */}
       {canAct && mode === "idle" ? (
         <div
-          className="flex flex-col gap-0.5 text-[10px] leading-relaxed text-text-muted"
+          className="flex flex-col gap-0.5 text-meta leading-relaxed text-text-muted"
           data-testid={`inbox-review-clarity-${entry.id}`}
         >
           <span className="font-mono uppercase tracking-label">
@@ -403,17 +403,17 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
               data-testid={`journal-clarify-suggestion-${entry.id}`}
             >
               {entry.hours && !entry.hours.certain && (
-                <p className="text-[11px] leading-relaxed text-state-warning">
+                <p className="text-meta leading-relaxed text-state-warning">
                   {t("inbox.clarifyHoursIntro")}
                 </p>
               )}
-              <p className="text-[11px] leading-relaxed text-text-secondary">
+              <p className="text-meta leading-relaxed text-text-secondary">
                 {clarificationSuggestion}
               </p>
               <button
                 type="button"
                 onClick={copySuggestion}
-                className="w-fit rounded-md border border-state-warning/40 px-2 py-0.5 text-[10px] font-medium text-state-warning hover:bg-state-warning/10"
+                className="w-fit rounded-md border border-state-warning/40 px-2 py-0.5 text-meta font-medium text-state-warning hover:bg-state-warning/10"
               >
                 {copied ? t("inbox.copied") : t("inbox.copySuggestion")}
               </button>

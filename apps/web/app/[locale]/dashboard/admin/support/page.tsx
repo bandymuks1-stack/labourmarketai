@@ -80,11 +80,11 @@ export default async function AdminSupportInboxPage({
                   <span className="text-sm font-semibold text-text-primary">
                     {r.subject ?? t("unnamed")}
                   </span>
-                  <span className="font-mono text-[10px] text-text-muted whitespace-nowrap">
+                  <span className="font-mono text-meta text-text-muted whitespace-nowrap">
                     {new Date(r.updated_at).toLocaleString(locale)}
                   </span>
                 </div>
-                <span className="font-mono text-[10px] text-text-muted">
+                <span className="font-mono text-meta text-text-muted">
                   {t("createdBy", { id: r.created_by?.slice(0, 8) ?? "?" })}
                 </span>
               </Link>
@@ -93,7 +93,7 @@ export default async function AdminSupportInboxPage({
         </ul>
       )}
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

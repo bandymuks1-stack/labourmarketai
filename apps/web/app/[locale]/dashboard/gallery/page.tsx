@@ -38,7 +38,7 @@ export default async function PersonalGalleryPage({
       data-testid="personal-gallery"
     >
       <header className="flex flex-col gap-1">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <Images className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
@@ -72,7 +72,7 @@ export default async function PersonalGalleryPage({
       ) : (
         <>
           {previewsUnavailable ? (
-            <p className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-[11px] leading-relaxed text-text-secondary">
+            <p className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary">
               {t("previewsUnavailable")}
             </p>
           ) : null}
@@ -92,7 +92,7 @@ export default async function PersonalGalleryPage({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-[11px] leading-relaxed text-text-muted">
+                  <div className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-meta leading-relaxed text-text-muted">
                     {t("previewUnavailable")}
                   </div>
                 )}
@@ -102,7 +102,7 @@ export default async function PersonalGalleryPage({
                       {p.entrySnippet}
                     </p>
                   ) : null}
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {p.entryCreatedAt.slice(0, 10)}
                   </span>
                 </div>

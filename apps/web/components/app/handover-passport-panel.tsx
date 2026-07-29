@@ -80,7 +80,7 @@ export function HandoverPassportPanel({
           {t("title")}
         </h2>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("honestNote")}
         </p>
       </header>
@@ -88,7 +88,7 @@ export function HandoverPassportPanel({
       {/* Responsible parties — the REAL active assignments already loaded by
           the operations board (no new read, names only). */}
       <div className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("responsibleHeading")}
         </span>
         {responsibleWorkers.length === 0 ? (
@@ -105,7 +105,7 @@ export function HandoverPassportPanel({
             ))}
           </ul>
         )}
-        <p className="text-[11px] text-text-muted">{t("checklistNote")}</p>
+        <p className="text-meta text-text-muted">{t("checklistNote")}</p>
       </div>
 
       {!data.applied ? (
@@ -118,7 +118,7 @@ export function HandoverPassportPanel({
       ) : (
         <>
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("statusHeading")}
             </span>
             <p className="text-sm text-text-primary" data-testid="handover-declared-status">
@@ -126,11 +126,11 @@ export function HandoverPassportPanel({
                 ? t(`statuses.${data.declaredStatus}`)
                 : t("statusNone")}
             </p>
-            <p className="text-[11px] text-text-muted">{t("statusDisclaimer")}</p>
+            <p className="text-meta text-text-muted">{t("statusDisclaimer")}</p>
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("historyHeading")}
             </span>
             {data.entries.length === 0 ? (
@@ -145,12 +145,12 @@ export function HandoverPassportPanel({
                     className="rounded-md border border-ink-600 bg-ink-800/40 p-3"
                   >
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {e.entryType === "status"
                           ? t("entryStatusLabel")
                           : t("entryNoteLabel")}
                       </span>
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-meta text-text-muted">
                         {new Date(e.createdAt).toLocaleDateString()}
                       </span>
                     </div>

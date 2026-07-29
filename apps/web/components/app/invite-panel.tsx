@@ -320,7 +320,7 @@ function ResultRow({
     >
       <span className="min-w-0 break-all text-text-primary">{r.email}</span>
       <span
-        className={`font-mono text-[10px] uppercase tracking-label ${
+        className={`font-mono text-meta uppercase tracking-label ${
           r.outcome === "sent"
             ? "text-state-success"
             : r.outcome === "created"
@@ -336,7 +336,7 @@ function ResultRow({
             type="button"
             onClick={() => onCopy(r.inviteLink as string)}
             data-testid="invite-copy-link"
-            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             {copiedLink === r.inviteLink ? (
               <Check className="h-3 w-3" aria-hidden />
@@ -349,7 +349,7 @@ function ResultRow({
             type="button"
             onClick={() => onShare(r.inviteLink as string)}
             data-testid="invite-share-link"
-            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             <Share2 className="h-3 w-3" aria-hidden />
             {t("share")}

@@ -120,16 +120,16 @@ export function SupportConversationLauncher({
             reset();
             setOpen(false);
           }}
-          className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-primary"
+          className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary"
         >
           {t("cancel")}
         </button>
       </header>
-      <p className="text-[11px] leading-relaxed text-text-secondary">
+      <p className="text-meta leading-relaxed text-text-secondary">
         {t("intro")}
       </p>
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("subjectLabel")}
         </span>
         <input
@@ -143,7 +143,7 @@ export function SupportConversationLauncher({
         />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("bodyLabel")}
         </span>
         <textarea

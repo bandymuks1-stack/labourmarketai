@@ -37,7 +37,7 @@ export function AdminUiToggle({
       <p className="text-xs leading-relaxed text-text-secondary">
         {labels.description}
       </p>
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {hidden ? labels.statusHidden : labels.statusShown}
       </p>
       <Button

@@ -346,7 +346,7 @@ export default async function OpportunitiesPage({
       >
         {/* Density pass (worker-workspace UX audit v2): the intro sentence
             restated what the two link cards below already say — removed. */}
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("nextStep.title")}
         </span>
         <div className="grid gap-2 sm:grid-cols-2">
@@ -443,7 +443,7 @@ export default async function OpportunitiesPage({
               data-testid="opportunities-market-context"
               aria-label={tIntel("trustCard.rowTitle")}
             >
-              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                 {tIntel("trustCard.rowTitle")}
               </h2>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -532,7 +532,7 @@ export default async function OpportunitiesPage({
             </summary>
             <div className="flex flex-col gap-2 px-4 pb-4 text-xs leading-relaxed text-text-secondary">
               <p>{t("discovery.how.body")}</p>
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("discovery.how.version", { version: MATCH_CALC_VERSION })}
               </p>
             </div>
@@ -630,7 +630,7 @@ export default async function OpportunitiesPage({
                       data-testid="opportunities-saved"
                       aria-label={t("saved.sectionTitle")}
                     >
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {t("saved.sectionTitle")} · {savedLive.length}
                       </span>
                       {savedLive.length > 0 ? (
@@ -646,7 +646,7 @@ export default async function OpportunitiesPage({
                                 <span className="text-xs font-semibold text-text-primary">
                                   {roleLabel(need.roleText)}
                                 </span>
-                                <span className="text-[11px] text-text-muted">
+                                <span className="text-meta text-text-muted">
                                   {scanLine(need)}
                                 </span>
                               </a>
@@ -664,7 +664,7 @@ export default async function OpportunitiesPage({
                           {t("saved.noLongerOpen", { count: savedStaleCount })}
                         </p>
                       ) : null}
-                      <p className="text-[10px] leading-relaxed text-text-muted">
+                      <p className="text-meta leading-relaxed text-text-muted">
                         {t("saved.privateHint")}
                       </p>
                     </section>
@@ -677,7 +677,7 @@ export default async function OpportunitiesPage({
                     aria-label={t("discovery.filters.title")}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {t("discovery.filters.title")}
                         {active.length > 0
                           ? ` · ${t("discovery.filters.activeCount", { count: active.length })}`
@@ -697,7 +697,7 @@ export default async function OpportunitiesPage({
                       .filter((g) => g.values.length > 0)
                       .map((g) => (
                         <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
-                          <span className="min-w-[7rem] font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
                             {t(`discovery.filters.${g.dim}` as never)}
                           </span>
                           {g.values.map((v) => {
@@ -722,7 +722,7 @@ export default async function OpportunitiesPage({
                       className="flex flex-wrap items-center gap-1.5 border-t border-ink-600 pt-3"
                       data-testid="opportunities-sort"
                     >
-                      <span className="min-w-[7rem] font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
                         {t("discovery.sort.label")}
                       </span>
                       {(["relevance", "newest"] as const).map((s) => (
@@ -799,7 +799,7 @@ export default async function OpportunitiesPage({
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                               <span
-                                className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[fit.status]}`}
+                                className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${STATUS_TONE[fit.status]}`}
                               >
                                 {statusLabel(fit.status)}
                               </span>
@@ -818,7 +818,7 @@ export default async function OpportunitiesPage({
                           </div>
                           {need.companyName ? (
                             <p className="text-xs text-text-secondary" data-testid="opportunity-company">
-                              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                                 {t("fieldCompany")}:
                               </span>{" "}
                               {need.companyName}
@@ -828,7 +828,7 @@ export default async function OpportunitiesPage({
                                   copy-driven, never default. */}
                               {need.routeStatus === "approved_direct_partner" ? (
                                 <span
-                                  className="ml-2 rounded-sm border border-state-success/40 bg-state-success/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
+                                  className="ml-2 rounded-sm border border-state-success/40 bg-state-success/10 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-success"
                                   data-testid="opportunity-company-verified"
                                 >
                                   {t("companyVerified")}
@@ -853,7 +853,7 @@ export default async function OpportunitiesPage({
                               what to check), reusing the deterministic fit engine. No
                               score, no percentage, no guaranteed match. */}
                           <div className="flex flex-col gap-1.5" data-testid="opportunity-match-breakdown">
-                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("matchTitle")}
                             </span>
                             <MatchSignals
@@ -873,7 +873,7 @@ export default async function OpportunitiesPage({
                               data-testid="opportunity-skill-match"
                               data-band={match.status}
                             >
-                              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                                 {t("skillMatch.title")} ·{" "}
                                 {t.has(`skillMatch.band.${match.status}`)
                                   ? t(`skillMatch.band.${match.status}` as never)
@@ -903,7 +903,7 @@ export default async function OpportunitiesPage({
                           >
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                               <div className="min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldCountry")}
                                 </dt>
                                 <dd className="truncate text-xs text-text-primary">
@@ -913,7 +913,7 @@ export default async function OpportunitiesPage({
                                 </dd>
                               </div>
                               <div className="min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldStart")}
                                 </dt>
                                 <dd className="truncate text-xs text-text-primary">
@@ -921,7 +921,7 @@ export default async function OpportunitiesPage({
                                 </dd>
                               </div>
                               <div className="min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldTeam")}
                                 </dt>
                                 <dd className="truncate text-xs text-text-primary">
@@ -929,7 +929,7 @@ export default async function OpportunitiesPage({
                                 </dd>
                               </div>
                               <div className="min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldAccommodation")}
                                 </dt>
                                 <dd className="truncate text-xs text-text-primary">
@@ -945,7 +945,7 @@ export default async function OpportunitiesPage({
                                   "—", never free text; stays "—" until the transport
                                   RPC recreate is applied. */}
                               <div className="min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldTransport")}
                                 </dt>
                                 <dd
@@ -965,7 +965,7 @@ export default async function OpportunitiesPage({
                                   stated" until the company selects tools AND the
                                   required-tools RPC recreate is applied. */}
                               <div className="col-span-2 min-w-0">
-                                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("fieldTools")}
                                 </dt>
                                 <dd
@@ -996,7 +996,7 @@ export default async function OpportunitiesPage({
                                 {match.skillFit.matchedUris.map((slug) => (
                                   <span
                                     key={slug}
-                                    className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
+                                    className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
                                   >
                                     ✓ {skillLabel(slug)}
                                   </span>
@@ -1008,7 +1008,7 @@ export default async function OpportunitiesPage({
                                 {match.skillFit.missingUris.map((slug) => (
                                   <span
                                     key={slug}
-                                    className="rounded-md border border-state-amber/30 bg-state-amber/5 px-2 py-0.5 text-[11px] text-state-amber"
+                                    className="rounded-md border border-state-amber/30 bg-state-amber/5 px-2 py-0.5 text-meta text-state-amber"
                                   >
                                     {t("skillMatch.missingPrefix")} {skillLabel(slug)}
                                   </span>
@@ -1030,7 +1030,7 @@ export default async function OpportunitiesPage({
 
                           {/* The one clear next step for this card. */}
                           <p
-                            className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                            className="font-mono text-meta uppercase tracking-label text-text-muted"
                             data-testid="opportunity-next-action"
                             data-next-action={nextAction}
                           >
@@ -1064,7 +1064,7 @@ export default async function OpportunitiesPage({
                               {fit.gaps.map((g) => (
                                 <span
                                   key={g}
-                                  className="rounded-md border border-state-amber/30 bg-state-amber/5 px-2 py-0.5 text-[11px] text-state-amber"
+                                  className="rounded-md border border-state-amber/30 bg-state-amber/5 px-2 py-0.5 text-meta text-state-amber"
                                 >
                                   {gapLabel(g)}
                                 </span>
@@ -1086,7 +1086,7 @@ export default async function OpportunitiesPage({
                               {t("ctaProfile")} →
                             </Link>
                             {fit.status === "possible_match" ? (
-                              <span className="text-[11px] text-text-muted">{t("possibleNote")}</span>
+                              <span className="text-meta text-text-muted">{t("possibleNote")}</span>
                             ) : null}
                           </div>
                         </li>
@@ -1103,7 +1103,7 @@ export default async function OpportunitiesPage({
             })()
           )}
 
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("footnote")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
         </>
       )}
     </main>

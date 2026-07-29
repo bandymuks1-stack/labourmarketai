@@ -91,7 +91,7 @@ export default async function CandidatesPage({
           ← {tRooms("backToActions")}
         </Link>
         <p
-          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-brand-orange"
           data-testid="company-context"
         >
           {tRooms("candidates.context")}

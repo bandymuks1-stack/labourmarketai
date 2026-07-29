@@ -11,7 +11,7 @@ export async function DraftBoard() {
     <section className="relative mt-16 overflow-hidden">
       <ConstellationBg />
       <div className="relative mx-auto max-w-container px-6 sm:px-12">
-        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>

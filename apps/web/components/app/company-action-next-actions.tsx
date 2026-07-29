@@ -44,7 +44,7 @@ export async function CompanyActionNextActions({
       >
         {(["step1", "step2", "step3"] as const).map((step, i) => (
           <li key={step} className="flex items-start gap-2 text-sm text-text-secondary">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-blue/40 font-mono text-[11px] text-brand-blue">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-blue/40 font-mono text-meta text-brand-blue">
               {i + 1}
             </span>
             <span className="leading-relaxed">{t(`flow.${step}`)}</span>

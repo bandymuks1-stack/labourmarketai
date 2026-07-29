@@ -45,7 +45,7 @@ export async function FreshnessNote({ label }: { label: FreshnessLabel }) {
   const t = await getTranslations("intelligence");
   return (
     <span
-      className="text-[11px] text-text-muted"
+      className="text-meta text-text-muted"
       data-testid="intelligence-freshness-note"
       data-freshness-code={label.code}
     >

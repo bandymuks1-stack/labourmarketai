@@ -234,7 +234,7 @@ export function LearningReviewSection({
                 {item.status === "pending" &&
                   (item.entryStale || staleIds.has(item.id)) && (
                     <span
-                      className="text-[11px] text-text-muted"
+                      className="text-meta text-text-muted"
                       data-testid={`learning-item-stale-${item.id}`}
                     >
                       {labels.staleEntry}

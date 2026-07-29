@@ -47,7 +47,7 @@ export async function SetupRoleChoice() {
               <span className="text-sm font-medium text-text-primary">
                 {t(`options.${o.key}.label`)}
               </span>
-              <span className="text-[11px] leading-relaxed text-text-secondary">
+              <span className="text-meta leading-relaxed text-text-secondary">
                 {t(`options.${o.key}.hint`)}
               </span>
             </Link>
@@ -62,12 +62,12 @@ export async function SetupRoleChoice() {
         <h3 className="font-display text-sm font-semibold text-text-primary">
           {t("draft.title")}
         </h3>
-        <p className="text-[11px] leading-relaxed text-text-secondary">{t("draft.body")}</p>
+        <p className="text-meta leading-relaxed text-text-secondary">{t("draft.body")}</p>
         <div className="flex flex-wrap gap-1.5">
           {(["notRegistered", "notVerified", "draft", "canLinkLater"] as const).map((k) => (
             <span
               key={k}
-              className="rounded-full border border-ink-600 px-2 py-0.5 text-[10px] uppercase tracking-label text-text-muted"
+              className="rounded-full border border-ink-600 px-2 py-0.5 text-meta uppercase tracking-label text-text-muted"
             >
               {t(`draft.labels.${k}`)}
             </span>
@@ -75,7 +75,7 @@ export async function SetupRoleChoice() {
         </div>
         <Link
           href={"/dashboard/candidates" as "/dashboard"}
-          className="self-start text-[11px] font-medium text-brand-cyan hover:underline"
+          className="self-start text-meta font-medium text-brand-cyan hover:underline"
           data-testid="role-choice-candidates-link"
         >
           {t("draft.cta")} →

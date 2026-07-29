@@ -261,7 +261,7 @@ export default async function ProjectCostCalculatorPage({
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("honesty.body")}
         </p>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("honesty.userNumbers")}
         </p>
       </div>

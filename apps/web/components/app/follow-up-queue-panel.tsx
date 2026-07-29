@@ -96,12 +96,12 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
           {isAdmin ? (
             <Link
               href={`/dashboard/admin/users/${task.subjectProfileId}`}
-              className="font-mono text-[10px] text-brand-blue hover:underline"
+              className="font-mono text-meta text-brand-blue hover:underline"
             >
               {task.subjectProfileId.slice(0, 8)}… → {t("openSubject")}
             </Link>
           ) : (
-            <span className="font-mono text-[10px]">
+            <span className="font-mono text-meta">
               {task.subjectProfileId.slice(0, 8)}…
             </span>
           )}
@@ -112,7 +112,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
       return (
         <span>
           {t("subjectCompany")}{" "}
-          <span className="font-mono text-[10px]">
+          <span className="font-mono text-meta">
             {task.subjectCompanyId.slice(0, 8)}…
           </span>
         </span>
@@ -131,7 +131,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
           {t("title")}
         </h2>
         <p className="text-xs text-text-secondary">{t("intro")}</p>
-        <p className="text-[11px] text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta text-text-muted">{t("honestNote")}</p>
       </div>
 
       {!data.applied ? (
@@ -145,7 +145,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
         <>
           {/* Pending queue — oldest first (a queue, not a feed). */}
           <div className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("queueHeading")} · {data.pending.length}
             </span>
             {data.pending.length === 0 ? (
@@ -165,7 +165,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
                     <p className="whitespace-pre-wrap text-sm text-text-primary">
                       {task.note}
                     </p>
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-text-muted">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-meta text-text-muted">
                       {subjectLine(task)}
                       <span>
                         {t("createdLabel")}: {task.createdAt.slice(0, 10)}
@@ -201,7 +201,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
           {/* Recently resolved — honest history, reopenable. */}
           {data.resolved.length > 0 && (
             <div className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("resolvedHeading")}
               </span>
               <ul className="flex flex-col gap-1.5" data-testid="follow-up-resolved">
@@ -213,14 +213,14 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
                     <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">
                       {task.note}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t(`statuses.${task.status}`)}
                     </span>
                     <button
                       type="button"
                       disabled={pending}
                       onClick={() => setStatus(task.id, "pending")}
-                      className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+                      className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
                       data-testid={`follow-up-reopen-${task.id}`}
                     >
                       {t("actions.reopen")}
@@ -267,7 +267,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
                 data-testid="follow-up-subject-company"
               />
             </div>
-            <p className="text-[11px] text-text-muted">{t("form.subjectHint")}</p>
+            <p className="text-meta text-text-muted">{t("form.subjectHint")}</p>
             <div>
               <Button
                 type="button"

@@ -93,7 +93,7 @@ export function PlayerCard({ id }: { id: string }) {
       <div className="flex h-8 items-center justify-between">
         <span
           className={cn(
-            "font-mono text-[11px] font-semibold uppercase tracking-label",
+            "font-mono text-meta font-semibold uppercase tracking-label",
             card.tier === "gold"
               ? "text-tier-gold"
               : card.tier === "silver"
@@ -105,7 +105,7 @@ export function PlayerCard({ id }: { id: string }) {
         </span>
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
+            "inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label",
             STATUS_CLS[card.status],
           )}
         >
@@ -130,7 +130,7 @@ export function PlayerCard({ id }: { id: string }) {
           {showMarker && (
             <span
               aria-hidden
-              className="pointer-events-none absolute -right-1 -top-2 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[8px] uppercase tracking-label text-brand-blue"
+              className="pointer-events-none absolute -right-1 -top-2 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-meta uppercase tracking-label text-brand-blue"
             >
               Placeholder
             </span>
@@ -163,7 +163,7 @@ export function PlayerCard({ id }: { id: string }) {
                   where it appears (the showcase also prints a visible legend
                   directly above the cards). */}
               <span
-                className="w-7 shrink-0 cursor-help font-mono text-[11px] text-text-muted"
+                className="w-7 shrink-0 cursor-help font-mono text-meta text-text-muted"
                 title={t(`stat.${k}`)}
               >
                 {k}
@@ -189,7 +189,7 @@ export function PlayerCard({ id }: { id: string }) {
                   }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-right font-mono text-[11px] text-text-secondary">
+              <span className="w-6 shrink-0 text-right font-mono text-meta text-text-secondary">
                 {v}
               </span>
             </div>
@@ -202,7 +202,7 @@ export function PlayerCard({ id }: { id: string }) {
         {card.skills.map((s) => (
           <span
             key={s.en}
-            className="inline-flex items-center gap-1 truncate rounded-sm border border-ink-500 px-2 py-1 text-[10px] text-text-secondary"
+            className="inline-flex items-center gap-1 truncate rounded-sm border border-ink-500 px-2 py-1 text-meta text-text-secondary"
           >
             {lc(s)}
           </span>

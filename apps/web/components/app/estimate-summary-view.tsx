@@ -72,7 +72,7 @@ export function EstimateSummaryView({
 
   return (
     <div className="flex flex-col gap-3" data-testid="estimate-summary">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
         {labels.sectionResult}
       </p>
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-4 text-sm">
@@ -102,10 +102,10 @@ export function EstimateSummaryView({
 
       {assumptionItems.length > 0 && (
         <div className="flex flex-col gap-1">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.assumptionsTitle}
           </p>
-          <ul className="list-disc pl-4 text-[11px] leading-relaxed text-text-muted">
+          <ul className="list-disc pl-4 text-meta leading-relaxed text-text-muted">
             {assumptionItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -115,10 +115,10 @@ export function EstimateSummaryView({
 
       {!compact && missingItems.length > 0 && (
         <div className="flex flex-col gap-1">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.missingTitle}
           </p>
-          <ul className="list-disc pl-4 text-[11px] leading-relaxed text-text-muted">
+          <ul className="list-disc pl-4 text-meta leading-relaxed text-text-muted">
             {missingItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -127,7 +127,7 @@ export function EstimateSummaryView({
       )}
 
       <p
-        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-[11px] leading-relaxed text-state-warning"
+        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-state-warning"
         data-testid="estimate-disclaimer"
       >
         {labels.disclaimer}

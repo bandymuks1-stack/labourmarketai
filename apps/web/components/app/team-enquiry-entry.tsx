@@ -225,7 +225,7 @@ export function MyTeamEnquiriesList({
               <span className="text-sm font-medium text-text-primary">
                 {e.teamName ?? t("myList.unknownTeam")}
               </span>
-              <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted">
                 {statusLabel(e.status)}
               </span>
             </div>
@@ -233,7 +233,7 @@ export function MyTeamEnquiriesList({
               {e.message}
             </p>
             {(e.startDate ?? e.expectedEndDate) && (
-              <p className="text-[11px] text-text-muted">
+              <p className="text-meta text-text-muted">
                 {t("dates", {
                   from: e.startDate ?? "—",
                   to: e.expectedEndDate ?? "—",
@@ -242,7 +242,7 @@ export function MyTeamEnquiriesList({
             )}
             {e.teamAvailability && (
               <ul className="flex flex-wrap gap-1.5">
-                <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                   {e.teamAvailability.availabilityStatus === "available_now"
                     ? t("availability.availableNow")
                     : e.teamAvailability.availabilityStatus === "available_from"
@@ -252,17 +252,17 @@ export function MyTeamEnquiriesList({
                       : t("availability.notAvailable")}
                 </li>
                 {e.teamAvailability.accommodationNeeded && (
-                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                     {t("availability.accommodationNeeded")}
                   </li>
                 )}
                 {e.teamAvailability.transportOwn && (
-                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                     {t("availability.ownTransport")}
                   </li>
                 )}
                 {e.teamAvailability.maxTripDays != null && (
-                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                  <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                     {t("availability.maxTripDays", {
                       count: e.teamAvailability.maxTripDays,
                     })}

@@ -26,12 +26,12 @@ export async function TeamRosterEmptyState({
         <h2 className="font-display text-base font-semibold text-text-primary">
           {t("title")}
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("scope")}
         </span>
       </header>
       <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("footnote")}
       </p>
     </section>

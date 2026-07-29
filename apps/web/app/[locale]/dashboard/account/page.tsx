@@ -118,7 +118,7 @@ export default async function AccountPage({
         data-testid="account-plan-status"
         data-state={PRICING_READINESS_STATE}
       >
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tRoot("accountPlan.title")}
         </p>
         <p className="mt-2 text-sm text-text-primary">
@@ -127,7 +127,7 @@ export default async function AccountPage({
         <p className="mt-2 text-xs leading-relaxed text-text-secondary">
           {tRoot("accountPlan.prepared")}
         </p>
-        <p className="mt-2 text-[11px] text-text-muted">
+        <p className="mt-2 text-meta text-text-muted">
           {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
         </p>
         <Link
@@ -140,7 +140,7 @@ export default async function AccountPage({
       </section>
 
       <section className="card-border p-5">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("account.email_label")}
         </p>
         <p className="mt-2 break-words text-sm text-text-primary">
@@ -155,7 +155,7 @@ export default async function AccountPage({
           flow. Enrollment UI ships in its own PR (docs §3 step 2) — until
           then the copy says setup is coming; no fake button, no fake state. */}
       <section className="card-border p-5" data-testid="account-security">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("account.security.title")}
         </p>
         <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -192,7 +192,7 @@ export default async function AccountPage({
             {mfaFactorCount !== null && (
               <span
                 data-testid="account-mfa-status"
-                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
                   mfaFactorCount > 0
                     ? "border-state-success/40 bg-state-success/5 text-state-success"
                     : "border-ink-500 bg-ink-800/40 text-text-muted"
@@ -251,7 +251,7 @@ export default async function AccountPage({
           Points at the public explanation pack so a signed-in user can find
           what the platform is, what data it uses and who can see it. */}
       <section className="card-border p-5" data-testid="account-privacy-data">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tRoot("legal.accountSection.title")}
         </p>
         <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -324,7 +324,7 @@ export default async function AccountPage({
       )}
 
       <section className="card-border p-5">
-        <p className="mb-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-muted">
           {t("account.theme.appearance")}
         </p>
         <ThemeToggle
@@ -340,7 +340,7 @@ export default async function AccountPage({
           settings stay practical, not a product dashboard. The rolesIntro +
           per-role chips (roleStatusChipKey) remain in the source. */}
       <details className="card-border group p-5" data-testid="account-roles-details">
-        <summary className="flex cursor-pointer list-none items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-muted hover:text-text-primary">
+        <summary className="flex cursor-pointer list-none items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary">
           <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
           {t("account.roles_label")}
         </summary>
@@ -378,13 +378,13 @@ export default async function AccountPage({
                 <span className="flex items-center gap-2">
                   {chipKey && (
                     <span
-                      className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${chipTone}`}
+                      className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${chipTone}`}
                     >
                       {tRoot(chipKey)}
                     </span>
                   )}
                   {isActiveView && (
-                    <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                    <span className="font-mono text-meta uppercase tracking-label text-state-live">
                       ● {tSwitcher("active_label")}
                     </span>
                   )}
@@ -400,7 +400,7 @@ export default async function AccountPage({
           mobile-only. Reuses the existing locale architecture (lt/en/ru active,
           RU preview-tagged) — no new locales, no new switcher system. */}
       <section className="card-border p-5" data-testid="account-ui-language">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tCommon("localeSwitch")}
         </p>
         <div className="mt-3">

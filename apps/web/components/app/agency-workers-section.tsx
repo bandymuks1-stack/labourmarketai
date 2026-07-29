@@ -148,7 +148,7 @@ export function AgencyWorkersSection({
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
           data-testid="agency-workers-migration-blocker"
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
             {labels.migrationBlockerHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
@@ -197,15 +197,15 @@ export function AgencyWorkersSection({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="break-all text-sm font-medium text-text-primary">{w.email ?? "—"}</span>
-                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
+                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-text-secondary">
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
                         <span>
                           {w.operationsTitle?.trim()
                             ? w.operationsTitle
                             : roleLabel}
-                          <span className="ml-1 text-[10px] text-text-muted">
+                          <span className="ml-1 text-meta text-text-muted">
                             ·{" "}
                             {ctx.reviewCapability === "can_review"
                               ? labels.operations.reviewEnabled
@@ -213,7 +213,7 @@ export function AgencyWorkersSection({
                           </span>
                         </span>
                         <span
-                          className="text-[10px] text-text-muted"
+                          className="text-meta text-text-muted"
                           data-testid={`agency-worker-next-action-${w.workerId}`}
                         >
                           {labels.operations.nextActionLabels[ctx.nextAction] ??
@@ -238,7 +238,7 @@ export function AgencyWorkersSection({
                           />
                         ) : null}
                     </div>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
                     </span>
                   </li>
@@ -251,7 +251,7 @@ export function AgencyWorkersSection({
       {activeWorkers.length > 0 &&
       activeWorkers.every((w) => !w.operationsRole?.trim()) ? (
         <p
-          className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-[11px] text-text-secondary"
+          className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-meta text-text-secondary"
           data-testid="agency-workers-ops-setup-note"
         >
           {labels.operations.setupNote}
@@ -263,13 +263,13 @@ export function AgencyWorkersSection({
           className="rounded-md border border-ink-700 bg-surface-1 p-3"
           data-testid="agency-workers-coordination-note"
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.coordinationHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
             {labels.coordinationBody}
           </p>
-          <p className="mt-1 text-[11px] text-text-muted">
+          <p className="mt-1 text-meta text-text-muted">
             {labels.coordinationNextAction}
           </p>
         </div>
@@ -312,7 +312,7 @@ export function AgencyWorkersSection({
             className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
             data-testid="agency-workers-invite-note"
           />
-          <span className="text-[11px] text-text-muted">
+          <span className="text-meta text-text-muted">
             {labels.inviteNoteHint}
           </span>
         </label>
@@ -361,9 +361,9 @@ export function AgencyWorkersSection({
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">{inv.status}</span>
+                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
                 </span>
               </li>

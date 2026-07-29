@@ -21,7 +21,7 @@ export async function OrgTier1Warning() {
       className="card-border bg-brand-blue/5 p-3 text-xs leading-relaxed text-text-secondary"
       data-testid="org-tier1-warning"
     >
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
         {t("eyebrow")}
       </p>
       <p className="mt-1">{t("body")}</p>

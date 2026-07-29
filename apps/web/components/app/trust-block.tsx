@@ -101,7 +101,7 @@ function Stat({
       )}
     >
       <dt
-        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted"
+        className="flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted"
       >
         {icon}
         {label}

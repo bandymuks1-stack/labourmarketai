@@ -63,7 +63,7 @@ export interface DemandRequestsReadbackLabels {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="whitespace-pre-wrap text-text-secondary">{value}</dd>
@@ -106,7 +106,7 @@ export function DemandRequestsReadback({
           {labels.note}
         </p>
         <p
-          className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-[11px] leading-relaxed text-text-secondary"
+          className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
           data-testid="demand-readback-worker-visibility-note"
         >
           {labels.workerVisibilityNote}
@@ -115,7 +115,7 @@ export function DemandRequestsReadback({
 
       {rows.length > 0 && (
         <p
-          className="rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-[11px] leading-relaxed text-text-muted"
+          className="rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-meta leading-relaxed text-text-muted"
           data-testid="demand-readback-manage-help"
         >
           {labels.manageHelp}
@@ -156,11 +156,11 @@ export function DemandRequestsReadback({
                     <span className="truncate text-sm font-medium text-text-primary">
                       {sanitizeDemandTitle(r.title)}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.created}: {r.createdAt.slice(0, 10)}
                     </span>
                   </div>
-                  <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                  <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {labels.status[r.status] ?? labels.statusOther}
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export function DemandRequestsReadback({
                 </Link>
                 {detailRows.length > 0 && (
                   <details className="group">
-                    <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary">
+                    <summary className="cursor-pointer select-none font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary">
                       {labels.detailsLabel}
                     </summary>
                     <dl

@@ -80,14 +80,14 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
           <MapPin className="h-3.5 w-3.5 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("title")}
         </span>
-        <span className="text-[11px] leading-relaxed text-text-muted">
+        <span className="text-meta leading-relaxed text-text-muted">
           {t("note")}
         </span>
       </div>
 
       {done ? (
         <p
-          className="rounded-md border border-state-success/40 bg-state-success/5 px-2.5 py-2 text-[11px] leading-relaxed text-text-secondary"
+          className="rounded-md border border-state-success/40 bg-state-success/5 px-2.5 py-2 text-meta leading-relaxed text-text-secondary"
           data-testid="demand-location-capture-done"
         >
           {duplicate ? t("duplicate") : t("done")}
@@ -142,7 +142,7 @@ export function DemandLocationCapture({ requestId }: { requestId: string }) {
           </label>
 
           {error && (
-            <p className="text-[11px] text-state-danger" data-testid="demand-location-error">
+            <p className="text-meta text-state-danger" data-testid="demand-location-error">
               {error}
             </p>
           )}

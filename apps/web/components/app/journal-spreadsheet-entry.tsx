@@ -170,10 +170,10 @@ export function JournalSpreadsheetEntry({
       className="flex flex-col gap-3"
       data-testid="journal-spreadsheet-entry"
     >
-      <p className="text-[11px] leading-relaxed text-text-muted">{t("hint")}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{t("hint")}</p>
 
       {/* Header row — desktop only; mobile rows carry their own labels. */}
-      <div className="hidden gap-2 px-1 font-mono text-[10px] uppercase tracking-label text-text-muted md:grid md:grid-cols-[6.5rem_minmax(10rem,2fr)_4.5rem_6.5rem_4.5rem_minmax(8rem,1.2fr)_minmax(8rem,1fr)_2rem]">
+      <div className="hidden gap-2 px-1 font-mono text-meta uppercase tracking-label text-text-muted md:grid md:grid-cols-[6.5rem_minmax(10rem,2fr)_4.5rem_6.5rem_4.5rem_minmax(8rem,1.2fr)_minmax(8rem,1fr)_2rem]">
         <span>{t("colDate")}</span>
         <span>{t("colText")}</span>
         <span>{t("colQuantity")}</span>
@@ -201,7 +201,7 @@ export function JournalSpreadsheetEntry({
               )}
             >
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colDate")}
                 </span>
                 <Input
@@ -212,7 +212,7 @@ export function JournalSpreadsheetEntry({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colText")}
                 </span>
                 <Input
@@ -225,7 +225,7 @@ export function JournalSpreadsheetEntry({
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colQuantity")}
                 </span>
                 <Input
@@ -237,7 +237,7 @@ export function JournalSpreadsheetEntry({
                 />
               </label>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colUnit")}
                 </span>
                 <DarkListbox
@@ -253,7 +253,7 @@ export function JournalSpreadsheetEntry({
                 />
               </div>
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colHours")}
                 </span>
                 <Input
@@ -265,7 +265,7 @@ export function JournalSpreadsheetEntry({
                 />
               </label>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colEngagement")}
                 </span>
                 <DarkListbox
@@ -279,7 +279,7 @@ export function JournalSpreadsheetEntry({
                 />
               </div>
               <label className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-label text-text-muted md:hidden">
+                <span className="text-meta uppercase tracking-label text-text-muted md:hidden">
                   {t("colNote")}
                 </span>
                 <Input
@@ -299,7 +299,7 @@ export function JournalSpreadsheetEntry({
                     ✓
                   </span>
                 ) : row.status === "saving" ? (
-                  <span className="text-[10px] text-text-muted" role="status">
+                  <span className="text-meta text-text-muted" role="status">
                     …
                   </span>
                 ) : (
@@ -316,7 +316,7 @@ export function JournalSpreadsheetEntry({
               </div>
               {(row.errors.length > 0 || row.serverMessage) && (
                 <p
-                  className="text-[11px] leading-relaxed text-state-danger md:col-span-8"
+                  className="text-meta leading-relaxed text-state-danger md:col-span-8"
                   role="alert"
                   data-testid={`journal-spreadsheet-row-error-${idx}`}
                 >
@@ -362,7 +362,7 @@ export function JournalSpreadsheetEntry({
         >
           + {t("addRow")}
         </button>
-        <span className="text-[10px] text-text-muted">
+        <span className="text-meta text-text-muted">
           {t("rowCount", { count: rows.length, max: SPREADSHEET_MAX_ROWS })}
         </span>
       </div>

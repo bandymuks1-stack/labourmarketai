@@ -29,7 +29,7 @@ export async function ProjectWorkGallery({
       className="flex flex-col gap-3"
       data-testid="project-work-gallery"
     >
-      <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
         <Images className="h-3.5 w-3.5" aria-hidden />
         {t("title")}
         {photos.length > 0 ? (
@@ -52,7 +52,7 @@ export async function ProjectWorkGallery({
         <>
           {previewsUnavailable ? (
             <p
-              className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-[11px] leading-relaxed text-text-secondary"
+              className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
               data-testid="project-gallery-previews-unavailable"
             >
               {t("previewsUnavailable")}
@@ -75,14 +75,14 @@ export async function ProjectWorkGallery({
                   />
                 ) : (
                   <div
-                    className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-[11px] leading-relaxed text-text-muted"
+                    className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-meta leading-relaxed text-text-muted"
                     data-testid="project-gallery-photo-no-preview"
                   >
                     {t("previewUnavailableOne")}
                   </div>
                 )}
                 <div className="flex flex-col gap-1 p-3 pt-1">
-                  <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {(workerNames.get(p.workerId) ?? t("unknownWorker")) +
                       " · " +
                       p.entryCreatedAt.slice(0, 10)}
@@ -98,7 +98,7 @@ export async function ProjectWorkGallery({
           </ul>
         </>
       )}
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("sourceNote")}
       </p>
     </section>

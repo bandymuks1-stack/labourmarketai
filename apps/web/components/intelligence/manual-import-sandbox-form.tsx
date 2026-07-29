@@ -72,7 +72,7 @@ function PreviewCard({
       data-valid={preview.valid}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels["preview.row"]} {preview.rowNumber}
         </span>
         <span
@@ -88,19 +88,19 @@ function PreviewCard({
       <dl className="grid grid-cols-1 gap-x-4 gap-y-1 text-xs text-text-secondary sm:grid-cols-2">
         {rows.map(([label, value]) => (
           <div key={label} className="flex min-w-0 flex-col">
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
               {label}
             </dt>
-            <dd className="break-all font-mono text-[11px]">{value}</dd>
+            <dd className="break-all font-mono text-meta">{value}</dd>
           </div>
         ))}
       </dl>
       {preview.failureCodes.length > 0 ? (
         <div className="flex flex-col gap-0.5">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels["preview.reasonCodes"]}
           </span>
-          <ul className="flex flex-col gap-0.5 font-mono text-[11px] text-state-danger">
+          <ul className="flex flex-col gap-0.5 font-mono text-meta text-state-danger">
             {preview.failureCodes.map((code) => (
               <li key={code}>{code}</li>
             ))}
@@ -137,7 +137,7 @@ export function ManualImportSandboxForm({
         data-testid="sandbox-form"
       >
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels["form.file"]}
           </span>
           <input
@@ -150,7 +150,7 @@ export function ManualImportSandboxForm({
         </label>
         <div className="flex flex-wrap gap-4">
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels["form.format"]}
             </span>
             <select
@@ -164,7 +164,7 @@ export function ManualImportSandboxForm({
             </select>
           </label>
           <fieldset className="flex flex-col gap-1 text-xs text-text-secondary">
-            <legend className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <legend className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels["form.mode"]}
             </legend>
             <label className="flex items-center gap-2">
@@ -185,7 +185,7 @@ export function ManualImportSandboxForm({
         >
           {pending ? labels["form.running"] : labels["form.run"]}
         </button>
-        <p className="text-[11px] text-text-muted">{labels["form.note"]}</p>
+        <p className="text-meta text-text-muted">{labels["form.note"]}</p>
       </form>
 
       {state.kind === "refused" ? (
@@ -237,7 +237,7 @@ export function ManualImportSandboxForm({
                     key={key}
                     className="flex flex-col rounded-md border border-ink-500 bg-ink-800/30 p-3"
                   >
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels[key]}
                     </dt>
                     <dd className="text-lg font-semibold text-text-primary">
@@ -251,7 +251,7 @@ export function ManualImportSandboxForm({
                 className="flex flex-col gap-1 rounded-md border border-ink-500 bg-ink-800/30 p-3"
                 data-testid="sandbox-tallies"
               >
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {labels["tallies.title"]}
                 </span>
                 <ul className="grid grid-cols-1 gap-1 text-xs text-text-secondary sm:grid-cols-3">
@@ -268,7 +268,7 @@ export function ManualImportSandboxForm({
 
               {run.previews.length > 0 ? (
                 <section className="flex flex-col gap-2">
-                  <h3 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                     {labels["preview.title"]}
                   </h3>
                   <ul className="flex flex-col gap-2">
@@ -288,7 +288,7 @@ export function ManualImportSandboxForm({
                   className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/30 p-3"
                   data-testid="sandbox-report-preview"
                 >
-                  <h3 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                     {labels["report.title"]}
                   </h3>
                   <dl className="grid grid-cols-1 gap-x-4 gap-y-1 text-xs text-text-secondary sm:grid-cols-2">
@@ -303,19 +303,19 @@ export function ManualImportSandboxForm({
                       ] as const
                     ).map(([key, value]) => (
                       <div key={key} className="flex min-w-0 flex-col">
-                        <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {labels[key]}
                         </dt>
-                        <dd className="break-all font-mono text-[11px]">{value}</dd>
+                        <dd className="break-all font-mono text-meta">{value}</dd>
                       </div>
                     ))}
                   </dl>
                   {run.reportPreview.skipped.length > 0 ? (
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {labels["report.skipped"]}
                       </span>
-                      <ul className="flex flex-col gap-0.5 font-mono text-[11px] text-text-secondary">
+                      <ul className="flex flex-col gap-0.5 font-mono text-meta text-text-secondary">
                         {run.reportPreview.skipped.map((entry) => (
                           <li key={entry.code}>
                             {entry.code} × {entry.count}

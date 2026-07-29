@@ -59,7 +59,7 @@ export function MarketMoment() {
     <section className="mt-24" aria-labelledby="market-moment-title" data-testid="market-moment">
       <div className="grid items-center gap-10 lg:grid-cols-2">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("chip")}
           </p>
           <h2
@@ -84,7 +84,7 @@ export function MarketMoment() {
                   }`}
                 >
                   <span
-                    className={`flex size-6 flex-none items-center justify-center rounded-full border font-mono text-[11px] font-semibold ${
+                    className={`flex size-6 flex-none items-center justify-center rounded-full border font-mono text-meta font-semibold ${
                       on
                         ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
                         : "border-ink-500"
@@ -159,7 +159,7 @@ export function MarketMoment() {
                 ["avail", "bg-state-success"],
               ] as const
             ).map(([key, dot]) => (
-              <span key={key} className="inline-flex items-center gap-1.5 text-[11px] text-text-muted">
+              <span key={key} className="inline-flex items-center gap-1.5 text-meta text-text-muted">
                 <span className={`size-2 rounded-full ${dot}`} aria-hidden /> {t(`legend.${key}`)}
               </span>
             ))}

@@ -119,7 +119,7 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
                       </span>
                       {r.isNew && (
                         <span
-                          className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-cyan"
+                          className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
                           data-testid="dashboard-jobs-card-new"
                         >
                           {tRec("newBadge")}
@@ -127,7 +127,7 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
                       )}
                       {r.salary === "within" && (
                         <span
-                          className="rounded-full border border-state-success/40 bg-state-success/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
+                          className="rounded-full border border-state-success/40 bg-state-success/10 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-success"
                           data-testid="dashboard-jobs-card-salary"
                         >
                           {tRec("salaryWithin")}
@@ -135,7 +135,7 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
                       )}
                       {r.salary === "negotiable" && (
                         <span
-                          className="rounded-full border border-state-amber/40 bg-state-amber/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber"
+                          className="rounded-full border border-state-amber/40 bg-state-amber/10 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber"
                           data-testid="dashboard-jobs-card-salary"
                         >
                           {tRec("salaryNegotiable")}
@@ -167,13 +167,13 @@ export async function JobRecommendationsCard({ locale }: { locale: string }) {
                         {missingShown.map((slug) => (
                           <span
                             key={slug}
-                            className="rounded-md border border-state-amber/30 bg-state-amber/5 px-1.5 py-0.5 text-[11px] text-state-amber"
+                            className="rounded-md border border-state-amber/30 bg-state-amber/5 px-1.5 py-0.5 text-meta text-state-amber"
                           >
                             {tOpp("skillMatch.missingPrefix")} {skillLabel(slug)}
                           </span>
                         ))}
                         {missingMore > 0 && (
-                          <span className="text-[11px] text-text-muted">
+                          <span className="text-meta text-text-muted">
                             {tRec("moreSkills", { n: missingMore })}
                           </span>
                         )}

@@ -32,7 +32,7 @@ export async function ServiceOffers() {
   return (
     <section className="mx-auto max-w-container px-6 pb-16 sm:px-12">
       <div className="card-border wow-card p-6 sm:p-10">
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
@@ -60,11 +60,11 @@ export async function ServiceOffers() {
               <div className="mt-5 font-display text-2xl font-bold tracking-tightest text-text-primary">
                 {offer.priceFrom}
               </div>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="mt-1 font-mono text-meta uppercase tracking-label text-text-muted">
                 {offer.timeline}
               </p>
 
-              <p className="mt-5 font-mono text-[11px] uppercase tracking-label text-text-muted">
+              <p className="mt-5 font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("includesLabel")}
               </p>
               <ul className="mt-3 flex flex-1 flex-col gap-2 text-sm text-text-secondary">

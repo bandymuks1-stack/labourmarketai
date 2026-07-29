@@ -93,7 +93,7 @@ export function BottomNav({
                 aria-current={active ? "page" : undefined}
                 data-testid={`bottom-nav-${id}`}
                 className={cn(
-                  "relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-tight transition-colors",
+                  "relative flex h-16 flex-col items-center justify-center gap-1 text-meta font-medium tracking-tight transition-colors",
                   active
                     ? "text-brand-orange"
                     : "text-text-muted hover:text-text-secondary",
@@ -114,7 +114,7 @@ export function BottomNav({
                   <NavLinkPending className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />
                   {badge > 0 && (
                     <span
-                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold leading-none text-white"
+                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-white"
                       data-testid={`bottom-nav-badge-${id}`}
                     >
                       {badge > 9 ? "9+" : badge}

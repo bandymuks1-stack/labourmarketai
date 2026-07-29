@@ -17,7 +17,7 @@ import type { TrustCardStatus } from "@/lib/intelligence/trust-card-model";
 
 /** Base chip class shared by EVERY intelligence badge. */
 export const INTEL_CHIP_CLASS =
-  "inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label";
+  "inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label";
 
 /** V1 card states (dashboard/intelligence workspace cards). */
 export const INTEL_STATE_TONE: Record<IntelligenceCardState, string> = {

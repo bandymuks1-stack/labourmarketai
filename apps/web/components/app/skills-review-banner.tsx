@@ -35,7 +35,7 @@ export function SkillsReviewBanner({
         />
         {title}
         <span
-          className="rounded-sm border border-state-warning/40 bg-state-warning/10 px-1.5 py-0.5 font-mono text-[10px] text-state-warning"
+          className="rounded-sm border border-state-warning/40 bg-state-warning/10 px-1.5 py-0.5 font-mono text-meta text-state-warning"
           data-testid="skills-review-banner-count"
         >
           {count}

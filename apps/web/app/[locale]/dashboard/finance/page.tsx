@@ -99,7 +99,7 @@ const TRANSITIONS: Record<
 };
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -145,7 +145,7 @@ export default async function FinancePage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -243,7 +243,7 @@ export default async function FinancePage({
         className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/30 p-3"
         data-testid={testid}
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {label}
         </span>
         <span
@@ -280,7 +280,7 @@ export default async function FinancePage({
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="inline-flex items-center rounded-full border border-ink-500 px-2 py-0.5">
             {t(`type.${record.recordType}`)}
           </span>
@@ -466,7 +466,7 @@ export default async function FinancePage({
         aria-label={t("filters.label")}
         data-testid="finance-filters"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("filters.label")}
         </span>
         <Link
@@ -494,7 +494,7 @@ export default async function FinancePage({
         aria-label={t("filters.statusLabel")}
         data-testid="finance-status-filters"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("filters.statusLabel")}
         </span>
         <Link

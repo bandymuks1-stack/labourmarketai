@@ -87,7 +87,7 @@ export function CompareToggleChip({
       data-testid={`compare-toggle-${entry.id}`}
       data-selected={isSelected ? "true" : "false"}
     >
-      <span aria-hidden className="font-mono text-[11px] text-text-muted">
+      <span aria-hidden className="font-mono text-meta text-text-muted">
         {isSelected ? "✓" : "⇄"}
       </span>
       {label}
@@ -165,7 +165,7 @@ export function CompareBar({
                     <tr key={key} className="border-b border-ink-700 last:border-b-0">
                       <th
                         scope="row"
-                        className="min-w-[7rem] px-3 py-2 align-top font-mono text-[10px] uppercase tracking-label text-text-muted"
+                        className="min-w-[7rem] px-3 py-2 align-top font-mono text-meta uppercase tracking-label text-text-muted"
                       >
                         {factLabels[key]}
                       </th>

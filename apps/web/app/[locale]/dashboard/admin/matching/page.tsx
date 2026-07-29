@@ -160,7 +160,7 @@ export default async function AdminMatchingWorkbenchPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-matching-workbench">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -221,13 +221,13 @@ export default async function AdminMatchingWorkbenchPage({
                         <span className="text-sm font-semibold text-text-primary">
                           {r.title}
                         </span>
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {r.kind ? `${t(`kind.${r.kind}` as never)} · ` : ""}
                           {t("fields.created")}: {r.createdAt.slice(0, 10)}
                         </span>
                       </div>
                       <span
-                        className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                        className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
                           STATUS_TONE[r.status] ?? STATUS_TONE.submitted
                         }`}
                       >
@@ -266,7 +266,7 @@ export default async function AdminMatchingWorkbenchPage({
                         />
                         <button
                           type="submit"
-                          className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                          className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-brand-blue"
                           data-testid={`matching-message-requester-${r.id}`}
                         >
                           {t("demand.messageRequester")}
@@ -276,10 +276,10 @@ export default async function AdminMatchingWorkbenchPage({
 
                     {r.payloadFields.length > 0 ? (
                       <div className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1">
-                        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("fields.payload")}
                         </p>
-                        <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-[11px] sm:grid-cols-2">
+                        <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-meta sm:grid-cols-2">
                           {r.payloadFields.map((f) => (
                             <div key={f.key} className="flex gap-1">
                               <dt className="font-mono text-text-muted">{f.key}:</dt>
@@ -295,10 +295,10 @@ export default async function AdminMatchingWorkbenchPage({
                         className="rounded-md border border-state-success/30 bg-state-success/5 px-2 py-1"
                         data-testid={`matching-log-${r.id}`}
                       >
-                        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("log.title")}
                         </p>
-                        <ul className="mt-1 flex flex-col gap-1 text-[11px] text-text-secondary">
+                        <ul className="mt-1 flex flex-col gap-1 text-meta text-text-secondary">
                           {r.matchLog.map((m, i) => (
                             <li key={`${m.worker_id}-${i}`}>
                               {m.decided_at.slice(0, 16).replace("T", " ")} ·{" "}
@@ -312,7 +312,7 @@ export default async function AdminMatchingWorkbenchPage({
                     ) : null}
 
                     {r.manualReviewNote && r.matchLog.length === 0 ? (
-                      <p className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-[11px] text-text-secondary">
+                      <p className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-meta text-text-secondary">
                         <span className="font-mono uppercase tracking-label text-text-muted">
                           {t("fields.reviewNote")}:
                         </span>{" "}
@@ -343,10 +343,10 @@ export default async function AdminMatchingWorkbenchPage({
                           className="rounded-md border border-brand-blue/20 bg-brand-blue/5 p-2"
                           data-testid={`matching-engine-${r.id}`}
                         >
-                          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                             {t("engine.title")}
                           </p>
-                          <p className="text-[11px] text-text-secondary">
+                          <p className="text-meta text-text-secondary">
                             {t("engine.humanRule")}
                           </p>
                           <ul className="mt-1 flex flex-col gap-1.5">
@@ -362,7 +362,7 @@ export default async function AdminMatchingWorkbenchPage({
                                     {w.displayName ?? t("supply.unnamed")}
                                   </span>
                                   <span className="flex items-center gap-2">
-                                    <span className="rounded-sm border border-brand-blue/30 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue">
+                                    <span className="rounded-sm border border-brand-blue/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                                       {t(`engine.status.${match.status}` as never)}
                                     </span>
                                     {w.profileId ? (
@@ -376,7 +376,7 @@ export default async function AdminMatchingWorkbenchPage({
                                         />
                                         <button
                                           type="submit"
-                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue hover:border-brand-blue"
+                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-meta font-semibold text-brand-blue hover:border-brand-blue"
                                           data-testid={`matching-start-conversation-${r.id}-${w.id}`}
                                         >
                                           {t("engine.start")}
@@ -387,7 +387,7 @@ export default async function AdminMatchingWorkbenchPage({
                                 </span>
                                 {/* §19: the coverage % never without its basis. */}
                                 {match.skillFit ? (
-                                  <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                                  <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                                     {match.skillFit.pct}% ·{" "}
                                     {t("fit.basis", {
                                       matched: match.skillFit.matchedTotal,
@@ -425,18 +425,18 @@ export default async function AdminMatchingWorkbenchPage({
                           className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                           data-testid={`matching-team-${r.id}`}
                         >
-                          <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                          <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
                             {t("team.title")}
                           </p>
                           {teamsRead === null || teamsRead.kind === "unreadable" ? (
                             <p
-                              className="mt-1 text-[11px] text-text-muted"
+                              className="mt-1 text-meta text-text-muted"
                               data-testid="team-not-readable"
                             >
                               {t("team.notReadable")}
                             </p>
                           ) : teamsRead.teams.length === 0 ? (
-                            <p className="mt-1 text-[11px] text-text-muted">
+                            <p className="mt-1 text-meta text-text-muted">
                               {t("team.empty")}
                             </p>
                           ) : (
@@ -475,19 +475,19 @@ export default async function AdminMatchingWorkbenchPage({
                                       <span className="text-xs font-semibold text-text-primary">
                                         {team.name}
                                       </span>
-                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-cyan">
+                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan">
                                         {t(`engine.status.${teamMatch.status}` as never)}
                                       </span>
                                     </span>
                                     {matchable.length === 0 ? (
-                                      <span className="text-[11px] text-text-muted">
+                                      <span className="text-meta text-text-muted">
                                         {t("team.noMatchableMembers")}
                                       </span>
                                     ) : (
                                       <>
                                         {/* §19: coverage with its FULL basis. */}
                                         {teamMatch.coverage ? (
-                                          <span className="text-[11px] text-text-secondary">
+                                          <span className="text-meta text-text-secondary">
                                             {t("team.coverage", {
                                               covered: teamMatch.coverage.coveredCount,
                                               total: teamMatch.coverage.needTotal,
@@ -497,7 +497,7 @@ export default async function AdminMatchingWorkbenchPage({
                                           </span>
                                         ) : null}
                                         {teamMatch.setBlockers.length > 0 ? (
-                                          <span className="text-[11px] text-state-danger">
+                                          <span className="text-meta text-state-danger">
                                             {t("team.blockers")}{" "}
                                             {teamMatch.setBlockers
                                               .map(
@@ -514,7 +514,7 @@ export default async function AdminMatchingWorkbenchPage({
                                           {teamMatch.members.map((m) => (
                                             <li
                                               key={m.memberRef}
-                                              className="text-[11px] text-text-secondary"
+                                              className="text-meta text-text-secondary"
                                             >
                                               {m.memberRef} ·{" "}
                                               {t(`engine.status.${m.result.status}` as never)}{" "}
@@ -528,7 +528,7 @@ export default async function AdminMatchingWorkbenchPage({
                                       </>
                                     )}
                                     {unmatchable > 0 ? (
-                                      <span className="text-[11px] text-text-muted">
+                                      <span className="text-meta text-text-muted">
                                         {t("team.unmatchableMembers", { count: unmatchable })}
                                       </span>
                                     ) : null}
@@ -570,16 +570,16 @@ export default async function AdminMatchingWorkbenchPage({
                             className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                             data-testid={`matching-fit-${r.id}`}
                           >
-                            <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                            <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
                               {t("fit.title")}
                             </p>
-                            <p className="text-[11px] leading-relaxed text-text-secondary">
+                            <p className="text-meta leading-relaxed text-text-secondary">
                               {t("fit.needLine", { n: r.structuredNeed.escoSkillUris.length })}{" "}
                               {r.structuredNeed.escoSkillUris.map(escoLabel).join(", ")}
                             </p>
                             {fits.length === 0 ? (
                               <p
-                                className="mt-1 text-[11px] text-text-muted"
+                                className="mt-1 text-meta text-text-muted"
                                 data-testid="fit-no-overlap"
                               >
                                 {t("fit.noOverlap")}
@@ -602,7 +602,7 @@ export default async function AdminMatchingWorkbenchPage({
                                     </span>
                                     {/* §19 b/c: the basis, with the confirmed
                                         share always separated. */}
-                                    <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                                    <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                                       {t("fit.basis", {
                                         matched: fit.matchedTotal,
                                         total: fit.needTotal,
@@ -610,7 +610,7 @@ export default async function AdminMatchingWorkbenchPage({
                                       })}
                                     </span>
                                     {fit.missingUris.length > 0 ? (
-                                      <span className="text-[11px] text-text-muted">
+                                      <span className="text-meta text-text-muted">
                                         {t("fit.missing")}:{" "}
                                         {fit.missingUris.map(escoLabel).join(", ")}
                                       </span>
@@ -619,7 +619,7 @@ export default async function AdminMatchingWorkbenchPage({
                                 ))}
                               </ul>
                             )}
-                            <p className="mt-1.5 text-[10px] leading-relaxed text-text-muted">
+                            <p className="mt-1.5 text-meta leading-relaxed text-text-muted">
                               {t("fit.humanNote")}
                             </p>
                           </div>
@@ -627,7 +627,7 @@ export default async function AdminMatchingWorkbenchPage({
                       })()
                     ) : (
                       <div className="flex flex-col gap-1.5" data-testid={`fit-unstructured-${r.id}`}>
-                        <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] leading-relaxed text-text-muted">
+                        <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted">
                           {t("fit.unstructured")}
                         </p>
                         <StructureNeedForm requestId={r.id} />
@@ -641,10 +641,10 @@ export default async function AdminMatchingWorkbenchPage({
                         className="rounded-md border border-state-success/20 bg-state-success/5 px-2 py-1.5"
                         data-testid={`agency-offers-${r.id}`}
                       >
-                        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("agencyOffers.title")}
                         </p>
-                        <ul className="mt-0.5 flex flex-col gap-0.5 text-[11px] text-text-secondary">
+                        <ul className="mt-0.5 flex flex-col gap-0.5 text-meta text-text-secondary">
                           {r.agencyOffers.map((o, i) => (
                             <li key={`${o.agencyName ?? "x"}-${i}`}>
                               {o.agencyName ?? t("agencyOffers.unnamed")}
@@ -704,7 +704,7 @@ export default async function AdminMatchingWorkbenchPage({
                 ...new Set(supply.flatMap((w) => w.professionSlugs)),
               ].sort();
               const chip = (active: boolean): string =>
-                `rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-label ${
+                `rounded-md border px-2 py-1 font-mono text-meta uppercase tracking-label ${
                   active
                     ? "border-brand-blue text-brand-blue"
                     : "border-ink-500 text-text-secondary hover:border-brand-blue"
@@ -823,7 +823,7 @@ export default async function AdminMatchingWorkbenchPage({
                           {w.displayName ?? t("supply.unnamed")}
                         </span>
                       </span>
-                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
                         {w.availabilityStatus === "available" ? (
                           <span className="live-dot" aria-hidden />
                         ) : null}
@@ -835,7 +835,7 @@ export default async function AdminMatchingWorkbenchPage({
                           : t("supply.availability.unknown")}
                       </span>
                     </div>
-                    <p className="text-[11px] text-text-secondary">
+                    <p className="text-meta text-text-secondary">
                       {w.professionSlugs.length > 0
                         ? w.professionSlugs.map(professionLabel).join(", ")
                         : t("supply.noProfession")}
@@ -845,7 +845,7 @@ export default async function AdminMatchingWorkbenchPage({
                         : ""}
                     </p>
                     {/* Honest signal counts — declared is NOT verified. */}
-                    <p className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px] uppercase tracking-label">
+                    <p className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-meta uppercase tracking-label">
                       <span className="text-text-muted">
                         {t("supply.skillsDeclared")}: {w.skillsDeclared}
                       </span>

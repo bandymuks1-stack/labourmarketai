@@ -61,7 +61,7 @@ export default async function VisionPage({
           data-testid="vision-internal-preview"
           className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-4"
         >
-          <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
             {t("internalPreviewBadge")}
           </span>
           <p className="text-sm leading-relaxed text-text-secondary">

@@ -41,7 +41,7 @@ export function ProjectStageGantt({ gantt }: { gantt: StageGantt }) {
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("ganttTitle")}
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {gantt.windowStart} → {gantt.windowEnd}
         </span>
       </header>
@@ -56,7 +56,7 @@ export function ProjectStageGantt({ gantt }: { gantt: StageGantt }) {
               aria-hidden
               data-testid="project-gantt-today"
             >
-              <span className="absolute -top-4 -translate-x-1/2 font-mono text-[9px] uppercase tracking-label text-brand-blue">
+              <span className="absolute -top-4 -translate-x-1/2 font-mono text-meta uppercase tracking-label text-brand-blue">
                 {t("ganttToday")}
               </span>
             </div>
@@ -75,7 +75,7 @@ export function ProjectStageGantt({ gantt }: { gantt: StageGantt }) {
                 />
               </div>
               {b.overdue && (
-                <span className="shrink-0 font-mono text-[9px] uppercase tracking-label text-state-danger">
+                <span className="shrink-0 font-mono text-meta uppercase tracking-label text-state-danger">
                   {t("ganttOverdue")}
                 </span>
               )}
@@ -90,11 +90,11 @@ export function ProjectStageGantt({ gantt }: { gantt: StageGantt }) {
           <li key={b.id} className="flex flex-col gap-1 rounded-md border border-ink-600 p-2">
             <div className="flex items-center justify-between gap-2">
               <span className="truncate text-sm text-text-primary">{b.name}</span>
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t(`statuses.${b.status}`)}
               </span>
             </div>
-            <span className="font-mono text-[10px] text-text-muted">
+            <span className="font-mono text-meta text-text-muted">
               {b.start} → {b.end}
               {b.overdue ? ` · ${t("ganttOverdue")}` : ""}
             </span>

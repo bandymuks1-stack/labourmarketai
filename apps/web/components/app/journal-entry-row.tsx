@@ -132,7 +132,7 @@ export function JournalEntryRow({
         {error && (
           <span
             role="alert"
-            className="w-full text-[11px] text-state-danger"
+            className="w-full text-meta text-state-danger"
             data-testid={`journal-entry-restore-error-${entryId}`}
           >
             {error}
@@ -196,7 +196,7 @@ export function JournalEntryRow({
               />
             </>
           ) : (
-            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
               {t("entry.deleteBlocked")}
             </span>
           )}
@@ -217,7 +217,7 @@ export function JournalEntryRow({
         {error && (
           <span
             role="alert"
-            className="text-[11px] text-state-danger"
+            className="text-meta text-state-danger"
             data-testid={`journal-entry-delete-error-${entryId}`}
           >
             {error}
@@ -226,14 +226,14 @@ export function JournalEntryRow({
         {reprocessResult !== null &&
           (reprocessResult.status === "failed" ? (
             <span
-              className="w-full text-[11px] text-state-warning"
+              className="w-full text-meta text-state-warning"
               data-testid={`journal-entry-reprocess-failed-${entryId}`}
             >
               {t("pipelineFailed", { trace: reprocessResult.trace })}
             </span>
           ) : (
             <span
-              className="w-full text-[11px] text-text-secondary"
+              className="w-full text-meta text-text-secondary"
               data-testid={`journal-entry-reprocess-result-${entryId}`}
             >
               {t("pipelineLine", {
@@ -250,7 +250,7 @@ export function JournalEntryRow({
         {reprocessError && (
           <span
             role="alert"
-            className="w-full text-[11px] text-state-danger"
+            className="w-full text-meta text-state-danger"
             data-testid={`journal-entry-reprocess-error-${entryId}`}
           >
             {t("saveError")}

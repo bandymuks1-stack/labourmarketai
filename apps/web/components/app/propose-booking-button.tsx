@@ -80,10 +80,10 @@ export function ProposeBookingButton({
   if (state === "sent") {
     return (
       <div className="flex flex-col gap-1" data-testid="propose-booking-sent">
-        <span className="text-[11px] font-medium text-state-success">{labels.sent}</span>
+        <span className="text-meta font-medium text-state-success">{labels.sent}</span>
         {/* What happens next: the worker decides; the answer lands under
             Bookings; the proposal stays withdrawable until answered. */}
-        <span className="text-[11px] text-text-muted">{tPropose("afterSent")}</span>
+        <span className="text-meta text-text-muted">{tPropose("afterSent")}</span>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export function ProposeBookingButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10"
+        className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10"
         data-testid={variant === "rebook" ? "propose-again-open" : "propose-booking-open"}
       >
         {labels.open}
@@ -107,10 +107,10 @@ export function ProposeBookingButton({
           until the WORKER accepts. Stated up front, honestly. The rebook
           variant says instead that this RE-OPENS the same proposal with new
           dates and the worker decides again. */}
-      <p className="text-[11px] text-text-secondary" data-testid="propose-booking-mode-note">
+      <p className="text-meta text-text-secondary" data-testid="propose-booking-mode-note">
         {variant === "rebook" ? tPropose("againModeNote") : tPropose("modeNote")}
       </p>
-      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
         {labels.startDate}
         <input
           type="date"
@@ -119,7 +119,7 @@ export function ProposeBookingButton({
           className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
         {labels.note}
         <input
           type="text"
@@ -134,29 +134,29 @@ export function ProposeBookingButton({
           type="button"
           disabled={pending}
           onClick={send}
-          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {pending ? labels.sending : labels.send}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-[11px] text-text-muted hover:text-text-secondary"
+          className="text-meta text-text-muted hover:text-text-secondary"
         >
           {labels.cancel}
         </button>
       </div>
       {state === "unavailable" ? (
-        <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+        <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state === "not_entitled" ? (
-        <span className="text-[11px] text-state-amber">{labels.notEntitled}</span>
+        <span className="text-meta text-state-amber">{labels.notEntitled}</span>
       ) : state === "rate_limited" ? (
         // Bounded request budget reached (Wagon 1) — honest limit note.
-        <span className="text-[11px] text-state-warning" data-testid="propose-booking-limit">
+        <span className="text-meta text-state-warning" data-testid="propose-booking-limit">
           {tPropose("rateLimited")}
         </span>
       ) : state === "error" ? (
-        <span className="text-[11px] text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger">{labels.error}</span>
       ) : null}
     </div>
   );

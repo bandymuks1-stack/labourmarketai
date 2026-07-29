@@ -139,7 +139,7 @@ export default async function PrivacyPage({
 
       {/* 1. Employer visibility — the profile_discoverability consent. */}
       <section className="card-border p-5" data-testid="privacy-visibility" id="visibility">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.visibility")}
         </p>
         <div className="mt-3">
@@ -180,7 +180,7 @@ export default async function PrivacyPage({
           data-testid="privacy-contact-requests"
           id="contact-requests"
         >
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tc("contactRequests.section")}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-text-primary">
@@ -216,7 +216,7 @@ export default async function PrivacyPage({
 
       {/* 2. Data transfers to companies — individual disclosure permissions. */}
       <section className="card-border p-5" data-testid="privacy-disclosures" id="disclosures">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.disclosures")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
@@ -249,10 +249,10 @@ export default async function PrivacyPage({
                     .join(", ")}
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.createdAt.slice(0, 10)}
                   </span>
-                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {tc(`history.action.${r.action}` as never)}
                   </span>
                 </span>
@@ -264,7 +264,7 @@ export default async function PrivacyPage({
 
       {/* 3. Consent history — the user's own immutable ledger. */}
       <section className="card-border p-5" data-testid="privacy-history" id="history">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.history")}
         </p>
         {discoverabilityRows.length === 0 && disclosureRows.length === 0 ? (
@@ -284,11 +284,11 @@ export default async function PrivacyPage({
                     : r.purpose}
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.createdAt.slice(0, 16).replace("T", " ")} · {r.version} ·{" "}
                     {r.locale}
                   </span>
-                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {tc(`history.action.${r.action}` as never)}
                   </span>
                 </span>
@@ -300,7 +300,7 @@ export default async function PrivacyPage({
 
       {/* 4. Privacy rights & contact — pre-existing real self-service. */}
       <section className="card-border p-5" data-testid="privacy-export" id="rights">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc("sections.rights")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
@@ -325,7 +325,7 @@ export default async function PrivacyPage({
       </section>
 
       <section className="card-border p-5" data-testid="privacy-deletion">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("deletion.title")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text-primary">
@@ -349,7 +349,7 @@ export default async function PrivacyPage({
 
       {myRequests.length > 0 && (
         <section className="card-border p-5" data-testid="privacy-requests-list">
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("requests.title")}
           </p>
           <ul className="mt-3 flex flex-col gap-2">
@@ -366,10 +366,10 @@ export default async function PrivacyPage({
                       : humanizeCode(r.type)}
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.createdAt.slice(0, 10)}
                   </span>
-                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                  <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {t.has(`requests.status.${r.status}` as never)
                       ? t(`requests.status.${r.status}` as never)
                       : humanizeCode(r.status)}

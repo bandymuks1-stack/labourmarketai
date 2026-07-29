@@ -59,7 +59,7 @@ export async function FeatureAvailabilityGrid({
     >
       {showHeading && (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {comingLater
               ? t("dashboard.comingLater.eyebrow")
               : t("dashboard.featuresHeading.eyebrow")}
@@ -97,7 +97,7 @@ export async function FeatureAvailabilityGrid({
                   {t(f.labelKey)}
                 </h3>
                 {!active && (
-                  <span className="shrink-0 rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
+                  <span className="shrink-0 rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
                     {t("features.preparing_badge")}
                   </span>
                 )}
@@ -108,12 +108,12 @@ export async function FeatureAvailabilityGrid({
               {active && f.primaryRoute ? (
                 <Link
                   href={f.primaryRoute as "/dashboard/profile"}
-                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+                  className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-brand-blue"
                 >
                   {t("dashboard.featuresHeading.open")} →
                 </Link>
               ) : f.preparingReasonKey ? (
-                <p className="mt-auto text-[11px] leading-relaxed text-text-muted">
+                <p className="mt-auto text-meta leading-relaxed text-text-muted">
                   {t(f.preparingReasonKey)}
                 </p>
               ) : null}

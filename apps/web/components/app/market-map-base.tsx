@@ -443,7 +443,7 @@ export function MarketMapBase({
             <p className="text-center text-xs font-medium text-text-primary">
               {t("previewTitle")}
             </p>
-            <p className="text-center text-[11px] text-text-secondary">
+            <p className="text-center text-meta text-text-secondary">
               {previewPoint.lat.toFixed(4)}, {previewPoint.lng.toFixed(4)} ·{" "}
               {t("previewKeepNote")}
             </p>
@@ -469,7 +469,7 @@ export function MarketMapBase({
           </div>
         ) : mapEditMode ? (
           <p
-            className="text-center text-[11px] text-brand-cyan"
+            className="text-center text-meta text-brand-cyan"
             data-testid="location-map-edit-hint"
           >
             {t("mapEditHint")}
@@ -478,7 +478,7 @@ export function MarketMapBase({
           <div className="flex flex-col items-center gap-1.5">
             {pickLockedHint && (
               <p
-                className="text-center text-[11px] text-state-warning"
+                className="text-center text-meta text-state-warning"
                 data-testid="location-map-locked-hint"
                 role="status"
               >
@@ -499,7 +499,7 @@ export function MarketMapBase({
             </button>
           </div>
         ) : (
-          <p className="text-center text-[11px] text-text-muted" data-testid="location-map-tap-hint">
+          <p className="text-center text-meta text-text-muted" data-testid="location-map-tap-hint">
             {t("mapTapHint")}
           </p>
         )}
@@ -511,7 +511,7 @@ export function MarketMapBase({
             {/* Honest precision: device / selected city / approximate country /
                 not pinpointed — so a marker never looks more precise than it is. */}
             <span
-              className="rounded-full border border-ink-500 px-2 py-0.5 text-[10px] font-medium text-text-muted"
+              className="rounded-full border border-ink-500 px-2 py-0.5 text-meta font-medium text-text-muted"
               data-testid="location-precision"
             >
               {t(PRECISION_KEY[resolveLocation(selected).precision])}
@@ -520,7 +520,7 @@ export function MarketMapBase({
         ) : (
           <p className="text-center text-xs text-text-muted">{t("panelEmpty")}</p>
         )}
-        <p className="text-center text-[11px] text-text-muted">
+        <p className="text-center text-meta text-text-muted">
           {t("radiusValue", { km: selected?.radiusKm ?? radiusKm })}
         </p>
       </div>
@@ -542,7 +542,7 @@ export function MarketMapBase({
         </select>
         {/* First-use UX (2026-07-04): "25 km" meant nothing to a first-time
             mobile user — say plainly what the circle is. */}
-        <span className="text-[11px] leading-relaxed text-text-muted" data-testid="map-locator-radius-help">
+        <span className="text-meta leading-relaxed text-text-muted" data-testid="map-locator-radius-help">
           {t("radiusHelp", { km: selected?.radiusKm ?? radiusKm })}
         </span>
       </label>
@@ -559,10 +559,10 @@ export function MarketMapBase({
             {t(selected.source === "auto" ? "sourceAuto" : "sourceManual")}
             {whereText(selected) ? ` · ${whereText(selected)}` : ""}
           </p>
-          <p className="text-[11px] leading-relaxed text-text-secondary" data-testid="map-locator-usable">
+          <p className="text-meta leading-relaxed text-text-secondary" data-testid="map-locator-usable">
             {t("usableNote", { km: selected.radiusKm })}
           </p>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("savedLocally")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("savedLocally")}</p>
           <div className="mt-1 flex flex-wrap gap-2">
             <button
               type="button"

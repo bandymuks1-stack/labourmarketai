@@ -185,14 +185,14 @@ function EditEntrySheet({
         className="relative mt-auto flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-2xl border-t border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-card outline-none md:mt-0 md:h-full md:max-h-none md:w-full md:max-w-xl md:rounded-none md:border-l md:border-t-0"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-ink-600 bg-ink-900/95 px-4 py-3 backdrop-blur">
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {title}
           </p>
           <button
             type="button"
             onClick={onClose}
             aria-label={closeLabel}
-            className="inline-flex min-h-[2.25rem] items-center rounded-md border border-ink-500 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            className="inline-flex min-h-[2.25rem] items-center rounded-md border border-ink-500 px-2.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             ✕
           </button>

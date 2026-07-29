@@ -68,7 +68,7 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
       <p className="text-xs leading-relaxed text-text-secondary">{labels.intro}</p>
 
       <div className="flex flex-col gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.visibleNow}
         </span>
         <ul className="flex flex-col gap-1.5" data-testid="map-layers-visible">
@@ -82,7 +82,7 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
                 <span className="min-w-0">
                   <span className="block text-sm text-text-primary">{row.label}</span>
                   {row.hint && (
-                    <span className="block text-[11px] leading-relaxed text-text-muted">
+                    <span className="block text-meta leading-relaxed text-text-muted">
                       {row.hint}
                     </span>
                   )}
@@ -115,7 +115,7 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.futureLayers}
           <span className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-1.5 py-0.5 text-state-warning">
             {labels.futureBadge}
@@ -126,7 +126,7 @@ export function MapLayersLegend({ labels }: { labels: MapLayersLabels }) {
             <li key={item}>
               <span
                 aria-disabled="true"
-                className="inline-block cursor-not-allowed rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-muted opacity-70"
+                className="inline-block cursor-not-allowed rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-meta text-text-muted opacity-70"
               >
                 {item}
               </span>

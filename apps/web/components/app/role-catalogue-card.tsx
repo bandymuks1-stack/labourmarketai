@@ -74,7 +74,7 @@ export async function RoleCatalogueCard({
         </h3>
         <span
           className={cn(
-            "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
+            "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label",
             chipTone,
           )}
         >
@@ -85,14 +85,14 @@ export async function RoleCatalogueCard({
         {t(role.descriptionKey)}
       </p>
       {!isActive && role.preparingReasonKey ? (
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t(role.preparingReasonKey)}
         </p>
       ) : null}
       {hasHonestStartPath && ctaRoute ? (
         <Link
           href={ctaRoute as "/dashboard"}
-          className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+          className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-brand-blue"
           data-testid={`role-catalogue-card-${role.id}-cta`}
         >
           {isActive

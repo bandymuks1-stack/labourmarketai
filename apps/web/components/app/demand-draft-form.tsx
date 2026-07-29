@@ -174,7 +174,7 @@ export function DemandDraftForm({
           if (f.variant === "textarea") {
             return (
               <label key={id} className="sm:col-span-2 flex flex-col gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {label}
                 </span>
                 <textarea
@@ -195,7 +195,7 @@ export function DemandDraftForm({
             const opts = selectOptions[f.selectOptionsKey] ?? [];
             return (
               <div key={id} className="sm:col-span-2 flex flex-col gap-1.5">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {label}
                 </span>
                 <OptionCards
@@ -212,7 +212,7 @@ export function DemandDraftForm({
                   }))}
                 />
                 {f.helpKey ? (
-                  <span className="text-[11px] leading-snug text-text-muted">
+                  <span className="text-meta leading-snug text-text-muted">
                     {t(f.helpKey)}
                   </span>
                 ) : null}
@@ -223,7 +223,7 @@ export function DemandDraftForm({
             const opts = selectOptions[f.selectOptionsKey] ?? [];
             return (
               <label key={id} className="flex flex-col gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {label}
                 </span>
                 <select
@@ -247,7 +247,7 @@ export function DemandDraftForm({
           }
           return (
             <label key={id} className="flex flex-col gap-1">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {label}
               </span>
               <input

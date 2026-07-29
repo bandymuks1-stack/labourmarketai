@@ -139,7 +139,7 @@ export function MarketMapCapture({
                   <span className="font-medium text-text-primary">{countryName(p.countryCode)}{p.city ? `, ${p.city}` : ""}</span>
                   {/* Direction: primary / secondary / optional (localized, not raw enum). */}
                   <span
-                    className="rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+                    className="rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue"
                     data-testid="capture-preferred-priority"
                   >
                     {t(`priority.${p.priority}`)}
@@ -148,17 +148,17 @@ export function MarketMapCapture({
                 {p.intents.length > 0 && (
                   <div className="flex flex-wrap gap-1" data-testid="capture-preferred-intents">
                     {p.intents.map((i) => (
-                      <span key={i} className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[11px] text-text-secondary">
+                      <span key={i} className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-meta text-text-secondary">
                         {t(`intent.${i}`)}
                       </span>
                     ))}
                   </div>
                 )}
-                {p.shortNote && <p className="text-[11px] italic leading-relaxed text-text-muted">{p.shortNote}</p>}
+                {p.shortNote && <p className="text-meta italic leading-relaxed text-text-muted">{p.shortNote}</p>}
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Inline edit: change this location's visibility. */}
                   <select
-                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     value={p.visibilityLevel}
                     disabled={pending}
                     data-testid="capture-preferred-visibility"
@@ -172,7 +172,7 @@ export function MarketMapCapture({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => setPreferredLocationActiveAction(p.id, !p.active))}
-                    className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-cyan"
                     data-testid="capture-preferred-toggle"
                   >
                     {p.active ? t("disable") : t("enable")}
@@ -200,7 +200,7 @@ export function MarketMapCapture({
         </div>
 
         <fieldset className="flex flex-wrap gap-1.5">
-          <legend className="mb-1 w-full font-mono text-[10px] uppercase tracking-label text-text-muted">{t("preferred.intents")}</legend>
+          <legend className="mb-1 w-full font-mono text-meta uppercase tracking-label text-text-muted">{t("preferred.intents")}</legend>
           {INTENTS.map((i) => {
             const on = pIntents.includes(i);
             return (
@@ -291,7 +291,7 @@ export function MarketMapCapture({
             {t("preferred.add")}
           </Button>
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("aggregatedHint")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("aggregatedHint")}</p>
       </div>
 
       {/* ── Login location consent ────────────────────────────────────── */}
@@ -361,21 +361,21 @@ export function MarketMapCapture({
                   <span className="font-medium text-text-primary">{d.locationLabel || countryName(d.countryCode)}</span>
                   {d.urgency && (
                     <span
-                      className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-state-warning"
+                      className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
                       data-testid="capture-demand-urgency"
                     >
                       {t(`urgency.${d.urgency}`)}
                     </span>
                   )}
                   {d.mobilityRequired && (
-                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[10px] text-text-secondary">{t("demand.mobility")}</span>
+                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-meta text-text-secondary">{t("demand.mobility")}</span>
                   )}
                   {d.accommodationNeeded && (
-                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-[10px] text-text-secondary">{t("demand.accommodation")}</span>
+                    <span className="rounded-full border border-border-subtle bg-surface-1 px-2 py-0.5 text-meta text-text-secondary">{t("demand.accommodation")}</span>
                   )}
                 </div>
                 {(people || dates) && (
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-text-muted">
                     {people && <span>{t("demand.people")}: {people}</span>}
                     {dates && <span>{t("demand.dates")}: {dates}</span>}
                   </div>
@@ -383,7 +383,7 @@ export function MarketMapCapture({
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Inline edit: need type (localized, not a raw enum). */}
                   <select
-                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     value={d.needType ?? ""}
                     disabled={pending}
                     data-testid="capture-demand-needtype"
@@ -396,7 +396,7 @@ export function MarketMapCapture({
                   </select>
                   {/* Inline edit: change this company-need location's visibility. */}
                   <select
-                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary"
+                    className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     value={d.visibilityLevel}
                     disabled={pending}
                     data-testid="capture-demand-visibility"
@@ -410,7 +410,7 @@ export function MarketMapCapture({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => setDemandLocationActiveAction(d.id, !d.active))}
-                    className="ml-auto text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-cyan"
                     data-testid="capture-demand-toggle"
                   >
                     {d.active ? t("disable") : t("enable")}
@@ -423,7 +423,7 @@ export function MarketMapCapture({
         ) : (
           <p className="text-xs leading-relaxed text-text-secondary">{t("demand.empty")}</p>
         )}
-        <Link href={"/dashboard/company" as "/dashboard"} className="inline-flex w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan" data-testid="capture-demand-add">
+        <Link href={"/dashboard/company" as "/dashboard"} className="inline-flex w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan" data-testid="capture-demand-add">
           {t("demand.addCta")} →
         </Link>
       </div>

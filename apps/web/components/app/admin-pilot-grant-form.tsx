@@ -53,7 +53,7 @@ export function AdminPilotGrantForm({
   return (
     <div className="card-border flex flex-col gap-3 p-4" data-testid="admin-pilot-grant">
       <div className="flex flex-wrap gap-3">
-        <label className="flex flex-1 flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-1 flex-col gap-1 text-meta text-text-muted">
           {labels.ownerId}
           <input
             value={ownerId}
@@ -62,7 +62,7 @@ export function AdminPilotGrantForm({
             className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 font-mono text-xs text-text-primary"
           />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.plan}
           <select
             value={planKey}
@@ -95,9 +95,9 @@ export function AdminPilotGrantForm({
           {labels.revoke}
         </button>
         {state === "done" ? (
-          <span className="text-[11px] text-state-success">{labels.done}</span>
+          <span className="text-meta text-state-success">{labels.done}</span>
         ) : state === "error" ? (
-          <span className="text-[11px] text-state-danger">{labels.error}</span>
+          <span className="text-meta text-state-danger">{labels.error}</span>
         ) : null}
       </div>
     </div>

@@ -82,7 +82,7 @@ export default async function ProjectsPage({
                     {p.title ?? t("untitledProject")}
                   </span>
                   {p.city || p.country ? (
-                    <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                    <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
                       <MapPin className="h-3 w-3" aria-hidden />
                       {[p.city, p.country].filter(Boolean).join(", ")}
                     </span>
@@ -90,8 +90,8 @@ export default async function ProjectsPage({
                   <span
                     className={
                       p.assignmentStatus === "active"
-                        ? "w-fit rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
-                        : "w-fit rounded-full border border-ink-500 bg-ink-800 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                        ? "w-fit rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-success"
+                        : "w-fit rounded-full border border-ink-500 bg-ink-800 px-2.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     }
                   >
                     {p.assignmentStatus === "active"
@@ -163,7 +163,7 @@ export default async function ProjectsPage({
           ← {tRooms("backToActions")}
         </Link>
         <p
-          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-brand-orange"
           data-testid="company-context"
         >
           {tRooms("projects.context")}
@@ -203,7 +203,7 @@ export default async function ProjectsPage({
 
       {/* DRAFT — the gated create/assign flow (human decision, RPC writes). */}
       <section className="flex flex-col gap-3" data-testid="draft-section">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("draft.title")}
         </h2>
         <ProjectAssignmentManager

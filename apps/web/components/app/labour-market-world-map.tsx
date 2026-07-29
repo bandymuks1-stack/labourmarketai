@@ -126,7 +126,7 @@ export async function LabourMarketWorldMap() {
   return (
     <section className="card-border flex flex-col gap-5 p-5 sm:p-6" data-testid="labour-market-world-map">
       <header className="flex flex-col gap-1">
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
@@ -193,10 +193,10 @@ export async function LabourMarketWorldMap() {
                       </span>
                       <span className={`h-2 w-2 shrink-0 rounded-full ${DOT[z.status]}`} aria-hidden />
                     </span>
-                    <span className="text-[10px] leading-snug text-text-muted" data-testid={`world-zone-${z.key}-state`}>
+                    <span className="text-meta leading-snug text-text-muted" data-testid={`world-zone-${z.key}-state`}>
                       {nodeState(z)}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                    <span className="inline-flex items-center gap-1 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
                       {ctaLabel(z)}
                       <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
                     </span>
@@ -232,7 +232,7 @@ export async function LabourMarketWorldMap() {
                       <ArrowRight className="h-4 w-4 text-brand-blue transition-colors group-hover:text-brand-cyan" strokeWidth={2} aria-hidden />
                     </span>
                     <span className="text-xs leading-relaxed text-text-muted">{nodeState(z)}</span>
-                    <span className="mt-0.5 text-[11px] font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
+                    <span className="mt-0.5 text-meta font-semibold text-brand-blue transition-colors group-hover:text-brand-cyan">
                       {ctaLabel(z)}
                     </span>
                   </Link>
@@ -245,7 +245,7 @@ export async function LabourMarketWorldMap() {
         {/* Side panel: legend + summary */}
         <aside className="flex flex-col gap-4">
           <section className="rounded-xl border border-ink-500 bg-ink-800/40 p-4" data-testid="world-map-legend">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("legendTitle")}</p>
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("legendTitle")}</p>
             <ul className="mt-2 flex flex-col gap-1.5">
               {WORLD_MAP_LEGEND.map((role) => (
                 <li key={role} className="flex items-center gap-2 text-xs text-text-secondary">
@@ -256,7 +256,7 @@ export async function LabourMarketWorldMap() {
             </ul>
           </section>
           <section className="rounded-xl border border-ink-500 bg-ink-800/40 p-4">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("summaryTitle")}</p>
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("summaryTitle")}</p>
             <p className="mt-2 text-xs leading-relaxed text-text-secondary">{t("summaryBody")}</p>
             <p className="mt-2 text-xs font-medium text-text-primary" data-testid="world-map-real-count">
               {t("summaryCounts", { real: realCount, total: zones.length })}

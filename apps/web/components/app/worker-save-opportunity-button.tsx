@@ -62,13 +62,13 @@ export function WorkerSaveOpportunityButton({
         data-testid="save-toggle"
         data-saved={saved ? "true" : "false"}
       >
-        <span aria-hidden className="font-mono text-[11px]">
+        <span aria-hidden className="font-mono text-meta">
           {saved ? "✓" : "+"}
         </span>
         {saved ? labels.saved : labels.save}
       </button>
       {failed ? (
-        <span role="alert" className="text-[11px] text-state-warning">
+        <span role="alert" className="text-meta text-state-warning">
           {labels.error}
         </span>
       ) : null}

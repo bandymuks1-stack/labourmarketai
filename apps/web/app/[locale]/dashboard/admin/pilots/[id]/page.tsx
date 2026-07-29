@@ -101,7 +101,7 @@ export default async function AdminPilotDetailPage({
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {pilot.name}
         </h1>
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t(`kind.${pilot.organisationKind}`)} · {t(`status.${pilot.status}`)} ·{" "}
           {pilot.startsOn || pilot.endsOn
             ? `${pilot.startsOn ?? "…"} → ${pilot.endsOn ?? "…"}`
@@ -136,7 +136,7 @@ export default async function AdminPilotDetailPage({
                   <span className="truncate text-sm text-text-primary">
                     {p.name}
                   </span>
-                  <span className="font-mono text-[10px] text-text-muted">
+                  <span className="font-mono text-meta text-text-muted">
                     {p.email ?? p.profileId} ·{" "}
                     {t(`participants.joinedVia.${p.joinedVia}`)} ·{" "}
                     {new Date(p.joinedAt).toLocaleDateString(locale)}
@@ -148,7 +148,7 @@ export default async function AdminPilotDetailPage({
                     profileId={p.profileId}
                   />
                 ) : (
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("participants.left", {
                       date: new Date(p.leftAt).toLocaleDateString(locale),
                     })}
@@ -176,7 +176,7 @@ export default async function AdminPilotDetailPage({
           <h2 className="font-display text-sm font-semibold text-text-primary">
             {t("outcomes.title")}
           </h2>
-          <p className="text-[11px] text-text-muted">{t("outcomes.honesty")}</p>
+          <p className="text-meta text-text-muted">{t("outcomes.honesty")}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -186,7 +186,7 @@ export default async function AdminPilotDetailPage({
               className="rounded-md border border-ink-600/60 px-3 py-2"
             >
               <div className="font-mono text-lg text-text-primary">{d.count}</div>
-              <div className="text-[11px] text-text-muted">
+              <div className="text-meta text-text-muted">
                 {t(`outcomes.values.${d.outcome}`)}
               </div>
             </div>
@@ -220,7 +220,7 @@ export default async function AdminPilotDetailPage({
                     <span className="text-text-muted">
                       {o.participantName ?? t("outcomes.wholePilot")}
                     </span>
-                    <span className="font-mono text-[10px] text-text-muted">
+                    <span className="font-mono text-meta text-text-muted">
                       {new Date(o.createdAt).toLocaleString(locale)}
                     </span>
                   </span>
@@ -242,11 +242,11 @@ export default async function AdminPilotDetailPage({
           {t("ttv.title")}
         </summary>
         <div className="flex flex-col gap-3 pt-3">
-          <p className="text-[11px] text-text-muted">{t("ttv.help")}</p>
+          <p className="text-meta text-text-muted">{t("ttv.help")}</p>
           {/* Honest limitation: no session ↔ participant linkage exists, so
               timing below is GLOBAL — never presented as cohort-scoped. */}
           <p
-            className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] text-text-secondary"
+            className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta text-text-secondary"
             data-testid="pilot-ttv-cohort-limitation"
           >
             {t("ttv.cohortLimitation")}
@@ -261,19 +261,19 @@ export default async function AdminPilotDetailPage({
                 <div className="font-mono text-lg text-text-primary">
                   {formatDurationMs(ttv.medianMs)}
                 </div>
-                <div className="text-[11px] text-text-muted">{t("ttv.median")}</div>
+                <div className="text-meta text-text-muted">{t("ttv.median")}</div>
               </div>
               <div className="rounded-md border border-ink-600/60 px-3 py-2">
                 <div className="font-mono text-lg text-text-primary">
                   {formatDurationMs(ttv.p75Ms)}
                 </div>
-                <div className="text-[11px] text-text-muted">{t("ttv.p75")}</div>
+                <div className="text-meta text-text-muted">{t("ttv.p75")}</div>
               </div>
               <div className="rounded-md border border-ink-600/60 px-3 py-2">
                 <div className="font-mono text-lg text-text-primary">
                   {ttv.sessionsWithStart}
                 </div>
-                <div className="text-[11px] text-text-muted">
+                <div className="text-meta text-text-muted">
                   {t("ttv.sessionsWithStart")}
                 </div>
               </div>
@@ -281,7 +281,7 @@ export default async function AdminPilotDetailPage({
                 <div className="font-mono text-lg text-text-primary">
                   {ttv.sessionsReachedValue}
                 </div>
-                <div className="text-[11px] text-text-muted">
+                <div className="text-meta text-text-muted">
                   {t("ttv.sessionsReachedValue")}
                 </div>
               </div>

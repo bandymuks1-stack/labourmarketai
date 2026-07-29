@@ -57,17 +57,17 @@ export async function IntelligenceTimeline({
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <p className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-primary">
+              <span className="font-mono text-meta uppercase tracking-label text-text-primary">
                 {t(`timeline.stage.${stage.stage}`)}
               </span>
-              <span className="text-[11px] text-text-muted">
+              <span className="text-meta text-text-muted">
                 {fmtIso(stage.timestampIso)}
               </span>
             </p>
             <p className="text-xs text-text-secondary">
               {tc(stage.explanationCode)}
             </p>
-            <p className="flex flex-wrap gap-2 text-[11px] text-text-muted">
+            <p className="flex flex-wrap gap-2 text-meta text-text-muted">
               <span>
                 {t("timeline.actorLabel")}: {tc(stage.actorCode)}
               </span>

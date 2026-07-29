@@ -61,7 +61,7 @@ export function ActionCard({
           {badgeCount > 0 ? (
             <span
               data-testid={testid ? `${testid}-badge` : undefined}
-              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold leading-none text-white tabular-nums"
+              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold leading-none text-white tabular-nums"
             >
               {badgeCount > 9 ? "9+" : badgeCount}
             </span>
@@ -72,7 +72,7 @@ export function ActionCard({
         {title}
       </span>
       {description ? (
-        <span className="text-[11px] leading-snug text-text-secondary">
+        <span className="text-meta leading-snug text-text-secondary">
           {description}
         </span>
       ) : null}

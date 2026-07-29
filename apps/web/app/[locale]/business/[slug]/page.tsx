@@ -54,7 +54,7 @@ export default async function BusinessProfilePage({
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
       {/* Identity */}
       <header className="flex flex-col gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">

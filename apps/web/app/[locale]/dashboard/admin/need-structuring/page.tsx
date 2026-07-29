@@ -45,7 +45,7 @@ export default async function NeedStructuringPage({
         </ul>
       )}
 
-      <p className="text-[11px] leading-relaxed text-text-muted">{t("footnote")}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
     </main>
   );
 }

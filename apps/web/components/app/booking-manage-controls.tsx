@@ -121,7 +121,7 @@ export function BookingManageControls({
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
           data-testid="booking-reschedule-form"
         >
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.startDate")}
             <input
               type="date"
@@ -130,7 +130,7 @@ export function BookingManageControls({
               className={inputCls}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.endDate")}
             <input
               type="date"
@@ -139,7 +139,7 @@ export function BookingManageControls({
               className={inputCls}
             />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.note")}
             <input
               type="text"
@@ -162,7 +162,7 @@ export function BookingManageControls({
             <button
               type="button"
               onClick={() => setPanel("none")}
-              className="min-h-11 text-[11px] text-text-muted hover:text-text-secondary sm:min-h-0"
+              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
             >
               {t("reschedule.cancel")}
             </button>
@@ -175,7 +175,7 @@ export function BookingManageControls({
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
           data-testid="booking-deadline-form"
         >
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("deadline.label")}
             <input
               type="date"
@@ -197,7 +197,7 @@ export function BookingManageControls({
             <button
               type="button"
               onClick={() => setPanel("none")}
-              className="min-h-11 text-[11px] text-text-muted hover:text-text-secondary sm:min-h-0"
+              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
             >
               {t("deadline.cancel")}
             </button>
@@ -206,19 +206,19 @@ export function BookingManageControls({
       ) : null}
 
       {notice === "dates-saved" ? (
-        <span className="text-[11px] text-state-success">{t("reschedule.saved")}</span>
+        <span className="text-meta text-state-success">{t("reschedule.saved")}</span>
       ) : notice === "dates-unchanged" ? (
-        <span className="text-[11px] text-text-muted" data-testid="booking-reschedule-unchanged">
+        <span className="text-meta text-text-muted" data-testid="booking-reschedule-unchanged">
           {t("reschedule.notChanged")}
         </span>
       ) : notice === "deadline-saved" ? (
-        <span className="text-[11px] text-state-success">{t("deadline.saved")}</span>
+        <span className="text-meta text-state-success">{t("deadline.saved")}</span>
       ) : notice === "deadline-unsaved" ? (
-        <span className="text-[11px] text-text-muted" data-testid="booking-deadline-unsaved">
+        <span className="text-meta text-text-muted" data-testid="booking-deadline-unsaved">
           {t("deadline.notSet")}
         </span>
       ) : notice === "error" ? (
-        <span className="text-[11px] text-state-danger">{t("actions.error")}</span>
+        <span className="text-meta text-state-danger">{t("actions.error")}</span>
       ) : null}
     </div>
   );

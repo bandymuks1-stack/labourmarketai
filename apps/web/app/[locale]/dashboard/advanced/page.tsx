@@ -270,7 +270,7 @@ export default async function DashboardAdvancedPage({
           {providerNew > 0 && (
             <span
               data-testid="dashboard-service-requests-new"
-              className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
+              className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
             >
               {providerNew} {tMarket("newBadge")}
             </span>
@@ -325,7 +325,7 @@ export default async function DashboardAdvancedPage({
         {buyerNew > 0 && (
           <span
             data-testid="dashboard-outgoing-requests-new"
-            className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
+            className="inline-flex items-center rounded-full bg-brand-cyan/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-cyan tabular-nums"
           >
             {buyerNew} {tMarket("newBadge")}
           </span>
@@ -386,7 +386,7 @@ export default async function DashboardAdvancedPage({
   // never a permanent label.
   const Header = (
     <header className="flex flex-col gap-2">
-      <span className="inline-flex w-fit items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="inline-flex w-fit items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
         <span className="live-dot" aria-hidden />
         {tRole(role)}
       </span>
@@ -518,7 +518,7 @@ export default async function DashboardAdvancedPage({
               data-testid="demand-intake-section"
             >
               <div className="flex flex-col gap-1">
-                <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
                   <span className="live-dot" aria-hidden />
                   {tf("company.eyebrow")}
                 </span>
@@ -538,7 +538,7 @@ export default async function DashboardAdvancedPage({
                   progress, they are not live modules. Kept inside the
                   section so it reads as the intake's own fine print. */}
               <p
-                className="text-[11px] leading-relaxed text-text-muted"
+                className="text-meta leading-relaxed text-text-muted"
                 data-testid="journey-progress-helper"
               >
                 {tw("demand.progressHelper")}
@@ -782,7 +782,7 @@ export default async function DashboardAdvancedPage({
           data-top-slot={topSlot}
           className="flex flex-col gap-2"
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+          <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
             {t("topSlot.eyebrow")}
           </span>
           {topSlotCard}

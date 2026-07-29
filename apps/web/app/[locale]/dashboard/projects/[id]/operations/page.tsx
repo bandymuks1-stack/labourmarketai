@@ -254,9 +254,9 @@ export default async function ProjectOperationsPage({
   const hasProjectWindow = ops.project.startDate !== null;
 
   const chipClass =
-    "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary";
+    "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary";
   const sectionTitleClass =
-    "font-mono text-[10px] uppercase tracking-label text-text-muted";
+    "font-mono text-meta uppercase tracking-label text-text-muted";
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
@@ -337,8 +337,8 @@ export default async function ProjectOperationsPage({
             {projectAssets.assets.map((a) => (
               <li key={a.assignmentId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 px-3 py-2" data-testid="project-asset-row">
                 <span className="text-sm text-text-primary">{a.assetName}</span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{tAssets(`types.${a.assetType}`)}</span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">{tAssets(`assignmentStatus.${a.status}`)}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">{tAssets(`types.${a.assetType}`)}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-secondary">{tAssets(`assignmentStatus.${a.status}`)}</span>
                 {a.workerName ? <span className="text-xs text-text-muted">· {a.workerName}</span> : null}
               </li>
             ))}
@@ -373,7 +373,7 @@ export default async function ProjectOperationsPage({
             {attention.map((a) => {
               const body = (
                 <>
-                  <span className="inline-flex shrink-0 items-center rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
+                  <span className="inline-flex shrink-0 items-center rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
                     {tCentre(`attention.kind.${a.kind}`)}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
@@ -406,7 +406,7 @@ export default async function ProjectOperationsPage({
             })}
           </ul>
         )}
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {tCentre("attention.note")}
         </p>
       </section>
@@ -502,7 +502,7 @@ export default async function ProjectOperationsPage({
                     </span>
                   ) : r.overlappingBookings > 0 ? (
                     <span
-                      className="inline-flex items-center gap-1.5 rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-warning"
                       data-testid="ops-resource-booking-overlap"
                     >
                       {tCentre("resources.bookingConflict", {
@@ -519,7 +519,7 @@ export default async function ProjectOperationsPage({
             ))}
           </ul>
         )}
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {tCentre("resources.note")}
         </p>
       </section>
@@ -561,7 +561,7 @@ export default async function ProjectOperationsPage({
                   <span
                     className={
                       isOverdue(task.dueAt, now)
-                        ? "inline-flex items-center rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-state-warning"
+                        ? "inline-flex items-center rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-warning"
                         : chipClass
                     }
                   >
@@ -601,7 +601,7 @@ export default async function ProjectOperationsPage({
             {tCentre("evidence.photosLabel")}: {evidence.photoCount}
           </span>
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {tCentre("evidence.note")}
         </p>
         <Link
@@ -617,7 +617,7 @@ export default async function ProjectOperationsPage({
           nothing absent (milestones, issue registers, resource tables) is
           simulated. */}
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="ops-centre-honest-note"
       >
         {tCentre("honestNote")}

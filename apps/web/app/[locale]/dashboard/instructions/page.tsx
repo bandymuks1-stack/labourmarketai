@@ -63,7 +63,7 @@ export default async function InstructionsPage({
         {isManager ? t("managerIntro") : t("workerIntro")}
       </p>
       <p
-        className="mt-1 text-[11px] leading-relaxed text-text-muted"
+        className="mt-1 text-meta leading-relaxed text-text-muted"
         data-testid="instructions-foundation-note"
       >
         {t("foundationNote")}

@@ -98,7 +98,7 @@ export function OptionCards({
               />
             </span>
             {opt.hint ? (
-              <span className="text-[11px] leading-snug text-text-muted">
+              <span className="text-meta leading-snug text-text-muted">
                 {opt.hint}
               </span>
             ) : null}

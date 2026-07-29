@@ -273,13 +273,13 @@ export function WorkerOperationsRoleForm({
       className="mt-2 flex flex-col gap-2 rounded-md border border-ink-700 bg-surface-1 p-2"
       data-testid={`worker-ops-role-form-${workerId}`}
     >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {labels.heading}
       </span>
 
       <form action={formAction} className="flex flex-col gap-2">
         <input type="hidden" name="workerId" value={workerId} />
-        <label className="flex flex-col gap-0.5 text-[11px]">
+        <label className="flex flex-col gap-0.5 text-meta">
           <span className="text-text-secondary">{labels.roleLabel}</span>
           <DarkListbox
             name="operationsRole"
@@ -297,7 +297,7 @@ export function WorkerOperationsRoleForm({
           />
         </label>
 
-        <label className="flex flex-col gap-0.5 text-[11px]">
+        <label className="flex flex-col gap-0.5 text-meta">
           <span className="text-text-secondary">{labels.titleLabel}</span>
           <input
             type="text"
@@ -313,7 +313,7 @@ export function WorkerOperationsRoleForm({
         <button
           type="submit"
           disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-3 py-1 text-[11px] font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          className="self-start rounded-md bg-brand-blue px-3 py-1 text-meta font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid={`worker-ops-save-${workerId}`}
         >
           {isPending ? labels.saving : labels.save}
@@ -323,8 +323,8 @@ export function WorkerOperationsRoleForm({
           <p
             className={
               outcomeMessage.ok
-                ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[10px] text-state-success"
-                : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[10px] text-state-warning"
+                ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+                : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
             }
             role="status"
             data-testid={`worker-ops-result-${workerId}`}
@@ -339,7 +339,7 @@ export function WorkerOperationsRoleForm({
           - bridgeReady → interactive enable/disable toggle.
           - otherwise → visibly disabled with the exact blocker note. */}
       <div className="mt-1 flex flex-col gap-1 border-t border-ink-700 pt-2">
-        <div className="flex items-center gap-2 text-[11px] text-text-muted">
+        <div className="flex items-center gap-2 text-meta text-text-muted">
           <input
             type="checkbox"
             checked={bridge.reviewActive}
@@ -359,7 +359,7 @@ export function WorkerOperationsRoleForm({
             <button
               type="submit"
               disabled={isProvisioning}
-              className="self-start rounded-md border border-brand-blue px-3 py-1 text-[11px] font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+              className="self-start rounded-md border border-brand-blue px-3 py-1 text-meta font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
               data-testid={`worker-ops-provision-${workerId}`}
             >
               {isProvisioning ? labels.provision.provisioning : labels.provision.button}
@@ -368,8 +368,8 @@ export function WorkerOperationsRoleForm({
               <p
                 className={
                   provisionMessage.ok
-                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[10px] text-state-success"
-                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[10px] text-state-warning"
+                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
                 }
                 role="status"
                 data-testid={`worker-ops-provision-result-${workerId}`}
@@ -388,7 +388,7 @@ export function WorkerOperationsRoleForm({
             <button
               type="submit"
               disabled={isReviewPending}
-              className="self-start rounded-md bg-brand-blue px-3 py-1 text-[11px] font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+              className="self-start rounded-md bg-brand-blue px-3 py-1 text-meta font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid={`worker-ops-review-submit-${workerId}`}
             >
               {bridge.reviewActive
@@ -403,8 +403,8 @@ export function WorkerOperationsRoleForm({
               <p
                 className={
                   reviewMessage.ok
-                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[10px] text-state-success"
-                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[10px] text-state-warning"
+                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
                 }
                 role="status"
                 data-testid={`worker-ops-review-result-${workerId}`}
@@ -416,7 +416,7 @@ export function WorkerOperationsRoleForm({
         ) : (
           // Not bridge-ready → exact disabled-state blocker text.
           <p
-            className="text-[10px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid={`worker-ops-review-disabled-note-${workerId}`}
           >
             {labels.review.blockerNotReady}
@@ -429,8 +429,8 @@ export function WorkerOperationsRoleForm({
         <p
           className={
             bridge.bridgeReady
-              ? "text-[10px] leading-relaxed text-brand-blue"
-              : "text-[10px] leading-relaxed text-text-muted"
+              ? "text-meta leading-relaxed text-brand-blue"
+              : "text-meta leading-relaxed text-text-muted"
           }
           data-testid={`worker-ops-bridge-reason-${workerId}`}
           data-bridge-state={bridge.state}

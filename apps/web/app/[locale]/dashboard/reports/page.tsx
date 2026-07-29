@@ -44,7 +44,7 @@ type Translate = Awaited<ReturnType<typeof getTranslations>>;
 function MetricTile({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 p-3">
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="text-lg font-semibold tabular-nums text-text-primary">
@@ -58,7 +58,7 @@ function MetricTile({ label, value }: { label: string; value: number }) {
 function BasisNote({ t, basisKey }: { t: Translate; basisKey: string }) {
   return (
     <p
-      className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-[11px] leading-relaxed text-text-muted"
+      className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-meta leading-relaxed text-text-muted"
       data-testid={`reports-basis-${basisKey}`}
     >
       <span className="font-mono uppercase tracking-label">
@@ -114,7 +114,7 @@ export default async function ReportsHubPage({
   return (
     <div className="flex flex-col gap-6" data-testid="reports-hub">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

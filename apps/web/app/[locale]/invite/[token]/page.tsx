@@ -108,7 +108,7 @@ export default async function InvitePage({
 
   return shell(
     <>
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-2xl font-bold text-text-primary">
@@ -178,7 +178,7 @@ export default async function InvitePage({
         </div>
       )}
 
-      <p className="text-[11px] text-text-muted">
+      <p className="text-meta text-text-muted">
         {t("expiresNote", {
           date: preview.expires_at
             ? new Date(preview.expires_at).toLocaleDateString(locale)

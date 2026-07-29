@@ -107,13 +107,13 @@ function AssetManagerRow({
     <li className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3" data-testid="asset-row">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold text-text-primary">{asset.name}</span>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t(`types.${asset.assetType}`)}</span>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">{t(`conditions.${asset.condition}`)}</span>
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${asset.availability === "available" ? "border-state-success/40 text-state-success" : "border-ink-500 text-text-muted"}`}>
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`types.${asset.assetType}`)}</span>
+        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">{t(`conditions.${asset.condition}`)}</span>
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${asset.availability === "available" ? "border-state-success/40 text-state-success" : "border-ink-500 text-text-muted"}`}>
           {t(`availability.${asset.availability}`)}
         </span>
         {orgLabel ? (
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-text-muted" data-testid={`asset-org-context-${asset.id}`}>
+          <span className="inline-flex items-center gap-1.5 text-meta text-text-muted" data-testid={`asset-org-context-${asset.id}`}>
             <span className={`size-2 flex-none rounded-full ${orgLabel.dot}`} aria-hidden />
             {orgLabel.name}
           </span>
@@ -123,15 +123,15 @@ function AssetManagerRow({
       {a ? (
         <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
           <span>{t("assignedTo")}: {a.workerName ?? a.projectTitle ?? t("noWorker")}</span>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t(`assignmentStatus.${a.status}`)}</span>
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`assignmentStatus.${a.status}`)}</span>
           <button type="button" disabled={pending} onClick={() => setMode(mode === "return" ? "none" : "return")}
-            className="rounded-md border border-ink-500 px-2 py-1 text-[11px] hover:border-brand-blue" data-testid="asset-return-toggle">{t("return")}</button>
+            className="rounded-md border border-ink-500 px-2 py-1 text-meta hover:border-brand-blue" data-testid="asset-return-toggle">{t("return")}</button>
           <button type="button" disabled={pending} onClick={() => setMode(mode === "transfer" ? "none" : "transfer")}
-            className="rounded-md border border-ink-500 px-2 py-1 text-[11px] hover:border-brand-blue" data-testid="asset-transfer-toggle">{t("transfer")}</button>
+            className="rounded-md border border-ink-500 px-2 py-1 text-meta hover:border-brand-blue" data-testid="asset-transfer-toggle">{t("transfer")}</button>
         </div>
       ) : (
         <button type="button" disabled={pending} onClick={() => setMode(mode === "issue" ? "none" : "issue")}
-          className="w-fit rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] text-brand-blue hover:border-brand-blue" data-testid="asset-issue-toggle">{t("issue")}</button>
+          className="w-fit rounded-md border border-brand-blue/50 px-2 py-1 text-meta text-brand-blue hover:border-brand-blue" data-testid="asset-issue-toggle">{t("issue")}</button>
       )}
 
       {mode === "issue" && (
@@ -149,7 +149,7 @@ function AssetManagerRow({
 
       {mode === "return" && a && (
         <div className="flex flex-wrap items-center gap-2 border-t border-ink-600 pt-2">
-          <span className="text-[11px] text-text-secondary">{t("conditionAtReturn")}</span>
+          <span className="text-meta text-text-secondary">{t("conditionAtReturn")}</span>
           <select aria-label={t("conditionLabel")} value={condition} onChange={(e) => setCondition(e.target.value as AssetCondition)}
             className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="asset-return-condition">
             {ASSET_CONDITIONS.map((c) => (<option key={c} value={c}>{t(`conditions.${c}`)}</option>))}
@@ -199,7 +199,7 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
     <section className="card-border flex flex-col gap-4 p-5" data-testid="assets-registry">
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("registryTitle")}</h2>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
       </header>
 
       {!data.applied ? (
@@ -241,7 +241,7 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
           )}
 
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("addHeading")}</span>
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("addHeading")}</span>
             <div className="flex flex-wrap items-center gap-2">
               {data.orgs.length > 1 && (
                 <select aria-label={t("orgLabel")} value={effectiveOrg} onChange={(e) => setOrgId(e.target.value)}
@@ -299,7 +299,7 @@ export function MyAssignedAssetsPanel({ data }: { data: MyAssignedAssets }) {
         {data.assignments.map((a) => (
           <li key={a.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 p-3">
             <span className="text-sm text-text-primary">{a.assetName}</span>
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t(`assignmentStatus.${a.status}`)}</span>
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`assignmentStatus.${a.status}`)}</span>
             {a.status === "issued" && (
               <Button type="button" size="sm" disabled={pending} onClick={() => ack(a.id)} data-testid="asset-acknowledge">{t("acknowledge")}</Button>
             )}

@@ -214,7 +214,7 @@ export function HelpRequestPanel({
             >
               {submitting ? t("submitting") : t("submit")}
             </Button>
-            <span className="text-[11px] leading-relaxed text-text-muted">
+            <span className="text-meta leading-relaxed text-text-muted">
               {t("internalNote")}
             </span>
           </div>

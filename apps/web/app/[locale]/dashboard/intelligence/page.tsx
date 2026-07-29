@@ -90,7 +90,7 @@ export default async function IntelligencePage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("page.eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -167,7 +167,7 @@ export default async function IntelligencePage({
               className={SECTION_CLASS}
               data-testid="intelligence-missing"
             >
-              <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                 {t("page.missingTitle")}
               </h2>
               <ul className="list-inside list-disc text-xs text-text-secondary">
@@ -186,7 +186,7 @@ export default async function IntelligencePage({
             data-testid="intelligence-signals"
             aria-label={t("page.signalsTitle")}
           >
-            <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+            <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
               {t("page.signalsTitle")}
             </h2>
             {cards.map((card) => (
@@ -206,7 +206,7 @@ export default async function IntelligencePage({
           data-testid="intelligence-eurostat-context"
           aria-label={t("eurostat.sectionTitle")}
         >
-          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("eurostat.sectionTitle")}
           </h2>
           <p className="text-xs leading-relaxed text-text-secondary">
@@ -215,7 +215,7 @@ export default async function IntelligencePage({
           {buildEurostatContextCards(eurostatRows, Date.now()).map((card) => (
             <div key={card.id} className="flex flex-col gap-1">
               <TrustInsightCard card={card} locale={locale} />
-              <span className="pl-1 font-mono text-[10px] text-text-muted">
+              <span className="pl-1 font-mono text-meta text-text-muted">
                 {
                   EUROSTAT_KIND_DATASET[
                     card.kind as keyof typeof EUROSTAT_KIND_DATASET
@@ -225,7 +225,7 @@ export default async function IntelligencePage({
             </div>
           ))}
           <p
-            className="pt-1 text-[11px] leading-relaxed text-text-muted"
+            className="pt-1 text-meta leading-relaxed text-text-muted"
             data-testid="intelligence-eurostat-attribution"
           >
             {t(
@@ -244,7 +244,7 @@ export default async function IntelligencePage({
       >
         <h2
           id="intelligence-methodology-heading"
-          className="font-mono text-[11px] uppercase tracking-label text-text-secondary"
+          className="font-mono text-meta uppercase tracking-label text-text-secondary"
         >
           {t("methodology.title")}
         </h2>
@@ -262,7 +262,7 @@ export default async function IntelligencePage({
         <p className="text-xs leading-relaxed text-text-secondary">
           {t("methodology.cohort")}
         </p>
-        <h3 className="pt-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h3 className="pt-1 font-mono text-meta uppercase tracking-label text-text-muted">
           {t("page.sourcesTitle")}
         </h3>
         <ul className="flex flex-col gap-1" data-testid="intelligence-sources">
@@ -278,7 +278,7 @@ export default async function IntelligencePage({
               {/* Lifecycle badge (Trust Layer v1) — DERIVED deterministically
                   from the governance profile; the page never decides a state. */}
               <SourceStatusBadge state={deriveSourceLifecycleState(p)} />
-              <span className="w-full text-[11px] text-text-muted">
+              <span className="w-full text-meta text-text-muted">
                 {t(p.termsNoteCode.replace(/^intelligence\./, "") as never) as string}
               </span>
             </li>

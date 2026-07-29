@@ -79,7 +79,7 @@ export function DetectedSuggestionCard({
             {label}
           </span>
           {hint && (
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {hint}
             </span>
           )}
@@ -87,7 +87,7 @@ export function DetectedSuggestionCard({
         {status !== "pending" && (
           <span
             className={cn(
-              "shrink-0 font-mono text-[10px] uppercase tracking-label",
+              "shrink-0 font-mono text-meta uppercase tracking-label",
               status === "confirmed" && "text-state-success",
               status === "saved" && "text-state-success",
               status === "already_saved" && "text-text-secondary",
@@ -121,14 +121,14 @@ export function DetectedSuggestionCard({
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded-md border border-state-success/40 px-2.5 py-1 text-[11px] font-semibold text-state-success hover:border-state-success"
+            className="rounded-md border border-state-success/40 px-2.5 py-1 text-meta font-semibold text-state-success hover:border-state-success"
           >
             {t("actions.confirm")}
           </button>
           <button
             type="button"
             onClick={onDiscard}
-            className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-secondary hover:border-state-danger hover:text-state-danger"
+            className="rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-secondary hover:border-state-danger hover:text-state-danger"
           >
             {t("actions.discard")}
           </button>

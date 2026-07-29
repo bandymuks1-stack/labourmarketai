@@ -77,7 +77,7 @@ export async function EvidenceStatusStrip({
             data-status={status}
             data-active={isActive}
             title={t(`${status}.hint`)}
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] leading-tight ${
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-meta leading-tight ${
               isActive ? ACTIVE_STYLE[status].chip : MUTED_CHIP
             }`}
           >

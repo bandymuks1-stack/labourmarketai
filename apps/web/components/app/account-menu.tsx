@@ -118,7 +118,7 @@ export function AccountMenu() {
           className="w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
-            <p className="truncate px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="truncate px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
               {displayName}
             </p>
           )}

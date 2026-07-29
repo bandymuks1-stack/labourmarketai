@@ -72,7 +72,7 @@ export default async function ReviewReportPage({
             </span>
           </span>
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted" data-testid="review-report-project-note">
+        <p className="text-meta leading-relaxed text-text-muted" data-testid="review-report-project-note">
           {t("projectNote")}
         </p>
       </header>
@@ -91,7 +91,7 @@ export default async function ReviewReportPage({
                   <li key={e.id} className="flex flex-col gap-1 border-t border-border/60 pt-2 first:border-0 first:pt-0">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                       <span className="text-text-muted">{fmtDate(e.date)}</span>
-                      <span className="rounded-full bg-state-warning/10 px-2 py-0.5 text-[10px] font-medium text-state-warning">
+                      <span className="rounded-full bg-state-warning/10 px-2 py-0.5 text-meta font-medium text-state-warning">
                         {t("status.pending")}
                       </span>
                       {e.hours && (
@@ -105,17 +105,17 @@ export default async function ReviewReportPage({
                         {e.works.map((name, i) => (
                           <span
                             key={`${e.id}-${i}`}
-                            className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue"
+                            className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue"
                           >
                             {name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[11px] text-text-muted">{t("noWorks")}</span>
+                      <span className="text-meta text-text-muted">{t("noWorks")}</span>
                     )}
                     {e.needsClarification && (
-                      <span className="text-[10px] text-state-warning">{t("uncertaintyNote")}</span>
+                      <span className="text-meta text-state-warning">{t("uncertaintyNote")}</span>
                     )}
                   </li>
                 ))}

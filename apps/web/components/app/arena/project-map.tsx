@@ -35,7 +35,7 @@ export async function ProjectMap({
 
   return (
     <section className="flex flex-col gap-3" data-testid="project-map">
-      <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("title")}
       </h2>
       <ul className="grid gap-4 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export async function ProjectMap({
               </span>
               {showOrg && p.orgName ? (
                 <span
-                  className="inline-flex items-center gap-1.5 text-[11px] text-text-muted"
+                  className="inline-flex items-center gap-1.5 text-meta text-text-muted"
                   data-testid={`project-org-context-${p.id}`}
                 >
                   <span
@@ -73,7 +73,7 @@ export async function ProjectMap({
                 </span>
               ) : null}
               {p.city ? (
-                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
                   {p.city}
                 </span>
@@ -84,7 +84,7 @@ export async function ProjectMap({
                   text={String(p.assignedCount)}
                   className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
                 />
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("teamLabel")}
                 </span>
               </span>
@@ -95,14 +95,14 @@ export async function ProjectMap({
               <Link
                 href={`/${locale}/dashboard/projects/${p.id}/operations`}
                 data-testid="project-operations-link"
-                className="inline-flex min-h-8 w-fit items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+                className="inline-flex min-h-8 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               >
                 {t("openArena")} →
               </Link>
               <Link
                 href={`/${locale}/dashboard/communication`}
                 data-testid="project-card-chat-cta"
-                className="inline-flex min-h-8 w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+                className="inline-flex min-h-8 w-fit items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
               >
                 <MessageSquare className="h-3.5 w-3.5" aria-hidden />
                 {t("chatCta")}

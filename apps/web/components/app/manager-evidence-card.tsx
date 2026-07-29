@@ -34,19 +34,19 @@ export async function ManagerEvidenceCard({ evidence }: { evidence: ManagerEvide
         <h3 className="font-display text-sm font-semibold text-text-primary">
           {t("title")}
         </h3>
-        <span className="rounded-full bg-state-success/10 px-2 py-0.5 text-[10px] font-medium text-state-success">
+        <span className="rounded-full bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
           {t("systemEvidenced")}
         </span>
       </div>
 
-      <p className="text-[12px] leading-relaxed text-text-secondary">
+      <p className="text-meta leading-relaxed text-text-secondary">
         {t("description")}
       </p>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="flex flex-col">
-            <dt className="text-[10px] uppercase tracking-label text-text-muted">
+            <dt className="text-meta uppercase tracking-label text-text-muted">
               {s.label}
             </dt>
             <dd className="font-display text-lg font-semibold text-text-primary">
@@ -56,7 +56,7 @@ export async function ManagerEvidenceCard({ evidence }: { evidence: ManagerEvide
         ))}
       </dl>
 
-      <p className="text-[10px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("distinctionNote")}
       </p>
     </section>

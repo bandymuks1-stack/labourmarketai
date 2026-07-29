@@ -22,7 +22,7 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
     <section className="card-border flex flex-col gap-3 p-4" data-testid="worker-readiness-summary">
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-base font-semibold text-text-primary">{t("title")}</h2>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("note")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("note")}</p>
       </header>
 
       <ul className="flex flex-col gap-2">
@@ -35,7 +35,7 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
             <span className="break-words text-sm font-medium text-text-primary">
               {r.workerName}
             </span>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-secondary">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-text-secondary">
               <span>
                 {t("journalEntries")}:{" "}
                 <span className="font-semibold text-text-primary">{r.readiness.journalEntries}</span>

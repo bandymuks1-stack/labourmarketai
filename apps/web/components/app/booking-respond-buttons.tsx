@@ -85,7 +85,7 @@ export function BookingRespondButtons({
     return (
       <div className="flex flex-col gap-1">
         <span
-          className={`text-[11px] font-medium ${state.status === "accepted" ? "text-state-success" : "text-text-muted"}`}
+          className={`text-meta font-medium ${state.status === "accepted" ? "text-state-success" : "text-text-muted"}`}
           data-testid="booking-responded"
         >
           {state.status === "accepted" ? labels.accepted : labels.declined}
@@ -93,7 +93,7 @@ export function BookingRespondButtons({
         {state.reasonStored === false ? (
           // Honest partial: the ANSWER landed, the reason could not be
           // stored yet (v2 not installed) — one calm sentence, no jargon.
-          <span className="text-[11px] text-text-muted" data-testid="booking-reason-not-stored">
+          <span className="text-meta text-text-muted" data-testid="booking-reason-not-stored">
             {t("reason.notStored")}
           </span>
         ) : null}
@@ -130,7 +130,7 @@ export function BookingRespondButtons({
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
           data-testid="booking-decline-form"
         >
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.optionalTitle")}
             <select
               value={reasonKind}
@@ -146,7 +146,7 @@ export function BookingRespondButtons({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.noteLabel")}
             <input
               type="text"
@@ -169,7 +169,7 @@ export function BookingRespondButtons({
             <button
               type="button"
               onClick={() => setDeclineOpen(false)}
-              className="min-h-11 text-[11px] text-text-muted hover:text-text-secondary sm:min-h-0"
+              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
             >
               {t("reason.cancel")}
             </button>
@@ -177,11 +177,11 @@ export function BookingRespondButtons({
         </div>
       ) : null}
       {state.kind === "conflict" ? (
-        <span className="text-[11px] text-state-warning">{labels.conflict}</span>
+        <span className="text-meta text-state-warning">{labels.conflict}</span>
       ) : state.kind === "unavailable" ? (
-        <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+        <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state.kind === "error" ? (
-        <span className="text-[11px] text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger">{labels.error}</span>
       ) : null}
     </div>
   );

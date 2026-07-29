@@ -63,7 +63,7 @@ export function RequestContactDetailsButton({
   if (!modelApplied) {
     return (
       <p
-        className="text-[11px] text-text-muted"
+        className="text-meta text-text-muted"
         data-testid={`contact-request-unavailable-${workerId}`}
       >
         {labels.unavailable}
@@ -79,7 +79,7 @@ export function RequestContactDetailsButton({
   if (effectiveStatus === "created") {
     return (
       <p
-        className="text-[11px] text-text-secondary"
+        className="text-meta text-text-secondary"
         data-testid={`contact-request-status-${workerId}`}
         data-status="created"
       >
@@ -90,7 +90,7 @@ export function RequestContactDetailsButton({
   if (effectiveStatus === "accepted") {
     return (
       <p
-        className={`text-[11px] font-medium ${
+        className={`text-meta font-medium ${
           disclosureGranted ? "text-state-success" : "text-text-secondary"
         }`}
         data-testid={`contact-request-status-${workerId}`}
@@ -125,38 +125,38 @@ export function RequestContactDetailsButton({
           onClick={send}
           disabled={pending}
           data-testid={`contact-request-open-${workerId}`}
-          className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-[11px] font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+          className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
         >
           {pending ? labels.sending : labels.button}
         </button>
         {effectiveStatus === "declined" ? (
-          <span className="text-[11px] text-text-muted" data-status="declined">
+          <span className="text-meta text-text-muted" data-status="declined">
             {labels.declined}
           </span>
         ) : null}
         {effectiveStatus === "expired" ? (
-          <span className="text-[11px] text-text-muted" data-status="expired">
+          <span className="text-meta text-text-muted" data-status="expired">
             {labels.expired}
           </span>
         ) : null}
       </div>
       {/* What the ask covers — stated before sending, no hidden scope. */}
-      <p className="text-[10px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {labels.fieldsNote}
       </p>
       {state === "rate_limited" ? (
-        <p className="text-[11px] text-state-warning" data-testid={`contact-request-limit-${workerId}`}>
+        <p className="text-meta text-state-warning" data-testid={`contact-request-limit-${workerId}`}>
           {labels.rateLimited}
         </p>
       ) : null}
       {state === "no_organization" ? (
-        <p className="text-[11px] text-state-warning">{labels.noOrganization}</p>
+        <p className="text-meta text-state-warning">{labels.noOrganization}</p>
       ) : null}
       {state === "unavailable" ? (
-        <p className="text-[11px] text-text-muted">{labels.unavailable}</p>
+        <p className="text-meta text-text-muted">{labels.unavailable}</p>
       ) : null}
       {state === "error" ? (
-        <p className="text-[11px] text-state-danger">{labels.error}</p>
+        <p className="text-meta text-state-danger">{labels.error}</p>
       ) : null}
     </div>
   );

@@ -95,11 +95,11 @@ export function CandidatePoolBoard({
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-2xl font-bold text-text-primary">{labels.title}</h1>
         <p className="text-sm text-text-secondary">{labels.subtitle}</p>
-        <p className="text-[11px] text-text-muted">{labels.notVerifiedNote}</p>
+        <p className="text-meta text-text-muted">{labels.notVerifiedNote}</p>
       </header>
 
       <div className="flex flex-wrap gap-3" data-testid="candidate-pool-filters">
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.filterProfession}
           <select className={ctl} value={filters.profession ?? ""} onChange={(e) => set({ profession: e.target.value || undefined })}>
             <option value="">{labels.any}</option>
@@ -108,7 +108,7 @@ export function CandidatePoolBoard({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.filterCountry}
           <select className={ctl} value={filters.country ?? ""} onChange={(e) => set({ country: e.target.value || undefined })}>
             <option value="">{labels.any}</option>
@@ -117,11 +117,11 @@ export function CandidatePoolBoard({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.filterAvailableBy}
           <input type="date" className={ctl} value={filters.availableBy ?? ""} onChange={(e) => set({ availableBy: e.target.value || undefined })} />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.filterEvidence}
           <select className={ctl} value={filters.evidence ?? "any"} onChange={(e) => set({ evidence: e.target.value as CandidateFilters["evidence"] })}>
             <option value="any">{labels.any}</option>
@@ -130,7 +130,7 @@ export function CandidatePoolBoard({
             <option value="missing_info">{labels.evidenceMissing}</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.search}
           <input type="text" className={ctl} value={filters.search ?? ""} onChange={(e) => set({ search: e.target.value || undefined })} />
         </label>
@@ -173,21 +173,21 @@ export function CandidatePoolBoard({
                     {typeof c.experienceYears === "number" ? `${c.experienceYears} ${labels.expYears}` : "—"}
                   </td>
                   <td className="py-2 pr-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${BADGE[c.evidenceStatus]}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-meta font-semibold ${BADGE[c.evidenceStatus]}`}>
                       {labels[EVIDENCE_LABEL[c.evidenceStatus]]}
                     </span>
                   </td>
                   <td className="py-2 pr-3">
                     {c.workerPermission === "granted" ? (
-                      <span className="rounded-full bg-state-success/15 px-2 py-0.5 text-[10px] font-semibold text-state-success">
+                      <span className="rounded-full bg-state-success/15 px-2 py-0.5 text-meta font-semibold text-state-success">
                         {labels.permissionGranted}
                       </span>
                     ) : c.workerPermission === "withdrawn" ? (
-                      <span className="rounded-full bg-surface-1 px-2 py-0.5 text-[10px] font-semibold text-text-muted">
+                      <span className="rounded-full bg-surface-1 px-2 py-0.5 text-meta font-semibold text-text-muted">
                         {labels.permissionWithdrawn}
                       </span>
                     ) : (
-                      <span className="rounded-full bg-state-warning/15 px-2 py-0.5 text-[10px] font-semibold text-state-warning">
+                      <span className="rounded-full bg-state-warning/15 px-2 py-0.5 text-meta font-semibold text-state-warning">
                         {labels.permissionAwaiting}
                       </span>
                     )}

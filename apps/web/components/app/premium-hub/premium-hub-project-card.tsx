@@ -59,13 +59,13 @@ export async function PremiumHubProjectCard({ project }: { project: ProjectVM })
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             {location ? (
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
                 <MapPin className="h-3 w-3" strokeWidth={1.75} aria-hidden />
                 {location}
               </span>
             ) : null}
             {project.handoverStatus ? (
-              <span className="inline-flex w-fit items-center rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+              <span className="inline-flex w-fit items-center rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                 {t(`project.handover.${project.handoverStatus}`)}
               </span>
             ) : null}

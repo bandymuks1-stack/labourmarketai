@@ -165,7 +165,7 @@ export function ManagerInstructionComposer({
         />
       </label>
 
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {labels.languageNote}
       </p>
 
@@ -173,7 +173,7 @@ export function ManagerInstructionComposer({
           project) or PROJECT-level (a worker actively assigned to that project).
           Project scope is real as of F5 — see the project selector above. */}
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="instruction-scope-note"
       >
         {labels.scopeNote}

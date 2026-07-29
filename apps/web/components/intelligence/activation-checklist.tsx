@@ -77,7 +77,7 @@ export async function ActivationChecklist({
       </ul>
       {checklist.vetoCodes.length > 0 ? (
         <ul
-          className="flex flex-col gap-1 text-[11px] text-state-danger"
+          className="flex flex-col gap-1 text-meta text-state-danger"
           data-testid="activation-vetoes"
         >
           {checklist.vetoCodes.map((code) => (
@@ -85,7 +85,7 @@ export async function ActivationChecklist({
           ))}
         </ul>
       ) : null}
-      <p className="text-[11px] text-text-muted">
+      <p className="text-meta text-text-muted">
         {checklist.activationAllowed
           ? t("activation.allGreenNote")
           : t("activation.notReadyNote")}

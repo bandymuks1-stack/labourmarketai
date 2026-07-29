@@ -31,7 +31,7 @@ import { getSpineCounts } from "@/lib/notifications/spine";
  */
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -76,7 +76,7 @@ export default async function ActivityCentrePage({
   return (
     <div className="flex flex-col gap-6" data-testid="activity-centre-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {tA("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -102,7 +102,7 @@ export default async function ActivityCentrePage({
         data-testid="activity-filters"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tA("filters.stateLabel")}
           </span>
           {(["attention", "all"] as const).map((s) => (
@@ -118,7 +118,7 @@ export default async function ActivityCentrePage({
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tA("filters.moduleLabel")}
           </span>
           <Link
@@ -164,7 +164,7 @@ export default async function ActivityCentrePage({
                 className="flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/30 px-4 py-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               >
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(row.moduleLabelKey)}
                   </span>
                   <span className="text-sm font-semibold text-text-primary">
@@ -180,7 +180,7 @@ export default async function ActivityCentrePage({
                     {row.count}
                   </span>
                 ) : (
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {tA("rowClear")}
                   </span>
                 )}

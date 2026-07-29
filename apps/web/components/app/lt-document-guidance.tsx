@@ -98,7 +98,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
         className="flex flex-wrap items-center gap-2"
         data-testid="documents-guidance-status-summary"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("statusSummary", { total, awaiting: awaitingReview })}
         </span>
         {(Object.keys(counts) as GuidanceStatus[])
@@ -106,7 +106,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
           .map((s) => (
             <span
               key={s}
-              className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[s]}`}
+              className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[s]}`}
               data-testid={`guidance-status-count-${s}`}
             >
               {t(`status.${s}` as never)}: {counts[s]}
@@ -120,7 +120,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
           every item stays reachable in one tap, nothing is removed. */}
       {[...grouped.entries()].map(([country, items]) => (
         <details key={country} className="group flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/20">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-primary [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary [&::-webkit-details-marker]:hidden">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {country === "ALL" ? t("groupAll") : country}
             <span className="rounded-full border border-ink-500 px-1.5 py-0.5 tabular-nums">
@@ -140,13 +140,13 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
                   </span>
                   <span className="flex flex-wrap gap-1.5">
                     <span
-                      className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[item.status]}`}
+                      className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[item.status]}`}
                     >
                       {t(`status.${item.status}` as never)}
                     </span>
                     {item.needsLegalReview ? (
                       <span
-                        className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning"
+                        className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
                         data-testid={`guidance-needs-review-${item.id}`}
                       >
                         {t("needsLegalReview")}
@@ -157,14 +157,14 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
                 <p className="text-xs leading-relaxed text-text-secondary">
                   {item.bodyLt}
                 </p>
-                <p className="text-[11px] leading-relaxed text-text-muted">
+                <p className="text-meta leading-relaxed text-text-muted">
                   {t("whoProvides")}: {item.whoUsuallyProvidesLt}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {item.dependsOn.map((d) => (
                     <span
                       key={d}
-                      className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-muted"
+                      className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                     >
                       {t(`dimensions.${d}` as never)}
                     </span>
@@ -179,7 +179,7 @@ export async function LtDocumentGuidance({ locale }: { locale: string }) {
       {/* Information-only closing line — the real help-request flow is a
           WAGON 10 deliverable; nothing here pretends to be a CTA. */}
       <p
-        className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] leading-relaxed text-text-muted"
+        className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted"
         data-testid="documents-guidance-help-info"
       >
         {t("helpInfoNote")}

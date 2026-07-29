@@ -37,7 +37,7 @@ export async function MarketMapSignalLayer({ board }: { board: DemandSignalBoard
           <Radar className="h-4 w-4 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("signalLayer.title", { count: board.total })}
         </span>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("signalLayer.note")}
         </p>
       </div>
@@ -53,7 +53,7 @@ export async function MarketMapSignalLayer({ board }: { board: DemandSignalBoard
               <span className="text-sm font-medium text-text-primary">
                 {countryName(group.countryCode)}
               </span>
-              <span className="rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+              <span className="rounded-full border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                 {t("signalLayer.countryCount", { count: group.count })}
               </span>
             </div>
@@ -74,7 +74,7 @@ export async function MarketMapSignalLayer({ board }: { board: DemandSignalBoard
                     <span className="flex flex-col gap-0.5">
                       <span className="text-text-primary">{e.label}</span>
                       {place && <span className="text-text-muted">{place}</span>}
-                      <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {t(`signalLayer.precision.${e.precision}`)}
                       </span>
                     </span>
@@ -87,7 +87,7 @@ export async function MarketMapSignalLayer({ board }: { board: DemandSignalBoard
       </ul>
 
       <p
-        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-2.5 py-2 text-[11px] leading-relaxed text-text-secondary"
+        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-2.5 py-2 text-meta leading-relaxed text-text-secondary"
         data-testid="market-map-signal-no-points"
       >
         {t("signalLayer.noPoints")}

@@ -124,7 +124,7 @@ export async function ProfileStateStrip({ workerId }: { workerId: string }) {
         {tiles.map((tile) => {
           const body = (
             <>
-              <span className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="flex items-center justify-between gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
                 {tile.label}
                 <span aria-hidden className="text-text-muted">
                   {tile.href.startsWith("#") ? "↓" : "→"}

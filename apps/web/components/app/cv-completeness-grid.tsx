@@ -49,7 +49,7 @@ export async function CvCompletenessGrid({
                 {tName(s.key)}
               </span>
               <span
-                className={`font-mono text-[10px] uppercase tracking-label ${
+                className={`font-mono text-meta uppercase tracking-label ${
                   s.filled ? "text-state-success" : "text-text-muted"
                 }`}
                 data-testid={`cv-section-state-${s.key}`}

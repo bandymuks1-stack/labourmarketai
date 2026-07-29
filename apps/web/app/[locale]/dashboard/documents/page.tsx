@@ -78,7 +78,7 @@ const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
 };
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -159,7 +159,7 @@ export default async function WorkerDocumentsPage({
                     key={key}
                     className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2"
                   >
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {tc(`org.${key}`)}
                     </dt>
                     <dd className="font-display text-lg font-semibold text-text-primary">
@@ -168,7 +168,7 @@ export default async function WorkerDocumentsPage({
                   </div>
                 ))}
               </dl>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-meta text-text-muted">
                 {tc("org.consentNote")}
               </p>
             </>
@@ -180,7 +180,7 @@ export default async function WorkerDocumentsPage({
           >
             {tc("org.projectAxisLink")}
           </Link>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-meta text-text-muted">
             {tc("org.projectAxisNote")}
           </p>
         </section>
@@ -292,7 +292,7 @@ export default async function WorkerDocumentsPage({
                   </Link>
                 ) : null}
               </div>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-meta text-text-muted">
                 {tc("attention.note")}
               </p>
             </>
@@ -340,7 +340,7 @@ export default async function WorkerDocumentsPage({
             {inv.documents.length > 0 ? (
               <div className="flex flex-col gap-2" data-testid="doc-centre-filters">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {tc("filters.statusLabel")}
                   </span>
                   <Link
@@ -364,7 +364,7 @@ export default async function WorkerDocumentsPage({
                 </div>
                 {ownedTypeSlugs.length > 1 ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {tc("filters.typeLabel")}
                     </span>
                     <Link
@@ -416,7 +416,7 @@ export default async function WorkerDocumentsPage({
                         {d.country ? ` · ${d.country}` : ""}
                       </span>
                       {d.validUntil ? (
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("fields.validUntil")}: {d.validUntil}
                         </span>
                       ) : null}
@@ -426,7 +426,7 @@ export default async function WorkerDocumentsPage({
                           is really readable; no claim otherwise. */}
                       {inv.verificationAvailable && d.verification ? (
                         <span
-                          className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${VERIFICATION_TONE[d.verification]}`}
+                          className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${VERIFICATION_TONE[d.verification]}`}
                           data-testid="doc-centre-verification"
                           data-verification={d.verification}
                         >
@@ -434,7 +434,7 @@ export default async function WorkerDocumentsPage({
                         </span>
                       ) : null}
                       <span
-                        className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[d.derivedStatus]}`}
+                        className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[d.derivedStatus]}`}
                       >
                         {t(`status.${d.derivedStatus}` as never)}
                       </span>
@@ -463,7 +463,7 @@ export default async function WorkerDocumentsPage({
                 <Link
                   key={c}
                   href={`/dashboard/documents?country=${c}` as "/dashboard"}
-                  className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label ${
+                  className={`rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label ${
                     country === c
                       ? "border-brand-blue text-brand-blue"
                       : "border-ink-500 text-text-secondary hover:border-brand-blue"
@@ -502,11 +502,11 @@ export default async function WorkerDocumentsPage({
                       data-testid="documents-overall-status"
                       data-status={overall.status}
                     >
-                      <span className="font-mono text-[11px] uppercase tracking-label">
+                      <span className="font-mono text-meta uppercase tracking-label">
                         {t(`overall.${overall.status}` as never)}
                       </span>
                       {!inv.readiness.availabilitySet ? (
-                        <span className="text-[11px] text-text-muted">
+                        <span className="text-meta text-text-muted">
                           {t("overall.availabilityHint")}
                         </span>
                       ) : null}
@@ -519,12 +519,12 @@ export default async function WorkerDocumentsPage({
                         >
                           <span className="text-sm text-text-primary">
                             {t(`types.${i.documentTypeSlug}` as never)}
-                            <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="ml-2 font-mono text-meta uppercase tracking-label text-text-muted">
                               {t(`requirement.${i.requirementLevel}` as never)}
                             </span>
                             {i.confidence === "needs_legal_review" ||
                             i.sourceStatus === "needs_legal_source" ? (
-                              <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-state-warning">
+                              <span className="ml-2 font-mono text-meta uppercase tracking-label text-state-warning">
                                 {t("needsLegalReview")}
                               </span>
                             ) : null}
@@ -533,21 +533,21 @@ export default async function WorkerDocumentsPage({
                                 href={i.sourceUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="ml-2 font-mono text-[10px] uppercase tracking-label text-brand-blue underline"
+                                className="ml-2 font-mono text-meta uppercase tracking-label text-brand-blue underline"
                               >
                                 {t("sourceLink")}
                               </a>
                             ) : null}
                           </span>
                           <span
-                            className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[i.status]}`}
+                            className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[i.status]}`}
                           >
                             {t(`status.${i.status}` as never)}
                           </span>
                         </li>
                       ))}
                     </ul>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
                     {readiness.nextActionSlug ? (
@@ -624,7 +624,7 @@ function WorkProofExports({
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
       data-testid="documents-reports-exports"
     >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("workProof.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("reports.intro")}</p>
@@ -673,11 +673,11 @@ function WorkProofExports({
       </div>
       {/* Photo evidence lives inside journal entries; project galleries render
           on each project page — linked, never duplicated here. */}
-      <p className="text-[11px] text-text-muted" data-testid="doc-centre-gallery-note">
+      <p className="text-meta text-text-muted" data-testid="doc-centre-gallery-note">
         {tc("workProof.galleryNote")}
       </p>
       <p
-        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+        className="font-mono text-meta uppercase tracking-label text-text-muted"
         data-testid="documents-export-format-status"
       >
         {t("reports.formatStatus")}
@@ -689,7 +689,7 @@ function WorkProofExports({
 function Header({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
   return (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

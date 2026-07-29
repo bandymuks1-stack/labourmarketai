@@ -78,7 +78,7 @@ export function LiveProductDemo() {
   return (
     <div className="relative" data-testid="live-product-demo">
       {/* The honesty chip — sample sequence, real UI. */}
-      <p className="mb-3 inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+      <p className="mb-3 inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
         <span className="live-dot" aria-hidden />
         {t("chip")}
       </p>
@@ -113,10 +113,10 @@ export function LiveProductDemo() {
       <div className="overflow-hidden rounded-2xl border border-ink-500 bg-ink-900/80 shadow-card">
         {/* Window chrome — states this is the product surface. */}
         <div className="flex items-center gap-2 border-b border-ink-600 px-4 py-2.5">
-          <span className="flex size-5 items-center justify-center rounded-sm bg-brand-blue text-[10px] font-bold text-white">
+          <span className="flex size-5 items-center justify-center rounded-sm bg-brand-blue text-meta font-bold text-white">
             L
           </span>
-          <span className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("windowTitle")}
           </span>
         </div>
@@ -142,7 +142,7 @@ export function LiveProductDemo() {
                 exit={{ opacity: 0 }}
                 className={`${bubble} max-w-[85%]`}
               >
-                <p className="font-mono text-[10px] uppercase tracking-label text-state-success">
+                <p className="font-mono text-meta uppercase tracking-label text-state-success">
                   {t("entrySaved")}
                 </p>
                 <p className="mt-1 text-text-primary">{s("entryLine")}</p>
@@ -156,7 +156,7 @@ export function LiveProductDemo() {
                 exit={{ opacity: 0 }}
                 className={`${bubble} max-w-[85%]`}
               >
-                <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+                <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
                   {t("skillSignal")}
                 </p>
                 <p className="mt-1 text-text-primary">{s("skillLine")}</p>
@@ -179,7 +179,7 @@ export function LiveProductDemo() {
                 exit={{ opacity: 0 }}
                 className={`${bubble} max-w-[85%] border-brand-blue/40`}
               >
-                <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
                   {t("matchFound")}
                 </p>
                 <p className="mt-1 text-text-primary">{s("matchLine")}</p>

@@ -129,7 +129,7 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
 
       {/* Honest country-fit / documents gate — never "ready abroad" without docs. */}
       <div
-        className="flex items-start gap-2 rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-[11px] leading-relaxed text-text-secondary"
+        className="flex items-start gap-2 rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-meta leading-relaxed text-text-secondary"
         data-testid="readiness-country-fit"
       >
         <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted" aria-hidden />

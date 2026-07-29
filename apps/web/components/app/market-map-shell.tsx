@@ -127,7 +127,7 @@ export async function MarketMapShell() {
         className="card-border flex flex-col gap-1 p-4"
         data-testid="market-map-filters"
       >
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("scopeTitle")}
         </p>
         <p className="text-xs text-text-secondary">
@@ -181,7 +181,7 @@ export async function MarketMapShell() {
               a bare "empty/fake" state. */}
           {!hasRealSignal && (
             <p
-              className="text-[11px] leading-relaxed text-text-muted"
+              className="text-meta leading-relaxed text-text-muted"
               data-testid="market-map-no-signal-hint"
             >
               {t("noSignalHint")}
@@ -196,7 +196,7 @@ export async function MarketMapShell() {
             className="card-border flex flex-col gap-2 p-4"
             data-testid="market-map-legend"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("legendTitle")}
             </p>
             <ul className="flex flex-col gap-1.5">
@@ -215,7 +215,7 @@ export async function MarketMapShell() {
             className="card-border flex flex-col gap-3 p-4"
             data-testid="market-map-layers"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("layersTitle")}
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -227,7 +227,7 @@ export async function MarketMapShell() {
                       {t(`layers.${key}.label`)}
                       <span
                         data-testid={`market-map-layer-${key}-status`}
-                        className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-brand-blue"
+                        className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue"
                       >
                         {t("layerActive")}
                       </span>
@@ -237,7 +237,7 @@ export async function MarketMapShell() {
                     </span>
                     {key === "demand" && demandSignalCount > 0 && (
                       <span
-                        className="mt-0.5 text-[11px] leading-relaxed text-text-muted"
+                        className="mt-0.5 text-meta leading-relaxed text-text-muted"
                         data-testid="market-map-demand-signal-note"
                       >
                         {t("demandSignalNote", { count: demandSignalCount })}
@@ -253,7 +253,7 @@ export async function MarketMapShell() {
               className="mt-1 flex flex-col gap-2 border-t border-ink-600/60 pt-3"
               data-testid="market-map-next-stage"
             >
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("nextStageTitle")}
               </p>
               <ul className="flex flex-col gap-2">
@@ -265,7 +265,7 @@ export async function MarketMapShell() {
                         {t(`layers.${key}.label`)}
                         <span
                           data-testid={`market-map-layer-${key}-status`}
-                          className="rounded-sm border border-border-subtle bg-surface-1 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted"
+                          className="rounded-sm border border-border-subtle bg-surface-1 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                         >
                           {t("layerNextStage")}
                         </span>
@@ -277,7 +277,7 @@ export async function MarketMapShell() {
                   </li>
                 ))}
               </ul>
-              <p className="text-[11px] leading-relaxed text-text-muted">{t("nextStageNote")}</p>
+              <p className="text-meta leading-relaxed text-text-muted">{t("nextStageNote")}</p>
             </div>
           </section>
         </aside>
@@ -302,14 +302,14 @@ export async function MarketMapShell() {
           {MAP_LAYER_KINDS.map((kind) => (
             <li
               key={kind}
-              className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-secondary"
+              className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-meta text-text-secondary"
               data-layer-kind={kind}
             >
               {t(`atlas.kind.${kind}`)}
             </li>
           ))}
         </ul>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("atlas.signalOnlyNote")}
         </p>
       </section>

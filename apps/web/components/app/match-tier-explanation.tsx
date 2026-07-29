@@ -28,7 +28,7 @@ export interface MatchTierLabels {
 }
 
 const CHIP =
-  "rounded-md border px-2 py-0.5 text-[11px]";
+  "rounded-md border px-2 py-0.5 text-meta";
 
 function TierGroup({
   title,
@@ -48,7 +48,7 @@ function TierGroup({
   if (items.length === 0) return null;
   return (
     <div className="flex flex-col gap-1" data-testid={testId}>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {title}
       </span>
       <div className="flex flex-wrap gap-1.5">
@@ -126,14 +126,14 @@ export function MatchTierExplanation({
           className="flex flex-col gap-1"
           data-testid={`${testId ?? "match-tiers"}-missing`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.missingTitle}
           </span>
           <ul className="flex flex-col gap-0.5">
             {missingFacts.map((m) => (
               <li
                 key={`${m.criterion}-${m.side}`}
-                className="text-[11px] text-text-muted"
+                className="text-meta text-text-muted"
                 data-criterion={m.criterion}
                 data-side={m.side}
                 title={m.source}

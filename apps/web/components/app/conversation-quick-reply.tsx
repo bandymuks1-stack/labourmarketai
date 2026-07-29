@@ -33,7 +33,7 @@ export function ConversationQuickReply({
   if (sent) {
     return (
       <p
-        className="text-[11px] text-state-success"
+        className="text-meta text-state-success"
         data-testid={`quick-reply-sent-${conversationId}`}
       >
         {t("sent")}
@@ -47,7 +47,7 @@ export function ConversationQuickReply({
         type="button"
         onClick={() => setOpen(true)}
         data-testid={`quick-reply-open-${conversationId}`}
-        className="w-fit rounded-full border border-ink-500 px-3 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+        className="w-fit rounded-full border border-ink-500 px-3 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
       >
         {t("open")}
       </button>
@@ -102,7 +102,7 @@ export function ConversationQuickReply({
       </div>
       {error ? (
         <p
-          className="text-[11px] text-state-danger"
+          className="text-meta text-state-danger"
           data-testid={`quick-reply-error-${conversationId}`}
         >
           {error}

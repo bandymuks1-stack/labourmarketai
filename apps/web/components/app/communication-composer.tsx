@@ -264,7 +264,7 @@ export function CommunicationComposer({
   return (
     <form onSubmit={onSubmit} className="card-border flex flex-col gap-3 p-4">
       <label className="flex flex-col gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("composer.label")}
         </span>
         <textarea
@@ -301,7 +301,7 @@ export function CommunicationComposer({
                 <span className="max-w-[10rem] truncate text-xs text-text-primary">
                   {a.fileName}
                 </span>
-                <span className="text-[10px] text-text-muted">
+                <span className="text-meta text-text-muted">
                   {a.status === "uploading"
                     ? t("composer.attachments.uploading")
                     : a.status === "failed"
@@ -338,7 +338,7 @@ export function CommunicationComposer({
           counterpart sees the ORIGINAL text — there is no automatic
           translation, and this line says so instead of hiding it. */}
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="communication-language-hint"
       >
         {t("composer.languageHint")}
@@ -384,7 +384,7 @@ export function CommunicationComposer({
             <Paperclip className="h-4 w-4" aria-hidden />
             {t("composer.attachments.addButton")}
           </button>
-          <span className="font-mono text-[10px] text-text-muted">
+          <span className="font-mono text-meta text-text-muted">
             {t("composer.charCount", { n: body.length, max: 10000 })}
           </span>
         </div>
@@ -392,7 +392,7 @@ export function CommunicationComposer({
           {pending ? t("composer.sending") : t("composer.send")}
         </Button>
       </div>
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("composer.attachments.help")}
       </p>
     </form>

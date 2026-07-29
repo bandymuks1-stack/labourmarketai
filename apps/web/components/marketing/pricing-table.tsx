@@ -19,7 +19,7 @@ export async function PricingTable() {
 
         return (
           <div key={slug} className="flex flex-col card-border p-6">
-            <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {name}
             </p>
             <p className="mt-2 text-sm text-text-secondary">
@@ -32,14 +32,14 @@ export async function PricingTable() {
                 (CR WAGON 4): reuses the owner-editable readiness state from
                 lib/billing/readiness.ts — never a purchasable claim. */}
             <p
-              className="mt-1 text-[11px] text-text-muted"
+              className="mt-1 text-meta text-text-muted"
               data-testid={`pricing-price-state-${slug}`}
               data-state={PRICING_READINESS_STATE}
             >
               {t(`priceState.${PRICING_READINESS_STATE}` as never)}
             </p>
 
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <p className="mt-6 font-mono text-meta uppercase tracking-label text-text-muted">
               {t("featuresLabel")}
             </p>
             <ul className="mt-3 flex flex-1 flex-col gap-2 text-sm text-text-secondary">

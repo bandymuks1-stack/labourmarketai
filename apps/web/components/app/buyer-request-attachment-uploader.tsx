@@ -220,21 +220,21 @@ export function BuyerRequestAttachmentUploader({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-text-primary">{a.fileName}</span>
-              <span className="font-mono text-[10px] text-text-muted">
+              <span className="font-mono text-meta text-text-muted">
                 {Math.round(a.fileSizeBytes / 1024)} KB
               </span>
             </div>
-            <p className="text-[11px] text-text-muted">{a.mimeType}</p>
+            <p className="text-meta text-text-muted">{a.mimeType}</p>
             {a.analysisStatus === "not_started" ? (
               <p
-                className="text-[11px] text-state-warning"
+                className="text-meta text-state-warning"
                 data-testid="buyer-request-attachment-analysis-fallback"
               >
                 {analysisFallbackLine}
               </p>
             ) : null}
             <p
-              className="text-[11px] text-text-muted"
+              className="text-meta text-text-muted"
               data-testid="buyer-request-attachment-readiness"
             >
               {extractionReadinessLabels[computeExtractionReadiness(a.mimeType)]}
@@ -243,7 +243,7 @@ export function BuyerRequestAttachmentUploader({
               type="button"
               onClick={() => handleRemove(a.id)}
               disabled={removingId === a.id}
-              className="mt-1 text-[11px] text-brand-blue hover:underline disabled:opacity-50"
+              className="mt-1 text-meta text-brand-blue hover:underline disabled:opacity-50"
               data-testid={`buyer-request-attachment-remove-${a.id}`}
             >
               {removingId === a.id ? labels.removingLabel : labels.removeLabel}
@@ -266,12 +266,12 @@ export function BuyerRequestAttachmentUploader({
         {isUploading ? labels.uploadingLabel : labels.addButton}
       </label>
 
-      <p className="text-[11px] text-text-muted">{labels.sizeHelp}</p>
-      <p className="text-[11px] text-text-muted">{labels.allowedHelp}</p>
+      <p className="text-meta text-text-muted">{labels.sizeHelp}</p>
+      <p className="text-meta text-text-muted">{labels.allowedHelp}</p>
 
       {errorText ? (
         <p
-          className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[11px] text-state-warning"
+          className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
           role="status"
           data-testid="buyer-request-attachment-error"
         >
@@ -280,7 +280,7 @@ export function BuyerRequestAttachmentUploader({
       ) : null}
       {successText ? (
         <p
-          className="rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[11px] text-state-success"
+          className="rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
           role="status"
           data-testid="buyer-request-attachment-success"
         >

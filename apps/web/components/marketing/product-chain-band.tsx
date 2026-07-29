@@ -22,7 +22,7 @@ export async function ProductChainBand() {
   return (
     <section className="mt-24" aria-labelledby="product-chain-title">
       <Reveal>
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("eyebrow")}
         </p>
         <h2
@@ -47,7 +47,7 @@ export async function ProductChainBand() {
                 }`}
               >
                 <span
-                  className={`font-mono text-[11px] font-semibold ${
+                  className={`font-mono text-meta font-semibold ${
                     isPivot ? "text-brand-cyan" : "text-text-muted"
                   }`}
                 >

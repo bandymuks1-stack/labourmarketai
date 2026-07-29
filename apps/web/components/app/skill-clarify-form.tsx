@@ -79,14 +79,14 @@ export function SkillClarifyForm({ labels }: { labels: SkillClarifyLabels }) {
         <input name="often_with" placeholder={labels.oftenPlaceholder} className={field} />
       </label>
 
-      <p className="text-[11px] leading-relaxed text-text-muted" data-testid="skill-clarify-self-declared">
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="skill-clarify-self-declared">
         {labels.selfDeclaredNote}
       </p>
 
       {/* Mandatory EU-licence attribution — shown wherever ESCO data
           surfaces (canonical English legal line, not translated). */}
       {ESCO_AUTOCOMPLETE_ENABLED ? (
-        <p className="text-[10px] leading-relaxed text-text-muted" data-testid="esco-attribution">
+        <p className="text-meta leading-relaxed text-text-muted" data-testid="esco-attribution">
           {ESCO_ATTRIBUTION}
         </p>
       ) : null}

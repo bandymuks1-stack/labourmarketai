@@ -77,14 +77,14 @@ export function ClientAgencyBridgeSection({
 
       {gated ? (
         <div className="rounded-md border border-state-warning bg-state-warning/10 p-3" data-testid="client-bridge-gated">
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">{labels.gatedHeading}</p>
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">{labels.gatedHeading}</p>
           <p className="mt-1 text-xs text-text-secondary">{labels.gatedBody}</p>
         </div>
       ) : (
         <>
           {/* Pending invites */}
           <div className="flex flex-col gap-2" data-testid="client-bridge-invites">
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.invitesHeading}</h3>
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.invitesHeading}</h3>
             {pend.length === 0 ? (
               <p className="text-xs text-text-muted">{labels.noInvites}</p>
             ) : (
@@ -117,7 +117,7 @@ export function ClientAgencyBridgeSection({
 
           {/* Active agencies + share a request */}
           <div className="flex flex-col gap-2" data-testid="client-bridge-active">
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.activeHeading}</h3>
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.activeHeading}</h3>
             {active.length === 0 ? (
               <p className="text-xs text-text-muted">{labels.noActive}</p>
             ) : (

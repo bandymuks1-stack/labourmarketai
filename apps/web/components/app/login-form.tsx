@@ -134,7 +134,7 @@ export function LoginForm() {
         >
           <p>{oauthError}</p>
           {oauthTrace && (
-            <p className="mt-1 font-mono text-[10px] text-text-muted">
+            <p className="mt-1 font-mono text-meta text-text-muted">
               trace: {oauthTrace}
             </p>
           )}
@@ -173,7 +173,7 @@ export function LoginForm() {
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("divider")}
         </span>
         <span className="h-px flex-1 bg-ink-500" />
@@ -271,7 +271,7 @@ export function LoginForm() {
         >
           {t("reset_password_cta")}
         </Link>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("reset_password_help")}
         </p>
       </div>

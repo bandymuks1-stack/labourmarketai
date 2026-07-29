@@ -137,7 +137,7 @@ export function WorkerTradeProfile({
                       <span className="block truncate text-sm font-semibold text-text-primary">
                         {d.name}
                       </span>
-                      <span className="block font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="block font-mono text-meta uppercase tracking-label text-text-muted">
                         {d.isPrimary
                           ? t("primaryBadge")
                           : isActive
@@ -192,7 +192,7 @@ export function WorkerTradeProfile({
         <section className="flex flex-col gap-3">
           {/* Clear editing context — which direction, and that others are safe */}
           <div className="flex flex-col gap-1">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-blue/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-blue/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-brand-blue">
               {t("editingDirection")}: {editName}
             </span>
             <p className="text-sm font-semibold text-text-primary">

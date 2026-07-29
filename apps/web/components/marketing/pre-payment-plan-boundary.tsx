@@ -55,7 +55,7 @@ export async function PrePaymentPlanBoundary() {
         data-testid="plan-boundary-free-today"
       >
         <div className="card-border p-4">
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-success">
+          <p className="font-mono text-meta uppercase tracking-label text-state-success">
             {t("freeToday.freeTitle")}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -63,7 +63,7 @@ export async function PrePaymentPlanBoundary() {
           </p>
         </div>
         <div className="card-border p-4">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
+          <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
             {t("freeToday.paidTitle")}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -71,7 +71,7 @@ export async function PrePaymentPlanBoundary() {
           </p>
         </div>
         <div className="card-border p-4">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("freeToday.preparedTitle")}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-text-secondary">
@@ -101,17 +101,17 @@ export async function PrePaymentPlanBoundary() {
                   {t(`plans.${plan.slug}` as never)}
                 </span>
                 <span
-                  className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${ACCESS_TONE[plan.accessState]}`}
+                  className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${ACCESS_TONE[plan.accessState]}`}
                 >
                   {t(`access.${plan.accessState}` as never)}
                 </span>
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t(`audience.${plan.audience}` as never)}
               </p>
 
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("featuresLabel")}
                 </p>
                 <ul
@@ -135,7 +135,7 @@ export async function PrePaymentPlanBoundary() {
                             </span>
                           )}
                         </span>
-                        <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t(`enforcement.${enforcement.kind}` as never)}
                         </span>
                       </li>
@@ -151,11 +151,11 @@ export async function PrePaymentPlanBoundary() {
           );
         })}
       </div>
-      <p className="mt-4 text-[11px] text-text-muted">{t("note")}</p>
+      <p className="mt-4 text-meta text-text-muted">{t("note")}</p>
       {/* Owner-editable pricing readiness — plans stay prepared, not
           purchasable, in BOTH states (payments are off by kill-switch). */}
       <p
-        className="mt-1 text-[11px] text-text-muted"
+        className="mt-1 text-meta text-text-muted"
         data-testid="plan-boundary-readiness"
         data-state={PRICING_READINESS_STATE}
       >

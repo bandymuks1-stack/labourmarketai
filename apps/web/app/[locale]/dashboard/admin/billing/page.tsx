@@ -45,7 +45,7 @@ export default async function AdminBillingPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-billing">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -56,10 +56,10 @@ export default async function AdminBillingPage({
 
       {/* Always-on test/disabled banner — never a live claim. */}
       <div className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 ${stateTone}`}>
-        <span className="font-mono text-[11px] uppercase tracking-label">
+        <span className="font-mono text-meta uppercase tracking-label">
           {t(`state.${o.configState}` as never)}
         </span>
-        <span className="text-[11px] text-text-secondary">
+        <span className="text-meta text-text-secondary">
           {o.testMode ? t("testModeOn") : t("testModeOff")} · {t("liveNever")}
         </span>
       </div>
@@ -80,7 +80,7 @@ export default async function AdminBillingPage({
         ) : (
           <ul className="flex flex-wrap gap-1.5">
             {o.blockers.map((b) => (
-              <li key={b} className="rounded-md border border-state-warning/40 px-2 py-0.5 text-[11px] text-state-warning">
+              <li key={b} className="rounded-md border border-state-warning/40 px-2 py-0.5 text-meta text-state-warning">
                 {b}
               </li>
             ))}
@@ -103,10 +103,10 @@ export default async function AdminBillingPage({
 
         {/* Owner-editable pricing readiness state */}
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("readiness.pricingState")}
           </span>
-          <span className="rounded-sm border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber">
+          <span className="rounded-sm border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
             {t(`readiness.state.${PRICING_READINESS_STATE}` as never)}
           </span>
         </div>
@@ -118,7 +118,7 @@ export default async function AdminBillingPage({
           <Tile label={t("readiness.coverage.free_surface")} value={String(coverage.freeSurface)} />
           <Tile label={t("readiness.coverage.declared_only")} value={String(coverage.declaredOnly)} />
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("readiness.coverage.note")}
         </p>
 
@@ -132,14 +132,14 @@ export default async function AdminBillingPage({
               data-readiness-status={item.status}
             >
               <span
-                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${READINESS_TONE[item.status]}`}
+                className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${READINESS_TONE[item.status]}`}
               >
                 {t(`readiness.status.${item.status}` as never)}
               </span>
               <span className="text-sm text-text-primary">
                 {t(`readiness.items.${item.key}` as never)}
               </span>
-              <span className="font-mono text-[10px] text-text-muted">
+              <span className="font-mono text-meta text-text-muted">
                 · {t("readiness.proofLabel")}: {item.proof}
               </span>
             </li>
@@ -163,13 +163,13 @@ export default async function AdminBillingPage({
                 <span className="text-sm text-text-primary">
                   <span className="font-mono text-xs text-text-muted">{s.ownerId.slice(0, 8)}</span> · {s.planKey}
                   {s.isManualOverride ? (
-                    <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-brand-blue">{t("subs.manual")}</span>
+                    <span className="ml-2 font-mono text-meta uppercase tracking-label text-brand-blue">{t("subs.manual")}</span>
                   ) : null}
                   {s.testMode ? (
-                    <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-state-amber">test</span>
+                    <span className="ml-2 font-mono text-meta uppercase tracking-label text-state-amber">test</span>
                   ) : null}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                   {s.status}{s.cancelAtPeriodEnd ? " · cancel@end" : ""}
                 </span>
               </li>
@@ -211,7 +211,7 @@ export default async function AdminBillingPage({
         ) : (
           <ul className="flex flex-col gap-1">
             {o.webhookEvents.map((e, i) => (
-              <li key={i} className="font-mono text-[11px] text-text-secondary">
+              <li key={i} className="font-mono text-meta text-text-secondary">
                 {e.eventType} · {e.processed ? "processed" : "pending"} · {e.testMode ? "test" : "live?"}
               </li>
             ))}
@@ -232,7 +232,7 @@ function Tile({ label, value }: { label: string; value: string }) {
   return (
     <div className="card-border flex flex-col gap-1 p-3">
       <span className="font-display text-xl font-bold text-text-primary">{value}</span>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{label}</span>
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{label}</span>
     </div>
   );
 }

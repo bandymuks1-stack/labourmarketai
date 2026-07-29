@@ -56,11 +56,11 @@ export function SimilarSkillsSection({
           {t("similarSkillsTitle")}
         </h4>
         {/* Exact owner subtitle: "Pasirinkite, jei tinka / Choose if this fits". */}
-        <p className="text-[11px] leading-relaxed text-text-secondary">
+        <p className="text-meta leading-relaxed text-text-secondary">
           {t("similarSkillsChoose")}
         </p>
         {/* Honesty line — these are not facts and nothing is linked. */}
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("similarSkillsIntro")}
         </p>
       </div>
@@ -96,12 +96,12 @@ export function SimilarSkillsSection({
                   </button>
                 )}
               </div>
-              <p className="text-[11px] leading-relaxed text-text-muted">
+              <p className="text-meta leading-relaxed text-text-muted">
                 {t("reasonFound", { word: c.matchedText })}
               </p>
               {status === "error" && (
                 <p
-                  className="text-[11px] text-state-danger"
+                  className="text-meta text-state-danger"
                   role="alert"
                   data-testid={`similar-skill-error-${c.slug}`}
                 >

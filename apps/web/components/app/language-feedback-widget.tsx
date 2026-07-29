@@ -140,9 +140,9 @@ export function LanguageFeedbackWidget() {
               </p>
             </header>
 
-            <dl className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 text-[11px] text-text-secondary">
+            <dl className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 text-meta text-text-secondary">
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("routeLabel")}
                 </dt>
                 <dd className="truncate text-right font-mono text-text-primary">
@@ -150,7 +150,7 @@ export function LanguageFeedbackWidget() {
                 </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("localeLabel")}
                 </dt>
                 <dd className="font-mono text-text-primary">{locale}</dd>
@@ -159,7 +159,7 @@ export function LanguageFeedbackWidget() {
 
             {selectedText ? (
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("selectedLabel")}
                 </span>
                 <blockquote className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs italic leading-relaxed text-text-primary">
@@ -167,13 +167,13 @@ export function LanguageFeedbackWidget() {
                 </blockquote>
               </div>
             ) : (
-              <p className="text-[11px] leading-relaxed text-text-muted">
+              <p className="text-meta leading-relaxed text-text-muted">
                 {t("noSelectionHint")}
               </p>
             )}
 
             <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("commentLabel")}
               </span>
               <textarea
@@ -212,7 +212,7 @@ export function LanguageFeedbackWidget() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-primary"
+                className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary"
               >
                 {t("cancel")}
               </button>
@@ -224,7 +224,7 @@ export function LanguageFeedbackWidget() {
                 {pending ? t("submitting") : t("submit")}
               </Button>
             </div>
-            <p className="text-[10px] leading-relaxed text-text-muted">
+            <p className="text-meta leading-relaxed text-text-muted">
               {t("privacyNote")}
             </p>
           </div>

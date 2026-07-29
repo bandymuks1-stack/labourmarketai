@@ -179,7 +179,7 @@ export default async function ProjectTruthPage({
   return (
     <div className="flex flex-col gap-6" data-testid="project-truth-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           P0 · PROJECT TRUTH
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -295,7 +295,7 @@ export default async function ProjectTruthPage({
         </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               profiles
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -303,7 +303,7 @@ export default async function ProjectTruthPage({
             </p>
           </div>
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               profile_roles
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -311,7 +311,7 @@ export default async function ProjectTruthPage({
             </p>
           </div>
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               pilot_drafts
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -322,14 +322,14 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-customers-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               customers
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {customersBlocked ? "—" : (customersCount.count ?? "—")}
             </p>
             {customersBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0026 not applied
               </p>
             ) : null}
@@ -338,7 +338,7 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-agency-workers-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               agency_workers
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -349,7 +349,7 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-agency-worker-invitations-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               agency_worker_invitations
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -358,7 +358,7 @@ export default async function ProjectTruthPage({
                 : (agencyWorkerInvitationsCount.count ?? "—")}
             </p>
             {agencyWorkerInvitationsBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0025 not applied
               </p>
             ) : null}
@@ -367,14 +367,14 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-company-workers-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               company_workers
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {companyWorkersBlocked ? "—" : (companyWorkersCount.count ?? "—")}
             </p>
             {companyWorkersBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0027 not applied
               </p>
             ) : null}
@@ -383,7 +383,7 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-company-worker-invitations-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               company_worker_invitations
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -392,7 +392,7 @@ export default async function ProjectTruthPage({
                 : (companyWorkerInvitationsCount.count ?? "—")}
             </p>
             {companyWorkerInvitationsBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0027 not applied
               </p>
             ) : null}
@@ -401,14 +401,14 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-customer-requests-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               customer_requests
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {customerRequestsBlocked ? "—" : (customerRequestsCount.count ?? "—")}
             </p>
             {customerRequestsBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0028 not applied
               </p>
             ) : null}
@@ -417,7 +417,7 @@ export default async function ProjectTruthPage({
             className="card-border p-3"
             data-testid="project-truth-customer-request-attachments-count"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               customer_request_attachments
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -426,7 +426,7 @@ export default async function ProjectTruthPage({
                 : (customerRequestAttachmentsCount.count ?? "—")}
             </p>
             {customerRequestAttachmentsBlocked ? (
-              <p className="mt-1 text-[10px] text-state-warning">
+              <p className="mt-1 text-meta text-state-warning">
                 migration 0029 not applied
               </p>
             ) : null}

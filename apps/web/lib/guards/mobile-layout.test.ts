@@ -73,7 +73,9 @@ describe("mobile layout invariants", () => {
     it("role trigger label is mobile-hidden (icon + chevron only on phones)", () => {
       // F5: the workspace label is a short human word (never an uppercase
       // mono pill) and still hides on phones — icon + chevron only.
-      expect(src).toMatch(/hidden text-\[13px\][^"]*sm:inline/);
+      // §12 design pass: the hand-rolled `text-[13px]` became the ROLE token
+      // `text-basis` — the product's own scale, one place sizes are decided.
+      expect(src).toMatch(/hidden text-basis[^"]*sm:inline/);
       expect(src).not.toMatch(/hidden font-mono[^"]*uppercase[^"]*sm:inline/);
     });
 

@@ -44,7 +44,7 @@ export async function ObservationInspector({
           data-observation-id={row.id ?? undefined}
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {show(row.subjectKind)} · {show(row.subjectId)} ·{" "}
               {show(row.metricKey)}
             </span>
@@ -64,10 +64,10 @@ export async function ObservationInspector({
               ] as const
             ).map(([labelKey, value]) => (
               <div key={labelKey} className="flex min-w-0 flex-col">
-                <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(labelKey as never) as string}
                 </dt>
-                <dd className="break-all font-mono text-[11px]">{value}</dd>
+                <dd className="break-all font-mono text-meta">{value}</dd>
               </div>
             ))}
           </dl>

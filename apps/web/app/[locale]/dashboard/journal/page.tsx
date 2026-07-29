@@ -667,7 +667,7 @@ export default async function JournalPage({
           className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
-          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
             <span className="inline-flex items-center gap-2">
               <span
                 aria-hidden
@@ -695,7 +695,7 @@ export default async function JournalPage({
           kept but demoted to ONE compact footnote — it is guard-required
           (journal-evidence-clarity + product-readiness) and stays honest
           (private + not yet externally confirmed). */}
-      <p className="order-5 text-[11px] leading-relaxed text-text-muted">
+      <p className="order-5 text-meta leading-relaxed text-text-muted">
         {t("pilotBackboneNote")}
       </p>
 
@@ -708,7 +708,7 @@ export default async function JournalPage({
           correction-request UI for that. */}
       {!anyReviewEnabled && (
         <p
-          className="order-4 text-[11px] leading-relaxed text-text-muted"
+          className="order-4 text-meta leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"
         >
           {t("reviewNotEnabledNote")}
@@ -821,7 +821,7 @@ export default async function JournalPage({
                   month: "short",
                   day: "numeric",
                 })}
-                <span className="ml-1 text-[10px] text-text-muted">
+                <span className="ml-1 text-meta text-text-muted">
                   {g.entries.length}
                 </span>
               </Link>
@@ -857,7 +857,7 @@ export default async function JournalPage({
             (client) manager. Until then it stays self-declared. No broad
             confirmer is implied. */}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-who-can-confirm"
         >
           {t("whoCanConfirm")}
@@ -876,7 +876,7 @@ export default async function JournalPage({
             entries yet the line stays as a quiet zero-state so the direct CV
             link is ALWAYS reachable from the journal (cv-workspace-ia). */}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-cv-bridge"
         >
           {totalEntryCount > 0
@@ -896,7 +896,7 @@ export default async function JournalPage({
         {/* Proof-engine loop strip — ONE dense row, real counts only:
             įrašai → įgūdžių įrodymai → CV → pasiūlymai. */}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-proof-loop"
         >
           {t("proofLoop.strip", {
@@ -960,7 +960,7 @@ export default async function JournalPage({
                         {group.label}
                       </span>
                     </span>
-                    <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
                       {totalLabel && (
                         <span data-testid="journal-day-hours">
                           {totalLabel}
@@ -1090,7 +1090,7 @@ export default async function JournalPage({
                           {/* 1 · Entry text — first, so the worker immediately sees
                         what they wrote. Long unbroken strings wrap cleanly. */}
                           <div className="flex flex-col gap-1">
-                            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("entry.textLabel")}
                             </p>
                             <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
@@ -1100,7 +1100,7 @@ export default async function JournalPage({
                                 No snapshot → honest "Vieta nenurodyta" (never the
                                 worker's current or profile location). */}
                             <p
-                              className="text-[11px] text-text-muted"
+                              className="text-meta text-text-muted"
                               data-testid={`journal-entry-location-${e.id}`}
                             >
                               {t("entry.locationLabel")}:{" "}
@@ -1126,7 +1126,7 @@ export default async function JournalPage({
                               e.engagement_context_id &&
                               engagementChips.has(e.engagement_context_id) && (
                                 <p
-                                  className="flex items-center gap-1.5 text-[11px] text-text-muted"
+                                  className="flex items-center gap-1.5 text-meta text-text-muted"
                                   data-testid={`journal-entry-context-${e.id}`}
                                 >
                                   <span
@@ -1142,12 +1142,12 @@ export default async function JournalPage({
                           {hasUnderstood && (
                             <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
                               <p
-                                className="font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                                className="font-mono text-meta uppercase tracking-label text-text-secondary"
                                 data-testid={`journal-entry-understood-${e.id}`}
                               >
                                 {t("entry.understoodLabel")}
                               </p>
-                              <div className="flex flex-wrap gap-x-4 gap-y-1 break-words text-[11px] text-text-muted">
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 break-words text-meta text-text-muted">
                                 {dir?.value_text && (
                                   <span className="min-w-0 break-words">
                                     {tProf(dir.value_text)}

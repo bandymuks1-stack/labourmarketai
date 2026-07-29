@@ -94,25 +94,25 @@ export default async function AdminLanguageFeedbackPage({
           <table className="min-w-full text-left text-xs">
             <thead className="border-b border-ink-600/60 bg-ink-800/40 text-text-muted">
               <tr>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.createdAt")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.status")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.locale")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.route")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.selected")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.comment")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("col.user")}
                 </th>
               </tr>
@@ -120,18 +120,18 @@ export default async function AdminLanguageFeedbackPage({
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} className="border-b border-ink-700/40 align-top">
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary whitespace-nowrap">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary whitespace-nowrap">
                     {new Date(r.created_at).toLocaleString(locale)}
                   </td>
                   <td className="px-3 py-2">
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary">
                     {r.locale}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary break-all">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary break-all">
                     {r.route}
                   </td>
                   <td className="px-3 py-2 text-text-primary">
@@ -146,7 +146,7 @@ export default async function AdminLanguageFeedbackPage({
                   <td className="px-3 py-2 leading-relaxed text-text-primary">
                     {r.comment}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[10px] text-text-muted break-all">
+                  <td className="px-3 py-2 font-mono text-meta text-text-muted break-all">
                     {r.user_id ? r.user_id.slice(0, 8) : t("anonymous")}
                   </td>
                 </tr>
@@ -156,7 +156,7 @@ export default async function AdminLanguageFeedbackPage({
         </div>
       )}
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

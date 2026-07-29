@@ -76,7 +76,7 @@ export default async function AdminLaunchReadinessPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-launch-readiness">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -120,7 +120,7 @@ export default async function AdminLaunchReadinessPage({
             <Tile key={label} label={label} value={show(value)} />
           ))}
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("supply.note")}
         </p>
       </section>
@@ -136,7 +136,7 @@ export default async function AdminLaunchReadinessPage({
             <Tile key={label} label={label} value={show(value)} />
           ))}
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("privacy.note")}
         </p>
       </section>
@@ -169,7 +169,7 @@ export default async function AdminLaunchReadinessPage({
             {t("workerAds.title")}
           </h2>
           <span
-            className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${
+            className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${
               workerAds.status === "READY"
                 ? "border-state-success/40 bg-state-success/10 text-state-success"
                 : "border-state-amber/40 bg-state-amber/10 text-state-amber"
@@ -199,7 +199,7 @@ export default async function AdminLaunchReadinessPage({
                 ) : null}
               </span>
               <span
-                className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
                   item.ok
                     ? "border-state-success/40 bg-state-success/10 text-state-success"
                     : "border-state-amber/40 bg-state-amber/10 text-state-amber"
@@ -210,12 +210,12 @@ export default async function AdminLaunchReadinessPage({
             </li>
           ))}
         </ul>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("workerAds.note")}
         </p>
       </section>
 
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("gapNote")}
       </p>
     </div>
@@ -228,7 +228,7 @@ function Tile({ label, value }: { label: string; value: string }) {
       <span className="font-display text-xl font-bold text-text-primary">
         {value}
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </span>
     </div>

@@ -249,7 +249,7 @@ export function ProjectCostCalculator({
         className={FIELD}
         data-testid={`pcc-${String(key)}`}
       />
-      {opts?.help ? <span className="text-[11px] text-text-muted">{opts.help}</span> : null}
+      {opts?.help ? <span className="text-meta text-text-muted">{opts.help}</span> : null}
     </label>
   );
 
@@ -410,7 +410,7 @@ export function ProjectCostCalculator({
                 </p>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {packNum("netAreaM2", labels.pack.netArea)}
-                  <p className="self-end text-[11px] text-text-muted">
+                  <p className="self-end text-meta text-text-muted">
                     {labels.pack.dimensionsHint}
                   </p>
                   {packNum("lengthM", labels.pack.lengthM)}
@@ -503,9 +503,9 @@ export function ProjectCostCalculator({
                 className={FIELD}
                 data-testid="pcc-vat"
               />
-              <span className="text-[11px] text-text-muted">{labels.vat.help}</span>
+              <span className="text-meta text-text-muted">{labels.vat.help}</span>
               {vatInvalid && (
-                <span className="text-[11px] text-state-danger" role="alert">
+                <span className="text-meta text-state-danger" role="alert">
                   {labels.vat.invalid}
                 </span>
               )}
@@ -706,7 +706,7 @@ export function ProjectCostCalculator({
                     {labels.result.ctaCompanyNeed}
                   </Link>
                 </div>
-                <p className="text-[11px] leading-relaxed text-text-muted">
+                <p className="text-meta leading-relaxed text-text-muted">
                   {labels.result.ctaDashboardHelp} {labels.result.ctaCompanyNeedHelp}
                 </p>
               </div>
@@ -748,7 +748,7 @@ export function ProjectCostCalculator({
               setAcc({ workers: 0, days: 0, perWorkerDay: 0 });
               setStep("context");
             }}
-            className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary"
+            className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary"
             data-testid="pcc-start-over"
           >
             {labels.steps.startOver}

@@ -50,7 +50,7 @@ export function RecentMatchesFeed() {
       className="relative card-border p-5"
     >
       <header className="mb-3 flex items-center justify-between">
-        <h3 className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <h3 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot" aria-hidden />
           {t("panel.recentMatches")}
         </h3>
@@ -80,7 +80,7 @@ export function RecentMatchesFeed() {
           ))}
         </AnimatePresence>
       </ul>
-      <p className="mt-3 text-right font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="mt-3 text-right font-mono text-meta uppercase tracking-label text-text-muted">
         {t("autoUpdate")}
       </p>
     </section>

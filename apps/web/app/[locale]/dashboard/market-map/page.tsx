@@ -182,7 +182,7 @@ export default async function MarketMapPage({
         title={tRec("entry.body")}
       >
         <span className="flex min-w-0 flex-col">
-          <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+          <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
             {tRec("entry.title")}
           </span>
           <span className="truncate text-xs leading-relaxed text-text-secondary">
@@ -244,7 +244,7 @@ export default async function MarketMapPage({
         className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-3"
         data-testid="market-map-connections"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tMap("connections.title")}
         </span>
         <div className="grid gap-2 sm:grid-cols-3">
@@ -288,8 +288,8 @@ export default async function MarketMapPage({
           demoted to the end (progressive disclosure, not the main carrier). */}
       <details className="group flex flex-col gap-4" data-testid="market-map-advanced">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted group-open:hidden">+</span>
-          <span className="hidden font-mono text-[10px] uppercase tracking-label text-text-muted group-open:inline">−</span>
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted group-open:hidden">+</span>
+          <span className="hidden font-mono text-meta uppercase tracking-label text-text-muted group-open:inline">−</span>
           {tMap("advanced")}
         </summary>
         <div className="mt-4 flex flex-col gap-4">

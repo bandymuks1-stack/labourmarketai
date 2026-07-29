@@ -66,7 +66,7 @@ export async function LabourMarketOsMap() {
               key={step}
               className="flex items-start gap-3 rounded-md border border-ink-600 bg-ink-800/40 p-3"
             >
-              <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-brand-blue/40 bg-brand-blue/10 font-mono text-[11px] font-semibold text-brand-blue">
+              <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-brand-blue/40 bg-brand-blue/10 font-mono text-meta font-semibold text-brand-blue">
                 {i + 1}
               </span>
               <span className="text-sm leading-snug text-text-primary">
@@ -268,7 +268,7 @@ function StatusChip({ kind }: { kind: "active" | "preparing" }) {
   return (
     <span
       className={cn(
-        "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
+        "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label",
         kind === "active"
           ? "border-state-success/40 bg-state-success/5 text-state-success"
           : "border-state-warning/40 bg-state-warning/5 text-state-warning",
@@ -381,7 +381,7 @@ async function ControlRoomCard() {
             <span className="text-sm text-text-primary">{t(row.labelKey)}</span>
             <span
               className={cn(
-                "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label",
+                "shrink-0 rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label",
                 row.kind === "blocked"
                   ? "border-state-danger/40 bg-state-danger/5 text-state-danger"
                   : row.kind === "preparing"
@@ -401,7 +401,7 @@ async function ControlRoomCard() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border border-ink-600 bg-ink-800/40 p-3">
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="mt-1 font-display text-xl font-bold tracking-tightest text-text-primary">

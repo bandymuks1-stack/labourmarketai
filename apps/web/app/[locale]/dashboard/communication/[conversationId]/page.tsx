@@ -140,7 +140,7 @@ export default async function ConversationDetailPage({
         <div className="flex flex-col gap-1">
           <Link
             href="/dashboard/communication"
-            className="font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue"
+            className="font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue"
           >
             ← {t("backToList")}
           </Link>
@@ -156,7 +156,7 @@ export default async function ConversationDetailPage({
                 : t("conversationFallback"))}
           </h1>
           <span
-            className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+            className="font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="thread-type"
           >
             {t(card.typeKey)}
@@ -164,7 +164,7 @@ export default async function ConversationDetailPage({
           {/* Who + which context — a restricted counterparty renders as a
               locked, system-limited chip (NOT a normal name, NOT a bland
               "unspecified recipient"): the details are simply not shown yet. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta">
             {card.counterpartyRestricted ? (
               <span
                 className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
@@ -212,7 +212,7 @@ export default async function ConversationDetailPage({
               from the subject). With a route for this viewer it is a real
               link-back; without one it is a plain label — no dead ends. */}
           {card.sourceKey && (
-            <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+            <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
               {card.sourceHref ? (
                 <Link
                   href={card.sourceHref as "/dashboard"}
@@ -265,10 +265,10 @@ export default async function ConversationDetailPage({
                 }`}
               >
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {isMine ? t("byYou") : t("byOther")}
                   </span>
-                  <span className="font-mono text-[10px] text-text-muted">
+                  <span className="font-mono text-meta text-text-muted">
                     {new Date(m.created_at).toLocaleString(locale)}
                   </span>
                 </div>
@@ -287,7 +287,7 @@ export default async function ConversationDetailPage({
                     <>
                       {vt.languageBadge ? (
                         <span
-                          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted"
+                          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                           data-testid={`message-lang-${m.id}`}
                         >
                           {t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
@@ -339,7 +339,7 @@ export default async function ConversationDetailPage({
                                 className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-medium text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                               >
                                 {a.fileName}
-                                <span className="text-[10px] text-text-muted">
+                                <span className="text-meta text-text-muted">
                                   ({Math.max(1, Math.round(a.fileSizeBytes / 1024))} KB)
                                 </span>
                               </a>

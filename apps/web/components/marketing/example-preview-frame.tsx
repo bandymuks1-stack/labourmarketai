@@ -23,10 +23,10 @@ export async function ExamplePreviewFrame({
       data-testid="example-preview-frame"
     >
       <figcaption className="flex max-w-sm flex-col items-center gap-1 text-center">
-        <span className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+        <span className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("conceptChip")}
         </span>
-        <span className="text-[11px] leading-snug text-text-muted">
+        <span className="text-meta leading-snug text-text-muted">
           {t("conceptNote")}
         </span>
       </figcaption>

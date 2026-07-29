@@ -43,7 +43,7 @@ export default async function AdminLeaguePage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-league">
       <header className="flex flex-col gap-1">
-        <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <Trophy className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </p>
@@ -86,7 +86,7 @@ export default async function AdminLeaguePage({
             >
               <h2 className="flex items-center gap-2 font-display text-lg font-semibold tracking-tightest text-text-primary">
                 {country === UNKNOWN_BUCKET ? t("unknownCountry") : country}
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("cellCount", { n: cells.length })}
                 </span>
               </h2>
@@ -140,22 +140,22 @@ function LeagueRow({
           {name}
         </span>
         {cell.smallSample ? (
-          <span className="font-mono text-[9px] uppercase tracking-label text-state-warning">
+          <span className="font-mono text-meta uppercase tracking-label text-state-warning">
             {labels.smallSample}
           </span>
         ) : null}
       </span>
-      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-text-secondary">
+      <span className="inline-flex items-center gap-1.5 font-mono text-meta text-text-secondary">
         <Users className="h-3.5 w-3.5 text-brand-cyan" aria-hidden />
         {cell.workers}
       </span>
-      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-text-secondary">
+      <span className="inline-flex items-center gap-1.5 font-mono text-meta text-text-secondary">
         <span className="live-dot" aria-hidden />
         {cell.availableNow} {labels.available}
       </span>
       <span
         className={cn(
-          "font-mono text-[11px]",
+          "font-mono text-meta",
           cell.confirmedSkillWorkers > 0
             ? "text-state-success"
             : "text-text-muted",
@@ -175,7 +175,7 @@ function LeagueRow({
         </span>
       ) : (
         <span
-          className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="league-thermometer-missing"
         >
           {labels.insufficient}

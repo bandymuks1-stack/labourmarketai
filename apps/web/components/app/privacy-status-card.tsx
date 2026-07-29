@@ -34,7 +34,7 @@ export async function PrivacyStatusCard() {
       data-testid="privacy-status-card"
       data-privacy-status={status}
     >
-      <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("sections.visibility")}
       </p>
       <p className="text-sm font-medium text-text-primary">{title}</p>

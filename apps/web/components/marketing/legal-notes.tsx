@@ -24,7 +24,7 @@ export async function PendingLegalNotice() {
       data-testid="pending-legal-note"
       className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-4"
     >
-      <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning">
+      <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
         {t("badge")}
       </span>
       <p className="text-sm leading-relaxed text-text-secondary">{t("body")}</p>
@@ -84,7 +84,7 @@ export function PendingLegalItems({ title, items }: { title: string; items: stri
       data-testid="pending-legal-items"
       className="mt-8 rounded-md border border-state-warning/40 bg-state-warning/5 p-4"
     >
-      <p className="font-mono text-[11px] uppercase tracking-label text-state-warning">{title}</p>
+      <p className="font-mono text-meta uppercase tracking-label text-state-warning">{title}</p>
       <ul className="mt-2 flex flex-col gap-1">
         {items.map((item, i) => (
           <li key={i} className="text-sm leading-relaxed text-text-secondary">

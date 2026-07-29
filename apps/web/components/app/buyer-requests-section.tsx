@@ -137,13 +137,13 @@ export interface BuyerRequestUnderstandingLabels {
 /** Status-chip tone for each deterministic readiness state. */
 const READINESS_CHIP_CLASS: Record<RequestReadinessStatus, string> = {
   no_files:
-    "rounded-full bg-ink-700/40 px-2 py-0.5 text-[11px] text-text-muted",
+    "rounded-full bg-ink-700/40 px-2 py-0.5 text-meta text-text-muted",
   needs_more_info:
-    "rounded-full bg-state-warning/15 px-2 py-0.5 text-[11px] text-state-warning",
+    "rounded-full bg-state-warning/15 px-2 py-0.5 text-meta text-state-warning",
   files_added:
-    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-[11px] text-brand-blue",
+    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta text-brand-blue",
   enough_for_manual_review:
-    "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
+    "rounded-full bg-state-success/15 px-2 py-0.5 text-meta text-state-success",
 };
 
 /**
@@ -233,10 +233,10 @@ export function BuyerRequestsSection({
       {/* Lightweight workflow stepper — explains the flow; the future
           structured helper is visibly marked as not enabled. */}
       <div className="flex flex-col gap-1" data-testid="buyer-requests-workflow">
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.understanding.workflow.heading}
         </p>
-        <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[11px]">
+        <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 text-meta">
           {[
             { label: labels.understanding.workflow.steps.request, future: false },
             { label: labels.understanding.workflow.steps.files, future: false },
@@ -276,7 +276,7 @@ export function BuyerRequestsSection({
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
           data-testid="buyer-requests-migration-blocker"
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
             {labels.migrationBlockerHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
@@ -341,7 +341,7 @@ export function BuyerRequestsSection({
                       <span className="font-display text-sm font-semibold text-text-primary">
                         {sanitizeDemandTitle(r.title)}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {u.labelCreated}: {r.createdAt.slice(0, 10)}
                       </span>
                     </div>
@@ -381,7 +381,7 @@ export function BuyerRequestsSection({
                     className="flex flex-col gap-1"
                     data-testid={`buyer-request-completion-${r.id}`}
                   >
-                    <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {u.completion.heading} · {completion.doneCount}/
                       {completion.totalCount}
                     </p>
@@ -389,7 +389,7 @@ export function BuyerRequestsSection({
                       {completion.items.map((item) => (
                         <li
                           key={item.key}
-                          className="flex items-center gap-2 text-[11px]"
+                          className="flex items-center gap-2 text-meta"
                         >
                           <span
                             aria-hidden
@@ -422,12 +422,12 @@ export function BuyerRequestsSection({
 
                   {/* 2. Attached files */}
                   <div className="border-t border-ink-700 pt-2">
-                    <p className="mb-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <p className="mb-1 font-mono text-meta uppercase tracking-label text-text-muted">
                       {u.filesHeading}
                     </p>
                     {attachmentsMigrationNeeded ? (
                       <p
-                        className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[11px] text-state-warning"
+                        className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
                         data-testid={`buyer-request-attachments-blocker-${r.id}`}
                       >
                         {labels.attachmentsMigrationBlocker}
@@ -435,7 +435,7 @@ export function BuyerRequestsSection({
                     ) : (
                       <>
                         {requestAttachments.length === 0 ? (
-                          <p className="text-[11px] text-text-muted">
+                          <p className="text-meta text-text-muted">
                             {labels.attachmentsEmpty}
                           </p>
                         ) : null}
@@ -455,14 +455,14 @@ export function BuyerRequestsSection({
                     className="flex flex-col gap-1 border-t border-ink-700 pt-2"
                     data-testid={`buyer-request-timeline-${r.id}`}
                   >
-                    <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {u.timeline.heading}
                     </p>
                     <ul className="flex flex-col gap-1">
                       {timeline.map((event, idx) => (
                         <li
                           key={`${event.key}-${idx}`}
-                          className="flex items-center gap-2 text-[11px]"
+                          className="flex items-center gap-2 text-meta"
                         >
                           <span
                             aria-hidden
@@ -475,7 +475,7 @@ export function BuyerRequestsSection({
                               : ""}
                           </span>
                           {event.at ? (
-                            <span className="font-mono text-[10px] text-text-muted">
+                            <span className="font-mono text-meta text-text-muted">
                               {event.at.slice(0, 10)}
                             </span>
                           ) : null}
@@ -486,7 +486,7 @@ export function BuyerRequestsSection({
 
                   {/* 3. Honest understanding message */}
                   <p
-                    className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-[11px] text-text-secondary"
+                    className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-meta text-text-secondary"
                     data-testid={`buyer-request-honest-${r.id}`}
                   >
                     {u.honestMessage}
@@ -497,7 +497,7 @@ export function BuyerRequestsSection({
                     className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-3 py-2"
                     data-testid={`buyer-request-next-action-${r.id}`}
                   >
-                    <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                    <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
                       {u.nextActionHeading}
                     </p>
                     <p className="text-xs font-semibold text-text-primary">
@@ -537,7 +537,7 @@ export function BuyerRequestsSection({
             className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
             data-testid="buyer-requests-field-title"
           />
-          <span className="text-[11px] text-text-muted">
+          <span className="text-meta text-text-muted">
             {labels.fieldTitleHelp}
           </span>
         </label>
@@ -668,7 +668,7 @@ export function BuyerRequestsSection({
             />
             <span>{labels.statusSubmitted}</span>
           </label>
-          <span className="text-[11px] text-text-muted">{labels.statusHelp}</span>
+          <span className="text-meta text-text-muted">{labels.statusHelp}</span>
         </fieldset>
 
         <button

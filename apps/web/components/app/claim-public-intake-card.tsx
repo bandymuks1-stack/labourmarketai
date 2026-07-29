@@ -102,7 +102,7 @@ export function ClaimPublicIntakeCard({
                 </button>
               )}
               {failedId === intake.id ? (
-                <span role="alert" className="text-[11px] text-state-warning">
+                <span role="alert" className="text-meta text-state-warning">
                   {labels.error}
                 </span>
               ) : null}

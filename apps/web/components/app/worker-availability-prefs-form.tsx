@@ -381,7 +381,7 @@ export function WorkerAvailabilityPrefsForm({
             className="flex flex-col gap-4 rounded-md border border-ink-600 p-4"
             data-testid="prefs-v2-fieldset"
           >
-            <legend className="px-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+            <legend className="px-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               {labels.v2.title}
             </legend>
             {v2Enabled ? (

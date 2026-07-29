@@ -64,11 +64,11 @@ export function MiniDraftCard({
             {card.flag}
           </span>
         </p>
-        <p className="truncate text-[11px] text-text-muted">{card.country}</p>
+        <p className="truncate text-meta text-text-muted">{card.country}</p>
       </div>
       <span
         className={cn(
-          "inline-grid h-8 w-8 shrink-0 place-items-center rounded-full border font-mono text-[11px] font-bold",
+          "inline-grid h-8 w-8 shrink-0 place-items-center rounded-full border font-mono text-meta font-bold",
           TIER_BADGE[card.tier],
         )}
       >
@@ -76,7 +76,7 @@ export function MiniDraftCard({
       </span>
       <span
         className={cn(
-          "hidden shrink-0 items-center rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label transition-colors group-hover:brightness-125 sm:inline-flex",
+          "hidden shrink-0 items-center rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label transition-colors group-hover:brightness-125 sm:inline-flex",
           PILL[statusKey],
         )}
       >

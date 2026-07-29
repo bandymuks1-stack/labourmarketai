@@ -32,7 +32,7 @@ export function HubPanel({
         {Icon ? (
           <Icon className="h-4 w-4 text-brand-cyan" strokeWidth={1.75} aria-hidden />
         ) : null}
-        <span className="font-mono text-[10px] font-medium uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta font-medium uppercase tracking-label text-brand-cyan">
           {eyebrow}
         </span>
       </div>
@@ -166,7 +166,7 @@ export function HubStat({
       >
         {value}
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </span>
     </>

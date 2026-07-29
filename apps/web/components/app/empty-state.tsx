@@ -51,7 +51,7 @@ export function EmptyState({
         </p>
       ) : null}
       {next ? (
-        <p className="max-w-prose text-[13px] leading-relaxed text-text-muted">
+        <p className="max-w-prose text-basis leading-relaxed text-text-muted">
           {next}
         </p>
       ) : null}

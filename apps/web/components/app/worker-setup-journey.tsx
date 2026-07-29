@@ -76,7 +76,7 @@ export async function WorkerSetupJourney(): Promise<React.ReactElement | null> {
           {allDone ? t("readyTitle") : t("title")}
         </h2>
         <span
-          className="font-mono text-[11px] uppercase tracking-label text-text-muted"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="setup-journey-count"
         >
           {t("progress", { done: doneCount, total: steps.length })}

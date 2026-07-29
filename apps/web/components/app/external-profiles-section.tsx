@@ -105,7 +105,7 @@ function ProfileRow({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex min-w-0 items-baseline gap-2 text-sm text-text-primary">
-          <span className="shrink-0 rounded-sm border border-ink-600 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <span className="shrink-0 rounded-sm border border-ink-600 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
             {labels.platformNames[entry.platform]}
           </span>
           {/* Host only — the full URL is the worker's own data and does not
@@ -325,7 +325,7 @@ export function ExternalProfilesSection({
             {labels.importNote}{" "}
             <a
               href="#profile-edit"
-              className="font-mono text-[11px] uppercase tracking-label text-brand-blue hover:underline"
+              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               data-testid="external-profiles-import-link"
             >
               {labels.importLink} →

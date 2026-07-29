@@ -26,7 +26,7 @@ export default async function AdminReadinessPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-readiness">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
@@ -73,7 +73,7 @@ export default async function AdminReadinessPage({
                 <span className="text-sm text-text-primary">
                   {d.documentTypeSlug}
                   {d.country ? ` · ${d.country}` : ""}
-                  <span className="ml-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="ml-2 font-mono text-meta uppercase tracking-label text-text-muted">
                     {d.workerId.slice(0, 8)}
                   </span>
                 </span>
@@ -114,7 +114,7 @@ export default async function AdminReadinessPage({
                 href={r.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[10px] uppercase tracking-label text-brand-blue underline"
+                className="font-mono text-meta uppercase tracking-label text-brand-blue underline"
               >
                 {t("countryReview.source")}
               </a>
@@ -158,7 +158,7 @@ function Tile({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="card-border flex flex-col gap-1 p-3">
       <span className="font-display text-2xl font-bold text-text-primary">{value}</span>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </span>
     </div>

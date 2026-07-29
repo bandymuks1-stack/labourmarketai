@@ -152,10 +152,10 @@ function Stat({
         text={value}
         className="font-mono text-2xl font-bold tracking-tightest text-text-primary"
       />
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </span>
-      <span className="text-[11px] leading-relaxed text-text-secondary">{hint}</span>
+      <span className="text-meta leading-relaxed text-text-secondary">{hint}</span>
     </Link>
   );
 }
@@ -238,7 +238,7 @@ export function WorkerPlayerCard({
             </span>
           )}
           <div className="min-w-0 flex-col">
-            <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+            <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
               {labels.title}
             </span>
             <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">
@@ -265,26 +265,26 @@ export function WorkerPlayerCard({
         data-testid="player-card-readiness"
         data-readiness-level={readiness.level}
       >
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.readiness.label}
           <span className="text-text-secondary">
             {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
           </span>
         </span>
         {missing.length > 0 ? (
-          <span className="flex flex-wrap items-center gap-1.5 text-[11px] leading-relaxed text-text-secondary">
+          <span className="flex flex-wrap items-center gap-1.5 text-meta leading-relaxed text-text-secondary">
             <span className="text-text-muted">{labels.readiness.nextLabel}</span>
             {missing.map((k) => (
               <span
                 key={k}
-                className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-[10px] text-text-secondary"
+                className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-meta text-text-secondary"
               >
                 {labels.readiness.pillars[k]}
               </span>
             ))}
           </span>
         ) : (
-          <span className="text-[11px] leading-relaxed text-text-secondary">
+          <span className="text-meta leading-relaxed text-text-secondary">
             {labels.readiness.hint}
           </span>
         )}
@@ -294,7 +294,7 @@ export function WorkerPlayerCard({
       <div className="flex flex-wrap items-center gap-2">
         {labels.availabilityLabel ? (
           <span
-            className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+            className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
             data-testid="player-card-availability"
           >
             {card.availabilityStatus === "available" ? (
@@ -305,7 +305,7 @@ export function WorkerPlayerCard({
         ) : null}
         {labels.availabilityFrom ? (
           <span
-            className="inline-flex min-h-7 items-center rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-[11px] text-text-secondary"
+            className="inline-flex min-h-7 items-center rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
             data-testid="player-card-available-from"
           >
             {labels.availabilityFrom}
@@ -315,7 +315,7 @@ export function WorkerPlayerCard({
             precision only (the card never implies an address). */}
         {labels.locationName ? (
           <span
-            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-[11px] text-text-secondary"
+            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
             data-testid="player-card-location"
           >
             <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
@@ -323,7 +323,7 @@ export function WorkerPlayerCard({
           </span>
         ) : null}
         <span
-          className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+          className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
           data-testid="player-card-workcard"
         >
           <Shield className="h-3.5 w-3.5" aria-hidden />
@@ -336,7 +336,7 @@ export function WorkerPlayerCard({
           "verified" glow, no certification badge — confirmation stays an
           internal signal and is never advertised on this self-view card. ── */}
       <div className="flex flex-col gap-2" data-testid="player-card-skill-signals">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.verifiedTitle}
         </span>
         {card.verifiedSkills.length > 0 ? (
@@ -352,7 +352,7 @@ export function WorkerPlayerCard({
             ))}
           </ul>
         ) : (
-          <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] leading-relaxed text-text-muted">
+          <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted">
             {labels.verifiedEmpty}
           </p>
         )}
@@ -362,7 +362,7 @@ export function WorkerPlayerCard({
             tiers stay visually distinct and honest (DESIGN_SOUL §1). */}
         {card.journalSupportedSkills > 0 ? (
           <p
-            className="inline-flex items-center gap-2 self-start rounded-md border border-brand-cyan/30 bg-brand-cyan/10 px-2.5 py-1.5 text-[11px] leading-relaxed text-brand-cyan"
+            className="inline-flex items-center gap-2 self-start rounded-md border border-brand-cyan/30 bg-brand-cyan/10 px-2.5 py-1.5 text-meta leading-relaxed text-brand-cyan"
             data-testid="player-card-journal-supported"
             title={labels.journalSupportedHint}
           >
@@ -411,20 +411,20 @@ export function WorkerPlayerCard({
             history renders nothing (it is a fact, not a gap to pad). */}
       {card.workHistory.length > 0 ? (
         <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.workHistoryLabel}
           </span>
           <ul className="flex flex-col gap-1">
             {card.workHistory.slice(0, 3).map((h) => (
               <li
                 key={h.id}
-                className="flex flex-wrap items-baseline gap-x-2 text-[13px] text-text-primary"
+                className="flex flex-wrap items-baseline gap-x-2 text-basis text-text-primary"
               >
                 <span className="font-medium">
                   {h.organizationName ?? h.title ?? labels.workHistoryUnnamed}
                 </span>
                 {h.startedAt ? (
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {h.startedAt}
                     {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
                   </span>
@@ -448,7 +448,7 @@ export function WorkerPlayerCard({
             className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
             data-testid="player-card-documents"
           >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels.documentsLabel}
             </span>
             <span className="text-sm text-text-primary">{labels.documentsValue}</span>
@@ -458,13 +458,13 @@ export function WorkerPlayerCard({
           className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
           data-testid="player-card-reputation"
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.reputationLabel}
           </span>
           <span className="text-sm text-text-primary">
             {labels.reputationValue ?? labels.reputationEmpty}
           </span>
-          <span className="text-[11px] leading-relaxed text-text-muted">
+          <span className="text-meta leading-relaxed text-text-muted">
             {labels.reputationHint}
           </span>
         </div>
@@ -477,7 +477,7 @@ export function WorkerPlayerCard({
           className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
           data-testid="player-card-thermometer"
         >
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
             <Thermometer className="h-3.5 w-3.5" aria-hidden />
             {labels.thermoLabel}
           </span>
@@ -488,19 +488,19 @@ export function WorkerPlayerCard({
               </span>
               {thermometer.smallSample ? (
                 <span
-                  className="text-[11px] leading-relaxed text-state-warning"
+                  className="text-meta leading-relaxed text-state-warning"
                   data-testid="player-card-thermometer-small-sample"
                 >
                   {labels.thermoSmallSample}
                 </span>
               ) : null}
-              <span className="text-[11px] leading-relaxed text-text-secondary">
+              <span className="text-meta leading-relaxed text-text-secondary">
                 {labels.thermoHint}
               </span>
             </>
           ) : (
             <span
-              className="text-[11px] leading-relaxed text-text-muted"
+              className="text-meta leading-relaxed text-text-muted"
               data-testid="player-card-thermometer-missing"
             >
               {thermometer.missing === "position"
@@ -523,7 +523,7 @@ export function WorkerPlayerCard({
         ) : (
           <Sparkle className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
         )}
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.latestEvidenceLabel}
         </span>
         <span className="text-text-primary">

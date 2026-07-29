@@ -75,7 +75,7 @@ export default async function BuyerStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="buyer-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {label("PIRKĖJO BŪSENA", "BUYER STATE")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

@@ -67,16 +67,16 @@ export interface CandidateDraftsLabels {
 function HonestChips({ labels, linked }: { labels: CandidateDraftsLabels; linked: boolean }) {
   return (
     <div className="flex flex-wrap gap-1.5" data-testid="draft-honesty-chips">
-      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[10px] uppercase tracking-label text-text-muted">
+      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-meta uppercase tracking-label text-text-muted">
         {labels.labelDraft}
       </span>
-      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[10px] uppercase tracking-label text-text-muted">
+      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-meta uppercase tracking-label text-text-muted">
         {labels.labelNotRegistered}
       </span>
-      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[10px] uppercase tracking-label text-text-muted">
+      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-meta uppercase tracking-label text-text-muted">
         {labels.labelNotVerified}
       </span>
-      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[10px] uppercase tracking-label text-text-muted">
+      <span className="rounded-full border border-ink-600 px-2 py-0.5 text-meta uppercase tracking-label text-text-muted">
         {linked ? labels.linkedNote : labels.labelCanLinkLater}
       </span>
     </div>
@@ -128,27 +128,27 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
     <section className="card-border flex flex-col gap-3 p-4" data-testid="candidate-draft-create">
       <h2 className="font-display text-lg font-semibold text-text-primary">{labels.createTitle}</h2>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.nameLabel}
           <input className={field} value={form.nameOrTitle} onChange={set("nameOrTitle")} placeholder={labels.namePlaceholder} data-testid="draft-name-input" />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.contactLabel}
           <input className={field} value={form.contact} onChange={set("contact")} placeholder={labels.contactPlaceholder} />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.professionLabel}
           <input className={field} value={form.professionService} onChange={set("professionService")} placeholder={labels.professionPlaceholder} />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+        <label className="flex flex-col gap-1 text-meta text-text-muted">
           {labels.languageLabel}
           <input className={field} value={form.language} onChange={set("language")} placeholder={labels.languagePlaceholder} />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted sm:col-span-2">
+        <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
           {labels.skillsLabel}
           <input className={field} value={form.skillsText} onChange={set("skillsText")} placeholder={labels.skillsPlaceholder} />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] text-text-muted sm:col-span-2">
+        <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
           {labels.notesLabel}
           <textarea className={field} value={form.notes} onChange={set("notes")} placeholder={labels.notesPlaceholder} rows={2} />
         </label>
@@ -163,7 +163,7 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
         >
           {pending ? labels.creating : labels.create}
         </button>
-        {msg ? <span className="text-[11px] text-text-secondary">{msg}</span> : null}
+        {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </section>
   );
@@ -211,7 +211,7 @@ function DraftCard({ draft, labels }: { draft: CandidateDraft; labels: Candidate
         </select>
       </header>
       <HonestChips labels={labels} linked={Boolean(draft.linkedProfileId)} />
-      <dl className="grid grid-cols-1 gap-1 text-[11px] sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-1 text-meta sm:grid-cols-2">
         {draft.professionService ? (
           <div>
             <dt className="text-text-muted">{labels.professionLabel}</dt>
@@ -243,18 +243,18 @@ function DraftCard({ draft, labels }: { draft: CandidateDraft; labels: Candidate
           </div>
         ) : null}
       </dl>
-      <p className="text-[10px] leading-relaxed text-text-muted">{labels.notAssignableNote}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{labels.notAssignableNote}</p>
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={remove}
           disabled={pending}
-          className="text-[11px] text-text-secondary hover:text-state-danger disabled:opacity-50"
+          className="text-meta text-text-secondary hover:text-state-danger disabled:opacity-50"
           data-testid="draft-delete"
         >
           {labels.delete}
         </button>
-        {msg ? <span className="text-[11px] text-text-secondary">{msg}</span> : null}
+        {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </article>
   );
@@ -272,7 +272,7 @@ export function CandidateDraftsManager({
   return (
     <div className="flex flex-col gap-6" data-testid="candidate-drafts-manager">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
           {labels.eyebrow}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -280,7 +280,7 @@ export function CandidateDraftsManager({
         </h1>
         <p className="text-sm leading-relaxed text-text-secondary">{labels.intro}</p>
         <p
-          className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-[11px] leading-relaxed text-text-muted"
+          className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-meta leading-relaxed text-text-muted"
           data-testid="candidate-drafts-honesty"
         >
           {labels.honestyNote}
@@ -295,7 +295,7 @@ export function CandidateDraftsManager({
         <>
           <CreateForm labels={labels} />
           <section className="flex flex-col gap-3">
-            <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
               {labels.listTitle}
             </h2>
             {drafts.length === 0 ? (

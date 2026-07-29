@@ -70,7 +70,7 @@ export interface WorkerIntakeFormLabels {
 const FIELD =
   "rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
 const LABEL = "flex flex-col gap-1 text-xs";
-const HELP = "text-[11px] text-text-muted";
+const HELP = "text-meta text-text-muted";
 
 export function WorkerIntakeForm({
   labels,
@@ -236,10 +236,10 @@ export function WorkerIntakeForm({
           ) : (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-blue">
+                <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-blue">
                   {labels.aiBadge}
                 </span>
-                <span className="text-[11px] text-text-muted">{labels.aiNotVerified}</span>
+                <span className="text-meta text-text-muted">{labels.aiNotVerified}</span>
               </div>
               {state.headline ? (
                 <p className="text-sm text-text-primary">

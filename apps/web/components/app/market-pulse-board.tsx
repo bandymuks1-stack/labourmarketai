@@ -45,7 +45,7 @@ export async function MarketPulseBoard({
       className="card-border rise-in flex flex-col gap-5 p-5 sm:p-6"
       data-testid="market-pulse-board"
     >
-      <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
         <BarChart3 className="h-3.5 w-3.5" aria-hidden />
         {t("title")}
       </h2>
@@ -68,12 +68,12 @@ export async function MarketPulseBoard({
                   className="flex flex-col gap-0.5"
                   data-testid="pulse-supply-row"
                 >
-                  <span className="flex items-baseline justify-between gap-2 text-[11px]">
+                  <span className="flex items-baseline justify-between gap-2 text-meta">
                     <span className="truncate text-text-secondary">
                       {professionLabel(s.professionSlug)} ·{" "}
                       {countryLabel(s.country)}
                       {s.smallSample ? (
-                        <span className="ml-1.5 font-mono text-[9px] uppercase tracking-label text-state-warning">
+                        <span className="ml-1.5 font-mono text-meta uppercase tracking-label text-state-warning">
                           {t("smallSample", { n: SMALL_SAMPLE_N })}
                         </span>
                       ) : null}
@@ -117,7 +117,7 @@ export async function MarketPulseBoard({
                   className="flex flex-col gap-0.5"
                   data-testid="pulse-demand-row"
                 >
-                  <span className="flex items-baseline justify-between gap-2 text-[11px]">
+                  <span className="flex items-baseline justify-between gap-2 text-meta">
                     <span className="truncate text-text-secondary">
                       {d.roleText} · {countryLabel(d.country)}
                     </span>
@@ -153,7 +153,7 @@ export async function MarketPulseBoard({
               <li
                 key={g.country}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 font-mono text-[11px]",
+                  "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 font-mono text-meta",
                   g.supplyWorkers === 0
                     ? "border-state-warning/40 bg-state-warning/10 text-state-warning"
                     : "border-ink-600 bg-ink-800/40 text-text-secondary",

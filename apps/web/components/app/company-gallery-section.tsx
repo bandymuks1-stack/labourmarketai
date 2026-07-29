@@ -60,7 +60,7 @@ export function CompanyGallerySection({
                 className="flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm text-text-primary transition-colors hover:border-brand-blue"
               >
                 <span className="truncate font-medium">{p.title ?? "—"}</span>
-                <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[11px] text-text-secondary">
+                <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-meta text-text-secondary">
                   <Images className="h-3.5 w-3.5" aria-hidden />
                   {p.photoCount} · {labels.openLabel} →
                 </span>

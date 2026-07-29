@@ -70,7 +70,7 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="truncate font-display text-sm font-bold text-text-primary">{need.title}</p>
         <span
-          className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${CONFIDENCE_TONE[s.confidence]}`}
+          className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${CONFIDENCE_TONE[s.confidence]}`}
         >
           {t(`confidence.${s.confidence}`)}
           {s.needsReview ? ` · ${t("needsReview")}` : ""}
@@ -175,7 +175,7 @@ export function NeedStructureRow({ need }: { need: UnstructuredNeed }) {
 function Fragmenty({ k, v }: { k: string; v: string | null }) {
   return (
     <>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">{k}</dt>
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{k}</dt>
       <dd className="whitespace-pre-wrap text-text-secondary">{v?.trim() || "—"}</dd>
     </>
   );

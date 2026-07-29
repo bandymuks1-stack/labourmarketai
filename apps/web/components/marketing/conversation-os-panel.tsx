@@ -24,7 +24,7 @@ export async function ConversationOsPanel() {
 
   return (
     <section id="conversation" className="mt-16 scroll-mt-24">
-      <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+      <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
         <span className="live-dot" aria-hidden />
         {t("eyebrow")}
       </p>
@@ -40,7 +40,7 @@ export async function ConversationOsPanel() {
         <Reveal>
           <div className="flex flex-col gap-5">
             <div className="card-border p-5 sm:p-6">
-              <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-success">
+              <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-state-success">
                 <span
                   className="h-1.5 w-1.5 rounded-full bg-state-success"
                   aria-hidden
@@ -63,7 +63,7 @@ export async function ConversationOsPanel() {
               </ul>
             </div>
             <div className="card-border p-5 sm:p-6">
-              <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-state-amber">
+              <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-state-amber">
                 <span
                   className="h-1.5 w-1.5 rounded-full bg-state-amber"
                   aria-hidden
@@ -91,7 +91,7 @@ export async function ConversationOsPanel() {
         {/* Static chat composition — concept-marked, non-interactive */}
         <Reveal delay={0.1}>
           <div className="card-border relative overflow-hidden p-5 sm:p-6">
-            <p className="inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-800/70 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-800/70 px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
               {t("conceptLabel")}
             </p>
             <div className="mt-4 flex flex-col gap-3" aria-hidden>

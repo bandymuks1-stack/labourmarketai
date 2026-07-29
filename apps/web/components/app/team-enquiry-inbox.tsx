@@ -80,11 +80,11 @@ export function TeamEnquiryInbox({
                 {e.proposerName ?? t("unknownProposer")}
               </span>
               {e.proposerCompanyName && (
-                <span className="text-[11px] text-text-muted">
+                <span className="text-meta text-text-muted">
                   {e.proposerCompanyName}
                 </span>
               )}
-              <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted">
                 {statusLabel(e.status)}
               </span>
             </div>
@@ -92,7 +92,7 @@ export function TeamEnquiryInbox({
               {e.message}
             </p>
             {(e.startDate ?? e.expectedEndDate) && (
-              <p className="text-[11px] text-text-muted">
+              <p className="text-meta text-text-muted">
                 {t("dates", {
                   from: e.startDate ?? "—",
                   to: e.expectedEndDate ?? "—",

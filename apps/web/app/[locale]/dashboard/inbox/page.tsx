@@ -178,7 +178,7 @@ export default async function InboxPage({
           </span>
         </div>
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="inbox-project-note"
         >
           {t("inbox.projectNote")}

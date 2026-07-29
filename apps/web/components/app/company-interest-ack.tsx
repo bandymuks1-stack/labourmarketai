@@ -79,7 +79,7 @@ export function CompanyInterestAck({
       data-interest-status={status}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
+        <span className="font-mono text-meta uppercase tracking-label text-state-success">
           {labels.statusLabels[status] ?? status}
         </span>
         {status !== "reviewed" && status !== "contacted" ? (
@@ -87,7 +87,7 @@ export function CompanyInterestAck({
             type="button"
             onClick={markReviewed}
             disabled={pending}
-            className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-[11px] text-text-primary hover:border-brand-blue disabled:opacity-50"
+            className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-meta text-text-primary hover:border-brand-blue disabled:opacity-50"
             data-testid="interest-ack-reviewed"
           >
             {labels.markReviewed}
@@ -99,22 +99,22 @@ export function CompanyInterestAck({
           type="button"
           onClick={contact}
           disabled={pending}
-          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-[11px] text-brand-blue hover:border-brand-blue disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-meta text-brand-blue hover:border-brand-blue disabled:opacity-50"
           data-testid="interest-ack-contacted"
         >
           <MessageSquare className="h-3 w-3" /> {labels.markContacted}
         </button>
         {failure === "error" ? (
-          <span role="alert" className="text-[11px] text-state-warning">
+          <span role="alert" className="text-meta text-state-warning">
             {labels.error}
           </span>
         ) : null}
         {failure === "not-available" ? (
-          <span className="text-[11px] text-text-muted">{labels.notAvailable}</span>
+          <span className="text-meta text-text-muted">{labels.notAvailable}</span>
         ) : null}
       </div>
       {/* Honest scope line — in-app thread only, no external send. */}
-      <p className="text-[10px] leading-relaxed text-text-muted">{labels.internalNote}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>
   );
 }

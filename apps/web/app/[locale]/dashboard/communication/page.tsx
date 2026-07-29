@@ -186,7 +186,7 @@ export default async function CommunicationListPage({
             <span className="flex min-w-0 items-center gap-2">
               {unread && (
                 <span
-                  className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label text-brand-blue"
+                  className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-meta font-bold uppercase tracking-label text-brand-blue"
                   data-testid={`conversation-unread-${c.id}`}
                 >
                   {t("unread")}
@@ -198,7 +198,7 @@ export default async function CommunicationListPage({
                   states the real elapsed wait in words. */}
               {priority.level === "awaiting_you" && (
                 <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label ${
+                  className={`shrink-0 rounded-full px-2 py-0.5 font-mono text-meta font-bold uppercase tracking-label ${
                     priority.overdue
                       ? "bg-state-danger/15 text-state-danger"
                       : "bg-state-amber/15 text-state-amber"
@@ -221,7 +221,7 @@ export default async function CommunicationListPage({
               </span>
             </span>
             <span
-              className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
+              className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted"
               data-testid={`conversation-type-${c.id}`}
             >
               {t(card.typeKey)}
@@ -254,7 +254,7 @@ export default async function CommunicationListPage({
               chip (NOT a normal name and NOT a bland "unspecified
               recipient") so the user knows the details are simply not
               shown yet. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta">
             {card.counterpartyRestricted ? (
               <span
                 className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
@@ -329,7 +329,7 @@ export default async function CommunicationListPage({
             this viewer it is a real link-back; without one it is a
             plain label — no dead ends, no fake state. */}
         {card.sourceKey && (
-          <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
             {card.sourceHref ? (
               <Link
                 href={card.sourceHref as "/dashboard"}
@@ -406,9 +406,9 @@ export default async function CommunicationListPage({
         >
           <span className="flex flex-col">
             <span className="font-medium">{tBookings("pendingLink")}</span>
-            <span className="text-[11px] text-text-muted">{tBookings("pendingNote")}</span>
+            <span className="text-meta text-text-muted">{tBookings("pendingNote")}</span>
           </span>
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[11px] font-bold text-white">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white">
             {pendingBookings}
           </span>
         </Link>
@@ -460,7 +460,7 @@ export default async function CommunicationListPage({
           of this page; help lives below the list, still one tap away. */}
       <SupportConversationLauncher locale={locale} />
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

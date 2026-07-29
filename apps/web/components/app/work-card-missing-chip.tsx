@@ -25,7 +25,7 @@ export function WorkCardMissingChip({
   testid: string;
 }) {
   const className =
-    "inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-[11px] text-brand-orange transition-colors hover:border-brand-orange hover:bg-brand-orange/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange";
+    "inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-orange/30 bg-brand-orange/5 px-2.5 py-1 text-meta text-brand-orange transition-colors hover:border-brand-orange hover:bg-brand-orange/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange";
 
   if (href) {
     return (

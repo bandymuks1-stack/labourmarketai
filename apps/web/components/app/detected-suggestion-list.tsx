@@ -27,11 +27,11 @@ export function DetectedSuggestionList({
   return (
     <section className={cn("flex flex-col gap-2", className)}>
       <header className="flex items-center justify-between gap-3">
-        <h3 className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+        <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           <span className="text-text-muted">{t("groupEyebrow")}</span> · {title}
         </h3>
         {typeof count === "number" && (
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {count}
           </span>
         )}

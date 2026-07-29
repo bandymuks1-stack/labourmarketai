@@ -57,7 +57,7 @@ export async function CurrentSpaceHeader({ role }: { role: Role }) {
       title={t(`${key}.purpose`)}
     >
       <div className="flex min-w-0 items-baseline gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("current")}
         </span>
         <h2 className="truncate font-display text-sm font-semibold text-text-primary">

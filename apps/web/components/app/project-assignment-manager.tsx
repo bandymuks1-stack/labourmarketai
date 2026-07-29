@@ -202,7 +202,7 @@ export function ProjectAssignmentManager({
           <p className="font-display text-sm font-semibold text-text-primary">
             {p.title ?? p.id.slice(0, 8)}{p.city ? ` · ${p.city}` : ""}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.assignmentsTitle}
           </p>
           {p.assignments.length === 0 ? (
@@ -217,7 +217,7 @@ export function ProjectAssignmentManager({
                     <span className="flex min-w-0 items-center gap-2.5">
                       <span
                         aria-hidden
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-[11px] font-bold text-text-primary"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-meta font-bold text-text-primary"
                       >
                         {playerInitials(a.name)}
                       </span>
@@ -250,14 +250,14 @@ export function ProjectAssignmentManager({
             <a
               href="#assign-worker"
               data-testid="roster-assign-link"
-              className="inline-flex min-h-8 items-center font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+              className="inline-flex min-h-8 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
             >
               {labels.assignFromRoster} ↑
             </a>
             <Link
               href={`/dashboard/projects/${p.id}/operations`}
               data-testid="roster-operations-link"
-              className="inline-flex min-h-8 items-center font-mono text-[10px] uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+              className="inline-flex min-h-8 items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
             >
               {labels.openBoard} →
             </Link>
