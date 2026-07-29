@@ -96,9 +96,9 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
           <UserRound className="h-4 w-4 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("title")}
         </span>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("note")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("note")}</p>
         <p
-          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5 text-[11px] leading-relaxed text-text-secondary"
+          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2.5 py-1.5 text-meta leading-relaxed text-text-secondary"
           data-testid="market-map-country-level-notice"
         >
           {t("countryLevelNotice")} · {t("exactHidden")}
@@ -150,7 +150,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   <Icon className="h-4 w-4 shrink-0 text-brand-blue" strokeWidth={1.75} aria-hidden />
                   <span className="text-sm font-medium text-text-primary">{t(labelKey)}</span>
                   {rows.length > 0 && (
-                    <span className="ml-auto font-mono text-[9px] uppercase tracking-label text-text-muted">
+                    <span className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("countryLevelTag")}
                     </span>
                   )}
@@ -181,7 +181,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   <a
                     href={anchor}
                     data-testid={`market-map-cta-${type}`}
-                    className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
                   >
                     {t(ctaKey)}
                     <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -190,7 +190,7 @@ export function MarketMapMySignals({ signals }: { signals: NormalizedSignal[] })
                   <Link
                     href={href as "/dashboard"}
                     data-testid={`market-map-cta-${type}`}
-                    className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
                   >
                     {t(ctaKey)}
                     <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />

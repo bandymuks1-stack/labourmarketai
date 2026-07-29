@@ -118,7 +118,7 @@ export function MarketMapEntityLayers({
         <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
         {/* The separation + communication contract, stated to the user. */}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="entity-layers-never-mixed"
         >
           {t("neverMixedNote")} {t("contactNote")}
@@ -146,11 +146,11 @@ export function MarketMapEntityLayers({
                   <span className="block text-sm text-text-primary">
                     {t(`${I18N[kind]}.name`)}
                   </span>
-                  <span className="block text-[11px] leading-relaxed text-text-muted">
+                  <span className="block text-meta leading-relaxed text-text-muted">
                     {t(`${I18N[kind]}.legend`)}
                   </span>
                 </span>
-                <span className="font-mono text-[11px] text-text-muted">{count}</span>
+                <span className="font-mono text-meta text-text-muted">{count}</span>
                 {on ? (
                   <Eye className="h-3.5 w-3.5 shrink-0 text-text-secondary" strokeWidth={1.75} aria-hidden />
                 ) : (
@@ -165,7 +165,7 @@ export function MarketMapEntityLayers({
       {/* 1 · Person presence — aggregated area chips only (never a point). */}
       {visible.person_presence && (
         <div className="flex flex-col gap-1.5" data-testid="entity-layer-person_presence">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("person.name")}
           </span>
           {collections.personPresence.length === 0 ? (
@@ -182,7 +182,7 @@ export function MarketMapEntityLayers({
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/10 px-2.5 py-1 text-xs text-text-primary">
                     <span aria-hidden className="h-2 w-2 rounded bg-brand-blue/70" />
                     {areaLabel(e.country, e.region, e.city)}
-                    <span className="font-mono text-[11px] text-text-secondary">
+                    <span className="font-mono text-meta text-text-secondary">
                       {e.band.kind === "exact"
                         ? t("person.countLabel", { count: e.band.count })
                         : t("person.smallSample")}
@@ -192,7 +192,7 @@ export function MarketMapEntityLayers({
               ))}
             </ul>
           )}
-          <p className="text-[11px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("person.visibilityNote")}
           </p>
         </div>
@@ -201,7 +201,7 @@ export function MarketMapEntityLayers({
       {/* 2 · Company operating territory — outlined areas, never point-pins. */}
       {visible.company_territory && (
         <div className="flex flex-col gap-1.5" data-testid="entity-layer-company_territory">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("company.name")}
           </span>
           {companyTerritorySource === "needs-migration" ? (
@@ -236,14 +236,14 @@ export function MarketMapEntityLayers({
                   <span className="min-w-0 flex-1 truncate">
                     {e.label ?? areaLabel(e.country, e.region, e.city)}
                   </span>
-                  <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-[10px] text-text-muted">
+                  <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-muted">
                     {t(`company.kinds.${e.territoryKind}`)}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-[11px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("company.visibilityNote")}
           </p>
         </div>
@@ -252,7 +252,7 @@ export function MarketMapEntityLayers({
       {/* 3 · Project locations — typed diamond entries, honest confirmation. */}
       {visible.project_location && (
         <div className="flex flex-col gap-1.5" data-testid="entity-layer-project_location">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("project.name")}
           </span>
           {collections.projectLocations.length === 0 ? (
@@ -273,14 +273,14 @@ export function MarketMapEntityLayers({
                   <span className="min-w-0 flex-1 truncate">
                     {areaLabel(e.country, null, e.city)}
                   </span>
-                  <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-[10px] text-text-muted">
+                  <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-muted">
                     {e.confirmed ? t("project.confirmedTag") : t("project.unconfirmedTag")}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-[11px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("project.visibilityNote")}
           </p>
         </div>

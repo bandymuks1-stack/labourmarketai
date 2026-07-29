@@ -86,7 +86,7 @@ export default async function AdminCompanyNeedIntakesPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-company-need-intakes">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -182,14 +182,14 @@ export default async function AdminCompanyNeedIntakesPage({
                     <span className="text-sm font-semibold text-text-primary">
                       {r.companyName ?? "—"}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.created")}:{" "}
                       {r.createdAt.slice(0, 16).replace("T", " ")}
                       {r.locale ? ` · ${r.locale.toUpperCase()}` : ""}
                     </span>
                   </div>
                   <span
-                    className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[r.status]}`}
+                    className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[r.status]}`}
                     data-testid={`company-need-intake-status-chip-${r.id}`}
                   >
                     {t(`status.${r.status}`)}
@@ -239,7 +239,7 @@ export default async function AdminCompanyNeedIntakesPage({
                 </dl>
 
                 {r.description ? (
-                  <p className="whitespace-pre-wrap rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-[11px] leading-relaxed text-text-secondary">
+                  <p className="whitespace-pre-wrap rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-meta leading-relaxed text-text-secondary">
                     <span className="font-mono uppercase tracking-label text-text-muted">
                       {t("fields.description")}:
                     </span>{" "}

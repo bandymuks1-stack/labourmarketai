@@ -38,6 +38,9 @@ export async function PlayerCardShowcase() {
     availabilityStatus: "available",
     availableFrom: null,
     professionSlug: "cook",
+    // §5.2 on the landing too — the SAME fields the signed-in card shows.
+    locationCountry: "LT",
+    documents: { total: 3, expiring: 0 },
     latestEvidenceAt: "2026-07-21T09:00:00Z",
     workHistory: [
       {
@@ -58,7 +61,7 @@ export async function PlayerCardShowcase() {
     <section className="relative mt-16 overflow-hidden">
       <ConstellationBg />
       <div className="relative mx-auto max-w-container px-6 sm:px-12">
-        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
@@ -84,7 +87,7 @@ export async function PlayerCardShowcase() {
 
         {/* §18 honesty line: the sample is said out loud, in words. */}
         <p
-          className="mt-4 text-center font-mono text-[11px] uppercase tracking-label text-text-muted"
+          className="mt-4 text-center font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="playercards-concept-note"
         >
           {t("conceptNote")}

@@ -109,7 +109,7 @@ export async function PremiumHubPersonCard({
         className="flex flex-col gap-3 border-t border-ink-600 pt-4"
         data-testid="premium-hub-person-next"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {tw("nextEyebrow")}
         </span>
         <WorkCardEditor
@@ -142,14 +142,14 @@ export async function PremiumHubPersonCard({
             ) : null}
             <div className="flex flex-wrap items-center gap-1.5">
               {person.locationCountry ? (
-                <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
                   <MapPin className="h-3 w-3" strokeWidth={1.75} aria-hidden />
                   {person.locationCountry}
                 </span>
               ) : null}
               {person.availability ? (
                 <span
-                  className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label ${AVAIL_TONE[person.availability]}`}
+                  className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-meta uppercase tracking-label ${AVAIL_TONE[person.availability]}`}
                 >
                   {person.availability === "available" ? (
                     <span className="live-dot" aria-hidden />
@@ -191,7 +191,7 @@ export async function PremiumHubPersonCard({
           {/* RC3 skills truth: one plain-language line explaining what the
               two skill numbers mean — never internal "signal" vocabulary. */}
           <p
-            className="text-[11px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid="hub-person-stats-legend"
           >
             {t("person.stats.legend")}

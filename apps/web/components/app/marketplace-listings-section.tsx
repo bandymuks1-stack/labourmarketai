@@ -319,7 +319,7 @@ export function MarketplaceListingsSection({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-text-primary">{row.title}</span>
-                    <span className={`rounded-full border px-2 py-0.5 text-[11px] ${STATUS_RING[row.status]}`}>
+                    <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
                       {t(`status.${row.status}`)}
                     </span>
                   </div>
@@ -404,7 +404,7 @@ export function MarketplaceListingsSection({
               <li key={row.id} className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-text-primary">{row.title}</span>
-                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-[11px] text-text-muted">
+                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
                     {t(`kinds.${row.listingKind}`)}
                   </span>
                 </div>

@@ -49,11 +49,11 @@ export function CvPreview({
     <aside className="card-border bg-card-glow relative overflow-hidden p-5 md:sticky md:top-20">
       {/* Passport header — eyebrow + a calm "profile online" signal (not data) */}
       <div className="flex items-center justify-between gap-2">
-        <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot signal-dot" aria-hidden />
           {t("title")}
         </p>
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+        <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("savedCount", { n: skills.length })}
         </p>
       </div>
@@ -93,7 +93,7 @@ export function CvPreview({
             >
               {tRole(r)}
               {r === activeRole && (
-                <span className="font-mono text-[8px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("activeTag")}
                 </span>
               )}
@@ -105,7 +105,7 @@ export function CvPreview({
       <hr className="my-4 border-ink-600" />
 
       {/* Capabilities */}
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("skills")}
       </p>
       {skills.length === 0 ? (
@@ -142,7 +142,7 @@ export function CvPreview({
       <hr className="my-4 border-ink-600" />
 
       <p className="text-xs leading-relaxed text-state-live">{t("transparency")}</p>
-      <p className="mt-1.5 text-[11px] leading-relaxed text-text-muted">
+      <p className="mt-1.5 text-meta leading-relaxed text-text-muted">
         {t("disclaimer")}
       </p>
     </aside>

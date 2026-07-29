@@ -53,9 +53,9 @@ export async function EvidenceDecisionTimeline({
       {/* Record created — always real (the entry's own timestamp). */}
       <li className="flex items-start gap-2" data-step="created">
         <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.created}`} aria-hidden />
-        <span className="flex flex-wrap items-baseline gap-x-1.5 text-[11px] leading-tight text-text-secondary">
+        <span className="flex flex-wrap items-baseline gap-x-1.5 text-meta leading-tight text-text-secondary">
           <span>{t("entry.timeline.created")}</span>
-          <span className="font-mono text-[10px] text-text-muted">
+          <span className="font-mono text-meta text-text-muted">
             {createdAt.slice(0, 10)}
           </span>
         </span>
@@ -65,7 +65,7 @@ export async function EvidenceDecisionTimeline({
         /* No human decision yet — honestly "waiting", never auto-confirmed. */
         <li className="flex items-start gap-2" data-step="waiting">
           <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
-          <span className="text-[11px] leading-tight text-amber-700">
+          <span className="text-meta leading-tight text-amber-700">
             {t("entry.timeline.waiting")}
           </span>
         </li>
@@ -86,7 +86,7 @@ export async function EvidenceDecisionTimeline({
                 aria-hidden
               />
               <span className="flex flex-col gap-0.5">
-                <span className="flex flex-wrap items-baseline gap-x-1.5 text-[11px] leading-tight">
+                <span className="flex flex-wrap items-baseline gap-x-1.5 text-meta leading-tight">
                   <span className={`font-medium ${TEXT[ev.result]}`}>
                     {t(`entry.timeline.${ev.result}`)}
                   </span>
@@ -96,7 +96,7 @@ export async function EvidenceDecisionTimeline({
                     </span>
                   ) : null}
                   {ev.at ? (
-                    <span className="font-mono text-[10px] text-text-muted">
+                    <span className="font-mono text-meta text-text-muted">
                       · {ev.at.slice(0, 10)}
                     </span>
                   ) : null}
@@ -104,7 +104,7 @@ export async function EvidenceDecisionTimeline({
                 {/* Real reason only — rendered solely when a note actually
                     exists; never a default/fabricated reason. */}
                 {ev.note ? (
-                  <span className="text-[10px] leading-relaxed text-text-secondary break-words">
+                  <span className="text-meta leading-relaxed text-text-secondary break-words">
                     {t("entry.timeline.reasonLabel")}: {ev.note}
                   </span>
                 ) : null}

@@ -127,11 +127,11 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
         </svg>
 
         <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5">
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary">
             <span className="h-2 w-2 rounded-full bg-brand-cyan" aria-hidden />
             {t("map.activePoint")}
           </span>
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
             <span className="h-2 w-2 rounded-full bg-brand-blue/70" aria-hidden />
             {t("map.points")}
           </span>
@@ -147,7 +147,7 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
             <dd className="font-display text-xl font-bold tracking-tightest tabular-nums text-text-primary">
               {r.value}
             </dd>
-            <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
               {r.label}
             </dt>
           </div>

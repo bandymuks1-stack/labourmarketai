@@ -122,7 +122,7 @@ export default async function ProfessionsPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
       <header className="max-w-3xl">
-        <p className="font-mono text-[11px] uppercase tracking-label text-brand-blue">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
           {pick(INTRO.eyebrow, l)}
         </p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tightest text-text-primary sm:text-5xl">
@@ -144,7 +144,7 @@ export default async function ProfessionsPage({
               className="rounded-full border border-border-subtle bg-surface-1 px-3 py-1.5 text-sm text-text-secondary"
             >
               <span className="text-text-primary">{pick(p.label, l)}</span>
-              <span className="ml-2 text-[11px] uppercase tracking-label text-text-muted">
+              <span className="ml-2 text-meta uppercase tracking-label text-text-muted">
                 {pick(SECTOR_LABEL[p.sector], l)}
               </span>
             </li>

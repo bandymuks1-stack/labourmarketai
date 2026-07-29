@@ -103,7 +103,7 @@ export function WorkerMyInterestSection({
     >
       <summary className="flex cursor-pointer select-none flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-text-primary marker:text-text-muted">
         <span>{labels.title}</span>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.summary}
         </span>
       </summary>
@@ -132,7 +132,7 @@ export function WorkerMyInterestSection({
                   <span className="text-sm font-semibold text-text-primary">
                     {row.title}
                   </span>
-                  <span className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                  <span className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {statusText}
                   </span>
                 </div>
@@ -143,7 +143,7 @@ export function WorkerMyInterestSection({
                   /* Honest closed-demand state — the signal never silently
                      disappears with its demand. */
                   <p
-                    className="text-[11px] text-state-amber"
+                    className="text-meta text-state-amber"
                     data-testid="my-interest-closed"
                   >
                     {labels.closed}
@@ -204,7 +204,7 @@ export function WorkerMyInterestSection({
                   ) : null}
                 </div>
                 {failedId === row.requestId ? (
-                  <span role="alert" className="text-[11px] text-state-warning">
+                  <span role="alert" className="text-meta text-state-warning">
                     {labels.error}
                   </span>
                 ) : null}
@@ -213,7 +213,7 @@ export function WorkerMyInterestSection({
           })}
         </ul>
         {/* Honest scope line — internal signals only, nothing was sent. */}
-        <p className="text-[10px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {labels.internalNote}
         </p>
       </div>

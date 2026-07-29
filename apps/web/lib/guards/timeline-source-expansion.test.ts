@@ -180,6 +180,9 @@ describe("permissions — no amounts, no widened reads", () => {
     const item = projectFinanceItem(financeRecord(), TODAY)!;
     const blob = JSON.stringify(item);
     expect(blob).not.toMatch(/\d+[.,]\d{2}/); // no money-looking value
+    // The item carries the canonical PlanningItem shape — the base fields
+    // plus the §7.1 context fields (owner visual acceptance). Nothing more:
+    // an exact key set still forbids a money or third-party field sneaking in.
     expect(Object.keys(item).sort()).toEqual(
       [
         "detail",
@@ -193,8 +196,29 @@ describe("permissions — no amounts, no widened reads", () => {
         "startDate",
         "status",
         "statusKey",
+        // §7.1 — present in the shape, ALL null for finance (asserted below).
+        "startTime",
+        "duration",
+        "workspace",
+        "project",
+        "place",
+        "counterpart",
+        "organization",
       ].sort(),
     );
+    // Finance stays operational-only: the calendar never learns a place, an
+    // organization or another person's name from a money record.
+    for (const key of [
+      "startTime",
+      "duration",
+      "workspace",
+      "project",
+      "place",
+      "counterpart",
+      "organization",
+    ] as const) {
+      expect(item[key], `finance.${key} must be absent`).toBeNull();
+    }
   });
 
   it("planning composes invitations ONLY through the existing scoped reads", () => {

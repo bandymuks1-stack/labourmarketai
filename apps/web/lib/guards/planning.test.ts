@@ -23,6 +23,7 @@ import {
   effectiveEndDay,
   hrefForSource,
   isConflictEligible,
+  planningMeta,
   itemsForDay,
   navAnchors,
   parseIsoDay,
@@ -85,6 +86,7 @@ function item(
     statusKey: "bookings.status.accepted",
     href: "/dashboard/bookings",
     roleContext: "incoming",
+    ...planningMeta(),
     ...over,
   };
 }
@@ -121,8 +123,11 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
     // (owned-org scope), workers (own worker id), journal_entries (own dated
     // facts), project_worker_assignments (Time Engine W2: the caller's OWN
     // assignments — unlocks the "assigned" conflict context) and
-    // project_stages (W6 bands over the ALREADY-visible project ids only) —
-    // every read RLS-scoped and bounded. Absences deliberately do NOT appear
+    // project_stages (W6 bands over the ALREADY-visible project ids only),
+    // journal_entry_metrics + engagement_contexts (owner audit §7.1 — the
+    // entry's OWN real hours/site and the workspace it was logged against,
+    // both chained over the SAME entry ids, never a wider scope) — every
+    // read RLS-scoped and bounded. Absences deliberately do NOT appear
     // here: they reuse the W7 surface's own read (getMyAbsences).
     expect(new Set(froms)).toEqual(
       new Set([
@@ -130,6 +135,8 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "organizations",
         "workers",
         "journal_entries",
+        "journal_entry_metrics",
+        "engagement_contexts",
         "project_worker_assignments",
         "project_stages",
       ]),

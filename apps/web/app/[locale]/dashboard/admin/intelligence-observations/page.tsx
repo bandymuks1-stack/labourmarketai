@@ -106,7 +106,7 @@ export default async function IntelligenceObservationInspectorPage({
   return (
     <div className="flex flex-col gap-6" data-testid="observation-inspector-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("inspector.eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -125,7 +125,7 @@ export default async function IntelligenceObservationInspectorPage({
         <div className="flex flex-col gap-1">
           <h2
             id="source-readiness-heading"
-            className="font-mono text-[11px] uppercase tracking-label text-text-secondary"
+            className="font-mono text-meta uppercase tracking-label text-text-secondary"
           >
             {t("activation.title")}
           </h2>

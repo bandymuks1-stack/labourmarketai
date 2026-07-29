@@ -79,12 +79,12 @@ export function LiveMap() {
       className="relative w-full overflow-hidden card-border"
     >
       {/* top-right static directions label */}
-      <div className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-900/70 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <div className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-sm border border-ink-600/70 bg-ink-900/70 px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
         {t("label.live")}
       </div>
 
       {/* legend bottom-right */}
-      <div className="pointer-events-none absolute bottom-3 right-3 z-10 flex flex-col gap-1 rounded-sm border border-ink-600/70 bg-ink-900/70 px-2.5 py-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <div className="pointer-events-none absolute bottom-3 right-3 z-10 flex flex-col gap-1 rounded-sm border border-ink-600/70 bg-ink-900/70 px-2.5 py-2 font-mono text-meta uppercase tracking-label text-text-muted">
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-brand-cyan" />
           <span className="h-2 w-2 rounded-full bg-state-amber" />
@@ -97,7 +97,7 @@ export function LiveMap() {
       </div>
 
       {/* market-count caption bottom-left */}
-      <div className="pointer-events-none absolute bottom-3 left-3 z-10 font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-10 font-mono text-meta uppercase tracking-label text-text-muted">
         {t("caption")}
       </div>
 
@@ -282,7 +282,7 @@ export function LiveMap() {
           ) : (
             <span className="flex items-center gap-2">
               <span className="text-text-primary">{hover.name}</span>
-              <span className="rounded-sm border border-brand-blue/40 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+              <span className="rounded-sm border border-brand-blue/40 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                 {t("tooltip.expansion_candidate")}
               </span>
             </span>

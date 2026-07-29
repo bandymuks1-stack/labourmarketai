@@ -24,12 +24,12 @@ export function AgencyPoolPreview({ id }: { id: string }) {
         <span className="font-display text-4xl font-bold tracking-tightest text-text-primary">
           {p.poolSize}
         </span>
-        <span className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("poolSize")}
         </span>
       </div>
 
-      <p className="mt-5 font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <p className="mt-5 font-mono text-meta uppercase tracking-label text-text-muted">
         {t("trades")}
       </p>
       <div className="mt-2 flex flex-col gap-2">
@@ -44,7 +44,7 @@ export function AgencyPoolPreview({ id }: { id: string }) {
                 style={{ width: `${(b.count / max) * 100}%` }}
               />
             </div>
-            <span className="w-7 shrink-0 text-right font-mono text-[11px] text-text-secondary">
+            <span className="w-7 shrink-0 text-right font-mono text-meta text-text-secondary">
               {b.count}
             </span>
           </div>
@@ -55,7 +55,7 @@ export function AgencyPoolPreview({ id }: { id: string }) {
         {STATUS.map((s) => (
           <span
             key={s.key}
-            className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${s.cls}`}
+            className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${s.cls}`}
           >
             <span className="font-bold">{s.n}</span>
             {t(`status.${s.key}`)}
@@ -78,7 +78,7 @@ export function AgencyPoolPreview({ id }: { id: string }) {
             </span>
           ))}
         </div>
-        <span className="ml-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <span className="ml-3 font-mono text-meta uppercase tracking-label text-text-muted">
           {t("more", { n: p.extraCount })}
         </span>
       </div>

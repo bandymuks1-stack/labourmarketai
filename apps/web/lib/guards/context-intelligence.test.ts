@@ -7,7 +7,10 @@ import {
   buildWorkContext,
   deriveNextBestActions,
 } from "@/lib/conversation/context-intelligence";
-import type { PlanningItem } from "@/lib/planning/planning-model";
+import {
+  planningMeta,
+  type PlanningItem,
+} from "@/lib/planning/planning-model";
 
 /**
  * Context Intelligence Engine guards (rebuild phase 3).
@@ -42,6 +45,7 @@ function item(over: Partial<PlanningItem>): PlanningItem {
     statusKey: "tasks.status.open",
     href: "/dashboard/tasks",
     roleContext: "mine",
+    ...planningMeta(),
     ...over,
   };
 }

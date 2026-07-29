@@ -118,7 +118,7 @@ export default async function CompanyStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -160,7 +160,7 @@ export default async function CompanyStartPage({
               {t("existingHeading")}
             </h2>
             <span
-              className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[company.verificationStatus]}`}
+              className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[company.verificationStatus]}`}
               data-testid="company-start-verification-status"
             >
               {t(`verificationStatus.${company.verificationStatus}`)}

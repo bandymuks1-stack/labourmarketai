@@ -271,7 +271,7 @@ export function ServiceOfferingsSection({
                   placeholder={labels.formRatePlaceholder}
                   maxLength={120}
                 />
-                <span className="text-[11px] text-text-muted">{labels.formRateHint}</span>
+                <span className="text-meta text-text-muted">{labels.formRateHint}</span>
               </label>
               <label className="flex items-center gap-2 text-xs text-text-secondary">
                 <input
@@ -328,7 +328,7 @@ export function ServiceOfferingsSection({
                       {row.title}
                     </span>
                     <span
-                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_RING[row.status]}`}
+                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_RING[row.status]}`}
                       data-testid={`service-offering-status-${row.id}`}
                     >
                       {labels.status[row.status]}
@@ -337,7 +337,7 @@ export function ServiceOfferingsSection({
                   {row.description && (
                     <p className="text-xs leading-relaxed text-text-secondary">{row.description}</p>
                   )}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
                     {row.categorySlug && <span>{row.categorySlug}</span>}
                     {row.locationCountry && <span>{row.locationCountry}</span>}
                     {row.remote && <span>{labels.remoteBadge}</span>}
@@ -347,7 +347,7 @@ export function ServiceOfferingsSection({
                       findable by signed-in members; draft/paused stay private. */}
                   <p
                     data-testid={`service-offering-discoverability-${row.id}`}
-                    className={`text-[11px] leading-relaxed ${
+                    className={`text-meta leading-relaxed ${
                       row.status === "active" ? "text-state-success" : "text-text-muted"
                     }`}
                   >

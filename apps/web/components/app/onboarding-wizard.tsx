@@ -177,7 +177,7 @@ export function OnboardingWizard({
                   <span
                     aria-hidden
                     className={cn(
-                      "mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded border text-[11px]",
+                      "mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded border text-meta",
                       selected
                         ? "border-brand-orange bg-brand-orange text-ink-900"
                         : "border-ink-500 text-transparent",
@@ -280,7 +280,7 @@ export function OnboardingWizard({
         className="card-border flex flex-col gap-3 p-4"
         data-testid="onboarding-next-steps"
       >
-        <p className="font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
           {t("nextSteps.eyebrow")}
         </p>
         <ul className="flex flex-col gap-2">
@@ -289,7 +289,7 @@ export function OnboardingWizard({
               key={k}
               className="flex items-start gap-2.5 text-sm leading-relaxed text-text-secondary"
             >
-              <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border border-brand-blue/30 bg-brand-blue/10 font-mono text-[10px] font-semibold text-brand-blue">
+              <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border border-brand-blue/30 bg-brand-blue/10 font-mono text-meta font-semibold text-brand-blue">
                 {i + 1}
               </span>
               {t(`nextSteps.${k}`)}

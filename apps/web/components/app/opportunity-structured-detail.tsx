@@ -36,9 +36,9 @@ import {
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 const CHIP =
-  "rounded-md border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-[11px] text-text-secondary";
+  "rounded-md border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-secondary";
 const CHIP_AMBER =
-  "rounded-md border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 text-[11px] text-state-amber";
+  "rounded-md border border-state-amber/40 bg-state-amber/10 px-2 py-0.5 text-meta text-state-amber";
 
 /** Pay display text (amount + explicit currency + unit, basis when stated).
  *  Exported for reuse by the P2-PR5 compare facts — ONE pay rendering rule. */
@@ -147,7 +147,7 @@ export function OpportunityStructuredChips({
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="text-xs text-text-primary">{children}</dd>
@@ -166,7 +166,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-2" data-testid={testId}>
-      <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
         {title}
       </h3>
       {children}
@@ -385,7 +385,7 @@ export function OpportunityStructuredSections({
         ) : null}
         {c?.deductions && c.deductions.length > 0 ? (
           <div className="flex flex-col gap-1" data-testid="opportunity-deductions">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {sd("deductionsLabel")}
             </span>
             <ul className="flex flex-col gap-0.5">
@@ -401,7 +401,7 @@ export function OpportunityStructuredSections({
         ) : null}
         {gaps.length > 0 ? (
           <div className="flex flex-col gap-1" data-testid="opportunity-structured-gaps">
-            <span className="font-mono text-[10px] uppercase tracking-label text-state-amber">
+            <span className="font-mono text-meta uppercase tracking-label text-state-amber">
               {ts("gapsTitle")}
             </span>
             <div className="flex flex-wrap gap-1.5">

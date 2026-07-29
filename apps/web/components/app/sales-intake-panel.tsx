@@ -115,7 +115,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
 
   function heading(labelKey: string, section: IntakeSection<unknown>) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t(labelKey)}
         {section.readable ? ` · ${section.rows.length}` : ""}
       </span>
@@ -124,7 +124,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
 
   function mono(value: string | null) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {value && value.trim() ? value : "—"}
       </span>
     );
@@ -166,7 +166,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
           </div>
           {mono(r.status)}
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
           <span>
             {t("sourceLabel")}: {r.source ?? "—"}
           </span>
@@ -191,7 +191,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
           </span>
           {mono(r.locale)}
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
           <span>
             {t("sourceLabel")}: {r.source}
           </span>
@@ -213,7 +213,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
           </span>
           {mono(r.status)}
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
           <span>
             {t("roleLabel")}: {r.roleOrWorkType ?? "—"}
           </span>
@@ -224,7 +224,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
           {isAdmin && (
             <Link
               href={`/dashboard/admin/users/${r.profileId}`}
-              className="font-mono text-[10px] text-brand-blue hover:underline"
+              className="font-mono text-meta text-brand-blue hover:underline"
             >
               {r.profileId.slice(0, 8)}… → {t("openSubject")}
             </Link>
@@ -252,19 +252,19 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
             {r.note}
           </p>
         ) : null}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
           <span>
             {t("createdLabel")}: {r.createdAt.slice(0, 10)}
           </span>
           {r.demandRequestId ? (
-            <span className="font-mono text-[10px] uppercase tracking-label">
+            <span className="font-mono text-meta uppercase tracking-label">
               {t("helpDemandRef")}: {r.demandRequestId.slice(0, 8)}…
             </span>
           ) : null}
           {isAdmin && (
             <Link
               href={`/dashboard/admin/users/${r.profileId}`}
-              className="font-mono text-[10px] text-brand-blue hover:underline"
+              className="font-mono text-meta text-brand-blue hover:underline"
             >
               {r.profileId.slice(0, 8)}… → {t("openSubject")}
             </Link>
@@ -284,7 +284,7 @@ export function SalesIntakePanel({ data }: { data: LeadIntakeOverview }) {
           {t("title")}
         </h2>
         <p className="text-xs text-text-secondary">{t("intro")}</p>
-        <p className="text-[11px] text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta text-text-muted">{t("honestNote")}</p>
         {/* Control room PR F — the same rows also appear in the consolidated
             demand pipeline read view (read-only; statuses stay here). */}
         <Link

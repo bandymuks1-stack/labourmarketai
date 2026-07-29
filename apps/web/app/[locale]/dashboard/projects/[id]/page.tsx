@@ -129,7 +129,7 @@ export default async function ProjectStadiumPage({
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
       {/* ── Arena header: real project facts only ── */}
       <header className="flex flex-col gap-2">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <Activity className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
@@ -138,18 +138,18 @@ export default async function ProjectStadiumPage({
         </h1>
         <div className="flex flex-wrap gap-2">
           {ops.project.city ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
               {ops.project.city}
             </span>
           ) : null}
           {ops.project.startDate ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {ops.project.startDate}
             </span>
           ) : null}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
             <Users className="h-3 w-3" aria-hidden />
             {t("fieldCount", { n: ops.counters.totalAssigned })}
           </span>
@@ -164,7 +164,7 @@ export default async function ProjectStadiumPage({
         data-testid="project-location"
         data-location-status={location.status}
       >
-        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <MapPin className="h-3.5 w-3.5" aria-hidden />
           {tLoc("title")}
         </h2>
@@ -176,7 +176,7 @@ export default async function ProjectStadiumPage({
         </p>
         {!location.mappable && (
           <div
-            className="mt-1 flex items-center gap-2 rounded-md border border-dashed border-ink-500 px-3 py-3 text-[11px] leading-relaxed text-text-muted"
+            className="mt-1 flex items-center gap-2 rounded-md border border-dashed border-ink-500 px-3 py-3 text-meta leading-relaxed text-text-muted"
             data-testid="project-location-no-marker"
           >
             <MapPin className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
@@ -192,7 +192,7 @@ export default async function ProjectStadiumPage({
         className="card-border flex flex-col gap-3 p-5"
         data-testid="project-communication"
       >
-        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <MessageSquare className="h-3.5 w-3.5" aria-hidden />
           {tComm("title")}
         </h2>
@@ -207,7 +207,7 @@ export default async function ProjectStadiumPage({
           <MessageSquare className="h-4 w-4" aria-hidden />
           {tComm("cta")}
         </Link>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {tComm("notReadyNote")}
         </p>
       </section>
@@ -246,7 +246,7 @@ export default async function ProjectStadiumPage({
 
       {/* ── THE FIELD: real assigned workers as positioned cards ── */}
       <section className="flex flex-col gap-3" data-testid="stadium-field">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("fieldTitle")}
         </h2>
         {hasTeam ? (
@@ -279,19 +279,19 @@ export default async function ProjectStadiumPage({
                     <p className="truncate font-display text-base font-semibold tracking-tightest text-text-primary group-hover:text-brand-blue">
                       {w.name}
                     </p>
-                    <p className="truncate font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <p className="truncate font-mono text-meta uppercase tracking-label text-text-muted">
                       {positionLabel(w.workerId)}
                     </p>
                   </div>
                 </Link>
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-[11px] text-text-secondary">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-meta text-text-secondary">
                     <NotebookPen className="h-3 w-3" aria-hidden />
                     {w.journalEntries}
                   </span>
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px]",
+                      "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
                       w.confirmedSkills > 0
                         ? "border-state-success/30 bg-state-success/10 text-state-success"
                         : "border-ink-600 bg-ink-800/40 text-text-secondary",
@@ -301,24 +301,24 @@ export default async function ProjectStadiumPage({
                     {w.confirmedSkills}
                   </span>
                   {w.openReviewItems > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-[11px] text-state-warning">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
                       <ClipboardCheck className="h-3 w-3" aria-hidden />
                       {w.openReviewItems}
                     </span>
                   ) : null}
                   {w.docsMissing > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-[11px] text-state-warning">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
                       <FileWarning className="h-3 w-3" aria-hidden />
                       {t("docsMissingChip", { n: w.docsMissing })}
                     </span>
                   ) : w.docsChecked > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/10 px-2 py-1 font-mono text-[11px] text-state-success">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/10 px-2 py-1 font-mono text-meta text-state-success">
                       <ShieldCheck className="h-3 w-3" aria-hidden />
                       {t("docsCheckedChip", { n: w.docsChecked })}
                     </span>
                   ) : null}
                 </div>
-                <p className="text-[11px] leading-relaxed text-text-muted">
+                <p className="text-meta leading-relaxed text-text-muted">
                   {w.lastActivity
                     ? t("lastActivity", { date: w.lastActivity.slice(0, 10) })
                     : t("noActivity")}
@@ -359,7 +359,7 @@ export default async function ProjectStadiumPage({
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("positionsTitle")}
         </h2>
         <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-xs leading-relaxed text-text-muted">

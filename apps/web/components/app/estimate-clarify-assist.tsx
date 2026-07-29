@@ -72,7 +72,7 @@ export function EstimateClarifyAssist({
       </button>
 
       {state === "disabled" && (
-        <p className="text-[11px] text-text-muted" data-testid="estimate-clarify-disabled">
+        <p className="text-meta text-text-muted" data-testid="estimate-clarify-disabled">
           {t("disabledNote")}
         </p>
       )}
@@ -81,7 +81,7 @@ export function EstimateClarifyAssist({
         <div className="flex flex-col gap-2" data-testid="estimate-clarify-result">
           {result.questions.length > 0 && (
             <div className="flex flex-col gap-1">
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("questionsTitle")}
               </p>
               <ul className="list-disc pl-4 text-xs leading-relaxed text-text-secondary">
@@ -93,7 +93,7 @@ export function EstimateClarifyAssist({
           )}
           {result.assumptionNotes.length > 0 && (
             <div className="flex flex-col gap-1">
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("assumptionsTitle")}
               </p>
               <ul className="list-disc pl-4 text-xs leading-relaxed text-text-secondary">
@@ -103,7 +103,7 @@ export function EstimateClarifyAssist({
               </ul>
             </div>
           )}
-          <p className="text-[11px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("humanConfirmNote")}
           </p>
         </div>

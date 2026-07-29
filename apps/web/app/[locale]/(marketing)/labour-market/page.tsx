@@ -34,7 +34,7 @@ export default async function CountryIndexPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <section>
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <span className="live-dot" aria-hidden />
           {t("countryIndexEyebrow")}
         </p>
@@ -61,7 +61,7 @@ export default async function CountryIndexPage({
                       <span className="font-display text-lg font-semibold text-text-primary">
                         {name}
                       </span>
-                      <span className="font-mono text-[11px] uppercase tracking-label text-brand-blue">
+                      <span className="font-mono text-meta uppercase tracking-label text-brand-blue">
                         {t("countryView")} →
                       </span>
                     </Card>
@@ -71,7 +71,7 @@ export default async function CountryIndexPage({
                     <span className="font-display text-lg font-semibold text-text-secondary">
                       {name}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("countryComingSoon")}
                     </span>
                   </Card>

@@ -158,7 +158,7 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
           {entry.recognizedNames.map((name) => (
             <span
               key={name}
-              className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-[11px] text-brand-blue"
+              className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue"
             >
               {name}
             </span>
@@ -173,14 +173,14 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
           className="flex flex-col gap-1.5"
           data-testid={`quick-will-confirm-${entry.id}`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("inbox.quick.willConfirm")}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {entry.skills.map((s) => (
               <span
                 key={s.id}
-                className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
+                className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
               >
                 {s.name}
               </span>
@@ -188,7 +188,7 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
           </div>
         </div>
       ) : (
-        <p className="text-[11px] text-text-muted">
+        <p className="text-meta text-text-muted">
           {t("inbox.quick.entryOnlyNote")}
         </p>
       )}

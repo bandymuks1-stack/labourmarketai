@@ -157,7 +157,7 @@ export function RoleSwitcher() {
           // visually distinct from the person identity. Falls back to the
           // generic identity label when no real company name exists.
           <span
-            className="hidden max-w-[12rem] truncate text-[13px] font-semibold text-text-primary sm:inline"
+            className="hidden max-w-[12rem] truncate text-basis font-semibold text-text-primary sm:inline"
             data-testid="role-switcher-active-org"
           >
             {activeOrgName}
@@ -165,7 +165,7 @@ export function RoleSwitcher() {
         ) : (
           // F5 icon-first header: a short human word next to the identity
           // icon — not an uppercase mono sentence-pill.
-          <span className="hidden text-[13px] font-medium text-text-secondary sm:inline">
+          <span className="hidden text-basis font-medium text-text-secondary sm:inline">
             {activeIdentity ? tSwitcher(baseIdentityLabelKey(activeIdentity)) : tSwitcher("label")}
           </span>
         )}
@@ -180,7 +180,7 @@ export function RoleSwitcher() {
           className="absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           <div className="flex items-center justify-between px-2 py-1">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {tSwitcher("label")}
             </p>
             <button
@@ -188,19 +188,19 @@ export function RoleSwitcher() {
               onClick={close}
               aria-label={tSwitcher("label")}
               data-testid="role-switcher-close"
-              className="rounded-md border border-ink-500 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              className="rounded-md border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
               ✕
             </button>
           </div>
           {/* Phase 6: honest non-locking framing right inside the menu so the
               user never wonders what RUOŠIAMA means. */}
-          <p className="px-2 pb-2 text-[11px] leading-snug text-text-secondary">
+          <p className="px-2 pb-2 text-meta leading-snug text-text-secondary">
             {tAccount("rolesIntro")}
           </p>
           {/* SR-2: pre-role-switch clarity — workspace view vs account
               identity; org-context expectation. */}
-          <p className="px-2 pb-2 text-[11px] leading-snug text-text-muted">
+          <p className="px-2 pb-2 text-meta leading-snug text-text-muted">
             {tSwitcher("clarityNote")}
           </p>
           <ul className="flex flex-col gap-0.5">
@@ -240,7 +240,7 @@ export function RoleSwitcher() {
                       {chipKey && !isHonestlyActive && (
                         <span
                           className={cn(
-                            "rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
+                            "rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label",
                             chipTone,
                           )}
                           data-testid={`role-switcher-chip-${identity}`}
@@ -253,7 +253,7 @@ export function RoleSwitcher() {
                         </span>
                       )}
                       {isActive && (
-                        <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                        <span className="font-mono text-meta uppercase tracking-label text-state-live">
                           {tSwitcher("active_label")}
                         </span>
                       )}
@@ -274,7 +274,7 @@ export function RoleSwitcher() {
             <>
               <hr className="my-2 border-ink-600" />
               <p
-                className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted"
+                className="px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted"
                 data-testid="org-switcher-heading"
               >
                 {tCompanySwitcher("heading")}
@@ -304,11 +304,11 @@ export function RoleSwitcher() {
                         </span>
                         <span className="ml-auto flex shrink-0 items-center gap-2">
                           {pendingOrgId === org.id ? (
-                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {tSwitcher("switching")}
                             </span>
                           ) : isActiveOrg ? (
-                            <span className="font-mono text-[10px] uppercase tracking-label text-state-live">
+                            <span className="font-mono text-meta uppercase tracking-label text-state-live">
                               {tSwitcher("active_label")}
                             </span>
                           ) : null}
@@ -318,7 +318,7 @@ export function RoleSwitcher() {
                   );
                 })}
               </ul>
-              <p className="px-2 pb-1 pt-1 text-[11px] leading-snug text-text-muted">
+              <p className="px-2 pb-1 pt-1 text-meta leading-snug text-text-muted">
                 {tCompanySwitcher("note")}
               </p>
             </>
@@ -327,7 +327,7 @@ export function RoleSwitcher() {
           {missingIdentities.length > 0 && (
             <>
               <hr className="my-2 border-ink-600" />
-              <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
                 {tSwitcher("add_role")}
               </p>
               <ul className="flex flex-col gap-0.5">
@@ -364,7 +364,7 @@ export function RoleSwitcher() {
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
-                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label",
                                 chipTone,
                               )}
                               data-testid={`role-switcher-chip-add-${identity}`}
@@ -389,7 +389,7 @@ export function RoleSwitcher() {
                           {chipKey && !isHonestlyActive && (
                             <span
                               className={cn(
-                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label",
+                                "ml-auto rounded-sm border px-1.5 py-0.5 font-mono text-meta uppercase tracking-label",
                                 chipTone,
                               )}
                             >
@@ -401,7 +401,7 @@ export function RoleSwitcher() {
                             </span>
                           )}
                           {pending === primary && (
-                            <span className="ml-auto font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="ml-auto font-mono text-meta uppercase tracking-label text-text-muted">
                               {tSwitcher("switching")}
                             </span>
                           )}

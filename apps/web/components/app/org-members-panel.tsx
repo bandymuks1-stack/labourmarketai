@@ -90,8 +90,8 @@ export function OrgMembersPanel({
                 <span
                   className={
                     m.reviewEnabled
-                      ? "rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-success"
-                      : "rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-muted"
+                      ? "rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-success"
+                      : "rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
                   }
                 >
                   {m.reviewEnabled ? labels.reviewEnabledBadge : labels.reviewDisabledBadge}
@@ -114,7 +114,7 @@ export function OrgMembersPanel({
       )}
 
       <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.addTitle}
         </p>
         {addable.length === 0 ? (

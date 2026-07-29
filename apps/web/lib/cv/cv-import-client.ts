@@ -8,7 +8,10 @@
  */
 
 export const CV_ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".txt"] as const;
-export const CV_MAX_BYTES = 5 * 1024 * 1024; // 5 MB — mirrors the server cap.
+/** Mirrors the server cap (lib/cv/extract.ts MAX_CV_BYTES). Owner audit §10:
+ *  the ceiling exists to bound abuse, NOT to make the person manage bytes —
+ *  no real CV reaches it, and the UI never states it as a requirement. */
+export const CV_MAX_BYTES = 25 * 1024 * 1024;
 
 export type CvExtractClientResult =
   | { ok: true; text: string; format: "pdf" | "docx" | "txt" }

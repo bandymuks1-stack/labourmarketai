@@ -57,7 +57,7 @@ export async function SiteFooter() {
     <footer className="relative z-10 mt-24 border-t border-ink-600/60">
       <div className="mx-auto max-w-container px-6 sm:px-12">
         <div className="py-8 opacity-70">
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-muted">
             {t("activity")}
           </p>
           <ActivityMap />
@@ -77,7 +77,7 @@ export async function SiteFooter() {
               audience pages + pricing. No template labels, no duplicate
               "about" destinations (about lives in the company column only). */}
           <div className="flex flex-col gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("product")}
             </p>
             <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
@@ -95,7 +95,7 @@ export async function SiteFooter() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("legalGroup")}
             </p>
             <Link href="/legal/terms" className="text-sm text-text-secondary hover:text-text-primary">
@@ -122,7 +122,7 @@ export async function SiteFooter() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("company")}
             </p>
             <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary">

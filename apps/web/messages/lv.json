@@ -1531,7 +1531,18 @@
       "title": "Neizdevās atvērt sarunu",
       "body": "Iespējams, jums nav atļaujas rakstīt šai personai vai tā vairs nav pieejama. Nekas netika nosūtīts."
     },
-    "originalLanguage": "[EN] Original ({lang})"
+    "originalLanguage": "[EN] Original ({lang})",
+    "priority": {
+      "awaitingYou": "[EN] Awaiting your reply",
+      "overdue": "[EN] Waiting a long time",
+      "waiting": "[EN] Waiting {hours} h"
+    },
+    "quickReply": {
+      "open": "[EN] Reply here",
+      "placeholder": "[EN] A short reply…",
+      "send": "[EN] Send",
+      "sent": "[EN] Reply sent."
+    }
   },
   "trust": {
     "title": "[EN] Trust signals",
@@ -1659,7 +1670,17 @@
         "evidence": "[EN] Add a work entry",
         "workCard": "[EN] Submit card"
       }
-    }
+    },
+    "documentsLabel": "[EN] Documents",
+    "documentsValue": "{valid} valid",
+    "documentsValueExpiring": "{valid} valid · {expiring} expiring soon",
+    "reputationLabel": "[EN] Response from others",
+    "reputationValue": "{count, plural, one {# of your records marked as accurate} other {# of your records marked as accurate}}",
+    "reputationEmpty": "[EN] Nobody has marked anything on your records yet.",
+    "reputationHint": "[EN] Real manager or client responses only. No overall human score.",
+    "workHistoryLabel": "[EN] Work history",
+    "workHistoryUnnamed": "[EN] Work context",
+    "workHistoryCurrent": "[EN] now"
   },
   "projects": {
     "map": {
@@ -3380,6 +3401,25 @@
         "languages": "valodas",
         "salary": "gaidāmo likmi"
       }
+    },
+    "messages": {
+      "blocked": "[EN] Messages could not be read right now.",
+      "empty": "[EN] No messages yet.",
+      "noneWaiting": "[EN] No message is waiting for your reply.",
+      "intro": "{count, plural, one {# message is waiting for your reply} other {# messages are waiting for your reply}}:",
+      "awaiting": "[EN] Awaiting your reply",
+      "overdue": "[EN] Waiting a long time",
+      "waiting": "{hours} h",
+      "someone": "[EN] The other person",
+      "attachmentOnly": "[EN] (attachment only)",
+      "draftPlaceholder": "[EN] Write your reply…",
+      "review": "[EN] Review before sending",
+      "openThread": "[EN] Open the thread",
+      "confirmTitle": "[EN] This will be sent:",
+      "confirmSend": "[EN] Send",
+      "editAgain": "[EN] Edit",
+      "sending": "[EN] Sending…",
+      "sent": "[EN] Reply sent."
     }
   },
   "landing": {

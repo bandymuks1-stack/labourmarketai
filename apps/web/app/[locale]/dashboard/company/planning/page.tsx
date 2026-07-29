@@ -44,7 +44,7 @@ import type { GapRiskLevel } from "@/lib/workforce/gap-timeline";
 export const dynamic = "force-dynamic";
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
 /** Accessible risk tone — always paired with a text label. */
 const RISK_TONE: Record<GapRiskLevel, string> = {
@@ -75,7 +75,7 @@ export default async function CompanyWorkforcePlanningPage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -243,7 +243,7 @@ export default async function CompanyWorkforcePlanningPage({
   function RiskChip({ level }: { level: GapRiskLevel }) {
     return (
       <span
-        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${RISK_TONE[level]}`}
+        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${RISK_TONE[level]}`}
       >
         {t(`risk.level.${level}`)}
       </span>
@@ -254,14 +254,14 @@ export default async function CompanyWorkforcePlanningPage({
     const body = (
       <>
         <span className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex shrink-0 items-center rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="inline-flex shrink-0 items-center rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
             {t(`timeline.source.${entry.source}`)}
           </span>
           <span className="min-w-0 break-words text-sm font-semibold text-text-primary">
             {entry.title ?? t("timeline.untitled")}
           </span>
         </span>
-        <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           {entry.startDate ? (
             <span>
               {fmtDay(entry.startDate)}
@@ -362,7 +362,7 @@ export default async function CompanyWorkforcePlanningPage({
           </span>
           {view.totals.shortfall > 0 ? (
             <span
-              className="font-mono text-[11px] uppercase tracking-label text-state-danger"
+              className="font-mono text-meta uppercase tracking-label text-state-danger"
               data-testid="planning-zone-shortfall"
             >
               {t("summary.shortPeople", { count: view.totals.shortfall })}
@@ -371,7 +371,7 @@ export default async function CompanyWorkforcePlanningPage({
                 : ""}
             </span>
           ) : (
-            <span className="font-mono text-[11px] uppercase tracking-label text-state-success">
+            <span className="font-mono text-meta uppercase tracking-label text-state-success">
               {t("summary.coveredAll")}
             </span>
           )}
@@ -383,7 +383,7 @@ export default async function CompanyWorkforcePlanningPage({
         view.totals.systemSuggestedHeadcount !== null ||
         view.totals.confirmedRequiredHeadcount !== null ? (
           <div
-            className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted"
+            className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-text-muted"
             data-testid="planning-zone-headcount-provenance"
           >
             {view.totals.userEnteredHeadcount !== null ? (
@@ -433,7 +433,7 @@ export default async function CompanyWorkforcePlanningPage({
       {/* Skill gaps — chips, capped short. */}
       {view.missingSkills.length > 0 ? (
         <section className="flex flex-col gap-2" data-testid="planning-zone-skills">
-          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("skills.title")}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -459,7 +459,7 @@ export default async function CompanyWorkforcePlanningPage({
           recommendations are a quiet text list, and the equal-validity
           starting points below stay available regardless. */}
       <section className="flex flex-col gap-2" data-testid="planning-zone-action">
-        <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("action.title")}
         </h2>
         {view.primaryAction ? (
@@ -475,7 +475,7 @@ export default async function CompanyWorkforcePlanningPage({
             </p>
             {view.secondaryActions.length > 0 ? (
               <div className="flex flex-col gap-1 pt-1">
-                <p className="text-[11px] uppercase tracking-label text-text-muted">
+                <p className="text-meta uppercase tracking-label text-text-muted">
                   {t("action.secondaryTitle")}
                 </p>
                 <ul
@@ -496,7 +496,7 @@ export default async function CompanyWorkforcePlanningPage({
         )}
         {/* Other legitimate starting points — always available, no gating. */}
         <div className="flex flex-col gap-1 pt-2">
-          <p className="text-[11px] uppercase tracking-label text-text-muted">
+          <p className="text-meta uppercase tracking-label text-text-muted">
             {t("entries.title")}
           </p>
           <EntryChoices />
@@ -505,7 +505,7 @@ export default async function CompanyWorkforcePlanningPage({
 
       {/* Upcoming work — vertical month-bucketed timeline. */}
       <section className="flex flex-col gap-4" data-testid="planning-zone-timeline">
-        <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("timeline.title")}
         </h2>
         {view.months.map((m) => (
@@ -523,7 +523,7 @@ export default async function CompanyWorkforcePlanningPage({
                     label={`${t("summary.capacityLabel")}: ${m.coveragePct}%`}
                   />
                 </div>
-                <span className="shrink-0 font-mono text-[10px] uppercase tracking-label tabular-nums text-text-muted">
+                <span className="shrink-0 font-mono text-meta uppercase tracking-label tabular-nums text-text-muted">
                   {m.coveredHeadcount}/{m.requiredHeadcount}
                 </span>
               </div>

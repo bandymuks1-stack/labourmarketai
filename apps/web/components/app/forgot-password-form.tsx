@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
   if (status === "sent") {
     return (
       <div className="card-border bg-card-glow p-8">
-        <p className="font-mono text-[11px] uppercase tracking-label text-state-live">
+        <p className="font-mono text-meta uppercase tracking-label text-state-live">
           ✓
         </p>
         <h2 className="mt-3 font-display text-2xl font-bold tracking-tightest text-text-primary">

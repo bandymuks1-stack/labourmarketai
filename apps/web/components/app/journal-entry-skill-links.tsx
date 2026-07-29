@@ -107,7 +107,7 @@ export function JournalEntrySkillLinks({
             className="flex flex-col gap-1"
             data-testid={`entry-skill-detected-${entryId}`}
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
               {t("detectedHeading")}
             </p>
             {detectedLabels.length > 0 ? (
@@ -115,7 +115,7 @@ export function JournalEntrySkillLinks({
                 {detectedLabels.map((label) => (
                   <li key={label}>
                     <span
-                      className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-[10px] text-text-secondary"
+                      className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-meta text-text-secondary"
                       data-testid={`entry-skill-detected-label-${entryId}`}
                     >
                       {label}
@@ -125,7 +125,7 @@ export function JournalEntrySkillLinks({
               </ul>
             ) : (
               <p
-                className="text-[10px] leading-relaxed text-text-muted"
+                className="text-meta leading-relaxed text-text-muted"
                 data-testid={`entry-skill-detected-empty-${entryId}`}
               >
                 {t("detectedEmpty")}
@@ -133,7 +133,7 @@ export function JournalEntrySkillLinks({
             )}
           </div>
         )}
-        <p className="text-[11px] text-text-muted">
+        <p className="text-meta text-text-muted">
           {t("none")}{" "}
           <Link
             href="/dashboard/profile"
@@ -181,7 +181,7 @@ export function JournalEntrySkillLinks({
           title={labelKey ? t(labelKey) : undefined}
           data-source={sourceOf(s.id)}
           className={cn(
-            "rounded-full border px-2 py-0.5 text-[10px] transition-colors disabled:opacity-50",
+            "rounded-full border px-2 py-0.5 text-meta transition-colors disabled:opacity-50",
             tone === "review"
               ? "border-state-warning/60 bg-state-warning/10 text-state-warning hover:border-state-warning"
               : on
@@ -199,17 +199,17 @@ export function JournalEntrySkillLinks({
 
   return (
     <div className="mt-2 flex flex-col gap-1.5 border-t border-border/40 pt-2">
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+      <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {t("signalsHeading")}
       </p>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[10px] leading-relaxed text-text-muted">{t("helper")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("helper")}</p>
         {status === "error" ? (
-          <span className="shrink-0 text-[10px] text-state-danger" role="alert">
+          <span className="shrink-0 text-meta text-state-danger" role="alert">
             {t("error")}
           </span>
         ) : status !== "idle" ? (
-          <span className="shrink-0 text-[10px] text-text-muted" role="status">
+          <span className="shrink-0 text-meta text-text-muted" role="status">
             {status === "saving" ? t("saving") : t("saved")}
           </span>
         ) : null}
@@ -234,7 +234,7 @@ export function JournalEntrySkillLinks({
           className="flex flex-col gap-1"
           data-testid={`entry-skill-detected-${entryId}`}
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+          <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("detectedHeading")}
           </p>
           {hasDetected ? (
@@ -243,7 +243,7 @@ export function JournalEntrySkillLinks({
               {detectedLabels.map((label) => (
                 <li key={label}>
                   <span
-                    className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-[10px] text-text-secondary"
+                    className="inline-block rounded-full border border-ink-500/70 px-2 py-0.5 text-meta text-text-secondary"
                     data-testid={`entry-skill-detected-label-${entryId}`}
                   >
                     {label}
@@ -253,7 +253,7 @@ export function JournalEntrySkillLinks({
             </ul>
           ) : (
             <p
-              className="text-[10px] leading-relaxed text-text-muted"
+              className="text-meta leading-relaxed text-text-muted"
               data-testid={`entry-skill-detected-empty-${entryId}`}
             >
               {t("detectedEmpty")}
@@ -272,7 +272,7 @@ export function JournalEntrySkillLinks({
         <button
           type="button"
           onClick={() => setPicker((v) => !v)}
-          className="self-start font-mono text-[10px] uppercase tracking-label text-text-muted transition-colors hover:text-text-secondary"
+          className="self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-secondary"
           data-testid={`entry-skill-picker-toggle-${entryId}`}
           aria-expanded={picker}
         >
@@ -290,7 +290,7 @@ export function JournalEntrySkillLinks({
           className="flex flex-col gap-1"
           data-testid={`entry-skill-picker-${entryId}`}
         >
-          <p className="text-[10px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("pickerHint")}
           </p>
           <ul className="flex flex-wrap gap-1">
@@ -310,11 +310,11 @@ export function JournalEntrySkillLinks({
           className="mt-1 flex flex-col gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/5 p-2"
           data-testid={`entry-skill-review-${entryId}`}
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
             {t("reviewHeading")}
           </p>
           <p
-            className="text-[10px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid={`entry-skill-review-summary-${entryId}`}
           >
             {t("reviewSummary", { count: reviewChips.length })}
@@ -328,7 +328,7 @@ export function JournalEntrySkillLinks({
             <button
               type="button"
               onClick={() => setReviewOpen((v) => !v)}
-              className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary"
+              className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary"
               data-testid={`entry-skill-review-toggle-${entryId}`}
               aria-expanded={reviewOpen}
             >
@@ -336,7 +336,7 @@ export function JournalEntrySkillLinks({
             </button>
             <Link
               href={`/dashboard/journal?editing=${entryId}#journal-composer`}
-              className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
               data-testid={`entry-skill-review-again-${entryId}`}
             >
               {t("reviewAgain")}
@@ -345,7 +345,7 @@ export function JournalEntrySkillLinks({
               type="button"
               onClick={unlinkFlagged}
               disabled={pending}
-              className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-state-danger disabled:opacity-50"
+              className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-state-danger disabled:opacity-50"
               data-testid={`entry-skill-unlink-flagged-${entryId}`}
             >
               {t("unlinkFlagged")}

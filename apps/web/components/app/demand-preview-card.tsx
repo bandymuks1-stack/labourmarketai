@@ -39,7 +39,7 @@ export function DemandPreviewCard({
             {lc(d.project)}
           </p>
           <p className="mt-1 text-sm text-text-secondary">{lc(d.location)}</p>
-          <span className="mt-2 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+          <span className="mt-2 inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary">
             <span
               aria-hidden
               className={cn("h-2 w-2 rounded-full", DOT[d.intensity])}
@@ -58,7 +58,7 @@ export function DemandPreviewCard({
         <span className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {d.headcount}
         </span>
-        <span className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("headcount")}
         </span>
       </div>
@@ -71,7 +71,7 @@ export function DemandPreviewCard({
         ))}
       </div>
 
-      <div className="mt-5 inline-flex items-center gap-2 rounded-sm border border-brand-blue/40 px-2.5 py-1 font-mono text-[11px] uppercase tracking-label text-brand-blue">
+      <div className="mt-5 inline-flex items-center gap-2 rounded-sm border border-brand-blue/40 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-brand-blue">
         <span className="font-bold text-text-primary">{d.rankedMatches}</span>
         {t("rankedMatches")}
       </div>

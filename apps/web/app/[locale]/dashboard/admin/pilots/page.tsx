@@ -34,7 +34,7 @@ export default async function AdminPilotsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-pilots-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -80,7 +80,7 @@ export default async function AdminPilotsPage({
                         <span className="truncate text-sm font-medium text-text-primary">
                           {p.name}
                         </span>
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t(`kind.${p.organisationKind}`)} ·{" "}
                           {p.startsOn || p.endsOn
                             ? `${p.startsOn ?? "…"} → ${p.endsOn ?? "…"}`
@@ -94,7 +94,7 @@ export default async function AdminPilotsPage({
                         <span className="text-text-secondary">
                           {t("list.outcomes", { n: p.outcomeCount })}
                         </span>
-                        <span className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                        <span className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                           {t(`status.${p.status}`)}
                         </span>
                       </span>

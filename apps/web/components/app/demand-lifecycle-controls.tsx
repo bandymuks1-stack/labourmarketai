@@ -96,7 +96,7 @@ export function DemandLifecycleControls({
       ) : null}
       {currentStatus === "closed" ? (
         <>
-          <span className="text-[11px] text-text-muted">{labels.closedNote}</span>
+          <span className="text-meta text-text-muted">{labels.closedNote}</span>
           <button
             type="button"
             disabled={pending}
@@ -108,7 +108,7 @@ export function DemandLifecycleControls({
           </button>
         </>
       ) : null}
-      {failed ? <span className="text-[11px] text-state-warning">{labels.error}</span> : null}
+      {failed ? <span className="text-meta text-state-warning">{labels.error}</span> : null}
     </div>
   );
 }

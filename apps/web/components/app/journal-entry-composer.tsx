@@ -1070,7 +1070,7 @@ export function JournalEntryComposer({
         <Label>{t("photo.label")}</Label>
         {mode === "photo" && (
           <p
-            className="text-[11px] leading-relaxed text-text-secondary"
+            className="text-meta leading-relaxed text-text-secondary"
             data-testid="journal-photo-first-note"
           >
             {t("modes.photoFirstNote")}
@@ -1134,7 +1134,7 @@ export function JournalEntryComposer({
           </p>
         ) : null}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-photo-free-tier-note"
         >
           {t("photo.freeTierNote")}
@@ -1262,7 +1262,7 @@ export function JournalEntryComposer({
                       aria-busy={state === "working" || undefined}
                       onClick={() => void confirmCandidate(c)}
                       data-testid="journal-candidate-confirm"
-                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
                     >
                       {state === "working"
                         ? t("candidateConfirming")
@@ -1273,7 +1273,7 @@ export function JournalEntryComposer({
                       disabled={state === "working"}
                       onClick={() => void rejectCandidate(c)}
                       data-testid="journal-candidate-reject"
-                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                      className="rounded-md border border-ink-500 px-2.5 py-1 text-meta text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
                     >
                       {t("candidateReject")}
                     </button>
@@ -1282,14 +1282,14 @@ export function JournalEntryComposer({
                 const stateBadge = (state: string) =>
                   state === "confirmed" ? (
                     <span
-                      className="text-[11px] font-semibold text-state-success"
+                      className="text-meta font-semibold text-state-success"
                       data-testid="journal-candidate-confirmed"
                     >
                       ✓ {t("candidateConfirmed")}
                     </span>
                   ) : state === "rejected" ? (
                     <span
-                      className="text-[11px] text-text-muted"
+                      className="text-meta text-text-muted"
                       data-testid="journal-candidate-rejected"
                     >
                       {t("candidateRejected")}
@@ -1307,18 +1307,18 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-recognized"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                           {t("groupRecognized")}
                         </span>
                         {detectedSlugs.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("resultDetected")}
                             </span>
                             {detectedSlugs.map((slug) => (
                               <span
                                 key={`det-${slug}`}
-                                className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
+                                className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
                                 data-testid={`journal-detected-skill-${slug}`}
                               >
                                 {tSkillSafe(tSkill, slug)}
@@ -1328,13 +1328,13 @@ export function JournalEntryComposer({
                         )}
                         {savedPipeline.addedSkills.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("resultAutoAdded")}
                             </span>
                             {savedPipeline.addedSkills.map((s) => (
                               <span
                                 key={`add-${s.slug}`}
-                                className="rounded-md border border-state-success/40 bg-state-success/5 px-2 py-0.5 text-[11px] text-state-success"
+                                className="rounded-md border border-state-success/40 bg-state-success/5 px-2 py-0.5 text-meta text-state-success"
                                 data-testid={`journal-added-skill-${s.slug}`}
                               >
                                 {tSkillSafe(tSkill, s.slug)}
@@ -1350,7 +1350,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-choice"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                           {t("groupChoice")}
                         </span>
                         <span className="sr-only">{t("resultNeedsConfirm")}</span>
@@ -1368,7 +1368,7 @@ export function JournalEntryComposer({
                                   {candidateDisplayLabel(c)}
                                 </span>
                                 {c.reason ? (
-                                  <span className="text-[11px] text-text-muted">
+                                  <span className="text-meta text-text-muted">
                                     {c.kind === "ambiguous"
                                       ? c.reason
                                       : t("reasonFound", { word: c.reason })}
@@ -1389,7 +1389,7 @@ export function JournalEntryComposer({
                                           void chooseAmbiguous(c, ch.slug)
                                         }
                                         data-testid="journal-ambiguous-choice"
-                                        className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                        className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
                                       >
                                         {ch.label}
                                       </button>
@@ -1407,7 +1407,7 @@ export function JournalEntryComposer({
                                         placeholder={t("ambiguousOtherPlaceholder")}
                                         aria-label={t("ambiguousOther")}
                                         data-testid="journal-ambiguous-rename-input"
-                                        className="w-40 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                        className="w-40 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-meta text-text-primary"
                                       />
                                       <button
                                         type="button"
@@ -1418,7 +1418,7 @@ export function JournalEntryComposer({
                                         }
                                         onClick={() => void renameAmbiguous(c)}
                                         data-testid="journal-ambiguous-rename"
-                                        className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary transition-colors hover:border-brand-blue disabled:opacity-50"
+                                        className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-secondary transition-colors hover:border-brand-blue disabled:opacity-50"
                                       >
                                         {t("ambiguousOtherSave")}
                                       </button>
@@ -1428,7 +1428,7 @@ export function JournalEntryComposer({
                                       disabled={state === "working"}
                                       onClick={() => void rejectCandidate(c)}
                                       data-testid="journal-candidate-reject"
-                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-meta text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
                                     >
                                       {t("candidateReject")}
                                     </button>
@@ -1438,7 +1438,7 @@ export function JournalEntryComposer({
                                 ))}
                               {state === "error" && (
                                 <span
-                                  className="text-[11px] text-state-danger"
+                                  className="text-meta text-state-danger"
                                   role="alert"
                                   data-testid="journal-candidate-error"
                                 >
@@ -1456,7 +1456,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-claims"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                           {t("groupClaims")}
                         </span>
                         {claimCandidates.map((c) => {
@@ -1475,7 +1475,7 @@ export function JournalEntryComposer({
                                 candidateActions(c, state)}
                               {state === "error" && (
                                 <span
-                                  className="text-[11px] text-state-danger"
+                                  className="text-meta text-state-danger"
                                   role="alert"
                                   data-testid="journal-candidate-error"
                                 >
@@ -1493,10 +1493,10 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-unresolved"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                           {t("groupUnresolved")}
                         </span>
-                        <p className="text-[11px] leading-relaxed text-text-muted">
+                        <p className="text-meta leading-relaxed text-text-muted">
                           {t("unresolvedHint")}
                         </p>
                         {unresolvedList.map((u) => {
@@ -1513,14 +1513,14 @@ export function JournalEntryComposer({
                               </span>
                               {state === "named" ? (
                                 <span
-                                  className="text-[11px] font-semibold text-state-success"
+                                  className="text-meta font-semibold text-state-success"
                                   data-testid="journal-unresolved-named"
                                 >
                                   ✓ {t("unresolvedSaved")}
                                 </span>
                               ) : state === "skipped" ? (
                                 <span
-                                  className="text-[11px] text-text-muted"
+                                  className="text-meta text-text-muted"
                                   data-testid="journal-unresolved-skipped"
                                 >
                                   {t("unresolvedSkipped")}
@@ -1546,7 +1546,7 @@ export function JournalEntryComposer({
                                         "unresolvedSearchPlaceholder",
                                       )}
                                       data-testid="journal-unresolved-search"
-                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-meta text-text-primary"
                                     />
                                     {(unresolvedHits[u.fragmentId] ?? []).map(
                                       (hit) => (
@@ -1561,7 +1561,7 @@ export function JournalEntryComposer({
                                             )
                                           }
                                           data-testid="journal-unresolved-skill-pick"
-                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                          className="rounded-md border border-brand-blue/50 px-2 py-1 text-meta font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
                                         >
                                           {hit.label}
                                         </button>
@@ -1586,7 +1586,7 @@ export function JournalEntryComposer({
                                       )}
                                       aria-label={t("unresolvedSaveClaim")}
                                       data-testid="journal-unresolved-claim-input"
-                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-[11px] text-text-primary"
+                                      className="w-44 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-meta text-text-primary"
                                     />
                                     <button
                                       type="button"
@@ -1602,7 +1602,7 @@ export function JournalEntryComposer({
                                         void nameUnresolvedAsClaim(u)
                                       }
                                       data-testid="journal-unresolved-save-claim"
-                                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
+                                      className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-50"
                                     >
                                       {t("unresolvedSaveClaim")}
                                     </button>
@@ -1611,7 +1611,7 @@ export function JournalEntryComposer({
                                       disabled={state === "working"}
                                       onClick={() => void skipUnresolved(u)}
                                       data-testid="journal-unresolved-skip"
-                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
+                                      className="rounded-md border border-ink-500 px-2.5 py-1 text-meta text-text-secondary transition-colors hover:border-state-danger/60 hover:text-state-danger disabled:opacity-50"
                                     >
                                       {t("unresolvedSkip")}
                                     </button>
@@ -1620,7 +1620,7 @@ export function JournalEntryComposer({
                               )}
                               {state === "error" && (
                                 <span
-                                  className="text-[11px] text-state-danger"
+                                  className="text-meta text-state-danger"
                                   role="alert"
                                   data-testid="journal-unresolved-error"
                                 >
@@ -1638,13 +1638,13 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1"
                         data-testid="journal-group-rejected"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("resultRejected")}
                         </span>
                         {savedPipeline.rejected.map((r) => (
                           <p
                             key={`rej-${r.label}`}
-                            className="text-[11px] leading-relaxed text-text-muted"
+                            className="text-meta leading-relaxed text-text-muted"
                             data-testid="journal-rejected-line"
                           >
                             {tSkillSafe(tSkill, r.label)} —{" "}
@@ -1661,13 +1661,13 @@ export function JournalEntryComposer({
             {/* Honest "what's next + who confirms" — saving is never a dead end:
                 the entry is below, skills surface in the profile, and it stays
                 private until a real human confirms it. */}
-            <p className="text-[11px] leading-relaxed text-text-muted">
+            <p className="text-meta leading-relaxed text-text-muted">
               {t("savedConfirmNote")}
             </p>
             {photoOutcome ? (
               <p
                 className={cn(
-                  "text-[11px] leading-relaxed",
+                  "text-meta leading-relaxed",
                   photoOutcome === "uploaded"
                     ? "text-state-success"
                     : "text-state-warning",
@@ -1735,14 +1735,14 @@ export function JournalEntryComposer({
                 type="button"
                 onClick={onCancelEdit}
                 data-testid="journal-edit-cancel"
-                className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+                className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               >
                 {t("editEntryCancel")}
               </button>
             ) : (
               <a
                 href={`/${locale}/dashboard/journal`}
-                className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:underline"
+                className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               >
                 {t("editEntryCancel")}
               </a>
@@ -1757,13 +1757,13 @@ export function JournalEntryComposer({
             className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2"
             data-testid="journal-edit-preserved"
           >
-            <p className="text-[11px] font-medium text-text-secondary">
+            <p className="text-meta font-medium text-text-secondary">
               {t("editPreservedTitle")}
             </p>
             {textDirty && (
               <div className="flex flex-col gap-1.5">
                 <p
-                  className="text-[11px] leading-relaxed text-state-warning"
+                  className="text-meta leading-relaxed text-state-warning"
                   data-testid="journal-edit-text-changed"
                 >
                   {t("editTextChangedHint")}
@@ -1785,14 +1785,14 @@ export function JournalEntryComposer({
             )}
             <div className={cn("flex flex-wrap gap-1.5", textDirty && "opacity-50")}>
               {workDate && (
-                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-date">
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary" data-testid="journal-edit-preserved-date">
                   {workDate}
                 </span>
               )}
               {timeValue && (
                 // LT plural honesty: "1 valandos" is wrong — format durations
                 // through the shared duration formatter ("1 val.", "9 val.").
-                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-time">
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary" data-testid="journal-edit-preserved-time">
                   {formatDuration(
                     Number(timeValue.replace(",", ".")) || 0,
                     timeUnit,
@@ -1801,19 +1801,19 @@ export function JournalEntryComposer({
                 </span>
               )}
               {qtyValue && (
-                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-qty">
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary" data-testid="journal-edit-preserved-qty">
                   {qtyValue} {tUnit(qtyUnit)}
                 </span>
               )}
               {dirSlug && (
-                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary" data-testid="journal-edit-preserved-dir">
+                <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary" data-testid="journal-edit-preserved-dir">
                   {directionBySlug.get(dirSlug)?.name ?? dirSlug}
                 </span>
               )}
               {skillSuggestions.map((s) => (
                 <span
                   key={s.slug}
-                  className="rounded-md border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 text-[11px] text-brand-blue"
+                  className="rounded-md border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 text-meta text-brand-blue"
                   data-testid={`journal-edit-preserved-skill-${s.slug}`}
                 >
                   {s.name}
@@ -1944,7 +1944,7 @@ export function JournalEntryComposer({
               ))}
             </div>
             <p
-              className="text-[11px] leading-relaxed text-text-muted"
+              className="text-meta leading-relaxed text-text-muted"
               data-testid="journal-mode-hint"
             >
               {t(`modes.${mode}Hint`)}
@@ -1980,7 +1980,7 @@ export function JournalEntryComposer({
                 </button>
               ))}
             </div>
-            <p className="text-[11px] leading-relaxed text-text-muted">
+            <p className="text-meta leading-relaxed text-text-muted">
               {t("templates.hint")}
             </p>
           </div>
@@ -2006,7 +2006,7 @@ export function JournalEntryComposer({
         {(mode !== "photo" || editingEntry) && photoField}
 
         <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
-          <summary className="cursor-pointer select-none font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <summary className="cursor-pointer select-none font-mono text-meta uppercase tracking-label text-text-muted">
             {t("examplesTitle")}
           </summary>
           <ul className="mt-2 flex flex-col gap-1.5 leading-relaxed">
@@ -2082,12 +2082,12 @@ export function JournalEntryComposer({
           data-testid="manual-fallback"
         >
           <p className="text-sm text-text-secondary">{tS("noMatches")}</p>
-          <p className="text-[11px] leading-relaxed text-text-muted">
+          <p className="text-meta leading-relaxed text-text-muted">
             {t("addManuallyHint")}
           </p>
           <Link
             href="/dashboard/profile#capabilities"
-            className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
             data-testid="manual-fallback-link"
           >
             {t("addManuallyCta")} →
@@ -2131,7 +2131,7 @@ export function JournalEntryComposer({
                   >
                     {f.isUnknown && (
                       <div className="flex flex-col gap-1.5">
-                        <p className="text-[11px] leading-relaxed text-text-secondary">
+                        <p className="text-meta leading-relaxed text-text-secondary">
                           {t("fragment.unknownHint")}
                         </p>
                         <Input
@@ -2151,7 +2151,7 @@ export function JournalEntryComposer({
                           // confirmed, so we render a precise inline
                           // hint so the worker knows what's blocking them.
                           <p
-                            className="text-[11px] leading-relaxed text-state-warning"
+                            className="text-meta leading-relaxed text-state-warning"
                             data-testid={`fragment-unknown-clarify-${idx}`}
                           >
                             {t("fragment.unknownClarifyPrompt")}
@@ -2344,14 +2344,14 @@ export function JournalEntryComposer({
                 className="md:col-span-2 flex flex-col gap-1.5"
                 data-testid="skill-suggestions-empty-note"
               >
-                <p className="text-[11px] leading-relaxed text-text-muted">
+                <p className="text-meta leading-relaxed text-text-muted">
                   {t("skillNoMatch")}
                 </p>
                 {candidateSuggestions.length === 0 &&
                   newSkillSuggestions.length === 0 && (
                     <Link
                       href="/dashboard/profile#capabilities"
-                      className="w-fit text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
                       data-testid="skill-add-manually-link"
                     >
                       {t("addManuallyCta")} →
@@ -2377,7 +2377,7 @@ export function JournalEntryComposer({
               >
                 {row.confidence === "low" && (
                   <span
-                    className="text-[10px] text-text-muted"
+                    className="text-meta text-text-muted"
                     data-testid="skill-suggestion-weak"
                   >
                     {t("reasonWeak")}
@@ -2402,7 +2402,7 @@ export function JournalEntryComposer({
               count={newSkillSuggestions.length}
             >
               <p
-                className="md:col-span-2 text-[11px] leading-relaxed text-text-muted"
+                className="md:col-span-2 text-meta leading-relaxed text-text-muted"
                 data-testid="new-skill-suggestions-intro"
               >
                 {t("newSkillIntro")}
@@ -2444,13 +2444,13 @@ export function JournalEntryComposer({
                         </button>
                       )}
                     </div>
-                    <p className="text-[11px] leading-relaxed text-text-muted">
+                    <p className="text-meta leading-relaxed text-text-muted">
                       {t("reasonFound", { word: row.matchedText })}
                       {row.confidence === "medium" && ` · ${t("reasonWeak")}`}
                     </p>
                     {status === "error" && (
                       <p
-                        className="text-[11px] text-state-danger"
+                        className="text-meta text-state-danger"
                         role="alert"
                         data-testid={`new-skill-error-${row.slug}`}
                       >
@@ -2571,7 +2571,7 @@ export function JournalEntryComposer({
           {t("editText")}
         </button>
       </div>
-      <p className="text-[11px] text-text-muted">{t("reviewMetaNote")}</p>
+      <p className="text-meta text-text-muted">{t("reviewMetaNote")}</p>
     </div>
   );
 }

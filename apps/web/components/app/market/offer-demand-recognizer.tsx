@@ -58,7 +58,7 @@ export function OfferDemandRecognizer() {
         </p>
         {/* Preparation framing — this is the step BEFORE search/request. */}
         <p
-          className="max-w-prose rounded-md border border-ink-600 bg-ink-800/40 p-3 text-[13px] leading-relaxed text-text-secondary"
+          className="max-w-prose rounded-md border border-ink-600 bg-ink-800/40 p-3 text-basis leading-relaxed text-text-secondary"
           data-testid="recognizer-prep"
         >
           {t("prep")}
@@ -89,7 +89,7 @@ export function OfferDemandRecognizer() {
       <div className="flex flex-col gap-3">
         <label
           htmlFor="recognizer-input"
-          className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
         >
           {t("pasteLabel")}
         </label>
@@ -120,11 +120,11 @@ export function OfferDemandRecognizer() {
         >
           {/* Readiness (honest label + real field count, never a rating). */}
           <div className="flex items-center justify-between gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("readinessTitle")}
             </span>
             <span
-              className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[11px] text-text-secondary"
+              className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-meta text-text-secondary"
               data-testid="recognizer-readiness"
               data-label={card.readiness.label}
             >
@@ -136,7 +136,7 @@ export function OfferDemandRecognizer() {
           {/* Recognized */}
           {card.recognized.length > 0 && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-              <span className="font-mono text-[10px] uppercase tracking-label text-state-success">
+              <span className="font-mono text-meta uppercase tracking-label text-state-success">
                 {t("recognizedTitle")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -144,7 +144,7 @@ export function OfferDemandRecognizer() {
                   <span
                     key={f.key}
                     data-testid={`recognizer-recognized-${f.key}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/5 px-2.5 py-1 text-[11px] text-text-secondary"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/5 px-2.5 py-1 text-meta text-text-secondary"
                   >
                     <span aria-hidden className="text-state-success">
                       ✓
@@ -159,7 +159,7 @@ export function OfferDemandRecognizer() {
           {/* Missing */}
           {card.missing.length > 0 && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-              <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
                 {t("missingTitle")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -169,7 +169,7 @@ export function OfferDemandRecognizer() {
                     data-testid={`recognizer-missing-${f.key}`}
                     data-severity={f.severity}
                     className={
-                      "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] " +
+                      "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-meta " +
                       (f.severity === "important"
                         ? "border-brand-orange/40 bg-brand-orange/5 text-brand-orange"
                         : "border-ink-500 bg-ink-800/40 text-text-muted")
@@ -186,7 +186,7 @@ export function OfferDemandRecognizer() {
           {/* Risks worth clarifying */}
           {card.risks.length > 0 && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-              <span className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+              <span className="font-mono text-meta uppercase tracking-label text-state-warning">
                 {t("risksTitle")}
               </span>
               <ul className="flex flex-col gap-1.5">
@@ -194,7 +194,7 @@ export function OfferDemandRecognizer() {
                   <li
                     key={r.code}
                     data-testid={`recognizer-risk-${r.code}`}
-                    className="text-[13px] leading-relaxed text-text-secondary"
+                    className="text-basis leading-relaxed text-text-secondary"
                   >
                     • {t(`risk.${r.code}`)}
                   </li>
@@ -205,7 +205,7 @@ export function OfferDemandRecognizer() {
 
           {/* Up to 3 next steps → existing real surfaces. No dead end. */}
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-            <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
               {t("nextActionTitle")}
             </span>
             {card.nextActions.map((a) => (

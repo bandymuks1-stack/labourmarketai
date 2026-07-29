@@ -212,7 +212,7 @@ export default async function CompanyScoutingPage({
           <ul className="flex flex-col gap-1.5">
             {(["strong", "possible", "weak", "insufficient_data"] as const).map((k) => (
               <li key={k} className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
-                <span className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                   {statusLabels[k]}
                 </span>
                 <span>{t(`how.legend.${k}`)}</span>
@@ -251,7 +251,7 @@ export default async function CompanyScoutingPage({
             >
               {d.title}
               {!d.structured ? (
-                <span className="ml-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="ml-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("unstructuredTag")}
                 </span>
               ) : null}
@@ -272,7 +272,7 @@ export default async function CompanyScoutingPage({
           data-testid="scouting-filters"
           aria-label={t("filters.title")}
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("filters.title")}
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -420,7 +420,7 @@ export default async function CompanyScoutingPage({
             {offeredCandidates.map((oc) => (
               <li key={oc.offerId} className="card-border flex flex-col gap-3 p-3" data-testid={`scout-offered-${oc.workerId}`}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                  <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {anonymizedToken(anonymizedWorkerLabel(oc.workerId))}
                   </span>
                   <span className="text-xs text-text-muted">{tOffered("via")}: {oc.agencyName}</span>
@@ -521,7 +521,7 @@ export default async function CompanyScoutingPage({
                         (demand_interest_signals row), never fabricated. */}
                     {result.interestByWorker[c.workerId] ? (
                       <span
-                        className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-state-success"
+                        className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
                         data-testid={`scout-interest-${c.workerId}`}
                       >
                         {t("interestBadge")}
@@ -530,14 +530,14 @@ export default async function CompanyScoutingPage({
                     {/* Honest profile freshness (Wagon 1) — real updated_at
                         bucket; dormant is ranked lower, never hidden. */}
                     <span
-                      className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
+                      className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
                       data-testid={`scout-freshness-${c.workerId}`}
                       data-freshness={c.lastActiveBucket}
                     >
                       {t(`freshness.${c.lastActiveBucket}` as never)}
                     </span>
                     <span
-                      className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                      className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
                       data-testid={`scout-status-${c.workerId}`}
                     >
                       {statusLabels[c.match.status]}
@@ -554,13 +554,13 @@ export default async function CompanyScoutingPage({
                   data-stage={stage}
                 >
                   <span
-                    className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                    className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
                   >
                     {tPipe(`stage.${stage}` as never)}
                   </span>
                   <Link
                     href={nextAction.href}
-                    className="text-[11px] font-medium text-brand-blue hover:text-brand-cyan"
+                    className="text-meta font-medium text-brand-blue hover:text-brand-cyan"
                     data-testid={`scout-pipeline-next-${c.workerId}`}
                   >
                     {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
@@ -570,7 +570,7 @@ export default async function CompanyScoutingPage({
                 {/* Profile-safe facts (owner-approved fields only). */}
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                   <div className="min-w-0">
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.location")}
                     </dt>
                     <dd className="truncate text-xs text-text-primary">
@@ -578,7 +578,7 @@ export default async function CompanyScoutingPage({
                     </dd>
                   </div>
                   <div className="min-w-0">
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.availability")}
                     </dt>
                     <dd className="truncate text-xs text-text-primary">
@@ -589,7 +589,7 @@ export default async function CompanyScoutingPage({
                     </dd>
                   </div>
                   <div className="min-w-0">
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.rate")}
                     </dt>
                     <dd className="truncate text-xs text-text-primary">
@@ -597,7 +597,7 @@ export default async function CompanyScoutingPage({
                     </dd>
                   </div>
                   <div className="min-w-0">
-                    <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.evidence")}
                     </dt>
                     <dd className="truncate text-xs text-text-primary">{p.evidenceCount}</dd>
@@ -616,7 +616,7 @@ export default async function CompanyScoutingPage({
                   </p>
                 ) : null}
                 {/* Evidence ladder counts for the matched skills */}
-                <p className="font-mono text-[11px] text-text-muted">
+                <p className="font-mono text-meta text-text-muted">
                   {t("evidence", {
                     confirmed: c.match.evidence.matchedManagerConfirmed,
                     journal: c.match.evidence.matchedJournalSupported,
@@ -633,14 +633,14 @@ export default async function CompanyScoutingPage({
                   data-readiness={c.readiness.label}
                 >
                   <span
-                    className={`rounded-md border px-2 py-0.5 text-[11px] ${READINESS_TONE[c.readiness.label]}`}
+                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
                   >
                     {t(`readiness.label.${c.readiness.label}` as never)}
                   </span>
-                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary">
+                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
                     {t(`readiness.country.${c.readiness.countryFit}` as never)}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("readiness.docsConsent")}
                   </span>
                 </div>
@@ -653,7 +653,7 @@ export default async function CompanyScoutingPage({
                       .map((r, i) => (
                         <span
                           key={`${r.code}-${i}`}
-                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-[11px] text-state-success"
+                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
                         >
                           {reason(r.code)}
                         </span>
@@ -666,7 +666,7 @@ export default async function CompanyScoutingPage({
                     {c.match.gaps.map((g, i) => (
                       <span
                         key={`${g.code}-${i}`}
-                        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-2 py-0.5 text-[11px] text-state-warning"
+                        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning"
                       >
                         {gap(g.code)}
                       </span>
@@ -682,14 +682,14 @@ export default async function CompanyScoutingPage({
                     className="flex flex-col gap-1"
                     data-testid={`scout-negotiables-${c.workerId}`}
                   >
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("tiers.negotiables")}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {c.match.negotiables.map((n) => (
                         <span
                           key={n.criterion}
-                          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2 py-0.5 text-[11px] text-brand-blue"
+                          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2 py-0.5 text-meta text-brand-blue"
                           data-criterion={n.criterion}
                           title={n.source}
                         >
@@ -707,14 +707,14 @@ export default async function CompanyScoutingPage({
                     className="flex flex-col gap-1"
                     data-testid={`scout-missing-${c.workerId}`}
                   >
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("tiers.missing")}
                     </span>
                     <ul className="flex flex-col gap-0.5">
                       {c.match.missingFacts.map((m) => (
                         <li
                           key={`${m.criterion}-${m.side}`}
-                          className="text-[11px] text-text-muted"
+                          className="text-meta text-text-muted"
                           data-criterion={m.criterion}
                           data-side={m.side}
                           title={m.source}
@@ -734,7 +734,7 @@ export default async function CompanyScoutingPage({
 
                 {/* The one clear next step for this result (PR4). */}
                 <p
-                  className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+                  className="font-mono text-meta uppercase tracking-label text-text-muted"
                   data-testid={`scout-next-${c.workerId}`}
                 >
                   {t.has(`nextAction.${c.match.nextAction}`)
@@ -752,7 +752,7 @@ export default async function CompanyScoutingPage({
                   data-testid={`scout-comms-${c.workerId}`}
                   data-can-contact={c.canContact ? "true" : "false"}
                 >
-                  <p className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                  <p className="flex items-center gap-1.5 text-meta text-text-muted">
                     <span aria-hidden>{c.canContact ? "💬" : "⏳"}</span>
                     {c.canContact ? t("comms.eligible") : t("comms.blocked")}
                   </p>
@@ -879,7 +879,7 @@ export default async function CompanyScoutingPage({
         </ul>
       ) : null}
 
-      <p className="text-[11px] leading-relaxed text-text-muted">{t("footnote")}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
     </main>
   );
 }

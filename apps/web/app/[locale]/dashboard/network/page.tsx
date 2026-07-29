@@ -73,7 +73,7 @@ export default async function NetworkPage({
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -85,7 +85,7 @@ export default async function NetworkPage({
       {/* Invitations addressed to ME — the most actionable thing first. */}
       {incoming.status === "ok" && incoming.items.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-incoming">
-          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("incoming.title")}
           </h2>
           <IncomingInvitationList items={incoming.items} locale={locale} />
@@ -94,7 +94,7 @@ export default async function NetworkPage({
 
       {/* People & company search. */}
       <section className="flex flex-col gap-3" data-testid="network-search">
-        <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("search.title")}
         </h2>
         <form
@@ -130,7 +130,7 @@ export default async function NetworkPage({
                 every listed person has a reason to be here. */}
             {search.people.length > 0 && (
               <p
-                className="text-[11px] leading-relaxed text-text-muted"
+                className="text-meta leading-relaxed text-text-muted"
                 data-testid="network-visibility-reason"
               >
                 {t("search.visibilityReason")}
@@ -154,7 +154,7 @@ export default async function NetworkPage({
                           {p.displayName}
                         </span>
                         {(p.city ?? p.country) && (
-                          <span className="text-[11px] text-text-muted">
+                          <span className="text-meta text-text-muted">
                             {[p.city, p.country].filter(Boolean).join(", ")}
                           </span>
                         )}
@@ -181,11 +181,11 @@ export default async function NetworkPage({
                         <span className="text-sm font-medium text-text-primary">
                           {c.displayName}
                         </span>
-                        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {t(`search.orgType.${c.organizationType}`)}
                         </span>
                         {c.country && (
-                          <span className="text-[11px] text-text-muted">{c.country}</span>
+                          <span className="text-meta text-text-muted">{c.country}</span>
                         )}
                         {/* Trust Connect Teams v1: where a TEAM is already
                             legitimately visible (this public-display search),
@@ -217,7 +217,7 @@ export default async function NetworkPage({
 
       {/* My sent invitations with the real lifecycle. */}
       <section className="flex flex-col gap-2" data-testid="network-sent">
-        <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("sent.title")}
         </h2>
         {sent.status === "ok" ? (
@@ -236,7 +236,7 @@ export default async function NetworkPage({
           rows in the search above. */}
       {myTeamEnquiries.status === "ok" && myTeamEnquiries.items.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-team-enquiries">
-          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("teamEnquiriesTitle")}
           </h2>
           <MyTeamEnquiriesList items={myTeamEnquiries.items} locale={locale} />
@@ -246,7 +246,7 @@ export default async function NetworkPage({
       {/* My organizations. */}
       {organizations.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-organizations">
-          <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("organizations.title")}
           </h2>
           <ul className="flex flex-col gap-2">
@@ -267,7 +267,7 @@ export default async function NetworkPage({
 
       {/* My active relationships (the other side of the network). */}
       <section className="flex flex-col gap-2" data-testid="network-relationships">
-        <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("relationships.title")}
         </h2>
         {/* Why each row is here: only ACTIVE work relationships appear, and
@@ -275,7 +275,7 @@ export default async function NetworkPage({
             v1: no unexplained people). */}
         {engagements.length > 0 && (
           <p
-            className="text-[11px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid="network-relationships-why"
           >
             {t("relationships.why")}
@@ -294,11 +294,11 @@ export default async function NetworkPage({
                 <span className="text-sm text-text-primary">
                   {e.organizationName ?? t("relationships.noOrg")}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`relationships.slug.${e.relationshipSlug}`)}
                 </span>
                 {e.title && (
-                  <span className="text-[11px] text-text-muted">{e.title}</span>
+                  <span className="text-meta text-text-muted">{e.title}</span>
                 )}
               </li>
             ))}

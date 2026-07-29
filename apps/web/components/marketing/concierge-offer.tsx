@@ -30,7 +30,7 @@ export async function ConciergeAccessBanner() {
       data-testid="concierge-access-banner"
     >
       <div className="flex flex-wrap items-center gap-3 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-4 py-3">
-        <span className="rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+        <span className="rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
           {t("badge")}
         </span>
         <p className="min-w-0 flex-1 text-xs leading-relaxed text-text-secondary">
@@ -62,7 +62,7 @@ export async function ConciergeOfferSection() {
       <ol className="mt-6 grid gap-6 md:grid-cols-2">
         {steps.map((step, i) => (
           <li key={step.title} className="card-border p-6">
-            <p className="font-mono text-[11px] uppercase tracking-label text-brand-blue">
+            <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
               {i + 1}
             </p>
             <h3 className="mt-2 font-display text-base font-semibold text-text-primary">

@@ -57,7 +57,7 @@ export function RecentlyViewedStrip({
       aria-label={labels.title}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.title}
         </span>
         <button
@@ -79,13 +79,13 @@ export function RecentlyViewedStrip({
               data-testid="opportunities-recently-viewed-item"
             >
               <span className="text-xs font-semibold text-text-primary">{r.title}</span>
-              <span className="text-[11px] text-text-muted">{r.scanLine}</span>
+              <span className="text-meta text-text-muted">{r.scanLine}</span>
             </a>
           </li>
         ))}
       </ul>
       {/* Explicit storage disclosure — REQUIRED copy: this device only. */}
-      <p className="text-[10px] leading-relaxed text-text-muted">{labels.deviceOnly}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{labels.deviceOnly}</p>
     </section>
   );
 }

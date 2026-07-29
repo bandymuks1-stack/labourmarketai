@@ -99,7 +99,7 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
 
       <article className="flex flex-col gap-5">
         <header className="flex flex-col gap-2">
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             <Link href={catPath} className="hover:text-brand-blue hover:underline">{catLabel}</Link>
           </p>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-text-primary">
@@ -108,7 +108,7 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
         </header>
 
         <section aria-label={pickL(CHROME.shortAnswer, locale)} className="rounded-lg border border-border/60 bg-ink-800/30 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-label text-text-muted">
+          <p className="text-meta font-semibold uppercase tracking-label text-text-muted">
             {pickL(CHROME.shortAnswer, locale)}
           </p>
           <p className="mt-1 text-base leading-relaxed text-text-primary">{answer.shortAnswer}</p>
@@ -177,7 +177,7 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
           </section>
         ) : null}
 
-        <footer className="flex flex-col gap-1 border-t border-border/40 pt-3 text-[11px] text-text-muted">
+        <footer className="flex flex-col gap-1 border-t border-border/40 pt-3 text-meta text-text-muted">
           <span>{pickL(CHROME.lastReviewed, locale)}: <time dateTime={answer.reviewDate}>{answer.reviewDate}</time></span>
           <span>{pickL(CHROME.editorialBy, locale)}: {answer.editorialResponsibility}</span>
         </footer>

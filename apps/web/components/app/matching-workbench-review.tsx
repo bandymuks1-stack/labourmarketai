@@ -80,7 +80,7 @@ export function MatchingWorkbenchReview({
       <input type="hidden" name="request_id" value={requestId} />
       <input type="hidden" name="status" ref={statusRef} defaultValue="" />
 
-      <label className="flex flex-col gap-1 text-[11px]">
+      <label className="flex flex-col gap-1 text-meta">
         <span className="text-text-muted">{labels.workerLabel}</span>
         <DarkListbox
           value={workerId}
@@ -93,7 +93,7 @@ export function MatchingWorkbenchReview({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[11px]">
+      <label className="flex flex-col gap-1 text-meta">
         <span className="text-text-muted">{labels.noteLabel}</span>
         <textarea
           name="note"
@@ -139,8 +139,8 @@ export function MatchingWorkbenchReview({
         <p
           className={
             banner.tone === "success"
-              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[11px] text-state-success"
-              : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[11px] text-state-warning"
+              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+              : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
           }
           role="status"
           data-testid={`matching-result-${requestId}`}

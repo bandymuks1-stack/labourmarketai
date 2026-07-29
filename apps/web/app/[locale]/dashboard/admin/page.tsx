@@ -25,13 +25,13 @@ const READINESS_KINDS: readonly ExtractionReadiness[] = [
 /** Priority-chip tone for the admin manual-review list. */
 const REVIEW_PRIORITY_CHIP: Record<AdminReviewPriorityStatus, string> = {
   review_ready:
-    "rounded-full bg-state-success/15 px-2 py-0.5 text-[11px] text-state-success",
+    "rounded-full bg-state-success/15 px-2 py-0.5 text-meta text-state-success",
   manual_review_needed:
-    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-[11px] text-brand-blue",
+    "rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta text-brand-blue",
   missing_description:
-    "rounded-full bg-state-warning/15 px-2 py-0.5 text-[11px] text-state-warning",
+    "rounded-full bg-state-warning/15 px-2 py-0.5 text-meta text-state-warning",
   missing_files:
-    "rounded-full bg-ink-700/40 px-2 py-0.5 text-[11px] text-text-muted",
+    "rounded-full bg-ink-700/40 px-2 py-0.5 text-meta text-text-muted",
 };
 
 /**
@@ -387,7 +387,7 @@ export default async function AdminDashboardPage({
                       <span className="text-sm font-semibold text-text-primary">
                         {r.title}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                         {tReview("created")}: {r.createdAt.slice(0, 10)} ·{" "}
                         {tReview("filesLabel")}: {r.attachmentCount}
                       </span>
@@ -405,7 +405,7 @@ export default async function AdminDashboardPage({
                   >
                     {hasDescription ? r.needSummary : tReview("noDescription")}
                   </p>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta">
                     <span className="text-text-muted">
                       {tReview("descriptionSignalHeading")}:
                     </span>
@@ -425,7 +425,7 @@ export default async function AdminDashboardPage({
                     </span>
                     <span className="text-text-secondary">{fileSummary}</span>
                   </div>
-                  <p className="text-[11px] font-medium text-text-primary">
+                  <p className="text-meta font-medium text-text-primary">
                     {tReview(`action.${r.priority}`)}
                   </p>
                   {/* Dead-UI P0 fix: the action queue must give a click
@@ -452,7 +452,7 @@ export default async function AdminDashboardPage({
                   <p className="text-sm font-semibold text-text-primary">
                     {maskEmail(p.email)}
                   </p>
-                  <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {p.active_role ?? "—"}
                   </p>
                 </div>
@@ -484,7 +484,7 @@ export default async function AdminDashboardPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -507,7 +507,7 @@ export default async function AdminDashboardPage({
           {kpis.map((k) => {
             const body = (
               <>
-                <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {k.label}
                 </p>
                 <p
@@ -550,7 +550,7 @@ export default async function AdminDashboardPage({
         {/* Rule D: counters without a queue page are explicitly
             monitoring-only — no pretend clickability. */}
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="admin-kpi-monitoring-note"
         >
           {t("room.kpi.monitoringNote")}
@@ -621,7 +621,7 @@ export default async function AdminDashboardPage({
           {/* Rule D: these are monitoring-only counts (drafts live on the
               company/buyer dashboards; no admin drafts queue exists). */}
           <p
-            className="text-[11px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid="admin-drafts-monitoring-note"
           >
             {t("room.kpi.monitoringNote")}
@@ -629,7 +629,7 @@ export default async function AdminDashboardPage({
         </div>
         <div className="grid gap-3 sm:grid-cols-4">
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("drafts.total")}
             </p>
             <p className="mt-1 font-display text-xl font-bold text-text-primary">
@@ -637,7 +637,7 @@ export default async function AdminDashboardPage({
             </p>
           </div>
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("drafts.byType.company")}
             </p>
             <p className="mt-1 font-display text-xl font-bold text-text-primary">
@@ -645,7 +645,7 @@ export default async function AdminDashboardPage({
             </p>
           </div>
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("drafts.byType.agency")}
             </p>
             <p className="mt-1 font-display text-xl font-bold text-text-primary">
@@ -653,7 +653,7 @@ export default async function AdminDashboardPage({
             </p>
           </div>
           <div className="card-border p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("drafts.byType.buyer")}
             </p>
             <p className="mt-1 font-display text-xl font-bold text-text-primary">
@@ -705,7 +705,7 @@ export default async function AdminDashboardPage({
                 <h3 className="font-display text-sm font-semibold text-text-primary">
                   {g.title}
                 </h3>
-                <p className="text-[11px] text-text-muted">{g.purpose}</p>
+                <p className="text-meta text-text-muted">{g.purpose}</p>
               </div>
               <ul className="flex flex-col gap-1.5">
                 {g.links.map((l) => (
@@ -717,7 +717,7 @@ export default async function AdminDashboardPage({
                     >
                       <span>{l.label}</span>
                       {l.internal ? (
-                        <span className="rounded-full bg-ink-700/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
+                        <span className="rounded-full bg-ink-700/60 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                           {t("room.internalBadge")}
                         </span>
                       ) : (

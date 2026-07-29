@@ -57,7 +57,7 @@ export function RequestCommunicationButton({
 
   if (state.kind === "opened") {
     return (
-      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+      <div className="flex flex-wrap items-center gap-2 text-meta">
         <span className="text-state-success">{labels.opened}</span>
         <button
           type="button"
@@ -82,12 +82,12 @@ export function RequestCommunicationButton({
         {pending ? labels.opening : labels.button}
       </button>
       {state.kind === "rate_limited" ? (
-        <span className="text-[11px] text-state-warning" data-testid="request-communication-limit">
+        <span className="text-meta text-state-warning" data-testid="request-communication-limit">
           {labels.limitReached}
         </span>
       ) : null}
       {state.kind === "error" ? (
-        <span className="text-[11px] text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger">{labels.error}</span>
       ) : null}
     </div>
   );

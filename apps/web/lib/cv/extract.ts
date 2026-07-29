@@ -28,7 +28,19 @@ export type CvExtractResult =
   | { kind: "failed" };
 
 /** Hard ceiling — defensive; the route handler enforces the same cap first. */
-export const MAX_CV_BYTES = 5 * 1024 * 1024; // 5 MB
+/**
+ * Input ceiling for a CV upload (owner audit §10).
+ *
+ * It used to be 5 MB and the UI made the PERSON carry that number — a
+ * technical budget pushed onto someone who just wants to attach their CV.
+ * The real cost of this route is not the input size: it is the EXTRACTED
+ * TEXT and the parse time, and both are already bounded
+ * (MAX_EXTRACTED_CHARS + PARSE_TIMEOUT_MS below). So the input ceiling is
+ * now set where no genuine CV can reach it — a scanned, image-heavy CV is a
+ * normal document, not an abuse case — and the person is never asked to
+ * shrink a file the system can handle.
+ */
+export const MAX_CV_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /** Collapse runaway whitespace the extractors emit, without touching content. */
 function tidy(text: string): string {

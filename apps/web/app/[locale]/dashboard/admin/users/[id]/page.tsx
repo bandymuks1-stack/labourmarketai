@@ -82,7 +82,7 @@ export default async function AdminUserPage({
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
           {profile.full_name ?? profile.email ?? id}
         </h1>
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {profile.active_role ?? "—"} ·{" "}
           {profile.onboarded_at ? t("user.onboarded") : t("user.notOnboarded")}
         </p>
@@ -118,7 +118,7 @@ export default async function AdminUserPage({
                 className="flex items-center gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-2 py-1 text-sm text-text-primary"
               >
                 <span>{c.label}</span>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {c.status}
                 </span>
               </li>
@@ -149,12 +149,12 @@ export default async function AdminUserPage({
                   className="card-border flex flex-col gap-2 p-3"
                 >
                   <header className="flex items-baseline justify-between gap-3">
-                    <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+                    <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
                       {t(
                         `user.draftType.${d.draft_type as DraftType}`,
                       )}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {d.visibility}
                     </span>
                   </header>
@@ -166,7 +166,7 @@ export default async function AdminUserPage({
                     <dl className="grid gap-1 sm:grid-cols-2 text-xs">
                       {entries.map(([k, v]) => (
                         <div key={k} className="flex flex-col gap-0.5">
-                          <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                          <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                             {k}
                           </dt>
                           <dd className="text-text-secondary">

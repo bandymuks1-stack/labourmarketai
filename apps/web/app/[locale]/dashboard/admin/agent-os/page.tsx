@@ -171,7 +171,7 @@ export default async function AdminAgentOsPage({
       />
 
       <header className="flex flex-col gap-1">
-        <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+        <p className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-blue">
           <span
             aria-hidden="true"
             className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-brand-blue shadow-[0_0_8px_rgba(57,124,255,0.8)]"
@@ -189,7 +189,7 @@ export default async function AdminAgentOsPage({
           aria-hidden="true"
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-state-warning/60 to-transparent"
         />
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("statusEyebrow")}
         </p>
         <p className="mt-1">{t("statusV1Body")}</p>
@@ -211,7 +211,7 @@ export default async function AdminAgentOsPage({
           <h2 className="font-display text-base font-semibold text-text-primary">
             {t("commandCenter.title")}
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("commandCenter.window")}
           </span>
         </header>
@@ -221,7 +221,7 @@ export default async function AdminAgentOsPage({
               aria-hidden="true"
               className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-blue/50 to-transparent opacity-60"
             />
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.events24h")}
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary [text-shadow:_0_0_16px_rgba(57,124,255,0.25)]">
@@ -235,7 +235,7 @@ export default async function AdminAgentOsPage({
                 (eventsErrors ?? 0) > 0 ? "opacity-90" : "opacity-30"
               }`}
             />
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.errors24h")}
             </p>
             <p
@@ -253,7 +253,7 @@ export default async function AdminAgentOsPage({
               aria-hidden="true"
               className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent opacity-60"
             />
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.languageOpen")}
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -265,13 +265,13 @@ export default async function AdminAgentOsPage({
               aria-hidden="true"
               className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-state-success/50 to-transparent opacity-60"
             />
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.draftsTotal")}
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
               {draftsTotal ?? "—"}
             </p>
-            <p className="mt-1 font-mono text-[10px] text-text-muted">
+            <p className="mt-1 font-mono text-meta text-text-muted">
               {t("commandCenter.metric.draftsBreakdown", {
                 company: companyDrafts ?? 0,
                 agency: agencyDrafts ?? 0,
@@ -280,7 +280,7 @@ export default async function AdminAgentOsPage({
             </p>
           </div>
           <div className="rounded-md border border-ink-600/60 p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.supportThreads")}
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -288,7 +288,7 @@ export default async function AdminAgentOsPage({
             </p>
           </div>
           <div className="rounded-md border border-ink-600/60 p-3">
-            <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("commandCenter.metric.communicationMessages")}
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
@@ -296,7 +296,7 @@ export default async function AdminAgentOsPage({
             </p>
           </div>
         </div>
-        <p className="text-[11px] text-text-muted">
+        <p className="text-meta text-text-muted">
           {t("commandCenter.footnote")}
         </p>
       </section>
@@ -316,7 +316,7 @@ export default async function AdminAgentOsPage({
           <h2 className="font-display text-base font-semibold text-text-primary">
             {t("checklist.title")}
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("checklist.scope")}
           </span>
         </header>
@@ -347,14 +347,14 @@ export default async function AdminAgentOsPage({
                 <span className="flex-1 text-text-secondary">
                   {t(`checklist.item.${row.key}`)}
                 </span>
-                <span className="font-mono text-[10px] text-text-muted">
+                <span className="font-mono text-meta text-text-muted">
                   {row.observed === null ? "—" : row.observed}
                 </span>
               </li>
             );
           })}
         </ul>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("checklist.footnote")}
         </p>
       </section>
@@ -378,14 +378,14 @@ export default async function AdminAgentOsPage({
               <h2 className="font-display text-base font-semibold text-text-primary">
                 {t(a.titleKey)}
               </h2>
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t(`scope.${a.scope}`)}
               </span>
             </header>
             <p className="text-xs leading-relaxed text-text-secondary">
               {t(a.summaryKey)}
             </p>
-            <p className="mt-1 font-mono text-[10px] text-text-muted">
+            <p className="mt-1 font-mono text-meta text-text-muted">
               {a.docPath}
             </p>
           </article>
@@ -413,7 +413,7 @@ export default async function AdminAgentOsPage({
         </Link>
       </section>
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

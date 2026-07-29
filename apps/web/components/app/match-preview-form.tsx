@@ -199,8 +199,8 @@ export function MatchPreviewForm({
               ) : null}
               <div className="rounded-md border border-border-subtle bg-surface-2 p-3">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-label text-brand-blue">{labels.aiBadge}</span>
-                  <span className="text-[11px] text-text-muted">{labels.aiExplanationTitle}</span>
+                  <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-meta font-semibold uppercase tracking-label text-brand-blue">{labels.aiBadge}</span>
+                  <span className="text-meta text-text-muted">{labels.aiExplanationTitle}</span>
                 </div>
                 <p className="mt-2 text-sm text-text-secondary">
                   {state.explanationStatus === "suggestion" && state.explanation

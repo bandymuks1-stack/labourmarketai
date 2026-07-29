@@ -16,7 +16,7 @@ export function DashboardSection({
   const marker = showPlaceholderMarkers;
   return (
     <section className="card-border p-6">
-      <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
         {title}
       </h2>
       <div className="mt-4">
@@ -31,7 +31,7 @@ export function DashboardSection({
             {marker && (
               <span
                 aria-hidden
-                className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-[10px] uppercase tracking-label text-brand-blue"
+                className="pointer-events-none absolute -right-1 -top-3 select-none rounded-sm border border-brand-blue/40 bg-ink-800 px-1 font-mono text-meta uppercase tracking-label text-brand-blue"
               >
                 Placeholder
               </span>

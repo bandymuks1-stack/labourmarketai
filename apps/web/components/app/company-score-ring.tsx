@@ -119,7 +119,7 @@ export function CompanyScoreRing({
       </svg>
       <span
         className={cn(
-          "font-mono text-[10px] font-semibold uppercase tracking-label",
+          "font-mono text-meta font-semibold uppercase tracking-label",
           TIER_TEXT[tier],
         )}
       >
@@ -128,7 +128,7 @@ export function CompanyScoreRing({
 
       {hover && (
         <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-md border border-ink-500 bg-ink-900/95 p-3 shadow-card">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="mb-2 font-mono text-meta uppercase tracking-label text-text-muted">
             {t("label")}
           </p>
           <ul className="flex flex-col gap-1.5">

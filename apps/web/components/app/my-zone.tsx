@@ -38,7 +38,7 @@ export async function MyZoneImproves() {
       data-testid="my-zone-improves"
       className="flex flex-col gap-1.5 rounded-xl border border-border-subtle bg-ink-800/20 p-4"
     >
-      <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("improvesHeading")}
       </h3>
       <ul className="flex flex-col gap-1 text-xs leading-relaxed text-text-secondary">
@@ -111,7 +111,7 @@ export async function MyZone({
                         <span className="text-sm font-medium text-text-primary">
                           {t(`missing.${m.key}.title`)}
                         </span>
-                        <span className="text-[11px] leading-snug text-text-secondary">
+                        <span className="text-meta leading-snug text-text-secondary">
                           {t(`missing.${m.key}.hint`)}
                         </span>
                       </span>

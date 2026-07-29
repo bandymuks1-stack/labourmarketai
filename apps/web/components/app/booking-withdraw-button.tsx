@@ -64,7 +64,7 @@ export function BookingWithdrawButton({
     return (
       <div className="flex flex-col gap-1">
         <span
-          className="text-[11px] font-medium text-text-muted"
+          className="text-meta font-medium text-text-muted"
           data-testid="booking-withdrawn"
         >
           {labels.withdrawn}
@@ -72,7 +72,7 @@ export function BookingWithdrawButton({
         {state.reasonStored === false ? (
           // Honest partial: the withdrawal landed, the reason could not be
           // stored yet (v2 not installed) — one calm sentence, no jargon.
-          <span className="text-[11px] text-text-muted" data-testid="booking-reason-not-stored">
+          <span className="text-meta text-text-muted" data-testid="booking-reason-not-stored">
             {t("reason.notStored")}
           </span>
         ) : null}
@@ -96,7 +96,7 @@ export function BookingWithdrawButton({
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
           data-testid="booking-withdraw-form"
         >
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.optionalTitle")}
             <select
               value={reasonKind}
@@ -112,7 +112,7 @@ export function BookingWithdrawButton({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[11px] text-text-muted">
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reason.noteLabel")}
             <input
               type="text"
@@ -135,7 +135,7 @@ export function BookingWithdrawButton({
             <button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="min-h-11 text-[11px] text-text-muted hover:text-text-secondary sm:min-h-0"
+              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
             >
               {t("reason.cancel")}
             </button>
@@ -143,9 +143,9 @@ export function BookingWithdrawButton({
         </div>
       ) : null}
       {state.kind === "unavailable" ? (
-        <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+        <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state.kind === "error" ? (
-        <span className="text-[11px] text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger">{labels.error}</span>
       ) : null}
     </div>
   );

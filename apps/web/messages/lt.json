@@ -3300,12 +3300,12 @@
       "helper": "CV padeda greičiau suprasti jūsų patirtį ir stiprina jūsų darbo kortelę. Jis privatus. Įkelkite PDF, DOCX ar TXT failą arba įklijuokite tekstą.",
       "uploadLabel": "Įkelti CV failą",
       "uploadPick": "Pasirinkti CV failą",
-      "uploadFormats": "PDF, DOCX ar TXT · iki 5 MB",
+      "uploadFormats": "PDF, DOCX arba TXT",
       "uploadHint": "Nuskaitome tekstą ir pasiūlome įgūdžius, kuriuos pasirenkate. Pats failas nesaugomas.",
       "uploadExtracting": "Skaitoma…",
       "uploadPicked": "Pasirinkta: {file}",
       "uploadErrorType": "Netinkamas failas. Naudokite PDF, DOCX arba TXT.",
-      "uploadErrorSize": "Failas per didelis (iki 5 MB).",
+      "uploadErrorSize": "Šio failo nepavyko apdoroti — jis kelis kartus didesnis už įprastą CV. Atsiųsk CV failą arba parašyk savo patirtį pokalbyje.",
       "uploadErrorEmpty": "Faile teksto nerasta. Pabandykite kitą failą arba įklijuokite tekstą.",
       "uploadErrorAuth": "Prisijunkite iš naujo, kad įkeltumėte CV.",
       "uploadErrorFailed": "Nepavyko nuskaityti failo. Pabandykite kitą failą arba įklijuokite tekstą.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Darbo nuotraukos ir failai — parodo realiai atliktą darbą.",
       "evidenceRecs": "Rekomendacijos — padeda pagrįsti patikimumą.",
       "evidenceLegal": "Asmens ar teisiniai dokumentai — naudojami tik tada, kai reikia įdarbinimo ar teisiniam procesui.",
-      "privacyNote": "Jūsų dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo."
+      "privacyNote": "Jūsų dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo.",
+      "uploadCostNote": "CV įkėlimas nemokamas — LMC nenuskaitoma. Sistema pati susitvarko su failo dydžiu."
     }
   },
   "live": {
@@ -5968,6 +5969,17 @@
     "sections": {
       "unread": "Neperskaitytos",
       "earlier": "Ankstesnės"
+    },
+    "priority": {
+      "awaitingYou": "Laukia tavo atsakymo",
+      "overdue": "Laukia jau ilgai",
+      "waiting": "Laukia {hours} val."
+    },
+    "quickReply": {
+      "open": "Atsakyti čia",
+      "placeholder": "Trumpas atsakymas…",
+      "send": "Siųsti",
+      "sent": "Atsakymas išsiųstas."
     }
   },
   "orgTier1Warning": {
@@ -6763,7 +6775,17 @@
       "opportunityUnavailable": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl tai nebuvo išmatuota.",
       "opportunityNoWorker": "Tai išmatuojama, kai turi darbuotojo profilį.",
       "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu."
-    }
+    },
+    "documentsLabel": "Dokumentai",
+    "documentsValue": "{valid} galiojantys",
+    "documentsValueExpiring": "{valid} galiojantys · {expiring} greitai baigiasi",
+    "reputationLabel": "Kitų atsakas",
+    "reputationValue": "{count, plural, one {# tavo įrašas pažymėtas kaip tikslus} few {# tavo įrašai pažymėti kaip tikslūs} other {# tavo įrašų pažymėta kaip tikslūs}}",
+    "reputationEmpty": "Kiti dar nieko nepažymėjo tavo įrašuose.",
+    "reputationHint": "Tik realūs vadovų ar užsakovų atsakymai. Jokio bendro žmogaus balo.",
+    "workHistoryLabel": "Darbo istorija",
+    "workHistoryUnnamed": "Darbo kontekstas",
+    "workHistoryCurrent": "dabar"
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",
@@ -9012,6 +9034,18 @@
       "bookings": "Pasiūlyti rezervaciją",
       "tasks": "Sukurti užduotį",
       "journal": "Įrašyti atliktą darbą"
+    },
+    "meta": {
+      "workspace": "Erdvė",
+      "project": "Projektas",
+      "place": "Vieta",
+      "organization": "Organizacija",
+      "counterpart": "Susijęs žmogus",
+      "unit": {
+        "hours": "val.",
+        "minutes": "min.",
+        "days": "d."
+      }
     }
   },
   "workforcePlanning": {
@@ -11202,6 +11236,25 @@
         "languages": "kalbas",
         "salary": "tarifo lūkestį"
       }
+    },
+    "messages": {
+      "blocked": "Žinučių dabar nepavyko perskaityti.",
+      "empty": "Kol kas nėra jokių žinučių.",
+      "noneWaiting": "Nė viena žinutė nelaukia tavo atsakymo.",
+      "intro": "{count, plural, one {# žinutė laukia tavo atsakymo} few {# žinutės laukia tavo atsakymo} other {# žinučių laukia tavo atsakymo}}:",
+      "awaiting": "Laukia tavo atsakymo",
+      "overdue": "Laukia jau ilgai",
+      "waiting": "{hours} val.",
+      "someone": "Pašnekovas",
+      "attachmentOnly": "(tik priedas)",
+      "draftPlaceholder": "Parašyk atsakymą…",
+      "review": "Peržiūrėti prieš siunčiant",
+      "openThread": "Atidaryti pokalbį",
+      "confirmTitle": "Bus išsiųsta:",
+      "confirmSend": "Siųsti",
+      "editAgain": "Taisyti",
+      "sending": "Siunčiama…",
+      "sent": "Atsakymas išsiųstas."
     }
   },
   "landing": {

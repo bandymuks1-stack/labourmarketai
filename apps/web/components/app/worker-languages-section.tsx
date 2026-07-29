@@ -80,7 +80,7 @@ function LanguageRow({
         <span className="truncate font-medium">
           {WORKER_LANGUAGE_NATIVE_NAMES[entry.lang]}
         </span>
-        <span className="shrink-0 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-secondary">
           {levelLabel(entry.level, labels.levelNative)}
         </span>
       </span>

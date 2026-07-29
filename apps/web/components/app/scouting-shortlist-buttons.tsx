@@ -106,7 +106,7 @@ export function ScoutingShortlistButtons({
               onClick={() => choose(s)}
               aria-pressed={active}
               className={cn(
-                "rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors disabled:opacity-50",
+                "rounded-md border px-2.5 py-1 text-meta font-medium transition-colors disabled:opacity-50",
                 active
                   ? "border-brand-blue bg-brand-blue/15 text-text-primary"
                   : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",
@@ -125,10 +125,10 @@ export function ScoutingShortlistButtons({
           className="flex flex-col gap-0.5 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-1.5"
           data-testid={`scout-shortlist-note-${workerId}`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.note.label} · {labels.note.internalHint}
           </span>
-          <p className="whitespace-pre-wrap text-[11px] leading-relaxed text-text-secondary">
+          <p className="whitespace-pre-wrap text-meta leading-relaxed text-text-secondary">
             {note}
           </p>
         </div>
@@ -143,7 +143,7 @@ export function ScoutingShortlistButtons({
             setDraft(note ?? "");
             setError(null);
           }}
-          className="w-fit text-[11px] font-medium text-brand-blue hover:text-brand-cyan disabled:opacity-50"
+          className="w-fit text-meta font-medium text-brand-blue hover:text-brand-cyan disabled:opacity-50"
           data-testid={`scout-shortlist-note-toggle-${workerId}`}
         >
           {note === null ? labels.note.add : labels.note.edit}
@@ -154,7 +154,7 @@ export function ScoutingShortlistButtons({
           data-testid={`scout-shortlist-editor-${workerId}`}
           data-mode={editor}
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {reasonMode ? labels.note.reasonTitle : labels.note.label} ·{" "}
             {labels.note.internalHint}
           </span>
@@ -194,7 +194,7 @@ export function ScoutingShortlistButtons({
               {labels.note.cancel}
             </button>
             {reasonMode && draft.trim() === "" ? (
-              <span className="text-[11px] text-state-amber">
+              <span className="text-meta text-state-amber">
                 {labels.note.reasonRequired}
               </span>
             ) : null}
@@ -203,7 +203,7 @@ export function ScoutingShortlistButtons({
       )}
 
       {error ? (
-        <p className="text-[11px] text-state-danger" role="alert">
+        <p className="text-meta text-state-danger" role="alert">
           {error}
         </p>
       ) : null}

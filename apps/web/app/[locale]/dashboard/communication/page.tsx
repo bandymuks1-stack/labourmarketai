@@ -12,6 +12,11 @@ import { readCounterpartIdentities } from "@/lib/communication/contact-permissio
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
 import { getConversationPreviews } from "@/lib/communication/inbox-preview";
+import {
+  deriveInboxPriority,
+  sortByInboxPriority,
+} from "@/lib/communication/inbox-priority";
+import { ConversationQuickReply } from "@/components/app/conversation-quick-reply";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
@@ -81,7 +86,6 @@ export default async function CommunicationListPage({
   // visible structure, not just an invisible sort.
   const unreadConversations = fetched.filter((c) => unreadIds.has(c.id));
   const readConversations = fetched.filter((c) => !unreadIds.has(c.id));
-  const conversations = [...unreadConversations, ...readConversations];
 
   // Newest-message preview per thread (sender + first line) — WHAT is new,
   // visible without opening every thread.
@@ -89,6 +93,29 @@ export default async function CommunicationListPage({
     fetched.map((c) => c.id),
     user.id,
   );
+
+  // §8.1 PRIORITY — derived from real thread state (who wrote last, is it
+  // unread, how long has it waited). No priority column is invented: the
+  // levels are statements the UI defends in words, and the sort puts the
+  // longest-waiting question the counterpart asked first.
+  const nowMs = Date.now();
+  const priorityOf = (c: ConversationRow) => {
+    const p = previews.get(c.id);
+    return deriveInboxPriority(
+      {
+        unread: unreadIds.has(c.id),
+        newestByViewer: p?.byViewer ?? false,
+        newestAt: p?.createdAt ?? c.updated_at ?? null,
+      },
+      nowMs,
+    );
+  };
+  const newestAtOf = (c: ConversationRow) =>
+    previews.get(c.id)?.createdAt ?? c.updated_at ?? null;
+  const conversations = [
+    ...sortByInboxPriority(unreadConversations, priorityOf, newestAtOf),
+    ...sortByInboxPriority(readConversations, priorityOf, newestAtOf),
+  ];
 
   // §8.1 safe counterpart identity reader — display names for 2-person direct
   // threads the viewer participates in, via the permission-gated RPC only.
@@ -117,6 +144,7 @@ export default async function CommunicationListPage({
   // honesty rules and testids are identical wherever a thread renders.
   const renderConversation = (c: ConversationRow) => {
     const unread = unreadIds.has(c.id);
+    const priority = priorityOf(c);
     // Clarity v1: never render a card where the user cannot tell WHO /
     // WHAT / WHICH CONTEXT. Derived honestly from the real `kind`; when
     // identity/workspace are not in the data model we say so, not fake it.
@@ -158,10 +186,34 @@ export default async function CommunicationListPage({
             <span className="flex min-w-0 items-center gap-2">
               {unread && (
                 <span
-                  className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-label text-brand-blue"
+                  className="shrink-0 rounded-full bg-brand-blue/15 px-2 py-0.5 font-mono text-meta font-bold uppercase tracking-label text-brand-blue"
                   data-testid={`conversation-unread-${c.id}`}
                 >
                   {t("unread")}
+                </span>
+              )}
+              {/* §8.1 PRIORITY — only the ACT-NOW state gets a badge; the
+                  other levels are the absence of one (a chip on every row
+                  would be noise, not prioritisation). The overdue variant
+                  states the real elapsed wait in words. */}
+              {priority.level === "awaiting_you" && (
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 font-mono text-meta font-bold uppercase tracking-label ${
+                    priority.overdue
+                      ? "bg-state-danger/15 text-state-danger"
+                      : "bg-state-amber/15 text-state-amber"
+                  }`}
+                  data-testid={`conversation-priority-${c.id}`}
+                  data-level={priority.overdue ? "overdue" : "awaiting"}
+                  title={
+                    priority.waitingHours !== null
+                      ? t("priority.waiting", { hours: priority.waitingHours })
+                      : undefined
+                  }
+                >
+                  {priority.overdue
+                    ? t("priority.overdue")
+                    : t("priority.awaitingYou")}
                 </span>
               )}
               <span className="truncate text-sm font-semibold text-text-primary">
@@ -169,7 +221,7 @@ export default async function CommunicationListPage({
               </span>
             </span>
             <span
-              className="shrink-0 font-mono text-[10px] uppercase tracking-label text-text-muted"
+              className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted"
               data-testid={`conversation-type-${c.id}`}
             >
               {t(card.typeKey)}
@@ -202,7 +254,7 @@ export default async function CommunicationListPage({
               chip (NOT a normal name and NOT a bland "unspecified
               recipient") so the user knows the details are simply not
               shown yet. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta">
             {card.counterpartyRestricted ? (
               <span
                 className="inline-flex items-center gap-1 rounded border border-ink-600/60 bg-ink-800/40 px-1.5 py-0.5 text-text-muted"
@@ -260,6 +312,16 @@ export default async function CommunicationListPage({
             </span>
           </div>
         </Link>
+        {/* §8.1 QUICK REPLY — answer without opening the thread. A SIBLING
+            of the card link (nested interactive elements are invalid), and
+            offered only where a reply is what the situation calls for: the
+            counterpart wrote last and it is unread. It calls the ONE
+            canonical sendMessage action — no second messaging path. */}
+        {priority.level === "awaiting_you" ? (
+          <div className="pt-1">
+            <ConversationQuickReply conversationId={c.id} locale={locale} />
+          </div>
+        ) : null}
         {/* Source relation v1 — typed source line, rendered ONLY when
             the participant-scoped RPC resolved a live source row
             (never guessed from the subject). A SIBLING of the card
@@ -267,7 +329,7 @@ export default async function CommunicationListPage({
             this viewer it is a real link-back; without one it is a
             plain label — no dead ends, no fake state. */}
         {card.sourceKey && (
-          <div className="flex flex-wrap items-center gap-x-1.5 text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
             {card.sourceHref ? (
               <Link
                 href={card.sourceHref as "/dashboard"}
@@ -344,9 +406,9 @@ export default async function CommunicationListPage({
         >
           <span className="flex flex-col">
             <span className="font-medium">{tBookings("pendingLink")}</span>
-            <span className="text-[11px] text-text-muted">{tBookings("pendingNote")}</span>
+            <span className="text-meta text-text-muted">{tBookings("pendingNote")}</span>
           </span>
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[11px] font-bold text-white">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white">
             {pendingBookings}
           </span>
         </Link>
@@ -398,7 +460,7 @@ export default async function CommunicationListPage({
           of this page; help lives below the list, still one tap away. */}
       <SupportConversationLauncher locale={locale} />
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

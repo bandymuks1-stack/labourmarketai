@@ -33,7 +33,7 @@ export function AdminDocVerifyButtons({
   }
 
   if (state === "done") {
-    return <span className="text-[11px] text-text-muted">{labels.done}</span>;
+    return <span className="text-meta text-text-muted">{labels.done}</span>;
   }
 
   return (
@@ -43,7 +43,7 @@ export function AdminDocVerifyButtons({
           type="button"
           disabled={pending}
           onClick={() => act("verified")}
-          className="rounded-md border border-state-success/50 px-2 py-0.5 text-[11px] text-state-success hover:bg-state-success/10 disabled:opacity-50"
+          className="rounded-md border border-state-success/50 px-2 py-0.5 text-meta text-state-success hover:bg-state-success/10 disabled:opacity-50"
         >
           {labels.verify}
         </button>
@@ -51,15 +51,15 @@ export function AdminDocVerifyButtons({
           type="button"
           disabled={pending}
           onClick={() => act("rejected")}
-          className="rounded-md border border-state-danger/50 px-2 py-0.5 text-[11px] text-state-danger hover:bg-state-danger/10 disabled:opacity-50"
+          className="rounded-md border border-state-danger/50 px-2 py-0.5 text-meta text-state-danger hover:bg-state-danger/10 disabled:opacity-50"
         >
           {labels.reject}
         </button>
       </div>
       {state === "unavailable" ? (
-        <span className="text-[11px] text-text-muted">{labels.unavailable}</span>
+        <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state === "error" ? (
-        <span className="text-[11px] text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger">{labels.error}</span>
       ) : null}
     </div>
   );

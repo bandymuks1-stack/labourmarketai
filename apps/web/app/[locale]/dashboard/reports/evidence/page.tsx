@@ -85,7 +85,7 @@ export default async function EvidenceReportPage({
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([["total","total"],["selfDeclared","selfDeclared"],["workSupported","workSupported"],["confirmed","confirmed"]] as const).map(([k,label]) => (
             <div key={k} className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-center">
-              <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t(`metric.${label}`)}</dt>
+              <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`metric.${label}`)}</dt>
               <dd className="mt-1 font-display text-2xl font-bold tabular-nums text-text-primary">{byKey.profileEvidence.metrics[k] ?? 0}</dd>
             </div>
           ))}
@@ -129,7 +129,7 @@ export default async function EvidenceReportPage({
         <p className="text-xs text-text-muted">{byKey.fitReadiness.state === "real" ? t("fitReal") : t("fitNotAvailable")}</p>
       </section>
 
-      <p className="text-[11px] leading-relaxed text-text-muted">{t("footer")}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{t("footer")}</p>
     </div>
   );
 }

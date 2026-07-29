@@ -127,7 +127,7 @@ export default async function CompanyDashboardPage({
           metadata={{ surface: "company", step: "no_profile" }}
         />
         <header className="flex flex-col gap-1">
-          <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
             {t("eyebrow")}
           </p>
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -563,7 +563,7 @@ export default async function CompanyDashboardPage({
         {/* Breadcrumb: this is the company identity workspace, framed as an
             action context, not a separate system. */}
         <p
-          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-brand-orange"
           data-testid="company-context"
         >
           {tRooms("company.context")}
@@ -579,21 +579,21 @@ export default async function CompanyDashboardPage({
         {companyRow ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
-              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-cyan"
+              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
               data-testid="company-dashboard-type-chip"
             >
               {t(`setup.companyTypeOptions.${companyRow.companyType}`)}
             </span>
             {companyRow.companyType === "staffing_agency" ? (
               <span
-                className="text-[11px] text-text-muted"
+                className="text-meta text-text-muted"
                 data-testid="company-dashboard-type-note"
               >
                 {t("typeNotes.staffing_agency")}
               </span>
             ) : companyRow.companyType === "client_customer" ? (
               <span
-                className="text-[11px] text-text-muted"
+                className="text-meta text-text-muted"
                 data-testid="company-dashboard-type-note"
               >
                 {t("typeNotes.client_customer")}
@@ -673,7 +673,7 @@ export default async function CompanyDashboardPage({
             {item.icon}
             {item.label}
             {typeof item.count === "number" ? (
-              <span className="rounded-full bg-ink-700 px-1.5 py-0.5 font-mono text-[10px] text-text-primary tabular-nums">
+              <span className="rounded-full bg-ink-700 px-1.5 py-0.5 font-mono text-meta text-text-primary tabular-nums">
                 {item.count}
               </span>
             ) : null}
@@ -712,7 +712,7 @@ export default async function CompanyDashboardPage({
             data-testid="company-decisions-strip"
             className="flex flex-col gap-2"
           >
-            <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+            <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
               {t("decisions.title")}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -844,7 +844,7 @@ export default async function CompanyDashboardPage({
             })}
           </div>
           <p
-            className="text-[11px] leading-relaxed text-text-muted"
+            className="text-meta leading-relaxed text-text-muted"
             data-testid="company-agency-mode-legacy-note"
           >
             {t("agencyMode.legacyNote")}
@@ -934,7 +934,7 @@ export default async function CompanyDashboardPage({
               className="flex min-h-11 flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               data-testid={`company-ops-count-${c.key}`}
             >
-              <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {tOps(`counts.${c.key}`)}
               </dt>
               <dd className="font-display text-xl font-semibold text-text-primary">
@@ -981,17 +981,17 @@ export default async function CompanyDashboardPage({
               <h3 className="font-display text-sm font-semibold text-text-primary">
                 {tOps("projectsTitle")}
               </h3>
-              <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-medium text-brand-blue">
+              <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-meta font-medium text-brand-blue">
                 {tOps("projectsReadyBadge")}
               </span>
             </div>
             <p className="text-xs leading-relaxed text-text-secondary">{tOps("projectsBody")}</p>
-            <p className="text-[11px] text-text-muted" data-testid="company-ops-projects-count">
+            <p className="text-meta text-text-muted" data-testid="company-ops-projects-count">
               {tOps("projectsCount")}:{" "}
               <span className="font-semibold text-text-primary">{projectContext.projects}</span>
               {projectContext.projects === 0 ? ` · ${tOps("projectsEmpty")}` : ""}
             </p>
-            <p className="text-[11px] leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
+            <p className="text-meta leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
               {tOps("projectsLinkingNote")}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1037,7 +1037,7 @@ export default async function CompanyDashboardPage({
         className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="company-assignment-connections"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tOps("connections.title")}
         </span>
         <p className="text-xs text-text-secondary">{tOps("connections.intro")}</p>

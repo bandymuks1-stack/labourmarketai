@@ -64,7 +64,7 @@ export default async function AssistPage({
 
   const sourcesList = (keys: readonly string[], testid: string) => (
     <p
-      className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted"
+      className="flex flex-wrap items-center gap-2 text-meta text-text-muted"
       data-testid={testid}
     >
       <span className="font-mono uppercase tracking-label">
@@ -84,7 +84,7 @@ export default async function AssistPage({
   return (
     <div className="flex flex-col gap-6" data-testid="assist-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -127,7 +127,7 @@ export default async function AssistPage({
                     <span className="break-words text-sm font-medium text-text-primary">
                       {tAll(item.labelKey)}
                     </span>
-                    <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
                       <span className="inline-flex items-center rounded-full border border-ink-500 px-2 py-0.5">
                         {t(`sources.${item.sourceKey}`)}
                       </span>
@@ -187,7 +187,7 @@ export default async function AssistPage({
                   key={key}
                   className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 p-3"
                 >
-                  <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`summaries.worker.${key}`)}
                   </dt>
                   <dd className="text-lg font-semibold tabular-nums text-text-primary">
@@ -237,7 +237,7 @@ export default async function AssistPage({
                           {p.title?.trim() ? p.title : p.id.slice(0, 8)}
                           {p.city ? ` — ${p.city}` : ""}
                         </span>
-                        <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                        <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
                           <span className="inline-flex items-center rounded-full border border-ink-500 px-2 py-0.5">
                             {tAll(p.statusKey)}
                           </span>
@@ -292,7 +292,7 @@ export default async function AssistPage({
         </h2>
 
         <p className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("provider.stateLabel")}
           </span>
           <span
@@ -333,7 +333,7 @@ export default async function AssistPage({
           >
             {view.provider.provider ? (
               <p className="text-sm text-text-secondary">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("provider.providerLabel")}:{" "}
                 </span>
                 {view.provider.provider}
@@ -341,7 +341,7 @@ export default async function AssistPage({
             ) : null}
             {view.provider.model ? (
               <p className="text-sm text-text-secondary">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("provider.modelLabel")}:{" "}
                 </span>
                 {view.provider.model}

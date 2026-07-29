@@ -34,7 +34,7 @@ export function LiveTicker() {
       aria-label={t("label")}
       className="overflow-hidden border-y border-ink-600/60"
     >
-      <div className="ticker-track flex h-6 w-max items-center font-mono text-[11px] uppercase tracking-label">
+      <div className="ticker-track flex h-6 w-max items-center font-mono text-meta uppercase tracking-label">
         <Run />
         <Run hidden />
       </div>

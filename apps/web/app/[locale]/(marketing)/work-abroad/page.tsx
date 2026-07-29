@@ -37,7 +37,7 @@ export default async function WorkAbroadPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <header className="max-w-3xl">
-        <p className="font-mono text-[11px] uppercase tracking-label text-brand-blue">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
           {t("eyebrow")}
         </p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tightest text-text-primary sm:text-5xl">
@@ -98,7 +98,7 @@ export default async function WorkAbroadPage({
           </p>
           <Link
             href="/labour-market"
-            className="mt-4 inline-block font-mono text-[11px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+            className="mt-4 inline-block font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
           >
             {t("directionsCta")} →
           </Link>

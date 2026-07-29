@@ -117,7 +117,7 @@ export function DiscoverabilityConsent({
       className="mt-4 rounded-md border border-ink-500 bg-ink-800/30 p-4"
       data-testid="discoverability-preview"
     >
-      <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {labels.previewTitle}
       </p>
       {preview.length === 0 ? (

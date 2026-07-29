@@ -104,7 +104,7 @@ export function ReadinessRing({
       </svg>
       <span
         className={cn(
-          "font-mono text-[10px] font-semibold uppercase tracking-label",
+          "font-mono text-meta font-semibold uppercase tracking-label",
           LEVEL_TEXT[level],
         )}
       >

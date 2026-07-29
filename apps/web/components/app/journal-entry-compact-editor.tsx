@@ -449,7 +449,7 @@ export function JournalEntryCompactEditor({
               {displayLabel(row.label)}
               {row.origin === "added" && (
                 <span
-                  className="ml-2 rounded-sm border border-dashed border-brand-blue/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue"
+                  className="ml-2 rounded-sm border border-dashed border-brand-blue/60 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue"
                   data-testid="journal-compact-unsaved-chip"
                 >
                   {t("compactEdit.unsavedChip")}
@@ -525,7 +525,7 @@ export function JournalEntryCompactEditor({
 
         {totalLine !== null && rows.some((r) => r.timeValue !== "") && (
           <p
-            className="text-[11px] text-text-muted"
+            className="text-meta text-text-muted"
             data-testid="journal-compact-total-time"
           >
             {t("compactEdit.totalTime")}: {totalLine}
@@ -580,7 +580,7 @@ export function JournalEntryCompactEditor({
                 setAddQuery("");
                 setAddHits([]);
               }}
-              className="w-fit text-[11px] text-text-muted hover:text-text-primary"
+              className="w-fit text-meta text-text-muted hover:text-text-primary"
             >
               {t("compactEdit.cancel")}
             </button>
@@ -717,14 +717,14 @@ export function JournalEntryCompactEditor({
                   {c.label}
                 </span>
                 {c.reason ? (
-                  <span className="text-[11px] text-text-muted">{c.reason}</span>
+                  <span className="text-meta text-text-muted">{c.reason}</span>
                 ) : null}
                 {state === "confirmed" ? (
-                  <span className="text-[11px] font-semibold text-state-success">
+                  <span className="text-meta font-semibold text-state-success">
                     ✓ {t("candidateConfirmed")}
                   </span>
                 ) : state === "rejected" ? (
-                  <span className="text-[11px] text-text-muted">
+                  <span className="text-meta text-text-muted">
                     {t("candidateRejected")}
                   </span>
                 ) : (
@@ -753,7 +753,7 @@ export function JournalEntryCompactEditor({
                   </div>
                 )}
                 {state === "error" && (
-                  <span className="text-[11px] text-state-danger" role="alert">
+                  <span className="text-meta text-state-danger" role="alert">
                     {t("candidateError")}
                   </span>
                 )}
@@ -825,7 +825,7 @@ export function JournalEntryCompactEditor({
         </button>
         {dirty && (
           <span
-            className="font-mono text-[10px] uppercase tracking-label text-state-warning"
+            className="font-mono text-meta uppercase tracking-label text-state-warning"
             data-testid="journal-compact-dirty"
           >
             {t("compactEdit.dirtyNote")}

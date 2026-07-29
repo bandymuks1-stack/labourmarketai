@@ -28,7 +28,7 @@ export async function ProofBand() {
   return (
     <section className="mt-24" aria-labelledby="proof-band-title">
       <Reveal>
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+        <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("eyebrow")}
         </p>
         <h2
@@ -42,7 +42,7 @@ export async function ProofBand() {
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {kinds.map(({ key, accent, chip }) => (
             <div key={key} className={`rounded-xl border ${accent} bg-ink-800/40 p-5`}>
-              <p className={`font-mono text-[11px] uppercase tracking-label ${chip}`}>
+              <p className={`font-mono text-meta uppercase tracking-label ${chip}`}>
                 {t(`${key}.label`)}
               </p>
               <p className="mt-2 text-sm font-semibold text-text-primary">

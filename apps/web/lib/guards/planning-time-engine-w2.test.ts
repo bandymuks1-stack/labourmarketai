@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   detectConflicts,
   isConflictEligible,
+  planningMeta,
   projectAbsenceItem,
   projectStageItem,
   type PlanningItem,
@@ -35,6 +36,7 @@ function bookingAccepted(over: Partial<PlanningItem> = {}): PlanningItem {
     statusKey: "bookings.status.accepted",
     href: "/dashboard/bookings",
     roleContext: "incoming",
+    ...planningMeta(),
     ...over,
   };
 }
@@ -153,6 +155,7 @@ describe("cross-source conflicts — impossible plans are surfaced", () => {
       statusKey: "planning.projectStatus.live",
       href: "/dashboard/projects/p9",
       roleContext: "assigned",
+      ...planningMeta(),
     };
     expect(detectConflicts([bookingAccepted(), assigned])).toHaveLength(1);
     // The managed twin of the same band never conflicts (unchanged rule).

@@ -94,7 +94,7 @@ export async function DashboardChainActions({ role }: { role: Role }) {
               <span className="text-sm font-semibold text-text-primary">
                 {a.label} →
               </span>
-              <span className="text-[11px] leading-relaxed text-text-muted">
+              <span className="text-meta leading-relaxed text-text-muted">
                 {a.desc}
               </span>
             </Link>

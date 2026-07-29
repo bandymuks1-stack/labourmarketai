@@ -136,7 +136,7 @@ export function ProfileAvatar({
             {error}
           </p>
         )}
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("hint")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("hint")}</p>
       </div>
     </div>
   );

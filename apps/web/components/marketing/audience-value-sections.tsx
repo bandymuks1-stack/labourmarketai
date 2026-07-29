@@ -55,7 +55,7 @@ export async function AudienceValueSections() {
 
   return (
     <section className="mt-16">
-      <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("audienceValueEyebrow")}
       </p>
       <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">

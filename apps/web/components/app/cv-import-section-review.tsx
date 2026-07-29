@@ -403,7 +403,7 @@ function ReviewGroup({
   if (count === 0) return null;
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+      <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {t(`groups.${nameKey}`)} · {count}
       </p>
       <ul className="flex flex-col gap-1.5">{children}</ul>
@@ -445,7 +445,7 @@ function ItemRow({
               <span className="text-xs text-text-secondary">{sub}</span>
             ) : null}
             {aiOrigin && (
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("aiHint")}
               </span>
             )}
@@ -477,14 +477,14 @@ function ItemRow({
             )}
             {s.state === "saved" && (
               <span
-                className="font-mono text-[10px] uppercase tracking-label text-state-success"
+                className="font-mono text-meta uppercase tracking-label text-state-success"
                 data-testid={`cv-import-saved-${itemKey}`}
               >
                 ✓ {t("confirmedLabel")}
               </span>
             )}
             {s.state === "discarded" && (
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("discardedLabel")}
               </span>
             )}

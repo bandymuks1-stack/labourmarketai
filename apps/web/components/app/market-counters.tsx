@@ -48,7 +48,7 @@ export function MarketCounters() {
             {/* 5b.5: 2-line min-height + items-end so the number baselines
                 stay aligned even when one label wraps to a single line
                 (notably LT "Atvira paklausa" vs the 2-line others). */}
-            <span className="flex min-h-9 items-end font-mono text-[11px] uppercase tracking-label text-text-muted">
+            <span className="flex min-h-9 items-end font-mono text-meta uppercase tracking-label text-text-muted">
               {t(c.label)}
             </span>
             <span className="relative inline-flex h-9 items-center overflow-hidden font-display text-3xl font-bold tabular-nums tracking-tightest text-text-primary">
@@ -66,7 +66,7 @@ export function MarketCounters() {
             </span>
             <span
               className={
-                "font-mono text-[10px] tracking-label " +
+                "font-mono text-meta tracking-label " +
                 (dir > 0
                   ? "text-state-live"
                   : dir < 0
@@ -88,7 +88,7 @@ export function MarketCounters() {
           The key existed since the counters shipped but was rendered
           nowhere; a guard now pins this render. */}
       <p
-        className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+        className="font-mono text-meta uppercase tracking-label text-text-muted"
         data-testid="market-counters-preview-note"
       >
         {t("previewNote")}

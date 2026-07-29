@@ -171,7 +171,7 @@ export async function JournalJobContext({
               </span>
               {/* The deterministic journal connection (honest "supported",
                   never "confirmed"). */}
-              <span className="text-[11px] leading-relaxed text-text-muted">
+              <span className="text-meta leading-relaxed text-text-muted">
                 {tRec("journalLine", {
                   skill: skillLabel(connection.slug),
                 })}

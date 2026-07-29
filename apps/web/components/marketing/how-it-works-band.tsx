@@ -19,7 +19,7 @@ export async function HowItWorksBand() {
   return (
     <section id="how-it-works" className="mt-16 scroll-mt-24">
       <div className="card-border wow-card p-6 sm:p-10">
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>

@@ -203,7 +203,7 @@ export default async function AdminTelemetryPage({
           <h2 className="font-display text-base font-semibold text-text-primary">
             Acquisition funnel
           </h2>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-meta text-text-muted">
             First-party conversion counts for paid-ad readiness — landing →
             CTA → registration, and company-need submissions. Event
             occurrences over the recent window, not unique visitors; no
@@ -229,7 +229,7 @@ export default async function AdminTelemetryPage({
                   <div className="font-mono text-lg text-text-primary">
                     {s.count}
                   </div>
-                  <div className="text-[11px] text-text-muted">{s.label}</div>
+                  <div className="text-meta text-text-muted">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -247,7 +247,7 @@ export default async function AdminTelemetryPage({
               ))}
             </div>
             <div className="flex flex-col gap-1">
-              <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
                 First-touch source (conversions)
               </h3>
               {funnel.sources.length === 0 ? (
@@ -284,7 +284,7 @@ export default async function AdminTelemetryPage({
           {t("ttv.title")}
         </summary>
         <div className="flex flex-col gap-3 pt-3">
-          <p className="text-[11px] text-text-muted">
+          <p className="text-meta text-text-muted">
             {t("ttv.help")}
             {ttv.excludedPreview > 0
               ? ` ${t("ttv.excludedNote", { n: ttv.excludedPreview })}`
@@ -301,7 +301,7 @@ export default async function AdminTelemetryPage({
                   <div className="font-mono text-lg text-text-primary">
                     {formatDurationMs(ttv.medianMs)}
                   </div>
-                  <div className="text-[11px] text-text-muted">
+                  <div className="text-meta text-text-muted">
                     {t("ttv.median")}
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default async function AdminTelemetryPage({
                   <div className="font-mono text-lg text-text-primary">
                     {formatDurationMs(ttv.p75Ms)}
                   </div>
-                  <div className="text-[11px] text-text-muted">
+                  <div className="text-meta text-text-muted">
                     {t("ttv.p75")}
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export default async function AdminTelemetryPage({
                   <div className="font-mono text-lg text-text-primary">
                     {ttv.sessionsWithStart}
                   </div>
-                  <div className="text-[11px] text-text-muted">
+                  <div className="text-meta text-text-muted">
                     {t("ttv.sessionsWithStart")}
                   </div>
                 </div>
@@ -325,13 +325,13 @@ export default async function AdminTelemetryPage({
                   <div className="font-mono text-lg text-text-primary">
                     {ttv.sessionsReachedValue}
                   </div>
-                  <div className="text-[11px] text-text-muted">
+                  <div className="text-meta text-text-muted">
                     {t("ttv.sessionsReachedValue")}
                   </div>
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("ttv.firstValueEvent")}
                 </h3>
                 {ttv.byFirstValueEvent.map((v) => (
@@ -368,7 +368,7 @@ export default async function AdminTelemetryPage({
           {excludeAdmins ? t("filter.showAll") : t("filter.excludeAdmins")}
         </Link>
         {excludeAdmins && (
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("filter.hiddenNote", { n: hiddenCount })}
           </span>
         )}
@@ -378,29 +378,29 @@ export default async function AdminTelemetryPage({
         <h2 className="font-display text-base font-semibold text-text-primary">
           {t("tasks.title")}
         </h2>
-        <p className="text-[11px] text-text-muted">{t("tasks.help")}</p>
+        <p className="text-meta text-text-muted">{t("tasks.help")}</p>
         {taskRows.length === 0 ? (
           <p className="text-sm text-text-secondary">{t("tasks.empty")}</p>
         ) : (
           <table className="text-left text-xs">
             <thead className="border-b border-ink-600/60 text-text-muted">
               <tr>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.task")}
                 </th>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.started")}
                 </th>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.success")}
                 </th>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.error")}
                 </th>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.abandoned")}
                 </th>
-                <th className="px-2 py-1 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
                   {t("tasks.col.avgMs")}
                 </th>
               </tr>
@@ -408,7 +408,7 @@ export default async function AdminTelemetryPage({
             <tbody>
               {taskRows.map((r) => (
                 <tr key={r.task} className="border-b border-ink-700/40">
-                  <td className="px-2 py-1 font-mono text-[11px] text-text-primary">
+                  <td className="px-2 py-1 font-mono text-meta text-text-primary">
                     {r.task}
                   </td>
                   <td className="px-2 py-1 text-text-secondary">{r.started}</td>
@@ -431,7 +431,7 @@ export default async function AdminTelemetryPage({
         <h2 className="font-display text-base font-semibold text-text-primary">
           {t("errors.title")}
         </h2>
-        <p className="text-[11px] text-text-muted">{t("errors.help")}</p>
+        <p className="text-meta text-text-muted">{t("errors.help")}</p>
         {topErrors.length === 0 ? (
           <p className="text-sm text-text-secondary">{t("errors.empty")}</p>
         ) : (
@@ -456,7 +456,7 @@ export default async function AdminTelemetryPage({
           <h2 className="font-display text-base font-semibold text-text-primary">
             {t("recent.title")}
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("recent.count", { n: rows.length })}
           </span>
         </header>
@@ -468,28 +468,28 @@ export default async function AdminTelemetryPage({
           <table className="min-w-full text-left text-xs">
             <thead className="border-b border-ink-700/40 bg-ink-800/40 text-text-muted">
               <tr>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.when")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.result")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.event")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.task")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.route")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.duration")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.error")}
                 </th>
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-label">
+                <th className="px-3 py-2 font-mono text-meta uppercase tracking-label">
                   {t("recent.col.metadata")}
                 </th>
               </tr>
@@ -501,28 +501,28 @@ export default async function AdminTelemetryPage({
                   className="border-b border-ink-700/40 align-top"
                   data-testid={`pilot-event-${r.id}`}
                 >
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary whitespace-nowrap">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary whitespace-nowrap">
                     {new Date(r.created_at).toLocaleString(locale)}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <td className="px-3 py-2 font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.result}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-primary">
+                  <td className="px-3 py-2 font-mono text-meta text-text-primary">
                     {r.event_name}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary">
                     {r.task_name ?? "—"}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-text-secondary break-all">
+                  <td className="px-3 py-2 font-mono text-meta text-text-secondary break-all">
                     {r.route}
                   </td>
                   <td className="px-3 py-2 text-text-secondary">
                     {r.duration_ms !== null ? `${r.duration_ms} ms` : "—"}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-state-danger">
+                  <td className="px-3 py-2 font-mono text-meta text-state-danger">
                     {r.error_code ?? "—"}
                   </td>
-                  <td className="px-3 py-2 font-mono text-[10px] text-text-muted">
+                  <td className="px-3 py-2 font-mono text-meta text-text-muted">
                     {Object.keys(r.metadata).length === 0
                       ? "—"
                       : JSON.stringify(r.metadata)}
@@ -549,7 +549,7 @@ export default async function AdminTelemetryPage({
         </Link>
       </section>
 
-      <p className="text-[11px] text-text-muted">{t("footnote")}</p>
+      <p className="text-meta text-text-muted">{t("footnote")}</p>
     </div>
   );
 }

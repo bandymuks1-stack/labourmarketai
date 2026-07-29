@@ -77,7 +77,7 @@ export function ProjectContextCreateForm() {
         <Input name="client_name" maxLength={200} placeholder={t("clientPlaceholder")} />
       </label>
 
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("journalLinkingDisabled")}
       </p>
 

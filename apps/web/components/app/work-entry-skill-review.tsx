@@ -68,7 +68,7 @@ export function WorkEntrySkillReview({
   }
 
   const domainBadge = (it: EntryReviewItem) => (
-    <span className="rounded-sm border border-border-subtle bg-surface-1 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
+    <span className="rounded-sm border border-border-subtle bg-surface-1 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
       {t(`domain.${it.domain}`)}
     </span>
   );
@@ -80,13 +80,13 @@ export function WorkEntrySkillReview({
     >
       <header className="flex flex-col gap-1">
         <h3 className="font-display text-sm font-semibold text-text-primary">{t("title")}</h3>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("intro")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("intro")}</p>
       </header>
 
       {/* Performed activities in this entry (sector-tagged "what I did"). */}
       {review.activities.length > 0 && (
         <div className="flex flex-col gap-1.5" data-testid="work-entry-activities">
-          <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
             <Activity className="h-3.5 w-3.5 text-brand-cyan" strokeWidth={1.75} aria-hidden />
             {t("activitiesTitle")}
           </p>
@@ -95,16 +95,16 @@ export function WorkEntrySkillReview({
               <li
                 key={`a${i}`}
                 data-testid={`work-entry-activity-${a.domain}`}
-                className="flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-secondary"
+                className="flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-meta text-text-secondary"
               >
-                <span className="font-mono text-[9px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`domain.${a.domain}`)}
                 </span>
                 <span className="text-text-secondary">{a.phrase}</span>
               </li>
             ))}
           </ul>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("activitiesNote")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("activitiesNote")}</p>
         </div>
       )}
 
@@ -112,12 +112,12 @@ export function WorkEntrySkillReview({
       {(review.durations.length > 0 || review.quantities.length > 0) && (
         <ul className="flex flex-wrap gap-2" data-testid="work-entry-review-signals">
           {review.quantities.map((q, i) => (
-            <li key={`q${i}`} className="rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-secondary">
+            <li key={`q${i}`} className="rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-meta text-text-secondary">
               {t("quantityLabel")}: {q.raw}
             </li>
           ))}
           {review.durations.map((d, i) => (
-            <li key={`d${i}`} className="rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-[11px] text-text-secondary">
+            <li key={`d${i}`} className="rounded-full border border-ink-500 bg-ink-800/40 px-2.5 py-1 text-meta text-text-secondary">
               {t("durationLabel")}: {d.value} {t(`unit.${d.unit}`)}
             </li>
           ))}
@@ -127,7 +127,7 @@ export function WorkEntrySkillReview({
       {/* EXISTING profile skills evidenced by this entry — never re-added. */}
       {review.existingItems.length > 0 && (
         <div className="flex flex-col gap-2" data-testid="work-entry-existing">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("existingTitle")}</p>
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("existingTitle")}</p>
           <ul className="flex flex-col gap-1.5">
             {review.existingItems.map((it) => (
               // Read-only evidence (already on the profile) — deliberately FLAT
@@ -142,21 +142,21 @@ export function WorkEntrySkillReview({
                   <span className="text-sm font-medium text-text-secondary">{it.label}</span>
                   {domainBadge(it)}
                 </span>
-                <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 text-[10px] font-semibold text-brand-blue">
+                <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-1.5 py-0.5 text-meta font-semibold text-brand-blue">
                   {t("existingBadge")}
                 </span>
               </li>
             ))}
           </ul>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("existingNote")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("existingNote")}</p>
         </div>
       )}
 
       {/* NEW possible skills — accept (self-declared) or ignore. */}
       {review.newItems.length > 0 && (
         <div className="flex flex-col gap-2" data-testid="work-entry-new">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("newTitle")}</p>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("newNote")}</p>
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("newTitle")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("newNote")}</p>
           <ul className="flex flex-col gap-2" data-testid="work-entry-review-items">
             {review.newItems.map((it) => {
               const decided = decisions[it.id];
@@ -203,14 +203,14 @@ export function WorkEntrySkillReview({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] leading-relaxed text-text-muted">
+                  <p className="text-meta leading-relaxed text-text-muted">
                     {t("reasonLabel")}: {it.reason}
                   </p>
                   {state === "error" && (
-                    <p className="text-[11px] text-state-danger" role="alert">{t("saveError")}</p>
+                    <p className="text-meta text-state-danger" role="alert">{t("saveError")}</p>
                   )}
                   {decided === "accepted" && (
-                    <p className="text-[11px] leading-relaxed text-text-muted">{t("acceptedNote")}</p>
+                    <p className="text-meta leading-relaxed text-text-muted">{t("acceptedNote")}</p>
                   )}
                 </li>
               );
@@ -221,7 +221,7 @@ export function WorkEntrySkillReview({
 
       {review.unmapped.length > 0 && (
         <div className="flex flex-col gap-1.5" data-testid="work-entry-review-unmapped">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("unmappedTitle")}</p>
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("unmappedTitle")}</p>
           <ul className="flex flex-col gap-1">
             {review.unmapped.map((u, i) => (
               <li key={i} className="flex items-center gap-2 text-xs text-text-secondary">
@@ -230,7 +230,7 @@ export function WorkEntrySkillReview({
               </li>
             ))}
           </ul>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("unmappedNote")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("unmappedNote")}</p>
         </div>
       )}
 
@@ -239,11 +239,11 @@ export function WorkEntrySkillReview({
         className="flex flex-col gap-1 border-t border-ink-600/60 pt-3"
         data-testid="work-entry-verification-note"
       >
-        <p className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <p className="flex items-center gap-1.5 text-meta text-text-muted">
           <ShieldCheck className="h-3.5 w-3.5 text-text-muted" strokeWidth={1.75} aria-hidden />
           {t("evidenceLabel")}: {t("evidenceJournal")}
         </p>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("verificationNote")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("verificationNote")}</p>
       </footer>
     </section>
   );

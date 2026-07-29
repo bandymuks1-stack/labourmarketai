@@ -51,7 +51,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -111,7 +111,7 @@ export default async function PlanningPage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -156,6 +156,25 @@ export default async function PlanningPage({
   const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
   const fmtShort = (dayIso: string) => shortFmt.format(utc(dayIso));
 
+  /**
+   * Localized duration. Two honest shapes only, both from real source data:
+   * `"<n>|<unit>"` (the journal's own quantity metric with a TIME unit) and
+   * a bare day count (an inclusive date band). Anything else is dropped
+   * rather than rendered as an unlabelled number.
+   */
+  function durationLabel(raw: string): string | null {
+    if (raw.includes("|")) {
+      const [value, unit] = raw.split("|", 2);
+      const n = Number(value);
+      if (!Number.isFinite(n)) return null;
+      const key = `meta.unit.${unit}`;
+      return t.has(key) ? `${n} ${t(key)}` : null;
+    }
+    const days = Number(raw);
+    if (!Number.isFinite(days)) return null;
+    return `${days} ${t("meta.unit.days")}`;
+  }
+
   function ItemRow({ item }: { item: PlanningItem }) {
     const conflict = conflictIds.has(item.id);
     const contextKey =
@@ -173,7 +192,7 @@ export default async function PlanningPage({
         >
           <span className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${SOURCE_TONE[item.sourceType]}`}
+              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${SOURCE_TONE[item.sourceType]}`}
             >
               {t(`source.${item.sourceType}`)}
             </span>
@@ -182,14 +201,14 @@ export default async function PlanningPage({
             </span>
             {conflict ? (
               <span
-                className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-danger"
+                className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-danger"
                 data-testid={`planning-conflict-${item.id}`}
               >
                 {t("conflict.flag")}
               </span>
             ) : null}
           </span>
-          <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
             {item.startDate ? (
               <span>
                 {fmtShort(item.startDate)}
@@ -200,10 +219,66 @@ export default async function PlanningPage({
             ) : (
               <span>{t("undated.title")}</span>
             )}
+            {/* §7.1 TIME + DURATION — real clock time when the source stored
+                one, real length when the source recorded one. */}
+            {item.startTime ? (
+              <span data-testid={`planning-time-${item.id}`}>{item.startTime}</span>
+            ) : null}
+            {item.duration ? (
+              <span data-testid={`planning-duration-${item.id}`}>
+                {durationLabel(item.duration)}
+              </span>
+            ) : null}
             <span>{tAll(item.statusKey)}</span>
+            <span>{t(`source.${item.sourceType}`)}</span>
             {item.detail ? <span>{item.detail}</span> : null}
             {contextKey ? <span>{t(contextKey)}</span> : null}
           </span>
+          {/* §7.1 THE WORK CONTEXT ROW — workspace · project · place ·
+              organization · counterpart. Rendered only for the fields the
+              source really carries; a row with none of them shows nothing
+              extra rather than a line of dashes. */}
+          {[item.workspace, item.project, item.place, item.organization, item.counterpart].some(
+            Boolean,
+          ) ? (
+            <span
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-secondary"
+              data-testid={`planning-context-${item.id}`}
+            >
+              {item.workspace ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.workspace")}: </span>
+                  {item.workspace}
+                </span>
+              ) : null}
+              {/* The project name is not repeated when it is already the row's
+                  own title (project rows) or its detail line (stages). */}
+              {item.project && item.project !== item.label && item.project !== item.detail ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.project")}: </span>
+                  {item.project}
+                </span>
+              ) : null}
+              {item.place && item.place !== item.detail ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.place")}: </span>
+                  {item.place}
+                </span>
+              ) : null}
+              {item.organization && item.organization !== item.workspace ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.organization")}: </span>
+                  {item.organization}
+                </span>
+              ) : null}
+              {item.counterpart ? (
+                <span>
+                  <span className="text-text-muted">{t("meta.counterpart")}: </span>
+                  {item.counterpart}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
         </Link>
       </li>
     );
@@ -348,7 +423,7 @@ export default async function PlanningPage({
         aria-label={t("filters.label")}
         data-testid="planning-filters"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("filters.label")}
         </span>
         <Link
@@ -379,7 +454,7 @@ export default async function PlanningPage({
             {monthGrid.weeks[0]?.map((cell) => (
               <span
                 key={`hdr-${cell.day}`}
-                className="text-center font-mono text-[10px] uppercase tracking-label text-text-muted"
+                className="text-center font-mono text-meta uppercase tracking-label text-text-muted"
               >
                 {stripFmt.format(utc(cell.day))}
               </span>
@@ -402,7 +477,7 @@ export default async function PlanningPage({
                 </span>
                 {cell.count > 0 ? (
                   <span
-                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
+                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-meta font-bold leading-none tabular-nums ${
                       cell.hasConflict
                         ? "bg-state-danger/15 text-state-danger"
                         : "bg-brand-blue/15 text-brand-blue"
@@ -411,7 +486,7 @@ export default async function PlanningPage({
                     {cell.count}
                   </span>
                 ) : (
-                  <span className="h-5 text-[10px] text-text-muted">·</span>
+                  <span className="h-5 text-meta text-text-muted">·</span>
                 )}
               </Link>
             ))}
@@ -425,7 +500,7 @@ export default async function PlanningPage({
         <section className="flex flex-col gap-4" data-testid="planning-week-view">
           {weekDays.map((d) => (
             <div key={d.day} className="flex flex-col gap-2">
-              <h2 className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+              <h2 className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
                 <Link
                   href={planningHref({ view: "day", date: d.day, source: sourceFilter, today }) as "/dashboard"}
                   className="hover:text-brand-blue"
@@ -433,7 +508,7 @@ export default async function PlanningPage({
                   {fmtDay(d.day)}
                 </Link>
                 {d.isToday ? (
-                  <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
+                  <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue">
                     {t("today")}
                   </span>
                 ) : null}
@@ -484,7 +559,7 @@ export default async function PlanningPage({
               <span className="text-sm font-semibold capitalize text-text-primary">
                 {monthOnlyFmt.format(utc(`${m.month}-01`))}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("year.count", { count: m.count })}
               </span>
             </Link>
@@ -501,7 +576,7 @@ export default async function PlanningPage({
             aria-label={t("week.label")}
             data-testid="planning-week-strip"
           >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("week.label")}
             </span>
             <div className="grid grid-cols-7 gap-1">
@@ -516,7 +591,7 @@ export default async function PlanningPage({
                       : "border-ink-600 bg-ink-800/20"
                   }`}
                 >
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {stripFmt.format(utc(d.day))}
                   </span>
                   <span className="text-sm font-semibold tabular-nums text-text-primary">
@@ -524,7 +599,7 @@ export default async function PlanningPage({
                   </span>
                   {d.count > 0 ? (
                     <span
-                      className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none tabular-nums ${
+                      className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-meta font-bold leading-none tabular-nums ${
                         d.hasConflict
                           ? "bg-state-danger/15 text-state-danger"
                           : "bg-brand-blue/15 text-brand-blue"
@@ -533,7 +608,7 @@ export default async function PlanningPage({
                       {d.count}
                     </span>
                   ) : (
-                    <span className="h-5 text-[10px] text-text-muted">·</span>
+                    <span className="h-5 text-meta text-text-muted">·</span>
                   )}
                 </Link>
               ))}
@@ -546,10 +621,10 @@ export default async function PlanningPage({
             <section className="flex flex-col gap-4" data-testid="planning-agenda">
               {agenda.days.map((group) => (
                 <div key={group.day} className="flex flex-col gap-2">
-                  <h2 className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h2 className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {fmtDay(group.day)}
                     {group.isToday ? (
-                      <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
+                      <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue">
                         {t("today")}
                       </span>
                     ) : null}
@@ -563,7 +638,7 @@ export default async function PlanningPage({
 
               {agenda.later.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                     {t("later.title")}
                   </h2>
                   <ItemList items={agenda.later} testid="planning-later" />
@@ -572,7 +647,7 @@ export default async function PlanningPage({
 
               {agenda.undated.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <h2 className="font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                     {t("undated.title")}
                   </h2>
                   <p className="text-xs text-text-muted">{t("undated.hint")}</p>

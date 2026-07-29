@@ -3300,12 +3300,12 @@
       "helper": "Ein Lebenslauf hilft anderen, Ihre Erfahrung schneller zu verstehen, und stärkt Ihre Arbeitskarte. Er bleibt privat. Laden Sie eine PDF-, DOCX- oder TXT-Datei hoch oder fügen Sie den Text ein.",
       "uploadLabel": "Lebenslauf-Datei hochladen",
       "uploadPick": "Lebenslauf-Datei auswählen",
-      "uploadFormats": "PDF, DOCX oder TXT · max. 5 MB",
+      "uploadFormats": "PDF, DOCX oder TXT",
       "uploadHint": "Wir lesen den Text und schlagen Fähigkeiten vor, die Sie auswählen. Die Datei selbst wird nicht gespeichert.",
       "uploadExtracting": "Wird gelesen…",
       "uploadPicked": "Ausgewählt: {file}",
       "uploadErrorType": "Nicht unterstützte Datei. Verwenden Sie PDF, DOCX oder TXT.",
-      "uploadErrorSize": "Datei zu groß (max. 5 MB).",
+      "uploadErrorSize": "Diese Datei konnte nicht verarbeitet werden — sie ist um ein Vielfaches größer als ein normaler Lebenslauf. Sende die Lebenslauf-Datei selbst oder beschreibe deine Erfahrung im Chat.",
       "uploadErrorEmpty": "Kein Text in der Datei gefunden. Versuchen Sie eine andere Datei oder fügen Sie stattdessen den Text ein.",
       "uploadErrorAuth": "Bitte melden Sie sich erneut an, um einen Lebenslauf zu importieren.",
       "uploadErrorFailed": "Die Datei konnte nicht gelesen werden. Versuchen Sie eine andere Datei oder fügen Sie stattdessen den Text ein.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Arbeitsfotos und Dateien — zeigen Arbeit, die Sie tatsächlich geleistet haben.",
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
-      "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt."
+      "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {
@@ -5968,6 +5969,17 @@
     "sections": {
       "unread": "Ungelesen",
       "earlier": "Früher"
+    },
+    "priority": {
+      "awaitingYou": "Wartet auf deine Antwort",
+      "overdue": "Wartet schon lange",
+      "waiting": "Wartet {hours} Std."
+    },
+    "quickReply": {
+      "open": "Hier antworten",
+      "placeholder": "Eine kurze Antwort…",
+      "send": "Senden",
+      "sent": "Antwort gesendet."
     }
   },
   "orgTier1Warning": {
@@ -6763,7 +6775,17 @@
       "opportunityUnavailable": "Offene Anfragen sind für dein Konto noch nicht verfügbar, deshalb wurde das nicht gemessen.",
       "opportunityNoWorker": "Das wird gemessen, sobald du ein Arbeitnehmerprofil hast.",
       "closestBasis": "Am nächsten — {what}: passt bei {matched} von {required} geforderten Fähigkeiten, {confirmed} mit einem Eintrag der Führungskraft."
-    }
+    },
+    "documentsLabel": "Dokumente",
+    "documentsValue": "{valid} gültig",
+    "documentsValueExpiring": "{valid} gültig · {expiring} laufen bald ab",
+    "reputationLabel": "Rückmeldung anderer",
+    "reputationValue": "{count, plural, one {# deiner Einträge als korrekt markiert} other {# deiner Einträge als korrekt markiert}}",
+    "reputationEmpty": "Noch hat niemand etwas in deinen Einträgen markiert.",
+    "reputationHint": "Nur echte Rückmeldungen von Vorgesetzten oder Kunden. Keine Gesamtbewertung eines Menschen.",
+    "workHistoryLabel": "Arbeitshistorie",
+    "workHistoryUnnamed": "Arbeitskontext",
+    "workHistoryCurrent": "jetzt"
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",
@@ -9012,6 +9034,18 @@
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",
       "journal": "Erledigte Arbeit erfassen"
+    },
+    "meta": {
+      "workspace": "Arbeitsbereich",
+      "project": "Projekt",
+      "place": "Ort",
+      "organization": "Organisation",
+      "counterpart": "Person",
+      "unit": {
+        "hours": "Std.",
+        "minutes": "Min.",
+        "days": "T"
+      }
     }
   },
   "workforcePlanning": {
@@ -11202,6 +11236,25 @@
         "languages": "Sprachen",
         "salary": "erwarteten Satz"
       }
+    },
+    "messages": {
+      "blocked": "Nachrichten konnten gerade nicht gelesen werden.",
+      "empty": "Noch keine Nachrichten.",
+      "noneWaiting": "Keine Nachricht wartet auf deine Antwort.",
+      "intro": "{count, plural, one {# Nachricht wartet auf deine Antwort} other {# Nachrichten warten auf deine Antwort}}:",
+      "awaiting": "Wartet auf deine Antwort",
+      "overdue": "Wartet schon lange",
+      "waiting": "{hours} Std.",
+      "someone": "Die andere Person",
+      "attachmentOnly": "(nur Anhang)",
+      "draftPlaceholder": "Schreibe deine Antwort…",
+      "review": "Vor dem Senden prüfen",
+      "openThread": "Unterhaltung öffnen",
+      "confirmTitle": "Das wird gesendet:",
+      "confirmSend": "Senden",
+      "editAgain": "Bearbeiten",
+      "sending": "Senden…",
+      "sent": "Antwort gesendet."
     }
   },
   "landing": {

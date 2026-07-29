@@ -248,7 +248,7 @@ export default async function BuyerDashboardPage({
         {/* Breadcrumb: this is an ACTION under the company identity, not a
             separate top-level system. */}
         <p
-          className="font-mono text-[10px] uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-brand-orange"
           data-testid="company-context"
         >
           {t("companyContext")}

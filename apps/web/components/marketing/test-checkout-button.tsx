@@ -50,7 +50,7 @@ export function TestCheckoutButton({
         {pending ? labels.starting : labels.start}
       </button>
       {error ? (
-        <span className="font-mono text-[10px] text-state-warning">
+        <span className="font-mono text-meta text-state-warning">
           {labels.error}: {error}
         </span>
       ) : null}

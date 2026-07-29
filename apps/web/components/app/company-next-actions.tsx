@@ -102,7 +102,7 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
             ) : null}
           </h2>
           <span
-            className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[status]}`}
+            className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[status]}`}
             data-testid="company-next-actions-status"
           >
             {tSetup(`verificationStatus.${status}`)}
@@ -132,7 +132,7 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
             </ul>
             <Link
               href={"/dashboard/start/company" as "/dashboard"}
-              className="mt-1 inline-block text-[11px] font-medium text-brand-blue hover:underline"
+              className="mt-1 inline-block text-meta font-medium text-brand-blue hover:underline"
               data-testid="company-next-actions-fix-link"
             >
               {t("fixCta")} →
@@ -149,7 +149,7 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
         event={FUNNEL_EVENTS.companyDemandActionClicked}
         eventMetadata={{ surface: "company", entity_type: "company_request" }}
         href={"#company-requests" as "/dashboard"}
-        className="inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-blue"
+        className="inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-brand-blue"
       >
         {t("cards.requests.cta")} →
       </TrackedLink>

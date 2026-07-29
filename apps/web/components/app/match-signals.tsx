@@ -42,7 +42,7 @@ export function MatchSignals({
       {signals.map((s) => (
         <li
           key={s.key}
-          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] ${STATE_STYLE[s.state]}`}
+          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-meta ${STATE_STYLE[s.state]}`}
           data-signal={s.key}
           data-state={s.state}
         >

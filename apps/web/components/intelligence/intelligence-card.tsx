@@ -89,7 +89,7 @@ export async function IntelligenceCard({
         <span className={`${INTEL_CHIP_CLASS} ${INTEL_ORIGIN_TONE[badge.originKind]}`}>
           {t(`origin.${badge.originKind}`)}
         </span>
-        <span className="text-[11px] text-text-muted">
+        <span className="text-meta text-text-muted">
           {t("badge.source")}: {tc(`intelligence.sources.key.${badge.sourceKey}`)}
           {" · "}
           {t("badge.observedAt")}: {observed ?? t("badge.notObserved")}
@@ -105,7 +105,7 @@ export async function IntelligenceCard({
       data-state={card.state}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc(card.kindCode)}
         </span>
         <span className={`${INTEL_CHIP_CLASS} ${INTEL_STATE_TONE[card.state]}`}>
@@ -155,7 +155,7 @@ export async function IntelligenceCard({
 
       {card.nextActionCode ? (
         <p className="text-xs text-text-secondary" data-testid="intelligence-card-next-action">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("explain.nextAction")}:
           </span>{" "}
           {tc(card.nextActionCode)}

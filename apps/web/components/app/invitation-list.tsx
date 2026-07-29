@@ -106,11 +106,11 @@ export function SentInvitationList({
                 {row.invitedName ? `${row.invitedName} · ` : ""}
                 {row.invitedEmail}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {tTypes(row.invitationType)}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label">
+            <div className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label">
               <span
                 className={
                   row.status === "accepted"
@@ -148,7 +148,7 @@ export function SentInvitationList({
                   onClick={() => onResend(row)}
                   disabled={busyId === row.id}
                   data-testid={`sent-invitation-resend-${row.id}`}
-                  className="inline-flex items-center rounded border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+                  className="inline-flex items-center rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
                 >
                   {t("resend")}
                 </button>
@@ -157,7 +157,7 @@ export function SentInvitationList({
                   onClick={() => onRevoke(row.id)}
                   disabled={busyId === row.id}
                   data-testid={`sent-invitation-revoke-${row.id}`}
-                  className="inline-flex items-center rounded border border-state-danger/40 px-2 py-1 text-[11px] text-state-danger hover:border-state-danger disabled:opacity-50"
+                  className="inline-flex items-center rounded border border-state-danger/40 px-2 py-1 text-meta text-state-danger hover:border-state-danger disabled:opacity-50"
                 >
                   {t("revoke")}
                 </button>
@@ -166,7 +166,7 @@ export function SentInvitationList({
                     type="button"
                     onClick={() => copyLink(freshLinks[row.id])}
                     data-testid={`sent-invitation-copy-${row.id}`}
-                    className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                    className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
                   >
                     {copied === freshLinks[row.id] ? (
                       <Check className="h-3 w-3" aria-hidden />
@@ -238,7 +238,7 @@ export function IncomingInvitationList({
                 </span>
               )}
               {row.inviterName && (
-                <span className="text-[11px] text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t("from", { name: row.inviterName })}
                 </span>
               )}
@@ -258,7 +258,7 @@ export function IncomingInvitationList({
               >
                 {busyId === row.id ? t("accepting") : t("accept")}
               </button>
-              <span className="text-[11px] text-text-muted">
+              <span className="text-meta text-text-muted">
                 {t("expires", {
                   date: new Date(row.expiresAt).toLocaleDateString(locale),
                 })}

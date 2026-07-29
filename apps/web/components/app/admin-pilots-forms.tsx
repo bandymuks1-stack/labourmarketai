@@ -229,12 +229,12 @@ export function RemoveParticipantButton({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md border border-state-danger/50 px-2 py-0.5 text-[11px] text-state-danger hover:bg-state-danger/10 disabled:opacity-50"
+        className="rounded-md border border-state-danger/50 px-2 py-0.5 text-meta text-state-danger hover:bg-state-danger/10 disabled:opacity-50"
       >
         {t("participants.remove")}
       </button>
       {state && !state.ok ? (
-        <span className="text-[11px] text-state-danger" role="alert">
+        <span className="text-meta text-state-danger" role="alert">
           {t(`errors.${state.code}`)}
         </span>
       ) : null}
@@ -263,7 +263,7 @@ export function RecordOutcomeForm({
       <input type="hidden" name="pilot_id" value={pilotId} />
       {/* Honesty label: this ledger row is an admin's observation, never a
           platform verification. */}
-      <p className="text-[11px] text-text-muted">{t("outcomes.honesty")}</p>
+      <p className="text-meta text-text-muted">{t("outcomes.honesty")}</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <label className={labelCls}>
           {t("outcomes.outcomeLabel")}

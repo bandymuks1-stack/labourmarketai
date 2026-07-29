@@ -49,7 +49,7 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
             key={s.key}
             className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2"
           >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t(`signals.${s.key}` as never)}
             </span>
             <span className="font-mono text-lg font-semibold text-text-primary">
@@ -61,7 +61,7 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
       {/* Rule D (dead-UI repair): these tiles are monitoring-only counts —
           said explicitly so nobody hunts for a click. */}
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="admin-launch-signals-monitoring-note"
       >
         {t("monitoringNote")}
@@ -78,7 +78,7 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
             data-launch-status={item.status}
           >
             <span
-              className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[item.status]}`}
+              className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[item.status]}`}
             >
               {t(`status.${item.status}` as never)}
             </span>
@@ -86,17 +86,17 @@ export async function AdminLaunchBoard({ signals }: { signals: LaunchSignals }) 
               {t(`items.${item.key}` as never)}
             </span>
             {item.pending ? (
-              <span className="text-[11px] text-text-muted">· {item.pending}</span>
+              <span className="text-meta text-text-muted">· {item.pending}</span>
             ) : null}
             {item.ownerDecision ? (
-              <span className="text-[11px] text-state-amber">
+              <span className="text-meta text-state-amber">
                 · {t("ownerDecision")}: {item.ownerDecision}
               </span>
             ) : null}
           </li>
         ))}
       </ul>
-      <p className="text-[11px] leading-relaxed text-text-muted">{t("footnote")}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
     </section>
   );
 }

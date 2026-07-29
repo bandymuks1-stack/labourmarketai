@@ -140,12 +140,12 @@ export function WorkerInterestButton({
           </button>
         )}
         {failed ? (
-          <span role="alert" className="text-[11px] text-state-warning">
+          <span role="alert" className="text-meta text-state-warning">
             {labels.error}
           </span>
         ) : null}
         {contactFailed ? (
-          <span role="alert" className="text-[11px] text-state-warning">
+          <span role="alert" className="text-meta text-state-warning">
             {labels.contactError}
           </span>
         ) : null}
@@ -163,7 +163,7 @@ export function WorkerInterestButton({
         </Link>
       ) : null}
       {/* Honest scope line — REQUIRED copy: internal signal only. */}
-      <p className="text-[10px] leading-relaxed text-text-muted">{labels.internalNote}</p>
+      <p className="text-meta leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>
   );
 }

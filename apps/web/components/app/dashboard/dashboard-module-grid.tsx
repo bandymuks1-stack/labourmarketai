@@ -268,7 +268,7 @@ export function DashboardModuleGrid({
           onClick={() => setManaging((v) => !v)}
           aria-pressed={managing}
           data-testid="module-grid-manage-toggle"
-          className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-2 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-2 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           <Settings2 aria-hidden className="h-3.5 w-3.5" strokeWidth={1.75} />
           {managing ? tGrid("done") : tGrid("manage")}
@@ -367,7 +367,7 @@ export function DashboardModuleGrid({
 
           {hiddenModules.length > 0 && (
             <div className="flex flex-col gap-1.5" data-testid="module-grid-hidden">
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {tGrid("hiddenTitle")}
               </p>
               <div className="flex flex-wrap gap-1.5">

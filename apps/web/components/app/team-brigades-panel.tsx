@@ -113,7 +113,7 @@ export function TeamBrigadesPanel({
           {t("title")}
         </h2>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("honestNote")}
         </p>
       </header>
@@ -134,7 +134,7 @@ export function TeamBrigadesPanel({
                 <h3 className="font-display text-base font-semibold text-text-primary">
                   {team.name}
                 </h3>
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t("memberCount", { count: team.members.length })}
                 </span>
               </div>
@@ -151,12 +151,12 @@ export function TeamBrigadesPanel({
                     <li key={m.engagementId} className="text-xs text-text-primary">
                       {m.name}
                       {m.provenance === "invited" && (
-                        <span className="ml-1.5 text-[10px] text-state-success">
+                        <span className="ml-1.5 text-meta text-state-success">
                           {t("provenance.invited")}
                         </span>
                       )}
                       {m.provenance === "direct" && (
-                        <span className="ml-1.5 text-[10px] text-text-muted">
+                        <span className="ml-1.5 text-meta text-text-muted">
                           {t("provenance.direct")}
                         </span>
                       )}
@@ -168,7 +168,7 @@ export function TeamBrigadesPanel({
               {/* Gap 4: availability + capability composition side by side. */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("capabilityHeading")}
                   </span>
                   {team.capability === null || team.capability.length === 0 ? (
@@ -181,7 +181,7 @@ export function TeamBrigadesPanel({
                       {team.capability.map((c) => (
                         <li
                           key={c.slug}
-                          className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary"
+                          className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary"
                         >
                           <span className="text-text-primary">{skillLabel(c.slug)}</span>{" "}
                           · {t("declaredShort", { count: c.membersDeclared })}
@@ -194,7 +194,7 @@ export function TeamBrigadesPanel({
                   )}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("availability.heading")}
                   </span>
                   {!detailsApplied ? (
@@ -216,7 +216,7 @@ export function TeamBrigadesPanel({
                       className="flex flex-wrap gap-1.5"
                       data-testid={`team-availability-${team.id}`}
                     >
-                      <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-primary">
+                      <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-primary">
                         {team.details.availabilityStatus === "available_now"
                           ? t("details.status.availableNow")
                           : team.details.availabilityStatus === "available_from"
@@ -226,17 +226,17 @@ export function TeamBrigadesPanel({
                             : t("details.status.notAvailable")}
                       </li>
                       {team.details.accommodationNeeded && (
-                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                           {t("availability.accommodationNeeded")}
                         </li>
                       )}
                       {team.details.transportOwn && (
-                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                           {t("availability.ownTransport")}
                         </li>
                       )}
                       {team.details.maxTripDays != null && (
-                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                           {t("availability.maxTripDays", {
                             count: team.details.maxTripDays,
                           })}
@@ -244,7 +244,7 @@ export function TeamBrigadesPanel({
                       )}
                       {(team.details.deployableSizeMin != null ||
                         team.details.deployableSizeMax != null) && (
-                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                        <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                           {t("availability.size", {
                             size:
                               team.details.deployableSizeMin != null &&
@@ -262,7 +262,7 @@ export function TeamBrigadesPanel({
                       )}
                       {team.details.destinationCountries &&
                         team.details.destinationCountries.length > 0 && (
-                          <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-[11px] text-text-secondary">
+                          <li className="rounded-md border border-ink-600 bg-ink-800/60 px-2 py-0.5 text-meta text-text-secondary">
                             {t("availability.countries", {
                               list: team.details.destinationCountries.join(", "),
                             })}
@@ -311,13 +311,13 @@ export function TeamBrigadesPanel({
                   the worker's own acceptance creates the membership. */}
               {!invitationsApplied ? (
                 <p
-                  className="text-[11px] text-text-muted"
+                  className="text-meta text-text-muted"
                   data-testid={`team-invite-not-enabled-${team.id}`}
                 >
                   {t("inviteNotEnabled")}
                 </p>
               ) : team.addable.length === 0 ? (
-                <p className="text-[11px] text-text-muted">{t("noAddable")}</p>
+                <p className="text-meta text-text-muted">{t("noAddable")}</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   <div className="flex flex-wrap items-center gap-2">
@@ -355,7 +355,7 @@ export function TeamBrigadesPanel({
                       {t("addButton")}
                     </Button>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-text-muted">
+                  <p className="text-meta leading-relaxed text-text-muted">
                     {t("consentNote")}
                   </p>
                 </div>

@@ -131,7 +131,7 @@ function Column({
           "ring-1 ring-state-live/20 shadow-[inset_0_0_30px_-15px_rgba(0,230,118,0.30)]",
       )}
     >
-      <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {title}
       </p>
       <ul role="list" className="flex flex-col gap-2.5">

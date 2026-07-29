@@ -1,0 +1,101 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+/**
+ * §5.2 PREMIUM PLAYER CARD — the owner visual-acceptance completeness
+ * contract. The card must carry: avatar, professional identity, location,
+ * availability, work history, proven skills, signals, document status,
+ * reputation statistics, explainable evidence and opportunities — and
+ * landing + product must render the SAME component.
+ */
+
+const APP = join(__dirname, "..", "..");
+const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
+
+const CARD = read("components/app/worker-player-card.tsx");
+const DATA = read("lib/player-card/player-card.ts");
+const LABELS = read("lib/player-card/labels.ts");
+const SHOWCASE = read("components/marketing/player-card-showcase.tsx");
+
+describe("§5.2 the card carries every agreed dimension", () => {
+  it("avatar, identity, availability, location", () => {
+    for (const marker of [
+      "avatarUrl", // real consented photo or the initials monogram
+      "professionName", // professional identity
+      "player-card-availability",
+      "player-card-available-from",
+      "player-card-location", // §5.2 addition
+    ]) {
+      expect(CARD, marker).toContain(marker);
+    }
+  });
+
+  it("work history, proven skills and signals", () => {
+    expect(CARD).toContain("workHistory");
+    expect(CARD).toContain("verifiedSkillNames");
+    expect(CARD).toContain("journalSupportedLabel"); // the signal tier
+    expect(CARD).toContain("candidateLabel"); // candidate signals
+  });
+
+  it("document status and reputation statistics (§5.2 additions)", () => {
+    expect(CARD).toContain("player-card-documents");
+    expect(CARD).toContain("player-card-reputation");
+    expect(CARD).toContain("reputationHint");
+  });
+
+  it("explainable evidence and opportunities", () => {
+    expect(CARD).toContain("latestEvidenceLabel"); // when the proof last grew
+    expect(CARD).toContain("evidenceLabel"); // how many records back it
+    expect(CARD).toContain("player-card-thermometer"); // market opportunity
+  });
+});
+
+describe("§5.2 every new dimension is REAL data, honestly absent otherwise", () => {
+  it("location comes from the worker's own stated country, country-precision", () => {
+    expect(DATA).toMatch(/locationCountry: worker\?\.current_location_country \?\? null/);
+    // The label resolves the country NAME from the ONE canonical catalogue.
+    expect(LABELS).toMatch(/countryNames\.\$\{card\.locationCountry\}/);
+  });
+
+  it("documents reuse the documents surface's OWN reader and pure deriver", () => {
+    expect(DATA).toContain("listMyDocuments");
+    expect(DATA).toContain("deriveDocumentStatus");
+    // Any non-ok state is null — never a fabricated "0 documents" summary.
+    expect(DATA).toMatch(/if \(res\.kind !== "ok"\) return null/);
+  });
+
+  it("reputation is real confirmations — never a universal human score", () => {
+    expect(DATA).toContain("managerConfirmations");
+    // A zero is stated in words, not rendered as a verdict number.
+    expect(LABELS).toMatch(/card\.managerConfirmations > 0[\s\S]{0,160}: null/);
+    expect(CARD).toMatch(/labels\.reputationValue \?\? labels\.reputationEmpty/);
+    // No medal TIERS and no universal score: the retired FUT card's tier
+    // tokens and OVR ring may never appear as rendered classes or data here.
+    // (Design-token prose in comments explains what gold is RESERVED for —
+    // the trust accent — which is exactly why it must not be a tier.)
+    expect(CARD).not.toMatch(/(?:bg|text|border)-tier-(?:gold|silver|bronze)/);
+    expect(CARD).not.toMatch(/TIER_(?:BAR|ACCENT)|card\.tier|OvrRing/);
+  });
+
+  it("a card with no documents surface simply renders no documents block", () => {
+    expect(CARD).toMatch(/labels\.documentsLabel && labels\.documentsValue \?/);
+  });
+});
+
+describe("§5.2 landing and product are the SAME component", () => {
+  it("the landing showcase renders the canonical WorkerPlayerCard", () => {
+    expect(SHOWCASE).toContain("WorkerPlayerCard");
+    expect(SHOWCASE).toContain("buildPlayerCardLabels");
+    expect(SHOWCASE).not.toMatch(/<PlayerCard\b/);
+  });
+
+  it("the landing sample fills the SAME §5.2 fields", () => {
+    expect(SHOWCASE).toContain("locationCountry");
+    expect(SHOWCASE).toContain("documents:");
+  });
+
+  it("the landing still says out loud that the sample is not a real person", () => {
+    expect(SHOWCASE).toContain("conceptNote");
+  });
+});

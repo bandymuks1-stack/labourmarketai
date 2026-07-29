@@ -138,10 +138,10 @@ export function ContactDisclosureRequests({
                 {r.organizationName} · {r.needTitle}
               </p>
               <span className="flex items-center gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {r.createdAtDate}
                 </span>
-                <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                <span className="rounded-sm border border-ink-500 bg-ink-800/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                   {statusLabel[status]}
                 </span>
               </span>

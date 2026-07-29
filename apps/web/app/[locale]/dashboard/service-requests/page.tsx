@@ -178,7 +178,7 @@ function MarketplaceConnections({
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
       data-testid="marketplace-connections"
     >
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>

@@ -108,8 +108,8 @@ export function CompanyNeedIntakeStatusControl({
         <p
           className={
             banner.tone === "success"
-              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-[11px] text-state-success"
-              : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-[11px] text-state-warning"
+              ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+              : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
           }
           role="status"
           data-testid={`company-need-intake-result-${intakeId}`}

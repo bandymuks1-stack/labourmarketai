@@ -180,7 +180,7 @@ function RequestAgainButton({
     >
       {/* What this does, up front: a NEW request for the same service — the
           provider decides again. No re-opening of the concluded row. */}
-      <p className="text-[11px] text-text-secondary">{labels.requestAgainNote}</p>
+      <p className="text-meta text-text-secondary">{labels.requestAgainNote}</p>
       <textarea
         value={message}
         maxLength={2000}
@@ -193,29 +193,29 @@ function RequestAgainButton({
           type="button"
           disabled={pending}
           onClick={send}
-          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-[11px] font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {labels.request}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-[11px] text-text-muted hover:text-text-secondary"
+          className="text-meta text-text-muted hover:text-text-secondary"
         >
           {labels.cancel}
         </button>
       </div>
       {state === "duplicate" ? (
-        <span className="text-[11px] text-state-warning">{labels.duplicate}</span>
+        <span className="text-meta text-state-warning">{labels.duplicate}</span>
       ) : state === "inactive" ? (
         <span
           data-testid="marketplace-request-again-inactive"
-          className="text-[11px] text-state-warning"
+          className="text-meta text-state-warning"
         >
           {labels.offeringInactive}
         </span>
       ) : state === "error" ? (
-        <span className="text-[11px] text-state-warning">{labels.errorGeneric}</span>
+        <span className="text-meta text-state-warning">{labels.errorGeneric}</span>
       ) : null}
     </div>
   );
@@ -481,7 +481,7 @@ export function MarketplaceLoopSection({
                   >
                     <span
                       aria-hidden
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-meta font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
                     >
                       {requester.initials}
                     </span>

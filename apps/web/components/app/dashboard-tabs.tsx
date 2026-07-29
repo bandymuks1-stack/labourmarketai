@@ -64,7 +64,7 @@ export function DashboardTabs({
             <NavLinkPending />
             {badge > 0 && (
               <span
-                className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[10px] font-bold leading-none text-white"
+                className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-white"
                 data-testid={`dashboard-tab-badge-${id}`}
               >
                 {badge > 9 ? "9+" : badge}

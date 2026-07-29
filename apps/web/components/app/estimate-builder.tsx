@@ -97,7 +97,7 @@ export function EstimateBuilder({
             setOpen(false);
           }}
           data-testid="estimate-clear"
-          className="font-mono text-[10px] uppercase tracking-label text-text-muted hover:text-text-secondary"
+          className="font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary"
         >
           {t("clear")}
         </button>
@@ -105,7 +105,7 @@ export function EstimateBuilder({
       <p className="text-xs leading-relaxed text-text-secondary">{t("intro")}</p>
 
       {/* ── Entered numbers ───────────────────────────────────────────── */}
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("sectionEntered")}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">

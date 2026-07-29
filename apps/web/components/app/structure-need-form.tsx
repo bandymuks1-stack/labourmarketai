@@ -49,10 +49,10 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
       className="flex flex-col gap-2 rounded-md border border-dashed border-brand-blue/30 bg-brand-blue/5 p-3"
       data-testid="structure-need-form"
     >
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("title")}
       </p>
-      <p className="text-[11px] leading-relaxed text-text-secondary">
+      <p className="text-meta leading-relaxed text-text-secondary">
         {t("hint")}
       </p>
 
@@ -74,7 +74,7 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
                     prev.filter((x) => x.conceptId !== s.conceptId),
                   )
                 }
-                className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-2 py-1 text-[11px] text-brand-blue hover:border-state-danger hover:text-state-danger"
+                className="rounded-md border border-brand-blue/40 bg-brand-blue/10 px-2 py-1 text-meta text-brand-blue hover:border-state-danger hover:text-state-danger"
                 title={t("removeSkill")}
               >
                 {s.label} ×
@@ -92,7 +92,7 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
         onPick={setOccupation}
       />
       {occupation ? (
-        <p className="text-[11px] text-text-secondary">
+        <p className="text-meta text-text-secondary">
           {t("occupationPicked")}: {occupation.label}
         </p>
       ) : null}
@@ -119,7 +119,7 @@ export function StructureNeedForm({ requestId }: { requestId: string }) {
           {pending ? t("saving") : t("submit", { n: skills.length })}
         </button>
         {state && !state.ok ? (
-          <span className="text-[11px] text-state-warning" role="status">
+          <span className="text-meta text-state-warning" role="status">
             {t(`error.${state.code}`)}
           </span>
         ) : null}

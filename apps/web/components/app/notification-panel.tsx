@@ -90,7 +90,7 @@ export function NotificationPanel() {
               onClick={close}
               aria-label={t("close")}
               data-testid="notification-panel-close"
-              className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
               ✕
             </button>
@@ -170,7 +170,7 @@ function NotificationsBody({
     <>
       {!chromeless && (
         <header className="flex items-center justify-between border-b border-ink-600 px-3 py-2">
-          <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {label}
           </p>
           {/* "Mark all read" applies only to stored notifications — derived
@@ -180,7 +180,7 @@ function NotificationsBody({
             <button
               type="button"
               onClick={markAllRead}
-              className="font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
             >
               {markAllReadLabel}
             </button>
@@ -211,7 +211,7 @@ function NotificationsBody({
                   {tTypes.has(n.type) ? tTypes(n.type as never) : tTypes("generic")}
                 </span>
                 {typeof n.count === "number" && (
-                  <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold text-white tabular-nums">
+                  <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white tabular-nums">
                     {n.count}
                   </span>
                 )}
@@ -242,7 +242,7 @@ function NotificationsBody({
                   <button
                     type="button"
                     onClick={() => switchRole(n.role)}
-                    className="mx-3 mb-3 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue"
+                    className="mx-3 mb-3 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-meta uppercase tracking-label text-brand-blue hover:border-brand-blue"
                   >
                     {switchRoleLabel(n.role)}
                   </button>
@@ -261,7 +261,7 @@ function NotificationsBody({
         <Link
           href={"/dashboard/activity" as "/dashboard"}
           data-testid="notification-panel-view-all"
-          className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="rounded-sm font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           {tPanel("viewAll")} →
         </Link>

@@ -101,7 +101,7 @@ export function BuyerSetupForm({
           className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
           data-testid="buyer-setup-contact-name"
         />
-        <span className="text-[11px] text-text-muted">{labels.contactNameHelp}</span>
+        <span className="text-meta text-text-muted">{labels.contactNameHelp}</span>
       </label>
 
       <label className="flex flex-col gap-1 text-xs">
@@ -155,7 +155,7 @@ export function BuyerSetupForm({
           className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
           data-testid="buyer-setup-need-summary"
         />
-        <span className="text-[11px] text-text-muted">{labels.needSummaryHelp}</span>
+        <span className="text-meta text-text-muted">{labels.needSummaryHelp}</span>
       </label>
 
       <label className="flex flex-col gap-1 text-xs">
@@ -184,7 +184,7 @@ export function BuyerSetupForm({
           className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
           data-testid="buyer-setup-manual-review-note"
         />
-        <span className="text-[11px] text-text-muted">
+        <span className="text-meta text-text-muted">
           {labels.manualReviewNoteHelp}
         </span>
       </label>

@@ -118,7 +118,7 @@ export function ProfessionSkillsPicker({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("pickerTitle")}
           {skills !== null && skills.length > 0 && (
-            <span className="ml-2 font-mono text-[11px] font-normal uppercase tracking-label text-text-muted">
+            <span className="ml-2 font-mono text-meta font-normal uppercase tracking-label text-text-muted">
               {t("selectedCount", {
                 n: skills.filter((s) => selected.has(s.id)).length,
               })}
@@ -172,7 +172,7 @@ export function ProfessionSkillsPicker({
                   {s.isCore && (
                     <span
                       className={cn(
-                        "rounded-sm px-1 font-mono text-[10px] uppercase tracking-label",
+                        "rounded-sm px-1 font-mono text-meta uppercase tracking-label",
                         isSelected
                           ? "bg-ink-900/20 text-ink-900"
                           : "text-text-muted",

@@ -75,14 +75,14 @@ function StageRow({
       data-testid="project-stage-row"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] text-text-muted">
+        <span className="font-mono text-meta text-text-muted">
           #{stage.stageOrder}
         </span>
         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">
           {stage.name}
         </span>
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[status]}`}
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[status]}`}
           data-testid="project-stage-status-badge"
         >
           {t(`statuses.${status}`)}
@@ -90,7 +90,7 @@ function StageRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-[11px] text-text-secondary" htmlFor={`stage-status-${stage.id}`}>
+        <label className="text-meta text-text-secondary" htmlFor={`stage-status-${stage.id}`}>
           {t("statusLabel")}
         </label>
         <select
@@ -108,7 +108,7 @@ function StageRow({
           ))}
         </select>
         {(stage.plannedStart || stage.plannedEnd) && (
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("plannedLabel")}: {stage.plannedStart ?? "—"} → {stage.plannedEnd ?? "—"}
           </span>
         )}
@@ -116,7 +116,7 @@ function StageRow({
           type="button"
           onClick={remove}
           disabled={pending}
-          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-muted transition-colors hover:border-state-danger hover:text-state-danger"
+          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted transition-colors hover:border-state-danger hover:text-state-danger"
           data-testid="project-stage-delete"
         >
           {t("delete")}
@@ -198,7 +198,7 @@ export function ProjectStagesPanel({
           {t("title")}
         </h2>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
       </header>
 
       {!data.applied ? (
@@ -220,7 +220,7 @@ export function ProjectStagesPanel({
           )}
 
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("addHeading")}
             </span>
             <div className="flex flex-wrap items-center gap-2">

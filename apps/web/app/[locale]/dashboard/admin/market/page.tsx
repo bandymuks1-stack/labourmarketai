@@ -78,7 +78,7 @@ export default async function AdminMarketPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-market">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -148,7 +148,7 @@ export default async function AdminMarketPage({
                         {r.avgRateEur} € / {t(`basis.${r.basis}` as never)}
                       </span>
                       <span
-                        className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+                        className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
                           r.sourceStatus === "needs_source"
                             ? "border-state-warning/60 text-state-warning"
                             : "border-state-success/40 text-state-success"
@@ -181,7 +181,7 @@ export default async function AdminMarketPage({
         ) : (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-ink-500 text-left font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <tr className="border-b border-ink-500 text-left font-mono text-meta uppercase tracking-label text-text-muted">
                 <th className="py-1.5 pr-3">{t("supply.profession")}</th>
                 <th className="py-1.5 pr-3">{t("supply.country")}</th>
                 <th className="py-1.5 pr-3">{t("supply.workers")}</th>
@@ -202,7 +202,7 @@ export default async function AdminMarketPage({
                     {s.workers}
                     {s.smallSample ? (
                       <span
-                        className="ml-1.5 text-[10px] text-state-warning"
+                        className="ml-1.5 text-meta text-state-warning"
                         data-testid="market-small-sample"
                       >
                         {t("smallSample")}
@@ -234,7 +234,7 @@ export default async function AdminMarketPage({
         ) : (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-ink-500 text-left font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <tr className="border-b border-ink-500 text-left font-mono text-meta uppercase tracking-label text-text-muted">
                 <th className="py-1.5 pr-3">{t("demand.country")}</th>
                 <th className="py-1.5 pr-3">{t("demand.role")}</th>
                 <th className="py-1.5">{t("demand.requests")}</th>
@@ -251,7 +251,7 @@ export default async function AdminMarketPage({
                   <td className="py-1.5">
                     {d.requests}
                     {d.smallSample ? (
-                      <span className="ml-1.5 text-[10px] text-state-warning">
+                      <span className="ml-1.5 text-meta text-state-warning">
                         {t("smallSample")}
                       </span>
                     ) : null}

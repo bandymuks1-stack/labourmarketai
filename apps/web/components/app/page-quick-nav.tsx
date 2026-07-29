@@ -43,7 +43,7 @@ export function PageQuickNav({
         <a
           key={it.href}
           href={it.href}
-          className="inline-flex min-h-11 shrink-0 items-center rounded px-2.5 font-mono text-[10px] uppercase tracking-label text-text-secondary transition-colors hover:bg-ink-700 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="inline-flex min-h-11 shrink-0 items-center rounded px-2.5 font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:bg-ink-700 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           {it.label}
         </a>

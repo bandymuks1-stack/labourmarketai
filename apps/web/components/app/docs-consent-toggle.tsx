@@ -40,7 +40,7 @@ export function DocsConsentToggle({
       className="card-border flex flex-col gap-2 p-4"
       data-testid="docs-consent"
     >
-      <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("title")}
       </h2>
       <p className="max-w-prose text-xs leading-relaxed text-text-secondary">
@@ -48,7 +48,7 @@ export function DocsConsentToggle({
       </p>
       {gateMissing ? (
         <p
-          className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-[11px] leading-relaxed text-text-muted"
+          className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted"
           data-testid="docs-consent-needs-gate"
         >
           {t("needsGate")}
@@ -74,11 +74,11 @@ export function DocsConsentToggle({
                 ? t("onLabel")
                 : t("offLabel")}
           </button>
-          <span className="text-[11px] leading-relaxed text-text-muted">
+          <span className="text-meta leading-relaxed text-text-muted">
             {effective ? t("onHint") : t("offHint")}
           </span>
           {state?.outcome === "error" || state?.outcome === "no_worker" ? (
-            <span className="text-[11px] text-state-warning" role="status">
+            <span className="text-meta text-state-warning" role="status">
               {t(`error.${state.outcome}`)}
             </span>
           ) : null}

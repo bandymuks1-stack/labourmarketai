@@ -147,12 +147,12 @@ export function JournalAiSuggestions({
           {t("discard")}
         </button>
         {status === "needs_migration" && (
-          <span className="text-[11px] text-state-warning" role="alert">
+          <span className="text-meta text-state-warning" role="alert">
             {t("needsMigration")}
           </span>
         )}
         {status === "error" && (
-          <span className="text-[11px] text-state-danger" role="alert">
+          <span className="text-meta text-state-danger" role="alert">
             {t("saveError")}
           </span>
         )}
@@ -166,7 +166,7 @@ export function JournalAiSuggestions({
       data-testid="journal-ai-suggestions"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </p>
         {phase !== "done" || result?.status !== "ok" ? (
@@ -181,7 +181,7 @@ export function JournalAiSuggestions({
           </button>
         ) : null}
       </div>
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {t("disclaimer")}
       </p>
 
@@ -189,7 +189,7 @@ export function JournalAiSuggestions({
         // Honest off/empty state — the runtime is not enabled here or the
         // model found nothing plainly stated. Never an error wall.
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="journal-ai-off-note"
         >
           {t("offNote")}
@@ -200,7 +200,7 @@ export function JournalAiSuggestions({
         <div className="flex flex-col gap-3">
           {result.skillLabels.length > 0 && (
             <section className="flex flex-col gap-1.5">
-              <p className="text-[11px] font-medium text-text-secondary">
+              <p className="text-meta font-medium text-text-secondary">
                 {t("skillsTitle")}
               </p>
               <ul className="flex flex-col gap-1.5">
@@ -253,7 +253,7 @@ export function JournalAiSuggestions({
 
           {result.achievements.length > 0 && (
             <section className="flex flex-col gap-1.5">
-              <p className="text-[11px] font-medium text-text-secondary">
+              <p className="text-meta font-medium text-text-secondary">
                 {t("achievementsTitle")}
               </p>
               <ul className="flex flex-col gap-1.5">
@@ -288,7 +288,7 @@ export function JournalAiSuggestions({
 
           {result.experiencePeriods.length > 0 && (
             <section className="flex flex-col gap-1.5">
-              <p className="text-[11px] font-medium text-text-secondary">
+              <p className="text-meta font-medium text-text-secondary">
                 {t("experienceTitle")}
               </p>
               <ul className="flex flex-col gap-1.5">
@@ -343,7 +343,7 @@ export function JournalAiSuggestions({
             if (matches.length === 0) return null;
             return (
               <section className="flex flex-col gap-1.5">
-                <p className="text-[11px] font-medium text-text-secondary">
+                <p className="text-meta font-medium text-text-secondary">
                   {t("projectTitle")}
                 </p>
                 <ul className="flex flex-col gap-1.5">

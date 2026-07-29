@@ -157,7 +157,7 @@ export async function ProfileHubOverview({
             "flex min-h-[3.25rem] flex-col gap-1 rounded-md border border-border/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue";
           const body = (
             <>
-              <span className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="flex items-center justify-between gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
                 {p.label}
                 <span aria-hidden className="text-text-muted">
                   {p.href.startsWith("#") ? "↓" : "→"}
@@ -222,7 +222,7 @@ export async function ProfileHubOverview({
             if (!status) return null;
             return (
               <p
-                className="text-[11px] leading-relaxed text-text-muted"
+                className="text-meta leading-relaxed text-text-muted"
                 data-testid="profile-hub-skill-evidence-status"
                 data-status={status}
               >
@@ -235,7 +235,7 @@ export async function ProfileHubOverview({
 
       {/* The single honest verification disclaimer for the unified profile. */}
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="profile-hub-not-verified"
       >
         {t("notVerified")}

@@ -191,11 +191,11 @@ function Counter({
       >
         {value}
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </span>
       {hint ? (
-        <span className="text-[11px] leading-relaxed text-text-secondary">{hint}</span>
+        <span className="text-meta leading-relaxed text-text-secondary">{hint}</span>
       ) : null}
     </>
   );
@@ -255,7 +255,7 @@ function StatusEditor({
 
   return (
     <div className="flex flex-col gap-1 print:hidden" data-testid="ops-status-editor">
-      <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {labels.statusTitle}
       </span>
       <div className="flex flex-wrap items-center gap-2">
@@ -282,7 +282,7 @@ function StatusEditor({
         >
           {pending ? labels.saving : labels.save}
         </button>
-        {msg ? <span className="text-[11px] text-text-secondary">{msg}</span> : null}
+        {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </div>
   );
@@ -357,10 +357,10 @@ function ChecklistEditor({
   return (
     <div className="flex flex-col gap-2" data-testid="ops-checklist">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.checklist.title}
         </span>
-        <span className="flex flex-wrap gap-2 text-[10px] text-text-secondary">
+        <span className="flex flex-wrap gap-2 text-meta text-text-secondary">
           <span data-testid="ops-docs-missing">
             {labels.checklist.missing}: {worker.docsMissing}
           </span>
@@ -377,7 +377,7 @@ function ChecklistEditor({
       </div>
 
       {worker.readinessItems.length === 0 ? (
-        <p className="text-[11px] text-text-muted" data-testid="ops-checklist-empty">
+        <p className="text-meta text-text-muted" data-testid="ops-checklist-empty">
           {labels.checklist.empty}
         </p>
       ) : (
@@ -387,13 +387,13 @@ function ChecklistEditor({
               key={item.itemKey}
               className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1"
             >
-              <span className="text-[11px] text-text-primary">{item.label}</span>
+              <span className="text-meta text-text-primary">{item.label}</span>
               <select
                 aria-label={item.label}
                 value={item.status}
                 disabled={pending}
                 onChange={(e) => setItemStatus(item, e.target.value as ReadinessStatus)}
-                className="rounded-md border border-ink-600 bg-ink-800/40 px-1.5 py-0.5 text-[11px] text-text-primary print:hidden"
+                className="rounded-md border border-ink-600 bg-ink-800/40 px-1.5 py-0.5 text-meta text-text-primary print:hidden"
                 data-testid="ops-item-status-select"
               >
                 {READINESS_STATUSES.map((s) => (
@@ -402,7 +402,7 @@ function ChecklistEditor({
                   </option>
                 ))}
               </select>
-              <span className="hidden text-[11px] text-text-secondary print:inline">
+              <span className="hidden text-meta text-text-secondary print:inline">
                 {labels.readinessStatusLabels[item.status]}
               </span>
             </li>
@@ -416,7 +416,7 @@ function ChecklistEditor({
             type="button"
             onClick={seed}
             disabled={pending}
-            className="rounded-md border border-ink-600 px-2 py-1 text-[11px] font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
+            className="rounded-md border border-ink-600 px-2 py-1 text-meta font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
             data-testid="ops-checklist-seed"
           >
             {labels.checklist.seed}
@@ -426,21 +426,21 @@ function ChecklistEditor({
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           placeholder={labels.checklist.addPlaceholder}
-          className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-[11px] text-text-primary"
+          className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
           data-testid="ops-checklist-add-input"
         />
         <button
           type="button"
           onClick={addItem}
           disabled={pending || newLabel.trim().length === 0}
-          className="rounded-md border border-ink-600 px-2 py-1 text-[11px] font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
+          className="rounded-md border border-ink-600 px-2 py-1 text-meta font-medium text-text-secondary hover:border-brand-cyan hover:text-text-primary disabled:opacity-50"
           data-testid="ops-checklist-add"
         >
           {labels.checklist.addItem}
         </button>
       </div>
-      <p className="text-[10px] leading-relaxed text-text-muted">{labels.checklist.helper}</p>
-      {msg ? <p className="text-[11px] text-text-secondary">{msg}</p> : null}
+      <p className="text-meta leading-relaxed text-text-muted">{labels.checklist.helper}</p>
+      {msg ? <p className="text-meta text-text-secondary">{msg}</p> : null}
     </div>
   );
 }
@@ -491,7 +491,7 @@ function WorkerCard({
         <div className="flex flex-wrap items-center gap-1.5">
           {worker.operationalStatus ? (
             <span
-              className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+              className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
                 worker.operationalStatus === "ready"
                   ? "border-state-success/40 text-state-success"
                   : "border-ink-600 text-text-secondary"
@@ -502,7 +502,7 @@ function WorkerCard({
             </span>
           ) : null}
           <span
-            className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${
+            className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
               worker.ready
                 ? "border-state-success/40 text-state-success"
                 : "border-ink-600 text-text-secondary"
@@ -516,7 +516,7 @@ function WorkerCard({
 
       <StatusEditor worker={worker} labels={labels} projectId={projectId} />
 
-      <dl className="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-2 text-meta sm:grid-cols-4">
         <div>
           <dt className="text-text-muted">{labels.declaredSkills}</dt>
           <dd className="font-display text-sm text-text-primary">{worker.declaredSkills}</dd>
@@ -537,20 +537,20 @@ function WorkerCard({
 
       {worker.missing.length > 0 ? (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.missingTitle}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {worker.missing.map((m) => (
               <span
                 key={m}
-                className="rounded-full border border-ink-600 px-2 py-0.5 text-[11px] text-text-secondary"
+                className="rounded-full border border-ink-600 px-2 py-0.5 text-meta text-text-secondary"
               >
                 {missingLabel(m)}
               </span>
             ))}
             {worker.needsFollowUp ? (
-              <span className="rounded-full border border-ink-600 px-2 py-0.5 text-[11px] text-text-secondary">
+              <span className="rounded-full border border-ink-600 px-2 py-0.5 text-meta text-text-secondary">
                 {labels.followUpChip}
               </span>
             ) : null}
@@ -560,7 +560,7 @@ function WorkerCard({
 
       <ChecklistEditor worker={worker} labels={labels} projectId={projectId} />
 
-      <footer className="flex flex-wrap items-center gap-3 text-[11px] print:hidden">
+      <footer className="flex flex-wrap items-center gap-3 text-meta print:hidden">
         <Link href={`/${locale}/dashboard/journal`} className="text-brand-cyan hover:underline">
           {labels.playerCardLink}
         </Link>
@@ -633,7 +633,7 @@ export function ProjectOperationsBoard({
       type="button"
       onClick={() => setFilter(key)}
       aria-pressed={filter === key}
-      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+      className={`rounded-full border px-2.5 py-1 text-meta font-medium ${
         filter === key
           ? "border-brand-cyan text-text-primary"
           : "border-ink-600 text-text-secondary hover:text-text-primary"
@@ -647,7 +647,7 @@ export function ProjectOperationsBoard({
   return (
     <div className="flex flex-col gap-6" data-testid="project-operations-board">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
           {labels.eyebrow}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -664,11 +664,11 @@ export function ProjectOperationsBoard({
             {labels.startLabel}: {project.startDate ?? labels.notSet}
           </span>
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">{labels.schemaNote}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{labels.schemaNote}</p>
       </header>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.countersTitle}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -741,7 +741,7 @@ export function ProjectOperationsBoard({
       </section>
 
       <section className="flex flex-col gap-2 print:hidden">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.actionsTitle}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
@@ -778,7 +778,7 @@ export function ProjectOperationsBoard({
       </section>
 
       <section className="flex flex-col gap-2 print:hidden" data-testid="ops-filters">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.filters.title}
         </h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -793,7 +793,7 @@ export function ProjectOperationsBoard({
             aria-label={labels.filters.byStatus}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as OperationalStatus)}
-            className="rounded-full border border-ink-600 bg-ink-800/40 px-2 py-1 text-[11px] text-text-primary"
+            className="rounded-full border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
             data-testid="ops-filter-status"
           >
             <option value="">{labels.filters.anyStatus}</option>
@@ -807,7 +807,7 @@ export function ProjectOperationsBoard({
       </section>
 
       <section id="ops-workers-section" className="flex flex-col gap-3 scroll-mt-4">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.workersTitle}
         </h2>
         {workers.length === 0 ? (
@@ -857,10 +857,10 @@ export function ProjectOperationsBoard({
       </section>
 
       <section className="flex flex-col gap-2" data-testid="ops-honesty-notes">
-        <h2 className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.notesTitle}
         </h2>
-        <ul className="flex flex-col gap-1 text-[11px] leading-relaxed text-text-muted">
+        <ul className="flex flex-col gap-1 text-meta leading-relaxed text-text-muted">
           <li>{labels.readinessHonestyNote}</li>
           <li>{labels.statusHelper}</li>
           <li>{labels.checklist.helper}</li>

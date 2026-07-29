@@ -161,7 +161,7 @@ export function WorkerAchievementsSection({
                       {tType(entry.achievementTypeSlug)}
                       {entry.achievedAt ? ` · ${entry.achievedAt.slice(0, 10)}` : ""}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {entry.confirmedByManager
                         ? t("confirmedBadge")
                         : t("declaredBadge")}

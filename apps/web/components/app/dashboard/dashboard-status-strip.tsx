@@ -26,7 +26,7 @@ export async function DashboardStatusStrip({
       className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </span>
         <span className="flex items-center gap-3">
@@ -36,7 +36,7 @@ export async function DashboardStatusStrip({
           <Link
             href={"/dashboard/planning" as "/dashboard"}
             data-testid="status-strip-calendar"
-            className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="rounded-sm font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             {t("calendar")} →
           </Link>
@@ -45,7 +45,7 @@ export async function DashboardStatusStrip({
           <Link
             href={"/dashboard/activity" as "/dashboard"}
             data-testid="status-strip-view-all"
-            className="rounded-sm font-mono text-[10px] uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="rounded-sm font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             {t("viewAll")} →
           </Link>
@@ -68,7 +68,7 @@ export async function DashboardStatusStrip({
                 className="inline-flex min-h-11 items-center gap-2 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-xs text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               >
                 <span>{tTypes(e.typeKey)}</span>
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold leading-none text-white tabular-nums">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold leading-none text-white tabular-nums">
                   {e.count}
                 </span>
               </Link>

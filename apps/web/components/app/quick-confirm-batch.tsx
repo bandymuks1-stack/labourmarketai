@@ -91,7 +91,7 @@ export function QuickConfirmBatch({
                 .map((o) => (
                   <li
                     key={o.entryId}
-                    className="rounded-md border border-ink-600 px-3 py-1.5 text-[11px] leading-relaxed text-text-secondary"
+                    className="rounded-md border border-ink-600 px-3 py-1.5 text-meta leading-relaxed text-text-secondary"
                   >
                     <span className="font-medium text-text-primary">
                       {nameById.get(o.entryId) ?? o.entryId.slice(0, 8)}
@@ -155,11 +155,11 @@ export function QuickConfirmBatch({
                       <span className="font-medium text-text-primary">
                         {e.workerName}
                       </span>
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-meta text-text-muted">
                         {new Date(e.createdAt).toLocaleDateString(locale)}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-text-secondary">
+                    <p className="mt-0.5 text-meta text-text-secondary">
                       {e.skills.length > 0
                         ? `${t("inbox.quick.willConfirm")} ${e.skills
                             .map((s) => s.name)
@@ -175,7 +175,7 @@ export function QuickConfirmBatch({
                           {flags.map((slug) => (
                             <span
                               key={slug}
-                              className="inline-flex items-center rounded-full border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning"
+                              className="inline-flex items-center rounded-full border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
                             >
                               {t(`inbox.quick.exception.${slug}`)}
                             </span>
@@ -203,7 +203,7 @@ export function QuickConfirmBatch({
             </ul>
             {exceptedCount > 0 ? (
               <p
-                className="mt-3 rounded-md border border-dashed border-state-warning/40 px-3 py-2 text-[11px] leading-relaxed text-text-secondary"
+                className="mt-3 rounded-md border border-dashed border-state-warning/40 px-3 py-2 text-meta leading-relaxed text-text-secondary"
                 data-testid="quick-batch-excluded-note"
               >
                 {t("inbox.quick.excludedNote", { count: unackedCount })}

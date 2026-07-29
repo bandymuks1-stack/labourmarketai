@@ -48,26 +48,26 @@ function DefectRow({ defect, onDone }: { defect: Defect; onDone: (m: string) => 
   return (
     <li className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3" data-testid="defect-row">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${SEVERITY_TONE[defect.severity]}`}>{t(`severity.${defect.severity}`)}</span>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t(`category.${defect.category}`)}</span>
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${SEVERITY_TONE[defect.severity]}`}>{t(`severity.${defect.severity}`)}</span>
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`category.${defect.category}`)}</span>
         <span className="min-w-0 flex-1 truncate text-sm text-text-primary" title={defect.description}>{defect.description}</span>
         {defect.status === STATUS_ACCEPTED && (
-          <span className="font-mono text-[10px] uppercase tracking-label text-state-success">{t(`status.${defect.status}`)}</span>
+          <span className="font-mono text-meta uppercase tracking-label text-state-success">{t(`status.${defect.status}`)}</span>
         )}
       </div>
-      {defect.location ? <span className="text-[11px] text-text-muted">{t("locationLabel")}: {defect.location}</span> : null}
+      {defect.location ? <span className="text-meta text-text-muted">{t("locationLabel")}: {defect.location}</span> : null}
 
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-[11px] text-text-secondary" htmlFor={`defect-status-${defect.id}`}>{t("statusLabel")}</label>
+        <label className="text-meta text-text-secondary" htmlFor={`defect-status-${defect.id}`}>{t("statusLabel")}</label>
         <select id={`defect-status-${defect.id}`} value={defect.status} disabled={pending}
           onChange={(e) => run(() => setDefectStatusAction({ defectId: defect.id, status: e.target.value }))}
           className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="defect-status">
           {DEFECT_STATUSES.map((s) => (<option key={s} value={s}>{t(`status.${s}`)}</option>))}
         </select>
         <button type="button" disabled={pending} onClick={() => setShowCorrection((v) => !v)}
-          className="rounded-md border border-ink-500 px-2 py-1 text-[11px] hover:border-brand-blue" data-testid="defect-correction-toggle">{t("addCorrection")}</button>
+          className="rounded-md border border-ink-500 px-2 py-1 text-meta hover:border-brand-blue" data-testid="defect-correction-toggle">{t("addCorrection")}</button>
         <button type="button" disabled={pending} onClick={() => run(() => deleteDefectAction({ defectId: defect.id }))}
-          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-muted hover:border-state-danger hover:text-state-danger" data-testid="defect-delete">{t("delete")}</button>
+          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger" data-testid="defect-delete">{t("delete")}</button>
       </div>
 
       {defect.corrections.length > 0 && (
@@ -128,7 +128,7 @@ export function ProjectDefectsPanel({ projectId, data }: { projectId: string; da
     <section className="card-border flex flex-col gap-4 p-5" data-testid="project-defects-panel">
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
       </header>
 
       {!data.applied ? (
@@ -144,7 +144,7 @@ export function ProjectDefectsPanel({ projectId, data }: { projectId: string; da
           )}
 
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("reportHeading")}</span>
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("reportHeading")}</span>
             <div className="flex flex-wrap items-center gap-2">
               <select aria-label={t("categoryLabel")} value={category} onChange={(e) => setCategory(e.target.value as DefectCategory)}
                 className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="defect-category">

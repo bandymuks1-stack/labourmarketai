@@ -53,7 +53,7 @@ export async function TrustInsightCard({
       data-kind={card.kind}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tc(card.titleCode)}
         </span>
         {card.status === "conflict" ? (
@@ -91,15 +91,15 @@ export async function TrustInsightCard({
                   pct: conflict.divergencePct,
                 })}
               </p>
-              <p className="font-mono text-[11px]">
+              <p className="font-mono text-meta">
                 {tc(`intelligence.sources.key.${conflict.a.sourceKey}`)}:{" "}
                 {conflict.a.valueNumeric} {conflict.a.unit}
               </p>
-              <p className="font-mono text-[11px]">
+              <p className="font-mono text-meta">
                 {tc(`intelligence.sources.key.${conflict.b.sourceKey}`)}:{" "}
                 {conflict.b.valueNumeric} {conflict.b.unit}
               </p>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-meta text-text-muted">
                 {t("conflict.note")}
               </p>
             </div>
@@ -123,14 +123,14 @@ export async function TrustInsightCard({
           {/* WHY there is no figure here (§5 — never "coming soon"). */}
           <p>{tc(card.unavailable.reasonCode)}</p>
           <p>
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("trustCard.unavailable.requirementTitle")}:
             </span>{" "}
             {tc(card.unavailable.requirementCode)}
           </p>
           {card.unavailable.disabledSourceKeys.length > 0 ? (
             <div className="flex flex-col gap-1">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("trustCard.unavailable.sourcesTitle")}:
               </span>
               <ul className="flex flex-col gap-1">
@@ -145,7 +145,7 @@ export async function TrustInsightCard({
                       <SourceStatusBadge
                         state={deriveSourceLifecycleState(profile)}
                       />
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-meta text-text-muted">
                         {tc(profile.displayNameCode)}
                       </span>
                     </li>
@@ -154,7 +154,7 @@ export async function TrustInsightCard({
               </ul>
             </div>
           ) : null}
-          <p className="text-[11px] text-text-muted">
+          <p className="text-meta text-text-muted">
             {tc(card.unavailable.afterActivationCode)}
           </p>
         </div>

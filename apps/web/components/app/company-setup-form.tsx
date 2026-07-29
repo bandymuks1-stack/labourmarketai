@@ -173,7 +173,7 @@ export function CompanySetupForm({
           className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-legal-name"
         />
-        <span className="text-[11px] text-text-muted">{labels.legalNameHelp}</span>
+        <span className="text-meta text-text-muted">{labels.legalNameHelp}</span>
       </label>
 
       {/* One canonical company profile. The field is the org's PRIMARY ACTIVITY,
@@ -193,7 +193,7 @@ export function CompanySetupForm({
             label: labels.companyTypeOptions[type],
           }))}
         />
-        <span className="text-[11px] text-text-muted">
+        <span className="text-meta text-text-muted">
           {labels.companyTypeHelp}
         </span>
       </fieldset>
@@ -236,7 +236,7 @@ export function CompanySetupForm({
           className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
           data-testid="company-setup-registration-code"
         />
-        <span className="text-[11px] text-text-muted">
+        <span className="text-meta text-text-muted">
           {labels.registrationCodeHelp}
         </span>
       </label>

@@ -66,7 +66,7 @@ export async function PermissionMatrixSection() {
                   <span className="mt-1 block text-xs leading-relaxed text-text-secondary">
                     {t(`rows.${row.key}.editNote`)}
                   </span>
-                  <span className="mt-2 block break-all font-mono text-[10px] leading-relaxed text-text-muted">
+                  <span className="mt-2 block break-all font-mono text-meta leading-relaxed text-text-muted">
                     {t("sourceLabel")}: {row.sources.join(" · ")}
                   </span>
                 </th>
@@ -102,7 +102,7 @@ export async function PermissionMatrixSection() {
               <span className="block text-sm leading-relaxed text-text-secondary">
                 {t(`messaging.rules.${rule.key}`)}
               </span>
-              <span className="mt-1 block break-all font-mono text-[10px] leading-relaxed text-text-muted">
+              <span className="mt-1 block break-all font-mono text-meta leading-relaxed text-text-muted">
                 {t("sourceLabel")}: {rule.sources.join(" · ")}
               </span>
             </li>

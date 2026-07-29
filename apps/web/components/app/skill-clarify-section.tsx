@@ -44,7 +44,7 @@ export async function SkillClarifySection() {
 
       <SkillClarifyForm labels={labels} />
 
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("listTitle")}
       </p>
       {read.kind === "needs-migration" ? (
@@ -62,7 +62,7 @@ export async function SkillClarifySection() {
               data-testid="candidate-skill-item"
             >
               <span className="text-sm font-semibold text-text-primary">{c.label}</span>
-              <span className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
                 {t("candidateBadge")}
               </span>
               {c.relatedTo && (

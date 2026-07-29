@@ -101,14 +101,14 @@ export function AgencyBridgeSection({
 
       {gated ? (
         <div className="rounded-md border border-state-warning bg-state-warning/10 p-3" data-testid="agency-bridge-gated">
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">{labels.gatedHeading}</p>
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">{labels.gatedHeading}</p>
           <p className="mt-1 text-xs text-text-secondary">{labels.gatedBody}</p>
         </div>
       ) : (
         <>
           {/* Connections + invite */}
           <div className="flex flex-col gap-2" data-testid="agency-bridge-connections">
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.connectionsHeading}</h3>
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.connectionsHeading}</h3>
             {connRows.length === 0 ? (
               <p className="text-xs text-text-muted">{labels.noConnections}</p>
             ) : (
@@ -116,7 +116,7 @@ export function AgencyBridgeSection({
                 {connRows.map((c) => (
                   <li key={c.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-connection-row">
                     <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{c.invitedEmail}</span>
-                    <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-muted">
+                    <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.statusLabels[c.status] ?? c.status}
                     </span>
                     {(c.status === "pending" || c.status === "active") && (
@@ -148,7 +148,7 @@ export function AgencyBridgeSection({
 
           {/* Shared requests + offer form */}
           <div className="flex flex-col gap-2" data-testid="agency-bridge-shared">
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.sharedHeading}</h3>
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.sharedHeading}</h3>
             {sharedRows.length === 0 ? (
               <p className="text-xs text-text-muted">{labels.noShared}</p>
             ) : (
@@ -187,7 +187,7 @@ export function AgencyBridgeSection({
 
           {/* Offer progress (derived review stage) */}
           <div className="flex flex-col gap-2" data-testid="agency-bridge-progress">
-            <h3 className="font-mono text-[10px] uppercase tracking-label text-text-muted">{labels.progressHeading}</h3>
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.progressHeading}</h3>
             {progressRows.length === 0 ? (
               <p className="text-xs text-text-muted">{labels.noOffers}</p>
             ) : (
@@ -196,7 +196,7 @@ export function AgencyBridgeSection({
                   void stageByWorker;
                   return (
                     <li key={p.offerId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-progress-row">
-                      <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-label ${TONE[reviewStageTone(p.reviewStage)]}`}>
+                      <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(p.reviewStage)]}`}>
                         {labels.stageLabels[p.reviewStage] ?? p.reviewStage}
                       </span>
                       <a href={`/${locale}/dashboard/company/scouting?request=${p.requestId}`}

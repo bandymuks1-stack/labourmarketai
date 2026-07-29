@@ -49,13 +49,13 @@ export function CvInputPanel({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/50 p-3">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("uploadLabel")}
           </span>
           {/* Real upload → server-side text extraction. The extracted text is
               fed into the SAME review/save path as pasted text. */}
           <CvImportUpload onExtracted={onPasteSubmit} disabled={pasting} />
-          <span className="text-[11px] leading-relaxed text-text-muted">
+          <span className="text-meta leading-relaxed text-text-muted">
             {t("uploadHint")}
           </span>
           {/* Image OCR — honest FUTURE seam (§18): the input exists, is
@@ -65,7 +65,7 @@ export function CvInputPanel({
             className="flex flex-col gap-1 rounded-md border border-dashed border-ink-600 p-2 opacity-70"
             data-testid="cv-image-ocr-seam"
           >
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {tImport("imageOcr.label")}
             </span>
             <input
@@ -75,7 +75,7 @@ export function CvInputPanel({
               aria-disabled="true"
               className="text-xs text-text-muted"
             />
-            <span className="text-[11px] leading-relaxed text-text-muted">
+            <span className="text-meta leading-relaxed text-text-muted">
               {tImport("imageOcr.note")}
             </span>
           </div>
@@ -84,7 +84,7 @@ export function CvInputPanel({
         <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/50 p-3">
           <label
             htmlFor={`${id}-paste`}
-            className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+            className="font-mono text-meta uppercase tracking-label text-text-muted"
           >
             {t("pasteLabel")}
           </label>
@@ -113,7 +113,7 @@ export function CvInputPanel({
         className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
         data-testid="cv-evidence-types"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("evidenceTitle")}
         </span>
         <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-text-secondary">
@@ -125,7 +125,7 @@ export function CvInputPanel({
         </ul>
       </div>
       <p
-        className="text-[11px] leading-relaxed text-text-muted"
+        className="text-meta leading-relaxed text-text-muted"
         data-testid="cv-privacy-note"
       >
         {t("privacyNote")}

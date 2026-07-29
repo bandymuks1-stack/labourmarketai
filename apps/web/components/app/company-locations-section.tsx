@@ -92,7 +92,7 @@ export function CompanyLocationsSection({
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
           data-testid="company-locations-gated"
         >
-          <p className="font-mono text-[10px] uppercase tracking-label text-state-warning">
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
             {labels.gatedHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">{labels.gatedBody}</p>
@@ -133,7 +133,7 @@ export function CompanyLocationsSection({
                           .filter(Boolean)
                           .join(", ")}
                       </span>
-                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-[9px] uppercase tracking-label text-text-secondary">
+                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                         {kindLabel(row.kind, labels)}
                       </span>
                     </span>

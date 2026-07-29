@@ -60,7 +60,7 @@ export function AdminJoinConversation({
         type="button"
         onClick={onJoin}
         disabled={pending}
-        className="rounded-md border border-brand-blue/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-label text-brand-blue hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+        className="rounded-md border border-brand-blue/40 px-3 py-1.5 font-mono text-meta uppercase tracking-label text-brand-blue hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
         data-testid="admin-join-conversation"
       >
         {pending ? t("joinPending") : t("joinLabel")}

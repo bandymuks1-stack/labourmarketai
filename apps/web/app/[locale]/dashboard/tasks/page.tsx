@@ -98,7 +98,7 @@ const TRANSITIONS: Record<
 };
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -186,7 +186,7 @@ export default async function TasksPage({
             {task.title}
           </p>
           <span
-            className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${priorityTone[task.priority]}`}
+            className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${priorityTone[task.priority]}`}
           >
             {t(`priority.${task.priority}`)}
           </span>
@@ -198,7 +198,7 @@ export default async function TasksPage({
           </p>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span>{t(`status.${task.status}`)}</span>
           {task.dueAt ? (
             <span className={overdue ? "text-state-danger" : undefined}>
@@ -344,7 +344,7 @@ export default async function TasksPage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -423,7 +423,7 @@ export default async function TasksPage({
         aria-label={t("views.label")}
         data-testid="tasks-view-switch"
       >
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("views.label")}
         </span>
         <Link
@@ -570,7 +570,7 @@ export default async function TasksPage({
                 className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/20 p-3"
                 data-testid={`tasks-board-column-${status}`}
               >
-                <h3 className="flex items-center justify-between font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                <h3 className="flex items-center justify-between font-mono text-meta uppercase tracking-label text-text-secondary">
                   {t(`status.${status}`)}
                   <span className="tabular-nums text-text-muted">
                     {column.length}
@@ -601,7 +601,7 @@ export default async function TasksPage({
               if (group.length === 0) return null;
               return (
                 <div key={status} className="flex flex-col gap-2">
-                  <h2 className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-secondary">
+                  <h2 className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
                     {t(`status.${status}`)}
                     <span className="tabular-nums text-text-muted">
                       {group.length}
@@ -641,7 +641,7 @@ export default async function TasksPage({
                 if (group.length === 0) return null;
                 return (
                   <div key={status} className="flex flex-col gap-2">
-                    <h2 className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+                    <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t(`status.${status}`)}
                     </h2>
                     <TaskList

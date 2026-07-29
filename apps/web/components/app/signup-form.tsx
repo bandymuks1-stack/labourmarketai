@@ -189,7 +189,7 @@ export function SignupForm() {
 
       <div className="flex items-center gap-3" aria-hidden>
         <span className="h-px flex-1 bg-ink-500" />
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("divider")}
         </span>
         <span className="h-px flex-1 bg-ink-500" />

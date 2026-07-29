@@ -3300,12 +3300,12 @@
       "helper": "Een cv helpt mensen je ervaring sneller te begrijpen en versterkt je werkkaart. Het blijft privé. Upload een PDF-, DOCX- of TXT-bestand, of plak de tekst.",
       "uploadLabel": "Cv-bestand uploaden",
       "uploadPick": "Cv-bestand kiezen",
-      "uploadFormats": "PDF, DOCX of TXT · max 5 MB",
+      "uploadFormats": "PDF, DOCX of TXT",
       "uploadHint": "We lezen de tekst en stellen vaardigheden voor die jij selecteert. Het bestand zelf wordt niet opgeslagen.",
       "uploadExtracting": "Lezen…",
       "uploadPicked": "Geselecteerd: {file}",
       "uploadErrorType": "Niet-ondersteund bestand. Gebruik PDF, DOCX of TXT.",
-      "uploadErrorSize": "Bestand te groot (max 5 MB).",
+      "uploadErrorSize": "Dit bestand kon niet worden verwerkt — het is veel groter dan een normaal cv. Stuur het cv-bestand zelf, of beschrijf je ervaring in de chat.",
       "uploadErrorEmpty": "Geen tekst gevonden in het bestand. Probeer een ander bestand of plak de tekst.",
       "uploadErrorAuth": "Log opnieuw in om een cv te importeren.",
       "uploadErrorFailed": "Kon het bestand niet lezen. Probeer een ander bestand of plak de tekst.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Werkfoto's en bestanden — laten zien welk werk je echt hebt gedaan.",
       "evidenceRecs": "Referenties — helpen je betrouwbaarheid te onderbouwen.",
       "evidenceLegal": "Identiteits- of juridische documenten — alleen gebruikt wanneer nodig voor aanname of een juridisch proces.",
-      "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag."
+      "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag.",
+      "uploadCostNote": "Een cv uploaden is gratis — er wordt geen LMC afgeschreven. Het systeem regelt de bestandsgrootte zelf."
     }
   },
   "live": {
@@ -5968,6 +5969,17 @@
     "sections": {
       "unread": "Ongelezen",
       "earlier": "Eerder"
+    },
+    "priority": {
+      "awaitingYou": "Wacht op jouw antwoord",
+      "overdue": "Wacht al lang",
+      "waiting": "Wacht {hours} u"
+    },
+    "quickReply": {
+      "open": "Hier antwoorden",
+      "placeholder": "Een kort antwoord…",
+      "send": "Verzenden",
+      "sent": "Antwoord verzonden."
     }
   },
   "orgTier1Warning": {
@@ -6763,7 +6775,17 @@
       "opportunityUnavailable": "Open aanvragen zijn nog niet beschikbaar voor je account, dus dit is niet gemeten.",
       "opportunityNoWorker": "Dit wordt gemeten zodra je een werknemersprofiel hebt.",
       "closestBasis": "Dichtstbij — {what}: komt overeen met {matched} van {required} gevraagde vaardigheden, {confirmed} met een registratie van een leidinggevende."
-    }
+    },
+    "documentsLabel": "Documenten",
+    "documentsValue": "{valid} geldig",
+    "documentsValueExpiring": "{valid} geldig · {expiring} verlopen binnenkort",
+    "reputationLabel": "Reactie van anderen",
+    "reputationValue": "{count, plural, one {# van je registraties gemarkeerd als juist} other {# van je registraties gemarkeerd als juist}}",
+    "reputationEmpty": "Niemand heeft nog iets in je registraties gemarkeerd.",
+    "reputationHint": "Alleen echte reacties van managers of klanten. Geen totaalscore voor een mens.",
+    "workHistoryLabel": "Werkgeschiedenis",
+    "workHistoryUnnamed": "Werkcontext",
+    "workHistoryCurrent": "nu"
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",
@@ -9012,6 +9034,18 @@
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",
       "journal": "Uitgevoerd werk vastleggen"
+    },
+    "meta": {
+      "workspace": "Werkruimte",
+      "project": "Project",
+      "place": "Plaats",
+      "organization": "Organisatie",
+      "counterpart": "Persoon",
+      "unit": {
+        "hours": "u",
+        "minutes": "min",
+        "days": "d"
+      }
     }
   },
   "workforcePlanning": {
@@ -11202,6 +11236,25 @@
         "languages": "talen",
         "salary": "tariefverwachting"
       }
+    },
+    "messages": {
+      "blocked": "Berichten konden nu niet worden gelezen.",
+      "empty": "Nog geen berichten.",
+      "noneWaiting": "Geen bericht wacht op jouw antwoord.",
+      "intro": "{count, plural, one {# bericht wacht op jouw antwoord} other {# berichten wachten op jouw antwoord}}:",
+      "awaiting": "Wacht op jouw antwoord",
+      "overdue": "Wacht al lang",
+      "waiting": "{hours} u",
+      "someone": "De ander",
+      "attachmentOnly": "(alleen bijlage)",
+      "draftPlaceholder": "Schrijf je antwoord…",
+      "review": "Controleren voor verzenden",
+      "openThread": "Gesprek openen",
+      "confirmTitle": "Dit wordt verzonden:",
+      "confirmSend": "Verzenden",
+      "editAgain": "Aanpassen",
+      "sending": "Verzenden…",
+      "sent": "Antwoord verzonden."
     }
   },
   "landing": {

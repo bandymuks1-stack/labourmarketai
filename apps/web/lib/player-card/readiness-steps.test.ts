@@ -18,6 +18,8 @@ const EMPTY: WorkerPlayerCard = {
   professionSlug: null,
   latestEvidenceAt: null,
   workHistory: [],
+  locationCountry: null,
+  documents: null,
 };
 
 describe("readinessNextSteps — every unmet signal gets a real next step", () => {

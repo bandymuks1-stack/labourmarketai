@@ -86,6 +86,108 @@ export interface PlanningItem {
   /** Route of the REAL source object — never a planning-local detail page. */
   readonly href: string;
   readonly roleContext: PlanningRoleContext;
+
+  // ── §7.1 THE FULL AGREED FIELD SET (owner visual acceptance) ──────────
+  // Every field below is OPTIONAL BY CONTRACT and null when the source row
+  // genuinely does not carry it. The calendar renders what exists and says
+  // nothing about what does not — a null is never padded with an example
+  // (doctrine §7 honesty), and no field here is derived by guessing.
+
+  /** Clock time of day, "HH:MM" (24h, source timezone as stored). Null for
+   *  day-precision sources (project bands, task due days). */
+  readonly startTime: string | null;
+  /** Real duration, already humanized by the source (e.g. "6 val.", "3 d.").
+   *  Null when the source records no length. */
+  readonly duration: string | null;
+  /** The WORK CONTEXT the row belongs to — the workspace/organization name
+   *  the person was acting in. Null for personal-space rows. */
+  readonly workspace: string | null;
+  /** Project title when the row belongs to a project. */
+  readonly project: string | null;
+  /** Physical place: site name, city or country — whatever the row states. */
+  readonly place: string | null;
+  /** The other real person on the row (worker on a booking, task assignee).
+   *  Only ever a counterpart the caller may already see. */
+  readonly counterpart: string | null;
+  /** The related organization (company that proposed a booking, project org). */
+  readonly organization: string | null;
+}
+
+/**
+ * Clock time "HH:MM" (UTC) from a real timestamp, or null when the value is
+ * absent / unparsable / midnight-exact. Midnight is excluded on purpose:
+ * a date-only value stored as `…T00:00:00Z` would otherwise render as a
+ * fabricated "00:00 appointment".
+ */
+export function clockTime(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const ms = Date.parse(value);
+  if (!Number.isFinite(ms)) return null;
+  const d = new Date(ms);
+  const hh = d.getUTCHours();
+  const mm = d.getUTCMinutes();
+  if (hh === 0 && mm === 0) return null;
+  const p = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  return `${p(hh)}:${p(mm)}`;
+}
+
+/**
+ * INCLUSIVE day-span length of a real date band, as a bare count of days
+ * (the UI appends the localized unit). Returns null for a single day or an
+ * unknown end — a one-day row states its date, not a "1 day" duration.
+ * Pure UTC arithmetic, no date library.
+ */
+export function daySpanDays(
+  startIso: string | null,
+  endIso: string | null,
+): string | null {
+  if (!startIso || !endIso || endIso <= startIso) return null;
+  const a = Date.parse(`${startIso}T00:00:00Z`);
+  const b = Date.parse(`${endIso}T00:00:00Z`);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  const days = Math.round((b - a) / 86_400_000) + 1; // inclusive
+  return days > 1 ? String(days) : null;
+}
+
+/** Builder for the optional §7.1 fields — keeps every reader honest by
+ *  defaulting the whole set to null, so a source can only ever ADD what it
+ *  really has. */
+export function planningMeta(
+  partial: Partial<
+    Pick<
+      PlanningItem,
+      | "startTime"
+      | "duration"
+      | "workspace"
+      | "project"
+      | "place"
+      | "counterpart"
+      | "organization"
+    >
+  > = {},
+): Pick<
+  PlanningItem,
+  | "startTime"
+  | "duration"
+  | "workspace"
+  | "project"
+  | "place"
+  | "counterpart"
+  | "organization"
+> {
+  const clean = (v: string | null | undefined): string | null => {
+    const t = typeof v === "string" ? v.trim() : "";
+    return t.length > 0 ? t : null;
+  };
+  return {
+    startTime: clean(partial.startTime),
+    duration: clean(partial.duration),
+    workspace: clean(partial.workspace),
+    project: clean(partial.project),
+    place: clean(partial.place),
+    counterpart: clean(partial.counterpart),
+    organization: clean(partial.organization),
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -658,6 +760,10 @@ export function projectFinanceItem(
   const overdue =
     FINANCE_UNPAID.has(record.status) && dueDay !== null && dueDay < todayIso;
   const status = overdue ? "overdue" : record.status;
+  // The finance row subset deliberately carries no place, no organization
+  // and no third-party name (the calendar projection drops money and
+  // third-party identity by design), so every §7.1 field is absent here.
+  const meta = planningMeta();
   return {
     id: `finance:${record.id}`,
     sourceType: "finance",
@@ -670,6 +776,7 @@ export function projectFinanceItem(
     statusKey: statusKeyForSource("finance", status),
     href: hrefForSource("finance", record.id),
     roleContext: "mine",
+    ...meta,
   };
 }
 
@@ -729,6 +836,9 @@ export function projectSentInvitationItem(
   row: SentInvitationPlanningInput,
 ): PlanningItem {
   const name = row.invitedName?.trim() ? row.invitedName : row.invitedEmail;
+  // The invited person IS the counterpart on this row (the caller invited
+  // them, so the name is already theirs to see).
+  const meta = planningMeta({ counterpart: name });
   return {
     id: `invitation:${row.id}`,
     sourceType: "invitation",
@@ -741,6 +851,7 @@ export function projectSentInvitationItem(
     statusKey: statusKeyForSource("invitation", row.status),
     href: hrefForSource("invitation", row.id),
     roleContext: "outgoing",
+    ...meta,
   };
 }
 
@@ -758,6 +869,11 @@ export function projectIncomingInvitationItem(
         : row.inviterName?.trim()
           ? row.inviterName
           : null;
+  const meta = planningMeta({
+    organization: row.organizationName,
+    project: row.projectTitle,
+    counterpart: row.inviterName,
+  });
   return {
     id: `invitation:${row.id}`,
     sourceType: "invitation",
@@ -770,6 +886,7 @@ export function projectIncomingInvitationItem(
     statusKey: statusKeyForSource("invitation", "pending"),
     href: hrefForSource("invitation", row.id),
     roleContext: "incoming",
+    ...meta,
   };
 }
 
@@ -823,6 +940,12 @@ export function projectAbsenceItem(
   }
   const start = toIsoDay(row.startDate);
   if (!start) return null;
+  // An absence is a whole-day band on the person's OWN plan: it carries no
+  // place, no project and no counterpart, and the calendar says nothing it
+  // does not know. The day span IS the duration.
+  const meta = planningMeta({
+    duration: daySpanDays(start, toIsoDay(row.endDate)),
+  });
   return {
     id: `absence:${row.id}`,
     sourceType: "absence",
@@ -835,6 +958,7 @@ export function projectAbsenceItem(
     statusKey: statusKeyForSource("absence", row.status),
     href: hrefForSource("absence", row.id),
     roleContext: "mine",
+    ...meta,
   };
 }
 
@@ -875,6 +999,11 @@ export function projectStageItem(
   const start = toIsoDay(row.actualStart) ?? toIsoDay(row.plannedStart);
   const end = toIsoDay(row.actualEnd) ?? toIsoDay(row.plannedEnd);
   if (!start && !end) return null;
+  // A stage belongs to a real project; the band itself is its duration.
+  const meta = planningMeta({
+    project: row.projectTitle,
+    duration: daySpanDays(start ?? end, end),
+  });
   return {
     id: `stage:${row.id}`,
     sourceType: "stage",
@@ -889,5 +1018,6 @@ export function projectStageItem(
     // planning-local detail page.
     href: `/dashboard/projects/${row.projectId}/operations`,
     roleContext: "managed",
+    ...meta,
   };
 }

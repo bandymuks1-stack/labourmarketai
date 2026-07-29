@@ -77,7 +77,7 @@ export default async function AdminPipelinePage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-pipeline">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -117,7 +117,7 @@ export default async function AdminPipelinePage({
                 stage === s ? "border-brand-blue" : ""
               }`}
             >
-              <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t(`stages.${s}`)}
               </p>
               <p className="mt-1 font-display text-2xl font-bold text-text-primary tabular-nums">
@@ -128,7 +128,7 @@ export default async function AdminPipelinePage({
         </div>
         {/* Per-source breakdown — real fetched counts, honest states. */}
         <div
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted"
           data-testid="pipeline-source-breakdown"
         >
           {overview.sources.map((s) => (
@@ -138,7 +138,7 @@ export default async function AdminPipelinePage({
             </span>
           ))}
         </div>
-        <p className="text-[11px] leading-relaxed text-text-muted">
+        <p className="text-meta leading-relaxed text-text-muted">
           {t("windowNote")}
         </p>
       </section>
@@ -165,7 +165,7 @@ export default async function AdminPipelinePage({
         data-testid="pipeline-filters"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("filters.sourceLabel")}
           </span>
           <a
@@ -198,7 +198,7 @@ export default async function AdminPipelinePage({
           {source ? <input type="hidden" name="source" value={source} /> : null}
           <label
             htmlFor="pipeline-q"
-            className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+            className="font-mono text-meta uppercase tracking-label text-text-muted"
           >
             {t("filters.searchLabel")}
           </label>
@@ -255,12 +255,12 @@ export default async function AdminPipelinePage({
                     {item.title.trim().length > 0 ? item.title : "—"}
                   </span>
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-sm border border-ink-700/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+                    <span className="rounded-sm border border-ink-700/60 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                       {t(`sources.${item.sourceType}`)}
                     </span>
                     {overview.duplicateIds.has(item.id) ? (
                       <span
-                        className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-warning"
+                        className="rounded-sm border border-state-warning/40 bg-state-warning/5 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning"
                         data-testid={`pipeline-duplicate-${item.id}`}
                       >
                         {t("duplicateChip")}
@@ -269,17 +269,17 @@ export default async function AdminPipelinePage({
                   </span>
                 </div>
                 <span className="flex flex-col items-end gap-0.5">
-                  <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-brand-blue">
+                  <span className="rounded-sm border border-brand-blue/40 bg-brand-blue/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
                     {t(`stages.${item.stage}`)}
                   </span>
                   {/* The stored lifecycle value VERBATIM — the underlying
                       truth, never hidden behind the mapped stage. */}
-                  <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("storedStatusLabel")}: {item.storedStatus ?? "—"}
                   </span>
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted">
                 <span>
                   {t("createdLabel")}: {item.createdAt.slice(0, 10)}
                 </span>

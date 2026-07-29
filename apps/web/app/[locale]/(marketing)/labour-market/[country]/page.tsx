@@ -34,7 +34,7 @@ export default async function CountryPage({
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <Link
         href="/labour-market"
-        className="font-mono text-[11px] uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+        className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
       >
         ← {t("countryBackToIndex")}
       </Link>

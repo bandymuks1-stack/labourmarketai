@@ -45,11 +45,11 @@ export function SupplyDemandChart() {
       className="relative card-border p-5"
     >
       <header className="mb-3 flex items-center justify-between">
-        <h3 className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-text-muted">
+        <h3 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <span className="live-dot" aria-hidden />
           {t("panel.supplyDemand")}
         </h3>
-        <span className="inline-flex items-center gap-1.5 rounded-sm border border-state-amber/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber">
+        <span className="inline-flex items-center gap-1.5 rounded-sm border border-state-amber/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
           {t("demandLed")}
         </span>
       </header>
@@ -99,7 +99,7 @@ export function SupplyDemandChart() {
         />
       </svg>
 
-      <div className="mt-3 flex items-center justify-between text-[11px]">
+      <div className="mt-3 flex items-center justify-between text-meta">
         <div className="flex items-center gap-4 text-text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden className="h-2 w-2 rounded-full bg-brand-cyan" />
@@ -110,7 +110,7 @@ export function SupplyDemandChart() {
             {t("legend.demand")}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("autoUpdate")}
         </span>
       </div>

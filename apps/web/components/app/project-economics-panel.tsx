@@ -93,7 +93,7 @@ export function ProjectEconomicsPanel({
     <section className="card-border flex flex-col gap-4 p-5" data-testid="project-economics-panel">
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
-        <p className="text-[11px] leading-relaxed text-text-muted">{t("honestNote")}</p>
+        <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
       </header>
 
       {!data.applied ? (
@@ -103,19 +103,19 @@ export function ProjectEconomicsPanel({
           {/* Variance summary */}
           <div className="flex flex-wrap gap-4 rounded-md border border-ink-600 bg-ink-800/40 p-3" data-testid="economics-summary">
             <div className="flex flex-col">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("baseline")}</span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("baseline")}</span>
               <span className="text-sm text-text-primary" data-testid="economics-baseline">
                 {data.hasBaseline ? eur(data.baselineCents) : t("noBaseline")}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("actual")}</span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("actual")}</span>
               <span className="text-sm text-text-primary" data-testid="economics-actual">
                 {data.actualCents === null ? t("actualUnavailable") : eur(data.actualCents)}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("variance")}</span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("variance")}</span>
               <span className={`text-sm font-semibold ${STATE_TONE[data.state]}`} data-testid="economics-variance">
                 {data.varianceCents === null
                   ? "—"
@@ -123,7 +123,7 @@ export function ProjectEconomicsPanel({
               </span>
             </div>
           </div>
-          <p className="text-[11px] leading-relaxed text-text-muted">{t("actualNote")}</p>
+          <p className="text-meta leading-relaxed text-text-muted">{t("actualNote")}</p>
 
           {/* Budget lines */}
           {data.lines.length === 0 ? (
@@ -134,18 +134,18 @@ export function ProjectEconomicsPanel({
                 <li key={l.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 p-3" data-testid="economics-line">
                   <span className="text-sm text-text-primary">{t(`categories.${l.category}`)}</span>
                   <span className="font-mono text-sm text-text-secondary">{eur(l.plannedAmountCents)}</span>
-                  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${l.status === "approved" ? "border-state-success/40 text-state-success" : "border-ink-500 text-text-muted"}`}>
+                  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${l.status === "approved" ? "border-state-success/40 text-state-success" : "border-ink-500 text-text-muted"}`}>
                     {t(`budgetStatus.${l.status}`)}
                   </span>
                   <div className="ml-auto flex gap-2">
                     <button type="button" disabled={pending}
                       onClick={() => toggleApprove(l.id, l.status === "approved" ? "draft" : "approved")}
-                      className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                      className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-brand-blue"
                       data-testid="economics-toggle-approve">
                       {l.status === "approved" ? t("unapprove") : t("approve")}
                     </button>
                     <button type="button" disabled={pending} onClick={() => remove(l.id)}
-                      className="rounded-md border border-ink-500 px-2 py-1 text-[11px] text-text-muted hover:border-state-danger hover:text-state-danger"
+                      className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger"
                       data-testid="economics-delete">
                       {t("delete")}
                     </button>
@@ -157,7 +157,7 @@ export function ProjectEconomicsPanel({
 
           {/* Add / edit a budget line */}
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
-            <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">{t("addHeading")}</span>
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("addHeading")}</span>
             <div className="flex flex-wrap items-center gap-2">
               <select aria-label={t("categoryLabel")} value={category} disabled={pending}
                 onChange={(e) => setCategory(e.target.value as BudgetCategory)}

@@ -71,14 +71,14 @@ export function MobileSheet({
         )}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-ink-600 bg-ink-900/95 px-4 py-3 backdrop-blur">
-          <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {title}
           </p>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             ✕
           </button>

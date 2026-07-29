@@ -65,7 +65,7 @@ export async function ExplainabilityDrawer({
   ];
 
   const DT_CLASS =
-    "font-mono text-[10px] uppercase tracking-label text-text-muted";
+    "font-mono text-meta uppercase tracking-label text-text-muted";
 
   return (
     <details
@@ -119,7 +119,7 @@ export async function ExplainabilityDrawer({
           <dd className="flex flex-wrap items-center gap-2 pt-1">
             <OriginBadge originKind={originKind} />
             {keys.length > 0 ? (
-              <span className="text-[11px] text-text-muted">
+              <span className="text-meta text-text-muted">
                 {keys.map((key) => tc(`intelligence.sources.key.${key}`)).join(" · ")}
               </span>
             ) : null}
@@ -146,7 +146,7 @@ export async function ExplainabilityDrawer({
           <dt className={DT_CLASS}>{t("explain.observations")}</dt>
           <dd data-testid="drawer-observation-refs">
             {report && report.observationRefs.length > 0 ? (
-              <ul className="list-inside list-disc break-all font-mono text-[11px]">
+              <ul className="list-inside list-disc break-all font-mono text-meta">
                 {report.observationRefs.map((ref) => (
                   <li key={ref}>{ref}</li>
                 ))}
@@ -183,7 +183,7 @@ export async function ExplainabilityDrawer({
             {timeline ? (
               <IntelligenceTimeline timeline={timeline} locale={locale} />
             ) : (
-              <span className="text-[11px] text-text-muted">
+              <span className="text-meta text-text-muted">
                 {t("drawer.timelineUnavailable")}
               </span>
             )}

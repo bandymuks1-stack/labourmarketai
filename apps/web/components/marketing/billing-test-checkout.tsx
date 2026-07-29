@@ -29,7 +29,7 @@ export async function BillingTestCheckout() {
     >
       <div className="card-border flex flex-col gap-3 p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-sm border border-state-amber/50 bg-state-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-label text-state-amber">
+          <span className="rounded-sm border border-state-amber/50 bg-state-amber/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
             {t("badge")}
           </span>
           <h2 className="font-display text-lg font-semibold text-text-primary">
@@ -40,7 +40,7 @@ export async function BillingTestCheckout() {
         <div className="flex flex-wrap gap-4">
           {paidPlans.map((p) => (
             <div key={p.slug} className="flex flex-col gap-1">
-              <span className="font-mono text-[11px] uppercase tracking-label text-text-muted">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {p.slug}
               </span>
               <TestCheckoutButton

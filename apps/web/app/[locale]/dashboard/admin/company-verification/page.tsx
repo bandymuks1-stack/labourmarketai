@@ -72,7 +72,7 @@ export default async function AdminCompanyVerificationPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-company-verification">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-[10px] uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -119,12 +119,12 @@ export default async function AdminCompanyVerificationPage({
                     <span className="text-sm font-semibold text-text-primary">
                       {r.legalName ?? "—"}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("user")}: {r.userEmail ?? r.userName ?? "—"}
                     </span>
                   </div>
                   <span
-                    className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${STATUS_TONE[r.verificationStatus]}`}
+                    className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[r.verificationStatus]}`}
                     data-testid={`company-verification-status-${r.id}`}
                   >
                     {t(`status.${r.verificationStatus}`)}
@@ -146,7 +146,7 @@ export default async function AdminCompanyVerificationPage({
                 </dl>
 
                 {r.verificationNote ? (
-                  <p className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-[11px] text-text-secondary">
+                  <p className="rounded-md border border-ink-600 bg-ink-800/30 px-2 py-1 text-meta text-text-secondary">
                     <span className="font-mono uppercase tracking-label text-text-muted">
                       {t("fields.note")}:
                     </span>{" "}

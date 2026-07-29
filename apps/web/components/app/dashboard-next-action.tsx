@@ -27,7 +27,7 @@ export async function DashboardNextAction({
       className="card-border wow-card flex flex-col gap-3 p-6 sm:p-7"
       data-testid="dashboard-next-action"
     >
-      <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-orange">
+      <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-orange">
         <span className="live-dot signal-dot" aria-hidden />
         {t("eyebrow")}
       </span>

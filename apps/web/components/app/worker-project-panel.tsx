@@ -49,7 +49,7 @@ export async function WorkerProjectPanel({
       data-testid="worker-project-view"
     >
       <header className="flex flex-col gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
           {t("eyebrow")}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -59,21 +59,21 @@ export async function WorkerProjectPanel({
           <span
             className={
               active
-                ? "inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-state-success"
-                : "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary"
+                ? "inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-success"
+                : "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
             }
             data-testid="worker-project-assignment-status"
           >
             {active ? t("assignmentActive") : t("assignmentEnded")}
           </span>
           {place ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
               {place}
             </span>
           ) : null}
           {project?.startDate ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {project.startDate}
               {project.endDate ? ` – ${project.endDate}` : ""}
@@ -113,7 +113,7 @@ export async function WorkerProjectPanel({
       {/* Own photo evidence on this project — session RLS shows exactly the
           photos this worker attached to their own journal entries. */}
       <section className="flex flex-col gap-2" id="project-gallery">
-        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Images className="h-3.5 w-3.5" aria-hidden />
           {t("galleryTitle")}
         </h2>

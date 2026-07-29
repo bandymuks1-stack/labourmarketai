@@ -60,7 +60,7 @@ export function WorkerInstructionCard({
         <span className="text-xs font-semibold text-text-primary">
           {instruction.authorName ?? "—"}
         </span>
-        <span className="font-mono text-[10px] text-text-muted">
+        <span className="font-mono text-meta text-text-muted">
           {new Date(instruction.createdAt).toLocaleString()}
         </span>
       </div>
@@ -68,7 +68,7 @@ export function WorkerInstructionCard({
       {/* Primary reading surface: real translation if present, else honest state. */}
       {hasTranslation ? (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+          <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
             {labels.autoTranslation}
           </span>
           <p className="text-sm leading-relaxed text-text-primary">
@@ -77,7 +77,7 @@ export function WorkerInstructionCard({
         </div>
       ) : (
         <p
-          className="text-[11px] leading-relaxed text-text-muted"
+          className="text-meta leading-relaxed text-text-muted"
           data-testid="instruction-translation-unavailable"
         >
           {labels.translationUnavailable}
@@ -99,7 +99,7 @@ export function WorkerInstructionCard({
           className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/50 p-3"
           data-testid="instruction-original"
         >
-          <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.originalLabel}
             {instruction.originalLanguage
               ? ` · ${labels.originalLanguagePrefix} ${instruction.originalLanguage.toUpperCase()}`
@@ -111,7 +111,7 @@ export function WorkerInstructionCard({
         </div>
       )}
 
-      <p className="text-[11px] leading-relaxed text-text-muted">
+      <p className="text-meta leading-relaxed text-text-muted">
         {labels.safetyNote}
       </p>
 
@@ -150,7 +150,7 @@ export function WorkerInstructionCard({
             {labels.clarifyViewThread} →
           </Link>
         )}
-        <span className="text-[11px] text-text-muted">{labels.helpLine}</span>
+        <span className="text-meta text-text-muted">{labels.helpLine}</span>
       </div>
       {clarifyFailed && (
         <p

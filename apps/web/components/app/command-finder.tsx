@@ -322,7 +322,7 @@ export function CommandFinder() {
       <div className="flex items-center justify-between gap-2">
         <label
           htmlFor="command-finder-input"
-          className="font-mono text-[10px] uppercase tracking-label text-text-muted"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
         >
           {t("title")}
         </label>
@@ -331,7 +331,7 @@ export function CommandFinder() {
         <span
           aria-hidden
           data-testid="command-finder-shortcut-hint"
-          className="hidden rounded border border-ink-500 bg-ink-800/60 px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex"
+          className="hidden rounded border border-ink-500 bg-ink-800/60 px-1.5 py-0.5 font-mono text-meta text-text-muted sm:inline-flex"
         >
           {t("shortcutHint")}
         </span>
@@ -391,7 +391,7 @@ export function CommandFinder() {
       {/* Recent commands — shown only while the input is empty. Ids only. */}
       {recentEntries.length > 0 && (
         <nav aria-label={t("recentLabel")}>
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <p className="mb-1 font-mono text-meta uppercase tracking-label text-text-muted">
             {t("recentLabel")}
           </p>
           <ul
@@ -409,7 +409,7 @@ export function CommandFinder() {
                   <span className="min-w-0 truncate font-medium">
                     {entry.labels[locale]}
                   </span>
-                  <span className="shrink-0 font-mono text-[10px] text-text-muted">
+                  <span className="shrink-0 font-mono text-meta text-text-muted">
                     {entry.route}
                   </span>
                 </Link>
@@ -437,7 +437,7 @@ export function CommandFinder() {
                   <span className="min-w-0 truncate font-medium">
                     {entry.labels[locale]}
                   </span>
-                  <span className="shrink-0 font-mono text-[10px] text-text-muted">
+                  <span className="shrink-0 font-mono text-meta text-text-muted">
                     {entry.route}
                   </span>
                 </Link>
@@ -471,7 +471,7 @@ export function CommandFinder() {
           <ul className="flex flex-col gap-2">
             {objectGroups.map((group) => (
               <li key={group.source} className="flex flex-col gap-1">
-                <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+                <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`groups.${group.source}`)}
                 </p>
                 <ul className="flex flex-col gap-1">
@@ -485,7 +485,7 @@ export function CommandFinder() {
                         <span className="min-w-0 truncate font-medium">
                           {r.label}
                         </span>
-                        <span className="shrink-0 font-mono text-[10px] text-text-muted">
+                        <span className="shrink-0 font-mono text-meta text-text-muted">
                           {t(`groups.${group.source}`)}
                         </span>
                       </Link>

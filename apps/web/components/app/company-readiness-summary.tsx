@@ -37,7 +37,7 @@ export async function CompanyReadinessSummary({
           {t("title")}
         </h2>
         <span
-          className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label ${TONE[r.status]}`}
+          className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[r.status]}`}
         >
           {t(`status.${r.status}` as never)}
         </span>
@@ -49,7 +49,7 @@ export async function CompanyReadinessSummary({
           {r.missing.map((m) => (
             <li
               key={m}
-              className="rounded-md border border-ink-500 px-2 py-0.5 text-[11px] text-text-secondary"
+              className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
             >
               {t(`fields.${m}` as never)}
             </li>
@@ -59,7 +59,7 @@ export async function CompanyReadinessSummary({
         <p className="text-xs text-state-success">{t("allSet")}</p>
       )}
 
-      <p className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {r.verified ? t("verified") : t("notVerified")}
       </p>
     </section>

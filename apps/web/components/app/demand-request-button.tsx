@@ -353,51 +353,51 @@ export function DemandRequestButton({
       className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-ink-600 bg-ink-800/40 p-4 text-sm"
       data-testid="demand-summary-list"
     >
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t(`${key}.roleLabel`)}
       </dt>
       <dd className="text-text-primary">{role.trim() || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t(`${key}.descLabel`)}
       </dt>
       <dd className="whitespace-pre-wrap text-text-primary" data-testid="demand-summary-description">
         {description.trim()}
       </dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("form.locationLabel")}
       </dt>
       <dd className="text-text-primary">{location.trim() || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("form.skillsLabel")}
       </dt>
       <dd className="text-text-primary">{skills.trim() || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("form.urgencyLabel")}
       </dt>
       <dd className="text-text-primary">{urgencyLabel}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("profession")}
       </dt>
       <dd className="text-text-primary">{workTypeLabel || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("country")}
       </dt>
       <dd className="text-text-primary">
         {country ? tlm(`countryNames.${country}`) : "—"}
       </dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("numberOfWorkers")}
       </dt>
       <dd className="text-text-primary">{teamSize.trim() || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("accommodation")}
       </dt>
       <dd className="text-text-primary">{accommodationLabel || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("transportOffer")}
       </dt>
       <dd className="text-text-primary">{transportLabel || "—"}</dd>
-      <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {tc("requiredTools")}
       </dt>
       <dd className="text-text-primary" data-testid="demand-summary-required-tools">
@@ -407,7 +407,7 @@ export function DemandRequestButton({
       </dd>
       {notes.trim() && (
         <>
-          <dt className="font-mono text-[10px] uppercase tracking-label text-text-muted">
+          <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("form.notesLabel")}
           </dt>
           <dd className="whitespace-pre-wrap text-text-primary">{notes.trim()}</dd>
@@ -469,7 +469,7 @@ export function DemandRequestButton({
           return (
             <li key={title} className="flex min-w-0 items-center gap-2">
               <span
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] font-semibold ${stateClass}`}
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border font-mono text-meta font-semibold ${stateClass}`}
                 aria-current={n === step ? "step" : undefined}
               >
                 {n}

@@ -19,6 +19,9 @@ export async function buildPlayerCardLabels(
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tWorkCard = await getTranslations("auth.dashboard.workCard");
+  // Country names come from the ONE canonical country catalogue the rest of
+  // the product reads (never a second list).
+  const tlm = await getTranslations("labourMarket");
 
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
@@ -55,6 +58,37 @@ export async function buildPlayerCardLabels(
           ),
         })
       : null,
+    // §5.2 LOCATION — the country NAME for the worker's own stated code.
+    // An unknown code renders the raw code rather than a guessed country.
+    locationName: card.locationCountry
+      ? tlm.has(`countryNames.${card.locationCountry}`)
+        ? (tlm(`countryNames.${card.locationCountry}`) as string)
+        : card.locationCountry
+      : null,
+    // §5.2 DOCUMENTS — real counts only; absent when the surface is not
+    // available for this account (the card then shows no documents block).
+    documentsLabel: card.documents ? t("documentsLabel") : null,
+    documentsValue: card.documents
+      ? card.documents.expiring > 0
+        ? t("documentsValueExpiring", {
+            valid: card.documents.total,
+            expiring: card.documents.expiring,
+          })
+        : t("documentsValue", { valid: card.documents.total })
+      : null,
+    // §5.2 REPUTATION — what other people really confirmed. No universal
+    // score, no medal tier: a count of real confirmations, or the honest
+    // "nothing confirmed yet" line.
+    reputationLabel: t("reputationLabel"),
+    reputationValue:
+      card.managerConfirmations > 0
+        ? t("reputationValue", { count: card.managerConfirmations })
+        : null,
+    reputationEmpty: t("reputationEmpty"),
+    reputationHint: t("reputationHint"),
+    workHistoryLabel: t("workHistoryLabel"),
+    workHistoryUnnamed: t("workHistoryUnnamed"),
+    workHistoryCurrent: t("workHistoryCurrent"),
     verifiedTitle: t("verifiedTitle"),
     verifiedEmpty: t("verifiedEmpty"),
     journalSupportedLabel: t("journalSupportedLabel"),

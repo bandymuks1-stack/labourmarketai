@@ -127,7 +127,7 @@ export default async function PersonPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="person-page">
       <header className="flex flex-col gap-3">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
           <UserRound className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
@@ -159,25 +159,25 @@ export default async function PersonPage({
         </div>
         <div className="flex flex-wrap gap-2">
           {available ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-state-success">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-success">
               {t("available")}
             </span>
           ) : null}
           {worker.available_from ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {t("availableFrom", { date: worker.available_from as string })}
             </span>
           ) : null}
           {worker.current_location_country ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
               {worker.current_location_country as string}
             </span>
           ) : null}
           {typeof worker.experience_years === "number" &&
           worker.experience_years > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-label text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               {t("experienceYears", { n: worker.experience_years })}
             </span>
           ) : null}
@@ -191,7 +191,7 @@ export default async function PersonPage({
       </header>
 
       <section className="flex flex-col gap-3">
-        <h2 className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-label text-text-muted">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
           {t("skillsTitle")} · {shown.length}
         </h2>
@@ -211,7 +211,7 @@ export default async function PersonPage({
                 >
                   <span className="text-sm text-text-primary">{s.label}</span>
                   <span
-                    className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-label ${chip.cls}`}
+                    className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${chip.cls}`}
                   >
                     {chip.label}
                   </span>
@@ -220,7 +220,7 @@ export default async function PersonPage({
             })}
           </ul>
         )}
-        <p className="inline-flex items-center gap-2 text-[11px] leading-relaxed text-text-muted">
+        <p className="inline-flex items-center gap-2 text-meta leading-relaxed text-text-muted">
           <NotebookPen className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {t("skillsLegend")}
         </p>

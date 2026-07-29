@@ -61,7 +61,7 @@ export function MarketMapOwnerReadiness({
           <Link
             href={"/dashboard/profile" as "/dashboard"}
             data-testid="readiness-add"
-            className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
           >
             {t("addAction")}
             <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -87,7 +87,7 @@ export function MarketMapOwnerReadiness({
             </div>
 
             {hasMobility ? (
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted" data-testid="readiness-mobility">
+              <div className="flex flex-wrap items-center gap-2 text-meta text-text-muted" data-testid="readiness-mobility">
                 <Plane className="h-3.5 w-3.5 text-brand-blue" strokeWidth={1.75} aria-hidden />
                 {availability.currentCountry && (
                   <span className="inline-flex items-center gap-1">
@@ -110,7 +110,7 @@ export function MarketMapOwnerReadiness({
               <Link
                 href={"/dashboard/profile" as "/dashboard"}
                 data-testid="readiness-mobility-add"
-                className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+                className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
               >
                 {t("mobilityAdd")}
                 <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -132,7 +132,7 @@ export function MarketMapOwnerReadiness({
           <Link
             href={"/dashboard/profile" as "/dashboard"}
             data-testid="capabilities-add"
-            className="inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-brand-blue hover:text-brand-cyan"
+            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
           >
             {tc("addAction")}
             <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -146,7 +146,7 @@ export function MarketMapOwnerReadiness({
                   key={s}
                   data-testid={`capabilities-count-${s}`}
                   data-count={capabilities.counts[s]}
-                  className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-label ${STATUS_TONE[s]}`}
+                  className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[s]}`}
                 >
                   {tc(`status.${s}`)}: {capabilities.counts[s]}
                 </span>
@@ -158,13 +158,13 @@ export function MarketMapOwnerReadiness({
                 <li
                   key={c.skillId}
                   data-testid={`capability-chip-${c.status}`}
-                  className={`rounded-full border px-2 py-0.5 text-[11px] ${STATUS_TONE[c.status]}`}
+                  className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_TONE[c.status]}`}
                 >
                   {skillName(c)}
                 </li>
               ))}
             </ul>
-            <p className="text-[11px] leading-relaxed text-text-muted">{tc("legend")}</p>
+            <p className="text-meta leading-relaxed text-text-muted">{tc("legend")}</p>
           </div>
         )}
       </div>
