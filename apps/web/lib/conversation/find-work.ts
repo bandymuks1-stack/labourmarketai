@@ -5,6 +5,7 @@ import "server-only";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -62,11 +63,19 @@ function fitKey(status: JobRecommendation["status"]): string {
 
 export type { ChatEmployerMatch, FindWorkResult } from "./find-work-contract";
 
-export async function findWorkForChat(): Promise<FindWorkResult> {
+export async function findWorkForChat(
+  /**
+   * Canonical discovery filters (W4). The AI reads them out of the person's own
+   * sentence and passes them straight through; this adapter still decides
+   * nothing — the use case applies them inside the ONE ranking path.
+   */
+  filters?: DiscoveryFilterState,
+): Promise<FindWorkResult> {
   const t = await getTranslations("conversation.findWork");
   const view = await loadWorkerOpportunityMatches({
     surface: "conversation",
     limit: CONVERSATION_FIND_WORK_LIMIT,
+    filters,
   });
 
   if (view.kind !== "ready") {

@@ -134,7 +134,10 @@ describe("W3 — a new entity type is a registration", () => {
   it("the registry is the only place a type is bound to a resolver", () => {
     const src = read(RESOLVERS);
     expect(src).toMatch(/registerEntityContextResolver\("job", resolveJobContext\)/);
-    expect(REGISTERED_ENTITY_TYPES).toEqual(["job"]);
+    // W4 added `project` — one registration line, no panel change. The exact
+    // list is not pinned (the world is meant to grow); what is pinned is that
+    // growth happens HERE and nowhere else, plus the two-way sync below.
+    expect(REGISTERED_ENTITY_TYPES).toContain("job");
   });
 
   it("the allowlist and the registrations stay in sync, both ways", () => {

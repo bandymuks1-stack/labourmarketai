@@ -101,7 +101,10 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1100 at W3 context-panel (+48: the `workspace.panel` copy lands in
   // all 11 locales; lt/en/ru/nl/de translated (de:0 / nl:0 ratchet intact),
   // da [EN] until human translation).
-  da: 1100,
+  // MEASURED 1178 at W4 ai-workspace (+78: the `workspace.ai` workflow copy +
+  // `workspace.project` panel captions land in all 11 locales; lt/en/ru/nl/de
+  // translated (de:0 / nl:0 ratchet intact), da [EN] until human translation).
+  da: 1178,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

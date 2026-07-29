@@ -34,6 +34,20 @@ import {
 } from "@/lib/assistant/transcript";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
+import {
+  AiWorkspaceBridge,
+  type AiWorldStateHandle,
+} from "@/components/app/world-state/ai-workspace-bridge";
+import {
+  runContextReadback,
+  runFigures,
+  runFindWork,
+  runFindWorkers,
+  runOpenProject,
+  runRecentJournal,
+  runSkillGap,
+} from "@/lib/ai-workspace/workflows";
+import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
@@ -188,6 +202,10 @@ export function ConversationChat({
    */
   const t = useTranslations("conversation.chat");
   const tSummary = useTranslations("conversation.summary");
+  /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
+  const tAi = useTranslations("workspace.ai");
+  /** The AI's hand on World State, published by the bridge inside the provider. */
+  const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
   const firstName = useMemo(() => {
     const full = auth?.profile?.full_name?.trim();
@@ -375,6 +393,73 @@ export function ConversationChat({
       { id: "profile", label: labels.chipProfile },
     ],
     [labels.chipPrefs, labels.chipProfile],
+  );
+
+  /**
+   * THE AI WORKSPACE (W4). A stated goal runs a real workflow: the canonical
+   * read happens server-side, the answer arrives with its explanation, and an
+   * "open this" outcome writes World State instead of navigating.
+   *
+   * Every result renders through the EXISTING message + chip mechanisms — the
+   * assistant grew new abilities, not a new UI.
+   */
+  const runWorkflow = useCallback(
+    (workflow: () => Promise<WorkflowResult>) => {
+      setTyping(true);
+      workflow()
+        .then((res) => {
+          setTyping(false);
+          // The WHY is part of the answer, never a footnote the caller may
+          // forget: the contract makes it required and this renders it.
+          const why = res.explanation.why;
+          const unsupported = res.explanation.unsupported ?? [];
+          const tail = [
+            why,
+            ...unsupported.map((d) => tAi("unsupportedDimension", { dimension: tAi(`dimension.${d}` as never) })),
+          ].filter(Boolean);
+
+          if (res.kind === "matches") {
+            const applied = res.appliedFilters
+              .map((f) => `${f.label}: ${f.matchedText}`)
+              .join(" · ");
+            if (applied) assistant(applied);
+            if (res.result.kind === "matches") {
+              pushMessage({
+                id: nid(),
+                role: "assistant",
+                kind: "employer-match",
+                intro: res.result.intro,
+                matches: res.result.matches,
+                locale,
+                interestLabels: res.result.interestLabels,
+              });
+              assistant(tail.join("\n"));
+            } else {
+              assistant([res.result.message, ...tail].join("\n"), searchChips);
+            }
+            return;
+          }
+
+          if (res.kind === "open-entity") {
+            // The AI changes World State. It does not change the page.
+            worldRef.current?.openEntity(res.ref);
+            assistant([res.text, ...tail].join("\n"));
+            return;
+          }
+
+          assistant(
+            [res.text, ...tail].join("\n"),
+            res.kind === "answer" && res.chips
+              ? res.chips.map((c) => ({ id: c.id, label: c.label }))
+              : undefined,
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.fallback, starterChips);
+        });
+    },
+    [assistant, pushMessage, locale, searchChips, starterChips, labels.fallback, tAi],
   );
 
   /** Real employer/opportunity search — its own typing lifecycle (async). */
@@ -668,11 +753,28 @@ export function ConversationChat({
     (text: string) => {
       user(text);
       const { intent } = classifyIntent(text);
-      // These run a real async server read with their own typing cue.
-      if (intent === "find-work") {
-        startFindWork();
+
+      /**
+       * AI-workspace goals (W4). Each one is a real workflow over canonical
+       * reads; "find-work" now goes through it too, because the sentence may
+       * carry World State ("…in Germany") that the plain search would drop on
+       * the floor.
+       */
+      const WORKFLOWS: Partial<Record<typeof intent, () => Promise<WorkflowResult>>> = {
+        "find-work": () => runFindWork(text),
+        "skill-gap": () => runSkillGap(),
+        "journal-recent": () => runRecentJournal(),
+        figures: () => runFigures(),
+        "open-project": () => runOpenProject(text),
+        "find-workers": () => runFindWorkers(),
+        context: () => runContextReadback(),
+      };
+      const workflow = WORKFLOWS[intent];
+      if (workflow) {
+        runWorkflow(workflow);
         return;
       }
+      // These run a real async server read with their own typing cue.
       if (intent === "profile" || intent === "next-action" || intent === "resume") {
         startProfileSummary(
           intent === "profile" ? "profile" : intent === "next-action" ? "next" : "resume",
@@ -762,6 +864,9 @@ export function ConversationChat({
      * either part.
      */
     <WorldStateProvider avatarId={auth0?.user?.id ?? null}>
+      {/* Publishes open/close into `worldRef` so the send handler — which sits
+          above this provider — can let the AI change World State (W4). */}
+      <AiWorkspaceBridge bind={worldRef} />
       <div className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`} data-testid="conversation-chat">
         <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
         {/* Column on phones (panel docks under the composer, collapsed until
