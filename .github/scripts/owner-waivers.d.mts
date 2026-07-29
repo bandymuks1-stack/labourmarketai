@@ -57,6 +57,8 @@ export interface WaiverContext {
   headSha: string | null;
   /** ISO date of the run — injected so the expiry rule is testable. */
   today: string;
+  /** The run's changed files. `null` = unknown → treated as touching everything. */
+  changedFiles?: readonly string[] | null;
 }
 
 export interface WaiverDecision {

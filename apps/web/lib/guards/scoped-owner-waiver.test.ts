@@ -36,6 +36,7 @@ const BOTH = [MAP_FINDING, WAIVER_FINDING];
 
 /** A context that satisfies every condition — the baseline the tests break. */
 const ok = (over: Record<string, unknown> = {}) => ({
+  changedFiles: ["apps/web/components/app/world-state/context-panel.tsx"],
   pullRequest: 909,
   headSha: null,
   today: "2026-07-29",
@@ -160,6 +161,45 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
     const v = evaluateFindings(BOTH, ok(), unapproved);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
+  });
+});
+
+describe("scoped waiver — pre-existing debt vs a new change", () => {
+  const PANEL = "apps/web/components/app/world-state/context-panel.tsx";
+
+  it("an UNRELATED PR is not blamed for debt already in the base branch", () => {
+    // After the waived PRs merge, the gate reports this finding on EVERY run,
+    // because it validates the registry as a whole. Blaming a PR that never
+    // opened the file would make the merged waiver a permanent repo-wide block
+    // — the exact failure the mechanism exists to remove.
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/something-else.ts"] }),
+    );
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but a NEW PR that EDITS the waived file is blocked", () => {
+    // This is the line that keeps the exception from being inherited: touch the
+    // waived file and you must be one of the listed PRs.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: [PANEL] }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+    expect(v.blockingFindings[0].decision.detail).toMatch(/MODIFIES/);
+  });
+
+  it("unknown changed files are treated as touching everything (cautious)", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: null }));
+    expect(v.pass).toBe(false);
+  });
+
+  it("expiry still kills it, even for an unrelated PR", () => {
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/x.ts"], today: "2027-01-01" }),
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
   });
 });
 

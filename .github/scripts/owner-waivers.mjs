@@ -104,22 +104,38 @@ export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
         `${w.id} expired on ${w.expiresAt} — remove it and resolve ${w.resolvedBy}`,
       );
     }
-    if (ctx.pullRequest === null) {
-      // Not a PR run. The only non-PR case a waiver may cover is the branch the
-      // waived PRs merged INTO — the same finding, in its new home.
-      const branches = w.postMergeBranches ?? [];
-      if (!ctx.branch || !branches.includes(ctx.branch)) {
-        return no(
-          "pr-not-covered",
-          `${w.id} covers PR ${w.pullRequests.join(", ")}${
-            branches.length > 0 ? ` and branch ${branches.join(", ")}` : ""
-          }; this run is ${ctx.branch ? `branch ${ctx.branch}` : "not a PR"}`,
-        );
-      }
-    } else if (!w.pullRequests.includes(ctx.pullRequest)) {
+    // A run may carry this finding for exactly three reasons.
+    const branches = w.postMergeBranches ?? [];
+    const isListedPr = ctx.pullRequest !== null && w.pullRequests.includes(ctx.pullRequest);
+    const isPostMergeBranch = ctx.pullRequest === null && !!ctx.branch && branches.includes(ctx.branch);
+    // (3) PRE-EXISTING DEBT. Once a waived PR merges, the violation lives in the
+    //     base branch and the gate — which validates the registry as a whole,
+    //     not just the diff — reports it on EVERY later PR. Holding an unrelated
+    //     PR responsible for a finding its diff never touched would make the
+    //     merged waiver a permanent block on the whole repository, which is the
+    //     very failure this mechanism exists to remove. So: if the PR does not
+    //     touch any waived file, the finding is not its doing.
+    //
+    //     This does NOT let a new change inherit the exception. The subset rule
+    //     still blocks any NEW finding, and the moment a PR does touch a waived
+    //     file it must be one of the listed PRs.
+    const touchesWaivedFile =
+      ctx.changedFiles === null ||
+      w.files.some((f) => ctx.changedFiles.some((c) => c.endsWith(f)));
+    const isUnrelatedPr = ctx.pullRequest !== null && !isListedPr && !touchesWaivedFile;
+
+    if (!isListedPr && !isPostMergeBranch && !isUnrelatedPr) {
       return no(
         "pr-not-covered",
-        `${w.id} covers PR ${w.pullRequests.join(", ")}; this run is ${ctx.pullRequest}`,
+        `${w.id} covers PR ${w.pullRequests.join(", ")}${
+          branches.length > 0 ? ` and branch ${branches.join(", ")}` : ""
+        }; this run is ${
+          ctx.pullRequest !== null
+            ? `PR ${ctx.pullRequest}, and it MODIFIES ${w.files.join(", ")}`
+            : ctx.branch
+              ? `branch ${ctx.branch}`
+              : "not a PR"
+        }`,
       );
     }
     if (
@@ -171,5 +187,8 @@ export function waiverContextFromEnv(env = process.env, now = new Date()) {
     branch,
     headSha: env.PR_HEAD_SHA || null,
     today: (env.GATE_TODAY || now.toISOString()).slice(0, 10),
+    // Filled by the gate from its own diff. `null` means "unknown", which is
+    // treated as "touches everything" — the cautious direction.
+    changedFiles: null,
   };
 }
