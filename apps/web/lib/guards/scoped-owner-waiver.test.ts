@@ -34,6 +34,32 @@ const WAIVER_FINDING = {
 };
 const BOTH = [MAP_FINDING, WAIVER_FINDING];
 
+/**
+ * SYNTHETIC fixture. The LIVE record was deleted in W6 (the map shipped, the
+ * answer became a real yes) — the mechanism itself stays proven on this
+ * fixture so a future owner ruling can add a record with confidence.
+ */
+const FIXTURE_WAIVER = {
+  id: "test-waiver",
+  axioms: ["A-01", "A-09"],
+  scope: "W3 (Context Panel) + W4 (AI Workspace)",
+  pullRequests: [909, 912],
+  approvedHeadShas: [] as string[],
+  postMergeBranches: ["main"],
+  files: ["components/app/world-state/context-panel.tsx"],
+  expectedFindings: [
+    { code: "not_reflected_on_map", file: "components/app/world-state/context-panel.tsx" },
+    { code: "transitional_waiver_in_use", file: "components/app/world-state/context-panel.tsx" },
+  ],
+  reason:
+    "Synthetic copy of the retired W3/W4 record, kept so every constraint of the mechanism stays executable and provably enforced.",
+  resolvedBy: "W6-map-slice",
+  expiresAt: "2026-10-31",
+  owner: "Owner ruling 2026-07-29 — scoped transitional waiver (fixture copy).",
+};
+const FIXTURES = [FIXTURE_WAIVER];
+
+
 /** A context that satisfies every condition — the baseline the tests break. */
 const ok = (over: Record<string, unknown> = {}) => ({
   changedFiles: ["apps/web/components/app/world-state/context-panel.tsx"],
@@ -45,14 +71,14 @@ const ok = (over: Record<string, unknown> = {}) => ({
 
 describe("scoped waiver — the approved cases pass", () => {
   it("the exact #909 (W3) finding set is allowed", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 909 }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 909 }), FIXTURES);
     expect(v.pass).toBe(true);
     expect(v.blockingFindings).toHaveLength(0);
     expect(v.waivedFindings).toHaveLength(2);
   });
 
   it("the exact #912 (W4) finding set is allowed", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 912 }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 912 }), FIXTURES);
     expect(v.pass).toBe(true);
   });
 
@@ -61,24 +87,24 @@ describe("scoped waiver — the approved cases pass", () => {
     // the debt simply moved from the PR into the branch. It stays bounded:
     // every other constraint (file, code, axiom, subset, expiry) still holds,
     // and only `main` is listed.
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main" }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main" }), FIXTURES);
     expect(v.pass).toBe(true);
   });
 
   it("…but main is still blocked once the waiver expires", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main", today: "2027-01-01" }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main", today: "2027-01-01" }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("expired");
   });
 
   it("…and a NEW violation on main still blocks", () => {
     const extra = { code: "second_dashboard", axiom: "A-01", what: "apps/web/x/page.tsx" };
-    const v = evaluateFindings([...BOTH, extra], ok({ pullRequest: null, branch: "main" }));
+    const v = evaluateFindings([...BOTH, extra], ok({ pullRequest: null, branch: "main" }), FIXTURES);
     expect(v.pass).toBe(false);
   });
 
   it("the decision names owner, scope, expiry and what removes it", () => {
-    const d = decideWaiver(MAP_FINDING, ok());
+    const d = decideWaiver(MAP_FINDING, ok(), FIXTURES);
     expect(d.waived).toBe(true);
     // `waived: true` guarantees a waiver; TS cannot see that through the JS.
     const w = d.waiver!;
@@ -98,25 +124,25 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
   });
 
   it("wrong PR → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 999 }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 999 }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
   it("not a PR and not a covered branch → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: null }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: null }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
   it("a push to some OTHER branch → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "feat/anything" }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "feat/anything" }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
   it("wrong head SHA → blocked (when the waiver pins SHAs)", () => {
-    const pinned = [{ ...SCOPED_OWNER_WAIVERS[0], approvedHeadShas: ["abc1234"] }];
+    const pinned = [{ ...FIXTURE_WAIVER, approvedHeadShas: ["abc1234"] }];
     const bad = evaluateFindings(BOTH, ok({ headSha: "deadbee" }), pinned);
     expect(bad.pass).toBe(false);
     expect(bad.blockingFindings[0].decision.rejection).toBe("sha-not-covered");
@@ -125,7 +151,7 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
   });
 
   it("expired → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ today: "2027-01-01" }));
+    const v = evaluateFindings(BOTH, ok({ today: "2027-01-01" }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("expired");
     expect(v.blockingFindings[0].decision.detail).toMatch(/W6-map-slice/);
@@ -138,26 +164,26 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
       axiom: "A-01",
       what: "apps/web/app/[locale]/dashboard/other/page.tsx",
     };
-    const v = evaluateFindings([...BOTH, extra], ok());
+    const v = evaluateFindings([...BOTH, extra], ok(), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings.map((b) => b.finding.code)).toEqual(["second_dashboard"]);
   });
 
   it("the SAME code on a DIFFERENT file → blocked", () => {
     const elsewhere = { ...MAP_FINDING, what: "components/app/world-state/other-panel.tsx" };
-    const v = evaluateFindings([elsewhere], ok());
+    const v = evaluateFindings([elsewhere], ok(), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
   });
 
   it("an axiom outside A-01 / A-09 → blocked", () => {
-    const v = evaluateFindings([{ ...MAP_FINDING, axiom: "A-06" }], ok());
+    const v = evaluateFindings([{ ...MAP_FINDING, axiom: "A-06" }], ok(), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("axiom-not-waivable");
   });
 
   it("a waiver with no recorded owner approval → blocked", () => {
-    const unapproved = [{ ...SCOPED_OWNER_WAIVERS[0], owner: "" }];
+    const unapproved = [{ ...FIXTURE_WAIVER, owner: "" }];
     const v = evaluateFindings(BOTH, ok(), unapproved);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
@@ -175,6 +201,7 @@ describe("scoped waiver — pre-existing debt vs a new change", () => {
     const v = evaluateFindings(
       BOTH,
       ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/something-else.ts"] }),
+      FIXTURES,
     );
     expect(v.pass).toBe(true);
   });
@@ -182,14 +209,14 @@ describe("scoped waiver — pre-existing debt vs a new change", () => {
   it("…but a NEW PR that EDITS the waived file is blocked", () => {
     // This is the line that keeps the exception from being inherited: touch the
     // waived file and you must be one of the listed PRs.
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: [PANEL] }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: [PANEL] }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
     expect(v.blockingFindings[0].decision.detail).toMatch(/MODIFIES/);
   });
 
   it("unknown changed files are treated as touching everything (cautious)", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: null }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: null }), FIXTURES);
     expect(v.pass).toBe(false);
   });
 
@@ -197,6 +224,7 @@ describe("scoped waiver — pre-existing debt vs a new change", () => {
     const v = evaluateFindings(
       BOTH,
       ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/x.ts"], today: "2027-01-01" }),
+      FIXTURES,
     );
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("expired");
@@ -207,27 +235,25 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
   it("the W5 pull request is not covered", () => {
     // #915 is W5. Its number is not in the waiver, so even the identical
     // finding on the identical file is blocked.
-    const v = evaluateFindings(BOTH, ok({ pullRequest: 915 }));
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 915 }), FIXTURES);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("the waiver names ONLY the two W3/W4 pull requests", () => {
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(1);
-    expect(SCOPED_OWNER_WAIVERS[0].pullRequests).toEqual([909, 912]);
-    expect(SCOPED_OWNER_WAIVERS[0].files).toEqual([
-      "components/app/world-state/context-panel.tsx",
-    ]);
+  it("the LIVE waiver list is EMPTY — W6 removed the last record", () => {
+    // "waiver negali likti vien todėl, kad CI žalias" — the record died with
+    // the debt. Any future entry is a new owner ruling, not a leftover.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(0);
   });
 
   it("a future W6 map fix makes the waiver unnecessary, not permanent", () => {
     // When the panel IS reflected on the map, the finding stops being produced;
     // with no finding there is nothing to waive, and the expiry then removes
     // the record itself.
-    const v = evaluateFindings([], ok());
+    const v = evaluateFindings([], ok(), FIXTURES);
     expect(v.pass).toBe(true);
     expect(v.waivedFindings).toHaveLength(0);
-    expect(SCOPED_OWNER_WAIVERS[0].resolvedBy).toBe("W6-map-slice");
+    expect(FIXTURE_WAIVER.resolvedBy).toBe("W6-map-slice");
   });
 });
 

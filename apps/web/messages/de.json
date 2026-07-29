@@ -11086,7 +11086,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# Aufgabe ist überfällig} other {# Aufgaben sind überfällig}} — einen Blick wert.",
       "suggestLogToday": "📝 Du hast heute eine aktive Buchung, aber noch keinen Journaleintrag — erfasse deine Arbeit.",
       "suggestReserveTomorrow": "📅 Morgen steht eine Frist an und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren.",
-      "suggestReserveTomorrowNamed": "📅 Morgen ist die Frist für „{label}“ und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren."
+      "suggestReserveTomorrowNamed": "📅 Morgen ist die Frist für „{label}“ und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren.",
+      "briefNewMatches": "{count} neue Chancen passen zu deinem Profil.",
+      "briefMatches": "{count} sichtbare Chancen passen zu deinem Profil.",
+      "briefConflicts": "Dein Kalender hat {count} überlappende Verpflichtungen.",
+      "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
+      "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
+      "briefProfileGap": "Deinem Profil fehlt noch: {step}."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11281,6 +11287,83 @@
       "employer": "Ich bin Arbeitgeber",
       "agency": "Ich vertrete eine Agentur",
       "partner": "Ich möchte Partner werden"
+    },
+    "loop": {
+      "chip": "Beispielsequenz — echter Produktablauf",
+      "windowTitle": "LabourMarket AI — Gespräch",
+      "userSays": "Heute Ziegelwände auf der Baustelle in Vilnius gemauert, 8 Stunden.",
+      "entrySaved": "Journaleintrag gespeichert · #D-1042",
+      "entryLine": "Mauern · Baustelle Vilnius · 8 Std. · zu deiner Arbeitshistorie hinzugefügt.",
+      "skillSignal": "Fähigkeitssignal verstärkt",
+      "skillLine": "Mauern — jetzt durch 12 Journaleinträge belegt.",
+      "matchFound": "Neue passende Chance",
+      "matchLine": "Ein verifiziertes Unternehmen in Kaunas braucht 3 Maurer.",
+      "matchWhy": "Warum du: 4 von 5 geforderten Fähigkeiten, 3 durch dein Journal belegt."
+    },
+    "chain": {
+      "eyebrow": "Wie die Plattform wirklich funktioniert",
+      "title": "Arbeit wird Beleg. Beleg wird deine nächste Chance.",
+      "journalNote": "Das Arbeitsjournal ist der Unterschied: jeder erfasste Tag wird überprüfbare Berufsgeschichte — deine nächste Chance wird mit dem begründet, was du wirklich getan hast, nicht mit dem, was ein Lebenslauf behauptet.",
+      "steps": {
+        "need": {
+          "title": "Ein Arbeitsbedarf",
+          "body": "Ein Unternehmen nennt echten Bedarf — Rolle, Ort, Zeit."
+        },
+        "person": {
+          "title": "Die richtige Person",
+          "body": "Matching läuft über Fähigkeiten und Verfügbarkeit, mit Gründen."
+        },
+        "work": {
+          "title": "Echte Arbeit",
+          "body": "Du arbeitest. Die Plattform steht nicht im Weg."
+        },
+        "journal": {
+          "title": "Das Arbeitsjournal",
+          "body": "Du erfasst, was geschah — das wird deine Geschichte."
+        },
+        "skills": {
+          "title": "Belegte Fähigkeiten",
+          "body": "Fähigkeiten wachsen aus Einträgen, nicht aus Behauptungen."
+        },
+        "next": {
+          "title": "Eine bessere nächste Chance",
+          "body": "Der nächste Match wird mit deinen Belegen begründet."
+        }
+      }
+    },
+    "moment": {
+      "chip": "Konzeptbeispiel — Beispielzahlen",
+      "title": "Eine Stadt. Ein Bedarf. Eine sichtbare Antwort.",
+      "body": "Die Marktkarte ist keine Dekoration: an einem Ort erscheint ein Bedarf, passende Menschen leuchten auf, Verfügbarkeit engt auf die ein, die wirklich kommen können.",
+      "p1": "Vilnius braucht 3 Fachkräfte",
+      "p2": "8 passende Menschen gefunden",
+      "p3": "5 im genannten Zeitraum verfügbar",
+      "svgLabel": "Stilisierte Stadtkarte mit einem Bedarfspunkt und passenden Menschen",
+      "legend": {
+        "need": "Der Bedarf",
+        "match": "Passende Menschen",
+        "avail": "Jetzt verfügbar"
+      }
+    },
+    "proof": {
+      "eyebrow": "Vertrauen, ehrlich getrennt",
+      "title": "Ein Fakt, eine belegte Fähigkeit und eine Meinung sind drei verschiedene Dinge.",
+      "fact": {
+        "label": "Arbeitsfakt",
+        "title": "Was wirklich geschah",
+        "body": "Ein nicht überschreibbarer Journaleintrag: Datum, Ort, geleistete Arbeit. Er kann nicht still umgeschrieben werden."
+      },
+      "skill": {
+        "label": "Belegte Fähigkeit",
+        "title": "Was die Einträge stützen",
+        "body": "Eine Fähigkeit gilt als belegt, wenn deine eigenen Journaleinträge — und, wo vorhanden, der Eintrag einer Führungskraft — dahinterstehen."
+      },
+      "opinion": {
+        "label": "Meinung",
+        "title": "Was jemand empfand",
+        "body": "Ein subjektives +1 oder −1 mit Text. Als Meinung gezeigt, getrennt von Fakten; eine Serie von Negativen ist ein Prüfsignal, nie ein Urteil."
+      },
+      "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     }
   },
   "workspace": {
@@ -11426,6 +11509,13 @@
       "recNeedsEvidence": "{count} zugewiesene Personen haben noch keine Arbeitsnachweise.",
       "recBasisCounters": "Aus den Zuweisungsdaten dieses Projekts.",
       "untitled": "(Projekt ohne Titel)"
+    },
+    "map": {
+      "regionLabel": "Arbeitsbereichskarte",
+      "legendEntities": "Echte Chancen und Projekte, je Ort gruppiert",
+      "approx": "ungefährer Ort",
+      "unmapped": "{count} ohne bestimmbaren Ort",
+      "unmappedOnly": "{count} Einträge haben noch keinen bestimmbaren Ort, es gibt nichts zu zeichnen."
     }
   }
 }

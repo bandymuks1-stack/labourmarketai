@@ -10,7 +10,6 @@ import { NotificationPanel } from "@/components/app/notification-panel";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
-import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { WorkspaceChip } from "./workspace-chip";
 import { iconControl } from "./icon-scale";
 
@@ -85,7 +84,6 @@ export function ConversationHeader({
 }) {
   const active = useActiveHref();
   const auth = useAuthOptional();
-  const initials = personMonogram(auth?.profile?.full_name ?? null);
   const label = (key: (typeof NAV)[number]["key"]) => nav[key];
   // Reuses the account menu's existing theme copy — no new i18n keys.
   const tTheme = useTranslations("auth.dashboard.account.theme");
@@ -98,7 +96,13 @@ export function ConversationHeader({
         {/* The ACTIVE WORKSPACE, always visible beside the conversation —
             the user must never have to guess which work context they are in
             (real-user workflow rebuild W1). */}
-        {auth && <WorkspaceChip />}
+        {/* min-w-0 so the chip TRUNCATES on a phone instead of ramming into
+            the right-side controls (owner-visible mobile overlap bug). */}
+        {auth && (
+          <span className="flex min-w-0">
+            <WorkspaceChip />
+          </span>
+        )}
       </span>
 
       {/* Desktop simple-mode tabs. Human message threads and the AI chat are
@@ -115,45 +119,36 @@ export function ConversationHeader({
         ))}
       </nav>
 
-      <div className="flex items-center gap-1">
-        {/* Real chrome renders only inside the authenticated app; the
-          provider-less dev preview keeps a lean header for screenshots. */}
-        {/* The SAME universal command search the Advanced header mounts — one
-            registry, one deterministic matcher, one role filter, one shortcut.
-            It was previously only reachable from Advanced pages, so the
-            chat-first home had no way to reach the other 40 destinations
-            without leaving for the module navbar first. */}
+      <div className="flex flex-none items-center gap-1">
+        {/* TOP-BAR CLEANUP (owner ruling 2026-07-29, §B). The bar used to
+            carry SEVEN right-side controls, two of which were avatars — the
+            profile-initials circle AND the account-menu circle showed the
+            same person twice. Now every element has one clear job:
+              search (desktop) · locale (desktop) · theme (desktop, guarded
+              light-first entry) · notifications · Advanced (desktop) · ONE
+              avatar = the account menu, which carries Profile inside it.
+            On a PHONE the bar is just: workspace chip · bell · avatar —
+            nothing can overlap at 360px. */}
         {auth && (
           <HeaderSearch
             testId="chat-command-search"
-            className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+            className={`size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary ${mobile ? "hidden" : "hidden md:inline-flex"}`}
           />
         )}
         {auth && <LocaleSwitcher className={mobile ? "hidden" : "hidden md:flex"} />}
-        {/* Appearance is a first-class control, not a setting buried two clicks
-            deep in the avatar menu: light is now the default, so the way BACK to
-            dark has to be visible on the product's primary screen. Still also
-            present in AccountMenu — this is a second entry point, not a second
-            implementation. */}
+        {/* Appearance stays a first-class DESKTOP control (light is the
+            default, so the way back to dark lives on the primary screen —
+            ux-2-0 light-first guard). On phones it lives in the account menu
+            only: five circles did not fit 360px and the workspace chip was
+            overlapping the search button. */}
         {auth && (
           <ThemeToggleIcon
             testId="chat-theme-toggle"
             labels={{ toDark: tTheme("toDark"), toLight: tTheme("toLight") }}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+            className={`size-11 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary ${mobile ? "hidden" : "hidden md:inline-flex"}`}
           />
         )}
         {auth && <NotificationPanel />}
-        <Link
-          href="/dashboard/profile"
-          aria-label={nav.profile}
-          aria-current={active === "/dashboard/profile" ? "page" : undefined}
-          data-testid="chat-profile-link"
-          className={`flex size-11 items-center justify-center rounded-full border text-text-secondary hover:border-brand-blue hover:text-brand-blue ${
-            active === "/dashboard/profile" ? "border-brand-blue text-brand-blue" : "border-ink-500"
-          }`}
-        >
-          <span className="text-support font-semibold">{initials}</span>
-        </Link>
         <Link
           href="/dashboard/advanced"
           data-testid="chat-advanced-link"
@@ -162,6 +157,8 @@ export function ConversationHeader({
           <SlidersHorizontal {...iconControl()} aria-hidden />
           {nav.advanced}
         </Link>
+        {/* THE one avatar. Profile moved INSIDE the menu (account-menu.tsx),
+            so the person appears in the bar exactly once. */}
         {auth && <AccountMenu />}
       </div>
     </header>

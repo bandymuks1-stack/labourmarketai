@@ -44,10 +44,11 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
     const page = read("app/[locale]/(marketing)/page.tsx");
     for (const sym of [
       "PlayerCardShowcase",
-      // PR-H global landing: the hero map is the WORLD edition of the same
-      // cinematic baseline (LiveWorldMap superseded LiveMap; enforced by
-      // lib/guards/global-landing.test.ts).
-      "LiveWorldMap",
+      // Landing rebuild (owner directive 2026-07-29): the hero visual is the
+      // LIVE PRODUCT DEMO — the same cinematic baseline, now showing the
+      // product's real core loop instead of a static map (LiveProductDemo
+      // superseded LiveWorldMap; enforced by lib/guards/global-landing.test.ts).
+      "LiveProductDemo",
       "MarketPulse",
       "DraftBoard",
       "text-gradient-accent",

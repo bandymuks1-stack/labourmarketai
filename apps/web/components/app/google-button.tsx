@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateOauthTraceId,
@@ -9,44 +9,12 @@ import {
   rememberOauthTraceId,
   withOauthTraceId,
 } from "@/lib/auth/oauth-trace";
-import { sha256Hex } from "@/lib/auth/google-id-token";
 import { markSignupPending, recordEvent, trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   captureFirstTouchAttribution,
   getFirstTouchAttribution,
 } from "@/lib/telemetry/attribution";
-
-/** Public OAuth client id — inlined at build time. When set, the
- *  first-party Google Identity Services (GIS) ID-token flow is active
- *  and the browser NEVER navigates through the raw Supabase host; when
- *  unset, the legacy signInWithOAuth redirect flow is used. */
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
-
-const GSI_SRC = "https://accounts.google.com/gsi/client";
-
-type GisCredentialResponse = { credential?: string };
-
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: GisCredentialResponse) => void;
-            nonce?: string;
-            ux_mode?: "popup" | "redirect";
-          }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: Record<string, unknown>,
-          ) => void;
-        };
-      };
-    };
-  }
-}
 
 /** Official Google "G" mark (multicolour). Inline so the white OAuth button
  *  needs no asset pipeline. */
@@ -74,19 +42,30 @@ function GoogleLogo() {
 }
 
 /**
- * Shared "Continue with Google" button used on both /auth/login and
- * /auth/signup.
+ * "Continue with Google" — ONE flow: a SAME-TAB redirect (owner ruling
+ * 2026-07-29, P0).
  *
- * FIRST-PARTY MODE (NEXT_PUBLIC_GOOGLE_CLIENT_ID set): renders the GIS
- * button. Google returns an ID token to this page; we POST it with a
- * per-attempt nonce to the same-origin /api/auth/google, which performs
- * the server-side Supabase exchange and answers with the safe `next`
- * path. Visible surfaces: labourmarket.ai → accounts.google.com popup →
- * labourmarket.ai. No *.supabase.co navigation.
+ * The previous GIS ID-token integration opened a SEPARATE POPUP WINDOW for
+ * the account chooser. The owner ruled the popup out: sign-in must happen as
+ * a full-page redirect in the same tab. So this button now does exactly one
+ * thing — `signInWithOAuth` with a PKCE callback on our own
+ * `/{locale}/auth/callback`, which routes the user back to their intended
+ * `next` path (or onboarding) with the fresh session cookies.
  *
- * LEGACY MODE (client id unset): the previous signInWithOAuth redirect
- * flow via the PKCE callback — scheduled for removal once the
- * first-party flow is verified in production (Phase 3).
+ * DELIBERATE TRADE, recorded: the redirect passes through the Supabase auth
+ * host for one hop. The consent screen itself is branded `labourmarket.ai`
+ * (OAuth runbook, Lever 1.5 — applied), and this flow needs NO Google-console
+ * change because the Supabase callback is the registered redirect URI. The
+ * fully-branded alternative (GIS `ux_mode: "redirect"` with a login_uri on
+ * our domain) requires adding that URI to the console's Authorized redirect
+ * URIs first — a one-action owner step documented in
+ * docs/GOOGLE_OAUTH_BRANDING_RUNBOOK.md. Popup removal outranks the host
+ * cosmetics, so redirect ships now.
+ *
+ * Locale + return path: the callback URL carries the active locale segment
+ * and the sanitised `next` param, so after Google the user lands back on the
+ * SAME locale and the SAME intended page — never on someone else's profile
+ * and never on a bare default route.
  */
 export function GoogleButton({
   label,
@@ -101,7 +80,7 @@ export function GoogleButton({
   errorLabel: string;
   disabled?: boolean;
   /** Already-sanitised internal path (see `getSafeReturnPath`). When set,
-   *  the auth exchange routes the user here on success. */
+   *  the auth callback routes the user here on success. */
   nextPath?: string;
   /** Which surface hosts this button. In "signup" context the press is a
    *  registration attempt (emits `registration_started` with first-touch
@@ -110,155 +89,10 @@ export function GoogleButton({
   context?: "signup" | "login";
 }) {
   const locale = useLocale();
-  const tAuth = useTranslations("auth.login");
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
-  // Non-secret diagnostic reference shown after a GIS failure:
-  // "<safe error code> · <trace id>" — quotable in a bug report,
-  // matchable against server logs, contains no token material.
-  const [errorRef, setErrorRef] = useState<string | null>(null);
-  const gisContainer = useRef<HTMLDivElement | null>(null);
-  // Per-attempt RAW nonce, generated once per mount. NONCE CONTRACT
-  // (root cause of the 2026-07-19 "Nonces mismatch" incident): Google
-  // GIS receives the SHA-256 HASH (it lands in the ID token's nonce
-  // claim); our endpoint receives the RAW value and Supabase
-  // signInWithIdToken re-hashes + compares. See
-  // lib/auth/google-id-token.ts.
-  const nonceRef = useRef<string>("");
-  if (!nonceRef.current) {
-    nonceRef.current = generateOauthTraceId() + generateOauthTraceId();
-  }
 
-  const handleCredential = useCallback(
-    async (response: GisCredentialResponse) => {
-      setFailed(false);
-      setErrorRef(null);
-      setLoading(true);
-      // Per-attempt non-secret trace id: rides in the POST body, is
-      // echoed in error responses and stamped on every server log line.
-      const trace = generateOauthTraceId();
-      try {
-        if (!response?.credential) throw new Error("no_credential");
-        trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
-        // In signup context this press is a registration attempt — mirror the
-        // email path so Google signups are counted in the acquisition funnel
-        // with first-touch campaign attribution (idempotent capture).
-        if (context === "signup") {
-          captureFirstTouchAttribution();
-          trackFunnel(FUNNEL_EVENTS.registrationStarted, {
-            surface: "google",
-            ...getFirstTouchAttribution(),
-          });
-        }
-        recordEvent("google_id_token_start", { provider: "google", trace });
-        const res = await fetch(
-          `/api/auth/google?locale=${encodeURIComponent(locale)}`,
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              credential: response.credential,
-              nonce: nonceRef.current,
-              next: nextPath ?? null,
-              trace,
-            }),
-            // Bounded: a hung auth exchange must fail visibly, not hang
-            // the login screen (client-fetch-timeout guard).
-            signal: AbortSignal.timeout(15_000),
-          },
-        );
-        const out = (await res.json().catch(() => null)) as
-          | { ok?: boolean; next?: string; error?: string }
-          | null;
-        if (!res.ok || !out?.ok || !out.next) {
-          throw new Error(out?.error ?? `http_${res.status}`);
-        }
-        recordEvent("google_id_token_success", { provider: "google", trace });
-        // A new / un-onboarded user is routed to /onboarding. In signup
-        // context that means a fresh registration completed — mark it so the
-        // first authed surface emits `signup_completed` exactly once. An
-        // already-onboarded returning user is routed elsewhere and is never
-        // mis-counted as a signup.
-        if (context === "signup" && out.next.includes("/onboarding")) {
-          markSignupPending("google");
-        }
-        // Full navigation so server components render with the fresh
-        // session cookies.
-        window.location.assign(out.next);
-      } catch (e) {
-        // Never log the credential — name/message only.
-        const safeCode = e instanceof Error ? e.message : "unknown";
-        console.error("[auth] first-party google sign-in failed:", {
-          name: e instanceof Error ? e.name : "unknown",
-          message: safeCode,
-          trace,
-        });
-        recordEvent("google_id_token_error", {
-          provider: "google",
-          result_kind: safeCode,
-          trace,
-        });
-        setErrorRef(`${safeCode} · ${trace}`);
-        setLoading(false);
-        setFailed(true);
-      }
-    },
-    [locale, nextPath, context],
-  );
-
-  // First-party mode: hash the nonce, load the GIS script, render
-  // Google's button. Hashing is async (WebCrypto), so the whole init
-  // chain lives in one cancellable effect.
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) return;
-    let cancelled = false;
-
-    const init = async () => {
-      if (cancelled) return;
-      const gis = window.google?.accounts?.id;
-      const parent = gisContainer.current;
-      if (!gis || !parent) return;
-      // Google gets the HASHED nonce (nonce contract — see above).
-      const hashedNonce = await sha256Hex(nonceRef.current);
-      if (cancelled) return;
-      // Idempotent re-init: never stack a second Google iframe.
-      parent.innerHTML = "";
-      gis.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredential,
-        nonce: hashedNonce,
-        ux_mode: "popup",
-      });
-      gis.renderButton(parent, {
-        theme: "outline",
-        size: "large",
-        width: parent.offsetWidth || 320,
-        text: "continue_with",
-        locale,
-      });
-    };
-
-    const existing = document.querySelector(
-      `script[src="${GSI_SRC}"]`,
-    ) as HTMLScriptElement | null;
-    if (existing) {
-      if (window.google?.accounts?.id) void init();
-      else existing.addEventListener("load", () => void init(), { once: true });
-    } else {
-      const s = document.createElement("script");
-      s.src = GSI_SRC;
-      s.async = true;
-      s.defer = true;
-      s.addEventListener("load", () => void init(), { once: true });
-      document.head.appendChild(s);
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [handleCredential, locale]);
-
-  // ── Legacy redirect flow (client id unset) ────────────────────────────
-  async function onLegacyClick() {
+  async function onClick() {
     setFailed(false);
     setLoading(true);
     try {
@@ -270,8 +104,9 @@ export function GoogleButton({
       } catch {
         // No local session — irrelevant for a fresh OAuth start.
       }
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      // The SAME-locale callback with the intended return path — this is what
+      // brings the user back to where they started, in their language.
       const callback = new URL(`${origin}/${locale}/auth/callback`);
       if (nextPath) callback.searchParams.set("next", nextPath);
       const traceId = generateOauthTraceId();
@@ -292,13 +127,31 @@ export function GoogleButton({
         ),
       });
       trackFunnel(FUNNEL_EVENTS.loginStarted, { surface: "google" });
+      if (context === "signup") {
+        // Mirror the email path so Google signups are counted in the
+        // acquisition funnel with first-touch campaign attribution.
+        captureFirstTouchAttribution();
+        trackFunnel(FUNNEL_EVENTS.registrationStarted, {
+          surface: "google",
+          ...getFirstTouchAttribution(),
+        });
+        // The callback routes a NEW user to /onboarding; mark the pending
+        // signup now so the first authed surface emits `signup_completed`
+        // exactly once. A returning user never reaches /onboarding, so they
+        // are never mis-counted (the marker is consumed only there).
+        markSignupPending("google");
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
+        // SAME TAB. No popup: the browser itself navigates to Google and
+        // back. skipBrowserRedirect stays default (false) on purpose.
         options: { redirectTo: callbackWithTrace.toString() },
       });
       if (error) throw error;
-      // Success: browser navigates to Google; keep the loading state.
+      // Success: this tab navigates to Google; keep the loading state so the
+      // button cannot be double-pressed during the handoff.
     } catch (e) {
+      // Never log tokens — name/message only.
       console.error("[auth] signInWithOAuth(google) failed:", {
         name: e instanceof Error ? e.name : "unknown",
         message: e instanceof Error ? e.message : String(e),
@@ -312,70 +165,20 @@ export function GoogleButton({
     }
   }
 
-  if (GOOGLE_CLIENT_ID) {
-    return (
-      <div className="flex flex-col gap-2">
-        {/* GIS renders its own accessible button into this container. */}
-        <div
-          ref={gisContainer}
-          data-testid="google-gis-button"
-          aria-busy={loading || undefined}
-          className="flex min-h-[40px] w-full justify-center"
-        />
-        {loading && (
-          <p className="text-xs text-text-secondary">{redirectingLabel}</p>
-        )}
-        {failed && (
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-state-danger" role="alert">
-              {errorLabel}
-            </p>
-            {errorRef && (
-              // Non-secret diagnostic reference (safe error code + trace
-              // id) — quotable in a bug report, matchable in server logs.
-              <p
-                className="font-mono text-[11px] text-text-secondary"
-                data-testid="google-error-ref"
-              >
-                {errorRef}
-              </p>
-            )}
-            {/* TEMPORARY, explicitly labelled recovery path (incident
-                2026-07-19): while the first-party flow is unproven for
-                real accounts and PR #831 is unmerged, a failed GIS
-                attempt reveals the legacy Supabase-hosted redirect
-                sign-in. It VISIBLY navigates via the Supabase host —
-                never silently; the label says it is a backup route.
-                Remove together with the legacy flow (Phase 3). */}
-            <button
-              type="button"
-              onClick={onLegacyClick}
-              disabled={disabled || loading}
-              data-testid="google-legacy-recovery"
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-border bg-white px-4 py-2 text-xs font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <GoogleLogo />
-              {tAuth("google_recovery_label")}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-2">
       <button
         type="button"
-        onClick={onLegacyClick}
+        onClick={onClick}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
+        data-testid="google-signin"
         // The button surface is ALWAYS the Google-white card (`bg-white`), so
         // its label must use a FIXED dark ink — never `text-ink-900`, which
         // inverts to near-white under `[data-theme="light"]` and makes the
         // label invisible (white-on-white). `#1f1f1f` is Google's own button
         // text colour and is theme-independent, matching the fixed `bg-white`.
-        className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-white px-4 py-2.5 text-sm font-medium text-[#1f1f1f] transition-opacity hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <GoogleLogo />
         {loading ? redirectingLabel : label}

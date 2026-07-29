@@ -184,16 +184,16 @@ describe("W3 — the declaration", () => {
     expect(decl?.originAxiom).toBe("A-01");
   });
 
-  it("answers the map question honestly, and waives it rather than lying", () => {
-    // The map is not part of the workspace until W6. `false` + an approved,
-    // self-expiring waiver is the honest route; `true` would be fabrication.
-    expect(decl?.reflectedOnMap).toBe(false);
-    expect(decl?.transitionalWaiver?.fields).toEqual(["reflectedOnMap"]);
-    expect(decl?.transitionalWaiver?.enablingStep).toBe("E.7");
-    expect((decl?.transitionalWaiver?.ownerApproval ?? "").length).toBeGreaterThan(20);
+  it("answers the map question with a REAL yes — the waiver is gone (W6)", () => {
+    // W6 shipped the workspace map: the selection flies the map to the
+    // entity's place and a marker click opens the entity. The transitional
+    // waiver was deleted the moment the answer became true — the self-expiry
+    // the owner demanded, enforced here so it can never quietly return.
+    expect(decl?.reflectedOnMap).toBe(true);
+    expect(decl?.transitionalWaiver).toBeUndefined();
   });
 
-  it("answers every other blocking question with a real YES", () => {
+  it("answers every blocking question with a real YES", () => {
     expect(decl?.changesWorldState).toBe(true);
     expect(decl?.aiControlled).toBe(true);
     expect(decl?.usableWithoutLeavingWorkspace).toBe(true);

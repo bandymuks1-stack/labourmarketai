@@ -75,6 +75,9 @@ export const CLIENT_MESSAGE_ROOTS = [
   "journal",
   "journalSkillLinks",
   "labourMarket",
+  /** Landing rebuild 2026-07-29: `landing.loop` / `landing.moment` are read
+   *  by client components on the public landing. */
+  "landing",
   "languageFeedback",
   "live",
   "map",
@@ -130,6 +133,10 @@ export const MARKETING_CLIENT_MESSAGE_ROOTS = [
   "common",
   "company",
   "draft",
+  /** Landing rebuild 2026-07-29: the hero core-loop sample
+   *  (`landing.loop`) + the market-moment map fragment are client
+   *  components reading `landing.*`. */
+  "landing",
   "live",
   "map",
   "marketPulse",

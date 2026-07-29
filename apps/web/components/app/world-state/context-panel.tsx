@@ -18,6 +18,7 @@ import type {
 import type { WorkContextView } from "@/lib/world-state/work-context-server";
 import { entityKey } from "@/lib/world-state/world-state";
 import { useWorldState } from "./world-state-provider";
+import { WorkspaceMap } from "./workspace-map";
 
 /**
  * THE CONTEXT PANEL (W3) — the third part of the one workspace.
@@ -140,11 +141,29 @@ export function ContextPanel({
     <aside
       // A complementary landmark, NOT a dialog: the conversation stays fully
       // usable while this is open, which is the whole point of the workspace.
+      // On phones the EXPANDED panel rides up as a NON-MODAL bottom sheet
+      // (W3 mobile): fixed over the lower screen, no backdrop, no focus trap
+      // — the chevron and the close button remain the honest ways out. From
+      // `lg` the sheet classes are inert and the panel is the static column.
       aria-label={t("regionLabel")}
       data-testid="context-panel"
       data-panel-mode={panel.mode}
-      className={`flex flex-none flex-col border-t border-ink-600 bg-ink-900/60 lg:h-full lg:w-[22rem] lg:flex-none lg:border-l lg:border-t-0 ${className}`}
+      className={`flex flex-none flex-col ${
+        expanded
+          ? // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
+            // composer (and the z-40 feedback FAB), not under them.
+            "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 shadow-2xl"
+          : "border-t border-ink-600 bg-ink-900/60"
+      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:w-[22rem] lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${className}`}
     >
+      {/* Sheet grab-handle — a visual affordance only (the chevron is the
+          control), hidden on desktop where there is no sheet. */}
+      {expanded ? (
+        <span
+          aria-hidden
+          className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-ink-500 lg:hidden"
+        />
+      ) : null}
       <div className="flex items-center gap-2 px-4 pt-2.5">
         <Info {...iconControl("flex-none text-brand-blue")} aria-hidden />
         {/* The name gets the whole row. The trust badge sits on its own line
@@ -192,6 +211,10 @@ export function ContextPanel({
         id="context-panel-body"
         className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? "block max-h-[45dvh]" : "hidden"} lg:block lg:max-h-none`}
       >
+        {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
+            World State: the selection flies it to the entity's place, and
+            clicking a marker opens that entity here. Not a separate screen. */}
+        <WorkspaceMap className="mb-4" />
         {loading ? (
           <p className="text-basis text-text-muted" data-testid="context-panel-loading">
             {t("loading")}

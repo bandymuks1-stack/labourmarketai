@@ -127,15 +127,11 @@ const schema = z.object({
   AGENTAI_OS_ALERT_ENDPOINT: z.string().url().optional(),
   AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
 
-  // ── First-party Google sign-in (Google Identity Services ID-token flow) ────
-  // The OAuth *client id* is public by design (it appears in every Google
-  // auth URL). When set, the login/signup Google button uses the
-  // first-party GIS flow: credential → POST /api/auth/google (same origin)
-  // → server-side Supabase signInWithIdToken. The browser then NEVER
-  // navigates through the raw Supabase host. When unset, the legacy
-  // Supabase-hosted redirect flow stays active (safe rollout).
-  // Requires the owner to add https://labourmarket.ai to the OAuth
-  // client's Authorized JavaScript origins in Google Cloud Console.
+  // ── Google sign-in ────────────────────────────────────────────────────────
+  // Owner ruling 2026-07-29 (P0): the GIS ID-token POPUP flow was removed —
+  // sign-in is ONE same-tab redirect via signInWithOAuth + the PKCE
+  // callback. The client id stays declared (it is public by design and other
+  // tooling may read it), but no runtime path branches on it any more.
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
 
   // ── Voice Work Journal transcription (server-only, never NEXT_PUBLIC) ──────

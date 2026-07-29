@@ -50,7 +50,8 @@ import {
 import type { WorkflowResult } from "@/lib/ai-workspace/workflow-contract";
 import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
-import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
+import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
+import { loadOpeningBrief } from "@/lib/conversation/opening-brief";
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -107,20 +108,6 @@ export type ChatLabels = {
   writeEmployerHint: string;
 };
 
-/**
- * Which profile action genuinely fixes which checkpoint.
- *
- * Deliberately PARTIAL. `about` and `skills` have no chip in this row — about
- * text is edited on the profile screen and skills are recognised from the CV or
- * the work journal — so when one of those is the first gap the row simply
- * offers no recommendation. That is the honest outcome: a recommendation exists
- * only where a listed action really closes the gap the server reported.
- */
-const CHIP_FOR_STEP: Partial<Record<WorkerProfileStep, string>> = {
-  languages: "f:worker.add-language",
-  workHistory: "f:worker.add-work-history",
-  availability: "f:worker.save-work-card",
-};
 
 let uid = 0;
 const nid = () => `m${uid++}`;
@@ -170,22 +157,19 @@ export function ConversationChat({
         ? [
             // The employer's primary action — the canonical demand intake as
             // an inline conversation form (company.create-demand executor).
+            // Employer greeting also honours the 1–3 cap (§D).
             { id: "f:company.create-demand", label: labels.chipNeedWorkers },
             { id: "agenda", label: labels.chipAgenda },
-            // Contextual navigation to the REAL canonical surfaces (not new
-            // entry points): candidate scouting and the company workspace.
             { id: "link:/dashboard/company/scouting", label: labels.chipCandidates },
-            { id: "link:/dashboard/company", label: labels.chipCompanyHub },
           ]
         : [
-            // Logging work is the product's PRIMARY worker action (the journal
-            // is the spine) — one tap from the greeting (rebuild W3).
+            // OWNER RULING 2026-07-29 (§D): the six-chip wall is gone. The
+            // greeting offers at most THREE meaningful starts; everything
+            // else is contextual — the opening brief and each answer's own
+            // follow-ups surface actions when they are actually relevant.
             { id: "logwork", label: labels.chipLogWork },
             { id: "cv", label: labels.chipCv },
             { id: "jobs", label: labels.chipJobs },
-            { id: "agenda", label: labels.chipAgenda },
-            { id: "profile", label: labels.chipProfile },
-            { id: "offers", label: labels.chipOffers },
           ],
     [labels, identity],
   );
@@ -545,11 +529,18 @@ export function ConversationChat({
               doneWord: tSummary("doneWord"),
               missingWord: tSummary("missingWord"),
               lastActivity: res.lastActivity,
+              // Owner cap (§D): at most THREE follow-ups, the recommended
+              // one first — never the full five-action catalogue. No client
+              // sorting: the server's own ordering picked `recommendedId`,
+              // and this only moves that one chip to the front.
               chips:
                 res.missing.length > 0
-                  ? profileChips.map((c) =>
-                      c.id === recommendedId ? { ...c, recommended: true } : c,
-                    )
+                  ? [
+                      ...profileChips
+                        .filter((c) => c.id === recommendedId)
+                        .map((c) => ({ ...c, recommended: true })),
+                      ...profileChips.filter((c) => c.id !== recommendedId),
+                    ].slice(0, 3)
                   : starterChips,
             });
           } else if (!opts?.quiet) {
@@ -566,25 +557,38 @@ export function ConversationChat({
   startProfileSummaryRef.current = startProfileSummary;
 
   /**
-   * State-aware opening: the first paint must not be an empty greeting when
-   * the product already KNOWS this user (doctrine §18 — the system may never
-   * pretend to know nothing it knows). One real server read on mount appends
-   * the same profile-summary card the "resume" intent produces: progress,
-   * what changed last, and the recommended next gap. Signed-out visitors and
-   * the design preview keep the plain greeting.
+   * State-aware opening (owner ruling 2026-07-29, W2): the first paint must
+   * not be an empty greeting when the product already KNOWS this user
+   * (doctrine §18). One server action composes the OPENING BRIEF from the
+   * canonical reads — new matching opportunities, calendar conflicts, work
+   * done but not logged, the first missing profile step — as at most three
+   * short lines with at most three contextual chips. Nothing relevant →
+   * `none`, and the greeting alone stands with its small starter row.
+   * Signed-out visitors and the design preview keep the plain greeting.
    */
   const openedWithStateRef = useRef(false);
   useEffect(() => {
     if (script || openedWithStateRef.current) return;
     if (!auth?.profile) return; // signed-out: nothing real to show
     // Employer identity opens with the employer starters — the worker
-    // profile-summary read would be the wrong audience (rebuild W4).
+    // reads would be the wrong audience (rebuild W4).
     if (identity !== "person") return;
     openedWithStateRef.current = true;
-    // quiet: a company account (no worker profile) opens with the plain
-    // greeting instead of a wrong-audience message.
-    startProfileSummaryRef.current("resume", { quiet: true });
-  }, [script, auth?.profile, identity]);
+    loadOpeningBrief()
+      .then((brief) => {
+        if (brief.kind !== "brief") return; // honest: nothing to report
+        pushMessage({
+          id: nid(),
+          role: "assistant",
+          kind: "text",
+          text: brief.lines.join("\n"),
+          chips: brief.chips,
+        });
+      })
+      .catch(() => {
+        /* the greeting stands on its own — never a fabricated brief */
+      });
+  }, [script, auth?.profile, identity, pushMessage]);
 
   /**
    * "Kokie kriterijai pas mane nurodyti?" — a REAL readback of the worker's

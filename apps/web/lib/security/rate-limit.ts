@@ -23,7 +23,7 @@ import "server-only";
  * -----------------------------------------
  * State is IN-MEMORY, so on serverless it is PER-INSTANCE. An attacker spread
  * across many cold instances gets more than `limit` requests in total. This is
- * the same trade `app/api/auth/google/route.ts` already documents and accepts:
+ * the same trade the (since-removed) first-party Google endpoint documented:
  * a brake on naive abuse, NOT a distributed quota. It is strictly better than
  * the nothing that was there before, and it is deliberately not described as a
  * hard guarantee.

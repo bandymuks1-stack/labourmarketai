@@ -130,13 +130,18 @@ describe("a recommendation is server-derived or absent", () => {
     expect(chat).not.toMatch(/\.sort\(/);
   });
 
-  it("the step→chip map is partial, so no match means no recommendation", () => {
-    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
-    expect(chat).toMatch(/Partial<Record<WorkerProfileStep, string>>/);
-    // `about` and `skills` are not closable by these chips and must be absent.
+  it("the pillar→chip map is partial, so no match means no recommendation", () => {
+    // The map moved to its own PURE module (shared by the chat surface and
+    // the W2 opening brief) — one definition, both consumers. W5: keyed by
+    // the Player Card readiness pillars (the ONE completeness source).
+    const chat = read("lib/conversation/worker-activity-chips.ts");
+    expect(chat).toMatch(/Partial<Record<ReadinessPillarKey, string>>/);
+    // Pillars not closable by these chips must be absent from the map.
     const map = /CHIP_FOR_STEP[^=]*=\s*\{([\s\S]*?)\};/.exec(chat)?.[1] ?? "";
-    expect(map).not.toMatch(/\babout\b/);
+    expect(map).not.toMatch(/\bprofession\b/);
     expect(map).not.toMatch(/\bskills\b/);
+    expect(map).not.toMatch(/\bjournal\b/);
+    expect(map).not.toMatch(/\bevidence\b/);
   });
 
   it("starter chips carry no recommendation at all", () => {

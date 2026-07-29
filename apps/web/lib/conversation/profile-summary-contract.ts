@@ -11,7 +11,7 @@
  * describes how the conversation renders them.
  */
 
-import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
+import type { ReadinessPillarKey } from "@/lib/player-card/readiness";
 
 /** Which question the summary is answering. The FACTS are identical in all
  *  three cases — only the opening line differs, because "show my profile",
@@ -35,7 +35,7 @@ export type ChatProfileSummary =
        *  worker's own rows — nothing here is a heuristic, and a surface with no
        *  matching action simply offers no recommendation rather than inventing
        *  one. */
-      missingKeys: WorkerProfileStep[];
+      missingKeys: ReadinessPillarKey[];
       /** Checkpoints really saved, straight from the read model.
        *
        *  Sent explicitly rather than left for the UI to derive from

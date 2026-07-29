@@ -3278,7 +3278,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# oppgave er over fristen} other {# oppgaver er over fristen}} — verdt å se over.",
       "suggestLogToday": "📝 Du har en aktiv booking i dag, men ingen journalføring ennå — registrer arbeidet ditt.",
       "suggestReserveTomorrow": "📅 I morgen er det en frist, og kalenderen din er nesten ledig — jeg anbefaler å sette av tid.",
-      "suggestReserveTomorrowNamed": "📅 I morgen er fristen for “{label}”, og kalenderen din er nesten ledig — jeg anbefaler å sette av tid."
+      "suggestReserveTomorrowNamed": "📅 I morgen er fristen for “{label}”, og kalenderen din er nesten ledig — jeg anbefaler å sette av tid.",
+      "briefNewMatches": "[EN] {count} new opportunities match your profile.",
+      "briefMatches": "[EN] {count} visible opportunities match your profile.",
+      "briefConflicts": "[EN] Your calendar has {count} overlapping commitments.",
+      "briefOverdue": "[EN] {count} tasks are past their due day.",
+      "briefLogToday": "[EN] You are working today and nothing is logged yet.",
+      "briefProfileGap": "[EN] Your profile is still missing: {step}."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3473,6 +3479,83 @@
       "employer": "Jeg er arbeidsgiver",
       "agency": "Jeg representerer et byrå",
       "partner": "Jeg vil bli partner"
+    },
+    "loop": {
+      "chip": "[EN] Sample sequence — real product flow",
+      "windowTitle": "[EN] LabourMarket AI — conversation",
+      "userSays": "[EN] Today I laid brick walls at the Vilnius site, 8 hours.",
+      "entrySaved": "[EN] Journal entry saved · #D-1042",
+      "entryLine": "[EN] Bricklaying · Vilnius site · 8 h · added to your work history.",
+      "skillSignal": "[EN] Skill signal strengthened",
+      "skillLine": "[EN] Bricklaying — now backed by 12 journal entries.",
+      "matchFound": "[EN] New matching opportunity",
+      "matchLine": "[EN] A verified company needs 3 bricklayers in Kaunas.",
+      "matchWhy": "[EN] Why you: matches 4 of 5 required skills, 3 backed by your journal."
+    },
+    "chain": {
+      "eyebrow": "[EN] How the platform actually works",
+      "title": "[EN] Work becomes evidence. Evidence becomes your next opportunity.",
+      "journalNote": "[EN] The work journal is the difference: every day you record becomes verifiable professional history — so your next opportunity is argued from what you actually did, not from what a CV claims.",
+      "steps": {
+        "need": {
+          "title": "[EN] A work need",
+          "body": "[EN] A company states real demand — role, place, time."
+        },
+        "person": {
+          "title": "[EN] The right person",
+          "body": "[EN] Matching runs on skills and availability, with reasons."
+        },
+        "work": {
+          "title": "[EN] Real work",
+          "body": "[EN] You work. The platform stays out of the way."
+        },
+        "journal": {
+          "title": "[EN] The work journal",
+          "body": "[EN] You record what happened — it becomes your history."
+        },
+        "skills": {
+          "title": "[EN] Proven skills",
+          "body": "[EN] Skills grow from records, not from claims."
+        },
+        "next": {
+          "title": "[EN] A better next opportunity",
+          "body": "[EN] The next match is argued from your evidence."
+        }
+      }
+    },
+    "moment": {
+      "chip": "[EN] Concept example — sample numbers",
+      "title": "[EN] One city. One need. A visible answer.",
+      "body": "[EN] The market map is not decoration: a need appears in a place, matching people light up, availability narrows it to the ones who can actually come.",
+      "p1": "[EN] Vilnius needs 3 specialists",
+      "p2": "[EN] 8 matching people found",
+      "p3": "[EN] 5 available in the stated period",
+      "svgLabel": "[EN] Stylised city map with a demand point and matching people",
+      "legend": {
+        "need": "[EN] The need",
+        "match": "[EN] Matching people",
+        "avail": "[EN] Available now"
+      }
+    },
+    "proof": {
+      "eyebrow": "[EN] Trust, separated honestly",
+      "title": "[EN] A fact, a proven skill and an opinion are three different things.",
+      "fact": {
+        "label": "[EN] Work fact",
+        "title": "[EN] What actually happened",
+        "body": "[EN] An append-only journal record: date, place, work done. It cannot be quietly rewritten."
+      },
+      "skill": {
+        "label": "[EN] Proven skill",
+        "title": "[EN] What the records back",
+        "body": "[EN] A skill counts as proven when your own journal entries — and, when present, a manager's record — stand behind it."
+      },
+      "opinion": {
+        "label": "[EN] Opinion",
+        "title": "[EN] What someone felt",
+        "body": "[EN] A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
+      },
+      "noStars": "[EN] No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     }
   },
   "workspace": {
@@ -3618,6 +3701,13 @@
       "recNeedsEvidence": "[EN] {count} assigned people have no work evidence yet.",
       "recBasisCounters": "[EN] From the assignment records on this project.",
       "untitled": "[EN] (untitled project)"
+    },
+    "map": {
+      "regionLabel": "[EN] Workspace map",
+      "legendEntities": "[EN] Real opportunities and projects, grouped per place",
+      "approx": "[EN] approximate location",
+      "unmapped": "[EN] {count} without a mappable place",
+      "unmappedOnly": "[EN] {count} items have no mappable place yet, so there is nothing to draw."
     }
   }
 }

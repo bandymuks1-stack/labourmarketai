@@ -554,3 +554,77 @@ a {
     transform: none !important;
   }
 }
+
+/* ── Workspace map (W6) ─────────────────────────────────────────────────────
+   The map card inside the one workspace. Tiles are softened toward the design
+   system (slightly desaturated, calmer contrast) so the OSM raster reads as a
+   designed part of the product; pins are brand-token vectors, clustered per
+   place with a real count. */
+.wsmap .leaflet-tile-pane {
+  filter: saturate(0.72) contrast(0.94);
+}
+.wsmap .leaflet-container {
+  background: rgb(var(--c-ink-800));
+  font: inherit;
+}
+.wsmap-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: rgb(var(--c-brand-blue));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.wsmap-pin-active {
+  background: rgb(var(--c-brand-cyan));
+  outline: 3px solid rgba(var(--c-brand-cyan), 0.35);
+}
+.wsmap-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+.wsmap-place {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgb(var(--c-text-muted));
+  margin: 0 0 2px;
+}
+.wsmap-row {
+  text-align: left;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: rgb(var(--c-text-primary));
+  background: transparent;
+}
+.wsmap-row:hover {
+  background: rgba(var(--c-brand-blue), 0.1);
+}
+.wsmap-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: rgb(var(--c-brand-blue));
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+.wsmap .leaflet-popup-content-wrapper {
+  background: rgb(var(--c-ink-800));
+  color: rgb(var(--c-text-primary));
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+}
+.wsmap .leaflet-popup-tip {
+  background: rgb(var(--c-ink-800));
+}
