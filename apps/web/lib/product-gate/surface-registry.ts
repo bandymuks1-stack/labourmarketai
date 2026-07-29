@@ -178,7 +178,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     avatarEffect:
       "It changes nothing about the avatar by itself. It shows the avatar's own state against a selected entity — which of the demand's required skills the person actually holds — and routes the fix to the work journal, where skills really come from.",
     mapEffect:
-      "None yet, and the declaration says so rather than claiming otherwise: the map is not part of the workspace until W6. The selection lives in World State precisely so the map subscribes to it then without the panel changing. See the transitional waiver below.",
+      "W6 delivered it: the workspace map (components/app/world-state/workspace-map.tsx) subscribes to the SAME World State — the selection flies the map to the entity's place, and clicking a marker dispatches open_object so the panel and the conversation follow. Real rows only, clustered per city, approximate centroids labelled.",
     journalRelation:
       "The panel's primary recommendation for a missing required skill is to log the work that proves it — the journal stays the source of skills, and the panel never offers a self-declaration shortcut around it.",
 
@@ -192,7 +192,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
 
     // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
     changesWorldState: true, // it IS a World State slot (context_panel)
-    reflectedOnMap: false, // honest: the map joins the workspace in W6
+    reflectedOnMap: true, // W6: the workspace map reacts to the selection
     aiControlled: true, // opened/closed through the conversation's own state
     usableWithoutLeavingWorkspace: true,
     needsNoNewPage: true, // no route was added by this slice
@@ -210,14 +210,9 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: true,
 
-    transitionalWaiver: {
-      reason:
-        "The Context Panel cannot be reflected on the World Map before the map is part of the workspace. The owner's own W3–W8 sequence puts the Context Panel at W3 and the operational World Map at W6, so 'not yet' is the true answer today and claiming 'yes' would be the fabrication this gate exists to catch. The selection already lives in World State, which is what makes W6 a subscription rather than a rewrite.",
-      fields: ["reflectedOnMap"],
-      enablingStep: "E.7",
-      ownerApproval:
-        "Owner directive 2026-07-29 (W3–W8 execution plan): W3 = Context Panel, W6 = World Map becomes operational — map reflection is explicitly scheduled after the panel.",
-    },
+    // The W3-era transitional waiver (reflectedOnMap) was DELETED in W6: the
+    // workspace map now genuinely reacts to the selection, so the answer is a
+    // real yes and nothing is excused any more.
   },
 ] as const;
 

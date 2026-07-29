@@ -11432,6 +11432,13 @@
       "recNeedsEvidence": "{count} toegewezen mensen hebben nog geen werkbewijs.",
       "recBasisCounters": "Uit de toewijzingsgegevens van dit project.",
       "untitled": "(project zonder naam)"
+    },
+    "map": {
+      "regionLabel": "Werkruimtekaart",
+      "legendEntities": "Echte kansen en projecten, gegroepeerd per plaats",
+      "approx": "benaderde locatie",
+      "unmapped": "{count} zonder bepaalbare plaats",
+      "unmappedOnly": "{count} items hebben nog geen bepaalbare plaats, dus er valt niets te tekenen."
     }
   }
 }

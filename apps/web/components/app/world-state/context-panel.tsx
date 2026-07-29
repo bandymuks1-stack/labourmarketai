@@ -18,6 +18,7 @@ import type {
 import type { WorkContextView } from "@/lib/world-state/work-context-server";
 import { entityKey } from "@/lib/world-state/world-state";
 import { useWorldState } from "./world-state-provider";
+import { WorkspaceMap } from "./workspace-map";
 
 /**
  * THE CONTEXT PANEL (W3) — the third part of the one workspace.
@@ -192,6 +193,10 @@ export function ContextPanel({
         id="context-panel-body"
         className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? "block max-h-[45dvh]" : "hidden"} lg:block lg:max-h-none`}
       >
+        {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
+            World State: the selection flies it to the entity's place, and
+            clicking a marker opens that entity here. Not a separate screen. */}
+        <WorkspaceMap className="mb-4" />
         {loading ? (
           <p className="text-basis text-text-muted" data-testid="context-panel-loading">
             {t("loading")}

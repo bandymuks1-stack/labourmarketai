@@ -11432,6 +11432,13 @@
       "recNeedsEvidence": "{count} zugewiesene Personen haben noch keine Arbeitsnachweise.",
       "recBasisCounters": "Aus den Zuweisungsdaten dieses Projekts.",
       "untitled": "(Projekt ohne Titel)"
+    },
+    "map": {
+      "regionLabel": "Arbeitsbereichskarte",
+      "legendEntities": "Echte Chancen und Projekte, je Ort gruppiert",
+      "approx": "ungefährer Ort",
+      "unmapped": "{count} ohne bestimmbaren Ort",
+      "unmappedOnly": "{count} Einträge haben noch keinen bestimmbaren Ort, es gibt nichts zu zeichnen."
     }
   }
 }

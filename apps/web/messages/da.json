@@ -3624,6 +3624,13 @@
       "recNeedsEvidence": "[EN] {count} assigned people have no work evidence yet.",
       "recBasisCounters": "[EN] From the assignment records on this project.",
       "untitled": "[EN] (untitled project)"
+    },
+    "map": {
+      "regionLabel": "[EN] Workspace map",
+      "legendEntities": "[EN] Real opportunities and projects, grouped per place",
+      "approx": "[EN] approximate location",
+      "unmapped": "[EN] {count} without a mappable place",
+      "unmappedOnly": "[EN] {count} items have no mappable place yet, so there is nothing to draw."
     }
   }
 }

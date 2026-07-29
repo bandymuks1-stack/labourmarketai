@@ -11432,6 +11432,13 @@
       "recNeedsEvidence": "{count} priskirti žmonės dar neturi darbo įrodymų.",
       "recBasisCounters": "Iš šio projekto priskyrimų įrašų.",
       "untitled": "(projektas be pavadinimo)"
+    },
+    "map": {
+      "regionLabel": "Darbo erdvės žemėlapis",
+      "legendEntities": "Realios galimybės ir projektai, sugrupuoti pagal vietą",
+      "approx": "apytikslė vieta",
+      "unmapped": "{count} be nustatomos vietos",
+      "unmappedOnly": "{count} įrašai dar neturi nustatomos vietos, todėl nėra ko braižyti."
     }
   }
 }

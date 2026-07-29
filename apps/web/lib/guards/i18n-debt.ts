@@ -118,7 +118,10 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1211 at owner-shell-ux (+6: conversation.chat.brief* opening-brief
   // lines land in all 11 locales; lt/en/ru/nl/de translated, da [EN] until
   // human translation).
-  da: 1211,
+  // MEASURED 1216 at W6 workspace map (+5: workspace.map.* — legend, approx,
+  // unmapped lines land in all 11 locales; lt/en/ru/nl/de translated, da [EN]
+  // until human translation).
+  da: 1216,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

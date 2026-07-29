@@ -41,41 +41,15 @@
  * before the map is part of the workspace, and the owner sequenced the map
  * after the panel.
  */
-export const SCOPED_OWNER_WAIVERS = [
-  {
-    id: "w3-w4-context-panel-not-on-map",
-    // Nothing outside A-01 / A-09 is waivable.
-    axioms: ["A-01", "A-09"],
-    scope: "W3 (Context Panel) + W4 (AI Workspace)",
-    // THE BINDING KEY. A PR not listed here matches nothing.
-    pullRequests: [909, 912],
-    // Once those PRs merge, the SAME debt lives on this branch — and the
-    // push-to-main run has no PR number to match. Without this, merging a
-    // waived PR turns main's own CI red, which is exactly what happened at
-    // 9ad4c441. This widens WHERE the identical finding is tolerated, never
-    // WHAT is tolerated: code, axiom, file, subset rule and expiry all still
-    // apply, so a new violation on main blocks just as hard.
-    postMergeBranches: ["main"],
-    // Audit trail; enforced only when a run supplies a SHA to check.
-    approvedHeadShas: [],
-    // The only files whose findings may be excused.
-    files: ["components/app/world-state/context-panel.tsx"],
-    // The EXACT finding set the owner reviewed. A run producing anything more
-    // is out of scope and must go back to review.
-    expectedFindings: [
-      { code: "not_reflected_on_map", file: "components/app/world-state/context-panel.tsx" },
-      { code: "transitional_waiver_in_use", file: "components/app/world-state/context-panel.tsx" },
-    ],
-    reason:
-      "The Context Panel cannot be reflected on the World Map before the map is part of the workspace. The owner's own W3-W8 sequence puts the Context Panel at W3 and the operational World Map at W6, so 'not yet' is the true answer and claiming 'yes' would be the fabrication this gate exists to catch. The selection already lives in World State, which is what makes W6 a subscription rather than a rewrite.",
-    // The work whose arrival makes this unnecessary. Not a date — a THING.
-    resolvedBy: "W6-map-slice",
-    // ISO date, inclusive. After it, the waiver is dead.
-    expiresAt: "2026-10-31",
-    owner:
-      "Owner ruling 2026-07-29 — scoped transitional waiver approved for the existing W3/W4 scope only; explicitly NOT inheritable by W5 or any new change.",
-  },
-];
+/**
+ * The active waivers. EMPTY since W6: the one recorded waiver
+ * (`w3-w4-context-panel-not-on-map`) was removed the moment the workspace map
+ * shipped and `reflectedOnMap` became a real yes — exactly the self-expiry the
+ * owner demanded. The MECHANISM stays: a future owner ruling adds a record
+ * here, with the same six constraints, and the tests keep proving them on
+ * synthetic fixtures.
+ */
+export const SCOPED_OWNER_WAIVERS = [];
 
 /** Is this ONE finding excused? Every constraint must hold. */
 export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
