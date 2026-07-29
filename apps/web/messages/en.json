@@ -11086,7 +11086,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# task is past its due date} other {# tasks are past their due date}} — worth reviewing.",
       "suggestLogToday": "📝 You have an active booking today but no journal entry yet — log your work.",
       "suggestReserveTomorrow": "📅 A deadline lands tomorrow and your calendar is nearly free — I recommend reserving time.",
-      "suggestReserveTomorrowNamed": "📅 Tomorrow is the deadline for “{label}” and your calendar is nearly free — I recommend reserving time."
+      "suggestReserveTomorrowNamed": "📅 Tomorrow is the deadline for “{label}” and your calendar is nearly free — I recommend reserving time.",
+      "briefNewMatches": "{count} new opportunities match your profile.",
+      "briefMatches": "{count} visible opportunities match your profile.",
+      "briefConflicts": "Your calendar has {count} overlapping commitments.",
+      "briefOverdue": "{count} tasks are past their due day.",
+      "briefLogToday": "You are working today and nothing is logged yet.",
+      "briefProfileGap": "Your profile is still missing: {step}."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

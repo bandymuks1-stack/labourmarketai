@@ -39,8 +39,10 @@ describe("generic starter chips appear only where a menu belongs", () => {
     // profile-summary read; the employer demand form (rebuild W4) ends in the
     // demand-specific follow-up — the user always sees a contextual next
     // step, never the generic menu.
+    // Three flow closings remain (CV import, worker forms, work log); the
+    // MOUNT read moved to the opening brief, which is asserted below.
     const closings = CHAT.match(/startProfileSummaryRef\.current\(/g) ?? [];
-    expect(closings.length).toBeGreaterThanOrEqual(4);
+    expect(closings.length).toBeGreaterThanOrEqual(3);
     expect(CHAT).toMatch(/isEmployer\s*\?\s*companyFollowup/);
     expect(CHAT).toMatch(/assistant\(labels\.companyDemandNext/);
     expect(CHAT).not.toMatch(/onClose=\{\(\) => assistant\(labels\.fallback, starterChips\)/);
@@ -69,8 +71,24 @@ describe("history + state-aware opening", () => {
     expect(history).toMatch(/setShown\(/);
   });
 
-  it("an authenticated mount opens with a REAL state read (quiet for non-workers)", () => {
+  it("an authenticated mount opens with the REAL opening brief (owner W2)", () => {
     expect(CHAT).toMatch(/openedWithStateRef/);
-    expect(CHAT).toMatch(/startProfileSummaryRef\.current\("resume", \{ quiet: true \}\)/);
+    // The brief composes new-matches / conflicts / unlogged-work / first
+    // profile gap server-side; `none` leaves the greeting standing alone.
+    expect(CHAT).toMatch(/loadOpeningBrief\(\)/);
+    expect(CHAT).toMatch(/if \(brief\.kind !== "brief"\) return/);
+  });
+
+  it("the greeting row and every answer respect the 1-3 action cap", () => {
+    // The six-chip wall is gone: the worker greeting offers exactly three
+    // starts, and the profile summary slices its follow-ups to three.
+    const starter = /const starterChips[\s\S]*?\],\s*\[labels/.exec(CHAT)?.[0] ?? "";
+    // BOTH identity branches respect the cap: each chip-array segment holds
+    // at most three entries.
+    for (const segment of starter.split(": [").slice(1)) {
+      const ids = segment.split("]")[0].match(/\{ id: "/g) ?? [];
+      expect(ids.length).toBeLessThanOrEqual(3);
+    }
+    expect(CHAT).toMatch(/\.slice\(0, 3\)/);
   });
 });

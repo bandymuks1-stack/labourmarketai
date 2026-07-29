@@ -11086,7 +11086,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# Aufgabe ist überfällig} other {# Aufgaben sind überfällig}} — einen Blick wert.",
       "suggestLogToday": "📝 Du hast heute eine aktive Buchung, aber noch keinen Journaleintrag — erfasse deine Arbeit.",
       "suggestReserveTomorrow": "📅 Morgen steht eine Frist an und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren.",
-      "suggestReserveTomorrowNamed": "📅 Morgen ist die Frist für „{label}“ und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren."
+      "suggestReserveTomorrowNamed": "📅 Morgen ist die Frist für „{label}“ und dein Kalender ist fast frei — ich empfehle, Zeit zu reservieren.",
+      "briefNewMatches": "{count} neue Chancen passen zu deinem Profil.",
+      "briefMatches": "{count} sichtbare Chancen passen zu deinem Profil.",
+      "briefConflicts": "Dein Kalender hat {count} überlappende Verpflichtungen.",
+      "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
+      "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
+      "briefProfileGap": "Deinem Profil fehlt noch: {step}."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

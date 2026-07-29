@@ -131,7 +131,9 @@ describe("a recommendation is server-derived or absent", () => {
   });
 
   it("the step→chip map is partial, so no match means no recommendation", () => {
-    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    // The map moved to its own PURE module (shared by the chat surface and
+    // the W2 opening brief) — one definition, both consumers.
+    const chat = read("lib/conversation/worker-activity-chips.ts");
     expect(chat).toMatch(/Partial<Record<WorkerProfileStep, string>>/);
     // `about` and `skills` are not closable by these chips and must be absent.
     const map = /CHIP_FOR_STEP[^=]*=\s*\{([\s\S]*?)\};/.exec(chat)?.[1] ?? "";

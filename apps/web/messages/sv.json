@@ -3278,7 +3278,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# uppgift har passerat sin deadline} other {# uppgifter har passerat sina deadlines}} — värt att se över.",
       "suggestLogToday": "📝 Du har en aktiv bokning i dag men ingen journalpost ännu — registrera ditt arbete.",
       "suggestReserveTomorrow": "📅 I morgon är det en deadline och din kalender är nästan ledig — jag rekommenderar att reservera tid.",
-      "suggestReserveTomorrowNamed": "📅 I morgon är deadline för “{label}” och din kalender är nästan ledig — jag rekommenderar att reservera tid."
+      "suggestReserveTomorrowNamed": "📅 I morgon är deadline för “{label}” och din kalender är nästan ledig — jag rekommenderar att reservera tid.",
+      "briefNewMatches": "[EN] {count} new opportunities match your profile.",
+      "briefMatches": "[EN] {count} visible opportunities match your profile.",
+      "briefConflicts": "[EN] Your calendar has {count} overlapping commitments.",
+      "briefOverdue": "[EN] {count} tasks are past their due day.",
+      "briefLogToday": "[EN] You are working today and nothing is logged yet.",
+      "briefProfileGap": "[EN] Your profile is still missing: {step}."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

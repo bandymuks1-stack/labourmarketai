@@ -287,7 +287,18 @@ function CardBody({
   );
 }
 
-export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }) {
+export function ChatMessageView({
+  m,
+  h,
+  isLast = true,
+}: {
+  m: ChatMessage;
+  h: MessageHandlers;
+  /** Chip rows render only on the NEWEST message (owner ruling 2026-07-29,
+   *  W2): earlier answers keep their text, their buttons collapse — the
+   *  thread never accumulates a persistent button wall. */
+  isLast?: boolean;
+}) {
   // ── the opening turn — the screen's one real heading ─────────────────────
   // 22px on phones / 28px from `sm:` up, display face, no bubble. This is the
   // page title, so it is an <h1>: the conversation carried ZERO headings
@@ -305,7 +316,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
         <h1 className="max-w-[30ch] text-balance font-display text-title font-bold text-text-primary sm:text-title-lg">
           {m.text}
         </h1>
-        {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
+        {isLast && m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
       </div>
     );
   }
@@ -361,7 +372,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
           {/* pre-line: structured server readbacks (criteria, summaries) send
               real newlines; collapsing them would mash facts into one line. */}
           <div className="whitespace-pre-line text-body text-text-primary">{m.text}</div>
-          {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
+          {isLast && m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </AssistantTurn>
     );
@@ -373,7 +384,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
       <AssistantTurn testId="msg-question" speaker={h.speakers.assistant}>
         <div className="min-w-0 max-w-[46rem] pt-0.5">
           <div className="text-body text-text-primary">{m.text}</div>
-          <Chips chips={m.chips} onChip={h.onChip} />
+          {isLast && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </AssistantTurn>
     );
@@ -531,7 +542,7 @@ export function ChatMessageView({ m, h }: { m: ChatMessage; h: MessageHandlers }
               </p>
             )}
           </div>
-          {m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
+          {isLast && m.chips && m.chips.length > 0 && <Chips chips={m.chips} onChip={h.onChip} />}
         </div>
       </AssistantTurn>
     );

@@ -11086,7 +11086,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# užduoties terminas praėjęs} few {# užduočių terminai praėję} other {# užduočių terminai praėję}} — verta peržiūrėti.",
       "suggestLogToday": "📝 Šiandien turi aktyvų užsakymą, bet žurnale įrašo dar nėra — užfiksuok darbą.",
       "suggestReserveTomorrow": "📅 Rytoj artėja terminas, o kalendorius beveik laisvas — rekomenduoju rezervuoti laiko.",
-      "suggestReserveTomorrowNamed": "📅 Rytoj terminas: „{label}“, o kalendorius beveik laisvas — rekomenduoju rezervuoti laiko."
+      "suggestReserveTomorrowNamed": "📅 Rytoj terminas: „{label}“, o kalendorius beveik laisvas — rekomenduoju rezervuoti laiko.",
+      "briefNewMatches": "{count} naujos galimybės atitinka tavo profilį.",
+      "briefMatches": "{count} matomos galimybės atitinka tavo profilį.",
+      "briefConflicts": "Kalendoriuje {count} persidengiantys įsipareigojimai.",
+      "briefOverdue": "{count} užduotys jau pradelstos.",
+      "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
+      "briefProfileGap": "Profilyje dar trūksta: {step}."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

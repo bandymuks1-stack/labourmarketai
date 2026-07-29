@@ -11086,7 +11086,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# taak is over de deadline} other {# taken zijn over de deadline}} — de moeite waard om te bekijken.",
       "suggestLogToday": "📝 Je hebt vandaag een actieve boeking maar nog geen logboekvermelding — leg je werk vast.",
       "suggestReserveTomorrow": "📅 Morgen valt een deadline en je kalender is bijna vrij — ik raad aan tijd te reserveren.",
-      "suggestReserveTomorrowNamed": "📅 Morgen is de deadline voor “{label}” en je kalender is bijna vrij — ik raad aan tijd te reserveren."
+      "suggestReserveTomorrowNamed": "📅 Morgen is de deadline voor “{label}” en je kalender is bijna vrij — ik raad aan tijd te reserveren.",
+      "briefNewMatches": "{count} nieuwe kansen passen bij je profiel.",
+      "briefMatches": "{count} zichtbare kansen passen bij je profiel.",
+      "briefConflicts": "Je agenda heeft {count} overlappende verplichtingen.",
+      "briefOverdue": "{count} taken zijn over hun einddatum heen.",
+      "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
+      "briefProfileGap": "Je profiel mist nog: {step}."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

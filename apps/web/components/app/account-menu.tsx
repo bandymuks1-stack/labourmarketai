@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -63,6 +63,10 @@ export function AccountMenu() {
   //                   stays valid (no dead link), just not surfaced here.
   // (See docs/owner-input/contact-message-demand-cleanup-p0-audit.md §A.)
   const featureLinks: { href: string; label: string; icon: LucideIcon; testid: string }[] = [
+    // Profile — moved here from the top bar (owner ruling 2026-07-29, §B):
+    // the bar carried TWO avatars for the same person; now this menu is the
+    // one avatar and Profile is its first entry.
+    { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]

@@ -79,7 +79,19 @@ export function ConversationThread({
             re-animates on re-render because React reuses those DOM nodes). */}
         {items.map((it, i) => (
           <div key={it.id} className={`ua-msg-in ${spacingFor(it, i)}`}>
-            {"embed" in it ? it.embed : <ChatMessageView m={it.message} h={handlers} />}
+            {"embed" in it ? (
+              it.embed
+            ) : (
+              <ChatMessageView
+                m={it.message}
+                h={handlers}
+                // OLD ACTIONS COLLAPSE (owner ruling 2026-07-29, W2): chip
+                // rows render only on the NEWEST message. Answers higher up
+                // keep their text — their buttons stop competing for
+                // attention, so the thread never accumulates a button wall.
+                isLast={i === items.length - 1}
+              />
+            )}
           </div>
         ))}
         {typing && (

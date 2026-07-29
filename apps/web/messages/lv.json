@@ -3278,7 +3278,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# uzdevumam termiņš ir pagājis} other {# uzdevumiem termiņš ir pagājis}} — vērts pārskatīt.",
       "suggestLogToday": "📝 Šodien tev ir aktīva rezervācija, bet žurnālā ieraksta vēl nav — reģistrē darbu.",
       "suggestReserveTomorrow": "📅 Rīt ir termiņš, un kalendārs ir gandrīz brīvs — iesaku rezervēt laiku.",
-      "suggestReserveTomorrowNamed": "📅 Rīt ir termiņš: “{label}”, un kalendārs ir gandrīz brīvs — iesaku rezervēt laiku."
+      "suggestReserveTomorrowNamed": "📅 Rīt ir termiņš: “{label}”, un kalendārs ir gandrīz brīvs — iesaku rezervēt laiku.",
+      "briefNewMatches": "[EN] {count} new opportunities match your profile.",
+      "briefMatches": "[EN] {count} visible opportunities match your profile.",
+      "briefConflicts": "[EN] Your calendar has {count} overlapping commitments.",
+      "briefOverdue": "[EN] {count} tasks are past their due day.",
+      "briefLogToday": "[EN] You are working today and nothing is logged yet.",
+      "briefProfileGap": "[EN] Your profile is still missing: {step}."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

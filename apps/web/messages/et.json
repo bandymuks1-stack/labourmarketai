@@ -3278,7 +3278,13 @@
       "suggestOverdueTasks": "⏰ {count, plural, one {# ülesande tähtaeg on möödas} other {# ülesande tähtaeg on möödas}} — tasub üle vaadata.",
       "suggestLogToday": "📝 Sul on täna aktiivne broneering, kuid päevikus kannet veel pole — pane töö kirja.",
       "suggestReserveTomorrow": "📅 Homme on tähtaeg ja kalender on peaaegu vaba — soovitan aega broneerida.",
-      "suggestReserveTomorrowNamed": "📅 Homme on tähtaeg: „{label}“ ja kalender on peaaegu vaba — soovitan aega broneerida."
+      "suggestReserveTomorrowNamed": "📅 Homme on tähtaeg: „{label}“ ja kalender on peaaegu vaba — soovitan aega broneerida.",
+      "briefNewMatches": "[EN] {count} new opportunities match your profile.",
+      "briefMatches": "[EN] {count} visible opportunities match your profile.",
+      "briefConflicts": "[EN] Your calendar has {count} overlapping commitments.",
+      "briefOverdue": "[EN] {count} tasks are past their due day.",
+      "briefLogToday": "[EN] You are working today and nothing is logged yet.",
+      "briefProfileGap": "[EN] Your profile is still missing: {step}."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

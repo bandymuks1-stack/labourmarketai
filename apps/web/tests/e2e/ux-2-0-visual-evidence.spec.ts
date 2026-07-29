@@ -817,7 +817,7 @@ test.describe("conversation composition", () => {
     const name = await page.evaluate(
       () =>
         document
-          .querySelector('[data-testid="chat-profile-link"]')
+          .querySelector('[data-testid="account-menu-trigger"]')
           ?.textContent?.trim() ?? "",
     );
     test.info().annotations.push({
