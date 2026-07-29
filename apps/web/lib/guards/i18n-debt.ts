@@ -111,11 +111,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // (de:0 / nl:0 ratchet intact), da [EN] until human translation). Both sides
   // of the rebase raised this ceiling; the value is MEASURED after the merge,
   // never added up on paper.
-  // MEASURED __PENDING__ at W4 ai-workspace rebased onto W3+W5 (+the
+  // MEASURED 1205 at W4 ai-workspace rebased onto W3+W5 (+the
   // `workspace.ai` workflow copy and `workspace.project` panel captions in all
   // 11 locales; lt/en/ru/nl/de translated, da [EN] until human translation).
   // Again MEASURED on the rebased tree, not summed.
-  da: __PENDING__,
+  da: 1205,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an
