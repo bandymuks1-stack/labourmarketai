@@ -30,6 +30,19 @@ Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
   deep-link į kanoninį bloką. LIKUTIS (§5.2 premium vizualika: vieta,
   dokumentų būsena, reputacija kortelėje) — perkelta į premium design pass.
 
+- **Projekcijos (žurnalas/žemėlapis/enum) — BAIGTA 2026-07-29** (c3437eda):
+  žurnalo puslapis be kūrimo formos (§6.1, kūrimas per pokalbį; forma tik
+  edit režimui); „employee" enum lokalizuotas (§6.2); žemėlapio „Tavo
+  rinka" inkaras + legendos paaiškinimas + sąžiningas unmapped tekstas
+  (§9.1/§9.2); panelės linksniai ICU.
+- **Landing — BAIGTA 2026-07-29** (7a7ec80d): 7 kanoniniai blokai (be
+  ConversationOsPanel, chips juostos, DraftBoard, MarketPulse); kanoninis
+  WorkerPlayerCard vietoj FUT kortelių su medaliais/balais (§3.7); 4
+  sektorių interaktyvus scenarijus (§3.3/§3.4); copy pataisos (§3.5);
+  freeze baseline pergeneruotas. Lokalus QA: 22/22 PASS (1440+390),
+  aukštis 9619→7376px; evidence
+  `docs/audits/evidence/owner-visual-acceptance-2026/`.
+
 ### Etapas 0 — kanoninė specifikacija + production auditas (2026-07-29)
 
 - **Kanoninė specifikacija — savininko auditas**: rastas
