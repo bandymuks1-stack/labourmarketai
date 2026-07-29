@@ -160,3 +160,68 @@ than smoothed over.
 - **W1–W3 were not touched**, other than the two additive extension points W4
   needed: the entity-type registry gained `project`, and the recommendations use
   case gained an optional `filters` argument.
+
+## 6. Pre-merge patch (owner-approved)
+
+Two changes landed after the final review, both approved before merge:
+
+**Employer assignment blindness — fixed.** `profiles!inner(full_name)` →
+`profiles(full_name)` at the three sites that read the optional display name:
+`lib/projects/operations.ts`, `lib/projects/projects.ts`,
+`lib/instructions/instructions.ts`. No RLS change, no new grant, no additional
+profile data. Proof in §8.
+
+**World State filters — extension point prepared, behaviour unchanged.** See §7.
+
+## 7. W6 EXTENSION POINT — persistent filters
+
+Recorded so W6 does not have to re-derive it. Nothing below is wired; the
+behaviour today is per-turn filtering, unchanged by this patch.
+
+| Piece | State today | What W6 does |
+|---|---|---|
+| The slot | `WorldState.activeFilters` exists, typed, always `{}` | becomes the single source of the active narrowing |
+| The transition | `worldStateReducer` handles `change_world_state` (set + clear), unit-tested | dispatched instead of ignored |
+| The dispatcher | `WorldStateContextValue.dispatch` already exposes it | no new context, no new store, no type change |
+| The producer | `runFindWork` computes `reading.filters` and passes them to that ONE search | dispatches per entry **before** searching |
+| The consumer (search) | `findWorkForChat(filters)` takes them as an argument | reads `state.activeFilters` |
+| The consumer (map) | — | subscribes to the same slot; this is why filters must live in World State rather than in a function argument |
+| The consumer (panel) | shows the selected entity only | can render the active filters + a way to clear them |
+
+**The open product question W6 must answer first:** when do filters clear? A
+narrowing that silently survives into an unrelated later question is worse than
+today's behaviour, which is exactly why this patch did not enable it. Options:
+clear on an explicit "show everything", clear when the objectType changes, or
+always show them with a one-tap clear.
+
+**Deliberately no unused code was added** for this. An exported-but-uncalled
+setter in a `"use server"` or provider module is a reachable surface with no
+caller — the same defect the review removed (`describeAppliedFilters`).
+
+## 8. Verification of the assignment fix
+
+Run through the REAL PostgREST path as the employer (`dev.company@local.test`),
+against a project with one `status='active'` assignment:
+
+| # | Query | Result |
+|---|---|---|
+| A | old shape, `profiles!inner(full_name)` | **0 rows** — the assignment is dropped (the bug) |
+| B | new shape, `profiles(full_name)` | **1 row**, with `"profiles": null` |
+| C | `GET /profiles?select=id,full_name,email` | **1 row — the employer's OWN profile only** |
+| D | `GET /profiles?id=eq.<the assigned worker>` | **0 rows** — still unreadable |
+
+So: the assignment is visible, the profile is not, and RLS was not touched.
+`profiles` arrives as `null` because PostgREST applies the policy to the
+embedded resource — a left join asks, it does not grant.
+
+**The fallback is now reachable.** With `profiles: null` and this fixture's
+`display_name: null`, `readActiveAssignments` resolves
+`full_name ?? display_name ?? profile_id.slice(0,8)` to the id prefix **and sets
+`hasRealName: false`**, which `deriveWorkerOps` turns into an honest
+`missing: ["name"]` signal. Before the fix the whole row vanished and the
+manager saw "0 assigned"; now they see the assignment, correctly flagged as
+lacking a display name.
+
+**Product note for the owner:** employers will see assigned workers labelled by
+id prefix until the worker sets `workers.display_name` — the field that exists
+for exactly this purpose. That is the privacy model working, not a defect.

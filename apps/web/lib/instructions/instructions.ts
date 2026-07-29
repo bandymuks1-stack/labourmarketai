@@ -142,8 +142,12 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
+  // LEFT join on `profiles` — same reason as lib/projects/operations.ts: an
+  // employer cannot read another person's profile row, so `!inner` emptied the
+  // whole picker. The join only supplies an optional display name that already
+  // falls back to `display_name` and then to an id prefix.
   const select =
-    "worker:workers!inner(profile_id, display_name, profiles!inner(full_name))";
+    "worker:workers!inner(profile_id, display_name, profiles(full_name))";
 
   const [cw, aw] = await Promise.all([
     asAny(supabase)

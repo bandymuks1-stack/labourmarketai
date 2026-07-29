@@ -58,7 +58,12 @@ export async function resolveProjectContext(projectId: string): Promise<EntityCo
   // is not. Straight counts of real assignment rows — no score.
   const requirements: ContextRequirement[] = [];
   if (ops.counters.totalAssigned > 0) {
-    requirements.push({ label: t("crewReady", { count: ops.counters.ready }), met: true });
+    // Only when somebody IS ready. A green tick against "0 ready" reads as
+    // reassurance the data does not support — and it was invisible until the
+    // assignment fix made this block render at all.
+    if (ops.counters.ready > 0) {
+      requirements.push({ label: t("crewReady", { count: ops.counters.ready }), met: true });
+    }
     if (ops.counters.needsEvidence > 0) {
       requirements.push({
         label: t("crewNeedsEvidence", { count: ops.counters.needsEvidence }),
