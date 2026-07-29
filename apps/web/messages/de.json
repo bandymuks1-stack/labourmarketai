@@ -3300,12 +3300,12 @@
       "helper": "Ein Lebenslauf hilft anderen, Ihre Erfahrung schneller zu verstehen, und stärkt Ihre Arbeitskarte. Er bleibt privat. Laden Sie eine PDF-, DOCX- oder TXT-Datei hoch oder fügen Sie den Text ein.",
       "uploadLabel": "Lebenslauf-Datei hochladen",
       "uploadPick": "Lebenslauf-Datei auswählen",
-      "uploadFormats": "PDF, DOCX oder TXT · max. 5 MB",
+      "uploadFormats": "PDF, DOCX oder TXT",
       "uploadHint": "Wir lesen den Text und schlagen Fähigkeiten vor, die Sie auswählen. Die Datei selbst wird nicht gespeichert.",
       "uploadExtracting": "Wird gelesen…",
       "uploadPicked": "Ausgewählt: {file}",
       "uploadErrorType": "Nicht unterstützte Datei. Verwenden Sie PDF, DOCX oder TXT.",
-      "uploadErrorSize": "Datei zu groß (max. 5 MB).",
+      "uploadErrorSize": "Diese Datei konnte nicht verarbeitet werden — sie ist um ein Vielfaches größer als ein normaler Lebenslauf. Sende die Lebenslauf-Datei selbst oder beschreibe deine Erfahrung im Chat.",
       "uploadErrorEmpty": "Kein Text in der Datei gefunden. Versuchen Sie eine andere Datei oder fügen Sie stattdessen den Text ein.",
       "uploadErrorAuth": "Bitte melden Sie sich erneut an, um einen Lebenslauf zu importieren.",
       "uploadErrorFailed": "Die Datei konnte nicht gelesen werden. Versuchen Sie eine andere Datei oder fügen Sie stattdessen den Text ein.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Arbeitsfotos und Dateien — zeigen Arbeit, die Sie tatsächlich geleistet haben.",
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
-      "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt."
+      "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {

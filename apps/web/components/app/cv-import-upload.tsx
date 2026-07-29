@@ -102,8 +102,21 @@ export function CvImportUpload({
         />
       </label>
 
+      {/* §10: the formats are the person's business; the SIZE is the
+          system's. The old line pushed a 5 MB budget onto whoever was
+          attaching their CV — the ceiling still exists to bound abuse, but
+          it is not stated as a requirement any more. */}
       <span className="font-mono text-[10px] uppercase tracking-label text-text-muted">
         {t("uploadFormats")}
+      </span>
+      {/* §10: what this costs, said BEFORE the action. CV import consumes no
+          LMC today, so the honest statement is that it is free — never a
+          silent charge and never a vague "may cost" hedge. */}
+      <span
+        className="text-[11px] leading-relaxed text-text-muted"
+        data-testid="cv-upload-cost-note"
+      >
+        {t("uploadCostNote")}
       </span>
 
       {pickedName && !error && (

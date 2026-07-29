@@ -3300,12 +3300,12 @@
       "helper": "A CV helps people understand your experience faster and strengthens your work card. It stays private. Upload a PDF, DOCX or TXT file, or paste the text.",
       "uploadLabel": "Upload CV file",
       "uploadPick": "Choose CV file",
-      "uploadFormats": "PDF, DOCX or TXT · max 5 MB",
+      "uploadFormats": "PDF, DOCX or TXT",
       "uploadHint": "We read the text and suggest skills you select. The file itself is not stored.",
       "uploadExtracting": "Reading…",
       "uploadPicked": "Selected: {file}",
       "uploadErrorType": "Unsupported file. Use PDF, DOCX or TXT.",
-      "uploadErrorSize": "File too large (max 5 MB).",
+      "uploadErrorSize": "This file could not be processed — it is many times larger than a normal CV. Send the CV file itself, or describe your experience in the chat.",
       "uploadErrorEmpty": "No text found in the file. Try another file or paste the text instead.",
       "uploadErrorAuth": "Please log in again to upload a CV.",
       "uploadErrorFailed": "Could not read the file. Try another file or paste the text instead.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Work photos and files — show work you actually did.",
       "evidenceRecs": "References — help back up your reliability.",
       "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
-      "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis."
+      "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis.",
+      "uploadCostNote": "Uploading a CV is free — no LMC is charged. The system handles the file size itself."
     }
   },
   "live": {

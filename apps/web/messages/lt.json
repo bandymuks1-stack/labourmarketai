@@ -3300,12 +3300,12 @@
       "helper": "CV padeda greičiau suprasti jūsų patirtį ir stiprina jūsų darbo kortelę. Jis privatus. Įkelkite PDF, DOCX ar TXT failą arba įklijuokite tekstą.",
       "uploadLabel": "Įkelti CV failą",
       "uploadPick": "Pasirinkti CV failą",
-      "uploadFormats": "PDF, DOCX ar TXT · iki 5 MB",
+      "uploadFormats": "PDF, DOCX arba TXT",
       "uploadHint": "Nuskaitome tekstą ir pasiūlome įgūdžius, kuriuos pasirenkate. Pats failas nesaugomas.",
       "uploadExtracting": "Skaitoma…",
       "uploadPicked": "Pasirinkta: {file}",
       "uploadErrorType": "Netinkamas failas. Naudokite PDF, DOCX arba TXT.",
-      "uploadErrorSize": "Failas per didelis (iki 5 MB).",
+      "uploadErrorSize": "Šio failo nepavyko apdoroti — jis kelis kartus didesnis už įprastą CV. Atsiųsk CV failą arba parašyk savo patirtį pokalbyje.",
       "uploadErrorEmpty": "Faile teksto nerasta. Pabandykite kitą failą arba įklijuokite tekstą.",
       "uploadErrorAuth": "Prisijunkite iš naujo, kad įkeltumėte CV.",
       "uploadErrorFailed": "Nepavyko nuskaityti failo. Pabandykite kitą failą arba įklijuokite tekstą.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Darbo nuotraukos ir failai — parodo realiai atliktą darbą.",
       "evidenceRecs": "Rekomendacijos — padeda pagrįsti patikimumą.",
       "evidenceLegal": "Asmens ar teisiniai dokumentai — naudojami tik tada, kai reikia įdarbinimo ar teisiniam procesui.",
-      "privacyNote": "Jūsų dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo."
+      "privacyNote": "Jūsų dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo.",
+      "uploadCostNote": "CV įkėlimas nemokamas — LMC nenuskaitoma. Sistema pati susitvarko su failo dydžiu."
     }
   },
   "live": {

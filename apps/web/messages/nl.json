@@ -3300,12 +3300,12 @@
       "helper": "Een cv helpt mensen je ervaring sneller te begrijpen en versterkt je werkkaart. Het blijft privé. Upload een PDF-, DOCX- of TXT-bestand, of plak de tekst.",
       "uploadLabel": "Cv-bestand uploaden",
       "uploadPick": "Cv-bestand kiezen",
-      "uploadFormats": "PDF, DOCX of TXT · max 5 MB",
+      "uploadFormats": "PDF, DOCX of TXT",
       "uploadHint": "We lezen de tekst en stellen vaardigheden voor die jij selecteert. Het bestand zelf wordt niet opgeslagen.",
       "uploadExtracting": "Lezen…",
       "uploadPicked": "Geselecteerd: {file}",
       "uploadErrorType": "Niet-ondersteund bestand. Gebruik PDF, DOCX of TXT.",
-      "uploadErrorSize": "Bestand te groot (max 5 MB).",
+      "uploadErrorSize": "Dit bestand kon niet worden verwerkt — het is veel groter dan een normaal cv. Stuur het cv-bestand zelf, of beschrijf je ervaring in de chat.",
       "uploadErrorEmpty": "Geen tekst gevonden in het bestand. Probeer een ander bestand of plak de tekst.",
       "uploadErrorAuth": "Log opnieuw in om een cv te importeren.",
       "uploadErrorFailed": "Kon het bestand niet lezen. Probeer een ander bestand of plak de tekst.",
@@ -3318,7 +3318,8 @@
       "evidencePhotos": "Werkfoto's en bestanden — laten zien welk werk je echt hebt gedaan.",
       "evidenceRecs": "Referenties — helpen je betrouwbaarheid te onderbouwen.",
       "evidenceLegal": "Identiteits- of juridische documenten — alleen gebruikt wanneer nodig voor aanname of een juridisch proces.",
-      "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag."
+      "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag.",
+      "uploadCostNote": "Een cv uploaden is gratis — er wordt geen LMC afgeschreven. Het systeem regelt de bestandsgrootte zelf."
     }
   },
   "live": {
