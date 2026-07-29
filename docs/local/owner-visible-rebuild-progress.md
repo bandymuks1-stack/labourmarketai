@@ -6,6 +6,29 @@ Savininkas atmetė `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED`
 Naujas tikslas: `OWNER_VISUAL_ACCEPTANCE_2026_PREMIUM_PRODUCTION_VERIFIED`.
 Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
 
+### GALUTINIS UŽDARYMO CIKLAS — 6 etapai (2026-07-30)
+
+Kanoninis GOAL: `docs/owner-goals/owner-visual-acceptance-final-goal-2026.md`.
+Visi šeši etapai BAIGTI, sumerginti (PR #921 + follow-up commitai) ir gyvi
+production; kiekvienas patikrintas realiu click-through.
+
+| Etapas | Rezultatas | Production įrodymas |
+|---|---|---|
+| §7 Kalendorius | laikas, trukmė, erdvė, projektas, vieta, žmogus, organizacija; 8 šaltiniai; 0 dublikatų | 3/3 unikalūs įrašai, 4 projekcijos HTTP 200, „Erdvė: Labour market ai Sp. z o.o", realus 18:22 |
+| §8 Žinutės | išvestinis prioritetas, quick reply, atsakymas iš pokalbio TIK po patvirtinimo, vienas rašymo kelias | kortelės su siuntėju/preview/unread; prioriteto ženklas nerodomas, nes nė viena gija nelaukia atsakymo (sąžininga būsena) |
+| §5.2 Player Card | vieta, dokumentai, reputacija, darbo istorija; landing = tas pats komponentas | „KITŲ ATSAKAS · 2 tavo įrašai pažymėti kaip tikslūs", „Dar nėra įrašytų dokumentų", 1 pavadinta istorijos eilutė |
+| §10 CV | „iki 5 MB" pašalinta; lubos 5→25 MB; kaina PRIEŠ veiksmą | copy be MB; „CV įkėlimas nemokamas — LMC nenuskaitoma" |
+| §12 Design pass | 1570 sub-floor tipografijos vietų → skalė; guardas prirakina | matricoje 0 mazgų < 12px visuose 7 viewport × 2 temos |
+| §16 QA | 7 viewport × light/dark × reali elgsena | **182/182 PASS** production + **63/63 PASS** antras harness'as |
+
+Per §16 patikrą rasti ir ištaisyti 4 realūs defektai, kurių testai nerodė:
+A-12 (lietuviški intentai reikalavo diakritikų — „Parodyk zinutes" nukrisdavo
+į fallback), „0 galiojantys" kaip verdiktas, pasikartojanti „Darbo kontekstas"
+eilutė, ir — svarbiausia — **trys guardai turėjo tikrą backspace baitą vietoj
+``, todėl jų tikrinimai buvo tušti**. Visi ištaisyti; medis nuskenuotas.
+
+OWNER GATE (read-only, nieko nepakeista): `docs/owner-goals/owner-gate-final-2026.md`.
+
 ### Etapų žurnalas (owner visual acceptance)
 
 - **P0 blokas — BAIGTA 2026-07-29** (commit'ai 66f4dc3f…62a8ca2b dalis):
