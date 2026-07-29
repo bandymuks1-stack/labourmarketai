@@ -87,4 +87,35 @@ Sprendimas (nauja IA, pagal owner-rebuild-audit-v1 PR C):
   (#partners), ConversationOsPanel (#conversation), LabourMarketEvidence,
   PlayerCardShowcase, DraftBoard, MarketPulse, TrustBand (#trust), FinalCtaBand.
 
-Laukiama patikra: typecheck, lint, guards (vitest), build, baseline regen.
+**BAIGTA 2026-07-29.** Commitai: `f058cccb` (audito docs), `ba4a1db8`
+(landing rebuild + guardai). Šaka pushinta į origin (upstream sukurtas).
+
+Kliūtys, rastos ir išspręstos stabilizuojant:
+- §18 forbidden-terms guardas skenuoja ir JSON RAKTUS → namespace
+  `landing.demo` pervadintas į `landing.loop` (visos 11 lokalių; vertimų
+  tekstuose savarankiško „demo" nebuvo — patikrinta ta pačia regex).
+- `landing` root pridėtas į `CLIENT_MESSAGE_ROOTS` + 
+  `MARKETING_CLIENT_MESSAGE_ROOTS` (client-messages-allowlist guardas).
+- `global-landing.test.ts` (a) perrašytas: hero = live product demo;
+  `service-offers-baseline` markeris LiveWorldMap → LiveProductDemo;
+  freeze sąrašas +4 komponentai + use-mounted; baseline pergeneruotas.
+- e2e `pr-i-reality-landing.spec.ts` atnaujintas į naują kompoziciją
+  (world-canvas count → 0, demo/moment testid'ai).
+
+Patikros (visos žalios): `tsc --noEmit` 0; eslint 0 errors; vitest
+**780/780 failų**; `next build` sėkmingas.
+
+Reali naršyklės patikra (production build, `next start -p 3100`,
+Playwright/chromium): lt+en × 1440+390 — overflow 0 visur, demo+moment
+matomi, `#how-it-works` = 1, seno world-map canvas 0.
+
+Pakeisti failai: `app/[locale]/(marketing)/page.tsx`,
+`components/marketing/{live-product-demo,product-chain-band,market-moment,proof-band}.tsx`,
+`lib/i18n/client-messages.ts`, `lib/guards/{global-landing.test.ts,
+service-offers-baseline.test.ts,landing-freeze.ts,landing-freeze-baseline.json,
+i18n-debt.ts}`, `messages/*.json` (11), `tests/e2e/pr-i-reality-*.spec.ts`,
+`scripts/capture-owner-rebuild-{after,sections}.mjs`.
+
+Screenshotai: `docs/audits/evidence/owner-rebuild-after/`
+`landing-rebuild-{lt,en}-{1440,390}-{full,hero}.png`,
+`section-{chain,moment,demo-reduced,proof-title,trust}.png`.
