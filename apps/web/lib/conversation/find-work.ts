@@ -5,12 +5,12 @@ import "server-only";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
+import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
   CONVERSATION_FIND_WORK_LIMIT,
   type ChatEmployerMatch,
-  type ChatInterestLabels,
   type FindWorkResult,
 } from "./find-work-contract";
 
@@ -132,21 +132,3 @@ export async function findWorkForChat(): Promise<FindWorkResult> {
   };
 }
 
-/** The canonical `WorkerInterestButton` copy, resolved once per turn from the
- *  SAME `opportunities.interest.*` namespace the board uses — the chat invents
- *  no interest wording of its own. */
-async function resolveInterestLabels(): Promise<ChatInterestLabels> {
-  const t = await getTranslations("opportunities.interest");
-  return {
-    express: t("express"),
-    sent: t("sent"),
-    reviewed: t("reviewed"),
-    contacted: t("contacted"),
-    withdraw: t("withdraw"),
-    internalNote: t("internalNote"),
-    error: t("error"),
-    contactedLink: t("contactedLink"),
-    contactEmployer: t("contactEmployer"),
-    contactError: t("contactError"),
-  };
-}

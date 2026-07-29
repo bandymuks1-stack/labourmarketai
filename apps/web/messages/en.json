@@ -11282,5 +11282,66 @@
       "agency": "I represent an agency",
       "partner": "I want to become a partner"
     }
+  },
+  "workspace": {
+    "panel": {
+      "regionLabel": "Context",
+      "workTitle": "Your work right now",
+      "workHeadline": "This is what your own records say about right now.",
+      "workHeadlineQuiet": "Nothing is planned in your window, and nothing is overdue.",
+      "loading": "Reading…",
+      "close": "Close",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "notStated": "Not stated",
+      "act": "Do this",
+      "fieldRole": "Role",
+      "fieldLocation": "Place",
+      "fieldPay": "Pay",
+      "sectionFacts": "Details",
+      "sectionRequirements": "Requirements",
+      "sectionRecommendations": "Next steps",
+      "sectionHistory": "History",
+      "sectionRelated": "Related",
+      "sectionActions": "Actions",
+      "requirementMissing": "Missing:",
+      "contactNote": "Contact happens through LabourMarket.ai. No direct contact details are shown here.",
+      "unavailableNoWorker": "This opens once you have a worker profile.",
+      "unavailableNoAccess": "Open demands are not available to your account yet, so there is nothing to show here.",
+      "unavailableGone": "This is no longer on your board. It was closed, or it is no longer visible to you.",
+      "unavailableUnknownType": "This kind of object cannot be opened here yet.",
+      "unavailableWorkContext": "Your plan could not be read just now.",
+      "unavailableGeneric": "This could not be read just now.",
+      "historyInterest": {
+        "interested": "You expressed interest.",
+        "reviewed": "The company reviewed your interest.",
+        "contacted": "The company opened a thread with you.",
+        "withdrawn": "You withdrew your interest."
+      },
+      "historySaved": "You saved this.",
+      "recMissingSkills": "{count} required skills are not in your profile yet: {skills}.",
+      "recMissingSkillsBasis": "From this demand's requirements against your saved skills.",
+      "recInterestPending": "Your interest is sent and the company has not answered yet. There is nothing more to send.",
+      "recInterestPendingBasis": "From the status on your own interest signal.",
+      "recNextAction": {
+        "add_work_evidence": "Log work you have actually done. That is where your skills come from.",
+        "complete_profile": "Your profile is still too thin to compare properly.",
+        "review_opportunity": "This demand lists no structured requirements, so read it and decide for yourself."
+      },
+      "recNextActionBasis": "From the state of your own profile.",
+      "factToday": "Today",
+      "factTodayValue": "{count} commitments",
+      "factProject": "Project",
+      "factConflicts": "Conflicts",
+      "factConflictsValue": "{count} overlapping",
+      "factOverdue": "Overdue",
+      "factOverdueValue": "{count} tasks",
+      "factDeadline": "Next deadline",
+      "suggestOverdue": "{count} tasks are past their due day.",
+      "suggestLogToday": "You are working today and nothing is logged yet.",
+      "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
+      "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
+      "suggestBasis": "From your own calendar and tasks."
+    }
   }
 }

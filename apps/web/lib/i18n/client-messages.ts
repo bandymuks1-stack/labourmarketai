@@ -113,6 +113,8 @@ export const CLIENT_MESSAGE_ROOTS = [
   "waze",
   "workEntryReview",
   "workforcePlanning",
+  /** The one workspace: Context Panel copy (W3). */
+  "workspace",
 ] as const;
 
 /** Shipped by the root [locale] layout. The root error boundary

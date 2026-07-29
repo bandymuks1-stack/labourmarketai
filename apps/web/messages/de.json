@@ -11282,5 +11282,66 @@
       "agency": "Ich vertrete eine Agentur",
       "partner": "Ich möchte Partner werden"
     }
+  },
+  "workspace": {
+    "panel": {
+      "regionLabel": "Kontext",
+      "workTitle": "Deine Arbeit gerade jetzt",
+      "workHeadline": "Das sagen deine eigenen Aufzeichnungen über den Moment.",
+      "workHeadlineQuiet": "In deinem Zeitraum ist nichts geplant und nichts überfällig.",
+      "loading": "Wird gelesen…",
+      "close": "Schließen",
+      "collapse": "Einklappen",
+      "expand": "Ausklappen",
+      "notStated": "Nicht angegeben",
+      "act": "Das tun",
+      "fieldRole": "Tätigkeit",
+      "fieldLocation": "Ort",
+      "fieldPay": "Bezahlung",
+      "sectionFacts": "Angaben",
+      "sectionRequirements": "Anforderungen",
+      "sectionRecommendations": "Nächste Schritte",
+      "sectionHistory": "Verlauf",
+      "sectionRelated": "Verbunden",
+      "sectionActions": "Aktionen",
+      "requirementMissing": "Fehlt:",
+      "contactNote": "Der Kontakt läuft über LabourMarket.ai. Direkte Kontaktdaten werden hier nicht gezeigt.",
+      "unavailableNoWorker": "Das öffnet sich, sobald du ein Arbeitnehmerprofil hast.",
+      "unavailableNoAccess": "Offene Anfragen sind für dein Konto noch nicht verfügbar, deshalb gibt es hier nichts zu zeigen.",
+      "unavailableGone": "Das steht nicht mehr auf deiner Liste. Es wurde geschlossen oder ist für dich nicht mehr sichtbar.",
+      "unavailableUnknownType": "Diese Art von Objekt lässt sich hier noch nicht öffnen.",
+      "unavailableWorkContext": "Deine Planung konnte gerade nicht gelesen werden.",
+      "unavailableGeneric": "Das konnte gerade nicht gelesen werden.",
+      "historyInterest": {
+        "interested": "Du hast Interesse gezeigt.",
+        "reviewed": "Das Unternehmen hat dein Interesse angesehen.",
+        "contacted": "Das Unternehmen hat einen Gesprächsfaden mit dir eröffnet.",
+        "withdrawn": "Du hast dein Interesse zurückgezogen."
+      },
+      "historySaved": "Du hast das gespeichert.",
+      "recMissingSkills": "{count} geforderte Fähigkeiten stehen noch nicht in deinem Profil: {skills}.",
+      "recMissingSkillsBasis": "Aus den Anforderungen dieser Anfrage im Vergleich zu deinen gespeicherten Fähigkeiten.",
+      "recInterestPending": "Dein Interesse ist gesendet und das Unternehmen hat noch nicht geantwortet. Mehr musst du nicht senden.",
+      "recInterestPendingBasis": "Aus dem Status deines eigenen Interessenseintrags.",
+      "recNextAction": {
+        "add_work_evidence": "Trage Arbeit ein, die du wirklich gemacht hast. Daraus entstehen deine Fähigkeiten.",
+        "complete_profile": "Dein Profil ist noch zu dünn für einen richtigen Vergleich.",
+        "review_opportunity": "Diese Anfrage nennt keine strukturierten Anforderungen — lies sie und entscheide selbst."
+      },
+      "recNextActionBasis": "Aus dem Zustand deines eigenen Profils.",
+      "factToday": "Heute",
+      "factTodayValue": "{count} Verpflichtungen",
+      "factProject": "Projekt",
+      "factConflicts": "Konflikte",
+      "factConflictsValue": "{count} überschneiden sich",
+      "factOverdue": "Überfällig",
+      "factOverdueValue": "{count} Aufgaben",
+      "factDeadline": "Nächste Frist",
+      "suggestOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
+      "suggestLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
+      "suggestReserve": "Morgen fällt eine Frist an, und morgen ist fast frei.",
+      "suggestReserveNamed": "„{label}“ ist morgen fällig, und morgen ist fast frei.",
+      "suggestBasis": "Aus deinem eigenen Kalender und deinen Aufgaben."
+    }
   }
 }

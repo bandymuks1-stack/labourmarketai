@@ -273,8 +273,27 @@ it("form inputs reach 16px, so iOS never auto-zooms the page on focus", () => {
       const src = read(rel(p));
       for (const m of src.match(/min-h-(\d+)/g) ?? []) {
         const n = Number(m.replace("min-h-", ""));
+        // `min-h-0` is the flex-overflow idiom (`min-height: 0` on a flex child
+        // so a scrolling area can actually shrink) — a LAYOUT declaration, not
+        // a control height. It is exempt here and checked below instead: the
+        // rule keeps its teeth because a CONTROL may still never carry it.
+        if (m === "min-h-0") continue;
         // Tailwind spacing: 11 = 44px. Anything smaller on a control is a miss.
         if (n < 11) offenders.push(`${rel(p)}: ${m}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("the flex-overflow idiom is never applied to a control", () => {
+    // The compensating half of the `min-h-0` exemption above: a button, a link
+    // or an input carrying it would be a genuine zero-height touch target.
+    const offenders: string[] = [];
+    for (const p of conversationFiles()) {
+      const src = read(rel(p));
+      const tags = src.match(/<(button|a|input|Link)\b[^>]*>/g) ?? [];
+      for (const tag of tags) {
+        if (/min-h-0/.test(tag)) offenders.push(`${rel(p)}: ${tag.slice(0, 60)}`);
       }
     }
     expect(offenders).toEqual([]);

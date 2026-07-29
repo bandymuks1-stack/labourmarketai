@@ -11282,5 +11282,66 @@
       "agency": "Atstovauju agentūrai",
       "partner": "Noriu tapti partneriu"
     }
+  },
+  "workspace": {
+    "panel": {
+      "regionLabel": "Kontekstas",
+      "workTitle": "Tavo darbas dabar",
+      "workHeadline": "Štai ką apie dabartį sako tavo paties įrašai.",
+      "workHeadlineQuiet": "Tavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.",
+      "loading": "Skaitoma…",
+      "close": "Uždaryti",
+      "collapse": "Suskleisti",
+      "expand": "Išskleisti",
+      "notStated": "Nenurodyta",
+      "act": "Padaryti",
+      "fieldRole": "Darbas",
+      "fieldLocation": "Vieta",
+      "fieldPay": "Atlygis",
+      "sectionFacts": "Duomenys",
+      "sectionRequirements": "Reikalavimai",
+      "sectionRecommendations": "Kiti žingsniai",
+      "sectionHistory": "Istorija",
+      "sectionRelated": "Susiję",
+      "sectionActions": "Veiksmai",
+      "requirementMissing": "Trūksta:",
+      "contactNote": "Susisiekiama per LabourMarket.ai. Tiesioginiai kontaktai čia nerodomi.",
+      "unavailableNoWorker": "Tai atsidarys, kai turėsi darbuotojo profilį.",
+      "unavailableNoAccess": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl čia nėra ko rodyti.",
+      "unavailableGone": "Šito tavo sąraše nebėra. Jis uždarytas arba tau nebematomas.",
+      "unavailableUnknownType": "Tokio objekto čia dar negalima atidaryti.",
+      "unavailableWorkContext": "Tavo plano dabar nepavyko perskaityti.",
+      "unavailableGeneric": "Šito dabar nepavyko perskaityti.",
+      "historyInterest": {
+        "interested": "Pareiškei susidomėjimą.",
+        "reviewed": "Įmonė peržiūrėjo tavo susidomėjimą.",
+        "contacted": "Įmonė pradėjo pokalbį su tavimi.",
+        "withdrawn": "Atsiėmei susidomėjimą."
+      },
+      "historySaved": "Išsisaugojai šitą.",
+      "recMissingSkills": "{count} reikalaujami įgūdžiai dar neįrašyti tavo profilyje: {skills}.",
+      "recMissingSkillsBasis": "Iš šio poreikio reikalavimų, palygintų su tavo įrašytais įgūdžiais.",
+      "recInterestPending": "Susidomėjimas išsiųstas, įmonė dar neatsakė. Daugiau siųsti nieko nereikia.",
+      "recInterestPendingBasis": "Iš tavo paties susidomėjimo įrašo būsenos.",
+      "recNextAction": {
+        "add_work_evidence": "Užrašyk realiai atliktą darbą. Iš jo atsiranda tavo įgūdžiai.",
+        "complete_profile": "Tavo profilis dar per plonas, kad būtų galima tinkamai palyginti.",
+        "review_opportunity": "Šiame poreikyje nėra struktūruotų reikalavimų, tad perskaityk ir spręsk pats."
+      },
+      "recNextActionBasis": "Iš tavo paties profilio būsenos.",
+      "factToday": "Šiandien",
+      "factTodayValue": "{count} įsipareigojimai",
+      "factProject": "Projektas",
+      "factConflicts": "Konfliktai",
+      "factConflictsValue": "{count} persidengia",
+      "factOverdue": "Vėluoja",
+      "factOverdueValue": "{count} užduotys",
+      "factDeadline": "Artimiausias terminas",
+      "suggestOverdue": "{count} užduotys jau pradelstos.",
+      "suggestLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
+      "suggestReserve": "Rytoj terminas, o rytojus beveik laisvas.",
+      "suggestReserveNamed": "„{label}“ terminas rytoj, o rytojus beveik laisvas.",
+      "suggestBasis": "Iš tavo paties kalendoriaus ir užduočių."
+    }
   }
 }

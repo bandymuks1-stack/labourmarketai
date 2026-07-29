@@ -32,6 +32,8 @@ import {
   appendAssistantTurn,
   loadAssistantThread,
 } from "@/lib/assistant/transcript";
+import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
+import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import type { WorkerProfileStep } from "@/lib/conversation/worker-activity";
@@ -740,27 +742,55 @@ export function ConversationChat({
     advanced: labels.advanced,
   };
 
+  /**
+   * The Context Panel acts by asking the conversation to do what it already
+   * does (W3). It never owns an action: a chip id from the panel enters the
+   * SAME `handleChip` a chip in the thread enters, so there is one dispatcher
+   * and one set of flows no matter which part of the workspace was touched.
+   */
+  const handlePanelChip = useCallback(
+    (chipId: string) => handleChip({ id: chipId, label: "" }),
+    [handleChip],
+  );
+
   return (
-    <div className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`} data-testid="conversation-chat">
-      <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
-      <ConversationThread
-        items={items}
-        typing={typing}
-        handlers={{
-          onChip: handleChip,
-          onConfirm: () => {},
-          onCancel: () => {},
-          speakers: { assistant: labels.assistantName, user: labels.speakerYou },
-        }}
-      />
-      <Composer
-        placeholder={labels.composerPlaceholder}
-        attachLabel={labels.attach}
-        sendLabel={labels.send}
-        onSend={handleSend}
-        onAttach={() => handleChip({ id: "cv", label: "" })}
-      />
-      <ConversationBottomNav nav={nav} mobile={mobile} />
-    </div>
+    /**
+     * ONE WORKSPACE (W3). The conversation and the Context Panel share one
+     * World State: the panel follows the selection, the conversation performs
+     * the actions, and the person never leaves this page. The map joins the
+     * same state in W6 — that is why the state lives here rather than inside
+     * either part.
+     */
+    <WorldStateProvider avatarId={auth0?.user?.id ?? null}>
+      <div className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`} data-testid="conversation-chat">
+        <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        {/* Column on phones (panel docks under the composer, collapsed until
+            something is selected), row from `lg` (panel is the right column
+            and is always visible). Same component, one mount. */}
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <ConversationThread
+              items={items}
+              typing={typing}
+              handlers={{
+                onChip: handleChip,
+                onConfirm: () => {},
+                onCancel: () => {},
+                speakers: { assistant: labels.assistantName, user: labels.speakerYou },
+              }}
+            />
+            <Composer
+              placeholder={labels.composerPlaceholder}
+              attachLabel={labels.attach}
+              sendLabel={labels.send}
+              onSend={handleSend}
+              onAttach={() => handleChip({ id: "cv", label: "" })}
+            />
+          </div>
+          <ContextPanel locale={locale} onChip={handlePanelChip} />
+        </div>
+        <ConversationBottomNav nav={nav} mobile={mobile} />
+      </div>
+    </WorldStateProvider>
   );
 }
