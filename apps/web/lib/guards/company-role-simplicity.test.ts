@@ -178,10 +178,15 @@ describe("header popovers close on navigation and have a close button", () => {
     expect(dismissHook).toMatch(/mousedown/);
     expect(dismissHook).toMatch(/Escape/);
   });
-  it("notification panel + role switcher both use the hook and render ✕", () => {
-    for (const src of [notifPanel, roleSwitcher]) {
-      expect(src).toMatch(/usePopoverDismiss\(/);
-    }
+  it("notification panel + role switcher dismiss on route change/outside/Escape and render ✕", () => {
+    // The notification panel moved to the ONE portal root (owner audit
+    // P0.3): AnchoredOverlay owns outside-click + Escape, and the panel
+    // keeps its own pathname-close effect. The role switcher still uses the
+    // shared hook.
+    expect(notifPanel).toMatch(/AnchoredOverlay/);
+    expect(notifPanel).toMatch(/usePathname/);
+    expect(notifPanel).toMatch(/\[pathname\]/);
+    expect(roleSwitcher).toMatch(/usePopoverDismiss\(/);
     expect(notifPanel).toMatch(/notification-panel-close/);
     expect(roleSwitcher).toMatch(/role-switcher-close/);
   });

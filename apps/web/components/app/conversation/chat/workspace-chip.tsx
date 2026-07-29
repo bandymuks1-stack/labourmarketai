@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef } from "react";
-import { Check } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useAuthOptional } from "@/lib/auth/context";
@@ -9,6 +9,7 @@ import {
   PERSONAL_WORKSPACE_ID,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
+import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { iconControl } from "./icon-scale";
 
 /**
@@ -59,7 +60,8 @@ function dotClass(w: WorkspaceInfo): string {
 export function WorkspaceChip() {
   const auth = useAuthOptional();
   const t = useTranslations("conversation.chat");
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
 
   const workspaces = auth?.workspaces ?? [];
   const activeWorkspaceId = auth?.activeWorkspaceId ?? PERSONAL_WORKSPACE_ID;
@@ -67,7 +69,7 @@ export function WorkspaceChip() {
 
   const onPick = useCallback(
     async (id: string) => {
-      if (detailsRef.current) detailsRef.current.open = false;
+      setOpen(false);
       if (switchWorkspace) await switchWorkspace(id);
     },
     [switchWorkspace],
@@ -98,21 +100,32 @@ export function WorkspaceChip() {
   }
 
   return (
-    <details ref={detailsRef} className="relative" data-testid="workspace-chip">
-      <summary
-        className="flex min-h-11 max-w-40 cursor-pointer list-none items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary sm:max-w-56 [&::-webkit-details-marker]:hidden"
+    <div className="relative" data-testid="workspace-chip">
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
         aria-label={t("workspaceLabel")}
+        className="flex min-h-11 max-w-40 cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary sm:max-w-56"
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
         <span className="truncate">{nameOf(active)}</span>
-      </summary>
-      <div
-        data-testid="workspace-chip-menu"
-        // z-[60]: one dropdown tier for every header menu (workspace, account,
-        // notifications) — they can never interleave with each other's
-        // trigger rows or sink under the map (owner audit P0.3).
-        className="absolute left-0 top-full z-[60] mt-2 w-64 rounded-md border border-ink-600 bg-ink-800 p-1.5 shadow-lg"
+        <ChevronDown {...iconControl("flex-none")} aria-hidden />
+      </button>
+      {/* The ONE portal root (owner audit P0.3): the menu renders at
+          document.body, above every stacking context — never under the map. */}
+      <AnchoredOverlay
+        anchorRef={triggerRef}
+        open={open}
+        onClose={() => setOpen(false)}
+        align="left"
       >
+        <div
+          data-testid="workspace-chip-menu"
+          className="w-64 rounded-md border border-ink-600 bg-ink-800 p-1.5 shadow-lg"
+        >
         <p className="px-2 pb-1 pt-0.5 text-meta font-semibold uppercase tracking-wide text-text-muted">
           {t("workspaceLabel")}
         </p>
@@ -139,8 +152,9 @@ export function WorkspaceChip() {
               </li>
             );
           })}
-        </ul>
-      </div>
-    </details>
+          </ul>
+        </div>
+      </AnchoredOverlay>
+    </div>
   );
 }

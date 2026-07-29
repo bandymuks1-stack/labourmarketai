@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { CommandFinder } from "@/components/app/command-finder";
+import { OverlayPortal } from "@/components/ui/anchored-overlay";
 
 /**
  * Universal OS search (owner UX recovery v1). One compact header button that
@@ -121,11 +122,14 @@ export function HeaderSearch({
       </button>
 
       {open && (
+        <OverlayPortal>
         <div
-          // z-[70]: the search dialog must dim EVERYTHING — the chat composer
-          // (z-50), the context-panel sheet (z-50) and the notification
-          // popover (z-60). In production the right panel stayed bright over
-          // the backdrop (owner visual acceptance P0-2).
+          // z-[70] through the ONE portal root (owner audit P0.3): rendered
+          // at document.body the backdrop competes only in the root stacking
+          // context, so it dims EVERYTHING — composer (z-50), panel sheet
+          // (z-50), dropdown menus (z-60). Inside the header its z was
+          // trapped by the backdrop-blur stacking context and the right
+          // panel stayed bright over it in production.
           className="fixed inset-0 z-[70] flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
@@ -152,6 +156,7 @@ export function HeaderSearch({
             <CommandFinder />
           </div>
         </div>
+        </OverlayPortal>
       )}
     </>
   );

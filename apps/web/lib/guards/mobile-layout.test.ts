@@ -96,10 +96,12 @@ describe("mobile layout invariants", () => {
   describe("account menu (apps/web/components/app/account-menu.tsx)", () => {
     const src = read("components/app/account-menu.tsx");
 
-    it("dropdown menu is capped to the viewport on mobile", () => {
-      expect(src).toMatch(
-        /absolute right-0[^"]*w-56[^"]*max-w-\[calc\(100vw-1\.5rem\)\]/,
-      );
+    it("dropdown menu is capped to the viewport on mobile (via the portal root)", () => {
+      // The menu renders through AnchoredOverlay (owner audit P0.3 — one
+      // portal root) with fixed positioning clamped to an 8px gutter; the
+      // panel itself keeps the viewport cap.
+      expect(src).toMatch(/AnchoredOverlay/);
+      expect(src).toMatch(/w-56[^"]*max-w-\[calc\(100vw-1\.5rem\)\]/);
     });
   });
 
