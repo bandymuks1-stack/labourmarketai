@@ -75,7 +75,7 @@ export function WorkspaceMap({
 
   // ── map init (client only; leaflet touches window) ──────────────────────
   useEffect(() => {
-    if (!view || view.clusters.length === 0) return;
+    if (!view || (view.clusters.length === 0 && !view.home)) return;
     let disposed = false;
     (async () => {
       const L = (await import("leaflet")).default as unknown as typeof LeafletTypes;
@@ -92,10 +92,28 @@ export function WorkspaceMap({
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
         maxZoom: 18,
       }).addTo(map);
-      const bounds = boundsFor(view.clusters);
+      // Bounds include the viewer's OWN market anchor (owner audit §9.2):
+      // the map opens on THEIR market, not on a lone foreign pin.
+      const bounds = boundsFor(view.clusters, view.home);
       if (bounds) map.fitBounds(bounds, { padding: [24, 24], maxZoom: 11 });
       mapRef.current = map;
       markersRef.current = L.layerGroup().addTo(map);
+      if (view.home) {
+        L.marker([view.home.lat, view.home.lng], {
+          icon: L.divIcon({
+            className: "",
+            html: `<div class="wsmap-home" title=""></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          }),
+          interactive: false,
+        })
+          .addTo(map)
+          .bindTooltip(
+            `${t("homeLabel")}${view.home.precision === "country" ? ` · ${t("approx")}` : ""}`,
+            { direction: "top", offset: L.point(0, -8) },
+          );
+      }
       drawMarkers(view.clusters, state.activeEntity);
     })();
     return () => {
@@ -189,7 +207,7 @@ export function WorkspaceMap({
 
   // Honest states: reading / nothing mappable / failed — never a blank tile.
   if (failed) return null; // the panel simply has no map section
-  if (view && view.clusters.length === 0) {
+  if (view && view.clusters.length === 0 && !view.home) {
     return view.unmapped > 0 ? (
       <p className="text-meta text-text-muted" data-testid="workspace-map-unmapped">
         {t("unmappedOnly", { count: view.unmapped })}
@@ -206,10 +224,17 @@ export function WorkspaceMap({
         role="application"
       />
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-        {/* The legend states what a pin IS — real rows, grouped per place. */}
+        {/* The legend states what EVERY mark is — no unexplained dots
+            (owner audit §9.1): a pin is real rows grouped per place; the
+            ring is the viewer's own market anchor. */}
         <span className="inline-flex items-center gap-1.5 text-meta text-text-muted">
           <span className="wsmap-legend-dot" aria-hidden /> {t("legendEntities")}
         </span>
+        {view?.home && (
+          <span className="inline-flex items-center gap-1.5 text-meta text-text-muted" data-testid="workspace-map-home-legend">
+            <span className="wsmap-legend-home" aria-hidden /> {t("homeLabel")}
+          </span>
+        )}
         {view && view.unmapped > 0 && (
           <span className="text-meta text-text-muted" data-testid="workspace-map-unmapped">
             {t("unmapped", { count: view.unmapped })}

@@ -226,6 +226,8 @@
   "listEmptyTitle": "Pradėkite kurti darbo įrašus",
   "listEmptyNext": "Sukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.",
   "listEmptyCta": "Sukurti pirmą įrašą",
+  "logViaChatBody": "Darbas fiksuojamas pokalbyje — parašyk, ką dirbai, ir įrašas atsiras čia.",
+  "logViaChatCta": "Užfiksuoti darbą pokalbyje",
   "listTitle": "Darbo įrašai",
   "navTitle": "Darbo žurnalas",
   "navSubtitle": "Parodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.",

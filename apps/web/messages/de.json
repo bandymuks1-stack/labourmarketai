@@ -4088,7 +4088,8 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netzwerk",
-        "advanced": "Erweiterte Steuerung"
+        "advanced": "Erweiterte Steuerung",
+        "playerCard": "Meine Karte"
       },
       "roleNotice": {
         "needs_worker_role": "Dieser Link öffnet den Arbeitskraft-Bereich, den Ihr Konto noch nicht hat. Fügen Sie die Arbeitskraft-Rolle im Bereichs-Hub hinzu.",
@@ -11048,6 +11049,8 @@
       "chipPrefs": "Präferenzen",
       "offersEmpty": "Du hast noch keine Angebote. Sobald dein Profil fertig ist, können Arbeitgeber dir Angebote senden.",
       "searchAskCriteria": "Für eine genaue Suche legen wir zuerst deine Kriterien fest — wo, wann und zu welchen Bedingungen du arbeiten möchtest. Fülle das unten aus und ich suche sofort.",
+      "playerCardAfterLog": "Hier ist deine Karte nach diesem Eintrag — deine Arbeitshistorie ist gerade stärker geworden.",
+      "playerCardBlocked": "Dieses Konto hat noch keine Arbeitskarte. Erfasse deine erste Arbeit oder lade einen Lebenslauf hoch — die Karte wächst aus echten Einträgen.",
       "fallback": "Ich kann dir mit Lebenslauf, Profil und Angeboten helfen. Was möchtest du tun?",
       "userCv": "Ich lade meinen Lebenslauf hoch",
       "userProfile": "Zeig mein Profil",
@@ -11120,6 +11123,14 @@
       "saved": "Eintrag im Arbeitsjournal gespeichert.",
       "errorGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
       "minutesUnit": "Min",
+      "relationship": {
+        "employee": "Angestellter",
+        "freelancer": "Freiberufler",
+        "consultant": "Berater",
+        "owner": "Inhaber",
+        "collaborator": "Mitwirkender",
+        "other": "Anderer Kontext"
+      },
       "addedSkillPrefix": "Fähigkeit hinzugefügt",
       "strengthenedSkillPrefix": "Fähigkeit gestärkt",
       "pendingConfirmPrefix": "Wartet auf deine Bestätigung",
@@ -11418,14 +11429,14 @@
       },
       "recNextActionBasis": "Aus dem Zustand deines eigenen Profils.",
       "factToday": "Heute",
-      "factTodayValue": "{count} Verpflichtungen",
+      "factTodayValue": "{count, plural, one {# Verpflichtung} other {# Verpflichtungen}}",
       "factProject": "Projekt",
       "factConflicts": "Konflikte",
       "factConflictsValue": "{count} überschneiden sich",
       "factOverdue": "Überfällig",
-      "factOverdueValue": "{count} Aufgaben",
+      "factOverdueValue": "{count, plural, one {# Aufgabe} other {# Aufgaben}}",
       "factDeadline": "Nächste Frist",
-      "suggestOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
+      "suggestOverdue": "{count, plural, one {# Aufgabe ist über ihrem Fälligkeitstag} other {# Aufgaben sind über ihrem Fälligkeitstag}}.",
       "suggestLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
       "suggestReserve": "Morgen fällt eine Frist an, und morgen ist fast frei.",
       "suggestReserveNamed": "„{label}“ ist morgen fällig, und morgen ist fast frei.",
@@ -11518,9 +11529,10 @@
     "map": {
       "regionLabel": "Arbeitsbereichskarte",
       "legendEntities": "Echte Chancen und Projekte, je Ort gruppiert",
+      "homeLabel": "Dein Markt",
       "approx": "ungefährer Ort",
-      "unmapped": "{count} ohne bestimmbaren Ort",
-      "unmappedOnly": "{count} Einträge haben noch keinen bestimmbaren Ort, es gibt nichts zu zeichnen."
+      "unmapped": "{count, plural, one {noch # Chance ohne angegebenen Ort — sie erscheint in der Chat-Suche} other {noch # Chancen ohne angegebenen Ort — sie erscheinen in der Chat-Suche}}",
+      "unmappedOnly": "{count, plural, one {# echte Chance hat keinen angegebenen Ort und kann nicht gezeichnet werden — finde sie in der Chat-Suche} other {# echte Chancen haben keinen angegebenen Ort und können nicht gezeichnet werden — finde sie in der Chat-Suche}}."
     }
   }
 }

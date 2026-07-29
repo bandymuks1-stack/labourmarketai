@@ -4088,7 +4088,8 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "advanced": "Advanced controls"
+        "advanced": "Advanced controls",
+        "playerCard": "My card"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -11048,6 +11049,8 @@
       "chipPrefs": "Preferences",
       "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
       "searchAskCriteria": "To search well, let's first pin down your criteria — where, when and on what terms you want to work. Fill this in below and I'll search right away.",
+      "playerCardAfterLog": "Here's your card after that entry — your work record just got stronger.",
+      "playerCardBlocked": "This account has no worker card yet. Log your first work or upload a CV — the card grows from real records.",
       "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "I'll upload my CV",
       "userProfile": "Show my profile",
@@ -11120,6 +11123,14 @@
       "saved": "Entry saved to your work journal.",
       "errorGeneric": "Couldn't save. Please try again.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Employee",
+        "freelancer": "Freelancer",
+        "consultant": "Consultant",
+        "owner": "Owner",
+        "collaborator": "Collaborator",
+        "other": "Other context"
+      },
       "addedSkillPrefix": "Skill added",
       "strengthenedSkillPrefix": "Skill strengthened",
       "pendingConfirmPrefix": "Awaiting your confirmation",
@@ -11418,14 +11429,14 @@
       },
       "recNextActionBasis": "From the state of your own profile.",
       "factToday": "Today",
-      "factTodayValue": "{count} commitments",
+      "factTodayValue": "{count, plural, one {# commitment} other {# commitments}}",
       "factProject": "Project",
       "factConflicts": "Conflicts",
       "factConflictsValue": "{count} overlapping",
       "factOverdue": "Overdue",
-      "factOverdueValue": "{count} tasks",
+      "factOverdueValue": "{count, plural, one {# task} other {# tasks}}",
       "factDeadline": "Next deadline",
-      "suggestOverdue": "{count} tasks are past their due day.",
+      "suggestOverdue": "{count, plural, one {# task is past its due day} other {# tasks are past their due day}}.",
       "suggestLogToday": "You are working today and nothing is logged yet.",
       "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
       "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
@@ -11518,9 +11529,10 @@
     "map": {
       "regionLabel": "Workspace map",
       "legendEntities": "Real opportunities and projects, grouped per place",
+      "homeLabel": "Your market",
       "approx": "approximate location",
-      "unmapped": "{count} without a mappable place",
-      "unmappedOnly": "{count} items have no mappable place yet, so there is nothing to draw."
+      "unmapped": "{count, plural, one {# more opportunity has no stated place — it shows in the chat search} other {# more opportunities have no stated place — they show in the chat search}}",
+      "unmappedOnly": "{count, plural, one {# real opportunity has no stated place, so it cannot be drawn — find it in the chat search} other {# real opportunities have no stated place, so they cannot be drawn — find them in the chat search}}."
     }
   }
 }

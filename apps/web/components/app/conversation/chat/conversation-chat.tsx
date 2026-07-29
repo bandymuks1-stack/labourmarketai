@@ -26,6 +26,8 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
+import { loadPlayerCardForChat } from "@/lib/conversation/player-card-chat";
+import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -97,6 +99,8 @@ export type ChatLabels = {
   /** P0.5 (owner audit): the search dialog's opening line — what we know,
    *  before asking for what is missing. */
   searchAskCriteria: string;
+  /** §5.1: the line above the card when it re-renders after a work log. */
+  playerCardAfterLog: string;
   fallback: string;
   userCv: string;
   userProfile: string;
@@ -669,6 +673,46 @@ export function ConversationChat({
       });
   }, [assistant, starterChips, labels.fallback, labels.chipPrefs, labels.chipJobs]);
 
+  /**
+   * THE PLAYER CARD IN THE CONVERSATION (owner audit §5.1). "Parodyk mano
+   * kortelę" renders the ONE canonical `WorkerPlayerCard` — the exact
+   * component and the exact server-derived data the journal identity block
+   * uses — as an embedded turn. It also runs right after a work log lands,
+   * so the person SEES their card grow the moment their record changed.
+   */
+  const startPlayerCard = useCallback(
+    (opts?: { intro?: string }) => {
+      setTyping(true);
+      loadPlayerCardForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "card") {
+            if (opts?.intro) assistant(opts.intro);
+            pushEmbed(
+              <div className="max-w-2xl" data-testid="chat-player-card">
+                <WorkerPlayerCard
+                  card={res.card}
+                  labels={res.labels}
+                  thermometer={res.thermometer}
+                  avatarUrl={res.avatarUrl}
+                />
+              </div>,
+            );
+          } else {
+            assistant(res.message, starterChips);
+          }
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.fallback, starterChips);
+        });
+    },
+    [assistant, pushEmbed, starterChips, labels.fallback],
+  );
+  /** Late-bound so earlier flows (work-log onClose) can show the card. */
+  const startPlayerCardRef = useRef(startPlayerCard);
+  startPlayerCardRef.current = startPlayerCard;
+
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string) => {
@@ -683,14 +727,15 @@ export function ConversationChat({
           draft={draft}
           locale={locale}
           labels={workLogLabels}
-          // After a work log lands, show what actually changed (profile
-          // summary re-reads the real rows: new skills, updated activity) —
-          // the contextual follow-up, not the generic menu.
-          onClose={() => startProfileSummaryRef.current("resume")}
+          // After a work log lands, the person SEES their card change
+          // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
+          // canonical Player Card re-renders with the just-strengthened
+          // record — the real payoff of logging work, not a generic menu.
+          onClose={() => startPlayerCardRef.current({ intro: labels.playerCardAfterLog })}
         />,
       );
     },
-    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog],
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog],
   );
 
   /**
@@ -832,6 +877,11 @@ export function ConversationChat({
       }
       if (intent === "criteria") {
         startCriteria();
+        return;
+      }
+      if (intent === "player-card") {
+        // The canonical card, rendered IN the conversation (§5.1).
+        startPlayerCard();
         return;
       }
       if (intent === "calendar-view") {

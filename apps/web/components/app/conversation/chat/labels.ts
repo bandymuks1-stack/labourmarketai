@@ -10,7 +10,7 @@ const CHAT_KEYS = [
   "composerPlaceholder", "send", "attach", "greeting",
   "chipCv", "chipJobs", "chipProfile", "chipOffers", "chipLang",
   "chipExp", "chipEdu", "chipCard", "chipPrefs", "offersEmpty",
-  "searchAskCriteria",
+  "searchAskCriteria", "playerCardAfterLog",
   "fallback", "userCv", "userProfile", "userOffers", "userJobs",
   "chipLogWork", "userLogWork",
   "chipAgenda", "userAgenda", "chipNeedWorkers", "chipCandidates",

@@ -41,6 +41,7 @@ export type ConversationIntent =
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "context" // "ką tu apie mane žinai?"
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
+  | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "unknown";
 
 export type IntentMatch = {
@@ -224,6 +225,19 @@ const RULES: IntentRule[] = [
       p("\\bvacancy|vacature|vakans", 1),
       // "in the Netherlands / country" — a search location
       p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
+    ],
+  },
+  {
+    // The Player Card, asked for in words (owner audit §5.1) — MUST outrank
+    // `profile` and the work-card FORM intent: showing the card is a read,
+    // not an edit. "kortel" alone is decisive; the save-work-card flow is
+    // reached through its explicit chip, never through this sentence.
+    intent: "player-card",
+    patterns: [
+      p("(parodyk|rodyk|atidaryk|show|open|покажи|открой)\\s*.{0,14}(kortel|card\\b|карточк)", 7),
+      p("(mano|my|моя)\\s+(kortel|card\\b|карточк)", 6),
+      p("player\\s*card", 6),
+      p("(darbuotojo|worker)\\s+(kortel|card\\b)", 5),
     ],
   },
   {

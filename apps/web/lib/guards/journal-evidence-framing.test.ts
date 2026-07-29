@@ -83,11 +83,12 @@ describe("no heavy technical / module / draft wording on worker-facing copy", ()
 
 describe("journal entry surface stays focused", () => {
   const page = read(PAGE);
-  it("renders the evidence subtitle + composer benefit line", () => {
+  it("renders the evidence subtitle + the log-via-chat framing (owner audit §6.1)", () => {
     expect(page).toMatch(/journal-nav-subtitle/);
-    expect(page).toMatch(/journal-composer-benefit/);
     expect(page).toMatch(/navSubtitle/);
-    expect(page).toMatch(/composerBenefit/);
+    // Intake framing: work is logged in the CONVERSATION; the page states it.
+    expect(page).toMatch(/journal-log-via-chat/);
+    expect(page).toMatch(/logViaChatBody/);
   });
   it("has at most one primary gradient CTA on the page", () => {
     const n = (page.match(/from-brand-blue to-brand-cyan|variant="primary"/g) ?? []).length;

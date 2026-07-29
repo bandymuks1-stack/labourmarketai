@@ -67,6 +67,9 @@ export function AccountMenu() {
     // the bar carried TWO avatars for the same person; now this menu is the
     // one avatar and Profile is its first entry.
     { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
+    // The Premium Player Card, reachable through the avatar (owner audit
+    // §5.1) — deep-links to the canonical card block on the Mano CV surface.
+    { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]

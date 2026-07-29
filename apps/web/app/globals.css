@@ -621,6 +621,24 @@ a {
 .wsmap-row:hover {
   background: rgba(var(--c-brand-blue), 0.1);
 }
+.wsmap-home {
+  /* The viewer's own market anchor — a calm ring, visually distinct from the
+     entity pins so no dot is ever ambiguous (owner audit §9.1). */
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 3px solid rgb(var(--c-brand-violet));
+  background: rgb(var(--c-brand-violet) / 0.18);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.75);
+}
+.wsmap-legend-home {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 2px solid rgb(var(--c-brand-violet));
+  background: rgb(var(--c-brand-violet) / 0.18);
+  display: inline-block;
+}
 .wsmap-legend-dot {
   display: inline-block;
   width: 10px;

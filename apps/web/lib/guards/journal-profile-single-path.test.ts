@@ -29,15 +29,18 @@ const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 describe("Guard: journal is the canonical entry INPUT", () => {
   const journal = read(JOURNAL_PAGE);
 
-  it("the journal page renders the entry composer (create/edit)", () => {
+  it("the journal page renders the entry composer for EDIT mode only (owner audit §6.1)", () => {
+    // Correcting an existing record stays on the projection (supersede path);
+    // a NEW record starts in the conversation — no second intake form.
+    expect(journal).toMatch(/editingEntry \? \(/);
     expect(journal).toMatch(/<JournalEntryComposer/);
   });
 
-  it("has ONE clear primary action that jumps to the single composer", () => {
-    // The "New entry" CTA anchors to #journal-composer (no duplicate create
-    // route/surface). dashboard-primary-action-clarity enforces <= 1 primary CTA.
-    expect(journal).toMatch(/journal-new-entry-cta/);
-    expect(journal).toMatch(/href="#journal-composer"/);
+  it("has ONE clear primary action — log work in the conversation", () => {
+    expect(journal).toMatch(/journal-log-via-chat-cta/);
+    expect(journal).toMatch(/logViaChatCta/);
+    // No duplicate create surface, no on-page create anchor CTA.
+    expect(journal).not.toMatch(/href="#journal-composer"/);
   });
 
   it("composer renders first (order-1), compact history after (order-2) — Wagon 5", () => {

@@ -4088,7 +4088,8 @@
         "admin": "Administravimas",
         "planning": "Kalendorius",
         "network": "Ryšiai",
-        "advanced": "Išplėstinis valdymas"
+        "advanced": "Išplėstinis valdymas",
+        "playerCard": "Mano kortelė"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -11048,6 +11049,8 @@
       "chipPrefs": "Pageidavimus",
       "offersEmpty": "Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia.",
       "searchAskCriteria": "Kad paieška būtų tiksli, pirmiausia patikslinkime kriterijus — kur, kada ir kokiomis sąlygomis nori dirbti. Užpildyk žemiau, ir iškart ieškosiu.",
+      "playerCardAfterLog": "Štai tavo kortelė po šio įrašo — darbo istorija ką tik sustiprėjo.",
+      "playerCardBlocked": "Darbuotojo kortelė dar nesukurta šioje paskyroje. Užfiksuok pirmą darbą arba įkelk CV — kortelė atsiras iš realių įrašų.",
       "fallback": "Galiu padėti su CV, profiliu ir darbo pasiūlymais. Ką norėtum daryti?",
       "userCv": "Įkelsiu CV",
       "userProfile": "Parodyk mano profilį",
@@ -11120,6 +11123,14 @@
       "saved": "Įrašas išsaugotas darbo žurnale.",
       "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Darbuotojas",
+        "freelancer": "Laisvai samdomas",
+        "consultant": "Konsultantas",
+        "owner": "Savininkas",
+        "collaborator": "Bendradarbis",
+        "other": "Kitas kontekstas"
+      },
       "addedSkillPrefix": "Pridėtas įgūdis",
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",
@@ -11418,14 +11429,14 @@
       },
       "recNextActionBasis": "Iš tavo paties profilio būsenos.",
       "factToday": "Šiandien",
-      "factTodayValue": "{count} įsipareigojimai",
+      "factTodayValue": "{count, plural, one {# įsipareigojimas} few {# įsipareigojimai} other {# įsipareigojimų}}",
       "factProject": "Projektas",
       "factConflicts": "Konfliktai",
       "factConflictsValue": "{count} persidengia",
       "factOverdue": "Vėluoja",
-      "factOverdueValue": "{count} užduotys",
+      "factOverdueValue": "{count, plural, one {# užduotis} few {# užduotys} other {# užduočių}}",
       "factDeadline": "Artimiausias terminas",
-      "suggestOverdue": "{count} užduotys jau pradelstos.",
+      "suggestOverdue": "{count, plural, one {# užduotis jau pradelsta} few {# užduotys jau pradelstos} other {# užduočių jau pradelsta}}.",
       "suggestLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
       "suggestReserve": "Rytoj terminas, o rytojus beveik laisvas.",
       "suggestReserveNamed": "„{label}“ terminas rytoj, o rytojus beveik laisvas.",
@@ -11518,9 +11529,10 @@
     "map": {
       "regionLabel": "Darbo erdvės žemėlapis",
       "legendEntities": "Realios galimybės ir projektai, sugrupuoti pagal vietą",
+      "homeLabel": "Tavo rinka",
       "approx": "apytikslė vieta",
-      "unmapped": "{count} be nustatomos vietos",
-      "unmappedOnly": "{count} įrašai dar neturi nustatomos vietos, todėl nėra ko braižyti."
+      "unmapped": "{count, plural, one {dar # galimybė be nurodytos vietos — ji matoma pokalbio paieškoje} few {dar # galimybės be nurodytos vietos — jos matomos pokalbio paieškoje} other {dar # galimybių be nurodytos vietos — jos matomos pokalbio paieškoje}}",
+      "unmappedOnly": "{count, plural, one {# reali galimybė yra be nurodytos vietos, todėl žemėlapyje jos parodyti negalima — ją rasi pokalbio paieškoje} other {# realios galimybės yra be nurodytos vietos, todėl žemėlapyje jų parodyti negalima — jas rasi pokalbio paieškoje}}."
     }
   }
 }

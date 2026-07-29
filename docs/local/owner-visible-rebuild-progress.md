@@ -6,6 +6,30 @@ Savininkas atmetė `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED`
 Naujas tikslas: `OWNER_VISUAL_ACCEPTANCE_2026_PREMIUM_PRODUCTION_VERIFIED`.
 Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
 
+### Etapų žurnalas (owner visual acceptance)
+
+- **P0 blokas — BAIGTA 2026-07-29** (commit'ai 66f4dc3f…62a8ca2b dalis):
+  overlay z-skalė (`.wsmap` isolation, dropdown'ai z-60, paieška z-70);
+  paieška randa žurnalo įrašus; „Ieškau darbo" pradeda kriterijų dialogą;
+  profilio chip būsenos-neutralus; kalendorius/paieška — vienas aktyvus
+  įrašas korekcijų grandinėje; composer pre-hydration salvage; „kiek
+  valandų dirbau" → žurnalo readback; workspace perjungimas REALUS
+  (server-side sesijos pointer + narystės validacija + rolė seka erdvę;
+  „switch soon" tekstas ištrintas ×11 lokalių); OAuth identiteto read-only
+  auditas (`docs/owner-goals/oauth-identity-audit-2026.md`, savininko gate).
+- **Chat-first IA — BAIGTA 2026-07-29** (62a8ca2b): tabų eilė ir bottom nav
+  pašalinti; header = back-to-chat + identitetas + erdvės chip + paieška
+  (visose platumose) + kalba + varpelis + vienas avataras; Advanced tik
+  adminams per meniu; composer centre pirmo atidarymo metu → sticky po
+  pirmo turn; žinutės per brief eilutę + „parodyk žinutes" intentą.
+  Guard'ai perpinti į naują kanoną; 10140 testų žali; build ok.
+- **Player Card matomumas — BAIGTA 2026-07-29**: „Parodyk mano kortelę"
+  chat komanda renderina KANONINĮ `WorkerPlayerCard` pokalbyje (server
+  action `loadPlayerCardForChat`); po darbo įrašo išsaugojimo kortelė
+  parodoma automatiškai su intro eilute; avataro meniu — „Mano kortelė"
+  deep-link į kanoninį bloką. LIKUTIS (§5.2 premium vizualika: vieta,
+  dokumentų būsena, reputacija kortelėje) — perkelta į premium design pass.
+
 ### Etapas 0 — kanoninė specifikacija + production auditas (2026-07-29)
 
 - **Kanoninė specifikacija — savininko auditas**: rastas

@@ -4088,7 +4088,8 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netwerk",
-        "advanced": "Geavanceerd beheer"
+        "advanced": "Geavanceerd beheer",
+        "playerCard": "Mijn kaart"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -11048,6 +11049,8 @@
       "chipPrefs": "Voorkeuren",
       "offersEmpty": "Je hebt nog geen aanbiedingen. Zodra je profiel klaar is, kunnen werkgevers je aanbiedingen sturen.",
       "searchAskCriteria": "Om goed te zoeken leggen we eerst je criteria vast — waar, wanneer en onder welke voorwaarden je wilt werken. Vul dit hieronder in en ik zoek meteen.",
+      "playerCardAfterLog": "Dit is je kaart na die invoer — je werkgeschiedenis is net sterker geworden.",
+      "playerCardBlocked": "Dit account heeft nog geen werknemerskaart. Registreer je eerste werk of upload een cv — de kaart groeit uit echte gegevens.",
       "fallback": "Ik kan je helpen met je cv, profiel en aanbiedingen. Wat wil je doen?",
       "userCv": "Ik upload mijn cv",
       "userProfile": "Toon mijn profiel",
@@ -11120,6 +11123,14 @@
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Werknemer",
+        "freelancer": "Freelancer",
+        "consultant": "Consultant",
+        "owner": "Eigenaar",
+        "collaborator": "Medewerker",
+        "other": "Andere context"
+      },
       "addedSkillPrefix": "Vaardigheid toegevoegd",
       "strengthenedSkillPrefix": "Vaardigheid versterkt",
       "pendingConfirmPrefix": "Wacht op je bevestiging",
@@ -11418,14 +11429,14 @@
       },
       "recNextActionBasis": "Uit de staat van je eigen profiel.",
       "factToday": "Vandaag",
-      "factTodayValue": "{count} verplichtingen",
+      "factTodayValue": "{count, plural, one {# verplichting} other {# verplichtingen}}",
       "factProject": "Project",
       "factConflicts": "Conflicten",
       "factConflictsValue": "{count} overlappen",
       "factOverdue": "Te laat",
-      "factOverdueValue": "{count} taken",
+      "factOverdueValue": "{count, plural, one {# taak} other {# taken}}",
       "factDeadline": "Eerstvolgende deadline",
-      "suggestOverdue": "{count} taken zijn over hun einddatum heen.",
+      "suggestOverdue": "{count, plural, one {# taak is over de einddatum heen} other {# taken zijn over hun einddatum heen}}.",
       "suggestLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "suggestReserve": "Er valt morgen een deadline en morgen is bijna vrij.",
       "suggestReserveNamed": "„{label}“ moet morgen af, en morgen is bijna vrij.",
@@ -11518,9 +11529,10 @@
     "map": {
       "regionLabel": "Werkruimtekaart",
       "legendEntities": "Echte kansen en projecten, gegroepeerd per plaats",
+      "homeLabel": "Jouw markt",
       "approx": "benaderde locatie",
-      "unmapped": "{count} zonder bepaalbare plaats",
-      "unmappedOnly": "{count} items hebben nog geen bepaalbare plaats, dus er valt niets te tekenen."
+      "unmapped": "{count, plural, one {nog # kans zonder opgegeven plaats — te vinden in de chatzoekfunctie} other {nog # kansen zonder opgegeven plaats — te vinden in de chatzoekfunctie}}",
+      "unmappedOnly": "{count, plural, one {# echte kans heeft geen opgegeven plaats en kan niet getekend worden — vind hem in de chatzoekfunctie} other {# echte kansen hebben geen opgegeven plaats en kunnen niet getekend worden — vind ze in de chatzoekfunctie}}."
     }
   }
 }

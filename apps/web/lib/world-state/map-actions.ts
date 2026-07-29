@@ -8,6 +8,7 @@ import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportuniti
 import { listManagedProjects } from "@/lib/projects/projects";
 import { resolveLocation } from "@/lib/location/city-coordinates";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
+import { createClient } from "@/lib/supabase/server";
 import {
   clusterWorkspaceEntities,
   type WorkspaceMapEntity,
@@ -69,6 +70,41 @@ export async function loadWorkspaceMap(): Promise<WorkspaceMapView> {
     /* the board being unavailable contributes nothing — never a fake pin */
   }
 
+  // ── the viewer's OWN market anchor (owner audit §9.2) ────────────────────
+  // The worker's own stated location (their row, their view — no third
+  // party's place is read). It anchors the map to THEIR market: without it a
+  // Lithuanian worker whose only located opportunity sat in the Netherlands
+  // opened a map of the Netherlands.
+  let home = null as import("./workspace-map-model").WorkspaceMapHome | null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: worker } = await supabase
+        .from("workers")
+        .select("current_location_country")
+        .eq("profile_id", user.id)
+        .maybeSingle();
+      const country = (worker as { current_location_country?: string | null } | null)
+        ?.current_location_country;
+      if (country) {
+        const resolved = resolveLocation({ country, region: null });
+        if (resolved.coord) {
+          home = {
+            lat: resolved.coord.lat,
+            lng: resolved.coord.lng,
+            precision: resolved.precision === "city" ? "city" : "country",
+            placeLabel: country,
+          };
+        }
+      }
+    }
+  } catch {
+    /* no anchor — the map still fits the real clusters */
+  }
+
   // ── managed projects (employer side; empty for a pure worker) ───────────
   try {
     const projects = await listManagedProjects();
@@ -91,5 +127,5 @@ export async function loadWorkspaceMap(): Promise<WorkspaceMapView> {
     /* nothing */
   }
 
-  return clusterWorkspaceEntities(entities, unmapped);
+  return clusterWorkspaceEntities(entities, unmapped, home);
 }

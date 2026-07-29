@@ -3,6 +3,8 @@
   "cvBridgeLink": "Åpne CV",
   "chooseWorkType": "[EN] Choose work type",
   "whatDidYouDo": "Hva jobbet du med i dag?",
+  "logViaChatBody": "[EN] Work is logged in the conversation — say what you did and the record appears here.",
+  "logViaChatCta": "[EN] Log work in the chat",
   "freeTextLead": "[EN] Describe everything freely: work done, quantities, units, time, location, and notes. Later the system can help turn this into structured work lines.",
   "quantitySummaryHint": "[EN] Optional quick summary — you can also write all quantities and units in the description above.",
   "workDirectionOptional": "[EN] Work direction (optional)",
