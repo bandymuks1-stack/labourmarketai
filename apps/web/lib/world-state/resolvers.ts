@@ -24,15 +24,26 @@ import { resolveJobContext } from "./job-context-server";
  */
 registerEntityContextResolver("job", resolveJobContext);
 
-/** Entity types the workspace can open today. Exported for the guard. */
+/**
+ * Entity types the workspace can open today — and the ALLOWLIST the dispatch
+ * below resolves through. Kept in sync with the registrations above by a guard:
+ * a registered resolver missing from this list would be silently unreachable,
+ * and a listed type with no resolver would degrade for no reason.
+ */
 export const REGISTERED_ENTITY_TYPES = ["job"] as const;
 
 export async function resolveEntityContext(
   ref: EntityRef,
   unknownTypeReason: string,
 ): Promise<EntityContextResult> {
-  const resolver = resolverFor(ref.type);
-  if (!resolver) {
+  // The type arrives from the client (it is a selection), so it is never used
+  // to look anything up directly. It is matched against this module's own
+  // constant list first, and the MATCHED LITERAL does the lookup — so the
+  // dispatch target can only ever be one this file registered. CodeQL flagged
+  // the direct form (`js/unvalidated-dynamic-method-call`) and it was right to.
+  const known = REGISTERED_ENTITY_TYPES.find((t) => t === ref.type);
+  const resolver = known ? resolverFor(known) : null;
+  if (typeof resolver !== "function") {
     // An unregistered type is an honest "cannot open this yet" — never an
     // empty panel that implies the entity has nothing to show.
     return { kind: "unavailable", reason: unknownTypeReason };

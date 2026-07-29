@@ -137,6 +137,28 @@ describe("W3 — a new entity type is a registration", () => {
     expect(REGISTERED_ENTITY_TYPES).toEqual(["job"]);
   });
 
+  it("the allowlist and the registrations stay in sync, both ways", () => {
+    // A registered resolver missing from the allowlist would be unreachable;
+    // an allowlisted type with no resolver would degrade for no reason. Both
+    // are silent failures, so both are asserted.
+    const src = read(RESOLVERS);
+    const registered = [...src.matchAll(/registerEntityContextResolver\("([^"]+)"/g)].map(
+      (m) => m[1],
+    );
+    expect([...registered].sort()).toEqual([...REGISTERED_ENTITY_TYPES].sort());
+  });
+
+  it("the entity type never reaches the lookup unvalidated", () => {
+    // The type comes from the client. CodeQL flagged the direct
+    // `resolverFor(ref.type)` form as an unvalidated dynamic dispatch; the
+    // fix — match against this module's own constant list, then look up with
+    // the MATCHED LITERAL — must not be undone by a later simplification.
+    const src = read(RESOLVERS);
+    expect(src).not.toMatch(/resolverFor\(ref\.type\)/);
+    expect(src).toMatch(/REGISTERED_ENTITY_TYPES\.find\(/);
+    expect(src).toMatch(/typeof resolver !== "function"/);
+  });
+
   it("the panel has no per-type branch — it renders the resolved view", () => {
     const src = read(PANEL);
     // If the panel ever learns what a "job" is, registering a type stops being
