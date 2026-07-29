@@ -14,15 +14,12 @@ export async function generateMetadata({
 import { Button } from "@/components/ui/Button";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
-import { DraftBoard } from "@/components/marketing/draft-board";
-import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
 import { LiveProductDemo } from "@/components/marketing/live-product-demo";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { MarketMoment } from "@/components/marketing/market-moment";
 import { ProofBand } from "@/components/marketing/proof-band";
-import { ConversationOsPanel } from "@/components/marketing/conversation-os-panel";
 import { AudienceValueSections } from "@/components/marketing/audience-value-sections";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { FinalCtaBand } from "@/components/marketing/final-cta-band";
@@ -35,17 +32,6 @@ export default async function LandingPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("hero");
-  const tlm = await getTranslations("labourMarket");
-  const audienceKeys = [
-    "aWorkers",
-    "aJobseekers",
-    "aFreelancers",
-    "aStudents",
-    "aChangers",
-    "aEmployers",
-    "aAgencies",
-    "aClients",
-  ] as const;
   // Landing rebuild (owner directive 2026-07-29): the former journey band,
   // the HowItWorksBand 4-step rail, the why-now pillars grid and the
   // two-paths cards are superseded by the narrative chain
@@ -147,55 +133,24 @@ export default async function LandingPage({
       {/* ── One city, one need, a visible answer — the map moment ──────── */}
       <MarketMoment />
 
-      {/* ── Conversation as the operating system (PR-H, G) ─────────────── */}
-      <ConversationOsPanel />
-
-      {/* ── Audience band — whole labour market, not construction-only ─── */}
-      <section className="mt-16">
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-brand-cyan">
-          <span className="live-dot" aria-hidden />
-          {tlm("audienceEyebrow")}
-        </p>
-        <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
-          {tlm("audienceTitle")}
-        </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-text-secondary sm:text-base">
-          {tlm("audienceSubcopy")}
-        </p>
-        <ul className="mt-6 flex flex-wrap gap-2">
-          {audienceKeys.map((k) => (
-            <li
-              key={k}
-              className="inline-flex items-center gap-2 rounded-full border border-ink-500 bg-ink-800/40 px-3.5 py-1.5 text-sm text-text-secondary transition-colors hover:border-brand-blue/50 hover:text-text-primary"
-            >
-              <span
-                className="h-1.5 w-1.5 rounded-full bg-brand-cyan/70"
-                aria-hidden
-              />
-              {tlm(k)}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* OWNER SHORTENING (audit §3.1, 2026-07-29): the landing is exactly
+          the seven canonical blocks — hero + live scenario, product chain,
+          audience value, Player Card + proof system, market/map context,
+          final CTA. Removed as self-duplication: ConversationOsPanel (the
+          hero demo already SHOWS the conversation working), the audience
+          chip strip (AudienceValueSections is the audience block), DraftBoard
+          and MarketPulse (interior dashboards re-rendered as brochure). */}
 
       {/* ── Audience value blocks — workers / employers / agencies /
-             training institutions / partners (PR-H, B–F) ───────────────── */}
+             training institutions / partners (#partners anchor) ─────────── */}
       <AudienceValueSections />
 
-      {/* ── Labour-market evidence (source-backed, Step 1) ───────────── */}
-      <LabourMarketEvidence />
-
-      {/* ── Player card showcase (5b.3) ──────────────────────────────── */}
+      {/* ── Player Card + the proof system: the CANONICAL card (§3.7),
+             fact vs proven skill vs opinion, and the source-backed market
+             evidence behind it ─────────────────────────────────────────── */}
       <PlayerCardShowcase />
-
-      {/* ── Draft Board (5b.4) ───────────────────────────────────────── */}
-      <DraftBoard />
-
-      {/* ── Market Pulse (5b.4) ──────────────────────────────────────── */}
-      <MarketPulse />
-
-      {/* ── Fact vs proven skill vs opinion — the reputation model ─────── */}
       <ProofBand />
+      <LabourMarketEvidence />
 
       {/* ── Trust & security — verifiable claims only (PR-H, H) ────────── */}
       <TrustBand />

@@ -3451,7 +3451,11 @@
       "drafted": "Ausgewählt",
       "busy": "Beschäftigt"
     },
-    "conceptNote": "Konzeptvorschau — fiktive Profile, keine echten Personen. Ihr echtes Profil entsteht aus Ihren echten Einträgen."
+    "conceptNote": "Eine Beispielkarte mit illustrativen Daten — keine reale Person. Deine Karte entsteht aus deinen echten Arbeitseinträgen.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restaurant Ąžuolas"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -11307,17 +11311,49 @@
     "loop": {
       "chip": "Beispielsequenz — echter Produktablauf",
       "windowTitle": "LabourMarket AI — Gespräch",
-      "userSays": "Heute Ziegelwände auf der Baustelle in Vilnius gemauert, 8 Stunden.",
       "entrySaved": "Journaleintrag gespeichert · #D-1042",
-      "entryLine": "Mauern · Baustelle Vilnius · 8 Std. · zu deiner Arbeitshistorie hinzugefügt.",
       "skillSignal": "Fähigkeitssignal verstärkt",
-      "skillLine": "Mauern — jetzt durch 12 Journaleinträge belegt.",
       "matchFound": "Neue passende Chance",
-      "matchLine": "Ein verifiziertes Unternehmen in Kaunas braucht 3 Maurer.",
-      "matchWhy": "Warum du: 4 von 5 geforderten Fähigkeiten, 3 durch dein Journal belegt."
+      "sectorsLabel": "Sektorauswahl",
+      "sector": {
+        "construction": "Bau",
+        "horeca": "HoReCa",
+        "logistics": "Logistik",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Heute 8 Stunden Wände auf der Baustelle in Vilnius gemauert.",
+          "entryLine": "Mauern · Baustelle Vilnius · 8 Std. · zu deiner Arbeitshistorie hinzugefügt.",
+          "skillLine": "Mauern — jetzt durch 12 Journaleinträge gestützt.",
+          "matchLine": "Ein verifiziertes Unternehmen in Kaunas braucht 3 Maurer.",
+          "matchWhy": "Warum du: 4 von 5 geforderten Fähigkeiten, 3 durch dein Journal gestützt."
+        },
+        "horeca": {
+          "userSays": "Heute 60 Mittagsportionen zubereitet und die Lieferungen angenommen.",
+          "entryLine": "Zubereitung · Restaurant · 8 Std. · zur Historie hinzugefügt.",
+          "skillLine": "Zubereitung — jetzt durch 9 Einträge gestützt.",
+          "matchLine": "Ein Hotelrestaurant in Vilnius braucht einen Koch für die Schicht.",
+          "matchWhy": "Warum du: 3 von 4 geforderten Fähigkeiten, Verfügbarkeit passt."
+        },
+        "logistics": {
+          "userSays": "Heute 14 Bestellungen auf der Route Kaunas ausgeliefert, 9 Stunden.",
+          "entryLine": "Zustellung · Route Kaunas · 9 Std. · zur Historie hinzugefügt.",
+          "skillLine": "Fahren — jetzt durch 21 Einträge gestützt.",
+          "matchLine": "Ein Logistikunternehmen braucht einen Fahrer für eine feste Route.",
+          "matchWhy": "Warum du: Führerschein B/C und Routenerfahrung durch dein Journal gestützt."
+        },
+        "it": {
+          "userSays": "Heute die Fehler im Kundenportal behoben und das Update ausgeliefert.",
+          "entryLine": "Programmierung · Kundenportal · 7 Std. · zur Historie hinzugefügt.",
+          "skillLine": "Programmierung — jetzt durch 15 Einträge gestützt.",
+          "matchLine": "Ein Produktteam braucht einen Entwickler für drei Monate.",
+          "matchWhy": "Warum du: 5 von 6 geforderten Fähigkeiten, 4 durch dein Journal gestützt."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "Wie die Plattform wirklich funktioniert",
+      "eyebrow": "Die Produktkette",
       "title": "Arbeit wird Beleg. Beleg wird deine nächste Chance.",
       "journalNote": "Das Arbeitsjournal ist der Unterschied: jeder erfasste Tag wird überprüfbare Berufsgeschichte — deine nächste Chance wird mit dem begründet, was du wirklich getan hast, nicht mit dem, was ein Lebenslauf behauptet.",
       "steps": {

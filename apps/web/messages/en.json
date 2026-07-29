@@ -3451,7 +3451,11 @@
       "drafted": "Drafted",
       "busy": "Busy"
     },
-    "conceptNote": "Concept preview — fictional profiles, not real people. Your real profile is built from your real entries."
+    "conceptNote": "An example card with illustrative data — not a real person. Your card is built from your real work records.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restaurant Ąžuolas"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -11307,17 +11311,49 @@
     "loop": {
       "chip": "Sample sequence — real product flow",
       "windowTitle": "LabourMarket AI — conversation",
-      "userSays": "Today I laid brick walls at the Vilnius site, 8 hours.",
       "entrySaved": "Journal entry saved · #D-1042",
-      "entryLine": "Bricklaying · Vilnius site · 8 h · added to your work history.",
       "skillSignal": "Skill signal strengthened",
-      "skillLine": "Bricklaying — now backed by 12 journal entries.",
       "matchFound": "New matching opportunity",
-      "matchLine": "A verified company needs 3 bricklayers in Kaunas.",
-      "matchWhy": "Why you: matches 4 of 5 required skills, 3 backed by your journal."
+      "sectorsLabel": "Sector selection",
+      "sector": {
+        "construction": "Construction",
+        "horeca": "HoReCa",
+        "logistics": "Logistics",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Today I laid brick walls at the Vilnius site, 8 hours.",
+          "entryLine": "Bricklaying · Vilnius site · 8 h · added to your work history.",
+          "skillLine": "Bricklaying — now backed by 12 journal entries.",
+          "matchLine": "A verified company needs 3 bricklayers in Kaunas.",
+          "matchWhy": "Why you: matches 4 of 5 required skills, 3 backed by your journal."
+        },
+        "horeca": {
+          "userSays": "Today I prepared 60 lunch portions and received the deliveries.",
+          "entryLine": "Food preparation · restaurant · 8 h · added to your work history.",
+          "skillLine": "Food preparation — now backed by 9 journal entries.",
+          "matchLine": "A hotel restaurant in Vilnius needs a shift cook.",
+          "matchWhy": "Why you: matches 3 of 4 required skills, availability lines up."
+        },
+        "logistics": {
+          "userSays": "Today I delivered 14 orders on the Kaunas route, 9 hours.",
+          "entryLine": "Deliveries · Kaunas route · 9 h · added to your history.",
+          "skillLine": "Driving — now backed by 21 journal entries.",
+          "matchLine": "A logistics company needs a driver for a regular route.",
+          "matchWhy": "Why you: B/C licence and route experience backed by your journal."
+        },
+        "it": {
+          "userSays": "Today I fixed the client portal bugs and shipped the update.",
+          "entryLine": "Programming · client portal · 7 h · added to your history.",
+          "skillLine": "Programming — now backed by 15 journal entries.",
+          "matchLine": "A product team needs a developer for three months.",
+          "matchWhy": "Why you: matches 5 of 6 required skills, 4 backed by your journal."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "How the platform actually works",
+      "eyebrow": "The product chain",
       "title": "Work becomes evidence. Evidence becomes your next opportunity.",
       "journalNote": "The work journal is the difference: every day you record becomes verifiable professional history — so your next opportunity is argued from what you actually did, not from what a CV claims.",
       "steps": {

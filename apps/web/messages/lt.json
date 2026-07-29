@@ -3451,7 +3451,11 @@
       "drafted": "Atrinktas",
       "busy": "Užimtas"
     },
-    "conceptNote": "Koncepcijos peržiūra — išgalvoti profiliai, ne tikri žmonės. Tikras profilis kuriamas iš jūsų tikrų įrašų."
+    "conceptNote": "Pavyzdinė kortelė su iliustraciniais duomenimis — ne realus asmuo. Tavo kortelė kuriama iš tavo realių darbo įrašų.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restoranas „Ąžuolas”"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -11307,17 +11311,49 @@
     "loop": {
       "chip": "Pavyzdinė seka — reali produkto eiga",
       "windowTitle": "LabourMarket AI — pokalbis",
-      "userSays": "Šiandien mūrijau sienas Vilniaus objekte, 8 valandas.",
       "entrySaved": "Žurnalo įrašas išsaugotas · #D-1042",
-      "entryLine": "Mūrijimas · Vilniaus objektas · 8 val. · pridėta prie tavo darbo istorijos.",
       "skillSignal": "Įgūdžio signalas sustiprėjo",
-      "skillLine": "Mūrijimas — dabar paremtas 12 žurnalo įrašų.",
       "matchFound": "Nauja tinkanti galimybė",
-      "matchLine": "Patikrintai įmonei Kaune reikia 3 mūrininkų.",
-      "matchWhy": "Kodėl tu: atitinka 4 iš 5 reikalaujamų įgūdžių, 3 paremti tavo žurnalu."
+      "sectorsLabel": "Sektoriaus pasirinkimas",
+      "sector": {
+        "construction": "Statybos",
+        "horeca": "HoReCa",
+        "logistics": "Logistika",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Šiandien mūrijau sienas Vilniaus objekte, 8 valandas.",
+          "entryLine": "Mūrijimas · Vilniaus objektas · 8 val. · pridėta prie tavo darbo istorijos.",
+          "skillLine": "Mūrijimas — dabar paremtas 12 žurnalo įrašų.",
+          "matchLine": "Patikrintai įmonei Kaune reikia 3 mūrininkų.",
+          "matchWhy": "Kodėl tu: atitinka 4 iš 5 reikalaujamų įgūdžių, 3 paremti tavo žurnalu."
+        },
+        "horeca": {
+          "userSays": "Šiandien virtuvėje paruošiau 60 porcijų pietų ir priėmiau prekes.",
+          "entryLine": "Maisto gamyba · restoranas · 8 val. · pridėta prie tavo darbo istorijos.",
+          "skillLine": "Maisto gamyba — dabar paremta 9 žurnalo įrašais.",
+          "matchLine": "Viešbučio restoranui Vilniuje reikia virėjo pamainai.",
+          "matchWhy": "Kodėl tu: atitinka 3 iš 4 reikalaujamų įgūdžių, prieinamumas sutampa."
+        },
+        "logistics": {
+          "userSays": "Šiandien išvežiojau 14 užsakymų Kauno maršrutu, 9 valandas.",
+          "entryLine": "Krovinių pristatymas · Kauno maršrutas · 9 val. · pridėta prie istorijos.",
+          "skillLine": "Vairavimas — dabar paremtas 21 žurnalo įrašu.",
+          "matchLine": "Logistikos įmonei reikia vairuotojo nuolatiniam maršrutui.",
+          "matchWhy": "Kodėl tu: B/C kategorijos ir maršruto patirtis paremta tavo žurnalu."
+        },
+        "it": {
+          "userSays": "Šiandien sutvarkiau klientų portalo klaidas ir įdiegiau atnaujinimą.",
+          "entryLine": "Programavimas · klientų portalas · 7 val. · pridėta prie istorijos.",
+          "skillLine": "Programavimas — dabar paremtas 15 žurnalo įrašų.",
+          "matchLine": "Produkto komandai reikia programuotojo trims mėnesiams.",
+          "matchWhy": "Kodėl tu: atitinka 5 iš 6 reikalaujamų įgūdžių, 4 paremti tavo žurnalu."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "Kaip platforma veikia iš tikrųjų",
+      "eyebrow": "Produkto grandinė",
       "title": "Darbas tampa įrodymu. Įrodymas tampa kita tavo galimybe.",
       "journalNote": "Darbo žurnalas ir yra skirtumas: kiekviena užrašyta diena virsta patikrinama profesine istorija — tavo kita galimybė grindžiama tuo, ką realiai padarei, o ne tuo, ką teigia CV.",
       "steps": {

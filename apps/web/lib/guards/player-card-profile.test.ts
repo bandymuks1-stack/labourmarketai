@@ -83,13 +83,16 @@ describe("4. no fake verified labels", () => {
     expect(src).not.toMatch(/NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS\s*===/);
   });
 
-  it("the showcase carries a visible concept-preview line in active locales", () => {
+  it("the showcase renders the CANONICAL card with a visible not-a-real-person line (owner audit §3.7)", () => {
     const showcase = read("components/marketing/player-card-showcase.tsx");
+    // Landing = product: the SAME WorkerPlayerCard, never the FUT concept.
+    expect(showcase).toMatch(/WorkerPlayerCard/);
+    expect(showcase).not.toMatch(/<PlayerCard\b/);
     expect(showcase).toMatch(/conceptNote/);
     for (const [locale, needle] of [
-      ["en", "fictional"],
-      ["lt", "išgalvoti"],
-      ["ru", "вымышленные"],
+      ["en", "not a real person"],
+      ["lt", "ne realus asmuo"],
+      ["ru", "не реальный человек"],
     ] as const) {
       const j = JSON.parse(read(`messages/${locale}.json`)) as {
         playercards?: { conceptNote?: string };

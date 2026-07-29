@@ -121,11 +121,15 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1216 at W6 workspace map (+5: workspace.map.* — legend, approx,
   // unmapped lines land in all 11 locales; lt/en/ru/nl/de translated, da [EN]
   // until human translation).
+  // MEASURED 1284 at the owner visual-acceptance round (+21: multi-sector
+  // hero scenarios landing.loop.scenario/sector — §3.3 — plus the journal
+  // log-via-chat framing — §6.1; the retired single-sector loop keys came
+  // off). Human translation for da stays queued, same as the entry below.
   // MEASURED 1263 at landing rebuild (+47: landing.demo/chain/moment/proof —
   // the hero product demo, the six-step product chain, the concept map moment
   // and the fact/skill/opinion band land in all 11 locales; lt/en/ru/nl/de
   // translated, da [EN] until human translation).
-  da: 1263,
+  da: 1284,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

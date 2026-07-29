@@ -3451,7 +3451,11 @@
       "drafted": "Gedraft",
       "busy": "Bezet"
     },
-    "conceptNote": "Conceptpreview — fictieve profielen, geen echte mensen. Je echte profiel wordt opgebouwd uit je echte registraties."
+    "conceptNote": "Een voorbeeldkaart met illustratieve gegevens — geen echte persoon. Jouw kaart groeit uit je echte werkregistraties.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restaurant Ąžuolas"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -11307,17 +11311,49 @@
     "loop": {
       "chip": "Voorbeeldreeks — echte productflow",
       "windowTitle": "LabourMarket AI — gesprek",
-      "userSays": "Vandaag muren gemetseld op de bouwplaats in Vilnius, 8 uur.",
       "entrySaved": "Dagboekregel opgeslagen · #D-1042",
-      "entryLine": "Metselen · bouwplaats Vilnius · 8 u · toegevoegd aan je werkgeschiedenis.",
       "skillSignal": "Vaardigheidssignaal versterkt",
-      "skillLine": "Metselen — nu onderbouwd door 12 dagboekregels.",
       "matchFound": "Nieuwe passende kans",
-      "matchLine": "Een geverifieerd bedrijf in Kaunas zoekt 3 metselaars.",
-      "matchWhy": "Waarom jij: 4 van 5 gevraagde vaardigheden, 3 onderbouwd door je dagboek."
+      "sectorsLabel": "Sectorkeuze",
+      "sector": {
+        "construction": "Bouw",
+        "horeca": "Horeca",
+        "logistics": "Logistiek",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Vandaag 8 uur muren gemetseld op de locatie in Vilnius.",
+          "entryLine": "Metselen · locatie Vilnius · 8 u · toegevoegd aan je werkgeschiedenis.",
+          "skillLine": "Metselen — nu onderbouwd door 12 logboekvermeldingen.",
+          "matchLine": "Een geverifieerd bedrijf in Kaunas zoekt 3 metselaars.",
+          "matchWhy": "Waarom jij: 4 van 5 vereiste vaardigheden, 3 onderbouwd door je logboek."
+        },
+        "horeca": {
+          "userSays": "Vandaag 60 lunchporties bereid en de leveringen ontvangen.",
+          "entryLine": "Voedselbereiding · restaurant · 8 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Voedselbereiding — nu onderbouwd door 9 vermeldingen.",
+          "matchLine": "Een hotelrestaurant in Vilnius zoekt een kok voor de dienst.",
+          "matchWhy": "Waarom jij: 3 van 4 vereiste vaardigheden, beschikbaarheid past."
+        },
+        "logistics": {
+          "userSays": "Vandaag 14 bestellingen bezorgd op de route Kaunas, 9 uur.",
+          "entryLine": "Bezorging · route Kaunas · 9 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Rijden — nu onderbouwd door 21 vermeldingen.",
+          "matchLine": "Een logistiek bedrijf zoekt een chauffeur voor een vaste route.",
+          "matchWhy": "Waarom jij: rijbewijs B/C en route-ervaring onderbouwd door je logboek."
+        },
+        "it": {
+          "userSays": "Vandaag de fouten in het klantportaal opgelost en de update uitgerold.",
+          "entryLine": "Programmeren · klantportaal · 7 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Programmeren — nu onderbouwd door 15 vermeldingen.",
+          "matchLine": "Een productteam zoekt een ontwikkelaar voor drie maanden.",
+          "matchWhy": "Waarom jij: 5 van 6 vereiste vaardigheden, 4 onderbouwd door je logboek."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "Hoe het platform echt werkt",
+      "eyebrow": "De productketen",
       "title": "Werk wordt bewijs. Bewijs wordt je volgende kans.",
       "journalNote": "Het werkdagboek is het verschil: elke vastgelegde dag wordt verifieerbare professionele geschiedenis — je volgende kans wordt beargumenteerd met wat je echt deed, niet met wat een CV beweert.",
       "steps": {
