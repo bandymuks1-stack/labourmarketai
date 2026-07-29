@@ -1,5 +1,20 @@
 # Owner-visible rebuild — progress (W1–W6 + chat-first UX + landing)
 
+## 2026-07-29 — OWNER VISUAL ACCEPTANCE ROUND (verdiktas atmestas)
+
+Savininkas atmetė `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED`.
+Naujas tikslas: `OWNER_VISUAL_ACCEPTANCE_2026_PREMIUM_PRODUCTION_VERIFIED`.
+
+### Etapas 0 — production auditas (BAIGTA 2026-07-29)
+
+Savininko audito failo repo nebuvo → defektų sąrašas išvestas per realią
+production peržiūrą autentikuota worker sesija (Chrome, gyvi paspaudimai):
+`docs/owner-goals/owner-visual-acceptance-audit-2026.md` — 7 P0, 9 P1, 4 P2.
+Kritiškiausi: pranešimų popover po Leaflet žemėlapiu; paieškos backdrop
+nepridengia panelės; paieška neranda ką tik įrašytų duomenų; chat žinutė
+dingusi be atsako; chat neatsako iš žurnalo duomenų; >30 s UI užšalimai
+(sutampa su realiu vartotojo skundu); žemėlapis centruotas į NL.
+
 > Savininko direktyva 2026-07-29: užbaigti owner-visible W1–W6, chat-first UX ir
 > profesionalų landing rebuild. Galutinis verdiktas tik
 > `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED` arba
