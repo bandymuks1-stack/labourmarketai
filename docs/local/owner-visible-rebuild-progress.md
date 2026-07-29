@@ -4,16 +4,29 @@
 
 Savininkas atmetė `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED`.
 Naujas tikslas: `OWNER_VISUAL_ACCEPTANCE_2026_PREMIUM_PRODUCTION_VERIFIED`.
+Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
 
-### Etapas 0 — production auditas (BAIGTA 2026-07-29)
+### Etapas 0 — kanoninė specifikacija + production auditas (2026-07-29)
 
-Savininko audito failo repo nebuvo → defektų sąrašas išvestas per realią
-production peržiūrą autentikuota worker sesija (Chrome, gyvi paspaudimai):
-`docs/owner-goals/owner-visual-acceptance-audit-2026.md` — 7 P0, 9 P1, 4 P2.
-Kritiškiausi: pranešimų popover po Leaflet žemėlapiu; paieškos backdrop
-nepridengia panelės; paieška neranda ką tik įrašytų duomenų; chat žinutė
-dingusi be atsako; chat neatsako iš žurnalo duomenų; >30 s UI užšalimai
-(sutampa su realiu vartotojo skundu); žemėlapis centruotas į NL.
+- **Kanoninė specifikacija — savininko auditas**: rastas
+  `C:\Users\Mano\Downloads\owner-visual-acceptance-audit-2026.md` ir įdėtas
+  VERBATIM į `docs/owner-goals/owner-visual-acceptance-audit-2026.md`.
+  (Pastaba sau: failas buvo pateiktas savininko, bet dar nebuvo repo darbo
+  medyje — todėl pirmi paieškos bandymai repo viduje jo nerado. Savininko
+  auditas YRA ir YRA kanoninis.)
+- **Atsekamumas**: pilna lentelė (reikalavimas → production būsena → failai →
+  priėmimo veiksmas → statusas) —
+  `docs/owner-goals/owner-visual-acceptance-traceability-2026.md`.
+  Ten pat atskirai — AGENT_DISCOVERED_ADDITIONAL_DEFECTS (A-1…A-9), kurie
+  savininko audito nepakeičia, tik papildo.
+- **Reali production peržiūra** (autentikuota worker sesija, Chrome):
+  patvirtinta — pranešimų popover po Leaflet žemėlapiu (P0.3); paieškos
+  backdrop nepridengia dešinės panelės (P0.3); paieška neranda ką tik
+  įrašytų duomenų (A-1); chat žinutė dingo be pėdsako (A-2); „Kiek valandų
+  dirbau šiandien?" atsakoma log-work šablonu (A-3); „employee" enum LT
+  formoje (6.2); Player Card paslėpta akordeone (5.1); landing 10,7 ekrano
+  (3.1); demo tik statybų (3.3); žemėlapis centruotas į NL su „13 be
+  nustatomos vietos" (9.2); >30 s UI užšalimai (A-4).
 
 > Savininko direktyva 2026-07-29: užbaigti owner-visible W1–W6, chat-first UX ir
 > profesionalų landing rebuild. Galutinis verdiktas tik
