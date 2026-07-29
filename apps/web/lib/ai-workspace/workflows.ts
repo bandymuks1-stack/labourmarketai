@@ -1,0 +1,508 @@
+"use server";
+
+import "server-only";
+
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { findWorkForChat } from "@/lib/conversation/find-work";
+import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
+import { getReportsView } from "@/lib/reports/reports-hub";
+import { listManagedProjects } from "@/lib/projects/projects";
+import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { getPlanning } from "@/lib/planning/planning";
+import { visibleRange } from "@/lib/planning/planning-model";
+import { loadAiWorkspaceContext } from "./ai-context";
+import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
+import { readWorldState, type WorldStateMatch } from "./world-state-language";
+import type { WorkflowResult } from "./workflow-contract";
+
+/**
+ * THE AI WORKSPACE WORKFLOWS (W4).
+ *
+ * "AI must execute workflows. Not only answer questions." Each function here is
+ * one thing a person can ask for in their own words and have DONE — searching
+ * their real board, naming their real skill gaps, opening a real project in the
+ * workspace, reading their real figures.
+ *
+ * FOUR RULES, ENFORCED BY CONSTRUCTION:
+ *
+ * 1. **Real data only.** Every workflow enters through a canonical use case
+ *    that already decided authorization and ranking. No table is named here,
+ *    no query is written here, no ranking is recomputed here.
+ * 2. **No duplicated logic.** Search goes through `findWorkForChat`, the same
+ *    adapter the chip uses. Reports go through `getReportsView`, the same read
+ *    the reports page renders. The AI is a new WAY IN, never a second engine.
+ * 3. **Never fabricate.** Every result is a real row or an honest "not
+ *    available, because…". A workflow whose data source is missing says so.
+ * 4. **Always explain.** `explanation.why` is required by the contract, and it
+ *    quotes what the AI understood from the person's own sentence.
+ *
+ * NO LLM. This is the deterministic floor the doctrine requires (§7): the whole
+ * workspace works with the model switched off.
+ */
+
+/** How many rows a conversational answer may list before it stops being an
+ *  answer and becomes a screen. */
+const ANSWER_LIMIT = 5;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. Find work — the AI writes World State instead of navigating
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * "I want work in Germany."
+ *
+ * Reads World State out of the sentence, applies it through the CANONICAL
+ * discovery filters inside the one ranking path, and reports what it changed.
+ * A country the person's board does not contain is understood and answered
+ * honestly — with the countries that ARE there — rather than filtered to an
+ * unexplained empty list.
+ */
+export async function runFindWork(text: string): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) {
+    return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  }
+
+  const board = await loadWorkerOpportunityBoard("conversation");
+  const needs = board.kind === "ready" ? board.opportunities.map((o) => o.need) : [];
+  const { terms, facets } = await buildWorkspaceVocabulary(needs);
+  const unavailable = await buildUnavailableCountryTerms(facets);
+
+  const reading = readWorldState(text, [...terms, ...unavailable]);
+  const applied = reading.matches.filter((m) => m.available);
+  const missed = reading.matches.filter((m) => !m.available);
+
+  // Named something the world does not have: say what it DOES have. This is
+  // the difference between "no results" and an answer.
+  if (applied.length === 0 && missed.length > 0) {
+    const countries = facets.countries.join(", ");
+    return {
+      kind: "answer",
+      text: countries
+        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: countries })
+        : t("noSuchValue", { asked: missed[0].matchedText }),
+      explanation: {
+        why: t("whyFromYourBoard"),
+        unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
+      },
+    };
+  }
+
+  /**
+   * ── W6 EXTENSION POINT (persistent filters) ──────────────────────────────
+   * `reading.filters` is the World State the person just expressed. Today it is
+   * applied to THIS search only and then forgotten, so a later sentence starts
+   * from an unnarrowed world.
+   *
+   * When the owner approves persistence, this is the seam: the caller dispatches
+   * `change_world_state` per entry of `reading.filters` before searching, and
+   * the search reads `state.activeFilters` instead of this local value. The
+   * reducer transition already exists and is unit-tested; the map subscribes to
+   * the same slot in W6. See docs/product/AI_WORKSPACE_W4_V1.md §7.
+   *
+   * NOT wired here on purpose: persistence changes behaviour across turns
+   * (when do filters clear?), which is a product decision, not a refactor.
+   */
+  const result = await findWorkForChat(reading.filters);
+  const dimensionLabel = async (m: WorldStateMatch): Promise<string> =>
+    t(`dimension.${m.dimension}` as never) as string;
+
+  return {
+    kind: "matches",
+    result,
+    explanation: {
+      why:
+        applied.length > 0
+          ? t("whyFiltered", { words: applied.map((m) => m.matchedText).join(", ") })
+          : t("whyUnfiltered"),
+      unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
+    },
+    appliedFilters: await Promise.all(
+      applied.map(async (m) => ({ label: await dimensionLabel(m), matchedText: m.matchedText })),
+    ),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. Skill gap — "what skills am I missing?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The skills the person's OWN visible demands require and their profile does
+ * not hold, counted across the board.
+ *
+ * Every number comes from the canonical match engine's fit basis — the same
+ * matched/missing sets the Context Panel shows for one demand. This aggregates
+ * them; it computes no score and invents no "recommended skill".
+ */
+export async function runSkillGap(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const board = await loadWorkerOpportunityBoard("conversation");
+  if (board.kind !== "ready") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  if (!board.capabilities.boardAvailable) {
+    return blocked(t("blockedNoAccess"), t("whyNoAccess"));
+  }
+  if (board.opportunities.length === 0) {
+    return {
+      kind: "answer",
+      text: t("skillGapNoDemands"),
+      explanation: { why: t("whyFromYourBoard") },
+    };
+  }
+
+  // Count how many visible demands require each skill the person lacks.
+  const demandsPerSkill = new Map<string, number>();
+  for (const card of board.opportunities) {
+    for (const slug of card.match.skillFit?.missingUris ?? []) {
+      demandsPerSkill.set(slug, (demandsPerSkill.get(slug) ?? 0) + 1);
+    }
+  }
+  if (demandsPerSkill.size === 0) {
+    return {
+      kind: "answer",
+      text: t("skillGapNone", { demands: board.opportunities.length }),
+      explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
+    };
+  }
+
+  const tSkill = await getTranslations("skillNames");
+  const ranked = [...demandsPerSkill.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, ANSWER_LIMIT);
+  const lines = ranked.map(([slug, count]) =>
+    t("skillGapLine", {
+      skill: tSkill.has(slug) ? (tSkill(slug) as string) : slug,
+      demands: count,
+    }),
+  );
+
+  return {
+    kind: "answer",
+    text: [t("skillGapIntro", { count: demandsPerSkill.size }), ...lines].join("\n"),
+    explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
+    // The journal is where a skill becomes real — never a self-declaration.
+    chips: [{ id: "logwork", label: t("chipLogWork") }],
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. Journal — "show my latest journal"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The person's most recent real journal entries, from the canonical Time Engine
+ * projection (the same rows the calendar shows). No second journal read.
+ */
+export async function runRecentJournal(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const range = visibleRange("agenda", todayIso);
+  const planning = await getPlanning({ rangeStart: range.start, rangeEnd: range.end });
+  if (planning.status !== "ok") return blocked(t("blockedNoPlan"), t("whyNoPlan"));
+
+  const entries = planning.items
+    .filter((it) => it.sourceType === "journal" && it.startDate !== null)
+    .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1))
+    .slice(0, ANSWER_LIMIT);
+
+  if (entries.length === 0) {
+    return {
+      kind: "answer",
+      text: t("journalEmpty", { days: rangeDays(range.start, range.end) }),
+      explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
+      chips: [{ id: "logwork", label: t("chipLogWork") }],
+    };
+  }
+
+  const fmt = new Intl.DateTimeFormat(locale, {
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "UTC",
+  });
+  const lines = entries.map((e) =>
+    t("journalLine", {
+      day: fmt.format(new Date(`${e.startDate}T00:00:00Z`)),
+      what: e.label ?? t("journalUnlabelled"),
+    }),
+  );
+
+  return {
+    kind: "answer",
+    text: [t("journalIntro", { count: entries.length }), ...lines].join("\n"),
+    explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
+    chips: [{ id: "logwork", label: t("chipLogWork") }],
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. Figures — "show my approved hours" / "prepare the report"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The canonical reports figures for whichever side the person is acting as.
+ *
+ * HONESTY NOTE THAT MATTERS. The owner's example was "show my approved hours".
+ * This platform does not keep an approved-hours ledger — what it really records
+ * is manager-CONFIRMED journal entries and confirmed skills. So the answer
+ * gives those, and says plainly that hours approval is not something the
+ * product tracks. Inventing an hours figure from entry counts would be exactly
+ * the fabrication doctrine §7 forbids, and it would be a number someone might
+ * put in front of an employer.
+ */
+export async function runFigures(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.permissionsKnown && !ctx.hasWorkerProfile) {
+    return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+  }
+
+  const view = await getReportsView(ctx.identity === "company" ? "company" : "worker");
+  if (view.kind === "worker") {
+    if (!view.evidence) {
+      return {
+        kind: "answer",
+        text: t("figuresWorkerEmpty"),
+        explanation: { why: t("whyFigures") },
+        chips: [{ id: "logwork", label: t("chipLogWork") }],
+      };
+    }
+    return {
+      kind: "answer",
+      text: [
+        t("figuresWorker", {
+          entries: view.evidence.journalEntries,
+          confirmations: view.evidence.confirmations,
+          skills: view.evidence.totalSkills,
+          confirmed: view.evidence.confirmed,
+        }),
+        t("figuresNoHoursLedger"),
+      ].join("\n"),
+      explanation: { why: t("whyFigures") },
+    };
+  }
+
+  const demand = view.demand.state === "ok" ? view.demand : null;
+  const projects = view.projects.state === "ok" ? view.projects : null;
+  const tasks = view.tasks.state === "ok" ? view.tasks : null;
+  const parts: string[] = [];
+  if (demand) parts.push(t("figuresOrgDemand", { open: demand.open, total: demand.total }));
+  if (projects) parts.push(t("figuresOrgProjects", { total: projects.total }));
+  if (tasks) parts.push(t("figuresOrgTasks", { open: tasks.open, total: tasks.total }));
+  if (parts.length === 0) {
+    return blocked(t("figuresOrgUnavailable"), t("whyFigures"));
+  }
+  return {
+    kind: "answer",
+    text: [t("figuresOrgIntro"), ...parts].join("\n"),
+    explanation: { why: t("whyFigures") },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. Open a project — the AI opens an entity, it does not navigate
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * "Open this project."
+ *
+ * Resolves against the projects the person really manages, then returns an
+ * EntityRef for the workspace to OPEN — `AI_MAY_NEVER_CHANGE` includes the page
+ * and the route, so this workflow never returns a destination. The Context
+ * Panel (W3) renders it.
+ *
+ * Ambiguity is asked about, never guessed: several name matches yield the list,
+ * not a pick.
+ */
+export async function runOpenProject(text: string): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  const projects = await listManagedProjects();
+
+  if (projects.length === 0) {
+    // "this project" with no name: the one project covering today is the only
+    // unambiguous reading, and the context resolver already applies that rule.
+    if (ctx.project) {
+      return {
+        kind: "open-entity",
+        ref: { type: "project", id: ctx.project.id },
+        text: t("openedProject", { title: ctx.project.title ?? t("projectUntitled") }),
+        explanation: { why: t("whyActiveProject") },
+      };
+    }
+    return blocked(t("blockedNoProjects"), t("whyNoProjects"));
+  }
+
+  const named = matchByName(
+    text,
+    projects.map((p) => ({ id: p.id, name: p.title ?? "" })),
+  );
+
+  if (named.length === 1) {
+    const project = projects.find((p) => p.id === named[0].id)!;
+    return {
+      kind: "open-entity",
+      ref: { type: "project", id: project.id },
+      text: t("openedProject", { title: project.title ?? t("projectUntitled") }),
+      explanation: { why: t("whyNamedProject", { words: named[0].matchedText }) },
+    };
+  }
+
+  if (named.length === 0 && ctx.project) {
+    return {
+      kind: "open-entity",
+      ref: { type: "project", id: ctx.project.id },
+      text: t("openedProject", { title: ctx.project.title ?? t("projectUntitled") }),
+      explanation: { why: t("whyActiveProject") },
+    };
+  }
+
+  const candidates = (named.length > 1 ? named : projects.slice(0, ANSWER_LIMIT)).map((c) =>
+    "name" in c ? c.name : (projects.find((p) => p.id === c.id)?.title ?? ""),
+  );
+  return {
+    kind: "answer",
+    text: [t("whichProject"), ...candidates.filter(Boolean).map((c) => `— ${c}`)].join("\n"),
+    explanation: { why: t("whyAmbiguous") },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. Find workers — the employer side
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * "Find workers."
+ *
+ * Scouting runs against ONE demand, so the honest first step is naming the
+ * demands the company actually has. Nothing is scouted for a demand the person
+ * has not chosen — a candidate list attached to the wrong need is worse than no
+ * list.
+ */
+export async function runFindWorkers(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (ctx.identity !== "company") {
+    return blocked(t("blockedNotEmployer"), t("whyNotEmployer"));
+  }
+
+  const demands = await listCompanyDemands();
+  if (demands.length === 0) {
+    return {
+      kind: "answer",
+      text: t("noDemands"),
+      explanation: { why: t("whyFromYourDemands") },
+      chips: [{ id: "f:company.create-demand", label: t("chipCreateDemand") }],
+    };
+  }
+
+  const open = demands.slice(0, ANSWER_LIMIT);
+  return {
+    kind: "answer",
+    text: [
+      t("demandsIntro", { count: demands.length }),
+      ...open.map((d) =>
+        t("demandLine", {
+          title: d.title,
+          state: d.structured ? t("demandStructured") : t("demandUnstructured"),
+        }),
+      ),
+      // Honest dead end rather than a way out of the workspace. Running the
+      // scouting engine per demand needs a `demand` entity resolver so the
+      // candidates land in the Context Panel; until that exists the AI states
+      // where the work stops instead of handing the person a route.
+      t("scoutingNotInWorkspaceYet"),
+    ].join("\n"),
+    explanation: { why: t("whyFromYourDemands") },
+    // NO chip. A `link:` chip would navigate out of the workspace, which is
+    // exactly what `AI_MAY_NEVER_CHANGE` forbids and what this phase promised
+    // not to do (W4 final review, finding A1).
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. "What do you know about me right now?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The context readback. Not decoration: an AI that claims to understand the
+ * current workspace, company, project and permissions must be able to SHOW
+ * what it understands, so the person can catch it being wrong.
+ */
+export async function runContextReadback(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  const lines: string[] = [];
+
+  lines.push(
+    ctx.workspace
+      ? t("ctxWorkspace", {
+          name:
+            ctx.workspace.kind === "personal"
+              ? t("personalWorkspace")
+              : (ctx.workspace.name ?? t("unnamedOrganization")),
+        })
+      : t("ctxWorkspaceUnknown"),
+  );
+  if (ctx.company) {
+    lines.push(t("ctxCompany", { name: ctx.company.name ?? t("unnamedOrganization") }));
+  }
+  lines.push(
+    ctx.project
+      ? t("ctxProject", { title: ctx.project.title ?? t("projectUntitled") })
+      : t("ctxProjectNone"),
+  );
+  lines.push(
+    ctx.journal?.lastEntryDay
+      ? t("ctxJournal", { day: ctx.journal.lastEntryDay })
+      : t("ctxJournalNone"),
+  );
+  lines.push(
+    ctx.permissionsKnown
+      ? t("ctxRoles", { roles: ctx.roles.join(", ") })
+      : t("ctxRolesUnknown"),
+  );
+
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyContext") },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function blocked(text: string, why: string): Promise<WorkflowResult> {
+  return { kind: "blocked", text, explanation: { why } };
+}
+
+function rangeDays(start: string, end: string): number {
+  const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
+  return Math.max(1, Math.round(ms / 86_400_000));
+}
+
+/**
+ * Match a sentence against real object names. Case-insensitive containment of
+ * the whole name — deliberately strict, because opening the WRONG project is a
+ * worse failure than asking which one.
+ */
+function matchByName(
+  text: string,
+  objects: readonly { id: string; name: string }[],
+): Array<{ id: string; name: string; matchedText: string }> {
+  const hay = (text ?? "").toLowerCase();
+  const out: Array<{ id: string; name: string; matchedText: string }> = [];
+  for (const o of objects) {
+    const name = o.name.trim().toLowerCase();
+    if (name.length < 3) continue;
+    if (hay.includes(name)) out.push({ id: o.id, name: o.name, matchedText: o.name });
+  }
+  return out;
+}

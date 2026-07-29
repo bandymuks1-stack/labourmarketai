@@ -7,6 +7,7 @@ import {
 } from "./entity-context";
 import type { EntityRef } from "./world-state";
 import { resolveJobContext } from "./job-context-server";
+import { resolveProjectContext } from "./project-context-server";
 
 /**
  * THE REGISTRATION POINT — where an entity type becomes openable (W3).
@@ -23,6 +24,9 @@ import { resolveJobContext } from "./job-context-server";
  * the mechanism.
  */
 registerEntityContextResolver("job", resolveJobContext);
+// W4 — the second type, and the whole bill for adding it: this line, its
+// resolver module, and the allowlist entry below. Nothing else moved.
+registerEntityContextResolver("project", resolveProjectContext);
 
 /**
  * Entity types the workspace can open today — and the ALLOWLIST the dispatch
@@ -30,7 +34,7 @@ registerEntityContextResolver("job", resolveJobContext);
  * a registered resolver missing from this list would be silently unreachable,
  * and a listed type with no resolver would degrade for no reason.
  */
-export const REGISTERED_ENTITY_TYPES = ["job"] as const;
+export const REGISTERED_ENTITY_TYPES = ["job", "project"] as const;
 
 export async function resolveEntityContext(
   ref: EntityRef,

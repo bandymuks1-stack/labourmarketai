@@ -6,6 +6,7 @@ import {
   type WorkerReadiness,
 } from "@/lib/opportunities/load-worker-opportunities";
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import type { MyInterestViewRow } from "@/lib/opportunities/my-interest-view";
 import { writeOpportunitySeen } from "@/lib/opportunities/seen";
@@ -158,8 +159,18 @@ export async function loadWorkerOpportunityBoard(
 export async function loadWorkerOpportunityMatches(input: {
   readonly surface: MarketplaceSurface;
   readonly limit?: number;
+  /**
+   * Canonical discovery filters (W4). The AI writes World State from the
+   * person's own words and passes the result here; the use case hands it to
+   * the ONE ranking path. No surface filters after the fact — that would drop
+   * matches from an already-narrowed top-N.
+   */
+  readonly filters?: DiscoveryFilterState;
 }): Promise<MarketplaceMatchesView> {
-  const result = await getWorkerJobRecommendations({ limit: input.limit });
+  const result = await getWorkerJobRecommendations({
+    limit: input.limit,
+    filters: input.filters,
+  });
   if (result.kind !== "ready") return { kind: "no-worker" };
   return {
     kind: "ready",

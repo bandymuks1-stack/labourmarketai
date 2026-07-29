@@ -33,6 +33,13 @@ export type ConversationIntent =
   | "criteria" // "kokie kriterijai pas mane nurodyti?" — search-criteria readback
   | "next-action" // "ką dar turiu padaryti?"
   | "resume" // "kur sustojau?"
+  // ── AI workspace (W4): goals stated in words, executed as workflows ──────
+  | "skill-gap" // "kokių įgūdžių man trūksta?"
+  | "journal-recent" // "parodyk paskutinius žurnalo įrašus"
+  | "figures" // "parodyk patvirtintas valandas" / "paruošk ataskaitą"
+  | "open-project" // "atidaryk šį projektą"
+  | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
+  | "context" // "ką tu apie mane žinai?"
   | "unknown";
 
 export type IntentMatch = {
@@ -54,8 +61,10 @@ type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
  * the `u` flag), so short stems like `cv`/`job` stay properly bounded across
  * every launch language.
  */
-const UB =
+export const UNICODE_WORD_BOUNDARY =
   "(?:(?<![\\p{L}\\p{N}])(?=[\\p{L}\\p{N}])|(?<=[\\p{L}\\p{N}])(?![\\p{L}\\p{N}]))";
+
+const UB = UNICODE_WORD_BOUNDARY;
 
 /** Build a word/phrase pattern, translating each ASCII `\b` in the source into
  *  the Unicode-safe boundary `UB` before compiling. */
@@ -70,6 +79,78 @@ function p(source: string, weight = 1): Pattern {
  * log-work, the SEEKING verb tips it to find-work).
  */
 const RULES: IntentRule[] = [
+  // ── AI workspace intents (W4) ────────────────────────────────────────────
+  // First, because each one is a MORE SPECIFIC reading of words that a
+  // general rule below would otherwise swallow ("įgūdžiai" → profile,
+  // "žurnalas" → log-work, "darbuotojai" → need-workers). Their weights are
+  // set so the specific reading wins on score, not merely on order.
+  {
+    intent: "skill-gap",
+    patterns: [
+      p("(trūksta|nemoku|neturiu)\\s*.{0,20}(įgūd|kvalifik)", 5),
+      p("(kokių|kurių)\\s+įgūdž", 5),
+      p("(what|which)\\s+skills?\\s*(am\\s+i|do\\s+i)?\\s*(missing|lack|need)", 5),
+      p("(каких|какие)\\s+навык", 5),
+      p("skill\\s*gap", 4),
+      p("(missing|lacking)\\s+skills?", 4),
+      p("не\\s+хватает\\s+навык", 5),
+    ],
+  },
+  {
+    intent: "journal-recent",
+    patterns: [
+      p("(parodyk|rodyk|show|покажи)\\s*.{0,20}(žurnal|journal|дневник)", 5),
+      p("(paskutin|latest|last|последн)\\s*.{0,18}(įraš|entr|запис)", 5),
+      p("(mano|my|мой)\\s+(žurnal|journal|дневник)", 4),
+    ],
+  },
+  {
+    intent: "figures",
+    patterns: [
+      // "approved hours" is the owner's phrasing; the product records
+      // CONFIRMED entries, and the workflow says so rather than inventing a
+      // number. Recognising the question is what lets it answer honestly.
+      p("(patvirtint|approved|confirmed|подтвержд)\\s*.{0,18}(valand|hour|час|įraš|entr|запис)", 5),
+      p("\\bataskait", 4),
+      p("\\breport\\b", 4),
+      p("(отчёт|отчет)", 4),
+      p("(bericht|rapport)", 3),
+    ],
+  },
+  {
+    intent: "open-project",
+    patterns: [
+      // `projekt` is the LT/DE stem and `project` the EN spelling — both are
+      // needed, or "Open this project" silently classifies as unknown.
+      p("(atidaryk|atidaryti|atverk|open|открой|öffne)\\s*.{0,15}(projekt|project|проект)", 5),
+      p("(šį|šitą|this|этот)\\s+(projekt|project|проект)", 4),
+    ],
+  },
+  {
+    // Scouting the SUPPLY side — deliberately NOT the same as employer demand
+    // intake. "reikia darbuotojų" / "ieškau darbuotojų" stay `need-workers`
+    // (the product decided that already, and a guard pins it); this fires on
+    // an explicit SEARCH-FOR-PEOPLE framing, and on the word "candidates",
+    // which never means anything else.
+    intent: "find-workers",
+    patterns: [
+      p("\\bkandidat", 5),
+      p("кандидат", 5),
+      p("\\bcandidates?\\b", 5),
+      p("(find|search\\s+for|show|list)\\s+(me\\s+)?(the\\s+)?(workers|people)", 6),
+      p("(surask|parodyk|rodyk|peržiūrėk)\\s*.{0,12}(darbuotoj|žmoni)", 6),
+      p("(найди|покажи)\\s*.{0,12}(работник)", 6),
+      p("\\bscouting\\b", 4),
+    ],
+  },
+  {
+    intent: "context",
+    patterns: [
+      p("(ką\\s+tu\\s+(apie\\s+mane\\s+)?žinai|what\\s+do\\s+you\\s+know|что\\s+ты\\s+знаешь)", 5),
+      p("(kokiame\\s+kontekst|current\\s+context|мой\\s+контекст)", 4),
+      p("(kur\\s+aš\\s+dabar\\s+esu|where\\s+am\\s+i\\s+now)", 4),
+    ],
+  },
   {
     intent: "log-work",
     patterns: [
@@ -118,6 +199,14 @@ const RULES: IntentRule[] = [
       p("\\bieškau\\b", 3),
       p("\\bieškok\\b", 3),
       p("(find|look(ing)?\\s+for)\\s+(me\\s+)?(a\\s+)?(job|work)", 3),
+      // "I want work in Germany" — stating the GOAL, not issuing a command, is
+      // how most people actually ask (W4: goals in words). Without these the
+      // sentence classified as `unknown` and fell through to the fallback.
+      p("\\bwant\\s+(to\\s+work|work|a\\s+job)", 3),
+      p("\\bnoriu\\s+(dirbti|darbo)", 3),
+      p("хочу\\s+(работать|работу)", 3),
+      p("\\bwil\\s+werk", 3), // nl
+      p("(ich\\s+)?(will|möchte)\\s+.{0,12}arbeit", 3), // de
       p("найди", 3),
       p("ищу", 3),
       p("(darbo|darbą)\\b", 1),

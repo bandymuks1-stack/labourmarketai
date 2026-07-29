@@ -3,13 +3,19 @@ import "server-only";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
-import { loadWorkerOpportunities } from "./load-worker-opportunities";
+import { loadWorkerOpportunities, type OpportunityCard } from "./load-worker-opportunities";
 import type { InterestStatus } from "./interest-snapshot";
 import { readMyOpportunitySeen, toSeenState } from "./seen";
+import {
+  applyDiscoveryFilters,
+  activeFilterCount,
+  type DiscoveryFilterState,
+} from "./discovery-filters";
 import {
   countUnseenRecommendations,
   deriveJobRecommendations,
   type JobRecommendation,
+  type SeenState,
 } from "./recommendations-model";
 
 /**
@@ -55,6 +61,17 @@ export type WorkerJobRecommendationsResult =
       readonly interestStatusByRequestId: Readonly<Record<string, InterestStatus>>;
       /** ALL recommendable matches, best first (shared §19 comparator). */
       readonly all: readonly JobRecommendation[];
+      /** The authorized board rows this derivation ran over.
+       *
+       *  Carried so a caller that needs a FILTERED view (the AI workspace, W4:
+       *  "I want work in Germany") can apply the canonical discovery filters
+       *  and re-run the SAME derivation, instead of growing a second ranking
+       *  path. Filtering happens before the derivation, never after — a filter
+       *  applied to an already-ranked top-N would silently drop matches the
+       *  person asked for. */
+      readonly boardOpportunities: readonly OpportunityCard[];
+      /** The seen state that produced `all`, so the re-derivation is identical. */
+      readonly seenState: SeenState;
       /** Unseen recommendations — the aggregate spine count. 0 while the
        *  seen store is absent (a badge that cannot clear is noise). */
       readonly newCount: number;
@@ -90,6 +107,8 @@ const loadRecommendationsResult = cache(
       interestAvailable: board.interestAvailable,
       interestStatusByRequestId,
       all,
+      boardOpportunities: board.opportunities,
+      seenState: seen,
       newCount: seen.available ? countUnseenRecommendations(all) : 0,
     };
   },
@@ -115,10 +134,29 @@ export interface WorkerJobRecommendations {
  *  accounts without a worker profile (surfaces render nothing then). */
 export async function getWorkerJobRecommendations(options?: {
   readonly limit?: number;
+  /**
+   * Canonical discovery filters (W4 — the AI writes World State). Omitted or
+   * empty ⇒ byte-identical behaviour to before: the request-cached `all` is
+   * used untouched. With filters, the SAME derivation re-runs over the filtered
+   * board rows, so ranking, the §19 basis and the recommendable rule are the
+   * ones they have always been.
+   */
+  readonly filters?: DiscoveryFilterState;
 }): Promise<{ readonly kind: "no-worker" } | WorkerJobRecommendations> {
   const result = await loadRecommendationsResult();
   if (result.kind !== "ready") return { kind: "no-worker" };
   const limit = Math.max(1, options?.limit ?? DEFAULT_LIMIT);
+
+  const filters = options?.filters;
+  const filtered =
+    filters && activeFilterCount(filters) > 0
+      ? deriveJobRecommendations(
+          applyDiscoveryFilters(result.boardOpportunities, filters),
+          result.seenState,
+          Date.now(),
+        )
+      : result.all;
+
   return {
     kind: "ready",
     boardAvailable: result.boardAvailable,
@@ -126,8 +164,8 @@ export async function getWorkerJobRecommendations(options?: {
     seenReadDegraded: result.seenReadDegraded,
     interestAvailable: result.interestAvailable,
     interestStatusByRequestId: result.interestStatusByRequestId,
-    recommendations: result.all.slice(0, limit),
-    totalRecommendable: result.all.length,
+    recommendations: filtered.slice(0, limit),
+    totalRecommendable: filtered.length,
     newCount: result.newCount,
   };
 }

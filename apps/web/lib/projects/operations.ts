@@ -80,8 +80,21 @@ async function readActiveAssignments(
 ): Promise<AssignmentRow[]> {
   const res = await supabase
     .from("project_worker_assignments")
+    // `profiles` is a LEFT join on purpose (W4 review, §3).
+    //
+    // It was `profiles!inner(full_name)`, and the only SELECT policy on
+    // `profiles` is `(id = auth.uid()) OR is_admin()` — an employer may never
+    // read another person's profile row. So the inner join dropped EVERY
+    // assignment before it reached the code below, and this screen showed
+    // "0 assigned" to every manager, always.
+    //
+    // The join exists solely to fetch an OPTIONAL display name that already has
+    // a fallback (`full_name ?? display_name ?? id-prefix`); the `!inner` made
+    // that fallback unreachable. Left-joining changes no policy and grants
+    // nothing: PostgREST still applies RLS to the embedded resource, so an
+    // unreadable profile simply arrives as `null` and the fallback runs.
     .select(
-      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles!inner(full_name))",
+      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
     )
     .eq("project_id", projectId)
     .eq("status", "active")
