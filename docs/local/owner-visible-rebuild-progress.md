@@ -43,6 +43,32 @@ Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
   aukštis 9619→7376px; evidence
   `docs/audits/evidence/owner-visual-acceptance-2026/`.
 
+- **Overlay portal root — BAIGTA 2026-07-30** (main c13af477, prod deploy
+  success): production click-through parodė, kad `.wsmap` izoliacijos +
+  z-60 NEPAKANKA — header'io `backdrop-blur` sukuria stacking kontekstą su
+  `z-index: auto`, todėl bet koks z jo VIDUJE pralošia vėlesniam puslapio
+  turiniui root lygyje. Architektūrinis fiksas (§P0.3 „vienas portal
+  root"): `components/ui/anchored-overlay.tsx` — visi header dropdown'ai
+  (avataro meniu, erdvės meniu, pranešimai) renderinami į `document.body`
+  su inkaruota fixed pozicija, Escape + outside-pointerdown, re-anchor per
+  resize/scroll; paieškos dialogas per `OverlayPortal`. Z skalė root'e:
+  60 dropdown, 70 dialog.
+  **Production patikra (autentikuota sesija, gyvi paspaudimai):**
+  avataro meniu `parentIsBody: true`, `topElementIsMenu: true`;
+  pranešimų popover `topElementIsPopover: true`; paieškos backdrop
+  `panelAreaCoveredByBackdrop: true` (dešinė panelė pagaliau pritemsta).
+
+- **Production verifikacija 2026-07-30**: `scripts/verify-prod-owner-visual-acceptance.mjs`
+  — **63/63 PASS** per visus 7 savininko privalomus viewport'us
+  (360/390/412/768/1280/1440/1920): landing ilgis, 0 horizontalaus
+  overflow, pašalintos dubliuotos sekcijos, 4 sektorių scenarijai,
+  kanoninė kortelė, 0 PLACEHOLDER, 0 medalių, 0 raw enum, 0 GIS popup.
+  Autentikuoti veiksmai patikrinti gyvai naršyklėje: „Kiek valandų dirbau
+  šiandien?" → REALUS žurnalo readback (2 tikri įrašai, ne šablonas);
+  „Parodyk mano kortele" → kanoninė kortelė pokalbyje (40 įgūdžių, 18
+  įrašų, 14 pagrįsta darbu); žemėlapis rodo „Tavo rinka" žiedą + „dar 13
+  galimybių be nurodytos vietos — jos matomos pokalbio paieškoje".
+
 ### Etapas 0 — kanoninė specifikacija + production auditas (2026-07-29)
 
 - **Kanoninė specifikacija — savininko auditas**: rastas

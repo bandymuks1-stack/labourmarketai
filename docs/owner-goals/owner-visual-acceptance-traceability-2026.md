@@ -62,4 +62,31 @@
 | A-6 | „1 įsipareigojimai" linksnio klaida; panelė neatsinaujina po chat įrašo be perkrovimo | Fixas ruošiamas | 9.1 |
 | A-7 | Vietos ekstrakcija nepagauna „Kauno objekte" → Objektas tuščias | Fixas ruošiamas | 6.3 |
 | A-8 | Dviguba įrašo konfirmacija („išsaugoti?" → „Patvirtinti įrašą?") | Fixas ruošiamas | 4.3 |
-| A-9 | Žurnalo įrašo meta „Vieta: labourmarket.ai" (beprasmė vieta) | Fixas ruošiamas | 6.2 |
+| A-9 | Žurnalo įrašo meta „Vieta: labourmarket.ai" (beprasmė vieta) | ATVIRA | 6.2 |
+| A-10 | Overlay z-index nepakanka: header `backdrop-blur` sukuria stacking kontekstą su `z-index: auto`, todėl joks z jo viduje neužtikrina viršenybės prieš puslapio turinį | IŠSPRĘSTA architektūriškai (vienas portal root, c13af477; production patvirtinta) | P0.3 |
+| A-11 | „Kiek valandų dirbau?" atsako įrašų sąrašu, nesuskaičiuoja valandų sumos | ATVIRA — produkte nėra valandų ledger'io (`figuresNoHoursLedger`); dabartinis atsakymas sąžiningas, bet ne pilnas | 4.2 |
+
+## LIKĘ BLOKATORIAI (galutiniam verdiktui)
+
+Šie savininko audito punktai dar NEĮGYVENDINTI — todėl verdiktas yra
+`OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE`:
+
+1. **§7.1/§7.2 Kalendorius** — nerodo pilno sutarto informacijos rinkinio
+   (trukmė, workspace, vieta, konfliktas, tipas, šaltinis, susijęs žmogus);
+   šaltinių auditas neatliktas.
+2. **§8.1 Žinutės** — projekcija vis dar sąrašo lygio; nėra preview/unread/
+   prioriteto/thread/greito atsakymo/archyvo; pokalbis dar negali parengti
+   ir išsiųsti atsakymo po patvirtinimo.
+3. **§5.2 Premium kortelės vizualika** — kortelėje nėra vietos, dokumentų
+   būsenos ir reputacijos statistikos.
+4. **§10 CV įkėlimas** — „iki 5 MB" naštos perkėlimas ir LMC informavimas
+   prieš veiksmą nepakeisti.
+5. **§12 Premium design-system pass** — atliktas dalinis (IA + landing);
+   pilnas vizualinis praėjimas per visus autentikuotus ekranus neatliktas.
+6. **P0.4 OAuth identitetas** — SAVININKO GATE (Supabase custom domain +
+   Google Console; planas `oauth-identity-audit-2026.md`).
+7. **P0.1 patvarus workspace pointer** — SAVININKO GATE (migracija
+   20260714210000; sesijos pointer jau veikia).
+8. **§16 pilna QA matrica** — 63/63 PASS viešiems paviršiams per 7
+   viewport'us; autentikuotos būsenos (kalendorius day/week/month/year,
+   žinutės, light/dark) dar neperėjo pilnos matricos.
