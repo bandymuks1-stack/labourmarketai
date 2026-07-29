@@ -12,16 +12,16 @@ export async function generateMetadata({
   return buildPageMetadata({ locale, path: "" });
 }
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { PreviewChip } from "@/components/app/preview-chip";
-import { LiveWorldMap } from "@/components/app/live-world-map";
 import { LiveTicker } from "@/components/app/live-ticker";
 import { MarketCounters } from "@/components/app/market-counters";
 import { DraftBoard } from "@/components/marketing/draft-board";
 import { MarketPulse } from "@/components/marketing/market-pulse";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
-import { HowItWorksBand } from "@/components/marketing/how-it-works-band";
+import { LiveProductDemo } from "@/components/marketing/live-product-demo";
+import { ProductChainBand } from "@/components/marketing/product-chain-band";
+import { MarketMoment } from "@/components/marketing/market-moment";
+import { ProofBand } from "@/components/marketing/proof-band";
 import { ConversationOsPanel } from "@/components/marketing/conversation-os-panel";
 import { AudienceValueSections } from "@/components/marketing/audience-value-sections";
 import { TrustBand } from "@/components/marketing/trust-band";
@@ -46,16 +46,12 @@ export default async function LandingPage({
     "aAgencies",
     "aClients",
   ] as const;
-  const pillarKeys = [
-    ["p1Title", "p1Body"],
-    ["p2Title", "p2Body"],
-    ["p3Title", "p3Body"],
-    ["p4Title", "p4Body"],
-  ] as const;
-  // PR-H global landing: the former journey band (the in-app stage rail) is
-  // superseded by <HowItWorksBand/> — the conversation-first 4-step flow.
-  // The `journey.*` i18n keys stay in messages/*.json (used elsewhere and
-  // kept for a cheap restore).
+  // Landing rebuild (owner directive 2026-07-29): the former journey band,
+  // the HowItWorksBand 4-step rail, the why-now pillars grid and the
+  // two-paths cards are superseded by the narrative chain
+  // hero(LiveProductDemo) → ProductChainBand → MarketMoment → … → ProofBand.
+  // Their i18n keys (`journey.*`, `labourMarket.p*`, `landing.how.*`,
+  // worker/employer path keys) stay in messages/*.json for a cheap restore.
 
   // Premium-impression cleanup v1: the `tr` (trusted) + `sec` (secondary)
   // namespaces are no longer rendered on this page (placeholder-only
@@ -131,14 +127,10 @@ export default async function LandingPage({
            */}
         </div>
 
-        {/* Hero right — world directions map (PR-H global landing). Concept
-            visual, not live data — marked by the chip + on-map caption. */}
-        <div className="relative">
-          <div className="relative mb-5 flex items-start justify-between gap-4">
-            <PreviewChip />
-          </div>
-          <LiveWorldMap />
-        </div>
+        {/* Hero right — the product WORKING (landing rebuild 2026-07-29).
+            The wall-sized static world map is superseded by a live, honestly
+            labelled sample sequence of the real core loop. */}
+        <LiveProductDemo />
       </section>
 
       {/* ── Live ticker (full-width hero strip) ──────────────────────── */}
@@ -146,8 +138,14 @@ export default async function LandingPage({
         <LiveTicker />
       </div>
 
-      {/* ── How it works — conversation-first 4-step flow (PR-H, A) ────── */}
-      <HowItWorksBand />
+      {/* ── The product chain — six links, journal as pivot. Carries the
+             #how-it-works nav anchor (supersedes HowItWorksBand). ───────── */}
+      <div id="how-it-works" className="scroll-mt-24">
+        <ProductChainBand />
+      </div>
+
+      {/* ── One city, one need, a visible answer — the map moment ──────── */}
+      <MarketMoment />
 
       {/* ── Conversation as the operating system (PR-H, G) ─────────────── */}
       <ConversationOsPanel />
@@ -184,83 +182,6 @@ export default async function LandingPage({
              training institutions / partners (PR-H, B–F) ───────────────── */}
       <AudienceValueSections />
 
-      {/* ── Why-now pillars ──────────────────────────────────────────── */}
-      <section className="mt-16">
-        <p className="font-mono text-[11px] uppercase tracking-label text-text-muted">
-          {tlm("pillarsEyebrow")}
-        </p>
-        <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-4xl">
-          {tlm("pillarsTitle")}
-        </h2>
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {pillarKeys.map(([titleKey, bodyKey], i) => (
-            <Card
-              key={titleKey}
-              className="glow-hover flex flex-col gap-3 sm:p-7"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-blue/30 bg-brand-blue/10 font-mono text-sm font-semibold text-brand-blue">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="font-display text-lg font-semibold text-text-primary">
-                  {tlm(titleKey)}
-                </h3>
-              </div>
-              <p className="text-sm leading-relaxed text-text-secondary">
-                {tlm(bodyKey)}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Two paths: worker-first + employer ───────────────────────── */}
-      <section className="mt-16 grid gap-5 md:grid-cols-2">
-        <Card className="glow-hover flex flex-col items-start gap-3 sm:p-7">
-          <span
-            className="h-1 w-12 rounded-full bg-brand-cyan"
-            aria-hidden
-          />
-          <h3 className="font-display text-xl font-semibold text-text-primary">
-            {tlm("workerPathTitle")}
-          </h3>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tlm("workerPathBody")}
-          </p>
-          <Link
-            href="/auth/signup"
-            className="mt-auto w-full pt-2 sm:w-auto"
-          >
-            <Button className="w-full rounded-xl sm:w-auto">
-              {tlm("workerPathCta")} →
-            </Button>
-          </Link>
-        </Card>
-        <Card className="glow-hover flex flex-col items-start gap-3 sm:p-7">
-          <span
-            className="h-1 w-12 rounded-full bg-brand-blue"
-            aria-hidden
-          />
-          <h3 className="font-display text-xl font-semibold text-text-primary">
-            {tlm("employerPathTitle")}
-          </h3>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tlm("employerPathBody")}
-          </p>
-          {/* Canonical demand funnel: every "submit/start a need" CTA routes
-              to /company-need (the single company demand entry). The
-              educational /for-companies page stays reachable from the nav. */}
-          <Link
-            href="/company-need"
-            className="mt-auto w-full pt-2 sm:w-auto"
-          >
-            <Button variant="secondary" className="w-full rounded-xl sm:w-auto">
-              {tlm("employerPathCta")} →
-            </Button>
-          </Link>
-        </Card>
-      </section>
-
       {/* ── Labour-market evidence (source-backed, Step 1) ───────────── */}
       <LabourMarketEvidence />
 
@@ -272,6 +193,9 @@ export default async function LandingPage({
 
       {/* ── Market Pulse (5b.4) ──────────────────────────────────────── */}
       <MarketPulse />
+
+      {/* ── Fact vs proven skill vs opinion — the reputation model ─────── */}
+      <ProofBand />
 
       {/* ── Trust & security — verifiable claims only (PR-H, H) ────────── */}
       <TrustBand />

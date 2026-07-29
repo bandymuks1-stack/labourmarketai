@@ -3,12 +3,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Global landing guard (PR-H global landing + motion).
+ * Global landing guard (PR-H global landing + motion; landing rebuild
+ * 2026-07-29 — owner directive).
  *
  * The public landing presents a GLOBAL AI-first work platform — not
  * Europe-only, not construction-only. This guard pins four facts:
- *  (a) the landing hero renders the WORLD map (world-geo), not the old
- *      Europe-bounded map (europe-geo);
+ *  (a) the landing hero renders the LIVE PRODUCT DEMO (the real core loop,
+ *      honestly labelled as a sample sequence) — the wall-sized static map
+ *      is gone, and no Europe-bounded map (europe-geo) may return;
  *  (b) no "across Europe"-style hardcode remains in the landing render tree
  *      or the landing i18n namespaces;
  *  (c) every final-CTA href resolves to a real route file under
@@ -21,8 +23,10 @@ const read = (rel: string) => readFileSync(join(WEB_ROOT, rel), "utf8");
 
 const LANDING_FILES = [
   "app/[locale]/(marketing)/page.tsx",
-  "components/app/live-world-map.tsx",
-  "components/marketing/how-it-works-band.tsx",
+  "components/marketing/live-product-demo.tsx",
+  "components/marketing/product-chain-band.tsx",
+  "components/marketing/market-moment.tsx",
+  "components/marketing/proof-band.tsx",
   "components/marketing/conversation-os-panel.tsx",
   "components/marketing/audience-value-sections.tsx",
   "components/marketing/trust-band.tsx",
@@ -30,15 +34,21 @@ const LANDING_FILES = [
   "components/marketing/reveal.tsx",
 ] as const;
 
-describe("(a) the landing renders the world map, not the Europe-only map", () => {
-  it("page.tsx imports live-world-map and not live-map / europe-geo", () => {
+describe("(a) the landing hero is the live product demo, never a Europe-only map", () => {
+  it("page.tsx imports live-product-demo and not live-map / europe-geo", () => {
     const page = read("app/[locale]/(marketing)/page.tsx");
-    expect(page).toMatch(/components\/app\/live-world-map/);
+    expect(page).toMatch(/components\/marketing\/live-product-demo/);
     expect(page).not.toMatch(/components\/app\/live-map/);
     expect(page).not.toMatch(/europe-geo/);
   });
 
-  it("live-world-map renders the generated world-geo module", () => {
+  it("the demo is honestly labelled and reduced-motion safe", () => {
+    const demo = read("components/marketing/live-product-demo.tsx");
+    expect(demo).toMatch(/useReducedMotion/);
+    expect(demo).toMatch(/t\("chip"\)/);
+  });
+
+  it("live-world-map (kept in repo, restorable) renders the generated world-geo module", () => {
     const map = read("components/app/live-world-map.tsx");
     expect(map).toMatch(/components\/app\/world-geo/);
     expect(map).not.toMatch(/europe-geo/);

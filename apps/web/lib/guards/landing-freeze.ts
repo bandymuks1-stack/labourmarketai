@@ -37,6 +37,13 @@ export const FROZEN_LANDING_FILES = [
   "components/app/regional-heatmap.tsx",
   "components/app/skills-demand-list.tsx",
   "components/app/supply-demand-chart.tsx",
+  // Landing rebuild (owner directive 2026-07-29): the narrative chain —
+  // hero demo, six-link product chain, the map moment, the proof band.
+  "components/marketing/live-product-demo.tsx",
+  "components/marketing/product-chain-band.tsx",
+  "components/marketing/market-moment.tsx",
+  "components/marketing/proof-band.tsx",
+  "lib/use-mounted.ts",
   "components/marketing/draft-board.tsx",
   "components/marketing/market-pulse.tsx",
   "components/marketing/player-card-showcase.tsx",

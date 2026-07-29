@@ -11287,6 +11287,83 @@
       "employer": "I am an employer",
       "agency": "I represent an agency",
       "partner": "I want to become a partner"
+    },
+    "loop": {
+      "chip": "Sample sequence — real product flow",
+      "windowTitle": "LabourMarket AI — conversation",
+      "userSays": "Today I laid brick walls at the Vilnius site, 8 hours.",
+      "entrySaved": "Journal entry saved · #D-1042",
+      "entryLine": "Bricklaying · Vilnius site · 8 h · added to your work history.",
+      "skillSignal": "Skill signal strengthened",
+      "skillLine": "Bricklaying — now backed by 12 journal entries.",
+      "matchFound": "New matching opportunity",
+      "matchLine": "A verified company needs 3 bricklayers in Kaunas.",
+      "matchWhy": "Why you: matches 4 of 5 required skills, 3 backed by your journal."
+    },
+    "chain": {
+      "eyebrow": "How the platform actually works",
+      "title": "Work becomes evidence. Evidence becomes your next opportunity.",
+      "journalNote": "The work journal is the difference: every day you record becomes verifiable professional history — so your next opportunity is argued from what you actually did, not from what a CV claims.",
+      "steps": {
+        "need": {
+          "title": "A work need",
+          "body": "A company states real demand — role, place, time."
+        },
+        "person": {
+          "title": "The right person",
+          "body": "Matching runs on skills and availability, with reasons."
+        },
+        "work": {
+          "title": "Real work",
+          "body": "You work. The platform stays out of the way."
+        },
+        "journal": {
+          "title": "The work journal",
+          "body": "You record what happened — it becomes your history."
+        },
+        "skills": {
+          "title": "Proven skills",
+          "body": "Skills grow from records, not from claims."
+        },
+        "next": {
+          "title": "A better next opportunity",
+          "body": "The next match is argued from your evidence."
+        }
+      }
+    },
+    "moment": {
+      "chip": "Concept example — sample numbers",
+      "title": "One city. One need. A visible answer.",
+      "body": "The market map is not decoration: a need appears in a place, matching people light up, availability narrows it to the ones who can actually come.",
+      "p1": "Vilnius needs 3 specialists",
+      "p2": "8 matching people found",
+      "p3": "5 available in the stated period",
+      "svgLabel": "Stylised city map with a demand point and matching people",
+      "legend": {
+        "need": "The need",
+        "match": "Matching people",
+        "avail": "Available now"
+      }
+    },
+    "proof": {
+      "eyebrow": "Trust, separated honestly",
+      "title": "A fact, a proven skill and an opinion are three different things.",
+      "fact": {
+        "label": "Work fact",
+        "title": "What actually happened",
+        "body": "An append-only journal record: date, place, work done. It cannot be quietly rewritten."
+      },
+      "skill": {
+        "label": "Proven skill",
+        "title": "What the records back",
+        "body": "A skill counts as proven when your own journal entries — and, when present, a manager's record — stand behind it."
+      },
+      "opinion": {
+        "label": "Opinion",
+        "title": "What someone felt",
+        "body": "A subjective +1 or −1 with text. Shown as an opinion, kept apart from facts; a run of negatives is a signal to check, never a verdict."
+      },
+      "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     }
   },
   "workspace": {

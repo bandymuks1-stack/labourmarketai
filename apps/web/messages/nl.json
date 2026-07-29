@@ -11287,6 +11287,83 @@
       "employer": "Ik ben werkgever",
       "agency": "Ik vertegenwoordig een bureau",
       "partner": "Ik wil partner worden"
+    },
+    "loop": {
+      "chip": "Voorbeeldreeks — echte productflow",
+      "windowTitle": "LabourMarket AI — gesprek",
+      "userSays": "Vandaag muren gemetseld op de bouwplaats in Vilnius, 8 uur.",
+      "entrySaved": "Dagboekregel opgeslagen · #D-1042",
+      "entryLine": "Metselen · bouwplaats Vilnius · 8 u · toegevoegd aan je werkgeschiedenis.",
+      "skillSignal": "Vaardigheidssignaal versterkt",
+      "skillLine": "Metselen — nu onderbouwd door 12 dagboekregels.",
+      "matchFound": "Nieuwe passende kans",
+      "matchLine": "Een geverifieerd bedrijf in Kaunas zoekt 3 metselaars.",
+      "matchWhy": "Waarom jij: 4 van 5 gevraagde vaardigheden, 3 onderbouwd door je dagboek."
+    },
+    "chain": {
+      "eyebrow": "Hoe het platform echt werkt",
+      "title": "Werk wordt bewijs. Bewijs wordt je volgende kans.",
+      "journalNote": "Het werkdagboek is het verschil: elke vastgelegde dag wordt verifieerbare professionele geschiedenis — je volgende kans wordt beargumenteerd met wat je echt deed, niet met wat een CV beweert.",
+      "steps": {
+        "need": {
+          "title": "Een werkbehoefte",
+          "body": "Een bedrijf noemt echte vraag — rol, plaats, tijd."
+        },
+        "person": {
+          "title": "De juiste persoon",
+          "body": "Matching draait op vaardigheden en beschikbaarheid, met redenen."
+        },
+        "work": {
+          "title": "Echt werk",
+          "body": "Jij werkt. Het platform staat niet in de weg."
+        },
+        "journal": {
+          "title": "Het werkdagboek",
+          "body": "Je legt vast wat gebeurde — dat wordt je geschiedenis."
+        },
+        "skills": {
+          "title": "Bewezen vaardigheden",
+          "body": "Vaardigheden groeien uit registraties, niet uit claims."
+        },
+        "next": {
+          "title": "Een betere volgende kans",
+          "body": "De volgende match is beargumenteerd met jouw bewijs."
+        }
+      }
+    },
+    "moment": {
+      "chip": "Conceptvoorbeeld — voorbeeldcijfers",
+      "title": "Eén stad. Eén behoefte. Een zichtbaar antwoord.",
+      "body": "De marktkaart is geen decoratie: op een plek verschijnt een behoefte, passende mensen lichten op, beschikbaarheid versmalt tot wie echt kan komen.",
+      "p1": "Vilnius zoekt 3 specialisten",
+      "p2": "8 passende mensen gevonden",
+      "p3": "5 beschikbaar in de genoemde periode",
+      "svgLabel": "Gestileerde stadskaart met een vraagpunt en passende mensen",
+      "legend": {
+        "need": "De behoefte",
+        "match": "Passende mensen",
+        "avail": "Nu beschikbaar"
+      }
+    },
+    "proof": {
+      "eyebrow": "Vertrouwen, eerlijk gescheiden",
+      "title": "Een feit, een bewezen vaardigheid en een mening zijn drie verschillende dingen.",
+      "fact": {
+        "label": "Werkfeit",
+        "title": "Wat er echt gebeurde",
+        "body": "Een niet-herschrijfbare dagboekregistratie: datum, plaats, gedaan werk. Die kan niet stilletjes worden herschreven."
+      },
+      "skill": {
+        "label": "Bewezen vaardigheid",
+        "title": "Wat de registraties onderbouwen",
+        "body": "Een vaardigheid telt als bewezen wanneer je eigen dagboekregels — en waar aanwezig een registratie van een leidinggevende — erachter staan."
+      },
+      "opinion": {
+        "label": "Mening",
+        "title": "Wat iemand vond",
+        "body": "Een subjectieve +1 of −1 met tekst. Getoond als mening, gescheiden van feiten; een reeks negatieven is een signaal om te checken, nooit een vonnis."
+      },
+      "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     }
   },
   "workspace": {

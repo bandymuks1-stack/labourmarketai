@@ -11287,6 +11287,83 @@
       "employer": "Esu darbdavys",
       "agency": "Atstovauju agentūrai",
       "partner": "Noriu tapti partneriu"
+    },
+    "loop": {
+      "chip": "Pavyzdinė seka — reali produkto eiga",
+      "windowTitle": "LabourMarket AI — pokalbis",
+      "userSays": "Šiandien mūrijau sienas Vilniaus objekte, 8 valandas.",
+      "entrySaved": "Žurnalo įrašas išsaugotas · #D-1042",
+      "entryLine": "Mūrijimas · Vilniaus objektas · 8 val. · pridėta prie tavo darbo istorijos.",
+      "skillSignal": "Įgūdžio signalas sustiprėjo",
+      "skillLine": "Mūrijimas — dabar paremtas 12 žurnalo įrašų.",
+      "matchFound": "Nauja tinkanti galimybė",
+      "matchLine": "Patikrintai įmonei Kaune reikia 3 mūrininkų.",
+      "matchWhy": "Kodėl tu: atitinka 4 iš 5 reikalaujamų įgūdžių, 3 paremti tavo žurnalu."
+    },
+    "chain": {
+      "eyebrow": "Kaip platforma veikia iš tikrųjų",
+      "title": "Darbas tampa įrodymu. Įrodymas tampa kita tavo galimybe.",
+      "journalNote": "Darbo žurnalas ir yra skirtumas: kiekviena užrašyta diena virsta patikrinama profesine istorija — tavo kita galimybė grindžiama tuo, ką realiai padarei, o ne tuo, ką teigia CV.",
+      "steps": {
+        "need": {
+          "title": "Darbo poreikis",
+          "body": "Įmonė įvardija realų poreikį — rolė, vieta, laikas."
+        },
+        "person": {
+          "title": "Tinkamas žmogus",
+          "body": "Atitikimas skaičiuojamas pagal įgūdžius ir prieinamumą, su priežastimis."
+        },
+        "work": {
+          "title": "Realus darbas",
+          "body": "Tu dirbi. Platforma netrukdo."
+        },
+        "journal": {
+          "title": "Darbo žurnalas",
+          "body": "Užrašai, kas įvyko — tai tampa tavo istorija."
+        },
+        "skills": {
+          "title": "Įrodyti įgūdžiai",
+          "body": "Įgūdžiai auga iš įrašų, ne iš teiginių."
+        },
+        "next": {
+          "title": "Geresnė kita galimybė",
+          "body": "Kitas atitikimas grindžiamas tavo įrodymais."
+        }
+      }
+    },
+    "moment": {
+      "chip": "Koncepcinis pavyzdys — pavyzdiniai skaičiai",
+      "title": "Vienas miestas. Vienas poreikis. Matomas atsakymas.",
+      "body": "Rinkos žemėlapis nėra dekoracija: vietoje atsiranda poreikis, užsidega tinkami žmonės, prieinamumas susiaurina iki tų, kurie realiai gali atvykti.",
+      "p1": "Vilniuje reikalingi 3 specialistai",
+      "p2": "Rasti 8 tinkami žmonės",
+      "p3": "5 prieinami nurodytu laikotarpiu",
+      "svgLabel": "Stilizuotas miesto žemėlapis su poreikio tašku ir tinkamais žmonėmis",
+      "legend": {
+        "need": "Poreikis",
+        "match": "Tinkami žmonės",
+        "avail": "Prieinami dabar"
+      }
+    },
+    "proof": {
+      "eyebrow": "Pasitikėjimas, atskirtas sąžiningai",
+      "title": "Faktas, įrodytas įgūdis ir nuomonė — trys skirtingi dalykai.",
+      "fact": {
+        "label": "Darbo faktas",
+        "title": "Kas įvyko iš tikrųjų",
+        "body": "Nekeičiamas žurnalo įrašas: data, vieta, atliktas darbas. Jo negalima tyliai perrašyti."
+      },
+      "skill": {
+        "label": "Įrodytas įgūdis",
+        "title": "Ką paremia įrašai",
+        "body": "Įgūdis laikomas įrodytu, kai už jo stovi tavo paties žurnalo įrašai — o kai yra, ir vadovo įrašas."
+      },
+      "opinion": {
+        "label": "Nuomonė",
+        "title": "Ką kažkas pajuto",
+        "body": "Subjektyvus +1 arba −1 su tekstu. Rodoma kaip nuomonė, atskirai nuo faktų; neigiamų virtinė — signalas pasitikrinti, niekada ne nuosprendis."
+      },
+      "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     }
   },
   "workspace": {
