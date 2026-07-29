@@ -106,12 +106,12 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // existed only in the five served locales, so the missing-data list would
   // have leaked raw keys in the other six. Backfilled per doctrine §2.4 —
   // every key in every locale, in the same PR).
-  // MEASURED __PENDING__ at W3 context-panel rebased onto W5 (+48: the
+  // MEASURED 1127 at W3 context-panel rebased onto W5 (+48: the
   // `workspace.panel` copy lands in all 11 locales; lt/en/ru/nl/de translated
   // (de:0 / nl:0 ratchet intact), da [EN] until human translation). Both sides
   // of the rebase raised this ceiling; the value is MEASURED after the merge,
   // never added up on paper.
-  da: __PENDING__,
+  da: 1127,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an
