@@ -8,7 +8,7 @@ import {
   computeActualCostUsd,
   pricingForModel,
 } from "./model-pricing";
-import { AI_MODEL_CANDIDATES } from "../types";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
 
 describe("pricing table", () => {
   it("covers every routing alias and every anthropic candidate id", () => {

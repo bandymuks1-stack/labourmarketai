@@ -10,7 +10,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { getAiProvider, isAiAssistEnabled } from "../ai/provider";
 import { noopAiProvider } from "../ai/noop-provider";
-import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/schemas";
+import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/legacy-assist-schemas";
 import { AI_ASSIST_ENABLED, AI_ASSIST_FLAGS } from "../config/ai";
 
 const webRoot = resolve(__dirname, "..", "..");
@@ -114,7 +114,7 @@ describe("no estimate / verification can be AI-sourced", () => {
     ).toBeNull();
   });
   it("estimate-clarify has no numeric field — AI can't produce a total", () => {
-    const schemaSrc = read(resolve(aiDir, "schemas.ts"));
+    const schemaSrc = read(resolve(aiDir, "legacy-assist-schemas.ts"));
     // The estimate-clarify schema block carries only string-array fields.
     expect(schemaSrc).toMatch(/estimateClarifyResultSchema[\s\S]*?questions[\s\S]*?assumptionNotes/);
     expect(schemaSrc).not.toMatch(/estimateClarifyResultSchema[\s\S]*?z\.number\(\)[\s\S]*?\.strict\(\)/);

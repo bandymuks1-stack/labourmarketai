@@ -1,4 +1,29 @@
 /**
+ * LEGACY AI assist boundary — typed skeleton. NOT the canonical runtime.
+ *
+ * AI Runtime Consolidation Plan v1 Phase 2 marking. This module belongs to the
+ * LEGACY assist island (plan §1.3): `lib/config/ai.ts` + `./provider.ts` +
+ * `./noop-provider.ts` + `./estimate-clarify-actions.ts` +
+ * `./legacy-assist-schemas.ts` + `components/app/estimate-clarify-assist.tsx`.
+ * The island is permanently inert — `AI_ASSIST_ENABLED` is a source literal
+ * `false` that no environment variable can flip, and `getAiProvider()` has no
+ * live branch to return.
+ *
+ * CANONICAL REPLACEMENTS — use these in new code:
+ *   provider adapter contract  →  `lib/ai/runtime/types.ts` (`AiCompletionProvider`)
+ *   runtime configuration      →  `lib/ai/runtime/config-core.ts` (`AiRuntimeConfig`)
+ *   model candidates           →  `lib/ai/runtime/model-candidates.ts`
+ *   agent output contract      →  `lib/ai/schemas/envelope.ts`
+ *   entrypoint                 →  `runAiAgent()` in `lib/ai/run-agent-server.ts`
+ *
+ * ZERO symbols are shared with the runtime (plan §1.2, enforced by
+ * `lib/guards/ai-runtime-boundary.test.ts`). `AiLocale` is declared here AND in
+ * `lib/ai/runtime/types.ts` DELIBERATELY: two identical, independent
+ * declarations keep the boundary import-free. Do not "de-duplicate" them by
+ * importing across the boundary — that would re-create the coupling Phase 1
+ * removed.
+ *
+ * ── original header ──
  * AI assistance layer — typed boundary (readiness skeleton).
  *
  * TYPES + CONFIG CONSTANTS ONLY. There is NO runtime model integration, NO SDK,
@@ -26,38 +51,17 @@ export type AiProviderId = "noop" | "anthropic" | "openai";
 export const DEFAULT_AI_PROVIDER_ID: AiProviderId = "noop";
 
 /**
- * Model id constants — DOCUMENTATION / CONFIG CANDIDATES ONLY. They are not
- * imported by any SDK and are not used to make any call. They exist so a future,
- * owner-approved activation slice has a single typed place to choose a model.
+ * Model id candidates MOVED — AI Runtime Consolidation Plan v1, Phase 1.
+ *
+ * `AI_MODEL_CANDIDATES` now lives in `lib/ai/runtime/model-candidates.ts`, the
+ * canonical runtime. It was the ONLY symbol shared between the runtime and this
+ * legacy assist boundary; moving it means zero symbols now cross, and
+ * `lib/guards/ai-task-routing.test.ts` allowlists `lib/ai/runtime/` alone.
+ *
+ * Nothing here re-exports it. A module that needs a model id belongs inside the
+ * routing layer, and the guard enforces exactly that.
  */
-export const AI_MODEL_CANDIDATES = {
-  anthropic: {
-    fable: "claude-fable-5",
-    opus: "claude-opus-4-8",
-    sonnet: "claude-sonnet-4-6",
-    haiku: "claude-haiku-4-5-20251001",
-  },
-  // Non-anthropic candidates for the env-gated fetch adapters
-  // (lib/ai/runtime/providers/{openai,gemini,xai}.ts). Keyed by the same tier
-  // ALIASES the routing layer uses (haiku = cheapest sufficient, sonnet =
-  // standard, opus = advanced). OWNER REVIEWS these ids before enabling any
-  // provider — they are config candidates only; nothing here activates AI.
-  openai: {
-    opus: "gpt-5",
-    sonnet: "gpt-5-mini",
-    haiku: "gpt-5-nano",
-  },
-  gemini: {
-    opus: "gemini-2.5-pro",
-    sonnet: "gemini-2.5-flash",
-    haiku: "gemini-2.5-flash-lite",
-  },
-  xai: {
-    opus: "grok-4",
-    sonnet: "grok-3",
-    haiku: "grok-3-mini",
-  },
-} as const;
+
 
 /** The use cases this boundary is shaped for (all inactive). */
 export type AiAssistKind =

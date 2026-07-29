@@ -1,5 +1,18 @@
 /**
- * AI assist — runtime output SCHEMAS (structured, not prose).
+ * LEGACY assist output SCHEMAS (structured, not prose).
+ *
+ * RENAMED from `lib/ai/schemas.ts` by AI Runtime Consolidation Plan v1 Phase 3.
+ * That filename collided with the `lib/ai/schemas/` DIRECTORY, so `lib/ai/schemas`
+ * resolved to a file while `lib/ai/schemas/envelope` resolved into a directory of
+ * the same name — a real resolution hazard, and a reader could not tell which of
+ * the two output contracts a module meant.
+ *
+ * This module belongs to the LEGACY assist island (plan §1.3) and has exactly one
+ * importer, `lib/ai/estimate-clarify-actions.ts`. The CANONICAL output contract
+ * for the live runtime is `lib/ai/schemas/envelope.ts`, used by all 11 registry
+ * agents. Do not add importers here; add them to the envelope.
+ *
+ * Contents unchanged — only the filename and this note moved.
  *
  * These zod schemas define the ONLY shape a future, owner-approved provider may
  * return. They are `strict` so a model can never smuggle a fabricated `total`,

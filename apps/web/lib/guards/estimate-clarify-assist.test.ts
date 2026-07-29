@@ -9,7 +9,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/schemas";
+import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/legacy-assist-schemas";
 import { AI_ASSIST_ENABLED, AI_ASSIST_FLAGS } from "../config/ai";
 
 const webRoot = resolve(__dirname, "..", "..");
