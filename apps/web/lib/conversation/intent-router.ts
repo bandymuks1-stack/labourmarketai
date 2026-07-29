@@ -102,6 +102,14 @@ const RULES: IntentRule[] = [
       p("(parodyk|rodyk|show|покажи)\\s*.{0,20}(žurnal|journal|дневник)", 5),
       p("(paskutin|latest|last|последн)\\s*.{0,18}(įraš|entr|запис)", 5),
       p("(mano|my|мой)\\s+(žurnal|journal|дневник)", 4),
+      // A QUESTION about hours worked is a journal READ, not a log-work
+      // intake. "Kiek valandų dirbau šiandien?" used to score log-work via
+      // the bare past-tense verb and answered with the log-work template —
+      // the assistant asking you to record the very thing it should be
+      // reporting (owner visual acceptance P0-5). The interrogative +
+      // hours/worked pairing outweighs log-work's verb+today signals.
+      p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(valand|hour|час)", 7),
+      p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(dirbau|dirbome|worked|работал)", 7),
     ],
   },
   {

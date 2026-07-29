@@ -39,6 +39,10 @@ export const DASHBOARD_SEARCH_MAX_TOTAL_RESULTS = 30;
  * deterministic scouting flow is the only person-finding path (gap map §11).
  */
 export const DASHBOARD_SEARCH_SOURCES = [
+  // The worker's own journal FIRST: it is the platform's primary record, and
+  // in production a just-saved entry was unfindable ("plyteles" → nothing)
+  // because the finder never read it (owner visual acceptance A-1).
+  "journal",
   "projects",
   "tasks",
   "finance",

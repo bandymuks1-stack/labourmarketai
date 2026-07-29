@@ -112,7 +112,10 @@ export function AccountMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          // z-[60]: the account menu (Profilis / Nustatymai) must never hide
+          // under the workspace map or the composer — in production it was
+          // unclickable behind higher-z content (owner audit P0.2).
+          className="absolute right-0 z-[60] mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
             <p className="truncate px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">

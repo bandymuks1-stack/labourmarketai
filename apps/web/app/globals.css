@@ -560,6 +560,16 @@ a {
    system (slightly desaturated, calmer contrast) so the OSM raster reads as a
    designed part of the product; pins are brand-token vectors, clustered per
    place with a real count. */
+.wsmap {
+  /* Leaflet's internal panes carry z-index 400–700. Without a stacking
+     context of its own the map would paint OVER every header overlay below
+     z-400 — the notification popover and the search backdrop both lost this
+     fight in production (owner visual acceptance P0-1/P0-2). Isolating the
+     card keeps Leaflet's z-indexes private to the map. */
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
 .wsmap .leaflet-tile-pane {
   filter: saturate(0.72) contrast(0.94);
 }

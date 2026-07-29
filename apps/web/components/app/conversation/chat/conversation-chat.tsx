@@ -94,6 +94,9 @@ export type ChatLabels = {
   chipCard: string;
   chipPrefs: string;
   offersEmpty: string;
+  /** P0.5 (owner audit): the search dialog's opening line — what we know,
+   *  before asking for what is missing. */
+  searchAskCriteria: string;
   fallback: string;
   userCv: string;
   userProfile: string;
@@ -338,7 +341,7 @@ export function ConversationChat({
   }, [assistant, labels.companyDemandNext, labels.chipCompanyHub, labels.chipNeedWorkers]);
 
   const openForm = useCallback(
-    (actionId: string) => {
+    (actionId: string, onCloseOverride?: () => void) => {
       // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
       // specs share InlineActionForm + the canonical dispatcher.
       const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
@@ -351,11 +354,14 @@ export function ConversationChat({
             locale={locale}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
-            // demand form offers the real demand follow-ups.
+            // demand form offers the real demand follow-ups. A caller with a
+            // flow of its own (the search dialog, P0.5) hands in the next
+            // step explicitly.
             onClose={
-              isEmployer
+              onCloseOverride ??
+              (isEmployer
                 ? companyFollowup
-                : () => startProfileSummaryRef.current("profile")
+                : () => startProfileSummaryRef.current("profile"))
             }
           />,
         );
@@ -446,8 +452,9 @@ export function ConversationChat({
     [assistant, pushMessage, locale, searchChips, starterChips, labels.fallback, tAi],
   );
 
-  /** Real employer/opportunity search — its own typing lifecycle (async). */
-  const startFindWork = useCallback(() => {
+  /** The REAL search request (employer/opportunity read) — its own typing
+   *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
+  const doFindWork = useCallback(() => {
     setTyping(true);
     findWorkForChat()
       .then((res) => {
@@ -475,6 +482,42 @@ export function ConversationChat({
         assistant(labels.fallback, starterChips);
       });
   }, [pushMessage, assistant, searchChips, starterChips, labels.fallback, locale]);
+
+  /**
+   * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
+   * old flow searched immediately and greeted the person with "nothing found"
+   * before they had said a single criterion. Now: read the REAL persisted
+   * criteria first; if the important ones are missing, say what is already
+   * known, ask for the rest with the canonical work-card form (location,
+   * availability, salary), and only run the search once the person answers.
+   * A person whose criteria are already complete goes straight to results.
+   */
+  const startFindWork = useCallback(() => {
+    setTyping(true);
+    loadCriteriaSummaryForChat()
+      .then((res) => {
+        if (
+          res.kind === "criteria" &&
+          (res.lines.length === 0 || res.missing.length > 0)
+        ) {
+          setTyping(false);
+          const known = res.lines.map((l) => `${l.label}: ${l.value}`);
+          const missingBlock =
+            res.missingIntro && res.missing.length > 0
+              ? [res.missingIntro, ...res.missing.map((m) => `— ${m}`)]
+              : [];
+          assistant(
+            [labels.searchAskCriteria, ...known, ...missingBlock].join("\n"),
+          );
+          // The dialog's answer form; when it closes, the search actually runs.
+          openForm("worker.save-work-card", doFindWork);
+          return;
+        }
+        // Criteria complete (or the read degraded) → the real search now.
+        doFindWork();
+      })
+      .catch(() => doFindWork());
+  }, [assistant, labels.searchAskCriteria, openForm, doFindWork]);
 
   const profileChips: ChoiceChip[] = useMemo(
     () => [

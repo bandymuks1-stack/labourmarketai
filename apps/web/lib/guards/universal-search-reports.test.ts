@@ -209,13 +209,19 @@ describe("2. search reads are RLS-scoped helpers only — never a privileged pat
     expect(SEARCH_READS).toMatch(/listManagedProjects/);
   });
 
-  it("the ONLY direct table read is the conversations list (the communication-page read), bounded", () => {
+  it("the ONLY direct table reads are the caller's own journal entries and the conversations list, bounded", () => {
     const c = code(SEARCH_READS);
     const froms = [...c.matchAll(/\.from\(\s*"([^"]+)"\s*\)/g)].map((m) => m[1]);
-    expect(froms).toEqual(["conversations"]);
-    // Bounded + fields-limited: id + subject only, LIMIT present.
+    // journal_entries (owner visual acceptance A-1: a just-saved entry must
+    // be findable) + conversations (the communication-page read). Both are
+    // RLS-scoped to the caller's own rows.
+    expect(froms).toEqual(["journal_entries", "conversations"]);
+    // Bounded + fields-limited, LIMIT present; live-chain filters only.
     expect(SEARCH_READS).toMatch(/select\("id, subject"\)/);
     expect(SEARCH_READS).toMatch(/\.limit\(100\)/);
+    expect(SEARCH_READS).toMatch(/\.is\("deleted_at", null\)/);
+    expect(SEARCH_READS).toMatch(/\.is\("superseded_by", null\)/);
+    expect(SEARCH_READS).toMatch(/\.limit\(200\)/);
   });
 
   it("NO people search: no profiles/workers read, no scouting/matching import, no people source", () => {
@@ -226,6 +232,7 @@ describe("2. search reads are RLS-scoped helpers only — never a privileged pat
       expect(c, rel).not.toMatch(/match-preview|staffing|scouting/i);
     }
     expect([...DASHBOARD_SEARCH_SOURCES]).toEqual([
+      "journal",
       "projects",
       "tasks",
       "finance",

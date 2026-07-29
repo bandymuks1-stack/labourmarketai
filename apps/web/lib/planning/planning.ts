@@ -456,7 +456,7 @@ async function readJournalItems(
 
   const res = await asAny(supabase)
     .from("journal_entries")
-    .select("id, original_text, created_at, deleted_at, superseded_by")
+    .select("id, original_text, created_at, deleted_at, superseded_by, correction_of")
     .eq("worker_id", workerRes.data.id)
     .is("deleted_at", null)
     .is("superseded_by", null)
@@ -468,8 +468,25 @@ async function readJournalItems(
     return { state: { status: "error", count: 0 }, items: [] };
   }
 
-  type Row = { id: string; original_text: string | null; created_at: string };
-  const items: PlanningItem[] = ((res.data ?? []) as Row[]).map((e) => {
+  type Row = {
+    id: string;
+    original_text: string | null;
+    created_at: string;
+    correction_of: string | null;
+  };
+  // ONE ACTIVE ENTRY PER CHAIN (owner audit P0.7). Editing a CONFIRMED entry
+  // creates a correction row whose `correction_of` points at the original —
+  // the original deliberately stays visible in the journal's audit trail,
+  // but the CALENDAR is a projection of what happened, and showing both made
+  // one edited entry appear as several similar rows. An entry that a live
+  // correction points at is therefore replaced by that correction here.
+  const rows = (res.data ?? []) as Row[];
+  const correctedIds = new Set(
+    rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
+  );
+  const items: PlanningItem[] = rows
+    .filter((e) => !correctedIds.has(e.id))
+    .map((e) => {
     const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
     return {
       id: `journal:${e.id}`,

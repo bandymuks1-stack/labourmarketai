@@ -82,6 +82,18 @@ export function Composer({
   // component renders at different font sizes across breakpoints.
   useEffect(resize, [resize]);
 
+  // PRE-HYDRATION SALVAGE (owner visual acceptance P0-4). On a slow load the
+  // user can focus this textarea and type BEFORE React hydrates; the DOM then
+  // holds their text while the controlled value is still "". The first
+  // controlled re-render would silently erase what they wrote — in production
+  // a whole message vanished this way. Adopting the DOM value once on mount
+  // makes the typed text the state instead of losing the race to it.
+  useEffect(() => {
+    const el = ref.current;
+    if (el && el.value) setValue((prev) => (prev ? prev : el.value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function submit() {
     const t = value.trim();
     if (!t || disabled) return;

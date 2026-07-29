@@ -104,7 +104,10 @@ export function WorkspaceChip() {
       </summary>
       <div
         data-testid="workspace-chip-menu"
-        className="absolute left-0 top-full z-40 mt-2 w-64 rounded-md border border-ink-600 bg-ink-800 p-1.5 shadow-lg"
+        // z-[60]: one dropdown tier for every header menu (workspace, account,
+        // notifications) — they can never interleave with each other's
+        // trigger rows or sink under the map (owner audit P0.3).
+        className="absolute left-0 top-full z-[60] mt-2 w-64 rounded-md border border-ink-600 bg-ink-800 p-1.5 shadow-lg"
       >
         <p className="px-2 pb-1 pt-0.5 text-meta font-semibold uppercase tracking-wide text-text-muted">
           {t("workspaceLabel")}
