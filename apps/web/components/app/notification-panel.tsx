@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, usePathname } from "@/lib/i18n/navigation";
 import { MobileSheet } from "@/components/ui/MobileSheet";
-import { usePopoverDismiss } from "@/lib/hooks/use-popover-dismiss";
+import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
 
@@ -27,12 +27,16 @@ export function NotificationPanel() {
   const [open, setOpen] = useState(false);
   const unread = notifications.filter((n) => !n.read_at).length;
 
-  // Owner smoke fix: the desktop popover used to stay open across page
-  // navigation and had no close affordance. Now it closes on route change,
-  // outside click, Escape — and renders an explicit ✕ button.
+  // Outside-click + Escape live in AnchoredOverlay (the ONE portal root,
+  // owner audit P0.3): the popover renders at document.body, so the header's
+  // backdrop-blur stacking context can never trap it under the map again.
+  // Route change still closes it (owner smoke fix), and ✕ stays.
   const rootRef = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setOpen(false), []);
-  usePopoverDismiss(open, close, rootRef);
+  const pathname = usePathname();
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <div className="relative" ref={rootRef}>
@@ -66,16 +70,19 @@ export function NotificationPanel() {
         />
       </button>
 
-      {/* Desktop: keep a right-anchored popover; on phones it would cover the
-          hero, so we render the same content inside a MobileSheet instead. */}
-      {open && (
+      {/* Desktop: a right-anchored popover through the ONE portal root; on
+          phones the same content renders inside a MobileSheet instead. */}
+      <AnchoredOverlay
+        anchorRef={rootRef}
+        open={open}
+        onClose={close}
+        align="right"
+        className="hidden md:block"
+      >
         <div
           role="dialog"
           aria-label={t("label")}
-          // z-[60]: above the chat composer (z-50) and the context-panel
-          // sheet (z-50). The workspace map is isolated (`.wsmap`), so its
-          // Leaflet panes can no longer cover this popover (P0-1).
-          className="absolute right-0 z-[60] mt-2 hidden max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:block"
+          className="max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card"
         >
           <div className="flex justify-end border-b border-ink-600 px-2 py-1.5">
             <button
@@ -100,7 +107,7 @@ export function NotificationPanel() {
             markAllRead={markAllRead}
           />
         </div>
-      )}
+      </AnchoredOverlay>
 
       <MobileSheet open={open} onClose={() => setOpen(false)} title={t("label")}>
         <NotificationsBody

@@ -6,6 +6,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -81,21 +82,9 @@ export function AccountMenu() {
       : []),
   ];
 
-  useEffect(() => {
-    if (!open) return;
-    function onDocClick(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  // Outside-click + Escape live in AnchoredOverlay (the ONE portal root,
+  // owner audit P0.3) — the menu renders at document.body, so no header
+  // stacking context can ever trap or cover it.
 
   const displayName = profile?.full_name?.trim() || profile?.email || user?.email || "";
   const initial = (displayName || "?").trim().charAt(0).toUpperCase() || "?";
@@ -118,13 +107,15 @@ export function AccountMenu() {
         <span aria-hidden>{initial}</span>
       </button>
 
-      {open && (
+      <AnchoredOverlay
+        anchorRef={rootRef}
+        open={open}
+        onClose={() => setOpen(false)}
+        align="right"
+      >
         <div
           role="menu"
-          // z-[60]: the account menu (Profilis / Nustatymai) must never hide
-          // under the workspace map or the composer — in production it was
-          // unclickable behind higher-z content (owner audit P0.2).
-          className="absolute right-0 z-[60] mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          className="w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
             <p className="truncate px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">
@@ -195,7 +186,7 @@ export function AccountMenu() {
             </button>
           </form>
         </div>
-      )}
+      </AnchoredOverlay>
     </div>
   );
 }
