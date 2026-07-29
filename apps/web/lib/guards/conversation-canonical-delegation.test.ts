@@ -145,8 +145,10 @@ describe("B — acting on a match uses the ONE canonical interest path", () => {
 
   it("no dead button: the control is offered only when the store exists", () => {
     expect(findWork).toMatch(/interestAvailable\s*\n?\s*\?/);
-    // …and the card renders it only when those labels really arrived.
-    expect(messages).toMatch(/m\.interestLabels\s*&&\s*m\.locale\s*\?/);
+    // …and the card renders it only when those labels really arrived. The
+    // condition moved into `EmployerMatchCard` in W3 (the card became
+    // selectable); the rule is unchanged — labels absent ⇒ no control at all.
+    expect(messages).toMatch(/interestLabels\s*&&\s*locale\s*\?/);
   });
 });
 
