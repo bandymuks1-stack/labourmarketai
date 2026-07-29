@@ -101,7 +101,14 @@ jobs:
       # owner. Any automatic RED rule (docs/PRODUCT_CONSTITUTION.md 13.3) sets
       # PRODUCT_REVIEW_REQUIRED and blocks the merge. Always writes
       # PRODUCT_ARCHITECTURE_DIFF.md for the reviewer.
+      # PR_NUMBER / PR_HEAD_SHA feed the SCOPED OWNER WAIVER check
+      # (.github/scripts/owner-waivers.mjs). A waiver is bound to specific pull
+      # requests, so a run that cannot identify its PR waives nothing — which is
+      # the safe direction: push-to-main runs and anything unrecognised block.
       - name: Product gate (constitution enforcement)
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           BASE_REF="${{ github.base_ref || 'main' }}"
           git fetch --no-tags origin "$BASE_REF"
