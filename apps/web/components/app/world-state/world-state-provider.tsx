@@ -32,8 +32,17 @@ import {
 
 type WorldStateContextValue = {
   readonly state: WorldState;
+  /**
+   * The full transition surface.
+   *
+   * W6 EXTENSION POINT: persistent filters plug in HERE — a caller dispatches
+   * `{ kind: "change_world_state", dimension, value }` and both the panel and
+   * (from W6) the map re-read `state.activeFilters`. No new context, no new
+   * store, and no addition to this type is needed: the transition and the slot
+   * already exist. See docs/product/AI_WORKSPACE_W4_V1.md §7.
+   */
   readonly dispatch: (action: WorldStateAction) => void;
-  /** Convenience: the two transitions every caller needs. */
+  /** Convenience: the two transitions every caller needs TODAY. */
   readonly openEntity: (ref: EntityRef) => void;
   readonly closeEntity: () => void;
 };

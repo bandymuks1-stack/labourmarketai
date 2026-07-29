@@ -83,8 +83,12 @@ export async function listProjectAssignments(
   const supabase = await createClient();
   const res = await asAny(supabase)
     .from("project_worker_assignments")
+    // LEFT join on `profiles` — same reason as lib/projects/operations.ts:
+    // an employer cannot read another person's profile row, so `!inner` dropped
+    // every assignment and this list was always empty. The join only supplies
+    // an optional display name that already has a fallback below.
     .select(
-      "assigned_at, worker:workers!inner(profile_id, display_name, profiles!inner(full_name))",
+      "assigned_at, worker:workers!inner(profile_id, display_name, profiles(full_name))",
     )
     .eq("project_id", projectId)
     .eq("status", "active")
