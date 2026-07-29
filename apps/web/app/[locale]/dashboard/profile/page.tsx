@@ -7,6 +7,7 @@ import { WorkerSetupJourney } from "@/components/app/worker-setup-journey";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { ProfileStateStrip } from "@/components/app/profile-state-strip";
+import { LiveProfileSection } from "@/components/app/live-profile-section";
 import { FeatureNote } from "@/components/app/feature-note";
 import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
@@ -509,6 +510,13 @@ export default async function ProfilePage({
           setup journey uses), aktualumas (newest journal-entry date) and
           šiandienos aktyvumas (today's real entry count). Workers only. */}
       {workerId ? <ProfileStateStrip workerId={workerId} /> : null}
+
+      {/* W5 Slice 1 — the LIVE profile: what is missing (named, never scored),
+          where the work happened (real engagements), what the journal backs,
+          and how many visible opportunities match, with the §19 basis of the
+          closest one. Reads the SAME canonical card model as the strip above,
+          so the numbers cannot disagree. */}
+      {workerId ? <LiveProfileSection /> : null}
 
       {/* Wagon 4 — guided setup journey: registration → goal → experience →
           review → location → availability → ready. A guide over the

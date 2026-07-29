@@ -6739,7 +6739,24 @@
     "journalSupportedHint": "Vaardigheden die je werklogboek ondersteunt — sterker dan zelfverklaard; wachten op bevestiging door de manager.",
     "latestEvidenceLabel": "Laatste registraties",
     "latestEvidenceEmpty": "Nog geen registraties — je eerste journaalitem wordt de eerste.",
-    "availabilityFrom": "Beschikbaar vanaf {date}"
+    "availabilityFrom": "Beschikbaar vanaf {date}",
+    "live": {
+      "missingTitle": "Ontbreekt nog",
+      "missingNone": "Er ontbreekt niets essentieels.",
+      "historyTitle": "Waar je gewerkt hebt",
+      "historyEmpty": "Er zijn nog geen dienstverbanden vastgelegd.",
+      "orgUnknown": "(organisatie niet getoond)",
+      "dateUnknown": "(geen startdatum)",
+      "current": "nu",
+      "currentCount": "{count} lopen nu.",
+      "evidenceTitle": "Wat je registraties laten zien",
+      "evidenceLine": "{declared} vaardigheden opgegeven · {journal} onderbouwd door je dagboek · {confirmed} met een registratie van een leidinggevende · {entries} dagboekregels.",
+      "opportunityTitle": "Aanvragen die bij je passen",
+      "opportunityCount": "{count} nu zichtbare aanvragen passen bij je profiel.",
+      "opportunityUnavailable": "Open aanvragen zijn nog niet beschikbaar voor je account, dus dit is niet gemeten.",
+      "opportunityNoWorker": "Dit wordt gemeten zodra je een werknemersprofiel hebt.",
+      "closestBasis": "Dichtstbij — {what}: komt overeen met {matched} van {required} gevraagde vaardigheden, {confirmed} met een registratie van een leidinggevende."
+    }
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",

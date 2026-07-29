@@ -6739,7 +6739,24 @@
     "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai.",
     "latestEvidenceLabel": "Naujausias įrašas",
     "latestEvidenceEmpty": "Įrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
-    "availabilityFrom": "Laisvas nuo {date}"
+    "availabilityFrom": "Laisvas nuo {date}",
+    "live": {
+      "missingTitle": "Dar trūksta",
+      "missingNone": "Nieko esminio netrūksta.",
+      "historyTitle": "Kur dirbai",
+      "historyEmpty": "Kol kas neįrašyta nė vieno darbo ryšio.",
+      "orgUnknown": "(organizacija nerodoma)",
+      "dateUnknown": "(nėra pradžios datos)",
+      "current": "dabar",
+      "currentCount": "{count} vyksta dabar.",
+      "evidenceTitle": "Ką rodo tavo įrašai",
+      "evidenceLine": "{declared} įrašyti įgūdžiai · {journal} paremti tavo žurnalu · {confirmed} su vadovo įrašu · {entries} žurnalo įrašai.",
+      "opportunityTitle": "Tau tinkančios galimybės",
+      "opportunityCount": "{count} šiuo metu matomos galimybės atitinka tavo profilį.",
+      "opportunityUnavailable": "Atviri poreikiai tavo paskyrai dar nepasiekiami, todėl tai nebuvo išmatuota.",
+      "opportunityNoWorker": "Tai išmatuojama, kai turi darbuotojo profilį.",
+      "closestBasis": "Artimiausia — {what}: atitinka {matched} iš {required} reikalaujamų įgūdžių, {confirmed} su vadovo įrašu."
+    }
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

@@ -6739,7 +6739,24 @@
     "journalSupportedHint": "Навыки, подкреплённые записями вашего журнала работ.",
     "latestEvidenceLabel": "Последнее записейо",
     "latestEvidenceEmpty": "Записей пока нет — первой станет ваша первая запись в журнале.",
-    "availabilityFrom": "Доступен с {date}"
+    "availabilityFrom": "Доступен с {date}",
+    "live": {
+      "missingTitle": "Ещё не хватает",
+      "missingNone": "Ничего важного не не хватает.",
+      "historyTitle": "Где вы работали",
+      "historyEmpty": "Пока не записано ни одной рабочей связи.",
+      "orgUnknown": "(организация не показана)",
+      "dateUnknown": "(нет даты начала)",
+      "current": "сейчас",
+      "currentCount": "{count} идут сейчас.",
+      "evidenceTitle": "Что показывают ваши записи",
+      "evidenceLine": "{declared} записанных навыков · {journal} подкреплены дневником · {confirmed} с записью руководителя · {entries} записей.",
+      "opportunityTitle": "Подходящие вам возможности",
+      "opportunityCount": "{count} видимых сейчас возможностей подходят вашему профилю.",
+      "opportunityUnavailable": "Открытые заявки вашему аккаунту пока недоступны, поэтому это не измерялось.",
+      "opportunityNoWorker": "Это измеряется, когда у вас есть профиль работника.",
+      "closestBasis": "Ближайшая — {what}: совпадает {matched} из {required} требуемых навыков, {confirmed} с записью руководителя."
+    }
   },
   "skillClarify": {
     "title": "Мои навыки",
