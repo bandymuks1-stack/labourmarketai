@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { resolveAiRuntimeConfig } from "./runtime/config-core";
 import { runAiAgentCore } from "./run-agent";
 import { matchingExplanationEntry } from "./registry/agents/matching-explanation";
-import { AI_MODEL_CANDIDATES } from "./types";
+import { AI_MODEL_CANDIDATES } from "./runtime/model-candidates";
 
 const MOCK = resolveAiRuntimeConfig({
   mode: "mock", provider: undefined, apiKey: undefined, model: undefined,

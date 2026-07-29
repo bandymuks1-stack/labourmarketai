@@ -24,7 +24,7 @@ import { deeplCompletionProvider } from "./runtime/providers/deepl";
 import { openaiCompletionProvider } from "./runtime/providers/openai";
 import { geminiCompletionProvider } from "./runtime/providers/gemini";
 import { xaiCompletionProvider } from "./runtime/providers/xai";
-import { AI_MODEL_CANDIDATES } from "./types";
+import { AI_MODEL_CANDIDATES } from "./runtime/model-candidates";
 
 const MOCK = resolveAiRuntimeConfig({
   mode: "mock", provider: undefined, apiKey: undefined, model: undefined,

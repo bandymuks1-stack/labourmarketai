@@ -4,7 +4,7 @@
  * Every internal agent run is routed by TASK, not by hard-coded model id.
  * A task policy declares what the task may see (data minimisation), what it
  * must produce (strict schema), how much it may cost, and which model TIER it
- * runs on. Tiers map to model ALIASES (lib/ai/types.ts AI_MODEL_CANDIDATES) —
+ * runs on. Tiers map to model ALIASES (./model-candidates.ts) —
  * product code never carries a raw model id (guard: ai-task-routing).
  *
  * Binding routing rules (docs/product/cost-aware-ai-task-routing-contract-v1.md):
@@ -31,7 +31,7 @@
  *
  * Pure. No server-only, no env, no IO, no fetch.
  */
-import { AI_MODEL_CANDIDATES } from "../types";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
 import type { AiRuntimeConfig } from "./config-core";
 import type { AiAgentKey } from "../registry/types";
 

@@ -4,8 +4,10 @@
  * Pins the cost-aware routing layer's boundaries:
  *   (a) no product code outside lib/ai/runtime references AI_MODEL_CANDIDATES
  *       or a raw model id literal ("claude-…", "gpt-…") — model choice lives
- *       ONLY in the routing layer (lib/ai/types.ts is the declared candidate
- *       table and the sole allowlisted definition site);
+ *       ONLY in the routing layer. Since AI Runtime Consolidation Plan v1
+ *       Phase 1 the candidate table is lib/ai/runtime/model-candidates.ts, so
+ *       lib/ai/runtime/ is the WHOLE allowlist and the legacy assist island
+ *       carries no model id either;
  *   (b) TASK_POLICIES exists and covers every AiTaskType;
  *   (c) providers/anthropic.ts stays the ONLY LLM SDK importer;
  *   (d) no provider adapter other than anthropic is ever "active" (fetch-based
@@ -47,9 +49,15 @@ const rel = (abs: string) => abs.slice(APP_ROOT.length + 1).replace(/\\/g, "/");
 
 // ── (a) model choice lives only in the routing layer ───────────────────────
 
-// The candidate table itself + the runtime (routing/config/providers) may
-// carry model ids. NOTHING else may.
-const MODEL_ALLOWLIST_PREFIXES = ["lib/ai/runtime/", "lib/ai/types.ts"];
+// ONLY the runtime (routing/config/providers, including the candidate table at
+// lib/ai/runtime/model-candidates.ts) may carry model ids. NOTHING else may.
+//
+// AI Runtime Consolidation Plan v1 Phase 1 moved AI_MODEL_CANDIDATES out of
+// lib/ai/types.ts into lib/ai/runtime/model-candidates.ts, so this allowlist no
+// longer needs the legacy-boundary exception. The guard is now strictly
+// stronger: model choice cannot leak into ANY module outside the routing layer,
+// the legacy assist island included.
+const MODEL_ALLOWLIST_PREFIXES = ["lib/ai/runtime/"];
 const MODEL_LITERAL = /["'`](?:claude-|gpt-)[A-Za-z0-9._-]*["'`]/;
 
 describe("(a) no product code outside lib/ai/runtime picks a model", () => {

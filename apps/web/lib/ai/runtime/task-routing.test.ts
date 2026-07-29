@@ -18,7 +18,7 @@ import {
   type AiTaskPolicy,
   type AiTaskType,
 } from "./task-routing";
-import { AI_MODEL_CANDIDATES } from "../types";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
 import { resolveAiRuntimeConfig } from "./config-core";
 import { ALL_AGENT_KEYS } from "../registry/registry";
 

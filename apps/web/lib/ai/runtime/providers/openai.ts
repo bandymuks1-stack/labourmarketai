@@ -21,7 +21,7 @@ import type {
   AiCompletionResult,
 } from "../types";
 import type { AiRuntimeConfig } from "../config-core";
-import { AI_MODEL_CANDIDATES } from "../../types";
+import { AI_MODEL_CANDIDATES } from "../model-candidates";
 import { extractJson, fetchErrorResult, jsonSchemaHint } from "./extract-json";
 
 const OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions";
