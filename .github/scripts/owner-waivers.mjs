@@ -49,6 +49,13 @@ export const SCOPED_OWNER_WAIVERS = [
     scope: "W3 (Context Panel) + W4 (AI Workspace)",
     // THE BINDING KEY. A PR not listed here matches nothing.
     pullRequests: [909, 912],
+    // Once those PRs merge, the SAME debt lives on this branch — and the
+    // push-to-main run has no PR number to match. Without this, merging a
+    // waived PR turns main's own CI red, which is exactly what happened at
+    // 9ad4c441. This widens WHERE the identical finding is tolerated, never
+    // WHAT is tolerated: code, axiom, file, subset rule and expiry all still
+    // apply, so a new violation on main blocks just as hard.
+    postMergeBranches: ["main"],
     // Audit trail; enforced only when a run supplies a SHA to check.
     approvedHeadShas: [],
     // The only files whose findings may be excused.
@@ -97,10 +104,38 @@ export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
         `${w.id} expired on ${w.expiresAt} — remove it and resolve ${w.resolvedBy}`,
       );
     }
-    if (ctx.pullRequest === null || !w.pullRequests.includes(ctx.pullRequest)) {
+    // A run may carry this finding for exactly three reasons.
+    const branches = w.postMergeBranches ?? [];
+    const isListedPr = ctx.pullRequest !== null && w.pullRequests.includes(ctx.pullRequest);
+    const isPostMergeBranch = ctx.pullRequest === null && !!ctx.branch && branches.includes(ctx.branch);
+    // (3) PRE-EXISTING DEBT. Once a waived PR merges, the violation lives in the
+    //     base branch and the gate — which validates the registry as a whole,
+    //     not just the diff — reports it on EVERY later PR. Holding an unrelated
+    //     PR responsible for a finding its diff never touched would make the
+    //     merged waiver a permanent block on the whole repository, which is the
+    //     very failure this mechanism exists to remove. So: if the PR does not
+    //     touch any waived file, the finding is not its doing.
+    //
+    //     This does NOT let a new change inherit the exception. The subset rule
+    //     still blocks any NEW finding, and the moment a PR does touch a waived
+    //     file it must be one of the listed PRs.
+    const touchesWaivedFile =
+      ctx.changedFiles === null ||
+      w.files.some((f) => ctx.changedFiles.some((c) => c.endsWith(f)));
+    const isUnrelatedPr = ctx.pullRequest !== null && !isListedPr && !touchesWaivedFile;
+
+    if (!isListedPr && !isPostMergeBranch && !isUnrelatedPr) {
       return no(
         "pr-not-covered",
-        `${w.id} covers PR ${w.pullRequests.join(", ")}; this run is ${ctx.pullRequest ?? "not a PR"}`,
+        `${w.id} covers PR ${w.pullRequests.join(", ")}${
+          branches.length > 0 ? ` and branch ${branches.join(", ")}` : ""
+        }; this run is ${
+          ctx.pullRequest !== null
+            ? `PR ${ctx.pullRequest}, and it MODIFIES ${w.files.join(", ")}`
+            : ctx.branch
+              ? `branch ${ctx.branch}`
+              : "not a PR"
+        }`,
       );
     }
     if (
@@ -142,9 +177,18 @@ export function evaluateFindings(findings, ctx, waivers = SCOPED_OWNER_WAIVERS) 
 export function waiverContextFromEnv(env = process.env, now = new Date()) {
   const fromRef = /refs\/pull\/(\d+)\//.exec(env.GITHUB_REF ?? "")?.[1];
   const pr = env.PR_NUMBER || fromRef || null;
+  // `refs/heads/main` → "main". Only used for the post-merge case above.
+  const branch =
+    env.GATE_BRANCH ||
+    /refs\/heads\/(.+)$/.exec(env.GITHUB_REF ?? "")?.[1] ||
+    null;
   return {
     pullRequest: pr === null ? null : Number(pr),
+    branch,
     headSha: env.PR_HEAD_SHA || null,
     today: (env.GATE_TODAY || now.toISOString()).slice(0, 10),
+    // Filled by the gate from its own diff. `null` means "unknown", which is
+    // treated as "touches everything" — the cautious direction.
+    changedFiles: null,
   };
 }

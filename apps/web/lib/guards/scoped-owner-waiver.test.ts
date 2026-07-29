@@ -36,6 +36,7 @@ const BOTH = [MAP_FINDING, WAIVER_FINDING];
 
 /** A context that satisfies every condition — the baseline the tests break. */
 const ok = (over: Record<string, unknown> = {}) => ({
+  changedFiles: ["apps/web/components/app/world-state/context-panel.tsx"],
   pullRequest: 909,
   headSha: null,
   today: "2026-07-29",
@@ -53,6 +54,27 @@ describe("scoped waiver — the approved cases pass", () => {
   it("the exact #912 (W4) finding set is allowed", () => {
     const v = evaluateFindings(BOTH, ok({ pullRequest: 912 }));
     expect(v.pass).toBe(true);
+  });
+
+  it("main's OWN push run is allowed after those PRs merged", () => {
+    // Without this the gate turns main red the moment a waived PR merges —
+    // the debt simply moved from the PR into the branch. It stays bounded:
+    // every other constraint (file, code, axiom, subset, expiry) still holds,
+    // and only `main` is listed.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main" }));
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but main is still blocked once the waiver expires", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main", today: "2027-01-01" }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("…and a NEW violation on main still blocks", () => {
+    const extra = { code: "second_dashboard", axiom: "A-01", what: "apps/web/x/page.tsx" };
+    const v = evaluateFindings([...BOTH, extra], ok({ pullRequest: null, branch: "main" }));
+    expect(v.pass).toBe(false);
   });
 
   it("the decision names owner, scope, expiry and what removes it", () => {
@@ -81,8 +103,14 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("not a PR run at all → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null }));
+  it("not a PR and not a covered branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: null }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("a push to some OTHER branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "feat/anything" }));
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
@@ -133,6 +161,45 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
     const v = evaluateFindings(BOTH, ok(), unapproved);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
+  });
+});
+
+describe("scoped waiver — pre-existing debt vs a new change", () => {
+  const PANEL = "apps/web/components/app/world-state/context-panel.tsx";
+
+  it("an UNRELATED PR is not blamed for debt already in the base branch", () => {
+    // After the waived PRs merge, the gate reports this finding on EVERY run,
+    // because it validates the registry as a whole. Blaming a PR that never
+    // opened the file would make the merged waiver a permanent repo-wide block
+    // — the exact failure the mechanism exists to remove.
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/something-else.ts"] }),
+    );
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but a NEW PR that EDITS the waived file is blocked", () => {
+    // This is the line that keeps the exception from being inherited: touch the
+    // waived file and you must be one of the listed PRs.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: [PANEL] }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+    expect(v.blockingFindings[0].decision.detail).toMatch(/MODIFIES/);
+  });
+
+  it("unknown changed files are treated as touching everything (cautious)", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: null }));
+    expect(v.pass).toBe(false);
+  });
+
+  it("expiry still kills it, even for an unrelated PR", () => {
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/x.ts"], today: "2027-01-01" }),
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
   });
 });
 

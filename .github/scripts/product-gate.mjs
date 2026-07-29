@@ -734,7 +734,17 @@ const { findings, surfaces } = result;
  * requests, until the exact date. One unexpected finding and the run blocks
  * again.
  */
-const waiverCtx = waiverContextFromEnv();
+const waiverCtx = {
+  ...waiverContextFromEnv(),
+  // The gate's OWN diff decides whether this run touched a waived file. A PR
+  // that never opened `context-panel.tsx` is not responsible for a finding that
+  // was already in the base branch.
+  changedFiles: [
+    ...result.changed.added,
+    ...result.changed.modified,
+    ...result.changed.deleted,
+  ],
+};
 const verdict = evaluateFindings(
   findings.map((f) => ({ code: f.code, axiom: f.axiom, what: f.what })),
   waiverCtx,
