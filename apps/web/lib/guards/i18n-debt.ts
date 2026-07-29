@@ -102,7 +102,11 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // list, work history, journal-backed evidence line and the opportunity signal
   // — lands in all 11 locales; lt/en/ru/nl/de translated (de:0 / nl:0 ratchet
   // intact), da [EN] until human translation).
-  da: 1062,
+  // MEASURED 1074 at the same slice (+12 more: `playerCard.readinessSteps`
+  // existed only in the five served locales, so the missing-data list would
+  // have leaked raw keys in the other six. Backfilled per doctrine §2.4 —
+  // every key in every locale, in the same PR).
+  da: 1074,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

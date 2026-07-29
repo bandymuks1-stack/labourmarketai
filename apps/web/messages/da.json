@@ -1635,6 +1635,24 @@
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
       "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+    },
+    "readinessSteps": {
+      "pillar": {
+        "profession": "[EN] Profession set",
+        "availability": "[EN] Availability set",
+        "skills": "[EN] Skills added",
+        "journal": "[EN] Work journal entries",
+        "evidence": "[EN] Skills backed by work",
+        "workCard": "[EN] Work card submitted"
+      },
+      "action": {
+        "profession": "[EN] Set profession",
+        "availability": "[EN] Set availability",
+        "skills": "[EN] Add skills",
+        "journal": "[EN] Write an entry",
+        "evidence": "[EN] Add a work entry",
+        "workCard": "[EN] Submit card"
+      }
     }
   },
   "projects": {

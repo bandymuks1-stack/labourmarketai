@@ -44,7 +44,10 @@ export async function LiveProfileSection() {
 
   const t = await getTranslations("playerCard.live");
   const tSkill = await getTranslations("skillNames");
-  const tPillar = await getTranslations("playerCard.readinessSteps");
+  // The ACTION wording, not the met-state wording: this list is what is still
+  // missing, so "Nurodyti profesiją" is right and "Profesija nurodyta" would
+  // state the opposite of the truth. (The met-state subtree is `.pillar`.)
+  const tPillar = await getTranslations("playerCard.readinessSteps.action");
   const locale = await getLocale();
 
   const readiness = deriveWorkerReadiness(card);

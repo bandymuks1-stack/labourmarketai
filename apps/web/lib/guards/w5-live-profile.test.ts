@@ -170,6 +170,35 @@ describe("W5 — copy exists in every active locale", () => {
     }
   });
 
+  it("every readiness pillar the section can render HAS a label", () => {
+    // The section renders one label per MISSING pillar. A pillar with no label
+    // resolves to the raw key on screen — next-intl does not throw, so this is
+    // exactly the class of defect that ships silently. (It did: the first draft
+    // read `readinessSteps.<pillar>` instead of `readinessSteps.action.<pillar>`
+    // and leaked `workCard` to the user.)
+    const pillars = read("lib/player-card/readiness.ts")
+      .match(/export type ReadinessPillarKey =([\s\S]*?);/)?.[1]
+      ?.match(/"([a-zA-Z]+)"/g)
+      ?.map((s) => s.replace(/"/g, "")) ?? [];
+    expect(pillars.length).toBeGreaterThan(0);
+
+    const subtree = read(SECTION).match(/getTranslations\("(playerCard\.readinessSteps[^"]*)"\)/)?.[1];
+    expect(subtree, "the section must name its label subtree").toBeTruthy();
+    const path = (subtree as string).split(".");
+
+    for (const locale of LOCALES) {
+      const json = JSON.parse(read(`messages/${locale}.json`)) as Record<string, unknown>;
+      const node = path.reduce<unknown>(
+        (o, k) => (o as Record<string, unknown> | undefined)?.[k],
+        json,
+      ) as Record<string, string> | undefined;
+      expect(node, `${locale}: ${subtree} missing`).toBeTruthy();
+      for (const pillar of pillars) {
+        expect(String(node?.[pillar] ?? ""), `${locale}: ${subtree}.${pillar}`).not.toBe("");
+      }
+    }
+  });
+
   it("the closest-match line always carries its basis counts", () => {
     // §19(b): a match statement without its counts does not exist.
     for (const locale of LOCALES) {
