@@ -464,6 +464,7 @@
     "objectsLoading": "Zoeken in je eigen records…",
     "objectsError": "Je records konden nu niet doorzocht worden. De paginalinks hierboven blijven werken.",
     "groups": {
+      "journal": "Je logboekvermeldingen",
       "projects": "Je projecten",
       "tasks": "Je taken",
       "finance": "Je financiële registraties",
@@ -3450,7 +3451,11 @@
       "drafted": "Gedraft",
       "busy": "Bezet"
     },
-    "conceptNote": "Conceptpreview — fictieve profielen, geen echte mensen. Je echte profiel wordt opgebouwd uit je echte registraties."
+    "conceptNote": "Een voorbeeldkaart met illustratieve gegevens — geen echte persoon. Jouw kaart groeit uit je echte werkregistraties.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restaurant Ąžuolas"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -4086,7 +4091,9 @@
         "account": "Instellingen",
         "admin": "Admin",
         "planning": "Kalender",
-        "network": "Netwerk"
+        "network": "Netwerk",
+        "advanced": "Geavanceerd beheer",
+        "playerCard": "Mijn kaart"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -11037,7 +11044,7 @@
       "greetingNamed": "Hoi, {name}. Waarmee kan ik je vandaag helpen?",
       "chipCv": "CV uploaden",
       "chipJobs": "Ik zoek werk",
-      "chipProfile": "Profiel voltooien",
+      "chipProfile": "Mijn profiel",
       "chipOffers": "Aanbiedingen bekijken",
       "chipLang": "Een taal",
       "chipExp": "Werkervaring",
@@ -11045,9 +11052,12 @@
       "chipCard": "Beschikbaarheid & loon",
       "chipPrefs": "Voorkeuren",
       "offersEmpty": "Je hebt nog geen aanbiedingen. Zodra je profiel klaar is, kunnen werkgevers je aanbiedingen sturen.",
+      "searchAskCriteria": "Om goed te zoeken leggen we eerst je criteria vast — waar, wanneer en onder welke voorwaarden je wilt werken. Vul dit hieronder in en ik zoek meteen.",
+      "playerCardAfterLog": "Dit is je kaart na die invoer — je werkgeschiedenis is net sterker geworden.",
+      "playerCardBlocked": "Dit account heeft nog geen werknemerskaart. Registreer je eerste werk of upload een cv — de kaart groeit uit echte gegevens.",
       "fallback": "Ik kan je helpen met je cv, profiel en aanbiedingen. Wat wil je doen?",
       "userCv": "Ik upload mijn cv",
-      "userProfile": "Profiel voltooien",
+      "userProfile": "Toon mijn profiel",
       "userOffers": "Mijn aanbiedingen bekijken",
       "userJobs": "Ik zoek werk",
       "navChat": "Chat",
@@ -11056,6 +11066,7 @@
       "navProfile": "Profiel",
       "clarifyWorkLog": "Op welke dag en hoe lang heb je gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
       "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "messagesHint": "Hier zijn je berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
@@ -11067,7 +11078,7 @@
       "historyMore": "Meer tonen",
       "workspaceLabel": "Werkruimte",
       "workspacePersonal": "Persoonlijke ruimte",
-      "workspaceSwitchSoon": "Wisselen van werkruimte is nog niet beschikbaar — voorlopig wordt de actieve context getoond.",
+      "workspaceUnnamed": "Bedrijfswerkruimte",
       "chipLogWork": "Werk vastleggen",
       "agendaTitle": "Je planning voor de komende {days} dagen:",
       "agendaEmpty": "Er is niets gepland voor de komende {days} dagen.",
@@ -11092,6 +11103,7 @@
       "briefConflicts": "Je agenda heeft {count} overlappende verplichtingen.",
       "briefOverdue": "{count} taken zijn over hun einddatum heen.",
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
+      "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}."
     },
     "worklog": {
@@ -11115,6 +11127,14 @@
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Werknemer",
+        "freelancer": "Freelancer",
+        "consultant": "Consultant",
+        "owner": "Eigenaar",
+        "collaborator": "Medewerker",
+        "other": "Andere context"
+      },
       "addedSkillPrefix": "Vaardigheid toegevoegd",
       "strengthenedSkillPrefix": "Vaardigheid versterkt",
       "pendingConfirmPrefix": "Wacht op je bevestiging",
@@ -11291,17 +11311,49 @@
     "loop": {
       "chip": "Voorbeeldreeks — echte productflow",
       "windowTitle": "LabourMarket AI — gesprek",
-      "userSays": "Vandaag muren gemetseld op de bouwplaats in Vilnius, 8 uur.",
       "entrySaved": "Dagboekregel opgeslagen · #D-1042",
-      "entryLine": "Metselen · bouwplaats Vilnius · 8 u · toegevoegd aan je werkgeschiedenis.",
       "skillSignal": "Vaardigheidssignaal versterkt",
-      "skillLine": "Metselen — nu onderbouwd door 12 dagboekregels.",
       "matchFound": "Nieuwe passende kans",
-      "matchLine": "Een geverifieerd bedrijf in Kaunas zoekt 3 metselaars.",
-      "matchWhy": "Waarom jij: 4 van 5 gevraagde vaardigheden, 3 onderbouwd door je dagboek."
+      "sectorsLabel": "Sectorkeuze",
+      "sector": {
+        "construction": "Bouw",
+        "horeca": "Horeca",
+        "logistics": "Logistiek",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Vandaag 8 uur muren gemetseld op de locatie in Vilnius.",
+          "entryLine": "Metselen · locatie Vilnius · 8 u · toegevoegd aan je werkgeschiedenis.",
+          "skillLine": "Metselen — nu onderbouwd door 12 logboekvermeldingen.",
+          "matchLine": "Een geverifieerd bedrijf in Kaunas zoekt 3 metselaars.",
+          "matchWhy": "Waarom jij: 4 van 5 vereiste vaardigheden, 3 onderbouwd door je logboek."
+        },
+        "horeca": {
+          "userSays": "Vandaag 60 lunchporties bereid en de leveringen ontvangen.",
+          "entryLine": "Voedselbereiding · restaurant · 8 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Voedselbereiding — nu onderbouwd door 9 vermeldingen.",
+          "matchLine": "Een hotelrestaurant in Vilnius zoekt een kok voor de dienst.",
+          "matchWhy": "Waarom jij: 3 van 4 vereiste vaardigheden, beschikbaarheid past."
+        },
+        "logistics": {
+          "userSays": "Vandaag 14 bestellingen bezorgd op de route Kaunas, 9 uur.",
+          "entryLine": "Bezorging · route Kaunas · 9 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Rijden — nu onderbouwd door 21 vermeldingen.",
+          "matchLine": "Een logistiek bedrijf zoekt een chauffeur voor een vaste route.",
+          "matchWhy": "Waarom jij: rijbewijs B/C en route-ervaring onderbouwd door je logboek."
+        },
+        "it": {
+          "userSays": "Vandaag de fouten in het klantportaal opgelost en de update uitgerold.",
+          "entryLine": "Programmeren · klantportaal · 7 u · toegevoegd aan je geschiedenis.",
+          "skillLine": "Programmeren — nu onderbouwd door 15 vermeldingen.",
+          "matchLine": "Een productteam zoekt een ontwikkelaar voor drie maanden.",
+          "matchWhy": "Waarom jij: 5 van 6 vereiste vaardigheden, 4 onderbouwd door je logboek."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "Hoe het platform echt werkt",
+      "eyebrow": "De productketen",
       "title": "Werk wordt bewijs. Bewijs wordt je volgende kans.",
       "journalNote": "Het werkdagboek is het verschil: elke vastgelegde dag wordt verifieerbare professionele geschiedenis — je volgende kans wordt beargumenteerd met wat je echt deed, niet met wat een CV beweert.",
       "steps": {
@@ -11413,14 +11465,14 @@
       },
       "recNextActionBasis": "Uit de staat van je eigen profiel.",
       "factToday": "Vandaag",
-      "factTodayValue": "{count} verplichtingen",
+      "factTodayValue": "{count, plural, one {# verplichting} other {# verplichtingen}}",
       "factProject": "Project",
       "factConflicts": "Conflicten",
       "factConflictsValue": "{count} overlappen",
       "factOverdue": "Te laat",
-      "factOverdueValue": "{count} taken",
+      "factOverdueValue": "{count, plural, one {# taak} other {# taken}}",
       "factDeadline": "Eerstvolgende deadline",
-      "suggestOverdue": "{count} taken zijn over hun einddatum heen.",
+      "suggestOverdue": "{count, plural, one {# taak is over de einddatum heen} other {# taken zijn over hun einddatum heen}}.",
       "suggestLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "suggestReserve": "Er valt morgen een deadline en morgen is bijna vrij.",
       "suggestReserveNamed": "„{label}“ moet morgen af, en morgen is bijna vrij.",
@@ -11513,9 +11565,10 @@
     "map": {
       "regionLabel": "Werkruimtekaart",
       "legendEntities": "Echte kansen en projecten, gegroepeerd per plaats",
+      "homeLabel": "Jouw markt",
       "approx": "benaderde locatie",
-      "unmapped": "{count} zonder bepaalbare plaats",
-      "unmappedOnly": "{count} items hebben nog geen bepaalbare plaats, dus er valt niets te tekenen."
+      "unmapped": "{count, plural, one {nog # kans zonder opgegeven plaats — te vinden in de chatzoekfunctie} other {nog # kansen zonder opgegeven plaats — te vinden in de chatzoekfunctie}}",
+      "unmappedOnly": "{count, plural, one {# echte kans heeft geen opgegeven plaats en kan niet getekend worden — vind hem in de chatzoekfunctie} other {# echte kansen hebben geen opgegeven plaats en kunnen niet getekend worden — vind ze in de chatzoekfunctie}}."
     }
   }
 }

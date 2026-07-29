@@ -168,7 +168,8 @@ describe("company switcher wiring", () => {
     const src = read("lib/company/active-organization.ts");
     expect(src).toMatch(/resolveActiveOrganizationId/);
     expect(src).toMatch(/42703/);
-    expect(src).not.toMatch(/localStorage/);
+    // Usage form only — prose in comments may NAME localStorage to ban it.
+    expect(src).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
   });
 
   it("switch action validates membership BEFORE writing and degrades on 42703", () => {

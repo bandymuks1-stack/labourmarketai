@@ -464,6 +464,7 @@
     "objectsLoading": "Ieškoma jūsų įrašuose…",
     "objectsError": "Šiuo metu jūsų įrašų paieška nepavyko. Puslapių nuorodos viršuje veikia toliau.",
     "groups": {
+      "journal": "Jūsų žurnalo įrašai",
       "projects": "Jūsų projektai",
       "tasks": "Jūsų užduotys",
       "finance": "Jūsų finansų įrašai",
@@ -3450,7 +3451,11 @@
       "drafted": "Atrinktas",
       "busy": "Užimtas"
     },
-    "conceptNote": "Koncepcijos peržiūra — išgalvoti profiliai, ne tikri žmonės. Tikras profilis kuriamas iš jūsų tikrų įrašų."
+    "conceptNote": "Pavyzdinė kortelė su iliustraciniais duomenimis — ne realus asmuo. Tavo kortelė kuriama iš tavo realių darbo įrašų.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restoranas „Ąžuolas”"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -4086,7 +4091,9 @@
         "account": "Nustatymai",
         "admin": "Administravimas",
         "planning": "Kalendorius",
-        "network": "Ryšiai"
+        "network": "Ryšiai",
+        "advanced": "Išplėstinis valdymas",
+        "playerCard": "Mano kortelė"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -11037,7 +11044,7 @@
       "greetingNamed": "Labas, {name}. Kuo šiandien galiu padėti?",
       "chipCv": "Įkelti CV",
       "chipJobs": "Ieškau darbo",
-      "chipProfile": "Užbaigti profilį",
+      "chipProfile": "Mano profilis",
       "chipOffers": "Peržiūrėti pasiūlymus",
       "chipLang": "Kalbą",
       "chipExp": "Darbo patirtį",
@@ -11045,9 +11052,12 @@
       "chipCard": "Prieinamumą ir atlygį",
       "chipPrefs": "Pageidavimus",
       "offersEmpty": "Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia.",
+      "searchAskCriteria": "Kad paieška būtų tiksli, pirmiausia patikslinkime kriterijus — kur, kada ir kokiomis sąlygomis nori dirbti. Užpildyk žemiau, ir iškart ieškosiu.",
+      "playerCardAfterLog": "Štai tavo kortelė po šio įrašo — darbo istorija ką tik sustiprėjo.",
+      "playerCardBlocked": "Darbuotojo kortelė dar nesukurta šioje paskyroje. Užfiksuok pirmą darbą arba įkelk CV — kortelė atsiras iš realių įrašų.",
       "fallback": "Galiu padėti su CV, profiliu ir darbo pasiūlymais. Ką norėtum daryti?",
       "userCv": "Įkelsiu CV",
-      "userProfile": "Užbaigti profilį",
+      "userProfile": "Parodyk mano profilį",
       "userOffers": "Peržiūrėti pasiūlymus",
       "userJobs": "Ieškau darbo",
       "navChat": "Pokalbis",
@@ -11056,6 +11066,7 @@
       "navProfile": "Profilis",
       "clarifyWorkLog": "Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.",
       "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
+      "messagesHint": "Štai tavo žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
@@ -11067,7 +11078,7 @@
       "historyMore": "Rodyti daugiau",
       "workspaceLabel": "Darbo erdvė",
       "workspacePersonal": "Asmeninė erdvė",
-      "workspaceSwitchSoon": "Erdvės perjungimas dar neįjungtas — kol kas rodomas aktyvus kontekstas.",
+      "workspaceUnnamed": "Įmonės erdvė",
       "chipLogWork": "Užfiksuoti darbą",
       "agendaTitle": "Artimiausių {days} d. planas:",
       "agendaEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
@@ -11092,6 +11103,7 @@
       "briefConflicts": "Kalendoriuje {count} persidengiantys įsipareigojimai.",
       "briefOverdue": "{count} užduotys jau pradelstos.",
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
+      "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
       "briefProfileGap": "Profilyje dar trūksta: {step}."
     },
     "worklog": {
@@ -11115,6 +11127,14 @@
       "saved": "Įrašas išsaugotas darbo žurnale.",
       "errorGeneric": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Darbuotojas",
+        "freelancer": "Laisvai samdomas",
+        "consultant": "Konsultantas",
+        "owner": "Savininkas",
+        "collaborator": "Bendradarbis",
+        "other": "Kitas kontekstas"
+      },
       "addedSkillPrefix": "Pridėtas įgūdis",
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",
@@ -11291,17 +11311,49 @@
     "loop": {
       "chip": "Pavyzdinė seka — reali produkto eiga",
       "windowTitle": "LabourMarket AI — pokalbis",
-      "userSays": "Šiandien mūrijau sienas Vilniaus objekte, 8 valandas.",
       "entrySaved": "Žurnalo įrašas išsaugotas · #D-1042",
-      "entryLine": "Mūrijimas · Vilniaus objektas · 8 val. · pridėta prie tavo darbo istorijos.",
       "skillSignal": "Įgūdžio signalas sustiprėjo",
-      "skillLine": "Mūrijimas — dabar paremtas 12 žurnalo įrašų.",
       "matchFound": "Nauja tinkanti galimybė",
-      "matchLine": "Patikrintai įmonei Kaune reikia 3 mūrininkų.",
-      "matchWhy": "Kodėl tu: atitinka 4 iš 5 reikalaujamų įgūdžių, 3 paremti tavo žurnalu."
+      "sectorsLabel": "Sektoriaus pasirinkimas",
+      "sector": {
+        "construction": "Statybos",
+        "horeca": "HoReCa",
+        "logistics": "Logistika",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Šiandien mūrijau sienas Vilniaus objekte, 8 valandas.",
+          "entryLine": "Mūrijimas · Vilniaus objektas · 8 val. · pridėta prie tavo darbo istorijos.",
+          "skillLine": "Mūrijimas — dabar paremtas 12 žurnalo įrašų.",
+          "matchLine": "Patikrintai įmonei Kaune reikia 3 mūrininkų.",
+          "matchWhy": "Kodėl tu: atitinka 4 iš 5 reikalaujamų įgūdžių, 3 paremti tavo žurnalu."
+        },
+        "horeca": {
+          "userSays": "Šiandien virtuvėje paruošiau 60 porcijų pietų ir priėmiau prekes.",
+          "entryLine": "Maisto gamyba · restoranas · 8 val. · pridėta prie tavo darbo istorijos.",
+          "skillLine": "Maisto gamyba — dabar paremta 9 žurnalo įrašais.",
+          "matchLine": "Viešbučio restoranui Vilniuje reikia virėjo pamainai.",
+          "matchWhy": "Kodėl tu: atitinka 3 iš 4 reikalaujamų įgūdžių, prieinamumas sutampa."
+        },
+        "logistics": {
+          "userSays": "Šiandien išvežiojau 14 užsakymų Kauno maršrutu, 9 valandas.",
+          "entryLine": "Krovinių pristatymas · Kauno maršrutas · 9 val. · pridėta prie istorijos.",
+          "skillLine": "Vairavimas — dabar paremtas 21 žurnalo įrašu.",
+          "matchLine": "Logistikos įmonei reikia vairuotojo nuolatiniam maršrutui.",
+          "matchWhy": "Kodėl tu: B/C kategorijos ir maršruto patirtis paremta tavo žurnalu."
+        },
+        "it": {
+          "userSays": "Šiandien sutvarkiau klientų portalo klaidas ir įdiegiau atnaujinimą.",
+          "entryLine": "Programavimas · klientų portalas · 7 val. · pridėta prie istorijos.",
+          "skillLine": "Programavimas — dabar paremtas 15 žurnalo įrašų.",
+          "matchLine": "Produkto komandai reikia programuotojo trims mėnesiams.",
+          "matchWhy": "Kodėl tu: atitinka 5 iš 6 reikalaujamų įgūdžių, 4 paremti tavo žurnalu."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "Kaip platforma veikia iš tikrųjų",
+      "eyebrow": "Produkto grandinė",
       "title": "Darbas tampa įrodymu. Įrodymas tampa kita tavo galimybe.",
       "journalNote": "Darbo žurnalas ir yra skirtumas: kiekviena užrašyta diena virsta patikrinama profesine istorija — tavo kita galimybė grindžiama tuo, ką realiai padarei, o ne tuo, ką teigia CV.",
       "steps": {
@@ -11413,14 +11465,14 @@
       },
       "recNextActionBasis": "Iš tavo paties profilio būsenos.",
       "factToday": "Šiandien",
-      "factTodayValue": "{count} įsipareigojimai",
+      "factTodayValue": "{count, plural, one {# įsipareigojimas} few {# įsipareigojimai} other {# įsipareigojimų}}",
       "factProject": "Projektas",
       "factConflicts": "Konfliktai",
       "factConflictsValue": "{count} persidengia",
       "factOverdue": "Vėluoja",
-      "factOverdueValue": "{count} užduotys",
+      "factOverdueValue": "{count, plural, one {# užduotis} few {# užduotys} other {# užduočių}}",
       "factDeadline": "Artimiausias terminas",
-      "suggestOverdue": "{count} užduotys jau pradelstos.",
+      "suggestOverdue": "{count, plural, one {# užduotis jau pradelsta} few {# užduotys jau pradelstos} other {# užduočių jau pradelsta}}.",
       "suggestLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
       "suggestReserve": "Rytoj terminas, o rytojus beveik laisvas.",
       "suggestReserveNamed": "„{label}“ terminas rytoj, o rytojus beveik laisvas.",
@@ -11513,9 +11565,10 @@
     "map": {
       "regionLabel": "Darbo erdvės žemėlapis",
       "legendEntities": "Realios galimybės ir projektai, sugrupuoti pagal vietą",
+      "homeLabel": "Tavo rinka",
       "approx": "apytikslė vieta",
-      "unmapped": "{count} be nustatomos vietos",
-      "unmappedOnly": "{count} įrašai dar neturi nustatomos vietos, todėl nėra ko braižyti."
+      "unmapped": "{count, plural, one {dar # galimybė be nurodytos vietos — ji matoma pokalbio paieškoje} few {dar # galimybės be nurodytos vietos — jos matomos pokalbio paieškoje} other {dar # galimybių be nurodytos vietos — jos matomos pokalbio paieškoje}}",
+      "unmappedOnly": "{count, plural, one {# reali galimybė yra be nurodytos vietos, todėl žemėlapyje jos parodyti negalima — ją rasi pokalbio paieškoje} other {# realios galimybės yra be nurodytos vietos, todėl žemėlapyje jų parodyti negalima — jas rasi pokalbio paieškoje}}."
     }
   }
 }

@@ -2,6 +2,8 @@
 
 import "server-only";
 
+import { getTranslations } from "next-intl/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 
@@ -61,6 +63,14 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     .in("relationship_slug", WORKER_RELATIONSHIPS)
     .order("is_primary", { ascending: false });
 
+  // A context with no org and no title used to fall back to the RAW
+  // relationship slug — the owner saw a literal "employee" in a Lithuanian
+  // dropdown (owner audit §6.2). The registry slugs are a closed set, so
+  // they localize here, at the one place the label is composed.
+  const t = await getTranslations("conversation.worklog");
+  const relationshipLabel = (slug: string): string =>
+    t.has(`relationship.${slug}`) ? t(`relationship.${slug}`) : t("relationship.other");
+
   const engagements: (WorkLogEngagement & { organizationId: string | null })[] = (
     ecRows ?? []
   ).map((e) => {
@@ -70,7 +80,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       organization_type: string | null;
     } | null;
     const orgName = org?.display_name ?? org?.legal_name ?? null;
-    const label = orgName ?? e.title ?? e.relationship_slug;
+    const label = orgName ?? e.title ?? relationshipLabel(e.relationship_slug);
     return {
       id: e.id,
       label,

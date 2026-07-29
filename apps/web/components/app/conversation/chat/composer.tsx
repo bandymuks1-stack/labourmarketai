@@ -44,6 +44,7 @@ export function Composer({
   disabled = false,
   onSend,
   onAttach,
+  variant = "bar",
 }: {
   placeholder: string;
   attachLabel: string;
@@ -53,6 +54,10 @@ export function Composer({
   /** Opens the canonical CV flow (the real uploader lives there, not here — one
    *  canonical CV file-pick surface). */
   onAttach?: () => void;
+  /** "bar" = the sticky bottom bar; "inline" = the same control rendered
+   *  inside the centred opening composition (owner audit §4.1) — no border,
+   *  no backdrop, it is part of the greeting, not chrome. */
+  variant?: "bar" | "inline";
 }) {
   const [value, setValue] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -82,6 +87,17 @@ export function Composer({
   // component renders at different font sizes across breakpoints.
   useEffect(resize, [resize]);
 
+  // PRE-HYDRATION SALVAGE (owner visual acceptance P0-4). On a slow load the
+  // user can focus this textarea and type BEFORE React hydrates; the DOM then
+  // holds their text while the controlled value is still "". The first
+  // controlled re-render would silently erase what they wrote — in production
+  // a whole message vanished this way. Adopting the DOM value once on mount
+  // makes the typed text the state instead of losing the race to it.
+  useEffect(() => {
+    const el = ref.current;
+    if (el && el.value) setValue((prev) => (prev ? prev : el.value));
+  }, []);
+
   function submit() {
     const t = value.trim();
     if (!t || disabled) return;
@@ -94,7 +110,13 @@ export function Composer({
     // (fixed, `z-40`, lifted by `--feedback-fab-bottom` on this surface).
     // Sending a message is the primary action here and must never lose a
     // hit-test to a secondary affordance.
-    <div className="relative z-50 flex-none border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur">
+    <div
+      className={
+        variant === "bar"
+          ? "relative z-50 flex-none border-t border-ink-600 bg-ink-900/80 px-3 py-3 backdrop-blur"
+          : "relative flex-none"
+      }
+    >
       <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
         {onAttach && (
           <button

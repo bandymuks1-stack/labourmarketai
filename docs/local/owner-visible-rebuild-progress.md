@@ -1,5 +1,70 @@
 # Owner-visible rebuild — progress (W1–W6 + chat-first UX + landing)
 
+## 2026-07-29 — OWNER VISUAL ACCEPTANCE ROUND (verdiktas atmestas)
+
+Savininkas atmetė `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED`.
+Naujas tikslas: `OWNER_VISUAL_ACCEPTANCE_2026_PREMIUM_PRODUCTION_VERIFIED`.
+Dabartinis statusas: **OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE**.
+
+### Etapų žurnalas (owner visual acceptance)
+
+- **P0 blokas — BAIGTA 2026-07-29** (commit'ai 66f4dc3f…62a8ca2b dalis):
+  overlay z-skalė (`.wsmap` isolation, dropdown'ai z-60, paieška z-70);
+  paieška randa žurnalo įrašus; „Ieškau darbo" pradeda kriterijų dialogą;
+  profilio chip būsenos-neutralus; kalendorius/paieška — vienas aktyvus
+  įrašas korekcijų grandinėje; composer pre-hydration salvage; „kiek
+  valandų dirbau" → žurnalo readback; workspace perjungimas REALUS
+  (server-side sesijos pointer + narystės validacija + rolė seka erdvę;
+  „switch soon" tekstas ištrintas ×11 lokalių); OAuth identiteto read-only
+  auditas (`docs/owner-goals/oauth-identity-audit-2026.md`, savininko gate).
+- **Chat-first IA — BAIGTA 2026-07-29** (62a8ca2b): tabų eilė ir bottom nav
+  pašalinti; header = back-to-chat + identitetas + erdvės chip + paieška
+  (visose platumose) + kalba + varpelis + vienas avataras; Advanced tik
+  adminams per meniu; composer centre pirmo atidarymo metu → sticky po
+  pirmo turn; žinutės per brief eilutę + „parodyk žinutes" intentą.
+  Guard'ai perpinti į naują kanoną; 10140 testų žali; build ok.
+- **Player Card matomumas — BAIGTA 2026-07-29**: „Parodyk mano kortelę"
+  chat komanda renderina KANONINĮ `WorkerPlayerCard` pokalbyje (server
+  action `loadPlayerCardForChat`); po darbo įrašo išsaugojimo kortelė
+  parodoma automatiškai su intro eilute; avataro meniu — „Mano kortelė"
+  deep-link į kanoninį bloką. LIKUTIS (§5.2 premium vizualika: vieta,
+  dokumentų būsena, reputacija kortelėje) — perkelta į premium design pass.
+
+- **Projekcijos (žurnalas/žemėlapis/enum) — BAIGTA 2026-07-29** (c3437eda):
+  žurnalo puslapis be kūrimo formos (§6.1, kūrimas per pokalbį; forma tik
+  edit režimui); „employee" enum lokalizuotas (§6.2); žemėlapio „Tavo
+  rinka" inkaras + legendos paaiškinimas + sąžiningas unmapped tekstas
+  (§9.1/§9.2); panelės linksniai ICU.
+- **Landing — BAIGTA 2026-07-29** (7a7ec80d): 7 kanoniniai blokai (be
+  ConversationOsPanel, chips juostos, DraftBoard, MarketPulse); kanoninis
+  WorkerPlayerCard vietoj FUT kortelių su medaliais/balais (§3.7); 4
+  sektorių interaktyvus scenarijus (§3.3/§3.4); copy pataisos (§3.5);
+  freeze baseline pergeneruotas. Lokalus QA: 22/22 PASS (1440+390),
+  aukštis 9619→7376px; evidence
+  `docs/audits/evidence/owner-visual-acceptance-2026/`.
+
+### Etapas 0 — kanoninė specifikacija + production auditas (2026-07-29)
+
+- **Kanoninė specifikacija — savininko auditas**: rastas
+  `C:\Users\Mano\Downloads\owner-visual-acceptance-audit-2026.md` ir įdėtas
+  VERBATIM į `docs/owner-goals/owner-visual-acceptance-audit-2026.md`.
+  (Pastaba sau: failas buvo pateiktas savininko, bet dar nebuvo repo darbo
+  medyje — todėl pirmi paieškos bandymai repo viduje jo nerado. Savininko
+  auditas YRA ir YRA kanoninis.)
+- **Atsekamumas**: pilna lentelė (reikalavimas → production būsena → failai →
+  priėmimo veiksmas → statusas) —
+  `docs/owner-goals/owner-visual-acceptance-traceability-2026.md`.
+  Ten pat atskirai — AGENT_DISCOVERED_ADDITIONAL_DEFECTS (A-1…A-9), kurie
+  savininko audito nepakeičia, tik papildo.
+- **Reali production peržiūra** (autentikuota worker sesija, Chrome):
+  patvirtinta — pranešimų popover po Leaflet žemėlapiu (P0.3); paieškos
+  backdrop nepridengia dešinės panelės (P0.3); paieška neranda ką tik
+  įrašytų duomenų (A-1); chat žinutė dingo be pėdsako (A-2); „Kiek valandų
+  dirbau šiandien?" atsakoma log-work šablonu (A-3); „employee" enum LT
+  formoje (6.2); Player Card paslėpta akordeone (5.1); landing 10,7 ekrano
+  (3.1); demo tik statybų (3.3); žemėlapis centruotas į NL su „13 be
+  nustatomos vietos" (9.2); >30 s UI užšalimai (A-4).
+
 > Savininko direktyva 2026-07-29: užbaigti owner-visible W1–W6, chat-first UX ir
 > profesionalų landing rebuild. Galutinis verdiktas tik
 > `OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED` arba

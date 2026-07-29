@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, SlidersHorizontal, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -67,9 +67,17 @@ export function AccountMenu() {
     // the bar carried TWO avatars for the same person; now this menu is the
     // one avatar and Profile is its first entry.
     { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
+    // The Premium Player Card, reachable through the avatar (owner audit
+    // §5.1) — deep-links to the canonical card block on the Mano CV surface.
+    { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
+      : []),
+    // Advanced control room — GONE from the top bar for the ordinary user
+    // (owner audit §4.4); admins keep an entry here.
+    ...(isAdmin && !adminUiHidden
+      ? [{ href: "/dashboard/advanced", label: t("tabs.advanced"), icon: SlidersHorizontal, testid: "account-menu-advanced-link" }]
       : []),
   ];
 
@@ -102,7 +110,8 @@ export function AccountMenu() {
         aria-label={t("tabs.account")}
         data-testid="account-menu-trigger"
         className={cn(
-          "inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
+          // size-11 = the 44px touch-target floor every header control keeps.
+          "inline-flex size-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
           open && "border-brand-blue",
         )}
       >
@@ -112,7 +121,10 @@ export function AccountMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          // z-[60]: the account menu (Profilis / Nustatymai) must never hide
+          // under the workspace map or the composer — in production it was
+          // unclickable behind higher-z content (owner audit P0.2).
+          className="absolute right-0 z-[60] mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
             <p className="truncate px-2 py-1 font-mono text-[10px] uppercase tracking-label text-text-muted">

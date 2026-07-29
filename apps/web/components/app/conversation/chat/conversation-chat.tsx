@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
-import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
+import { ConversationHeader } from "./conversation-header";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
@@ -26,6 +26,8 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
+import { loadPlayerCardForChat } from "@/lib/conversation/player-card-chat";
+import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -94,6 +96,11 @@ export type ChatLabels = {
   chipCard: string;
   chipPrefs: string;
   offersEmpty: string;
+  /** P0.5 (owner audit): the search dialog's opening line — what we know,
+   *  before asking for what is missing. */
+  searchAskCriteria: string;
+  /** §5.1: the line above the card when it re-renders after a work log. */
+  playerCardAfterLog: string;
   fallback: string;
   userCv: string;
   userProfile: string;
@@ -103,6 +110,8 @@ export type ChatLabels = {
   // mechanism does not yet exist).
   clarifyWorkLog: string;
   calendarHint: string;
+  /** Messages projection opener (owner audit §4.4). */
+  messagesHint: string;
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
@@ -338,7 +347,7 @@ export function ConversationChat({
   }, [assistant, labels.companyDemandNext, labels.chipCompanyHub, labels.chipNeedWorkers]);
 
   const openForm = useCallback(
-    (actionId: string) => {
+    (actionId: string, onCloseOverride?: () => void) => {
       // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
       // specs share InlineActionForm + the canonical dispatcher.
       const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
@@ -351,11 +360,14 @@ export function ConversationChat({
             locale={locale}
             // Closing a form shows the contextual next step, never a generic
             // menu: worker forms re-read the REAL profile state; the employer
-            // demand form offers the real demand follow-ups.
+            // demand form offers the real demand follow-ups. A caller with a
+            // flow of its own (the search dialog, P0.5) hands in the next
+            // step explicitly.
             onClose={
-              isEmployer
+              onCloseOverride ??
+              (isEmployer
                 ? companyFollowup
-                : () => startProfileSummaryRef.current("profile")
+                : () => startProfileSummaryRef.current("profile"))
             }
           />,
         );
@@ -446,8 +458,9 @@ export function ConversationChat({
     [assistant, pushMessage, locale, searchChips, starterChips, labels.fallback, tAi],
   );
 
-  /** Real employer/opportunity search — its own typing lifecycle (async). */
-  const startFindWork = useCallback(() => {
+  /** The REAL search request (employer/opportunity read) — its own typing
+   *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
+  const doFindWork = useCallback(() => {
     setTyping(true);
     findWorkForChat()
       .then((res) => {
@@ -475,6 +488,42 @@ export function ConversationChat({
         assistant(labels.fallback, starterChips);
       });
   }, [pushMessage, assistant, searchChips, starterChips, labels.fallback, locale]);
+
+  /**
+   * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
+   * old flow searched immediately and greeted the person with "nothing found"
+   * before they had said a single criterion. Now: read the REAL persisted
+   * criteria first; if the important ones are missing, say what is already
+   * known, ask for the rest with the canonical work-card form (location,
+   * availability, salary), and only run the search once the person answers.
+   * A person whose criteria are already complete goes straight to results.
+   */
+  const startFindWork = useCallback(() => {
+    setTyping(true);
+    loadCriteriaSummaryForChat()
+      .then((res) => {
+        if (
+          res.kind === "criteria" &&
+          (res.lines.length === 0 || res.missing.length > 0)
+        ) {
+          setTyping(false);
+          const known = res.lines.map((l) => `${l.label}: ${l.value}`);
+          const missingBlock =
+            res.missingIntro && res.missing.length > 0
+              ? [res.missingIntro, ...res.missing.map((m) => `— ${m}`)]
+              : [];
+          assistant(
+            [labels.searchAskCriteria, ...known, ...missingBlock].join("\n"),
+          );
+          // The dialog's answer form; when it closes, the search actually runs.
+          openForm("worker.save-work-card", doFindWork);
+          return;
+        }
+        // Criteria complete (or the read degraded) → the real search now.
+        doFindWork();
+      })
+      .catch(() => doFindWork());
+  }, [assistant, labels.searchAskCriteria, openForm, doFindWork]);
 
   const profileChips: ChoiceChip[] = useMemo(
     () => [
@@ -624,6 +673,46 @@ export function ConversationChat({
       });
   }, [assistant, starterChips, labels.fallback, labels.chipPrefs, labels.chipJobs]);
 
+  /**
+   * THE PLAYER CARD IN THE CONVERSATION (owner audit §5.1). "Parodyk mano
+   * kortelę" renders the ONE canonical `WorkerPlayerCard` — the exact
+   * component and the exact server-derived data the journal identity block
+   * uses — as an embedded turn. It also runs right after a work log lands,
+   * so the person SEES their card grow the moment their record changed.
+   */
+  const startPlayerCard = useCallback(
+    (opts?: { intro?: string }) => {
+      setTyping(true);
+      loadPlayerCardForChat()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "card") {
+            if (opts?.intro) assistant(opts.intro);
+            pushEmbed(
+              <div className="max-w-2xl" data-testid="chat-player-card">
+                <WorkerPlayerCard
+                  card={res.card}
+                  labels={res.labels}
+                  thermometer={res.thermometer}
+                  avatarUrl={res.avatarUrl}
+                />
+              </div>,
+            );
+          } else {
+            assistant(res.message, starterChips);
+          }
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.fallback, starterChips);
+        });
+    },
+    [assistant, pushEmbed, starterChips, labels.fallback],
+  );
+  /** Late-bound so earlier flows (work-log onClose) can show the card. */
+  const startPlayerCardRef = useRef(startPlayerCard);
+  startPlayerCardRef.current = startPlayerCard;
+
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string) => {
@@ -638,14 +727,15 @@ export function ConversationChat({
           draft={draft}
           locale={locale}
           labels={workLogLabels}
-          // After a work log lands, show what actually changed (profile
-          // summary re-reads the real rows: new skills, updated activity) —
-          // the contextual follow-up, not the generic menu.
-          onClose={() => startProfileSummaryRef.current("resume")}
+          // After a work log lands, the person SEES their card change
+          // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
+          // canonical Player Card re-renders with the just-strengthened
+          // record — the real payoff of logging work, not a generic menu.
+          onClose={() => startPlayerCardRef.current({ intro: labels.playerCardAfterLog })}
         />,
       );
     },
-    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog],
+    [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog],
   );
 
   /**
@@ -789,6 +879,11 @@ export function ConversationChat({
         startCriteria();
         return;
       }
+      if (intent === "player-card") {
+        // The canonical card, rendered IN the conversation (§5.1).
+        startPlayerCard();
+        return;
+      }
       if (intent === "calendar-view") {
         // Real agenda readback from the canonical Time Engine (async, own
         // typing cue) — no longer a bare navigation hint.
@@ -828,6 +923,13 @@ export function ConversationChat({
             // No real translation engine — never a fake translation.
             assistant(labels.translateBlocked);
             break;
+          case "messages-view":
+            // The projection opens FROM the conversation — one link chip to
+            // the real communication surface, never a duplicated inbox here.
+            assistant(labels.messagesHint, [
+              { id: "link:/dashboard/communication", label: labels.navMessages },
+            ]);
+            break;
           case "write-employer":
             assistant(labels.writeEmployerHint);
             break;
@@ -847,6 +949,14 @@ export function ConversationChat({
     profile: labels.navProfile,
     advanced: labels.advanced,
   };
+
+  /** OPENING state (owner audit §4.1) — mirrors the thread's own predicate:
+   *  only the assistant's opening turns are on screen. It decides WHERE the
+   *  composer lives: centred inside the composition vs the sticky bottom. */
+  const opening =
+    !typing &&
+    items.length <= 3 &&
+    items.every((it) => "message" in it && it.message.role === "assistant");
 
   /**
    * The Context Panel acts by asking the conversation to do what it already
@@ -887,18 +997,32 @@ export function ConversationChat({
                 onCancel: () => {},
                 speakers: { assistant: labels.assistantName, user: labels.speakerYou },
               }}
+              // While the conversation is opening the composer renders inside
+              // the centred composition (owner audit §4.1); afterwards the
+              // thread ignores this prop and the sticky bar below takes over.
+              composer={
+                <Composer
+                  variant="inline"
+                  placeholder={labels.composerPlaceholder}
+                  attachLabel={labels.attach}
+                  sendLabel={labels.send}
+                  onSend={handleSend}
+                  onAttach={() => handleChip({ id: "cv", label: "" })}
+                />
+              }
             />
-            <Composer
-              placeholder={labels.composerPlaceholder}
-              attachLabel={labels.attach}
-              sendLabel={labels.send}
-              onSend={handleSend}
-              onAttach={() => handleChip({ id: "cv", label: "" })}
-            />
+            {opening ? null : (
+              <Composer
+                placeholder={labels.composerPlaceholder}
+                attachLabel={labels.attach}
+                sendLabel={labels.send}
+                onSend={handleSend}
+                onAttach={() => handleChip({ id: "cv", label: "" })}
+              />
+            )}
           </div>
           <ContextPanel locale={locale} onChip={handlePanelChip} />
         </div>
-        <ConversationBottomNav nav={nav} mobile={mobile} />
       </div>
     </WorldStateProvider>
   );

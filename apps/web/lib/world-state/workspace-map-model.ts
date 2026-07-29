@@ -41,10 +41,24 @@ export interface WorkspaceMapCluster {
   readonly entities: readonly WorkspaceMapEntity[];
 }
 
+/** The viewer's OWN market anchor — their stated location, country- or
+ *  city-precision. Private to their own view (never another user's data),
+ *  drawn as a distinct home marker so the map is centred on THEIR market
+ *  even when every visible opportunity is elsewhere (owner audit §9.2:
+ *  a Lithuanian worker must not open a map of the Netherlands). */
+export interface WorkspaceMapHome {
+  readonly lat: number;
+  readonly lng: number;
+  readonly precision: "city" | "country";
+  readonly placeLabel: string;
+}
+
 export interface WorkspaceMapView {
   readonly clusters: readonly WorkspaceMapCluster[];
   /** Real rows that could not be placed — reported, never faked. */
   readonly unmapped: number;
+  /** The viewer's own market anchor, when their location is stated. */
+  readonly home: WorkspaceMapHome | null;
 }
 
 /**
@@ -55,6 +69,7 @@ export interface WorkspaceMapView {
 export function clusterWorkspaceEntities(
   entities: readonly WorkspaceMapEntity[],
   unmapped: number,
+  home: WorkspaceMapHome | null = null,
 ): WorkspaceMapView {
   const byPlace = new Map<string, WorkspaceMapEntity[]>();
   for (const e of entities) {
@@ -75,19 +90,25 @@ export function clusterWorkspaceEntities(
   }));
   // Deterministic order: biggest place first, then north→south for stability.
   clusters.sort((a, b) => b.entities.length - a.entities.length || b.lat - a.lat);
-  return { clusters, unmapped };
+  return { clusters, unmapped, home };
 }
 
-/** Bounds that fit every cluster, or null when there is nothing to fit. */
+/** Bounds that fit every cluster AND the viewer's own market anchor, or null
+ *  when there is nothing to fit. Including `home` is what keeps the view
+ *  anchored to the viewer's market instead of flying to a lone foreign pin. */
 export function boundsFor(
   clusters: readonly WorkspaceMapCluster[],
+  home: WorkspaceMapHome | null = null,
 ): [[number, number], [number, number]] | null {
-  if (clusters.length === 0) return null;
+  if (clusters.length === 0 && !home) return null;
   let minLat = Infinity;
   let maxLat = -Infinity;
   let minLng = Infinity;
   let maxLng = -Infinity;
-  for (const c of clusters) {
+  const points: ReadonlyArray<{ lat: number; lng: number }> = home
+    ? [...clusters, home]
+    : [...clusters];
+  for (const c of points) {
     minLat = Math.min(minLat, c.lat);
     maxLat = Math.max(maxLat, c.lat);
     minLng = Math.min(minLng, c.lng);

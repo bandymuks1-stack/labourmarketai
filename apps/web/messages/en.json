@@ -464,6 +464,7 @@
     "objectsLoading": "Searching your own records…",
     "objectsError": "Your records could not be searched right now. The page links above still work.",
     "groups": {
+      "journal": "Your journal entries",
       "projects": "Your projects",
       "tasks": "Your tasks",
       "finance": "Your finance records",
@@ -3450,7 +3451,11 @@
       "drafted": "Drafted",
       "busy": "Busy"
     },
-    "conceptNote": "Concept preview — fictional profiles, not real people. Your real profile is built from your real entries."
+    "conceptNote": "An example card with illustrative data — not a real person. Your card is built from your real work records.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "Restaurant Ąžuolas"
+    }
   },
   "auth": {
     "legalNotice": {
@@ -4086,7 +4091,9 @@
         "account": "Settings",
         "admin": "Admin",
         "planning": "Calendar",
-        "network": "Network"
+        "network": "Network",
+        "advanced": "Advanced controls",
+        "playerCard": "My card"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -11037,7 +11044,7 @@
       "greetingNamed": "Hi, {name}. How can I help you today?",
       "chipCv": "Upload CV",
       "chipJobs": "I'm looking for work",
-      "chipProfile": "Complete my profile",
+      "chipProfile": "My profile",
       "chipOffers": "View offers",
       "chipLang": "A language",
       "chipExp": "Work experience",
@@ -11045,9 +11052,12 @@
       "chipCard": "Availability & pay",
       "chipPrefs": "Preferences",
       "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
+      "searchAskCriteria": "To search well, let's first pin down your criteria — where, when and on what terms you want to work. Fill this in below and I'll search right away.",
+      "playerCardAfterLog": "Here's your card after that entry — your work record just got stronger.",
+      "playerCardBlocked": "This account has no worker card yet. Log your first work or upload a CV — the card grows from real records.",
       "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "I'll upload my CV",
-      "userProfile": "Complete my profile",
+      "userProfile": "Show my profile",
       "userOffers": "View my offers",
       "userJobs": "I'm looking for work",
       "navChat": "Chat",
@@ -11056,6 +11066,7 @@
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
       "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
@@ -11067,7 +11078,7 @@
       "historyMore": "Show more",
       "workspaceLabel": "Workspace",
       "workspacePersonal": "Personal space",
-      "workspaceSwitchSoon": "Workspace switching isn't enabled yet — this shows your active context for now.",
+      "workspaceUnnamed": "Company workspace",
       "chipLogWork": "Log work",
       "agendaTitle": "Your plan for the next {days} days:",
       "agendaEmpty": "Nothing is planned for the next {days} days.",
@@ -11092,6 +11103,7 @@
       "briefConflicts": "Your calendar has {count} overlapping commitments.",
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
+      "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}."
     },
     "worklog": {
@@ -11115,6 +11127,14 @@
       "saved": "Entry saved to your work journal.",
       "errorGeneric": "Couldn't save. Please try again.",
       "minutesUnit": "min",
+      "relationship": {
+        "employee": "Employee",
+        "freelancer": "Freelancer",
+        "consultant": "Consultant",
+        "owner": "Owner",
+        "collaborator": "Collaborator",
+        "other": "Other context"
+      },
       "addedSkillPrefix": "Skill added",
       "strengthenedSkillPrefix": "Skill strengthened",
       "pendingConfirmPrefix": "Awaiting your confirmation",
@@ -11291,17 +11311,49 @@
     "loop": {
       "chip": "Sample sequence — real product flow",
       "windowTitle": "LabourMarket AI — conversation",
-      "userSays": "Today I laid brick walls at the Vilnius site, 8 hours.",
       "entrySaved": "Journal entry saved · #D-1042",
-      "entryLine": "Bricklaying · Vilnius site · 8 h · added to your work history.",
       "skillSignal": "Skill signal strengthened",
-      "skillLine": "Bricklaying — now backed by 12 journal entries.",
       "matchFound": "New matching opportunity",
-      "matchLine": "A verified company needs 3 bricklayers in Kaunas.",
-      "matchWhy": "Why you: matches 4 of 5 required skills, 3 backed by your journal."
+      "sectorsLabel": "Sector selection",
+      "sector": {
+        "construction": "Construction",
+        "horeca": "HoReCa",
+        "logistics": "Logistics",
+        "it": "IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "Today I laid brick walls at the Vilnius site, 8 hours.",
+          "entryLine": "Bricklaying · Vilnius site · 8 h · added to your work history.",
+          "skillLine": "Bricklaying — now backed by 12 journal entries.",
+          "matchLine": "A verified company needs 3 bricklayers in Kaunas.",
+          "matchWhy": "Why you: matches 4 of 5 required skills, 3 backed by your journal."
+        },
+        "horeca": {
+          "userSays": "Today I prepared 60 lunch portions and received the deliveries.",
+          "entryLine": "Food preparation · restaurant · 8 h · added to your work history.",
+          "skillLine": "Food preparation — now backed by 9 journal entries.",
+          "matchLine": "A hotel restaurant in Vilnius needs a shift cook.",
+          "matchWhy": "Why you: matches 3 of 4 required skills, availability lines up."
+        },
+        "logistics": {
+          "userSays": "Today I delivered 14 orders on the Kaunas route, 9 hours.",
+          "entryLine": "Deliveries · Kaunas route · 9 h · added to your history.",
+          "skillLine": "Driving — now backed by 21 journal entries.",
+          "matchLine": "A logistics company needs a driver for a regular route.",
+          "matchWhy": "Why you: B/C licence and route experience backed by your journal."
+        },
+        "it": {
+          "userSays": "Today I fixed the client portal bugs and shipped the update.",
+          "entryLine": "Programming · client portal · 7 h · added to your history.",
+          "skillLine": "Programming — now backed by 15 journal entries.",
+          "matchLine": "A product team needs a developer for three months.",
+          "matchWhy": "Why you: matches 5 of 6 required skills, 4 backed by your journal."
+        }
+      }
     },
     "chain": {
-      "eyebrow": "How the platform actually works",
+      "eyebrow": "The product chain",
       "title": "Work becomes evidence. Evidence becomes your next opportunity.",
       "journalNote": "The work journal is the difference: every day you record becomes verifiable professional history — so your next opportunity is argued from what you actually did, not from what a CV claims.",
       "steps": {
@@ -11413,14 +11465,14 @@
       },
       "recNextActionBasis": "From the state of your own profile.",
       "factToday": "Today",
-      "factTodayValue": "{count} commitments",
+      "factTodayValue": "{count, plural, one {# commitment} other {# commitments}}",
       "factProject": "Project",
       "factConflicts": "Conflicts",
       "factConflictsValue": "{count} overlapping",
       "factOverdue": "Overdue",
-      "factOverdueValue": "{count} tasks",
+      "factOverdueValue": "{count, plural, one {# task} other {# tasks}}",
       "factDeadline": "Next deadline",
-      "suggestOverdue": "{count} tasks are past their due day.",
+      "suggestOverdue": "{count, plural, one {# task is past its due day} other {# tasks are past their due day}}.",
       "suggestLogToday": "You are working today and nothing is logged yet.",
       "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
       "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
@@ -11513,9 +11565,10 @@
     "map": {
       "regionLabel": "Workspace map",
       "legendEntities": "Real opportunities and projects, grouped per place",
+      "homeLabel": "Your market",
       "approx": "approximate location",
-      "unmapped": "{count} without a mappable place",
-      "unmappedOnly": "{count} items have no mappable place yet, so there is nothing to draw."
+      "unmapped": "{count, plural, one {# more opportunity has no stated place — it shows in the chat search} other {# more opportunities have no stated place — they show in the chat search}}",
+      "unmappedOnly": "{count, plural, one {# real opportunity has no stated place, so it cannot be drawn — find it in the chat search} other {# real opportunities have no stated place, so they cannot be drawn — find them in the chat search}}."
     }
   }
 }

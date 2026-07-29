@@ -138,22 +138,17 @@ describe("/company-need is honest about being a draft-preparation step", () => {
   });
 });
 
-describe("player-card acronyms carry a visible legend", () => {
-  it("showcase renders a stat legend built from the localized stat names", () => {
+describe("the landing player-card is the CANONICAL card (owner audit §3.7)", () => {
+  // Supersedes the FUT-card stat-legend contract: the acronym codes left the
+  // landing together with the concept cards. The canonical WorkerPlayerCard
+  // explains itself with full localized labels, so no legend is needed.
+  it("showcase renders WorkerPlayerCard, never the FUT concept card or its stat codes", () => {
     const showcase = read("components/marketing/player-card-showcase.tsx");
-    expect(showcase).toContain("playercards-stat-legend");
-    expect(showcase).toContain("STAT_KEYS");
-  });
-
-  it("the legend appears ABOVE the cards so it isn't scrolled past on mobile", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    const legendAt = showcase.indexOf("playercards-stat-legend");
-    const firstCardAt = showcase.indexOf("<PlayerCard");
-    expect(legendAt).toBeGreaterThan(-1);
-    expect(firstCardAt).toBeGreaterThan(-1);
-    expect(legendAt).toBeLessThan(firstCardAt);
-    // and it carries a localized "what the codes mean" intro
-    expect(showcase).toContain("statLegendIntro");
+    expect(showcase).toMatch(/WorkerPlayerCard/);
+    expect(showcase).not.toContain("<PlayerCard ");
+    expect(showcase).not.toContain("STAT_KEYS");
+    // No universal human score / medal tiers anywhere near the landing card.
+    expect(showcase).not.toMatch(/gold|silver|bronze|\bOVR\b/i);
   });
 
   it("each on-card acronym exposes its meaning as a native title tooltip", () => {

@@ -10,11 +10,12 @@ const CHAT_KEYS = [
   "composerPlaceholder", "send", "attach", "greeting",
   "chipCv", "chipJobs", "chipProfile", "chipOffers", "chipLang",
   "chipExp", "chipEdu", "chipCard", "chipPrefs", "offersEmpty",
+  "searchAskCriteria", "playerCardAfterLog",
   "fallback", "userCv", "userProfile", "userOffers", "userJobs",
   "chipLogWork", "userLogWork",
   "chipAgenda", "userAgenda", "chipNeedWorkers", "chipCandidates",
   "chipCompanyHub", "companyDemandNext", "chipTasks",
-  "clarifyWorkLog", "calendarHint", "reminderBlocked", "translateBlocked",
+  "clarifyWorkLog", "calendarHint", "messagesHint", "reminderBlocked", "translateBlocked",
   "writeEmployerHint",
 ] as const;
 

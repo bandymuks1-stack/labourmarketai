@@ -40,6 +40,8 @@ export type ConversationIntent =
   | "open-project" // "atidaryk šį projektą"
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "context" // "ką tu apie mane žinai?"
+  | "messages-view" // "parodyk žinutes" — open the human-messages projection
+  | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "unknown";
 
 export type IntentMatch = {
@@ -102,6 +104,14 @@ const RULES: IntentRule[] = [
       p("(parodyk|rodyk|show|покажи)\\s*.{0,20}(žurnal|journal|дневник)", 5),
       p("(paskutin|latest|last|последн)\\s*.{0,18}(įraš|entr|запис)", 5),
       p("(mano|my|мой)\\s+(žurnal|journal|дневник)", 4),
+      // A QUESTION about hours worked is a journal READ, not a log-work
+      // intake. "Kiek valandų dirbau šiandien?" used to score log-work via
+      // the bare past-tense verb and answered with the log-work template —
+      // the assistant asking you to record the very thing it should be
+      // reporting (owner visual acceptance P0-5). The interrogative +
+      // hours/worked pairing outweighs log-work's verb+today signals.
+      p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(valand|hour|час)", 7),
+      p("(kiek|how\\s+(many|much)|сколько)\\s*.{0,24}(dirbau|dirbome|worked|работал)", 7),
     ],
   },
   {
@@ -215,6 +225,30 @@ const RULES: IntentRule[] = [
       p("\\bvacancy|vacature|vakans", 1),
       // "in the Netherlands / country" — a search location
       p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
+    ],
+  },
+  {
+    // The Player Card, asked for in words (owner audit §5.1) — MUST outrank
+    // `profile` and the work-card FORM intent: showing the card is a read,
+    // not an edit. "kortel" alone is decisive; the save-work-card flow is
+    // reached through its explicit chip, never through this sentence.
+    intent: "player-card",
+    patterns: [
+      p("(parodyk|rodyk|atidaryk|show|open|покажи|открой)\\s*.{0,14}(kortel|card\\b|карточк)", 7),
+      p("(mano|my|моя)\\s+(kortel|card\\b|карточк)", 6),
+      p("player\\s*card", 6),
+      p("(darbuotojo|worker)\\s+(kortel|card\\b)", 5),
+    ],
+  },
+  {
+    // The Messages projection, asked for in words (owner audit §4.4: with
+    // the tab row gone the conversation is how projections open). Outweighs
+    // write-employer's weak "žinut" stem — SHOWING messages is not WRITING.
+    intent: "messages-view",
+    patterns: [
+      p("(parodyk|rodyk|atidaryk|open|show|покажи|открой)\\s*.{0,14}(žinut|messages?|сообщени|berichten|nachrichten)", 6),
+      p("(mano|my|мои)\\s+(žinut|messages?|сообщени)", 5),
+      p("(neperskaityt|unread|непрочитан)", 4),
     ],
   },
   {

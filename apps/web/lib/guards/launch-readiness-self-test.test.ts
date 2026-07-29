@@ -53,10 +53,10 @@ describe("Launch Readiness — auth never blank-ends an unauthenticated visit", 
 });
 
 describe("Launch Readiness — worker path shows honest empty states", () => {
-  it("Work Journal renders an EmptyState with a single composer CTA when no entries", () => {
+  it("Work Journal renders an EmptyState whose single CTA opens the conversation (§6.1)", () => {
     const j = readApp("app/[locale]/dashboard/journal/page.tsx");
     expect(j).toContain("EmptyState");
-    expect(j).toContain("#journal-composer");
+    expect(j).toContain('cta={{ label: t("listEmptyCta"), href: "/dashboard" }}');
   });
 
   it("Player card shows a real verified-empty state and never fakes verification", () => {

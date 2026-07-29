@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -39,6 +40,29 @@ import {
 
 const UNDEFINED_COLUMN_CODE = "42703";
 const RELATION_NOT_FOUND_CODE = "42P01";
+
+/**
+ * The SERVER-SIDE session workspace pointer (owner audit P0.1). An httpOnly
+ * cookie written ONLY by the membership-validated switch actions
+ * (`lib/company/organization-actions.ts`) and read back here on every
+ * request. It makes workspace switching real before the owner-gated durable
+ * pointer migration (20260714210000) is applied; once that lands, the DB
+ * pointer becomes the cross-device default and this stays the most-recent
+ * in-session choice. Never localStorage, never client-writable.
+ */
+export const ACTIVE_WORKSPACE_COOKIE = "lm_active_workspace";
+
+/** Read the validated-at-write session pointer; resolution still membership-
+ *  validates it against the live workspace list before it can win. */
+async function readSessionWorkspacePointer(): Promise<string | null> {
+  try {
+    const jar = await cookies();
+    const v = jar.get(ACTIVE_WORKSPACE_COOKIE)?.value?.trim();
+    return v && v.length > 0 ? v : null;
+  } catch {
+    return null; // outside a request scope — no pointer
+  }
+}
 
 // The active_organization_id column ships in the owner-gated migration
 // 20260714210000 — it is not in the generated DB types until applied
@@ -85,28 +109,25 @@ export const getActiveOrganizationContext = cache(
     return EMPTY;
   }
 
-  // Stored pointer — feature-detected: 42703 (column not applied yet) and
-  // 42P01 both degrade to "no pointer" without failing the shell.
-  let storedId: string | null = null;
-  let pointerAvailable = false;
+  // Stored pointer — the in-session cookie choice wins, then the DB pointer
+  // (feature-detected: 42703 / 42P01 degrade to "no DB pointer" without
+  // failing the shell). Both are membership-validated by the pure resolver.
+  let dbPointer: string | null = null;
   const { data, error } = await asAny(supabase)
     .from("profiles")
     .select("active_organization_id")
     .eq("id", user.id)
     .maybeSingle();
   if (!error) {
-    pointerAvailable = true;
-    storedId =
+    dbPointer =
       ((data as { active_organization_id?: string | null } | null)
         ?.active_organization_id as string | null) ?? null;
-  } else if (
-    error.code !== UNDEFINED_COLUMN_CODE &&
-    error.code !== RELATION_NOT_FOUND_CODE
-  ) {
-    // Unexpected read failure — degrade like "no pointer" (first org wins);
-    // never break the authenticated shell over a display pointer.
-    pointerAvailable = false;
   }
+  const sessionPointer = await readSessionWorkspacePointer();
+  const storedId =
+    sessionPointer === PERSONAL_WORKSPACE_ID
+      ? null
+      : (sessionPointer ?? dbPointer);
 
   const activeOrganizationId = resolveActiveOrganizationId(
     owned.organizations,
@@ -119,9 +140,9 @@ export const getActiveOrganizationContext = cache(
     organizations: owned.organizations,
     activeOrganizationId,
     activeOrganization,
-    canSwitch:
-      pointerAvailable && shouldOfferOrganizationSwitch(owned.organizations),
-    pointerAvailable,
+    // The session pointer makes switching a real mechanism for everyone.
+    canSwitch: shouldOfferOrganizationSwitch(owned.organizations),
+    pointerAvailable: true,
   };
   },
 );
@@ -185,8 +206,10 @@ async function readEngagementMemberships(
     } | null;
     byOrg.set(orgId, {
       id: orgId,
-      name:
-        org?.display_name?.trim() || org?.legal_name?.trim() || "—",
+      // An unnamed organization must never render as a bare dash row (owner
+      // audit P0.1 "tušti punktai") — empty here, and the chip substitutes a
+      // localized fallback label.
+      name: org?.display_name?.trim() || org?.legal_name?.trim() || "",
       kind: "organization",
       organizationType: normalizeOrgType(org?.organization_type ?? null),
       relationship: normalizeRelationship(
@@ -250,20 +273,28 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
     }
   }
 
-  // Stored pointer — same feature detection as the active-organization read.
-  let storedId: string | null = null;
-  let pointerAvailable = false;
+  // Stored pointer: the in-session choice (server-side cookie, written only
+  // by the validated switch actions) wins over the durable DB pointer; both
+  // are membership-validated by `resolveActiveWorkspaceId` below. The DB
+  // column stays feature-detected (owner-gated migration 20260714210000) —
+  // its absence no longer disables switching, because the session pointer
+  // always exists as a mechanism (owner audit P0.1).
+  let dbPointer: string | null = null;
   const { data, error } = await asAny(supabase)
     .from("profiles")
     .select("active_organization_id")
     .eq("id", user.id)
     .maybeSingle();
   if (!error) {
-    pointerAvailable = true;
-    storedId =
+    dbPointer =
       ((data as { active_organization_id?: string | null } | null)
         ?.active_organization_id as string | null) ?? null;
   }
+  const sessionPointer = await readSessionWorkspacePointer();
+  const storedId =
+    sessionPointer === PERSONAL_WORKSPACE_ID
+      ? null
+      : (sessionPointer ?? dbPointer);
 
   const personal: WorkspaceInfo = {
     id: PERSONAL_WORKSPACE_ID,
@@ -279,6 +310,8 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
       orgWorkspaces.map((w) => w.id),
       storedId,
     ),
-    pointerAvailable,
+    // Switching is a real mechanism for every session now — the chip renders
+    // working switch buttons, never a "not enabled yet" production text.
+    pointerAvailable: true,
   };
 });

@@ -72,7 +72,10 @@ export function NotificationPanel() {
         <div
           role="dialog"
           aria-label={t("label")}
-          className="absolute right-0 z-30 mt-2 hidden max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:block"
+          // z-[60]: above the chat composer (z-50) and the context-panel
+          // sheet (z-50). The workspace map is isolated (`.wsmap`), so its
+          // Leaflet panes can no longer cover this popover (P0-1).
+          className="absolute right-0 z-[60] mt-2 hidden max-h-[28rem] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-ink-500 bg-ink-900/95 shadow-card md:block"
         >
           <div className="flex justify-end border-b border-ink-600 px-2 py-1.5">
             <button

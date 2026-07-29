@@ -48,9 +48,10 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
       // LIVE PRODUCT DEMO — the same cinematic baseline, now showing the
       // product's real core loop instead of a static map (LiveProductDemo
       // superseded LiveWorldMap; enforced by lib/guards/global-landing.test.ts).
+      // Owner shortening (visual acceptance §3.1, 2026-07-29): MarketPulse and
+      // DraftBoard LEFT the landing — interior dashboards re-rendered as
+      // brochure duplicated the product instead of showing it once.
       "LiveProductDemo",
-      "MarketPulse",
-      "DraftBoard",
       "text-gradient-accent",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(

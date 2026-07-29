@@ -122,7 +122,11 @@ export function HeaderSearch({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
+          // z-[70]: the search dialog must dim EVERYTHING — the chat composer
+          // (z-50), the context-panel sheet (z-50) and the notification
+          // popover (z-60). In production the right panel stayed bright over
+          // the backdrop (owner visual acceptance P0-2).
+          className="fixed inset-0 z-[70] flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);

@@ -55,6 +55,47 @@ function fallbackLabel(id: string): string {
   return id.slice(0, 8);
 }
 
+/** The worker's OWN journal entries (owner visual acceptance A-1). Direct
+ *  RLS-scoped read of the caller's rows — the same table the journal page
+ *  lists; deleted / superseded entries never resurface. Label = the entry's
+ *  own words, bounded for the result row. */
+async function searchOwnJournal(
+  nq: string,
+): Promise<DashboardSearchGroup | null> {
+  try {
+    const supabase = await createClient();
+    const res = await asAny(supabase)
+      .from("journal_entries")
+      .select("id, original_text, created_at, deleted_at, superseded_by, correction_of")
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (res.error) return null;
+    type Row = { id: string; original_text: string | null; correction_of: string | null };
+    // Same one-active-entry-per-chain rule the calendar applies (P0.7): a
+    // corrected original never resurfaces as a duplicate result.
+    const rows = (res.data ?? []) as Row[];
+    const correctedIds = new Set(
+      rows.map((r) => r.correction_of).filter((v): v is string => Boolean(v)),
+    );
+    const candidates: DashboardSearchCandidate[] = rows
+      .filter((e) => !correctedIds.has(e.id))
+      .map((e) => ({
+        id: e.id,
+        label: e.original_text?.trim()
+          ? e.original_text.trim().slice(0, 96)
+          : fallbackLabel(e.id),
+        href: "/dashboard/journal",
+        haystacks: [e.original_text],
+      }),
+    );
+    return buildSearchGroup("journal", candidates, nq);
+  } catch {
+    return null;
+  }
+}
+
 async function searchOwnProjects(
   nq: string,
 ): Promise<DashboardSearchGroup | null> {
@@ -190,6 +231,7 @@ export async function getDashboardSearchGroups(
   nq: string,
 ): Promise<readonly DashboardSearchGroup[]> {
   const groups = await Promise.all([
+    searchOwnJournal(nq),
     searchOwnProjects(nq),
     searchOwnTasks(nq),
     searchOwnFinance(nq),

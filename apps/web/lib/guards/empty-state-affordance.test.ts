@@ -50,13 +50,12 @@ describe("Guard: <EmptyState> offers at most one real, non-fake CTA", () => {
 // primary CTA at most (the journal one is primary; inbox has none; evidence is
 // secondary). This pins the per-surface intent at the call sites.
 describe("Guard: first-use surfaces wire EmptyState with a single honest CTA", () => {
-  it("journal empty state has exactly one CTA → the on-page composer anchor", () => {
+  it("journal empty state has exactly one CTA → the conversation (owner audit §6.1)", () => {
     const src = read("app/[locale]/dashboard/journal/page.tsx");
-    // The journal-empty CTA points at the real on-page composer (not a dead #).
-    expect(src).toMatch(/href:\s*"#journal-composer"/);
-    // The header "+ New entry" gradient is gated to non-empty, so the empty
-    // surface shows a single primary (no duplicate primary CTA).
-    expect(src).toMatch(/\(entries \?\? \[\]\)\.length > 0 && \(\s*<a/);
+    // A new record starts in the CONVERSATION — the empty state points there.
+    expect(src).toMatch(/href:\s*"\/dashboard"/);
+    // No on-page create anchor remains (the composer is edit-mode only).
+    expect(src).not.toMatch(/href:\s*"#journal-composer"/);
   });
 
   it("inbox empty state shows no CTA (passive queue, no fake action)", () => {

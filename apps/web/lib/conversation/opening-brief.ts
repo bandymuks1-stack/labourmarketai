@@ -10,6 +10,7 @@ import { visibleRange } from "@/lib/planning/planning-model";
 import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
+import { getUnreadConversationCount } from "@/lib/communication/unread";
 
 /**
  * THE OPENING BRIEF (owner ruling 2026-07-29, W2).
@@ -96,6 +97,21 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
       ) {
         lines.push(t("briefLogToday"));
         addChip("logwork", t("chipLogWork"));
+      }
+    }
+  } catch {
+    /* no line */
+  }
+
+  // 3b ── unread human messages (owner audit §4.4/§8: with the tab row gone,
+  // Messages is a conversation-driven projection — the brief is where a real
+  // unread thread announces itself, with the one chip that opens it).
+  try {
+    if (lines.length < MAX_LINES) {
+      const unread = await getUnreadConversationCount();
+      if (unread > 0) {
+        lines.push(t("briefUnreadMessages", { count: unread }));
+        addChip("link:/dashboard/communication", t("navMessages"));
       }
     }
   } catch {

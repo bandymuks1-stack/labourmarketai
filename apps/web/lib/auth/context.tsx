@@ -170,9 +170,27 @@ export function AuthProvider({
         workspaceId === PERSONAL_WORKSPACE_ID
           ? await clearActiveOrganizationAction()
           : await switchActiveOrganizationAction(workspaceId);
-      if (result.ok) router.refresh();
+      if (!result.ok) return;
+      // The workspace IS the acting context (owner audit P0.1): choosing an
+      // organization means acting as that organization, so the base identity
+      // follows — the chat greeting, CTAs, and company surfaces all switch
+      // with it. Only roles the person REALLY holds are ever activated.
+      const toOrg = workspaceId !== PERSONAL_WORKSPACE_ID;
+      const wanted: Role | null = toOrg
+        ? initial.roles.includes("company")
+          ? "company"
+          : initial.roles.includes("agency")
+            ? "agency"
+            : null
+        : initial.roles.includes("worker")
+          ? "worker"
+          : null;
+      if (wanted && wanted !== initial.activeRole) {
+        await switchActiveRoleAction(wanted);
+      }
+      router.refresh();
     },
-    [router],
+    [router, initial.roles, initial.activeRole],
   );
 
   const markAsRead = useCallback((id: string) => {

@@ -23,7 +23,6 @@ import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
 import { buildEntryDetectedSignals } from "@/lib/journal/entry-detected-signals";
-import { JournalSpreadsheetEntry } from "@/components/app/journal-spreadsheet-entry";
 import { listActiveJournalTemplates } from "@/lib/journal/journal-templates";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
 import { buildEditingEntry } from "@/lib/journal/edit-entry";
@@ -647,7 +646,8 @@ export default async function JournalPage({
           { href: "#mano-cv-top", label: tQuick("top") },
           { href: "#mano-cv-identity", label: tQuick("identity") },
           { href: "#journal-entries", label: tQuick("records") },
-          { href: "#journal-composer", label: tQuick("addEntry") },
+          // §6.1: "add entry" is the conversation's job now; the quick nav
+          // keeps only the projection's own regions.
         ]}
       />
 
@@ -714,72 +714,45 @@ export default async function JournalPage({
           {t("reviewNotEnabledNote")}
         </p>
       )}
-      {/* Wagon 5 first view (UX Recovery Train, supersedes the P0-rescue
-          records-first order): the day starts with ONE large input and ONE
-          main action — "Ką šiandien dirbai?" leads, the compact history
-          follows. */}
+      {/* CHAT-FIRST INTAKE (owner audit §6.1): work is REGISTERED in the
+          conversation — this page is the history/evidence PROJECTION of the
+          journal, not a second intake form. The composer therefore renders
+          ONLY in edit mode (?editing=<id> — correcting an existing record is
+          a projection concern; the supersede path stays canonical). A fresh
+          record starts in the chat, where the same deterministic extractor
+          saves through the same createJournalEntry action. */}
       <div id="journal-composer" className="order-1">
-        <div className="flex flex-col gap-2">
-          <JournalEntryComposer
-            // Remount the composer whenever the edit target changes. The
-            // composer derives its textarea state from `editingEntry` with
-            // useState (initial-value only). The Edit control is a client-side
-            // <Link> (no full reload), so without this key React keeps the same
-            // instance and the stale "" create-mode text — the entry's original
-            // text never loads (owner bug: "editing loses the text / blank
-            // editor"). Keying on the editing id forces a fresh mount so edit
-            // always shows the saved text, and cancel (back to no ?editing)
-            // resets cleanly to create mode.
-            key={editingId ?? "new"}
-            engagements={engagements}
-            directions={directions}
-            workerSkills={workerSkills}
-            editingEntry={editingEntry}
-            templates={journalTemplates}
-          />
-          {/* Wagon 5 first view: the benefit line and the voice input method
-              moved BELOW the composer — the question + input + one action
-              lead; everything else follows. Same ONE composer/save path. */}
-          <p
-            className="text-sm leading-relaxed text-text-secondary"
-            data-testid="journal-composer-benefit"
+        {editingEntry ? (
+          <div className="flex flex-col gap-2">
+            <JournalEntryComposer
+              // Remount the composer whenever the edit target changes (see
+              // git history: stale create-mode text on client-side ?editing
+              // navigation).
+              key={editingId ?? "new"}
+              engagements={engagements}
+              directions={directions}
+              workerSkills={workerSkills}
+              editingEntry={editingEntry}
+              templates={journalTemplates}
+            />
+          </div>
+        ) : (
+          <div
+            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/50 p-4"
+            data-testid="journal-log-via-chat"
           >
-            {t("composerBenefit")}
-          </p>
-          <Link
-            href="/dashboard/journal/voice"
-            className="inline-flex min-h-[2.75rem] w-fit items-center rounded-lg border border-border bg-surface-1 px-4 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
-            data-testid="voice-entry-link"
-          >
-            {t("voice.entryCta")}
-          </Link>
-          {/* Spreadsheet mode (Journal Proof Engine v1 §1): fast MULTI-ROW
-              bulk entry. Each grid row saves through the SAME
-              createJournalEntry action — a bulk surface, not a second
-              journal system. Collapsed by default so the single-entry
-              composer stays the primary surface. */}
-          {!editingEntry && (
-            <details
-              className="group rounded-md border border-border-subtle bg-surface-1/50"
-              data-testid="journal-spreadsheet-section"
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {t("logViaChatBody")}
+            </p>
+            <Link
+              href="/dashboard"
+              className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+              data-testid="journal-log-via-chat-cta"
             >
-              <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-[11px] uppercase tracking-label text-text-secondary hover:text-text-primary">
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    aria-hidden
-                    className="transition-transform group-open:rotate-90"
-                  >
-                    ›
-                  </span>
-                  {t("spreadsheet.title")}
-                </span>
-              </summary>
-              <div className="px-4 pb-4">
-                <JournalSpreadsheetEntry engagements={engagements} />
-              </div>
-            </details>
-          )}
-        </div>
+              {t("logViaChatCta")}
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Entry list — compact recent history AFTER the composer (Wagon 5
@@ -802,19 +775,8 @@ export default async function JournalPage({
               </span>
             )}
           </h2>
-          {/* ONE clear primary action — jump to the create/edit composer below
-              (the single create surface; no duplicate route). When the list is
-              empty the EmptyState below owns the single primary CTA instead, so
-              this header button only shows once there are entries. */}
-          {(entries ?? []).length > 0 && (
-            <a
-              href="#journal-composer"
-              className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-              data-testid="journal-new-entry-cta"
-            >
-              + {t("newEntry")}
-            </a>
-          )}
+          {/* The ONE primary action lives in the log-via-chat block above
+              (owner audit §6.1) — no duplicate gradient CTA here. */}
         </div>
         {/* Calendar-driven day navigation (owner UX recovery v1): the diary's
             days as compact chips — tap a day to see exactly that day, tap the
@@ -958,7 +920,7 @@ export default async function JournalPage({
             title={t("listEmptyTitle")}
             why={t("listEmpty")}
             next={t("listEmptyNext")}
-            cta={{ label: t("listEmptyCta"), href: "#journal-composer" }}
+            cta={{ label: t("listEmptyCta"), href: "/dashboard" }}
           />
         ) : (
           <div className="flex flex-col gap-4">

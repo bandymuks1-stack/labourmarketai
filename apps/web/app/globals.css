@@ -560,6 +560,16 @@ a {
    system (slightly desaturated, calmer contrast) so the OSM raster reads as a
    designed part of the product; pins are brand-token vectors, clustered per
    place with a real count. */
+.wsmap {
+  /* Leaflet's internal panes carry z-index 400–700. Without a stacking
+     context of its own the map would paint OVER every header overlay below
+     z-400 — the notification popover and the search backdrop both lost this
+     fight in production (owner visual acceptance P0-1/P0-2). Isolating the
+     card keeps Leaflet's z-indexes private to the map. */
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
 .wsmap .leaflet-tile-pane {
   filter: saturate(0.72) contrast(0.94);
 }
@@ -610,6 +620,24 @@ a {
 }
 .wsmap-row:hover {
   background: rgba(var(--c-brand-blue), 0.1);
+}
+.wsmap-home {
+  /* The viewer's own market anchor — a calm ring, visually distinct from the
+     entity pins so no dot is ever ambiguous (owner audit §9.1). */
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 3px solid rgb(var(--c-brand-violet));
+  background: rgb(var(--c-brand-violet) / 0.18);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.75);
+}
+.wsmap-legend-home {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 2px solid rgb(var(--c-brand-violet));
+  background: rgb(var(--c-brand-violet) / 0.18);
+  display: inline-block;
 }
 .wsmap-legend-dot {
   display: inline-block;

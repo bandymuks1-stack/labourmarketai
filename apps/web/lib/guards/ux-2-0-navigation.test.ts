@@ -110,14 +110,19 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
     expect(getCoreNavItems().map((i) => i.id)).toEqual([...CORE_NAV_IDS]);
   });
 
-  it("the simple shell renders the SAME core from the SAME source", () => {
-    expect(chatHeader).toMatch(/from "@\/lib\/config\/navigation"/);
-    expect(chatHeader).toMatch(/getCoreNavItems\(\)/);
-    // No hardcoded parallel href list for the core loop.
-    for (const item of getCoreNavItems()) {
-      if (item.href === "/dashboard") continue;
-      expect(chatHeader, `${item.href} matched by the active-tab logic`).toContain(item.href);
-    }
+  it("the simple shell is the ONE operating center — no parallel tab system (owner audit §4.4)", () => {
+    // The conversation header carries ONLY: back-to-chat, identity, the
+    // workspace chip, search, language, notifications, the avatar menu.
+    // Journal / calendar / messages remain ROUTES (projections opened from
+    // the conversation), never top-bar tabs.
+    expect(chatHeader).not.toMatch(/getCoreNavItems\(\)/);
+    expect(chatHeader).not.toMatch(/NavTab/);
+    expect(chatHeader).toMatch(/back-to-chat/);
+    expect(chatHeader).toMatch(/WorkspaceChip/);
+    expect(chatHeader).toMatch(/NotificationPanel/);
+    expect(chatHeader).toMatch(/AccountMenu/);
+    // Advanced is GONE from the bar for the ordinary user.
+    expect(chatHeader).not.toMatch(/dashboard\/advanced/);
   });
 
   it("the Advanced navbars START with the same core, then the module extras", () => {

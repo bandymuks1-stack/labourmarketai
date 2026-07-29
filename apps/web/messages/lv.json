@@ -272,7 +272,9 @@
         "overview": "[EN] Overview",
         "profile": "Profils",
         "journal": "Mans CV",
-        "search": "[EN] Search"
+        "search": "[EN] Search",
+        "advanced": "Paplašinātā pārvaldība",
+        "playerCard": "Mana kartīte"
       },
       "moreSection": {
         "title": "Detalizēts pārskats",
@@ -822,7 +824,11 @@
       "gold": "[EN] Gold",
       "silver": "[EN] Silver"
     },
-    "conceptNote": "[EN] Concept preview — fictional profiles, not real people. Your real profile is built from your real entries."
+    "conceptNote": "[EN] An example card with illustrative data — not a real person. Your card is built from your real work records.",
+    "sample": {
+      "name": "Rasa J.",
+      "organization": "[EN] Restaurant Ąžuolas"
+    }
   },
   "pricing": {
     "eyebrow": "[EN] Pricing",
@@ -3259,7 +3265,7 @@
       "historyMore": "Rādīt vairāk",
       "workspaceLabel": "Darba telpa",
       "workspacePersonal": "Personīgā telpa",
-      "workspaceSwitchSoon": "Darba telpas pārslēgšana vēl nav iespējota — pagaidām tiek rādīts aktīvais konteksts.",
+      "workspaceUnnamed": "Uzņēmuma darbtelpa",
       "chipLogWork": "Reģistrēt darbu",
       "agendaTitle": "Tavs plāns nākamajām {days} dienām:",
       "agendaEmpty": "Nākamajām {days} dienām nekas nav ieplānots.",
@@ -3483,14 +3489,46 @@
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",
       "windowTitle": "[EN] LabourMarket AI — conversation",
-      "userSays": "[EN] Today I laid brick walls at the Vilnius site, 8 hours.",
       "entrySaved": "[EN] Journal entry saved · #D-1042",
-      "entryLine": "[EN] Bricklaying · Vilnius site · 8 h · added to your work history.",
       "skillSignal": "[EN] Skill signal strengthened",
-      "skillLine": "[EN] Bricklaying — now backed by 12 journal entries.",
       "matchFound": "[EN] New matching opportunity",
-      "matchLine": "[EN] A verified company needs 3 bricklayers in Kaunas.",
-      "matchWhy": "[EN] Why you: matches 4 of 5 required skills, 3 backed by your journal."
+      "sectorsLabel": "[EN] Sector selection",
+      "sector": {
+        "construction": "[EN] Construction",
+        "horeca": "[EN] HoReCa",
+        "logistics": "[EN] Logistics",
+        "it": "[EN] IT"
+      },
+      "scenario": {
+        "construction": {
+          "userSays": "[EN] Today I laid brick walls at the Vilnius site, 8 hours.",
+          "entryLine": "[EN] Bricklaying · Vilnius site · 8 h · added to your work history.",
+          "skillLine": "[EN] Bricklaying — now backed by 12 journal entries.",
+          "matchLine": "[EN] A verified company needs 3 bricklayers in Kaunas.",
+          "matchWhy": "[EN] Why you: matches 4 of 5 required skills, 3 backed by your journal."
+        },
+        "horeca": {
+          "userSays": "[EN] Today I prepared 60 lunch portions and received the deliveries.",
+          "entryLine": "[EN] Food preparation · restaurant · 8 h · added to your work history.",
+          "skillLine": "[EN] Food preparation — now backed by 9 journal entries.",
+          "matchLine": "[EN] A hotel restaurant in Vilnius needs a shift cook.",
+          "matchWhy": "[EN] Why you: matches 3 of 4 required skills, availability lines up."
+        },
+        "logistics": {
+          "userSays": "[EN] Today I delivered 14 orders on the Kaunas route, 9 hours.",
+          "entryLine": "[EN] Deliveries · Kaunas route · 9 h · added to your history.",
+          "skillLine": "[EN] Driving — now backed by 21 journal entries.",
+          "matchLine": "[EN] A logistics company needs a driver for a regular route.",
+          "matchWhy": "[EN] Why you: B/C licence and route experience backed by your journal."
+        },
+        "it": {
+          "userSays": "[EN] Today I fixed the client portal bugs and shipped the update.",
+          "entryLine": "[EN] Programming · client portal · 7 h · added to your history.",
+          "skillLine": "[EN] Programming — now backed by 15 journal entries.",
+          "matchLine": "[EN] A product team needs a developer for three months.",
+          "matchWhy": "[EN] Why you: matches 5 of 6 required skills, 4 backed by your journal."
+        }
+      }
     },
     "chain": {
       "eyebrow": "[EN] How the platform actually works",

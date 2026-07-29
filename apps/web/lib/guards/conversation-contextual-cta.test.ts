@@ -39,10 +39,13 @@ describe("generic starter chips appear only where a menu belongs", () => {
     // profile-summary read; the employer demand form (rebuild W4) ends in the
     // demand-specific follow-up — the user always sees a contextual next
     // step, never the generic menu.
-    // Three flow closings remain (CV import, worker forms, work log); the
-    // MOUNT read moved to the opening brief, which is asserted below.
+    // Flow closings that re-read real state: CV import and the worker forms
+    // end in a fresh profile summary; the WORK LOG now ends in the Player
+    // Card itself (owner audit §5.1 — "matoma po darbo įrašo atnaujinimo"),
+    // which re-reads the same real rows plus the market thermometer.
     const closings = CHAT.match(/startProfileSummaryRef\.current\(/g) ?? [];
-    expect(closings.length).toBeGreaterThanOrEqual(3);
+    expect(closings.length).toBeGreaterThanOrEqual(2);
+    expect(CHAT).toMatch(/startPlayerCardRef\.current\(\{ intro: labels\.playerCardAfterLog \}\)/);
     expect(CHAT).toMatch(/isEmployer\s*\?\s*companyFollowup/);
     expect(CHAT).toMatch(/assistant\(labels\.companyDemandNext/);
     expect(CHAT).not.toMatch(/onClose=\{\(\) => assistant\(labels\.fallback, starterChips\)/);

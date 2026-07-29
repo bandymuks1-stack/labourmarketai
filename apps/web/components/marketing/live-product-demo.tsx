@@ -27,6 +27,12 @@ import { useMounted } from "@/lib/use-mounted";
 const STEP_MS = 2600;
 const STEPS = 4;
 
+/** The rotating SECTORS (owner audit §3.3): the same loop, four different
+ *  worlds — construction, HoReCa, logistics, IT — so the landing never reads
+ *  as a construction-only product. Order = the rotation order. */
+const SECTORS = ["construction", "horeca", "logistics", "it"] as const;
+type Sector = (typeof SECTORS)[number];
+
 export function LiveProductDemo() {
   // i18n namespace is `landing.loop` (the CORE LOOP sample) — the word "demo"
   // is banned from product copy AND message keys by §18 + the forbidden-terms
@@ -35,17 +41,36 @@ export function LiveProductDemo() {
   const mounted = useMounted();
   const reduced = useReducedMotion();
   const [step, setStep] = useState(1);
+  const [sector, setSector] = useState<Sector>("construction");
 
   useEffect(() => {
     if (!mounted || reduced) return;
     // Cycle 1→4→1: the window always holds at least the person's message —
-    // a briefly EMPTY product window reads as a broken product.
-    const id = window.setInterval(() => setStep((s) => (s % STEPS) + 1), STEP_MS);
+    // a briefly EMPTY product window reads as a broken product. A finished
+    // cycle hands the window to the NEXT sector (§3.3 rotation), so watching
+    // for a while shows the same product carrying four different trades.
+    const id = window.setInterval(() => {
+      setStep((s) => {
+        if (s === STEPS) {
+          setSector(
+            (cur) => SECTORS[(SECTORS.indexOf(cur) + 1) % SECTORS.length],
+          );
+          return 1;
+        }
+        return s + 1;
+      });
+    }, STEP_MS);
     return () => window.clearInterval(id);
   }, [mounted, reduced]);
 
   // Reduced motion / SSR: the whole sequence, statically visible.
   const visible = reduced || !mounted ? STEPS : step;
+  /** Interactive sector switch (§3.4) — a real control, not decoration. */
+  const pickSector = (s: Sector) => {
+    setSector(s);
+    setStep(1);
+  };
+  const s = (key: string) => t(`scenario.${sector}.${key}`);
 
   const bubble =
     "rounded-2xl border border-ink-500 bg-ink-800/70 px-4 py-3 text-sm leading-relaxed";
@@ -57,6 +82,33 @@ export function LiveProductDemo() {
         <span className="live-dot" aria-hidden />
         {t("chip")}
       </p>
+
+      {/* Interactive sector switch (§3.3/§3.4): the SAME loop across four
+          different trades — tap one, the window replays in that world. */}
+      <div
+        className="mb-3 flex flex-wrap gap-1.5"
+        role="tablist"
+        aria-label={t("sectorsLabel")}
+        data-testid="live-demo-sectors"
+      >
+        {SECTORS.map((sec) => (
+          <button
+            key={sec}
+            type="button"
+            role="tab"
+            aria-selected={sector === sec}
+            onClick={() => pickSector(sec)}
+            data-testid={`live-demo-sector-${sec}`}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              sector === sec
+                ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                : "border-ink-500 text-text-secondary hover:border-brand-blue/60 hover:text-text-primary"
+            }`}
+          >
+            {t(`sector.${sec}`)}
+          </button>
+        ))}
+      </div>
 
       <div className="overflow-hidden rounded-2xl border border-ink-500 bg-ink-900/80 shadow-card">
         {/* Window chrome — states this is the product surface. */}
@@ -79,7 +131,7 @@ export function LiveProductDemo() {
                 exit={{ opacity: 0 }}
                 className={`${bubble} ml-auto max-w-[85%] bg-brand-blue/10`}
               >
-                {t("userSays")}
+                {s("userSays")}
               </motion.div>
             )}
             {visible >= 2 && (
@@ -93,7 +145,7 @@ export function LiveProductDemo() {
                 <p className="font-mono text-[10px] uppercase tracking-label text-state-success">
                   {t("entrySaved")}
                 </p>
-                <p className="mt-1 text-text-primary">{t("entryLine")}</p>
+                <p className="mt-1 text-text-primary">{s("entryLine")}</p>
               </motion.div>
             )}
             {visible >= 3 && (
@@ -107,7 +159,7 @@ export function LiveProductDemo() {
                 <p className="font-mono text-[10px] uppercase tracking-label text-brand-cyan">
                   {t("skillSignal")}
                 </p>
-                <p className="mt-1 text-text-primary">{t("skillLine")}</p>
+                <p className="mt-1 text-text-primary">{s("skillLine")}</p>
                 {/* The evidence bar grows — the visual heart of the loop. */}
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-600">
                   <motion.div
@@ -130,8 +182,8 @@ export function LiveProductDemo() {
                 <p className="font-mono text-[10px] uppercase tracking-label text-brand-blue">
                   {t("matchFound")}
                 </p>
-                <p className="mt-1 text-text-primary">{t("matchLine")}</p>
-                <p className="mt-1 text-xs text-text-secondary">{t("matchWhy")}</p>
+                <p className="mt-1 text-text-primary">{s("matchLine")}</p>
+                <p className="mt-1 text-xs text-text-secondary">{s("matchWhy")}</p>
               </motion.div>
             )}
           </AnimatePresence>

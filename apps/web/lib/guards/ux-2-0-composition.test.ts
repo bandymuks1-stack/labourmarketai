@@ -112,10 +112,14 @@ describe("turn-pair rhythm", () => {
 });
 
 describe("the opening state is composed, not empty", () => {
-  it("the thread centres itself while only the greeting is present", () => {
+  it("the thread centres itself while only the assistant's opening is present", () => {
     expect(thread).toMatch(/isOpening/);
     expect(thread).toMatch(/justify-center/);
-    expect(thread).toMatch(/kind === "greeting"/);
+    // Owner audit §4.1: the opening composition includes the state brief and
+    // the composer itself, so the predicate is "assistant turns only" —
+    // not "exactly one greeting".
+    expect(thread).toMatch(/it\.message\.role === "assistant"/);
+    expect(thread).toMatch(/conversation-opening-composer/);
   });
 
   it("it exposes the state so a test can assert it", () => {
