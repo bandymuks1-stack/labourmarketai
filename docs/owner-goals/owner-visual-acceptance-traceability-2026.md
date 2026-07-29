@@ -1,7 +1,11 @@
 # Owner visual acceptance 2026 — atsekamumo lentelė
 
 > Kanoninė specifikacija: [`owner-visual-acceptance-audit-2026.md`](owner-visual-acceptance-audit-2026.md)
-> (savininko auditas, verbatim). Šis failas — vykdymo atsekamumas: kiekvienas
+> (savininko auditas, verbatim) **+ privaloma vykdymo politika**
+> [`owner-visual-acceptance-addendum-2026.md`](owner-visual-acceptance-addendum-2026.md)
+> (tos pačios galios addendum: architektūrą leidžiama perprojektuoti; jokių
+> laikinų apėjimų; chat-first absoliutus; landing = produktas; premium
+> standartas; kiekvienas taisymas užbaigia visą komponentą). Šis failas — vykdymo atsekamumas: kiekvienas
 > savininko reikalavimas → faktinė production būsena → keistini failai →
 > priėmimo veiksmas → statusas.
 >
