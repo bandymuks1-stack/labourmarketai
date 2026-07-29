@@ -6785,7 +6785,8 @@
     "reputationHint": "Tik realūs vadovų ar užsakovų atsakymai. Jokio bendro žmogaus balo.",
     "workHistoryLabel": "Darbo istorija",
     "workHistoryUnnamed": "Darbo kontekstas",
-    "workHistoryCurrent": "dabar"
+    "workHistoryCurrent": "dabar",
+    "documentsEmpty": "Dar nėra įrašytų dokumentų."
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

@@ -107,6 +107,41 @@ describe("§5.2 premium self-check — no zero-as-verdict, no repeated placehold
     expect(LABELS).toMatch(/documentsEmpty/);
   });
 
+  /**
+   * EVERY playerCard key the resolver reads must EXIST in the served
+   * locales. A production check caught `playerCard.documentsEmpty` rendering
+   * as the raw KEY because a copy script ran in the wrong directory and
+   * silently changed nothing — source-only assertions could not see it.
+   * This closes that class: the guard reads the catalogues, not the code.
+   */
+  it("every playerCard key the resolver reads exists in every served locale", () => {
+    const keys = [
+      ...new Set(
+        [...LABELS.matchAll(/t\("([a-zA-Z0-9_.]+)"/g)].map((m) => m[1]),
+      ),
+    ];
+    expect(keys.length).toBeGreaterThan(20);
+    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+      const msgs = JSON.parse(read(`messages/${loc}.json`)) as Record<
+        string,
+        unknown
+      >;
+      const pc = msgs.playerCard as Record<string, unknown> | undefined;
+      expect(pc, `${loc}.playerCard`).toBeTruthy();
+      const missing = keys.filter((k) => {
+        let node: unknown = pc;
+        for (const part of k.split(".")) {
+          if (node === null || typeof node !== "object") return true;
+          node = (node as Record<string, unknown>)[part];
+        }
+        return typeof node !== "string" || node.trim().length === 0;
+      });
+      expect(missing, `${loc} missing playerCard keys: ${missing.join(", ")}`).toEqual(
+        [],
+      );
+    }
+  });
+
   it("work-history rows that cannot NAME the work are dropped, not padded", () => {
     // Two rows both rendered the generic fallback noun in production.
     expect(CARD).toMatch(/namedHistory/);

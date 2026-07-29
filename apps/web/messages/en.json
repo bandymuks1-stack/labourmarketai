@@ -6785,7 +6785,8 @@
     "reputationHint": "Real manager or client responses only. No overall human score.",
     "workHistoryLabel": "Work history",
     "workHistoryUnnamed": "Work context",
-    "workHistoryCurrent": "now"
+    "workHistoryCurrent": "now",
+    "documentsEmpty": "No documents recorded yet."
   },
   "skillClarify": {
     "title": "My skills",

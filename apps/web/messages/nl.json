@@ -6785,7 +6785,8 @@
     "reputationHint": "Alleen echte reacties van managers of klanten. Geen totaalscore voor een mens.",
     "workHistoryLabel": "Werkgeschiedenis",
     "workHistoryUnnamed": "Werkcontext",
-    "workHistoryCurrent": "nu"
+    "workHistoryCurrent": "nu",
+    "documentsEmpty": "Nog geen documenten vastgelegd."
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",

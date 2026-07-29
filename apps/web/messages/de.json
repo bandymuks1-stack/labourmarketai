@@ -6785,7 +6785,8 @@
     "reputationHint": "Nur echte Rückmeldungen von Vorgesetzten oder Kunden. Keine Gesamtbewertung eines Menschen.",
     "workHistoryLabel": "Arbeitshistorie",
     "workHistoryUnnamed": "Arbeitskontext",
-    "workHistoryCurrent": "jetzt"
+    "workHistoryCurrent": "jetzt",
+    "documentsEmpty": "Noch keine Dokumente erfasst."
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",

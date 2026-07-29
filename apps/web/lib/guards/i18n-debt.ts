@@ -121,6 +121,8 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // MEASURED 1216 at W6 workspace map (+5: workspace.map.* — legend, approx,
   // unmapped lines land in all 11 locales; lt/en/ru/nl/de translated, da [EN]
   // until human translation).
+  // MEASURED 1314 at the §5.2 premium self-check (+1: playerCard.documentsEmpty
+  // — a zero document count stated in words instead of a bare "0 valid").
   // MEASURED 1313 at owner-acceptance closure stage 3 (+7: the §5.2 card
   // dimensions — documents, reputation and work-history labels).
   // MEASURED 1306 at owner-acceptance closure stages 1–2 (+22: planning.meta
@@ -134,7 +136,7 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // the hero product demo, the six-step product chain, the concept map moment
   // and the fact/skill/opinion band land in all 11 locales; lt/en/ru/nl/de
   // translated, da [EN] until human translation).
-  da: 1313,
+  da: 1314,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an

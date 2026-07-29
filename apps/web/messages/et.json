@@ -1680,7 +1680,8 @@
     "reputationHint": "[EN] Real manager or client responses only. No overall human score.",
     "workHistoryLabel": "[EN] Work history",
     "workHistoryUnnamed": "[EN] Work context",
-    "workHistoryCurrent": "[EN] now"
+    "workHistoryCurrent": "[EN] now",
+    "documentsEmpty": "[EN] No documents recorded yet."
   },
   "projects": {
     "map": {

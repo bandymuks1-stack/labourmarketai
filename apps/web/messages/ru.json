@@ -6785,7 +6785,8 @@
     "reputationHint": "Только реальные отклики руководителей или заказчиков. Никакой общей оценки человека.",
     "workHistoryLabel": "История работы",
     "workHistoryUnnamed": "Рабочий контекст",
-    "workHistoryCurrent": "сейчас"
+    "workHistoryCurrent": "сейчас",
+    "documentsEmpty": "Документы пока не внесены."
   },
   "skillClarify": {
     "title": "Мои навыки",
