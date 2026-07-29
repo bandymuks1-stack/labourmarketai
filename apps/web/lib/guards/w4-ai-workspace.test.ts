@@ -72,6 +72,27 @@ describe("W4 — the AI executes workflows over REAL data", () => {
     expect(AI_MAY_NEVER_CHANGE).toContain("route");
   });
 
+  it("never offers a chip that navigates out of the workspace", () => {
+    // THE GAP THIS CLOSES (W4 final review, finding A1). The checks above look
+    // for routing CONSTRUCTS, and this layer has none — but a workflow can
+    // still hand the chat a `link:` chip id, which the chat turns into a
+    // `router.push`. That is navigation by proxy: it leaves no trace in this
+    // module and takes the person out of the workspace anyway.
+    for (const file of [
+      WORKFLOWS,
+      "lib/world-state/job-context-server.ts",
+      "lib/world-state/project-context-server.ts",
+      "lib/world-state/work-context-server.ts",
+    ]) {
+      // Matched at the EMISSION site (`id:` / `chipId:`), not on any mention of
+      // the prefix — these modules document why they do not emit one, and a
+      // bare-substring check would fail on the documentation of the rule.
+      expect(read(file), `${file} emits a navigation chip`).not.toMatch(
+        /\b(chipId|id)\s*:\s*["'`]link:/,
+      );
+    }
+  });
+
   it("opens an entity instead of returning a destination", () => {
     const src = read(WORKFLOWS);
     expect(src).toMatch(/kind: "open-entity"/);

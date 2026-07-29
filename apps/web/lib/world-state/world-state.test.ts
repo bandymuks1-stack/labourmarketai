@@ -4,7 +4,7 @@ import { WORLD_STATE_SLOTS, AI_OPERATOR_ACTIONS } from "@/lib/product-gate/world
 import {
   INITIAL_WORLD_STATE,
   SLOT_FIELDS,
-  SLOTS_WRITTEN_IN_W3,
+  SLOTS_WRITTEN_IN_PRODUCTION,
   entityKey,
   panelShowsEntity,
   sameEntity,
@@ -31,9 +31,10 @@ describe("World State — slot coverage against the lock", () => {
     }
   });
 
-  it("declares honestly which slots W3 actually writes", () => {
-    // The claim in the file header is testable: everything W3 says it does not
-    // write must still be at its empty value after the actions W3 can produce.
+  it("declares honestly which slots production actually writes", () => {
+    // The claim in the file header is testable: everything the file says it
+    // does not write must still be at its empty value after the actions
+    // production code can produce.
     let state: WorldState = INITIAL_WORLD_STATE;
     state = worldStateReducer(state, { kind: "set_avatar", avatarId: "u1" });
     state = worldStateReducer(state, { kind: "open_object", ref: JOB });
@@ -44,7 +45,7 @@ describe("World State — slot coverage against the lock", () => {
     expect(state.mapState).toBeNull();
     expect(state.selectedEntities).toEqual([]);
 
-    for (const slot of SLOTS_WRITTEN_IN_W3) {
+    for (const slot of SLOTS_WRITTEN_IN_PRODUCTION) {
       expect(WORLD_STATE_SLOTS).toContain(slot);
     }
   });
@@ -126,7 +127,7 @@ describe("World State — selection", () => {
   });
 });
 
-describe("World State — filters (W4 writes these; the mechanism exists now)", () => {
+describe("World State — filters (the mechanism exists; nothing writes it yet)", () => {
   it("change_world_state sets and clears a dimension", () => {
     let state = worldStateReducer(INITIAL_WORLD_STATE, {
       kind: "change_world_state",

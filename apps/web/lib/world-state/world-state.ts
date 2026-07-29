@@ -87,9 +87,12 @@ export interface WorldState {
   readonly activeEntity: EntityRef | null;
   /** slot: selected_entities — multi-selection (comparison). */
   readonly selectedEntities: readonly EntityRef[];
-  /** slot: active_filters — NOT WRITTEN IN W3. The AI writes dimensions in W4. */
+  /** slot: active_filters — STILL NOT WRITTEN after W4: the AI reads dimensions
+   *  from a sentence and applies them for that turn only. Persisting them is an
+   *  open owner decision (see `change_world_state` below). */
   readonly activeFilters: Readonly<Record<string, string>>;
-  /** slot: ai_goal — NOT WRITTEN IN W3 (W4 owns the AI operator). */
+  /** slot: ai_goal — STILL NOT WRITTEN after W4: each utterance is classified
+   *  and executed on its own; no goal is carried between turns. */
   readonly aiGoal: string | null;
   /** slot: context_panel — what the panel shows right now. */
   readonly contextPanel: ContextPanelState;
@@ -132,13 +135,21 @@ export const SLOT_FIELDS: Readonly<Record<(typeof WORLD_STATE_SLOTS)[number], ke
   active_actions: "activeActions",
 };
 
-/** The slots W3 genuinely writes. The rest are declared, empty and honest. */
-export const SLOTS_WRITTEN_IN_W3 = [
+/**
+ * The slots production code genuinely writes, as of W4. The rest are declared,
+ * empty and honest.
+ *
+ * `active_actions` is deliberately NOT here. The reducer clears it when the
+ * selection changes, but nothing ever sets it: the Context Panel renders the
+ * actions the resolver returned in its payload. That is one source of truth,
+ * not two — and the slot stays unwritten rather than becoming a second copy of
+ * the same fact that could disagree with the payload.
+ */
+export const SLOTS_WRITTEN_IN_PRODUCTION = [
   "active_avatar",
   "active_entity",
   "context_panel",
   "conversation_state",
-  "active_actions",
 ] as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -158,7 +169,16 @@ export type WorldStateAction =
   | { readonly kind: "open_object"; readonly ref: EntityRef }
   /** close_object — drop the focus; the panel returns to the work context. */
   | { readonly kind: "close_object" }
-  /** change_world_state — write filter dimensions (W4 uses it; W3 does not). */
+  /**
+   * change_world_state — write filter dimensions.
+   *
+   * STILL UNUSED IN PRODUCTION as of W4. W4 reads dimensions out of a sentence
+   * and passes them to the search for that one turn; it does not persist them
+   * here, so `activeFilters` stays empty and a follow-up sentence starts fresh.
+   * Making filters persist is a product decision (do they accumulate? when do
+   * they clear?) that the owner has not taken — see the W4 review report. The
+   * transition exists and is tested so that decision costs one dispatch call.
+   */
   | { readonly kind: "change_world_state"; readonly dimension: string; readonly value: string | null }
   /** show_information — the actions currently available for the selection. */
   | { readonly kind: "show_information"; readonly actions: readonly string[] }

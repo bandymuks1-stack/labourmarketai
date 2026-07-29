@@ -3591,6 +3591,7 @@
       "demandLine": "[EN] — {title} ({state})",
       "demandStructured": "[EN] requirements derived",
       "demandUnstructured": "[EN] no derived requirements yet",
+      "scoutingNotInWorkspaceYet": "[EN] Scouting for one of these does not run inside the workspace yet, so I stop here rather than send you somewhere.",
       "ctxWorkspace": "[EN] Workspace: {name}.",
       "ctxWorkspaceUnknown": "[EN] I could not read which workspace you are in.",
       "ctxCompany": "[EN] Company: {name}.",
@@ -3603,8 +3604,7 @@
       "personalWorkspace": "[EN] your personal space",
       "unnamedOrganization": "[EN] (unnamed organization)",
       "chipLogWork": "[EN] Log work",
-      "chipCreateDemand": "[EN] Describe a need",
-      "chipScouting": "[EN] Open scouting"
+      "chipCreateDemand": "[EN] Describe a need"
     },
     "project": {
       "fieldStatus": "[EN] Status",

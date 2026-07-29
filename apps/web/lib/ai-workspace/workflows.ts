@@ -11,7 +11,6 @@ import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
-import { activeFilterEntries } from "@/lib/opportunities/discovery-filters";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -398,9 +397,16 @@ export async function runFindWorkers(): Promise<WorkflowResult> {
           state: d.structured ? t("demandStructured") : t("demandUnstructured"),
         }),
       ),
+      // Honest dead end rather than a way out of the workspace. Running the
+      // scouting engine per demand needs a `demand` entity resolver so the
+      // candidates land in the Context Panel; until that exists the AI states
+      // where the work stops instead of handing the person a route.
+      t("scoutingNotInWorkspaceYet"),
     ].join("\n"),
     explanation: { why: t("whyFromYourDemands") },
-    chips: [{ id: "link:/dashboard/company/scouting", label: t("chipScouting") }],
+    // NO chip. A `link:` chip would navigate out of the workspace, which is
+    // exactly what `AI_MAY_NEVER_CHANGE` forbids and what this phase promised
+    // not to do (W4 final review, finding A1).
   };
 }
 
@@ -484,14 +490,4 @@ function matchByName(
     if (hay.includes(name)) out.push({ id: o.id, name: o.name, matchedText: o.name });
   }
   return out;
-}
-
-/** The applied-filter labels, for callers that render the World State change. */
-export async function describeAppliedFilters(
-  filters: Parameters<typeof activeFilterEntries>[0],
-): Promise<readonly string[]> {
-  const t = await getTranslations("workspace.ai");
-  return activeFilterEntries(filters).map(
-    ([dimension, value]) => `${t(`dimension.${dimension}` as never)}: ${value}`,
-  );
 }
