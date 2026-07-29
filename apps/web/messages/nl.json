@@ -11265,5 +11265,66 @@
       "agency": "Ik vertegenwoordig een bureau",
       "partner": "Ik wil partner worden"
     }
+  },
+  "workspace": {
+    "panel": {
+      "regionLabel": "Context",
+      "workTitle": "Jouw werk nu",
+      "workHeadline": "Dit is wat je eigen gegevens over dit moment zeggen.",
+      "workHeadlineQuiet": "Er staat niets gepland in je periode en er is niets te laat.",
+      "loading": "Lezen…",
+      "close": "Sluiten",
+      "collapse": "Inklappen",
+      "expand": "Uitklappen",
+      "notStated": "Niet opgegeven",
+      "act": "Doe dit",
+      "fieldRole": "Werk",
+      "fieldLocation": "Plaats",
+      "fieldPay": "Beloning",
+      "sectionFacts": "Gegevens",
+      "sectionRequirements": "Eisen",
+      "sectionRecommendations": "Volgende stappen",
+      "sectionHistory": "Geschiedenis",
+      "sectionRelated": "Gerelateerd",
+      "sectionActions": "Acties",
+      "requirementMissing": "Ontbreekt:",
+      "contactNote": "Contact loopt via LabourMarket.ai. Directe contactgegevens worden hier niet getoond.",
+      "unavailableNoWorker": "Dit opent zodra je een werknemersprofiel hebt.",
+      "unavailableNoAccess": "Open aanvragen zijn nog niet beschikbaar voor je account, dus er is niets te tonen.",
+      "unavailableGone": "Dit staat niet meer op je lijst. Het is gesloten of niet langer zichtbaar voor jou.",
+      "unavailableUnknownType": "Dit soort object kan hier nog niet geopend worden.",
+      "unavailableWorkContext": "Je planning kon nu niet gelezen worden.",
+      "unavailableGeneric": "Dit kon nu niet gelezen worden.",
+      "historyInterest": {
+        "interested": "Je hebt interesse getoond.",
+        "reviewed": "Het bedrijf heeft je interesse bekeken.",
+        "contacted": "Het bedrijf is een gesprek met je begonnen.",
+        "withdrawn": "Je hebt je interesse ingetrokken."
+      },
+      "historySaved": "Je hebt dit bewaard.",
+      "recMissingSkills": "{count} gevraagde vaardigheden staan nog niet in je profiel: {skills}.",
+      "recMissingSkillsBasis": "Uit de eisen van deze aanvraag tegenover je opgeslagen vaardigheden.",
+      "recInterestPending": "Je interesse is verstuurd en het bedrijf heeft nog niet geantwoord. Er hoeft niets meer verstuurd te worden.",
+      "recInterestPendingBasis": "Uit de status van je eigen interessesignaal.",
+      "recNextAction": {
+        "add_work_evidence": "Leg werk vast dat je echt gedaan hebt. Daar komen je vaardigheden vandaan.",
+        "complete_profile": "Je profiel is nog te dun om goed te vergelijken.",
+        "review_opportunity": "Deze aanvraag noemt geen gestructureerde eisen, lees hem en beslis zelf."
+      },
+      "recNextActionBasis": "Uit de staat van je eigen profiel.",
+      "factToday": "Vandaag",
+      "factTodayValue": "{count} verplichtingen",
+      "factProject": "Project",
+      "factConflicts": "Conflicten",
+      "factConflictsValue": "{count} overlappen",
+      "factOverdue": "Te laat",
+      "factOverdueValue": "{count} taken",
+      "factDeadline": "Eerstvolgende deadline",
+      "suggestOverdue": "{count} taken zijn over hun einddatum heen.",
+      "suggestLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
+      "suggestReserve": "Er valt morgen een deadline en morgen is bijna vrij.",
+      "suggestReserveNamed": "„{label}“ moet morgen af, en morgen is bijna vrij.",
+      "suggestBasis": "Uit je eigen agenda en taken."
+    }
   }
 }

@@ -168,8 +168,28 @@ describe("product constitution — the supreme document", () => {
 // ── 2. The declaration contract ────────────────────────────────────────────
 
 describe("product gate — the declaration contract", () => {
-  it("the registry starts empty: this PR adds no UI, so it declares none", () => {
-    expect(PRODUCT_SURFACES).toEqual([]);
+  it("every declared surface is VALID — a declaration is not paperwork", () => {
+    // The registry started empty (PR #900 added no UI). W3 filled it with the
+    // Context Panel. What must hold from now on is not emptiness but validity:
+    // every entry answers all four locks, or the gate stops the merge.
+    const problems = validateDeclarations(PRODUCT_SURFACES, axiomIds(), worldElementIds());
+    // `reflectedOnMap: false` is the ONE answer the Context Panel cannot yet
+    // give — it carries an owner-approved, self-expiring waiver, and the gate
+    // reports it so the PR stays a human decision. Everything else must pass.
+    const unwaived = problems.filter((p) => p.code !== "not_reflected_on_map");
+    expect(unwaived, JSON.stringify(unwaived, null, 2)).toEqual([]);
+  });
+
+  it("a waived answer is waived for exactly one field, with owner approval", () => {
+    for (const s of PRODUCT_SURFACES) {
+      if (!s.transitionalWaiver) continue;
+      expect(s.transitionalWaiver.ownerApproval.trim().length).toBeGreaterThan(2);
+      for (const f of s.transitionalWaiver.fields) {
+        // Never `usesEntity`, never `registrationIsEnough` — the waiver may
+        // only excuse map/World-State readiness.
+        expect(["reflectedOnMap", "addableWithoutMapChange", "worldStateCanControlIt"]).toContain(f);
+      }
+    }
   });
 
   it("a complete declaration passes", () => {
@@ -795,10 +815,30 @@ describe("world state UX — AI-first, one workspace, no page switching", () => 
   });
 
   it("is HONEST that the product is still page-based today", () => {
+    // W3 shipped World State + the Context Panel, so those two facts flipped.
+    // The VERDICT deliberately did not: the map is still a separate surface and
+    // the per-domain detail pages still navigate. Half a workspace is not a
+    // workspace, and this assertion is what stops the verdict being softened
+    // because one part landed.
     expect(WORKSPACE_ASSESSMENT.verdict).toBe("still_page_based");
-    expect(WORKSPACE_ASSESSMENT.worldStateEngineExists).toBe(false);
-    expect(WORKSPACE_ASSESSMENT.contextPanelExists).toBe(false);
+    expect(WORKSPACE_ASSESSMENT.separateMapScreen).toBe(true);
+    expect(WORKSPACE_ASSESSMENT.objectClickOpensPage).toBe(true);
     expect(lock()).toMatch(/still page-based/i);
+  });
+
+  it("records the two facts W3 changed, and pins them to real files", () => {
+    expect(WORKSPACE_ASSESSMENT.worldStateEngineExists).toBe(true);
+    expect(WORKSPACE_ASSESSMENT.contextPanelExists).toBe(true);
+    // A recorded fact must point at code that exists — an assessment that
+    // claims a component nobody can find is worse than one that claims nothing.
+    for (const file of [
+      "lib/world-state/world-state.ts",
+      "components/app/world-state/context-panel.tsx",
+      "components/app/world-state/world-state-provider.tsx",
+    ]) {
+      expect(WORKSPACE_ASSESSMENT.evidence).toContain(file);
+      expect(existsSync(join(webRoot, file)), `${file} is missing`).toBe(true);
+    }
   });
 
   it("the gate implements the five world-state rules", () => {

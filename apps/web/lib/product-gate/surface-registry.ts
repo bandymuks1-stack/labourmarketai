@@ -139,11 +139,87 @@ export interface SurfaceDeclaration {
 }
 
 /**
- * Declarations added from this PR onward. It is deliberately EMPTY: this slice
- * adds no UI (that was forbidden), so there is nothing to declare yet. The
- * first new surface in the next PR fills it — or CI stays red.
+ * Declarations added from this PR onward.
+ *
+ * The FIRST entry is the Context Panel (W3). It is declared even though no
+ * detection pattern in the Product Gate would have caught it — it is not a
+ * page, not a modal, not a wizard and not a `*-card.tsx`. Declaring it anyway
+ * is the point of the constitution: this is the largest UI addition since the
+ * conversation itself, and a surface nobody can justify in five sentences is a
+ * surface that should not exist. The alternative — shipping it silently because
+ * the regexes happen not to match — would be following the letter of the gate
+ * while defeating it.
  */
-export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [] as const;
+export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
+  {
+    id: "components/app/world-state/context-panel.tsx",
+    kind: "dashboard_element",
+    // A-01 does not merely permit this — it NAMES it: "AI Conversation + World
+    // Map + Context Panel are ONE workspace".
+    originAxiom: "A-01",
+    purpose:
+      "The third part of the one workspace: it always answers 'what is in front of me right now' — the person's real work context when nothing is selected, and the selected entity's facts, requirements, history, deterministic next steps and real actions when something is.",
+    whyNotChat:
+      "The conversation answers a question once and the answer scrolls away. Selection state is PERSISTENT context: while a person compares an opportunity against their own skills they need the facts to stay in view while they keep talking. Re-asking the assistant for the same demand every turn is the failure this replaces — and the panel still performs no action of its own, it dispatches into the conversation.",
+    whyNotExistingComponent:
+      "No existing component is keyed on an ENTITY. Every detail view in the product today is a page per domain (/dashboard/people/[id], /dashboard/projects/[id], the opportunities board), which is exactly the page-based shape WORLD_STATE_UX_ARCHITECTURE_V1 forbids. The panel replaces those detail pages with one entity-typed lens that any registered entity type reaches without new UI.",
+    owner: "Product architecture (DI)",
+    // It owns the ACT of opening an entity in the workspace. Every domain
+    // action it offers still belongs to that domain's canonical control — the
+    // express-interest write stays at lib/opportunities/interest-actions.ts.
+    ownsAction: "world_state.open_entity",
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "ai_conversation",
+    whyNotExistingElement:
+      "It IS this element, not a new one: the AI Conversation element is defined as the interface that 'opens the context it needs, closes it, and returns to the conversation'. Before W3 the product had no way to open context without leaving the conversation, so the element was only half built.",
+    chatIntegration:
+      "One World State: a selection made in the chat opens the panel, and every action the panel offers is dispatched back into the chat's existing chip handler. The panel owns no dispatcher, no flow and no write path of its own.",
+    avatarEffect:
+      "It changes nothing about the avatar by itself. It shows the avatar's own state against a selected entity — which of the demand's required skills the person actually holds — and routes the fix to the work journal, where skills really come from.",
+    mapEffect:
+      "None yet, and the declaration says so rather than claiming otherwise: the map is not part of the workspace until W6. The selection lives in World State precisely so the map subscribes to it then without the panel changing. See the transitional waiver below.",
+    journalRelation:
+      "The panel's primary recommendation for a missing required skill is to log the work that proves it — the journal stays the source of skills, and the panel never offers a self-declaration shortcut around it.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    pillar: "ai_conversation",
+    objectType: "job",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "job"
+    hasTimeline: true, // the person's own interest signal is dated state
+    hasHistory: true, // interest + saved state, read from real rows
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    changesWorldState: true, // it IS a World State slot (context_panel)
+    reflectedOnMap: false, // honest: the map joins the workspace in W6
+    aiControlled: true, // opened/closed through the conversation's own state
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true, // no route was added by this slice
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    usesEntity: true, // it opens an EntityRef, never a per-domain screen
+    needsNewEntityType: false, // "job" already exists in the registry
+    registrationIsEnough: true, // a second type = one line in resolvers.ts
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+
+    transitionalWaiver: {
+      reason:
+        "The Context Panel cannot be reflected on the World Map before the map is part of the workspace. The owner's own W3–W8 sequence puts the Context Panel at W3 and the operational World Map at W6, so 'not yet' is the true answer today and claiming 'yes' would be the fabrication this gate exists to catch. The selection already lives in World State, which is what makes W6 a subscription rather than a rewrite.",
+      fields: ["reflectedOnMap"],
+      enablingStep: "E.7",
+      ownerApproval:
+        "Owner directive 2026-07-29 (W3–W8 execution plan): W3 = Context Panel, W6 = World Map becomes operational — map reflection is explicitly scheduled after the panel.",
+    },
+  },
+] as const;
 
 /**
  * BASELINE — surfaces that existed before the gate. Recorded as PATHS only:

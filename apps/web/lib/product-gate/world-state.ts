@@ -248,23 +248,35 @@ export interface WorkspaceAssessment {
 }
 
 /**
- * VERIFIED 2026-07-28 against the route inventory:
- *   - `/dashboard` is a separate chat surface;
- *   - `/dashboard/market-map` is a separate map surface;
- *   - selecting an entity navigates (e.g. `/dashboard/people/[workerId]`,
- *     `/dashboard/projects/[id]`) rather than opening a panel;
- *   - no World State object exists anywhere in the codebase.
+ * VERIFIED 2026-07-29, re-measured after W3 (Context Panel).
  *
- * So today the product IS page-based. That is the gap this lock closes going
- * forward — it is not fixed here, and the owner did not ask for it to be.
+ * This block records FACTS, so it moves when the facts move. What W3 changed:
+ *   - a World State object now exists at runtime (`lib/world-state/world-state.ts`
+ *     + the provider mounted in the workspace) — its slots are this lock's
+ *     `WORLD_STATE_SLOTS`, and W3 writes the selection ones;
+ *   - the Context Panel exists (`components/app/world-state/context-panel.tsx`)
+ *     and is mounted in the workspace, always available;
+ *   - selecting an opportunity in the workspace opens the PANEL, not a page.
+ *
+ * What W3 did NOT change, and is therefore still recorded as false:
+ *   - `/dashboard` is still a chat-shaped surface and `/dashboard/market-map`
+ *     is still a separate map surface (the map joins the workspace at W6);
+ *   - the per-domain detail pages (`/dashboard/people/[workerId]`,
+ *     `/dashboard/projects/[id]`) still exist and still navigate — the panel
+ *     resolves ONE entity type (`job`) so far, so those pages are not yet
+ *     replaceable. `objectClickOpensPage` stays TRUE until they are.
+ *
+ * The verdict therefore stays `still_page_based`. Half a workspace is not a
+ * workspace, and softening the verdict because the first part shipped is
+ * exactly the drift this lock exists to prevent.
  */
 export const WORKSPACE_ASSESSMENT: WorkspaceAssessment = {
   separateChatScreen: true,
   separateMapScreen: true,
-  contextPanelExists: false,
-  worldStateEngineExists: false,
+  contextPanelExists: true,
+  worldStateEngineExists: true,
   objectClickOpensPage: true,
   verdict: "still_page_based",
   evidence:
-    "/dashboard is a chat surface and /dashboard/market-map is a separate map surface; object selection routes to /dashboard/people/[workerId] and /dashboard/projects/[id]; no World State object exists in the codebase.",
+    "W3 shipped World State (lib/world-state/world-state.ts, mounted by components/app/world-state/world-state-provider.tsx) and the Context Panel (components/app/world-state/context-panel.tsx), and selecting an opportunity in the workspace opens the panel instead of navigating. Still page-based overall: /dashboard/market-map remains a separate map surface (W6), and the per-domain detail pages /dashboard/people/[workerId] and /dashboard/projects/[id] still exist and still navigate, because only the `job` entity type has a registered resolver so far.",
 };

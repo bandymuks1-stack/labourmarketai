@@ -11265,5 +11265,66 @@
       "agency": "Я представляю агентство",
       "partner": "Хочу стать партнёром"
     }
+  },
+  "workspace": {
+    "panel": {
+      "regionLabel": "Контекст",
+      "workTitle": "Ваша работа сейчас",
+      "workHeadline": "Вот что о текущем моменте говорят ваши собственные записи.",
+      "workHeadlineQuiet": "В вашем периоде ничего не запланировано и ничего не просрочено.",
+      "loading": "Читаем…",
+      "close": "Закрыть",
+      "collapse": "Свернуть",
+      "expand": "Развернуть",
+      "notStated": "Не указано",
+      "act": "Сделать",
+      "fieldRole": "Работа",
+      "fieldLocation": "Место",
+      "fieldPay": "Оплата",
+      "sectionFacts": "Данные",
+      "sectionRequirements": "Требования",
+      "sectionRecommendations": "Следующие шаги",
+      "sectionHistory": "История",
+      "sectionRelated": "Связанное",
+      "sectionActions": "Действия",
+      "requirementMissing": "Не хватает:",
+      "contactNote": "Связь происходит через LabourMarket.ai. Прямые контакты здесь не показываются.",
+      "unavailableNoWorker": "Это откроется, когда у вас появится профиль работника.",
+      "unavailableNoAccess": "Открытые заявки вашему аккаунту пока недоступны, поэтому показывать нечего.",
+      "unavailableGone": "Этого больше нет в вашем списке. Заявка закрыта или больше вам не видна.",
+      "unavailableUnknownType": "Такой объект здесь пока нельзя открыть.",
+      "unavailableWorkContext": "Ваш план сейчас не удалось прочитать.",
+      "unavailableGeneric": "Это сейчас не удалось прочитать.",
+      "historyInterest": {
+        "interested": "Вы выразили интерес.",
+        "reviewed": "Компания рассмотрела ваш интерес.",
+        "contacted": "Компания открыла с вами переписку.",
+        "withdrawn": "Вы отозвали свой интерес."
+      },
+      "historySaved": "Вы сохранили это.",
+      "recMissingSkills": "{count} требуемых навыков ещё нет в вашем профиле: {skills}.",
+      "recMissingSkillsBasis": "Из требований этой заявки в сравнении с вашими сохранёнными навыками.",
+      "recInterestPending": "Интерес отправлен, компания ещё не ответила. Больше отправлять ничего не нужно.",
+      "recInterestPendingBasis": "Из статуса вашей собственной записи об интересе.",
+      "recNextAction": {
+        "add_work_evidence": "Запишите реально выполненную работу. Из неё берутся ваши навыки.",
+        "complete_profile": "Ваш профиль пока слишком неполный для нормального сравнения.",
+        "review_opportunity": "В этой заявке нет структурированных требований, прочитайте её и решите сами."
+      },
+      "recNextActionBasis": "Из состояния вашего собственного профиля.",
+      "factToday": "Сегодня",
+      "factTodayValue": "{count} обязательств",
+      "factProject": "Проект",
+      "factConflicts": "Конфликты",
+      "factConflictsValue": "{count} пересекаются",
+      "factOverdue": "Просрочено",
+      "factOverdueValue": "{count} задач",
+      "factDeadline": "Ближайший срок",
+      "suggestOverdue": "{count} задач уже просрочены.",
+      "suggestLogToday": "Сегодня вы работаете, а ничего ещё не записано.",
+      "suggestReserve": "Завтра срок, а завтра почти свободно.",
+      "suggestReserveNamed": "«{label}» — срок завтра, а завтра почти свободно.",
+      "suggestBasis": "Из вашего собственного календаря и задач."
+    }
   }
 }
