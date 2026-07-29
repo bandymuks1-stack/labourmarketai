@@ -68,13 +68,18 @@ export async function buildPlayerCardLabels(
     // §5.2 DOCUMENTS — real counts only; absent when the surface is not
     // available for this account (the card then shows no documents block).
     documentsLabel: card.documents ? t("documentsLabel") : null,
+    // A ZERO is stated in words, never rendered as a bare "0 valid" tile —
+    // the same rule the reputation block follows. (Premium self-check on the
+    // production card: "0 galiojantys" read as a verdict, not as an absence.)
     documentsValue: card.documents
-      ? card.documents.expiring > 0
-        ? t("documentsValueExpiring", {
-            valid: card.documents.total,
-            expiring: card.documents.expiring,
-          })
-        : t("documentsValue", { valid: card.documents.total })
+      ? card.documents.total === 0
+        ? t("documentsEmpty")
+        : card.documents.expiring > 0
+          ? t("documentsValueExpiring", {
+              valid: card.documents.total,
+              expiring: card.documents.expiring,
+            })
+          : t("documentsValue", { valid: card.documents.total })
       : null,
     // §5.2 REPUTATION — what other people really confirmed. No universal
     // score, no medal tier: a count of real confirmations, or the honest

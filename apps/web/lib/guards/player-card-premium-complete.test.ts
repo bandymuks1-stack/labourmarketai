@@ -99,3 +99,25 @@ describe("§5.2 landing and product are the SAME component", () => {
     expect(SHOWCASE).toContain("conceptNote");
   });
 });
+
+describe("§5.2 premium self-check — no zero-as-verdict, no repeated placeholder rows", () => {
+  it("a zero document count is stated in words, not rendered as '0 valid'", () => {
+    // Production screenshot showed "0 galiojantys" reading as a verdict.
+    expect(LABELS).toMatch(/card\.documents\.total === 0/);
+    expect(LABELS).toMatch(/documentsEmpty/);
+  });
+
+  it("work-history rows that cannot NAME the work are dropped, not padded", () => {
+    // Two rows both rendered the generic fallback noun in production.
+    expect(CARD).toMatch(/namedHistory/);
+    expect(CARD).toMatch(
+      /filter\(\s*\(h\) => \(h\.organizationName \?\? h\.title \?\? ""\)\.trim\(\)\.length > 0/,
+    );
+    // The fallback noun is no longer rendered as a row label at all.
+    expect(CARD).not.toMatch(/\{h\.organizationName \?\? h\.title \?\? labels\.workHistoryUnnamed\}/);
+  });
+
+  it("the section disappears entirely when no row can be named", () => {
+    expect(CARD).toMatch(/namedHistory\.length > 0 \?/);
+  });
+});

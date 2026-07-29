@@ -197,6 +197,17 @@ export function WorkerPlayerCard({
     skillsVerified: card.verifiedSkills.length,
   });
   const name = identity.displayName ?? labels.namePlaceholder;
+  /**
+   * §5.2 work history, premium self-check (production screenshot): rows with
+   * NO organization name and NO title rendered the generic fallback word, so
+   * the card showed "Work context" twice — repeated placeholder nouns, which
+   * is exactly the empty-row pattern the owner rejected. A row that cannot
+   * name where the work happened carries no information, so it is dropped;
+   * the section disappears entirely when none of them can.
+   */
+  const namedHistory = card.workHistory.filter(
+    (h) => (h.organizationName ?? h.title ?? "").trim().length > 0,
+  );
   return (
     <section
       className={cn(
@@ -409,19 +420,19 @@ export function WorkerPlayerCard({
             engagement spine. Newest first, bounded to the most recent few:
             the card states a history, it does not become a CV page. An empty
             history renders nothing (it is a fact, not a gap to pad). */}
-      {card.workHistory.length > 0 ? (
+      {namedHistory.length > 0 ? (
         <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.workHistoryLabel}
           </span>
           <ul className="flex flex-col gap-1">
-            {card.workHistory.slice(0, 3).map((h) => (
+            {namedHistory.slice(0, 3).map((h) => (
               <li
                 key={h.id}
                 className="flex flex-wrap items-baseline gap-x-2 text-basis text-text-primary"
               >
                 <span className="font-medium">
-                  {h.organizationName ?? h.title ?? labels.workHistoryUnnamed}
+                  {h.organizationName ?? h.title}
                 </span>
                 {h.startedAt ? (
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
