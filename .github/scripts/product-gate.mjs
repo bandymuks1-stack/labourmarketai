@@ -28,6 +28,7 @@
 // No network, no env secrets, no writes outside PRODUCT_ARCHITECTURE_DIFF.md.
 
 import { execFileSync } from "node:child_process";
+import { evaluateFindings, waiverContextFromEnv } from "./owner-waivers.mjs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const REPO_ROOT = process.cwd();
@@ -724,7 +725,28 @@ try {
 }
 
 const { findings, surfaces } = result;
-const status = findings.length > 0 ? "PRODUCT_REVIEW_REQUIRED" : "GREEN";
+/**
+ * SCOPED OWNER WAIVERS (owner ruling 2026-07-29).
+ *
+ * The findings are NOT filtered — every violation is still detected and still
+ * printed below. What the waiver changes is the exit code, and only for the
+ * exact finding set the owner reviewed, on the exact files, for the exact pull
+ * requests, until the exact date. One unexpected finding and the run blocks
+ * again.
+ */
+const waiverCtx = waiverContextFromEnv();
+const verdict = evaluateFindings(
+  findings.map((f) => ({ code: f.code, axiom: f.axiom, what: f.what })),
+  waiverCtx,
+);
+const waivedAll = findings.length > 0 && verdict.pass;
+
+const status =
+  findings.length === 0
+    ? "GREEN"
+    : waivedAll
+      ? "PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER"
+      : "PRODUCT_REVIEW_REQUIRED";
 writeArchitectureDiff(result, status);
 
 console.log(`product-gate: ${surfaces.length} new product surface(s) in this diff`);
@@ -738,10 +760,38 @@ if (findings.length === 0) {
   process.exit(0);
 }
 
+// The violations, always. A waived run prints exactly what an unwaived one
+// prints — the reviewer must never have to guess what was excused.
 console.log("");
 for (const f of findings) {
+  const level = waivedAll ? "notice" : "error";
   console.log(
-    `::error file=${f.what}::[${f.code}] ${f.axiom} — ${f.detail} (certainty: ${f.certainty})`,
+    `::${level} file=${f.what}::[${f.code}] ${f.axiom} — ${f.detail} (certainty: ${f.certainty})`,
+  );
+}
+console.log("");
+
+if (waivedAll) {
+  const w = verdict.waivedFindings[0].decision.waiver;
+  console.log("product-gate: the violations above are REAL and still stand.");
+  console.log("They are excused by a scoped, owner-approved transitional waiver:");
+  console.log(`  waiver      ${w.id}`);
+  console.log(`  owner       ${w.owner}`);
+  console.log(`  scope       ${w.scope}`);
+  console.log(`  pull reqs   ${w.pullRequests.join(", ")}  (this run: ${waiverCtx.pullRequest})`);
+  console.log(`  files       ${w.files.join(", ")}`);
+  console.log(`  expires     ${w.expiresAt}  (today: ${waiverCtx.today})`);
+  console.log(`  removed by  ${w.resolvedBy} — the waiver MUST be deleted then`);
+  console.log(`  reason      ${w.reason}`);
+  console.log("");
+  console.log("product-gate: PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER");
+  console.log(`product-gate: wrote ${DIFF_OUT}`);
+  process.exit(0);
+}
+
+for (const b of verdict.blockingFindings) {
+  console.log(
+    `::error::[${b.finding.code}] not waived — ${b.decision.rejection}: ${b.decision.detail}`,
   );
 }
 console.log("");
