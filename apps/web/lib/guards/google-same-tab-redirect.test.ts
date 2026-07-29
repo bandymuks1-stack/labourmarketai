@@ -37,7 +37,10 @@ describe("google sign-in — same-tab redirect only", () => {
 
   it("has no popup machinery of any kind", () => {
     const code = stripComments(button);
-    expect(code).not.toMatch(/accounts\.google\.com\/gsi/);
+    // Plain substring, not a regex: this asserts the GIS script URL is ABSENT
+    // from source code — it never validates a URL, and an unanchored host
+    // regex would (rightly) trip CodeQL's missing-regexp-anchor rule.
+    expect(code).not.toContain("accounts.google.com/gsi");
     expect(code).not.toMatch(/ux_mode/);
     expect(code).not.toMatch(/window\.open\(/);
     expect(code).not.toMatch(/renderButton/);
