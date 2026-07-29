@@ -29,3 +29,23 @@ test("chat mobile after", async ({ page }) => {
   await page.waitForTimeout(800);
   await page.screenshot({ path: join(OUT, "chat-360.png") });
 });
+
+test("W3 bottom sheet expanded on a phone", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/lt/dashboard");
+  await expect(page.getByTestId("composer-input")).toBeEnabled({ timeout: 60_000 });
+  await page.getByTestId("context-panel-toggle").click();
+  await expect(page.getByTestId("context-panel")).toBeVisible();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: join(OUT, "w3-bottom-sheet-390.png") });
+});
+
+test("landing hero after the loop polish", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/lt");
+  await expect(page.getByTestId("live-product-demo")).toBeVisible({ timeout: 60_000 });
+  await page.waitForTimeout(3200);
+  await page.screenshot({ path: join(OUT, "landing-hero-loop-1440.png") });
+});

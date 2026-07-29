@@ -13,7 +13,7 @@
     "components/app/regional-heatmap.tsx": "73fa67793fe80766208b92e721e5e9a19c70a42e2c3179d9e48bf9002d68550e",
     "components/app/skills-demand-list.tsx": "31938e930a7b156d1c5684c69225e4c656e0765d2d3ded07ab683a294f24ed6a",
     "components/app/supply-demand-chart.tsx": "7ae93a0466cbc5c4d54af7033e9c358cc91de8003b514dbfb3a4b4ef9d40edfa",
-    "components/marketing/live-product-demo.tsx": "57a9253ba972138dd0cf6e52982e4e722fb6c29115b08916c446e1f7ada3c9fe",
+    "components/marketing/live-product-demo.tsx": "8d9af167f548bcf40b84e97ec98e3e5f822e0f136f511477cf83cdc39f2e6b92",
     "components/marketing/product-chain-band.tsx": "345935632c2c1ddf37d12ffe00715b86b47bed94602f272ac89403a8337c3893",
     "components/marketing/market-moment.tsx": "ead03a398813e6843b53a2ba9d4910a828ae678eb1dfe43038e795eec750825e",
     "components/marketing/proof-band.tsx": "8d2289865ae325266760bd358320b3d883ae6d013e6a312471d873a8f26def79",

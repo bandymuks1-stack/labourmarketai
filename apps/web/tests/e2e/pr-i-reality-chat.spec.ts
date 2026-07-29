@@ -72,14 +72,21 @@ function evidencePath(name: string): string {
   return join(EVIDENCE, name);
 }
 
-/** Run one read-only SQL statement against the LOCAL stack's db container. */
+/** Run one read-only SQL statement against the LOCAL stack's db container.
+ *  Failures are LOUD (status/stderr on stdout) — a silent null here once
+ *  masqueraded as "the row does not exist" while the row was in the table. */
 function sql(query: string): string | null {
   const res = spawnSync(
     "docker",
     ["exec", "-i", DB_CONTAINER, "psql", "-U", "postgres", "-d", "postgres", "-qtA", "-c", query],
     { encoding: "utf8" },
   );
-  if (res.error || res.status !== 0) return null;
+  if (res.error || res.status !== 0) {
+    console.log(
+      `[sql] FAILED status=${res.status} error=${res.error ?? ""} stderr=${(res.stderr ?? "").slice(0, 300)}`,
+    );
+    return null;
+  }
   return (res.stdout ?? "").trim();
 }
 
@@ -140,37 +147,60 @@ async function openDashboard(page: Page): Promise<void> {
     null,
     { timeout: 60_000 },
   );
+  // W2 OPENING SETTLE: the state-aware opening brief lands as an ASYNC
+  // assistant message shortly after mount. If a test counts messages while it
+  // is still in flight, the brief — not the actual reply — satisfies the
+  // "new message arrived" wait and every assertion reads a transcript without
+  // the answer. Wait for the assistant count to hold still for one interval.
+  let last = -1;
+  await expect
+    .poll(
+      async () => {
+        const n = await page.getByTestId("msg-assistant").count();
+        const stable = n === last && n > 0;
+        last = n;
+        return stable;
+      },
+      { timeout: 45_000, intervals: [1_200] },
+    )
+    .toBe(true);
 }
 
 test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
-  test("S1: /dashboard opens chat-first with a state-aware opening (real profile summary, not an empty greeting)", async ({ page }) => {
+  test("S1: /dashboard opens chat-first with a state-aware opening (the W2 brief, not an empty greeting)", async ({ page }) => {
     test.setTimeout(180_000);
     await openDashboard(page);
 
     // Chat-first: the conversation surface, not the wide module dashboard.
     await expect(page.locator('[data-chrome="full"]')).toHaveCount(0);
 
-    // State-aware opening: WITHOUT any input, the mount effect appends the
-    // REAL server-derived profile summary for the seeded worker.
-    const summary = page.getByTestId("msg-profile-summary").last();
-    await expect(summary).toBeVisible({ timeout: 45_000 });
+    // State-aware opening (owner ruling 2026-07-29, W2): WITHOUT any input,
+    // the opening BRIEF composes real lines from the person's own rows —
+    // matches / conflicts / unlogged work / first profile gap. For the seeded
+    // worker (one visible demand, availability pillar unmet) at least one
+    // real line beyond the bare greeting must render, with 1–3 chips, and
+    // NEVER the old six-chip button wall.
+    // (The greeting itself renders as the surface HEADING, not as a message —
+    // so the assistant messages must carry the real state lines.)
+    const opening = (await page.getByTestId("msg-assistant").allInnerTexts()).join("\n");
+    expect(
+      opening.trim().length,
+      `opening carries no real state line: ${opening}`,
+    ).toBeGreaterThan(0);
 
-    // It is a real read model, not canned copy: the growth bar carries the
-    // server's step counts, and at least one named checkpoint list renders.
-    const growth = summary.getByTestId("profile-growth");
-    await expect(growth).toBeVisible();
-    const done = Number(await growth.getAttribute("data-done"));
-    const total = Number(await growth.getAttribute("data-total"));
-    expect(total).toBeGreaterThan(0);
-    expect(done).toBeGreaterThanOrEqual(0);
-    const named =
-      (await summary.getByTestId("profile-summary-done").count()) +
-      (await summary.getByTestId("profile-summary-missing").count());
-    expect(named).toBeGreaterThan(0);
+    // §D cap: chips are 1–3, never a wall.
+    const chips = await page
+      .getByTestId("msg-assistant")
+      .last()
+      .locator('[data-testid^="chat-chip-"]')
+      .count();
+    const chipsAnywhere = await page.locator('[data-testid^="chat-chip-"]').count();
+    expect(chipsAnywhere).toBeGreaterThan(0);
+    expect(chips).toBeLessThanOrEqual(3);
 
     test.info().annotations.push({
       type: "s1-opening",
-      description: `profile summary on mount: ${done}/${total} steps`,
+      description: `opening brief: ${opening.slice(0, 300).replace(/\n/g, " | ")}`,
     });
     await page.screenshot({
       path: evidencePath("s1-state-aware-opening.png"),
@@ -262,8 +292,10 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
 
     // Backend proof: the row EXISTS in the local database (not a UI claim).
     if (LOCAL_STACK) {
+      // NOTE: journal_entries has NO work_date column — the entry date lives
+      // in journal_entry_metrics; created_at is proof enough of the row.
       const row = sql(
-        `select id || '|' || worker_id || '|' || work_date from public.journal_entries where original_text like '%${marker}%';`,
+        `select id || '|' || worker_id || '|' || created_at from public.journal_entries where original_text like '%${marker}%';`,
       );
       expect(
         row,

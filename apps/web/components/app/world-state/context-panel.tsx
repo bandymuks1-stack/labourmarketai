@@ -150,7 +150,9 @@ export function ContextPanel({
       data-panel-mode={panel.mode}
       className={`flex flex-none flex-col ${
         expanded
-          ? "fixed inset-x-0 bottom-0 z-40 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 shadow-2xl"
+          ? // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
+            // composer (and the z-40 feedback FAB), not under them.
+            "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 shadow-2xl"
           : "border-t border-ink-600 bg-ink-900/60"
       } lg:static lg:z-auto lg:h-full lg:max-h-none lg:w-[22rem] lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${className}`}
     >

@@ -55,8 +55,27 @@ test.setTimeout(120_000);
  *
  * The timeout is generous because the FIRST workflow of a run compiles the
  * whole server module graph on a dev server; production serves it prebuilt.
+ *
+ * SETTLE FIRST: the W2 opening brief lands as an ASYNC assistant message
+ * shortly after mount. Counting `before` while it is still in flight lets the
+ * brief — not the actual answer — satisfy the "a new message arrived" poll,
+ * and every assertion then reads a transcript without the reply (observed:
+ * 6 reds whose transcript was just greeting + brief). So wait until the
+ * assistant count holds still for one poll interval before counting.
  */
 async function say(page: Page, text: string): Promise<void> {
+  let last = -1;
+  await expect
+    .poll(
+      async () => {
+        const n = await page.getByTestId("msg-assistant").count();
+        const stable = n === last && n > 0;
+        last = n;
+        return stable;
+      },
+      { timeout: 45_000, intervals: [1_200] },
+    )
+    .toBe(true);
   const before = await page.getByTestId("msg-assistant").count();
   await page.getByTestId("composer-input").fill(text);
   await page.getByTestId("composer-send").click();
@@ -108,8 +127,12 @@ test.describe("W4 — goals in words, executed as workflows", () => {
     await say(page, "Kokių įgūdžių man trūksta?");
     const answer = await transcript(page);
     // Real outcome or an honest blocked state — never a generic fallback.
+    // "Nieko netrūksta" (all required skills present) is as real an outcome
+    // as a counted gap — the fixture worker can legitimately cover the one
+    // seeded demand's recognised requirements.
     const real =
       /trūksta \d+/.test(answer) ||
+      answer.includes(LT.workspace.ai.skillGapNone.split("{")[0]) ||
       answer.includes(LT.workspace.ai.skillGapNoDemands) ||
       answer.includes(LT.workspace.ai.blockedNoWorker) ||
       answer.includes(LT.workspace.ai.blockedNoAccess);

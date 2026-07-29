@@ -34,11 +34,13 @@ export function LiveProductDemo() {
   const t = useTranslations("landing.loop");
   const mounted = useMounted();
   const reduced = useReducedMotion();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     if (!mounted || reduced) return;
-    const id = window.setInterval(() => setStep((s) => (s + 1) % (STEPS + 1)), STEP_MS);
+    // Cycle 1→4→1: the window always holds at least the person's message —
+    // a briefly EMPTY product window reads as a broken product.
+    const id = window.setInterval(() => setStep((s) => (s % STEPS) + 1), STEP_MS);
     return () => window.clearInterval(id);
   }, [mounted, reduced]);
 

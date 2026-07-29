@@ -71,6 +71,63 @@ Faktinė Git būsena atkūrimo momentu:
 
 ## Etapo įrašai
 
+### 2–9. P0 + W1–W6 patikra ir užbaigimas — 2026-07-29
+
+**P0 Google popup (2):** kodas edf31ac6 + naujas guardas
+`google-same-tab-redirect.test.ts`; REALI naršyklės patikra
+(`scripts/verify-google-same-tab.mjs` prieš production build):
+GIS skriptų 0, klikas → same-tab `accounts.google.com` su mūsų
+`/lt/auth/callback?next=…&trace=…`, popup langų **0**.
+Įrodymai: `p0-login-before-click.png`, `p0-after-click-same-tab.png`.
+
+**W5 vienas šaltinis (5):** chat santrauka dabar skaito
+`deriveWorkerReadiness(getWorkerPlayerCard())` — tie patys 6 pillars ir
+etiketės (`playerCard.readinessSteps.pillar.*`) kaip kortelė; chip map
+per-keyed į `ReadinessPillarKey` (partial). Guardai atnaujinti
+(ux-2-0-growth, ux-2-0-actions, profile-summary elgsenos suite 0/6–6/6).
+
+**W3 mobile bottom-sheet (4):** išskleista panelė telefone = NE-modalinis
+fixed sheet (rounded, shadow, grab handle, z-50 virš composerio);
+guardai „niekada ne dialog" toliau žali. Įrodymas:
+`w3-bottom-sheet-390.png`.
+
+**Autentikuotas E2E (3,6,7,9)** — lokalus stekas (supabase start/reset →
+fixtures → mint → `pnpm e2e:local`), seed
+`scripts/e2e-seed-owner-rebuild.sql` (verified įmonė + submitted poreikis
++ worker_skills — pagal recepto atmintį):
+- `w3-context-panel.spec.ts` **3/3**
+- `w6-workspace-map.spec.ts` **3/3** (klasteris, marker→entity be URL
+  pokyčio, telefonas be horizontalaus scroll)
+- `w4-ai-workspace.spec.ts` **7/8 + 1 skip** (company sesija nereikalinga
+  worker patikrai)
+- `w5-live-profile.spec.ts` žalias
+- `pr-i-reality-chat.spec.ts` **6/6** — S1 brief atidarymas, S2 kriterijai,
+  **S3 žurnalas chat-first su DB įrodymu** (journal_entries eilutė su
+  markeriu), S4 reali paieška, S5 sąžiningas blokas, S7 pasaulio modelis
+- `pr-i-reality-landing.spec.ts` **5/5** (naujos kompozicijos)
+
+Spec pataisos (ne produkto): W2 brief lenktynė („settle" laukimas prieš
+skaičiuojant žinutes) w4 + pr-i-chat; S1 perrašytas į brief realybę;
+S3 DB užklausa naudojo neegzistuojantį `work_date` stulpelį → `created_at`;
+skillGapNone pridėtas kaip realus rezultatas. Aplinkos pamoka: nužudžius
+`pnpm exec next start` wrapperį lieka našlaitis serveris ant :3100 —
+Playwright jį pernaudoja (patikrinti `netstat`, žudyti PID).
+
+**Top bar (8):** vienas avataras (profilis meniu viduje), mobile
+chip·bell·avataras be persidengimų (`chat-1440.png`, `chat-360.png`).
+Žemėlapio tab'o chat shell'e nebėra; senasis `/dashboard/market-map`
+ekranas lieka pasiekiamas tik per „Išplėstinis valdymas" (advanced
+pasaulis sąmoningai išlaikytas) — užfiksuota kaip follow-up svarstymui,
+ne šio rebuild'o blokatorius.
+
+**Landing polish (10):** demo ciklas 1→4→1 (langas niekada tuščias);
+reduced-motion S6c žalias; jokių naujų bibliotekų (framer-motion only,
+3D NEDIEGTA — pagal dokumentuotą sprendimą).
+
+Patikros po visų pakeitimų: vitest **780/780**, tsc 0, eslint 0 errors,
+build ✓. Jokių migracijų šakoje → GREEN klasė (auth pakeitimas —
+tiesioginis savininko P0 nurodymas šiame prompt'e).
+
 ### 1. Landing stabilizacija — pradėta 2026-07-29
 
 Sprendimas (nauja IA, pagal owner-rebuild-audit-v1 PR C):
