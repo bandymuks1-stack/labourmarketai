@@ -128,6 +128,40 @@ Patikros po visų pakeitimų: vitest **780/780**, tsc 0, eslint 0 errors,
 build ✓. Jokių migracijų šakoje → GREEN klasė (auth pakeitimas —
 tiesioginis savininko P0 nurodymas šiame prompt'e).
 
+### 12. Merge → deploy → post-deploy — BAIGTA 2026-07-29
+
+- **PR #918** atidarytas; repo auto-merge išjungtas → laukta CI ir
+  merge'inta rankiniu `gh pr merge --squash` (pagal sutarties fallback).
+- CI kelyje CodeQL rado 1 HIGH (`js/regex/missing-regexp-anchor`) —
+  guard'o teste neinkarinis `accounts\.google\.com` regex; pakeista į
+  `toContain` substring (b69944c4). Po pataisos: quality ✓,
+  migration-safety ✓, CodeQL ✓.
+- **Merge:** squash `4bc93bdf` į main.
+- **Production deploy:** Vercel `success`
+  (labourmarketai-9nrjx1ich…, GitHub deployments API).
+- **Post-deploy patikra realiame labourmarket.ai**
+  (`scripts/verify-prod-owner-rebuild.mjs`, chromium): **14/14 PASS** —
+  landing 1440+390 (demo, moment, #how-it-works, seno world canvas 0,
+  overflow 0), login be GIS, Google klikas = same-tab
+  accounts.google.com, popup langų 0. Vizualiai peržiūrėta:
+  `prod-after-landing-1440-hero.png` (demo ciklas gyvas — matomas
+  žurnalo įrašo žingsnis), `prod-after-landing-390-hero.png` (mobile
+  švarus), `prod-after-login-1440.png`, `prod-after-google-same-tab.png`.
+
+Autentikuotos W1–W6 grandinės funkcinė patikra atlikta prieš TĄ PATĮ
+kodą lokaliame steke (e2e žali, DB įrodymai) — production autentikuotą
+srautą savininkas pamatys pirmu prisijungimu; visos viešos production
+patikros žalios.
+
+## GALUTINIS VERDIKTAS
+
+**OWNER_VISIBLE_W1_W6_AND_LANDING_REBUILD_PRODUCTION_VERIFIED**
+
+Likę užfiksuoti follow-up (ne blokatoriai): senasis
+`/dashboard/market-map` ekranas advanced pasaulyje; da/et/lv/no/pl/sv
+landing copy `[EN]` iki žmogaus vertimo (i18n-debt baseline 1263,
+dokumentuota).
+
 ### 1. Landing stabilizacija — pradėta 2026-07-29
 
 Sprendimas (nauja IA, pagal owner-rebuild-audit-v1 PR C):
