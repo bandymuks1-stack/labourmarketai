@@ -32,6 +32,9 @@ export interface ScopedOwnerWaiver {
   pullRequests: readonly number[];
   /** Audit trail; enforced when a run supplies a SHA to check. */
   approvedHeadShas: readonly string[];
+  /** Branches where the SAME finding is tolerated after the waived PRs merged.
+   *  Widens WHERE, never WHAT — every other constraint still applies. */
+  postMergeBranches?: readonly string[];
   files: readonly string[];
   expectedFindings: readonly ExpectedFinding[];
   reason: string;
@@ -49,6 +52,8 @@ export interface GateFinding {
 
 export interface WaiverContext {
   pullRequest: number | null;
+  /** Branch name for non-PR runs (push to main). */
+  branch?: string | null;
   headSha: string | null;
   /** ISO date of the run — injected so the expiry rule is testable. */
   today: string;

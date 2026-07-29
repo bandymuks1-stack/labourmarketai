@@ -55,6 +55,27 @@ describe("scoped waiver — the approved cases pass", () => {
     expect(v.pass).toBe(true);
   });
 
+  it("main's OWN push run is allowed after those PRs merged", () => {
+    // Without this the gate turns main red the moment a waived PR merges —
+    // the debt simply moved from the PR into the branch. It stays bounded:
+    // every other constraint (file, code, axiom, subset, expiry) still holds,
+    // and only `main` is listed.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main" }));
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but main is still blocked once the waiver expires", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main", today: "2027-01-01" }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("…and a NEW violation on main still blocks", () => {
+    const extra = { code: "second_dashboard", axiom: "A-01", what: "apps/web/x/page.tsx" };
+    const v = evaluateFindings([...BOTH, extra], ok({ pullRequest: null, branch: "main" }));
+    expect(v.pass).toBe(false);
+  });
+
   it("the decision names owner, scope, expiry and what removes it", () => {
     const d = decideWaiver(MAP_FINDING, ok());
     expect(d.waived).toBe(true);
@@ -81,8 +102,14 @@ describe("scoped waiver — every missing condition BLOCKS", () => {
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("not a PR run at all → blocked", () => {
-    const v = evaluateFindings(BOTH, ok({ pullRequest: null }));
+  it("not a PR and not a covered branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: null }));
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("a push to some OTHER branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "feat/anything" }));
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });

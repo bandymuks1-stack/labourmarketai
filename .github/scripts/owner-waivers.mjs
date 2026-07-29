@@ -49,6 +49,13 @@ export const SCOPED_OWNER_WAIVERS = [
     scope: "W3 (Context Panel) + W4 (AI Workspace)",
     // THE BINDING KEY. A PR not listed here matches nothing.
     pullRequests: [909, 912],
+    // Once those PRs merge, the SAME debt lives on this branch — and the
+    // push-to-main run has no PR number to match. Without this, merging a
+    // waived PR turns main's own CI red, which is exactly what happened at
+    // 9ad4c441. This widens WHERE the identical finding is tolerated, never
+    // WHAT is tolerated: code, axiom, file, subset rule and expiry all still
+    // apply, so a new violation on main blocks just as hard.
+    postMergeBranches: ["main"],
     // Audit trail; enforced only when a run supplies a SHA to check.
     approvedHeadShas: [],
     // The only files whose findings may be excused.
@@ -97,10 +104,22 @@ export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
         `${w.id} expired on ${w.expiresAt} — remove it and resolve ${w.resolvedBy}`,
       );
     }
-    if (ctx.pullRequest === null || !w.pullRequests.includes(ctx.pullRequest)) {
+    if (ctx.pullRequest === null) {
+      // Not a PR run. The only non-PR case a waiver may cover is the branch the
+      // waived PRs merged INTO — the same finding, in its new home.
+      const branches = w.postMergeBranches ?? [];
+      if (!ctx.branch || !branches.includes(ctx.branch)) {
+        return no(
+          "pr-not-covered",
+          `${w.id} covers PR ${w.pullRequests.join(", ")}${
+            branches.length > 0 ? ` and branch ${branches.join(", ")}` : ""
+          }; this run is ${ctx.branch ? `branch ${ctx.branch}` : "not a PR"}`,
+        );
+      }
+    } else if (!w.pullRequests.includes(ctx.pullRequest)) {
       return no(
         "pr-not-covered",
-        `${w.id} covers PR ${w.pullRequests.join(", ")}; this run is ${ctx.pullRequest ?? "not a PR"}`,
+        `${w.id} covers PR ${w.pullRequests.join(", ")}; this run is ${ctx.pullRequest}`,
       );
     }
     if (
@@ -142,8 +161,14 @@ export function evaluateFindings(findings, ctx, waivers = SCOPED_OWNER_WAIVERS) 
 export function waiverContextFromEnv(env = process.env, now = new Date()) {
   const fromRef = /refs\/pull\/(\d+)\//.exec(env.GITHUB_REF ?? "")?.[1];
   const pr = env.PR_NUMBER || fromRef || null;
+  // `refs/heads/main` → "main". Only used for the post-merge case above.
+  const branch =
+    env.GATE_BRANCH ||
+    /refs\/heads\/(.+)$/.exec(env.GITHUB_REF ?? "")?.[1] ||
+    null;
   return {
     pullRequest: pr === null ? null : Number(pr),
+    branch,
     headSha: env.PR_HEAD_SHA || null,
     today: (env.GATE_TODAY || now.toISOString()).slice(0, 10),
   };
