@@ -5968,6 +5968,17 @@
     "sections": {
       "unread": "Unread",
       "earlier": "Earlier"
+    },
+    "priority": {
+      "awaitingYou": "Awaiting your reply",
+      "overdue": "Waiting a long time",
+      "waiting": "Waiting {hours} h"
+    },
+    "quickReply": {
+      "open": "Reply here",
+      "placeholder": "A short reply…",
+      "send": "Send",
+      "sent": "Reply sent."
     }
   },
   "orgTier1Warning": {
@@ -11214,6 +11225,25 @@
         "languages": "languages",
         "salary": "rate expectation"
       }
+    },
+    "messages": {
+      "blocked": "Messages could not be read right now.",
+      "empty": "No messages yet.",
+      "noneWaiting": "No message is waiting for your reply.",
+      "intro": "{count, plural, one {# message is waiting for your reply} other {# messages are waiting for your reply}}:",
+      "awaiting": "Awaiting your reply",
+      "overdue": "Waiting a long time",
+      "waiting": "{hours} h",
+      "someone": "The other person",
+      "attachmentOnly": "(attachment only)",
+      "draftPlaceholder": "Write your reply…",
+      "review": "Review before sending",
+      "openThread": "Open the thread",
+      "confirmTitle": "This will be sent:",
+      "confirmSend": "Send",
+      "editAgain": "Edit",
+      "sending": "Sending…",
+      "sent": "Reply sent."
     }
   },
   "landing": {

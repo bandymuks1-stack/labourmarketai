@@ -5968,6 +5968,17 @@
     "sections": {
       "unread": "Ongelezen",
       "earlier": "Eerder"
+    },
+    "priority": {
+      "awaitingYou": "Wacht op jouw antwoord",
+      "overdue": "Wacht al lang",
+      "waiting": "Wacht {hours} u"
+    },
+    "quickReply": {
+      "open": "Hier antwoorden",
+      "placeholder": "Een kort antwoord…",
+      "send": "Verzenden",
+      "sent": "Antwoord verzonden."
     }
   },
   "orgTier1Warning": {
@@ -11214,6 +11225,25 @@
         "languages": "talen",
         "salary": "tariefverwachting"
       }
+    },
+    "messages": {
+      "blocked": "Berichten konden nu niet worden gelezen.",
+      "empty": "Nog geen berichten.",
+      "noneWaiting": "Geen bericht wacht op jouw antwoord.",
+      "intro": "{count, plural, one {# bericht wacht op jouw antwoord} other {# berichten wachten op jouw antwoord}}:",
+      "awaiting": "Wacht op jouw antwoord",
+      "overdue": "Wacht al lang",
+      "waiting": "{hours} u",
+      "someone": "De ander",
+      "attachmentOnly": "(alleen bijlage)",
+      "draftPlaceholder": "Schrijf je antwoord…",
+      "review": "Controleren voor verzenden",
+      "openThread": "Gesprek openen",
+      "confirmTitle": "Dit wordt verzonden:",
+      "confirmSend": "Verzenden",
+      "editAgain": "Aanpassen",
+      "sending": "Verzenden…",
+      "sent": "Antwoord verzonden."
     }
   },
   "landing": {

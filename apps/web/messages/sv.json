@@ -1531,7 +1531,18 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
-    "originalLanguage": "[EN] Original ({lang})"
+    "originalLanguage": "[EN] Original ({lang})",
+    "priority": {
+      "awaitingYou": "[EN] Awaiting your reply",
+      "overdue": "[EN] Waiting a long time",
+      "waiting": "[EN] Waiting {hours} h"
+    },
+    "quickReply": {
+      "open": "[EN] Reply here",
+      "placeholder": "[EN] A short reply…",
+      "send": "[EN] Send",
+      "sent": "[EN] Reply sent."
+    }
   },
   "trust": {
     "title": "[EN] Trust signals",
@@ -3380,6 +3391,25 @@
         "languages": "språk",
         "salary": "förväntad taxa"
       }
+    },
+    "messages": {
+      "blocked": "[EN] Messages could not be read right now.",
+      "empty": "[EN] No messages yet.",
+      "noneWaiting": "[EN] No message is waiting for your reply.",
+      "intro": "{count, plural, one {# message is waiting for your reply} other {# messages are waiting for your reply}}:",
+      "awaiting": "[EN] Awaiting your reply",
+      "overdue": "[EN] Waiting a long time",
+      "waiting": "{hours} h",
+      "someone": "[EN] The other person",
+      "attachmentOnly": "[EN] (attachment only)",
+      "draftPlaceholder": "[EN] Write your reply…",
+      "review": "[EN] Review before sending",
+      "openThread": "[EN] Open the thread",
+      "confirmTitle": "[EN] This will be sent:",
+      "confirmSend": "[EN] Send",
+      "editAgain": "[EN] Edit",
+      "sending": "[EN] Sending…",
+      "sent": "[EN] Reply sent."
     }
   },
   "landing": {

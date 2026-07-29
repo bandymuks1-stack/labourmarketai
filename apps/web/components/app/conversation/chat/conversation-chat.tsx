@@ -27,7 +27,9 @@ import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadPlayerCardForChat } from "@/lib/conversation/player-card-chat";
+import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -713,6 +715,34 @@ export function ConversationChat({
   const startPlayerCardRef = useRef(startPlayerCard);
   startPlayerCardRef.current = startPlayerCard;
 
+  /**
+   * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
+   * inbox (same RLS-scoped reads the messages page uses), shows only the
+   * threads that genuinely await this person, and offers a reply that is
+   * SENT ONLY AFTER an explicit confirmation of the exact text.
+   */
+  const startMessages = useCallback(() => {
+    setTyping(true);
+    loadMessagesForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "threads") {
+          assistant(res.intro);
+          pushEmbed(<ChatMessageReply threads={res.threads} locale={locale} />);
+        } else {
+          assistant(res.message, [
+            { id: "link:/dashboard/communication", label: labels.navMessages },
+          ]);
+        }
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.messagesHint, [
+          { id: "link:/dashboard/communication", label: labels.navMessages },
+        ]);
+      });
+  }, [assistant, pushEmbed, locale, labels.navMessages, labels.messagesHint]);
+
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
     (text: string) => {
@@ -924,11 +954,9 @@ export function ConversationChat({
             assistant(labels.translateBlocked);
             break;
           case "messages-view":
-            // The projection opens FROM the conversation — one link chip to
-            // the real communication surface, never a duplicated inbox here.
-            assistant(labels.messagesHint, [
-              { id: "link:/dashboard/communication", label: labels.navMessages },
-            ]);
+            // §8.1: the chat SHOWS the waiting threads, drafts a reply and
+            // sends it after confirmation — the full inbox stays one tap away.
+            startMessages();
             break;
           case "write-employer":
             assistant(labels.writeEmployerHint);
@@ -938,7 +966,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, openForm, identity],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, openForm, identity],
   );
 
   const nav = {

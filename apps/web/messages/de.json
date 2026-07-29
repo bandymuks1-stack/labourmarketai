@@ -5968,6 +5968,17 @@
     "sections": {
       "unread": "Ungelesen",
       "earlier": "Früher"
+    },
+    "priority": {
+      "awaitingYou": "Wartet auf deine Antwort",
+      "overdue": "Wartet schon lange",
+      "waiting": "Wartet {hours} Std."
+    },
+    "quickReply": {
+      "open": "Hier antworten",
+      "placeholder": "Eine kurze Antwort…",
+      "send": "Senden",
+      "sent": "Antwort gesendet."
     }
   },
   "orgTier1Warning": {
@@ -11214,6 +11225,25 @@
         "languages": "Sprachen",
         "salary": "erwarteten Satz"
       }
+    },
+    "messages": {
+      "blocked": "Nachrichten konnten gerade nicht gelesen werden.",
+      "empty": "Noch keine Nachrichten.",
+      "noneWaiting": "Keine Nachricht wartet auf deine Antwort.",
+      "intro": "{count, plural, one {# Nachricht wartet auf deine Antwort} other {# Nachrichten warten auf deine Antwort}}:",
+      "awaiting": "Wartet auf deine Antwort",
+      "overdue": "Wartet schon lange",
+      "waiting": "{hours} Std.",
+      "someone": "Die andere Person",
+      "attachmentOnly": "(nur Anhang)",
+      "draftPlaceholder": "Schreibe deine Antwort…",
+      "review": "Vor dem Senden prüfen",
+      "openThread": "Unterhaltung öffnen",
+      "confirmTitle": "Das wird gesendet:",
+      "confirmSend": "Senden",
+      "editAgain": "Bearbeiten",
+      "sending": "Senden…",
+      "sent": "Antwort gesendet."
     }
   },
   "landing": {

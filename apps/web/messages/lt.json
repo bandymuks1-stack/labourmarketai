@@ -5968,6 +5968,17 @@
     "sections": {
       "unread": "Neperskaitytos",
       "earlier": "Ankstesnės"
+    },
+    "priority": {
+      "awaitingYou": "Laukia tavo atsakymo",
+      "overdue": "Laukia jau ilgai",
+      "waiting": "Laukia {hours} val."
+    },
+    "quickReply": {
+      "open": "Atsakyti čia",
+      "placeholder": "Trumpas atsakymas…",
+      "send": "Siųsti",
+      "sent": "Atsakymas išsiųstas."
     }
   },
   "orgTier1Warning": {
@@ -11214,6 +11225,25 @@
         "languages": "kalbas",
         "salary": "tarifo lūkestį"
       }
+    },
+    "messages": {
+      "blocked": "Žinučių dabar nepavyko perskaityti.",
+      "empty": "Kol kas nėra jokių žinučių.",
+      "noneWaiting": "Nė viena žinutė nelaukia tavo atsakymo.",
+      "intro": "{count, plural, one {# žinutė laukia tavo atsakymo} few {# žinutės laukia tavo atsakymo} other {# žinučių laukia tavo atsakymo}}:",
+      "awaiting": "Laukia tavo atsakymo",
+      "overdue": "Laukia jau ilgai",
+      "waiting": "{hours} val.",
+      "someone": "Pašnekovas",
+      "attachmentOnly": "(tik priedas)",
+      "draftPlaceholder": "Parašyk atsakymą…",
+      "review": "Peržiūrėti prieš siunčiant",
+      "openThread": "Atidaryti pokalbį",
+      "confirmTitle": "Bus išsiųsta:",
+      "confirmSend": "Siųsti",
+      "editAgain": "Taisyti",
+      "sending": "Siunčiama…",
+      "sent": "Atsakymas išsiųstas."
     }
   },
   "landing": {
