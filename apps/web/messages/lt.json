@@ -4087,7 +4087,8 @@
         "account": "Nustatymai",
         "admin": "Administravimas",
         "planning": "Kalendorius",
-        "network": "Ryšiai"
+        "network": "Ryšiai",
+        "advanced": "Išplėstinis valdymas"
       },
       "roleNotice": {
         "needs_worker_role": "Ta nuoroda veda į darbuotojo erdvę, kurios jūsų paskyra dar neturi. Pridėkite darbuotojo vaidmenį erdvių centre.",
@@ -11058,6 +11059,7 @@
       "navProfile": "Profilis",
       "clarifyWorkLog": "Kurią dieną ir kiek laiko dirbai? Parašyk, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.",
       "calendarHint": "Tavo planą rasi skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
+      "messagesHint": "Štai tavo žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
       "translateBlocked": "Kol kas neturiu tikro vertimo variklio, todėl neišversiu žinutės netikrai. Žinutę matysi originalo kalba; kai vertimas bus įjungtas, pridėsiu abu tekstus.",
       "writeEmployerHint": "Žinutę darbdaviui gali parašyti iš konkretaus pasiūlymo. Parašyk „ieškau darbo“ — parodysiu tikrus poreikius, ir iš ten galėsi susisiekti.",
@@ -11094,6 +11096,7 @@
       "briefConflicts": "Kalendoriuje {count} persidengiantys įsipareigojimai.",
       "briefOverdue": "{count} užduotys jau pradelstos.",
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
+      "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
       "briefProfileGap": "Profilyje dar trūksta: {step}."
     },
     "worklog": {

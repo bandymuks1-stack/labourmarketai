@@ -4087,7 +4087,8 @@
         "account": "Settings",
         "admin": "Admin",
         "planning": "Calendar",
-        "network": "Network"
+        "network": "Network",
+        "advanced": "Advanced controls"
       },
       "roleNotice": {
         "needs_worker_role": "That link opens the worker space, which your account does not have yet. Add the worker role in the spaces hub.",
@@ -11058,6 +11059,7 @@
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
       "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
@@ -11094,6 +11096,7 @@
       "briefConflicts": "Your calendar has {count} overlapping commitments.",
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
+      "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}."
     },
     "worklog": {

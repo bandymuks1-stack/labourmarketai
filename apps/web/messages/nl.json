@@ -4087,7 +4087,8 @@
         "account": "Instellingen",
         "admin": "Admin",
         "planning": "Kalender",
-        "network": "Netwerk"
+        "network": "Netwerk",
+        "advanced": "Geavanceerd beheer"
       },
       "roleNotice": {
         "needs_worker_role": "Die link opent de werknemersruimte, die je account nog niet heeft. Voeg de werknemersrol toe in de ruimtehub.",
@@ -11058,6 +11059,7 @@
       "navProfile": "Profiel",
       "clarifyWorkLog": "Op welke dag en hoe lang heb je gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
       "calendarHint": "Je plan vind je in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "messagesHint": "Hier zijn je berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
@@ -11094,6 +11096,7 @@
       "briefConflicts": "Je agenda heeft {count} overlappende verplichtingen.",
       "briefOverdue": "{count} taken zijn over hun einddatum heen.",
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
+      "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}."
     },
     "worklog": {

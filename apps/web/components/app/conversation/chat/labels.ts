@@ -15,7 +15,7 @@ const CHAT_KEYS = [
   "chipLogWork", "userLogWork",
   "chipAgenda", "userAgenda", "chipNeedWorkers", "chipCandidates",
   "chipCompanyHub", "companyDemandNext", "chipTasks",
-  "clarifyWorkLog", "calendarHint", "reminderBlocked", "translateBlocked",
+  "clarifyWorkLog", "calendarHint", "messagesHint", "reminderBlocked", "translateBlocked",
   "writeEmployerHint",
 ] as const;
 

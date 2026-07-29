@@ -4087,7 +4087,8 @@
         "account": "Einstellungen",
         "admin": "Admin",
         "planning": "Kalender",
-        "network": "Netzwerk"
+        "network": "Netzwerk",
+        "advanced": "Erweiterte Steuerung"
       },
       "roleNotice": {
         "needs_worker_role": "Dieser Link öffnet den Arbeitskraft-Bereich, den Ihr Konto noch nicht hat. Fügen Sie die Arbeitskraft-Rolle im Bereichs-Hub hinzu.",
@@ -11058,6 +11059,7 @@
       "navProfile": "Profil",
       "clarifyWorkLog": "An welchem Tag und wie lange hast du gearbeitet? Zum Beispiel: „Heute von 8 bis 17, 30 Min Pause, Fenster montiert“.",
       "calendarHint": "Deinen Plan findest du im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
+      "messagesHint": "Hier sind deine Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
@@ -11094,6 +11096,7 @@
       "briefConflicts": "Dein Kalender hat {count} überlappende Verpflichtungen.",
       "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
       "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
+      "briefUnreadMessages": "Du hast {count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}.",
       "briefProfileGap": "Deinem Profil fehlt noch: {step}."
     },
     "worklog": {

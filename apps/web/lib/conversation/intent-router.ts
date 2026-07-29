@@ -40,6 +40,7 @@ export type ConversationIntent =
   | "open-project" // "atidaryk šį projektą"
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "context" // "ką tu apie mane žinai?"
+  | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "unknown";
 
 export type IntentMatch = {
@@ -223,6 +224,17 @@ const RULES: IntentRule[] = [
       p("\\bvacancy|vacature|vakans", 1),
       // "in the Netherlands / country" — a search location
       p("(nyderland|olandij|netherland|holland|нидерланд|deutschland|germanij)", 1),
+    ],
+  },
+  {
+    // The Messages projection, asked for in words (owner audit §4.4: with
+    // the tab row gone the conversation is how projections open). Outweighs
+    // write-employer's weak "žinut" stem — SHOWING messages is not WRITING.
+    intent: "messages-view",
+    patterns: [
+      p("(parodyk|rodyk|atidaryk|open|show|покажи|открой)\\s*.{0,14}(žinut|messages?|сообщени|berichten|nachrichten)", 6),
+      p("(mano|my|мои)\\s+(žinut|messages?|сообщени)", 5),
+      p("(neperskaityt|unread|непрочитан)", 4),
     ],
   },
   {

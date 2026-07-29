@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { usePathname } from "@/lib/i18n/navigation";
 import {
   ConversationHeader,
-  ConversationBottomNav,
   type ConversationNavLabels,
 } from "@/components/app/conversation/chat/conversation-header";
 
@@ -86,15 +85,16 @@ export function DashboardChrome({
   // Conversation: bare — the chat is self-contained (h-[100dvh], own nav).
   if (mode === "conversation") return <>{children}</>;
 
-  // Panel: the simple-mode shell (same nav as the conversation).
+  // Panel: a PROJECTION of the conversation (owner audit §4.4) — the same
+  // minimal top bar with the back-to-chat affordance; no parallel tab system
+  // and no bottom nav exists any more.
   if (mode === "panel") {
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple">
         <ConversationHeader title={headerTitle} nav={nav} />
-        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
           {children}
         </main>
-        <ConversationBottomNav nav={nav} />
       </div>
     );
   }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
-import { ConversationHeader, ConversationBottomNav } from "./conversation-header";
+import { ConversationHeader } from "./conversation-header";
 import { ConversationThread, type ThreadItem } from "./conversation-thread";
 import { Composer } from "./composer";
 import type { ChatMessage, ChoiceChip } from "./types";
@@ -106,6 +106,8 @@ export type ChatLabels = {
   // mechanism does not yet exist).
   clarifyWorkLog: string;
   calendarHint: string;
+  /** Messages projection opener (owner audit §4.4). */
+  messagesHint: string;
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
@@ -871,6 +873,13 @@ export function ConversationChat({
             // No real translation engine — never a fake translation.
             assistant(labels.translateBlocked);
             break;
+          case "messages-view":
+            // The projection opens FROM the conversation — one link chip to
+            // the real communication surface, never a duplicated inbox here.
+            assistant(labels.messagesHint, [
+              { id: "link:/dashboard/communication", label: labels.navMessages },
+            ]);
+            break;
           case "write-employer":
             assistant(labels.writeEmployerHint);
             break;
@@ -890,6 +899,14 @@ export function ConversationChat({
     profile: labels.navProfile,
     advanced: labels.advanced,
   };
+
+  /** OPENING state (owner audit §4.1) — mirrors the thread's own predicate:
+   *  only the assistant's opening turns are on screen. It decides WHERE the
+   *  composer lives: centred inside the composition vs the sticky bottom. */
+  const opening =
+    !typing &&
+    items.length <= 3 &&
+    items.every((it) => "message" in it && it.message.role === "assistant");
 
   /**
    * The Context Panel acts by asking the conversation to do what it already
@@ -930,18 +947,32 @@ export function ConversationChat({
                 onCancel: () => {},
                 speakers: { assistant: labels.assistantName, user: labels.speakerYou },
               }}
+              // While the conversation is opening the composer renders inside
+              // the centred composition (owner audit §4.1); afterwards the
+              // thread ignores this prop and the sticky bar below takes over.
+              composer={
+                <Composer
+                  variant="inline"
+                  placeholder={labels.composerPlaceholder}
+                  attachLabel={labels.attach}
+                  sendLabel={labels.send}
+                  onSend={handleSend}
+                  onAttach={() => handleChip({ id: "cv", label: "" })}
+                />
+              }
             />
-            <Composer
-              placeholder={labels.composerPlaceholder}
-              attachLabel={labels.attach}
-              sendLabel={labels.send}
-              onSend={handleSend}
-              onAttach={() => handleChip({ id: "cv", label: "" })}
-            />
+            {opening ? null : (
+              <Composer
+                placeholder={labels.composerPlaceholder}
+                attachLabel={labels.attach}
+                sendLabel={labels.send}
+                onSend={handleSend}
+                onAttach={() => handleChip({ id: "cv", label: "" })}
+              />
+            )}
           </div>
           <ContextPanel locale={locale} onChip={handlePanelChip} />
         </div>
-        <ConversationBottomNav nav={nav} mobile={mobile} />
       </div>
     </WorldStateProvider>
   );

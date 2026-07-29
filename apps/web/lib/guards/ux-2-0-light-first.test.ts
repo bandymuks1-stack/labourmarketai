@@ -103,23 +103,30 @@ describe("light is the product default", () => {
 });
 
 describe("the switch is discoverable", () => {
-  it("the conversation header mounts the shared toggle", () => {
+  // Owner audit §4.4 moved the toggle off the bar into the ONE avatar menu —
+  // still on every authenticated screen (the menu is always in the header),
+  // one tap deeper, and the storage contract is unchanged.
+  it("the account menu (mounted in the conversation header) carries the toggle", () => {
     const header = read("components/app/conversation/chat/conversation-header.tsx");
-    expect(header).toMatch(/ThemeToggleIcon/);
-    expect(header).toMatch(/testId="chat-theme-toggle"/);
+    expect(header).toMatch(/AccountMenu/);
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/account-menu-theme-toggle/);
   });
 
-  it("it is ONE toggle reused, not a second implementation", () => {
+  it("the menu toggle keeps the ONE storage contract", () => {
+    const menu = read("components/app/account-menu.tsx");
+    // Same dataset.theme + localStorage "theme" contract as <ThemeToggle/>.
+    expect(menu).toMatch(/dataset\.theme/);
+    expect(menu).toMatch(/localStorage\.setItem\("theme"/);
+    // The bar itself stays free of theme logic.
     const header = read("components/app/conversation/chat/conversation-header.tsx");
-    expect(header).toMatch(/from "@\/components\/ui\/theme-toggle-icon"/);
-    // No local storage writing / attribute flipping in the header itself.
     expect(header).not.toMatch(/localStorage/);
     expect(header).not.toMatch(/dataset\.theme/);
   });
 
   it("it reuses existing localized copy — no new i18n keys for a toggle", () => {
-    const header = read("components/app/conversation/chat/conversation-header.tsx");
-    expect(header).toMatch(/auth\.dashboard\.account\.theme/);
+    const header = read("components/app/account-menu.tsx");
+    expect(header).toMatch(/account\.theme/);
     for (const locale of ["lt", "en", "ru"]) {
       const msgs = JSON.parse(read(`messages/${locale}.json`)) as Record<string, never>;
       const theme = (

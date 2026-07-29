@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, SlidersHorizontal, type LucideIcon } from "lucide-react";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -71,6 +71,11 @@ export function AccountMenu() {
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
       : []),
+    // Advanced control room — GONE from the top bar for the ordinary user
+    // (owner audit §4.4); admins keep an entry here.
+    ...(isAdmin && !adminUiHidden
+      ? [{ href: "/dashboard/advanced", label: t("tabs.advanced"), icon: SlidersHorizontal, testid: "account-menu-advanced-link" }]
+      : []),
   ];
 
   useEffect(() => {
@@ -102,7 +107,8 @@ export function AccountMenu() {
         aria-label={t("tabs.account")}
         data-testid="account-menu-trigger"
         className={cn(
-          "inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
+          // size-11 = the 44px touch-target floor every header control keeps.
+          "inline-flex size-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
           open && "border-brand-blue",
         )}
       >

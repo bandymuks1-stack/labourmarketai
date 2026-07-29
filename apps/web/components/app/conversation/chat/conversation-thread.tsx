@@ -42,23 +42,31 @@ export function ConversationThread({
   typing,
   handlers,
   emptyState,
+  composer,
 }: {
   items: ThreadItem[];
   typing: boolean;
   handlers: MessageHandlers;
   emptyState?: ReactNode;
+  /** The chat composer, handed in by the shell. While the conversation is
+   *  still OPENING (greeting + brief only) it renders HERE, centred right
+   *  under the greeting (owner audit §4.1 — "composer centre pirmo atidarymo
+   *  metu"); after the first real turn the shell renders it at the sticky
+   *  bottom instead. */
+  composer?: ReactNode;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [items.length, typing]);
 
-  /** Nothing has happened yet — only the opening turn is on screen. */
+  /** Nothing has happened yet — the screen holds only the assistant's
+   *  opening (greeting, and possibly the real state brief). One user turn,
+   *  one embedded flow or restored history ends the opening state. */
   const isOpening =
     !typing &&
-    items.length === 1 &&
-    "message" in items[0] &&
-    items[0].message.kind === "greeting";
+    items.length <= 3 &&
+    items.every((it) => "message" in it && it.message.role === "assistant");
 
   return (
     <div
@@ -99,6 +107,14 @@ export function ConversationThread({
             <TypingIndicator />
           </div>
         )}
+        {/* Opening state: the composer sits right under the greeting, in the
+            centre of the screen — the conversation IS the front door, not a
+            bar glued to the bottom of an empty page (owner audit §4.1). */}
+        {isOpening && composer ? (
+          <div className="mt-5" data-testid="conversation-opening-composer">
+            {composer}
+          </div>
+        ) : null}
         <div ref={endRef} />
       </div>
     </div>
