@@ -40,9 +40,12 @@ describe("the numbers are the server's", () => {
     expect(contract).toMatch(/stepsTotal: number/);
   });
 
-  it("the adapter passes the read model's counts through without recomputing", () => {
-    expect(adapter).toMatch(/stepsDone: activity\.stepsDone/);
-    expect(adapter).toMatch(/stepsTotal: activity\.stepsTotal/);
+  it("the adapter passes the readiness model's counts through without recomputing", () => {
+    // W5 one-source rule: the chat reports the SAME readiness counts the
+    // Live Profile Card renders — never a parallel completeness model.
+    expect(adapter).toMatch(/deriveWorkerReadiness/);
+    expect(adapter).toMatch(/stepsDone: readiness\.met/);
+    expect(adapter).toMatch(/stepsTotal: readiness\.total/);
     // No second derivation of "how complete is this profile".
     expect(adapter).not.toMatch(/done\.length \/|Math\.round\([^)]*100/);
   });

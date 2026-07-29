@@ -5,11 +5,12 @@ import "server-only";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getWorkerActivity } from "@/lib/conversation/worker-activity";
+import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import {
-  WORKER_PROFILE_STEPS,
-  getWorkerActivity,
-  type WorkerProfileStep,
-} from "@/lib/conversation/worker-activity";
+  deriveWorkerReadiness,
+  type ReadinessPillarKey,
+} from "@/lib/player-card/readiness";
 import type {
   ChatProfileSummary,
   ProfileSummaryVariant,
@@ -17,7 +18,7 @@ import type {
 
 /**
  * Conversation "profile summary" — a THIN presentation adapter over the
- * canonical worker activity/completeness read model.
+ * canonical Player Card readiness model.
  *
  * WHY IT EXISTS: the chat used to answer "show my profile" / "what's left?" /
  * "where did I stop?" with three fixed sentences. A canned answer is the same
@@ -29,11 +30,15 @@ import type {
  * every turn. That is what this returns — which is why the same summary is
  * correct after a refresh and after a fresh login.
  *
- * It derives NOTHING: `getWorkerActivity` performs the five presence checks
- * against the worker's own canonical rows (profile text, skill claims,
- * languages, availability, engagements) and this module only localizes them.
- * No parallel profile store, no second completeness rule, no invented signal —
- * a missing fact is reported as missing.
+ * ONE COMPLETENESS SOURCE (owner rebuild 2026-07-29, W5): the chat used to
+ * count its own five profile checkpoints while the Live Profile Card showed
+ * six readiness pillars — two different "how complete am I" numbers about the
+ * same person. Now the summary derives NOTHING of its own: the counts and the
+ * named gaps come from `deriveWorkerReadiness(getWorkerPlayerCard())` — the
+ * SAME pillars, the SAME order and the SAME i18n labels
+ * (`playerCard.readinessSteps.pillar.*`) the card renders. The activity read
+ * model stays the owner of the journal-continuity facts this module still
+ * reports (worker-profile existence and the honest last-activity line).
  */
 export async function loadProfileSummaryForChat(
   variant: ProfileSummaryVariant,
@@ -46,35 +51,39 @@ export async function loadProfileSummaryForChat(
   } = await supabase.auth.getUser();
   if (!user) return { kind: "blocked", message: t("blockedNotSignedIn") };
 
-  const activity = await getWorkerActivity(user.id);
-  if (!activity.hasWorkerProfile) {
+  const [activity, card] = await Promise.all([
+    getWorkerActivity(user.id),
+    getWorkerPlayerCard(),
+  ]);
+  if (!activity.hasWorkerProfile || !card) {
     // A company-only account has no worker profile — say so rather than
-    // reporting "0 of 5 complete" about a profile that does not exist.
+    // reporting "0 of N complete" about a profile that does not exist.
     return { kind: "blocked", message: t("blockedNoWorker") };
   }
 
-  const tSteps = await getTranslations("conversation.journal.steps");
+  const readiness = deriveWorkerReadiness(card);
+  const tPillar = await getTranslations("playerCard.readinessSteps.pillar");
   const done: string[] = [];
   const missing: string[] = [];
-  const missingKeys: WorkerProfileStep[] = [];
-  for (const step of WORKER_PROFILE_STEPS) {
-    if (activity.steps[step]) {
-      done.push(tSteps(step));
+  const missingKeys: ReadinessPillarKey[] = [];
+  for (const pillar of readiness.pillars) {
+    if (pillar.met) {
+      done.push(tPillar(pillar.key));
     } else {
-      missing.push(tSteps(step));
-      missingKeys.push(step);
+      missing.push(tPillar(pillar.key));
+      missingKeys.push(pillar.key);
     }
   }
 
   return {
     kind: "summary",
-    intro: introFor(variant, activity.stepsDone, activity.stepsTotal, missing.length, t),
+    intro: introFor(variant, readiness.met, readiness.total, missing.length, t),
     done,
     missing,
     missingKeys,
-    // The read model's own counts — not recomputed here either.
-    stepsDone: activity.stepsDone,
-    stepsTotal: activity.stepsTotal,
+    // The readiness model's own counts — not recomputed here either.
+    stepsDone: readiness.met,
+    stepsTotal: readiness.total,
     lastActivity: await lastActivityLine(activity.events[0] ?? null),
   };
 }
