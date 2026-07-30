@@ -661,9 +661,19 @@ export default async function JournalPage({
           the CV identity. The player card (and its readiness detail) stays
           one tap away in a single disclosure — the diary is no longer pushed
           below a full identity block on every visit. */}
+      {/* §5.1 REGRESSION FOUND IN AUTHENTICATED PRODUCTION (2026-07-30, after
+          the false-completion postmortem): this disclosure shipped CLOSED, so
+          the avatar menu's "Mano kortelė" deep-link landed on a 40px summary
+          row — literally the defect the owner's audit §5.1 reported ("kortelė —
+          sulankstytas akordeonas žurnalo apačioje"), while the traceability
+          recorded §5.1 as LIVE. The canonical Player Card is the person's main
+          object (GOAL), so it now opens by default. It stays collapsible, so
+          the work-records-first reading of Owner UX recovery v1 is still one
+          click away — but the card is never HIDDEN (addendum §2). */}
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
+          open
           className="group order-3 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >

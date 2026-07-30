@@ -163,7 +163,25 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
   });
 
   it("the avatar menu still deep-links to the card", () => {
-    expect(read("components/app/account-menu.tsx")).toMatch(/player-card/);
+    expect(read("components/app/account-menu.tsx")).toMatch(
+      /\/dashboard\/journal#mano-cv-identity/,
+    );
+  });
+
+  /**
+   * Found in AUTHENTICATED production on 2026-07-30: the deep-link target was a
+   * CLOSED <details>, so "Mano kortelė" landed on a 40px summary row — the exact
+   * §5.1 defect the owner reported, while the traceability said LIVE. The card
+   * may be collapsible, but it may never arrive collapsed.
+   */
+  it("the card's disclosure on the journal page is OPEN by default", () => {
+    const journal = read("app/[locale]/dashboard/journal/page.tsx");
+    const block = journal.slice(journal.indexOf("<details"));
+    const details = block.slice(0, block.indexOf(">") + 1);
+    expect(details, "the mano-cv-identity disclosure").toContain(
+      'id="mano-cv-identity"',
+    );
+    expect(details, "must carry `open`").toMatch(/\bopen\b/);
   });
 
   it('"show my card" still resolves to the canonical card projection', () => {
