@@ -6786,7 +6786,31 @@
     "workHistoryLabel": "Arbeitshistorie",
     "workHistoryUnnamed": "Arbeitskontext",
     "workHistoryCurrent": "jetzt",
-    "documentsEmpty": "Noch keine Dokumente erfasst."
+    "documentsEmpty": "Noch keine Dokumente erfasst.",
+    "visuals": {
+      "evidenceTitle": "Arbeitseinträge im Zeitverlauf",
+      "evidenceHint": "Deine Arbeitsjournal-Einträge der letzten {months} Monate.",
+      "evidenceEmpty": "Noch keine Einträge — dein erster Arbeitseintrag startet dieses Diagramm.",
+      "evidenceTotal": "{count, plural, one {# Eintrag} other {# Einträge}} / {months} Monate",
+      "evidencePeak": "Höchstwert: {count} in {month}",
+      "evidenceAria": "Arbeitsjournal-Einträge pro Monat, letzte {months} Monate.",
+      "skillsTitle": "Einträge hinter jeder Fähigkeit",
+      "skillsHint": "Der Balken zeigt, wie viele deiner eigenen Arbeitseinträge diese Fähigkeit nennen. Es ist keine Bewertung.",
+      "skillsEmpty": "Noch keine Fähigkeiten mit Arbeitseinträgen.",
+      "skillsEntries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "skillsNoEvidence": "Noch keine Einträge",
+      "skillsLegendTitle": "Was die Farben bedeuten",
+      "skillsTierVerified": "Von anderen als zutreffend markiert",
+      "skillsTierJournal": "In deinen Arbeitseinträgen sichtbar",
+      "skillsTierDeclared": "Selbst angegeben — noch keine Einträge",
+      "skillsAria": "Fähigkeiten und wie viele deiner Arbeitseinträge jede davon nennen.",
+      "historyTitle": "Zeitleiste der Arbeitshistorie",
+      "historyCurrent": "Läuft derzeit",
+      "historyUndated": "Ohne Datum: {count} — nicht auf der Zeitleiste dargestellt",
+      "historyRange": "{from} – {to}",
+      "historyEmpty": "Noch keine Arbeitszeiträume erfasst.",
+      "historyAria": "Arbeitszeiträume auf einer Zeitleiste, von {from} bis {to}."
+    }
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",

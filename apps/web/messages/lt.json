@@ -6786,7 +6786,31 @@
     "workHistoryLabel": "Darbo istorija",
     "workHistoryUnnamed": "Darbo kontekstas",
     "workHistoryCurrent": "dabar",
-    "documentsEmpty": "Dar nėra įrašytų dokumentų."
+    "documentsEmpty": "Dar nėra įrašytų dokumentų.",
+    "visuals": {
+      "evidenceTitle": "Darbo įrašai laike",
+      "evidenceHint": "Tavo darbo žurnalo įrašai per paskutinius {months} mėn.",
+      "evidenceEmpty": "Dar nėra įrašų — pirmas darbo įrašas pradės šį grafiką.",
+      "evidenceTotal": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} / {months} mėn.",
+      "evidencePeak": "Daugiausia: {count} ({month})",
+      "evidenceAria": "Darbo žurnalo įrašai per mėnesį, paskutiniai {months} mėn.",
+      "skillsTitle": "Kiek darbo įrašų už kiekvieną įgūdį",
+      "skillsHint": "Stulpelis rodo, kiek tavo darbo įrašų mini tą įgūdį. Tai nėra balas.",
+      "skillsEmpty": "Dar nėra įgūdžių su darbo įrašais.",
+      "skillsEntries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "skillsNoEvidence": "Dar be įrašų",
+      "skillsLegendTitle": "Ką rodo spalvos",
+      "skillsTierVerified": "Kiti pažymėjo kaip tikslų",
+      "skillsTierJournal": "Matosi tavo darbo įrašuose",
+      "skillsTierDeclared": "Nurodei pats — dar be įrašų",
+      "skillsAria": "Įgūdžiai ir kiek tavo darbo įrašų kiekvieną jų mini.",
+      "historyTitle": "Darbo istorijos laiko juosta",
+      "historyCurrent": "Vyksta dabar",
+      "historyUndated": "Be datos: {count} — laiko juostoje nerodomi",
+      "historyRange": "{from} – {to}",
+      "historyEmpty": "Dar nėra įrašytų darbo laikotarpių.",
+      "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}."
+    }
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",

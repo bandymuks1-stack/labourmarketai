@@ -17,6 +17,12 @@ import {
 } from "@/lib/documents/readiness";
 import { getOwnWorkHistory } from "./work-history";
 import type { WorkHistoryEntry } from "./work-history-model";
+import {
+  deriveEvidenceTimeline,
+  deriveSkillEvidence,
+  type EvidenceMonth,
+  type SkillEvidenceBar,
+} from "./evidence-visuals";
 
 /**
  * Worker player-card (slice worker-player-card-v1, re-skinned by TASK 07 slice
@@ -93,7 +99,26 @@ export interface WorkerPlayerCard {
    * which is a fact; it is never padded with an example.
    */
   workHistory: readonly WorkHistoryEntry[];
+  /**
+   * §5.2 VISUALIZATION DATA — the owner's audit requires the card to show
+   * graphs, skill projections and evidence relationships, not a list of
+   * textual statistics. Both series are counts of the worker's OWN rows:
+   *
+   *  - `evidenceTimeline`: live `journal_entries` per calendar month over the
+   *    trailing window. A month with nothing logged is a real 0.
+   *  - `skillEvidence`: per catalogued skill, how many of the worker's own
+   *    journal entries are linked to it (`journal_entry_skills`), with the
+   *    honest evidence tier. A declared skill with no evidence keeps 0 —
+   *    that gap is exactly what the card must make visible.
+   *
+   * Both are `[]` on any read error (honest absence), never fabricated.
+   */
+  evidenceTimeline: readonly EvidenceMonth[];
+  skillEvidence: readonly SkillEvidenceBar[];
 }
+
+/** Trailing window of the evidence timeline, in calendar months. */
+export const EVIDENCE_TIMELINE_MONTHS = 12;
 
 async function safeCount(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,6 +238,58 @@ async function ownConfirmationsCount(
   }
 }
 
+/**
+ * §5.2 EVIDENCE TIMELINE — the `created_at` of the worker's own LIVE journal
+ * entries inside the trailing window. Returns the raw timestamps; the pure
+ * deriver buckets them, so the shape is unit-testable. [] on any error.
+ */
+async function journalEntryTimestamps(
+  supabase: SupabaseClient,
+  workerId: string,
+  windowStart: Date,
+): Promise<string[]> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("journal_entries")
+      .select("created_at")
+      .eq("worker_id", workerId)
+      .is("deleted_at", null)
+      .gte("created_at", windowStart.toISOString())
+      .order("created_at", { ascending: true })
+      .limit(2000);
+    if (error || !Array.isArray(data)) return [];
+    return (data as { created_at: string | null }[])
+      .map((r) => r.created_at)
+      .filter((v): v is string => typeof v === "string");
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * §5.2 SKILL EVIDENCE — the worker's own `journal_entry_skills` links, resolved
+ * to catalogue slugs. This is the evidence RELATIONSHIP the audit asks for:
+ * which recorded work actually backs which skill. [] on any error.
+ */
+async function journalSkillLinkSlugs(
+  supabase: SupabaseClient,
+  workerId: string,
+): Promise<{ slug: string | null }[]> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("journal_entry_skills")
+      .select("skills(slug)")
+      .eq("worker_id", workerId)
+      .limit(2000);
+    if (error || !Array.isArray(data)) return [];
+    return (data as { skills: { slug: string | null } | null }[]).map((r) => ({
+      slug: r.skills?.slug ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 /** Request-deduped (React cache): several profile-page sections read the same
  *  card in one render pass; the queries run once per request. */
 export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | null> => {
@@ -241,6 +318,13 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
 
   const workerId: string | null = worker?.id ?? null;
 
+  // ONE clock read for both visualization series, so the window and the
+  // buckets can never disagree inside a single render.
+  const now = new Date();
+  const timelineWindowStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (EVIDENCE_TIMELINE_MONTHS - 1), 1),
+  );
+
   const [
     skillsDeclared,
     journalSupportedSkills,
@@ -252,6 +336,8 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     professionSlug,
     latestEntry,
     documents,
+    entryTimestamps,
+    skillLinks,
   ] = await Promise.all([
     // RC3 skills truth: ONE declared population (claims ∪ catalogued skills).
     declaredSkillsUnionCount(supabase, user.id, workerId ? skillRows : []),
@@ -319,6 +405,13 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
         };
       })
       .catch(() => null),
+    // §5.2 visualization series — real rows only, [] without a worker row.
+    workerId
+      ? journalEntryTimestamps(supabase, workerId, timelineWindowStart)
+      : Promise.resolve([] as string[]),
+    workerId
+      ? journalSkillLinkSlugs(supabase, workerId)
+      : Promise.resolve([] as { slug: string | null }[]),
   ]);
 
   return {
@@ -338,5 +431,20 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     workHistory,
     locationCountry: worker?.current_location_country ?? null,
     documents,
+    // §5.2 — geometry comes from the pure derivers, so what the chart draws is
+    // exactly what the unit tests assert.
+    evidenceTimeline: deriveEvidenceTimeline(
+      entryTimestamps,
+      now,
+      EVIDENCE_TIMELINE_MONTHS,
+    ),
+    skillEvidence: deriveSkillEvidence(
+      skillLinks,
+      (workerId ? skillRows : []).map((r) => ({
+        slug: r.skills?.slug ?? r.skill_id,
+        verified: r.verified,
+        source: r.source,
+      })),
+    ),
   };
 });

@@ -1681,7 +1681,31 @@
     "workHistoryLabel": "[EN] Work history",
     "workHistoryUnnamed": "[EN] Work context",
     "workHistoryCurrent": "[EN] now",
-    "documentsEmpty": "[EN] No documents recorded yet."
+    "documentsEmpty": "[EN] No documents recorded yet.",
+    "visuals": {
+      "evidenceTitle": "Arbejdsposter over tid",
+      "evidenceHint": "Dine arbejdsjournal-poster fra de seneste {months} måneder.",
+      "evidenceEmpty": "Ingen poster endnu — din første arbejdspost starter dette diagram.",
+      "evidenceTotal": "{count, plural, one {# post} other {# poster}} / {months} måneder",
+      "evidencePeak": "Højeste: {count} i {month}",
+      "evidenceAria": "Arbejdsjournal-poster pr. måned, seneste {months} måneder.",
+      "skillsTitle": "Poster bag hver kompetence",
+      "skillsHint": "Bjælken viser, hvor mange af dine egne arbejdsposter der nævner kompetencen. Det er ikke en vurdering.",
+      "skillsEmpty": "Ingen kompetencer med arbejdsposter endnu.",
+      "skillsEntries": "{count, plural, one {# post} other {# poster}}",
+      "skillsNoEvidence": "Ingen poster endnu",
+      "skillsLegendTitle": "Hvad farverne betyder",
+      "skillsTierVerified": "Markeret som korrekt af andre",
+      "skillsTierJournal": "Synligt i dine arbejdsposter",
+      "skillsTierDeclared": "Du har angivet det — ingen poster endnu",
+      "skillsAria": "Kompetencer og hvor mange af dine arbejdsposter der nævner hver af dem.",
+      "historyTitle": "Tidslinje for arbejdshistorik",
+      "historyCurrent": "Kører nu",
+      "historyUndated": "Uden dato: {count} — ikke placeret på tidslinjen",
+      "historyRange": "{from} – {to}",
+      "historyEmpty": "Ingen arbejdsperioder registreret endnu.",
+      "historyAria": "Arbejdsperioder på en tidslinje, fra {from} til {to}."
+    }
   },
   "projects": {
     "map": {

@@ -3,7 +3,9 @@ import "server-only";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
+import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
+import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -26,6 +28,37 @@ export async function buildPlayerCardLabels(
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
     : null;
+
+  // ── §5.2 VISUALIZATION COPY ──────────────────────────────────────────────
+  // Everything here is derived from the card's REAL series. A label is only
+  // produced when the underlying number exists; `peak` stays null when there
+  // is nothing to point at, so the chart never annotates an invented high.
+  const monthFmt = new Intl.DateTimeFormat(locale, {
+    month: "short",
+    timeZone: "UTC",
+  });
+  const monthName = (key: string): string =>
+    monthFmt.format(new Date(`${key}-01T00:00:00Z`));
+  // The axis stays compact (many locales render "short" months numerically),
+  // but the peak annotation names the month in words — "4 (06)" was a riddle.
+  const monthLongFmt = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const monthLongName = (key: string): string =>
+    monthLongFmt.format(new Date(`${key}-01T00:00:00Z`));
+  const timelineTotal = card.evidenceTimeline.reduce((n, m) => n + m.entries, 0);
+  const peakMonth = card.evidenceTimeline.reduce<{ month: string; entries: number } | null>(
+    (best, m) => (m.entries > 0 && (best === null || m.entries > best.entries) ? m : best),
+    null,
+  );
+  const dateFmt = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  });
+  // The history band is derived from the SAME rows the card's text list uses.
+  const history = deriveWorkHistoryTimeline(card.workHistory, new Date());
 
   return {
     title: t("title"),
@@ -129,6 +162,83 @@ export async function buildPlayerCardLabels(
         journal: t("readiness.pillars.journal"),
         evidence: t("readiness.pillars.evidence"),
         workCard: t("readiness.pillars.workCard"),
+      },
+    },
+    visuals: {
+      evidence: {
+        title: t("visuals.evidenceTitle"),
+        hint: t("visuals.evidenceHint", { months: EVIDENCE_TIMELINE_MONTHS }),
+        empty: t("visuals.evidenceEmpty"),
+        total: t("visuals.evidenceTotal", {
+          count: timelineTotal,
+          months: EVIDENCE_TIMELINE_MONTHS,
+        }),
+        peak: peakMonth
+          ? t("visuals.evidencePeak", {
+              count: peakMonth.entries,
+              month: monthLongName(peakMonth.month),
+            })
+          : null,
+        monthLabels: card.evidenceTimeline.map((m) => monthName(m.month)),
+        ariaLabel: t("visuals.evidenceAria", {
+          months: EVIDENCE_TIMELINE_MONTHS,
+        }),
+      },
+      skills: {
+        title: t("visuals.skillsTitle"),
+        hint: t("visuals.skillsHint"),
+        empty: t("visuals.skillsEmpty"),
+        skillNames: card.skillEvidence.map((s) =>
+          tSkill.has(s.slug) ? tSkill(s.slug) : s.slug.replace(/-/g, " "),
+        ),
+        entryLabels: card.skillEvidence.map((s) =>
+          t("visuals.skillsEntries", { count: s.entries }),
+        ),
+        noEvidence: t("visuals.skillsNoEvidence"),
+        legendTitle: t("visuals.skillsLegendTitle"),
+        tierLabels: {
+          verified: t("visuals.skillsTierVerified"),
+          journal: t("visuals.skillsTierJournal"),
+          declared: t("visuals.skillsTierDeclared"),
+        },
+        ariaLabel: t("visuals.skillsAria"),
+      },
+      history: {
+        title: t("visuals.historyTitle"),
+        current: t("visuals.historyCurrent"),
+        undated:
+          history.undatedCount > 0
+            ? t("visuals.historyUndated", { count: history.undatedCount })
+            : null,
+        range:
+          history.fromIso && history.toIso
+            ? t("visuals.historyRange", {
+                from: dateFmt.format(new Date(`${history.fromIso}T00:00:00Z`)),
+                to: dateFmt.format(new Date(`${history.toIso}T00:00:00Z`)),
+              })
+            : null,
+        // One compact detail row per placed engagement, so the real dates are
+        // readable without a second history list underneath the card.
+        laneDetails: history.lanes.map((lane) => {
+          const entry = card.workHistory.find((h) => h.id === lane.id);
+          const from = entry?.startedAt
+            ? dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            : null;
+          const to = entry?.current
+            ? t("workHistoryCurrent")
+            : entry?.endedAt
+              ? dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              : null;
+          return from && to ? `${from} — ${to}` : (from ?? "");
+        }),
+        empty: t("visuals.historyEmpty"),
+        ariaLabel:
+          history.fromIso && history.toIso
+            ? t("visuals.historyAria", {
+                from: dateFmt.format(new Date(`${history.fromIso}T00:00:00Z`)),
+                to: dateFmt.format(new Date(`${history.toIso}T00:00:00Z`)),
+              })
+            : t("visuals.historyEmpty"),
       },
     },
   };

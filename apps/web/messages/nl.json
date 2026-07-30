@@ -6786,7 +6786,31 @@
     "workHistoryLabel": "Werkgeschiedenis",
     "workHistoryUnnamed": "Werkcontext",
     "workHistoryCurrent": "nu",
-    "documentsEmpty": "Nog geen documenten vastgelegd."
+    "documentsEmpty": "Nog geen documenten vastgelegd.",
+    "visuals": {
+      "evidenceTitle": "Werknotities in de tijd",
+      "evidenceHint": "Je werkjournaal-notities van de afgelopen {months} maanden.",
+      "evidenceEmpty": "Nog geen notities — je eerste werknotitie start deze grafiek.",
+      "evidenceTotal": "{count, plural, one {# notitie} other {# notities}} / {months} maanden",
+      "evidencePeak": "Hoogste: {count} in {month}",
+      "evidenceAria": "Werkjournaal-notities per maand, afgelopen {months} maanden.",
+      "skillsTitle": "Notities achter elke vaardigheid",
+      "skillsHint": "De balk laat zien hoeveel van je eigen werknotities die vaardigheid noemen. Het is geen beoordeling.",
+      "skillsEmpty": "Nog geen vaardigheden met werknotities.",
+      "skillsEntries": "{count, plural, one {# notitie} other {# notities}}",
+      "skillsNoEvidence": "Nog geen notities",
+      "skillsLegendTitle": "Wat de kleuren betekenen",
+      "skillsTierVerified": "Door anderen als juist gemarkeerd",
+      "skillsTierJournal": "Zichtbaar in je werknotities",
+      "skillsTierDeclared": "Zelf opgegeven — nog geen notities",
+      "skillsAria": "Vaardigheden en hoeveel van je werknotities elk daarvan noemen.",
+      "historyTitle": "Tijdlijn van werkgeschiedenis",
+      "historyCurrent": "Loopt nu",
+      "historyUndated": "Zonder datum: {count} — niet op de tijdlijn geplaatst",
+      "historyRange": "{from} – {to}",
+      "historyEmpty": "Nog geen werkperiodes vastgelegd.",
+      "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}."
+    }
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",

@@ -6786,7 +6786,31 @@
     "workHistoryLabel": "История работы",
     "workHistoryUnnamed": "Рабочий контекст",
     "workHistoryCurrent": "сейчас",
-    "documentsEmpty": "Документы пока не внесены."
+    "documentsEmpty": "Документы пока не внесены.",
+    "visuals": {
+      "evidenceTitle": "Рабочие записи по месяцам",
+      "evidenceHint": "Ваши записи рабочего журнала за последние {months} мес.",
+      "evidenceEmpty": "Записей пока нет — первая рабочая запись начнёт этот график.",
+      "evidenceTotal": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записей}} / {months} мес.",
+      "evidencePeak": "Больше всего: {count} ({month})",
+      "evidenceAria": "Записи рабочего журнала по месяцам, последние {months} мес.",
+      "skillsTitle": "Сколько записей за каждым навыком",
+      "skillsHint": "Полоса показывает, сколько ваших рабочих записей упоминают навык. Это не оценка.",
+      "skillsEmpty": "Пока нет навыков с рабочими записями.",
+      "skillsEntries": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записей}}",
+      "skillsNoEvidence": "Пока без записей",
+      "skillsLegendTitle": "Что означают цвета",
+      "skillsTierVerified": "Другие отметили как точное",
+      "skillsTierJournal": "Видно в ваших рабочих записях",
+      "skillsTierDeclared": "Вы указали — записей пока нет",
+      "skillsAria": "Навыки и сколько ваших рабочих записей упоминают каждый из них.",
+      "historyTitle": "Хронология трудовой истории",
+      "historyCurrent": "Идёт сейчас",
+      "historyUndated": "Без даты: {count} — на шкале не показаны",
+      "historyRange": "{from} – {to}",
+      "historyEmpty": "Рабочие периоды пока не записаны.",
+      "historyAria": "Рабочие периоды на шкале времени, с {from} по {to}."
+    }
   },
   "skillClarify": {
     "title": "Мои навыки",
