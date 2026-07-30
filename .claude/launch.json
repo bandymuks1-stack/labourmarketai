@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "acceptance",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "scripts/dev-acceptance.ts"],
+      "cwd": "apps/web",
+      "port": 3000
+    }
+  ]
+}

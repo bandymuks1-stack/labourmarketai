@@ -90,11 +90,17 @@ function main(): void {
   console.info(`[acceptance] ${describeAcceptanceEnv(childEnv)}`);
   console.info("[acceptance] starting next dev — production is not reachable.");
 
-  const child = spawn(
-    process.platform === "win32" ? "npx.cmd" : "npx",
-    ["next", "dev"],
-    { stdio: "inherit", env: childEnv, shell: false },
-  );
+  // Run Next's JS entry with THIS node binary rather than the `next` shim.
+  // On Windows the shim is `next.cmd`, and Node 24 refuses to spawn a `.cmd`
+  // without `shell: true` (EINVAL) — while `shell: true` would concatenate
+  // rather than escape the arguments. Resolving the entry point sidesteps both,
+  // and is identical on every platform.
+  const nextEntry = require.resolve("next/dist/bin/next");
+  const child = spawn(process.execPath, [nextEntry, "dev"], {
+    stdio: "inherit",
+    env: childEnv,
+    shell: false,
+  });
 
   child.on("exit", (code) => process.exit(code ?? 0));
   child.on("error", (err) => fail(`Failed to start next dev: ${err.message}`));
