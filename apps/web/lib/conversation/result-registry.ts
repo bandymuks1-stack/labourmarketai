@@ -137,11 +137,13 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     openedBy: ["worker.express-interest", "worker.what-next"],
     advancedRoute: "/dashboard/market-map",
     contexts: ["personal", "organization"],
-    // GATED: 8 of the 9 market components named in the owner command have zero
-    // importers and their data paths are NOT yet verified (dependency map U2).
-    // Stays `unverified` until phase E1 confirms real sources — otherwise this
-    // is exactly how placeholder data reaches the authenticated product.
-    dataReadiness: "unverified",
+    // VERIFIED: `lib/market-map/market-result.ts` aggregates REAL rows —
+    // open job_demands joined to their project's geography — and resolves
+    // coordinates through the canonical city table, falling back to a country
+    // centroid. No demo fallback: an empty market renders as empty. The
+    // landing's scripted scenario lives in a separate module tagged `demo` and
+    // cannot reach this path.
+    dataReadiness: "real",
   },
   {
     kind: "project",

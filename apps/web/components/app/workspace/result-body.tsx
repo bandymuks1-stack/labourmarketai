@@ -1,6 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+
+import { MarketMap } from "@/components/app/market-map/market-map";
+import { loadMarketResultAction } from "@/lib/market-map/market-result-actions";
+import type { MarketResultData } from "@/lib/market-map/market-result";
 
 import {
   canRenderInline,
@@ -83,7 +88,9 @@ function InlineResult({ kind }: { kind: ResultKind }) {
   const t = useTranslations("conversation.results");
 
   switch (kind) {
-    // Phase C wires the canonical Player Card here; phases D/E wire the rest.
+    case "market":
+      return <MarketInline />;
+    // Phase C wires the canonical Player Card here; the rest follow.
     default:
       return (
         <p className="text-basis text-text-muted" data-testid="result-body-pending">
@@ -91,4 +98,58 @@ function InlineResult({ kind }: { kind: ResultKind }) {
         </p>
       );
   }
+}
+
+/**
+ * THE MARKET RESULT, inline in the panel.
+ *
+ * The SAME canonical <MarketMap> the landing hero mounts — one engine, one
+ * geographic model, different mode. The data is real rows for this environment
+ * (`origin: "live"`); there is deliberately no demo fallback, so an empty
+ * market says so instead of borrowing the landing's scenario.
+ */
+function MarketInline() {
+  const t = useTranslations("conversation.results");
+  const [data, setData] = useState<MarketResultData | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadMarketResultAction()
+      .then((d) => {
+        if (!cancelled) setData(d);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (failed) {
+    return (
+      <p className="text-basis text-text-secondary" data-testid="market-error">
+        {t("marketError")}
+      </p>
+    );
+  }
+  if (!data) {
+    return (
+      <p className="text-basis text-text-muted" data-testid="market-loading">
+        {t("pendingInline")}
+      </p>
+    );
+  }
+  if (data.empty) {
+    // Honest empty: no rows is a real answer, and inventing demand here would
+    // be exactly the fabricated market this platform bans.
+    return (
+      <p className="text-basis text-text-secondary" data-testid="market-empty">
+        {t("marketEmpty")}
+      </p>
+    );
+  }
+
+  return <MarketMap view={data.view} mode="result" layer="demand" />;
 }

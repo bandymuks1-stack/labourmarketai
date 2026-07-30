@@ -11310,7 +11310,9 @@
       "openFull": "Volledig scherm openen",
       "fallbackUnverified": "Dit staat voorlopig op een eigen scherm — de databron is nog niet geverifieerd voor weergave hier.",
       "fallbackContext": "Dit resultaat is niet beschikbaar in de huidige context.",
-      "pendingInline": "Resultaat wordt voorbereid."
+      "pendingInline": "Resultaat wordt voorbereid.",
+      "marketEmpty": "Er zijn nu geen open behoeften met een locatie.",
+      "marketError": "Kon marktgegevens niet lezen."
     }
   },
   "landing": {
