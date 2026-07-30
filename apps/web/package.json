@@ -33,7 +33,8 @@
     "generate-activation-report": "tsx scripts/generate-activation-report.ts",
     "e2e": "playwright test",
     "e2e:local": "tsx scripts/e2e-local.ts",
-    "e2e:install": "playwright install chromium"
+    "e2e:install": "playwright install chromium",
+    "dev:acceptance": "tsx scripts/dev-acceptance.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
