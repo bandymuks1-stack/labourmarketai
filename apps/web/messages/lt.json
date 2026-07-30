@@ -11280,6 +11280,32 @@
       "editAgain": "Taisyti",
       "sending": "Siunčiama…",
       "sent": "Atsakymas išsiųstas."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Darbo kortelė"
+      },
+      "journal": {
+        "title": "Darbo žurnalas"
+      },
+      "calendar": {
+        "title": "Kalendorius"
+      },
+      "market": {
+        "title": "Rinka"
+      },
+      "project": {
+        "title": "Projektas"
+      },
+      "evidence": {
+        "title": "Įrodymai"
+      },
+      "reputation": {
+        "title": "Reputacija"
+      },
+      "invoice": {
+        "title": "Sąskaitos pagrindas"
+      }
     }
   },
   "landing": {

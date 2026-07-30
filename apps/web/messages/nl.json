@@ -11280,6 +11280,32 @@
       "editAgain": "Aanpassen",
       "sending": "Verzenden…",
       "sent": "Antwoord verzonden."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Werkkaart"
+      },
+      "journal": {
+        "title": "Werkjournaal"
+      },
+      "calendar": {
+        "title": "Agenda"
+      },
+      "market": {
+        "title": "Markt"
+      },
+      "project": {
+        "title": "Project"
+      },
+      "evidence": {
+        "title": "Bewijs"
+      },
+      "reputation": {
+        "title": "Reputatie"
+      },
+      "invoice": {
+        "title": "Factuurbasis"
+      }
     }
   },
   "landing": {

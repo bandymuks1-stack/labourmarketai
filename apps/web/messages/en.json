@@ -11280,6 +11280,32 @@
       "editAgain": "Edit",
       "sending": "Sending…",
       "sent": "Reply sent."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Player Card"
+      },
+      "journal": {
+        "title": "Work journal"
+      },
+      "calendar": {
+        "title": "Calendar"
+      },
+      "market": {
+        "title": "Market"
+      },
+      "project": {
+        "title": "Project"
+      },
+      "evidence": {
+        "title": "Evidence"
+      },
+      "reputation": {
+        "title": "Reputation"
+      },
+      "invoice": {
+        "title": "Invoice basis"
+      }
     }
   },
   "landing": {

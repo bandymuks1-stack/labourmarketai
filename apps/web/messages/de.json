@@ -11280,6 +11280,32 @@
       "editAgain": "Bearbeiten",
       "sending": "Senden…",
       "sent": "Antwort gesendet."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Arbeitskarte"
+      },
+      "journal": {
+        "title": "Arbeitsjournal"
+      },
+      "calendar": {
+        "title": "Kalender"
+      },
+      "market": {
+        "title": "Markt"
+      },
+      "project": {
+        "title": "Projekt"
+      },
+      "evidence": {
+        "title": "Nachweise"
+      },
+      "reputation": {
+        "title": "Reputation"
+      },
+      "invoice": {
+        "title": "Rechnungsgrundlage"
+      }
     }
   },
   "landing": {

@@ -11280,6 +11280,32 @@
       "editAgain": "Изменить",
       "sending": "Отправка…",
       "sent": "Ответ отправлен."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Рабочая карточка"
+      },
+      "journal": {
+        "title": "Журнал работ"
+      },
+      "calendar": {
+        "title": "Календарь"
+      },
+      "market": {
+        "title": "Рынок"
+      },
+      "project": {
+        "title": "Проект"
+      },
+      "evidence": {
+        "title": "Подтверждения"
+      },
+      "reputation": {
+        "title": "Репутация"
+      },
+      "invoice": {
+        "title": "Основание счёта"
+      }
     }
   },
   "landing": {
