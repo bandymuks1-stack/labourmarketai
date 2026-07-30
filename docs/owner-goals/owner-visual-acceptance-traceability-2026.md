@@ -61,8 +61,8 @@ Stulpelių reikšmės:
 | 4.2 | Pirmas ekranas rodo realią santrauką | LIVE | nevertinta atskirai | — | Opening brief live | Autentikuotas click-through | Brief screenshot su realiais duomenimis | `NOT_REVIEWED` |
 | 4.3 | Tik 1–3 kontekstiniai CTA | LIVE | nevertinta atskirai | — | ≤3 chips live | Autentikuotas click-through | Chips screenshot 2 būsenose | `NOT_REVIEWED` |
 | 4.4 | Viršuje tik erdvė, pokalbis, pranešimai, profilis | LIVE | nevertinta atskirai | — | Live | Autentikuotas click-through | Top bar screenshot 7 viewport | `NOT_REVIEWED` |
-| 5.1 | Player Card pasiekiama iš pirmo ekrano / avataro / komandos | LIVE | **savininkas nerado profesionalios kortelės** | Pasiekiamumas ≠ priimtinumas | Deep-link + chat komanda live | Kartu su §5.2 | Trys keliai į kortelę, screenshot kiekvienam | `OWNER_REJECTED` |
-| **5.2** | **Kortelės vizualika reali ir premium** | **LIVE (etapas 3 baigtas)** | **NEBAIGTA — nėra profesionalios Premium Player Card, trūksta grafikų** | **`toContain()` markerių patikros šaltinio tekste pateiktos kaip užbaigimas** | **Vertikali tekstinių dėžių eilė + 4 skaitiniai kvadratai + 1 žiedas (80 px). Jokių grafikų, įgūdžių projekcijų, įrodymų ryšių, istorijos laiko juostos** | **Kanoninės premium kortelės perdarymas: kompozicija, avataras, identitetas, vieta, prieinamumas, istorija, įrodyti įgūdžiai, įrodymų šaltiniai, dokumentų būsena, reputacijos statistika, paaiškinamos galimybės + profesionalūs grafikai ir duomenų vizualizacijos** | **Kortelės screenshot 7 viewport × 2 temos, landing ir autentikuotame produkte, su realiais duomenimis** | **`OWNER_REJECTED`** |
+| 5.1 | Player Card pasiekiama iš pirmo ekrano / avataro / komandos | LIVE | **savininkas nerado profesionalios kortelės** | Pasiekiamumas ≠ priimtinumas; be to §5.1 **nebuvo išspręstas** — deep-link vedė į UŽDARĄ akordeoną (A-17) | Pataisyta PR #924: `<details id="mano-cv-identity" open>`; guardas prirakina | Savininko peržiūra: avataras → „Mano kortelė" → kortelė matoma be papildomo paspaudimo | Autentikuotas production click-through 7 viewport × 2 temos | `OWNER_REVIEW_REQUIRED` |
+| **5.2** | **Kortelės vizualika reali ir premium** | **LIVE (etapas 3 baigtas)** | **NEBAIGTA — nėra profesionalios Premium Player Card, trūksta grafikų** | **`toContain()` markerių patikros šaltinio tekste pateiktos kaip užbaigimas** | **PR #923 + #924 (live production `51a78d6e`+): trys realios vizualizacijos — darbo įrašų 12 mėn. stulpelinė diagrama (`journal_entries.created_at`), įrašų-už-įgūdį juostos su šaltinių legenda (`journal_entry_skills`), darbo istorijos laiko juosta (`engagement_contexts` datos). Vieta, prieinamumas, dokumentai, reputacija — kaip anksčiau. Tekstinis istorijos sąrašas rodo tik tai, ko juosta negali padėti** | **Savininko vizualinis priėmimas. Atviri duomenų klausimai: A-16 (realios erdvės įrašai be datų → juosta rodo sąžiningą tuščią būseną)** | **Landing: 14 screenshot'ų 7 viewport × 2 temos + production DOM 364/364. Autentikuota production: DOM patikra atlikta (12 mėn., 8 realios įgūdžių juostos, 0 overflow, 0 sub-12px, 0 raw key)** | **`OWNER_REVIEW_REQUIRED`** |
 | 6.1 | Darbo registravimas tik per pokalbį | LIVE | nevertinta atskirai | — | Forma tik edit režimui | Autentikuotas click-through | Žurnalo puslapio screenshot | `NOT_REVIEWED` |
 | 6.2 | Jokių raw enum | LIVE | nevertinta atskirai | Tikrinta tik landing tekste | Landing'e enum'ų 0; autentikuotos pusės netikrinta | Autentikuotų ekranų grep + patikra | Screenshot žurnalo formos | `NOT_REVIEWED` |
 | 6.3 | Įgūdžio signalas paaiškinamas | DALINAI | **duomenų pateikimas neišbaigtas** | „DALINAI" nebuvo likusių blokatorių sąraše | Šaltinis rodomas, frazė nepabraukiama | Frazės paryškinimas + vizualus signalo→įgūdžio ryšys | Screenshot su paryškinta fraze | `OWNER_REJECTED` |
@@ -98,6 +98,8 @@ Stulpelių reikšmės:
 | **A-13** | **Etapas PAŠALINO vienintelę produkto duomenų vizualizaciją iš visų owner-visible paviršių.** `SupplyDemandChart` importuojamas tik iš `market-pulse.tsx`; `MarketPulse` išimtas iš landing PR #919; broliniai skydeliai liko tik `/dashboard/admin/market` (admin, §4.4 paslėptas). Chart bibliotekos `package.json` nėra. Landing'e `canvas` = 0, už ikoną didesnių SVG = 4 (2 dekoratyvūs, 1 žemėlapio forma, 1 readiness žiedas) | **ATVIRA — pirmas prioritetas** | 5.2 / 3.6 / 12 |
 | **A-14** | **`KONCEPCINIS PAVYZDYS — PAVYZDINIAI SKAIČIAI` gyvai production**, nors §3.5 vardija `Koncepcinis` kaip šalinamą. Harness'as tikrino tik `PLACEHOLDER` / `employee` / `owner`. Sprendimas — §3.6 realūs duomenys, NE etiketės paslėpimas (addendum §2) | **ATVIRA** | 3.5 / 3.6 / 11 |
 | **A-15** | **`§3.1 landing length` patikra yra tautologija** (`h > 0`) — visada PASS, nieko netvirtina, bet atrodo kaip §3.1 patikra | **ATVIRA** | 16 |
+| **A-16** | **Realios savininko erdvės `engagement_contexts` eilutės neturi `started_at`** — autentikuota production patikra parodė „Be datos: 4 — laiko juostoje nerodomi". Laiko juosta veikia (landing pavyzdyje ir kode), bet savininko duomenyse nėra ko dėti. Tai DUOMENŲ, ne kodo spraga; kortelė elgiasi sąžiningai | **ATVIRA** — reikia arba datų įvedimo per pokalbį, arba datų užpildymo esamose eilutėse | 5.2 / 7.2 |
+| **A-17** | **§5.1 niekada nebuvo išspręstas: kanoninė kortelė autentikuotame produkte buvo UŽDARAME `<details>` akordeone** (aukštis 39,6 px), todėl avataro meniu „Mano kortelė" deep-link nuvesdavo į 40 px antgalvį — pažodžiai savininko audito §5.1 defektas, nors atsekamumas rodė LIVE. Rasta autentikuotoje production patikroje 2026-07-30 | **IŠSPRĘSTA** PR #924 (`open` + guardas, mutation-tested) | 5.1 |
 
 ---
 
@@ -107,10 +109,12 @@ Ankstesnis „liko du savininko gate'ai" **netiesa**. Realus sąrašas:
 
 ### Agento darbas (ne savininko gate)
 
-1. **§5.2 profesionali kanoninė Premium Player Card** — kompozicija + grafikai
-   + įgūdžių projekcijos + įrodymų ryšiai (A-13).
-2. **Trūkstami grafikai ir paaiškinamos duomenų vizualizacijos** visuose
-   owner-visible paviršiuose (A-13).
+1. ~~**§5.2 profesionali kanoninė Premium Player Card**~~ — **ĮDIEGTA IR GYVA
+   production** (PR #923 + #924). Statusas: `OWNER_REVIEW_REQUIRED` — laukia
+   savininko vizualinio priėmimo, ne agento verdikto.
+2. **Trūkstami grafikai ir paaiškinamos duomenų vizualizacijos LIKUSIUOSE
+   paviršiuose** (kalendorius, žinutės, žemėlapis, dashboard) — A-13 dalis
+   kortelėje uždaryta, kitur atvira.
 3. **§12 pilnas owner-visible premium design pass** — hierarchija, kompozicija,
    tankis, būsenos, mobile↔desktop paritetas.
 4. **§7 / §8 / §9 Calendar / Messages / Map vizualinis ir informacinis lygis.**

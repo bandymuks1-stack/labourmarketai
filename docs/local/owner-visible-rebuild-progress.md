@@ -52,6 +52,54 @@ kad jis neegzistuoja; savininkas jį pateikė 2026-07-30.
 - Agento leidžiamas verdiktas iki tol — tik
   `OWNER_VISUAL_ACCEPTANCE_NOT_COMPLETE_OWNER_PRODUCTION_VISUAL_REVIEW_FAILED_<TIKSLŪS_LIKĘ_BLOKATORIAI>`.
 
+### ETAPAS 1 — §5.2 Premium Player Card + realios vizualizacijos (2026-07-30)
+
+PR [#923](https://github.com/bandymuks1-stack/labourmarketai/pull/923) merged
+(`51a78d6e`, production deploy `success`) + PR #924 (§5.1 regresija).
+
+**Kas atsirado kortelėje** — trys realios duomenų vizualizacijos, visos iš
+žmogaus PAČIO eilučių:
+
+| Vaizdas | Šaltinis | Sąžiningumas |
+|---|---|---|
+| Darbo įrašai laike (12 mėn. stulpelinė) | `journal_entries.created_at` (live) | mėnuo be įrašų = realus nulis, neišlyginamas |
+| Kiek darbo įrašų už kiekvieną įgūdį (juostos + šaltinių legenda) | `journal_entry_skills` → `skills.slug` | juostos ilgis = SKAIČIUS, ne balas; įgūdis su 0 įrašų paliekamas |
+| Darbo istorijos laiko juosta | `engagement_contexts` realios datos | be datos → NEDEDAMA, o suskaičiuojama |
+
+Senas tekstinis istorijos sąrašas dabar rodo tik tai, ko juosta negali padėti —
+faktas nekartojamas dukart.
+
+**Kodėl negali nudreifuoti**: `lib/player-card/evidence-visuals.ts` — pure,
+17 unit testų; landing pavyzdys eina per TUOS PAČIUS deriverius (negali turėti
+gražesnės fake diagramos) ir turi du įgūdžius be įrašų;
+`lib/guards/player-card-visualizations.test.ts` (19 testų) mutation-tested —
+4 sąmoningos regresijos davė 4 tikslius FAIL'us.
+
+**§16 harness be tautologijų**: `scripts/qa-player-card-visuals.mjs` — 26
+patikros × 7 viewport × 2 temos = **364/364** production landing'e, ir jis
+IŠSPAUSDINA savo apimtį (maršrutai, autentikacijos būsena, ko NEtikrino).
+
+**Autentikuota production patikra (savininko sesija, read-only DOM):**
+kortelė yra, vizualizacijų blokas yra, 12 mėn. juosta live (realūs 17 įrašų),
+8 realios įgūdžių juostos su realiais lygiais (100/80/60/60/40/20/20/20 %),
+0 horizontalaus overflow, 0 sub-12px, 0 raw i18n key, 0 medalių, 0 PLACEHOLDER.
+
+**Toje pačioje patikroje rasti 2 realūs defektai, kurių testai nerodė:**
+
+- **A-17 (IŠSPRĘSTA, PR #924)** — kanoninė kortelė autentikuotame produkte buvo
+  UŽDARAME `<details>` akordeone (39,6 px), t. y. avataro „Mano kortelė"
+  deep-link nuvesdavo į antgalvį. Tai pažodžiai savininko §5.1 defektas, nors
+  atsekamumas rodė LIVE. Dabar `open` + guardas.
+- **A-16 (ATVIRA, duomenų spraga)** — savininko erdvės `engagement_contexts`
+  eilutės neturi `started_at`, todėl laiko juosta sąžiningai rodo
+  „Be datos: 4 — laiko juostoje nerodomi". Kodas veikia; datų nėra ką dėti.
+
+Evidence: `docs/audits/evidence/player-card-visuals-2026/`
+(`landing-card-*` lokalus build, `prod-landing-card-*` production; 7 viewport ×
+light/dark).
+
+**Etapo statusas: `OWNER_REVIEW_REQUIRED`.** Ne `completed`, ne `verified`.
+
 ### Darbo prioritetas po audito
 
 1. Profesionali kanoninė Premium Player Card.
