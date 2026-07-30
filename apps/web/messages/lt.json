@@ -11551,7 +11551,8 @@
       "decisionField": {
         "whyHere": "Kodėl čia",
         "whyNow": "Kodėl dabar",
-        "whyYou": "Kodėl tau"
+        "whyYou": "Kodėl tau",
+        "whyNotElsewhere": "Kodėl ne kitur"
       },
       "reason": {
         "r1a": "Tikrinu atvirus poreikius pagal rolę ir regioną…",
@@ -11569,21 +11570,28 @@
           "whyHere": "Rotterdame ir Eindhovene atvirų poreikių daugiau nei laisvų elektrikų.",
           "whyNow": "Projektai startuoja per artimiausias 4 savaites.",
           "whyYou": "Tavo darbo žurnale — 14 įrašų, pagrindžiančių elektros darbus.",
-          "next": "Peržiūrėti šiuos poreikius"
+          "next": "Peržiūrėti šiuos poreikius",
+          "whyNotElsewhere": "Belgijoje ir Vokietijoje poreikis mažesnis, o konkurencija dėl tų pačių žmonių didesnė."
         },
         "d2": {
           "whyHere": "Stavangerio ir Bergeno jūrinėje pramonėje trūksta sertifikuotų suvirintojų.",
           "whyNow": "Rangos ciklas prasideda prieš žiemos sezoną.",
           "whyYou": "Turi suvirinimo įrodymų ir esi pasirengęs kelionei.",
-          "next": "Pamatyti reikalavimus"
+          "next": "Pamatyti reikalavimus",
+          "whyNotElsewhere": "Danijoje projektų mažiau, Lenkijoje — daugiau vietinių kandidatų tai pačiai rolei."
         },
         "d3": {
           "whyHere": "Vilniuje ir Kaune daugiausia žmonių, pasirengusių pradėti.",
           "whyNow": "Jų prieinamumas patvirtintas per pastarąsias 2 savaites.",
           "whyYou": "Tavo poreikis atitinka jų patvirtintus įgūdžius.",
-          "next": "Peržiūrėti žmones"
+          "next": "Peržiūrėti žmones",
+          "whyNotElsewhere": "Latvijoje ir Estijoje laisvų žmonių mažiau, o pradžios terminai vėlesni."
         }
-      }
+      },
+      "askPlaceholder": "Paklausk savo klausimo…",
+      "askSubmit": "Klausti",
+      "unmatched": "Šioje demonstracijoje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
+      "confidenceLabel": "Patikimumas"
     }
   },
   "workspace": {

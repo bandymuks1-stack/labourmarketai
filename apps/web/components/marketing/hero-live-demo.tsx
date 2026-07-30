@@ -9,6 +9,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { MarketMap } from "@/components/app/market-map/market-map";
 import {
   LANDING_SCENARIOS,
+  routeQuestion,
   type LandingScenario,
 } from "@/components/app/market-map/landing-scenario";
 import { topRegion } from "@/components/app/market-map/market-map-model";
@@ -51,6 +52,8 @@ export function HeroLiveDemo() {
   const [typed, setTyped] = useState("");
   const [steps, setSteps] = useState(0);
   const [reveal, setReveal] = useState(0);
+  const [draft, setDraft] = useState("");
+  const [unmatched, setUnmatched] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const scenario: LandingScenario = LANDING_SCENARIOS[index];
@@ -66,10 +69,11 @@ export function HeroLiveDemo() {
 
   /** Run one scenario end to end. */
   const play = useCallback(
-    (i: number) => {
+    (i: number, asked?: string) => {
       clearTimers();
       setIndex(i);
-      const text = t(`scenario.${LANDING_SCENARIOS[i].promptKey}`);
+      setUnmatched(false);
+      const text = asked ?? t(`scenario.${LANDING_SCENARIOS[i].promptKey}`);
 
       const reduced =
         typeof window !== "undefined" &&
@@ -121,6 +125,21 @@ export function HeroLiveDemo() {
       after(reasonMs + total * 150 + 420, () => setPhase("decided"));
     },
     [after, clearTimers, t],
+  );
+
+  /** The visitor asks their own question — the answer is routed from it. */
+  const ask = useCallback(
+    (text: string) => {
+      const hit = routeQuestion(text);
+      if (!hit) {
+        // Say so rather than answering a question nobody asked.
+        setUnmatched(true);
+        return;
+      }
+      setUnmatched(false);
+      play(LANDING_SCENARIOS.indexOf(hit), text);
+    },
+    [play],
   );
 
   // Auto-play the first scenario once on mount, then stop.
@@ -206,6 +225,40 @@ export function HeroLiveDemo() {
                 ))}
               </dl>
 
+              {/* CONFIDENCE — a recommendation without one asks to be trusted
+                  blindly. This one makes a claim the visitor can weigh. */}
+              <div className="mt-3 flex items-center gap-2.5 border-t border-ink-600 pt-2.5">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  {t("confidenceLabel")}
+                </span>
+                <span
+                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-700"
+                  aria-hidden
+                >
+                  <span
+                    className="block h-full rounded-full bg-brand-cyan"
+                    style={{ width: `${Math.round(scenario.confidence * 100)}%` }}
+                  />
+                </span>
+                <span
+                  className="font-mono text-meta text-brand-cyan"
+                  data-testid="hero-confidence"
+                >
+                  {Math.round(scenario.confidence * 100)}%
+                </span>
+              </div>
+
+              {/* WHY NOT SOMEWHERE ELSE — the trade-off the AI already weighed.
+                  Without it a recommendation hides the alternatives it beat. */}
+              <div className="mt-2.5 flex flex-col gap-0.5">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  {t("decisionField.whyNotElsewhere")}
+                </span>
+                <span className="text-basis text-text-secondary">
+                  {t(`decision.${scenario.decisionKey}.whyNotElsewhere`)}
+                </span>
+              </div>
+
               <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-ink-600 pt-2.5">
                 {region.anchors.slice(0, 3).map((a) => (
                   <li key={a.id} className="text-meta text-text-muted">
@@ -230,8 +283,40 @@ export function HeroLiveDemo() {
           ) : null}
         </div>
 
-        {/* Ask another question — the visitor drives the product themselves. */}
-        <div className="mt-auto flex flex-wrap gap-1.5 pt-3">
+        {/* THE VISITOR ASKS THEIR OWN QUESTION. Different questions take
+            different reasoning paths, different map layers and different
+            decisions — this is a session, not a replay. */}
+        <form
+          className="mt-auto flex gap-2 pt-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            ask(draft);
+          }}
+        >
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={t("askPlaceholder")}
+            aria-label={t("askPlaceholder")}
+            data-testid="hero-ask-input"
+            className="min-h-11 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
+          />
+          <button
+            type="submit"
+            data-testid="hero-ask-submit"
+            className="min-h-11 shrink-0 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            {t("askSubmit")}
+          </button>
+        </form>
+
+        {unmatched ? (
+          <p className="text-meta text-state-amber" data-testid="hero-unmatched">
+            {t("unmatched")}
+          </p>
+        ) : null}
+
+        <div className="flex flex-wrap gap-1.5 pt-1">
           {LANDING_SCENARIOS.map((s, i) => (
             <button
               key={s.id}

@@ -64,6 +64,38 @@ export interface LandingScenario {
    * to do next. Keys under `landing.hero.decision`.
    */
   readonly decisionKey: string;
+  /**
+   * How strongly the system stands behind this recommendation, 0..1.
+   *
+   * Shown to the visitor. A recommendation without a stated confidence asks to
+   * be trusted blindly; one that admits 0.72 is making a claim a person can
+   * weigh. Derived here from how much the underlying signal actually supports
+   * the answer — never a decorative number.
+   */
+  readonly confidence: number;
+  /** Terms that route a free-text question to this scenario. */
+  readonly match: readonly string[];
+}
+
+/**
+ * Route what the visitor actually typed to a scenario.
+ *
+ * Deliberately a transparent keyword match, not a fake "AI understood you":
+ * the landing runs no model, and pretending otherwise would be the fabricated
+ * intelligence this platform bans. What IS real is that the reasoning path,
+ * the map layer and the decision all change with the question — the visitor
+ * drives, and different questions genuinely produce different work.
+ *
+ * Returns null when nothing matches, so the hero can say so honestly instead
+ * of silently answering a question that was never asked.
+ */
+export function routeQuestion(text: string): LandingScenario | null {
+  const q = text.toLowerCase().trim();
+  if (!q) return null;
+  for (const s of LANDING_SCENARIOS) {
+    if (s.match.some((m) => q.includes(m))) return s;
+  }
+  return null;
 }
 
 const NL_ELECTRICIANS: MarketMapView = {
@@ -176,6 +208,8 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r1",
     reasoningKeys: ["r1a", "r1b", "r1c"],
     decisionKey: "d1",
+    confidence: 0.86,
+    match: ["elektrik", "electric", "электрик", "elektro"],
   },
   {
     id: "welders-nordic",
@@ -186,6 +220,8 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r2",
     reasoningKeys: ["r2a", "r2b", "r2c"],
     decisionKey: "d2",
+    confidence: 0.74,
+    match: ["suvirin", "weld", "сварщик", "lasser", "schweiss", "schweiß"],
   },
   {
     id: "people-baltic",
@@ -196,5 +232,7 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r3",
     reasoningKeys: ["r3a", "r3b", "r3c"],
     decisionKey: "d3",
+    confidence: 0.68,
+    match: ["laisv", "available", "people", "žmon", "работник", "mensen", "verfügbar"],
   },
 ];

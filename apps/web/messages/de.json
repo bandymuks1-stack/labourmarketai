@@ -11551,7 +11551,8 @@
       "decisionField": {
         "whyHere": "Why here",
         "whyNow": "Why now",
-        "whyYou": "Why you"
+        "whyYou": "Why you",
+        "whyNotElsewhere": "Why not elsewhere"
       },
       "reason": {
         "r1a": "Checking open needs by role and region…",
@@ -11569,21 +11570,28 @@
           "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
           "whyNow": "Projects start within the next 4 weeks.",
           "whyYou": "Your work journal holds 14 entries backing electrical work.",
-          "next": "Review these needs"
+          "next": "Review these needs",
+          "whyNotElsewhere": "Belgium and Germany show lower demand and more competition for the same people."
         },
         "d2": {
           "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
           "whyNow": "The contracting cycle opens before the winter season.",
           "whyYou": "You have welding evidence and are ready to travel.",
-          "next": "See the requirements"
+          "next": "See the requirements",
+          "whyNotElsewhere": "Denmark has fewer projects; Poland has more local candidates for the same role."
         },
         "d3": {
           "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
           "whyNow": "Their availability was confirmed in the last 2 weeks.",
           "whyYou": "Your need matches their evidenced skills.",
-          "next": "Review these people"
+          "next": "Review these people",
+          "whyNotElsewhere": "Latvia and Estonia hold fewer available people and later start dates."
         }
-      }
+      },
+      "askPlaceholder": "Ask your own question…",
+      "askSubmit": "Ask",
+      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "confidenceLabel": "Confidence"
     }
   },
   "workspace": {
