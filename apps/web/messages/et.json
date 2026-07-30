@@ -1704,7 +1704,8 @@
       "historyUndated": "[EN] Without a date: {count} — not placed on the timeline",
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
-      "historyAria": "[EN] Work periods on a time band, from {from} to {to}."
+      "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
+      "skillsScaleNote": "Riba pikkus näitab iga oskuse taga olevate töökirjete arvu (täisriba = {scale}+), mitte oskuse hinnet."
     }
   },
   "projects": {

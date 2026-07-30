@@ -1704,7 +1704,8 @@
       "historyUndated": "Uden dato: {count} — ikke placeret på tidslinjen",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Ingen arbejdsperioder registreret endnu.",
-      "historyAria": "Arbejdsperioder på en tidslinje, fra {from} til {to}."
+      "historyAria": "Arbejdsperioder på en tidslinje, fra {from} til {to}.",
+      "skillsScaleNote": "Bjælkens længde er antallet af dine arbejdsregistreringer bag hver færdighed (fuld bjælke = {scale}+), ikke en færdighedsvurdering."
     }
   },
   "projects": {

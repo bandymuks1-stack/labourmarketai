@@ -1704,7 +1704,8 @@
       "historyUndated": "[EN] Without a date: {count} — not placed on the timeline",
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
-      "historyAria": "[EN] Work periods on a time band, from {from} to {to}."
+      "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
+      "skillsScaleNote": "Długość paska to liczba Twoich wpisów pracy stojących za każdą umiejętnością (pełny pasek = {scale}+), a nie ocena umiejętności."
     }
   },
   "projects": {

@@ -6809,7 +6809,8 @@
       "historyUndated": "Zonder datum: {count} — niet op de tijdlijn geplaatst",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Nog geen werkperiodes vastgelegd.",
-      "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}."
+      "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}.",
+      "skillsScaleNote": "De balklengte is het aantal werkregistraties achter elke vaardigheid (volle balk = {scale}+), geen vaardigheidsscore."
     }
   },
   "skillClarify": {

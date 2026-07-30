@@ -6809,7 +6809,8 @@
       "historyUndated": "Without a date: {count} — not placed on the timeline",
       "historyRange": "{from} – {to}",
       "historyEmpty": "No work periods recorded yet.",
-      "historyAria": "Work periods on a time band, from {from} to {to}."
+      "historyAria": "Work periods on a time band, from {from} to {to}.",
+      "skillsScaleNote": "Bar length is the number of your work records behind each skill (a full bar = {scale}+), not a skill score."
     }
   },
   "skillClarify": {

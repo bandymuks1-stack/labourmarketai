@@ -6809,7 +6809,8 @@
       "historyUndated": "Ohne Datum: {count} — nicht auf der Zeitleiste dargestellt",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Noch keine Arbeitszeiträume erfasst.",
-      "historyAria": "Arbeitszeiträume auf einer Zeitleiste, von {from} bis {to}."
+      "historyAria": "Arbeitszeiträume auf einer Zeitleiste, von {from} bis {to}.",
+      "skillsScaleNote": "Die Balkenlänge ist die Anzahl Ihrer Arbeitseinträge hinter jeder Fähigkeit (voller Balken = {scale}+), keine Fähigkeitsbewertung."
     }
   },
   "skillClarify": {

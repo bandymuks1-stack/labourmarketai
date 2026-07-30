@@ -6809,7 +6809,8 @@
       "historyUndated": "Be datos: {count} — laiko juostoje nerodomi",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Dar nėra įrašytų darbo laikotarpių.",
-      "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}."
+      "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}.",
+      "skillsScaleNote": "Juostos ilgis — tai darbo įrašų skaičius, pagrindžiantis kiekvieną įgūdį (pilna juosta = {scale}+), o ne įgūdžio balas."
     }
   },
   "skillClarify": {
