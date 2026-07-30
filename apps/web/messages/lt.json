@@ -11591,7 +11591,22 @@
       "askPlaceholder": "Paklausk savo klausimo…",
       "askSubmit": "Klausti",
       "unmatched": "Šioje demonstracijoje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
-      "confidenceLabel": "Patikimumas"
+      "confidenceLabel": "Patikimumas",
+      "previewLabel": "Tinkamiausias žmogus",
+      "previewName": "Jonas P.",
+      "previewRole": "Elektrikas · Vilnius · Laisvas nuo rugsėjo",
+      "previewMetric": {
+        "entries": "Darbo įrašai",
+        "skills": "Pagrįsti įgūdžiai",
+        "years": "Metai"
+      },
+      "previewValue": {
+        "entries": "14",
+        "skills": "3",
+        "years": "7"
+      },
+      "persistAction": "Išsaugoti šį rezultatą",
+      "persistWhy": "Paskyros reikia tik norint išsaugoti, kreiptis ar susisiekti — peržiūrėti gali ir be jos."
     }
   },
   "workspace": {

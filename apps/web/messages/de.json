@@ -11591,7 +11591,22 @@
       "askPlaceholder": "Ask your own question…",
       "askSubmit": "Ask",
       "unmatched": "In this demonstration I answer about electricians, welders and available people.",
-      "confidenceLabel": "Confidence"
+      "confidenceLabel": "Confidence",
+      "previewLabel": "Best matching person",
+      "previewName": "Jonas P.",
+      "previewRole": "Electrician · Vilnius · Available from September",
+      "previewMetric": {
+        "entries": "Work records",
+        "skills": "Evidenced skills",
+        "years": "Years"
+      },
+      "previewValue": {
+        "entries": "14",
+        "skills": "3",
+        "years": "7"
+      },
+      "persistAction": "Save this result",
+      "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
     }
   },
   "workspace": {

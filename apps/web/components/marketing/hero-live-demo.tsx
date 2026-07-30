@@ -43,7 +43,22 @@ import { topRegion } from "@/components/app/market-map/market-map-model";
  * responding; `decided` states a decision that answers why here, why now, why
  * you, and what to do next — with the action available immediately.
  */
-type Phase = "idle" | "typing" | "reasoning" | "reacting" | "decided";
+type Phase =
+  | "idle"
+  | "typing"
+  | "reasoning"
+  | "reacting"
+  | "decided"
+  /**
+   * SESSION ZERO. The decision does not dead-end at a signup wall — it
+   * CONTINUES into the product: the visitor steps from the decision to the
+   * people behind it, still on the landing, still without an account.
+   *
+   * Signup is the persistence layer, not the destination. It is asked for only
+   * when the visitor wants to keep something (save, apply, contact, export) —
+   * never to see the next honest step.
+   */
+  | "continued";
 
 export function HeroLiveDemo() {
   const t = useTranslations("landing.hero");
@@ -57,7 +72,8 @@ export function HeroLiveDemo() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const scenario: LandingScenario = LANDING_SCENARIOS[index];
-  const decided = phase === "decided";
+  const decided = phase === "decided" || phase === "continued";
+  const continued = phase === "continued";
 
   const clearTimers = useCallback(() => {
     timers.current.forEach(clearTimeout);
@@ -269,19 +285,75 @@ export function HeroLiveDemo() {
               </ul>
 
               {/* IMMEDIATE ACTION — the decision is actionable right here. */}
-              <Link
-                // Locale-aware: a hardcoded /lt/ would send every other locale
-                // to the wrong place.
-                href="/auth/signup"
-                data-testid="hero-next-action"
-                className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                {t(`decision.${scenario.decisionKey}.next`)}
-                <ArrowRight className="size-3.5 shrink-0" aria-hidden />
-              </Link>
+              {/* The decision continues INTO the product. No account needed to
+                  take the next honest step. */}
+              {!continued ? (
+                <button
+                  type="button"
+                  onClick={() => setPhase("continued")}
+                  data-testid="hero-next-action"
+                  className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  {t(`decision.${scenario.decisionKey}.next`)}
+                  <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>
+
+        {/* CONTINUATION — the session keeps going: decision -> the people
+            behind it, as a COMPACT Player Card preview. The full card lives in
+            the authenticated ResultPanel; this is the preview that earns it. */}
+        {continued ? (
+          <div
+            className="rounded-card border border-ink-500 bg-ink-800/50 p-3.5"
+            data-testid="hero-player-preview"
+          >
+            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("previewLabel")}
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              <span
+                aria-hidden
+                className="grid size-11 shrink-0 place-items-center rounded-full border border-brand-cyan/40 bg-brand-cyan/10 font-display text-card-title font-semibold text-brand-cyan"
+              >
+                J
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-display text-card-title font-semibold text-text-primary">
+                  {t("previewName")}
+                </p>
+                <p className="truncate text-meta text-text-secondary">
+                  {t("previewRole")}
+                </p>
+              </div>
+            </div>
+            <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-ink-600 pt-2.5">
+              {(["entries", "skills", "years"] as const).map((k) => (
+                <div key={k} className="flex flex-col">
+                  <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t(`previewMetric.${k}`)}
+                  </dt>
+                  <dd className="font-display text-card-title font-semibold text-text-primary">
+                    {t(`previewValue.${k}`)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {/* PERSISTENCE, not a wall: the account is asked for only to KEEP
+                something — never to see the next step. */}
+            <Link
+              href="/auth/signup"
+              data-testid="hero-persist-action"
+              className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-brand-blue px-4 text-support font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10"
+            >
+              {t("persistAction")}
+              <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+            </Link>
+            <p className="mt-1.5 text-meta text-text-muted">{t("persistWhy")}</p>
+          </div>
+        ) : null}
 
         {/* THE VISITOR ASKS THEIR OWN QUESTION. Different questions take
             different reasoning paths, different map layers and different
