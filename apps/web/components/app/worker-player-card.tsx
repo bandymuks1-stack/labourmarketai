@@ -11,6 +11,19 @@ import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
 import { ReadinessRing } from "@/components/app/readiness-ring";
 import {
+  EvidenceTimelineChart,
+  type EvidenceChartLabels,
+} from "@/components/app/player-card/evidence-timeline-chart";
+import {
+  SkillEvidenceChart,
+  type SkillEvidenceLabels,
+} from "@/components/app/player-card/skill-evidence-chart";
+import {
+  WorkHistoryTimeline,
+  type HistoryTimelineLabels,
+} from "@/components/app/player-card/work-history-timeline";
+import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import {
   deriveWorkerReadiness,
   missingReadinessPillars,
   type ReadinessLevel,
@@ -108,6 +121,16 @@ export interface PlayerCardLabels {
       workCard: string;
     };
     nextLabel: string;
+  };
+  /**
+   * §5.2 VISUALIZATIONS — resolved copy for the three real data views. Built
+   * in ONE place (`buildPlayerCardLabels`) so every mount of the card carries
+   * the same charts with the same words.
+   */
+  visuals: {
+    evidence: EvidenceChartLabels;
+    skills: SkillEvidenceLabels;
+    history: HistoryTimelineLabels;
   };
 }
 
@@ -208,6 +231,21 @@ export function WorkerPlayerCard({
   const namedHistory = card.workHistory.filter(
     (h) => (h.organizationName ?? h.title ?? "").trim().length > 0,
   );
+  /**
+   * §5.2 the work history also becomes a real time band. Derived here from the
+   * SAME rows the text list uses, so the picture and the list can never
+   * disagree; the deriver is pure and unit-tested.
+   */
+  const historyTimeline = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  /**
+   * Premium self-check (owner post-deploy review): the card used to print the
+   * work history twice — once as a text list and, after this stage, once as a
+   * time band. The list now carries ONLY what the band cannot place (a named
+   * engagement with no start date), so no fact is stated twice and no row is
+   * filler.
+   */
+  const placedHistoryIds = new Set(historyTimeline.lanes.map((l) => l.id));
+  const unplacedHistory = namedHistory.filter((h) => !placedHistoryIds.has(h.id));
   return (
     <section
       className={cn(
@@ -384,8 +422,29 @@ export function WorkerPlayerCard({
         ) : null}
       </div>
 
+      {/* ── §5.2 EVIDENCE VIEWS — the card's real data visualizations.
+            Growth over time and per-skill strength sit side by side on wide
+            screens and stack on a phone; both read from the worker's OWN rows
+            and both state an honest empty case instead of an empty frame. ── */}
+      <div
+        className="grid gap-3 lg:grid-cols-2"
+        data-testid="player-card-visualizations"
+      >
+        <EvidenceTimelineChart
+          months={card.evidenceTimeline}
+          labels={labels.visuals.evidence}
+        />
+        <SkillEvidenceChart
+          skills={card.skillEvidence}
+          labels={labels.visuals.skills}
+        />
+      </div>
+
+      {/* ── §5.2 WORK HISTORY as a real time band (the text list follows) ── */}
+      <WorkHistoryTimeline timeline={historyTimeline} labels={labels.visuals.history} />
+
       {/* ── Honest dimensions (real counts, plain zeros) ── */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
           testid="player-card-skills"
           value={String(card.skillsDeclared)}
@@ -420,13 +479,13 @@ export function WorkerPlayerCard({
             engagement spine. Newest first, bounded to the most recent few:
             the card states a history, it does not become a CV page. An empty
             history renders nothing (it is a fact, not a gap to pad). */}
-      {namedHistory.length > 0 ? (
+      {unplacedHistory.length > 0 ? (
         <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {labels.workHistoryLabel}
           </span>
           <ul className="flex flex-col gap-1">
-            {namedHistory.slice(0, 3).map((h) => (
+            {unplacedHistory.slice(0, 3).map((h) => (
               <li
                 key={h.id}
                 className="flex flex-wrap items-baseline gap-x-2 text-basis text-text-primary"

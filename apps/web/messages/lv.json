@@ -1681,7 +1681,31 @@
     "workHistoryLabel": "[EN] Work history",
     "workHistoryUnnamed": "[EN] Work context",
     "workHistoryCurrent": "[EN] now",
-    "documentsEmpty": "[EN] No documents recorded yet."
+    "documentsEmpty": "[EN] No documents recorded yet.",
+    "visuals": {
+      "evidenceTitle": "[EN] Work records over time",
+      "evidenceHint": "[EN] Work-journal entries you recorded over the last {months} months.",
+      "evidenceEmpty": "[EN] No records yet — your first work record starts this chart.",
+      "evidenceTotal": "[EN] {count, plural, one {# entry} other {# entries}} / {months} months",
+      "evidencePeak": "[EN] Busiest: {count} in {month}",
+      "evidenceAria": "[EN] Work-journal records per month over the last {months} months.",
+      "skillsTitle": "[EN] Records behind each skill",
+      "skillsHint": "[EN] The bar shows how many of your own work records mention that skill. It is not a rating.",
+      "skillsEmpty": "[EN] No skills with work records yet.",
+      "skillsEntries": "[EN] {count, plural, one {# record} other {# records}}",
+      "skillsNoEvidence": "[EN] No records yet",
+      "skillsLegendTitle": "[EN] What the colours mean",
+      "skillsTierVerified": "[EN] Marked accurate by others",
+      "skillsTierJournal": "[EN] Visible in your work records",
+      "skillsTierDeclared": "[EN] You listed it — no records yet",
+      "skillsAria": "[EN] Skills and how many of your work records mention each one.",
+      "historyTitle": "[EN] Work history timeline",
+      "historyCurrent": "[EN] Running now",
+      "historyUndated": "[EN] Without a date: {count} — not placed on the timeline",
+      "historyRange": "[EN] {from} – {to}",
+      "historyEmpty": "[EN] No work periods recorded yet.",
+      "historyAria": "[EN] Work periods on a time band, from {from} to {to}."
+    }
   },
   "projects": {
     "map": {

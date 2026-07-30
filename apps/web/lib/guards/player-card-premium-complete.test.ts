@@ -152,7 +152,20 @@ describe("§5.2 premium self-check — no zero-as-verdict, no repeated placehold
     expect(CARD).not.toMatch(/\{h\.organizationName \?\? h\.title \?\? labels\.workHistoryUnnamed\}/);
   });
 
-  it("the section disappears entirely when no row can be named", () => {
-    expect(CARD).toMatch(/namedHistory\.length > 0 \?/);
+  /**
+   * §5.2 stage 1 (post-postmortem) TIGHTENED this rule. The history is now a
+   * real time band, so the old text list may not restate what the band already
+   * shows: it renders ONLY named engagements the band could not place, and
+   * disappears when there are none. Stating the same engagement twice is the
+   * filler pattern the owner rejected.
+   */
+  it("the text list carries ONLY what the time band cannot place", () => {
+    expect(CARD).toMatch(/const placedHistoryIds = new Set\(/);
+    expect(CARD).toMatch(
+      /const unplacedHistory = namedHistory\.filter\(\(h\) => !placedHistoryIds\.has\(h\.id\)\)/,
+    );
+    expect(CARD).toMatch(/unplacedHistory\.length > 0 \?/);
+    // …and it may never re-render the full named list.
+    expect(CARD).not.toMatch(/namedHistory\.slice\(/);
   });
 });
