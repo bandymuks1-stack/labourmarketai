@@ -50,6 +50,20 @@ export interface LandingScenario {
   readonly view: MarketMapView;
   /** i18n key for the result card headline. */
   readonly resultKey: string;
+  /**
+   * The AI's REASONING, surfaced step by step while it works.
+   *
+   * A spinner says "wait"; these say WHAT is being weighed. That difference is
+   * the whole point of the hero: the visitor should watch the system think,
+   * not watch a loading state. Keys under `landing.hero.reason`.
+   */
+  readonly reasoningKeys: readonly string[];
+  /**
+   * The DECISION, not a numeric summary. Every result answers the four
+   * questions a person actually has: why this place, why now, why me, and what
+   * to do next. Keys under `landing.hero.decision`.
+   */
+  readonly decisionKey: string;
 }
 
 const NL_ELECTRICIANS: MarketMapView = {
@@ -160,6 +174,8 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     layer: "demand",
     view: NL_ELECTRICIANS,
     resultKey: "r1",
+    reasoningKeys: ["r1a", "r1b", "r1c"],
+    decisionKey: "d1",
   },
   {
     id: "welders-nordic",
@@ -168,6 +184,8 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     layer: "demand",
     view: NORDIC_WELDERS,
     resultKey: "r2",
+    reasoningKeys: ["r2a", "r2b", "r2c"],
+    decisionKey: "d2",
   },
   {
     id: "people-baltic",
@@ -176,5 +194,7 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     layer: "people",
     view: BALTIC_PEOPLE,
     resultKey: "r3",
+    reasoningKeys: ["r3a", "r3b", "r3c"],
+    decisionKey: "d3",
   },
 ];

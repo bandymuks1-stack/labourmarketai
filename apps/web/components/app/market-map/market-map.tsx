@@ -45,6 +45,7 @@ export function MarketMap({
   selectedCode = null,
   onSelectRegion,
   className = "",
+  revealCount,
 }: {
   view: MarketMapView;
   mode?: MarketMapMode;
@@ -53,6 +54,15 @@ export function MarketMap({
   selectedCode?: string | null;
   onSelectRegion?: (code: string | null) => void;
   className?: string;
+  /**
+   * How many anchors are currently drawn, counted across the whole view.
+   *
+   * The market REACTING is the point: signals land one after another rather
+   * than the full answer blinking into place, which is what makes the hero read
+   * as a system working instead of an image loading. Leave undefined to draw
+   * everything at once (the authenticated surfaces do).
+   */
+  revealCount?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletTypes.Map | null>(null);
@@ -109,11 +119,16 @@ export function MarketMap({
 
     group.clearLayers();
 
+    let drawn = 0;
+    const limit = revealCount ?? Number.POSITIVE_INFINITY;
+
     for (const region of view.regions) {
       const anchors = anchorsForLayer(region, layer);
       const dimmed = selectedCode !== null && selectedCode !== region.code;
 
       for (const a of anchors) {
+        if (drawn >= limit) break;
+        drawn += 1;
         // Radius encodes the aggregate. sqrt keeps a 20-person anchor from
         // rendering 20x the area of a 1-person anchor — area, not radius, is
         // what the eye reads as quantity.
@@ -140,7 +155,7 @@ export function MarketMap({
         circle.addTo(group);
       }
     }
-  }, [ready, view, layer, selectedCode, onSelectRegion]);
+  }, [ready, view, layer, selectedCode, onSelectRegion, revealCount]);
 
   // ── fly to the selected region ────────────────────────────────────────────
   useEffect(() => {

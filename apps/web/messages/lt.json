@@ -11545,6 +11545,44 @@
         "r1": "Didžiausia elektrikų paklausa — Nyderlanduose",
         "r2": "Suvirintojų trūksta Norvegijos pakrantėje",
         "r3": "Daugiausia laisvų darbuotojų — Baltijos šalyse"
+      },
+      "reacting": "Rinka reaguoja… {count} signalai",
+      "decisionLabel": "AI SPRENDIMAS",
+      "decisionField": {
+        "whyHere": "Kodėl čia",
+        "whyNow": "Kodėl dabar",
+        "whyYou": "Kodėl tau"
+      },
+      "reason": {
+        "r1a": "Tikrinu atvirus poreikius pagal rolę ir regioną…",
+        "r1b": "Lyginu su prieinamais žmonėmis kiekvienoje vietovėje…",
+        "r1c": "Vertinu kelionės atstumą ir pradžios datas…",
+        "r2a": "Ieškau suvirinimo poreikių jūrinėje pramonėje…",
+        "r2b": "Tikrinu sertifikatų reikalavimus…",
+        "r2c": "Vertinu sezoninį projektų ciklą…",
+        "r3a": "Renku prieinamumo signalus pagal regionus…",
+        "r3b": "Tikrinu patvirtintus įgūdžius darbo žurnaluose…",
+        "r3c": "Vertinu pasirengimą pradėti…"
+      },
+      "decision": {
+        "d1": {
+          "whyHere": "Rotterdame ir Eindhovene atvirų poreikių daugiau nei laisvų elektrikų.",
+          "whyNow": "Projektai startuoja per artimiausias 4 savaites.",
+          "whyYou": "Tavo darbo žurnale — 14 įrašų, pagrindžiančių elektros darbus.",
+          "next": "Peržiūrėti šiuos poreikius"
+        },
+        "d2": {
+          "whyHere": "Stavangerio ir Bergeno jūrinėje pramonėje trūksta sertifikuotų suvirintojų.",
+          "whyNow": "Rangos ciklas prasideda prieš žiemos sezoną.",
+          "whyYou": "Turi suvirinimo įrodymų ir esi pasirengęs kelionei.",
+          "next": "Pamatyti reikalavimus"
+        },
+        "d3": {
+          "whyHere": "Vilniuje ir Kaune daugiausia žmonių, pasirengusių pradėti.",
+          "whyNow": "Jų prieinamumas patvirtintas per pastarąsias 2 savaites.",
+          "whyYou": "Tavo poreikis atitinka jų patvirtintus įgūdžius.",
+          "next": "Peržiūrėti žmones"
+        }
       }
     }
   },

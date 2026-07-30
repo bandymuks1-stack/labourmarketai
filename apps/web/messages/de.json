@@ -11545,6 +11545,44 @@
         "r1": "Höchste Elektriker-Nachfrage — Niederlande",
         "r2": "Schweißer fehlen an der norwegischen Küste",
         "r3": "Die meisten verfügbaren Menschen — das Baltikum"
+      },
+      "reacting": "Market reacting… {count} signals",
+      "decisionLabel": "AI DECISION",
+      "decisionField": {
+        "whyHere": "Why here",
+        "whyNow": "Why now",
+        "whyYou": "Why you"
+      },
+      "reason": {
+        "r1a": "Checking open needs by role and region…",
+        "r1b": "Comparing against available people in each area…",
+        "r1c": "Weighing travel distance and start dates…",
+        "r2a": "Searching welding needs in offshore industry…",
+        "r2b": "Checking certification requirements…",
+        "r2c": "Weighing the seasonal project cycle…",
+        "r3a": "Collecting availability signals by region…",
+        "r3b": "Checking skills evidenced in work journals…",
+        "r3c": "Assessing readiness to start…"
+      },
+      "decision": {
+        "d1": {
+          "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
+          "whyNow": "Projects start within the next 4 weeks.",
+          "whyYou": "Your work journal holds 14 entries backing electrical work.",
+          "next": "Review these needs"
+        },
+        "d2": {
+          "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
+          "whyNow": "The contracting cycle opens before the winter season.",
+          "whyYou": "You have welding evidence and are ready to travel.",
+          "next": "See the requirements"
+        },
+        "d3": {
+          "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
+          "whyNow": "Their availability was confirmed in the last 2 weeks.",
+          "whyYou": "Your need matches their evidenced skills.",
+          "next": "Review these people"
+        }
       }
     }
   },

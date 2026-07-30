@@ -81,10 +81,11 @@ for (const vp of VIEWPORTS) {
       const slug = route.replace(/^\//, "").replace(/\//g, "-") || "root";
       const url = `${BASE}${route}`;
       await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
-      // Let entrance motion settle. The hero demo types its question, then
-      // reveals the result at ~1.9s; capturing earlier shows an empty result
-      // slot and reads as a broken layout that is not broken.
-      await page.waitForTimeout(3200);
+      // Let the hero's full sequence finish. It types (~0.6s), reasons in
+      // three visible steps (~1.9s), lands the market signals (~0.6s) and then
+      // decides (~0.4s) — the decision card is the point of the shot, so
+      // anything under ~4s captures a half-finished thought.
+      await page.waitForTimeout(5000);
       const file = join(OUT, `${slug}-${vp.name}-${theme}.png`);
       await page.screenshot({ path: file, fullPage: FULL });
       count += 1;

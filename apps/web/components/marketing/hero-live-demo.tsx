@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 
+import { Link } from "@/lib/i18n/navigation";
+
 import { MarketMap } from "@/components/app/market-map/market-map";
 import {
   LANDING_SCENARIOS,
@@ -30,17 +32,29 @@ import { topRegion } from "@/components/app/market-map/market-map-model";
  * the reading it is supposed to support, and `prefers-reduced-motion` skips
  * straight to the settled end state.
  */
-type Phase = "idle" | "typing" | "thinking" | "revealed";
+/**
+ * The felt sequence is NOT question -> map -> card. It is:
+ *
+ *   question -> AI reasoning -> market reaction -> explanation -> decision -> action
+ *
+ * `reasoning` surfaces WHAT is being weighed (a spinner only says "wait");
+ * `reacting` lands the market signals one by one so the map is visibly
+ * responding; `decided` states a decision that answers why here, why now, why
+ * you, and what to do next — with the action available immediately.
+ */
+type Phase = "idle" | "typing" | "reasoning" | "reacting" | "decided";
 
 export function HeroLiveDemo() {
   const t = useTranslations("landing.hero");
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [typed, setTyped] = useState("");
+  const [steps, setSteps] = useState(0);
+  const [reveal, setReveal] = useState(0);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const scenario: LandingScenario = LANDING_SCENARIOS[index];
-  const revealed = phase === "revealed";
+  const decided = phase === "decided";
 
   const clearTimers = useCallback(() => {
     timers.current.forEach(clearTimeout);
@@ -62,20 +76,49 @@ export function HeroLiveDemo() {
         window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
       if (reduced) {
-        // Reduced motion still gets the ANSWER — only the theatre is skipped.
+        // Reduced motion still gets the REASONING and the DECISION — only the
+        // pacing is removed. Skipping to a bare card would hide the part that
+        // makes this a decision rather than a number.
         setTyped(text);
-        setPhase("revealed");
+        setSteps(LANDING_SCENARIOS[i].reasoningKeys.length);
+        setReveal(Number.POSITIVE_INFINITY);
+        setPhase("decided");
         return;
       }
 
       setTyped("");
+      setSteps(0);
+      setReveal(0);
       setPhase("typing");
-      const step = 28;
+
+      const step = 26;
+      const typeMs = text.length * step;
       for (let c = 1; c <= text.length; c += 1) {
         after(c * step, () => setTyped(text.slice(0, c)));
       }
-      after(text.length * step + 260, () => setPhase("thinking"));
-      after(text.length * step + 1250, () => setPhase("revealed"));
+
+      // AI reasoning — one visible consideration at a time.
+      const reasons = LANDING_SCENARIOS[i].reasoningKeys;
+      after(typeMs + 200, () => setPhase("reasoning"));
+      reasons.forEach((_, r) => {
+        after(typeMs + 320 + r * 520, () => setSteps(r + 1));
+      });
+
+      // Market reaction — signals land one after another.
+      const reasonMs = typeMs + 320 + reasons.length * 520;
+      const total = LANDING_SCENARIOS[i].view.regions.reduce(
+        (n, reg) =>
+          n +
+          reg.anchors.filter((a) => a.layer === LANDING_SCENARIOS[i].layer)
+            .length,
+        0,
+      );
+      after(reasonMs, () => setPhase("reacting"));
+      for (let k = 1; k <= total; k += 1) {
+        after(reasonMs + k * 150, () => setReveal(k));
+      }
+
+      after(reasonMs + total * 150 + 420, () => setPhase("decided"));
     },
     [after, clearTimers, t],
   );
@@ -108,39 +151,81 @@ export function HeroLiveDemo() {
             ) : null}
           </div>
 
-          {phase === "thinking" || revealed ? (
-            <div className="flex items-center gap-2 text-meta text-text-secondary">
-              <Sparkles className="size-3.5 shrink-0 text-brand-cyan" aria-hidden />
-              {phase === "thinking" ? t("thinking") : t("answered")}
-            </div>
+          {/* AI REASONING — what is being weighed, not a spinner. */}
+          {steps > 0 ? (
+            <ul className="flex flex-col gap-1.5" data-testid="hero-reasoning">
+              {scenario.reasoningKeys.slice(0, steps).map((k, i) => (
+                <li
+                  key={k}
+                  className="flex items-start gap-2 text-meta text-text-secondary"
+                >
+                  <Sparkles
+                    className={`mt-0.5 size-3.5 shrink-0 ${
+                      i === steps - 1 && !decided
+                        ? "animate-pulse text-brand-cyan"
+                        : "text-brand-cyan/60"
+                    }`}
+                    aria-hidden
+                  />
+                  <span>{t(`reason.${k}`)}</span>
+                </li>
+              ))}
+            </ul>
           ) : null}
 
-          {revealed && region ? (
+          {/* MARKET REACTION — stated while the signals are landing. */}
+          {phase === "reacting" && reveal > 0 ? (
+            <p className="text-meta text-brand-cyan" data-testid="hero-reacting">
+              {t("reacting", { count: reveal })}
+            </p>
+          ) : null}
+
+          {/* THE DECISION — why here, why now, why you, what next. */}
+          {decided && region ? (
             <div
-              className="rounded-card border border-ink-500 bg-ink-900/70 p-3.5"
+              className="rounded-card border border-brand-blue/35 bg-ink-900/70 p-3.5"
               data-testid="hero-result-card"
             >
-              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("resultLabel")}
+              <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                {t("decisionLabel")}
               </p>
               <p className="mt-1 font-display text-card-title font-semibold text-text-primary">
                 {t(`result.${scenario.resultKey}`)}
               </p>
-              <ul className="mt-2.5 flex flex-col gap-1.5">
+
+              <dl className="mt-3 flex flex-col gap-2 border-t border-ink-600 pt-2.5">
+                {(["whyHere", "whyNow", "whyYou"] as const).map((k) => (
+                  <div key={k} className="flex flex-col gap-0.5">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t(`decisionField.${k}`)}
+                    </dt>
+                    <dd className="text-basis text-text-secondary">
+                      {t(`decision.${scenario.decisionKey}.${k}`)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-ink-600 pt-2.5">
                 {region.anchors.slice(0, 3).map((a) => (
-                  <li
-                    key={a.id}
-                    className="flex items-baseline justify-between gap-3 text-basis"
-                  >
-                    <span className="min-w-0 truncate text-text-secondary">
-                      {a.label}
-                    </span>
-                    <span className="shrink-0 font-mono text-meta text-brand-cyan">
-                      {a.weight}
-                    </span>
+                  <li key={a.id} className="text-meta text-text-muted">
+                    {a.label}{" "}
+                    <span className="font-mono text-brand-cyan">{a.weight}</span>
                   </li>
                 ))}
               </ul>
+
+              {/* IMMEDIATE ACTION — the decision is actionable right here. */}
+              <Link
+                // Locale-aware: a hardcoded /lt/ would send every other locale
+                // to the wrong place.
+                href="/auth/signup"
+                data-testid="hero-next-action"
+                className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {t(`decision.${scenario.decisionKey}.next`)}
+                <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+              </Link>
             </div>
           ) : null}
         </div>
@@ -186,7 +271,10 @@ export function HeroLiveDemo() {
           view={scenario.view}
           mode="landing"
           layer={scenario.layer}
-          selectedCode={revealed ? scenario.focusCode : null}
+          selectedCode={
+            phase === "reacting" || decided ? scenario.focusCode : null
+          }
+          revealCount={reveal}
         />
 
         <p className="flex items-center gap-1.5 text-meta text-text-muted">
