@@ -11305,7 +11305,11 @@
       },
       "invoice": {
         "title": "Sąskaitos pagrindas"
-      }
+      },
+      "openFull": "Atidaryti pilną ekraną",
+      "fallbackUnverified": "Kol kas tai gyvena atskirame ekrane — jo duomenų šaltinis dar nepatikrintas rodymui čia.",
+      "fallbackContext": "Šis rezultatas nepasiekiamas dabartiniame kontekste.",
+      "pendingInline": "Ruošiamas rezultatas."
     }
   },
   "landing": {

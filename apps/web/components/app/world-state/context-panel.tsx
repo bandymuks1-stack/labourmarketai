@@ -17,6 +17,12 @@ import type {
 } from "@/lib/world-state/entity-context";
 import type { WorkContextView } from "@/lib/world-state/work-context-server";
 import { entityKey } from "@/lib/world-state/world-state";
+import {
+  getResult,
+  type ResultContext,
+  type ResultKind,
+} from "@/lib/conversation/result-registry";
+import { ResultBody } from "@/components/app/workspace/result-body";
 import { useWorldState } from "./world-state-provider";
 import { WorkspaceMap } from "./workspace-map";
 
@@ -54,6 +60,10 @@ export function ContextPanel({
   locale,
   onChip,
   className = "",
+  result = null,
+  resultContext = "personal",
+  onCloseResult,
+  onOpenFull,
 }: {
   /** The active locale — passed to the canonical interest control unchanged. */
   locale: string;
@@ -62,10 +72,32 @@ export function ContextPanel({
    *  thing it already does. */
   onChip: (chipId: string) => void;
   className?: string;
+  /**
+   * THE RESULT (unified premium product v1). The panel's third thing to show:
+   * the answer to "show me my card / my calendar / my journal".
+   *
+   * It arrives as a PROP rather than out of World State because the result
+   * lives in the `?result=` query string — the operator-action alphabet in
+   * `lib/product-gate/world-state.ts` is an owner lock and this work does not
+   * edit it. Keeping the URL out here also keeps this component free of the
+   * routing its own guard forbids.
+   *
+   * A result takes precedence over the work context but NEVER over a selected
+   * entity: if the person has focused an object, that focus is what the panel
+   * is for, and stealing it would break the one-subject rule.
+   */
+  result?: ResultKind | null;
+  resultContext?: ResultContext;
+  onCloseResult?: () => void;
+  onOpenFull?: (route: string) => void;
 }) {
   const t = useTranslations("workspace.panel");
+  const tr = useTranslations("conversation.results");
   const { state, closeEntity } = useWorldState();
   const panel = state.contextPanel;
+  /** Entity focus wins — see the `result` prop note. */
+  const showsResult = result !== null && panel.mode !== "entity";
+  const resultDescriptor = showsResult ? getResult(result) : undefined;
 
   /** Starts TRUE: a read is always pending on mount, so the first paint says
    *  "reading" instead of showing an empty body for one frame. An empty shell
@@ -132,10 +164,19 @@ export function ContextPanel({
   // Selecting something is what makes the panel worth looking at on a phone,
   // so a new selection opens it. Closing it again is the person's choice.
   useEffect(() => {
-    if (panel.mode === "entity") setExpanded(true);
-  }, [selectionKey, panel.mode]);
+    // A result is as much a reason to open the sheet as a selection is: the
+    // person asked to SEE something, so on a phone it must actually appear.
+    if (panel.mode === "entity" || showsResult) setExpanded(true);
+  }, [selectionKey, panel.mode, showsResult, result]);
 
-  const title = panel.mode === "entity" ? (entity?.title ?? t("loading")) : t("workTitle");
+  const title =
+    panel.mode === "entity"
+      ? (entity?.title ?? t("loading"))
+      : resultDescriptor
+        ? // `titleKey` is the absolute path; this hook is scoped to the
+          // `conversation.results` namespace, so trim the prefix.
+          tr(resultDescriptor.titleKey.replace("conversation.results.", ""))
+        : t("workTitle");
 
   return (
     <aside
@@ -172,10 +213,13 @@ export function ContextPanel({
         <h2 className="min-w-0 flex-1 truncate font-display text-card-title font-semibold text-text-primary">
           {title}
         </h2>
-        {panel.mode === "entity" ? (
+        {panel.mode === "entity" || showsResult ? (
           <button
             type="button"
-            onClick={closeEntity}
+            // Closing a RESULT drops the `?result=` param; the conversation
+            // keeps its summary card, so the answer never vanishes without
+            // trace. Closing an ENTITY keeps its existing meaning.
+            onClick={showsResult ? onCloseResult : closeEntity}
             data-testid="context-panel-close"
             aria-label={t("close")}
             className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
@@ -215,7 +259,13 @@ export function ContextPanel({
             World State: the selection flies it to the entity's place, and
             clicking a marker opens that entity here. Not a separate screen. */}
         <WorkspaceMap className="mb-4" />
-        {loading ? (
+        {showsResult && result ? (
+          <ResultBody
+            kind={result}
+            context={resultContext}
+            onOpenFull={onOpenFull ?? (() => {})}
+          />
+        ) : loading ? (
           <p className="text-basis text-text-muted" data-testid="context-panel-loading">
             {t("loading")}
           </p>

@@ -11305,7 +11305,11 @@
       },
       "invoice": {
         "title": "Factuurbasis"
-      }
+      },
+      "openFull": "Volledig scherm openen",
+      "fallbackUnverified": "Dit staat voorlopig op een eigen scherm — de databron is nog niet geverifieerd voor weergave hier.",
+      "fallbackContext": "Dit resultaat is niet beschikbaar in de huidige context.",
+      "pendingInline": "Resultaat wordt voorbereid."
     }
   },
   "landing": {

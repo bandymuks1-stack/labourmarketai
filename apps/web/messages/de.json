@@ -11305,7 +11305,11 @@
       },
       "invoice": {
         "title": "Rechnungsgrundlage"
-      }
+      },
+      "openFull": "Vollbild öffnen",
+      "fallbackUnverified": "Das liegt vorerst auf einem eigenen Bildschirm — die Datenquelle ist für die Anzeige hier noch nicht verifiziert.",
+      "fallbackContext": "Dieses Ergebnis ist im aktuellen Kontext nicht verfügbar.",
+      "pendingInline": "Ergebnis wird vorbereitet."
     }
   },
   "landing": {

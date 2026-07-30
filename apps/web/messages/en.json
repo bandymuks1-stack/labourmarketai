@@ -11305,7 +11305,11 @@
       },
       "invoice": {
         "title": "Invoice basis"
-      }
+      },
+      "openFull": "Open the full screen",
+      "fallbackUnverified": "This lives on its own screen for now — its data source has not been verified for inline display yet.",
+      "fallbackContext": "This result is not available in the current context.",
+      "pendingInline": "Preparing this result."
     }
   },
   "landing": {

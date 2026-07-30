@@ -38,6 +38,8 @@ import {
 } from "@/lib/assistant/transcript";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
+import { useResultParam } from "@/components/app/workspace/use-result-param";
+import type { ResultContext } from "@/lib/conversation/result-registry";
 import {
   AiWorkspaceBridge,
   type AiWorldStateHandle,
@@ -997,6 +999,27 @@ export function ConversationChat({
     [handleChip],
   );
 
+  /**
+   * THE RESULT (unified premium product v1). `?result=` is the workspace's
+   * result state: it survives reload, it is shareable, and it changes the query
+   * string only — the conversation is never remounted and no page transition
+   * happens, so this is emphatically not the navigation the panel forbids.
+   *
+   * `openFullScreen` is the honest fallback for a result that cannot yet render
+   * inline. It keeps every existing route reachable, which is what makes this
+   * work purely additive (NO REGRESSION).
+   */
+  const { result, closeResult } = useResultParam();
+  const resultContext: ResultContext = auth0?.activeOrgName
+    ? "organization"
+    : "personal";
+  const openFullScreen = useCallback(
+    // The locale-aware router already in this component — the fallback route
+    // is a REAL screen the person keeps, not a dead end.
+    (route: string) => router.push(route),
+    [router],
+  );
+
   return (
     /**
      * ONE WORKSPACE (W3). The conversation and the Context Panel share one
@@ -1049,7 +1072,17 @@ export function ConversationChat({
               />
             )}
           </div>
-          <ContextPanel locale={locale} onChip={handlePanelChip} />
+          <ContextPanel
+            locale={locale}
+            onChip={handlePanelChip}
+            // THE RESULT (unified premium product v1). The conversation owns
+            // the `?result=` deep link and hands the panel a validated kind —
+            // the panel itself stays free of the routing its guard forbids.
+            result={result}
+            resultContext={resultContext}
+            onCloseResult={closeResult}
+            onOpenFull={openFullScreen}
+          />
         </div>
       </div>
     </WorldStateProvider>
