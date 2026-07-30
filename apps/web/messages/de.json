@@ -11525,6 +11525,27 @@
         "body": "Ein subjektives +1 oder −1 mit Text. Als Meinung gezeigt, getrennt von Fakten; eine Serie von Negativen ist ein Prüfsignal, nie ein Urteil."
       },
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
+    },
+    "hero": {
+      "headline": "Fragen. Sehen. Einstellen.",
+      "sub": "Ein KI-Betriebssystem für den Arbeitsmarkt — Gespräch, Karte und Ergebnis an einem Ort.",
+      "chatLabel": "KI-Gespräch",
+      "mapLabel": "Europäischer Arbeitsmarkt",
+      "thinking": "Marktsignale werden analysiert…",
+      "answered": "Gefunden. Karte aktualisiert.",
+      "resultLabel": "Ergebnis",
+      "demoBadge": "Demonstration",
+      "mapHint": "Auf eine Markierung tippen — die Karte antwortet.",
+      "scenario": {
+        "q1": "Wo werden jetzt Elektriker gebraucht?",
+        "q2": "Wo fehlen Schweißer?",
+        "q3": "Wo sind Menschen verfügbar?"
+      },
+      "result": {
+        "r1": "Höchste Elektriker-Nachfrage — Niederlande",
+        "r2": "Schweißer fehlen an der norwegischen Küste",
+        "r3": "Die meisten verfügbaren Menschen — das Baltikum"
+      }
     }
   },
   "workspace": {

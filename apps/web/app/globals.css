@@ -656,3 +656,25 @@ a {
 .wsmap .leaflet-popup-tip {
   background: rgb(var(--c-ink-800));
 }
+
+/* ── MarketMap ─────────────────────────────────────────────────────────────
+   OSM raster tiles are light-only. Rather than add a second (paid) dark tile
+   vendor, invert the TILE PANE alone: markers, tooltips and controls live in
+   other Leaflet panes, so they keep their true colours and stay legible.
+   One tile source, one component, both themes. */
+:root[data-theme="dark"] .market-map-host .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.86) contrast(0.92)
+    saturate(0.75);
+}
+.market-map-host .leaflet-container {
+  background: transparent;
+  font: inherit;
+}
+.market-map-host .leaflet-control-attribution {
+  background: rgb(0 0 0 / 0.45);
+  color: rgb(255 255 255 / 0.7);
+  font-size: 10px;
+}
+:root[data-theme="dark"] .market-map-host .leaflet-control-attribution {
+  background: rgb(0 0 0 / 0.6);
+}

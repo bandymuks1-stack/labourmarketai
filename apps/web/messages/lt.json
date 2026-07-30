@@ -11525,6 +11525,27 @@
         "body": "Subjektyvus +1 arba −1 su tekstu. Rodoma kaip nuomonė, atskirai nuo faktų; neigiamų virtinė — signalas pasitikrinti, niekada ne nuosprendis."
       },
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
+    },
+    "hero": {
+      "headline": "Paklausk. Pamatyk. Įdarbink.",
+      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
+      "chatLabel": "AI pokalbis",
+      "mapLabel": "Europos darbo rinka",
+      "thinking": "Analizuoju rinkos signalus…",
+      "answered": "Radau. Žemėlapis atnaujintas.",
+      "resultLabel": "Rezultatas",
+      "demoBadge": "Demonstracija",
+      "mapHint": "Spustelėk žymeklį — žemėlapis atsako.",
+      "scenario": {
+        "q1": "Kur dabar reikia elektrikų?",
+        "q2": "Kur trūksta suvirintojų?",
+        "q3": "Kur yra laisvų darbuotojų?"
+      },
+      "result": {
+        "r1": "Didžiausia elektrikų paklausa — Nyderlanduose",
+        "r2": "Suvirintojų trūksta Norvegijos pakrantėje",
+        "r3": "Daugiausia laisvų darbuotojų — Baltijos šalyse"
+      }
     }
   },
   "workspace": {

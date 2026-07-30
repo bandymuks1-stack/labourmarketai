@@ -11525,6 +11525,27 @@
         "body": "Een subjectieve +1 of −1 met tekst. Getoond als mening, gescheiden van feiten; een reeks negatieven is een signaal om te checken, nooit een vonnis."
       },
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
+    },
+    "hero": {
+      "headline": "Vraag. Zie. Neem aan.",
+      "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
+      "chatLabel": "AI-gesprek",
+      "mapLabel": "Europese arbeidsmarkt",
+      "thinking": "Marktsignalen analyseren…",
+      "answered": "Gevonden. Kaart bijgewerkt.",
+      "resultLabel": "Resultaat",
+      "demoBadge": "Demonstratie",
+      "mapHint": "Tik op een markering — de kaart antwoordt.",
+      "scenario": {
+        "q1": "Waar zijn nu elektriciens nodig?",
+        "q2": "Waar is een lassertekort?",
+        "q3": "Waar zijn mensen beschikbaar?"
+      },
+      "result": {
+        "r1": "Hoogste vraag naar elektriciens — Nederland",
+        "r2": "Lassers tekort langs de Noorse kust",
+        "r3": "Meeste beschikbare mensen — de Baltische staten"
+      }
     }
   },
   "workspace": {

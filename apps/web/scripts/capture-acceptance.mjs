@@ -81,9 +81,10 @@ for (const vp of VIEWPORTS) {
       const slug = route.replace(/^\//, "").replace(/\//g, "-") || "root";
       const url = `${BASE}${route}`;
       await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
-      // Let entrance motion settle — a screenshot mid-animation reads as a
-      // layout bug that is not there.
-      await page.waitForTimeout(1200);
+      // Let entrance motion settle. The hero demo types its question, then
+      // reveals the result at ~1.9s; capturing earlier shows an empty result
+      // slot and reads as a broken layout that is not broken.
+      await page.waitForTimeout(3200);
       const file = join(OUT, `${slug}-${vp.name}-${theme}.png`);
       await page.screenshot({ path: file, fullPage: FULL });
       count += 1;
