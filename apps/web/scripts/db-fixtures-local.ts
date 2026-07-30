@@ -45,6 +45,22 @@ const DB_CONTAINER = "supabase_db_labourmarketai";
  * profile table (there is no `worker_profiles` relation in this schema).
  */
 export const EXPECTED_FIXTURE_COUNTS: Record<string, number> = {
+  // ── ACCEPTANCE SCENARIO (unified premium product v1) ───────────────────
+  // Asserted so an under-seeded database FAILS here rather than surfacing
+  // later as an empty premium-looking panel in a screenshot. Every §14
+  // scenario reads one of these.
+  //
+  // Scoped to the acceptance rows' DETERMINISTIC id prefixes rather than
+  // counting the whole table. A bare table count is not a fixture assertion:
+  // it also counts rows left behind by earlier e2e runs, so it passes when the
+  // acceptance seed did nothing and fails when the database is merely dirty.
+  // These keys are interpolated into `select count(*) from <relation>`.
+  "public.journal_entries where id::text like '1e111111%'": 14,
+  "public.journal_entry_skills where id::text like '1f111111%'": 14,
+  "public.worker_documents where id::text like 'cdcdcdcd%'": 2,
+  "public.worker_absences where id::text like 'abababab%'": 1,
+  "public.projects": 1,
+  // ── base identities ────────────────────────────────────────────────────
   "auth.users": 3,
   "public.profiles": 3,
   "public.workers": 3,

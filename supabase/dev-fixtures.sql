@@ -205,3 +205,97 @@ select w.id, p.id, true
  where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
    and p.slug = 'tiler'
 on conflict do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE SCENARIO (unified premium product v1)
+--
+-- One COHERENT story rather than scattered demo rows: the worker
+-- (dev.worker@local.test) has really been working on the company's project,
+-- and every downstream surface is derivable from those same rows — the Player
+-- Card charts, the skill evidence links, the calendar, the documents and the
+-- invoice basis.
+--
+-- Deterministic ids (1e…/1f…/cd…/ab… prefixes). NOTE the prefixes deliberately
+-- avoid ee…/dd…: the seeded PROJECT already owns
+-- eeeeeeee-0000-0000-0000-000000000001, and reusing that space silently
+-- collides with it.
+-- Idempotent: ON CONFLICT DO NOTHING, so re-running never duplicates.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- 14 journal entries across ~6 months. Spread over time on purpose: the
+-- 12-month activity chart and the "skills grew from real work" claim are both
+-- meaningless against a single day's data.
+insert into public.journal_entries
+  (id, worker_id, engagement_context_id, entry_type_slug, original_text,
+   original_language, visibility_scope, project_id, hash_self, created_at)
+select
+  ('1e111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  w.id,
+  '99999999-0000-0000-0000-000000000001',
+  'freeform',
+  (array[
+    'Klojau plyteles antrame aukste, 8 valandos.',
+    'Hidroizoliacija vonios patalpoje, 6 valandos.',
+    'Grindu islyginimas, 7 valandos.',
+    'Plyteliu klojimas koridoriuje, 8 valandos.',
+    'Siuliu uzpildymas ir valymas, 5 valandos.',
+    'Vonios sienu plyteles, 8 valandos.',
+    'Medziagu priemimas ir tikrinimas, 3 valandos.'
+  ])[1 + (g % 7)],
+  'lt', 'org',
+  p.id,
+  encode(extensions.digest('acceptance-entry-' || g::text, 'sha256'), 'hex'),
+  now() - ((g * 13) || ' days')::interval
+from public.workers w,
+     generate_series(1, 14) g,
+     lateral (select id from public.projects order by created_at limit 1) p
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Skill evidence — provenance is recognized/confirmed (NOT "journal"): the
+-- tier drives how the Player Card renders backing, and a quarter are confirmed
+-- so the verified tier is actually exercised.
+-- The patented loop's visible half: each entry BACKS a skill.
+-- Skills are chosen by rank, not by hardcoded slug: the taxonomy is seeded by
+-- migrations and an assumed slug silently seeds nothing (floor-screed did not
+-- exist). Uneven distribution on purpose, so the absolute-scale skill bars have
+-- something real to differentiate — a flat distribution would hide a
+-- normalization bug rather than expose it.
+insert into public.journal_entry_skills
+  (id, journal_entry_id, worker_id, skill_id, provenance)
+select
+  ('1f111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  ('1e111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  w.id, s.id, case when g % 4 = 0 then 'confirmed' else 'recognized' end
+from public.workers w,
+     generate_series(1, 14) g,
+     lateral (
+       select id from public.skills
+        order by slug
+        offset (g % 3) limit 1
+     ) s
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Worker documents — the Evidence catalogue needs real rows, not an empty tab.
+insert into public.worker_documents
+  (id, worker_id, document_type_slug, status, updated_by, verification)
+select
+  ('cdcdcdcd-0000-0000-0000-00000000000' || g::text)::uuid,
+  w.id, dt.slug, 'ready', 'aaaaaaaa-0000-0000-0000-000000000001', 'unverified'
+from public.workers w,
+     generate_series(1, 2) g,
+     lateral (select slug from public.document_types order by slug offset (g - 1) limit 1) dt
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Calendar — an absence so the calendar result has a real, non-empty week.
+insert into public.worker_absences
+  (id, worker_id, absence_type, start_date, end_date, status, requested_by)
+select
+  'abababab-0000-0000-0000-000000000001', w.id, 'annual_leave',
+  (now() + interval '9 days')::date, (now() + interval '11 days')::date,
+  'approved', 'aaaaaaaa-0000-0000-0000-000000000001'
+from public.workers w
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
