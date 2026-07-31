@@ -232,7 +232,11 @@ export function WorkerWorkLogFlow({
       <div className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support text-text-primary" data-testid="worklog-blocked">
         <p>{phase.reason === "no-context" ? labels.noContext : phase.reason === "no-worker" ? labels.noWorker : labels.notAuthed}</p>
         {phase.reason === "no-context" && (
-          <Link href="/dashboard/advanced" className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
+          // W3 rows 19/14: this pointed at /dashboard/advanced — a stale door
+          // into the dying second dashboard. The spaces hub is where a work
+          // context is actually established (per-space status + entry lanes),
+          // and the header's workspace switcher stays one tap away besides.
+          <Link href="/dashboard/start" className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20">
             {labels.noContextCta}
           </Link>
         )}
