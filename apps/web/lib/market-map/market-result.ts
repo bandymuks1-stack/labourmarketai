@@ -28,9 +28,12 @@ import {
  *  - PRIVACY: this reads DEMAND (projects and their open needs), never people.
  *    Individual worker coordinates are never resolved — `spatial-entities.ts`
  *    keeps the person type structurally coordinate-free and a guard enforces it.
- *  - Geography degrades honestly: a project with a known city gets the city's
- *    coordinate; one with only a country falls back to the country centroid,
- *    which is a real place rather than a jittered guess.
+ *  - Geography degrades honestly AND VISIBLY. A project with a known city gets
+ *    that city's coordinate (`precision: "city"`). One whose city cannot be
+ *    resolved is NOT given a city-looking pin: its demand is folded into a
+ *    single country-level aggregate marked `precision: "country"` and labelled
+ *    as approximate. A country centroid carrying a city name would be a
+ *    fabricated location, which is worse than a coarser honest one.
  *
  * RLS does the authorization. This runs as the signed-in user, so it can only
  * aggregate rows that user may already read.
@@ -75,23 +78,47 @@ export async function loadMarketResult(): Promise<MarketResultData> {
     const anchors: MarketAnchor[] = [];
     let total = 0;
 
+    // Demand whose city could not be resolved is accumulated here and emitted
+    // ONCE as an explicitly approximate country aggregate — never as N pins
+    // stacked on the centroid pretending to be distinct places.
+    let unresolved = 0;
+
     for (const [city, weight] of cities) {
       total += weight;
       const coord = city ? resolveCity(country, city) : null;
-      const fallback = COUNTRY_CENTROID[country];
-      const point = coord ?? fallback;
-      // No coordinate at all → the anchor is omitted rather than placed
-      // somewhere plausible-looking. A wrong pin is worse than a missing one.
-      if (!point) continue;
+      if (!coord) {
+        unresolved += weight;
+        continue;
+      }
       anchors.push({
-        id: `${country}-${city || "country"}`,
-        label: city || country,
-        lat: point.lat,
-        lng: point.lng,
+        id: `${country}-${city}`,
+        label: city,
+        precision: "city",
+        lat: coord.lat,
+        lng: coord.lng,
         weight,
         layer: "demand",
         country,
       });
+    }
+
+    if (unresolved > 0) {
+      const centroid = COUNTRY_CENTROID[country];
+      // No centroid either → omitted entirely. A wrong pin is worse than a
+      // missing one.
+      if (centroid) {
+        anchors.push({
+          id: `${country}-approx`,
+          // Country code only. Deliberately NOT a city name.
+          label: country,
+          precision: "country",
+          lat: centroid.lat,
+          lng: centroid.lng,
+          weight: unresolved,
+          layer: "demand",
+          country,
+        });
+      }
     }
 
     if (anchors.length === 0) continue;

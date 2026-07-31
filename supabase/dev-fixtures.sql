@@ -299,3 +299,42 @@ select
 from public.workers w
 where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
 on conflict (id) do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE: MARKET DEMAND ACROSS COUNTRIES
+--
+-- The authenticated MarketMap could not be verified because there were zero
+-- open job_demands — the map correctly rendered its honest-empty state, which
+-- proved the guard worked and proved nothing about the journey. This seeds the
+-- minimum coherent chain: project -> geography -> open need -> headcount.
+--
+-- Deliberately UNEVEN across four countries so one region wins for a REASON
+-- (most open headcount, concentrated in two cities) rather than by being the
+-- only rows present. NL 23 / DE 11 / BE 8 / PL 6.
+--
+-- Prefix 2b… . Idempotent.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+insert into public.projects
+  (id, company_id, title, country, city, status)
+values
+  ('2b000000-0000-0000-0000-000000000001','cccccccc-0000-0000-0000-000000000001','Rotterdam haven — elektros instaliacija','NL','Rotterdam','live'),
+  ('2b000000-0000-0000-0000-000000000002','cccccccc-0000-0000-0000-000000000001','Eindhoven campus — silpnos srovės','NL','Eindhoven','live'),
+  ('2b000000-0000-0000-0000-000000000003','cccccccc-0000-0000-0000-000000000001','Amsterdam Noord — renovacija','NL','Amsterdam','live'),
+  ('2b000000-0000-0000-0000-000000000004','cccccccc-0000-0000-0000-000000000001','Duisburg Logistikzentrum','DE','Duisburg','live'),
+  ('2b000000-0000-0000-0000-000000000005','cccccccc-0000-0000-0000-000000000001','Hamburg Hafen — Elektro','DE','Hamburg','live'),
+  ('2b000000-0000-0000-0000-000000000006','cccccccc-0000-0000-0000-000000000001','Antwerpen terminal','BE','Antwerpen','live'),
+  ('2b000000-0000-0000-0000-000000000007','cccccccc-0000-0000-0000-000000000001','Gdansk stocznia','PL','Gdansk','live')
+on conflict (id) do nothing;
+
+insert into public.job_demands
+  (id, project_id, role_title, headcount_needed, status, visibility, start_date)
+values
+  ('2b111111-0000-0000-0000-000000000001','2b000000-0000-0000-0000-000000000001','Elektrikas', 9,'open','public',(now() + interval '21 days')::date),
+  ('2b111111-0000-0000-0000-000000000002','2b000000-0000-0000-0000-000000000002','Elektrikas', 7,'open','public',(now() + interval '28 days')::date),
+  ('2b111111-0000-0000-0000-000000000003','2b000000-0000-0000-0000-000000000003','Elektrikas', 4,'open','public',(now() + interval '45 days')::date),
+  ('2b111111-0000-0000-0000-000000000004','2b000000-0000-0000-0000-000000000004','Elektriker', 6,'open','public',(now() + interval '35 days')::date),
+  ('2b111111-0000-0000-0000-000000000005','2b000000-0000-0000-0000-000000000005','Elektriker', 5,'open','public',(now() + interval '60 days')::date),
+  ('2b111111-0000-0000-0000-000000000006','2b000000-0000-0000-0000-000000000006','Elektricien', 8,'open','public',(now() + interval '30 days')::date),
+  ('2b111111-0000-0000-0000-000000000007','2b000000-0000-0000-0000-000000000007','Elektryk',    6,'open','public',(now() + interval '75 days')::date)
+on conflict (id) do nothing;

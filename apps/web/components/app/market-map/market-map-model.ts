@@ -30,9 +30,22 @@ export type MarketMapLayer = "demand" | "people" | "projects" | "jobs";
  * exist on the person type). So a `people` anchor here is always an AREA
  * aggregate — a city or region centroid with a count — never an individual.
  */
+/**
+ * How precisely an anchor's coordinate is known.
+ *
+ *  - `city`    — resolved from the canonical city table. The pin IS the place.
+ *  - `country` — only a country was known, so this is the country centroid: an
+ *                APPROXIMATE aggregate, never a city. It must be labelled as
+ *                such and must never carry a city name, because a centroid
+ *                wearing a city label is a fabricated location.
+ */
+export type AnchorPrecision = "city" | "country";
+
 export interface MarketAnchor {
   readonly id: string;
   readonly label: string;
+  /** Defaults to `city` — an anchor is precise unless it says otherwise. */
+  readonly precision?: AnchorPrecision;
   readonly lat: number;
   readonly lng: number;
   /** Aggregate magnitude — headcount needed, people available, project count. */

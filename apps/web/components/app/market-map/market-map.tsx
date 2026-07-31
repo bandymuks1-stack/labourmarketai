@@ -137,15 +137,20 @@ export function MarketMap({
         // within ~50km, so generous radii merge Rotterdam/Den Haag/Amsterdam
         // into one blob and the map stops showing WHERE the demand is.
         const radius = 4 + Math.sqrt(Math.max(a.weight, 1)) * 1.7;
+        // An APPROXIMATE country aggregate must not look like a city pin.
+        // Dashed and hollow, so precision is legible without reading the
+        // tooltip — and it is never colour alone that carries the difference.
+        const approx = a.precision === "country";
         const circle = L.circleMarker([a.lat, a.lng], {
-          radius,
+          radius: approx ? radius + 3 : radius,
           weight: 2,
+          dashArray: approx ? "3 3" : undefined,
           color: dimmed ? "#64748b" : LAYER_STROKE[layer],
           fillColor: dimmed ? "#64748b" : LAYER_FILL[layer],
-          fillOpacity: dimmed ? 0.15 : 0.55,
+          fillOpacity: dimmed ? 0.15 : approx ? 0.14 : 0.55,
           opacity: dimmed ? 0.35 : 0.95,
         });
-        circle.bindTooltip(`${a.label} · ${a.weight}`, {
+        circle.bindTooltip(`${a.label} · ${a.weight}${approx ? " ~" : ""}`, {
           direction: "top",
           offset: [0, -radius],
         });

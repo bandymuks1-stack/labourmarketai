@@ -59,7 +59,8 @@ export const EXPECTED_FIXTURE_COUNTS: Record<string, number> = {
   "public.journal_entry_skills where id::text like '1f111111%'": 14,
   "public.worker_documents where id::text like 'cdcdcdcd%'": 2,
   "public.worker_absences where id::text like 'abababab%'": 1,
-  "public.projects": 1,
+  "public.projects where id::text like '2b%'": 7,
+  "public.job_demands where id::text like '2b1%' and status = 'open'": 7,
   // ── base identities ────────────────────────────────────────────────────
   "auth.users": 3,
   "public.profiles": 3,
