@@ -65,10 +65,25 @@ port 3100  e2e:local rig, started and stopped per run by the harness.
 (`PROD_QA_*` secrets still absent). Authenticated proof is against the LOCAL
 guarded acceptance stack; the distinction is deliberate and stated.
 
+### SESSION CLOSE — 2026-08-01 (~01:40 Europe/Vilnius)
+
+| | |
+|---|---|
+| `main` HEAD | **`792e1837`** (#949) ← `9a7c34a8` (#948) ← `1e00fb44` (#947) ← `47d2041f` (#946) ← `788f17e0` (#945) |
+| Production deployment | **`5699066896`** — success, sha `792e1837`; anonymous smoke clean (landing renders, 0 console errors) |
+| Rows settled TODAY | 11/12, 16, 19, 14 — all CONFIRMED `ALREADY` by browser proof; calendar result SHIPPED |
+| Matrix | 9 ALREADY · 11 ABSORB · 3 CHAT · 4 OBSOLETE · 2 DETAIL — **8 ABSORB rows remain** |
+| Ratchet | `w3-return-to-workspace.test.ts` — 3 allowlisted advanced hrefs remain, the countdown for the deletion |
+| Known defect (P3, tracked) | `/dashboard/journal` dev-only React missing-key warning (`JournalEntryRow` children) — pre-existing, named in the spec allowance |
+
 ### NEXT EXACT ACTION
 
-Row 16 — Profile / identity actions (`IdentityActions`): audit before code,
-same order. Then rows 19 / 14 (return to chat).
+P0 Employee Journey remainder: row 21 (MyZone — OBSOLETE must be PROVEN, not
+assumed), row 24 (blocked on real reputation rows). Then P1 employer rows
+7/8/25, P2 company 2/3/9/10, P3 admin 22/23, row 20 (command finder —
+likely OBSOLETE), row 27, row 28 (second Leaflet chain), THEN delete
+`/dashboard/advanced` + mounts + guards + the 3 allowlisted hrefs in one
+commit, full proof, merge, deploy, production-prove.
 
 ---
 
