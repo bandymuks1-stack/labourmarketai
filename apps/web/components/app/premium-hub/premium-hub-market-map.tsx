@@ -4,24 +4,23 @@ import { Radar } from "lucide-react";
 import type { MarketVM } from "./premium-hub-data";
 import { HubEmptyState, HubPanel, HubZoneLink } from "./premium-hub-primitives";
 
-/** Abstract node layout (viewBox 0–400 x, 0–260 y). These are DECORATIVE
- *  positions, not geographic coordinates — the panel stays a stylized CSS/SVG
- *  network with no external/paid map provider and no geocoding. The number of
- *  points shown reflects the caller's REAL signal count; positions do not. */
-const NODE_LAYOUT: ReadonlyArray<{ x: number; y: number }> = [
-  { x: 232, y: 132 }, // index 0 = the highlighted active point
-  { x: 128, y: 96 },
-  { x: 300, y: 168 },
-  { x: 64, y: 190 },
-  { x: 256, y: 74 },
-  { x: 150, y: 214 },
-  { x: 344, y: 120 },
-  { x: 196, y: 150 },
-];
-
-/** Block C — Rinkos žemėlapis. Stylized provider-free market panel driven by the
- *  caller's REAL signal counts (preferred locations, needs, consented login).
- *  Honest empty state when no signals exist yet. */
+/**
+ * Block C — the market DOOR: real signal counts, and one way into the canonical
+ * map.
+ *
+ * WHAT WAS REMOVED AND WHY (W3 row 4). This panel used to draw a 400x260 `<svg>`
+ * "network" of dots whose own comment admitted the positions were decorative and
+ * not geographic. The count of dots was real; every position was invented. That
+ * is a picture of a map rather than a map — the thing the canonical `MarketMap`
+ * doctrine forbids ("no SVG illustration standing in for a map"), and the thing
+ * the owner command means by fiktyvūs grafikai.
+ *
+ * It was NOT replaced with a second `<MarketMap>`. This route is a second
+ * dashboard scheduled for removal, and mounting a real Leaflet instance inside
+ * it would add weight to a surface that is leaving. Everything real survives:
+ * the three signal counts, the honest empty state, and the door to
+ * `/dashboard/market-map` where the canonical map actually lives.
+ */
 export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
   const t = await getTranslations("premiumHub");
 
@@ -44,13 +43,6 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
     );
   }
 
-  // Show one point per signal (capped to the decorative layout); the first is the
-  // highlighted active point.
-  const shown = Math.max(1, Math.min(market.total, NODE_LAYOUT.length));
-  const nodes = NODE_LAYOUT.slice(0, shown);
-  const active = nodes[0];
-  const ambient = nodes.slice(1);
-
   const rows = [
     { label: t("map.signals.preferred"), value: String(market.preferred) },
     { label: t("map.signals.needs"), value: String(market.needs) },
@@ -64,80 +56,16 @@ export async function PremiumHubMarketMap({ market }: { market: MarketVM }) {
     <HubPanel eyebrow={t("map.title")} icon={Radar} testid="premium-hub-map" className="flex-1">
       <p className="text-sm text-text-secondary">{t("map.lead")}</p>
 
-      {/* The whole preview + signal zone is ONE door to the canonical map —
-          a mini-map that looks active but ignores taps reads as broken
-          (dashboard interactivity sweep). No nested interactive elements. */}
+      {/* The signal zone is ONE door to the canonical map. It was already a
+          single link rather than a tappable mini-map, because a map that looks
+          active and ignores taps reads as broken — the same reasoning that now
+          removes the drawing entirely. No nested interactive elements. */}
       <HubZoneLink
         href="/dashboard/market-map"
         ariaLabel={t("map.open")}
         testid="hub-map-open-link"
         className="-m-2 flex flex-col gap-4 p-2"
       >
-      <div className="relative overflow-hidden rounded-xl border border-ink-600 bg-ink-900">
-        <svg
-          viewBox="0 0 400 260"
-          role="img"
-          aria-label={t("map.title")}
-          className="h-full w-full"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <g className="stroke-ink-600/40" strokeWidth={1}>
-            {[52, 104, 156, 208].map((y) => (
-              <line key={`h${y}`} x1={0} y1={y} x2={400} y2={y} />
-            ))}
-            {[80, 160, 240, 320].map((x) => (
-              <line key={`v${x}`} x1={x} y1={0} x2={x} y2={260} />
-            ))}
-          </g>
-
-          <g className="stroke-brand-blue/30" strokeWidth={1.25} strokeLinecap="round">
-            {ambient.map((n, i) => (
-              <line
-                key={`c${i}`}
-                x1={active.x}
-                y1={active.y}
-                x2={n.x}
-                y2={n.y}
-                strokeDasharray="3 5"
-              />
-            ))}
-          </g>
-
-          <g>
-            {ambient.map((n, i) => (
-              <g key={`n${i}`}>
-                <circle cx={n.x} cy={n.y} r={9} className="fill-brand-blue/10" />
-                <circle cx={n.x} cy={n.y} r={3.5} className="fill-brand-blue/70" />
-              </g>
-            ))}
-          </g>
-
-          <g>
-            <circle cx={active.x} cy={active.y} r={26} className="fill-brand-cyan/5" />
-            <circle cx={active.x} cy={active.y} r={16} className="fill-brand-cyan/10" />
-            <circle
-              cx={active.x}
-              cy={active.y}
-              r={9}
-              className="fill-brand-cyan/20 stroke-brand-cyan/60"
-              strokeWidth={1.5}
-            />
-            <circle cx={active.x} cy={active.y} r={4.5} className="fill-brand-cyan" />
-          </g>
-        </svg>
-
-        <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5">
-          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-secondary">
-            <span className="h-2 w-2 rounded-full bg-brand-cyan" aria-hidden />
-            {t("map.activePoint")}
-          </span>
-          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
-            <span className="h-2 w-2 rounded-full bg-brand-blue/70" aria-hidden />
-            {t("map.points")}
-          </span>
-        </div>
-      </div>
-
       <dl className="grid grid-cols-3 gap-3">
         {rows.map((r) => (
           <div

@@ -16,15 +16,17 @@ import { join } from "node:path";
  * Public pages, no session needed.
  */
 
-const SHOTS = join(
-  process.cwd(),
-  "..",
-  "..",
-  "docs",
-  "audits",
-  "evidence",
-  "premium-rebuild-w1",
-);
+/**
+ * Where the screenshots land. Overridable so the SAME spec can prove the fix
+ * locally and again in production without one run overwriting the other's
+ * evidence — the master command requires every artefact to declare its proof
+ * level, and two runs writing to one directory would make that impossible.
+ *
+ *   E2E_SHOTS_DIR=docs/audits/evidence/premium-rebuild/production-landing
+ */
+const SHOTS = process.env.E2E_SHOTS_DIR
+  ? join(process.cwd(), "..", "..", process.env.E2E_SHOTS_DIR)
+  : join(process.cwd(), "..", "..", "docs", "audits", "evidence", "premium-rebuild-w1");
 const expect = baseExpect.configure({ timeout: 15_000 });
 
 test.use({ viewport: { width: 1440, height: 900 } });

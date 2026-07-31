@@ -8821,8 +8821,6 @@
       "title": "Market map",
       "open": "Open the market map",
       "lead": "An overview of your market signals.",
-      "activePoint": "Active point",
-      "points": "Market points",
       "signals": {
         "preferred": "Preferred locations",
         "needs": "Needs",
