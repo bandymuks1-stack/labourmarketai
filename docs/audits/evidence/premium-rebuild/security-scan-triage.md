@@ -66,9 +66,65 @@ runtime.
 4. The backlog is now recorded here with an owner-visible priority order rather
    than living invisibly in a scanner tab.
 
+## Alert #9 — `oauth-trace.ts:66` — READ, and it is a FALSE POSITIVE (2026-07-31)
+
+`js/clear-text-storage-of-sensitive-data`, high, raised 2026-07-27. The flagged
+line is `window.sessionStorage.setItem(STORAGE_KEY, traceId)`.
+
+The first pass called this "likely a false positive" and refused to close on
+that. Here is the reading, and what makes it a conclusion rather than a guess.
+
+**The scanner told us what it thinks the source is.** The alert message is:
+*"This stores sensitive data returned by a call to `generateOauthTraceId` as
+clear text."* So the question is precisely: what does that function return?
+
+**1. The value has exactly one origin, and it is a CSPRNG.**
+`generateOauthTraceId()` takes **no parameters**. Its whole body is
+`crypto.getRandomValues(new Uint8Array(8))` rendered as 16 hex characters, with
+a `Math.random()` fallback. It therefore *cannot* be derived from the OAuth
+code, the PKCE verifier, an access or refresh token, a cookie, a session or a
+user identity — there is no input to derive one from.
+
+**2. The only production caller generates it before any credential exists.**
+`components/app/google-button.tsx:112-113` — `generateOauthTraceId()` then
+`rememberOauthTraceId(...)`, at click time, *before* the redirect to Google. At
+that instant no token, code or session has been issued, so there is nothing
+sensitive in scope to leak into it.
+
+**3. It is not a user identifier.** A fresh value per login attempt, held in
+`sessionStorage`, which is per-tab. It identifies an *attempt*, not a person,
+and does not survive the tab.
+
+**4. Nothing treats it as an authentication or authorization factor.** Every
+use in `app/[locale]/auth/callback/route.ts` (lines 29, 32, 37, 54, 75, 85, 110,
+120) is either a log field or the `trace` query param propagated back to the
+login URL. The only branch on it anywhere is `if (traceId)` — a presence check
+that decides whether to attach the param. No comparison, no lookup, no grant.
+
+**5. The trigger is the NAME, not the data.** CodeQL's sensitive-data heuristic
+matches identifiers against patterns including `auth`; `generateOauthTraceId`
+contains "auth" inside "Oauth". The rule matched the identifier and never had a
+way to see that the value is 8 random bytes.
+
+**Residual risk: none that this alert describes.** Reading `sessionStorage`
+already requires XSS, and the trace id confers no capability — it is not
+accepted anywhere as proof of anything.
+
+**One adjacent observation, recorded rather than quietly folded in:** the
+`Math.random()` fallback is a non-cryptographic RNG. For a debug correlation id
+whose collision cost is "two log lines are harder to tell apart" that is
+acceptable, and the file says so. It is *not* what this alert flags and it
+grants nothing — but it is the kind of thing that must be named, not skipped
+past, when signing off on an auth-adjacent file.
+
+**Action taken: none in code, and the alert is NOT dismissed in GitHub.** The
+finding is answered with evidence here; leaving the alert open costs nothing and
+keeps the scanner's own record honest. Nothing was disabled, suppressed or
+filtered to make this go away.
+
 ## Open work — this file is not finished
 
-- [ ] Read `oauth-trace.ts:66` and either fix or dismiss with a written reason.
+- [x] Read `oauth-trace.ts:66` — false positive, evidence above, alert left open.
 - [ ] Triage the 5 `js/incomplete-sanitization` sites individually.
 - [ ] Anchor the 8 regexes; they are cheap and they are in guards, where a
       loose pattern quietly weakens an assertion.
@@ -76,4 +132,12 @@ runtime.
 - [ ] Re-run and record the count once the queue is worked.
 
 **No alert has been dismissed.** None is claimed to be a false positive on the
-strength of this pass alone.
+strength of the first pass alone — alert #9 is called one only after the
+code-path reading recorded above, and even it stays open in GitHub.
+
+## Count as of 2026-07-31
+
+24 open alerts, all raised 2026-07-27, none introduced by any W3 or gate branch.
+One (#9) is now read and answered; 23 remain in the queue in the priority order
+above. No P0 or P1 found so far, so W3 is not blocked by this backlog — which is
+the owner's instruction, and also what the evidence supports.
