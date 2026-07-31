@@ -1,22 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Conversation find-work — BEHAVIOUR tests against the canonical marketplace
- * use case (PR #864 × #868 integration).
+ * Conversation find-work — BEHAVIOUR tests for a THIN INTENT ADAPTER.
  *
- * These run the REAL `findWorkForChat()` with the use case stubbed, so what is
- * asserted is what the conversation actually does with a canonical result:
- *   • it calls the ONE use case with surface "conversation" and a limit;
- *   • it preserves the use case's order — no second sort;
- *   • it never re-slices the match set;
- *   • every card id is the REAL demand id (`requestId`), never a position;
- *   • the first reason bullet is the canonical §19 basis, taken from the
- *     result — no percentage and no aggregate score assembled here;
- *   • no-worker and empty results degrade honestly.
+ * The chat no longer renders job rows: the Context Panel `opportunities`
+ * result is the single renderer and the single action surface. So this module
+ * shrank to "is there an answer, and how do I say so in one sentence", and
+ * these tests shrank with it.
  *
- * i18n is stubbed as `key(values)` so the assertions read the CANONICAL KEY
- * that was used, which is the point: the conversation must reuse
- * `opportunities.recommendations.basisCompact`, not a private wording.
+ * The row-level guarantees this file used to assert — canonical order, real
+ * demand ids, no re-slice, the §19 basis crossing whole, interest status and
+ * copy — did NOT disappear with the old renderer. They moved, with the rows,
+ * to `lib/marketplace/opportunities-result-projection.test.ts`.
+ *
+ * What stays here is what the ADAPTER still decides: it delegates to the ONE
+ * use case, and it keeps blocked / empty / matches distinct — because
+ * "there is no demand data at all", "nothing matched you" and "here is your
+ * answer" are three different things to tell a person.
+ *
+ * i18n is stubbed as `key(values)` so an assertion reads the CANONICAL KEY.
  */
 
 const loadMatchesMock = vi.fn();
@@ -145,159 +147,37 @@ describe("delegation to the canonical use case", () => {
   });
 });
 
-describe("order, count and identity come from the use case", () => {
-  it("keeps the canonical order — no second sort", async () => {
-    // Deliberately NOT in "best first" order by any local heuristic: a weak
-    // match first, a strong one last. The conversation must not reorder.
-    loadMatchesMock.mockResolvedValue(
-      ready([
-        rec(ID.c, { status: "weak", basis: { pct: 33, matchedTotal: 1, needTotal: 3, matchedConfirmed: 0 } }),
-        rec(ID.a, { status: "possible" }),
-        rec(ID.b, { status: "strong" }),
-      ]),
-    );
-    const res = await findWorkForChat();
-    expect(res.kind).toBe("matches");
-    if (res.kind !== "matches") return;
-    expect(res.matches.map((m) => m.id)).toEqual([ID.c, ID.a, ID.b]);
-  });
-
-  it("renders every match the use case returned — no extra slice", async () => {
+describe("the answer is a count and a sentence — the panel renders the rows", () => {
+  it("reports how many rows the panel will render", async () => {
     loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b), rec(ID.c)]));
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.matches).toHaveLength(3);
+    expect(res.count).toBe(3);
   });
 
-  it("every card id is the REAL demand id, never a list position", async () => {
-    loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b), rec(ID.c)]));
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    for (const [i, m] of res.matches.entries()) {
-      expect(m.id, `card ${i}`).toMatch(UUID);
-      expect(m.id).not.toBe(String(i));
-    }
-    expect(res.matches.map((m) => m.id)).toEqual([ID.a, ID.b, ID.c]);
-  });
-
-  it("ids are unique, so they work as stable React keys", async () => {
-    loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b), rec(ID.c)]));
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(new Set(res.matches.map((m) => m.id)).size).toBe(3);
-  });
-});
-
-describe("explainability is the canonical §19 basis", () => {
-  it("the first reason is opportunities.recommendations.basisCompact with the canonical counts", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([
-        rec(ID.a, {
-          basis: { pct: 80, matchedTotal: 4, needTotal: 5, matchedConfirmed: 2 },
-        }),
-      ]),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.matches[0].reasons[0]).toBe(
-      'opportunities.recommendations.basisCompact({"matched":4,"total":5,"confirmed":2})',
-    );
-  });
-
-  it("no percentage and no aggregate score reach the chat card", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a, { basis: { pct: 80, matchedTotal: 4, needTotal: 5, matchedConfirmed: 2 } })]),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    const card = res.matches[0];
-    const blob = JSON.stringify(card);
-    // The canonical basis carries counts only; `pct` must not be interpolated.
-    expect(blob).not.toMatch(/"pct"/);
-    expect(blob).not.toMatch(/\b80\b/);
-    expect(blob).not.toMatch(/aiScore|overallScore|matchScore/);
-  });
-
-  it("the fit label is a lookup on the canonical status, not a recomputation", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a, { status: "possible" }), rec(ID.b, { status: "weak" })]),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.matches[0].fitLabel).toBe("conversation.findWork.fitPossible");
-    expect(res.matches[1].fitLabel).toBe("conversation.findWork.fitWeak");
-  });
-
-  it("never invents a company — an unnamed demand falls back to its role label", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a, { companyName: null, roleSlug: "welder" })]),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.matches[0].name).toBe("Suvirintojas");
-  });
-});
-
-describe("the match is actionable through the canonical interest path", () => {
-  it("carries the worker's OWN interest status, straight from the use case", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a), rec(ID.b)], {
-        interestStatusByRequestId: { [ID.a]: "interested" },
-      }),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.matches[0].interestStatus).toBe("interested");
-    // No signal must stay NULL — never defaulted into a concrete status.
-    expect(res.matches[1].interestStatus).toBeNull();
-  });
-
-  it("resolves the canonical interest copy — no chat-private wording", async () => {
+  it("uses the singular opening for exactly one match", async () => {
     loadMatchesMock.mockResolvedValue(ready([rec(ID.a)]));
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
-    expect(res.interestLabels).not.toBeNull();
-    // The SAME namespace the opportunities board renders.
-    expect(res.interestLabels?.express).toBe("opportunities.interest.express");
-    expect(res.interestLabels?.internalNote).toBe("opportunities.interest.internalNote");
+    expect(res.count).toBe(1);
+    expect(res.intro).toBe("conversation.findWork.introOne");
   });
 
-  it("offers NO control when the owner-gated interest table is absent", async () => {
-    loadMatchesMock.mockResolvedValue(
-      ready([rec(ID.a)], {
-        capabilities: {
-          boardAvailable: true,
-          seenAvailable: false,
-          seenReadDegraded: false,
-          interestAvailable: false,
-        },
-      }),
-    );
-    const res = await findWorkForChat();
-    if (res.kind !== "matches") throw new Error("expected matches");
-    // A dead button is a fake capability — the cards stay read-only instead.
-    expect(res.interestLabels).toBeNull();
-  });
-});
-
-describe("what the chat reports as shown", () => {
-  it("the ids the card renders are exactly the ids the marker would report", async () => {
-    // The employer-match card maps `matches` 1:1 and the marker is handed
-    // `m.matches.map((match) => match.id)` — so the reported set is provably
-    // the rendered set, and it contains only real demand ids.
+  it("states the real count in the plural opening — never a number of its own", async () => {
     loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b)]));
     const res = await findWorkForChat();
     if (res.kind !== "matches") throw new Error("expected matches");
-    const rendered = res.matches.map((m) => m.id);
-    expect(rendered).toEqual([ID.a, ID.b]);
-    expect(rendered).not.toContain(ID.c); // never returned ⇒ never reported
+    expect(res.intro).toBe('conversation.findWork.intro({"count":2})');
   });
 
-  it("an empty result produces no cards, so there is nothing to report", async () => {
-    loadMatchesMock.mockResolvedValue(ready([]));
+  it("hands the chat NO rows, NO ids and NO labels to render", async () => {
+    loadMatchesMock.mockResolvedValue(ready([rec(ID.a), rec(ID.b)]));
     const res = await findWorkForChat();
-    expect(res.kind).toBe("empty");
+    if (res.kind !== "matches") throw new Error("expected matches");
+    // The whole point of the consolidation: a second renderer cannot come
+    // back by accident, because there is nothing here to render.
     expect(res).not.toHaveProperty("matches");
+    expect(res).not.toHaveProperty("interestLabels");
+    expect(Object.keys(res).sort()).toEqual(["count", "intro", "kind"]);
   });
 });

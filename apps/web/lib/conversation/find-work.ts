@@ -2,66 +2,43 @@
 
 import "server-only";
 
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportunities";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
-import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
-import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
-import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
   CONVERSATION_FIND_WORK_LIMIT,
-  type ChatEmployerMatch,
   type FindWorkResult,
 } from "./find-work-contract";
 
 /**
- * Conversation "find work" — a THIN presentation adapter over the canonical
+ * Conversation "find work" — a THIN INTENT ADAPTER over the canonical
  * marketplace use case.
  *
  * Owner decision: docs/owner-decisions/work-journal-conversation-architecture-v1.md
  * (`CONVERSATION_AND_UI_SHARE_DOMAIN_USE_CASES`); integration record:
  * docs/handoffs/2026-07-25_864_conversation_marketplace_integration.md.
  *
- * This module does NOT load, filter, rank, score or explain anything of its
- * own. `loadWorkerOpportunityMatches` already returned rows that are:
- *   - authorized (own-data, RLS-scoped, gated board RPC),
- *   - ranked by the ONE shared §19 comparator,
- *   - limited to the display slice, and
- *   - explained by their own §19 basis (matched / total / confirmed counts).
+ * WHAT IT USED TO DO, AND WHY IT STOPPED. This module used to localize every
+ * matched row into chat-card strings and carry a label bag for the interest
+ * control, because the chat THREAD rendered its own job cards. That made two
+ * renderers and two action surfaces for one answer — the duplication the
+ * owner's net-complexity rule forbids. The Context Panel's `opportunities`
+ * result is now the single renderer and the single place a person acts, so
+ * this adapter no longer produces rows at all.
  *
- * All this adapter does is localize those facts into chat-card strings and
- * carry the REAL demand id forward, so the chat can open the opportunity and
- * report exactly what it showed. There is no percentage computed here, no
- * aggregate score anywhere, and no invented company, need or salary: an empty
- * board yields an honest empty message and an unapplied board RPC yields an
- * honest blocked message.
+ * It now answers exactly one question: **is there an answer worth opening the
+ * panel for, and how do I say so in one sentence?** The rows themselves travel
+ * through `loadOpportunitiesResultAction` to the panel, from the SAME use case
+ * this function calls — one data flow, read once by the surface that renders.
  *
- * ACTIONABILITY (P0 fix): a match the worker cannot act on is a dead end, so
- * each card carries the worker's OWN canonical interest status plus the label
- * bag for the EXISTING `WorkerInterestButton`. The chat renders that same
- * component the opportunities board renders — one interest state machine, one
- * write path (`lib/opportunities/interest-actions.ts`), one honest scope note.
- * When the owner-gated interest table is absent the labels are `null` and the
- * cards stay read-only rather than showing a dead button.
+ * It still decides nothing: no loading, filtering, ranking, scoring or
+ * explaining of its own. An empty board yields an honest empty message and an
+ * unapplied board RPC yields an honest blocked message — those two remain
+ * DISTINCT, because "nothing matched" and "there is no demand data at all" are
+ * different answers to a person.
  */
-
-/** Canonical match status → the conversation's localized fit label. A label
- *  lookup, not a recomputation: `status` comes straight from the use case. */
-function fitKey(status: JobRecommendation["status"]): string {
-  switch (status) {
-    case "strong":
-      return "fitStrong";
-    case "possible":
-      return "fitPossible";
-    case "weak":
-      return "fitWeak";
-    default:
-      return "fitInsufficient";
-  }
-}
-
-export type { ChatEmployerMatch, FindWorkResult } from "./find-work-contract";
+export type { FindWorkResult } from "./find-work-contract";
 
 export async function findWorkForChat(
   /**
@@ -90,54 +67,16 @@ export async function findWorkForChat(
     return { kind: "empty", message: t("emptyState") };
   }
 
-  // The canonical §19 basis line — the SAME localized form the dashboard card
-  // and the journal block render, so one demand reads identically everywhere.
-  const tRec = await getTranslations("opportunities.recommendations");
-  const tOpp = await getTranslations("opportunities");
-  const tlm = await getTranslations("labourMarket");
-  const workLabels = buildWorkTypeLabelMap(await getLocale());
-
-  const roleLabel = (slug: string | null): string =>
-    (slug && workLabels[slug]) || tOpp("fieldRoleUnknown");
-
-  // Order is the use case's order — no sort, no slice.
-  const matches: ChatEmployerMatch[] = view.matches.map((m) => {
-    const reasons: string[] = [
-      tRec("basisCompact", {
-        matched: m.basis.matchedTotal,
-        total: m.basis.needTotal,
-        confirmed: m.basis.matchedConfirmed,
-      }),
-    ];
-    const country =
-      m.country && tlm.has(`countryNames.${m.country}`)
-        ? (tlm(`countryNames.${m.country}`) as string)
-        : m.country;
-    const location = m.locationLabel ?? country ?? null;
-    if (location) reasons.push(t("locationReason", { location }));
-    if (m.roleSlug) reasons.push(t("roleReason", { role: roleLabel(m.roleSlug) }));
-
-    return {
-      id: m.requestId,
-      name: m.companyName ?? roleLabel(m.roleSlug),
-      fitLabel: t(fitKey(m.status)),
-      fitStatus: m.status,
-      reasons: reasons.slice(0, 3),
-      // Straight from the use case. Absent key = no signal, not "not interested".
-      interestStatus: view.interestStatusByRequestId[m.requestId] ?? null,
-    };
-  });
-
+  // The COUNT and one sentence — that is the whole of the chat's job now. The
+  // panel renders the rows, so nothing here is localized per row and no id is
+  // carried: the panel reads them from the same use case and reports what IT
+  // actually rendered (rendering is the read event, canonical decision §10).
   return {
     kind: "matches",
+    count: view.matches.length,
     intro:
-      matches.length === 1
+      view.matches.length === 1
         ? t("introOne")
-        : t("intro", { count: matches.length }),
-    matches,
-    interestLabels: view.capabilities.interestAvailable
-      ? await resolveInterestLabels()
-      : null,
+        : t("intro", { count: view.matches.length }),
   };
 }
-

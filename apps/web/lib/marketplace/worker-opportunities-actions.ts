@@ -7,6 +7,7 @@ import {
   type MarkShownOutcome,
   type OpportunitiesResultView,
 } from "./worker-opportunities-contract";
+import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
 import {
   loadWorkerOpportunityMatches,
   markOpportunitiesShown,
@@ -94,9 +95,20 @@ export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResu
       salary: m.salary,
       missingSkillSlugs: m.missingSkillSlugs,
       isNew: m.isNew,
+      companyName: m.companyName,
+      fitStatus: m.status,
+      // The worker's own signal, from the same view — never guessed, and
+      // absent-key means "no signal", not "not interested".
+      interestStatus: view.interestStatusByRequestId[m.requestId] ?? null,
     })),
     totalRecommendable: view.totalRecommendable,
     newCount: view.newCount,
     seenDegraded: view.capabilities.seenReadDegraded,
+    // ONE resolver for this copy, server-side, shared with the job context.
+    // Absent table ⇒ null ⇒ the panel renders read-only rows instead of a
+    // button that cannot write.
+    interestLabels: view.capabilities.interestAvailable
+      ? await resolveInterestLabels()
+      : null,
   };
 }

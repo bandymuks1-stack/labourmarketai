@@ -319,11 +319,37 @@ describe("no worker-initiated apply/contact CTA (platform workflow only)", () =>
   const stripComments = (s: string): string =>
     s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
-  it("the result and journal block never offer contact/apply", () => {
+  /**
+   * The rule this guard protects is "no worker-initiated apply/contact CTA —
+   * the platform workflow only". It used to also forbid the canonical
+   * `WorkerInterestButton` on the compact surface, because that surface was a
+   * passive dashboard CARD in a grid and acting belonged on the board.
+   *
+   * W3 changed what the compact surface IS. The Context Panel result is the
+   * successor to the CHAT's answer, not to the dashboard card — and the chat's
+   * answer always carried the interest control. Consolidating the two
+   * renderers into one would otherwise have silently deleted a capability the
+   * conversation already had, which is the opposite of the intent.
+   *
+   * So the interest control is allowed HERE and nowhere else new, and the
+   * apply/contact ban is untouched on both surfaces. Expressing interest is a
+   * canonical in-platform signal with one write path; "apply" and
+   * "contact-employer" remain the things no compact surface may offer.
+   */
+  it("neither surface offers apply/contact", () => {
     for (const src of [RESULT, JOURNAL_BLOCK].map(stripComments)) {
       expect(src).not.toMatch(/contact-employer/i);
       expect(src).not.toMatch(/\bapply\b/i);
-      expect(src).not.toMatch(/WorkerInterestButton/);
     }
+  });
+
+  it("the journal block stays read-only — it is a context block, not an answer", () => {
+    expect(stripComments(JOURNAL_BLOCK)).not.toMatch(/WorkerInterestButton/);
+  });
+
+  it("the result acts through the ONE canonical interest control, never its own", () => {
+    // Not a second button, not a local state machine, not a second write path.
+    expect(RESULT).toMatch(/WorkerInterestButton/);
+    expect(RESULT).not.toMatch(/expressInterestAction|interest-actions/);
   });
 });

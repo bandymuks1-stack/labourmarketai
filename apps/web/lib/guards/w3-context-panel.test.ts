@@ -32,7 +32,10 @@ const STATE = "lib/world-state/world-state.ts";
 const RESOLVERS = "lib/world-state/resolvers.ts";
 const JOB_SERVER = "lib/world-state/job-context-server.ts";
 const CHAT = "components/app/conversation/chat/conversation-chat.tsx";
-const MESSAGES = "components/app/conversation/chat/messages.tsx";
+/* W3 consolidation: selecting a match is a Context Panel result row now, not
+   a thread card. The invariant ("selecting writes World State, it does not
+   open a page") is unchanged — only its home is. */
+const MESSAGES = "components/app/workspace/opportunities-result.tsx";
 
 const LOCALES = ["lt", "en", "ru", "nl", "de", "da", "et", "lv", "no", "pl", "sv"] as const;
 

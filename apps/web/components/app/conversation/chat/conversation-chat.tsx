@@ -39,7 +39,7 @@ import {
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
-import type { ResultContext } from "@/lib/conversation/result-registry";
+import type { ResultContext, ResultKind } from "@/lib/conversation/result-registry";
 import {
   AiWorkspaceBridge,
   type AiWorldStateHandle,
@@ -424,16 +424,11 @@ export function ConversationChat({
               .join(" · ");
             if (applied) assistant(applied);
             if (res.result.kind === "matches") {
-              pushMessage({
-                id: nid(),
-                role: "assistant",
-                kind: "employer-match",
-                intro: res.result.intro,
-                matches: res.result.matches,
-                locale,
-                interestLabels: res.result.interestLabels,
-              });
-              assistant(tail.join("\n"));
+              // Same rule as the chip path: the AI EXPLAINS, the panel SHOWS.
+              // This branch used to push a second copy of the thread's job
+              // cards, which is how one answer ended up with two renderers.
+              assistant([res.result.intro, ...tail].filter(Boolean).join("\n"));
+              openResultRef.current("opportunities");
             } else {
               assistant([res.result.message, ...tail].join("\n"), searchChips);
             }
@@ -462,6 +457,13 @@ export function ConversationChat({
     [assistant, pushMessage, locale, searchChips, starterChips, labels.fallback, tAi],
   );
 
+  /**
+   * Late-bound so the find-work flow (declared here) can open a result whose
+   * hook lives further down, next to the URL state it writes. Same pattern as
+   * `startProfileSummaryRef` — a ref, not a second copy of the hook.
+   */
+  const openResultRef = useRef<(kind: ResultKind) => void>(() => {});
+
   /** The REAL search request (employer/opportunity read) — its own typing
    *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
   const doFindWork = useCallback(() => {
@@ -470,17 +472,13 @@ export function ConversationChat({
       .then((res) => {
         setTyping(false);
         if (res.kind === "matches") {
-          pushMessage({
-            id: nid(),
-            role: "assistant",
-            kind: "employer-match",
-            intro: res.intro,
-            matches: res.matches,
-            // Carried so each card can render the CANONICAL interest control;
-            // null labels ⇒ the interest table is absent ⇒ read-only cards.
-            locale,
-            interestLabels: res.interestLabels,
-          });
+          // THE ANSWER OPENS THE PANEL. The thread used to draw its own job
+          // cards here — a second renderer and a second place to act on the
+          // same rows. The chat now EXPLAINS the answer in one sentence and
+          // opens the one surface that shows it, which is also the surface
+          // that reports what it actually rendered.
+          assistant(res.intro);
+          openResultRef.current("opportunities");
         } else {
           // Empty/blocked: the useful next steps are the ones that change the
           // outcome — criteria and profile — not the four-item menu.
@@ -491,7 +489,7 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.fallback, starterChips);
       });
-  }, [pushMessage, assistant, searchChips, starterChips, labels.fallback, locale]);
+  }, [assistant, searchChips, starterChips, labels.fallback]);
 
   /**
    * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
@@ -1014,12 +1012,16 @@ export function ConversationChat({
     geography,
     geoToken,
     projectId,
+    openResult,
     closeResult,
     selectGeography,
     selectProject,
     clearGeography,
     clearProject,
   } = useResultParam();
+  // Bind the late-bound opener: the find-work flow above calls this to put its
+  // answer in the panel instead of drawing a second card list in the thread.
+  openResultRef.current = openResult;
   const resultContext: ResultContext = auth0?.activeOrgName
     ? "organization"
     : "personal";

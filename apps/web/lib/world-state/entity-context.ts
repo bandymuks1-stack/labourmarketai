@@ -26,7 +26,7 @@
  * Pure types + a pure registry. No IO.
  */
 
-import type { ChatInterestLabels } from "@/lib/conversation/find-work-contract";
+import type { InterestLabelBag } from "@/lib/marketplace/worker-opportunities-contract";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import type { EntityRef } from "./world-state";
 
@@ -84,13 +84,13 @@ export interface ContextRecommendation {
 export type ContextAction =
   /** The canonical `WorkerInterestButton` — one interest state machine, one
    *  write path (`lib/opportunities/interest-actions.ts`). The label bag is the
-   *  SAME `ChatInterestLabels` the conversation already resolves, so the panel
+   *  SAME `InterestLabelBag` the conversation already resolves, so the panel
    *  invents no interest wording of its own. */
   | {
       readonly kind: "express_interest";
       readonly requestId: string;
       readonly initialStatus: InterestStatus | null;
-      readonly labels: ChatInterestLabels;
+      readonly labels: InterestLabelBag;
     }
   /** An existing conversation chip, dispatched through the chat's own handler. */
   | { readonly kind: "chip"; readonly chipId: string; readonly label: string };
