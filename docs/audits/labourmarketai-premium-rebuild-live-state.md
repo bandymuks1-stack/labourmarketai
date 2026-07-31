@@ -10,8 +10,8 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 14:45 |
-| UTC | 2026-07-31 11:45 |
+| Europe/Vilnius | 2026-07-31 16:05 |
+| UTC | 2026-07-31 13:05 |
 
 ## REPOSITORY
 
@@ -76,10 +76,10 @@ implementation branch was created.**
 
 | | |
 |---|---|
-| Production SHA | **`a5b991f4`** (was `752f8b19`) |
-| Deployment ID | **`5690792306`** — Production, state **success**, 2026-07-31T11:32:05Z |
+| Production SHA | **`3e31a70e`** (was `752f8b19` → `a5b991f4` → `3e31a70e`) |
+| Deployment ID | **`5691288750`** — Production, state **success** (prior: `5690792306`) |
 | Target | `https://app.labourmarket.ai` |
-| Public landing proof | **4/4 PASSED IN PRODUCTION** — `premium-rebuild/production-smoke.md` |
+| Public landing proof | **4/4 PASSED IN PRODUCTION on both deploys** — `premium-rebuild/production-smoke.md` |
 | Authenticated proof | **NOT PROVEN in production** — blocked on a synthetic production account |
 
 ## DEV SERVER OWNERSHIP (master command §4)
@@ -130,7 +130,8 @@ None in the test suite at `9c7da373`.
 ## OPEN ARCHITECTURAL DEBT (drives W3+)
 
 1. `/dashboard/advanced` — **916-line second dashboard** (Premium Hub). The
-   single largest violation still open.
+   single largest violation still open. W3 matrix: 28 capabilities,
+   **1 MIGRATED** (row 4 — the fake market-map SVG is gone).
 2. **71** authenticated `/dashboard` routes (107 pages total).
 3. **Three** navigation systems: `bottom-nav` (5 items), `dashboard-chrome`
    module bar, account menu.
@@ -181,7 +182,8 @@ DONE this session: PR #925 merged (`a5b991f4`), production deployed
 written (27 capabilities classified, 0 migrated).
 
 ```text
-1. W3 row 4 — the lowest-risk migration, and it is already evidence-backed:
+1. DONE — W3 row 4 merged (#927) and deployed (`3e31a70e`).
+   SUPERSEDED, kept for the record — the original next action was:
    components/app/premium-hub/premium-hub-market-map.tsx renders a hand-drawn
    <svg> (159 lines), NOT a map. The canonical <MarketMap> (Leaflet, real WGS84)
    supersedes it and the doctrine forbids "an SVG illustration standing in for a

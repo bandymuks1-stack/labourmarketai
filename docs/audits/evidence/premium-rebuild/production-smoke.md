@@ -1,6 +1,25 @@
 # PRODUCTION SMOKE — 2026-07-31
 
-## Deployment under test
+> **Two production deployments this session.** Both smoke-proven. The second
+> table is the current one.
+
+## Deployment 2 (current) — W3 row 4
+
+| | |
+|---|---|
+| Production SHA | **`3e31a70e`** (merge of PR #927) |
+| Deployment ID | **`5691288750`** — Production, state **success** |
+| CI at merge | `quality` SUCCESS, `migration-safety` SUCCESS, mergeState `CLEAN` |
+| Public landing smoke | **4/4 PASSED** against `https://app.labourmarket.ai` |
+| Contents | production evidence for #925, plus W3 row 4 (the fake market-map SVG removed) and the `product-readiness` scan-budget fix |
+
+W3 row 4 is an authenticated surface (`/dashboard/advanced`), so its proof is
+LOCAL (2 scenarios, `tests/e2e/w3-second-dashboard.spec.ts`) and remains
+unproven in production for the same credential reason recorded below.
+
+---
+
+## Deployment 1 — the premium chain
 
 | | |
 |---|---|
