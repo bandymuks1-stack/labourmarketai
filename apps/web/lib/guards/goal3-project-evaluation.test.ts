@@ -486,7 +486,18 @@ describe("one map, at one depth", () => {
 
   it("the panel still hides the workspace map whenever a result owns geography", () => {
     // The Goal 4 fix. Two maps in one column is the panel arguing with itself.
-    expect(read(PANEL)).toMatch(/showsResult \? null : <WorkspaceMap/);
+    //
+    // Asserted as the INVARIANT, not as one line of source: W3 row 6 put the
+    // pending-invitation control in the same `showsResult ? null :` branch
+    // (attention before geography), so the map is no longer the first thing
+    // inside it. What must stay true is that the map has exactly one mount and
+    // that it is unreachable while a result is showing.
+    const src = read(PANEL);
+    const mounts = src.match(/<WorkspaceMap\b/g) ?? [];
+    expect(mounts, "one map mount").toHaveLength(1);
+    const branch = src.indexOf("showsResult ? null : (");
+    expect(branch, "the map lives behind the showsResult gate").toBeGreaterThan(-1);
+    expect(src.indexOf("<WorkspaceMap")).toBeGreaterThan(branch);
   });
 
   it("the deeper result widens the SAME panel instead of opening a second one", () => {

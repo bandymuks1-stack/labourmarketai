@@ -38,20 +38,31 @@ test.skip(
 test.use({ storageState: HAS_SESSION ? STORAGE_STATE : undefined });
 
 /** Ask for work and return the first selectable match, or null when the board
- *  is honestly empty / gated in this environment. */
+ *  is honestly empty / gated in this environment.
+ *
+ *  REPAIRED for W3 row 5 (#932/#934): the thread's own `chat-employer-match-card`
+ *  was DELETED when the recommendations became the `opportunities` result — one
+ *  renderer, one action surface. This helper kept waiting 20s for a component
+ *  that no longer exists, which blew the 30s test budget before its own
+ *  `test.skip` could fire. It now selects from the canonical surface, which is
+ *  what the rule under test ("selecting opens the panel, it does not navigate")
+ *  was always about. */
 async function firstMatch(page: Page) {
-  await page.getByTestId("composer-input").fill("Ieškau darbo");
-  await page.getByTestId("composer-send").click();
-  const cards = page.getByTestId("chat-employer-match-card");
+  await page.goto("/lt/dashboard?result=opportunities");
+  const rows = page.getByTestId("opportunities-match-open");
   try {
-    await expect(cards.first()).toBeVisible({ timeout: 20_000 });
+    await expect(rows.first()).toBeVisible({ timeout: 20_000 });
   } catch {
     return null;
   }
-  return cards.first();
+  return rows.first();
 }
 
 test.describe("W3 — the Context Panel", () => {
+  // A cold dev compile of the workspace genuinely exceeds the 30s default;
+  // that is build cost, not product latency.
+  test.setTimeout(120_000);
+
   test("is always available, and opens an entity without navigating", async ({ page }) => {
     await page.goto("/lt/dashboard");
     const panel = page.getByTestId("context-panel");
@@ -64,11 +75,12 @@ test.describe("W3 — the Context Panel", () => {
       timeout: 20_000,
     });
 
-    const urlBefore = page.url();
-
     const match = await firstMatch(page);
     test.skip(match === null, "No opportunity on this board — nothing to select.");
-    await match!.getByTestId("chat-employer-match-open").click();
+    // Captured AFTER the board is on screen: what must not move is the URL
+    // across the SELECTION, and the helper reaches the board by navigating.
+    const urlBefore = page.url();
+    await match!.click();
 
     // 2. THE RULE: the panel switched to the entity and the URL did not move.
     await expect(panel).toHaveAttribute("data-panel-mode", "entity", { timeout: 20_000 });
@@ -76,11 +88,17 @@ test.describe("W3 — the Context Panel", () => {
 
     // 3. Real content: the demand's own facts, and its requirements from the
     //    canonical engine. Both come from the server; neither is invented.
-    await expect(page.getByTestId("context-panel-unavailable")).toHaveCount(0, {
-      timeout: 20_000,
+    // The entity read must SETTLE first. `data-panel-mode` flips the moment
+    // the selection is written, so asserting content straight after it was
+    // reading the panel mid-load and calling the empty frame a failure — the
+    // same harness defect this programme has produced before, not a product
+    // one.
+    await expect(page.getByTestId("context-panel-loading")).toHaveCount(0, {
+      timeout: 30_000,
     });
-    await expect(page.getByTestId("context-panel-requirements")).toBeVisible();
+    await expect(page.getByTestId("context-panel-unavailable")).toHaveCount(0);
     await expect(page.getByTestId("context-panel-contact-note")).toBeVisible();
+    await expect(page.getByTestId("context-panel-requirements")).toBeVisible();
 
     // 5. The conversation is still usable — the panel never took the page.
     await expect(page.getByTestId("composer-input")).toBeEnabled();

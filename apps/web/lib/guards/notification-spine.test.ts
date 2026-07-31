@@ -176,18 +176,24 @@ describe("visiting the destination IS the read event", () => {
   });
 
   it("pending invitations clear on the SAME helper the spine counts", () => {
-    // Signal href is /dashboard: the overview must load the identical
-    // invitations helper and render the accept/decline card, otherwise the
-    // bell would point at a page that neither shows nor resolves the signal.
+    // Signal href is /dashboard — the WORKSPACE. W3 row 6 moved the accept
+    // surface there, into the Context Panel's work context, so the thing the
+    // bell announces is both shown and resolvable at the href it points to.
+    // Both ends are pinned: the same helper on both sides, and a real render.
     const spine = read("lib/notifications/spine.ts");
     expect(spine).toMatch(
       /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
     );
-    const overview = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(overview).toMatch(
-      /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
+    const workContext = read("lib/world-state/work-context-server.ts");
+    expect(workContext).toMatch(/listMyPendingWorkerInvitations,?\s*$/m);
+    expect(workContext).toMatch(/from "@\/lib\/worker\/invitations"/);
+    expect(read("components/app/world-state/context-panel.tsx")).toMatch(
+      /<WorkerInvitations\b/,
     );
-    expect(overview).toMatch(/<WorkerInvitationsCard/);
+    // …and it is NOT still on the old page, which would be two homes.
+    expect(read("app/[locale]/dashboard/advanced/page.tsx")).not.toMatch(
+      /listMyPendingWorkerInvitations/,
+    );
   });
 });
 

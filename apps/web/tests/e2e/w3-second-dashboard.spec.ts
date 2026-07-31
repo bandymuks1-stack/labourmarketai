@@ -458,3 +458,319 @@ test.describe("row 5 — the recommendations card became a result", () => {
     expect(failed, failed.join("\n")).toEqual([]);
   });
 });
+
+/* ── row 6 — worker invitations ─────────────────────────────────────────────
+ *
+ * The capability did NOT become a result kind. An invitation is an ATTENTION
+ * item — nobody types "show me my invitations", they are told — so it was
+ * absorbed into the Context Panel's EXISTING work context, which is the
+ * surface whose whole job is what needs you now. No result kind, no registry
+ * entry, no route, no second action surface.
+ *
+ * These scenarios seed REAL pending invitations into the local fixture
+ * database with the service role and then drive the REAL accept RPC. Nothing
+ * about the outcome is mocked: `linked`, `already_linked`, `no_invitation` and
+ * `error` are the values Postgres actually returned.
+ */
+
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const SUPA_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+
+/** The fixture identity the storage state belongs to (supabase/dev-fixtures.sql). */
+const WORKER_EMAIL = "dev.worker@local.test";
+/** Dev Construction — the fixture worker is ALREADY on this roster. */
+const COMPANY_ID = "cccccccc-0000-0000-0000-000000000001";
+/** Dev Staffing UAB — the fixture worker is NOT on this one. */
+const AGENCY_ID = "dddddddd-0000-0000-0000-000000000001";
+const COMPANY_INVITER = "aaaaaaaa-0000-0000-0000-000000000002";
+const AGENCY_INVITER = "aaaaaaaa-0000-0000-0000-000000000003";
+
+/** Minimal PostgREST calls with the LOCAL service key — no client dependency,
+ *  and it refuses outright if the target is not loopback. */
+async function db(
+  method: "POST" | "DELETE" | "GET",
+  path: string,
+  body?: unknown,
+): Promise<Response> {
+  if (!SUPA_URL || !SUPA_SERVICE) throw new Error("local stack env missing");
+  if (!/^(127\.0\.0\.1|localhost)$/.test(new URL(SUPA_URL).hostname)) {
+    throw new Error(`refusing to seed a non-local target: ${SUPA_URL}`);
+  }
+  return fetch(`${SUPA_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      apikey: SUPA_SERVICE,
+      Authorization: `Bearer ${SUPA_SERVICE}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
+async function clearInvitationState(): Promise<void> {
+  await db("DELETE", `agency_worker_invitations?invited_email=eq.${WORKER_EMAIL}`);
+  await db("DELETE", `company_worker_invitations?invited_email=eq.${WORKER_EMAIL}`);
+  // The agency link is the one the accept scenario creates; the company link
+  // is fixture state and is deliberately left alone.
+  await db("DELETE", `agency_workers?agency_id=eq.${AGENCY_ID}`);
+}
+
+async function seedAgencyInvitation(note = "E2E row 6 agency"): Promise<void> {
+  const r = await db("POST", "agency_worker_invitations", {
+    agency_id: AGENCY_ID,
+    invited_email: WORKER_EMAIL,
+    status: "pending",
+    inviter_profile_id: AGENCY_INVITER,
+    note,
+  });
+  if (!r.ok) throw new Error(`seed agency invitation failed: ${await r.text()}`);
+}
+
+async function seedCompanyInvitation(note = "E2E row 6 company"): Promise<void> {
+  const r = await db("POST", "company_worker_invitations", {
+    company_id: COMPANY_ID,
+    invited_email: WORKER_EMAIL,
+    status: "pending",
+    inviter_profile_id: COMPANY_INVITER,
+    note,
+  });
+  if (!r.ok) throw new Error(`seed company invitation failed: ${await r.text()}`);
+}
+
+const HAS_LOCAL_STACK = Boolean(SUPA_URL && SUPA_SERVICE);
+
+test.describe("row 6 — the invitation card became the panel's work context", () => {
+  test.skip(!HAS_LOCAL_STACK, "needs the local stack (pnpm -C apps/web e2e:local)");
+
+  test.beforeEach(clearInvitationState);
+  test.afterAll(clearInvitationState);
+
+  test("a pending invitation appears in the Context Panel, and the card is gone", async ({
+    page,
+  }) => {
+    const consoleErrors: string[] = [];
+    const failed: string[] = [];
+    page.on("console", (m) => {
+      if (m.type() === "error" && !/upgrade-insecure-requests/i.test(m.text())) {
+        consoleErrors.push(m.text());
+      }
+    });
+    page.on("requestfailed", (r) => {
+      const why = r.failure()?.errorText ?? "";
+      if (!why.includes("ERR_ABORTED")) failed.push(`${r.url()} — ${why}`);
+    });
+    page.on("response", (r) => {
+      if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`);
+    });
+
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard");
+
+    const panel = page.getByTestId("context-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute("data-panel-mode", "work_context");
+
+    // THE CAPABILITY IS HERE — inside the work context, not on a second page.
+    const invitations = panel.getByTestId("worker-invitations");
+    await expect(invitations).toBeVisible({ timeout: 40_000 });
+    // Real content: the inviting organisation's REAL name and note.
+    await expect(invitations).toContainText("Dev Staffing UAB");
+    await expect(invitations).toContainText("E2E row 6 agency");
+    // Exactly ONE renderer — the duplication this row exists to remove.
+    await expect(page.getByTestId("worker-invitations")).toHaveCount(1);
+    await expect(
+      page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`),
+    ).toBeVisible();
+
+    await page.screenshot({ path: join(SHOTS, "row6-invitation-panel-1440.png") });
+
+    expect(failed, failed.join("\n")).toEqual([]);
+    expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
+  });
+
+  test("the card is gone from /dashboard/advanced and that route still works", async ({
+    page,
+  }) => {
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard/advanced");
+
+    // The route is intact …
+    const more = page.getByTestId("dashboard-more-section");
+    await expect(more).toBeAttached();
+    await more.locator("summary").click();
+
+    // … and BOTH mounts are gone — including the one inside the disclosure,
+    // which is why the disclosure is opened before asserting.
+    await expect(page.getByTestId("worker-invitations")).toHaveCount(0);
+    await expect(
+      page.locator('[data-testid^="worker-invitation-accept-"]'),
+    ).toHaveCount(0);
+  });
+
+  test("accepting really links: the REAL RPC returns `linked`", async ({ page }) => {
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard");
+
+    const accept = page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`);
+    await expect(accept).toBeVisible({ timeout: 40_000 });
+    await accept.click();
+
+    const result = page.getByTestId(`worker-invitation-result-agency-${AGENCY_ID}`);
+    await expect(result).toBeVisible({ timeout: 40_000 });
+    await expect(result).toHaveText(/\S/);
+    // The accepted row drops its button — the action cannot be repeated.
+    await expect(accept).toHaveCount(0);
+
+    // THE WRITE REALLY HAPPENED: the roster link exists in the database.
+    const check = await db(
+      "GET",
+      `agency_workers?agency_id=eq.${AGENCY_ID}&select=agency_id,status`,
+    );
+    const rows = (await check.json()) as unknown[];
+    expect(rows.length, "the accept RPC must have created a real link").toBe(1);
+  });
+
+  test("an invitation from an org already on the roster says `already-linked`", async ({
+    page,
+  }) => {
+    // The fixture worker is already on Dev Construction's roster, so this is
+    // the real already_linked branch of the RPC — not a simulated one.
+    await seedCompanyInvitation();
+    await page.goto("/lt/dashboard");
+
+    const accept = page.getByTestId(`worker-invitation-accept-company-${COMPANY_ID}`);
+    await expect(accept).toBeVisible({ timeout: 40_000 });
+    await accept.click();
+
+    const result = page.getByTestId(`worker-invitation-result-company-${COMPANY_ID}`);
+    await expect(result).toBeVisible({ timeout: 40_000 });
+    // already_linked is an OK outcome, so it renders in the success tone …
+    await expect(result).toHaveClass(/state-success/);
+    // … and the button stays, because nothing was newly linked.
+    await expect(accept).toBeVisible();
+  });
+
+  test("an invitation withdrawn behind the person's back says `no-invitation`", async ({
+    page,
+  }) => {
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard");
+
+    const accept = page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`);
+    await expect(accept).toBeVisible({ timeout: 40_000 });
+
+    // The organisation withdraws it while the panel is open. Real row, really
+    // deleted — the stale screen must not claim a link it did not get.
+    await db("DELETE", `agency_worker_invitations?invited_email=eq.${WORKER_EMAIL}`);
+    await accept.click();
+
+    const result = page.getByTestId(`worker-invitation-result-agency-${AGENCY_ID}`);
+    await expect(result).toBeVisible({ timeout: 40_000 });
+    // A no-rows outcome is a WARNING, never the success tone.
+    await expect(result).toHaveClass(/state-warning/);
+    const links = await db(
+      "GET",
+      `agency_workers?agency_id=eq.${AGENCY_ID}&select=agency_id`,
+    );
+    expect((await links.json()) as unknown[]).toEqual([]);
+  });
+
+  test("a failed write states the error instead of pretending it worked", async ({
+    page,
+  }) => {
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard");
+
+    const accept = page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`);
+    await expect(accept).toBeVisible({ timeout: 40_000 });
+
+    // Corrupt the org id the form carries. The RPC then fails inside Postgres
+    // (invalid uuid), which is a REAL error on the real path — the component's
+    // `error` branch, not a mocked response.
+    await page
+      .locator(
+        `[data-testid="worker-invitation-agency-${AGENCY_ID}"] input[name="orgId"]`,
+      )
+      .evaluate((el) => {
+        (el as HTMLInputElement).value = "not-a-uuid";
+      });
+    await accept.click();
+
+    const result = page.getByTestId(`worker-invitation-result-agency-${AGENCY_ID}`);
+    await expect(result).toBeVisible({ timeout: 40_000 });
+    await expect(result).toHaveClass(/state-warning/);
+    // Nothing was written.
+    const links = await db(
+      "GET",
+      `agency_workers?agency_id=eq.${AGENCY_ID}&select=agency_id`,
+    );
+    expect((await links.json()) as unknown[]).toEqual([]);
+  });
+
+  test("reload keeps the state honest, and closing the panel is not a dead end", async ({
+    page,
+  }) => {
+    await seedAgencyInvitation();
+    await page.goto("/lt/dashboard");
+    const panel = page.getByTestId("context-panel");
+    await expect(panel.getByTestId("worker-invitations")).toBeVisible({
+      timeout: 40_000,
+    });
+
+    // A reload re-reads: still pending, still exactly one renderer.
+    await page.reload();
+    await expect(panel.getByTestId("worker-invitations")).toBeVisible({
+      timeout: 40_000,
+    });
+    await expect(page.getByTestId("worker-invitations")).toHaveCount(1);
+
+    // Opening a RESULT gives the panel to the result (one subject at a time),
+    // and closing it returns the work context — invitation included.
+    await page.goto("/lt/dashboard?result=opportunities");
+    await expect(page.getByTestId("context-panel-close")).toBeVisible({
+      timeout: 40_000,
+    });
+    await page.getByTestId("context-panel-close").click();
+    await expect(panel).toHaveAttribute("data-panel-mode", "work_context");
+    await expect(panel.getByTestId("worker-invitations")).toBeVisible({
+      timeout: 40_000,
+    });
+
+    // Once accepted, a reload must NOT resurrect the pending invitation.
+    await page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`).click();
+    await expect(
+      page.getByTestId(`worker-invitation-result-agency-${AGENCY_ID}`),
+    ).toBeVisible({ timeout: 40_000 });
+    await page.reload();
+    await expect(page.getByTestId("worker-invitations")).toHaveCount(0, {
+      timeout: 40_000,
+    });
+  });
+
+  test("375px — the invitation is reachable on a phone, with no overflow", async ({
+    page,
+  }) => {
+    await seedAgencyInvitation();
+    await page.setViewportSize({ width: 375, height: 780 });
+    await page.goto("/lt/dashboard");
+
+    // The panel is a bottom sheet on a phone and starts collapsed. A pending
+    // invitation opens it: the bell that announces the invitation points here,
+    // so a shut sheet would make the signal unreachable.
+    const invitations = page.getByTestId("worker-invitations");
+    await expect(invitations).toBeVisible({ timeout: 40_000 });
+    await expect(
+      page.getByTestId(`worker-invitation-accept-agency-${AGENCY_ID}`),
+    ).toBeVisible();
+
+    const overflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
+    );
+    expect(overflow, "no horizontal overflow at 375px").toBeLessThanOrEqual(1);
+
+    await page.screenshot({ path: join(SHOTS, "row6-invitation-panel-375.png") });
+  });
+});

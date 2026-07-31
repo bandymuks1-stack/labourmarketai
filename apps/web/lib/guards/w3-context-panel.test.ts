@@ -106,10 +106,40 @@ describe("W3 — one dispatcher, one write path", () => {
     expect(src).toMatch(/loadEntityContext/);
     expect(src).toMatch(/loadWorkContext/);
     expect(src).not.toMatch(/Action\(|createClient|supabase/);
-    // The one interactive control it renders is the CANONICAL interest button.
+    // The interactive controls it renders are CANONICAL components owned
+    // elsewhere, each with its own single write path (W3 row 6 added the
+    // second one): the marketplace's interest button and the worker
+    // invitations' accept control.
     expect(src).toMatch(/WorkerInterestButton/);
+    expect(src).toMatch(/WorkerInvitations/);
+    // It submits nothing of its own — no form, no submit control. That is the
+    // rule those two components are the exception to, and the reason a third
+    // control cannot be hand-rolled here.
+    expect(src).not.toMatch(/<form\b|type="submit"|formAction/);
     // Everything else goes back through the conversation's chip handler.
     expect(src).toMatch(/onChip/);
+  });
+
+  it("the invitation control is REUSED, not reimplemented (W3 row 6)", () => {
+    // Row 6's whole claim is that nothing was ported. The panel renders the
+    // same component the deleted dashboard card rendered, and that component
+    // still owns the only accept path.
+    const control = read("components/app/worker-invitations.tsx");
+    expect(control).toMatch(/acceptWorkerInvitationAction/);
+    // All six outcome states survive the move.
+    for (const outcome of [
+      "outcomeLinked",
+      "outcomeAlreadyLinked",
+      "outcomeNoInvitation",
+      "outcomeNoWorker",
+      "outcomeError",
+      "outcomeNeedsMigration",
+    ]) {
+      expect(control, `${outcome} must survive`).toMatch(outcome);
+      // …and the panel's server half must supply the copy for each of them,
+      // or the moved control would render raw keys.
+      expect(read("lib/world-state/work-context-server.ts"), outcome).toMatch(outcome);
+    }
   });
 
   it("the chat routes panel chips into its EXISTING handler", () => {

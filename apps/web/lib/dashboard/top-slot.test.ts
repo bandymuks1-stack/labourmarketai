@@ -9,7 +9,6 @@ import { decideTopSlot, type TopSlotSignals } from "./top-slot";
  */
 
 const NONE: TopSlotSignals = {
-  pendingInvitations: 0,
   acceptedOutgoing: 0,
   pendingIncomingServiceRequests: 0,
   pendingIncomingBookings: 0,
@@ -52,10 +51,9 @@ describe("decideTopSlot priority ladder", () => {
     ).toBe("incoming_service_request");
   });
 
-  it("an ACCEPTED outgoing request beats everything except an invitation", () => {
+  it("an ACCEPTED outgoing request beats every other state", () => {
     expect(
       decideTopSlot({
-        ...NONE,
         acceptedOutgoing: 1,
         pendingIncomingServiceRequests: 2,
         pendingIncomingBookings: 1,
@@ -65,17 +63,20 @@ describe("decideTopSlot priority ladder", () => {
     ).toBe("accepted_request");
   });
 
-  it("a pending invitation wins over every other state", () => {
-    expect(
-      decideTopSlot({
-        pendingInvitations: 1,
-        acceptedOutgoing: 5,
-        pendingIncomingServiceRequests: 5,
-        pendingIncomingBookings: 5,
-        bookingResponsesNew: 5,
-        isFirstUse: true,
-      }),
-    ).toBe("invitation");
+  // W3 row 6 — the ladder has no `invitation` rung any more. It is asserted as
+  // an ABSENCE rather than deleted silently, because a rung whose card no
+  // longer exists on this page would resolve to an empty slot: the capability
+  // moved to the Context Panel's work context, it was not dropped.
+  it("has no invitation rung — that capability is the Context Panel's", () => {
+    const kinds = [
+      decideTopSlot({ ...NONE, acceptedOutgoing: 1 }),
+      decideTopSlot({ ...NONE, pendingIncomingServiceRequests: 1 }),
+      decideTopSlot({ ...NONE, pendingIncomingBookings: 1 }),
+      decideTopSlot({ ...NONE, bookingResponsesNew: 1 }),
+      decideTopSlot({ ...NONE, isFirstUse: true }),
+      decideTopSlot(NONE),
+    ];
+    expect(kinds).not.toContain("invitation");
   });
 
   it("counts are gates, not weights — zero never claims the slot", () => {
