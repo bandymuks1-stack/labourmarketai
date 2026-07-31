@@ -52,30 +52,13 @@ export type HandoverStage =
   | "handover_declared"
   | "closed";
 
-/** The worker's state-aware next action + inline availability editor, folded
- *  from the former WorkCard into the hub person block. Derived on the dashboard
- *  page from the real `getWorkerCard` read (worker branch only); undefined for
- *  non-worker roles. `WorkCardEditor` renders it (real save/confirm RPCs). */
-export interface WorkEditorVM {
-  state: WorkCardState;
-  /** The single best next action ({ dim, href, whyKey }) from
-   *  deriveWorkCardState — href is null when the action is an inline card edit. */
-  next: WorkCardNext;
-  values: WorkCardValues;
-}
-
-export interface PersonVM {
-  status: BlockStatus;
-  name: string | null;
-  professionSlug: string | null;
-  roleFallback: string | null;
-  avatarUrl: string | null;
-  locationCountry: string | null;
-  availability: Availability | null;
-  skillsDeclared: number;
-  journalSupportedSkills: number;
-  evidenceEntries: number;
-}
+/* W3 row 1: `PersonVM` and `loadPerson` are GONE, and with them this module's
+   reads of the player card, the avatar and the worker core row. The hub's
+   person block was a second, lesser rendering of the canonical player card;
+   the card is now the `player-card` RESULT, which reads the same canonical
+   model directly. `WorkEditorVM` moved to `@/lib/worker/work-card` — it was
+   always a work-card view model, and it only lived here because the editor
+   was folded into this block. */
 
 export interface CompanyVM {
   status: BlockStatus;
@@ -109,91 +92,10 @@ export interface ProjectVM {
 }
 
 export interface PremiumHubViewModel {
-  person: PersonVM;
   company: CompanyVM;
   market: MarketVM;
   project: ProjectVM;
   allReady: boolean;
-}
-
-async function loadPerson(): Promise<PersonVM> {
-  const base: PersonVM = {
-    status: "empty",
-    name: null,
-    professionSlug: null,
-    roleFallback: null,
-    avatarUrl: null,
-    locationCountry: null,
-    availability: null,
-    skillsDeclared: 0,
-    journalSupportedSkills: 0,
-    evidenceEntries: 0,
-  };
-
-  // Wagon 2 (nav performance): the profile row comes from the request-cached
-  // session-profile reader shared with the auth-shell layout and the overview
-  // page — this block previously issued the third independent profiles SELECT
-  // of the navigation.
-  const session = await getSessionProfile();
-  if (!session.user) return { ...base, status: "unavailable" };
-
-  // P0 nav-performance: availability + current country come straight from
-  // THE request-cached core worker row (@/lib/data/worker-core) shared with
-  // the player-card / opportunities readers — this block previously called
-  // getOwnAvailability(), whose own `workers` select was the fourth
-  // independent read of the same row in one navigation.
-  const [playerCard, avatar, worker] = await Promise.all([
-    getWorkerPlayerCard(),
-    getOwnAvatar(),
-    getWorkerCoreRow(),
-  ]);
-
-  const profile = session.profile;
-
-  const name =
-    profile?.full_name?.trim() ||
-    playerCard?.displayName?.trim() ||
-    (profile?.email ? profile.email.split("@")[0] : "") ||
-    (session.user.email ? session.user.email.split("@")[0] : "") ||
-    null;
-
-  const professionSlug = playerCard?.professionSlug ?? null;
-  const skillsDeclared = playerCard?.skillsDeclared ?? 0;
-  const journalSupportedSkills = playerCard?.journalSupportedSkills ?? 0;
-  const evidenceEntries = playerCard?.evidenceEntries ?? 0;
-  const avatarUrl = avatar.signedUrl;
-  // Same normalization getOwnAvailability applied: a country renders only as
-  // a clean ISO-3166 alpha-2 code; anything else is honestly absent.
-  const rawCountry = (worker?.current_location_country ?? "").trim().toUpperCase();
-  const workerCountry = /^[A-Z]{2}$/.test(rawCountry) ? rawCountry : null;
-  const locationCountry = profile?.country ?? workerCountry ?? null;
-  const rawState = worker?.availability_status ?? null;
-  const availabilityState: Availability | null =
-    rawState === "available" || rawState === "busy" || rawState === "unavailable"
-      ? rawState
-      : null;
-
-  // "Empty" only when the account has nothing meaningful yet (brand-new).
-  const hasAny =
-    !!profile?.full_name ||
-    !!professionSlug ||
-    skillsDeclared > 0 ||
-    journalSupportedSkills > 0 ||
-    evidenceEntries > 0 ||
-    !!avatarUrl;
-
-  return {
-    status: hasAny ? "ready" : "empty",
-    name,
-    professionSlug,
-    roleFallback: profile?.active_role ?? null,
-    avatarUrl,
-    locationCountry,
-    availability: availabilityState,
-    skillsDeclared,
-    journalSupportedSkills,
-    evidenceEntries,
-  };
 }
 
 async function loadCompany(
@@ -315,16 +217,15 @@ export async function getPremiumHubViewModel(opts?: {
   /** Reuse the caller's in-flight getOwnCompany() read (Wagon 2). */
   companyRead?: Promise<CompanyReadResult>;
 }): Promise<PremiumHubViewModel> {
-  const [person, company, market, project] = await Promise.all([
-    loadPerson(),
+  const [company, market, project] = await Promise.all([
     loadCompany(opts?.companyRead),
     loadMarket(),
     loadProject(),
   ]);
 
-  const allReady = [person, company, market, project].every(
+  const allReady = [company, market, project].every(
     (b) => b.status === "ready",
   );
 
-  return { person, company, market, project, allReady };
+  return { company, market, project, allReady };
 }

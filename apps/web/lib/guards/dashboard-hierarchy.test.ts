@@ -91,7 +91,12 @@ describe("worker branch: state-driven top slot leads", () => {
   it("the hub person block carries the worker's folded next action + inline editor", () => {
     // WorkCard was removed (dedup); its state-aware next action + inline editor
     // now live in the hub Asmens kortelė via the workEditor prop.
-    expect(WORKER).toContain("workEditor={workEditor}");
+    // W3 row 1: the editor left this page with the person card and lives in
+    // the `player-card` result. Both halves pinned.
+    expect(WORKER).not.toContain("workEditor");
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
   });
 
   it("the action grid keeps its explainer demoted (help ≠ action)", () => {

@@ -127,7 +127,9 @@ describe("contextual hub — every card exactly once, placement by real state", 
 
   it("the worker page renders the hub contextually", () => {
     expect(WORKER).toContain(
-      "<PremiumHubScreen vm={hubVm} embedded contextual workEditor={workEditor} />",
+      // W3 row 1: `workEditor` is gone from this mount — the person card and
+      // its editor became the `player-card` result.
+      "<PremiumHubScreen vm={hubVm} embedded contextual />",
     );
   });
 

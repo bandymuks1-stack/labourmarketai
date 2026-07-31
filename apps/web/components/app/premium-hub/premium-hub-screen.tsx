@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import type { PremiumHubViewModel, WorkEditorVM } from "./premium-hub-data";
-import { PremiumHubPersonCard } from "./premium-hub-person-card";
+import type { PremiumHubViewModel } from "./premium-hub-data";
 import { PremiumHubCompanyCard } from "./premium-hub-company-card";
 import { PremiumHubMarketMap } from "./premium-hub-market-map";
 import { PremiumHubProjectCard } from "./premium-hub-project-card";
@@ -28,21 +27,16 @@ export async function PremiumHubScreen({
   vm,
   embedded = false,
   contextual = false,
-  workEditor,
 }: {
   vm: PremiumHubViewModel;
   embedded?: boolean;
   /** Primary-action hierarchy v1 (worker dashboard): the hub's PRIMARY slot
-   *  carries only the person card (the sole availability/pay editor +
-   *  activation surface) plus company/project cards that have REAL data
+   *  carries only company/project cards that have REAL data
    *  (`status === "ready"`). Empty/unavailable company & project cards and
    *  the map preview move to the collapsed review section — the page renders
    *  them there itself, so every door and honest empty state survives one
    *  tap away. Contextual rendering follows real state, never a guess. */
   contextual?: boolean;
-  /** Worker-only: the state-aware next action + inline editor folded into the
-   *  person block (dashboard worker branch). Absent for org roles. */
-  workEditor?: WorkEditorVM;
 }) {
   const t = await getTranslations("premiumHub");
 
@@ -54,20 +48,19 @@ export async function PremiumHubScreen({
   const showCompany = !contextual || vm.company.status === "ready";
   const showProject = !contextual || vm.project.status === "ready";
   const showMap = !contextual;
-  const columns =
-    1 + (showCompany || showMap ? 1 : 0) + (showProject ? 1 : 0);
+  const columns = (showCompany || showMap ? 1 : 0) + (showProject ? 1 : 0);
 
+  // W3 row 1: the PERSON block is gone from here. It was a second, lesser
+  // rendering of the canonical player card — and it carried the only
+  // availability/location/pay editor, which moved with it into the
+  // `player-card` RESULT. The hub keeps what is still its own subject: the
+  // organization, the market and the project (rows 2, 4 and 3).
   const grid = (
     <div
       className={`grid gap-4 lg:items-stretch ${
-        columns === 3
-          ? "lg:grid-cols-3"
-          : columns === 2
-            ? "lg:grid-cols-2"
-            : ""
+        columns === 2 ? "lg:grid-cols-2" : ""
       }`}
     >
-      <PremiumHubPersonCard person={vm.person} workEditor={workEditor} />
       {showCompany || showMap ? (
         <div className="flex flex-col gap-4">
           {showCompany ? <PremiumHubCompanyCard company={vm.company} /> : null}

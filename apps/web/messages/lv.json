@@ -3336,7 +3336,8 @@
       "briefConflicts": "[EN] Your calendar has {count} overlapping commitments.",
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
-      "briefProfileGap": "[EN] Your profile is still missing: {step}."
+      "briefProfileGap": "[EN] Your profile is still missing: {step}.",
+      "playerCardOpened": "Tava karte ir atvērta panelī — īsti dati no taviem ierakstiem."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

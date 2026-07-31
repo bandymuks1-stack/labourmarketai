@@ -40,7 +40,12 @@ describe("worker entry opens with the state-aware work card (folded into the hub
     // WorkCard was removed (dedup v1); the state-aware next action + inline
     // availability/location/pay editor now live in the hub Asmens kortelė via
     // the workEditor prop.
-    expect(page).toMatch(/workEditor=\{workEditor\}/);
+    // W3 row 1: the editor left this page with the person card and lives in
+    // the `player-card` result. Both halves pinned.
+    expect(page).not.toMatch(/workEditor/);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
   });
   it("the folded editor surfaces only honest state, never a fabricated value", () => {
     const editor = read("components/app/work-card-editor.tsx");

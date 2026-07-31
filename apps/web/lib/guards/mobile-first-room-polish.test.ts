@@ -37,7 +37,12 @@ describe("no broad redesign / no logic change", () => {
     const page = read("app/[locale]/dashboard/advanced/page.tsx");
     // WorkCard was removed (dedup v1); the worker's state-aware next action +
     // inline editor now live in the hub person block via workEditor.
-    expect(page).toMatch(/workEditor=\{workEditor\}/);
+    // W3 row 1: the editor left this page with the person card and lives in
+    // the `player-card` result. Both halves pinned.
+    expect(page).not.toMatch(/workEditor/);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
     expect(page).toMatch(/<DashboardNextAction\b/);
   });
 });

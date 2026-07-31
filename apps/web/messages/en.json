@@ -11161,7 +11161,8 @@
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
       "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
-      "briefProfileGap": "Your profile is still missing: {step}."
+      "briefProfileGap": "Your profile is still missing: {step}.",
+      "playerCardOpened": "Your card is open in the panel — real data from your own records."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -11376,7 +11377,8 @@
       "opportunitiesEmpty": "No open needs match your skills right now.",
       "opportunitiesPartial": "The “new” markers could not be read this time — the rows are real, novelty is not shown.",
       "opportunitiesMore": "{n} more in the full list.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "playerCardError": "We could not read your card."
     }
   },
   "landing": {

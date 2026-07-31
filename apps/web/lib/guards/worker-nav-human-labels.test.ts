@@ -97,7 +97,12 @@ describe("worker dashboard has no duplicate doors / card wall", () => {
   it("still surfaces the worker's folded next action + current-space header (identity preserved)", () => {
     // WorkCard was removed (dedup v1); the worker identity/card area is the hub
     // person block, which carries the folded next action + inline editor.
-    expect(page).toMatch(/workEditor=\{workEditor\}/);
+    // W3 row 1: the editor left this page with the person card and lives in
+    // the `player-card` result. Both halves pinned.
+    expect(page).not.toMatch(/workEditor/);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
     expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
   });
   it("keeps the page free of inline primary gradient CTAs (the one CTA is the work card's)", () => {

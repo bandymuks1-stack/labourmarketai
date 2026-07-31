@@ -50,7 +50,14 @@ describe("dashboard surfaces the chain entry points", () => {
     // folded editor (workEditor) — the WorkCard was removed (dedup v1) and its
     // state-aware next action + inline editor moved into the hub Asmens kortelė.
     expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
-    expect(page).toMatch(/workEditor=\{workEditor\}/);
+    // W3 row 1: the folded work editor is NOT on this page any more. It moved
+    // with the person card into the `player-card` RESULT, so BOTH halves are
+    // pinned — gone from here, and really rendered there. A guard that only
+    // checked the first half would pass if the editor had been thrown away.
+    expect(page).not.toMatch(/workEditor/);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
   });
 
   it("the chain-actions card links to all real chain surfaces (real Links, no placeholder)", () => {

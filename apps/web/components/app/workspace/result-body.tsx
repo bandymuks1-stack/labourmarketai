@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
+import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
 import type { GeographySelection } from "@/lib/market-map/geography-selection";
 
 import {
@@ -142,7 +143,12 @@ function InlineResult({
           onBackToProjects={navigation.onBackToProjects}
         />
       );
-    // Phase C wires the canonical Player Card here; the rest follow.
+    case "player-card":
+      // W3 row 1 — the canonical card. It was rendered in the chat THREAD and
+      // (as a lesser person block) twice inside the premium hub; both are gone
+      // and this is the one renderer.
+      return <PlayerCardResult onOpenFull={onOpenFull} />;
+    // The remaining kinds follow, one verified data path at a time.
     default:
       return (
         <p className="text-basis text-text-muted" data-testid="result-body-pending">

@@ -26,9 +26,7 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
-import { loadPlayerCardForChat } from "@/lib/conversation/player-card-chat";
 import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
-import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
@@ -105,6 +103,9 @@ export type ChatLabels = {
   searchAskCriteria: string;
   /** §5.1: the line above the card when it re-renders after a work log. */
   playerCardAfterLog: string;
+  /** W3 row 1: what the chat SAYS when it opens the card in the panel. The
+   *  thread reports the outcome; the panel shows the card. */
+  playerCardOpened: string;
   fallback: string;
   userCv: string;
   userProfile: string;
@@ -676,40 +677,24 @@ export function ConversationChat({
   }, [assistant, starterChips, labels.fallback, labels.chipPrefs, labels.chipJobs]);
 
   /**
-   * THE PLAYER CARD IN THE CONVERSATION (owner audit §5.1). "Parodyk mano
-   * kortelę" renders the ONE canonical `WorkerPlayerCard` — the exact
-   * component and the exact server-derived data the journal identity block
-   * uses — as an embedded turn. It also runs right after a work log lands,
-   * so the person SEES their card grow the moment their record changed.
+   * THE PLAYER CARD OPENS IN THE PANEL (W3 row 1).
+   *
+   * "Parodyk mano kortelę" used to push the canonical `WorkerPlayerCard` into
+   * the THREAD as an embedded turn. That gave one capability two renderers —
+   * and worse, a thread copy is frozen at the moment it was pushed, so asking
+   * twice left two versions of the same person on screen, each claiming to be
+   * current. The chat now EXPLAINS and opens the one surface that SHOWS,
+   * exactly as row 5 did for job matches.
+   *
+   * It still runs right after a work log lands, so the person sees their card
+   * grow the moment their record changed — the card is simply in the panel.
    */
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
-      setTyping(true);
-      loadPlayerCardForChat()
-        .then((res) => {
-          setTyping(false);
-          if (res.kind === "card") {
-            if (opts?.intro) assistant(opts.intro);
-            pushEmbed(
-              <div className="max-w-2xl" data-testid="chat-player-card">
-                <WorkerPlayerCard
-                  card={res.card}
-                  labels={res.labels}
-                  thermometer={res.thermometer}
-                  avatarUrl={res.avatarUrl}
-                />
-              </div>,
-            );
-          } else {
-            assistant(res.message, starterChips);
-          }
-        })
-        .catch(() => {
-          setTyping(false);
-          assistant(labels.fallback, starterChips);
-        });
+      assistant(opts?.intro ?? labels.playerCardOpened);
+      openResultRef.current("player-card");
     },
-    [assistant, pushEmbed, starterChips, labels.fallback],
+    [assistant, labels.playerCardOpened],
   );
   /** Late-bound so earlier flows (work-log onClose) can show the card. */
   const startPlayerCardRef = useRef(startPlayerCard);
@@ -1064,8 +1049,15 @@ export function ConversationChat({
   );
 
   /** The drill-down puts rows the person has to compare in the panel, which
-   *  22rem cannot hold honestly. Depth 0 (the map) keeps the narrow column. */
-  const panelWide = result !== null && geography !== null;
+   *  22rem cannot hold honestly. Depth 0 (the map) keeps the narrow column.
+   *
+   *  W3 row 1 adds the player card for the same reason and by the same
+   *  mechanism — the SAME panel takes more of the desktop column, never a
+   *  second surface. The card carries two side-by-side charts (evidence over
+   *  time, evidence per skill); at 22rem their axis labels wrapped to one word
+   *  per line, which is a chart the reader cannot actually read. */
+  const panelWide =
+    result !== null && (geography !== null || result === "player-card");
 
   return (
     /**

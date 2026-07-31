@@ -185,9 +185,20 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
   });
 
   it('"show my card" still resolves to the canonical card projection', () => {
-    expect(read("lib/conversation/player-card-chat.ts")).toContain(
+    // W3 row 1: the projection moved from the chat THREAD to the Context Panel
+    // RESULT, and its loader moved to the player-card module with it. The
+    // claim under test is unchanged — "show my card" reaches the ONE canonical
+    // component, never a second card-shaped summary.
+    expect(read("lib/player-card/player-card-result.ts")).toContain(
       "WorkerPlayerCard",
     );
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkerPlayerCard/,
+    );
+    // …and the thread no longer draws its own copy.
+    expect(
+      read("components/app/conversation/chat/conversation-chat.tsx"),
+    ).not.toMatch(/<WorkerPlayerCard/);
   });
 });
 
