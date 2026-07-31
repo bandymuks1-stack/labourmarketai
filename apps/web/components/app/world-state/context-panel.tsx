@@ -22,7 +22,10 @@ import {
   type ResultContext,
   type ResultKind,
 } from "@/lib/conversation/result-registry";
-import { ResultBody } from "@/components/app/workspace/result-body";
+import {
+  ResultBody,
+  type ResultNavigation,
+} from "@/components/app/workspace/result-body";
 import { useWorldState } from "./world-state-provider";
 import { WorkspaceMap } from "./workspace-map";
 
@@ -62,6 +65,8 @@ export function ContextPanel({
   className = "",
   result = null,
   resultContext = "personal",
+  resultNavigation,
+  wide = false,
   onCloseResult,
   onOpenFull,
 }: {
@@ -88,6 +93,20 @@ export function ContextPanel({
    */
   result?: ResultKind | null;
   resultContext?: ResultContext;
+  /** Depth within the result (Goal 3). Passed straight through — the panel
+   *  reads none of it, which is what keeps it free of domain knowledge. */
+  resultNavigation?: ResultNavigation;
+  /**
+   * WIDER, NOT ANOTHER PANEL.
+   *
+   * 22rem is right for a map and a handful of facts and wrong for rows the
+   * person has to compare — the market drill-down puts an organization, a
+   * place, roles, headcount, timing and a reason on one line. Rather than open
+   * a second surface (which would end the one-workspace rule), the SAME panel
+   * takes more of the desktop column when the result asks for it. Below `lg`
+   * nothing changes: the sheet is already full width.
+   */
+  wide?: boolean;
   onCloseResult?: () => void;
   onOpenFull?: (route: string) => void;
 }) {
@@ -95,8 +114,11 @@ export function ContextPanel({
   const tr = useTranslations("conversation.results");
   const { state, closeEntity } = useWorldState();
   const panel = state.contextPanel;
-  /** Entity focus wins — see the `result` prop note. */
-  const showsResult = result !== null && panel.mode !== "entity";
+  /** Entity focus wins — see the `result` prop note. A result without its
+   *  navigation is not a result the panel can render, so it never claims the
+   *  surface: the work context keeps it. */
+  const showsResult =
+    result !== null && resultNavigation !== undefined && panel.mode !== "entity";
   const resultDescriptor = showsResult ? getResult(result) : undefined;
 
   /** Starts TRUE: a read is always pending on mount, so the first paint says
@@ -195,7 +217,9 @@ export function ContextPanel({
             // composer (and the z-40 feedback FAB), not under them.
             "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 shadow-2xl"
           : "border-t border-ink-600 bg-ink-900/60"
-      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:w-[22rem] lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${className}`}
+      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${
+        wide ? "lg:w-[30rem] xl:w-[38rem]" : "lg:w-[22rem]"
+      } ${className}`}
     >
       {/* Sheet grab-handle — a visual affordance only (the chevron is the
           control), hidden on desktop where there is no sheet. */}
@@ -263,10 +287,11 @@ export function ContextPanel({
             and makes the panel argue with itself. When a result is showing, the
             result owns the geography. */}
         {showsResult ? null : <WorkspaceMap className="mb-4" />}
-        {showsResult && result ? (
+        {showsResult && result && resultNavigation ? (
           <ResultBody
             kind={result}
             context={resultContext}
+            navigation={resultNavigation}
             onOpenFull={onOpenFull ?? (() => {})}
           />
         ) : loading ? (

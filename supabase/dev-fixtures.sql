@@ -338,3 +338,50 @@ values
   ('2b111111-0000-0000-0000-000000000006','2b000000-0000-0000-0000-000000000006','Elektricien', 8,'open','public',(now() + interval '30 days')::date),
   ('2b111111-0000-0000-0000-000000000007','2b000000-0000-0000-0000-000000000007','Elektryk',    6,'open','public',(now() + interval '75 days')::date)
 on conflict (id) do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE: GOAL 3 — PROJECT EVALUATION
+--
+-- The market seed above proved WHERE demand is. Evaluating a project needs the
+-- cases the journey actually has to survive, so each row below exists to make
+-- one of them reachable in the authenticated browser:
+--
+--   * MULTIPLE PROJECTS IN ONE CITY — Rotterdam now holds three. One project
+--     per city would let a broken filter pass by accident.
+--   * COMPLETE TIMING — 2b…008 carries a project start AND end date.
+--   * MISSING TIMING — 2b…009 carries neither, and its need has no start date
+--     either, so the "missing" indication has something real to report.
+--   * MULTIPLE ROLES AND SKILLS — 2b…008 has TWO open needs with different
+--     role titles and different `required_skills`, so a project is not
+--     assumed to be one role.
+--
+-- Already covered by the market seed and deliberately not duplicated:
+--   * UNRESOLVED GEOGRAPHY — Duisburg (DE) and Antwerpen (BE) are not in the
+--     canonical city table, so they fold into their country's approximate
+--     aggregate. That IS the country-precision case.
+--   * ZERO MATCH — any valid place with no project, e.g. LT / Vilnius.
+--
+-- `required_skills` is `uuid[] -> skills.id`, so the slugs are resolved from
+-- the canonical skills table rather than hard-coded — a renamed skill fails
+-- loudly here instead of rendering a raw uuid in the panel.
+--
+-- Prefix 2b… . Idempotent. LOCAL DETERMINISTIC ACCEPTANCE ROWS IN REAL DOMAIN
+-- TABLES, read through real domain queries under RLS. Not production data.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+insert into public.projects
+  (id, company_id, title, country, city, status, start_date, end_date)
+values
+  ('2b000000-0000-0000-0000-000000000008','cccccccc-0000-0000-0000-000000000001','Rotterdam Maasvlakte — plieno konstrukcijos','NL','Rotterdam','live',(now() + interval '30 days')::date,(now() + interval '210 days')::date),
+  ('2b000000-0000-0000-0000-000000000009','cccccccc-0000-0000-0000-000000000001','Rotterdam Kralingen — vidaus apdaila','NL','Rotterdam','live',null,null)
+on conflict (id) do nothing;
+
+insert into public.job_demands
+  (id, project_id, role_title, headcount_needed, status, visibility, start_date, required_skills)
+values
+  ('2b111111-0000-0000-0000-000000000008','2b000000-0000-0000-0000-000000000008','Suvirintojas', 5,'open','public',(now() + interval '30 days')::date,
+   array(select id from public.skills where slug in ('mig-mag-welding','tig-welding'))),
+  ('2b111111-0000-0000-0000-000000000009','2b000000-0000-0000-0000-000000000008','Montuotojas',  3,'open','public',(now() + interval '52 days')::date,
+   array(select id from public.skills where slug in ('scaffolding','steel-fixing'))),
+  ('2b111111-0000-0000-0000-000000000010','2b000000-0000-0000-0000-000000000009','Apdailininkas',2,'open','public',null, null)
+on conflict (id) do nothing;

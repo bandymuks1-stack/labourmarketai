@@ -1009,7 +1009,17 @@ export function ConversationChat({
    * inline. It keeps every existing route reachable, which is what makes this
    * work purely additive (NO REGRESSION).
    */
-  const { result, closeResult } = useResultParam();
+  const {
+    result,
+    geography,
+    geoToken,
+    projectId,
+    closeResult,
+    selectGeography,
+    selectProject,
+    clearGeography,
+    clearProject,
+  } = useResultParam();
   const resultContext: ResultContext = auth0?.activeOrgName
     ? "organization"
     : "personal";
@@ -1019,6 +1029,41 @@ export function ConversationChat({
     (route: string) => router.push(route),
     [router],
   );
+
+  /**
+   * GOAL 3 — the depth inside the market result, assembled here because this is
+   * where the URL already lives. The panel receives it as opaque props and
+   * learns nothing about geography or projects, which is what keeps its "no
+   * per-type branch" guard true.
+   */
+  const resultNavigation = useMemo(
+    () => ({
+      geography,
+      geoToken,
+      projectId,
+      // Null means "no organization is active" — the panel renders its own
+      // localized word for that rather than this layer inventing one.
+      workspace: auth0?.activeOrgName ?? null,
+      onSelectGeography: selectGeography,
+      onSelectProject: selectProject,
+      onBackToMarket: clearGeography,
+      onBackToProjects: clearProject,
+    }),
+    [
+      geography,
+      geoToken,
+      projectId,
+      auth0?.activeOrgName,
+      selectGeography,
+      selectProject,
+      clearGeography,
+      clearProject,
+    ],
+  );
+
+  /** The drill-down puts rows the person has to compare in the panel, which
+   *  22rem cannot hold honestly. Depth 0 (the map) keeps the narrow column. */
+  const panelWide = result !== null && geography !== null;
 
   return (
     /**
@@ -1080,6 +1125,8 @@ export function ConversationChat({
             // the panel itself stays free of the routing its guard forbids.
             result={result}
             resultContext={resultContext}
+            resultNavigation={resultNavigation}
+            wide={panelWide}
             onCloseResult={closeResult}
             onOpenFull={openFullScreen}
           />

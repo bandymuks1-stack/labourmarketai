@@ -9,6 +9,7 @@ import {
   EUROPE_ZOOM,
   MODE_HEIGHT,
   anchorsForLayer,
+  type MarketAnchor,
   type MarketMapLayer,
   type MarketMapMode,
   type MarketMapView,
@@ -44,6 +45,7 @@ export function MarketMap({
   layer = "demand",
   selectedCode = null,
   onSelectRegion,
+  onSelectAnchor,
   className = "",
   revealCount,
 }: {
@@ -53,6 +55,20 @@ export function MarketMap({
   /** ISO-2 of the focused region — the map flies to it when it changes. */
   selectedCode?: string | null;
   onSelectRegion?: (code: string | null) => void;
+  /**
+   * The clicked ANCHOR, not just its country (Goal 3).
+   *
+   * `onSelectRegion` answers "which country was touched", which is all the
+   * landing hero needs. Continuing into projects needs the PLACE, and the
+   * anchor is the only thing that knows its own precision: a city anchor may
+   * become a city selection, the dashed country aggregate may not. Handing the
+   * whole anchor over keeps that decision with the data instead of
+   * reconstructing it from a country code afterwards.
+   *
+   * Both fire when both are given — the region highlight and the drill-down
+   * are different consequences of one click, not two competing ones.
+   */
+  onSelectAnchor?: (anchor: MarketAnchor) => void;
   className?: string;
   /**
    * How many anchors are currently drawn, counted across the whole view.
@@ -154,13 +170,39 @@ export function MarketMap({
           direction: "top",
           offset: [0, -radius],
         });
-        if (onSelectRegion) {
-          circle.on("click", () => onSelectRegion(region.code));
-        }
         circle.addTo(group);
+
+        if (onSelectRegion || onSelectAnchor) {
+          // A marker that acts must look like it acts, and must be reachable
+          // without a mouse — Leaflet's circleMarker is an SVG <path> with no
+          // affordance of its own. `getElement()` only returns once the layer
+          // is on the map, which is why this runs AFTER `addTo`.
+          circle.on("click", () => {
+            onSelectRegion?.(region.code);
+            onSelectAnchor?.(a);
+          });
+          // Leaflet types `getElement()` as `Element`; a circleMarker's element
+          // is always the SVG path it just drew.
+          const el = circle.getElement() as SVGElement | null;
+          if (el) {
+            el.style.cursor = "pointer";
+            el.setAttribute("tabindex", "0");
+            el.setAttribute("role", "button");
+            el.setAttribute("data-anchor-id", a.id);
+            el.setAttribute("data-anchor-precision", a.precision ?? "city");
+            el.setAttribute("aria-label", `${a.label} · ${a.weight}`);
+            el.addEventListener("keydown", (ev) => {
+              const key = (ev as KeyboardEvent).key;
+              if (key !== "Enter" && key !== " ") return;
+              ev.preventDefault();
+              onSelectRegion?.(region.code);
+              onSelectAnchor?.(a);
+            });
+          }
+        }
       }
     }
-  }, [ready, view, layer, selectedCode, onSelectRegion, revealCount]);
+  }, [ready, view, layer, selectedCode, onSelectRegion, onSelectAnchor, revealCount]);
 
   // ── fly to the selected region ────────────────────────────────────────────
   useEffect(() => {

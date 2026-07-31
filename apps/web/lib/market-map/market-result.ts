@@ -42,6 +42,15 @@ export interface MarketResultData {
   readonly view: MarketMapView;
   /** True when the query succeeded and simply found nothing. */
   readonly empty: boolean;
+  /**
+   * True when the READ ITSELF failed.
+   *
+   * Previously a failed query returned the empty result, so a broken read
+   * rendered "there are no open needs with a location right now" — a claim
+   * about the market made on the strength of a claim about us. They are
+   * different answers and the panel now says which one it is.
+   */
+  readonly failed: boolean;
 }
 
 type DemandRow = {
@@ -59,7 +68,7 @@ export async function loadMarketResult(): Promise<MarketResultData> {
     .eq("status", "open")
     .limit(500);
 
-  if (error || !data) return emptyResult();
+  if (error || !data) return emptyResult({ failed: true });
 
   // Group by country → city, summing headcount. The map shows WHERE work is,
   // so the unit is people needed, not rows returned.
@@ -134,6 +143,7 @@ export async function loadMarketResult(): Promise<MarketResultData> {
 
   return {
     empty: false,
+    failed: false,
     view: {
       origin: "live",
       center: EUROPE_CENTER,
@@ -143,9 +153,10 @@ export async function loadMarketResult(): Promise<MarketResultData> {
   };
 }
 
-function emptyResult(): MarketResultData {
+function emptyResult({ failed = false }: { failed?: boolean } = {}): MarketResultData {
   return {
     empty: true,
+    failed,
     view: {
       origin: "live",
       center: EUROPE_CENTER,

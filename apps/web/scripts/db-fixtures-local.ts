@@ -59,8 +59,20 @@ export const EXPECTED_FIXTURE_COUNTS: Record<string, number> = {
   "public.journal_entry_skills where id::text like '1f111111%'": 14,
   "public.worker_documents where id::text like 'cdcdcdcd%'": 2,
   "public.worker_absences where id::text like 'abababab%'": 1,
-  "public.projects where id::text like '2b%'": 7,
-  "public.job_demands where id::text like '2b1%' and status = 'open'": 7,
+  "public.projects where id::text like '2b%'": 9,
+  "public.job_demands where id::text like '2b1%' and status = 'open'": 10,
+  // Goal 3 needs the CASES, not just the rows: three projects in one city
+  // (Rotterdam), one with complete timing, one with none, and one carrying
+  // real `required_skills` uuids. Each is asserted separately because an
+  // aggregate count passes while any individual case is silently absent —
+  // and an absent case is exactly what makes a green acceptance run a lie.
+  "public.projects where city = 'Rotterdam' and status = 'live'": 3,
+  "public.projects where id::text like '2b%' and start_date is not null and end_date is not null":
+    1,
+  "public.projects where id::text like '2b%' and start_date is null and end_date is null":
+    8,
+  "public.job_demands where id::text like '2b1%' and array_length(required_skills, 1) >= 2":
+    2,
   // ── base identities ────────────────────────────────────────────────────
   "auth.users": 3,
   "public.profiles": 3,

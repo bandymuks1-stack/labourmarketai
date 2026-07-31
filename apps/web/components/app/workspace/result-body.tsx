@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { MarketMap } from "@/components/app/market-map/market-map";
-import { loadMarketResultAction } from "@/lib/market-map/market-result-actions";
-import type { MarketResultData } from "@/lib/market-map/market-result";
+import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
+import type { GeographySelection } from "@/lib/market-map/geography-selection";
 
 import {
   canRenderInline,
@@ -13,6 +11,25 @@ import {
   type ResultContext,
   type ResultKind,
 } from "@/lib/conversation/result-registry";
+
+/**
+ * The workspace's result state below the kind — the depth Goal 3 added.
+ *
+ * It arrives as one object rather than seven props so that adding a depth later
+ * cannot silently skip a component in the chain.
+ */
+export interface ResultNavigation {
+  readonly geography: GeographySelection | null;
+  readonly geoToken: string | null;
+  readonly projectId: string | null;
+  /** Active organization name, or null when the person is in their own space.
+   *  Carried into the people continuation (W4.5). */
+  readonly workspace: string | null;
+  readonly onSelectGeography: (g: GeographySelection) => void;
+  readonly onSelectProject: (projectId: string) => void;
+  readonly onBackToMarket: () => void;
+  readonly onBackToProjects: () => void;
+}
 
 /**
  * RESULT BODY — what the Context Panel shows when the person asked for a
@@ -40,11 +57,14 @@ import {
 export function ResultBody({
   kind,
   context,
+  navigation,
   onOpenFull,
 }: {
   kind: ResultKind;
   /** The active work context — a result not meaningful here is not rendered. */
   context: ResultContext;
+  /** Depth within the result — see `ResultNavigation`. */
+  navigation: ResultNavigation;
   /** Wired by the workspace layer to reach the result's existing full screen. */
   onOpenFull: (route: string) => void;
 }) {
@@ -55,7 +75,7 @@ export function ResultBody({
   if (!descriptor) return null;
 
   if (canRenderInline(kind, context)) {
-    return <InlineResult kind={kind} />;
+    return <InlineResult kind={kind} navigation={navigation} />;
   }
 
   // Honest degradation — see the header note. The reason is stated, not hidden.
@@ -84,12 +104,31 @@ export function ResultBody({
  * so anything still unimplemented falls through to the same honest fallback
  * rather than rendering an empty premium shell.
  */
-function InlineResult({ kind }: { kind: ResultKind }) {
+function InlineResult({
+  kind,
+  navigation,
+}: {
+  kind: ResultKind;
+  navigation: ResultNavigation;
+}) {
   const t = useTranslations("conversation.results");
 
   switch (kind) {
     case "market":
-      return <MarketInline />;
+      // Goal 3: the market result now has depth — map → projects → evaluation.
+      // Still ONE result and ONE panel; the depth lives in the URL.
+      return (
+        <MarketDrilldown
+          geography={navigation.geography}
+          geoToken={navigation.geoToken}
+          projectId={navigation.projectId}
+          workspace={navigation.workspace}
+          onSelectGeography={navigation.onSelectGeography}
+          onSelectProject={navigation.onSelectProject}
+          onBackToMarket={navigation.onBackToMarket}
+          onBackToProjects={navigation.onBackToProjects}
+        />
+      );
     // Phase C wires the canonical Player Card here; the rest follow.
     default:
       return (
@@ -98,58 +137,4 @@ function InlineResult({ kind }: { kind: ResultKind }) {
         </p>
       );
   }
-}
-
-/**
- * THE MARKET RESULT, inline in the panel.
- *
- * The SAME canonical <MarketMap> the landing hero mounts — one engine, one
- * geographic model, different mode. The data is real rows for this environment
- * (`origin: "live"`); there is deliberately no demo fallback, so an empty
- * market says so instead of borrowing the landing's scenario.
- */
-function MarketInline() {
-  const t = useTranslations("conversation.results");
-  const [data, setData] = useState<MarketResultData | null>(null);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadMarketResultAction()
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (failed) {
-    return (
-      <p className="text-basis text-text-secondary" data-testid="market-error">
-        {t("marketError")}
-      </p>
-    );
-  }
-  if (!data) {
-    return (
-      <p className="text-basis text-text-muted" data-testid="market-loading">
-        {t("pendingInline")}
-      </p>
-    );
-  }
-  if (data.empty) {
-    // Honest empty: no rows is a real answer, and inventing demand here would
-    // be exactly the fabricated market this platform bans.
-    return (
-      <p className="text-basis text-text-secondary" data-testid="market-empty">
-        {t("marketEmpty")}
-      </p>
-    );
-  }
-
-  return <MarketMap view={data.view} mode="result" layer="demand" />;
 }

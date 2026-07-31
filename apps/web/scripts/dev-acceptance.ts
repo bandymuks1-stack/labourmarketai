@@ -96,7 +96,13 @@ function main(): void {
   // rather than escape the arguments. Resolving the entry point sidesteps both,
   // and is identical on every platform.
   const nextEntry = require.resolve("next/dist/bin/next");
-  const child = spawn(process.execPath, [nextEntry, "dev"], {
+  // Extra arguments are forwarded verbatim (`pnpm dev:acceptance -- -p 3400`).
+  // Two acceptance sessions on one machine otherwise fight over port 3000, and
+  // the loser silently attaches to the winner's build. pnpm passes the `--`
+  // separator through as a real argv entry, which Next reads as a project
+  // directory — so it is dropped here rather than handed on.
+  const forwarded = process.argv.slice(2).filter((a) => a !== "--");
+  const child = spawn(process.execPath, [nextEntry, "dev", ...forwarded], {
     stdio: "inherit",
     env: childEnv,
     shell: false,
