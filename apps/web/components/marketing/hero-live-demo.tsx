@@ -74,6 +74,17 @@ export function HeroLiveDemo() {
   const scenario: LandingScenario = LANDING_SCENARIOS[index];
   const decided = phase === "decided" || phase === "continued";
   const continued = phase === "continued";
+  /**
+   * The demo is WORKING — typing the question, reasoning, or landing signals on
+   * the map. Derived from the phase machine, never a second piece of state that
+   * could drift out of step with it.
+   *
+   * The submit is deliberately NOT disabled while this is true: re-asking is a
+   * legitimate thing to want mid-run, and locking the one interactive control
+   * on the landing for four seconds reads as broken. `aria-busy` states the
+   * same fact without taking the control away.
+   */
+  const running = phase === "typing" || phase === "reasoning" || phase === "reacting";
 
   const clearTimers = useCallback(() => {
     timers.current.forEach(clearTimeout);
@@ -376,14 +387,33 @@ export function HeroLiveDemo() {
           <button
             type="submit"
             data-testid="hero-ask-submit"
-            className="min-h-11 shrink-0 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
+            // The one control on the landing that starts work owed a visible
+            // answer to "did that do anything?". The dot is the visual half and
+            // `aria-busy` the assistive half; neither invents a state, both
+            // read the phase machine.
+            aria-busy={running}
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90"
           >
             {t("askSubmit")}
+            {running ? (
+              <span
+                aria-hidden
+                data-testid="hero-ask-pending"
+                className="size-1.5 animate-pulse rounded-full bg-white/90"
+              />
+            ) : null}
           </button>
         </form>
 
         {unmatched ? (
-          <p className="text-meta text-state-amber" data-testid="hero-unmatched">
+          // A question the demo cannot answer is a RESULT, and a result the
+          // visitor cannot see announced is a silent submit. `status` rather
+          // than `alert`: it is informative, not urgent.
+          <p
+            role="status"
+            className="text-meta text-state-amber"
+            data-testid="hero-unmatched"
+          >
             {t("unmatched")}
           </p>
         ) : null}

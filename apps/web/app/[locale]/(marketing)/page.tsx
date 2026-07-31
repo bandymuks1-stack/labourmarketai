@@ -27,7 +27,10 @@ export default async function LandingPage({
   // Landing rebuild (owner directive 2026-07-29): the former journey band,
   // the HowItWorksBand 4-step rail, the why-now pillars grid and the
   // two-paths cards are superseded by the narrative chain
-  // hero(LiveProductDemo) → ProductChainBand → MarketMoment → … → ProofBand.
+  // hero(HeroLiveDemo) → ProductChainBand → MarketMoment → … → ProofBand.
+  // (HeroLiveDemo superseded LiveProductDemo on 2026-07-31 — same cinematic
+  // role, now driving the canonical <MarketMap>. The old component was dead
+  // and has been deleted.)
   // Their i18n keys (`journey.*`, `labourMarket.p*`, `landing.how.*`,
   // worker/employer path keys) stay in messages/*.json for a cheap restore.
 

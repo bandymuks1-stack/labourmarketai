@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { landingTreeSource } from "./landing-composition";
+
 /**
  * PUBLIC MARKET ENTRY / SALES FUNNEL — LAUNCH GUARDS (PR13).
  *
@@ -59,9 +61,17 @@ describe("no dead public links — every marketing CTA target route exists", () 
   });
 
   it("landing hero routes to the two real entries (worker signup + company need)", () => {
-    const page = read("app/[locale]/(marketing)/page.tsx");
-    expect(page).toContain('href="/auth/signup"');
-    expect(page).toContain('href="/company-need"');
+    // Asserted across the landing's COMPOSED tree, not page.tsx alone — the
+    // page was legitimately split into <HeroLiveDemo> / <FinalCtaBand>, and a
+    // guard that fails on that teaches people to ignore it. See
+    // `landing-composition.ts`; a genuinely deleted CTA still fails here.
+    // `href[=:]` matches BOTH forms — the JSX attribute and the `{ href:
+    // "/company-need" }` descriptor <FinalCtaBand> maps over. The old form
+    // asserted a SYNTAX; what actually matters is that the route is a CTA
+    // target on the landing.
+    const landing = landingTreeSource(APP_ROOT);
+    expect(landing).toMatch(/href[=:]\s*"\/auth\/signup"/);
+    expect(landing).toMatch(/href[=:]\s*"\/company-need"/);
   });
 
   it("work-abroad profile CTA goes to public signup, not an auth-walled bounce", () => {

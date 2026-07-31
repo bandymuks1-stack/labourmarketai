@@ -19,7 +19,6 @@ type NavLink = {
     | "agencies"
     | "how"
     | "pricing"
-    | "partners"
     | "about"
     | "vision";
   href: string;
@@ -29,16 +28,23 @@ type NavLink = {
 // Canonical public IA (nav/funnel consistency PR): every label names its
 // real destination — audience pages by audience, Kainos, Apie. No template
 // labels ("Solutions"/"Resources"/"Company") pointing at unrelated routes.
-// PR-H global landing: "How it works" and "Partners" point at REAL landing
-// anchors (#how-it-works / #partners — sections rendered by page.tsx); no
-// dead routes were created for them.
+// PR-H global landing: "How it works" points at a REAL landing anchor
+// (#how-it-works — now carried by <ProductChainBand>, which IS the
+// how-it-works answer since the rebuild).
+//
+// "Partneriams" (`/#partners`) WAS REMOVED on 2026-07-31. Its target section
+// left the landing with the rebuild — `audience-value-sections.tsx` is no
+// longer rendered — so the item scrolled nowhere for every visitor who
+// clicked it. Restoring the anchor would have meant inventing a partners
+// section to justify a nav item; the audience it named already has a real
+// page behind "Agentūroms" (/for-agencies). A nav item that goes nowhere is a
+// dead CTA, and the shortest honest fix is to stop offering it.
 const ALL_LINKS: readonly NavLink[] = [
   { key: "workers", href: "/for-workers", visibility: "always" },
   { key: "companies", href: "/for-companies", visibility: "always" },
   { key: "agencies", href: "/for-agencies", visibility: "always" },
   { key: "how", href: "/#how-it-works", visibility: "always" },
   { key: "pricing", href: "/pricing", visibility: "always" },
-  { key: "partners", href: "/#partners", visibility: "always" },
   { key: "about", href: "/about", visibility: "always" },
   { key: "vision", href: "/vision", visibility: "vision-gate" },
 ];

@@ -39,7 +39,13 @@ export const FROZEN_LANDING_FILES = [
   "components/app/supply-demand-chart.tsx",
   // Landing rebuild (owner directive 2026-07-29): the narrative chain —
   // hero demo, six-link product chain, the map moment, the proof band.
-  "components/marketing/live-product-demo.tsx",
+  //
+  // Premium rebuild (owner directive 2026-07-31): `live-product-demo.tsx` was
+  // superseded by `hero-live-demo.tsx` — the same cinematic role, now driving
+  // the canonical <MarketMap> — and the dead file was deleted. The freeze
+  // follows the component that is actually rendered; freezing a deleted file
+  // would only make the guard fail to load.
+  "components/marketing/hero-live-demo.tsx",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-moment.tsx",
   "components/marketing/proof-band.tsx",
