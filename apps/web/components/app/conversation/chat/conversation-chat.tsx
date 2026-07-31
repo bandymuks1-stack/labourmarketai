@@ -759,6 +759,10 @@ export function ConversationChat({
    * conflicts, overdue deadlines, and at most two rule-based next-step
    * suggestions rendered through the EXISTING chip mechanisms. The full
    * calendar stays one tap away; the chat never grows a second calendar view.
+   *
+   * W3 calendar slice: the chat EXPLAINS (the sentence) and the panel SHOWS —
+   * the same `?result=` mechanism rows 1 and 5 use, reading the same
+   * projection. One calculation, two presentations, zero new routes.
    */
   const startAgenda = useCallback(() => {
     setTyping(true);
@@ -780,6 +784,9 @@ export function ConversationChat({
             `${res.text}\n\n${labels.calendarHint}`,
             chips.length > 0 ? chips : undefined,
           );
+          // The panel holds the CURRENT visual plan while the thread keeps
+          // the sentence — same split as the player card (row 1).
+          openResultRef.current("calendar");
         } else {
           assistant(labels.calendarHint);
         }

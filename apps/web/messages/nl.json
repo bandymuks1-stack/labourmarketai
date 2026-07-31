@@ -11378,7 +11378,17 @@
       "opportunitiesPartial": "De ‘nieuw’-markeringen konden deze keer niet worden gelezen — de rijen zijn echt, nieuwheid wordt niet getoond.",
       "opportunitiesMore": "Nog {n} in de volledige lijst.",
       "retry": "Opnieuw proberen",
-      "playerCardError": "We konden je kaart niet lezen."
+      "playerCardError": "We konden je kaart niet lezen.",
+      "calendarError": "We konden de kalender niet lezen.",
+      "calendarBlocked": "De kalender kon niet worden gelezen — log opnieuw in.",
+      "calendarEmpty": "Er is niets gepland voor de komende {days} dagen.",
+      "calendarUndated": "{count, plural, one {# item zonder datum.} other {# items zonder datum.}}",
+      "calendarLater": "{count, plural, one {# item later.} other {# items later.}}",
+      "calendarConflicts": "⚠ {count, plural, one {# overlappende verplichting} other {# overlappende verplichtingen}} — dit plan is fysiek onmogelijk.",
+      "calendarPartial": "Sommige bronnen konden niet worden gelezen: {sources}. De lijst kan onvolledig zijn.",
+      "calendarMoreItems": "(+{count})",
+      "calendarMoreDays": "{count, plural, one {… en nog # dag met items.} other {… en nog # dagen met items.}}",
+      "calendarToday": "vandaag"
     }
   },
   "landing": {

@@ -11378,7 +11378,17 @@
       "opportunitiesPartial": "Die „neu“-Markierungen konnten diesmal nicht gelesen werden — die Einträge sind echt, Neuheit wird nicht angezeigt.",
       "opportunitiesMore": "Noch {n} in der vollständigen Liste.",
       "retry": "Erneut versuchen",
-      "playerCardError": "Deine Karte konnte nicht gelesen werden."
+      "playerCardError": "Deine Karte konnte nicht gelesen werden.",
+      "calendarError": "Der Kalender konnte nicht gelesen werden.",
+      "calendarBlocked": "Der Kalender konnte nicht gelesen werden — bitte erneut anmelden.",
+      "calendarEmpty": "Für die nächsten {days} Tage ist nichts geplant.",
+      "calendarUndated": "{count, plural, one {# Eintrag ohne Datum.} other {# Einträge ohne Datum.}}",
+      "calendarLater": "{count, plural, one {# Eintrag später.} other {# Einträge später.}}",
+      "calendarConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung} other {# überlappende Verpflichtungen}} — dieser Plan ist physisch unmöglich.",
+      "calendarPartial": "Einige Quellen konnten nicht gelesen werden: {sources}. Die Liste kann unvollständig sein.",
+      "calendarMoreItems": "(+{count})",
+      "calendarMoreDays": "{count, plural, one {… und # weiterer Tag mit Einträgen.} other {… und # weitere Tage mit Einträgen.}}",
+      "calendarToday": "heute"
     }
   },
   "landing": {

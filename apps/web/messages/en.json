@@ -11378,7 +11378,17 @@
       "opportunitiesPartial": "The “new” markers could not be read this time — the rows are real, novelty is not shown.",
       "opportunitiesMore": "{n} more in the full list.",
       "retry": "Try again",
-      "playerCardError": "We could not read your card."
+      "playerCardError": "We could not read your card.",
+      "calendarError": "We could not read the calendar.",
+      "calendarBlocked": "The calendar could not be read — please sign in again.",
+      "calendarEmpty": "Nothing is planned for the next {days} days.",
+      "calendarUndated": "{count, plural, one {# item has no date.} other {# items have no date.}}",
+      "calendarLater": "{count, plural, one {# item is later.} other {# items are later.}}",
+      "calendarConflicts": "⚠ {count, plural, one {# overlapping commitment} other {# overlapping commitments}} — this plan is physically impossible.",
+      "calendarPartial": "Some sources could not be read: {sources}. The list may be incomplete.",
+      "calendarMoreItems": "(+{count})",
+      "calendarMoreDays": "{count, plural, one {… and # more day with items.} other {… and # more days with items.}}",
+      "calendarToday": "today"
     }
   },
   "landing": {

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { CalendarResult } from "@/components/app/workspace/calendar-result";
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
 import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
@@ -148,6 +149,12 @@ function InlineResult({
       // (as a lesser person block) twice inside the premium hub; both are gone
       // and this is the one renderer.
       return <PlayerCardResult onOpenFull={onOpenFull} />;
+    case "calendar":
+      // W3 calendar slice — the panel presentation of the Time Engine. The
+      // SAME canonical agenda projection the planning page and the chat's
+      // agenda sentence read; no second calendar, no second truth store. The
+      // full calendar stays one action away via `onOpenFull`.
+      return <CalendarResult onOpenFull={onOpenFull} />;
     // The remaining kinds follow, one verified data path at a time.
     default:
       return (
