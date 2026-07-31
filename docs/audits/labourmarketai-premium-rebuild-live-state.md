@@ -10,8 +10,8 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 16:05 |
-| UTC | 2026-07-31 13:05 |
+| Europe/Vilnius | 2026-07-31 18:55 |
+| UTC | 2026-07-31 15:55 |
 
 ## REPOSITORY
 
@@ -20,7 +20,7 @@
 | Repo | `bandymuks1-stack/labourmarketai` |
 | Canonical path | `C:\Users\Mano\Documents\labourmarketai` |
 | Working worktree | `C:\Users\Mano\Documents\lm-unified-wt` (isolated per CLAUDE.md §4) |
-| Production | `app.labourmarket.ai` (Vercel, deploys on `main`) |
+| Production | `https://labourmarket.ai` — the APEX is canonical; `app.labourmarket.ai` is a legacy host that 301s here. Vercel deploys on `main`. |
 
 ## BRANCH / COMMIT GRAPH (verified 2026-07-31)
 
@@ -175,30 +175,79 @@ old LABMA project touched:             NO
 
 ---
 
+## CURRENT STATE — 2026-07-31 18:55 Europe/Vilnius
+
+| | |
+|---|---|
+| `main` HEAD | `7debb071` (== `origin/main`) |
+| Production deployment | `5694282066` — Production, **success**, sha `7debb071` |
+| Production URL | `https://labourmarket.ai` (apex, verified live — not the 301 host) |
+| PRs merged this session | **#931** (`9519df3c`), **#932** (`7debb071`) |
+| Open PRs | none |
+| Unit/guard suite | 791 files / 12833 tests PASS |
+| W3 e2e | `w3-second-dashboard.spec.ts` — 9/9 PASS (rows 4 + 5) |
+| Typecheck / lint | clean |
+
+### Employee beta production gate
+
+`EMPLOYEE_BETA_PRODUCTION_GATE = BLOCKED_BY_OWNER_SECRET_SETUP` — re-probed
+2026-07-31 18:00: `PROD_QA_SUPABASE_URL`, `PROD_QA_ANON_KEY`,
+`PROD_QA_SERVICE_ROLE_KEY` are all absent from the environment. The harness is
+complete and one command away (`pnpm -C apps/web prod-qa:gate`). Reported once;
+NOT re-probed on a loop, per CLAUDE.md §2.
+
+**Consequence for W3 production proof, stated rather than papered over:** the
+`opportunities` result is authenticated-only, so it cannot be browser-proven in
+PRODUCTION until that gate opens. Using a real person's account instead is
+forbidden. What IS proven in production for `7debb071`: the apex serves the
+deploy, `/lt/dashboard?result=opportunities` correctly redirects an anonymous
+visitor to `/lt/auth/login?next=/lt/dashboard` with no result markup leaking,
+0 console errors, 0 failed requests. The authenticated render is proven against
+the LOCAL acceptance stack (9/9 e2e), and that distinction is deliberate.
+
+### W3 progress
+
+- Row 4 — **MIGRATED** (fake SVG map removed; #927, deployed `3e31a70e`)
+- Rows 13, 15 — **VERIFIED**; no independent drop exists, they die with the route
+- Row 5 — **ABSORBED** (#932, deployed `7debb071`): `JobRecommendationsCard`
+  → the `opportunities` result. Old mount **deleted**; both halves guard-pinned.
+- Row 28 — found, tracked: `/dashboard/market-map` runs a SECOND Leaflet chain
+- Remaining: **14 ABSORB rows**. `/dashboard/advanced` still stands.
+
+### CodeQL
+
+24 open alerts, all raised 2026-07-27, none from any W3 or gate branch. Alert
+**#9** (`oauth-trace.ts:66`) is READ and answered with a code-path proof — a
+zero-argument CSPRNG trace id, flagged by a name heuristic ("auth" inside
+"Oauth"), never an auth factor. Documented in `security-scan-triage.md`, and
+deliberately **NOT dismissed** in GitHub. 23 remain queued; no P0/P1 found, so
+W3 is not blocked.
+
+---
+
 ## NEXT EXACT ACTION
 
-DONE this session: PR #925 merged (`a5b991f4`), production deployed
-(`5690792306`), public landing proven in production 4/4, W3 capability matrix
-written (27 capabilities classified, 0 migrated).
-
 ```text
-1. DONE — W3 row 4 merged (#927) and deployed (`3e31a70e`).
-   SUPERSEDED, kept for the record — the original next action was:
-   components/app/premium-hub/premium-hub-market-map.tsx renders a hand-drawn
-   <svg> (159 lines), NOT a map. The canonical <MarketMap> (Leaflet, real WGS84)
-   supersedes it and the doctrine forbids "an SVG illustration standing in for a
-   map". Replace the mount inside /dashboard/advanced with the canonical
-   MarketMap fed by loadMarketResult, then delete the component.
-   Prove: the advanced route still renders, one leaflet container, origin=live.
+1. W3 row 6 — worker invitations (WorkerInvitationsCard), the next smallest
+   ABSORB. It is heavier than row 5 in one specific way: it carries a WRITE
+   (accept-invitation RPC), so the result needs the outcome states the
+   read-only opportunities result did not — linked / already-linked /
+   no-invitation / no-worker / error, plus the needs-migration degradation.
+   Method, unchanged and proven twice now: build the result state on real data
+   with the full idle/loading/empty/partial/error/retry set, prove it in a
+   browser at 1440 AND 375, THEN delete the card and repoint its guard so BOTH
+   halves are pinned.
 
-2. W3 rows 13 and 15 (DashboardNextAction, CurrentSpaceHeader) — classified
-   ALREADY. Verify against the Context Panel work context, then drop.
+2. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
+   the collapse market-map.tsx's own header already describes.
 
-3. Then the 15 ABSORB rows in dependency order, each with its own browser proof.
-   Delete /dashboard/advanced only when every row is MIGRATED or OBSOLETE-proven,
-   updating surface-registry.ts and route-truth-map.test.ts in the same commit.
+3. Then the remaining 12 ABSORB rows in dependency order.
 
-4. In parallel, unblocked: run axe accessibility + Lighthouse baselines against
-   the production public routes and open docs/audits/evidence/premium-rebuild/
-   accessibility.md and performance-seo.md.
+4. Delete /dashboard/advanced only when every row is MIGRATED or
+   OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
+   the same commit.
+
+5. Owner-blocked, not agent-blocked: set the three PROD_QA_* secrets, then run
+   `pnpm -C apps/web prod-qa:gate` for G1–G10 and the authenticated production
+   proof of rows 4 and 5.
 ```
