@@ -10,9 +10,9 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 21:30 |
-| UTC | 2026-07-31 18:30 |
-| Production code SHA | `23ab316d` (PR #937 merged, Vercel Production Ready) |
+| Europe/Vilnius | 2026-07-31 23:30 |
+| UTC | 2026-07-31 20:30 |
+| Production code SHA | `4689f475` (PR #942 merged, Vercel Production Ready) |
 
 ## REPOSITORY
 
@@ -240,128 +240,139 @@ port 3400  STOPPED    this session's own dev:acceptance, in the throwaway
                       restart with `pnpm dev:acceptance -- -p 3400`.
 ```
 
-## NEXT EXACT ACTION — the owner has re-scoped the work
+## NEXT EXACT ACTION — W3 rows 11 / 12, the CALENDAR
 
-**A new owner directive arrived 2026-07-31 ~21:00 (mid-turn) and SUPERSEDES the
-"continue to the next P0 Employee Journey row" instruction**: turn
-Labourmarket.ai into a **Skills-first AI platform** — a Skill Registry, company
-/ worker / marketplace skills, Work-Journal-backed verified skills, agent
-execution over the registry, a Skill Store, and Phase-10 deliverables
-(architecture, DB, API, UX, security, subscription, roadmap, migration, risk,
-performance).
-
-Its own Phase 9 says: **audit first, refactor rather than rewrite, preserve
-backward compatibility.** That audit is the next action — not Player Card.
+The owner ruled 2026-07-31: **W3 finishes completely before the Capability
+Platform starts.** No interleaving of one W3 row with one Capability slice. The
+platform is designed and PARKED in
+`docs/architecture/CAPABILITY_PLATFORM_v1.md`; `capability_registry`,
+`capability_executions` and `CapabilityDescriptor` may NOT be added yet.
 
 ```text
-NEXT ACTION
+P0 EMPLOYEE JOURNEY — remaining
+  rows 11 / 12   Calendar          ← NEXT
+  row  16        Profile / identity actions
+  rows 19 / 14   return to chat (status strip, chain actions)
+  row  21        MyZone — likely OBSOLETE, must be PROVEN not assumed
+  row  24        Trust insight — BLOCKED on real reputation rows
 
-1. Phase 9 AUDIT of the existing architecture, against the skills-platform
-   shape. What already exists and must be REUSED rather than reinvented:
-     - lib/conversation/          intent router, chips, agenda, opening brief
-     - lib/ai/  lib/ai-workspace/  the existing AI context + types
-     - lib/conversation/result-registry.ts   ALREADY a registry of typed,
-       permissioned, data-readiness-tagged capabilities — the closest thing
-       to a Skill Registry the codebase has, and the likeliest spine.
-     - lib/product-gate/surface-registry.ts  declaration + gating model
-     - lib/journal/  skill-pipeline*, capability extraction — the patented
-       Work Journal chain Phase 5 names as the PRIMARY verification source
-     - lib/world-state/           entity resolvers = a registration pattern
-       that already proves "a new capability is a REGISTRATION, not an edit"
-2. Then the Phase 1 Skill Registry design ON TOP of what survives that audit.
-3. W3 is NOT abandoned: /dashboard/advanced still stands with 13 ABSORB rows.
-   It resumes after the skills-platform audit + design land, or in parallel if
-   the owner asks. Rows 1/21 (Player Card) remain the next W3 step.
+THEN  P1 employer 7 / 8 / 25 · P2 company 2 / 9 / 10 · P3 admin 22 / 23
+THEN  row 28 — collapse the second MarketMap chain
+THEN  delete /dashboard/advanced + its components, mounts, guards, nav refs
+THEN  full desktop + mobile proof, merge, deploy, production-prove
+ONLY THEN  the Capability Platform (slice S1)
 ```
 
-## W3 — WHERE IT ACTUALLY STANDS (verified 2026-07-31 21:2x)
+**Audit rows 11/12 before writing code.** That order has now paid twice: the
+row 6 audit found the write path was already single, and the row 1 audit —
+performed at implementation time — found a renderer the earlier pass had
+missed. For the calendar the first questions are: does `calendar` already have
+a `ResultBody` case (it does not — only `opportunities`, `market` and
+`player-card` do), is its `dataReadiness` `real`, and does the booking
+capability already have a canonical home in `/dashboard/planning`?
+
+## W3 — WHERE IT ACTUALLY STANDS (verified 2026-07-31 23:2x)
 
 | Row | Capability | State |
 |---|---|---|
+| 1 | Premium Hub person card → Player Card | **ABSORBED** — #942, deployed `4689f475` |
 | 4 | Premium Hub market map | **MIGRATED** — #927, deployed `3e31a70e` |
-| 5 | Job recommendations | **ABSORBED + CONSOLIDATED** — #932/#934, deployed `7debb071` / `6e5ef02a` |
+| 5 | Job recommendations | **ABSORBED + CONSOLIDATED** — #932/#934, deployed `6e5ef02a` |
 | 6 | Worker invitations | **ABSORBED** — #937, deployed `23ab316d` |
 | 13, 15 | Next action, space header | **VERIFIED** — no independent drop; they die with the route |
+| 21 | MyZone | likely OBSOLETE — not proven, deliberately not bundled into row 1 |
+| 24 | Trust insight | **BLOCKED** — `reputation` is `dataReadiness: "unverified"` |
 | 28 | Second Leaflet chain | tracked, TODO |
-| — | remaining | **13 ABSORB rows**; `/dashboard/advanced` still stands |
+| — | remaining | **12 ABSORB rows**; `/dashboard/advanced` still stands |
+
+### Row 1 — what shipped, and what the audit had missed
+
+The Player Card is the `player-card` RESULT in the Context Panel. The kind, its
+registry entry and its `dataReadiness: "real"` **all already existed** — so the
+row added no result kind, no registry entry, no route and no data chain.
+
+**The audit had missed a renderer.** `conversation-chat.tsx` embedded the
+CANONICAL card in the chat THREAD. A thread copy is frozen at the moment it was
+pushed, so asking twice left two versions of the same person on screen, each
+claiming to be current — the same defect row 5 removed from job matches, one
+surface later. Renderers **3 → 1**.
+
+**The editor was the hard acceptance condition and it survived.** The hub's
+person block carried `workEditor` — the only availability/location/pay editor
+in the product. It moved into the result, derived from the same reads, `null`
+for any identity without a worker row, with the real authorization still
+server-side in the save RPCs. Proven by asserting the **`workers` DATABASE
+ROW** changes, not a re-rendered select.
+
+Deleted: `premium-hub-person-card.tsx` (205 lines), `PersonVM`, `loadPerson`
+and this module's reads of the player card / avatar / worker core row, the
+`workEditor` prop threaded through `PremiumHubScreen`, the page's own work-card
+derivation, and the thread embed.
+
+Net: renderers 3 → **1** · person mounts 2 → **0** · data flows 1 · components
++1/−1 · routes / result kinds / registry entries **+0** · duplicate CTA **0** ·
+duplicate profile editor **0** · production LOC **+408/−455, net −47**
+(code-only net −103). **Negative on architecture AND on lines.**
+
+**Honest gaps recorded**: the non-worker path is not browser-proven (every
+local fixture identity has a `workers` row, and inventing a half-onboarded
+account to make a screenshot is the fabricated state this platform bans —
+pinned in code at both ends instead). And `WorkerPlayerCard` holds its own
+deep-links; the panel's source still holds no link and no router, but result
+bodies otherwise use `onOpenFull`, so the exception is stated rather than
+normalised.
 
 ### Row 6 — what shipped
 
-`WorkerInvitations` is rendered by the **Context Panel's existing work
-context**. NOT a result kind, NOT a route, NOT a registry entry, NOT a second
-action surface. The component is reused byte-for-byte; its six outcome states
-and its single write path moved intact.
+`WorkerInvitations` is the Context Panel's work context. Not a result kind, not
+a route. Card deleted, mounts 2 → 0, the `invitation` top-slot rung removed
+(with no renderer it would have resolved to an empty slot). Two browser-forced
+decisions: attention before geography on the phone sheet, and the work context
+now degrades without dropping the invitation. Gaps: `no-worker` and
+`needs-migration` are not browser-proven; covered by the unit guard.
 
-Deleted: `worker-invitations-card.tsx`, BOTH of its mounts on
-`/dashboard/advanced`, that page's invitations read, and the `invitation` rung
-of `decideTopSlot` (with no renderer left it would have resolved to an empty
-slot — asserted as an absence so a revert is visible).
-
-Two things the browser forced, both product improvements rather than
-accommodations:
-
-* **attention before geography** — behind `WorkspaceMap` the accept button sat
-  below the fold of the ~45dvh phone sheet, one scroll from the notification
-  that sent the person there;
-* **the work context degrades without dropping the invitation** — a failed Time
-  Engine read now becomes the headline instead of hiding a pending invitation
-  behind an unrelated failure.
-
-Net: components −1 · duplicate mounts 2 → **0** · top-slot kinds 6 → 5 · page
-reads −1 · routes / result kinds / registry entries **+0** · action surfaces
-1 → 1 · write paths 1 → 1. Production code +80/−56 (net +24 — the label mapping
-the deleted server component got for free; the panel is a CLIENT component and
-`BASE_CLIENT_MESSAGE_ROOTS` deliberately restricts which namespaces reach the
-bundle). **Negative on architecture, mildly positive on lines** — reported that
-way rather than rounded into a nicer number.
-
-**Honest gaps**: `no-worker` and `needs-migration` are the two outcome states
-NOT browser-proven. Every local fixture identity has a `workers` row, and
-forcing `needs-migration` means dropping a function from the shared local
-database mid-suite. Both are covered by the unit guard, which pins the branch in
-the control AND that the panel's server half supplies copy for all six
-outcomes, so neither can render a raw key.
-
-**A pre-existing break was repaired**: `w3-context-panel.spec.ts` still waited
-20 s for `chat-employer-match-card`, which row 5 (#934) deleted — its 30 s
-budget expired before its own `test.skip` could fire, so it had been **red on
-`main` since that merge**. Now selects from the canonical `opportunities`
-result and waits for the entity read to SETTLE before asserting content. Fifth
-harness defect of that family in this programme; again not a product defect.
-
-## VALIDATION AT `23ab316d`
+## VALIDATION AT `4689f475`
 
 ```text
-792 files / 12843 tests green      (was 12840 — +3 net)
-typecheck clean
-lint clean
-w3-second-dashboard e2e  20/20     (8 new row-6 scenarios)
-w3-context-panel     e2e   3/3     (was 1 failing on main)
+792 files / 12844 tests green
+typecheck clean · lint clean
+w3-second-dashboard e2e  27/27   (8 new row-1 scenarios)
+w3-context-panel     e2e   3/3
 CI on main: quality PASS · migration-safety PASS · CodeQL PASS
-Vercel Production 23ab316d — Ready
+Vercel Production 4689f475 — Ready
 ```
 
 Public production proof (anonymous, the only kind available):
-`/lt/dashboard` → 307 → `/lt/auth/login?next=/lt/dashboard`, no invitation
-markup leaked, 0 console errors, 0 failed requests.
+`/lt/dashboard?result=player-card` → redirects to
+`/lt/auth/login?next=/lt/dashboard`, **no player-card markup leaked**, 0
+console errors.
 
 ### Employee beta production gate — UNCHANGED
 
 `EMPLOYEE_BETA_PRODUCTION_GATE = BLOCKED_BY_OWNER_SECRET_SETUP`.
-`PROD_QA_SUPABASE_URL`, `PROD_QA_ANON_KEY`, `PROD_QA_SERVICE_ROLE_KEY` are still
-absent. Reported once, not re-probed on a loop (CLAUDE.md §2). The authenticated
-production render of rows 4/5/6 stays honestly unproven until the owner sets
-them; using a real person's account instead is forbidden. Every row-6 claim
-above is proven against the LOCAL guarded acceptance stack, and that distinction
-is deliberate.
+`PROD_QA_SUPABASE_URL`, `PROD_QA_ANON_KEY`, `PROD_QA_SERVICE_ROLE_KEY` are
+still absent. Reported once, not re-probed on a loop (CLAUDE.md §2). Every
+authenticated claim above is proven against the LOCAL guarded acceptance stack,
+and that distinction is deliberate.
+
+## CANONICAL NAMING RULE (owner, 2026-07-31)
+
+| Domain | Word |
+|---|---|
+| worker occupational, user-facing | **Skill**, Skills, Skill Store, Skill Library |
+| AI / system behaviour, implementation | **Capability** — `CapabilityRegistry`, `CapabilityDescriptor`, `CapabilityExecution`, `CapabilityManifest`, `CapabilityProvider`, `CapabilityResult` |
+
+`Skill` is a node in the canonical chain — Worker → Work Journal → Evidence →
+Confirmation → **Skill** → Reputation → Matching. **A second meaning of "Skill"
+may never enter the codebase.** The programme is the **Capability Platform**.
 
 ## DEV SERVERS
 
 ```text
 port 3000  ANOTHER session's dev:acceptance in lm-unified-wt. NOT touched.
 port 3100  this session's e2e:local rig (scripts/e2e-local.ts), started and
-           stopped per run. It boots on its OWN port precisely so a dev server
-           possibly pointed at cloud is never reused as a test target.
+           stopped per run, on its OWN port so a dev server possibly pointed
+           at cloud is never reused as a test target.
 port 3400  lm-w3proof, stopped, left in place (removing the worktree risks the
            known node_modules hazard).
 ```
@@ -371,3 +382,8 @@ port 3400  lm-w3proof, stopped, left in place (removing the worktree risks the
 | PR | What | Merge SHA |
 |---|---|---|
 | #937 | W3 row 6 — invitations become the panel's work context | `23ab316d` |
+| #938 | live-state after row 6 | `677086f0` |
+| #939 | Capability Platform — Phase 9 audit | `cdf8a786` |
+| #940 | Capability Platform — naming rule + parked behind W3 | `c8a1e1d4` |
+| #941 | the Player Card audit | `a9c06c6f` |
+| #942 | **W3 row 1 — the player card becomes a result** | `4689f475` |

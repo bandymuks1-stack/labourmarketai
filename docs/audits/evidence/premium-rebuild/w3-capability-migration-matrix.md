@@ -1,6 +1,6 @@
 # W3 — `/dashboard/advanced` CAPABILITY MIGRATION MATRIX
 
-> **Status: 3 of 28 rows MIGRATED (rows 4, 5 and 6). Rows 13 and 15 VERIFIED —
+> **Status: 4 of 28 rows MIGRATED (rows 1, 4, 5 and 6). Rows 13 and 15 VERIFIED —
 > no independent drop exists; they are removed by the route deletion.**
 > This file is step 1 of the W3 method. The route is **not** deleted, and must
 > not be deleted until every row below is `MIGRATED` and browser-proven.
@@ -46,7 +46,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 
 | # | Capability | Component(s) | Class | Target | State |
 |---|---|---|---|---|---|
-| 1 | Premium Hub person card | `PremiumHubScreen`, `premium-hub-person-card` | ABSORB | `player-card` result | TODO |
+| 1 | Premium Hub person card | `WorkerPlayerCard` (was `premium-hub-person-card` ×2 + a chat-thread embed) | ABSORB | `player-card` result | **ABSORBED 2026-07-31** — renderers 3→1, person mounts 2→0, production LOC net −47 (#942) |
 | 2 | Premium Hub company card | `PremiumHubCompanyCard` | ABSORB | new `organization` result kind | TODO |
 | 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB | `project` result | TODO |
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
@@ -76,7 +76,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
 **Counts: 28 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 3 MIGRATED (rows 4, 5 and 6); 13 ABSORB rows remain.**
+2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); 12 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -236,10 +236,10 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 |---|---|---|---|
 | 5 | Job recommendations | Chat → Result → Job | **DONE** |
 | 6 | Worker invitations | Onboarding → Chat (joining an employer) | **DONE** |
-| 1 | Premium Hub person card | Player Card | **AUDITED, next** — see the Player Card audit |
+| 1 | Premium Hub person card | Player Card | **DONE** |
 | 21 | My zone | Player Card | TODO |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
-| 11 | Booking responses | Calendar | TODO |
+| 11 | Booking responses | Calendar | **NEXT** |
 | 12 | Bookings | Calendar | TODO |
 | 16 | Identity actions | Profile update | TODO |
 | 19 | Status strip | Return to chat (active context) | TODO |
@@ -254,6 +254,101 @@ both already have real routes.
 
 Rows 17, 18, 20, 27 are OBSOLETE (the second dashboard's own navigation) and die
 with the route. Rows 4, 13, 15 are settled.
+
+## Row 1 — DONE, and what the audit had MISSED
+
+Shipped in #942, deployed `4689f475`. The audit below was right about the
+target and wrong about the count, and the correction is the useful part.
+
+**The audit said the card had no inline renderer. It also had a renderer too
+many.** `conversation-chat.tsx:695` embedded the CANONICAL `WorkerPlayerCard`
+in the chat THREAD — the same component, the same data, pushed as a turn. The
+audit found the hub's person block and the missing `ResultBody` case, and
+missed that the capability was already being rendered twice.
+
+That mattered, because a thread copy is **frozen at the moment it was pushed**.
+Asking twice left two versions of the same person on screen, each claiming to
+be current. This is the same defect row 5 removed from the job matches, one
+surface later — and it is now the second time an ABSORB row's real work turned
+out to be deleting a thread renderer rather than building a panel one.
+
+**The preservation map, produced before any edit:**
+
+| Mount | Props | Carried |
+|---|---|---|
+| `advanced:557` (org branch, folded) | `embedded` | person block, no editor |
+| `advanced:827` (worker branch, main flow) | `embedded contextual workEditor` | person block **+ the only availability/location/pay editor in the product** |
+| `conversation-chat:695` (thread) | — | the canonical card |
+
+Shared: ONE `hubVm`; and the hub's person block already derived from
+`getWorkerPlayerCard()`, so there was never a second data chain — only a second
+rendering. Only mount B carried `workEditor`. Nothing had to remain distinct:
+once the editor moved, A and B differed only by the `contextual` flag.
+
+**What the row did NOT add**: `player-card` was already a result kind, already
+`dataReadiness: "real"`, already opened by two registry actions. No kind, no
+registry entry, no route, no data chain.
+
+**The editor was the hard acceptance condition.** It moved into the result,
+derived from the same reads, `null` for any identity without a worker row —
+and the real authorization stayed exactly where it was, server-side in the save
+RPCs. The null is a UI decision, never the security boundary.
+
+**One quality fix using existing architecture.** The card carries two
+side-by-side charts; at 22rem their axis labels wrapped to one word per line —
+a chart the reader cannot read. The panel already has a `wide` mode for exactly
+this (the market drill-down), so the card uses it. The SAME panel takes more of
+the desktop column; no second surface.
+
+**Proven in the browser, 27/27 in the file** (8 new): the chat opens the card
+in the panel and draws none of its own (exactly ONE card in the document); the
+worker keeps the editor; **the write is proven against the `workers` DATABASE
+ROW**, not a re-rendered select; the person block and editor are gone from
+`/dashboard/advanced` and that route still works; reload/close/Back/Forward
+keep the result honest; loading announces itself and a real aborted read gives
+error + a working retry; 375px has no overflow. Evidence:
+`w3/row1-player-card-1440.png`, `w3/row1-player-card-375.png`.
+
+**Honest gap**: the non-worker path is NOT browser-proven. Every local fixture
+identity has a `workers` row, and inventing a half-onboarded account to make a
+screenshot is the fabricated state this platform bans. Pinned in code at both
+ends instead — the loader returns `null` without a worker row, the type makes
+that representable, and the component gates on it.
+
+**Recorded rather than normalised**: `WorkerPlayerCard` holds its own `<Link>`
+deep-links (`/dashboard/profile#capabilities`,
+`/dashboard/journal#journal-entries`). Those are the links it already had in
+the thread and on the journal page, and the panel's own source still holds no
+link and no router — but result bodies otherwise reach the full screen through
+`onOpenFull`, so the exception is stated.
+
+### Net complexity — row 1
+
+| Measure | Before | After |
+|---|---|---|
+| Player Card renderers | 3 | **1** |
+| `PremiumHubScreen` person mounts | 2 | **0** |
+| Data flows | 1 | 1 |
+| Components | — | **+1 / −1** |
+| Routes / result kinds / registry entries | — | **0 added** |
+| Duplicate CTA · duplicate profile editor | — | **0 · 0** |
+| Dead code removed | — | `PersonVM`, `loadPerson`, 3 reads, the page's work-card derivation |
+| Guards | — | 10 rewritten to pin both halves; 1 new (non-worker) |
+| Production LOC | — | **+408 / −455 — net −47 (code-only net −103)** |
+
+**Net complexity: NEGATIVE on architecture AND on lines. The project got
+simpler.**
+
+`PremiumHubScreen` mounts stay at 2, deliberately: after the person block
+leaves they differ only by `contextual`, which is real role-driven behaviour,
+and they still carry rows 2/3/4. Collapsing them means unifying the page's two
+role branches, which belongs to the route deletion.
+
+**Rows 21 and 24 were NOT bundled in.** Row 24 stays blocked on real reputation
+rows. Row 21 (`MyZone`) is a navigation grid and the likeliest OBSOLETE
+reclassification, but proving that needs its own check that the first-use
+guidance survives elsewhere — folding a navigation-grid deletion into a Player
+Card absorb would have made the diff unreviewable.
 
 ## Rows 1 / 21 / 24 — THE PLAYER CARD: the audit, before any code
 
