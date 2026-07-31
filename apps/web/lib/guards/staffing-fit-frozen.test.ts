@@ -68,7 +68,11 @@ function importsFrozenModule(source: string, moduleKey: string): boolean {
 
 describe("legacy staffing fit fork is frozen (no NEW imports, ever)", () => {
   for (const [moduleKey, allowed] of Object.entries(ALLOWED_IMPORTERS)) {
-    it(`${moduleKey} is imported ONLY by its existing callers`, () => {
+    // 30s: this reads every source file in the app for each frozen module.
+    // It began failing intermittently as the tree grew — a load-dependent
+    // failure, never a real import regression. Same fix as the other
+    // whole-tree walks (product-readiness, prod-qa-identity).
+    it(`${moduleKey} is imported ONLY by its existing callers`, { timeout: 30_000 }, () => {
       for (const file of SOURCE_FILES) {
         const rel = relative(APP, file).replace(/\\/g, "/");
         if (allowed.includes(rel)) continue;

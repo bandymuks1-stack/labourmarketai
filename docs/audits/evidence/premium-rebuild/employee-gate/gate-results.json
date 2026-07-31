@@ -1,0 +1,95 @@
+{
+  "gate": "EMPLOYEE_BETA_PRODUCTION_GATE",
+  "target": "http://127.0.0.1:3400",
+  "verdict": "PASS",
+  "checks": [
+    {
+      "id": "G1-login",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "authenticated workspace renders",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G2-first-experience",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "chat + composer + context panel present",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G2b-onboarding",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "onboarding settled at /lt/onboarding, no form maze",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G3-profile-player-card",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "profile renders, no OVR-style score",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G4-chat-action",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "chat accepted the request and the thread responded",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G5-market-depth",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "market → projects → evaluation on real rows",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G6-history",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "reload + back + forward all restore state",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G7-rls-isolation",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "unauthorized worker route status=200, no contact leak",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G8-logout-expiry-recovery",
+      "viewport": "desktop",
+      "status": "PASS",
+      "detail": "cleared session bounces to login; re-applied session restores the product",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G9-mobile-workspace",
+      "viewport": "mobile",
+      "status": "PASS",
+      "detail": "chat-first workspace, no horizontal overflow",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    },
+    {
+      "id": "G10-mobile-market",
+      "viewport": "mobile",
+      "status": "PASS",
+      "detail": "market result renders in the mobile sheet",
+      "consoleErrors": 0,
+      "failedRequests": 0
+    }
+  ]
+}

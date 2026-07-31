@@ -147,7 +147,11 @@ describe("no secret ever reaches a log, a report or an artefact", () => {
 });
 
 describe("the production path is a SCRIPT, never a reachable surface", () => {
-  it("nothing in the app imports the production QA guard", () => {
+  // 30s, not the 5s default. This walks app/, components/ and lib/ and reads
+  // every .ts/.tsx in them; alone it takes ~2s, and under full-suite CPU
+  // contention it intermittently crossed the default. A guard that fails on
+  // load rather than on truth is worse than no guard.
+  it("nothing in the app imports the production QA guard", { timeout: 30_000 }, () => {
     // If a route, server action or component ever imported this, the "no
     // general production session-mint endpoint" promise would be broken.
     // The guard itself and this test may name it; nothing that ships to a user
@@ -258,7 +262,18 @@ function grepTree(dir: string, rx: RegExp): string[] {
       continue;
     }
     if (s.isDirectory()) {
-      if (entry === "node_modules" || entry === ".next") continue;
+      // Build and test ARTEFACTS. Skipped both because they cannot contain a
+      // source import and because walking a directory another process is
+      // actively writing makes this assertion intermittently unreliable — the
+      // same failure mode `product-readiness`'s scan hit.
+      if (
+        entry === "node_modules" ||
+        entry === ".next" ||
+        entry === ".turbo" ||
+        entry === "test-results" ||
+        entry === "playwright-report"
+      )
+        continue;
       out.push(...grepTree(p, rx));
     } else if (/\.(ts|tsx)$/.test(p) && rx.test(readFileSync(p, "utf8"))) {
       out.push(p);

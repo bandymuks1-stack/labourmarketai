@@ -134,6 +134,11 @@ name so the allowance cannot quietly widen.
 | G9 | mobile workspace — usable, no horizontal overflow |
 | G10 | mobile market result |
 
+Plus **G2b onboarding** — a returning identity is never trapped in a form maze;
+the settled URL is the assertion, because onboarding redirects for an
+already-onboarded person. And **G8 covers recovery**: after the session is
+cleared the product bounces to login, and re-applying the session restores it.
+
 **Read-only in production.** Nothing in the gate creates, edits or deletes
 production data. The journal WRITE path is deliberately excluded and stays a
 local proof — a gate that leaves rows behind pollutes the thing it measures.
