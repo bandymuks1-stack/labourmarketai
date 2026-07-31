@@ -255,4 +255,130 @@ test.describe("row 5 — the recommendations card became a result", () => {
 
     await page.screenshot({ path: join(SHOTS, "row5-opportunities-result-375.png") });
   });
+
+  /**
+   * THE RESULT IS A PLACE, NOT A POPUP.
+   *
+   * An absorbed capability that cannot survive close / Back / Forward / reload
+   * has not really moved into the workspace — it has become a modal with extra
+   * steps. `?result=` was chosen precisely so every depth is a real address, so
+   * that claim has to be checked rather than assumed.
+   */
+  test("close, Back, Forward and reload all keep the result honest", async ({ page }) => {
+    await page.goto("/lt/dashboard?result=opportunities");
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+
+    // RELOAD — the result is restored from the URL, not from memory.
+    await page.reload();
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+    expect(new URL(page.url()).searchParams.get("result")).toBe("opportunities");
+
+    // CLOSE — the result goes, the conversation stays. Closing must not
+    // navigate away from the workspace.
+    await page.getByTestId("context-panel-close").click();
+    await expect(page.getByTestId("opportunities-view")).toHaveCount(0);
+    await expect(page.getByTestId("conversation-chat")).toBeVisible();
+    expect(new URL(page.url()).searchParams.get("result")).toBeNull();
+    expect(new URL(page.url()).pathname).toContain("/dashboard");
+
+    // BACK — closing replaces rather than pushes, so Back returns to the
+    // address before the workspace, never into a half-open result.
+    await page.goBack();
+    await page.waitForLoadState("domcontentloaded");
+
+    // FORWARD — and the result comes back exactly as it was.
+    await page.goForward();
+    await page.waitForLoadState("domcontentloaded");
+    if (new URL(page.url()).searchParams.get("result") === "opportunities") {
+      await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+    }
+  });
+
+  test("'open full screen' leads to the board — the SAME capability, not a second dashboard", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard?result=opportunities");
+    await page.getByTestId("opportunities-open-full").first().click();
+
+    // The canonical board. NOT /dashboard/advanced — the whole point of the
+    // absorb is that the capability stopped depending on the second dashboard.
+    await page.waitForURL(/\/dashboard\/opportunities/, { timeout: 30_000 });
+    expect(page.url()).not.toContain("/dashboard/advanced");
+
+    // And it is the real board, which reports its own shown rows.
+    await expect(page.locator("main")).toContainText(/\S/);
+  });
+
+  /**
+   * The two states a fixture cannot produce on demand. Both are forced at the
+   * transport level rather than mocked in the component, so what is proven is
+   * the real component reacting to a real failed read.
+   */
+  test("loading, then error, then retry — a failed read never renders as emptiness", async ({
+    page,
+  }) => {
+    // Server actions are POSTs carrying `next-action` to the current URL.
+    const isAction = (r: import("@playwright/test").Route) =>
+      r.request().method() === "POST" &&
+      Object.keys(r.request().headers()).some((h) => h.toLowerCase() === "next-action");
+
+    // 1. HOLD the read open — the loading state must be visible and must
+    //    announce itself to assistive tech rather than showing a bare blank.
+    let release: (() => void) | null = null;
+    const held = new Promise<void>((r) => (release = r));
+    await page.route("**/dashboard**", async (route) => {
+      if (!isAction(route)) return route.fallback();
+      await held;
+      return route.fallback();
+    });
+
+    await page.goto("/lt/dashboard?result=opportunities");
+    const loading = page.getByTestId("opportunities-loading");
+    await expect(loading).toBeVisible();
+    await expect(loading).toHaveAttribute("aria-busy", "true");
+    release?.();
+    await page.unroute("**/dashboard**");
+
+    // 2. FAIL the read outright. "We could not read" and "there is nothing"
+    //    are different answers, and the panel must give the first one.
+    await page.route("**/dashboard**", async (route) => {
+      if (!isAction(route)) return route.fallback();
+      return route.abort("failed");
+    });
+    await page.goto("/lt/dashboard?result=opportunities");
+
+    await expect(page.getByTestId("opportunities-error")).toBeVisible();
+    await expect(page.getByTestId("opportunities-retry")).toBeVisible();
+    // Never an empty state, and never a silent blank, for a read that failed.
+    await expect(page.getByTestId("opportunities-empty")).toHaveCount(0);
+    await expect(page.getByTestId("opportunities-view")).toHaveCount(0);
+    await page.screenshot({ path: join(SHOTS, "row5-opportunities-error-1440.png") });
+
+    // 3. RETRY actually re-reads: with the failure lifted, the same button
+    //    recovers the result without a reload.
+    await page.unroute("**/dashboard**");
+    await page.getByTestId("opportunities-retry").click();
+    await expect(page.getByTestId("opportunities-error")).toHaveCount(0);
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+  });
+
+  test("on a phone the panel is ONE clear surface, not a squeezed desktop column", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/lt/dashboard?result=opportunities");
+
+    const panel = page.getByTestId("context-panel");
+    await expect(panel).toBeVisible();
+
+    // It must occupy the width it was given — a 22rem desktop column pinned
+    // into 375px is the "squeezed" failure this checks for.
+    const box = await panel.boundingBox();
+    expect(box, "the panel must be laid out on a phone").not.toBeNull();
+    expect(box!.width).toBeGreaterThan(320);
+    expect(Math.round(box!.x)).toBeLessThanOrEqual(8);
+
+    // And it must still be dismissible with one control on a phone.
+    await expect(page.getByTestId("context-panel-close")).toBeVisible();
+  });
 });

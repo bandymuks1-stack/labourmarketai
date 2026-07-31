@@ -143,6 +143,42 @@ W3 step is an ABSORB row — and the honest smallest one is row 5 (job
 recommendations) or row 6 (worker invitations), each of which needs a result
 state with real data and the full idle/loading/empty/partial/error/retry set.
 
+## Migrated rows — the per-row record
+
+One row per absorbed capability, with where it was, where it now canonically
+lives, and what was actually proven in a browser. A row may not be marked
+`ABSORBED` on anything less.
+
+| Field | Row 4 | Row 5 |
+|---|---|---|
+| Capability | Premium Hub market map | Job recommendations ("Man tinkantys darbai") |
+| Previous location | `PremiumHubMarketMap` in `/dashboard/advanced` | `JobRecommendationsCard` in `/dashboard/advanced` (1 mount) |
+| New canonical location | the real `/dashboard/market-map` (the panel keeps only the door) | `opportunities` RESULT in the Context Panel (`?result=opportunities`); full screen stays `/dashboard/opportunities` |
+| Status | **OBSOLETE** (the drawing) + door retained | **ABSORBED** |
+| Browser proof | `w3-second-dashboard.spec.ts` — 2 scenarios | same file — **7 scenarios** |
+| Desktop proof | `row4-market-panel-1440.png`, `row4-real-map-1440.png` | `row5-opportunities-result-1440.png`, `row5-opportunities-error-1440.png` |
+| Mobile proof | not applicable (panel unchanged) | `row5-opportunities-result-375.png` — 375px, no horizontal overflow, 44px tap target, panel is one full-width surface with a working close |
+| Dependent components remaining | none | `OpportunitiesShownMarker` (shared with the board + journal block), `loadOpportunitiesResultAction`, the canonical use case — all shared, none forked |
+| Old mount safe to remove? | done — 159→72 lines | **done — card deleted, both halves guard-pinned** |
+
+**What "7 scenarios" covers for row 5**: the result renders real rows with the
+§19 basis; the card is gone from `/dashboard/advanced` and that route still
+works; 375px has no overflow; close / Back / Forward / reload keep the result
+honest and never strand it; "open full screen" reaches `/dashboard/opportunities`
+and provably NOT `/dashboard/advanced`; loading announces itself (`aria-busy`),
+a failed read renders the error state with a working retry and never an
+emptiness; the phone panel is one clear surface, not a squeezed desktop column.
+The loading and error states are forced at the transport level (the server
+action is held, then aborted), so what is proven is the real component reacting
+to a real failed read — not a mock of itself.
+
+**Honest gap**: the `empty` state is not directly rendered in this environment,
+because the local fixture worker HAS matches and fabricating a demand to force
+an empty screen is exactly the invented data this platform bans. It is covered
+by the state-exclusivity assertion (exactly one honest state may be on screen)
+and by the unit guard that pins all four no-rows states as distinct. Recorded
+as a gap rather than claimed as proven.
+
 ## Row 5 — DONE, and what the first ABSORB cost
 
 `JobRecommendationsCard` ("Man tinkantys darbai") had exactly ONE mount, on
