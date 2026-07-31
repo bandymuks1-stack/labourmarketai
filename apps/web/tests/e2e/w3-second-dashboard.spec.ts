@@ -381,4 +381,80 @@ test.describe("row 5 — the recommendations card became a result", () => {
     // And it must still be dismissible with one control on a phone.
     await expect(page.getByTestId("context-panel-close")).toBeVisible();
   });
+
+  /**
+   * THE CONSOLIDATION ITSELF.
+   *
+   * Before this change one answer had two renderers: the chat thread drew its
+   * own job cards with their own copy of the interest control, and the Context
+   * Panel result drew the same rows read-only — and nothing could even open the
+   * panel. These cases pin that exactly one of them survived, and that the
+   * survivor kept everything the other one could do.
+   */
+  test("the thread no longer draws job cards anywhere in the product", async ({ page }) => {
+    await page.goto("/lt/dashboard?result=opportunities");
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+
+    // The deleted renderer's own testids. If either comes back, the second
+    // renderer came back with it.
+    await expect(page.getByTestId("chat-employer-match-card")).toHaveCount(0);
+    await expect(page.getByTestId("msg-employer-match")).toHaveCount(0);
+    await expect(page.getByTestId("chat-employer-match-open")).toHaveCount(0);
+  });
+
+  test("the panel row kept everything the deleted card could do", async ({ page }) => {
+    await page.goto("/lt/dashboard?result=opportunities");
+    const rows = page.locator('li[data-testid^="opportunities-row-"]');
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+    if ((await rows.count()) === 0) test.skip(true, "this identity has no matches");
+
+    // WHO is hiring, and an HONEST fit badge — the two things only the thread
+    // card used to show. The badge must carry the canonical status, so a weak
+    // fit can never be painted with the success colour.
+    const fit = page.getByTestId("opportunities-match-fit").first();
+    await expect(fit).toBeVisible();
+    const status = await fit.getAttribute("data-fit-status");
+    expect(["strong", "possible", "weak", "insufficient"]).toContain(status);
+    const cls = (await fit.getAttribute("class")) ?? "";
+    if (status !== "strong") expect(cls).not.toContain("state-success");
+
+    // The drill-in survived: selecting a match writes World State rather than
+    // opening a page, so the job's full facts stay one tap away in the panel.
+    const open = page.getByTestId("opportunities-match-open").first();
+    await expect(open).toBeVisible();
+    const before = page.url();
+    await open.click();
+    expect(page.url(), "selecting a match must not navigate").toBe(before);
+  });
+
+  test("'Domiuosi' is the ONE action surface, and it really writes", async ({ page }) => {
+    const failed: string[] = [];
+    page.on("response", (r) => {
+      if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`);
+    });
+
+    await page.goto("/lt/dashboard?result=opportunities");
+    await expect(page.getByTestId("opportunities-open-full").first()).toBeVisible();
+
+    const interest = page.getByTestId("opportunities-match-interest").first();
+    if ((await interest.count()) === 0) {
+      test.skip(true, "the owner-gated interest table is not applied here");
+    }
+
+    // Exactly ONE interest control per row — never the row's own plus a
+    // leftover from the thread.
+    const rows = await page.locator('li[data-testid^="opportunities-row-"]').count();
+    expect(await page.getByTestId("opportunities-match-interest").count()).toBe(rows);
+
+    const button = interest.locator("button").first();
+    const label = (await button.innerText()).trim();
+    await button.click();
+
+    // The outcome is REAL: the control reports a changed state, and it reports
+    // it in the panel — the place the person acted.
+    await expect(interest).not.toHaveText(new RegExp(`^${label}$`), { timeout: 15_000 });
+    await expect(page.getByTestId("opportunities-match-interest").first()).toBeVisible();
+
+    expect(failed, failed.join("\n")).toEqual([]);
+  });
 });
