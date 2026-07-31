@@ -56,8 +56,8 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | `project` result | TODO |
 | 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
 | 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
-| 11 | Booking responses next-action | inline | ABSORB | `calendar` result | TODO |
-| 12 | Bookings next-action | inline | ABSORB | `calendar` result | TODO |
+| 11 | Booking responses next-action | inline `<Link>` + count badge | **ABSORB?** | likely `ALREADY` — the spine chip already presents it | **AUDITED 2026-07-31** — see the Calendar audit |
+| 12 | Bookings next-action | inline `<Link>` + count badge | **ABSORB?** | likely `ALREADY` — same | **AUDITED 2026-07-31** — see the Calendar audit |
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
 | 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
@@ -239,7 +239,7 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 1 | Premium Hub person card | Player Card | **DONE** |
 | 21 | My zone | Player Card | TODO |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
-| 11 | Booking responses | Calendar | **NEXT** |
+| 11 | Booking responses | Calendar | **AUDITED, next** — likely ALREADY, confirm then decide the calendar result |
 | 12 | Bookings | Calendar | TODO |
 | 16 | Identity actions | Profile update | TODO |
 | 19 | Status strip | Return to chat (active context) | TODO |
@@ -254,6 +254,59 @@ both already have real routes.
 
 Rows 17, 18, 20, 27 are OBSOLETE (the second dashboard's own navigation) and die
 with the route. Rows 4, 13, 15 are settled.
+
+## Rows 11 / 12 — THE CALENDAR: the audit, before any code
+
+Next in the P0 Employee Journey, audited first — the order that has now paid
+three times.
+
+**These two rows are NOT the shape rows 1, 5 and 6 were, and classifying them
+as ABSORB was probably wrong.**
+
+Rows 1/5/6 were capability RENDERERS that existed only on `/dashboard/advanced`
+— delete the route and the capability dies, so each had to become a result
+first. Rows 11/12 are neither components nor renderers. They are two **inline,
+count-gated `<Link>` badges**:
+
+| Row | What it is | Where | Opens |
+|---|---|---|---|
+| 11 | `bookingResponsesNextAction` — a `<Link>` + count badge, rendered only when `spineCounts.bookingResponsesNew > 0` | `advanced/page.tsx:351` | `/dashboard/bookings` |
+| 12 | `bookingsPendingNextAction` — same shape, gated on `spineCounts.pendingIncomingBookings` | `advanced/page.tsx:700` | `/dashboard/bookings` |
+
+**The capability is not in either of them.** Responding to a booking lives on
+`/dashboard/bookings`: `BookingRespondButtons`, `BookingManageControls`,
+`MarkBookingsSeen` — **one mount each**, a legitimate DETAIL route, not a
+competing dashboard. Nothing about it is duplicated on the advanced page.
+
+**The signal already survives the route deletion.** Both counts come from the
+notification spine, and the spine's own signals carry real hrefs to the surface
+that resolves them — `pending-bookings → /dashboard/bookings` and
+`booking-responses → /dashboard/bookings`, both already pinned in
+`dashboard-duplicate-removal.test.ts`. The status strip renders those chips on
+both branches. So deleting the two link cards removes a **second presentation
+of a signal that is already presented**, not a capability.
+
+**Provisional reclassification: rows 11 and 12 are `ALREADY`, like rows 13/15**
+— they have no independent drop and are removed by the route deletion. To be
+confirmed, not assumed: the confirming check is that the status-strip chips
+render for a worker with each signal non-zero, which needs a browser pass with
+seeded bookings.
+
+**What IS missing, and is a different piece of work.** `ResultBody` has no
+`calendar` case — the kind exists, `dataReadiness: "real"`, `advancedRoute:
+/dashboard/planning`, opened by `worker.review-bookings` /
+`worker.respond-booking` — so "show me my calendar" falls through to
+`result-body-pending` and the route. The chat's `startAgenda` →
+`loadContextBrief` already renders the Time Engine as a SENTENCE in the thread;
+a `calendar` result would render the same engine as a panel, which is the
+"one calculation, two presentations" rule the work context already follows.
+
+That is worth doing — but it is an addition, not rows 11/12, and it must not be
+smuggled in under their number. Recorded here so the next slice starts from the
+right question: **confirm 11/12 as ALREADY first, then decide the `calendar`
+result on its own merits.**
+
+**Not started.**
 
 ## Row 1 — DONE, and what the audit had MISSED
 
