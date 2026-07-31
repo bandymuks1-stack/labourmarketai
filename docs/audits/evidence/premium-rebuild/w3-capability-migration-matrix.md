@@ -52,8 +52,8 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
 | 5 | Job recommendations | `JobRecommendationsCard` + the chat thread's `EmployerMatchCard` | ABSORB | `opportunities` result | **ABSORBED + CONSOLIDATED 2026-07-31** — renderers 2→1, action surfaces 2→1, production LOC net −103 (#932, #934) |
 | 6 | Worker invitations | `WorkerInvitations` (was `WorkerInvitationsCard` ×2 mounts) | ABSORB | Context Panel work context | **ABSORBED 2026-07-31** — card deleted, mounts 2→0, no result kind, browser-proven with the REAL accept RPC |
-| 7 | Demand request create | `DemandRequestButton` | CHAT | already an action id — render result | TODO |
-| 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | `project` result | TODO |
+| 7 | Demand request create | `DemandRequestButton` | CHAT | one canonical intake presentation | **AUDITED 2026-08-01** — THREE demand forms found, see the P1 employer audit |
+| 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | one canonical readback | **AUDITED 2026-08-01** — three readbacks found, see the P1 employer audit |
 | 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
 | 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
 | 11 | Booking responses next-action | inline `<Link>` + count badge | **ALREADY** | the spine (bell + chips) already presents it; capability lives on `/dashboard/bookings` | **CONFIRMED 2026-08-01** — browser-proven with seeded real bookings, see below |
@@ -70,7 +70,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` exists | repoint |
 | 23 | Telemetry view | `TelemetryView` | DETAIL | admin surface | repoint |
 | 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (gated `unverified`) | **BLOCKED** — missing data source documented 2026-08-01, see the row 24 note |
-| 25 | Demand intake section | inline, `demand-intake-section` | CHAT | structured demand flow | TODO |
+| 25 | Demand intake section | inline, `demand-intake-section` | CHAT | the advanced host of row 7 | **AUDITED 2026-08-01** — dies with row 7's consolidation |
 | 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
@@ -380,6 +380,42 @@ the advanced page — it belongs to the row 5 family and must be dispositioned
 before the route deletion, under its own number.
 
 **Not started beyond the audit.**
+
+## P1 EMPLOYER — rows 7 / 8 / 25: the audit, before any code
+
+Audited 2026-08-01. **These rows are the first since row 1 that are NOT mere
+verification — a real consolidation slice is owed**, and the duplicate map
+must be on the table before it starts.
+
+**THREE demand write-forms exist today:**
+
+| Form | Where | Weight | Writes |
+|---|---|---|---|
+| `DemandRequestButton` | `/dashboard/advanced` §demand-intake (row 25) — ONLY mount | **888 lines**: structured v2 advanced sections, estimate builder, drafts, prefill | `submit_demand_request` → `customer_requests` |
+| chat inline form (`company.create-demand`) | conversation (`COMPANY_FORMS` → `InlineActionForm`) | light: description / role / location / team size, confirmation-token gated | the SAME canonical chain |
+| `DemandDraftForm` | `/dashboard/company` | draft continuation (`getDemandDraft` → "continue here as a real draft demand") | same intake |
+
+**THREE readbacks exist today:** `DemandRequestsReadback` (advanced, ONLY
+company/agency mount), the buyer page's own list (customers), and scouting's
+`listCompanyDemands` (per-demand scouting entry).
+
+**What the consolidation slice must decide (next window, full context):**
+
+1. The FULL form's canonical home. Its only mount is the dying page; the
+   action's own `advancedRoute` is `/dashboard/company`, which already hosts
+   the draft-continuation form — the natural move is ONE full form on the
+   company surface, absorbing `DemandDraftForm`'s continuation duty, with the
+   chat form remaining the light intake that hands off to it.
+2. ONE readback for the demand owner. Scouting already lists company demands
+   with the real follow-up (scout); `DemandRequestsReadback`'s unique honest
+   copy (worker-visibility note, manage help) must move or die with proof.
+3. Row 25 is only the advanced HOST of row 7 — it has no capability of its
+   own and resolves automatically with row 7's move.
+4. No new route, no new result kind unless the audit of `project` result fit
+   proves otherwise; the estimate builder must not be duplicated.
+
+**Nothing implemented yet — recorded so the next window starts at the
+decision, not the discovery.**
 
 ## Row 21 — MYZONE: the audit and the confirmation
 
