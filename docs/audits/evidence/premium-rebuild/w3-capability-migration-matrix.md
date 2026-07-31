@@ -1,6 +1,7 @@
 # W3 — `/dashboard/advanced` CAPABILITY MIGRATION MATRIX
 
-> **Status: INVENTORY COMPLETE. 1 of 28 rows MIGRATED (row 4).**
+> **Status: 1 of 28 rows MIGRATED (row 4). Rows 13 and 15 VERIFIED —
+> no independent drop exists; they are removed by the route deletion.**
 > This file is step 1 of the W3 method. The route is **not** deleted, and must
 > not be deleted until every row below is `MIGRATED` and browser-proven.
 
@@ -57,9 +58,9 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
 | 11 | Booking responses next-action | inline | ABSORB | `calendar` result | TODO |
 | 12 | Bookings next-action | inline | ABSORB | `calendar` result | TODO |
-| 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | verify then drop |
+| 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
-| 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | verify then drop |
+| 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 16 | Identity actions | `IdentityActions` | ABSORB | account menu / profile result | TODO |
 | 17 | Module grid | `DashboardModuleGrid` | **OBSOLETE** | this IS the second dashboard's navigation | delete with the route |
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
@@ -103,6 +104,45 @@ says it was meant to collapse `market-map-live.tsx` into itself; that collapse
 never finished. Both are real maps, so no user is misled — but two Leaflet
 implementations is one too many and it is now tracked rather than a surprise.
 
+## Rows 13 and 15 — verified, and the verification changed the plan
+
+Both were classified `ALREADY`, and both are: the Context Panel's work context
+carries the same next-action content (headline, facts, recommendations with a
+chip that dispatches into the conversation), and the workspace header carries
+the active space.
+
+What the verification actually established is that **neither can be dropped on
+its own.** Each has exactly ONE mount, and it is inside
+`/dashboard/advanced`:
+
+```text
+DashboardNextAction   → advanced/page.tsx:491        (1 mount)
+CurrentSpaceHeader    → advanced/page.tsx:599, :914  (2 mounts, same page)
+```
+
+Nothing else imports either. So "verify then drop" was the wrong instruction to
+give myself: there is no independent drop to perform. They are removed by the
+route deletion, and removing them earlier would only break the route while it
+is still the only home for 15 other capabilities.
+
+Noted in passing: `CurrentSpaceHeader` renders **twice on the same page**. Not
+worth a standalone fix on a surface being deleted, but it is a fair measure of
+how the second dashboard grew.
+
+**This is the difference between row 4 and rows 13/15.** Row 4 was a FAKE — a
+drawing pretending to be a map — so it could simply go, and its removal was a
+product improvement on its own. Rows 13/15 are real capabilities that already
+have a canonical home; their removal is bookkeeping that belongs to the
+deletion commit.
+
+### What this means for sequencing
+
+No further row can be MIGRATED without either absorbing an ABSORB row into the
+result surface, or deleting the route. The cheap wins are done. The next real
+W3 step is an ABSORB row — and the honest smallest one is row 5 (job
+recommendations) or row 6 (worker invitations), each of which needs a result
+state with real data and the full idle/loading/empty/partial/error/retry set.
+
 ## Honest reading of this matrix
 
 `/dashboard/advanced` cannot be removed in one step, and any claim that it can
@@ -125,14 +165,17 @@ through.
 ## Next exact action for W3
 
 ```text
-1. DONE — row 4. The method holds: remove the fake, keep every real branch,
-   prove both in a browser before claiming the capability survived.
-2. Rows 13 and 15 (DashboardNextAction, CurrentSpaceHeader) — classified
-   ALREADY. Verify against the Context Panel work context, then drop.
-3. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
+1. DONE — row 4 (the fake map removed, browser-proven).
+2. DONE — rows 13 and 15 VERIFIED. No independent drop exists; they are
+   removed by the route deletion. See the section above.
+3. NEXT — row 5 (job recommendations) or row 6 (worker invitations): the
+   smallest genuine ABSORB. Build the result state with real data and the full
+   idle/loading/empty/partial/error/retry set, repoint the inbound link, prove
+   the capability survived in a browser, THEN remove the card.
+4. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
    the collapse market-map.tsx's own header already describes.
-4. Then the 15 ABSORB rows in dependency order, each with its own browser proof.
-5. Delete /dashboard/advanced only when every row is MIGRATED or
+5. Then the remaining ABSORB rows in dependency order.
+6. Delete /dashboard/advanced only when every row is MIGRATED or
    OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
    the same commit.
 ```
