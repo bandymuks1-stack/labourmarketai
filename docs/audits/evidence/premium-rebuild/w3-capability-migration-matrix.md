@@ -236,7 +236,7 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 |---|---|---|---|
 | 5 | Job recommendations | Chat → Result → Job | **DONE** |
 | 6 | Worker invitations | Onboarding → Chat (joining an employer) | **DONE** |
-| 1 | Premium Hub person card | Player Card | **NEXT** |
+| 1 | Premium Hub person card | Player Card | **AUDITED, next** — see the Player Card audit |
 | 21 | My zone | Player Card | TODO |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
 | 11 | Booking responses | Calendar | TODO |
@@ -254,6 +254,65 @@ both already have real routes.
 
 Rows 17, 18, 20, 27 are OBSOLETE (the second dashboard's own navigation) and die
 with the route. Rows 4, 13, 15 are settled.
+
+## Rows 1 / 21 / 24 — THE PLAYER CARD: the audit, before any code
+
+Next in the P0 Employee Journey, audited first for the same reason row 6 was:
+find out what already exists before porting anything.
+
+**The result kind ALREADY EXISTS — and it is already declared honest.**
+
+```ts
+// lib/conversation/result-registry.ts
+{ kind: "player-card",
+  titleKey: "conversation.results.playerCard.title",
+  openedBy: ["worker.complete-profile", "worker.save-work-card"],
+  advancedRoute: "/dashboard/profile",
+  contexts: ["personal"],
+  dataReadiness: "real" }        // lib/player-card/* — 8 real modules
+```
+
+So this row does **not** add a result kind, a registry entry or a route either.
+What is missing is narrower and more specific than row 6's: **`player-card` has
+no inline renderer.** `ResultBody`'s switch handles `opportunities` and
+`market`; everything else falls through to `result-body-pending` and the honest
+`/dashboard/profile` fallback. The comment already names this row: *"Phase C
+wires the canonical Player Card here; the rest follow."*
+
+**Renderers and mounts today**
+
+| # | Component | Where | Mounts |
+|---|---|---|---|
+| 1 | `PremiumHubScreen` → `PremiumHubPersonCard` | `advanced/page.tsx:557` (org branch, inside More) and `:827` (worker branch, `#work-card`, with `workEditor`) | **2 — duplicated again** |
+| 21 | `MyZone` | `advanced/page.tsx:798` | 1 |
+| 24 | `TrustInsightCard` | `advanced/page.tsx:89,105`, `company/planning:117`, `intelligence:217`, `opportunities:451` | 5, but on **different subjects** |
+
+The `PremiumHubScreen` duplication is the third instance of the same defect in
+this route (`CurrentSpaceHeader`, `WorkerInvitationsCard`, now this). The two
+mounts are **not** identical: the worker one passes `contextual` and
+`workEditor`. So unlike row 6 this is not a straight de-duplication — the
+worker mount carries a real editing capability the org mount does not, and
+collapsing them without preserving `workEditor` would delete it.
+
+**Row 24 stays blocked.** `reputation` is still `dataReadiness: "unverified"`,
+and `TrustInsightCard`'s other four mounts are legitimately about other
+subjects (a demand's trust, the intelligence screen's, an opportunity's). It is
+NOT part of rows 1/21 and must not be swept in.
+
+**The real data already exists**: `lib/player-card/` is 12 modules —
+`player-card.ts`, `readiness.ts`, `readiness-steps.ts`, `work-history.ts`,
+`work-history-model.ts`, `evidence-visuals.ts`, `opportunity-signal.ts`,
+`labels.ts` and their tests. Nothing here needs a new reader.
+
+**Provisional shape of the work** (to be confirmed when the row starts):
+write the `player-card` case in `ResultBody` over the existing
+`lib/player-card/*` readers with the full idle/loading/empty/partial/error/retry
+set, then remove the `advanced` mounts — `workEditor` first, since that is the
+capability that would otherwise be lost. Row 21 (`MyZone`) is a navigation grid
+for a dashboard that is being deleted; it is the likeliest **OBSOLETE**
+reclassification in the matrix, but that must be proven, not assumed.
+
+**Not started.** The audit is written down so the next slice does not redo it.
 
 ## Row 6 — the audit, before any code
 
@@ -431,8 +490,12 @@ through.
    registry entry, no route, no second action surface: `WorkerInvitations`
    reused unchanged, mounts 2 -> 0 on the dying route, the server wrapper and
    the `invitation` top-slot rung deleted.
-5. NEXT — the Player Card (rows 1 / 21, then 24 when reputation has real
-   rows), which is the next P0 Employee Journey step.
+5. NEXT — the Player Card (rows 1 / 21; 24 stays blocked on real reputation
+   rows). AUDITED, not started — see the Player Card audit above. The audit
+   already settled that `player-card` is an EXISTING result kind marked
+   `dataReadiness: "real"` with no inline renderer, that `PremiumHubScreen` is
+   mounted twice with DIFFERENT props (the worker mount carries `workEditor`,
+   which must not be lost), and that row 24 must not be swept in.
 6. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
    the collapse market-map.tsx's own header already describes.
 7. Then the remaining 13 ABSORB rows in dependency order.
