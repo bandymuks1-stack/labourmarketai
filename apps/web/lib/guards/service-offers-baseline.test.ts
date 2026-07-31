@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { landingTreeSource } from "./landing-composition";
+
 /**
  * Guard: productized service offers ride the EXISTING cinematic baseline, and
  * their price CTAs stay honest.
@@ -41,7 +43,11 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
   });
 
   it("the landing page still renders the cinematic baseline components", () => {
-    const page = read("app/[locale]/(marketing)/page.tsx");
+    // The landing's COMPOSED sections, not page.tsx alone: the page was
+    // legitimately split into section components, and `text-gradient-accent`
+    // now lives inside them. Depth 1 keeps this an assertion about the landing
+    // rather than a whole-repo grep. See `landing-composition.ts`.
+    const page = landingTreeSource(APP_ROOT, 1);
     for (const sym of [
       "PlayerCardShowcase",
       // Landing rebuild (owner directive 2026-07-29): the hero visual is the
@@ -51,7 +57,9 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
       // Owner shortening (visual acceptance §3.1, 2026-07-29): MarketPulse and
       // DraftBoard LEFT the landing — interior dashboards re-rendered as
       // brochure duplicated the product instead of showing it once.
-      "LiveProductDemo",
+      // Premium rebuild 2026-07-31: HeroLiveDemo SUPERSEDED LiveProductDemo —
+      // same cinematic role, now driving the canonical <MarketMap>.
+      "HeroLiveDemo",
       "text-gradient-accent",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(

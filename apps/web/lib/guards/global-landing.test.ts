@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { landingTreeFiles } from "./landing-composition";
+
 /**
  * Global landing guard (PR-H global landing + motion; landing rebuild
  * 2026-07-29 — owner directive).
@@ -21,31 +23,49 @@ import { join } from "node:path";
 const WEB_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB_ROOT, rel), "utf8");
 
-const LANDING_FILES = [
-  "app/[locale]/(marketing)/page.tsx",
-  "components/marketing/live-product-demo.tsx",
-  "components/marketing/product-chain-band.tsx",
-  "components/marketing/market-moment.tsx",
-  "components/marketing/proof-band.tsx",
-  "components/marketing/conversation-os-panel.tsx",
-  "components/marketing/audience-value-sections.tsx",
-  "components/marketing/trust-band.tsx",
-  "components/marketing/final-cta-band.tsx",
-  "components/marketing/reveal.tsx",
-] as const;
+/**
+ * The landing's REAL sections, derived from what page.tsx renders.
+ *
+ * This was a hardcoded list, and it rotted: it still named
+ * `live-product-demo`, `market-moment`, `proof-band` and
+ * `conversation-os-panel` long after the landing stopped rendering them. A
+ * hardcoded list is a promise that someone will remember to update it, and the
+ * Europe-only check below silently stopped covering the sections that ARE on
+ * the landing. Deriving it means new sections are covered the moment they are
+ * mounted, and removed ones stop being asserted about.
+ */
+const LANDING_FILES = landingTreeFiles(WEB_ROOT, 1).filter(
+  (f) =>
+    f.startsWith("components/marketing/") ||
+    // page.tsx ITSELF is part of the landing, and leaving it out is not a
+    // detail: the page carries the `#how-it-works` anchor wrapper directly, so
+    // a components-only list made a live anchor look dead. That mistake was
+    // caught in a browser after a "fix" had already added a duplicate id.
+    f === "app/[locale]/(marketing)/page.tsx",
+);
 
 describe("(a) the landing hero is the live product demo, never a Europe-only map", () => {
-  it("page.tsx imports live-product-demo and not live-map / europe-geo", () => {
+  it("page.tsx imports the canonical hero demo and not live-map / europe-geo", () => {
+    // `live-product-demo` was SUPERSEDED by `hero-live-demo`, which mounts the
+    // canonical <MarketMap> the authenticated ResultPanel uses — one map
+    // engine for the whole product instead of a landing-only illustration.
+    // The old component was dead (referenced by a stale comment only) and has
+    // been deleted; this guard now pins the replacement.
     const page = read("app/[locale]/(marketing)/page.tsx");
-    expect(page).toMatch(/components\/marketing\/live-product-demo/);
+    expect(page).toMatch(/components\/marketing\/hero-live-demo/);
     expect(page).not.toMatch(/components\/app\/live-map/);
     expect(page).not.toMatch(/europe-geo/);
+    // The superseded component must not come back alongside its replacement.
+    expect(existsSync(join(WEB_ROOT, "components/marketing/live-product-demo.tsx"))).toBe(
+      false,
+    );
   });
 
   it("the demo is honestly labelled and reduced-motion safe", () => {
-    const demo = read("components/marketing/live-product-demo.tsx");
-    expect(demo).toMatch(/useReducedMotion/);
-    expect(demo).toMatch(/t\("chip"\)/);
+    const demo = read("components/marketing/hero-live-demo.tsx");
+    expect(demo).toMatch(/prefers-reduced-motion/);
+    // A scripted scenario on real geography must SAY it is a demonstration.
+    expect(demo).toMatch(/t\("demoBadge"\)/);
   });
 
   it("live-world-map (kept in repo, restorable) renders the generated world-geo module", () => {
@@ -135,7 +155,9 @@ describe("(c) every final-CTA href resolves to a real app/[locale]/ route", () =
   it("the nav anchor targets exist on the landing page", () => {
     const nav = read("components/layouts/site-nav.tsx");
     const anchors = [...nav.matchAll(/href:\s*"\/#([\w-]+)"/g)].map((m) => m[1]);
-    expect(anchors.length).toBeGreaterThanOrEqual(2);
+    // One since "partners" was removed as a dead anchor (2026-07-31). The
+    // floor stays >= 1 so the nav cannot quietly lose every landing anchor.
+    expect(anchors.length).toBeGreaterThanOrEqual(1);
     const landingTree = LANDING_FILES.map(read).join("\n");
     for (const a of anchors) {
       // Matches a JSX literal (id="partners") OR the data-driven form

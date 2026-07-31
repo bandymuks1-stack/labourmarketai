@@ -13,9 +13,31 @@ import type {
  * no entries yet renders at the floor with the words "no records yet", because
  * the missing evidence is the useful signal, not something to hide.
  *
- * Bars are CSS widths (percentages of the real maximum), so they reflow at
- * every viewport with no distortion and no library.
+ * Bars are CSS widths on a FIXED scale, so they reflow at every viewport with
+ * no distortion and no library.
+ *
+ * WHY A FIXED SCALE AND NOT THE MAXIMUM (owner command §4.4).
+ * These bars used to be normalized to the person's own busiest skill
+ * (`entries / max`). That is a relative chart wearing the clothes of an
+ * absolute one: the top skill ALWAYS rendered as a completely full bar, so a
+ * worker with 3 records on their best skill saw the same "full" bar as one with
+ * 300. A full bar reads as "100 %", and next to the word "skill" that reads as
+ * mastery — a competence score this platform must never fabricate.
+ *
+ * The scale is now absolute: `EVIDENCE_SCALE_MAX` records fill the bar, for
+ * everyone. A short bar now honestly means "not much recorded yet", the same
+ * length means the same quantity on every person's card, and the exact count is
+ * always printed beside it. `labels.scaleNote` states outright that this is a
+ * record count and not a skill score.
  */
+
+/**
+ * Records that fill the bar. A deliberate product constant, not a tuning knob:
+ * it is the point past which "this person really does this work regularly" is
+ * already established, so pushing further should not keep growing the bar.
+ * Counts above it print in full beside a full bar — the number is never hidden.
+ */
+export const EVIDENCE_SCALE_MAX = 20;
 
 export interface SkillEvidenceLabels {
   readonly title: string;
@@ -30,6 +52,12 @@ export interface SkillEvidenceLabels {
   readonly legendTitle: string;
   readonly tierLabels: Readonly<Record<SkillEvidenceTier, string>>;
   readonly ariaLabel: string;
+  /**
+   * REQUIRED (owner command §4.4): states in words that the bar is a count of
+   * records, not a score for the skill. The visual alone cannot carry this —
+   * any bar next to a skill name invites being read as a rating.
+   */
+  readonly scaleNote: string;
 }
 
 /** Tier → token. Three visually distinct rungs, and none of them is gold:
@@ -69,7 +97,6 @@ export function SkillEvidenceChart({
     );
   }
 
-  const max = skills.reduce((m, s) => (s.entries > m ? s.entries : m), 0);
   // Tiers that actually occur — the legend explains what is on screen, and
   // never advertises a rung this person has not reached.
   const tiersPresent = (["verified", "journal", "declared"] as const).filter(
@@ -87,11 +114,25 @@ export function SkillEvidenceChart({
         {labels.title}
       </span>
 
+      {/* §4.4 — said before the bars are read, not buried under them. */}
+      <p
+        className="text-meta leading-relaxed text-text-secondary"
+        data-testid="player-card-skill-scale-note"
+      >
+        {labels.scaleNote}
+      </p>
+
       <ul className="flex flex-col gap-2" aria-label={labels.ariaLabel}>
         {skills.map((s, i) => {
+          // ABSOLUTE, not relative: the same width means the same number of
+          // records on every person's card. Counts past the scale clamp to a
+          // full bar and still print their exact value beside it.
           // A real zero keeps a hairline so the row is readable as "declared,
-          // nothing behind it yet" — the width still encodes the real count.
-          const pct = max > 0 && s.entries > 0 ? (s.entries / max) * 100 : 0;
+          // nothing behind it yet".
+          const pct =
+            s.entries > 0
+              ? Math.min(s.entries / EVIDENCE_SCALE_MAX, 1) * 100
+              : 0;
           return (
             <li
               key={s.slug}

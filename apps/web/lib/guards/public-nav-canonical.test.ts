@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { landingTreeSource } from "./landing-composition";
+
 /**
  * PUBLIC NAV / FOOTER + COMPANY-DEMAND FUNNEL — CANONICAL IA GUARDS.
  *
@@ -28,12 +30,15 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     ["workers", "/for-workers"],
     ["companies", "/for-companies"],
     ["agencies", "/for-agencies"],
-    // PR-H global landing: "how it works" + "partners" are REAL landing
-    // anchors (sections rendered by page.tsx; existence pinned by
-    // lib/guards/global-landing.test.ts) — not new routes, not dead links.
+    // PR-H global landing: "how it works" is a REAL landing anchor (the
+    // section that carries it is pinned by lib/guards/global-landing.test.ts)
+    // — not a new route, not a dead link.
+    //
+    // "partners" was REMOVED on 2026-07-31: its landing section left with the
+    // rebuild, so the item scrolled nowhere. See site-nav.tsx for the full
+    // reason. Its absence is asserted below so it cannot silently return.
     ["how", "/#how-it-works"],
     ["pricing", "/pricing"],
-    ["partners", "/#partners"],
     ["about", "/about"],
   ])("nav key %s links to %s", (key, href) => {
     expect(nav).toContain(`{ key: "${key}", href: "${href}"`);
@@ -53,15 +58,18 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
         // themeToDark/themeToLight: the public header theme toggle labels
         // (production UX repair v2, F1 — the public site previously had no
         // theme control at all).
-        // how/partners: PR-H global landing anchor links (Kaip veikia /
-        // Partneriams) — labels for real landing sections.
+        // how: the PR-H landing anchor link (Kaip veikia) — a label for a
+        // real landing section.
+        //
+        // "partners" was removed with its nav item on 2026-07-31 (its landing
+        // section left with the rebuild). The key is gone from all 11 locale
+        // catalogues; this list is what stops it drifting back in unused.
         [
           "about",
           "agencies",
           "companies",
           "how",
           "login",
-          "partners",
           "pricing",
           "startNow",
           "themeToDark",
@@ -96,9 +104,16 @@ describe("footer matches the public IA and never duplicates 'about'", () => {
 
 describe("canonical demand funnel — action CTAs route to /company-need only", () => {
   it("landing employer-path card routes to /company-need (not /for-companies)", () => {
-    const page = read("app/[locale]/(marketing)/page.tsx");
-    expect(page).not.toContain('href="/for-companies"');
-    expect(page).toContain('href="/company-need"');
+    // The landing's own SECTIONS (depth 1), not page.tsx alone — the employer
+    // CTA moved into <FinalCtaBand> when the page was recomposed. Depth 1 is
+    // deliberate: a deeper walk would pull in shared chrome that may link to
+    // the educational /for-companies page for legitimate reasons, and this
+    // guard is about the landing's own ACTION CTA.
+    // Both href forms — the JSX attribute and the CTA descriptor object. See
+    // the note in `public-market-entry.test.ts`.
+    const landing = landingTreeSource(APP_ROOT, 1);
+    expect(landing).not.toMatch(/href[=:]\s*"\/for-companies"/);
+    expect(landing).toMatch(/href[=:]\s*"\/company-need"/);
   });
 
   it("for-companies hero CTA routes into /company-need (educational page, canonical action)", () => {

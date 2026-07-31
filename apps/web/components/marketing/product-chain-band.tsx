@@ -20,6 +20,12 @@ export async function ProductChainBand() {
   const steps = ["need", "person", "work", "journal", "skills", "next"] as const;
 
   return (
+    // NO `id="how-it-works"` HERE. `page.tsx` already wraps this band in
+    // `<div id="how-it-works" className="scroll-mt-24">`, so the nav anchor
+    // was never dead — adding a second id here duplicated it, which is an
+    // accessibility defect and exactly the kind of thing a guard is supposed
+    // to prevent rather than cause. Caught in the browser, not by the guard,
+    // because the guard's file list had excluded page.tsx.
     <section className="mt-24" aria-labelledby="product-chain-title">
       <Reveal>
         <p className="font-mono text-meta uppercase tracking-label text-text-secondary">

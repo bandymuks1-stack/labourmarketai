@@ -6,6 +6,7 @@ import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -195,6 +196,8 @@ export async function buildPlayerCardLabels(
           t("visuals.skillsEntries", { count: s.entries }),
         ),
         noEvidence: t("visuals.skillsNoEvidence"),
+        // §4.4 — the bar is a record count, never a competence score.
+        scaleNote: t("visuals.skillsScaleNote", { scale: EVIDENCE_SCALE_MAX }),
         legendTitle: t("visuals.skillsLegendTitle"),
         tierLabels: {
           verified: t("visuals.skillsTierVerified"),

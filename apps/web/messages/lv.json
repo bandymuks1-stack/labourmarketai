@@ -727,8 +727,7 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Tumšais motīvs",
     "themeToLight": "Gaišais motīvs",
-    "how": "Kā tas darbojas",
-    "partners": "Partneriem"
+    "how": "Kā tas darbojas"
   },
   "pages": {
     "agencies": {
@@ -1704,7 +1703,8 @@
       "historyUndated": "[EN] Without a date: {count} — not placed on the timeline",
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
-      "historyAria": "[EN] Work periods on a time band, from {from} to {to}."
+      "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
+      "skillsScaleNote": "Joslas garums ir jūsu darba ierakstu skaits aiz katras prasmes (pilna josla = {scale}+), nevis prasmes vērtējums."
     }
   },
   "projects": {

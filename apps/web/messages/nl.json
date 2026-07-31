@@ -4613,8 +4613,7 @@
     "startNow": "Begin nu",
     "themeToDark": "Donker thema",
     "themeToLight": "Licht thema",
-    "how": "Hoe het werkt",
-    "partners": "Voor partners"
+    "how": "Hoe het werkt"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
@@ -6809,7 +6808,8 @@
       "historyUndated": "Zonder datum: {count} — niet op de tijdlijn geplaatst",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Nog geen werkperiodes vastgelegd.",
-      "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}."
+      "historyAria": "Werkperiodes op een tijdbalk, van {from} tot {to}.",
+      "skillsScaleNote": "De balklengte is het aantal werkregistraties achter elke vaardigheid (volle balk = {scale}+), geen vaardigheidsscore."
     }
   },
   "skillClarify": {
@@ -11280,6 +11280,95 @@
       "editAgain": "Aanpassen",
       "sending": "Verzenden…",
       "sent": "Antwoord verzonden."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Werkkaart"
+      },
+      "journal": {
+        "title": "Werkjournaal"
+      },
+      "calendar": {
+        "title": "Agenda"
+      },
+      "market": {
+        "title": "Markt"
+      },
+      "project": {
+        "title": "Project"
+      },
+      "evidence": {
+        "title": "Bewijs"
+      },
+      "reputation": {
+        "title": "Reputatie"
+      },
+      "invoice": {
+        "title": "Factuurbasis"
+      },
+      "openFull": "Volledig scherm openen",
+      "fallbackUnverified": "Dit staat voorlopig op een eigen scherm — de databron is nog niet geverifieerd voor weergave hier.",
+      "fallbackContext": "Dit resultaat is niet beschikbaar in de huidige context.",
+      "pendingInline": "Resultaat wordt voorbereid.",
+      "marketEmpty": "Er zijn nu geen open behoeften met een locatie.",
+      "marketError": "Kon marktgegevens niet lezen.",
+      "selectPlaceHint": "Klik op een markering op de kaart om de projecten op die plek te zien.",
+      "crumbMarket": "Markt",
+      "backToMarket": "Terug naar de markt",
+      "backToProjects": "Terug naar de projecten",
+      "projectsError": "De projecten konden niet worden gelezen. Er wordt geen eerdere lijst getoond.",
+      "projectsEmpty": "Er zijn geen projecten met open vraag in “{place}”.",
+      "projectsUnsupported": "Een selectie op regioniveau kan niet worden beantwoord: de projectgegevens bevatten een land en een stad, en geen regioveld.",
+      "projectsCount": "{count} project(en) · {headcount} mensen open vraag",
+      "evaluationError": "De projectevaluatie kon niet worden gelezen.",
+      "evaluationNotFound": "Dit project ligt niet op de geselecteerde plek, of het is voor u niet zichtbaar.",
+      "notStated": "niet vermeld",
+      "whyMatch": "Waarom dit verschijnt",
+      "missingTitle": "Ontbreekt",
+      "reasonCityExact": "Dit project heeft open vraag in {city} ({country}) en komt overeen met het geselecteerde marktpunt op stadsniveau.",
+      "reasonCountryUnresolved": "Dit project ligt in {country} en de stad kon niet worden bepaald, dus het hoort bij het benaderende landtotaal dat de gestreepte markering weergeeft.",
+      "precisionCity": "stadsnauwkeurigheid",
+      "precisionCountry": "benaderde plek",
+      "fieldOrganization": "Organisatie",
+      "fieldPlace": "Plaats",
+      "fieldCity": "Stad",
+      "fieldCountry": "Land",
+      "fieldPrecision": "Nauwkeurigheid",
+      "fieldAnchor": "Geselecteerde plek",
+      "fieldRoles": "Functies",
+      "fieldHeadcount": "Mensen nodig",
+      "fieldStatus": "Status",
+      "fieldStart": "Start",
+      "fieldEnd": "Einde",
+      "fieldSource": "Bron",
+      "fieldSkills": "Vaardigheden",
+      "fieldDemands": "Open behoeften",
+      "fieldWorkspace": "Werkruimte",
+      "fieldProjectId": "Project-id",
+      "evalDemand": "Vraag",
+      "evalGeography": "Geografie",
+      "evalTiming": "Timing",
+      "evalOrganization": "Organisatie",
+      "evalDataQuality": "Datakwaliteit",
+      "evalExplanation": "Toelichting",
+      "evalOpenVsFilled": "Open vraag: {open} mensen. Hoeveel al is ingevuld, is voor u niet zichtbaar: alleen publiek open behoeften worden getoond.",
+      "evalVisibility": "U ziet alleen publiek open behoeften in actieve projecten.",
+      "evalTimingMissing": "Een deel van de timing is niet vermeld.",
+      "evalUnresolvedGeography": "De stad van dit project kon niet worden bepaald — de plek is benaderend.",
+      "evalSkillsUnresolved": "{count} vaardigheid-id('s) konden niet worden omgezet naar een naam.",
+      "evalNoJudgement": "Dit is een deterministische toelichting op het filter, geen oordeel: er wordt hier niets beweerd over aantrekkelijkheid, slaagkans of geschiktheid van het project.",
+      "findPeople": "Passende mensen vinden",
+      "peopleNotYet": "Het matchen van mensen is nog niet opgeleverd — dat is het volgende doel. Dit is de context die wordt meegegeven:",
+      "workspacePersonal": "Persoonlijke ruimte",
+      "missing": {
+        "city": "stad",
+        "startDate": "start",
+        "endDate": "einde",
+        "roleTitle": "functie",
+        "requiredSkills": "vaardigheden",
+        "headcount": "aantal mensen",
+        "organization": "organisatie"
+      }
     }
   },
   "landing": {
@@ -11494,6 +11583,88 @@
         "body": "Een subjectieve +1 of −1 met tekst. Getoond als mening, gescheiden van feiten; een reeks negatieven is een signaal om te checken, nooit een vonnis."
       },
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
+    },
+    "hero": {
+      "headline": "Vraag. Zie. Neem aan.",
+      "sub": "Een AI-besturingssysteem voor de arbeidsmarkt — gesprek, kaart en resultaat op één plek.",
+      "chatLabel": "AI-gesprek",
+      "mapLabel": "Europese arbeidsmarkt",
+      "thinking": "Marktsignalen analyseren…",
+      "answered": "Gevonden. Kaart bijgewerkt.",
+      "resultLabel": "Resultaat",
+      "demoBadge": "Demonstratie",
+      "mapHint": "Tik op een markering — de kaart antwoordt.",
+      "scenario": {
+        "q1": "Waar zijn nu elektriciens nodig?",
+        "q2": "Waar is een lassertekort?",
+        "q3": "Waar zijn mensen beschikbaar?"
+      },
+      "result": {
+        "r1": "Hoogste vraag naar elektriciens — Nederland",
+        "r2": "Lassers tekort langs de Noorse kust",
+        "r3": "Meeste beschikbare mensen — de Baltische staten"
+      },
+      "reacting": "Market reacting… {count} signals",
+      "decisionLabel": "AI DECISION",
+      "decisionField": {
+        "whyHere": "Why here",
+        "whyNow": "Why now",
+        "whyYou": "Why you",
+        "whyNotElsewhere": "Why not elsewhere"
+      },
+      "reason": {
+        "r1a": "Checking open needs by role and region…",
+        "r1b": "Comparing against available people in each area…",
+        "r1c": "Weighing travel distance and start dates…",
+        "r2a": "Searching welding needs in offshore industry…",
+        "r2b": "Checking certification requirements…",
+        "r2c": "Weighing the seasonal project cycle…",
+        "r3a": "Collecting availability signals by region…",
+        "r3b": "Checking skills evidenced in work journals…",
+        "r3c": "Assessing readiness to start…"
+      },
+      "decision": {
+        "d1": {
+          "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
+          "whyNow": "Projects start within the next 4 weeks.",
+          "whyYou": "Your work journal holds 14 entries backing electrical work.",
+          "next": "Review these needs",
+          "whyNotElsewhere": "Belgium and Germany show lower demand and more competition for the same people."
+        },
+        "d2": {
+          "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
+          "whyNow": "The contracting cycle opens before the winter season.",
+          "whyYou": "You have welding evidence and are ready to travel.",
+          "next": "See the requirements",
+          "whyNotElsewhere": "Denmark has fewer projects; Poland has more local candidates for the same role."
+        },
+        "d3": {
+          "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
+          "whyNow": "Their availability was confirmed in the last 2 weeks.",
+          "whyYou": "Your need matches their evidenced skills.",
+          "next": "Review these people",
+          "whyNotElsewhere": "Latvia and Estonia hold fewer available people and later start dates."
+        }
+      },
+      "askPlaceholder": "Ask your own question…",
+      "askSubmit": "Ask",
+      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "confidenceLabel": "Confidence",
+      "previewLabel": "Best matching person",
+      "previewName": "Jonas P.",
+      "previewRole": "Electrician · Vilnius · Available from September",
+      "previewMetric": {
+        "entries": "Work records",
+        "skills": "Evidenced skills",
+        "years": "Years"
+      },
+      "previewValue": {
+        "entries": "14",
+        "skills": "3",
+        "years": "7"
+      },
+      "persistAction": "Save this result",
+      "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
     }
   },
   "workspace": {

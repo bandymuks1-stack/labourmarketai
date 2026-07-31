@@ -727,8 +727,7 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Mörkt tema",
     "themeToLight": "Ljust tema",
-    "how": "Så fungerar det",
-    "partners": "För partner"
+    "how": "Så fungerar det"
   },
   "pages": {
     "agencies": {
@@ -1704,7 +1703,8 @@
       "historyUndated": "[EN] Without a date: {count} — not placed on the timeline",
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
-      "historyAria": "[EN] Work periods on a time band, from {from} to {to}."
+      "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
+      "skillsScaleNote": "Stapelns längd är antalet arbetsposter bakom varje färdighet (full stapel = {scale}+), inte ett färdighetsbetyg."
     }
   },
   "projects": {

@@ -205,3 +205,183 @@ select w.id, p.id, true
  where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
    and p.slug = 'tiler'
 on conflict do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE SCENARIO (unified premium product v1)
+--
+-- One COHERENT story rather than scattered demo rows: the worker
+-- (dev.worker@local.test) has really been working on the company's project,
+-- and every downstream surface is derivable from those same rows — the Player
+-- Card charts, the skill evidence links, the calendar, the documents and the
+-- invoice basis.
+--
+-- Deterministic ids (1e…/1f…/cd…/ab… prefixes). NOTE the prefixes deliberately
+-- avoid ee…/dd…: the seeded PROJECT already owns
+-- eeeeeeee-0000-0000-0000-000000000001, and reusing that space silently
+-- collides with it.
+-- Idempotent: ON CONFLICT DO NOTHING, so re-running never duplicates.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- 14 journal entries across ~6 months. Spread over time on purpose: the
+-- 12-month activity chart and the "skills grew from real work" claim are both
+-- meaningless against a single day's data.
+insert into public.journal_entries
+  (id, worker_id, engagement_context_id, entry_type_slug, original_text,
+   original_language, visibility_scope, project_id, hash_self, created_at)
+select
+  ('1e111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  w.id,
+  '99999999-0000-0000-0000-000000000001',
+  'freeform',
+  (array[
+    'Klojau plyteles antrame aukste, 8 valandos.',
+    'Hidroizoliacija vonios patalpoje, 6 valandos.',
+    'Grindu islyginimas, 7 valandos.',
+    'Plyteliu klojimas koridoriuje, 8 valandos.',
+    'Siuliu uzpildymas ir valymas, 5 valandos.',
+    'Vonios sienu plyteles, 8 valandos.',
+    'Medziagu priemimas ir tikrinimas, 3 valandos.'
+  ])[1 + (g % 7)],
+  'lt', 'org',
+  p.id,
+  encode(extensions.digest('acceptance-entry-' || g::text, 'sha256'), 'hex'),
+  now() - ((g * 13) || ' days')::interval
+from public.workers w,
+     generate_series(1, 14) g,
+     lateral (select id from public.projects order by created_at limit 1) p
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Skill evidence — provenance is recognized/confirmed (NOT "journal"): the
+-- tier drives how the Player Card renders backing, and a quarter are confirmed
+-- so the verified tier is actually exercised.
+-- The patented loop's visible half: each entry BACKS a skill.
+-- Skills are chosen by rank, not by hardcoded slug: the taxonomy is seeded by
+-- migrations and an assumed slug silently seeds nothing (floor-screed did not
+-- exist). Uneven distribution on purpose, so the absolute-scale skill bars have
+-- something real to differentiate — a flat distribution would hide a
+-- normalization bug rather than expose it.
+insert into public.journal_entry_skills
+  (id, journal_entry_id, worker_id, skill_id, provenance)
+select
+  ('1f111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  ('1e111111-0000-0000-0000-0000000000' || lpad(g::text, 2, '0'))::uuid,
+  w.id, s.id, case when g % 4 = 0 then 'confirmed' else 'recognized' end
+from public.workers w,
+     generate_series(1, 14) g,
+     lateral (
+       select id from public.skills
+        order by slug
+        offset (g % 3) limit 1
+     ) s
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Worker documents — the Evidence catalogue needs real rows, not an empty tab.
+insert into public.worker_documents
+  (id, worker_id, document_type_slug, status, updated_by, verification)
+select
+  ('cdcdcdcd-0000-0000-0000-00000000000' || g::text)::uuid,
+  w.id, dt.slug, 'ready', 'aaaaaaaa-0000-0000-0000-000000000001', 'unverified'
+from public.workers w,
+     generate_series(1, 2) g,
+     lateral (select slug from public.document_types order by slug offset (g - 1) limit 1) dt
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- Calendar — an absence so the calendar result has a real, non-empty week.
+insert into public.worker_absences
+  (id, worker_id, absence_type, start_date, end_date, status, requested_by)
+select
+  'abababab-0000-0000-0000-000000000001', w.id, 'annual_leave',
+  (now() + interval '9 days')::date, (now() + interval '11 days')::date,
+  'approved', 'aaaaaaaa-0000-0000-0000-000000000001'
+from public.workers w
+where w.profile_id = 'aaaaaaaa-0000-0000-0000-000000000001'
+on conflict (id) do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE: MARKET DEMAND ACROSS COUNTRIES
+--
+-- The authenticated MarketMap could not be verified because there were zero
+-- open job_demands — the map correctly rendered its honest-empty state, which
+-- proved the guard worked and proved nothing about the journey. This seeds the
+-- minimum coherent chain: project -> geography -> open need -> headcount.
+--
+-- Deliberately UNEVEN across four countries so one region wins for a REASON
+-- (most open headcount, concentrated in two cities) rather than by being the
+-- only rows present. NL 23 / DE 11 / BE 8 / PL 6.
+--
+-- Prefix 2b… . Idempotent.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+insert into public.projects
+  (id, company_id, title, country, city, status)
+values
+  ('2b000000-0000-0000-0000-000000000001','cccccccc-0000-0000-0000-000000000001','Rotterdam haven — elektros instaliacija','NL','Rotterdam','live'),
+  ('2b000000-0000-0000-0000-000000000002','cccccccc-0000-0000-0000-000000000001','Eindhoven campus — silpnos srovės','NL','Eindhoven','live'),
+  ('2b000000-0000-0000-0000-000000000003','cccccccc-0000-0000-0000-000000000001','Amsterdam Noord — renovacija','NL','Amsterdam','live'),
+  ('2b000000-0000-0000-0000-000000000004','cccccccc-0000-0000-0000-000000000001','Duisburg Logistikzentrum','DE','Duisburg','live'),
+  ('2b000000-0000-0000-0000-000000000005','cccccccc-0000-0000-0000-000000000001','Hamburg Hafen — Elektro','DE','Hamburg','live'),
+  ('2b000000-0000-0000-0000-000000000006','cccccccc-0000-0000-0000-000000000001','Antwerpen terminal','BE','Antwerpen','live'),
+  ('2b000000-0000-0000-0000-000000000007','cccccccc-0000-0000-0000-000000000001','Gdansk stocznia','PL','Gdansk','live')
+on conflict (id) do nothing;
+
+insert into public.job_demands
+  (id, project_id, role_title, headcount_needed, status, visibility, start_date)
+values
+  ('2b111111-0000-0000-0000-000000000001','2b000000-0000-0000-0000-000000000001','Elektrikas', 9,'open','public',(now() + interval '21 days')::date),
+  ('2b111111-0000-0000-0000-000000000002','2b000000-0000-0000-0000-000000000002','Elektrikas', 7,'open','public',(now() + interval '28 days')::date),
+  ('2b111111-0000-0000-0000-000000000003','2b000000-0000-0000-0000-000000000003','Elektrikas', 4,'open','public',(now() + interval '45 days')::date),
+  ('2b111111-0000-0000-0000-000000000004','2b000000-0000-0000-0000-000000000004','Elektriker', 6,'open','public',(now() + interval '35 days')::date),
+  ('2b111111-0000-0000-0000-000000000005','2b000000-0000-0000-0000-000000000005','Elektriker', 5,'open','public',(now() + interval '60 days')::date),
+  ('2b111111-0000-0000-0000-000000000006','2b000000-0000-0000-0000-000000000006','Elektricien', 8,'open','public',(now() + interval '30 days')::date),
+  ('2b111111-0000-0000-0000-000000000007','2b000000-0000-0000-0000-000000000007','Elektryk',    6,'open','public',(now() + interval '75 days')::date)
+on conflict (id) do nothing;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ACCEPTANCE: GOAL 3 — PROJECT EVALUATION
+--
+-- The market seed above proved WHERE demand is. Evaluating a project needs the
+-- cases the journey actually has to survive, so each row below exists to make
+-- one of them reachable in the authenticated browser:
+--
+--   * MULTIPLE PROJECTS IN ONE CITY — Rotterdam now holds three. One project
+--     per city would let a broken filter pass by accident.
+--   * COMPLETE TIMING — 2b…008 carries a project start AND end date.
+--   * MISSING TIMING — 2b…009 carries neither, and its need has no start date
+--     either, so the "missing" indication has something real to report.
+--   * MULTIPLE ROLES AND SKILLS — 2b…008 has TWO open needs with different
+--     role titles and different `required_skills`, so a project is not
+--     assumed to be one role.
+--
+-- Already covered by the market seed and deliberately not duplicated:
+--   * UNRESOLVED GEOGRAPHY — Duisburg (DE) and Antwerpen (BE) are not in the
+--     canonical city table, so they fold into their country's approximate
+--     aggregate. That IS the country-precision case.
+--   * ZERO MATCH — any valid place with no project, e.g. LT / Vilnius.
+--
+-- `required_skills` is `uuid[] -> skills.id`, so the slugs are resolved from
+-- the canonical skills table rather than hard-coded — a renamed skill fails
+-- loudly here instead of rendering a raw uuid in the panel.
+--
+-- Prefix 2b… . Idempotent. LOCAL DETERMINISTIC ACCEPTANCE ROWS IN REAL DOMAIN
+-- TABLES, read through real domain queries under RLS. Not production data.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+insert into public.projects
+  (id, company_id, title, country, city, status, start_date, end_date)
+values
+  ('2b000000-0000-0000-0000-000000000008','cccccccc-0000-0000-0000-000000000001','Rotterdam Maasvlakte — plieno konstrukcijos','NL','Rotterdam','live',(now() + interval '30 days')::date,(now() + interval '210 days')::date),
+  ('2b000000-0000-0000-0000-000000000009','cccccccc-0000-0000-0000-000000000001','Rotterdam Kralingen — vidaus apdaila','NL','Rotterdam','live',null,null)
+on conflict (id) do nothing;
+
+insert into public.job_demands
+  (id, project_id, role_title, headcount_needed, status, visibility, start_date, required_skills)
+values
+  ('2b111111-0000-0000-0000-000000000008','2b000000-0000-0000-0000-000000000008','Suvirintojas', 5,'open','public',(now() + interval '30 days')::date,
+   array(select id from public.skills where slug in ('mig-mag-welding','tig-welding'))),
+  ('2b111111-0000-0000-0000-000000000009','2b000000-0000-0000-0000-000000000008','Montuotojas',  3,'open','public',(now() + interval '52 days')::date,
+   array(select id from public.skills where slug in ('scaffolding','steel-fixing'))),
+  ('2b111111-0000-0000-0000-000000000010','2b000000-0000-0000-0000-000000000009','Apdailininkas',2,'open','public',null, null)
+on conflict (id) do nothing;

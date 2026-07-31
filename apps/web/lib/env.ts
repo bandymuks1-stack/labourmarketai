@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { assertAcceptanceTargetIsLocal } from "@/lib/testing/acceptance-mode";
+
 /**
  * Validated environment (principle: validate env at boot).
  *
@@ -254,6 +256,10 @@ export function requireSupabaseClientEnv(): {
         ".env.local (Supabase Dashboard → Settings → API). See .env.example.",
     );
   }
+  // ACCEPTANCE MODE — fail closed before any client can be built. A no-op
+  // unless LM_ACCEPTANCE_MODE=1, so normal dev and production are untouched.
+  // See lib/testing/acceptance-mode.ts for why env precedence is not trusted.
+  assertAcceptanceTargetIsLocal(process.env);
   return {
     url: env.NEXT_PUBLIC_SUPABASE_URL,
     anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -271,6 +277,9 @@ export function requireSupabaseServiceEnv(): {
         ".env.local (Supabase Dashboard → Settings → API). NEVER commit it.",
     );
   }
+  // ACCEPTANCE MODE — the service-role key bypasses RLS, so this is the path
+  // that could actually damage production data. Guarded first, always.
+  assertAcceptanceTargetIsLocal(process.env);
   return {
     url: env.NEXT_PUBLIC_SUPABASE_URL,
     serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,

@@ -4613,8 +4613,7 @@
     "startNow": "Начать сейчас",
     "themeToDark": "Тёмная тема",
     "themeToLight": "Светлая тема",
-    "how": "Как это работает",
-    "partners": "Партнёрам"
+    "how": "Как это работает"
   },
   "hero": {
     "chip": "Общая платформа рынка труда",
@@ -6809,7 +6808,8 @@
       "historyUndated": "Без даты: {count} — на шкале не показаны",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Рабочие периоды пока не записаны.",
-      "historyAria": "Рабочие периоды на шкале времени, с {from} по {to}."
+      "historyAria": "Рабочие периоды на шкале времени, с {from} по {to}.",
+      "skillsScaleNote": "Длина полосы — это количество ваших рабочих записей по каждому навыку (полная полоса = {scale}+), а не оценка навыка."
     }
   },
   "skillClarify": {
@@ -11280,6 +11280,95 @@
       "editAgain": "Изменить",
       "sending": "Отправка…",
       "sent": "Ответ отправлен."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Рабочая карточка"
+      },
+      "journal": {
+        "title": "Журнал работ"
+      },
+      "calendar": {
+        "title": "Календарь"
+      },
+      "market": {
+        "title": "Рынок"
+      },
+      "project": {
+        "title": "Проект"
+      },
+      "evidence": {
+        "title": "Подтверждения"
+      },
+      "reputation": {
+        "title": "Репутация"
+      },
+      "invoice": {
+        "title": "Основание счёта"
+      },
+      "openFull": "Открыть полный экран",
+      "fallbackUnverified": "Пока это отдельный экран — источник данных ещё не проверен для показа здесь.",
+      "fallbackContext": "Этот результат недоступен в текущем контексте.",
+      "pendingInline": "Результат готовится.",
+      "marketEmpty": "Сейчас нет открытых потребностей с указанным местом.",
+      "marketError": "Не удалось прочитать рыночные данные.",
+      "selectPlaceHint": "Нажмите на метку на карте, чтобы увидеть проекты в этом месте.",
+      "crumbMarket": "Рынок",
+      "backToMarket": "Назад к рынку",
+      "backToProjects": "Назад к проектам",
+      "projectsError": "Не удалось прочитать проекты. Предыдущий список не показывается.",
+      "projectsEmpty": "В месте «{place}» нет проектов с открытой потребностью.",
+      "projectsUnsupported": "На выбор уровня региона ответить нельзя: в данных проектов есть страна и город, поля региона нет.",
+      "projectsCount": "Проектов: {count} · открытая потребность: {headcount} чел.",
+      "evaluationError": "Не удалось прочитать оценку проекта.",
+      "evaluationNotFound": "Этот проект не находится в выбранном месте или недоступен вам.",
+      "notStated": "не указано",
+      "whyMatch": "Почему это показано",
+      "missingTitle": "Не хватает",
+      "reasonCityExact": "У проекта есть открытая потребность в городе {city} ({country}), и он соответствует выбранной точке рынка с точностью до города.",
+      "reasonCountryUnresolved": "Проект находится в стране {country}, а его город не определён, поэтому он относится к приблизительной страновой совокупности, которую обозначает пунктирная метка.",
+      "precisionCity": "точность до города",
+      "precisionCountry": "приблизительное место",
+      "fieldOrganization": "Организация",
+      "fieldPlace": "Место",
+      "fieldCity": "Город",
+      "fieldCountry": "Страна",
+      "fieldPrecision": "Точность",
+      "fieldAnchor": "Выбранное место",
+      "fieldRoles": "Роли",
+      "fieldHeadcount": "Нужно людей",
+      "fieldStatus": "Статус",
+      "fieldStart": "Начало",
+      "fieldEnd": "Окончание",
+      "fieldSource": "Источник",
+      "fieldSkills": "Навыки",
+      "fieldDemands": "Открытых потребностей",
+      "fieldWorkspace": "Пространство",
+      "fieldProjectId": "ID проекта",
+      "evalDemand": "Потребность",
+      "evalGeography": "География",
+      "evalTiming": "Сроки",
+      "evalOrganization": "Организация",
+      "evalDataQuality": "Качество данных",
+      "evalExplanation": "Пояснение",
+      "evalOpenVsFilled": "Открытая потребность: {open} чел. Сколько уже закрыто, вам не видно: показываются только публично открытые потребности.",
+      "evalVisibility": "Вы видите только публично открытые потребности в активных проектах.",
+      "evalTimingMissing": "Часть сроков не указана.",
+      "evalUnresolvedGeography": "Город проекта не определён — место приблизительное.",
+      "evalSkillsUnresolved": "{count} идентификатор(ов) навыка не удалось преобразовать в название.",
+      "evalNoJudgement": "Это детерминированное пояснение фильтра, а не оценка: о привлекательности проекта, вероятности успеха или пригодности здесь ничего не утверждается.",
+      "findPeople": "Найти подходящих людей",
+      "peopleNotYet": "Подбор людей ещё не поставлен — это следующая цель. Дальше передаётся такой контекст:",
+      "workspacePersonal": "Личное пространство",
+      "missing": {
+        "city": "город",
+        "startDate": "начало",
+        "endDate": "окончание",
+        "roleTitle": "роль",
+        "requiredSkills": "навыки",
+        "headcount": "число людей",
+        "organization": "организация"
+      }
     }
   },
   "landing": {
@@ -11494,6 +11583,88 @@
         "body": "Субъективный +1 или −1 с текстом. Показывается как мнение, отдельно от фактов; серия негатива — сигнал проверить, но никогда не приговор."
       },
       "noStars": "Никаких звёздных рейтингов: человек никогда не сводится к баллу. Каждое совпадение объясняется в контексте конкретной потребности — с видимыми числами."
+    },
+    "hero": {
+      "headline": "Спроси. Увидь. Найми.",
+      "sub": "Операционная система рынка труда на базе ИИ — диалог, карта и результат в одном месте.",
+      "chatLabel": "Диалог с ИИ",
+      "mapLabel": "Рынок труда Европы",
+      "thinking": "Анализирую сигналы рынка…",
+      "answered": "Нашёл. Карта обновлена.",
+      "resultLabel": "Результат",
+      "demoBadge": "Демонстрация",
+      "mapHint": "Нажми на маркер — карта ответит.",
+      "scenario": {
+        "q1": "Где сейчас нужны электрики?",
+        "q2": "Где не хватает сварщиков?",
+        "q3": "Где есть свободные работники?"
+      },
+      "result": {
+        "r1": "Наибольший спрос на электриков — Нидерланды",
+        "r2": "Сварщиков не хватает на побережье Норвегии",
+        "r3": "Больше всего свободных работников — страны Балтии"
+      },
+      "reacting": "Market reacting… {count} signals",
+      "decisionLabel": "AI DECISION",
+      "decisionField": {
+        "whyHere": "Why here",
+        "whyNow": "Why now",
+        "whyYou": "Why you",
+        "whyNotElsewhere": "Why not elsewhere"
+      },
+      "reason": {
+        "r1a": "Checking open needs by role and region…",
+        "r1b": "Comparing against available people in each area…",
+        "r1c": "Weighing travel distance and start dates…",
+        "r2a": "Searching welding needs in offshore industry…",
+        "r2b": "Checking certification requirements…",
+        "r2c": "Weighing the seasonal project cycle…",
+        "r3a": "Collecting availability signals by region…",
+        "r3b": "Checking skills evidenced in work journals…",
+        "r3c": "Assessing readiness to start…"
+      },
+      "decision": {
+        "d1": {
+          "whyHere": "Rotterdam and Eindhoven have more open needs than available electricians.",
+          "whyNow": "Projects start within the next 4 weeks.",
+          "whyYou": "Your work journal holds 14 entries backing electrical work.",
+          "next": "Review these needs",
+          "whyNotElsewhere": "Belgium and Germany show lower demand and more competition for the same people."
+        },
+        "d2": {
+          "whyHere": "Offshore industry in Stavanger and Bergen is short of certified welders.",
+          "whyNow": "The contracting cycle opens before the winter season.",
+          "whyYou": "You have welding evidence and are ready to travel.",
+          "next": "See the requirements",
+          "whyNotElsewhere": "Denmark has fewer projects; Poland has more local candidates for the same role."
+        },
+        "d3": {
+          "whyHere": "Vilnius and Kaunas hold the most people ready to start.",
+          "whyNow": "Their availability was confirmed in the last 2 weeks.",
+          "whyYou": "Your need matches their evidenced skills.",
+          "next": "Review these people",
+          "whyNotElsewhere": "Latvia and Estonia hold fewer available people and later start dates."
+        }
+      },
+      "askPlaceholder": "Ask your own question…",
+      "askSubmit": "Ask",
+      "unmatched": "In this demonstration I answer about electricians, welders and available people.",
+      "confidenceLabel": "Confidence",
+      "previewLabel": "Best matching person",
+      "previewName": "Jonas P.",
+      "previewRole": "Electrician · Vilnius · Available from September",
+      "previewMetric": {
+        "entries": "Work records",
+        "skills": "Evidenced skills",
+        "years": "Years"
+      },
+      "previewValue": {
+        "entries": "14",
+        "skills": "3",
+        "years": "7"
+      },
+      "persistAction": "Save this result",
+      "persistWhy": "An account is only needed to save, apply or make contact — looking is free."
     }
   },
   "workspace": {

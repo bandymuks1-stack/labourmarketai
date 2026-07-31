@@ -4613,8 +4613,7 @@
     "startNow": "Pradėti dabar",
     "themeToDark": "Tamsi tema",
     "themeToLight": "Šviesi tema",
-    "how": "Kaip veikia",
-    "partners": "Partneriams"
+    "how": "Kaip veikia"
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
@@ -6809,7 +6808,8 @@
       "historyUndated": "Be datos: {count} — laiko juostoje nerodomi",
       "historyRange": "{from} – {to}",
       "historyEmpty": "Dar nėra įrašytų darbo laikotarpių.",
-      "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}."
+      "historyAria": "Darbo laikotarpiai laiko juostoje nuo {from} iki {to}.",
+      "skillsScaleNote": "Juostos ilgis — tai darbo įrašų skaičius, pagrindžiantis kiekvieną įgūdį (pilna juosta = {scale}+), o ne įgūdžio balas."
     }
   },
   "skillClarify": {
@@ -11280,6 +11280,95 @@
       "editAgain": "Taisyti",
       "sending": "Siunčiama…",
       "sent": "Atsakymas išsiųstas."
+    },
+    "results": {
+      "playerCard": {
+        "title": "Darbo kortelė"
+      },
+      "journal": {
+        "title": "Darbo žurnalas"
+      },
+      "calendar": {
+        "title": "Kalendorius"
+      },
+      "market": {
+        "title": "Rinka"
+      },
+      "project": {
+        "title": "Projektas"
+      },
+      "evidence": {
+        "title": "Įrodymai"
+      },
+      "reputation": {
+        "title": "Reputacija"
+      },
+      "invoice": {
+        "title": "Sąskaitos pagrindas"
+      },
+      "openFull": "Atidaryti pilną ekraną",
+      "fallbackUnverified": "Kol kas tai gyvena atskirame ekrane — jo duomenų šaltinis dar nepatikrintas rodymui čia.",
+      "fallbackContext": "Šis rezultatas nepasiekiamas dabartiniame kontekste.",
+      "pendingInline": "Ruošiamas rezultatas.",
+      "marketEmpty": "Šiuo metu atvirų poreikių su vieta nėra.",
+      "marketError": "Nepavyko nuskaityti rinkos duomenų.",
+      "selectPlaceHint": "Spustelėkite žymeklį žemėlapyje — pamatysite projektus toje vietoje.",
+      "crumbMarket": "Rinka",
+      "backToMarket": "Atgal į rinką",
+      "backToProjects": "Atgal į projektus",
+      "projectsError": "Nepavyko nuskaityti projektų. Ankstesnis sąrašas nerodomas.",
+      "projectsEmpty": "Vietoje „{place}“ projektų su atviru poreikiu nėra.",
+      "projectsUnsupported": "Regiono lygio pasirinkimo atsakyti negalime: projektų duomenyse yra tik šalis ir miestas, regiono lauko nėra.",
+      "projectsCount": "Projektų: {count} · atviras poreikis: {headcount} žm.",
+      "evaluationError": "Nepavyko nuskaityti projekto vertinimo.",
+      "evaluationNotFound": "Šis projektas pasirinktoje vietoje nerastas arba jums nematomas.",
+      "notStated": "nenurodyta",
+      "whyMatch": "Kodėl rodoma",
+      "missingTitle": "Trūksta",
+      "reasonCityExact": "Projektas turi atvirą poreikį mieste {city} ({country}) ir atitinka pasirinktą miesto tikslumo rinkos tašką.",
+      "reasonCountryUnresolved": "Projektas yra šalyje {country}, o jo miestas nepatikslintas, todėl jis priklauso apytiksliam šalies telkiniui — žemėlapyje jį žymi punktyrinis žymeklis.",
+      "precisionCity": "miesto tikslumas",
+      "precisionCountry": "apytikslė vieta",
+      "fieldOrganization": "Organizacija",
+      "fieldPlace": "Vieta",
+      "fieldCity": "Miestas",
+      "fieldCountry": "Šalis",
+      "fieldPrecision": "Tikslumas",
+      "fieldAnchor": "Pasirinkta vieta",
+      "fieldRoles": "Pareigos",
+      "fieldHeadcount": "Reikia žmonių",
+      "fieldStatus": "Būsena",
+      "fieldStart": "Pradžia",
+      "fieldEnd": "Pabaiga",
+      "fieldSource": "Šaltinis",
+      "fieldSkills": "Įgūdžiai",
+      "fieldDemands": "Atvirų poreikių",
+      "fieldWorkspace": "Erdvė",
+      "fieldProjectId": "Projekto ID",
+      "evalDemand": "Poreikis",
+      "evalGeography": "Geografija",
+      "evalTiming": "Laikas",
+      "evalOrganization": "Organizacija",
+      "evalDataQuality": "Duomenų kokybė",
+      "evalExplanation": "Paaiškinimas",
+      "evalOpenVsFilled": "Atviras poreikis: {open} žm. Kiek jau užpildyta — jums nematoma: rodomi tik viešai atviri poreikiai.",
+      "evalVisibility": "Matote tik viešai skelbiamus atvirus poreikius aktyviuose projektuose.",
+      "evalTimingMissing": "Dalis laiko duomenų nenurodyta.",
+      "evalUnresolvedGeography": "Projekto miestas nepatikslintas — vieta apytikslė.",
+      "evalSkillsUnresolved": "{count} įgūdžio identifikatorių nepavyko paversti pavadinimu.",
+      "evalNoJudgement": "Tai deterministinis filtro paaiškinimas, ne vertinimas: apie projekto patrauklumą, sėkmės tikimybę ar tinkamumą čia nieko neteigiama.",
+      "findPeople": "Rasti tinkamus žmones",
+      "peopleNotYet": "Žmonių paieška dar nepristatyta — tai kitas tikslas. Toliau perduodamas šis kontekstas:",
+      "workspacePersonal": "Asmeninė erdvė",
+      "missing": {
+        "city": "miestas",
+        "startDate": "pradžia",
+        "endDate": "pabaiga",
+        "roleTitle": "pareigos",
+        "requiredSkills": "įgūdžiai",
+        "headcount": "žmonių skaičius",
+        "organization": "organizacija"
+      }
     }
   },
   "landing": {
@@ -11494,6 +11583,88 @@
         "body": "Subjektyvus +1 arba −1 su tekstu. Rodoma kaip nuomonė, atskirai nuo faktų; neigiamų virtinė — signalas pasitikrinti, niekada ne nuosprendis."
       },
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
+    },
+    "hero": {
+      "headline": "Paklausk. Pamatyk. Įdarbink.",
+      "sub": "AI darbo rinkos operacinė sistema — pokalbis, žemėlapis ir rezultatas vienoje vietoje.",
+      "chatLabel": "AI pokalbis",
+      "mapLabel": "Europos darbo rinka",
+      "thinking": "Analizuoju rinkos signalus…",
+      "answered": "Radau. Žemėlapis atnaujintas.",
+      "resultLabel": "Rezultatas",
+      "demoBadge": "Demonstracija",
+      "mapHint": "Spustelėk žymeklį — žemėlapis atsako.",
+      "scenario": {
+        "q1": "Kur dabar reikia elektrikų?",
+        "q2": "Kur trūksta suvirintojų?",
+        "q3": "Kur yra laisvų darbuotojų?"
+      },
+      "result": {
+        "r1": "Didžiausia elektrikų paklausa — Nyderlanduose",
+        "r2": "Suvirintojų trūksta Norvegijos pakrantėje",
+        "r3": "Daugiausia laisvų darbuotojų — Baltijos šalyse"
+      },
+      "reacting": "Rinka reaguoja… {count} signalai",
+      "decisionLabel": "AI SPRENDIMAS",
+      "decisionField": {
+        "whyHere": "Kodėl čia",
+        "whyNow": "Kodėl dabar",
+        "whyYou": "Kodėl tau",
+        "whyNotElsewhere": "Kodėl ne kitur"
+      },
+      "reason": {
+        "r1a": "Tikrinu atvirus poreikius pagal rolę ir regioną…",
+        "r1b": "Lyginu su prieinamais žmonėmis kiekvienoje vietovėje…",
+        "r1c": "Vertinu kelionės atstumą ir pradžios datas…",
+        "r2a": "Ieškau suvirinimo poreikių jūrinėje pramonėje…",
+        "r2b": "Tikrinu sertifikatų reikalavimus…",
+        "r2c": "Vertinu sezoninį projektų ciklą…",
+        "r3a": "Renku prieinamumo signalus pagal regionus…",
+        "r3b": "Tikrinu patvirtintus įgūdžius darbo žurnaluose…",
+        "r3c": "Vertinu pasirengimą pradėti…"
+      },
+      "decision": {
+        "d1": {
+          "whyHere": "Rotterdame ir Eindhovene atvirų poreikių daugiau nei laisvų elektrikų.",
+          "whyNow": "Projektai startuoja per artimiausias 4 savaites.",
+          "whyYou": "Tavo darbo žurnale — 14 įrašų, pagrindžiančių elektros darbus.",
+          "next": "Peržiūrėti šiuos poreikius",
+          "whyNotElsewhere": "Belgijoje ir Vokietijoje poreikis mažesnis, o konkurencija dėl tų pačių žmonių didesnė."
+        },
+        "d2": {
+          "whyHere": "Stavangerio ir Bergeno jūrinėje pramonėje trūksta sertifikuotų suvirintojų.",
+          "whyNow": "Rangos ciklas prasideda prieš žiemos sezoną.",
+          "whyYou": "Turi suvirinimo įrodymų ir esi pasirengęs kelionei.",
+          "next": "Pamatyti reikalavimus",
+          "whyNotElsewhere": "Danijoje projektų mažiau, Lenkijoje — daugiau vietinių kandidatų tai pačiai rolei."
+        },
+        "d3": {
+          "whyHere": "Vilniuje ir Kaune daugiausia žmonių, pasirengusių pradėti.",
+          "whyNow": "Jų prieinamumas patvirtintas per pastarąsias 2 savaites.",
+          "whyYou": "Tavo poreikis atitinka jų patvirtintus įgūdžius.",
+          "next": "Peržiūrėti žmones",
+          "whyNotElsewhere": "Latvijoje ir Estijoje laisvų žmonių mažiau, o pradžios terminai vėlesni."
+        }
+      },
+      "askPlaceholder": "Paklausk savo klausimo…",
+      "askSubmit": "Klausti",
+      "unmatched": "Šioje demonstracijoje atsakau tik apie elektrikus, suvirintojus ir laisvus darbuotojus.",
+      "confidenceLabel": "Patikimumas",
+      "previewLabel": "Tinkamiausias žmogus",
+      "previewName": "Jonas P.",
+      "previewRole": "Elektrikas · Vilnius · Laisvas nuo rugsėjo",
+      "previewMetric": {
+        "entries": "Darbo įrašai",
+        "skills": "Pagrįsti įgūdžiai",
+        "years": "Metai"
+      },
+      "previewValue": {
+        "entries": "14",
+        "skills": "3",
+        "years": "7"
+      },
+      "persistAction": "Išsaugoti šį rezultatą",
+      "persistWhy": "Paskyros reikia tik norint išsaugoti, kreiptis ar susisiekti — peržiūrėti gali ir be jos."
     }
   },
   "workspace": {
