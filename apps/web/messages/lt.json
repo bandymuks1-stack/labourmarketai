@@ -11378,7 +11378,17 @@
       "opportunitiesPartial": "Naujumo žymų šįkart nuskaityti nepavyko — įrašai tikri, bet „nauja“ nerodoma.",
       "opportunitiesMore": "Sąraše dar {n}.",
       "retry": "Bandyti dar kartą",
-      "playerCardError": "Nepavyko perskaityti tavo kortelės."
+      "playerCardError": "Nepavyko perskaityti tavo kortelės.",
+      "calendarError": "Nepavyko nuskaityti kalendoriaus.",
+      "calendarBlocked": "Kalendoriaus nuskaityti nepavyko — prisijunkite iš naujo.",
+      "calendarEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
+      "calendarUndated": "{count, plural, one {# įrašas be datos.} few {# įrašai be datos.} other {# įrašų be datos.}}",
+      "calendarLater": "{count, plural, one {# įrašas vėliau.} few {# įrašai vėliau.} other {# įrašų vėliau.}}",
+      "calendarConflicts": "⚠ {count, plural, one {# persidengiantis įsipareigojimas} few {# persidengiantys įsipareigojimai} other {# persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma.",
+      "calendarPartial": "Dalies šaltinių nepavyko nuskaityti: {sources}. Sąrašas gali būti nepilnas.",
+      "calendarMoreItems": "(+{count})",
+      "calendarMoreDays": "{count, plural, one {… ir dar # diena su įrašais.} few {… ir dar # dienos su įrašais.} other {… ir dar # dienų su įrašais.}}",
+      "calendarToday": "šiandien"
     }
   },
   "landing": {

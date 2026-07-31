@@ -56,8 +56,8 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | `project` result | TODO |
 | 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
 | 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
-| 11 | Booking responses next-action | inline `<Link>` + count badge | **ABSORB?** | likely `ALREADY` — the spine chip already presents it | **AUDITED 2026-07-31** — see the Calendar audit |
-| 12 | Bookings next-action | inline `<Link>` + count badge | **ABSORB?** | likely `ALREADY` — same | **AUDITED 2026-07-31** — see the Calendar audit |
+| 11 | Booking responses next-action | inline `<Link>` + count badge | **ALREADY** | the spine (bell + chips) already presents it; capability lives on `/dashboard/bookings` | **CONFIRMED 2026-08-01** — browser-proven with seeded real bookings, see below |
+| 12 | Bookings next-action | inline `<Link>` + count badge | **ALREADY** | same | **CONFIRMED 2026-08-01** — same proof |
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
 | 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
@@ -75,8 +75,9 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 28 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); 12 ABSORB rows remain.**
+**Counts: 28 capabilities — 6 ALREADY · 13 ABSORB · 4 CHAT · 4 OBSOLETE ·
+2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12 CONFIRMED `ALREADY`
+2026-08-01; 10 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -239,8 +240,8 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 1 | Premium Hub person card | Player Card | **DONE** |
 | 21 | My zone | Player Card | TODO |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
-| 11 | Booking responses | Calendar | **AUDITED, next** — likely ALREADY, confirm then decide the calendar result |
-| 12 | Bookings | Calendar | TODO |
+| 11 | Booking responses | Calendar | **DONE** — CONFIRMED `ALREADY` 2026-08-01, browser-proven |
+| 12 | Bookings | Calendar | **DONE** — same; and the `calendar` result shipped as its own slice |
 | 16 | Identity actions | Profile update | TODO |
 | 19 | Status strip | Return to chat (active context) | TODO |
 | 14 | Chain actions | Return to chat | TODO |
@@ -306,7 +307,57 @@ smuggled in under their number. Recorded here so the next slice starts from the
 right question: **confirm 11/12 as ALREADY first, then decide the `calendar`
 result on its own merits.**
 
-**Not started.**
+### CONFIRMED 2026-08-01 — `ALREADY`, by browser proof with seeded real bookings
+
+`tests/e2e/w3-calendar-rows-11-12.spec.ts` — REAL rows through the real tables
+(`booking_requests`, `booking_requests_seen`), the fixture request
+`99999999-…-01`, and the real RLS:
+
+- **Row 12 (worker)**: with ZERO bookings, no badge, no strip chip, no bell
+  signal — nothing renders a fake zero. With ONE seeded `proposed` booking the
+  badge renders, its count equals the database count, its href is
+  `/dashboard/bookings`, and the click lands on the ONE action surface
+  (`BookingRespondButtons` on the bookings page). Back / Forward / reload hold.
+  Keyboard focus works and the link carries a real accessible name. Desktop
+  1440 and 375px mobile proven; screenshots
+  `rows11-12-worker-badge-{1440,375}.png`, `rows11-12-bookings-detail-{1440,375}.png`.
+- **Row 11 (company)**: with a `seen_at` stamped yesterday and the worker's
+  real `accepted` transition today, the responses badge renders count 1 with
+  the same href; zero state renders nothing.
+- **The signal survives the route deletion**: the BELL (mounted in the
+  dashboard LAYOUT, not on the advanced page) presents
+  `notification-signal-pending-bookings` with the same count and the same
+  href — proven on `/dashboard/bookings`, a page that is not
+  `/dashboard/advanced`.
+- **RLS**: a fresh authenticated outsider selects `booking_requests` and
+  receives zero rows while the seeded booking exists.
+
+**Verdict: rows 11 and 12 are `ALREADY`.** The two link cards are a second
+presentation of an already-presented signal. They die with the route; no port,
+no new renderer, no new result kind, no new route. The verifying spec is the
+guard.
+
+## The calendar RESULT — the separate slice, on its own merits
+
+Implemented 2026-08-01 (the same continuation, its own number — NOT rows
+11/12). `ResultBody` gains its `calendar` case:
+
+- `lib/planning/calendar-result.ts` — a server re-shaping of the SAME
+  `getPlanning` → `buildAgenda` projection the planning page and the chat
+  sentence read. Guard-pinned to import no supabase, no table, no RPC, no
+  fetch — the anti-second-calendar rule as a test.
+- `components/app/workspace/calendar-result.tsx` — the panel presentation:
+  loading / error+retry / blocked / empty / partial (degraded sources NAMED) /
+  ready with real conflict marks. No `<Link>`, no router; `onOpenFull` opens
+  `/dashboard/planning`.
+- `startAgenda` in the chat now EXPLAINS (the sentence stays) and OPENS the
+  result — the same split rows 1 and 5 established. One calculation, two
+  presentations, zero new routes, zero new result kinds (the kind existed).
+- i18n: 10 keys × 5 active locales.
+- Proof: `tests/e2e/w3-calendar-result.spec.ts` — seeded booking renders as a
+  real agenda line; reload and Back/Forward hold via `?result=`; the
+  full-screen door opens the canonical calendar; honest empty state (fixture
+  absence lifted and restored verbatim); 375px with no sideways scroll.
 
 ## Row 1 — DONE, and what the audit had MISSED
 

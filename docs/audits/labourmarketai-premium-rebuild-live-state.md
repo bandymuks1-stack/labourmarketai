@@ -6,6 +6,62 @@
 
 ---
 
+## CURRENT STATE — 2026-08-01 (calendar: rows 11/12 + the calendar result)
+
+| | |
+|---|---|
+| Base | `b05658bd` (== origin/main at branch time — #944 merged) |
+| Branch | `feat/cc/w3-calendar-result-v1` (worktree `lm-unified-wt`) |
+| Slice | W3 rows 11/12 verification + the calendar `ResultBody` slice |
+
+### Rows 11/12 — CONFIRMED `ALREADY` (browser proof, seeded real bookings)
+
+`tests/e2e/w3-calendar-rows-11-12.spec.ts`: zero state renders nothing
+(count-gated); a seeded `proposed` booking lights the worker badge with the
+database count and the `/dashboard/bookings` href; the company responses badge
+follows the seen-model (`seen_at` yesterday + real `accepted` transition);
+Back/Forward/reload hold; keyboard + accessible name pass; 375px passes; the
+BELL (layout-mounted — survives the route deletion) carries both signals; a
+fresh authenticated outsider reads ZERO `booking_requests` rows (RLS negative
+proof). **No port, no new renderer, no new code owed for these rows.** Matrix
+updated: 10 ABSORB rows remain.
+
+### The calendar result — shipped as its OWN slice (not under rows 11/12)
+
+- `lib/planning/calendar-result.ts` — server re-shaping of the SAME
+  `getPlanning` → `buildAgenda` projection (guard-pinned: no supabase, no
+  table, no RPC, no fetch).
+- `components/app/workspace/calendar-result.tsx` — panel presentation with
+  loading / error+retry / blocked / empty / partial (degraded sources NAMED) /
+  ready + real conflict marks; no Link, no router.
+- `ResultBody` gains `case "calendar"`; `startAgenda` explains AND opens the
+  result (`openResultRef.current("calendar")`).
+- i18n: 10 keys × 5 active locales; parity-guard clean.
+- Guards: `lib/guards/w3-calendar-result.test.ts` (5 tests).
+- e2e: `tests/e2e/w3-calendar-result.spec.ts` — real seeded line, reload +
+  Back/Forward via `?result=`, full-screen door, honest empty (fixture absence
+  lifted and restored), 375px no-overflow.
+
+### Dev servers (this session)
+
+```text
+port 3000  another session's dev server in lm-unified-wt — NOT touched.
+port 3100  e2e:local rig, started and stopped per run by the harness.
+```
+
+### Employee beta production gate — UNCHANGED
+
+`EMPLOYEE_BETA_PRODUCTION_GATE = BLOCKED_BY_OWNER_SECRET_SETUP`
+(`PROD_QA_*` secrets still absent). Authenticated proof is against the LOCAL
+guarded acceptance stack; the distinction is deliberate and stated.
+
+### NEXT EXACT ACTION
+
+Row 16 — Profile / identity actions (`IdentityActions`): audit before code,
+same order. Then rows 19 / 14 (return to chat).
+
+---
+
 ## TIMESTAMP
 
 | | |
