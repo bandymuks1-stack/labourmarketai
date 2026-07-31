@@ -11366,7 +11366,17 @@
         "requiredSkills": "įgūdžiai",
         "headcount": "žmonių skaičius",
         "organization": "organizacija"
-      }
+      },
+      "opportunities": {
+        "title": "Man tinkantys darbai"
+      },
+      "opportunitiesError": "Nepavyko nuskaityti jums tinkančių darbų.",
+      "opportunitiesUnavailable": "Poreikių šaltinis dar neįjungtas, todėl atitikmenų kol kas nėra iš ko skaičiuoti.",
+      "opportunitiesNoWorker": "Kol nėra darbuotojo profilio, įgūdžių nėra su kuo palyginti.",
+      "opportunitiesEmpty": "Šiuo metu jūsų įgūdžius atitinkančių poreikių nėra.",
+      "opportunitiesPartial": "Naujumo žymų šįkart nuskaityti nepavyko — įrašai tikri, bet „nauja“ nerodoma.",
+      "opportunitiesMore": "Sąraše dar {n}.",
+      "retry": "Bandyti dar kartą"
     }
   },
   "landing": {

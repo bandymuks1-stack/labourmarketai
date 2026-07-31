@@ -97,7 +97,11 @@ export type MarketplaceMatchesView =
   | { readonly kind: "no-worker" }
   | {
       readonly kind: "ready";
-      readonly surface: MarketplaceSurface;
+      /** Which surface asked. NULL for a read that renders nothing at all —
+       *  the aggregate attention count below is the one such caller, and
+       *  naming a render surface there would be a claim that something was
+       *  shown to the person when nothing was. */
+      readonly surface: MarketplaceSurface | null;
       readonly capabilities: Pick<
         MarketplaceCapabilities,
         | "boardAvailable"
@@ -157,7 +161,9 @@ export async function loadWorkerOpportunityBoard(
  * on one page cost one computation.
  */
 export async function loadWorkerOpportunityMatches(input: {
-  readonly surface: MarketplaceSurface;
+  /** Omitted only by a caller that renders nothing — see `surface` on the
+   *  view. Every rendering caller names itself. */
+  readonly surface?: MarketplaceSurface;
   readonly limit?: number;
   /**
    * Canonical discovery filters (W4). The AI writes World State from the
@@ -174,7 +180,7 @@ export async function loadWorkerOpportunityMatches(input: {
   if (result.kind !== "ready") return { kind: "no-worker" };
   return {
     kind: "ready",
-    surface: input.surface,
+    surface: input.surface ?? null,
     capabilities: {
       boardAvailable: result.boardAvailable,
       seenAvailable: result.seenAvailable,
@@ -233,9 +239,11 @@ export async function markOpportunitiesShown(
  *  attention. */
 export async function getNewMarketplaceMatchCount(): Promise<number> {
   try {
-    const view = await loadWorkerOpportunityMatches({
-      surface: "dashboard_recommendations",
-    });
+    // NO SURFACE: this read renders nothing — it feeds the auth shell's
+    // attention count. Before W3 row 5 it borrowed the worker-overview card's
+    // tag; that card is gone, and borrowing another render surface's name
+    // would say the person was shown rows they were not.
+    const view = await loadWorkerOpportunityMatches({});
     return view.kind === "ready" ? view.newCount : 0;
   } catch {
     return 0;

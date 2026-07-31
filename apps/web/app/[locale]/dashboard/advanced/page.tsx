@@ -12,7 +12,6 @@ import { IdentityActions } from "@/components/app/identity-actions";
 import { DashboardModuleGrid } from "@/components/app/dashboard/dashboard-module-grid";
 import { DashboardMoreSection } from "@/components/app/dashboard/dashboard-more-section";
 import { DashboardStatusStrip } from "@/components/app/dashboard/dashboard-status-strip";
-import { JobRecommendationsCard } from "@/components/app/dashboard/job-recommendations-card";
 import {
   OpportunityDirectionsCard,
   type DirectionView,
@@ -861,12 +860,13 @@ export default async function DashboardAdvancedPage({
           All sections still server-render with real data — the fold is
           presentation only. */}
       <DashboardMoreSection>
-        {/* "Man tinkantys darbai" — top 3 recommendations from the ONE
-            request-cached read model (same PR4 engine as the board). §19
-            basis form on every row; honest empty state; renders nothing
-            while the gated worker-visibility RPC is unapplied. The module
-            grid above carries the new-job-matches badge from the spine. */}
-        <JobRecommendationsCard locale={locale} />
+        {/* W3 row 5 — "Man tinkantys darbai" MIGRATED out of this route.
+            It is the `opportunities` RESULT now (`?result=opportunities`),
+            reading the SAME canonical marketplace use case, with the states a
+            card could not have: a card may render nothing when the gated
+            demand source is unapplied, a result the person asked for may not.
+            The module grid above still carries the new-job-matches badge, and
+            /dashboard/opportunities is unchanged. */}
 
         {/* Market context (Contextual Intelligence UI v1): the worker's own
             salary-vs-benchmark trust card, or its honest unavailable state.

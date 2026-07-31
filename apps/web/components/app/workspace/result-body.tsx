@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
+import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
 import type { GeographySelection } from "@/lib/market-map/geography-selection";
 
 import {
@@ -75,7 +76,9 @@ export function ResultBody({
   if (!descriptor) return null;
 
   if (canRenderInline(kind, context)) {
-    return <InlineResult kind={kind} navigation={navigation} />;
+    return (
+      <InlineResult kind={kind} navigation={navigation} onOpenFull={onOpenFull} />
+    );
   }
 
   // Honest degradation — see the header note. The reason is stated, not hidden.
@@ -107,13 +110,23 @@ export function ResultBody({
 function InlineResult({
   kind,
   navigation,
+  onOpenFull,
 }: {
   kind: ResultKind;
   navigation: ResultNavigation;
+  /** An inline result may still need the full screen — the opportunities
+   *  result offers the board from every one of its states, so no state is a
+   *  dead end. Passed through rather than re-derived: the fallback route and
+   *  the inline route must stay the same route. */
+  onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
 
   switch (kind) {
+    case "opportunities":
+      // W3 row 5 — the first ABSORB. "Man tinkantys darbai" existed ONLY on
+      // /dashboard/advanced; it is a result now, so the route may lose it.
+      return <OpportunitiesResult onOpenFull={onOpenFull} />;
     case "market":
       // Goal 3: the market result now has depth — map → projects → evaluation.
       // Still ONE result and ONE panel; the depth lives in the URL.

@@ -48,7 +48,11 @@ const ZERO: SpineCounts = {
   newJobMatches: 0,
 };
 
-const CARD = read("components/app/dashboard/job-recommendations-card.tsx");
+/* W3 row 5: the compact recommendation surface is no longer a card on the
+ * second dashboard — it is the `opportunities` RESULT. Same canonical use
+ * case, same §19 basis form, same "rendering IS the read event" rule, so the
+ * guards below simply follow it to its new home. */
+const RESULT = read("components/app/workspace/opportunities-result.tsx");
 const JOURNAL_BLOCK = read("components/app/journal-job-context.tsx");
 
 describe("§19 form — recommendation copy always carries counts + confirmed share", () => {
@@ -120,13 +124,14 @@ describe("§19 form — recommendation copy always carries counts + confirmed sh
     });
   }
 
-  it("the card renders the basis through basisCompact with all three params", () => {
-    expect(CARD).toMatch(/basisCompact/);
-    expect(CARD).toMatch(/matched: r\.basis\.matchedTotal/);
-    expect(CARD).toMatch(/total: r\.basis\.needTotal/);
-    expect(CARD).toMatch(/confirmed: r\.basis\.matchedConfirmed/);
-    // Never a standalone percentage on the card.
-    expect(CARD).not.toMatch(/basis\.pct/);
+  it("the result renders the basis through basisCompact with all three params", () => {
+    expect(RESULT).toMatch(/basisCompact/);
+    expect(RESULT).toMatch(/opportunities-match-basis/);
+    expect(RESULT).toMatch(/matched: match\.basis\.matchedTotal/);
+    expect(RESULT).toMatch(/total: match\.basis\.needTotal/);
+    expect(RESULT).toMatch(/confirmed: match\.basis\.matchedConfirmed/);
+    // Never a standalone percentage in the result.
+    expect(RESULT).not.toMatch(/basis\.pct/);
   });
 
   it("the journal block renders the same basis form", () => {
@@ -205,8 +210,8 @@ describe("shown model — rendering a recommendation IS the read event", () => {
     expect(page).toMatch(/<OpportunitiesShownMarker/);
   });
 
-  it("the dashboard card and the journal block report their shown rows", () => {
-    expect(CARD).toMatch(/<OpportunitiesShownMarker/);
+  it("the opportunities result and the journal block report their shown rows", () => {
+    expect(RESULT).toMatch(/<OpportunitiesShownMarker/);
     expect(JOURNAL_BLOCK).toMatch(/<OpportunitiesShownMarker/);
   });
 
@@ -216,9 +221,43 @@ describe("shown model — rendering a recommendation IS the read event", () => {
     expect(lib).toMatch(/worker_opportunity_seen/);
   });
 
-  it("the dashboard overview mounts the card (worker daily surface)", () => {
+  /**
+   * W3 row 5 — the capability MOVED, and this is the pin that says so.
+   *
+   * The old assertion was "the second dashboard mounts the card". Deleting a
+   * capability would also satisfy a deleted assertion, so the replacement is
+   * deliberately two-sided: the card is gone from `/dashboard/advanced` AND
+   * the result surface renders it. One without the other is a regression.
+   */
+  it("the recommendation surface lives in the result panel, not on /dashboard/advanced", () => {
     const overview = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(overview).toMatch(/<JobRecommendationsCard/);
+    expect(overview).not.toMatch(/<JobRecommendationsCard/);
+    expect(overview).not.toMatch(/job-recommendations-card/);
+
+    const body = read("components/app/workspace/result-body.tsx");
+    expect(body).toMatch(/case "opportunities":/);
+    expect(body).toMatch(/<OpportunitiesResult/);
+  });
+
+  it("the result enters through the canonical marketplace use case only", () => {
+    // No second engine, no direct recommendations import, no RPC or table
+    // vocabulary on a surface.
+    expect(RESULT).toMatch(/loadOpportunitiesResultAction/);
+    expect(RESULT).not.toMatch(/lib\/opportunities\/recommendations/);
+    expect(RESULT).not.toMatch(/lib\/opportunities\/seen/);
+    expect(RESULT).not.toMatch(/\.rpc\(/);
+    expect(RESULT).not.toMatch(/worker_opportunity_seen/);
+  });
+
+  it("every reason for having no rows is a DISTINCT state, never one emptiness", () => {
+    // A card could render nothing when the gated demand source was unapplied;
+    // a result the person asked for may not. The three cases must stay apart.
+    expect(RESULT).toMatch(/opportunities-unavailable/);
+    expect(RESULT).toMatch(/opportunities-no-worker/);
+    expect(RESULT).toMatch(/opportunities-empty/);
+    // …and a failed read is never one of them.
+    expect(RESULT).toMatch(/opportunities-error/);
+    expect(RESULT).toMatch(/opportunities-retry/);
   });
 
   it("the journal page mounts the context block at ONE insertion point", () => {
@@ -280,8 +319,8 @@ describe("no worker-initiated apply/contact CTA (platform workflow only)", () =>
   const stripComments = (s: string): string =>
     s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
-  it("the card and journal block never offer contact/apply", () => {
-    for (const src of [CARD, JOURNAL_BLOCK].map(stripComments)) {
+  it("the result and journal block never offer contact/apply", () => {
+    for (const src of [RESULT, JOURNAL_BLOCK].map(stripComments)) {
       expect(src).not.toMatch(/contact-employer/i);
       expect(src).not.toMatch(/\bapply\b/i);
       expect(src).not.toMatch(/WorkerInterestButton/);
