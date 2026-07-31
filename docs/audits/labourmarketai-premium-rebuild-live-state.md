@@ -10,8 +10,9 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 20:30 |
-| UTC | 2026-07-31 17:30 |
+| Europe/Vilnius | 2026-07-31 21:30 |
+| UTC | 2026-07-31 18:30 |
+| Production code SHA | `23ab316d` (PR #937 merged, Vercel Production Ready) |
 
 ## REPOSITORY
 
@@ -207,12 +208,10 @@ the LOCAL acceptance stack (9/9 e2e), and that distinction is deliberate.
 
 ### W3 progress
 
-- Row 4 — **MIGRATED** (fake SVG map removed; #927, deployed `3e31a70e`)
-- Rows 13, 15 — **VERIFIED**; no independent drop exists, they die with the route
-- Row 5 — **ABSORBED** (#932, deployed `7debb071`): `JobRecommendationsCard`
-  → the `opportunities` result. Old mount **deleted**; both halves guard-pinned.
-- Row 28 — found, tracked: `/dashboard/market-map` runs a SECOND Leaflet chain
-- Remaining: **14 ABSORB rows**. `/dashboard/advanced` still stands.
+Superseded by the verified table further down ("W3 — WHERE IT ACTUALLY
+STANDS"), which is the canonical one. Summary: rows 4, 5 and 6 MIGRATED; rows
+13/15 VERIFIED; **13 ABSORB rows remain** and `/dashboard/advanced` still
+stands.
 
 ### CodeQL
 
@@ -241,71 +240,134 @@ port 3400  STOPPED    this session's own dev:acceptance, in the throwaway
                       restart with `pnpm dev:acceptance -- -p 3400`.
 ```
 
-## NEXT EXACT ACTION — row 6, and the audit is already done
+## NEXT EXACT ACTION — the owner has re-scoped the work
 
-Row 6 was AUDITED but NOT started: the context window ended, and beginning a
-multi-file absorb that could not be finished would have left the tree half
-modified. The expensive part is done and written down in
-`docs/audits/evidence/premium-rebuild/w3-capability-migration-matrix.md`
-("Row 6 — the audit, before any code"). Do not redo it.
+**A new owner directive arrived 2026-07-31 ~21:00 (mid-turn) and SUPERSEDES the
+"continue to the next P0 Employee Journey row" instruction**: turn
+Labourmarket.ai into a **Skills-first AI platform** — a Skill Registry, company
+/ worker / marketplace skills, Work-Journal-backed verified skills, agent
+execution over the registry, a Skill Store, and Phase-10 deliverables
+(architecture, DB, API, UX, security, subscription, roadmap, migration, risk,
+performance).
 
-```text
-WHAT THE AUDIT ALREADY SETTLED
-
-Renderers today: 3
-  advanced/page.tsx:591   WorkerInvitationsCard (More section)      accepts
-  advanced/page.tsx:748   the SAME card again (top slot)            accepts
-  onboarding/page.tsx:80  read-only note + org name                 no
-  journal/page.tsx:241    contextState="pending" + org name         no
-
-Write path: ALREADY SINGLE — acceptWorkerInvitationAction, exactly one caller
-  (components/app/worker-invitations.tsx). Nothing to collapse there, which
-  makes this row cheaper than row 5 looked.
-
-Reads: 4 (card, onboarding, journal, notifications/spine.ts). The spine one is
-  a request-cached COUNT, not a renderer — not duplication.
-
-TARGET, changed by the audit: the Context Panel WORK CONTEXT — NOT a new
-  `invitations` result kind. An invitation is an ATTENTION item, not an answer
-  anyone asks for. Absorbing there adds no result kind, no registry entry and
-  no route; a new result would add all three.
-
-REUSE `WorkerInvitations` unchanged, so its six outcome states (linked,
-  already-linked, no-invitation, no-worker, error, needs-migration) and its
-  single write path move intact. MOUNT IT ONCE — it is currently mounted twice.
-```
-
-Exact continuation command:
+Its own Phase 9 says: **audit first, refactor rather than rewrite, preserve
+backward compatibility.** That audit is the next action — not Player Card.
 
 ```text
-Continue labourmarket.ai W3 from main 6e5ef02a. Merge PR #935 if green.
-Then implement row 6 (worker invitations) per the audit already written in
-w3-capability-migration-matrix.md: absorb into the Context Panel WORK CONTEXT
-(NOT a new result kind), reuse WorkerInvitations unchanged, mount it ONCE,
-delete both mounts in advanced/page.tsx, repoint any guard that pins them.
-Preserve all six outcome states and prove the accept write in a browser at
-1440 and 375 with 0 console errors, using a CLEAN server (lm-w3proof on 3400),
-never the corrupted one on 3000. Then commit / push / PR / merge / deploy /
-production proof, report NET COMPLEXITY + VALUE CREATED + project-health KPI,
-and continue straight to the next P0 Employee Journey row without stopping.
+NEXT ACTION
+
+1. Phase 9 AUDIT of the existing architecture, against the skills-platform
+   shape. What already exists and must be REUSED rather than reinvented:
+     - lib/conversation/          intent router, chips, agenda, opening brief
+     - lib/ai/  lib/ai-workspace/  the existing AI context + types
+     - lib/conversation/result-registry.ts   ALREADY a registry of typed,
+       permissioned, data-readiness-tagged capabilities — the closest thing
+       to a Skill Registry the codebase has, and the likeliest spine.
+     - lib/product-gate/surface-registry.ts  declaration + gating model
+     - lib/journal/  skill-pipeline*, capability extraction — the patented
+       Work Journal chain Phase 5 names as the PRIMARY verification source
+     - lib/world-state/           entity resolvers = a registration pattern
+       that already proves "a new capability is a REGISTRATION, not an edit"
+2. Then the Phase 1 Skill Registry design ON TOP of what survives that audit.
+3. W3 is NOT abandoned: /dashboard/advanced still stands with 13 ABSORB rows.
+   It resumes after the skills-platform audit + design land, or in parallel if
+   the owner asks. Rows 1/21 (Player Card) remain the next W3 step.
 ```
 
-Working worktree: `C:\Users\Mano\Documents\lm-unified-wt`, branch
-`feat/cc/w3-row6-invitations` (matrix committed and pushed, PR #935).
+## W3 — WHERE IT ACTUALLY STANDS (verified 2026-07-31 21:2x)
+
+| Row | Capability | State |
+|---|---|---|
+| 4 | Premium Hub market map | **MIGRATED** — #927, deployed `3e31a70e` |
+| 5 | Job recommendations | **ABSORBED + CONSOLIDATED** — #932/#934, deployed `7debb071` / `6e5ef02a` |
+| 6 | Worker invitations | **ABSORBED** — #937, deployed `23ab316d` |
+| 13, 15 | Next action, space header | **VERIFIED** — no independent drop; they die with the route |
+| 28 | Second Leaflet chain | tracked, TODO |
+| — | remaining | **13 ABSORB rows**; `/dashboard/advanced` still stands |
+
+### Row 6 — what shipped
+
+`WorkerInvitations` is rendered by the **Context Panel's existing work
+context**. NOT a result kind, NOT a route, NOT a registry entry, NOT a second
+action surface. The component is reused byte-for-byte; its six outcome states
+and its single write path moved intact.
+
+Deleted: `worker-invitations-card.tsx`, BOTH of its mounts on
+`/dashboard/advanced`, that page's invitations read, and the `invitation` rung
+of `decideTopSlot` (with no renderer left it would have resolved to an empty
+slot — asserted as an absence so a revert is visible).
+
+Two things the browser forced, both product improvements rather than
+accommodations:
+
+* **attention before geography** — behind `WorkspaceMap` the accept button sat
+  below the fold of the ~45dvh phone sheet, one scroll from the notification
+  that sent the person there;
+* **the work context degrades without dropping the invitation** — a failed Time
+  Engine read now becomes the headline instead of hiding a pending invitation
+  behind an unrelated failure.
+
+Net: components −1 · duplicate mounts 2 → **0** · top-slot kinds 6 → 5 · page
+reads −1 · routes / result kinds / registry entries **+0** · action surfaces
+1 → 1 · write paths 1 → 1. Production code +80/−56 (net +24 — the label mapping
+the deleted server component got for free; the panel is a CLIENT component and
+`BASE_CLIENT_MESSAGE_ROOTS` deliberately restricts which namespaces reach the
+bundle). **Negative on architecture, mildly positive on lines** — reported that
+way rather than rounded into a nicer number.
+
+**Honest gaps**: `no-worker` and `needs-migration` are the two outcome states
+NOT browser-proven. Every local fixture identity has a `workers` row, and
+forcing `needs-migration` means dropping a function from the shared local
+database mid-suite. Both are covered by the unit guard, which pins the branch in
+the control AND that the panel's server half supplies copy for all six
+outcomes, so neither can render a raw key.
+
+**A pre-existing break was repaired**: `w3-context-panel.spec.ts` still waited
+20 s for `chat-employer-match-card`, which row 5 (#934) deleted — its 30 s
+budget expired before its own `test.skip` could fire, so it had been **red on
+`main` since that merge**. Now selects from the canonical `opportunities`
+result and waits for the entity read to SETTLE before asserting content. Fifth
+harness defect of that family in this programme; again not a product defect.
+
+## VALIDATION AT `23ab316d`
 
 ```text
-2. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
-
-2. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
-   the collapse market-map.tsx's own header already describes.
-
-3. Then the remaining 12 ABSORB rows in dependency order.
-
-4. Delete /dashboard/advanced only when every row is MIGRATED or
-   OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
-   the same commit.
-
-5. Owner-blocked, not agent-blocked: set the three PROD_QA_* secrets, then run
-   `pnpm -C apps/web prod-qa:gate` for G1–G10 and the authenticated production
-   proof of rows 4 and 5.
+792 files / 12843 tests green      (was 12840 — +3 net)
+typecheck clean
+lint clean
+w3-second-dashboard e2e  20/20     (8 new row-6 scenarios)
+w3-context-panel     e2e   3/3     (was 1 failing on main)
+CI on main: quality PASS · migration-safety PASS · CodeQL PASS
+Vercel Production 23ab316d — Ready
 ```
+
+Public production proof (anonymous, the only kind available):
+`/lt/dashboard` → 307 → `/lt/auth/login?next=/lt/dashboard`, no invitation
+markup leaked, 0 console errors, 0 failed requests.
+
+### Employee beta production gate — UNCHANGED
+
+`EMPLOYEE_BETA_PRODUCTION_GATE = BLOCKED_BY_OWNER_SECRET_SETUP`.
+`PROD_QA_SUPABASE_URL`, `PROD_QA_ANON_KEY`, `PROD_QA_SERVICE_ROLE_KEY` are still
+absent. Reported once, not re-probed on a loop (CLAUDE.md §2). The authenticated
+production render of rows 4/5/6 stays honestly unproven until the owner sets
+them; using a real person's account instead is forbidden. Every row-6 claim
+above is proven against the LOCAL guarded acceptance stack, and that distinction
+is deliberate.
+
+## DEV SERVERS
+
+```text
+port 3000  ANOTHER session's dev:acceptance in lm-unified-wt. NOT touched.
+port 3100  this session's e2e:local rig (scripts/e2e-local.ts), started and
+           stopped per run. It boots on its OWN port precisely so a dev server
+           possibly pointed at cloud is never reused as a test target.
+port 3400  lm-w3proof, stopped, left in place (removing the worktree risks the
+           known node_modules hazard).
+```
+
+## MERGED THIS SESSION
+
+| PR | What | Merge SHA |
+|---|---|---|
+| #937 | W3 row 6 — invitations become the panel's work context | `23ab316d` |
