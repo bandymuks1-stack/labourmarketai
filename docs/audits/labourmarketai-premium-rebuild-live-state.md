@@ -10,9 +10,19 @@
 
 | | |
 |---|---|
-| Base | `b05658bd` (== origin/main at branch time — #944 merged) |
-| Branch | `feat/cc/w3-calendar-result-v1` (worktree `lm-unified-wt`) |
+| `main` HEAD | **`788f17e0`** — PR **#945** squash-merged (base was `b05658bd`) |
+| Production deployment | **`5698508378`** — Production, **success**, sha `788f17e0` |
+| Production URL | `https://labourmarket.ai` (apex) |
 | Slice | W3 rows 11/12 verification + the calendar `ResultBody` slice |
+
+### Public production proof at `788f17e0` (anonymous — the only kind available)
+
+`/lt/dashboard?result=calendar` → redirects to
+`/lt/auth/login?result=calendar&next=%2Flt%2Fdashboard`; **zero
+`calendar-result*` markup leaked** (0 matching DOM nodes), no context panel,
+0 console errors, every request 200. The authenticated render is proven
+against the LOCAL guarded acceptance stack (11/11 e2e, two consecutive clean
+runs) — the distinction is deliberate; the QA-secret gate below is unchanged.
 
 ### Rows 11/12 — CONFIRMED `ALREADY` (browser proof, seeded real bookings)
 
