@@ -66,18 +66,19 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
 | 19 | Status strip | `DashboardStatusStrip` | **ALREADY** | the spine IS the bell; extra doors survive layout-level | **CONFIRMED 2026-08-01** — see the rows 19/14 audit |
 | 20 | Command finder | `CommandFinder` | CHAT | the conversation composer already is this | TODO — likely OBSOLETE |
-| 21 | My zone | `MyZone` | ABSORB | `player-card` result | TODO |
+| 21 | My zone | `MyZone` | **ALREADY / OBSOLETE** | readiness → the player-card result's work editor (richer 5-dim model); explainer dies with the route | **CONFIRMED 2026-08-01** — see the row 21 audit |
 | 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` exists | repoint |
 | 23 | Telemetry view | `TelemetryView` | DETAIL | admin surface | repoint |
-| 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (currently gated `unverified`) | TODO — blocked on reputation data |
+| 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (gated `unverified`) | **BLOCKED** — missing data source documented 2026-08-01, see the row 24 note |
 | 25 | Demand intake section | inline, `demand-intake-section` | CHAT | structured demand flow | TODO |
 | 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 28 capabilities — 9 ALREADY · 11 ABSORB · 3 CHAT · 4 OBSOLETE ·
-2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12, 16, 19 and 14 CONFIRMED
-`ALREADY` 2026-08-01; 8 ABSORB rows remain.**
+**Counts: 28 capabilities — 10 ALREADY · 10 ABSORB · 3 CHAT · 4 OBSOLETE ·
+2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12, 16, 19, 14 and 21
+CONFIRMED 2026-08-01; 7 ABSORB rows remain, of which row 24 is BLOCKED on
+data.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -238,7 +239,7 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 5 | Job recommendations | Chat → Result → Job | **DONE** |
 | 6 | Worker invitations | Onboarding → Chat (joining an employer) | **DONE** |
 | 1 | Premium Hub person card | Player Card | **DONE** |
-| 21 | My zone | Player Card | TODO |
+| 21 | My zone | Player Card | **DONE** — CONFIRMED 2026-08-01; readiness ALREADY in the work editor, explainer OBSOLETE |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
 | 11 | Booking responses | Calendar | **DONE** — CONFIRMED `ALREADY` 2026-08-01, browser-proven |
 | 12 | Bookings | Calendar | **DONE** — same; and the `calendar` result shipped as its own slice |
@@ -379,6 +380,65 @@ the advanced page — it belongs to the row 5 family and must be dispositioned
 before the route deletion, under its own number.
 
 **Not started beyond the audit.**
+
+## Row 21 — MYZONE: the audit and the confirmation
+
+Audited and browser-confirmed 2026-08-01 (`lib/guards/w3-row21-myzone.test.ts`
+5 guards; `tests/e2e/w3-row21-myzone.spec.ts` 2 scenarios).
+
+**The row splits into two sub-capabilities and is not one label.**
+
+`MyZone` is presentation-only (guard-pinned: no reads, no writes, no server
+action) with exactly ONE mount, on the advanced page's worker branch. It
+carries:
+
+1. **Readiness status + missing-item deep links** (profession → profile,
+   first entry → journal) — **`ALREADY`**. The canonical implementation is
+   RICHER and already shipped with row 1: the work-card model
+   (`lib/worker/work-card-state.ts`) inside the `player-card` RESULT tracks
+   FIVE dimensions (work / availability / location / pay / evidence) against
+   MyZone's two, derives ONE best next action, and explains WHY each step
+   helps (`whyKey`) — at the point of action. Guard-pinned: `work` requires
+   the profession, `evidence` requires journal entries with
+   `/dashboard/journal` as its destination — MyZone's two dimensions are a
+   strict subset. Browser-proven with the real fixture session on both
+   surfaces, desktop + 375px, keyboard + accessible name, 0 console errors.
+   The first-use branch is pinned by the model's own unit suite — a
+   half-onboarded account is not fabricated for a screenshot (row 1
+   precedent).
+
+2. **"Kas ką gerina" explainer** (`MyZoneImproves`) — **`OBSOLETE`**. Static
+   help copy whose only consumer is `my-zone.tsx` (guard-pinned), superseded
+   by the per-dimension `whyKey` explanations attached to the actions
+   themselves. Help detached from action dies with the route; deletion takes
+   the copy cleanly.
+
+**Not ported. No new hub. The mount dies with `/dashboard/advanced`.**
+
+## Row 24 — REPUTATION: blocked, and exactly WHY
+
+Documented 2026-08-01, so the block is a named fact and not a shrug.
+
+**The missing data source**: the canonical reputation model (doctrine §5 —
+one positive / one negative SUBJECTIVE experience, separated from objective
+evidence, no stars, no total person score) has **no table and no rows**. The
+database has no subjective-feedback store at all (`pg_tables` shows only
+`language_feedback` and `learning_review_queue`); the only trust chain in the
+product is the OBJECTIVE one — `lib/feedback/work-feedback-loop.ts`: work →
+journal → manager/client confirmation → evidence → trust signal, which
+computes no score by design.
+
+**What must create it**: W6 (trust / reputation / disputes) — the subjective
+feedback capability with its own table, RLS, provenance and dispute path.
+
+**Minimum real-data acceptance to unblock row 24**: the W6 store exists with
+RLS proven both ways; at least one REAL subjective experience row created
+through the real flow by a real counterpart account (not seeded solely for
+UI); the `reputation` result registry entry may then flip `unverified` →
+`real`, and `TrustInsightCard` absorbs into the `reputation` result.
+
+**Until then the UI stays honest**: `dataReadiness: "unverified"` keeps the
+panel on its fallback — no placeholder charts, no fabricated balance.
 
 ## Rows 19 / 14 — RETURN TO CHAT: the audit and the confirmation
 
