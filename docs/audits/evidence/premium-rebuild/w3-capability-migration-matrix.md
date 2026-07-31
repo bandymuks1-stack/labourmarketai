@@ -61,7 +61,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
 | 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
-| 16 | Identity actions | `IdentityActions` | ABSORB | account menu / profile result | TODO |
+| 16 | Identity actions | `IdentityActions` | **ABSORB?** | likely `ALREADY` — every destination keeps a surviving door | **AUDITED 2026-08-01** — see the row 16 audit |
 | 17 | Module grid | `DashboardModuleGrid` | **OBSOLETE** | this IS the second dashboard's navigation | delete with the route |
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
 | 19 | Status strip | `DashboardStatusStrip` | ABSORB | active-context status summary | TODO |
@@ -336,6 +336,42 @@ result on its own merits.**
 presentation of an already-presented signal. They die with the route; no port,
 no new renderer, no new result kind, no new route. The verifying spec is the
 guard.
+
+## Row 16 — IDENTITY ACTIONS: the audit, before any code
+
+Audited 2026-08-01, the same read-only pass rows 6, 1 and 11/12 got.
+
+**`IdentityActions` is not a capability renderer either.** One mount
+(`advanced/page.tsx:583`, the `focusRole` variant), zero data reads of its own
+(props only: `hasCompany`, `companyName`), zero action surfaces — it is a
+**link catalogue** to nine existing routes. That makes it the THIRD navigation
+presentation on the same page, next to the module grid (row 17, OBSOLETE) and
+the command finder entry (row 20).
+
+Where each destination's door survives the route deletion:
+
+| Destination | Surviving doors (all mounted OUTSIDE /dashboard/advanced) |
+|---|---|
+| `/dashboard/profile` | account menu (dashboard LAYOUT + conversation header); `player-card` result's open-full |
+| `/dashboard/opportunities` | `opportunities` result (chat); `journal-job-context`; `profile-hub-overview` |
+| `/dashboard/documents` | header-search command registry — public `documents` entry (layout + conversation header) |
+| `/dashboard/company` | chat company flows; `current-space-header`; `company-next-actions` |
+| `/dashboard/candidates` | command registry `candidates` entry; `setup-role-choice`; company planning page |
+| `/dashboard/buyer` | customer-role routing (`lib/config/roles.ts`); `next-action` model |
+| `/dashboard/projects` | `project-map`; company/project cards; `project-assignment-manager` |
+| `/dashboard/start` (+`/start/company`) | `setup-role-choice`; `company-next-actions`; command registry; canonical redirects |
+
+**Provisional reclassification: row 16 is `ALREADY`** — a duplicate
+presentation of navigation that survives everywhere else. To be CONFIRMED by a
+browser pass proving each role's primary door actually resolves (worker:
+account menu → profile; company: chat/current-space-header → company), not
+assumed.
+
+**Caveat recorded, not smuggled**: `OpportunityDirectionsCard` mounts ONLY on
+the advanced page — it belongs to the row 5 family and must be dispositioned
+before the route deletion, under its own number.
+
+**Not started beyond the audit.**
 
 ## The calendar RESULT — the separate slice, on its own merits
 
