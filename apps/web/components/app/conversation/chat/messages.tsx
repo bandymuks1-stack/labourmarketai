@@ -1,13 +1,11 @@
 "use client";
 
-import { Check, FileText, Languages, Clock, Building2, CircleDashed } from "lucide-react";
-import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
-import { WorkerInterestButton } from "@/components/app/worker-interest-button";
+import { Check, FileText, Languages, Clock, CircleDashed } from "lucide-react";
 import { useWorldStateOptional } from "@/components/app/world-state/world-state-provider";
 import { AssistantMark } from "./assistant-identity";
 import { ChatAction, ChatActionRow } from "./chat-action";
 import { iconControl, iconInline } from "./icon-scale";
-import type { ChatMessage, ChoiceChip, EmployerMatch, InterestLabels } from "./types";
+import type { ChatMessage, ChoiceChip } from "./types";
 
 /** Callbacks the thread wires into interactive messages. */
 export type MessageHandlers = {
@@ -17,108 +15,6 @@ export type MessageHandlers = {
   /** Localized speaker names, announced per turn to assistive tech only. */
   speakers: { assistant: string; user: string };
 };
-
-/**
- * Badge colour follows the CANONICAL match status, never a flat "success".
- * A weak fit painted success-green tells the worker the opposite of what the
- * use case computed — the colour has to carry the same fact as the label.
- */
-const FIT_BADGE: Record<string, string> = {
-  strong: "bg-state-success/10 text-state-success",
-  possible: "bg-brand-blue/10 text-brand-blue",
-  weak: "bg-state-warning/10 text-state-warning",
-  insufficient: "bg-ink-700 text-text-muted",
-};
-
-/**
- * One employer match, selectable (W3).
- *
- * Selecting it does NOT navigate: it writes `active_entity` into World State
- * and the Context Panel follows — "Paspaudus objektą NEATIDAROMAS NAUJAS
- * PUSLAPIS." The card keeps its own inline interest control, so a person who
- * only wants to signal interest never has to open the panel at all; the panel
- * is where the demand's full facts, requirements and next steps live.
- *
- * Outside the workspace (no World State provider) the title is plain text
- * rather than a button — a control that cannot do anything is never rendered.
- */
-function EmployerMatchCard({
-  match,
-  locale,
-  interestLabels,
-}: {
-  match: EmployerMatch;
-  locale?: string;
-  interestLabels: InterestLabels | null;
-}) {
-  const world = useWorldStateOptional();
-  const selected =
-    world?.state.activeEntity?.type === "job" && world.state.activeEntity.id === match.id;
-
-  const title = (
-    <span className="flex min-w-0 items-center gap-2 font-display text-card-title font-semibold text-text-primary">
-      <Building2 {...iconControl("flex-none text-brand-blue")} aria-hidden />
-      <span className="truncate">{match.name}</span>
-    </span>
-  );
-
-  return (
-    <div
-      data-testid="chat-employer-match-card"
-      data-selected={selected ? "true" : undefined}
-      className={`rounded-card border bg-ink-800/60 p-3.5 ${
-        selected ? "border-brand-blue" : "border-ink-500"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        {world ? (
-          <button
-            type="button"
-            onClick={() => world.openEntity({ type: "job", id: match.id })}
-            data-testid="chat-employer-match-open"
-            aria-pressed={selected}
-            className="flex min-w-0 items-center rounded-sm text-left hover:text-brand-blue"
-          >
-            {title}
-          </button>
-        ) : (
-          title
-        )}
-        <span
-          data-fit-status={match.fitStatus}
-          className={`flex-none rounded-full px-2.5 py-0.5 text-meta font-semibold ${FIT_BADGE[match.fitStatus] ?? FIT_BADGE.insufficient}`}
-        >
-          {match.fitLabel}
-        </span>
-      </div>
-      <ul className="mt-1.5 flex flex-col gap-0.5">
-        {match.reasons.map((r, i) => (
-          // Neutral bullets: these are FACTS about the demand (the §19 basis,
-          // its location, its role) — a green tick would read as "you meet
-          // this", which the basis may deny.
-          <li key={i} className="flex items-start gap-2 text-basis text-text-secondary">
-            <span className="mt-1.5 size-1 flex-none rounded-full bg-text-muted" aria-hidden /> {r}
-          </li>
-        ))}
-      </ul>
-      {/* The match must be ACTIONABLE, not a read-only card. This is the SAME
-          canonical control the opportunities board renders — one interest state
-          machine, one write path, one honest scope note. Rendered only when the
-          owner-gated interest table exists (labels present); otherwise the card
-          stays read-only rather than showing a button that cannot work. */}
-      {interestLabels && locale ? (
-        <div className="mt-2.5 border-t border-ink-600 pt-2.5">
-          <WorkerInterestButton
-            locale={locale}
-            requestId={match.id}
-            initialStatus={match.interestStatus}
-            labels={interestLabels}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 /** Who is speaking. The same product mark in every assistant turn. */
 function Avatar() {
@@ -455,37 +351,6 @@ export function ChatMessageView({
             </ChatAction>
           </ChatActionRow>
         </CardBody>
-      </AssistantTurn>
-    );
-  }
-
-  // ── employer match card ──────────────────────────────────────────────────
-  if (m.role === "assistant" && m.kind === "employer-match") {
-    return (
-      <AssistantTurn testId="msg-employer-match" speaker={h.speakers.assistant}>
-        <div className={TURN_WIDTH}>
-          {/* Rendering IS the read event (canonical decision §10). The cards
-              below are exactly what the human sees, so exactly these real
-              demand ids are reported — never the wider set the board loaded.
-              An empty `matches` renders no card and mounts no marker. */}
-          {m.matches.length > 0 && (
-            <OpportunitiesShownMarker
-              surface="conversation"
-              requestIds={m.matches.map((match) => match.id)}
-            />
-          )}
-          <div className="text-body text-text-primary">{m.intro}</div>
-          <div className="mt-2 flex flex-col gap-2">
-            {m.matches.map((e) => (
-              <EmployerMatchCard
-                key={e.id}
-                match={e}
-                locale={m.locale}
-                interestLabels={m.interestLabels ?? null}
-              />
-            ))}
-          </div>
-        </div>
       </AssistantTurn>
     );
   }

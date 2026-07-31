@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { OpportunitiesShownMarker } from "@/components/app/marketplace/opportunities-shown-marker";
+import { WorkerInterestButton } from "@/components/app/worker-interest-button";
+import { useWorldStateOptional } from "@/components/app/world-state/world-state-provider";
 import { loadOpportunitiesResultAction } from "@/lib/marketplace/worker-opportunities-actions";
 import type {
+  InterestLabelBag,
   OpportunitiesResultMatch,
   OpportunitiesResultView,
 } from "@/lib/marketplace/worker-opportunities-contract";
@@ -171,7 +174,12 @@ export function OpportunitiesResult({
 
       <ul className="flex flex-col divide-y divide-border/40">
         {view.matches.map((m) => (
-          <MatchRow key={m.requestId} match={m} claimNovelty={!view.seenDegraded} />
+          <MatchRow
+            key={m.requestId}
+            match={m}
+            claimNovelty={!view.seenDegraded}
+            interestLabels={view.interestLabels}
+          />
         ))}
       </ul>
 
@@ -194,24 +202,59 @@ export function OpportunitiesResult({
   );
 }
 
+/**
+ * Honest fit colouring. Moved here from the thread's deleted card renderer —
+ * a weak fit painted success-green tells the worker the opposite of what the
+ * use case said, so the status drives the colour and nothing else does.
+ */
+const FIT_BADGE: Record<string, string> = {
+  strong: "bg-state-success/10 text-state-success",
+  possible: "bg-brand-blue/10 text-brand-blue",
+  weak: "bg-state-warning/10 text-state-warning",
+  insufficient: "bg-ink-700 text-text-muted",
+};
+
+/** Status → label key. TOTAL on purpose: a `?? "literal"` fallback beside a
+ *  KEY-named map reads to the crypto-fallback guard as a published secret, and
+ *  a total map is the clearer thing anyway. */
+const FIT_LABEL: Record<string, string> = {
+  strong: "fitStrong",
+  possible: "fitPossible",
+  weak: "fitWeak",
+  insufficient: "fitInsufficient",
+};
+
 /** One match. Every line is a field from the row; nothing is derived here. */
 function MatchRow({
   match,
   claimNovelty,
+  interestLabels,
 }: {
   match: OpportunitiesResultMatch;
   /** False while the seen read is degraded — novelty is then not claimed. */
   claimNovelty: boolean;
+  /** Copy for the canonical interest control, resolved ONCE server-side and
+   *  carried with the view. `null` = the owner-gated table is absent, so the
+   *  row stays read-only rather than showing a button that cannot write. */
+  interestLabels: InterestLabelBag | null;
 }) {
+  const world = useWorldStateOptional();
+  const selected =
+    world?.state.activeEntity?.type === "job" &&
+    world.state.activeEntity.id === match.requestId;
   const locale = useLocale();
   const tRec = useTranslations("opportunities.recommendations");
   const tOpp = useTranslations("opportunities");
   const tlm = useTranslations("labourMarket");
   const tSkill = useTranslations("skillNames");
+  const tFind = useTranslations("conversation.findWork");
 
   const workLabels = buildWorkTypeLabelMap(locale);
   const role =
     (match.roleSlug && workLabels[match.roleSlug]) || tOpp("fieldRoleUnknown");
+  // The row names WHO is hiring when the demand carries a company, falling back
+  // to the role — the same rule the deleted thread card used.
+  const heading = match.companyName ?? role;
   const country =
     match.country && tlm.has(`countryNames.${match.country}`)
       ? tlm(`countryNames.${match.country}`)
@@ -228,9 +271,36 @@ function MatchRow({
     <li
       className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0"
       data-testid={`opportunities-row-${match.requestId}`}
+      data-selected={selected ? "true" : undefined}
     >
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="text-support font-semibold text-text-primary">{role}</span>
+        {/* Selecting a match writes World State — it does NOT open a page.
+            The deleted thread card owned this drill-in; the row inherits it,
+            so the job's full facts, requirements and next steps stay one tap
+            away in the same panel. Outside a World State provider the heading
+            is plain text: a control that cannot do anything is never rendered. */}
+        {world ? (
+          <button
+            type="button"
+            onClick={() => world.openEntity({ type: "job", id: match.requestId })}
+            data-testid="opportunities-match-open"
+            aria-pressed={selected}
+            className="min-w-0 rounded-sm text-left text-support font-semibold text-text-primary hover:text-brand-blue"
+          >
+            {heading}
+          </button>
+        ) : (
+          <span className="text-support font-semibold text-text-primary">{heading}</span>
+        )}
+        <span
+          data-fit-status={match.fitStatus}
+          data-testid="opportunities-match-fit"
+          className={`flex-none rounded-full px-2 py-0.5 text-meta font-semibold ${
+            FIT_BADGE[match.fitStatus] ?? FIT_BADGE.insufficient
+          }`}
+        >
+          {tFind(FIT_LABEL[match.fitStatus] ?? FIT_LABEL.insufficient)}
+        </span>
         {claimNovelty && match.isNew && (
           <span
             className="rounded-full bg-brand-cyan/15 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan"
@@ -287,6 +357,25 @@ function MatchRow({
             </span>
           )}
         </span>
+      )}
+
+      {/* THE ONE ACTION SURFACE. This is the SAME canonical control the
+          opportunities board renders — one interest state machine, one write
+          path. It used to be rendered a second time by the chat thread's own
+          match card; that renderer is deleted, so this is now the only place
+          a person expresses interest from a conversational answer.
+          Rendered only when the owner-gated interest table exists; otherwise
+          the row stays read-only rather than showing a button that cannot
+          write. */}
+      {interestLabels && (
+        <div className="mt-1.5" data-testid="opportunities-match-interest">
+          <WorkerInterestButton
+            locale={locale}
+            requestId={match.requestId}
+            initialStatus={match.interestStatus}
+            labels={interestLabels}
+          />
+        </div>
       )}
     </li>
   );

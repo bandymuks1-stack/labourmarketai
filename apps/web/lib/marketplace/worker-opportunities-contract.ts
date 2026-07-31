@@ -111,6 +111,10 @@ export interface MarkShownInput {
   readonly shownRequestIds: readonly string[];
 }
 
+/* Types only — both modules are pure, so this file stays pure. */
+import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
+import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
+
 /**
  * How many matches the conversation's opportunities RESULT shows (W3 row 5).
  *
@@ -153,7 +157,38 @@ export type OpportunitiesResultView =
        *  the new-markers are not trustworthy this render. The panel keeps the
        *  rows (they are real) and stops claiming novelty — the PARTIAL state. */
       readonly seenDegraded: boolean;
+      /**
+       * Copy for the canonical `WorkerInterestButton`, resolved by the ONE
+       * server-side resolver (`lib/opportunities/interest-labels.ts`).
+       *
+       * It travels with the view rather than being looked up in the panel on
+       * purpose: that resolver's own header warns that the moment a second
+       * surface resolves these strings itself, the express-interest control
+       * starts speaking two dialects of the same action.
+       *
+       * `null` means the owner-gated interest table is absent — which is also
+       * the availability signal, so there is no separate boolean to disagree
+       * with it. The rows then stay read-only rather than showing a button
+       * that cannot write.
+       */
+      readonly interestLabels: InterestLabelBag | null;
     };
+
+/** The 10 strings `WorkerInterestButton` needs. Declared here, in the pure
+ *  contract, so the server-only resolver and the client panel agree on one
+ *  shape without either importing the other. */
+export interface InterestLabelBag {
+  readonly express: string;
+  readonly sent: string;
+  readonly reviewed: string;
+  readonly contacted: string;
+  readonly withdraw: string;
+  readonly internalNote: string;
+  readonly error: string;
+  readonly contactedLink: string;
+  readonly contactEmployer: string;
+  readonly contactError: string;
+}
 
 /**
  * One match, as the panel renders it.
@@ -178,4 +213,14 @@ export interface OpportunitiesResultMatch {
   readonly salary: "within" | "negotiable" | "unknown";
   readonly missingSkillSlugs: readonly string[];
   readonly isNew: boolean;
+  /** The company name, when the demand carries one. The result IS the answer
+   *  to "find me work" now, so a row must name who is hiring. */
+  readonly companyName: string | null;
+  /** The canonical match status behind the basis — carried so a badge can be
+   *  coloured HONESTLY. A weak fit painted success-green tells the worker the
+   *  opposite of what the use case said. */
+  readonly fitStatus: JobRecommendation["status"];
+  /** The worker's OWN interest status on this demand, straight from the
+   *  canonical use case. `null` = no signal yet. Never guessed. */
+  readonly interestStatus: InterestStatus | null;
 }

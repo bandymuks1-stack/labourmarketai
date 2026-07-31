@@ -112,8 +112,11 @@ describe("A — the profile summary delegates to the ONE worker read model", () 
 });
 
 describe("B — acting on a match uses the ONE canonical interest path", () => {
-  const messages = read("components/app/conversation/chat/messages.tsx");
-  const findWork = read("lib/conversation/find-work.ts");
+  /* W3 consolidation: the chat thread stopped rendering job rows, so these
+     invariants moved with the rows to the Context Panel result and its
+     projection. The guarantees are unchanged — only where they are enforced. */
+  const messages = read("components/app/workspace/opportunities-result.tsx");
+  const findWork = read("lib/marketplace/worker-opportunities-actions.ts");
 
   it("the chat renders the canonical control, not a chat-local one", () => {
     expect(messages).toMatch(
@@ -138,17 +141,19 @@ describe("B — acting on a match uses the ONE canonical interest path", () => {
   it("the interest status shown is the use case's, never recomputed", () => {
     expect(findWork).toMatch(/view\.interestStatusByRequestId\[/);
     // No local defaulting of an absent signal into a concrete status.
-    expect(codeOf(join(APP_ROOT, "lib", "conversation", "find-work.ts"))).not.toMatch(
+    expect(codeOf(join(APP_ROOT, "lib", "marketplace", "worker-opportunities-actions.ts"))).not.toMatch(
       /\?\?\s*["']interested["']|\?\?\s*["']withdrawn["']/,
     );
   });
 
   it("no dead button: the control is offered only when the store exists", () => {
     expect(findWork).toMatch(/interestAvailable\s*\n?\s*\?/);
-    // …and the card renders it only when those labels really arrived. The
-    // condition moved into `EmployerMatchCard` in W3 (the card became
-    // selectable); the rule is unchanged — labels absent ⇒ no control at all.
-    expect(messages).toMatch(/interestLabels\s*&&\s*locale\s*\?/);
+    // …and the result row renders it only when those labels really arrived.
+    // The condition has moved twice now — into `EmployerMatchCard` when the
+    // card became selectable, and into the Context Panel result row when the
+    // card was deleted. The rule has never changed: labels absent ⇒ no
+    // control at all, because a button that cannot write is a lie.
+    expect(messages).toMatch(/\{interestLabels\s*&&/);
   });
 });
 
@@ -226,12 +231,12 @@ describe("honesty — the chat never promises a mechanism it lacks", () => {
     // The badge colour carries the same fact as the label. A flat
     // `text-state-success` on every match told the worker "strong" while the
     // label said "weak" — the colour is the louder signal.
-    const messages = read("components/app/conversation/chat/messages.tsx");
+    const messages = read("components/app/workspace/opportunities-result.tsx");
     expect(messages).toMatch(/FIT_BADGE/);
     expect(messages).toMatch(/weak:\s*["'][^"']*state-warning/);
     expect(messages).toMatch(/insufficient:\s*["'](?![^"']*state-success)/);
     // …and the status really travels from the use case to the card.
-    expect(read("lib/conversation/find-work.ts")).toMatch(/fitStatus:\s*m\.status/);
+    expect(read("lib/marketplace/worker-opportunities-actions.ts")).toMatch(/fitStatus:\s*m\.status/);
   });
 
   it("the chat answers state questions from the server, not from canned copy", () => {

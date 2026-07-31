@@ -2,14 +2,9 @@
  * Conversation chat message model (Real Conversation UI). Everything the user
  * sees is a MESSAGE in one chronological thread — assistant turns, user turns,
  * server results, confirmations, and structured cards (CV upload, work-log
- * preview, employer match, translation preview). No dashboard cards; the whole
- * surface is a single conversation.
+ * preview, translation preview). No dashboard cards, and no job cards either —
+ * job matches render in the Context Panel result, which is their one surface.
  */
-
-import type {
-  ChatEmployerMatch,
-  ChatInterestLabels,
-} from "@/lib/conversation/find-work-contract";
 
 export type Role = "assistant" | "user" | "system";
 
@@ -24,20 +19,6 @@ export type ChoiceChip = {
    *  designed. */
   recommended?: boolean;
 };
-
-/**
- * An employer-match card IS the canonical adapter's output — the same object,
- * not a look-alike. Re-declaring the shape here is exactly how a presentation
- * copy of a domain result starts drifting; the alias makes that impossible.
- *
- * It carries the REAL demand id (`JobRecommendation.requestId`, never a list
- * index — it doubles as the React key and as the id the shown-marker reports),
- * the bounded human reason bullets (the first is the canonical §19 basis line,
- * identical on every marketplace surface, never a raw score), and the worker's
- * own interest status.
- */
-export type EmployerMatch = ChatEmployerMatch;
-export type InterestLabels = ChatInterestLabels;
 
 export type WorkLogDraft = {
   date: string;
@@ -85,19 +66,6 @@ export type ChatMessage =
     }
   | { id: string; role: "user"; kind: "file"; fileName: string; status: "uploading" | "read" | "error"; note?: string; at?: string }
   | { id: string; role: "assistant"; kind: "question"; text: string; chips: ChoiceChip[]; at?: string }
-  | {
-      id: string;
-      role: "assistant";
-      kind: "employer-match";
-      intro: string;
-      matches: EmployerMatch[];
-      /** Locale + capability come from the server turn. `interestLabels: null`
-       *  means the owner-gated interest table is absent, so the cards stay
-       *  read-only — never a dead button. */
-      locale?: string;
-      interestLabels?: InterestLabels | null;
-      at?: string;
-    }
   | {
       id: string;
       role: "assistant";
