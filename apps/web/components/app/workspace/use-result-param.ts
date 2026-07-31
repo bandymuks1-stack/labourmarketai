@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { isResultKind, type ResultKind } from "@/lib/conversation/result-registry";
@@ -37,9 +37,28 @@ export function useResultParam(): {
   const router = useRouter();
   const params = useSearchParams();
 
+  /**
+   * `useSearchParams()` alone is not sufficient here.
+   *
+   * In the App Router a client component reading it outside a <Suspense>
+   * boundary renders once with EMPTY params — and this hook lives inside the
+   * conversation, which is mounted deep in the dashboard tree. Observed
+   * directly: `/lt/dashboard?result=market` mounted the panel in `work_context`
+   * mode because the hook saw no `result`, so the result silently never opened.
+   *
+   * The live location is therefore read after mount as the authoritative
+   * fallback. `useSearchParams` still drives subsequent in-page updates.
+   */
+  const [href, setHref] = useState<string | null>(null);
+  useEffect(() => {
+    setHref(window.location.search);
+  }, [params]);
+
   // An invented or stale `?result=` value must never render. Validating here
   // means every consumer receives either a real kind or null.
-  const raw = params?.get("result") ?? null;
+  const raw =
+    params?.get("result") ??
+    (href ? new URLSearchParams(href).get("result") : null);
   const result = useMemo<ResultKind | null>(
     () => (isResultKind(raw) ? raw : null),
     [raw],

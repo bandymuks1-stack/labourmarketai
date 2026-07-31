@@ -258,7 +258,11 @@ export function ContextPanel({
         {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
             World State: the selection flies it to the entity's place, and
             clicking a marker opens that entity here. Not a separate screen. */}
-        <WorkspaceMap className="mb-4" />
+        {/* One surface per question. WorkspaceMap and the market result BOTH
+            answer "where?", so stacking them puts two maps in a 22rem column
+            and makes the panel argue with itself. When a result is showing, the
+            result owns the geography. */}
+        {showsResult ? null : <WorkspaceMap className="mb-4" />}
         {showsResult && result ? (
           <ResultBody
             kind={result}
