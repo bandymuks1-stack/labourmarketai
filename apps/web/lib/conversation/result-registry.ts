@@ -46,6 +46,7 @@ export type ResultKind =
   | "journal"
   | "calendar"
   | "market"
+  | "opportunities"
   | "project"
   | "evidence"
   | "reputation"
@@ -134,7 +135,13 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
   {
     kind: "market",
     titleKey: "conversation.results.market.title",
-    openedBy: ["worker.express-interest", "worker.what-next"],
+    // `worker.express-interest` used to be listed here as well. Its OWN
+    // descriptor in the action registry says `advancedRoute:
+    // "/dashboard/opportunities"` — so the action and the result it opened
+    // disagreed about where the capability lives, and `resultForAction` (first
+    // match wins) resolved it to the map. W3 row 5 gave that action a result
+    // whose route matches its own, which is where it moved.
+    openedBy: ["worker.what-next"],
     advancedRoute: "/dashboard/market-map",
     contexts: ["personal", "organization"],
     // VERIFIED: `lib/market-map/market-result.ts` aggregates REAL rows —
@@ -143,6 +150,27 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // centroid. No demo fallback: an empty market renders as empty. The
     // landing's scripted scenario lives in a separate module tagged `demo` and
     // cannot reach this path.
+    dataReadiness: "real",
+  },
+  {
+    kind: "opportunities",
+    titleKey: "conversation.results.opportunities.title",
+    // The action whose own advancedRoute is `/dashboard/opportunities`. The
+    // result and the action now name the SAME screen.
+    openedBy: ["worker.express-interest"],
+    advancedRoute: "/dashboard/opportunities",
+    // PERSONAL ONLY, and that is a product statement, not an oversight: these
+    // are the matches for THIS PERSON's skills. Inside an organization context
+    // "my matches" answers a question nobody asked there, so it is not offered
+    // rather than offered and quietly wrong.
+    contexts: ["personal"],
+    // VERIFIED (W3 row 5): the read is the canonical marketplace use case
+    // `loadWorkerOpportunityMatches` → `getWorkerJobRecommendations` — the same
+    // gated RPC rows × match engine the board runs, ranked by the shared §19
+    // comparator. No second engine, no invented company, need, salary or
+    // score. The two ways real data can be absent (gated RPC unapplied, no
+    // worker row) are DISTINCT states in the panel, so an absent source is
+    // never rendered as an empty result.
     dataReadiness: "real",
   },
   {

@@ -201,7 +201,7 @@ describe("compact surfaces: load 3 → recommend 2 → limit → mark the displa
 
     const { ports, sent } = spyPorts();
     await runMarkShown(ports, {
-      surface: "dashboard_recommendations",
+      surface: "conversation",
       shownRequestIds: recs.slice(0, 3).map((r) => r.requestId),
     });
     expect(sent.flat()).not.toContain(ID.nlWelder);
@@ -213,10 +213,10 @@ describe("compact surfaces: load 3 → recommend 2 → limit → mark the displa
       { available: true, seenIds: new Set() },
       NOW,
     );
-    const displayed = recs.slice(0, 1); // the card renders one row
+    const displayed = recs.slice(0, 1); // the compact result renders one row
     const { ports, sent } = spyPorts();
     await runMarkShown(ports, {
-      surface: "dashboard_recommendations",
+      surface: "conversation",
       shownRequestIds: displayed.map((r) => r.requestId),
     });
     expect(sent).toEqual([[ID.nlTiler]]);
@@ -256,7 +256,6 @@ describe("one contract, four surfaces, same narrowing rule", () => {
       [
         { surface: "conversation", ids: [ID.nlTiler, ID.deTiler] },
         { surface: "opportunities_board", ids: [ID.deTiler] },
-        { surface: "dashboard_recommendations", ids: [ID.nlTiler] },
         { surface: "journal_context", ids: [ID.nlTiler] },
       ];
     for (const s of scenarios) {

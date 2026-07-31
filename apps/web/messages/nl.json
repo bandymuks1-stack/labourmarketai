@@ -11366,7 +11366,17 @@
         "requiredSkills": "vaardigheden",
         "headcount": "aantal mensen",
         "organization": "organisatie"
-      }
+      },
+      "opportunities": {
+        "title": "Vacatures die bij je passen"
+      },
+      "opportunitiesError": "Kon de vacatures die bij je passen niet laden.",
+      "opportunitiesUnavailable": "De vraagbron is nog niet ingeschakeld, dus er valt nog niets te matchen.",
+      "opportunitiesNoWorker": "Zonder werknemersprofiel is er niets om je vaardigheden mee te vergelijken.",
+      "opportunitiesEmpty": "Op dit moment past geen enkele open vraag bij je vaardigheden.",
+      "opportunitiesPartial": "De ‘nieuw’-markeringen konden deze keer niet worden gelezen — de rijen zijn echt, nieuwheid wordt niet getoond.",
+      "opportunitiesMore": "Nog {n} in de volledige lijst.",
+      "retry": "Opnieuw proberen"
     }
   },
   "landing": {

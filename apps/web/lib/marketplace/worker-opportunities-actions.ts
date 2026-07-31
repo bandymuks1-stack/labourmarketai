@@ -2,10 +2,15 @@
 
 import {
   MARKETPLACE_SURFACES,
+  OPPORTUNITIES_RESULT_LIMIT,
   type MarketplaceSurface,
   type MarkShownOutcome,
+  type OpportunitiesResultView,
 } from "./worker-opportunities-contract";
-import { markOpportunitiesShown } from "./worker-opportunities";
+import {
+  loadWorkerOpportunityMatches,
+  markOpportunitiesShown,
+} from "./worker-opportunities";
 
 /**
  * The ONE server action every marketplace surface uses to report what it put
@@ -41,4 +46,57 @@ export async function markOpportunitiesShownAction(
     };
   }
   return markOpportunitiesShown({ surface, shownRequestIds });
+}
+
+/**
+ * The opportunities RESULT's single server entrypoint (W3 row 5).
+ *
+ * Thin, like the market result's own action: it enters the SAME canonical use
+ * case every other marketplace surface enters, and projects the view onto the
+ * client-safe contract shape. No second engine, no second ranking, no second
+ * notion of what "new" means.
+ *
+ * NO ARGUMENTS, deliberately. The limit is a constant in the contract, so a
+ * client cannot widen its own read by passing a bigger number to an action
+ * that is, by construction, callable by anyone with a session. Authorization
+ * itself is unchanged: it is RLS on the rows the gated RPC returns.
+ *
+ * The three cases stay DISTINCT all the way to the panel. Collapsing
+ * "unapplied demand source" into "no matches" would be the surface claiming a
+ * fact about data that cannot exist yet — the exact dishonesty the compact
+ * card avoided by rendering nothing at all. A panel cannot render nothing, so
+ * it renders the reason instead.
+ */
+export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResultView> {
+  const view = await loadWorkerOpportunityMatches({
+    // The conversation window — the surface tag this result actually is.
+    surface: "conversation",
+    limit: OPPORTUNITIES_RESULT_LIMIT,
+  });
+  if (view.kind !== "ready") return { kind: "no-worker" };
+  if (!view.capabilities.boardAvailable) return { kind: "unavailable" };
+
+  return {
+    kind: "ready",
+    // Projected field by field: the recommendation model may grow without
+    // widening what crosses this boundary.
+    matches: view.matches.map((m) => ({
+      requestId: m.requestId,
+      roleSlug: m.roleSlug,
+      country: m.country,
+      locationLabel: m.locationLabel,
+      startPeriod: m.startPeriod,
+      basis: {
+        matchedTotal: m.basis.matchedTotal,
+        needTotal: m.basis.needTotal,
+        matchedConfirmed: m.basis.matchedConfirmed,
+      },
+      salary: m.salary,
+      missingSkillSlugs: m.missingSkillSlugs,
+      isNew: m.isNew,
+    })),
+    totalRecommendable: view.totalRecommendable,
+    newCount: view.newCount,
+    seenDegraded: view.capabilities.seenReadDegraded,
+  };
 }

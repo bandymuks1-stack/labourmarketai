@@ -215,11 +215,10 @@ describe("mark shown — unexpected failures are never swallowed", () => {
 });
 
 describe("mark shown — one contract for every surface", () => {
-  it("all four surfaces receive the identical outcome shape for the identical store answer", async () => {
+  it("every surface receives the identical outcome shape for the identical store answer", async () => {
     const surfaces: MarketplaceSurface[] = [
       "conversation",
       "opportunities_board",
-      "dashboard_recommendations",
       "journal_context",
     ];
     const outcomes = [];

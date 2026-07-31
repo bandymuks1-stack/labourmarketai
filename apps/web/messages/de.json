@@ -11366,7 +11366,17 @@
         "requiredSkills": "Fähigkeiten",
         "headcount": "Personenzahl",
         "organization": "Organisation"
-      }
+      },
+      "opportunities": {
+        "title": "Passende Jobs"
+      },
+      "opportunitiesError": "Die passenden Jobs konnten nicht geladen werden.",
+      "opportunitiesUnavailable": "Die Bedarfsquelle ist noch nicht aktiviert, es gibt also noch nichts zum Abgleichen.",
+      "opportunitiesNoWorker": "Ohne Arbeitnehmerprofil gibt es nichts, womit sich deine Fähigkeiten vergleichen lassen.",
+      "opportunitiesEmpty": "Derzeit passt kein offener Bedarf zu deinen Fähigkeiten.",
+      "opportunitiesPartial": "Die „neu“-Markierungen konnten diesmal nicht gelesen werden — die Einträge sind echt, Neuheit wird nicht angezeigt.",
+      "opportunitiesMore": "Noch {n} in der vollständigen Liste.",
+      "retry": "Erneut versuchen"
     }
   },
   "landing": {

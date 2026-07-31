@@ -11366,7 +11366,17 @@
         "requiredSkills": "skills",
         "headcount": "headcount",
         "organization": "organization"
-      }
+      },
+      "opportunities": {
+        "title": "Jobs that fit you"
+      },
+      "opportunitiesError": "Could not read the jobs that fit you.",
+      "opportunitiesUnavailable": "The demand source is not enabled yet, so there is nothing to match against.",
+      "opportunitiesNoWorker": "Without a worker profile there is nothing to compare your skills against.",
+      "opportunitiesEmpty": "No open needs match your skills right now.",
+      "opportunitiesPartial": "The “new” markers could not be read this time — the rows are real, novelty is not shown.",
+      "opportunitiesMore": "{n} more in the full list.",
+      "retry": "Try again"
     }
   },
   "landing": {

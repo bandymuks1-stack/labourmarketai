@@ -215,7 +215,7 @@ describe("rule 4 — every declared surface is really wired", () => {
     }
   });
 
-  it("all four declared surfaces exist in the product, not just in the type", () => {
+  it("every declared surface exists in the product, not just in the type", () => {
     const used = new Set(
       shownMarkerUsages()
         .map((u) => /surface=(?:"([a-z_]+)"|\{"([a-z_]+)"\})/.exec(u.props))

@@ -16,15 +16,25 @@
  * and receives an honest outcome back.
  */
 
-/** The four surfaces that may show a worker their opportunities. Adding a
- *  fifth is a deliberate act: it must go through the same use case. */
+/**
+ * The surfaces that may show a worker their opportunities. Adding one is a
+ * deliberate act: it must go through the same use case, and a guard test pins
+ * that every entry here is really rendered by something
+ * (`canonical-marketplace-use-case.test.ts`, rule 4).
+ *
+ * W3 row 5 removed a fourth, `dashboard_recommendations` — the worker-overview
+ * "Man tinkantys darbai" card on `/dashboard/advanced`. That capability did not
+ * disappear; it became the `opportunities` RESULT, which reports under
+ * `conversation`, the surface it actually is. The entry is deleted rather than
+ * kept "just in case" precisely because rule 4 would otherwise be asserting
+ * something untrue about the product.
+ */
 export const MARKETPLACE_SURFACES = [
-  /** The conversation window — the primary work journal (canonical §0). */
+  /** The conversation window — the primary work journal (canonical §0). This
+   *  is also where the `opportunities` result renders (W3 row 5). */
   "conversation",
   /** /dashboard/opportunities — the full structured board. */
   "opportunities_board",
-  /** The worker overview "Man tinkantys darbai" card. */
-  "dashboard_recommendations",
   /** The journal → jobs context block. */
   "journal_context",
 ] as const;
@@ -99,4 +109,73 @@ export interface MarkShownInput {
   readonly surface: MarketplaceSurface;
   /** ONLY the ids actually rendered to the human. Never "everything loaded". */
   readonly shownRequestIds: readonly string[];
+}
+
+/**
+ * How many matches the conversation's opportunities RESULT shows (W3 row 5).
+ *
+ * Fixed here rather than accepted from the client: the result's server
+ * entrypoint takes no arguments, so no caller can widen its own read.
+ */
+export const OPPORTUNITIES_RESULT_LIMIT = 5;
+
+/**
+ * What the opportunities RESULT hands its panel — the client-safe projection of
+ * `MarketplaceMatchesView` (W3 row 5).
+ *
+ * It lives in this PURE module, not next to the use case, because the panel is
+ * a client component: `worker-opportunities.ts` is `server-only`, and a surface
+ * reaching into it — even for a type — is the boundary this contract exists to
+ * keep. The three cases below are the only answers the panel may render, and
+ * each is a DIFFERENT fact, never collapsed into "nothing to show":
+ *
+ *   `no-worker`    — the caller has no worker row; matching cannot mean
+ *                    anything yet, so the panel says that and offers the board.
+ *   `unavailable`  — the owner-gated worker-visibility RPC is unapplied, so
+ *                    there is no demand data AT ALL. "No matches" would be a
+ *                    false claim about data that cannot exist yet.
+ *   `ready`        — real rows. An empty `matches` here is an honest empty:
+ *                    the read worked and found nothing.
+ */
+export type OpportunitiesResultView =
+  | { readonly kind: "no-worker" }
+  | { readonly kind: "unavailable" }
+  | {
+      readonly kind: "ready";
+      /** Ranked, explained matches — best first, already the displayed slice. */
+      readonly matches: readonly OpportunitiesResultMatch[];
+      /** How many matches exist beyond the shown slice's cap. */
+      readonly totalRecommendable: number;
+      /** Unseen matches over ALL recommendable rows. 0 while the seen store is
+       *  unapplied — a badge that can never clear is noise, not a signal. */
+      readonly newCount: number;
+      /** The seen read failed for a reason OTHER than "not applied yet", so
+       *  the new-markers are not trustworthy this render. The panel keeps the
+       *  rows (they are real) and stops claiming novelty — the PARTIAL state. */
+      readonly seenDegraded: boolean;
+    };
+
+/**
+ * One match, as the panel renders it.
+ *
+ * A structural subset of `JobRecommendation` — the fields a compact result can
+ * honestly show. It is restated rather than re-exported so that widening the
+ * recommendation model never silently widens what crosses the action boundary.
+ * `basis` travels WHOLE (§19): counts and confirmed share together, never a
+ * bare percentage.
+ */
+export interface OpportunitiesResultMatch {
+  readonly requestId: string;
+  readonly roleSlug: string | null;
+  readonly country: string | null;
+  readonly locationLabel: string | null;
+  readonly startPeriod: string | null;
+  readonly basis: {
+    readonly matchedTotal: number;
+    readonly needTotal: number;
+    readonly matchedConfirmed: number;
+  };
+  readonly salary: "within" | "negotiable" | "unknown";
+  readonly missingSkillSlugs: readonly string[];
+  readonly isNew: boolean;
 }

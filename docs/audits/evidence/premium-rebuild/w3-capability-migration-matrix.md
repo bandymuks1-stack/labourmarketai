@@ -1,6 +1,6 @@
 # W3 — `/dashboard/advanced` CAPABILITY MIGRATION MATRIX
 
-> **Status: 1 of 28 rows MIGRATED (row 4). Rows 13 and 15 VERIFIED —
+> **Status: 2 of 28 rows MIGRATED (rows 4 and 5). Rows 13 and 15 VERIFIED —
 > no independent drop exists; they are removed by the route deletion.**
 > This file is step 1 of the W3 method. The route is **not** deleted, and must
 > not be deleted until every row below is `MIGRATED` and browser-proven.
@@ -50,7 +50,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 2 | Premium Hub company card | `PremiumHubCompanyCard` | ABSORB | new `organization` result kind | TODO |
 | 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB | `project` result | TODO |
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
-| 5 | Job recommendations | `JobRecommendationsCard` | ABSORB | `market` result / new `opportunities` | TODO |
+| 5 | Job recommendations | `JobRecommendationsCard` | ABSORB | new `opportunities` result | **MIGRATED 2026-07-31** — result built, card deleted, browser-proven |
 | 6 | Worker invitations | `WorkerInvitationsCard` | ABSORB | `calendar` or new `invitations` | TODO |
 | 7 | Demand request create | `DemandRequestButton` | CHAT | already an action id — render result | TODO |
 | 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | `project` result | TODO |
@@ -76,7 +76,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
 **Counts: 28 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 1 MIGRATED (row 4).**
+2 DETAIL. 2 MIGRATED (rows 4 and 5); 14 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -143,6 +143,50 @@ W3 step is an ABSORB row — and the honest smallest one is row 5 (job
 recommendations) or row 6 (worker invitations), each of which needs a result
 state with real data and the full idle/loading/empty/partial/error/retry set.
 
+## Row 5 — DONE, and what the first ABSORB cost
+
+`JobRecommendationsCard` ("Man tinkantys darbai") had exactly ONE mount, on
+`/dashboard/advanced`, and no canonical home anywhere else. That is what makes
+it different from rows 13/15: deleting it would have deleted the capability. So
+it became the `opportunities` RESULT first, and only then was the card removed —
+in the same commit, with the guard rewritten to pin BOTH halves (the card is
+gone from the route AND the result renders it). A guard that only checked the
+first half would pass just as well if the capability had been thrown away.
+
+**Not a port.** The card could legitimately render NOTHING when the owner-gated
+worker-visibility RPC was unapplied. A result the person explicitly asked for
+may not do that: silence there reads as "no jobs match you", a claim about data
+that cannot exist yet. So each reason for having no rows became its own state —
+`unavailable` (gated source), `no-worker` (no subject to match), `empty` (the
+read worked, nothing matched) — plus `idle`/`loading`/`error`+`retry` and a
+`partial` state for when the seen store read degrades and novelty can no longer
+be claimed honestly. Every state offers the board, so none is a dead end.
+
+**Two pieces of drift the work exposed rather than accommodated:**
+
+1. `worker.express-interest` was listed under the `market` result, whose route
+   is `/dashboard/market-map`. The action's OWN descriptor says
+   `advancedRoute: "/dashboard/opportunities"` — action and result disagreed
+   about where the capability lives, and `resultForAction` (first match wins)
+   resolved it to the map. The action now opens the `opportunities` result,
+   whose route is the one the action itself names.
+2. `MARKETPLACE_SURFACES` declared four surfaces; with the card gone,
+   `dashboard_recommendations` had no renderer. Rule 4 of
+   `canonical-marketplace-use-case.test.ts` caught this on the first full run —
+   it is the guard doing exactly its job. The entry was deleted rather than
+   kept, and `getNewMarketplaceMatchCount` (which renders nothing) now passes
+   NO surface instead of borrowing a render surface's name.
+
+Proven in the browser at 1440 and 375 (`tests/e2e/w3-second-dashboard.spec.ts`,
+3 new scenarios, all 5 in the file green): the result renders real rows with the
+§19 basis, the advanced route still works without the card, and there is no
+horizontal overflow on a phone. Evidence:
+`w3/row5-opportunities-result-1440.png`, `w3/row5-opportunities-result-375.png`.
+
+One harness defect was produced and fixed while writing the proof — a state
+count read before the client-side read settled. That is the fourth of its kind
+in this programme and, again, not a product defect.
+
 ## Honest reading of this matrix
 
 `/dashboard/advanced` cannot be removed in one step, and any claim that it can
@@ -168,14 +212,15 @@ through.
 1. DONE — row 4 (the fake map removed, browser-proven).
 2. DONE — rows 13 and 15 VERIFIED. No independent drop exists; they are
    removed by the route deletion. See the section above.
-3. NEXT — row 5 (job recommendations) or row 6 (worker invitations): the
-   smallest genuine ABSORB. Build the result state with real data and the full
-   idle/loading/empty/partial/error/retry set, repoint the inbound link, prove
-   the capability survived in a browser, THEN remove the card.
-4. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
+3. DONE — row 5 (job recommendations) is the `opportunities` result; the card
+   is deleted and both halves are guard-pinned. See the section above.
+4. NEXT — row 6 (worker invitations), the next smallest ABSORB. It is heavier
+   than row 5 in one specific way: it carries a WRITE (accept-invitation), so
+   the result needs the outcome states the read-only result did not.
+5. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
    the collapse market-map.tsx's own header already describes.
-5. Then the remaining ABSORB rows in dependency order.
-6. Delete /dashboard/advanced only when every row is MIGRATED or
+6. Then the remaining 14 ABSORB rows in dependency order.
+7. Delete /dashboard/advanced only when every row is MIGRATED or
    OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
    the same commit.
 ```
