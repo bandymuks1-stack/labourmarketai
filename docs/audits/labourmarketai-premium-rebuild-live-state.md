@@ -10,8 +10,8 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 14:10 |
-| UTC | 2026-07-31 11:10 |
+| Europe/Vilnius | 2026-07-31 14:45 |
+| UTC | 2026-07-31 11:45 |
 
 ## REPOSITORY
 
@@ -63,22 +63,24 @@ implementation branch was created.**
 | | |
 |---|---|
 | PR | **#925** — `feat(product): unified premium workspace — chat-first result surface, Goal 3 market depth, landing repair` |
-| State | OPEN, **ready for review** (undrafted 2026-07-31) |
-| Head | `9c7da373` |
+| State | **MERGED** 2026-07-31 into `main` |
+| Head at merge | `9628308b` |
 | Base | `main` |
 | Mergeable | MERGEABLE |
 | Required checks | `quality`, `migration-safety` (branch protection on `main`) |
 | Previous CI | `quality` **FAILURE** at `edcec2fc` — 6 files / 7 tests, ALL landing guards. Confirmed against run `30609842472`; identical to the set fixed by `9c7da373`. |
-| Current CI | **running at `9c7da373`** |
-| Merge method | **merge commit or rebase — NOT squash.** A squash would collapse 18 commits and orphan the Goal 3 branch's base. |
+| Final CI | `quality` **SUCCESS**, `migration-safety` **SUCCESS**, mergeState `CLEAN` at `9628308b` |
+| Merge method used | **merge commit** — history preserved, all 20 commits intact. Merge SHA `a5b991f4`. |
 
 ## PRODUCTION
 
 | | |
 |---|---|
-| Production SHA | `752f8b19` (= `main`, unchanged) |
-| Deployment ID | not yet — no deploy performed this session |
-| Vercel | preview built SUCCESS on the PR |
+| Production SHA | **`a5b991f4`** (was `752f8b19`) |
+| Deployment ID | **`5690792306`** — Production, state **success**, 2026-07-31T11:32:05Z |
+| Target | `https://app.labourmarket.ai` |
+| Public landing proof | **4/4 PASSED IN PRODUCTION** — `premium-rebuild/production-smoke.md` |
+| Authenticated proof | **NOT PROVEN in production** — blocked on a synthetic production account |
 
 ## DEV SERVER OWNERSHIP (master command §4)
 
@@ -100,8 +102,8 @@ Base URL used for local proof: `http://127.0.0.1:3400`.
 | Item | State | Proof |
 |---|---|---|
 | Goal 3 — project evaluation | authenticated-browser proven, LOCAL | `docs/audits/evidence/goal3-project-evaluation/` — 8 scenarios, 5 clean runs, 14 screenshots |
-| W1 — audit + landing repair | delivered, LOCAL | `docs/audits/evidence/premium-rebuild-w1/` — 4 scenarios, 3 screenshots |
-| Branch integration | pushed, PR ready, CI running | PR #925 @ `9c7da373` |
+| W1 — audit + landing repair | **PRODUCTION PROVEN** | `premium-rebuild/production-smoke.md` — 4/4 against app.labourmarket.ai |
+| Branch integration | **MERGED + DEPLOYED** | PR #925 → `a5b991f4`, deployment `5690792306` |
 | Ponytail Improved decision | `ADAPT_RULES_ONLY` — **not installed** | `premium-rebuild-w1/README.md` §2 |
 
 ### Checks at `9c7da373` (local)
@@ -135,12 +137,21 @@ None in the test suite at `9c7da373`.
 4. `audience-value-sections.tsx` — dead, **not deleted**: no successor, so
    deleting it destroys content. Owner/product decision required.
 5. W2, W4–W11 not started.
-6. Nothing production-proven yet.
+6. The AUTHENTICATED product is not production-proven (public landing is).
 
 ## BLOCKERS
 
-**None requiring owner action.** Merge and deploy are authorized by the master
-command §3. The only wait is CI wall-clock.
+**ONE, and it is a genuine credential blocker — not a permission request.**
+
+Authenticated production proof of Goal 3 needs a synthetic PRODUCTION worker
+account. `scripts/e2e-mint-session.ts` refuses non-local targets by design, and
+this agent may not create accounts or handle credentials. Unblock by either
+creating `qa.worker+goal3@…` in production and supplying credentials through the
+approved secret path, or authorizing a scoped session-mint for that one
+synthetic account.
+
+Everything else proceeds: merge and deploy were authorized by master command §3
+and are DONE.
 
 ## COMPLIANCE
 
@@ -165,13 +176,27 @@ old LABMA project touched:             NO
 
 ## NEXT EXACT ACTION
 
+DONE this session: PR #925 merged (`a5b991f4`), production deployed
+(`5690792306`), public landing proven in production 4/4, W3 capability matrix
+written (27 capabilities classified, 0 migrated).
+
 ```text
-1. gh pr view 925 --json statusCheckRollup   → confirm quality + migration-safety SUCCESS
-2. gh pr merge 925 --merge                   → merge commit, NOT squash
-3. Wait for the Vercel production deployment of the new main; record SHA + deployment ID
-4. Run the authenticated browser proof against production (synthetic account only):
-   landing → inline login → /lt/dashboard?result=market → Rotterdam → project → evaluation
-5. Record production SHA, deployment ID, screenshots, failed-request and console counts
-   into docs/audits/evidence/premium-rebuild/production-smoke.md
-6. Then W3: write the /dashboard/advanced capability migration matrix before deleting anything.
+1. W3 row 4 — the lowest-risk migration, and it is already evidence-backed:
+   components/app/premium-hub/premium-hub-market-map.tsx renders a hand-drawn
+   <svg> (159 lines), NOT a map. The canonical <MarketMap> (Leaflet, real WGS84)
+   supersedes it and the doctrine forbids "an SVG illustration standing in for a
+   map". Replace the mount inside /dashboard/advanced with the canonical
+   MarketMap fed by loadMarketResult, then delete the component.
+   Prove: the advanced route still renders, one leaflet container, origin=live.
+
+2. W3 rows 13 and 15 (DashboardNextAction, CurrentSpaceHeader) — classified
+   ALREADY. Verify against the Context Panel work context, then drop.
+
+3. Then the 15 ABSORB rows in dependency order, each with its own browser proof.
+   Delete /dashboard/advanced only when every row is MIGRATED or OBSOLETE-proven,
+   updating surface-registry.ts and route-truth-map.test.ts in the same commit.
+
+4. In parallel, unblocked: run axe accessibility + Lighthouse baselines against
+   the production public routes and open docs/audits/evidence/premium-rebuild/
+   accessibility.md and performance-seo.md.
 ```
