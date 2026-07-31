@@ -1068,6 +1068,11 @@ export default async function JournalPage({
                           editSlot={
                             rowEditingEntry ? (
                               <JournalEntryEditLauncher
+                                // RSC-passed slot elements need an explicit key:
+                                // the row renders this beside its delete control
+                                // (an array position), and Flight-deserialized
+                                // elements can't be marked as static children.
+                                key="edit-launcher"
                                 entry={rowEditingEntry}
                                 engagements={engagements}
                                 directions={directions}
