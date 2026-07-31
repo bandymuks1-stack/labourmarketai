@@ -1,5 +1,5 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -33,7 +33,13 @@ import { join } from "node:path";
  * personal data. The storage state is gitignored and never attached.
  */
 
-const STATE = "tests/e2e/.storage-state.prod-qa.json";
+/**
+ * The minted session. Overridable ONLY so the gate's own logic can be exercised
+ * against the local stack before it is ever pointed at production — a suite
+ * that has never run cannot be trusted to judge a launch. In production use the
+ * default; `prod-qa-gate.ts` never sets this.
+ */
+const STATE = process.env.PROD_QA_STATE ?? "tests/e2e/.storage-state.prod-qa.json";
 const SHOTS = join(
   process.cwd(),
   "..",
@@ -136,6 +142,15 @@ test.afterAll(() => {
 
 test.use({ storageState: STATE, trace: "on" });
 
+/**
+ * 90s per check. Production serves prebuilt pages and never needs it — but the
+ * gate is also exercised against `next dev` before it is pointed at production,
+ * and there a first-hit route compile genuinely exceeds the 30s default. A
+ * budget that only works on the fast target would mean the suite could never be
+ * rehearsed, and an unrehearsed gate is not a gate.
+ */
+test.setTimeout(90_000);
+
 // ── DESKTOP ────────────────────────────────────────────────────────────────
 
 test.describe("desktop 1440x900", () => {
@@ -159,6 +174,33 @@ test.describe("desktop 1440x900", () => {
     await expect(page.getByTestId("composer-input")).toBeVisible();
     await expect(page.getByTestId("context-panel")).toBeVisible();
     settle("G2-first-experience", "desktop", c, "chat + composer + context panel present");
+  });
+
+  test("G2b onboarding — a returning identity is not sent back through a form maze", async ({
+    page,
+  }) => {
+    const c = instrument(page);
+    // Onboarding must either take an unfinished identity somewhere useful or
+    // get out of the way of a finished one. What it must NOT do is trap a
+    // returning worker in a questionnaire before they can reach the product.
+    //
+    // It REDIRECTS for an already-onboarded identity, so the settled URL is the
+    // assertion — navigating away mid-redirect aborts it, which is exactly what
+    // this check hit on its first local run.
+    await page.goto("/lt/onboarding", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("load");
+
+    const landed = new URL(page.url()).pathname;
+    if (landed.includes("/onboarding")) {
+      // It stayed: it must actually render something to act on.
+      await expect(page.locator("body")).toContainText(/\S/);
+      await expect(page.getByRole("button").or(page.getByRole("link")).first()).toBeVisible();
+    } else {
+      // It got out of the way: the destination must be usable, not a bounce.
+      await expect(page.getByTestId("conversation-chat")).toBeVisible();
+    }
+    await page.screenshot({ path: join(SHOTS, "g2b-onboarding-1440.png") });
+    settle("G2b-onboarding", "desktop", c, `onboarding settled at ${landed}, no form maze`);
   });
 
   test("G3 profile and Player Card — real data, no invented score", async ({ page }) => {
@@ -207,6 +249,11 @@ test.describe("desktop 1440x900", () => {
     await anchors.first().click();
     await expect(page.getByTestId("projects-view")).toBeVisible();
     await expect(page.getByTestId("crumb-place")).toBeVisible();
+    // Wait for a TERMINAL state before branching. Counting rows while the
+    // panel still says "loading" reads 0 and sends the assertion down the empty
+    // branch, which then fails for the wrong reason — the defect this check
+    // itself had on its first local run.
+    await expect(page.getByTestId("projects-loading")).toHaveCount(0);
     await page.screenshot({ path: join(SHOTS, "g5-projects-1440.png") });
 
     const rows = page.getByTestId("project-row");
@@ -273,7 +320,23 @@ test.describe("desktop 1440x900", () => {
     await expect(page).toHaveURL(/\/auth\/login/);
     await expect(page.getByTestId("conversation-chat")).toHaveCount(0);
     await page.screenshot({ path: join(SHOTS, "g8-session-expiry-1440.png") });
-    settle("G8-logout-expiry", "desktop", c, "cleared session bounces to login, no authenticated shell");
+
+    // RECOVERY: re-applying the minted session must restore the product. A
+    // session that cannot be re-established would make every later run depend
+    // on a fresh mint, and would hide a real re-login defect behind the setup.
+    await context.addCookies(
+      JSON.parse(readFileSync(join(process.cwd(), STATE), "utf8")).cookies,
+    );
+    await page.goto("/lt/dashboard");
+    await expect(page.getByTestId("conversation-chat")).toBeVisible();
+    await expect(page).not.toHaveURL(/\/auth\/login/);
+    await page.screenshot({ path: join(SHOTS, "g8-session-recovered-1440.png") });
+    settle(
+      "G8-logout-expiry-recovery",
+      "desktop",
+      c,
+      "cleared session bounces to login; re-applied session restores the product",
+    );
   });
 });
 
