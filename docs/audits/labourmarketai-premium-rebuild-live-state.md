@@ -10,8 +10,8 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 18:55 |
-| UTC | 2026-07-31 15:55 |
+| Europe/Vilnius | 2026-07-31 20:30 |
+| UTC | 2026-07-31 17:30 |
 
 ## REPOSITORY
 
@@ -179,13 +179,13 @@ old LABMA project touched:             NO
 
 | | |
 |---|---|
-| `main` HEAD | `7debb071` (== `origin/main`) |
-| Production deployment | `5694282066` — Production, **success**, sha `7debb071` |
+| `main` HEAD | `6e5ef02a` (== `origin/main`) |
+| Production deployment | `5695221417` — Production, **success**, sha `6e5ef02a` |
 | Production URL | `https://labourmarket.ai` (apex, verified live — not the 301 host) |
-| PRs merged this session | **#931** (`9519df3c`), **#932** (`7debb071`) |
-| Open PRs | none |
+| PRs merged this session | **#931**, **#932**, **#933**, **#934** (`6e5ef02a`) |
+| Open PRs | **#935** — W3 matrix + journey mapping + row 6 audit (docs only, checks pending) |
 | Unit/guard suite | 791 files / 12833 tests PASS |
-| W3 e2e | `w3-second-dashboard.spec.ts` — 9/9 PASS (rows 4 + 5) |
+| W3 e2e | `w3-second-dashboard.spec.ts` — **12/12 PASS** (rows 4 + 5, incl. consolidation) |
 | Typecheck / lint | clean |
 
 ### Employee beta production gate
