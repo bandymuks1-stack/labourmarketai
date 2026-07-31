@@ -19,8 +19,8 @@ delete the product, not the duplication.
 
 | Where | What |
 |---|---|
-| `components/app/account-menu.tsx:81` | "Advanced" menu entry — the main way in |
-| `components/app/conversation/worker-worklog-flow.tsx:235` | post-worklog CTA |
+| `components/app/account-menu.tsx:81` | "Advanced" menu entry — admin-only escape hatch |
+| ~~`worker-worklog-flow.tsx:235`~~ | **FIXED 2026-08-01** — the no-context CTA now opens `/dashboard/start`; ratchet guard `w3-return-to-workspace.test.ts` blocks new live doors |
 | `app/[locale]/dashboard/page.tsx:23` | comment only |
 | `components/app/dashboard-chrome.tsx:21` | comment; the route is in the `full` chrome group |
 | `lib/product-gate/surface-registry.ts:239` | declared "documented module escape hatch" |
@@ -59,12 +59,12 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 11 | Booking responses next-action | inline `<Link>` + count badge | **ALREADY** | the spine (bell + chips) already presents it; capability lives on `/dashboard/bookings` | **CONFIRMED 2026-08-01** — browser-proven with seeded real bookings, see below |
 | 12 | Bookings next-action | inline `<Link>` + count badge | **ALREADY** | same | **CONFIRMED 2026-08-01** — same proof |
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
-| 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
+| 14 | Chain actions | `DashboardChainActions` | **ALREADY** | destinations survive layout/chat-level | **CONFIRMED 2026-08-01** — see the rows 19/14 audit |
 | 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 16 | Identity actions | `IdentityActions` | **ALREADY** | every destination keeps a LAYOUT-mounted door | **CONFIRMED 2026-08-01** — per-role browser pass, see the row 16 audit |
 | 17 | Module grid | `DashboardModuleGrid` | **OBSOLETE** | this IS the second dashboard's navigation | delete with the route |
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
-| 19 | Status strip | `DashboardStatusStrip` | ABSORB | active-context status summary | TODO |
+| 19 | Status strip | `DashboardStatusStrip` | **ALREADY** | the spine IS the bell; extra doors survive layout-level | **CONFIRMED 2026-08-01** — see the rows 19/14 audit |
 | 20 | Command finder | `CommandFinder` | CHAT | the conversation composer already is this | TODO — likely OBSOLETE |
 | 21 | My zone | `MyZone` | ABSORB | `player-card` result | TODO |
 | 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` exists | repoint |
@@ -75,9 +75,9 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 28 capabilities — 7 ALREADY · 12 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12 and 16 CONFIRMED
-`ALREADY` 2026-08-01; 9 ABSORB rows remain.**
+**Counts: 28 capabilities — 9 ALREADY · 11 ABSORB · 3 CHAT · 4 OBSOLETE ·
+2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12, 16, 19 and 14 CONFIRMED
+`ALREADY` 2026-08-01; 8 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -243,8 +243,8 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 11 | Booking responses | Calendar | **DONE** — CONFIRMED `ALREADY` 2026-08-01, browser-proven |
 | 12 | Bookings | Calendar | **DONE** — same; and the `calendar` result shipped as its own slice |
 | 16 | Identity actions | Profile update | **DONE** — CONFIRMED `ALREADY` 2026-08-01, per-role browser pass |
-| 19 | Status strip | Return to chat (active context) | TODO |
-| 14 | Chain actions | Return to chat | TODO |
+| 19 | Status strip | Return to chat (active context) | **DONE** — CONFIRMED `ALREADY` 2026-08-01 |
+| 14 | Chain actions | Return to chat | **DONE** — CONFIRMED `ALREADY` 2026-08-01; stale advanced door fixed |
 | 28 | Second Leaflet chain | (cross-cutting) map collapse | TODO |
 
 **P1 — EMPLOYER JOURNEY**: rows 7, 8, 25 (demand create / readback / intake).
@@ -379,6 +379,49 @@ the advanced page — it belongs to the row 5 family and must be dispositioned
 before the route deletion, under its own number.
 
 **Not started beyond the audit.**
+
+## Rows 19 / 14 — RETURN TO CHAT: the audit and the confirmation
+
+Audited and browser-confirmed 2026-08-01
+(`tests/e2e/w3-rows19-14-return.spec.ts`, 4 scenarios).
+
+**Neither row is a capability renderer.**
+
+- Row 19 (`DashboardStatusStrip`, 2 mounts, both on the advanced page): its
+  chips ARE the notification spine, which the LAYOUT-mounted bell already
+  presents (proven with real seeded counts in the rows 11/12 pass). Its two
+  extra doors survive layout-level: the bell panel's "view all" opens
+  `/dashboard/activity` (browser-proven), and the primary nav carries the
+  calendar tab.
+- Row 14 (`DashboardChainActions`, 1 mount): a role-aware link card. Every
+  destination survives — journal via the shell nav, `/dashboard/inbox`
+  directly reachable with a company session (browser-proven) plus the chat
+  action registry, `company#company-team` via the company page itself
+  (row 16 pass).
+
+**The return-to-workspace primitive already exists and is ONE thing**: the
+shell's home entry (`/dashboard`) — the simple chrome's header link and the
+advanced chrome's bottom-nav entry, both LAYOUT-mounted. Browser-proven:
+detail route → home → the canonical chat workspace, desktop and 375px.
+**No new component, no new route.**
+
+**The documented result-state rule**: a `?result=` deep link carries state
+(reload holds it — calendar spec); going HOME is a fresh workspace and does
+not resurrect the last result; browser Back is how a result returns.
+Browser-proven.
+
+**One real stale door found and fixed**: the work-log flow's `no-context`
+blocked state linked `/dashboard/advanced`; it now opens `/dashboard/start`
+(the spaces hub). `lib/guards/w3-return-to-workspace.test.ts` is the RATCHET:
+no source file may carry a live quoted `"/dashboard/advanced"` href outside
+the three allowlisted survivors (the route's own segment, the admin-only
+account-menu escape hatch, the surface-registry entry) — the allowlist is the
+countdown for the route deletion, not a permission.
+
+**Known pre-existing defect recorded, not hidden**: `/dashboard/journal`
+emits a dev-only React "missing key" warning (`JournalEntryRow` children).
+Reproducible on the baseline; named narrowly in the spec allowance; tracked
+for its own fix.
 
 ## The calendar RESULT — the separate slice, on its own merits
 
