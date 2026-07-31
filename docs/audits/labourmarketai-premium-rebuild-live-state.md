@@ -76,14 +76,27 @@ guarded acceptance stack; the distinction is deliberate and stated.
 | Ratchet | `w3-return-to-workspace.test.ts` — 3 allowlisted advanced hrefs remain, the countdown for the deletion |
 | Known defect (P3, tracked) | `/dashboard/journal` dev-only React missing-key warning (`JournalEntryRow` children) — pre-existing, named in the spec allowance |
 
-### NEXT EXACT ACTION
+### CONTINUATION — 2026-08-01 (~02:20 Europe/Vilnius)
 
-P0 Employee Journey remainder: row 21 (MyZone — OBSOLETE must be PROVEN, not
-assumed), row 24 (blocked on real reputation rows). Then P1 employer rows
-7/8/25, P2 company 2/3/9/10, P3 admin 22/23, row 20 (command finder —
-likely OBSOLETE), row 27, row 28 (second Leaflet chain), THEN delete
-`/dashboard/advanced` + mounts + guards + the 3 allowlisted hrefs in one
-commit, full proof, merge, deploy, production-prove.
+| | |
+|---|---|
+| `main` | `b5985cba` (#952 row 21) ← `127c4d0d` (#951 journal key fix, separate session) ← `792e1837` |
+| Rows settled | 11/12, 16, 19, 14, **21** — all by proof; row 24 BLOCKED with the missing data source NAMED (no subjective-feedback table exists; W6 creates it; acceptance condition in the matrix) |
+| Journal warning | **FIXED** (#951 — key the RSC-passed editSlot at creation); the stale spec allowance removed in this branch |
+| Matrix | 10 ALREADY · 10 ABSORB · 3 CHAT · 4 OBSOLETE · 2 DETAIL — **7 ABSORB rows remain** (row 24 BLOCKED among them) |
+
+### NEXT EXACT ACTION — P1 employer rows 7/8/25 (IMPLEMENTATION, not verification)
+
+The audit is DONE and in the matrix: THREE demand forms
+(`DemandRequestButton` 888-line full form, advanced-only · chat inline form ·
+company `DemandDraftForm`) and THREE readbacks (advanced · buyer · scouting).
+The slice: ONE full form on `/dashboard/company` (the action's own
+advancedRoute) absorbing the draft continuation; chat stays the light intake;
+ONE owner readback (scouting is the strongest candidate); row 25 resolves with
+row 7. No new route, no duplicated estimate builder. Start from the matrix's
+"P1 EMPLOYER" section. Then P2 company rows 2/3/9/10, admin 22/23, rows
+20/27/28, THEN delete `/dashboard/advanced` + the 3 allowlisted hrefs + guards
+in one commit, full proof, merge, deploy, production-prove.
 
 ---
 

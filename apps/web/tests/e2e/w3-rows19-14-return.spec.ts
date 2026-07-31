@@ -30,12 +30,9 @@ const HAS_LOCAL_STACK = Boolean(SUPA_URL && SUPA_SERVICE);
 const PRE_EXISTING_CONSOLE = [
   /upgrade-insecure-requests/i,
   /hydrated but some attributes of the server rendered HTML didn't match/i,
-  // Pre-existing dev-only defect on /dashboard/journal, reproducible on the
-  // baseline (this slice changes no journal rendering; keying the two
-  // top-level children was tried and did not silence it — the real keyless
-  // array is deeper). Named narrowly so the allowance covers exactly this
-  // warning and nothing else; tracked for its own fix.
-  /unique "key" prop[\s\S]*JournalEntryRow/,
+  // The JournalEntryRow missing-key allowance that briefly lived here was
+  // removed after PR #951 fixed the defect (the RSC-passed editSlot element
+  // needed a key at creation) — the allowance may not outlive its reason.
 ];
 
 function watch(page: Page) {
