@@ -61,7 +61,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
 | 14 | Chain actions | `DashboardChainActions` | CHAT | conversation chips | TODO |
 | 15 | Current space header | `CurrentSpaceHeader` | **ALREADY** | workspace header | **VERIFIED 2026-07-31** — dies with the route, see below |
-| 16 | Identity actions | `IdentityActions` | **ABSORB?** | likely `ALREADY` — every destination keeps a surviving door | **AUDITED 2026-08-01** — see the row 16 audit |
+| 16 | Identity actions | `IdentityActions` | **ALREADY** | every destination keeps a LAYOUT-mounted door | **CONFIRMED 2026-08-01** — per-role browser pass, see the row 16 audit |
 | 17 | Module grid | `DashboardModuleGrid` | **OBSOLETE** | this IS the second dashboard's navigation | delete with the route |
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
 | 19 | Status strip | `DashboardStatusStrip` | ABSORB | active-context status summary | TODO |
@@ -75,9 +75,9 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 28 capabilities — 6 ALREADY · 13 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12 CONFIRMED `ALREADY`
-2026-08-01; 10 ABSORB rows remain.**
+**Counts: 28 capabilities — 7 ALREADY · 12 ABSORB · 4 CHAT · 4 OBSOLETE ·
+2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12 and 16 CONFIRMED
+`ALREADY` 2026-08-01; 9 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -242,7 +242,7 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
 | 11 | Booking responses | Calendar | **DONE** — CONFIRMED `ALREADY` 2026-08-01, browser-proven |
 | 12 | Bookings | Calendar | **DONE** — same; and the `calendar` result shipped as its own slice |
-| 16 | Identity actions | Profile update | TODO |
+| 16 | Identity actions | Profile update | **DONE** — CONFIRMED `ALREADY` 2026-08-01, per-role browser pass |
 | 19 | Status strip | Return to chat (active context) | TODO |
 | 14 | Chain actions | Return to chat | TODO |
 | 28 | Second Leaflet chain | (cross-cutting) map collapse | TODO |
@@ -361,11 +361,18 @@ Where each destination's door survives the route deletion:
 | `/dashboard/projects` | `project-map`; company/project cards; `project-assignment-manager` |
 | `/dashboard/start` (+`/start/company`) | `setup-role-choice`; `company-next-actions`; command registry; canonical redirects |
 
-**Provisional reclassification: row 16 is `ALREADY`** — a duplicate
-presentation of navigation that survives everywhere else. To be CONFIRMED by a
-browser pass proving each role's primary door actually resolves (worker:
-account menu → profile; company: chat/current-space-header → company), not
-assumed.
+**CONFIRMED 2026-08-01: row 16 is `ALREADY`** — the per-role browser pass
+(`tests/e2e/w3-row16-identity-actions.spec.ts`, 6 scenarios, real fixture
+sessions): every worker destination (profile / opportunities / documents /
+start) and every company destination (company / candidates / projects /
+start) is directly reachable with real permissions and no login bounce; the
+account menu (real accessible name, keyboard-reachable) and the header
+command finder — both LAYOUT-mounted — resolve profile and documents from the
+canonical workspace; Back/Forward/reload hold; 375px renders without sideways
+scroll; `/dashboard/buyer` answers a company session sanely (the page's own
+contract). Coverage note stated in the spec: agency/customer subsets link
+routes already covered by the two proven sessions. The catalogue is NOT
+ported; the mount dies with the route.
 
 **Caveat recorded, not smuggled**: `OpportunityDirectionsCard` mounts ONLY on
 the advanced page — it belongs to the row 5 family and must be dispositioned
