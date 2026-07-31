@@ -1,4 +1,4 @@
-# LABOURMARKET.AI — SKILLS PLATFORM v1
+# LABOURMARKET.AI — CAPABILITY PLATFORM v1
 
 > **Owner directive, 2026-07-31**: turn Labourmarket.ai into a Skills-first AI
 > platform. Every AI capability is a reusable Skill, not isolated code. It must
@@ -6,16 +6,52 @@
 >
 > **This document is Phase 9 (audit) and Phase 1 (registry design).** The
 > directive orders the audit first, and the audit changed the plan — which is
-> the point of ordering it first. Phases 2–4 (the skill catalogues), 7 (Skill
-> Store) and the remaining Phase 10 deliverables build on the decisions here
-> and are scoped at the end. Nothing below is a mockup: every "exists" claim
-> names the file, and every gap is named as a gap.
+> the point of ordering it first. Phases 2–4 (the catalogues), 7 (Skill Store)
+> and the remaining Phase 10 deliverables build on the decisions here and are
+> scoped at the end. Nothing below is a mockup: every "exists" claim names the
+> file, and every gap is named as a gap.
+
+---
+
+## ⛔ STATUS: DESIGNED, PARKED. DO NOT START.
+
+**Owner ruling, 2026-07-31 — W3 finishes completely first.** This document is
+the plan of record; **no part of it may be implemented yet.** Specifically:
+do not add `capability_registry`, do not add `capability_executions`, do not
+add `CapabilityDescriptor`.
+
+Required order, no interleaving of one W3 row with one Capability slice:
+
+```text
+1. Finish the remaining W3 Employee Journey rows.
+2. Finish the Employer, Company and Admin ABSORB rows.
+3. Collapse the second MarketMap chain (row 28).
+4. Prove EVERY /dashboard/advanced capability is absorbed, obsolete-proven, or
+   moved to a legitimate non-dashboard detail route.
+5. Delete /dashboard/advanced.
+6. Remove its obsolete components, mounts, routes, guards and nav references.
+7. Full desktop + mobile browser proof.
+8. Merge, deploy, production-prove W3.
+9. ONLY THEN start the Capability Platform.
+```
+
+**The one permitted exception**, deliberately narrow: if a remaining W3 row
+demonstrably cannot be completed without a foundation primitive from this
+document, implement **only the minimum primitive**, do not begin the platform,
+and return immediately to W3.
+
+Rationale, in the owner's terms: W3 is launch-critical and already in flight.
+`/dashboard/advanced` is still a second dashboard with 13 ABSORB rows left.
+Starting a new registry and execution programme while the canonical Context
+Panel architecture is still being consolidated would be a second unfinished
+architecture running beside an unfinished one — which is the failure mode W3
+exists to end.
 
 ---
 
 ## 0. THE HEADLINE — THE REGISTRY ALREADY EXISTS
 
-**Do not build a Skill Registry. Extend the one that is already in production.**
+**Do not build a Capability Registry from scratch. Extend the one that is already in production.**
 
 `lib/conversation/action-registry.ts` is a declarative, pure, guard-tested
 catalogue of 30 capabilities with stable ids, permissions, i18n labels,
@@ -49,17 +85,42 @@ lib/conversation/
 is currently spending an entire wave (W3) undoing.** `/dashboard/advanced` is a
 916-line parallel dashboard that exists because someone added a second surface
 instead of extending the first; three rows of it have been dismantled this week
-at real cost. A "Skill Registry" that duplicates the Action Registry would
+at real cost. A second capability registry that duplicates the Action Registry would
 recreate that mistake one layer deeper, where it is far more expensive: two
 places that decide what an AI is allowed to do, which is a security boundary,
 not a convenience.
 
 So the plan is **promotion, not creation**: the Action Registry becomes the
-Skill Registry by gaining the fields it lacks.
+Capability Registry by gaining the fields it lacks.
 
 ---
 
-## 1. NAMING — A COLLISION THAT MUST BE DECIDED BEFORE ANY CODE
+## 1. NAMING — DECIDED. THIS IS NOW THE REPOSITORY RULE
+
+**Owner ruling, 2026-07-31.** Product vocabulary and implementation vocabulary
+are **intentionally different**, and the difference is not cosmetic — it
+protects the canonical business domain.
+
+| Domain | Word |
+|---|---|
+| Worker occupational domain — user-facing | **Skill**, Skills, Skill Store, Skill Library |
+| AI / system behaviour — implementation | **Capability** — `CapabilityRegistry`, `CapabilityDescriptor`, `CapabilityExecution`, `CapabilityManifest`, `CapabilityProvider`, `CapabilityResult` |
+
+The programme is the **Capability Platform**, never the "Skills Platform".
+**A second meaning of "Skill" may never enter the codebase.**
+
+The reason, in the owner's terms: `Skill` is a node in the core domain chain —
+
+```text
+Worker → Work Journal → Evidence → Confirmation → Skill → Reputation → Matching
+```
+
+That is the patented path, and it is the product. Overloading its central noun
+would make `skills` ambiguous between "welding" and "an AI that assesses
+welding". Where this directive says "Skill" about AI behaviour, it is
+translated to `Capability` at the code boundary and stays "Skill" in the copy.
+
+### What the collision would have cost
 
 ⚠️ **`skill` is already the most loaded noun in this product**, and it does not
 mean what the directive means by it.
@@ -74,15 +135,10 @@ The directive's Phase 3 asks for a Skill called "Skill Verification". In code
 that reads as `skill.skill-verification`, and a table named `skills` would be
 ambiguous between "welding" and "an AI capability that assesses welding".
 
-**Recommendation (proceeding on this unless overruled):** keep `skill` as the
-domain word for what a worker can do. Name the AI unit **`capability`** in code
-and schema, and present it as **"Skill"** in the product, the Skill Store and
-all user-facing copy. The owner's product language is preserved exactly; the
-code stays unambiguous. Concretely: `capability_registry`,
-`capability_executions`, `CapabilityDescriptor` — surfaced as "Skills".
-
-This is flagged rather than decided quietly because renaming after Phase 2–4
-ship would touch every catalogue entry.
+Concretely: `capability_registry`, `capability_executions`,
+`CapabilityDescriptor` — surfaced to people as "Skills". Settled before any
+catalogue work precisely because renaming after Phases 2–4 ship would touch
+every entry.
 
 ---
 
@@ -428,7 +484,8 @@ Stated rather than implied, because the directive says no placeholders:
 | Risk | Severity | Mitigation |
 |---|---|---|
 | A second registry is built beside the Action Registry | **critical** | §0. One registry, extended. A guard should fail the build if a second capability catalogue appears. |
-| `skill` collides with the worker-skill domain noun | **high** | §1 — `capability` in code, "Skill" in product copy. Decide before S6. |
+| `skill` collides with the worker-skill domain noun | ~~high~~ **CLOSED** | §1 — owner ruled 2026-07-31: `Capability` in code, "Skill" in product copy. Now the repository rule. |
+| This programme starts before W3 finishes, leaving two unfinished architectures | **critical** | The ⛔ block above — owner-ordered sequencing, no interleaving. |
 | Third-party code reaches the database | **critical** | §6.5 — Store capabilities receive structured outputs only and never a DB client. |
 | Execution log becomes a PII copy outside RLS | **high** | Input hash only; append-only; RLS per actor/org. |
 | Chain planner invents a chain that spends money or contacts people | **critical** | Chains may only compose declared `dependencies`; any `strong_irreversible` step keeps its own confirmation token — a chain cannot pre-approve them. |
@@ -438,14 +495,26 @@ Stated rather than implied, because the directive says no placeholders:
 
 ---
 
-## 12. NEXT EXACT ACTION
+## 12. NEXT EXACT ACTION — **NOT THIS DOCUMENT**
 
 ```text
-1. OWNER DECISION — §1 naming. `capability` in code + "Skill" in product, or
-   `skill` everywhere and accept the collision with worker skills.
-2. S1 — promote the Action Registry to the Capability Registry: 8 new fields,
-   30 entries filled, guards extended, zero behaviour change.
-3. S2 — capability_executions + append-only RLS + one row per dispatch.
+The next action is W3, not S1. See the ⛔ block at the top.
+
+W3 order:
+  rows 1 / 21 / 24  Player Card      ← NEXT
+  rows 11 / 12      Calendar
+  row  16           Profile
+  rows 19 / 14      return to chat
+  rows 7 / 8 / 25   Employer
+  rows 2 / 9 / 10   Company
+  rows 22 / 23      Admin
+  row  28           collapse the second MarketMap chain
+  then              delete /dashboard/advanced + prove it
+
+Only after W3 is merged, deployed and production-proven:
+  S1 — promote the Action Registry to the Capability Registry: 8 new fields,
+       30 entries filled, guards extended, zero behaviour change.
+  S2 — capability_executions + append-only RLS + one row per dispatch.
 ```
 
 Everything above stands on files that exist today. The single most valuable
