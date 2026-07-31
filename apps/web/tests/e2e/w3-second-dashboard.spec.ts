@@ -484,6 +484,8 @@ const COMPANY_ID = "cccccccc-0000-0000-0000-000000000001";
 const AGENCY_ID = "dddddddd-0000-0000-0000-000000000001";
 const COMPANY_INVITER = "aaaaaaaa-0000-0000-0000-000000000002";
 const AGENCY_INVITER = "aaaaaaaa-0000-0000-0000-000000000003";
+/** The fixture worker's profile id — row 1 verifies its `workers` row. */
+const WORKER_PROFILE_ID = "aaaaaaaa-0000-0000-0000-000000000001";
 
 /** Minimal PostgREST calls with the LOCAL service key — no client dependency,
  *  and it refuses outright if the target is not loopback. */
@@ -772,5 +774,234 @@ test.describe("row 6 — the invitation card became the panel's work context", (
     expect(overflow, "no horizontal overflow at 375px").toBeLessThanOrEqual(1);
 
     await page.screenshot({ path: join(SHOTS, "row6-invitation-panel-375.png") });
+  });
+});
+
+/* ── row 1 — the Player Card ────────────────────────────────────────────────
+ *
+ * The capability had TWO renderers: the canonical `WorkerPlayerCard` embedded
+ * in the chat THREAD, and a lesser person block inside the premium hub on
+ * `/dashboard/advanced`, mounted twice. Both are gone. The card is the
+ * `player-card` RESULT in the Context Panel — the result kind, its registry
+ * entry and its `dataReadiness: "real"` all already existed, so this row added
+ * no kind, no entry and no route.
+ *
+ * The hard acceptance condition is the EDITOR. The hub's person block carried
+ * `workEditor` — the only availability/location/pay editor in the product.
+ * Absorbing the card without it would have deleted a capability silently, so
+ * these scenarios prove it survived, that a non-worker does not get it, and
+ * that it still writes.
+ */
+
+test.describe("row 1 — the player card became a result", () => {
+  test("chat opens the card in the panel, and draws no card of its own", async ({
+    page,
+  }) => {
+    const consoleErrors: string[] = [];
+    const failed: string[] = [];
+    page.on("console", (m) => {
+      if (m.type() === "error" && !/upgrade-insecure-requests/i.test(m.text())) {
+        consoleErrors.push(m.text());
+      }
+    });
+    page.on("requestfailed", (r) => {
+      const why = r.failure()?.errorText ?? "";
+      if (!why.includes("ERR_ABORTED")) failed.push(`${r.url()} — ${why}`);
+    });
+    page.on("response", (r) => {
+      if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`);
+    });
+
+    await page.goto("/lt/dashboard");
+    await expect(page.getByTestId("context-panel")).toBeVisible();
+
+    // Ask for the card the way a person does.
+    await page.getByTestId("composer-input").fill("Parodyk mano kortelę");
+    await page.getByTestId("composer-send").click();
+
+    // THE PANEL SHOWS IT …
+    const panel = page.getByTestId("context-panel");
+    await expect(panel.getByTestId("player-card-result")).toBeVisible({
+      timeout: 40_000,
+    });
+    await expect(panel.getByTestId("worker-player-card")).toBeVisible();
+
+    // … and the THREAD does not. The old embed had its own test id; a second
+    // renderer is exactly what this row removes.
+    await expect(page.getByTestId("chat-player-card")).toHaveCount(0);
+    // Exactly ONE card in the whole document.
+    await expect(page.getByTestId("worker-player-card")).toHaveCount(1);
+
+    await page.screenshot({ path: join(SHOTS, "row1-player-card-1440.png") });
+
+    expect(failed, failed.join("\n")).toEqual([]);
+    expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
+  });
+
+  test("the worker keeps the work editor — it came with the card", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard?result=player-card");
+    const editor = page.getByTestId("player-card-work-editor");
+    await expect(editor).toBeVisible({ timeout: 40_000 });
+    // The editor is the REAL control, not a link that leaves the workspace:
+    // its open affordance is a button inside the panel.
+    await expect(editor.locator("button").first()).toBeVisible();
+    // Exactly one editor — the hub used to carry a second copy of this.
+    await expect(page.getByTestId("player-card-work-editor")).toHaveCount(1);
+  });
+
+  test("the editor really writes — the DATABASE row changes", async ({ page }) => {
+    test.skip(!HAS_LOCAL_STACK, "needs the local stack to verify the row");
+
+    await page.goto("/lt/dashboard?result=player-card");
+    const editor = page.getByTestId("player-card-work-editor");
+    await expect(editor).toBeVisible({ timeout: 40_000 });
+
+    // Open the folded editor by its OWN control, not "the first button" — the
+    // block also carries the state-aware next action, and clicking that
+    // instead would have proven nothing.
+    await editor.getByTestId("work-card-editor-toggle").click();
+    const form = editor.getByTestId("work-card-editor");
+    await expect(form).toBeVisible();
+
+    const select = form.locator('select[name="availability_status"]');
+    await expect(select).toBeVisible();
+    const before = await select.inputValue();
+    const next = before === "available" ? "busy" : "available";
+    await select.selectOption(next);
+    await form.locator('button[type="submit"]').first().click();
+
+    // THE PROOF IS THE ROW, not the screen. A re-rendered select could show a
+    // value the database never received; this asserts the write itself.
+    await expect
+      .poll(
+        async () => {
+          const r = await db(
+            "GET",
+            `workers?profile_id=eq.${WORKER_PROFILE_ID}&select=availability_status`,
+          );
+          const rows = (await r.json()) as { availability_status: string | null }[];
+          return rows[0]?.availability_status ?? null;
+        },
+        { timeout: 30_000 },
+      )
+      .toBe(next);
+  });
+
+  test("the card is gone from /dashboard/advanced and that route still works", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard/advanced");
+    const more = page.getByTestId("dashboard-more-section");
+    await expect(more).toBeAttached();
+    await more.locator("summary").click();
+
+    // The hub survives — it still carries the company / market / project
+    // blocks, which are their own W3 rows …
+    await expect(page.getByTestId("premium-hub-screen").first()).toBeVisible();
+    // … but the person block and its editor are gone from this route.
+    await expect(page.getByTestId("premium-hub-person")).toHaveCount(0);
+    await expect(page.getByTestId("premium-hub-person-next")).toHaveCount(0);
+    await expect(page.getByTestId("worker-player-card")).toHaveCount(0);
+  });
+
+  test("reload, close and Back/Forward all keep the result honest", async ({
+    page,
+  }) => {
+    await page.goto("/lt/dashboard?result=player-card");
+    await expect(page.getByTestId("player-card-result")).toBeVisible({
+      timeout: 40_000,
+    });
+
+    // Reload re-reads and still shows exactly one card.
+    await page.reload();
+    await expect(page.getByTestId("player-card-result")).toBeVisible({
+      timeout: 40_000,
+    });
+    await expect(page.getByTestId("worker-player-card")).toHaveCount(1);
+
+    // Close drops the result and returns the work context — no dead end, and
+    // no navigation away from the workspace.
+    await page.getByTestId("context-panel-close").click();
+    await expect(page.getByTestId("player-card-result")).toHaveCount(0);
+    await expect(page.getByTestId("context-panel")).toHaveAttribute(
+      "data-panel-mode",
+      "work_context",
+    );
+    expect(new URL(page.url()).searchParams.get("result")).toBeNull();
+    expect(new URL(page.url()).pathname).toContain("/dashboard");
+
+    // BACK — closing REPLACES rather than pushes (the same contract row 5
+    // pinned), so Back returns to the address before the workspace and never
+    // to a half-open result.
+    await page.goBack();
+    await page.waitForLoadState("domcontentloaded");
+
+    // FORWARD — and if it lands back on the result, the result is whole.
+    await page.goForward();
+    await page.waitForLoadState("domcontentloaded");
+    if (new URL(page.url()).searchParams.get("result") === "player-card") {
+      await expect(page.getByTestId("player-card-result")).toBeVisible({
+        timeout: 40_000,
+      });
+      await expect(page.getByTestId("worker-player-card")).toHaveCount(1);
+    }
+  });
+
+  test("loading announces itself, and a failed read offers retry", async ({
+    page,
+  }) => {
+    // Hold the server action, then abort it — what is proven is the REAL
+    // component reacting to a real failed read, not a mock of itself.
+    let release: (() => void) | null = null;
+    const held = new Promise<void>((r) => {
+      release = r;
+    });
+    await page.route("**/dashboard**", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      await held;
+      return route.abort("failed");
+    });
+
+    await page.goto("/lt/dashboard?result=player-card");
+    // LOADING is announced rather than shown as a blank frame.
+    const loading = page.getByTestId("player-card-loading");
+    await expect(loading).toBeVisible({ timeout: 40_000 });
+    await expect(loading).toHaveAttribute("aria-busy", "true");
+
+    release?.();
+
+    // ERROR, with a working retry — never a false emptiness.
+    await expect(page.getByTestId("player-card-error")).toBeVisible({
+      timeout: 40_000,
+    });
+    await expect(page.getByTestId("player-card-retry")).toBeVisible();
+
+    // Retry with the route released reaches a real read again.
+    await page.unroute("**/dashboard**");
+    await page.getByTestId("player-card-retry").click();
+    await expect(page.getByTestId("player-card-error")).toHaveCount(0, {
+      timeout: 40_000,
+    });
+  });
+
+  test("375px — the card is usable on a phone with no overflow", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 780 });
+    await page.goto("/lt/dashboard?result=player-card");
+    await expect(page.getByTestId("player-card-result")).toBeVisible({
+      timeout: 40_000,
+    });
+
+    const overflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
+    );
+    expect(overflow, "no horizontal overflow at 375px").toBeLessThanOrEqual(1);
+
+    await page.screenshot({ path: join(SHOTS, "row1-player-card-375.png") });
   });
 });

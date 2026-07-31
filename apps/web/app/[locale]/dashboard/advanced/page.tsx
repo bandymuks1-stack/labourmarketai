@@ -24,8 +24,6 @@ import { PrivacyStatusCard } from "@/components/app/privacy-status-card";
 import { getOwnCompany } from "@/lib/company/company-setup";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { getWorkerCard } from "@/lib/worker/work-card";
-import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 import {
   getOutgoingRequestSummary,
   getServiceRequestsNewCounts,
@@ -647,24 +645,11 @@ export default async function DashboardAdvancedPage({
   // new/returning/stale from the worker's REAL saved data and shows ONE best
   // next action; it never re-asks a saved dimension and never restarts
   // onboarding on a returning login. ──
-  const cardData = await getWorkerCard({
-    workerId: workerRow?.id ?? null,
-    name,
-    professionName,
-    skillsCount,
-    evidenceCount: entriesCount,
-  });
-  // Folded into the hub person block (no separate WorkCard): the state-aware
-  // next action + the inline availability/location/pay editor. Derived from the
-  // worker's REAL saved card data; the client WorkCardEditor still writes via the
-  // real save/confirm RPCs. The worker's consented avatar is read by the hub
-  // adapter (getOwnAvatar) for the person block — no separate read here.
-  const workDerived = deriveWorkCardState(cardData.signals, Date.now());
-  const workEditor = {
-    state: workDerived.state,
-    next: workDerived.next,
-    values: cardData.values,
-  };
+  // W3 row 1: this page no longer DERIVES the work editor. The state-aware
+  // next action and the inline availability/location/pay editor moved with the
+  // person card into the `player-card` RESULT, which derives them from the
+  // same reads at the surface that renders them. Keeping a copy here would be
+  // the duplication this wave exists to remove.
 
   // ── Opportunity Discovery v1: REAL adjacent professional directions derived
   // from the worker's held skills over the SINGLE canonical adjacency map
@@ -824,7 +809,7 @@ export default async function DashboardAdvancedPage({
           OUTSIDE the collapsed section (fragment deep-links cannot open a
           closed details). Embedded = no competing title. */}
       <div id="work-card">
-        <PremiumHubScreen vm={hubVm} embedded contextual workEditor={workEditor} />
+        <PremiumHubScreen vm={hubVm} embedded contextual />
       </div>
 
       {/* D-01 duplicate removal (Wave 3, owner-approved): the repeated

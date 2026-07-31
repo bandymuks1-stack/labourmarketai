@@ -11161,7 +11161,8 @@
       "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
       "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
       "briefUnreadMessages": "Du hast {count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}.",
-      "briefProfileGap": "Deinem Profil fehlt noch: {step}."
+      "briefProfileGap": "Deinem Profil fehlt noch: {step}.",
+      "playerCardOpened": "Deine Karte ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11376,7 +11377,8 @@
       "opportunitiesEmpty": "Derzeit passt kein offener Bedarf zu deinen Fähigkeiten.",
       "opportunitiesPartial": "Die „neu“-Markierungen konnten diesmal nicht gelesen werden — die Einträge sind echt, Neuheit wird nicht angezeigt.",
       "opportunitiesMore": "Noch {n} in der vollständigen Liste.",
-      "retry": "Erneut versuchen"
+      "retry": "Erneut versuchen",
+      "playerCardError": "Deine Karte konnte nicht gelesen werden."
     }
   },
   "landing": {

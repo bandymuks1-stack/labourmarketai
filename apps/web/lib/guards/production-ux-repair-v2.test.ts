@@ -174,10 +174,17 @@ describe("RC3 — one skill-count source of truth", () => {
     expect(src).toMatch(/profile_skill_claims/);
     expect(src).toMatch(/worker_skills/);
   });
-  it("the dashboard explains the two numbers in human words", () => {
-    expect(read("components/app/premium-hub/premium-hub-person-card.tsx")).toMatch(
-      /person\.stats\.legend/,
-    );
+  it("the card explains the two numbers in human words", () => {
+    // W3 row 1: the hub person block (which carried this legend) is deleted.
+    // The claim it protected — the two skill numbers are never shown without
+    // saying what they mean — now belongs to the canonical card, which is the
+    // only place they appear.
+    // The canonical card carries its own plain-language explanation of the
+    // evidence ladder: the journal-supported count is LABELLED and carries a
+    // hint, so the two numbers are never shown bare.
+    const cardSrc = read("components/app/worker-player-card.tsx");
+    expect(cardSrc).toMatch(/journalSupportedLabel/);
+    expect(cardSrc).toMatch(/journalSupportedHint/);
   });
 });
 

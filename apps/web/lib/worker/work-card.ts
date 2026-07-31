@@ -3,7 +3,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import type { WorkCardSignals } from "./work-card-state";
+import type {
+  WorkCardNext,
+  WorkCardSignals,
+  WorkCardState,
+} from "./work-card-state";
 
 /**
  * Read service for "Mano darbo kortelė" (slice work-card-state-aware-v1).
@@ -42,6 +46,25 @@ export interface WorkCardData {
   professionName: string | null;
   /** True when the worker has no `workers` row yet (brand-new account). */
   noWorkerRow: boolean;
+}
+
+/**
+ * The worker's state-aware next action + inline availability/location/pay
+ * editor, as `WorkCardEditor` needs it. `null` for any identity without a
+ * worker row — a non-worker never receives worker-only editing controls.
+ *
+ * W3 row 1: this type used to live in the premium hub's data module, because
+ * the editor was folded into that hub's person block. The person block is
+ * gone (it was a second rendering of the canonical player card) and the editor
+ * moved into the `player-card` result, so the type now sits with the work-card
+ * model it actually describes.
+ */
+export interface WorkEditorVM {
+  state: WorkCardState;
+  /** The single best next action ({ dim, href, whyKey }) from
+   *  deriveWorkCardState — href is null when the action is an inline edit. */
+  next: WorkCardNext;
+  values: WorkCardValues;
 }
 
 type WorkerCardRow = {

@@ -25,7 +25,17 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const primitives = read("components/app/premium-hub/premium-hub-primitives.tsx");
-const person = read("components/app/premium-hub/premium-hub-person-card.tsx");
+/* W3 row 1: `premium-hub-person-card.tsx` is DELETED. It was a second, lesser
+   rendering of the canonical player card, and it carried the only
+   availability/location/pay editor. Both moved into the `player-card` RESULT,
+   which is asserted below — the deep-link contract this file protects still
+   has to hold, it just holds somewhere else now. */
+/** Code only — a doc comment that NAMES what was removed is not a
+ *  reintroduction of it. */
+const stripComments = (s: string): string =>
+  s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+const playerCard = read("components/app/worker-player-card.tsx");
+const playerCardResult = read("components/app/workspace/player-card-result.tsx");
 const company = read("components/app/premium-hub/premium-hub-company-card.tsx");
 const project = read("components/app/premium-hub/premium-hub-project-card.tsx");
 const map = read("components/app/premium-hub/premium-hub-market-map.tsx");
@@ -55,23 +65,62 @@ describe("shared primitives carry the interaction contract", () => {
   });
 });
 
-describe("person card — every visible number opens its exact section", () => {
-  it("identity header opens the profile space", () => {
-    expect(person).toMatch(/hub-person-profile-link/);
-    expect(person).toContain('href="/dashboard/profile"');
+describe("the person block LEFT the hub — and its contract went with it", () => {
+  it("the hub no longer renders a person block at all", () => {
+    const screen = read("components/app/premium-hub/premium-hub-screen.tsx");
+    expect(screen).not.toMatch(/PremiumHubPersonCard/);
+    // …and it no longer threads the worker-only editor through itself.
+    expect(screen).not.toMatch(/workEditor/);
+    // Comments stripped: the module's own note EXPLAINS that PersonVM and
+    // loadPerson were removed, and a guard that could not tell prose from code
+    // would forbid explaining the removal.
+    expect(stripComments(data), "PersonVM is dead code once the block is gone")
+      .not.toMatch(/PersonVM|loadPerson/);
   });
-  it("skills / supported / entries tiles deep-link to their sections", () => {
-    expect(person).toContain('href="/dashboard/profile#profile-edit"');
-    expect(person).toContain('href="/dashboard/profile#capabilities"');
-    expect(person).toContain('href="/dashboard/journal#journal-entries"');
-    for (const id of ["hub-person-stat-skills", "hub-person-stat-supported", "hub-person-stat-entries"]) {
-      expect(person, id).toContain(id);
-    }
+
+  it("the canonical card still deep-links every number to its section", () => {
+    // The SAME contract the hub person block held: a visible number is a door
+    // to the exact section it counts. It is the canonical card's now.
+    expect(playerCard).toContain('href="/dashboard/profile#capabilities"');
+    expect(playerCard).toContain('href="/dashboard/journal#journal-entries"');
   });
-  it("person card shows no completeness percentage meter (human-first v1)", () => {
+
+  it("no completeness percentage meter anywhere (human-first v1)", () => {
     // The user-visible completenessPct meter was removed — real counts only.
-    expect(person).not.toMatch(/completenessPct|person\.completeness/);
+    expect(playerCard).not.toMatch(/completenessPct/);
     expect(primitives).not.toMatch(/HubProgress[\s\S]{0,400}href/);
+  });
+
+  it("a non-worker gets NO worker-only editing controls", () => {
+    // The hard acceptance condition for row 1, and the half that cannot be
+    // browser-proven here: every local fixture identity HAS a `workers` row,
+    // and inventing a half-onboarded account to make a screenshot is the
+    // fabricated state this platform bans. So it is pinned in code, at both
+    // ends of the chain.
+    const loader = read("lib/player-card/player-card-result.ts");
+    // 1. The server returns no editor when there is no worker row.
+    expect(loader).toMatch(/if \(!worker\?\.id\) return null;/);
+    // 2. The result type makes "no editor" representable, not an empty object.
+    expect(loader).toMatch(/workEditor: WorkEditorVM \| null/);
+    // 3. The component renders the editor ONLY when the server sent one.
+    expect(playerCardResult).toMatch(
+      /view\.workEditor && view\.workEditorLabels \?/,
+    );
+    // 4. And the editor writes through the canonical save path, where the
+    //    REAL authorization lives — the null above is a UI decision, never
+    //    the security boundary.
+    expect(read("components/app/work-card-editor.tsx")).toMatch(
+      /use(ActionState|FormState)|action=\{/,
+    );
+  });
+
+  it("the card result computes no score of its own", () => {
+    // The whole reason the card may be trusted: it renders counts of the
+    // person's own rows. A total, a rating or a percentage introduced HERE
+    // would be exactly the fabricated reputation the platform bans.
+    expect(stripComments(playerCardResult)).not.toMatch(
+      /score|rating|percent|★|totalPoints/i,
+    );
   });
 });
 

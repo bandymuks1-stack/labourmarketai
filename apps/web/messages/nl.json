@@ -11161,7 +11161,8 @@
       "briefOverdue": "{count} taken zijn over hun einddatum heen.",
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
-      "briefProfileGap": "Je profiel mist nog: {step}."
+      "briefProfileGap": "Je profiel mist nog: {step}.",
+      "playerCardOpened": "Je kaart staat open in het paneel — echte gegevens uit je eigen records."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -11376,7 +11377,8 @@
       "opportunitiesEmpty": "Op dit moment past geen enkele open vraag bij je vaardigheden.",
       "opportunitiesPartial": "De ‘nieuw’-markeringen konden deze keer niet worden gelezen — de rijen zijn echt, nieuwheid wordt niet getoond.",
       "opportunitiesMore": "Nog {n} in de volledige lijst.",
-      "retry": "Opnieuw proberen"
+      "retry": "Opnieuw proberen",
+      "playerCardError": "We konden je kaart niet lezen."
     }
   },
   "landing": {

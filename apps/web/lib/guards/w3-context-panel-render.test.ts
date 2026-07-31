@@ -70,6 +70,15 @@ vi.mock("@/components/app/worker-interest-button", () => ({
   WorkerInterestButton: () => null,
 }));
 
+// W3 row 1: the panel now reaches the canonical player card through the result
+// body. The card carries the localized navigation helper, which resolves
+// `next/navigation` at import time and cannot load in this static renderer.
+// Stubbed at the RESULT boundary — the panel's own source is what this file
+// asserts on, and it still contains no link and no router.
+vi.mock("@/components/app/workspace/player-card-result", () => ({
+  PlayerCardResult: () => null,
+}));
+
 const { ContextPanel } = await import("@/components/app/world-state/context-panel");
 const { WorldStateProvider } = await import(
   "@/components/app/world-state/world-state-provider"

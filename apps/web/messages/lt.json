@@ -11161,7 +11161,8 @@
       "briefOverdue": "{count} užduotys jau pradelstos.",
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
       "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
-      "briefProfileGap": "Profilyje dar trūksta: {step}."
+      "briefProfileGap": "Profilyje dar trūksta: {step}.",
+      "playerCardOpened": "Tavo kortelė atidaryta šone — ten matai tikrus savo duomenis."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -11376,7 +11377,8 @@
       "opportunitiesEmpty": "Šiuo metu jūsų įgūdžius atitinkančių poreikių nėra.",
       "opportunitiesPartial": "Naujumo žymų šįkart nuskaityti nepavyko — įrašai tikri, bet „nauja“ nerodoma.",
       "opportunitiesMore": "Sąraše dar {n}.",
-      "retry": "Bandyti dar kartą"
+      "retry": "Bandyti dar kartą",
+      "playerCardError": "Nepavyko perskaityti tavo kortelės."
     }
   },
   "landing": {
