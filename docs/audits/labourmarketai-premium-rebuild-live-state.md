@@ -10,8 +10,8 @@
 
 | | |
 |---|---|
-| Europe/Vilnius | 2026-07-31 18:55 |
-| UTC | 2026-07-31 15:55 |
+| Europe/Vilnius | 2026-07-31 20:30 |
+| UTC | 2026-07-31 17:30 |
 
 ## REPOSITORY
 
@@ -179,13 +179,13 @@ old LABMA project touched:             NO
 
 | | |
 |---|---|
-| `main` HEAD | `7debb071` (== `origin/main`) |
-| Production deployment | `5694282066` — Production, **success**, sha `7debb071` |
+| `main` HEAD | `6e5ef02a` (== `origin/main`) |
+| Production deployment | `5695221417` — Production, **success**, sha `6e5ef02a` |
 | Production URL | `https://labourmarket.ai` (apex, verified live — not the 301 host) |
-| PRs merged this session | **#931** (`9519df3c`), **#932** (`7debb071`) |
-| Open PRs | none |
+| PRs merged this session | **#931**, **#932**, **#933**, **#934** (`6e5ef02a`) |
+| Open PRs | **#935** — W3 matrix + journey mapping + row 6 audit (docs only, checks pending) |
 | Unit/guard suite | 791 files / 12833 tests PASS |
-| W3 e2e | `w3-second-dashboard.spec.ts` — 9/9 PASS (rows 4 + 5) |
+| W3 e2e | `w3-second-dashboard.spec.ts` — **12/12 PASS** (rows 4 + 5, incl. consolidation) |
 | Typecheck / lint | clean |
 
 ### Employee beta production gate
@@ -225,18 +225,76 @@ W3 is not blocked.
 
 ---
 
-## NEXT EXACT ACTION
+## DEV SERVERS
 
 ```text
-1. W3 row 6 — worker invitations (WorkerInvitationsCard), the next smallest
-   ABSORB. It is heavier than row 5 in one specific way: it carries a WRITE
-   (accept-invitation RPC), so the result needs the outcome states the
-   read-only opportunities result did not — linked / already-linked /
-   no-invitation / no-worker / error, plus the needs-migration degradation.
-   Method, unchanged and proven twice now: build the result state on real data
-   with the full idle/loading/empty/partial/error/retry set, prove it in a
-   browser at 1440 AND 375, THEN delete the card and repoint its guard so BOTH
-   halves are pinned.
+port 3000  PID 1856   ANOTHER session's dev:acceptance in lm-unified-wt.
+                      NOT touched. Its .next cache is corrupted (a missing
+                      marketing chunk, plus a module this session briefly
+                      deleted and restored). Do NOT use it as proof.
+port 3400  STOPPED    this session's own dev:acceptance, in the throwaway
+                      worktree C:\Users\Mano\Documents\lm-w3proof (detached,
+                      real pnpm install, its own .next). It produced the clean
+                      12/12 browser proof and was then stopped. The worktree is
+                      LEFT IN PLACE deliberately: removing it risks the known
+                      node_modules hazard, and it is a ready clean rig — just
+                      restart with `pnpm dev:acceptance -- -p 3400`.
+```
+
+## NEXT EXACT ACTION — row 6, and the audit is already done
+
+Row 6 was AUDITED but NOT started: the context window ended, and beginning a
+multi-file absorb that could not be finished would have left the tree half
+modified. The expensive part is done and written down in
+`docs/audits/evidence/premium-rebuild/w3-capability-migration-matrix.md`
+("Row 6 — the audit, before any code"). Do not redo it.
+
+```text
+WHAT THE AUDIT ALREADY SETTLED
+
+Renderers today: 3
+  advanced/page.tsx:591   WorkerInvitationsCard (More section)      accepts
+  advanced/page.tsx:748   the SAME card again (top slot)            accepts
+  onboarding/page.tsx:80  read-only note + org name                 no
+  journal/page.tsx:241    contextState="pending" + org name         no
+
+Write path: ALREADY SINGLE — acceptWorkerInvitationAction, exactly one caller
+  (components/app/worker-invitations.tsx). Nothing to collapse there, which
+  makes this row cheaper than row 5 looked.
+
+Reads: 4 (card, onboarding, journal, notifications/spine.ts). The spine one is
+  a request-cached COUNT, not a renderer — not duplication.
+
+TARGET, changed by the audit: the Context Panel WORK CONTEXT — NOT a new
+  `invitations` result kind. An invitation is an ATTENTION item, not an answer
+  anyone asks for. Absorbing there adds no result kind, no registry entry and
+  no route; a new result would add all three.
+
+REUSE `WorkerInvitations` unchanged, so its six outcome states (linked,
+  already-linked, no-invitation, no-worker, error, needs-migration) and its
+  single write path move intact. MOUNT IT ONCE — it is currently mounted twice.
+```
+
+Exact continuation command:
+
+```text
+Continue labourmarket.ai W3 from main 6e5ef02a. Merge PR #935 if green.
+Then implement row 6 (worker invitations) per the audit already written in
+w3-capability-migration-matrix.md: absorb into the Context Panel WORK CONTEXT
+(NOT a new result kind), reuse WorkerInvitations unchanged, mount it ONCE,
+delete both mounts in advanced/page.tsx, repoint any guard that pins them.
+Preserve all six outcome states and prove the accept write in a browser at
+1440 and 375 with 0 console errors, using a CLEAN server (lm-w3proof on 3400),
+never the corrupted one on 3000. Then commit / push / PR / merge / deploy /
+production proof, report NET COMPLEXITY + VALUE CREATED + project-health KPI,
+and continue straight to the next P0 Employee Journey row without stopping.
+```
+
+Working worktree: `C:\Users\Mano\Documents\lm-unified-wt`, branch
+`feat/cc/w3-row6-invitations` (matrix committed and pushed, PR #935).
+
+```text
+2. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
 
 2. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
    the collapse market-map.tsx's own header already describes.
