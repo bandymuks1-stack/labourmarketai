@@ -53,8 +53,9 @@ describe("worker branch: state-driven top slot leads", () => {
     expect(PAGE).toMatch(/decideTopSlot\(\{/);
     expect(PAGE).toMatch(/from "@\/lib\/dashboard\/top-slot"/);
     // Gates, not guesses: every signal is a real loaded count.
+    // (W3 row 6 removed `pendingInvitations` — the ladder has no rung for it
+    // and this page no longer reads it.)
     for (const signal of [
-      "pendingInvitations: invitations.length",
       "acceptedOutgoing: outgoingSummary.accepted",
       "pendingIncomingServiceRequests: pendingServiceRequests",
       "pendingIncomingBookings: pendingBookings",
@@ -125,8 +126,9 @@ describe("worker branch: state-driven top slot leads", () => {
     expect(outgoing).toBeGreaterThan(0);
     expect(outgoing).toBeLessThan(help);
     // Every pending card still exists exactly once as a top-slot candidate.
+    // (W3 row 6 removed the invitation card from this list — it is no longer
+    // a candidate here; it is the Context Panel's work context.)
     for (const card of [
-      "<WorkerInvitationsCard preloaded={invitations} />",
       "bookingsPendingNextAction",
       "serviceRequestsNextAction",
       "bookingResponsesNextAction",
@@ -158,7 +160,6 @@ describe("org branch: compact home v1 order, informational surfaces folded", () 
         "<DemandRequestsReadback",
         "<DashboardChainActions",
         "<IdentityActions",
-        "<WorkerInvitationsCard",
         "<CommandFinder",
         "<CurrentSpaceHeader",
       ],
@@ -186,16 +187,28 @@ describe("top-slot copy exists in every served locale", () => {
   }
 });
 
-describe("invitations load exactly once (count + card share one read)", () => {
-  it("the page fetches listMyPendingWorkerInvitations and passes it down", () => {
-    // Read once inside the page's parallel batch (P0 latency audit); the rows
-    // land in `invitations` via the Promise.all destructure. The helper itself
-    // is request-cached, so the spine count shares the same single read.
-    expect(PAGE).toMatch(/listMyPendingWorkerInvitations\(\),/);
-    expect(PAGE).toMatch(/invitations,/);
-    // Both card mounts reuse the preloaded rows — no duplicate DB read.
-    const mounts = PAGE.match(/<WorkerInvitationsCard preloaded=\{invitations\}/g) ?? [];
-    expect(mounts.length).toBeGreaterThanOrEqual(2);
-    expect(PAGE).not.toMatch(/<WorkerInvitationsCard\s*\/>/);
+describe("invitations are read where they are rendered (W3 row 6)", () => {
+  it("this page no longer reads or renders them at all", () => {
+    // The page used to fetch the rows once and mount the card TWICE — the
+    // preload existed to stop the second mount re-querying. With the
+    // capability moved to the Context Panel, the read has no consumer here,
+    // and keeping it would be the duplication this wave removes.
+    expect(PAGE).not.toMatch(/listMyPendingWorkerInvitations/);
+    expect(PAGE).not.toMatch(/<WorkerInvitationsCard/);
+  });
+
+  it("the work context reads them once, and the panel renders them once", () => {
+    const server = read("lib/world-state/work-context-server.ts");
+    expect(
+      (server.match(/listMyPendingWorkerInvitations\(\)/g) ?? []).length,
+      "one read",
+    ).toBe(1);
+    const panel = read("components/app/world-state/context-panel.tsx");
+    expect((panel.match(/<WorkerInvitations\b/g) ?? []).length, "one mount").toBe(1);
+    // The helper is request-cached, so the spine's count and this read are
+    // still the same single query in one SSR pass.
+    expect(read("lib/worker/invitations.ts")).toMatch(
+      /export const listMyPendingWorkerInvitations = cache\(/,
+    );
   });
 });

@@ -4,7 +4,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CommandFinder } from "@/components/app/command-finder";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
-import { WorkerInvitationsCard } from "@/components/app/worker-invitations-card";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
@@ -44,7 +43,6 @@ import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-mod
 import { getDashboardCardPreferences } from "@/lib/dashboard/preferences";
 import { EMPTY_CARD_PREFS } from "@/lib/dashboard/dashboard-preferences-shared";
 import { getSpineCounts } from "@/lib/notifications/spine";
-import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { PremiumHubScreen } from "@/components/app/premium-hub/premium-hub-screen";
@@ -178,17 +176,20 @@ export default async function DashboardAdvancedPage({
   // request / booking counts, so those helpers are not re-queried here. The
   // profile row comes from the request-cached session-profile reader shared
   // with the layout and the hub (was: a third independent profiles SELECT).
+  //
+  // W3 row 6: the pending-invitation read is GONE from this page. The
+  // capability moved to the Context Panel's work context, which reads it
+  // there; reading it here as well would be the duplicate this wave exists to
+  // remove — and the spine still counts it for the bell.
   const [
     session,
     companyRead,
-    invitations,
     { providerNew, buyerNew },
     outgoingSummary,
     spineCounts,
   ] = await Promise.all([
     getSessionProfile(),
     companyReadPromise,
-    listMyPendingWorkerInvitations(),
     getServiceRequestsNewCounts(),
     getOutgoingRequestSummary(),
     getSpineCounts(),
@@ -587,8 +588,6 @@ export default async function DashboardAdvancedPage({
             compact
             focusRole={role}
           />
-
-          <WorkerInvitationsCard preloaded={invitations} />
         </DashboardMoreSection>
 
         {/* Universal command finder (WAGON 3) — type a normal term, get the
@@ -736,7 +735,6 @@ export default async function DashboardAdvancedPage({
   // action then. When a stronger card claims the slot, the work card
   // collapses to its hero so the action grid stays within one swipe. ──
   const topSlot = decideTopSlot({
-    pendingInvitations: invitations.length,
     acceptedOutgoing: outgoingSummary.accepted,
     pendingIncomingServiceRequests: pendingServiceRequests,
     pendingIncomingBookings: pendingBookings,
@@ -744,9 +742,7 @@ export default async function DashboardAdvancedPage({
     isFirstUse,
   });
   const topSlotCard =
-    topSlot === "invitation" ? (
-      <WorkerInvitationsCard preloaded={invitations} />
-    ) : topSlot === "accepted_request" ? (
+    topSlot === "accepted_request" ? (
       outgoingRequestsNextAction
     ) : topSlot === "incoming_service_request" ? (
       serviceRequestsNextAction
@@ -836,12 +832,13 @@ export default async function DashboardAdvancedPage({
           its canonical presentation on the status strip above — the SAME
           spineCounts numbers as these cards used, each chip linking the
           surface where the action really lives (bookings, service
-          requests). The invitations repeat was provably dead: a pending
-          invitation always wins the top slot, and the card renders null
-          when the list is empty. The ONE non-duplicate stays below —
-          outgoing service-request states (waiting / declined, and accepted
-          whenever an invitation occupies the slot) have no chip equivalent,
-          so this card is their only dashboard presentation. */}
+          requests). W3 row 6: the invitation card is no longer one of the
+          candidates at all — pending invitations live in the Context Panel's
+          work context now, which is where the bell's /dashboard href lands.
+          The ONE non-duplicate stays below — outgoing service-request states
+          (waiting / declined, and accepted whenever another state occupies
+          the slot) have no chip equivalent, so this card is their only
+          dashboard presentation. */}
       {topSlot !== "accepted_request" && outgoingRequestsNextAction}
 
       {/* Opportunity Discovery v1 — "Kur dar gali pritaikyti savo įgūdžius":

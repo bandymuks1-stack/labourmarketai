@@ -42,7 +42,9 @@ function count(haystack: string, needle: string): number {
 
 describe("D-01 — no duplicate pending-card rendering on the worker home", () => {
   it("each removed card renders exactly once (the top-slot candidate)", () => {
-    expect(count(WORKER, "<WorkerInvitationsCard")).toBe(1);
+    // W3 row 6: the invitation card is not a candidate any more — it is not
+    // on this page at all. Zero, asserted, so a revert is visible.
+    expect(count(WORKER, "<WorkerInvitationsCard")).toBe(0);
     expect(count(WORKER, "{bookingsPendingNextAction}")).toBe(0);
     expect(count(WORKER, "{serviceRequestsNextAction}")).toBe(0);
     expect(count(WORKER, "{bookingResponsesNextAction}")).toBe(0);
@@ -77,17 +79,22 @@ describe("every pending action keeps one canonical entry point", () => {
       "/dashboard/service-requests",
     );
     expect(byId.get("booking-responses")?.href).toBe("/dashboard/bookings");
-    // invitations clear on the dashboard itself — safe because a pending
-    // invitation ALWAYS wins the top slot (priority ladder pin below).
+    // invitations clear on the dashboard itself — and W3 row 6 is what makes
+    // that href honest: /dashboard is the workspace, and the Context Panel
+    // there both SHOWS the invitation and accepts it.
     expect(byId.get("pending-invitations")?.href).toBe("/dashboard");
   });
 
-  it("a pending invitation always wins the top slot (the dead-repeat proof)", () => {
-    const src = read("lib/dashboard/top-slot.ts");
-    const ladder = src.slice(src.indexOf("export function decideTopSlot"));
-    expect(ladder.indexOf('return "invitation"')).toBeGreaterThan(0);
-    expect(ladder.indexOf('return "invitation"')).toBeLessThan(
-      ladder.indexOf('return "accepted_request"'),
+  it("the invitation signal resolves where its href points (row 6)", () => {
+    const ladder = read("lib/dashboard/top-slot.ts");
+    // The rung is gone from the ladder …
+    expect(ladder).not.toMatch(/"invitation"/);
+    // … because the capability is in the panel's work context instead.
+    expect(read("lib/world-state/work-context-server.ts")).toMatch(
+      /listMyPendingWorkerInvitations/,
+    );
+    expect(read("components/app/world-state/context-panel.tsx")).toMatch(
+      /<WorkerInvitations\b/,
     );
   });
 

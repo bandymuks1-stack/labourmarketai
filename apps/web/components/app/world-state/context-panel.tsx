@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp, Info, X } from "lucide-react";
 
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
+import { WorkerInvitations } from "@/components/app/worker-invitations";
 import { iconControl } from "@/components/app/conversation/chat/icon-scale";
 import {
   loadEntityContext,
@@ -52,8 +53,10 @@ import { WorkspaceMap } from "./workspace-map";
  *    a related entity is another `open_object` on the SAME state.
  *  - NOT a second implementation of anything. Every action it offers is an
  *    existing canonical control: the interest button is the marketplace's own
- *    one-write-path component, and every other action is dispatched into the
- *    conversation's existing chip handler.
+ *    one-write-path component, the invitation control is the worker
+ *    invitations' own one-write-path component (W3 row 6 — REUSED unchanged,
+ *    not ported), and every other action is dispatched into the conversation's
+ *    existing chip handler.
  *
  * HONESTY. It renders what the server sent and computes nothing. An unknown
  * fact says "not stated" in muted type; an unavailable capability says why; an
@@ -191,6 +194,14 @@ export function ContextPanel({
     if (panel.mode === "entity" || showsResult) setExpanded(true);
   }, [selectionKey, panel.mode, showsResult, result]);
 
+  // W3 row 6 — a pending invitation opens the sheet too. The spine's bell
+  // points at this workspace to clear that signal; on a phone the panel starts
+  // collapsed, so leaving it shut would make the thing somebody is waiting on
+  // unreachable from the notification that announced it.
+  useEffect(() => {
+    if (work?.invitations) setExpanded(true);
+  }, [work]);
+
   const title =
     panel.mode === "entity"
       ? (entity?.title ?? t("loading"))
@@ -286,7 +297,23 @@ export function ContextPanel({
             answer "where?", so stacking them puts two maps in a 22rem column
             and makes the panel argue with itself. When a result is showing, the
             result owns the geography. */}
-        {showsResult ? null : <WorkspaceMap className="mb-4" />}
+        {/* W3 row 6 — ATTENTION BEFORE GEOGRAPHY. Somebody real is waiting on
+            this person, so a pending invitation leads the panel. It sits above
+            the map because on a phone the sheet is ~45dvh: behind the map, the
+            accept button is a scroll away from the notification that sent the
+            person here. Mounted ONCE, and only in work-context mode — entity
+            mode has its own subject. */}
+        {showsResult ? null : (
+          <>
+            {work?.invitations ? (
+              <WorkerInvitations
+                invitations={work.invitations.rows}
+                labels={work.invitations.labels}
+              />
+            ) : null}
+            <WorkspaceMap className={work?.invitations ? "my-4" : "mb-4"} />
+          </>
+        )}
         {showsResult && result && resultNavigation ? (
           <ResultBody
             kind={result}
@@ -503,6 +530,8 @@ function WorkBody({
   const t = useTranslations("workspace.panel");
   return (
     <div className="flex flex-col" data-testid="context-panel-work">
+      {/* `view.invitations` is rendered ABOVE the map by the panel body, not
+          here — see the note there. One mount, one place. */}
       <p className="text-basis text-text-secondary">{view.headline}</p>
       {view.facts.length > 0 && <Facts facts={view.facts} />}
       {view.recommendations.length > 0 && (

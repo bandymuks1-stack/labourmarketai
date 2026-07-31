@@ -8,6 +8,11 @@ import {
   buildWorkContext,
   deriveNextBestActions,
 } from "@/lib/conversation/context-intelligence";
+import {
+  listMyPendingWorkerInvitations,
+  type PendingWorkerInvitation,
+} from "@/lib/worker/invitations";
+import type { WorkerInvitationsLabels } from "@/components/app/worker-invitations";
 import type { ContextFact, ContextRecommendation } from "./entity-context";
 
 /**
@@ -30,6 +35,13 @@ import type { ContextFact, ContextRecommendation } from "./entity-context";
  * Empty is EMPTY. A quiet window says so; it never fills the panel with
  * placeholder cards or a fabricated "you're all caught up" claim about data
  * that was not read.
+ *
+ * W3 ROW 6 — PENDING INVITATIONS LIVE HERE. An invitation is an ATTENTION
+ * item, not an answer somebody asked for: nobody types "show me my
+ * invitations", they are told. So it is not a result kind and not a route —
+ * it is part of "what needs you now", which is exactly what this context is.
+ * The spine already counted it into the same context; now the person can also
+ * ACT on it here, through the one existing accept path.
  */
 
 export interface WorkContextView {
@@ -39,6 +51,16 @@ export interface WorkContextView {
   readonly facts: readonly ContextFact[];
   /** At most two, from the deterministic engine. */
   readonly recommendations: readonly ContextRecommendation[];
+  /**
+   * Pending company/agency invitations, with the copy the canonical
+   * `WorkerInvitations` control needs. `null` when there are none — the panel
+   * then renders nothing for it rather than an empty "no invitations" card,
+   * which would be a claim nobody asked to have answered.
+   */
+  readonly invitations: {
+    readonly rows: readonly PendingWorkerInvitation[];
+    readonly labels: WorkerInvitationsLabels;
+  } | null;
 }
 
 export type WorkContextResult =
@@ -64,9 +86,29 @@ export async function resolveWorkContext(locale: string): Promise<WorkContextRes
 
   const todayIso = new Date().toISOString().slice(0, 10);
   const range = visibleRange("agenda", todayIso);
-  const planning = await getPlanning({ rangeStart: range.start, rangeEnd: range.end });
+  // Independent reads — the Time Engine window and "who is waiting on me" have
+  // nothing to say to each other, so they run together.
+  const [planning, pendingInvitations] = await Promise.all([
+    getPlanning({ rangeStart: range.start, rangeEnd: range.end }),
+    listMyPendingWorkerInvitations(),
+  ]);
+  const invitations = await resolveInvitations(locale, pendingInvitations);
+
   if (planning.status !== "ok") {
-    return { kind: "unavailable", reason: tPanel("unavailableWorkContext") };
+    // The time read failed. An invitation does not depend on it, and somebody
+    // real is waiting on this person — so it still shows, with the failure
+    // STATED as the headline instead of hidden behind an empty panel.
+    return invitations
+      ? {
+          kind: "context",
+          view: {
+            headline: tPanel("unavailableWorkContext"),
+            facts: [],
+            recommendations: [],
+            invitations,
+          },
+        }
+      : { kind: "unavailable", reason: tPanel("unavailableWorkContext") };
   }
 
   const ctx = buildWorkContext(planning.items, todayIso);
@@ -125,6 +167,36 @@ export async function resolveWorkContext(locale: string): Promise<WorkContextRes
       headline: facts.length > 0 ? tPanel("workHeadline") : tPanel("workHeadlineQuiet"),
       facts,
       recommendations,
+      invitations,
+    },
+  };
+}
+
+/** The copy the canonical accept control needs, resolved ONLY when there is
+ *  something to accept — an empty list costs no translation lookup and sends
+ *  no labels over the wire. */
+async function resolveInvitations(
+  locale: string,
+  rows: readonly PendingWorkerInvitation[],
+): Promise<WorkContextView["invitations"]> {
+  if (rows.length === 0) return null;
+  const t = await getTranslations({ locale, namespace: "workerInvitations" });
+  return {
+    rows,
+    labels: {
+      title: t("title"),
+      body: t("body"),
+      companyLabel: t("companyLabel"),
+      agencyLabel: t("agencyLabel"),
+      accept: t("accept"),
+      accepting: t("accepting"),
+      noteLabel: t("noteLabel"),
+      outcomeLinked: t("outcomeLinked"),
+      outcomeAlreadyLinked: t("outcomeAlreadyLinked"),
+      outcomeNoInvitation: t("outcomeNoInvitation"),
+      outcomeNoWorker: t("outcomeNoWorker"),
+      outcomeError: t("outcomeError"),
+      outcomeNeedsMigration: t("outcomeNeedsMigration"),
     },
   };
 }

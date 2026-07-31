@@ -57,7 +57,6 @@ describe("one dominant primary-action region per branch", () => {
 
 describe("the top-slot ladder decides from real state (behavioral)", () => {
   const NONE: TopSlotSignals = {
-    pendingInvitations: 0,
     acceptedOutgoing: 0,
     pendingIncomingServiceRequests: 0,
     pendingIncomingBookings: 0,
@@ -65,16 +64,18 @@ describe("the top-slot ladder decides from real state (behavioral)", () => {
     isFirstUse: false,
   };
 
-  it("a pending invitation beats every other state", () => {
+  // W3 row 6: `invitation` was the top rung. It is gone from the ladder
+  // because its card is gone from this page — pending invitations are the
+  // Context Panel's work context now.
+  it("an accepted outgoing request beats every other state", () => {
     expect(
       decideTopSlot({
         ...NONE,
-        pendingInvitations: 1,
         acceptedOutgoing: 5,
         pendingIncomingBookings: 5,
         isFirstUse: true,
       }),
-    ).toBe("invitation");
+    ).toBe("accepted_request");
   });
 
   it("each rung wins only when every higher rung is empty", () => {

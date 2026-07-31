@@ -1,6 +1,6 @@
 # W3 — `/dashboard/advanced` CAPABILITY MIGRATION MATRIX
 
-> **Status: 2 of 28 rows MIGRATED (rows 4 and 5); row 6 audited. Rows 13 and 15 VERIFIED —
+> **Status: 3 of 28 rows MIGRATED (rows 4, 5 and 6). Rows 13 and 15 VERIFIED —
 > no independent drop exists; they are removed by the route deletion.**
 > This file is step 1 of the W3 method. The route is **not** deleted, and must
 > not be deleted until every row below is `MIGRATED` and browser-proven.
@@ -51,7 +51,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB | `project` result | TODO |
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
 | 5 | Job recommendations | `JobRecommendationsCard` + the chat thread's `EmployerMatchCard` | ABSORB | `opportunities` result | **ABSORBED + CONSOLIDATED 2026-07-31** — renderers 2→1, action surfaces 2→1, production LOC net −103 (#932, #934) |
-| 6 | Worker invitations | `WorkerInvitationsCard` ×2 mounts, `WorkerInvitations` | ABSORB | Context Panel — **work context preferred over a new result kind** | **AUDITED 2026-07-31, next** — see the row 6 audit below |
+| 6 | Worker invitations | `WorkerInvitations` (was `WorkerInvitationsCard` ×2 mounts) | ABSORB | Context Panel work context | **ABSORBED 2026-07-31** — card deleted, mounts 2→0, no result kind, browser-proven with the REAL accept RPC |
 | 7 | Demand request create | `DemandRequestButton` | CHAT | already an action id — render result | TODO |
 | 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | `project` result | TODO |
 | 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
@@ -76,7 +76,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
 **Counts: 28 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 4 OBSOLETE ·
-2 DETAIL. 2 MIGRATED (rows 4 and 5); 14 ABSORB rows remain.**
+2 DETAIL. 3 MIGRATED (rows 4, 5 and 6); 13 ABSORB rows remain.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -235,8 +235,8 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | Row | Capability | Journey step | State |
 |---|---|---|---|
 | 5 | Job recommendations | Chat → Result → Job | **DONE** |
-| 6 | Worker invitations | Onboarding → Chat (joining an employer) | **NEXT** |
-| 1 | Premium Hub person card | Player Card | TODO |
+| 6 | Worker invitations | Onboarding → Chat (joining an employer) | **DONE** |
+| 1 | Premium Hub person card | Player Card | **NEXT** |
 | 21 | My zone | Player Card | TODO |
 | 24 | Trust insight | Player Card (reputation) | blocked on real reputation rows |
 | 11 | Booking responses | Calendar | TODO |
@@ -295,6 +295,110 @@ accept UI and its single write path stay exactly as they are.
 must survive the move): `linked`, `already-linked`, `no-invitation`,
 `no-worker`, `error`, and the `needs-migration` degradation.
 
+## Row 6 — DONE, and what an ABSORB costs when the target already exists
+
+The audit's conclusion held: this was the cheapest ABSORB so far, because the
+capability had **one write path already** and needed **no new surface**.
+`WorkerInvitations` is rendered by the Context Panel with the props it always
+took — the accept form, the six outcome states and the single write path are
+byte-for-byte the ones that existed. Nothing was ported.
+
+What was removed: `worker-invitations-card.tsx` (the server wrapper, 47 lines),
+BOTH of its mounts on `/dashboard/advanced`, that page's own invitations read,
+and the `invitation` rung of the top-slot ladder. That last one is the row-5
+lesson applied early: with no renderer on the page, `decideTopSlot` returning
+`"invitation"` would have resolved to an empty slot — a ladder rung pointing at
+nothing. It is asserted as an ABSENCE in `top-slot.test.ts` so a revert is
+visible rather than silent.
+
+**Two decisions the work forced, neither of them in the audit:**
+
+1. **Attention before geography.** The panel body rendered `WorkspaceMap`
+   first. On a phone the sheet body is `max-h-[45dvh]`, so behind the map the
+   accept button sat below the fold — one scroll away from the notification
+   that sent the person there. The invitation now leads the panel and the map
+   follows. Caught in the browser, not in review: the first 375px screenshot
+   showed it.
+2. **The work context degrades without dropping the invitation.** If the Time
+   Engine read fails, `resolveWorkContext` used to return `unavailable` and
+   render one line. That would have hidden a pending invitation behind an
+   unrelated failure. The failure is now the headline and the invitation still
+   renders — the read it depends on succeeded.
+
+**Browser proof** (`tests/e2e/w3-second-dashboard.spec.ts`, 8 new scenarios,
+20 in the file green): a real seeded invitation appears in the panel with the
+inviting organisation's real name and note; both mounts are gone from
+`/dashboard/advanced` and that route still works; accepting drives the REAL
+SECURITY DEFINER RPC and the `agency_workers` row is verified to exist in the
+database afterwards; an org already on the roster returns `already_linked` in
+the success tone with the button still present; an invitation deleted behind
+the person's back returns `no_invitation` in the warning tone and writes
+nothing; a corrupted org id produces a REAL Postgres failure and the `error`
+state, again writing nothing; reload and close/reopen keep the state honest and
+an accepted invitation does not come back; 375px shows the invitation above the
+map with no horizontal overflow; zero console errors, zero failed requests.
+Evidence: `w3/row6-invitation-panel-1440.png`, `w3/row6-invitation-panel-375.png`.
+
+**Honest gaps.** Two of the six outcomes are NOT browser-proven here, and are
+named rather than claimed:
+
+* `no-worker` needs a signed-in identity with a profile but no `workers` row.
+  Every local fixture identity has one, and inventing a half-onboarded user to
+  make a screenshot is the fabricated state this platform bans.
+* `needs-migration` needs the accept RPC to be absent (SQLSTATE 42883). Forcing
+  it means dropping a function from the shared local database mid-suite.
+
+Both are covered by the unit guard, which pins that the branch exists in the
+control AND that the panel's server half supplies copy for all six outcomes —
+so neither can silently render a raw key.
+
+**One pre-existing break was found and repaired**: `w3-context-panel.spec.ts`
+still waited 20s for `chat-employer-match-card`, which row 5 (#934) deleted. Its
+own 30s budget expired before its `test.skip` could fire, so the spec had been
+red on `main` since that merge. It now selects from the canonical
+`opportunities` result, and waits for the entity read to SETTLE before asserting
+content — the fifth harness defect of that family in this programme, and again
+not a product defect.
+
+### Net complexity — row 6
+
+| Measure | Before | After |
+|---|---|---|
+| Renderers of an invitation surface | 3 (card, onboarding note, journal note) | 3 (panel, onboarding note, journal note) |
+| Mounts of an invitation surface | 4 | 3 |
+| Action surfaces | 1 | 1 |
+| Duplicate mounts | 2 | **0** |
+| Write paths | 1 | 1 |
+| Components | — | **−1** (`worker-invitations-card.tsx`) |
+| Routes | — | 0 added, 0 removed |
+| Result kinds | — | **0 added** |
+| Registry entries | — | **0 added** |
+| Top-slot kinds | 6 | **5** |
+| Reads on `/dashboard/advanced` | 6 | **5** |
+| Production LOC | — | +129 / −76 all lines; **+80 / −56 code-only (net +24)** |
+
+**Net complexity: NEGATIVE on architecture, mildly positive on lines.** Stated
+that way on purpose. One component, one duplicate mount, one state kind and one
+page read are gone, and nothing was added to the registry, the result kinds or
+the routes. The +24 code lines are the label mapping the deleted card used to
+get for free by being a server component: the panel is a CLIENT component, and
+this codebase deliberately restricts which message namespaces reach the client
+bundle (`BASE_CLIENT_MESSAGE_ROOTS`, guarded by
+`client-messages-allowlist.test.ts`). Letting `WorkerInvitations` translate
+itself would have deleted ~40 lines and shipped a whole namespace to every
+dashboard page's JavaScript. The lines were the cheaper cost, and pretending the
+count was negative would have been the easier report.
+
+**Two read-only notes were deliberately KEPT**, against the "fewer renderers"
+target, because the condition for keeping them is met: both give distinct
+context on surfaces where the Context Panel does not exist, and neither exposes
+an action. `/onboarding` names the inviting organisation to a user who has not
+onboarded yet — who *cannot* accept, because the accept RPC requires a worker
+profile they do not have. `/dashboard/journal` names the org the worker is
+waiting on as the real reason there is no writable journal context. Deleting
+either to move a number from 3 to 2 would have deleted a capability, which is
+the exact failure row 5's guard was rewritten to prevent.
+
 ## Honest reading of this matrix
 
 `/dashboard/advanced` cannot be removed in one step, and any claim that it can
@@ -323,14 +427,16 @@ through.
 3. DONE — row 5 is the `opportunities` result, and the chat thread's duplicate
    job-card renderer is deleted with it: renderers 2 -> 1, action surfaces
    2 -> 1, production LOC net -103 (#932, #934).
-4. NEXT — row 6 (worker invitations). AUDITED, not started. The audit changed
-   the target: absorb into the Context Panel WORK CONTEXT rather than mint a
-   new `invitations` result kind, reuse `WorkerInvitations` unchanged, and
-   collapse its two mounts into one. Its single write path already exists.
-5. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
+4. DONE — row 6 is the Context Panel's work context. No result kind, no
+   registry entry, no route, no second action surface: `WorkerInvitations`
+   reused unchanged, mounts 2 -> 0 on the dying route, the server wrapper and
+   the `invitation` top-slot rung deleted.
+5. NEXT — the Player Card (rows 1 / 21, then 24 when reputation has real
+   rows), which is the next P0 Employee Journey step.
+6. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
    the collapse market-map.tsx's own header already describes.
-6. Then the remaining 14 ABSORB rows in dependency order.
-7. Delete /dashboard/advanced only when every row is MIGRATED or
+7. Then the remaining 13 ABSORB rows in dependency order.
+8. Delete /dashboard/advanced only when every row is MIGRATED or
    OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
    the same commit.
 ```

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 
 /**
  * Guard: the work-journal review chain must be REACHABLE from the logged-in
@@ -13,6 +13,22 @@ import { join, resolve } from "node:path";
 const APP = resolve(__dirname, "..", "..");
 function read(rel: string): string {
   return readFileSync(join(APP, rel), "utf8");
+}
+
+/** Every product source file, POSIX-relative to apps/web. Tests are excluded:
+ *  a guard naming the action is not a second write path. */
+function sourceFiles(dir = APP): string[] {
+  const out: string[] = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === "node_modules" || e.name === ".next" || e.name === "tests") continue;
+    const abs = join(dir, e.name);
+    if (e.isDirectory()) {
+      out.push(...sourceFiles(abs));
+    } else if (/\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name)) {
+      out.push(relative(APP, abs).split("\\").join("/"));
+    }
+  }
+  return out;
 }
 
 describe("dashboard surfaces the chain entry points", () => {
@@ -35,7 +51,6 @@ describe("dashboard surfaces the chain entry points", () => {
     // state-aware next action + inline editor moved into the hub Asmens kortelė.
     expect((page.match(/<DashboardNextAction\b/g) ?? []).length).toBeGreaterThanOrEqual(1);
     expect(page).toMatch(/workEditor=\{workEditor\}/);
-    expect((page.match(/<WorkerInvitationsCard\b/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
   it("the chain-actions card links to all real chain surfaces (real Links, no placeholder)", () => {
@@ -66,9 +81,51 @@ describe("dashboard surfaces the chain entry points", () => {
     expect(src).toMatch(/role === "customer"/);
   });
 
-  it("the accept-invitation surface is mounted on the dashboard too", () => {
+  /**
+   * W3 row 6 — the accept-invitation surface MOVED; it was not deleted.
+   *
+   * Both halves are pinned, and that is the whole point: a guard that only
+   * checked the first half would pass just as happily if the capability had
+   * been thrown away with the card.
+   */
+  it("the accept-invitation surface left /dashboard/advanced", () => {
     const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).toMatch(/<WorkerInvitationsCard\b/);
+    expect(page).not.toMatch(/<WorkerInvitationsCard\b/);
+    expect(page).not.toMatch(/worker-invitations-card/);
+  });
+
+  it("...and landed in the Context Panel's work context, mounted once", () => {
+    const panel = read("components/app/world-state/context-panel.tsx");
+    const mounts = panel.match(/<WorkerInvitations\b/g) ?? [];
+    expect(mounts, "exactly one mount — two would be the old duplication").toHaveLength(1);
+    expect(panel).toMatch(
+      /import \{ WorkerInvitations \} from "@\/components\/app\/worker-invitations"/,
+    );
+    // The rows and the copy come from the work context the panel already
+    // reads — no second read, no fetch of its own.
+    expect(panel).toMatch(/work\.invitations\.rows/);
+    expect(panel).toMatch(/work\.invitations\.labels/);
+    // Attention before geography: on a phone the sheet is ~45dvh, and behind
+    // the map the accept button is a scroll away from the notification that
+    // sent the person here.
+    expect(panel.indexOf("<WorkerInvitations")).toBeLessThan(
+      panel.indexOf("<WorkspaceMap"),
+    );
+
+    const server = read("lib/world-state/work-context-server.ts");
+    expect(server).toMatch(
+      /import \{\s*listMyPendingWorkerInvitations,/,
+    );
+  });
+
+  it("the accept action still has exactly ONE caller and ONE write path", () => {
+    // The reason this row was cheap: unlike row 5 there was no second write
+    // path to collapse. Moving the control must not have created one — so the
+    // whole tree is scanned, not a hand-written file list.
+    const callers = sourceFiles()
+      .filter((rel) => rel !== "lib/worker/invitation-actions.ts")
+      .filter((rel) => read(rel).includes("acceptWorkerInvitationAction"));
+    expect(callers.sort()).toEqual(["components/app/worker-invitations.tsx"]);
   });
 });
 
