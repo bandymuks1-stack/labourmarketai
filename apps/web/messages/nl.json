@@ -8821,8 +8821,6 @@
       "title": "Marktkaart",
       "open": "Marktkaart openen",
       "lead": "Een overzicht van je marktsignalen.",
-      "activePoint": "Actief punt",
-      "points": "Marktpunten",
       "signals": {
         "preferred": "Voorkeurslocaties",
         "needs": "Behoeften",

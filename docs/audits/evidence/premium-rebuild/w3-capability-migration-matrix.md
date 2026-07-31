@@ -1,6 +1,6 @@
 # W3 — `/dashboard/advanced` CAPABILITY MIGRATION MATRIX
 
-> **Status: INVENTORY COMPLETE, MIGRATION NOT STARTED.**
+> **Status: INVENTORY COMPLETE. 1 of 28 rows MIGRATED (row 4).**
 > This file is step 1 of the W3 method. The route is **not** deleted, and must
 > not be deleted until every row below is `MIGRATED` and browser-proven.
 
@@ -48,7 +48,7 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 1 | Premium Hub person card | `PremiumHubScreen`, `premium-hub-person-card` | ABSORB | `player-card` result | TODO |
 | 2 | Premium Hub company card | `PremiumHubCompanyCard` | ABSORB | new `organization` result kind | TODO |
 | 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB | `project` result | TODO |
-| 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | `market` result (canonical `MarketMap`) | **superseded — verify then drop** |
+| 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
 | 5 | Job recommendations | `JobRecommendationsCard` | ABSORB | `market` result / new `opportunities` | TODO |
 | 6 | Worker invitations | `WorkerInvitationsCard` | ABSORB | `calendar` or new `invitations` | TODO |
 | 7 | Demand request create | `DemandRequestButton` | CHAT | already an action id — render result | TODO |
@@ -72,9 +72,36 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 25 | Demand intake section | inline, `demand-intake-section` | CHAT | structured demand flow | TODO |
 | 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
+| 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 27 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 3 OBSOLETE ·
-2 DETAIL. Zero migrated so far.**
+**Counts: 28 capabilities — 4 ALREADY · 15 ABSORB · 4 CHAT · 4 OBSOLETE ·
+2 DETAIL. 1 MIGRATED (row 4).**
+
+## Row 4 — DONE, and what it proved about the method
+
+`PremiumHubMarketMap` drew a 400×260 `<svg>` "network" of dots. Its own comment
+admitted the positions were decorative and not geographic: the number of dots
+was real, every position was invented. A picture of a map is not a map — the
+canonical doctrine forbids "an SVG illustration standing in for a map", and this
+is what the owner command means by *fiktyvūs grafikai*.
+
+It was **not** replaced with a second `<MarketMap>`. This route is leaving;
+mounting a real Leaflet instance inside it would add weight to a dying surface.
+Everything real survives — the three signal counts, the honest empty state, and
+the door to `/dashboard/market-map`. **159 → 72 lines**, and two dead i18n keys
+(`map.activePoint`, `map.points`) removed from 5 locales.
+
+Proven in the browser (`tests/e2e/w3-second-dashboard.spec.ts`, 2 scenarios):
+the advanced route still renders, the panel still shows its real branch —
+whichever of the two the identity lands in — the door still resolves, and the
+`viewBox="0 0 400 260"` drawing is gone.
+
+**Row 28, found while writing that proof.** `/dashboard/market-map` does NOT
+render the canonical `<MarketMap>`. It renders `market-map-base` →
+`market-map-live`, a **second real Leaflet chain**. `market-map.tsx`'s own header
+says it was meant to collapse `market-map-live.tsx` into itself; that collapse
+never finished. Both are real maps, so no user is misled — but two Leaflet
+implementations is one too many and it is now tracked rather than a surprise.
 
 ## Honest reading of this matrix
 
@@ -98,10 +125,14 @@ through.
 ## Next exact action for W3
 
 ```text
-1. Implement row 4 first: prove PremiumHubMarketMap is fully superseded by the
-   canonical MarketMap in the `market` result, then delete the component.
-   It is the lowest-risk row and it validates the migration method.
-2. Then rows 13 and 15 (also ALREADY) — verify, then drop.
-3. Then the ABSORB rows in dependency order, each with its own browser proof.
-4. Delete the route only when every row is MIGRATED or OBSOLETE-proven.
+1. DONE — row 4. The method holds: remove the fake, keep every real branch,
+   prove both in a browser before claiming the capability survived.
+2. Rows 13 and 15 (DashboardNextAction, CurrentSpaceHeader) — classified
+   ALREADY. Verify against the Context Panel work context, then drop.
+3. Row 28 — collapse market-map-live into the canonical MarketMap, finishing
+   the collapse market-map.tsx's own header already describes.
+4. Then the 15 ABSORB rows in dependency order, each with its own browser proof.
+5. Delete /dashboard/advanced only when every row is MIGRATED or
+   OBSOLETE-proven, updating surface-registry.ts and route-truth-map.test.ts in
+   the same commit.
 ```

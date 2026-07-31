@@ -1043,7 +1043,12 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     );
   });
 
-  it("no real owner email appears in repo changes", () => {
+  // 30s, not the 5s default. This walks apps/web/{messages,components,app,lib,
+  // scripts} AND docs/ and reads every text file in them. It crossed the
+  // default budget on 2026-07-31 purely because the evidence tree grew — a
+  // guard that times out protects nothing, and the honest fix for an I/O-bound
+  // whole-tree scan is a budget that matches what it does, not a smaller scan.
+  it("no real owner email appears in repo changes", { timeout: 30_000 }, () => {
     // Belt-and-braces: the primary email named in the bug report must
     // never appear in any source / docs / test fixture under apps/web
     // or docs/. This is a privacy hygiene guard — the literal itself
@@ -1066,10 +1071,17 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
         const p = join(dir, entry);
         const s = statSync(p);
         if (s.isDirectory()) {
+          // Build and test ARTEFACTS, not source. `test-results` and
+          // `playwright-report` in particular hold traces and videos that no
+          // hand ever writes an address into, and walking them grew this scan
+          // for nothing.
           if (
             entry === "node_modules" ||
             entry === ".next" ||
-            entry === ".turbo"
+            entry === ".turbo" ||
+            entry === ".git" ||
+            entry === "test-results" ||
+            entry === "playwright-report"
           )
             continue;
           out.push(...walkFiles(p));

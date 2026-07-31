@@ -8821,8 +8821,6 @@
       "title": "Rinkos žemėlapis",
       "open": "Atidaryti rinkos žemėlapį",
       "lead": "Jūsų rinkos signalų apžvalga.",
-      "activePoint": "Aktyvus taškas",
-      "points": "Rinkos taškai",
       "signals": {
         "preferred": "Pageidaujamos vietos",
         "needs": "Poreikiai",

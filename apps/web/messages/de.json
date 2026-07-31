@@ -8821,8 +8821,6 @@
       "title": "Marktkarte",
       "open": "Marktkarte öffnen",
       "lead": "Ein Überblick über Ihre Marktsignale.",
-      "activePoint": "Aktiver Punkt",
-      "points": "Marktpunkte",
       "signals": {
         "preferred": "Bevorzugte Standorte",
         "needs": "Bedarfe",
