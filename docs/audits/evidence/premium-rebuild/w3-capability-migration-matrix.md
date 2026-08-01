@@ -47,15 +47,15 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | # | Capability | Component(s) | Class | Target | State |
 |---|---|---|---|---|---|
 | 1 | Premium Hub person card | `WorkerPlayerCard` (was `premium-hub-person-card` ×2 + a chat-thread embed) | ABSORB | `player-card` result | **ABSORBED 2026-07-31** — renderers 3→1, person mounts 2→0, production LOC net −47 (#942) |
-| 2 | Premium Hub company card | `PremiumHubCompanyCard` | ABSORB | new `organization` result kind | TODO |
-| 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB | `project` result | TODO |
+| 2 | Premium Hub company card | `PremiumHubCompanyCard` | ABSORB→**VERIFIED** | door-panel; every destination canonical | **CONFIRMED 2026-08-01** — no editor/write/own read (guard-pinned); destinations proven in the browser; the "new `organization` result kind" target was CHALLENGED and dropped (no proof of need); dies with the route |
+| 3 | Premium Hub project card | `PremiumHubProjectCard` | ABSORB→**VERIFIED** | door-panel; `project` detail is canonical | **CONFIRMED 2026-08-01** — same proof; `/dashboard/projects/<id>` + `#project-gallery` browser-proven; dies with the route |
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
 | 5 | Job recommendations | `JobRecommendationsCard` + the chat thread's `EmployerMatchCard` | ABSORB | `opportunities` result | **ABSORBED + CONSOLIDATED 2026-07-31** — renderers 2→1, action surfaces 2→1, production LOC net −103 (#932, #934) |
 | 6 | Worker invitations | `WorkerInvitations` (was `WorkerInvitationsCard` ×2 mounts) | ABSORB | Context Panel work context | **ABSORBED 2026-07-31** — card deleted, mounts 2→0, no result kind, browser-proven with the REAL accept RPC |
 | 7 | Demand request create | `DemandRequestButton` | CHAT | one canonical intake presentation | **CONSOLIDATED 2026-08-01** — the FULL wizard moved to `/dashboard/company#demand-intake`; `DemandDraftForm`'s company mount absorbed by the wizard's save-draft leg; chat stays the thin intake; 5 stale `/dashboard#demand-intake` doors repaired; browser-proven (9/9 e2e ×2 runs) |
 | 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | one canonical readback | **CONSOLIDATED 2026-08-01** — the ONE owner readback now on `/dashboard/company`, employer-kind-scoped (buyer rows stay in the buyer room); buyer + scouting readbacks retained as genuinely distinct actors/purposes; advanced mount removed |
-| 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
-| 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
+| 9 | Service requests next-action | inline + `listOwnCustomerRequests` | **ALREADY** | the spine (bell) carries `incoming-service-requests`; capability lives on `/dashboard/service-requests` | **CONFIRMED 2026-08-01** — browser-proven with a seeded REAL incoming request (rows-11/12 method) |
+| 10 | Outgoing requests next-action | inline | **ALREADY** | the spine carries `service-request-responses` (real seen-model); same canonical surface | **CONFIRMED 2026-08-01** — browser-proven with a seeded provider response after `seen_at` |
 | 11 | Booking responses next-action | inline `<Link>` + count badge | **ALREADY** | the spine (bell + chips) already presents it; capability lives on `/dashboard/bookings` | **CONFIRMED 2026-08-01** — browser-proven with seeded real bookings, see below |
 | 12 | Bookings next-action | inline `<Link>` + count badge | **ALREADY** | same | **CONFIRMED 2026-08-01** — same proof |
 | 13 | Dashboard next action | `DashboardNextAction` | **ALREADY** | Context Panel work context | **VERIFIED 2026-07-31** — dies with the route, see below |
@@ -75,13 +75,14 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
-**Counts: 28 capabilities — 10 ALREADY · 10 ABSORB · 3 CHAT · 4 OBSOLETE ·
-2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12, 16, 19, 14 and 21
-CONFIRMED 2026-08-01; rows 7/8/25 CONSOLIDATED 2026-08-01 (the employer
-package — one wizard on `/dashboard/company`, one owner readback, zero
-advanced demand mounts). 4 ABSORB rows remain: 2, 3, 9, 10 — plus row 24,
-BLOCKED on data and transferred to W6 by owner ruling (it does not block W3
-closure).**
+**Counts: 28 capabilities. 4 MIGRATED (rows 1, 4, 5, 6); rows 11/12, 16, 19,
+14, 21 CONFIRMED; rows 7/8/25 CONSOLIDATED (employer package); rows 2/3/9/10
+CONFIRMED 2026-08-01 (company package — 9/10 ALREADY via the spine, 2/3
+verified door-panels that die with the route). ZERO ABSORB rows remain
+except row 24, BLOCKED on data and transferred to W6 by owner ruling (does
+not block W3 closure). Remaining before the route deletion: Package 3 —
+rows 22/23 (DETAIL repoints), 20/27/28 (OBSOLETE decisions + the second
+MarketMap chain) — then Package 4 deletes `/dashboard/advanced`.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -517,6 +518,19 @@ The accepted/waiting/declined breakdown row 10 renders is a *summary of the
 canonical surface's own list* — the surface owns it. Expected outcome:
 `ALREADY`, owed the rows-11/12-style browser proof with seeded counts —
 NOT a port.
+
+**COMPLETED 2026-08-01** — proof `tests/e2e/w3-company-rows-2-3-9-10.spec.ts`
+(8/8, two consecutive runs) + guard `lib/guards/w3-company-rows-2-3-9-10.test.ts`:
+zero state shows NO signals and NO advanced cards (count-gated); a seeded
+real incoming request lights the bell's `incoming-service-requests` signal
+with the DB count and the canonical href; a seeded provider response after a
+pinned `seen_at` lights `service-request-responses` (the mark-seen upsert
+race is settled deterministically in the spec); the hub cards render real
+counts today and every destination exists canonically (`#company-team`,
+`/dashboard/start`'s company door, the fixture project detail +
+`#project-gallery`); 375px clean; an authenticated outsider reads ZERO
+`service_offering_requests` rows against a non-empty table. **No port, no
+new result kind, no new code beyond tests/guards. Net production LOC: 0.**
 
 **Rows 2/3 are door-panels, not editors.** `premium-hub-company-card.tsx`
 (114 lines) and `premium-hub-project-card.tsx` (124 lines) render real
