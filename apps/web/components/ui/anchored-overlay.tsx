@@ -88,8 +88,17 @@ export function AnchoredOverlay({
       if (e.key === "Escape") onClose();
     };
     const onPointerDown = (e: MouseEvent) => {
+      // A CSS-hidden panel must not own outside-close. Callers pair this
+      // popover with a MobileSheet and hide THIS panel at <md (`hidden
+      // md:block`) while both stay mounted: without this guard, mousedown on
+      // a link INSIDE the sheet counted as "outside", onClose() unmounted the
+      // sheet between mousedown and click, and the link never navigated
+      // (real phone taps fail the same way — compatibility mousedown fires
+      // before click).
+      if (!panelRef.current || panelRef.current.getClientRects().length === 0)
+        return;
       const t = e.target as Node;
-      if (panelRef.current?.contains(t)) return;
+      if (panelRef.current.contains(t)) return;
       if (anchorRef.current?.contains(t)) return;
       onClose();
     };
