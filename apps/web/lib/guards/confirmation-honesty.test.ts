@@ -66,6 +66,16 @@ describe("Guard: the backend restricts confirmers to the supported set", () => {
       /confirmer_engagement_context_id\s+uuid\s+not null\s+references public\.engagement_contexts/,
     );
   });
+
+  it("the ungated legacy confirm/reject actions stay deleted (W5 slice 1)", () => {
+    // confirmEntry/rejectEntry inserted confirmations under the 0013 RLS
+    // alone, bypassing the journal_review_enabled relationship gate. They had
+    // no UI caller; any future confirmation write must go through the gated
+    // review chain (reviewJournalEntry / confirmEntrySkills).
+    const actions = read("lib/journal/confirm-actions.ts");
+    expect(actions).not.toMatch(/export async function (confirmEntry|rejectEntry)\b/);
+    expect(actions).not.toMatch(/from\("journal_entry_confirmations"\)\.insert/);
+  });
 });
 
 // ── 1b. The DB CHECK constraint pins confirmer_role to the supported set ──

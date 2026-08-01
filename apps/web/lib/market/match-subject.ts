@@ -20,9 +20,10 @@ import {
  *
  * Visibility: reads ONLY employer-visible tables — `workers`,
  * `worker_skills` (both `... or is_employer()`), `skills.esco_uri`
- * (`using(true)`), and approved `candidate_skills` ESCO mappings. It never
- * reads private worker content (journal text, raw candidate_skills text,
- * documents). Evidence tier comes from the real `worker_skills.source` column.
+ * (`using(true)`). It never reads private worker content (journal text,
+ * documents). Evidence tier comes from the real `worker_skills.source`
+ * column. (The candidate_skills join was removed in W5 slice 1 — the table
+ * never had a writer.)
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,9 +65,6 @@ export async function buildSupplyCandidates(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = workers as any[];
   const workerIds = rows.map((w) => w.id as string);
-  const profileIds = rows
-    .map((w) => w.profile_id as string | null)
-    .filter((p): p is string => !!p);
 
   // worker_skills.source → evidence tier, keyed on the CANONICAL SKILL SLUG
   // (best tier wins). PR4 repair: this used to key on skills.esco_uri and
@@ -173,34 +171,10 @@ export async function buildSupplyCandidates(
     languagesByWorker.set(l.worker_id, list);
   }
 
-  // Approved candidate-skill ESCO mappings join as self_declared (the mapping
-  // is curated, the skill stays self-declared until real work confirms it).
-  if (profileIds.length > 0) {
-    try {
-      const { data: cand } = await asAny(supabase)
-        .from("candidate_skills")
-        .select("profile_id, mapped_esco_uri")
-        .eq("status", "approved")
-        .not("mapped_esco_uri", "is", null)
-        .in("profile_id", profileIds);
-      const workerByProfile = new Map<string, string>();
-      for (const w of rows) {
-        if (w.profile_id) workerByProfile.set(w.profile_id as string, w.id as string);
-      }
-      for (const c of (cand ?? []) as {
-        profile_id: string;
-        mapped_esco_uri: string | null;
-      }[]) {
-        const wid = workerByProfile.get(c.profile_id);
-        if (!wid || !c.mapped_esco_uri) continue;
-        const m = skillsByWorker.get(wid) ?? new Map<string, EvidenceTier>();
-        if (!m.has(c.mapped_esco_uri)) m.set(c.mapped_esco_uri, "self_declared");
-        skillsByWorker.set(wid, m);
-      }
-    } catch {
-      // candidate_skills absent → curated worker_skills only (honest subset)
-    }
-  }
+  // W5 slice 1: the candidate_skills join was REMOVED. The table never had a
+  // writer (the capture slice shipped to skill_candidate_clarifications and
+  // profile_skill_claims instead), so this read only ever saw an empty set.
+  // Supply stays curated worker_skills — the honest truth, now stated plainly.
 
   return rows.map((w) => {
     const skillMap = skillsByWorker.get(w.id as string) ?? new Map();
