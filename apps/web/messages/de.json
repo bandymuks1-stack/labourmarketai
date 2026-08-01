@@ -1574,71 +1574,6 @@
       "title": "Unternehmensbereich",
       "subtitle": "Der Unternehmenskontext ist ein Einstiegspunkt, keine Grenze. Sie können weitere Rollen innehaben und später über den Rollenwechsler hinzufügen.",
       "pilotDisclaimer": "Matching wird noch nicht angeboten. Nichts wird automatisch öffentlich. Sie können Ihre erste Anfrage in Ruhe vorbereiten — sie wird sofort gespeichert und bleibt privat für Sie.",
-      "firstAction": {
-        "title": "Erstellen Sie Ihre erste Arbeits-/Teamanfrage",
-        "body": "Beschreiben Sie die Arbeitskräfte, das Team oder die Projekthilfe, die Sie benötigen. Es ist ein privater Entwurf — keine öffentliche Anzeige, nur Sie können ihn sehen.",
-        "emptyState": "Noch keine Anfrage. Beschreiben Sie die Arbeitskräfte, das Team oder die Projekthilfe, die Sie benötigen — Ihr Entwurf bleibt privat für Sie.",
-        "savedState": "Als privater Entwurf gespeichert. Nur Sie können ihn sehen.",
-        "submitRealCta": "Als echte Anfrage einreichen"
-      },
-      "draftForm": {
-        "field": {
-          "title": {
-            "label": "Benötigte Rolle / Berufsbezeichnung",
-            "placeholder": "z. B. Maler, Koch, Fahrer"
-          },
-          "capabilities": {
-            "label": "Erforderliche Fähigkeiten",
-            "placeholder": "z. B. Malerarbeiten, Mauerwerk, Fahren"
-          },
-          "location": {
-            "label": "Standort / Land",
-            "placeholder": "z. B. Vilnius, Litauen"
-          },
-          "timing": {
-            "label": "Startzeitpunkt",
-            "placeholder": "z. B. im März, diese Woche"
-          },
-          "projectRole": {
-            "label": "Ihre Rolle bei diesem Bedarf",
-            "placeholder": "Auswählen",
-            "help": "Die Rolle hängt vom konkreten Projekt ab, nicht von einem Unternehmenstyp.",
-            "options": {
-              "client": "Auftraggeber / Anfragender",
-              "general_contractor": "Generalunternehmer",
-              "contractor": "Auftragnehmer",
-              "subcontractor": "Subunternehmer",
-              "labour_supplier": "Arbeitskräfteanbieter",
-              "service_provider": "Dienstleister",
-              "other": "Sonstiges"
-            }
-          },
-          "accommodation": {
-            "label": "Unterkunft",
-            "placeholder": "Auswählen",
-            "options": {
-              "yes": "Wird gestellt",
-              "no": "Wird nicht gestellt",
-              "unknown": "Noch unklar"
-            }
-          },
-          "languages": {
-            "label": "Sprachanforderungen",
-            "placeholder": "z. B. Litauisch, Englisch"
-          },
-          "notes": {
-            "label": "Notizen",
-            "placeholder": "Beliebige Notizen"
-          }
-        },
-        "saveButton": "Entwurf speichern",
-        "saving": "Wird gespeichert…",
-        "deleteButton": "Entwurf entfernen",
-        "deleting": "Wird entfernt…",
-        "savedPrivate": "Privat gespeichert — niemand sonst sieht dies",
-        "saveError": "Konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-        "deleteError": "Konnte nicht entfernt werden. Bitte versuchen Sie es erneut."
-      },
       "profileLink": "Meine Fähigkeiten (falls Sie auch eine Person sind, nicht nur ein Unternehmen)",
       "nextActions": {
         "heading": "Nächste Schritte",
@@ -9575,7 +9510,11 @@
     "prefillLoading": "Wird geladen…",
     "prefillEmpty": "Keine frühere Anfrage gefunden",
     "prefillDone": "Aus Ihrer letzten Anfrage übernommen — prüfen und bearbeiten",
-    "prefillFromDraft": "Aus Ihrem gespeicherten Entwurf ausgefüllt — prüfen und absenden"
+    "prefillFromDraft": "Aus Ihrem gespeicherten Entwurf ausgefüllt — prüfen und absenden",
+    "draftSaveButton": "Entwurf privat speichern",
+    "draftSaving": "Wird gespeichert…",
+    "draftSavedPrivate": "Entwurf privat gespeichert — nur für Sie sichtbar",
+    "draftSaveError": "Entwurf konnte nicht gespeichert werden. Bitte erneut versuchen."
   },
   "workerPrefs": {
     "title": "Arbeitspräferenzen",

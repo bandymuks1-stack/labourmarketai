@@ -1574,71 +1574,6 @@
       "title": "Bedrijfswerkruimte",
       "subtitle": "Bedrijfscontext is een startpunt, geen beperking. Je kunt andere rollen hebben en er later meer toevoegen via de rolwisselaar.",
       "pilotDisclaimer": "Matching wordt nog niet aangeboden. Niets wordt automatisch openbaar. Je kunt rustig je eerste aanvraag voorbereiden — die wordt direct opgeslagen en blijft privé voor jou.",
-      "firstAction": {
-        "title": "Maak je eerste werk-/ploegaanvraag aan",
-        "body": "Beschrijf de werknemers, ploeg of projecthulp die je nodig hebt. Het is een privéconcept — geen openbare advertentie, alleen jij kunt het zien.",
-        "emptyState": "Nog geen aanvraag. Beschrijf de werknemers, ploeg of projecthulp die je nodig hebt — je concept blijft privé voor jou.",
-        "savedState": "Opgeslagen als privéconcept. Alleen jij kunt het zien.",
-        "submitRealCta": "Dien het in als echte aanvraag"
-      },
-      "draftForm": {
-        "field": {
-          "title": {
-            "label": "Gezochte rol / functietitel",
-            "placeholder": "bijv. schilder, kok, chauffeur"
-          },
-          "capabilities": {
-            "label": "Vereiste vaardigheden",
-            "placeholder": "bijv. schilderen, metselen, rijden"
-          },
-          "location": {
-            "label": "Locatie / land",
-            "placeholder": "bijv. Vilnius, Litouwen"
-          },
-          "timing": {
-            "label": "Startmoment",
-            "placeholder": "bijv. in maart, deze week"
-          },
-          "projectRole": {
-            "label": "Jouw rol bij deze behoefte",
-            "placeholder": "Kies",
-            "help": "De rol hangt af van het specifieke project, niet van een bedrijfstype.",
-            "options": {
-              "client": "Opdrachtgever / aanvrager",
-              "general_contractor": "Hoofdaannemer",
-              "contractor": "Aannemer",
-              "subcontractor": "Onderaannemer",
-              "labour_supplier": "Personeelsleverancier",
-              "service_provider": "Dienstverlener",
-              "other": "Anders"
-            }
-          },
-          "accommodation": {
-            "label": "Huisvesting",
-            "placeholder": "Kies",
-            "options": {
-              "yes": "Geregeld",
-              "no": "Niet geregeld",
-              "unknown": "Nog niet zeker"
-            }
-          },
-          "languages": {
-            "label": "Taalvereisten",
-            "placeholder": "bijv. Litouws, Engels"
-          },
-          "notes": {
-            "label": "Notities",
-            "placeholder": "Eventuele notities"
-          }
-        },
-        "saveButton": "Concept opslaan",
-        "saving": "Opslaan…",
-        "deleteButton": "Concept verwijderen",
-        "deleting": "Verwijderen…",
-        "savedPrivate": "Privé opgeslagen — niemand anders ziet dit",
-        "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
-        "deleteError": "Verwijderen is niet gelukt. Probeer het opnieuw."
-      },
       "profileLink": "Mijn vaardigheden (als je ook een persoon bent, niet alleen een bedrijf)",
       "nextActions": {
         "heading": "Volgende stappen",
@@ -9575,7 +9510,11 @@
     "prefillLoading": "Laden…",
     "prefillEmpty": "Geen eerdere aanvraag gevonden",
     "prefillDone": "Ingevuld op basis van uw laatste aanvraag — controleer en bewerk",
-    "prefillFromDraft": "Ingevuld vanuit uw opgeslagen concept — controleer en verstuur"
+    "prefillFromDraft": "Ingevuld vanuit uw opgeslagen concept — controleer en verstuur",
+    "draftSaveButton": "Concept privé opslaan",
+    "draftSaving": "Opslaan…",
+    "draftSavedPrivate": "Concept privé opgeslagen — alleen zichtbaar voor u",
+    "draftSaveError": "Concept kon niet worden opgeslagen. Probeer het opnieuw."
   },
   "workerPrefs": {
     "title": "Werkvoorkeuren",

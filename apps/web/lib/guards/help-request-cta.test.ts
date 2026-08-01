@@ -164,8 +164,10 @@ describe("LT-first — explanations are Lithuanian master only", () => {
 describe("reuse, not duplication", () => {
   it("company workspace renders the panel (room separation honoured)", () => {
     expect(companyPage).toMatch(/<HelpRequestPanel demandOptions=\{\[\]\} \/>/);
-    // Buyer-room reads stay out of the company room (room-separation guard).
-    expect(companyPage).not.toMatch(/listOwnCustomerRequests/);
+    // The help panel keeps NO demand picker here; the page's own readback
+    // read is employer-kind-scoped (see room-separation.test.ts) so buyer
+    // rows never enter the company room.
+    expect(companyPage).not.toMatch(/listOwnCustomerRequests\(\)/);
   });
   it("admin queue is a section of the EXISTING sales-intake panel reusing the follow-up action", () => {
     expect(intakePanel).toMatch(/data-testid="intake-help-requests"/);

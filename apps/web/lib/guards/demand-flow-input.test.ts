@@ -18,7 +18,8 @@ const code = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
 
 const form = read("components/app/demand-request-button.tsx");
-const page = read("app/[locale]/dashboard/advanced/page.tsx");
+// W3 rows 7/8/25: the wizard's ONE mount is the company page.
+const page = read("app/[locale]/dashboard/company/page.tsx");
 const helper = read("lib/demand/demand-request.ts");
 const readback = read("components/app/demand-requests-readback.tsx");
 const requestsLib = read("lib/buyer/customer-requests.ts");

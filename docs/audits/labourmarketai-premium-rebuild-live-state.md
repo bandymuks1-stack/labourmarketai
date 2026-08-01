@@ -85,7 +85,28 @@ guarded acceptance stack; the distinction is deliberate and stated.
 | Journal warning | **FIXED** (#951 — key the RSC-passed editSlot at creation); the stale spec allowance removed in this branch |
 | Matrix | 10 ALREADY · 10 ABSORB · 3 CHAT · 4 OBSOLETE · 2 DETAIL — **7 ABSORB rows remain** (row 24 BLOCKED among them) |
 
-### NEXT EXACT ACTION — P1 employer rows 7/8/25 (IMPLEMENTATION, not verification)
+### CONTINUATION — 2026-08-01 (employer package: rows 7/8/25 CONSOLIDATED)
+
+| | |
+|---|---|
+| Slice | **W3 rows 7/8/25** — one canonical demand flow, per the owner's Package 1 |
+| What shipped | FULL wizard moved to `/dashboard/company#demand-intake` (+ save-draft leg absorbing `DemandDraftForm`'s company mount); ONE owner readback on the company page, employer-kind-scoped; advanced page carries ZERO demand surfaces; 5 stale `/dashboard#demand-intake` doors repaired (they dead-ended on the chat since the root went chat-first) |
+| Proof | `w3-demand-consolidation.spec.ts` 9/9 × 2 consecutive runs (company + worker-only sessions, DB-row assertions, RLS negative); legacy demand/estimate specs retargeted and green; 795 files / 12 851 unit tests; typecheck clean; lint 0 errors |
+| Matrix | rows 7/8/25 done → **4 ABSORB rows remain: 2, 3, 9, 10** (+ row 24 BLOCKED → transferred to W6 by owner ruling; does not block W3 closure) |
+| Owner ruling (2026-08-01) | W3 is a **closing sprint** in 4 packages: 1 employer (7/8/25 — THIS) · 2 company (2/3/9/10) · 3 admin+map+cleanup (22/23, 20/27/28, second MarketMap, last advanced hrefs) · 4 delete `/dashboard/advanced`. Then immediately W4. |
+| Honest gaps | chat inline intake not re-browser-proven (unchanged code, unit-covered); buyer page not browser-proven (no customer fixture); scouting empty-state CTA repaired+guard-pinned, not browser-clicked (would require fabricating an empty stack) |
+
+### NEXT EXACT ACTION — Package 2: COMPANY rows 2/3/9/10
+
+Row 2 (`PremiumHubCompanyCard` → `organization` result kind?) and row 3
+(`PremiumHubProjectCard` → existing `project` result) + rows 9/10 (service /
+outgoing request next-actions → work context panel). Audit first (the row-1
+lesson: count the renderers), then one coherent slice. After that Package 3,
+then the route deletion (Package 4), full proof, merge, deploy,
+production-prove, mark W3 COMPLETE — and enter W4 in the same session if
+context remains.
+
+### SUPERSEDED — P1 employer rows 7/8/25 (IMPLEMENTATION, not verification)
 
 The audit is DONE and in the matrix: THREE demand forms
 (`DemandRequestButton` 888-line full form, advanced-only · chat inline form ·

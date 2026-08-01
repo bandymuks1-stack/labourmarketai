@@ -12,7 +12,10 @@ import {
   getOwnLastDemandPrefillAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
-import { deleteDemandDraftAction } from "@/lib/demand/demand-drafts-actions";
+import {
+  deleteDemandDraftAction,
+  saveDemandDraftAction,
+} from "@/lib/demand/demand-drafts-actions";
 import type { DemandPrefill, DemandUrgency } from "@/lib/demand/demand-request";
 import { DemandAdvancedSections } from "@/components/app/demand-advanced-sections";
 import {
@@ -177,6 +180,37 @@ export function DemandRequestButton({
   // (draft→closed) after the real submit so exactly ONE canonical demand row
   // remains — the company never re-enters the same need.
   const [draftSource, setDraftSource] = useState(false);
+  // W3 rows 7/8/25 — the wizard absorbs the company page's private-draft save
+  // (the standalone DemandDraftForm mount is gone). Same canonical action +
+  // alias keys the chat draft leg and getOwnLastDemandPrefill already share;
+  // company_request only — no other surface ever offered an agency draft.
+  const [draftState, setDraftState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  async function saveAsDraft() {
+    if (!descOk) {
+      setStep(1);
+      setShowDescError(true);
+      return;
+    }
+    setDraftState("saving");
+    try {
+      await saveDemandDraftAction("company_request", {
+        title: role,
+        capabilities: description,
+        location,
+        timing: urgency,
+        accommodation,
+        notes,
+      });
+      setDraftSource(true);
+      setDraftState("saved");
+      router.refresh();
+    } catch {
+      setDraftState("error");
+    }
+  }
 
   function applyPrefill(res: Extract<DemandPrefill, { found: true }>) {
     const f = res.fields;
@@ -868,7 +902,38 @@ export function DemandRequestButton({
             {state === "sending" ? t("sending") : t(`${key}.cta`)}
           </Button>
         )}
+        {/* Private draft save (rows 7/8/25) — the absorbed DemandDraftForm
+            capability: persist the described need privately (status='draft',
+            never submitted) through the SAME canonical action. Hiring intent
+            only — no other surface ever offered an agency draft. */}
+        {intent === "hire_workers" && (
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={saveAsDraft}
+            disabled={state === "sending" || draftState === "saving" || !descOk}
+            className="w-full sm:w-auto"
+            data-testid="demand-save-draft"
+          >
+            {draftState === "saving" ? tsd("draftSaving") : tsd("draftSaveButton")}
+          </Button>
+        )}
       </div>
+      {draftState === "saved" && (
+        <p
+          className="text-xs text-state-success"
+          role="status"
+          data-testid="demand-draft-saved"
+        >
+          ✓ {tsd("draftSavedPrivate")}
+        </p>
+      )}
+      {draftState === "error" && (
+        <p className="text-xs text-state-danger" role="alert" data-testid="demand-draft-error">
+          {tsd("draftSaveError")}
+        </p>
+      )}
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert" data-testid="demand-error">
           {t("error")}

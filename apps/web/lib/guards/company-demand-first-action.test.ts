@@ -4,13 +4,15 @@ import { join } from "node:path";
 
 /**
  * Company demand first-action guards (findings F-D1/F-D2/F-D3/F-D5 of the
- * full-project audit 2026-07-02).
+ * full-project audit 2026-07-02; consolidated by W3 rows 7/8/25).
  *
  * Contract:
- *   - The company saved-draft state links to the REAL submit wizard on the
- *     root dashboard (the draft alone never reaches customer_requests).
- *   - The root-dashboard demand wizard section carries the #demand-intake
- *     anchor those links target.
+ *   - The FULL demand wizard lives on /dashboard/company under the
+ *     #demand-intake anchor (its canonical home — the advanced-page mount is
+ *     gone). No draft-to-wizard bridge is needed: the wizard IS the page's
+ *     demand surface, and its own save-draft leg covers the private draft.
+ *   - The workspace-switching action targets the company route, so every
+ *     held-role caller lands on an anchor that exists.
  *   - Scouting's no-demands empty state has a CTA to create a need, and the
  *     "not structured" copy no longer instructs the company to perform the
  *     admin-only structuring step.
@@ -23,24 +25,25 @@ import { join } from "node:path";
 const APP = join(process.cwd());
 const read = (rel: string) => readFileSync(join(APP, rel), "utf-8");
 
-describe("company draft → real request bridge (F-D1)", () => {
-  it("saved-draft state opens the root-dashboard wizard via the workspace-switching action", () => {
-    // Audit PR4: a raw /dashboard#demand-intake link dead-ended for
-    // held-company users whose active role was worker (the wizard renders
-    // only in the org branch); the action switches the workspace first.
+describe("the canonical demand intake lives on the company page (W3 7/8/25)", () => {
+  it("the company page hosts the wizard under the demand-intake anchor", () => {
     const page = read("app/[locale]/dashboard/company/page.tsx");
-    expect(page).toMatch(/company-request-submit-real-link/);
-    expect(page).toMatch(/openDemandIntakeAsCompanyAction/);
-    expect(page).toMatch(/firstAction\.submitRealCta/);
-    const action = read("lib/company/demand-intake-navigation.ts");
-    expect(action).toMatch(/\/dashboard#demand-intake/);
-    expect(action).toMatch(/switchActiveRole\("company"\)/);
-  });
-
-  it("the wizard section carries the demand-intake anchor", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
     expect(page).toMatch(/id="demand-intake"/);
     expect(page).toMatch(/data-testid="demand-intake-section"/);
+    expect(page).toMatch(/<DemandRequestButton/);
+  });
+
+  it("the advanced page carries NO demand surface any more", () => {
+    const page = read("app/[locale]/dashboard/advanced/page.tsx");
+    expect(page).not.toMatch(/id="demand-intake"/);
+    expect(page).not.toMatch(/DemandRequestButton/);
+    expect(page).not.toMatch(/DemandRequestsReadback/);
+  });
+
+  it("the workspace-switching action targets the company route's anchor", () => {
+    const action = read("lib/company/demand-intake-navigation.ts");
+    expect(action).toMatch(/\/dashboard\/company#demand-intake/);
+    expect(action).toMatch(/switchActiveRole\("company"\)/);
   });
 });
 
@@ -82,10 +85,6 @@ describe("keys exist in en/lt/ru", () => {
   it("all new keys present", () => {
     for (const locale of ["en", "lt", "ru"]) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
-      expect(
-        msgs.roleDashboards.company.firstAction.submitRealCta,
-        `submitRealCta ${locale}`,
-      ).toBeTruthy();
       expect(msgs.scouting.noDemandsCta, `noDemandsCta ${locale}`).toBeTruthy();
       expect(
         msgs.companyOps.projectsManageCta,

@@ -18,8 +18,8 @@ function read(rel: string): string {
   return readFileSync(join(APP, rel), "utf8");
 }
 
-describe("Guard: overview wires the canonical demand read-back", () => {
-  const page = read("app/[locale]/dashboard/advanced/page.tsx");
+describe("Guard: the company page wires the canonical demand read-back (W3 7/8/25)", () => {
+  const page = read("app/[locale]/dashboard/company/page.tsx");
 
   it("imports the canonical read-back query + the read-back component", () => {
     expect(page).toMatch(
@@ -36,8 +36,14 @@ describe("Guard: overview wires the canonical demand read-back", () => {
     expect(page).not.toMatch(/from\(["'](matches|match_actions|job_demands)["']\)/);
   });
 
-  it("gates the read-back to company/agency (customer has its own requests surface)", () => {
-    expect(page).toMatch(/role === "company" \|\| role === "agency"/);
+  it("scopes the read to the employer demand kinds (buyer rows stay in the buyer room)", () => {
+    expect(page).toMatch(/listOwnCustomerRequests\(EMPLOYER_DEMAND_KINDS\)/);
+    expect(page).toMatch(/"company_request",\s*"agency_offer"/);
+  });
+
+  it("the advanced page no longer mounts the read-back", () => {
+    const advanced = read("app/[locale]/dashboard/advanced/page.tsx");
+    expect(advanced).not.toMatch(/DemandRequestsReadback/);
   });
 });
 

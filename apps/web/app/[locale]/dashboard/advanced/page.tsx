@@ -2,8 +2,6 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CommandFinder } from "@/components/app/command-finder";
-import { DemandRequestButton } from "@/components/app/demand-request-button";
-import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { DashboardChainActions } from "@/components/app/dashboard-chain-actions";
 import { DashboardNextAction } from "@/components/app/dashboard-next-action";
 import { CurrentSpaceHeader } from "@/components/app/current-space-header";
@@ -30,7 +28,6 @@ import {
 } from "@/lib/marketplace/service-requests";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import {
   managerNextAction,
   customerNextAction,
@@ -197,8 +194,6 @@ export default async function DashboardAdvancedPage({
   const bookingResponsesNew = spineCounts.bookingResponsesNew;
 
   const t = await getTranslations("auth.dashboard");
-  const tw = await getTranslations("auth.dashboard.wow");
-  const tf = await getTranslations("auth.dashboard.wow.flow");
   const tRole = await getTranslations("auth.signup.role");
   const tProf = await getTranslations("professions");
 
@@ -404,66 +399,17 @@ export default async function DashboardAdvancedPage({
     // pending-review set the inbox uses (RPC), so the priority is data-driven:
     // entries waiting → review; nothing waiting → invite/open team (real route).
     // Degrades to 0 (honest "nothing waiting") if the RPC isn't applied (42883).
-    // The reviewable-entries RPC and the demand read-back are independent
-    // reads — run them in parallel (P0 latency audit) instead of stacking
-    // two more round-trips onto the org overview.
     const isManagerRole = role === "company" || role === "agency";
-    const [reviewableRes, demandReadback] = await Promise.all([
-      isManagerRole
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any).rpc("reviewable_journal_entry_ids")
-        : Promise.resolve(null),
-      // Demand read-back for the org's own submitted requests (company/agency
-      // only; the customer/buyer role has its own detailed requests surface on
-      // /dashboard/buyer). Honest status only — no matching.
-      isManagerRole ? listOwnCustomerRequests() : Promise.resolve(null),
-    ]);
+    const reviewableRes = isManagerRole
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).rpc("reviewable_journal_entry_ids")
+      : null;
     let pendingReview = 0;
     if (Array.isArray(reviewableRes?.data)) pendingReview = reviewableRes.data.length;
     const nextAction: NextAction = isManagerRole
       ? managerNextAction(role, pendingReview)
       : customerNextAction();
 
-    const intent = role === "agency" ? "partner" : "hire_workers";
-    // Intent-specific copy: a company hiring sees hiring language, an agency sees
-    // candidate-supply language — never a generic buyer "need".
-    const pilotKey = intent === "hire_workers" ? "hire" : "partner";
-    const tReadback = await getTranslations("demandReadback");
-    const tReqStatus = await getTranslations(
-      "roleDashboards.buyer.requests.understanding.requestStatus",
-    );
-    const readbackLabels = {
-      heading: tReadback("heading"),
-      note: tReadback("note"),
-      workerVisibilityNote: tReadback("workerVisibilityNote"),
-      empty: tReadback("empty"),
-      created: tReadback("created"),
-      manageHelp: tReadback("manageHelp"),
-      scoutLink: tReadback("scoutLink"),
-      status: {
-        draft: tReqStatus("draft"),
-        submitted: tReqStatus("submitted"),
-        in_review: tReqStatus("in_review"),
-        needs_followup: tReqStatus("needs_followup"),
-        approved: tReqStatus("approved"),
-        closed: tReqStatus("closed"),
-      },
-      statusOther: tReadback("statusOther"),
-      detailsLabel: tReadback("detailsLabel"),
-      fields: {
-        description: tReadback("fields.description"),
-        role: tReadback("fields.role"),
-        location: tReadback("fields.location"),
-        skills: tReadback("fields.skills"),
-        urgency: tReadback("fields.urgency"),
-        notes: tReadback("fields.notes"),
-      },
-      urgencyValues: {
-        flexible: tw("demand.form.urgencyFlexible"),
-        this_week: tw("demand.form.urgencyThisWeek"),
-        urgent: tw("demand.form.urgencyUrgent"),
-      },
-    };
     return (
       <div className="flex flex-col gap-6">
         <TelemetryView
@@ -505,59 +451,17 @@ export default async function DashboardAdvancedPage({
           serverPrefs={serverCardPrefs}
         />
 
-        {/* Company / agency: create a structured work need (hire / partner).
-            A buyer/customer leads with their own request room (next action
-            above → /dashboard/buyer), so no hiring intake is shown to them. */}
-        {role !== "customer" && (
-          <>
-            <section
-              id="demand-intake"
-              className="card-border flex flex-col gap-5 p-6 scroll-mt-20 sm:p-8"
-              data-testid="demand-intake-section"
-            >
-              <div className="flex flex-col gap-1">
-                <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
-                  <span className="live-dot" aria-hidden />
-                  {tf("company.eyebrow")}
-                </span>
-                <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
-                  {tw(`demand.${pilotKey}.title`)}
-                </h2>
-                <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
-                  {tw(`demand.${pilotKey}.body`)}
-                </p>
-              </div>
-
-              <DemandRequestButton
-                intent={intent}
-                stepTitles={[tf("company.c1"), tf("company.c2"), tf("company.c3")]}
-              />
-              {/* Static-stepper honesty note (guarded): the steps show
-                  progress, they are not live modules. Kept inside the
-                  section so it reads as the intake's own fine print. */}
-              <p
-                className="text-meta leading-relaxed text-text-muted"
-                data-testid="journey-progress-helper"
-              >
-                {tw("demand.progressHelper")}
-              </p>
-            </section>
-          </>
-        )}
+        {/* W3 rows 7/8/25: the demand wizard + owner readback moved to their
+            canonical home, /dashboard/company#demand-intake. This page keeps
+            no demand surface. */}
 
         {/* Everything informational, collapsed by default (compact home v1).
             All sections still server-render with real data — the fold is
-            presentation only. The anchored #demand-intake section stays
-            OUTSIDE (fragment deep-links cannot open a closed details). */}
+            presentation only. */}
         <DashboardMoreSection>
           {/* Canonical premium hub — the real-data snapshot (consolidation
               v1). Embedded = no competing page title. */}
           <PremiumHubScreen vm={hubVm} embedded />
-
-          {/* The honest readback of what the org already asked for. */}
-          {demandReadback && (
-            <DemandRequestsReadback result={demandReadback} labels={readbackLabels} locale={locale} />
-          )}
 
           {/* Market context (Contextual Intelligence UI v1): the org's own
               demand trust card — company/agency workspaces only. Suspense so

@@ -63,11 +63,11 @@ describe("staffing-agency mode is a typed view on the company room", () => {
       );
     }
     // Each action targets an existing canonical surface — no new panels.
-    // "offer" goes through the workspace-switching server action (audit PR4:
-    // a raw /dashboard#demand-intake link dead-ended for held-company users
-    // whose active role was worker; the wizard renders only in the org branch).
+    // "offer" is a plain anchor link since W3 rows 7/8/25: the wizard lives
+    // ON this page under #demand-intake, so the old workspace-switching
+    // detour is unnecessary here.
     expect(companyPage).toMatch(/\/dashboard\/company#company-team/);
-    expect(companyPage).toMatch(/openDemandIntakeAsCompanyAction/);
+    expect(companyPage).toMatch(/\/dashboard\/company#demand-intake/);
     expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
   });
 

@@ -115,17 +115,18 @@ describe("5. role gate never bounces silently", () => {
   });
 });
 
-describe("6. company 'submit for real' works for every held-role user", () => {
+describe("6. company demand intake is reachable for every held-role user", () => {
   const page = read("app/[locale]/dashboard/company/page.tsx");
-  it("no raw link into the branch-dependent #demand-intake anchor remains", () => {
-    expect(page).not.toMatch(/href=\{"\/dashboard#demand-intake"/);
+  it("no link into the retired root-dashboard #demand-intake anchor remains", () => {
+    expect(page).not.toMatch(/\/dashboard#demand-intake/);
   });
-  it("both entry points go through the workspace-switching action", () => {
-    const matches = page.match(/openDemandIntakeAsCompanyAction/g) ?? [];
-    expect(matches.length).toBeGreaterThanOrEqual(3); // import + 2 forms
+  it("the wizard lives ON the company page; the shared action targets it", () => {
+    // W3 rows 7/8/25: the full wizard is mounted here — no bridge form.
+    expect(page).toMatch(/id="demand-intake"/);
+    expect(page).toMatch(/<DemandRequestButton/);
     const action = read("lib/company/demand-intake-navigation.ts");
     expect(action).toMatch(/switchActiveRole\("company"\)/);
-    expect(action).toMatch(/#demand-intake/);
+    expect(action).toMatch(/\/dashboard\/company#demand-intake/);
   });
 });
 

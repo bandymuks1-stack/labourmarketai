@@ -15,8 +15,9 @@ import { FeatureNote } from "@/components/app/feature-note";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
-import { DemandDraftForm } from "@/components/app/demand-draft-form";
-import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
+import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
+import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { AgencyClientsSection } from "@/components/app/agency-clients-section";
 import { AgencyBridgeSection } from "@/components/app/agency-bridge-section";
@@ -57,7 +58,6 @@ import {
   listActiveCompanyWorkers,
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
-import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
@@ -68,38 +68,12 @@ import {
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
 
-// Owner sequence: what is needed → where → when → which skills → role on THIS
-// need → accommodation/language → extra notes. The project/demand role is a
-// per-need question (not a permanent company identity) and is stored in the
-// existing customer_requests.payload jsonb — no DB migration.
-const COMPANY_FIELDS = [
-  { key: "title" as const, labelKey: "field.title.label", placeholderKey: "field.title.placeholder", variant: "text" as const },
-  { key: "location" as const, labelKey: "field.location.label", placeholderKey: "field.location.placeholder", variant: "text" as const },
-  { key: "timing" as const, labelKey: "field.timing.label", placeholderKey: "field.timing.placeholder", variant: "text" as const },
-  { key: "capabilities" as const, labelKey: "field.capabilities.label", placeholderKey: "field.capabilities.placeholder", variant: "text" as const },
-  { key: "projectRole" as const, labelKey: "field.projectRole.label", placeholderKey: "field.projectRole.placeholder", variant: "optioncards" as const, selectOptionsKey: "projectRole", optionColumns: 2 as const, helpKey: "field.projectRole.help" },
-  { key: "accommodation" as const, labelKey: "field.accommodation.label", placeholderKey: "field.accommodation.placeholder", variant: "optioncards" as const, selectOptionsKey: "accommodation", optionColumns: 3 as const },
-  { key: "languages" as const, labelKey: "field.languages.label", placeholderKey: "field.languages.placeholder", variant: "text" as const },
-  { key: "notes" as const, labelKey: "field.notes.label", placeholderKey: "field.notes.placeholder", variant: "textarea" as const },
-];
-
-const ACCOMMODATION_OPTIONS = [
-  { value: "yes", labelKey: "field.accommodation.options.yes" },
-  { value: "no", labelKey: "field.accommodation.options.no" },
-  { value: "unknown", labelKey: "field.accommodation.options.unknown" },
-];
-
-// Role the organisation takes ON THIS specific need — situational, not a
-// permanent identity. Stored as payload.projectRole (free jsonb, no enum/migration).
-const PROJECT_ROLE_OPTIONS = [
-  { value: "client", labelKey: "field.projectRole.options.client" },
-  { value: "general_contractor", labelKey: "field.projectRole.options.general_contractor" },
-  { value: "contractor", labelKey: "field.projectRole.options.contractor" },
-  { value: "subcontractor", labelKey: "field.projectRole.options.subcontractor" },
-  { value: "labour_supplier", labelKey: "field.projectRole.options.labour_supplier" },
-  { value: "service_provider", labelKey: "field.projectRole.options.service_provider" },
-  { value: "other", labelKey: "field.projectRole.options.other" },
-];
+// W3 rows 7/8/25: the light COMPANY_FIELDS draft form is absorbed by the full
+// demand wizard below (its private save-draft leg writes the same canonical
+// draft through save_demand_draft). The employer demand kinds the owner
+// readback is scoped to — a dual-role user's buyer service requests stay in
+// the buyer room.
+const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 export default async function CompanyDashboardPage({
   params,
@@ -150,11 +124,59 @@ export default async function CompanyDashboardPage({
   const agencyDemandsState = isStaffingAgency ? await listAgencyDemands() : null;
 
   const tWorkers = await getTranslations("roleDashboards.company.workers");
-  const existingDraft = await getDemandDraft("company_request");
+  // W3 rows 7/8/25 — the ONE owner readback (moved from /dashboard/advanced),
+  // scoped to the employer demand kinds. Same RLS-scoped own-rows read.
+  const demandReadback = await listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS);
   // Canonical-journey P3 — the caller's own claimable public intakes
   // (authenticated-email match; [] on any missing state, never an error).
   const tClaim = await getTranslations("companyClaimIntake");
   const claimableIntakes = await listClaimablePublicIntakes();
+
+  // W3 rows 7/8/25 — the FULL demand wizard now lives HERE (the action's own
+  // advancedRoute), not on the dying advanced page. Intent follows the
+  // company's own type: a staffing agency supplies candidates (partner), any
+  // other company hires (hire_workers) — same rule the wizard's draft-close
+  // leg already used.
+  const demandIntent = isStaffingAgency ? ("partner" as const) : ("hire_workers" as const);
+  const demandPilotKey = demandIntent === "hire_workers" ? "hire" : "partner";
+  const tWow = await getTranslations("auth.dashboard.wow");
+  const tFlow = await getTranslations("auth.dashboard.wow.flow");
+  const tReadback = await getTranslations("demandReadback");
+  const tReqStatus = await getTranslations(
+    "roleDashboards.buyer.requests.understanding.requestStatus",
+  );
+  const readbackLabels = {
+    heading: tReadback("heading"),
+    note: tReadback("note"),
+    workerVisibilityNote: tReadback("workerVisibilityNote"),
+    empty: tReadback("empty"),
+    created: tReadback("created"),
+    manageHelp: tReadback("manageHelp"),
+    scoutLink: tReadback("scoutLink"),
+    status: {
+      draft: tReqStatus("draft"),
+      submitted: tReqStatus("submitted"),
+      in_review: tReqStatus("in_review"),
+      needs_followup: tReqStatus("needs_followup"),
+      approved: tReqStatus("approved"),
+      closed: tReqStatus("closed"),
+    },
+    statusOther: tReadback("statusOther"),
+    detailsLabel: tReadback("detailsLabel"),
+    fields: {
+      description: tReadback("fields.description"),
+      role: tReadback("fields.role"),
+      location: tReadback("fields.location"),
+      skills: tReadback("fields.skills"),
+      urgency: tReadback("fields.urgency"),
+      notes: tReadback("fields.notes"),
+    },
+    urgencyValues: {
+      flexible: tWow("demand.form.urgencyFlexible"),
+      this_week: tWow("demand.form.urgencyThisWeek"),
+      urgent: tWow("demand.form.urgencyUrgent"),
+    },
+  };
 
   const ownCompany = await getOwnCompany();
   // Real two-subject bridge (issue #859): agency side reads its connections /
@@ -798,11 +820,10 @@ export default async function CompanyDashboardPage({
                 href: "/dashboard/company#company-team" as string | null,
               },
               {
-                // The demand wizard renders only in the ORG dashboard branch;
-                // the action switches the active workspace first so the
-                // anchor target always exists (audit PR4).
+                // W3 rows 7/8/25: the wizard now lives on THIS page — the
+                // old role-switch server action is no longer needed here.
                 key: "offer",
-                href: null as string | null,
+                href: "/dashboard/company#demand-intake" as string | null,
               },
               {
                 key: "scouting",
@@ -821,25 +842,15 @@ export default async function CompanyDashboardPage({
               );
               const className =
                 "flex min-h-[3.25rem] w-full flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:border-brand-blue";
-              return a.href ? (
+              return (
                 <Link
                   key={a.key}
-                  href={a.href as "/dashboard"}
+                  href={(a.href ?? "/dashboard/company") as "/dashboard"}
                   data-testid={`company-agency-mode-action-${a.key}`}
                   className={className}
                 >
                   {body}
                 </Link>
-              ) : (
-                <form key={a.key} action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
-                  <button
-                    type="submit"
-                    data-testid={`company-agency-mode-action-${a.key}`}
-                    className={className}
-                  >
-                    {body}
-                  </button>
-                </form>
               );
             })}
           </div>
@@ -1179,74 +1190,63 @@ export default async function CompanyDashboardPage({
         </div>
       )}
 
+      {/* W3 rows 7/8/25 — the CANONICAL demand intake. The FULL wizard
+          (describe → criteria → review, structured v2, estimate builder,
+          prefill, draft auto-continue, private save-draft leg) moved here
+          from the deleted /dashboard/advanced mount. #demand-intake is the
+          stable anchor every demand door in the product targets. */}
       <section
         id="company-requests"
-        className="card-border flex flex-col gap-4 p-5 scroll-mt-20"
+        className="card-border flex flex-col gap-5 p-5 scroll-mt-20 sm:p-6"
         data-testid="company-dashboard-first-action"
       >
-        <header className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            {t("firstAction.title")}
-          </h2>
-          <p className="text-sm text-text-secondary">
-            {t("firstAction.body")}
-          </p>
-        </header>
-        {/* Persistent (reload-safe) empty / saved-private state. The form's own
-            "saved" line only appears right after an in-session save; this tells
-            the company, on every visit, whether a private draft exists — and is
-            careful to NEVER imply it was submitted, sent, matched, or reviewed. */}
-        {existingDraft ? (
-          <div className="flex flex-col gap-2">
-            <p
-              className="rounded-md border border-state-success/30 bg-state-success/5 px-3 py-2 text-xs text-state-success"
-              data-testid="company-request-saved-state"
-            >
-              ✓ {t("firstAction.savedState")}
+        <div
+          id="demand-intake"
+          data-testid="demand-intake-section"
+          className="flex flex-col gap-5 scroll-mt-20"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+              <span className="live-dot" aria-hidden />
+              {tFlow("company.eyebrow")}
+            </span>
+            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
+              {tWow(`demand.${demandPilotKey}.title`)}
+            </h2>
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
+              {tWow(`demand.${demandPilotKey}.body`)}
             </p>
-            {/* The draft is a dead end without this: the REAL submit path
-                (customer_requests, status=submitted) is the wizard on the
-                root dashboard (audit finding F-D1). The wizard renders only
-                in the ORG branch, so the action switches the active
-                workspace to company first — a plain link dead-ended for
-                held-company users whose active role was worker (audit PR4). */}
-            <form action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
-              <button
-                type="submit"
-                className="w-fit rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
-                data-testid="company-request-submit-real-link"
-              >
-                {t("firstAction.submitRealCta")} →
-              </button>
-            </form>
           </div>
-        ) : (
+          <DemandRequestButton
+            intent={demandIntent}
+            stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
+          />
+          {/* Static-stepper honesty note (guarded): the steps show progress,
+              they are not live modules. */}
           <p
-            className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-            data-testid="company-request-empty-state"
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journey-progress-helper"
           >
-            {t("firstAction.emptyState")}
+            {tWow("demand.progressHelper")}
           </p>
-        )}
-        <DemandDraftForm
-          draftType="company_request"
-          fields={COMPANY_FIELDS}
-          i18nNamespace="roleDashboards.company.draftForm"
-          initialDraft={existingDraft}
-          selectOptions={{
-            accommodation: ACCOMMODATION_OPTIONS,
-            projectRole: PROJECT_ROLE_OPTIONS,
-          }}
-        />
+        </div>
       </section>
+
+      {/* The ONE owner readback of what this organisation already asked for
+          (moved from /dashboard/advanced) — honest stored status only, with
+          the per-demand scouting deep link as the operational follow-up. */}
+      <DemandRequestsReadback
+        result={demandReadback}
+        labels={readbackLabels}
+        locale={locale}
+      />
 
       {/* WAGON 10 (areas 18+19) — typed INTERNAL help requests: recruiter /
           accounting / legal / document check / demand-filling help. Creates
           an operator-visible customer_requests record; sends nothing. */}
-      {/* Demand-context select stays empty here by design: reading the
-          buyer request list from the company room would break the
-          room-separation guard; the RPC still accepts an optional demand
-          pointer for the surfaces that own that list. */}
+      {/* Demand-context select stays empty here by design: the panel keeps
+          no demand picker in the company room; the RPC still accepts an
+          optional demand pointer for the surfaces that own that list. */}
       <HelpRequestPanel demandOptions={[]} />
 
       <CompanyScoutingBridge />

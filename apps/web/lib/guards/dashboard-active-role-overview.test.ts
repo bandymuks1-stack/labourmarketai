@@ -71,9 +71,10 @@ describe("role-specific first screen", () => {
       expect(set, `customer focus must not include "${k}"`).not.toContain(`"${k}"`);
     }
   });
-  it("buyer/customer does not get the hiring intake on the overview", () => {
-    expect(page).toMatch(/role !== "customer"/);
-    expect(page).toMatch(/data-testid="demand-intake-section"/);
+  it("no role gets a hiring intake on the overview (it lives on /dashboard/company)", () => {
+    // W3 rows 7/8/25: the demand wizard's one mount is the company page.
+    expect(page).not.toMatch(/data-testid="demand-intake-section"/);
+    expect(page).not.toMatch(/DemandRequestButton/);
   });
   it("company/agency keep one clear next action", () => {
     expect(page).toMatch(/<DashboardNextAction\b/);
