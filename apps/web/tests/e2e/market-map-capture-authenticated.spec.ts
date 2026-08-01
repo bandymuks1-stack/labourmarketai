@@ -7,15 +7,117 @@
  *      revoked → login signal no longer renders;
  *   3. company-need: edit visibility on an owner row (no new insert).
  *
- * Skips when tests/e2e/.storage-state.json is missing.
+ * Skips when tests/e2e/.storage-state.json is missing, and without the local
+ * stack (the beforeAll state pinning needs the local service role — run via
+ * pnpm -C apps/web e2e:local).
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { HAS_LOCAL_STACK, db, dbOk, mintedProfileId } from "./market-map-db-state";
 
 const STORAGE_STATE = join(__dirname, ".storage-state.json");
 test.skip(!existsSync(STORAGE_STATE), "run scripts/e2e-mint-session.ts first");
+test.skip(!HAS_LOCAL_STACK, "needs the local stack (pnpm -C apps/web e2e:local)");
 test.use({ storageState: STORAGE_STATE });
+
+/** Marker values — every row this spec creates or seeds carries one, so the
+ *  afterAll cleanup targets exactly the e2e rows and nothing else. */
+const PREFERRED_NOTE = "e2e note"; // the note the create test types into every row
+const SEED_REQUEST_ID = "99999999-e2e0-4000-8000-000000000001";
+const SEED_DEMAND_ID = "99999999-e2e0-4000-8000-000000000002";
+
+let uid = "";
+let seededDemand = false;
+
+test.beforeAll(async () => {
+  if (!HAS_LOCAL_STACK || !existsSync(STORAGE_STATE)) return;
+  uid = mintedProfileId(STORAGE_STATE);
+
+  // 1. Preferred rows ACCUMULATE across runs (the create test inserts one per
+  //    run and the capture list renders oldest-first), so the `.first()`
+  //    assertions only hold when the list starts EMPTY — the pristine fixture
+  //    state (dev-fixtures.sql seeds no preferred_locations). On the local
+  //    stack every row for the minted fixture user is e2e debris; drop them.
+  await dbOk("DELETE", `preferred_locations?profile_id=eq.${uid}`);
+
+  // 2. The consent buttons send `countryCode` only from the country input or
+  //    the EXISTING signal row (no silent country default, PR-G) — with no row
+  //    at all the "consented" click is rejected server-side (missing_country)
+  //    and the test flakes. Pin one revoked row with a real country so the
+  //    consented → revoked transition the test drives is real both ways.
+  await dbOk(
+    "POST",
+    "consented_login_location_signals?on_conflict=profile_id",
+    {
+      profile_id: uid,
+      country_code: "LT",
+      granularity: "country",
+      precision_level: "country",
+      source: "user_confirmed",
+      consent_status: "revoked",
+    },
+    "resolution=merge-duplicates,return=minimal",
+  );
+
+  // 3. The company-need test EDITS an existing owner row and never inserts —
+  //    it needs at least one company_demand_locations row owned by the minted
+  //    user. Seed a marker row (with its NOT-NULL customer_requests parent)
+  //    only when the user has none; fixed ids keep the seed idempotent even
+  //    after a crashed run that never reached afterAll.
+  const have = (await (
+    await dbOk("GET", `company_demand_locations?owner_id=eq.${uid}&select=id`)
+  ).json()) as unknown[];
+  if (have.length === 0) {
+    await dbOk(
+      "POST",
+      "customer_requests?on_conflict=id",
+      {
+        id: SEED_REQUEST_ID,
+        profile_id: uid,
+        title: "E2E market-map seed request",
+        status: "draft",
+      },
+      "resolution=merge-duplicates,return=minimal",
+    );
+    await dbOk(
+      "POST",
+      "company_demand_locations?on_conflict=id",
+      {
+        id: SEED_DEMAND_ID,
+        request_id: SEED_REQUEST_ID,
+        owner_id: uid,
+        country_code: "NL",
+        location_label: "E2E market-map seed",
+        granularity: "country",
+        need_type: "workers",
+        visibility_level: "company_only",
+        // The signal-only write policy (20260615210000) WITH CHECKs
+        // geocode_status in ('pending','manual') — the table default
+        // 'not_required' would make every owner EDIT of this row fail RLS.
+        geocode_status: "pending",
+      },
+      "resolution=merge-duplicates,return=minimal",
+    );
+    seededDemand = true;
+  }
+});
+
+test.afterAll(async () => {
+  if (!HAS_LOCAL_STACK || !uid) return;
+  // Marker-scoped cleanup only: the rows this spec created via the UI (the
+  //    note marks them), the single e2e-owned consent row, and the seeded
+  //    demand row + its request parent (cascade covers the demand row).
+  await db(
+    "DELETE",
+    `preferred_locations?profile_id=eq.${uid}&short_note=eq.${encodeURIComponent(PREFERRED_NOTE)}`,
+  );
+  await db("DELETE", `consented_login_location_signals?profile_id=eq.${uid}`);
+  if (seededDemand) {
+    await db("DELETE", `company_demand_locations?id=eq.${SEED_DEMAND_ID}`);
+    await db("DELETE", `customer_requests?id=eq.${SEED_REQUEST_ID}`);
+  }
+});
 
 async function gotoMap(page: Page) {
   await page.goto("/lt/dashboard/market-map", { waitUntil: "networkidle" });
