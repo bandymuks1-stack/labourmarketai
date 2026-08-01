@@ -9525,7 +9525,8 @@
     "skillVerified": "Mit Führungskraft-Eintrag",
     "skillWorkBacked": "Durch Arbeit belegt",
     "skillDeclared": "Selbst angegeben",
-    "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt."
+    "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt.",
+    "skillsReadError": "Die Fähigkeiten konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich erneut."
   },
   "companyLocations": {
     "title": "Standorte",

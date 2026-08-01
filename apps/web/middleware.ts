@@ -77,7 +77,10 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
   return { locale: routing.defaultLocale, rest: pathname };
 }
 
-const REQUIRES_AUTH = ["/dashboard", "/onboarding"];
+// /cv renders ONLY the caller's own session data and robots-disallows itself;
+// it was gated at the page level alone until W4 — the middleware backstop
+// keeps that protection from depending on one redirect() call surviving.
+const REQUIRES_AUTH = ["/dashboard", "/onboarding", "/cv"];
 
 /** True if the request carries a Supabase auth cookie. `@supabase/ssr` names
  *  the session cookie `sb-<ref>-auth-token` (chunked: `…-auth-token.0`, …). We

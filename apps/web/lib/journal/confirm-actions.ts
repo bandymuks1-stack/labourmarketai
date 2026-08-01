@@ -107,37 +107,25 @@ async function recomputeProfessionSkills(
     .in("skill_id", skillIds);
 }
 
-/** Side effects of an APPROVED review (the verified-skill loop, §13.2): mark
- *  the worker's self-declared skills under the entry's profession as verified,
- *  then recompute confidence. Shared by the legacy confirmEntry and the gated
- *  reviewJournalEntry action so approval behaves identically on both paths. */
+/** Side effects of an APPROVED review: recompute confidence for the entry's
+ *  profession skills. Shared by the legacy confirmEntry and the gated
+ *  reviewJournalEntry action so approval behaves identically on both paths.
+ *
+ *  W4 honesty repair: this used to ALSO blanket-flip `verified=true` on EVERY
+ *  self-declared skill under the entry's profession. For a manager the RLS
+ *  (owns_worker-only write) silently blocked that write, but an ADMIN session
+ *  passed it — one approved entry verified the worker's whole profession with
+ *  `source` still 'self_declared'. Verification is per-skill and goes ONLY
+ *  through the SECURITY DEFINER `confirm_entry_and_verify_skills` RPC
+ *  (confirmEntrySkills), where the reviewer names the exact skills the entry
+ *  proves. Approval alone verifies nothing. */
 export async function applyApprovalSkillEffects(
   supabase: DB,
   {
     workerId,
     professionId,
-    confirmerId,
   }: { workerId: string; professionId: string | null; confirmerId: string },
 ): Promise<void> {
-  if (professionId) {
-    const { data: psRows } = await supabase
-      .from("profession_skills")
-      .select("skill_id")
-      .eq("profession_id", professionId);
-    const skillIds = (psRows ?? []).map((r) => r.skill_id);
-    if (skillIds.length > 0) {
-      await supabase
-        .from("worker_skills")
-        .update({
-          verified: true,
-          verified_by: confirmerId,
-          verified_at: new Date().toISOString(),
-        })
-        .eq("worker_id", workerId)
-        .eq("source", "self_declared")
-        .in("skill_id", skillIds);
-    }
-  }
   await recomputeProfessionSkills(supabase, workerId, professionId);
 }
 

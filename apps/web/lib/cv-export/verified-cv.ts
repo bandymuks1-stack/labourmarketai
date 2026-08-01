@@ -19,6 +19,7 @@ import {
   type CvCertificateDoc,
   type CvProject,
 } from "./cv-sections";
+import { WORKER_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 
 /**
  * Verified CV export (S3.5) — the worker's OWN portable, honest history.
@@ -37,13 +38,8 @@ import {
 
 /** Worker engagement relationships — the person-as-worker history rows.
  *  Mirrors the set the profile page renders, so the CV and profile agree. */
-const WORKER_RELATIONSHIPS = [
-  "employee",
-  "freelancer",
-  "consultant",
-  "owner",
-  "collaborator",
-];
+// The ONE work-relationship list lives in work-history-model (W4: three
+// copies had already diverged once) — imported with the rest above.
 
 export type VerifiedCvEngagement = {
   /** Best display name for the org (display → legal); null when none stored

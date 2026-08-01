@@ -9525,7 +9525,8 @@
     "skillVerified": "Su vadovo įrašu",
     "skillWorkBacked": "Pagrįsta darbu",
     "skillDeclared": "Nurodyta paties",
-    "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta."
+    "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta.",
+    "skillsReadError": "Įgūdžių šiuo metu nepavyko įkelti. Pabandykite netrukus dar kartą."
   },
   "companyLocations": {
     "title": "Vietos",
