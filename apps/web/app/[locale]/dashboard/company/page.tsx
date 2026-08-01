@@ -1186,6 +1186,7 @@ export default async function CompanyDashboardPage({
                 ? businessPublicSettings.settings
                 : null
             }
+            locale={locale}
           />
         </div>
       )}

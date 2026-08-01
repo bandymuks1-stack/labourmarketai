@@ -77,3 +77,21 @@ baseline that invents states would poison the whole wagon.
 2. **SLICE 2 — certificates write path:** server action + form wrapping upsert_worker_document with honest needs-migration state (prod activation owner-gated on applying 20260610170000/20260613100200).
 3. **SLICE 3 — org identity completion:** description write path via existing owner RLS; ONE shared org-display helper replacing the six chains; link opportunity/invitation org names to the published /business/<slug> when it exists; add /cv to middleware REQUIRES_AUTH.
 4. **OWNER-GATED, reported once (no loops):** public worker profile (consent purpose wording + migrations), certificate file bucket, declared-cert expiry column, country_document_requirements curation, employer-visible card scope, is_employer org-membership gate, contact-disclosure delivery scope confirmation.
+
+---
+
+## SLICE LOG
+
+### Slice 1 — identity honesty & correctness (PR #963, MERGED, deployed 5703619557, prod smoke clean)
+Employer person-page skills render FIXED (was zero for every worker; browser-proven 8 chips under a company session); strict verified rule unified (both pinning guards flipped); admin blanket-verification deleted; card/CV history filter unified (ONE WORKER_RELATIONSHIPS constant); /cv middleware backstop (verified live in production); dead skills DELETE route + dead visibility policy removed.
+
+### Slice 2 — certificates write path (PR #964, MERGED)
+`upsert_worker_document` finally has its caller: server action (fail-closed needs_migration; refusal codes mapped) + worker document editor on /dashboard/documents, designed per the owner's frontend-design directive (status chip-radios in the inventory's own state tones; design vocabulary guard-pinned). Local-stack proof: real worker session → DB row + append-only audit event + row renders with its validity. PRODUCTION stays honestly needs-migration until the owner applies 20260610170000/20260613100200.
+
+### Slice 3 — org identity completion (this PR)
+`organizations.description` write path shipped WITHOUT a migration: the public page's main block is edited on the publication panel and travels through the owner's own `companies` row → SECURITY DEFINER mirror trigger (the one non-admin path into organizations); ONE `orgDisplayName` helper adopted at the three organizations-reading chains. CORRECTION to the audit: the invitations agency branch does NOT "skip display_name" — the legacy `agencies` table has no such column; that branch was correct and stays.
+
+### Residuals recorded honestly (not silently dropped)
+- Worker-facing /business/<slug> links on opportunities/invitations + sitemap entries for published org pages — enhancement, next slice or W5.
+- A24 systemic error-vs-empty on own-RLS reads — highest-risk instance (employer page) fixed with a visible error state; the rest is a design-level pass.
+- Org logo, OG images, certificate file bucket, declared-cert expiry, country requirement curation, public worker profile (consent purpose wording), employer-visible card scope, is_employer org-membership gate, contact-disclosure delivery — ALL owner-gated, listed once above.

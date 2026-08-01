@@ -146,3 +146,52 @@ describe("5. copy resolves in every active locale", () => {
     });
   }
 });
+
+describe("W4 Slice 3 — the description write path", () => {
+  const action = read(join(WEB, "lib", "company", "description-actions.ts"));
+  const panel = read(join(WEB, "components", "app", "business-public-profile-panel.tsx"));
+
+  it("writes through the owner's OWN companies row, never organizations directly", () => {
+    // organizations is admin-RLS + RPC-only; the mirror trigger is the one
+    // non-admin path. A direct organizations write here would silently no-op
+    // for every real owner.
+    expect(action).toMatch(/from\("companies"\)/);
+    expect(action).not.toMatch(/from\("organizations"\)[\s\S]{0,200}\.update\(/);
+    expect(action).toMatch(/profile_id.*user\.id|eq\("profile_id", user\.id\)/);
+  });
+
+  it("is bounded and honest about ownership", () => {
+    // The bound lives beside the org helpers ("use server" files may export
+    // only async functions); the action imports and enforces it.
+    const helpers = read(join(WEB, "lib", "company", "org-display.ts"));
+    expect(helpers).toMatch(/ORG_DESCRIPTION_MAX = 2000/);
+    expect(action).toMatch(/ORG_DESCRIPTION_MAX/);
+    expect(action).toMatch(/no-company/);
+  });
+
+  it("the panel carries the description editor with its hint", () => {
+    expect(panel).toMatch(/business-description-input/);
+    expect(panel).toMatch(/descriptionHint/);
+    expect(panel).toMatch(/maxLength=\{2000\}/);
+  });
+
+  const resolve = (msgs: unknown, path: string): unknown =>
+    path.split(".").reduce<unknown>(
+      (acc, k) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[k] : undefined),
+      msgs,
+    );
+  for (const loc of activeLocales) {
+    it(`${loc}: description editor copy is non-empty`, () => {
+      const msgs = JSON.parse(read(join(WEB, "messages", `${loc}.json`)));
+      for (const key of [
+        "businessProfile.descriptionLabel",
+        "businessProfile.descriptionPlaceholder",
+        "businessProfile.descriptionHint",
+        "businessProfile.errorDescription",
+      ]) {
+        const v = resolve(msgs, key);
+        expect(typeof v === "string" && v.trim().length > 0, `${loc}: ${key}`).toBe(true);
+      }
+    });
+  }
+});

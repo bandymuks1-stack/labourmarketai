@@ -35,7 +35,11 @@
     "errorSlug": "Gebruik 3–50 kleine letters, cijfers of koppeltekens.",
     "errorSlugTaken": "Dit openbare adres is al in gebruik.",
     "errorNotAuthorized": "Alleen een eigenaar of manager kan dit bedrijf publiceren.",
-    "errorGeneric": "Er ging iets mis. Probeer het opnieuw."
+    "errorGeneric": "Er ging iets mis. Probeer het opnieuw.",
+    "descriptionLabel": "Over het bedrijf (zichtbaar op de openbare pagina)",
+    "descriptionPlaceholder": "Wat u doet, waar u werkt, wat een klant of werker kan verwachten…",
+    "descriptionHint": "Maximaal 2000 tekens. Dit is het hoofdtekstblok van uw openbare pagina.",
+    "errorDescription": "Publicatie opgeslagen, maar de beschrijving kon niet worden opgeslagen. Probeer opnieuw."
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",

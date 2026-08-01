@@ -35,7 +35,11 @@
     "errorSlug": "Naudokite 3–50 mažųjų raidžių, skaičių ar brūkšnelių.",
     "errorSlugTaken": "Šis viešas adresas jau užimtas.",
     "errorNotAuthorized": "Skelbti verslą gali tik savininkas ar vadovas.",
-    "errorGeneric": "Įvyko klaida. Bandykite dar kartą."
+    "errorGeneric": "Įvyko klaida. Bandykite dar kartą.",
+    "descriptionLabel": "Apie įmonę (rodoma viešame puslapyje)",
+    "descriptionPlaceholder": "Ką darote, kur dirbate, ko gali tikėtis klientas ar darbuotojas…",
+    "descriptionHint": "Iki 2000 ženklų. Tai pagrindinis jūsų viešo puslapio teksto blokas.",
+    "errorDescription": "Publikavimas išsaugotas, bet aprašymo išsaugoti nepavyko. Pabandykite dar kartą."
   },
   "marketplaceListings": {
     "pageTitle": "Turgavietė",
