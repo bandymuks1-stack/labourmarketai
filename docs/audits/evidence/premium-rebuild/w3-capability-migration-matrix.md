@@ -501,6 +501,37 @@ dead-ends on the chat. Worker: one consistent demand pipeline feeds the
 board. Company/tech: one form, one readback, kind-scoped room separation,
 five dead doors gone, net-negative complexity.
 
+## P2 COMPANY — rows 2 / 3 / 9 / 10: the audit, before any code
+
+Audited 2026-08-01 (same window as the rows 7/8/25 consolidation — parallel
+planning per the owner's closing-sprint directive). Facts verified in code,
+decisions left for the implementation window:
+
+**Rows 9/10 look like rows 11/12, and that precedent decides them.** Both are
+count-gated door `<Link>`s on the advanced page (`serviceRequestsNextAction`,
+`outgoingRequestsNextAction`) into `/dashboard/service-requests`. The spine
+ALREADY carries both signals (`lib/notifications/spine.ts`:
+`pendingIncomingServiceRequests` + `serviceRequestResponsesNew` = the same
+`buyerNew` the card badges), and the LAYOUT-mounted bell presents the spine.
+The accepted/waiting/declined breakdown row 10 renders is a *summary of the
+canonical surface's own list* — the surface owns it. Expected outcome:
+`ALREADY`, owed the rows-11/12-style browser proof with seeded counts —
+NOT a port.
+
+**Rows 2/3 are door-panels, not editors.** `premium-hub-company-card.tsx`
+(114 lines) and `premium-hub-project-card.tsx` (124 lines) render real
+RLS-scoped counts and deep-link every zone to its canonical surface
+(`/dashboard/company#…`, `/dashboard/projects/<id>`, `…/operations`,
+`#project-gallery`). NEITHER carries a unique write, editor, or data chain
+(the row-1 `workEditor` situation does NOT repeat). Mounts: the advanced org
+branch (×1 each) + `PremiumHubScreen` (in the advanced fold) — all die with
+the route. The `project` result kind EXISTS (`dataReadiness: "real"`, opened
+by `company.assign-worker` / `company.who-waits`); whether `ResultBody` has a
+`project` case must be re-checked at implementation time. Row 2's recorded
+target ("new `organization` result kind") should be CHALLENGED before any
+code: the card's whole content is already canonical on `/dashboard/company`,
+and the no-new-result-kind rule requires proof of need, not a matrix label.
+
 ## Row 21 — MYZONE: the audit and the confirmation
 
 Audited and browser-confirmed 2026-08-01 (`lib/guards/w3-row21-myzone.test.ts`
