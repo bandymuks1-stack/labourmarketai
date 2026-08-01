@@ -175,8 +175,10 @@ describe("Guard: server-action wrapper is a thin pass-through", () => {
 describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
   // Direction A (2026-07-05): /dashboard/agency is a redirect stub into the
   // canonical company workspace; the agency_offer intake lives on the demand
-  // wizard (partner intent). Only company + buyer render draft forms now.
-  for (const role of ["company", "buyer"] as const) {
+  // wizard (partner intent). W3 rows 7/8/25: the company page's light draft
+  // form was absorbed by the full wizard (whose save-draft leg uses the same
+  // canonical action) — only the buyer renders a DemandDraftForm now.
+  for (const role of ["buyer"] as const) {
     it(`${role}/page.tsx calls requireRoleOrRedirect before getDemandDraft`, () => {
       const src = read(`app/[locale]/dashboard/${role}/page.tsx`);
       const requireAt = src.indexOf("requireRoleOrRedirect");
@@ -190,6 +192,17 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
     });
   }
 
+  it("company/page.tsx gates before its demand reads and mounts the wizard, not the light form", () => {
+    const src = read("app/[locale]/dashboard/company/page.tsx");
+    const requireAt = src.indexOf("requireRoleOrRedirect");
+    const fetchAt = src.indexOf("listOwnCustomerRequests(");
+    expect(requireAt).toBeGreaterThan(-1);
+    expect(fetchAt).toBeGreaterThan(-1);
+    expect(requireAt).toBeLessThan(fetchAt);
+    expect(src).not.toMatch(/DemandDraftForm/);
+    expect(src).toMatch(/DemandRequestButton/);
+  });
+
   it("buyer page uses the DB slug 'customer' (not 'buyer') for the role gate", () => {
     // Active rolebook: workers / company / agency / customer. The URL is
     // /buyer for human readability, but the gate maps to the DB slug.
@@ -197,17 +210,17 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
     expect(src).toMatch(/requireRoleOrRedirect\(\s*locale\s*,\s*["']customer["']\s*\)/);
   });
 
-  it("each page renders the DemandDraftForm for its own draft_type", () => {
-    const cases = [
-      { role: "company", draftType: "company_request" },
-      { role: "buyer", draftType: "buyer_request" },
-    ] as const;
+  it("each remaining light-form page renders the DemandDraftForm for its own draft_type", () => {
+    const cases = [{ role: "buyer", draftType: "buyer_request" }] as const;
     for (const { role, draftType } of cases) {
       const src = read(`app/[locale]/dashboard/${role}/page.tsx`);
       expect(src).toMatch(
         new RegExp(`draftType=\\{?["']${draftType}["']\\}?`),
       );
     }
+    // The company draft leg lives in the wizard, on the same canonical action.
+    const wizard = read("components/app/demand-request-button.tsx");
+    expect(wizard).toMatch(/saveDemandDraftAction\("company_request"/);
   });
 });
 
@@ -263,8 +276,8 @@ describe("Guard: i18n surface ships the draftForm + admin keys in LT and EN", ()
     >;
     const role = json.roleDashboards as Record<string, Record<string, unknown>>;
 
-    it(`${locale}.json: company/agency/buyer all have draftForm subtrees`, () => {
-      for (const r of ["company", "agency", "buyer"] as const) {
+    it(`${locale}.json: agency/buyer have draftForm subtrees (company's died with the light form, W3 7/8/25)`, () => {
+      for (const r of ["agency", "buyer"] as const) {
         const df = (role?.[r] as Record<string, unknown> | undefined)
           ?.draftForm;
         expect(df, `${locale}.${r}.draftForm missing`).toBeTruthy();

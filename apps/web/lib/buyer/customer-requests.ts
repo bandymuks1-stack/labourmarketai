@@ -114,18 +114,25 @@ function mapRow(
   };
 }
 
-export async function listOwnCustomerRequests(): Promise<CustomerRequestsListResult> {
+export async function listOwnCustomerRequests(
+  /** Optional room scoping (W3 rows 7/8/25): the company room reads ONLY the
+   *  employer demand kinds so a dual-role user's buyer service requests never
+   *  leak into the company workspace. Omitted = all own rows (buyer room). */
+  kinds?: readonly string[],
+): Promise<CustomerRequestsListResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
-  const { data, error } = await asAny(supabase)
+  let query = asAny(supabase)
     .from("customer_requests")
     .select(
       "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at",
     )
-    .eq("profile_id", user.id)
+    .eq("profile_id", user.id);
+  if (kinds && kinds.length > 0) query = query.in("kind", kinds);
+  const { data, error } = await query
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) {

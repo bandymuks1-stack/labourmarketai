@@ -51,19 +51,9 @@ async function shot(page: Page, name: string): Promise<void> {
 /** Ensure the dashboard is in a non-worker (company) context so the demand
  *  form renders. Switches active role via the role-switcher when needed. */
 async function ensureCompanyContext(page: Page): Promise<void> {
-  await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
-  const form = page.getByTestId("demand-intake-section");
-  if (await form.isVisible().catch(() => false)) return;
-  // Open the role switcher and pick company (or agency) — both render the form.
-  await page.getByTestId("role-switcher-toggle").click();
-  const company = page.getByTestId("role-switcher-chip-company");
-  const agency = page.getByTestId("role-switcher-chip-agency");
-  if (await company.isVisible().catch(() => false)) {
-    await company.click();
-  } else if (await agency.isVisible().catch(() => false)) {
-    await agency.click();
-  }
-  await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
+  // W3 rows 7/8/25: the wizard's canonical (and only) home is the company
+  // page — role-gated on the HELD company role, no active-role dance needed.
+  await page.goto("/lt/dashboard/company", { waitUntil: "networkidle" });
 }
 
 test("demand flow: empty blocked → describe → criteria → review → create", async ({
@@ -135,9 +125,20 @@ test("demand flow: empty blocked → describe → criteria → review → create
     await shot(page, "04-readback");
   }
 
-  // ── Honesty: no fake verified / matched language on this surface.
-  const body = (await page.locator("body").innerText()).replace(/\s+/g, " ");
-  expect(body).not.toMatch(/(^|\s)Patvirtinta(\s|$|[.,])/);
-  expect(body).not.toMatch(/\bVerified\b/);
-  expect(body).not.toMatch(/\bmatched\b/i);
+  // ── Honesty: no fake verified / matched language on the DEMAND surfaces.
+  // Scoped to the intake + readback since W3 rows 7/8/25 moved them onto the
+  // company page, whose OWN verification ladder ("Patvirtinta"/"Verified" in
+  // the honest company-status block) is legitimate vocabulary — the ban
+  // polices the demand flow, not the whole page.
+  const demandSurfaces = [
+    page.getByTestId("demand-intake-section"),
+    page.getByTestId("demand-requests-readback"),
+  ];
+  for (const surface of demandSurfaces) {
+    if (!(await surface.isVisible().catch(() => false))) continue;
+    const body = (await surface.innerText()).replace(/\s+/g, " ");
+    expect(body).not.toMatch(/(^|\s)Patvirtinta(\s|$|[.,])/);
+    expect(body).not.toMatch(/\bVerified\b/);
+    expect(body).not.toMatch(/\bmatched\b/i);
+  }
 });

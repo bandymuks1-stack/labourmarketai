@@ -159,15 +159,20 @@ describe("Guard: roleDashboards i18n is honest (LT + EN)", () => {
         ]) {
           expect(r[key], `${locale}.roleDashboards.${role}.${key}`).toBeTruthy();
         }
-        const firstAction = r.firstAction as Record<string, string>;
-        for (const key of ["title", "body"]) {
-          // `status` (the "Ruošiama" placeholder) was removed in PR B
-          // (feat/cc/pilot-draft-flows) when the form replaced the
-          // placeholder; title/body remain as the form's section header.
-          expect(
-            firstAction[key],
-            `${locale}.roleDashboards.${role}.firstAction.${key}`,
-          ).toBeTruthy();
+        // W3 rows 7/8/25: the COMPANY firstAction header died with the light
+        // draft form — the full wizard's own (auth.dashboard.wow.demand)
+        // header is the section title now. Agency/buyer keep theirs.
+        if (role !== "company") {
+          const firstAction = r.firstAction as Record<string, string>;
+          for (const key of ["title", "body"]) {
+            // `status` (the "Ruošiama" placeholder) was removed in PR B
+            // (feat/cc/pilot-draft-flows) when the form replaced the
+            // placeholder; title/body remain as the form's section header.
+            expect(
+              firstAction[key],
+              `${locale}.roleDashboards.${role}.firstAction.${key}`,
+            ).toBeTruthy();
+          }
         }
 
         // Honesty: no fake verified/confirmed copy. The company `setup` block

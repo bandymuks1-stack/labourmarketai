@@ -149,7 +149,9 @@ describe("org branch: compact home v1 order, informational surfaces folded", () 
   // action → compact planning status → the "Veiksmai" grid → the anchored
   // intake; the hub snapshot, readback and secondary entries sit inside the
   // collapsed more-section.
-  it("pending states → next action → status strip → grid → intake → fold (hub, readback, chain, identity) → finder → space chip", () => {
+  it("pending states → next action → status strip → grid → fold (hub, chain, identity) → finder → space chip", () => {
+    // W3 rows 7/8/25: the demand intake + owner readback moved to
+    // /dashboard/company — the org overview carries no demand surface.
     expectOrder(
       ORG,
       [
@@ -159,10 +161,8 @@ describe("org branch: compact home v1 order, informational surfaces folded", () 
         "<DashboardNextAction",
         "<DashboardStatusStrip",
         "<DashboardModuleGrid",
-        'data-testid="demand-intake-section"',
         "<DashboardMoreSection",
         "<PremiumHubScreen",
-        "<DemandRequestsReadback",
         "<DashboardChainActions",
         "<IdentityActions",
         "<CommandFinder",
@@ -172,11 +172,11 @@ describe("org branch: compact home v1 order, informational surfaces folded", () 
     );
   });
 
-  it("the journey helper text explains the intake AFTER it, not before", () => {
+  it("the journey helper text explains the intake AFTER it, not before (company page)", () => {
     expectOrder(
-      ORG,
+      read("app/[locale]/dashboard/company/page.tsx"),
       ['data-testid="demand-intake-section"', 'data-testid="journey-progress-helper"'],
-      "org helper",
+      "company intake helper",
     );
   });
 });

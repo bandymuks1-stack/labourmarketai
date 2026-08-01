@@ -52,14 +52,9 @@ async function shot(page: Page, name: string): Promise<void> {
 /** Ensure the dashboard is in a non-worker (company) context so the demand
  *  form (and its Estimate Builder) renders. */
 async function ensureCompanyContext(page: Page): Promise<void> {
-  await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
-  if (await page.getByTestId("demand-intake-section").isVisible().catch(() => false)) return;
-  await page.getByTestId("role-switcher-toggle").click();
-  const company = page.getByTestId("role-switcher-chip-company");
-  const agency = page.getByTestId("role-switcher-chip-agency");
-  if (await company.isVisible().catch(() => false)) await company.click();
-  else if (await agency.isVisible().catch(() => false)) await agency.click();
-  await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
+  // W3 rows 7/8/25: the wizard's canonical (and only) home is the company
+  // page — role-gated on the HELD company role, no active-role dance needed.
+  await page.goto("/lt/dashboard/company", { waitUntil: "networkidle" });
 }
 
 /** Parse a money string the UI renders. The spec runs on /lt, where the format
@@ -100,14 +95,20 @@ test("estimate flow: criteria estimate → total + range → review → create �
   // ── Deterministic total matches the formula:
   //    labour 3*40*20=2400; direct +1000=3400; overhead 10%=340;
   //    margin 15%*(3740)=561; contingency 10%*(4301)=430.1; total=4731.1
-  const total = page.getByTestId("estimate-total");
+  // Scoped: since W3 rows 7/8/25 the owner readback (which renders stored
+  // estimates) shares the page with the builder — target the BUILDER's total.
+  const total = page.getByTestId("estimate-builder").getByTestId("estimate-total");
   await expect(total).toBeVisible();
   expect(parseMoney(await total.textContent())).toBeCloseTo(4731.1, 1);
 
   // ── Range appears because contingency > 0 (low 4301.00 – high 5161.20).
-  await expect(page.getByTestId("estimate-range")).toBeVisible();
+  await expect(
+    page.getByTestId("estimate-builder").getByTestId("estimate-range"),
+  ).toBeVisible();
   // ── Disclaimer is an explicit negation (not a binding quote).
-  await expect(page.getByTestId("estimate-disclaimer")).toBeVisible();
+  await expect(
+    page.getByTestId("estimate-builder").getByTestId("estimate-disclaimer"),
+  ).toBeVisible();
   await shot(page, "01-estimate-criteria");
 
   await page.getByTestId("demand-next").click();

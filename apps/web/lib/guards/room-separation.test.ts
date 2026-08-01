@@ -80,8 +80,13 @@ describe("buyer room shows buyer/request only", () => {
 });
 
 describe("company room shows company work management only", () => {
-  it("imports no buyer-request blocks", () => {
-    expect(company).not.toMatch(/BuyerRequestsSection|getOwnCustomer\b|listOwnCustomerRequests/);
+  it("imports no buyer-request blocks; the owner readback is employer-kind-scoped", () => {
+    expect(company).not.toMatch(/BuyerRequestsSection|getOwnCustomer\b/);
+    // W3 rows 7/8/25: the ONE owner readback reads own customer_requests
+    // rows here — but ONLY the employer kinds. An unscoped call would leak a
+    // dual-role user's buyer service requests into the company room.
+    expect(company).not.toMatch(/listOwnCustomerRequests\(\)/);
+    expect(company).toMatch(/listOwnCustomerRequests\(EMPLOYER_DEMAND_KINDS\)/);
   });
   it("offers a compact My-spaces switch link (to the overview, never settings)", () => {
     expect(company).toMatch(/href="\/dashboard"[\s\S]{0,220}data-testid="room-my-spaces-link"/);

@@ -60,55 +60,17 @@ describe("finite company choices use OptionCards, not native <select>", () => {
     expect(demandForm).toMatch(/variant === "optioncards"/);
   });
 
-  it("accommodation + projectRole are optioncards (not a native select)", () => {
-    expect(companyPage).toMatch(/key: "accommodation"[\s\S]{0,160}variant: "optioncards"/);
-    expect(companyPage).toMatch(/key: "projectRole"[\s\S]{0,160}variant: "optioncards"/);
+  it("the company demand surface is the wizard with real closed-set controls (no native selects)", () => {
+    // W3 rows 7/8/25: the COMPANY_FIELDS light form is absorbed by the full
+    // wizard, whose closed-set fields use DarkListbox / chip toggles — the
+    // page itself mounts no native <select> demand field.
+    expect(companyPage).toMatch(/<DemandRequestButton/);
+    expect(companyPage).not.toMatch(/key: "accommodation"/);
+    const wizard = read("components/app/demand-request-button.tsx");
+    expect(wizard).toMatch(/DarkListbox/);
   });
 });
 
-// ── 2. Project / demand role is a per-need question ───────────────────────
-
-describe("project/demand role copy exists and is situational, not identity", () => {
-  for (const loc of ACTIVE) {
-    const pr = (
-      (json(`messages/${loc}.json`).roleDashboards as Record<string, unknown>)
-        ?.company as Record<string, unknown>
-    )?.draftForm as
-      | { field?: { projectRole?: Record<string, unknown> } }
-      | undefined;
-    const role = pr?.field?.projectRole;
-
-    it(`${loc}: projectRole has label + help + the seven role options`, () => {
-      expect(role?.label, `${loc} projectRole.label`).toBeTruthy();
-      expect(role?.help, `${loc} projectRole.help`).toBeTruthy();
-      const opts = role?.options as Record<string, string> | undefined;
-      for (const k of [
-        "client",
-        "general_contractor",
-        "contractor",
-        "subcontractor",
-        "labour_supplier",
-        "service_provider",
-        "other",
-      ]) {
-        expect(opts?.[k], `${loc} projectRole.options.${k}`).toBeTruthy();
-      }
-    });
-
-    it(`${loc}: help frames the role as project-dependent, not company-type`, () => {
-      const help = String(role?.help ?? "");
-      const ok =
-        loc === "en"
-          ? /project/i.test(help) && /role/i.test(help)
-          : loc === "lt"
-            ? /projekt/i.test(help) && /rol/i.test(help)
-            : /проект/i.test(help) && /рол/i.test(help);
-      expect(ok, `${loc} projectRole.help: "${help}"`).toBe(true);
-    });
-  }
-});
-
-// ── 3. Organisation profile = primary activity, not a permanent type cage ──
 
 describe("company type reframed as primary activity (agency = operating mode)", () => {
   it("LT label is a primary-activity question, not a rigid 'type'", () => {

@@ -52,8 +52,8 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 4 | Premium Hub market map | `PremiumHubMarketMap` | **ALREADY** | door to the real map | **MIGRATED 2026-07-31** — fake SVG removed, 159→72 lines, browser-proven |
 | 5 | Job recommendations | `JobRecommendationsCard` + the chat thread's `EmployerMatchCard` | ABSORB | `opportunities` result | **ABSORBED + CONSOLIDATED 2026-07-31** — renderers 2→1, action surfaces 2→1, production LOC net −103 (#932, #934) |
 | 6 | Worker invitations | `WorkerInvitations` (was `WorkerInvitationsCard` ×2 mounts) | ABSORB | Context Panel work context | **ABSORBED 2026-07-31** — card deleted, mounts 2→0, no result kind, browser-proven with the REAL accept RPC |
-| 7 | Demand request create | `DemandRequestButton` | CHAT | one canonical intake presentation | **AUDITED 2026-08-01** — THREE demand forms found, see the P1 employer audit |
-| 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | one canonical readback | **AUDITED 2026-08-01** — three readbacks found, see the P1 employer audit |
+| 7 | Demand request create | `DemandRequestButton` | CHAT | one canonical intake presentation | **CONSOLIDATED 2026-08-01** — the FULL wizard moved to `/dashboard/company#demand-intake`; `DemandDraftForm`'s company mount absorbed by the wizard's save-draft leg; chat stays the thin intake; 5 stale `/dashboard#demand-intake` doors repaired; browser-proven (9/9 e2e ×2 runs) |
+| 8 | Demand requests readback | `DemandRequestsReadback` | ABSORB | one canonical readback | **CONSOLIDATED 2026-08-01** — the ONE owner readback now on `/dashboard/company`, employer-kind-scoped (buyer rows stay in the buyer room); buyer + scouting readbacks retained as genuinely distinct actors/purposes; advanced mount removed |
 | 9 | Service requests next-action | inline + `listOwnCustomerRequests` | ABSORB | work context panel | TODO |
 | 10 | Outgoing requests next-action | inline | ABSORB | work context panel | TODO |
 | 11 | Booking responses next-action | inline `<Link>` + count badge | **ALREADY** | the spine (bell + chips) already presents it; capability lives on `/dashboard/bookings` | **CONFIRMED 2026-08-01** — browser-proven with seeded real bookings, see below |
@@ -70,15 +70,18 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` exists | repoint |
 | 23 | Telemetry view | `TelemetryView` | DETAIL | admin surface | repoint |
 | 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (gated `unverified`) | **BLOCKED** — missing data source documented 2026-08-01, see the row 24 note |
-| 25 | Demand intake section | inline, `demand-intake-section` | CHAT | the advanced host of row 7 | **AUDITED 2026-08-01** — dies with row 7's consolidation |
+| 25 | Demand intake section | inline, `demand-intake-section` | CHAT | the advanced host of row 7 | **RESOLVED 2026-08-01** — died with row 7's move; the advanced page carries no demand surface (guard-pinned) |
 | 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
 
 **Counts: 28 capabilities — 10 ALREADY · 10 ABSORB · 3 CHAT · 4 OBSOLETE ·
 2 DETAIL. 4 MIGRATED (rows 1, 4, 5 and 6); rows 11/12, 16, 19, 14 and 21
-CONFIRMED 2026-08-01; 7 ABSORB rows remain, of which row 24 is BLOCKED on
-data.**
+CONFIRMED 2026-08-01; rows 7/8/25 CONSOLIDATED 2026-08-01 (the employer
+package — one wizard on `/dashboard/company`, one owner readback, zero
+advanced demand mounts). 4 ABSORB rows remain: 2, 3, 9, 10 — plus row 24,
+BLOCKED on data and transferred to W6 by owner ruling (it does not block W3
+closure).**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -416,6 +419,87 @@ company/agency mount), the buyer page's own list (customers), and scouting's
 
 **Nothing implemented yet — recorded so the next window starts at the
 decision, not the discovery.**
+
+### P1 EMPLOYER — CONSOLIDATED 2026-08-01 (the employer package)
+
+What shipped, against the decisions above:
+
+1. **The FULL wizard moved to `/dashboard/company#demand-intake`** — the
+   action's own `advancedRoute`, inside the existing `#company-requests`
+   section. Same component, ONE mount; every unique capability preserved
+   (structured v2, estimate builder, `structureNeed` auto-suggest, honesty
+   flags, worker preview, duplicate-and-edit prefill, draft auto-continue).
+2. **`DemandDraftForm`'s company mount is absorbed**: the wizard gained a
+   private save-draft leg on the SAME `saveDemandDraftAction` +
+   `save_demand_draft` RPC and the same alias keys the chat leg and the
+   prefill already shared (+`accommodation`, whose wizard values round-trip
+   where the old form's never did). The component survives for the buyer
+   (distinct actor). The dead `projectRole`/`languages` light-form fields had
+   ZERO consumers (write-only payload; real language requirements live in
+   `structured_v2.requirements.languages`, which match-v1 reads) — recorded,
+   not ported. Dead i18n (`company.firstAction`, `company.draftForm`) removed
+   across the 5 active locales.
+3. **ONE owner readback** — `DemandRequestsReadback` on `/dashboard/company`,
+   now **employer-kind-scoped** (`company_request`/`agency_offer`): the
+   advanced mount ALSO leaked a dual-role user's buyer rows into the org
+   view; the move fixed that. Buyer room (customer actor) and scouting
+   (operations: matching, shortlist, lifecycle) retained as genuinely
+   distinct — classification per §7: OWNER=company page, CANDIDATE=worker
+   board, SCOUTING=scouting, advanced=REMOVED.
+4. **Five stale doors repaired** — `openDemandIntakeAsCompanyAction`,
+   scouting's no-demands CTA, agency-clients-section ×2, and the project
+   cost calculator all pointed at `/dashboard#demand-intake`, an anchor that
+   stopped existing when the root went chat-first (every one dead-ended on
+   the chat). All now target `/dashboard/company#demand-intake`, which the
+   role gate guarantees exists for every holder of the company role.
+5. **Row 25 resolved with row 7**: the advanced page carries no demand
+   surface (guard-pinned negative), and `wagon3`/`hierarchy`/`readback`
+   guards were rewritten to pin the new topology.
+
+**Browser proof** (`tests/e2e/w3-demand-consolidation.spec.ts`, 9/9 in two
+consecutive runs on the local guarded stack, company + worker-only fixture
+sessions): wizard + readback render on the company page; the save-draft leg
+writes a REAL `customer_requests` draft row and survives reload
+(auto-continue); describe → criteria (estimate builder) → review → submit
+echoes the values, returns the done receipt, CLOSES the continued draft
+(polled — the close is the same click's best-effort leg) and lands in the
+readback with its scouting deep link; the advanced page renders neither
+surface and Back returns to the anchored wizard; 375px no sideways scroll;
+a worker without the company role is redirected with the honest
+`needs_company_role` notice; an authenticated outsider reads ZERO
+`customer_requests` rows (RLS negative proof against a non-empty table).
+Legacy `demand-flow`/`estimate-flow` specs retargeted and green. Evidence:
+`w3/rows7825-company-wizard-1440.png`, `w3/rows7825-owner-readback-1440.png`,
+`w3/rows7825-company-wizard-375.png`.
+
+**Honest gaps**: the chat inline intake was NOT re-proven in the browser — it
+is UNCHANGED code (dispatcher + executor unit suites cover it) and its
+`advancedRoute` already pointed at `/dashboard/company`. The buyer page was
+not browser-proven (no customer fixture identity exists; the surface is
+untouched and guard-pinned). The scouting no-demands CTA door is repaired and
+guard-pinned but not browser-clicked (the fixture stack always has demands;
+emptying it would fabricate state).
+
+### Net complexity — rows 7/8/25
+
+| Measure | Before | After |
+|---|---|---|
+| Full demand form presentations | 3 (advanced wizard · chat · company light form) | **1 full wizard + 1 thin chat adapter** |
+| Estimate builders | 1 | 1 |
+| Owner readbacks | 3 (advanced · buyer · scouting) | **1 owner** (+ buyer/scouting retained as distinct actors/purposes) |
+| Advanced-page demand mounts | 2 | **0** |
+| Draft stores / write paths | 1 / 2 (`save_demand_draft`, `submit_demand_request`) | 1 / 2 — **unchanged** |
+| Validation schemas | 1 server-side | 1 — unchanged |
+| Stale `/dashboard#demand-intake` doors | 5 | **0** |
+| Routes / result kinds / registry entries added | — | **0** |
+| Dead code removed | — | `COMPANY_FIELDS` + options + company `DemandDraftForm` mount, advanced demand section + readback labels/reads, 61 dead i18n lines × 5 locales |
+| Production LOC (`git diff` app+components+lib, excl. tests/messages) | — | **+202 / −227, net −25** |
+
+**Value created** — employer: one place to state a need, the draft they save
+is the draft the wizard reopens, and the "submit for real" door no longer
+dead-ends on the chat. Worker: one consistent demand pipeline feeds the
+board. Company/tech: one form, one readback, kind-scoped room separation,
+five dead doors gone, net-negative complexity.
 
 ## Row 21 — MYZONE: the audit and the confirmation
 

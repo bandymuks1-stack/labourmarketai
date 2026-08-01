@@ -88,7 +88,6 @@ describe("Wagon 3 — org overview keeps the owner's task order (compact home v1
     const nextAction = orgBranch.indexOf("<DashboardNextAction");
     const planning = orgBranch.indexOf("<DashboardStatusStrip");
     const fold = orgBranch.indexOf("<DashboardMoreSection");
-    const need = orgBranch.indexOf("<DemandRequestsReadback");
     const market = orgBranch.indexOf("<HubCompanyIntelligence");
 
     for (const [name, idx] of Object.entries({
@@ -96,7 +95,6 @@ describe("Wagon 3 — org overview keeps the owner's task order (compact home v1
       nextAction,
       planning,
       fold,
-      need,
       market,
     })) {
       expect(idx, `${name} section missing from the org branch`).toBeGreaterThan(-1);
@@ -104,15 +102,19 @@ describe("Wagon 3 — org overview keeps the owner's task order (compact home v1
     expect(responses).toBeLessThan(nextAction);
     expect(nextAction).toBeLessThan(planning);
     expect(planning).toBeLessThan(fold);
-    // Nothing removed: the readback and the market context render inside the fold.
-    expect(need).toBeGreaterThan(fold);
+    // The market context renders inside the fold. (The workforce-need
+    // readback MOVED to /dashboard/company with W3 rows 7/8/25.)
     expect(market).toBeGreaterThan(fold);
   });
 
-  it("the workforce-need readback renders exactly once on the overview", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
+  it("the workforce-need readback renders exactly once, on the company page", () => {
     expect(
-      (page.match(/<DemandRequestsReadback/g) ?? []).length,
+      (read("app/[locale]/dashboard/advanced/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
+        .length,
+    ).toBe(0);
+    expect(
+      (read("app/[locale]/dashboard/company/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
+        .length,
     ).toBe(1);
   });
 });

@@ -40,6 +40,7 @@ next-env.d.ts
 # playwright / e2e local artifacts (never committed)
 /apps/web/tests/e2e/.storage-state.json
 /apps/web/tests/e2e/.storage-state.company.json
+/apps/web/tests/e2e/.storage-state.worker.json
 # The PRODUCTION QA session. Holds a real access token for the synthetic QA
 # identity — it must never be committed, attached to a report, or shipped
 # inside a trace. Minted per run by scripts/prod-qa-mint-session.ts.

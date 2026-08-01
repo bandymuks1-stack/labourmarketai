@@ -1574,71 +1574,6 @@
       "title": "Įmonės darbo erdvė",
       "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
       "pilotDisclaimer": "Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
-      "firstAction": {
-        "title": "Sukurkite pirmą darbo / komandos paklausą",
-        "body": "Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia. Tai privatus juodraštis — ne vieša reklama, matomas tik jums.",
-        "emptyState": "Užklausos dar nėra. Aprašykite, kokios darbuotojų, komandos ar projekto pagalbos reikia — juodraštis lieka privatus, matomas tik jums.",
-        "savedState": "Išsaugota kaip privatus juodraštis. Matote tik jūs.",
-        "submitRealCta": "Pateikti kaip tikrą užklausą"
-      },
-      "draftForm": {
-        "field": {
-          "title": {
-            "label": "Pareigybė / vaidmuo",
-            "placeholder": "Pvz., dažytojas, virėjas, vairuotojas"
-          },
-          "capabilities": {
-            "label": "Reikiamos kompetencijos",
-            "placeholder": "Pvz., dažymas, mūrijimas, vairavimas"
-          },
-          "location": {
-            "label": "Vieta / šalis",
-            "placeholder": "Pvz., Vilnius, Lietuva"
-          },
-          "timing": {
-            "label": "Pradžios laikas",
-            "placeholder": "Pvz., kovo mėnesį, šią savaitę"
-          },
-          "projectRole": {
-            "label": "Jūsų rolė šiame poreikyje",
-            "placeholder": "Pasirinkti",
-            "help": "Rolė priklauso nuo konkretaus projekto, ne nuo įmonės tipo.",
-            "options": {
-              "client": "Užsakovas / klientas",
-              "general_contractor": "Generalinis rangovas",
-              "contractor": "Rangovas",
-              "subcontractor": "Subrangovas",
-              "labour_supplier": "Darbuotojų tiekėjas",
-              "service_provider": "Paslaugų teikėjas",
-              "other": "Kita"
-            }
-          },
-          "accommodation": {
-            "label": "Apgyvendinimas",
-            "placeholder": "Pasirinkti",
-            "options": {
-              "yes": "Suteikiamas",
-              "no": "Nesuteikiamas",
-              "unknown": "Dar nežinia"
-            }
-          },
-          "languages": {
-            "label": "Kalbų poreikis",
-            "placeholder": "Pvz., lietuvių, anglų"
-          },
-          "notes": {
-            "label": "Papildoma informacija",
-            "placeholder": "Bet kokios pastabos"
-          }
-        },
-        "saveButton": "Išsaugoti juodraštį",
-        "saving": "Saugoma…",
-        "deleteButton": "Pašalinti juodraštį",
-        "deleting": "Šalinama…",
-        "savedPrivate": "Išsaugota privačiai — niekas nemato",
-        "saveError": "Nepavyko išsaugoti. Pabandykite dar kartą.",
-        "deleteError": "Nepavyko pašalinti. Pabandykite dar kartą."
-      },
       "profileLink": "Mano įgūdžiai (jei esate ir asmuo, ne tik įmonė)",
       "nextActions": {
         "heading": "Tolesni žingsniai",
@@ -9575,7 +9510,11 @@
     "prefillLoading": "Kraunama…",
     "prefillEmpty": "Ankstesnės užklausos nerasta",
     "prefillDone": "Užpildyta pagal paskutinę užklausą — peržiūrėkite ir redaguokite",
-    "prefillFromDraft": "Užpildyta iš jūsų juodraščio — peržiūrėkite ir pateikite"
+    "prefillFromDraft": "Užpildyta iš jūsų juodraščio — peržiūrėkite ir pateikite",
+    "draftSaveButton": "Išsaugoti juodraštį privačiai",
+    "draftSaving": "Saugoma…",
+    "draftSavedPrivate": "Juodraštis išsaugotas privačiai — matomas tik jums",
+    "draftSaveError": "Nepavyko išsaugoti juodraščio. Bandykite dar kartą."
   },
   "workerPrefs": {
     "title": "Darbo pageidavimai",

@@ -1574,71 +1574,6 @@
       "title": "Company workspace",
       "subtitle": "Company context is an entry point, not a limit. You can hold other roles and add more later via the role switcher.",
       "pilotDisclaimer": "Matching is not offered yet. Nothing becomes public automatically. You can prepare your first request calmly — it's saved right away and stays private to you.",
-      "firstAction": {
-        "title": "Create your first work / team request",
-        "body": "Describe the workers, team, or project help you need. It's a private draft — not a public advert, only you can see it.",
-        "emptyState": "No request yet. Describe the workers, team, or project help you need — your draft stays private to you.",
-        "savedState": "Saved as a private draft. Only you can see it.",
-        "submitRealCta": "Submit it as a real request"
-      },
-      "draftForm": {
-        "field": {
-          "title": {
-            "label": "Role / job title needed",
-            "placeholder": "e.g. painter, cook, driver"
-          },
-          "capabilities": {
-            "label": "Required skills",
-            "placeholder": "e.g. painting, masonry, driving"
-          },
-          "location": {
-            "label": "Location / country",
-            "placeholder": "e.g. Vilnius, Lithuania"
-          },
-          "timing": {
-            "label": "Start timing",
-            "placeholder": "e.g. in March, this week"
-          },
-          "projectRole": {
-            "label": "Your role on this need",
-            "placeholder": "Choose",
-            "help": "The role depends on the specific project, not on a company type.",
-            "options": {
-              "client": "Client / requester",
-              "general_contractor": "General contractor",
-              "contractor": "Contractor",
-              "subcontractor": "Subcontractor",
-              "labour_supplier": "Labour supplier",
-              "service_provider": "Service provider",
-              "other": "Other"
-            }
-          },
-          "accommodation": {
-            "label": "Accommodation",
-            "placeholder": "Choose",
-            "options": {
-              "yes": "Provided",
-              "no": "Not provided",
-              "unknown": "Not sure yet"
-            }
-          },
-          "languages": {
-            "label": "Language needs",
-            "placeholder": "e.g. Lithuanian, English"
-          },
-          "notes": {
-            "label": "Notes",
-            "placeholder": "Any notes"
-          }
-        },
-        "saveButton": "Save draft",
-        "saving": "Saving…",
-        "deleteButton": "Remove draft",
-        "deleting": "Removing…",
-        "savedPrivate": "Saved privately — nobody else sees this",
-        "saveError": "Could not save. Please try again.",
-        "deleteError": "Could not remove. Please try again."
-      },
       "profileLink": "My skills (if you're also a person, not only a company)",
       "nextActions": {
         "heading": "Next steps",
@@ -9575,7 +9510,11 @@
     "prefillLoading": "Loading…",
     "prefillEmpty": "No previous request found",
     "prefillDone": "Filled from your last request — review and edit",
-    "prefillFromDraft": "Filled from your saved draft — review and submit"
+    "prefillFromDraft": "Filled from your saved draft — review and submit",
+    "draftSaveButton": "Save draft privately",
+    "draftSaving": "Saving…",
+    "draftSavedPrivate": "Draft saved privately — visible only to you",
+    "draftSaveError": "Could not save the draft. Please try again."
   },
   "workerPrefs": {
     "title": "Work preferences",
