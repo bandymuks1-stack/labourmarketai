@@ -109,7 +109,55 @@ guarded acceptance stack; the distinction is deliberate and stated.
 | Proof | `w3-company-rows-2-3-9-10.spec.ts` 8/8 × 2 consecutive runs + 6 source guards; net production LOC **0** |
 | Matrix | **ZERO ABSORB rows remain** (row 24 → W6 by owner ruling). Left before deletion: Package 3 (rows 22/23 DETAIL repoints; 20/27/28 OBSOLETE decisions; collapse the second MarketMap chain; the 3 allowlisted advanced hrefs) → Package 4 (delete `/dashboard/advanced`) |
 
-### NEXT EXACT ACTION — Package 3: admin/detail + cleanup (rows 22/23, 20/27/28, MarketMap)
+### CONTINUATION — 2026-08-01 (Package 3: rows 20/22/23/27 confirmed, row 28 COLLAPSED)
+
+| | |
+|---|---|
+| Slice | **W3 Package 3** — PR #957: ONE Leaflet engine (`market-map/leaflet-engine.ts`), three presentations; `market-map-live.tsx` → `market-map/location-map.tsx` (rename, identical picker capability) |
+| Rows | 20 ALREADY (layout-mounted CommandFinder) · 22 DETAIL door · 23 generic · 27 OBSOLETE (dies with grid) · 28 COLLAPSED |
+| Proof | `w3-row28-map-collapse.spec.ts` 3/3 ×2; capture write proven once through the collapsed chain; 798 files / 12 864 unit tests; guard `w3-row28-one-leaflet-engine` pins the single tile source repo-wide |
+| Honest debt | capture/readiness authenticated specs were RED ON MAIN (7/7 baseline at `37ce8245`; #921 fold + fixture drift); fold navigation repaired (3 recovered); deterministic-state repair filed as its own task |
+
+### NEXT EXACT ACTION — Package 4: DELETE /dashboard/advanced (one guarded commit)
+
+The deletion inventory, verified 2026-08-01 (0 other consumers unless noted):
+
+- **Route**: `app/[locale]/dashboard/advanced/page.tsx` (916 lines).
+- **Advanced-exclusive components to delete** (consumer-counted): `MyZone`
+  (+`MyZoneImproves`), `PrivacyStatusCard`, `DashboardStatusStrip`,
+  `DashboardChainActions`, `DashboardModuleGrid`, `DashboardMoreSection`,
+  `DashboardNextAction`, `CurrentSpaceHeader`, `IdentityActions`,
+  `OpportunityDirectionsCard`, `PremiumHubScreen` (+the three PremiumHub
+  cards whose only other consumer IS the screen). `CommandFinder` SURVIVES
+  (header-search).
+- **Dead loaders/models to check-and-delete with it**: `premium-hub-data`,
+  `buildControlRoomViewModel` (matrix row 26 said "keep-reusable" — DELETE
+  if zero consumers post-route; it is not a kill switch),
+  `getDashboardCardPreferences` + prefs plumbing (row 27), `next-action`
+  lib, `decideTopSlot` — each needs a consumer count before deletion.
+- **Same-commit updates**: `surface-registry.ts` entry,
+  `route-truth-map.test.ts` pin, account-menu admin escape hatch,
+  `w3-return-to-workspace.test.ts` ratchet → the allowlist drops to ZERO
+  (then the guard flips to "no live advanced href anywhere").
+- **Guard rewrites** (every guard that `read()`s the advanced page file will
+  crash on the missing file — rewrite to assert ABSENCE):
+  `dashboard-active-role-overview`, `dashboard-hierarchy`,
+  `wagon3-nav-simplification`, `demand-readback` (the advanced negative),
+  `company-demand-first-action` (same), `click-target-repair`,
+  `role-value-to-action` (verify), plus any `grep -rl "dashboard/advanced"
+  lib/guards` hit at execution time.
+- **e2e rewrites**: `w3-second-dashboard.spec.ts` (targets the route —
+  becomes the DELETION proof: route 404s, capabilities live on their
+  canonical homes), `w3-row16-identity-actions.spec.ts`,
+  `w3-rows19-14-return.spec.ts`, `w3-calendar-rows-11-12.spec.ts`
+  (advanced-page badge scenarios — assert canonical surfaces instead).
+- **Final proof**: repo-wide search zero `/dashboard/advanced` refs outside
+  historical docs; full W3 browser pass (desktop+375px: chat, panel, player
+  card, calendar, demand, company, market, maps, Back/Forward/reload/deep
+  links); merge; deploy; production smoke (route redirects/404s for anon,
+  no leak); W3_FINAL_COMPLETION_REPORT; mark W3 COMPLETE; enter W4 baseline.
+
+### SUPERSEDED — Package 3: admin/detail + cleanup (rows 22/23, 20/27/28, MarketMap)
 
 Rows 22 (`PrivacyStatusCard` → `/dashboard/privacy` repoint) and 23
 (`TelemetryView` → admin surface repoint) are DETAIL; rows 20/27/28 are the
