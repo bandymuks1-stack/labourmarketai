@@ -546,6 +546,35 @@ target ("new `organization` result kind") should be CHALLENGED before any
 code: the card's whole content is already canonical on `/dashboard/company`,
 and the no-new-result-kind rule requires proof of need, not a matrix label.
 
+## P3 CLEANUP — rows 20/22/23/27/28: the audit, before any code
+
+Audited 2026-08-01 (parallel planning during the Package 2 window):
+
+- **Row 20 (`CommandFinder`) — expect `ALREADY`.** The component has TWO
+  consumers: the advanced page's inline mount (dies with the route) and
+  `header-search.tsx`, which the DASHBOARD LAYOUT mounts as an overlay on
+  EVERY page — the surviving presentation. Verification owed, no port.
+- **Row 22 (`PrivacyStatusCard`)** — advanced-only mount; the repoint is to
+  verify `/dashboard/privacy` carries the capability, then the mount dies.
+- **Row 23 (`TelemetryView`)** — a generic telemetry component used
+  product-wide; the advanced mount is just that page's own view event and
+  dies with it. Nothing to port.
+- **Row 27 (card preferences)** — preferences FOR the advanced card grid;
+  dies with the grid in Package 4. `server prefs` reads/writes stay unused
+  after deletion → remove in the same commit as the grid.
+- **Row 28 (second Leaflet chain) — the ONE real implementation slice left.**
+  `/dashboard/market-map` renders `MarketMapShell` + `MarketMapBase` →
+  `market-map-live.tsx` (295 lines, a second Leaflet engine with a location
+  PICKER + signal-capture write path), plus REAL unique capabilities that
+  must survive: preferred-locations / demand-locations capture,
+  `MarketMapOwnerReadiness`, `MarketMapEntityLayers`, `MapLayersLegend`. The
+  canonical engine (`components/app/market-map/market-map.tsx`) is consumed
+  by the panel drill-down + the marketing hero. The collapse: the route's
+  map rendering moves onto the canonical engine (or the canonical engine
+  gains the picker mode), base/live chain deleted, capture writes proven in
+  the browser. NOT bundled into Package 2 — it needs its own preservation
+  map of `market-map-live`'s picker API before any edit.
+
 ## Row 21 — MYZONE: the audit and the confirmation
 
 Audited and browser-confirmed 2026-08-01 (`lib/guards/w3-row21-myzone.test.ts`
