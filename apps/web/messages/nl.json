@@ -9525,7 +9525,8 @@
     "skillVerified": "Met managerregistratie",
     "skillWorkBacked": "Door werk gestaafd",
     "skillDeclared": "Zelf opgegeven",
-    "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd."
+    "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
+    "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw."
   },
   "companyLocations": {
     "title": "Locaties",

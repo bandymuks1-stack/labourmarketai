@@ -72,26 +72,26 @@ export default async function PersonPage({
     redirect(`/${locale}/dashboard/profile`);
   }
 
-  const { data: skillRows } = await supabase
+  // Catalogue slug is the ONLY name source — the legacy name_lt/name_en
+  // columns were dropped in 0012 and selecting them 400s the whole read
+  // (which silently rendered ZERO skills for every worker here until W4).
+  // The error is therefore CHECKED: a failed read is a read failure, not an
+  // empty skill set.
+  const { data: skillRows, error: skillsError } = await supabase
     .from("worker_skills")
-    .select("skill_id, verified, source, skills ( slug, name_lt, name_en )")
+    .select("skill_id, verified, source, skills ( slug )")
     .eq("worker_id", workerId);
 
   type SkillRow = {
     skill_id: string;
     verified: boolean | null;
     source: string | null;
-    skills: { slug: string | null; name_lt: string | null; name_en: string | null } | null;
+    skills: { slug: string | null } | null;
   };
   const skills = ((skillRows ?? []) as unknown as SkillRow[]).map((r) => {
     const slug = r.skills?.slug ?? null;
     const label =
-      slug && tSkillNames.has(slug)
-        ? tSkillNames(slug)
-        : (locale === "en" ? r.skills?.name_en : r.skills?.name_lt) ??
-          r.skills?.name_lt ??
-          r.skills?.name_en ??
-          null;
+      slug && tSkillNames.has(slug) ? tSkillNames(slug) : (slug ?? null);
     const state: "verified" | "work" | "declared" = r.verified
       ? "verified"
       : r.source === "work_journal"
@@ -195,7 +195,16 @@ export default async function PersonPage({
           <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
           {t("skillsTitle")} · {shown.length}
         </h2>
-        {shown.length === 0 ? (
+        {skillsError ? (
+          // A failed read must never masquerade as "no skills" — that lie hid
+          // the dropped-column defect on this page for weeks.
+          <p
+            className="card-border border-state-warning/40 p-4 text-sm text-text-secondary"
+            data-testid="person-skills-error"
+          >
+            {t("skillsReadError")}
+          </p>
+        ) : shown.length === 0 ? (
           <p className="card-border p-4 text-sm text-text-secondary">
             {t("skillsEmpty")}
           </p>

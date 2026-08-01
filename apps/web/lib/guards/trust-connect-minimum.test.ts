@@ -27,9 +27,13 @@ const REPO_ROOT = join(APP_ROOT, "..", "..");
 const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 
 describe("1. worker-skill 'verified' is manager-confirmation only", () => {
-  it("CV tier condition fires only on verified || manager_confirmed", () => {
+  it("CV tier condition fires only on the real verified flag", () => {
+    // W4 honesty repair: confirmed = verified===true, same rule as
+    // skill-tiers.ts; a manager_confirmed provenance without the flag is
+    // under-stated as evidence, never as confirmed.
     const src = read("components/app/cv-engagement-cards.tsx");
-    expect(src).toMatch(/verified\s*\|\|\s*.*manager_confirmed|manager_confirmed.*\|\|.*verified/);
+    expect(src).toMatch(/confirmed = s\.verified === true/);
+    expect(src).not.toMatch(/verified\s*\|\|\s*s\.source === "manager_confirmed"/);
   });
 
   it("evidence tiers never upgrade an unknown source", () => {

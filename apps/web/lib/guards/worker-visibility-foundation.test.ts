@@ -26,10 +26,13 @@ const MODULE = "lib/visibility/worker-profile-visibility.ts";
 describe("worker visibility — central policy module exists", () => {
   const src = code(read(MODULE));
 
-  it("exports the relation gate and contact gate", () => {
-    expect(src).toMatch(/export function canViewProfilePreview/);
+  it("exports the contact gate; the dead relation resolver stays deleted", () => {
     expect(src).toMatch(/export function canViewWorkerContact/);
-    expect(src).toMatch(/export function resolveWorkerVisibilityRelation/);
+    // W4: the app-layer relation resolver was deleted — it had no callers
+    // and disagreed with the shipped `can_view_worker` DB predicate. Dead
+    // policy code that contradicts the enforced policy must not return.
+    expect(src).not.toMatch(/export function canViewProfilePreview/);
+    expect(src).not.toMatch(/export function resolveWorkerVisibilityRelation/);
   });
 
   it("exports the profile-safe + shortlist-safe builders", () => {

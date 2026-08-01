@@ -57,7 +57,8 @@ export function AccountMenu() {
   // UTILITY-ONLY dropdown (IA cleanup): the name menu carries only account
   // utilities — Admin (gated) + Account + Logout. Product areas were REMOVED
   // from here so they are not hidden in the user-name menu:
-  //   - Skills      → lives on the Profile surface (#candidate-skills).
+  //   - Skills      → live on the Profile surface (#capabilities; the
+  //                   clarify capture is the separate #candidate-skills).
   //   - Projects    → reachable from the company / project-operations context.
   //   - Instructions→ reachable from the attention-instructions / ops surfaces.
   //   - Bookings    → no primary-IA home yet → documented RED (needs-IA), route

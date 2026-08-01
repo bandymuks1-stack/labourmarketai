@@ -18,6 +18,17 @@
  *    not an assessment of the person (§19).
  */
 
+/** The relationship slugs that count as WORK history — the ONE list every
+ *  history surface filters by (W4: the card timeline used to skip this filter
+ *  and showed manager/student/volunteer rows the CV and profile omit). */
+export const WORKER_RELATIONSHIPS = [
+  "employee",
+  "freelancer",
+  "consultant",
+  "owner",
+  "collaborator",
+] as const;
+
 /** One real engagement in the person's history. */
 export interface WorkHistoryEntry {
   readonly id: string;

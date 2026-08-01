@@ -15,8 +15,6 @@ import {
   anonymizedWorkerLabel,
   isContactSafe,
   assertContactSafe,
-  resolveWorkerVisibilityRelation,
-  canViewProfilePreview,
   canViewWorkerContact,
   canStartCommunicationOrBooking,
 } from "./worker-profile-visibility";
@@ -91,28 +89,11 @@ describe("profile-safe preview — forbidden contact/private fields", () => {
   });
 });
 
-describe("relation gating (owner rule 1) + contact gate (rules 2,3)", () => {
-  it("no relation → cannot view preview (default-closed)", () => {
-    expect(resolveWorkerVisibilityRelation({})).toBe("none");
-    expect(canViewProfilePreview("none")).toBe(false);
-  });
-
-  it("direct / agency / project / object relations allow the preview", () => {
-    expect(resolveWorkerVisibilityRelation({ directCompany: true })).toBe("direct_company");
-    expect(resolveWorkerVisibilityRelation({ agency: true })).toBe("agency");
-    expect(resolveWorkerVisibilityRelation({ projectAssignment: true })).toBe("project_assignment");
-    expect(resolveWorkerVisibilityRelation({ clientObject: true })).toBe("client_object");
-    for (const rel of ["direct_company", "agency", "project_assignment", "client_object"] as const) {
-      expect(canViewProfilePreview(rel)).toBe(true);
-    }
-  });
-
-  it("precedence is deterministic when several relations hold", () => {
-    expect(
-      resolveWorkerVisibilityRelation({ directCompany: true, agency: true, projectAssignment: true }),
-    ).toBe("direct_company");
-  });
-
+describe("contact gate (rules 2,3)", () => {
+  // W4: the app-layer relation resolver was DELETED — it had no callers and
+  // documented a STRICTER rule than the shipped `can_view_worker` DB
+  // predicate (the single visibility truth). Only the contact gate remains
+  // app-layer.
   it("contact exposure is ALWAYS denied (no paid unlock implemented)", () => {
     expect(canViewWorkerContact()).toBe(false);
   });

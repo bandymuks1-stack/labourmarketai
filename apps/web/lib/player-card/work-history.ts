@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   deriveWorkHistory,
+  WORKER_RELATIONSHIPS,
   type WorkHistoryEntry,
   type WorkHistorySourceRow,
 } from "./work-history-model";
@@ -53,6 +54,10 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryEntry[]> => 
         "id, title, relationship_slug, started_at, ended_at, status, country_code, organizations(display_name, legal_name)",
       )
       .eq("profile_id", user.id)
+      // The SAME work-relationship filter the CV and profile use — without it
+      // the card timeline showed manager/student/volunteer rows the other two
+      // surfaces omit (W4 audit A15: the same person had two histories).
+      .in("relationship_slug", [...WORKER_RELATIONSHIPS])
       .order("started_at", { ascending: false, nullsFirst: false })
       .limit(WORK_HISTORY_LIMIT);
     if (res.error) return [];

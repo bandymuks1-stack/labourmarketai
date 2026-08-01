@@ -125,12 +125,18 @@ export function CvEngagementCards({
                       </span>
                       <span className="flex flex-none items-center gap-1.5">
                         {/* The moment of truth: a declared skill becomes a real
-                            verified Work Proof once a manager confirms it. */}
+                            verified Work Proof once a manager confirms it.
+                            SAME rule as lib/cv-export/skill-tiers.ts: only
+                            verified===true renders confirmed; a
+                            manager_confirmed provenance without the flag is
+                            deliberately UNDER-stated as evidence (W4 audit —
+                            the two surfaces used to disagree). */}
                         {(() => {
-                          const confirmed =
-                            s.verified || s.source === "manager_confirmed";
+                          const confirmed = s.verified === true;
                           const journal =
-                            !confirmed && s.source === "work_journal";
+                            !confirmed &&
+                            (s.source === "work_journal" ||
+                              s.source === "manager_confirmed");
                           return (
                             <span
                               className={cn(

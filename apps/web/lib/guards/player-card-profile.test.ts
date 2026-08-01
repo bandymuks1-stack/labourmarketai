@@ -69,8 +69,12 @@ describe("3. journal-derived skills show their evidence basis", () => {
     const src = read("components/app/cv-engagement-cards.tsx");
     expect(src).toMatch(/manager_confirmed/);
     expect(src).toMatch(/work_journal/);
-    // verified label fires ONLY on the real signal
-    expect(src).toMatch(/verified\s*\|\|\s*.*manager_confirmed|manager_confirmed.*\|\|\s*.*verified/);
+    // W4 honesty repair: the confirmed badge fires ONLY on verified===true —
+    // the SAME rule as lib/cv-export/skill-tiers.ts. A manager_confirmed
+    // provenance without the flag is UNDER-stated as evidence; the old
+    // lenient `verified || manager_confirmed` disjunction may never return.
+    expect(src).toMatch(/confirmed = s\.verified === true/);
+    expect(src).not.toMatch(/verified\s*\|\|\s*s\.source === "manager_confirmed"/);
   });
 });
 

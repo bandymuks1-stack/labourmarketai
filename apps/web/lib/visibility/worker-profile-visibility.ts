@@ -198,45 +198,15 @@ export function assertContactSafe(obj: Record<string, unknown>): void {
 }
 
 // ---------------------------------------------------------------------------
-// Relation-based visibility (owner rule 1) + contact gate (rules 2, 3)
+// W4 note: the app-layer relation resolver (`resolveWorkerVisibilityRelation`
+// / `canViewProfilePreview`) that used to live here was DELETED — it had no
+// callers, and it documented a STRICTER rule (direct relation required) than
+// the one that actually ships (`can_view_worker` in the database also allows
+// consent-only discovery). Dead policy code that disagrees with the enforced
+// policy is worse than no code: readers believed a control existed that never
+// ran. The DB predicate is the single visibility truth; this module keeps
+// only the app-layer CONTACT-safety net above.
 // ---------------------------------------------------------------------------
-
-export type WorkerVisibilityRelation =
-  | "direct_company"
-  | "agency"
-  | "project_assignment"
-  | "client_object"
-  | "none";
-
-export interface WorkerRelationFacts {
-  /** company_workers row links the viewer's company to the worker. */
-  readonly directCompany?: boolean;
-  /** agency_workers row links the viewer's agency to the worker. */
-  readonly agency?: boolean;
-  /** project_worker_assignments places the worker on the viewer's project. */
-  readonly projectAssignment?: boolean;
-  /** worker works on the client's object/project. */
-  readonly clientObject?: boolean;
-}
-
-/** Resolve the strongest existing relation (deterministic precedence). */
-export function resolveWorkerVisibilityRelation(
-  facts: WorkerRelationFacts,
-): WorkerVisibilityRelation {
-  if (facts.directCompany) return "direct_company";
-  if (facts.agency) return "agency";
-  if (facts.projectAssignment) return "project_assignment";
-  if (facts.clientObject) return "client_object";
-  return "none";
-}
-
-/**
- * Owner rule 1: a company/client may see the PROFILE PREVIEW only with a direct
- * relation. No relation → no preview (default-closed).
- */
-export function canViewProfilePreview(relation: WorkerVisibilityRelation): boolean {
-  return relation !== "none";
-}
 
 /**
  * Owner rules 2 & 3: contact exposure is NOT available in this foundation. The
