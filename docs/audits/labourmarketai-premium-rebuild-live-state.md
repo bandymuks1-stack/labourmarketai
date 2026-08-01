@@ -99,7 +99,27 @@ guarded acceptance stack; the distinction is deliberate and stated.
 | Owner ruling (2026-08-01) | W3 is a **closing sprint** in 4 packages: 1 employer (7/8/25 — THIS) · 2 company (2/3/9/10) · 3 admin+map+cleanup (22/23, 20/27/28, second MarketMap, last advanced hrefs) · 4 delete `/dashboard/advanced`. Then immediately W4. |
 | Honest gaps | chat inline intake not re-browser-proven (unchanged code, unit-covered); buyer page not browser-proven (no customer fixture); scouting empty-state CTA repaired+guard-pinned, not browser-clicked (would require fabricating an empty stack) |
 
-### NEXT EXACT ACTION — Package 2: COMPANY rows 2/3/9/10
+### CONTINUATION — 2026-08-01 (company package: rows 2/3/9/10 CONFIRMED)
+
+| | |
+|---|---|
+| Slice | **W3 rows 2/3/9/10** — the owner's Package 2, verification not port |
+| Rows 9/10 | **ALREADY** — the spine (layout-mounted bell) carries `incoming-service-requests` + `service-request-responses`; browser-proven with REAL seeded requests + the seen-model; canonical surface `/dashboard/service-requests` |
+| Rows 2/3 | **VERIFIED door-panels** — no write/editor/own read (guard-pinned); destinations proven canonical in the browser; the "new `organization` result kind" target CHALLENGED and DROPPED; they die with the route |
+| Proof | `w3-company-rows-2-3-9-10.spec.ts` 8/8 × 2 consecutive runs + 6 source guards; net production LOC **0** |
+| Matrix | **ZERO ABSORB rows remain** (row 24 → W6 by owner ruling). Left before deletion: Package 3 (rows 22/23 DETAIL repoints; 20/27/28 OBSOLETE decisions; collapse the second MarketMap chain; the 3 allowlisted advanced hrefs) → Package 4 (delete `/dashboard/advanced`) |
+
+### NEXT EXACT ACTION — Package 3: admin/detail + cleanup (rows 22/23, 20/27/28, MarketMap)
+
+Rows 22 (`PrivacyStatusCard` → `/dashboard/privacy` repoint) and 23
+(`TelemetryView` → admin surface repoint) are DETAIL; rows 20/27/28 are the
+OBSOLETE decisions (incl. `market-map-base` → `market-map-live` collapse into
+the canonical MarketMap). Then Package 4: delete `/dashboard/advanced` + its
+components/guards/nav refs in one guarded commit (surface-registry +
+route-truth-map in the SAME commit), full desktop+mobile proof, merge,
+deploy, production-prove, mark W3 COMPLETE — then enter W4 immediately.
+
+### SUPERSEDED — Package 2: COMPANY rows 2/3/9/10
 
 Row 2 (`PremiumHubCompanyCard` → `organization` result kind?) and row 3
 (`PremiumHubProjectCard` → existing `project` result) + rows 9/10 (service /
