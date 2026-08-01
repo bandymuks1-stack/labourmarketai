@@ -131,8 +131,8 @@ export interface SupplyWorkerRow {
   readonly journalEntries: number;
   readonly managerConfirmations: number;
   /** The subject's C set for §19 fit: ESCO URIs from curated worker_skills
-   *  (verified flag = manager-confirmed) + approved candidate_skills
-   *  mappings (always declared, never verified). */
+   *  (verified flag = manager-confirmed). The candidate_skills join was
+   *  removed in W5 slice 1 (zero-writer ghost table). */
   readonly escoSkills: ReadonlyArray<{ uri: string; verified: boolean }>;
   /** Wagon 4: the canonical match-v1 subject assembled by the SAME read
    *  layer scouting uses (buildSupplyCandidates). Null when the worker was
@@ -368,35 +368,9 @@ export async function listWorkbench(
     }
   }
 
-  // Approved candidate-skill mappings join the C set as DECLARED (never
-  // verified) — the mapping is an admin-curated fact, the skill stays
-  // self-declared until a manager confirms real work (§7 / §19 c).
-  const profileToWorker = new Map<string, string>();
-  for (const w of workerRows) {
-    if (w.profile_id) profileToWorker.set(w.profile_id as string, w.id as string);
-  }
-  if (profileToWorker.size > 0) {
-    try {
-      const { data: candRows } = await asAny(supabase)
-        .from("candidate_skills")
-        .select("profile_id, mapped_esco_uri")
-        .eq("status", "approved")
-        .not("mapped_esco_uri", "is", null)
-        .in("profile_id", [...profileToWorker.keys()]);
-      for (const c of (candRows ?? []) as {
-        profile_id: string;
-        mapped_esco_uri: string | null;
-      }[]) {
-        const wid = profileToWorker.get(c.profile_id);
-        if (!wid || !c.mapped_esco_uri) continue;
-        const list = escoByWorker.get(wid) ?? new Map<string, boolean>();
-        if (!list.has(c.mapped_esco_uri)) list.set(c.mapped_esco_uri, false);
-        escoByWorker.set(wid, list);
-      }
-    } catch {
-      // table absent → C stays curated-skills-only (honest subset)
-    }
-  }
+  // W5 slice 1: the candidate_skills join was REMOVED — the table never had a
+  // writer, so the C set only ever saw an empty result here. C stays
+  // curated-skills-only, which was always the delivered truth.
 
   // Wagon 4: canonical match-v1 subjects from the ONE supply read layer
   // (lib/market/match-subject.ts — the same assembler scouting uses), so the

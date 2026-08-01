@@ -5,8 +5,9 @@ import { join } from "node:path";
 /**
  * Journal Proof Engine v1 guard (Sprint v2 §3) — pins the doctrine rules of
  * the proof-engine slice:
- *   - spreadsheet mode is a BULK SURFACE over the ONE journal write path
- *     (createJournalEntry only — no batch RPC, no second journal system);
+ *   - spreadsheet mode was DELETED in W5 slice 1: the component was mounted
+ *     nowhere (orphan bulk-write surface = second-journal risk); the guard
+ *     now pins its ABSENCE;
  *   - profession templates are a §10 SLUG REGISTRY (owner-gated draft
  *     migration, every seed inactive, admin-only writes) — never a hardcoded
  *     UI enum;
@@ -26,23 +27,13 @@ const readRepo = (rel: string): string =>
 const MIGRATION = "supabase/migrations/20260714180000_journal_profession_templates_v1.sql";
 const ROLLBACK = "supabase/rollbacks/20260714180000_journal_profession_templates_v1.down.sql";
 
-describe("spreadsheet mode — one write path", () => {
-  const comp = read("components/app/journal-spreadsheet-entry.tsx");
-  const model = read("lib/journal/spreadsheet-entry-model.ts");
-  it("every row saves via the existing createJournalEntry action only", () => {
-    expect(comp).toContain('import { createJournalEntry } from "@/lib/journal/actions"');
-    expect(comp).not.toMatch(/supabase|\.rpc\(|createJournalEntriesBatch/);
-  });
-  it("batch is bounded and units come from the §15 registry subset", () => {
-    expect(model).toMatch(/SPREADSHEET_MAX_ROWS = 15/);
-    expect(model).toMatch(/SPREADSHEET_UNIT_OPTIONS/);
-    // No invented unit slug: every option is one the composer already offers.
-    expect(model).not.toMatch(/cubic_meters|liters|tons/);
-  });
-  it("failed rows are reported honestly (per-row error + real summary)", () => {
-    expect(comp).toMatch(/journal-spreadsheet-row-error-/);
-    expect(comp).toMatch(/journal-spreadsheet-summary/);
-    expect(comp).toMatch(/savedSummary/);
+describe("spreadsheet mode — deleted orphan write surface stays deleted (W5 slice 1)", () => {
+  it("the never-mounted bulk-write component and its model do not return", () => {
+    // The component called createJournalEntry from a surface no route ever
+    // rendered — a dormant second intake. If bulk entry is ever wanted, it
+    // must be designed through the chat-first canonical intake, not revived.
+    expect(existsSync(join(ROOT, "components/app/journal-spreadsheet-entry.tsx"))).toBe(false);
+    expect(existsSync(join(ROOT, "lib/journal/spreadsheet-entry-model.ts"))).toBe(false);
   });
 });
 

@@ -48,8 +48,8 @@ describe("matching workbench — admin gate + canonical model", () => {
       "journal_entry_confirmations",
       // S6 (§19): the fit C set + need-label resolution ride the APPLIED
       // canonical ESCO layer — read-only catalogue tables, still no new
-      // table and no RPC write.
-      "candidate_skills",
+      // table and no RPC write. (candidate_skills was removed from this
+      // allowlist in W5 slice 1: the zero-writer ghost join is gone.)
       "esco_skills",
       "esco_labels",
       // Wagon 4: the esco_uri→slug bridge (same derivation input scouting

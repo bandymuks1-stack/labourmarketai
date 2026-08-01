@@ -14,6 +14,43 @@
 
 ---
 
+## ⚠️ DRIFT NOTICE 2026-08-01 — 26 applied migrations were never recorded here
+
+The functional-reality audit
+(`docs/audits/labourmarketai-functional-reality-matrix-v1.md` §4.1) diffed this
+file against prod `supabase_migrations.schema_migrations` and found **26
+migrations applied to production but absent from this ledger** (span
+`20260702130000_admin_grant_guard` → `20260720190000_lmc_ledger_foundation_v1`;
+the full 26-name list is in that section and re-verified 2026-08-01 — all 26
+still unrecorded). This is exactly the drift class this file warns about.
+
+Two of the 26 sit inside the W5 journal scope and get retroactive rows below
+(marked RETROACTIVE — doc-only, the applies happened earlier). The remaining 24
+need their apply context reconstructed from PR history before honest rows can
+be written — recording them as a batch without that context would fake
+precision this ledger exists to provide.
+
+### ✅ APPLIED TO PROD (RETROACTIVE ROW 2026-08-01) — `20260720100000_journal_atomic_supersede_v1`
+
+Applied ~2026-07-20 via Supabase MCP (present in prod `schema_migrations`;
+behaviour verified in prod by the reality audit). Replaces the app-side
+two-step supersede with ONE atomic SECURITY DEFINER RPC
+`journal_entry_supersede_v2` (owner-gated, stale-chain refusal, append-only —
+the original entry is never mutated beyond `superseded_by`). Consumer:
+`apps/web/lib/journal/actions.ts` edit path. Rollback: paired down file.
+
+### ✅ APPLIED TO PROD (RETROACTIVE ROW 2026-08-01) — `20260720150000_journal_photo_continuity_v1`
+
+Applied ~2026-07-20 via Supabase MCP (present in prod `schema_migrations`).
+Photo-metadata continuity across supersede (entry row-lock on register, private
+bucket unchanged) + the canonical current-definition home of
+`journal_entry_supersede_v2`, `confirm_entry_and_verify_skills` (the ONLY
+`verified=true` writer) and `apply_learning_auto_confirmation` (policy-gated,
+writes a real honestly-labelled confirmation row), + staleness guard on the
+legacy direct-insert confirmation RLS. Rollback: paired down file.
+
+---
+
 ## ⚠️ CORRECTION 2026-07-22 — "authenticated only, no anon" was FACTUALLY WRONG
 
 Several rows below state that a migration granted `EXECUTE` to `authenticated`
