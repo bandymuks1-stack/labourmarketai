@@ -118,7 +118,7 @@ export async function getBusinessPublicSettings(
   const supabase = await createClient();
   const { data, error } = await asAny(supabase)
     .from("organizations")
-    .select("public_profile_enabled, public_slug, public_tagline, public_contact_email, public_contact_phone")
+    .select("public_profile_enabled, public_slug, public_tagline, public_contact_email, public_contact_phone, description")
     .eq("id", orgId)
     .maybeSingle();
   if (error) {
@@ -134,6 +134,7 @@ export async function getBusinessPublicSettings(
       tagline: data.public_tagline ?? null,
       contactEmail: data.public_contact_email ?? null,
       contactPhone: data.public_contact_phone ?? null,
+      description: data.description ?? null,
     },
   };
 }

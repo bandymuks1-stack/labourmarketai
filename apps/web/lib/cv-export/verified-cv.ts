@@ -1,4 +1,5 @@
 import "server-only";
+import { orgDisplayName } from "@/lib/company/org-display";
 
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -272,7 +273,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         }
       | null;
     return {
-      orgName: org?.display_name ?? org?.legal_name ?? null,
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
       organizationType: org?.organization_type ?? null,
       relationship: e.relationship_slug,
       title: (e.title as string | null) ?? null,

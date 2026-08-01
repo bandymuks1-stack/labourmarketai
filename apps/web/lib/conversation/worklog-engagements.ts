@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { orgDisplayName } from "@/lib/company/org-display";
 
 import { getTranslations } from "next-intl/server";
 
@@ -79,7 +80,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const orgName = org?.display_name ?? org?.legal_name ?? null;
+    const orgName = orgDisplayName(org?.display_name, org?.legal_name);
     const label = orgName ?? e.title ?? relationshipLabel(e.relationship_slug);
     return {
       id: e.id,

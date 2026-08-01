@@ -35,7 +35,11 @@
     "errorSlug": "Verwenden Sie 3–50 Kleinbuchstaben, Ziffern oder Bindestriche.",
     "errorSlugTaken": "Diese öffentliche Adresse ist bereits vergeben.",
     "errorNotAuthorized": "Nur ein Eigentümer oder Manager kann dieses Unternehmen veröffentlichen.",
-    "errorGeneric": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "descriptionLabel": "Über das Unternehmen (auf der öffentlichen Seite sichtbar)",
+    "descriptionPlaceholder": "Was Sie tun, wo Sie arbeiten, was Kunden oder Arbeiter erwarten können…",
+    "descriptionHint": "Bis zu 2000 Zeichen. Dies ist der Haupttextblock Ihrer öffentlichen Seite.",
+    "errorDescription": "Veröffentlichung gespeichert, aber die Beschreibung konnte nicht gespeichert werden. Bitte erneut versuchen."
   },
   "marketplaceListings": {
     "pageTitle": "Marktplatz",

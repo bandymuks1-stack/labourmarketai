@@ -18,6 +18,8 @@
  *    not an assessment of the person (§19).
  */
 
+import { orgDisplayName } from "@/lib/company/org-display";
+
 /** The relationship slugs that count as WORK history — the ONE list every
  *  history surface filters by (W4: the card timeline used to skip this filter
  *  and showed manager/student/volunteer rows the CV and profile omit). */
@@ -81,7 +83,7 @@ export function deriveWorkHistory(
     // The org's own display name, then its legal name — never a fabricated
     // label, and never the id.
     organizationName:
-      nonEmpty(r.organizations?.display_name) ?? nonEmpty(r.organizations?.legal_name),
+      orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name),
     relationshipSlug: r.relationship_slug,
     startedAt: nonEmpty(r.started_at),
     endedAt: nonEmpty(r.ended_at),

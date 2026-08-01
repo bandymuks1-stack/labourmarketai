@@ -35,7 +35,11 @@
     "errorSlug": "Use 3–50 lowercase letters, numbers or hyphens.",
     "errorSlugTaken": "That public address is already taken.",
     "errorNotAuthorized": "Only an owner or manager can publish this business.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "descriptionLabel": "About the company (shown on the public page)",
+    "descriptionPlaceholder": "What you do, where you work, what a client or worker can expect…",
+    "descriptionHint": "Up to 2000 characters. This is the main text block on your public page.",
+    "errorDescription": "Publication saved, but the description could not be saved. Try again."
   },
   "marketplaceListings": {
     "pageTitle": "Marketplace",

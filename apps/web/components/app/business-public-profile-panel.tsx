@@ -7,6 +7,10 @@ import { Globe, ExternalLink } from "lucide-react";
 
 import { setBusinessPublicProfileAction } from "@/lib/company/public-profile";
 import {
+  saveOrganizationDescriptionAction,
+  ORG_DESCRIPTION_MAX,
+} from "@/lib/company/description-actions";
+import {
   isValidBusinessSlug,
   publicBusinessPath,
   type BusinessPublicSettings,
@@ -23,10 +27,12 @@ export function BusinessPublicProfilePanel({
   orgId,
   needsMigration,
   settings,
+  locale,
 }: {
   orgId: string;
   needsMigration: boolean;
   settings: BusinessPublicSettings | null;
+  locale: string;
 }) {
   const t = useTranslations("businessProfile");
   const router = useRouter();
@@ -34,6 +40,7 @@ export function BusinessPublicProfilePanel({
   const [enabled, setEnabled] = useState(settings?.enabled ?? false);
   const [slug, setSlug] = useState(settings?.slug ?? "");
   const [tagline, setTagline] = useState(settings?.tagline ?? "");
+  const [description, setDescription] = useState(settings?.description ?? "");
   const [email, setEmail] = useState(settings?.contactEmail ?? "");
   const [phone, setPhone] = useState(settings?.contactPhone ?? "");
   const [notice, setNotice] = useState<string | null>(null);
@@ -59,7 +66,18 @@ export function BusinessPublicProfilePanel({
         contactEmail: email || null,
         contactPhone: phone || null,
       });
-      if (res.kind === "ok") {
+      // ONE save button: the description travels with the same click.
+      // (Separate write path — owner's companies row + mirror trigger, see
+      // description-actions.ts; a description failure must not mask the
+      // publication result, so it degrades to its own notice.)
+      const descRes =
+        res.kind === "ok" && description !== (settings?.description ?? "")
+          ? await saveOrganizationDescriptionAction(description, locale)
+          : ({ kind: "ok" } as const);
+      if (res.kind === "ok" && descRes.kind !== "ok" && descRes.kind !== "no-company") {
+        setNotice(t("errorDescription"));
+        router.refresh();
+      } else if (res.kind === "ok") {
         setNotice(t("saved"));
         router.refresh();
       } else if (res.kind === "slug-taken") setNotice(t("errorSlugTaken"));
@@ -143,6 +161,23 @@ export function BusinessPublicProfilePanel({
               placeholder={t("taglinePlaceholder")}
               onChange={(e) => setTagline(e.target.value)}
             />
+          </label>
+
+          {/* W4: the public page's main content block finally gets its write
+              path — it rendered publicly but nothing in the product could
+              fill it. */}
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-text-secondary">{t("descriptionLabel")}</span>
+            <textarea
+              className={`${inputCls} min-h-24 resize-y`}
+              value={description}
+              maxLength={2000}
+              rows={4}
+              placeholder={t("descriptionPlaceholder")}
+              onChange={(e) => setDescription(e.target.value)}
+              data-testid="business-description-input"
+            />
+            <span className="text-xs text-text-muted">{t("descriptionHint")}</span>
           </label>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

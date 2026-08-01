@@ -53,6 +53,11 @@ export interface BusinessPublicSettings {
   readonly tagline: string | null;
   readonly contactEmail: string | null;
   readonly contactPhone: string | null;
+  /** organizations.description — the public page's main content block. W4:
+   *  it RENDERED publicly but had no write path anywhere in the product;
+   *  the panel now edits it (via the owner's legacy companies row + the
+   *  mirror trigger — the only non-admin write path into organizations). */
+  readonly description: string | null;
 }
 
 export interface BusinessPublishInput {
