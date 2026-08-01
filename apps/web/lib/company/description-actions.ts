@@ -17,8 +17,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-export const ORG_DESCRIPTION_MAX = 2000;
+import { ORG_DESCRIPTION_MAX } from "@/lib/company/org-display";
 
 export type SaveOrgDescriptionResult =
   | { kind: "ok" }

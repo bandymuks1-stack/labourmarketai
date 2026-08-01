@@ -161,7 +161,11 @@ describe("W4 Slice 3 — the description write path", () => {
   });
 
   it("is bounded and honest about ownership", () => {
-    expect(action).toMatch(/ORG_DESCRIPTION_MAX = 2000/);
+    // The bound lives beside the org helpers ("use server" files may export
+    // only async functions); the action imports and enforces it.
+    const helpers = read(join(WEB, "lib", "company", "org-display.ts"));
+    expect(helpers).toMatch(/ORG_DESCRIPTION_MAX = 2000/);
+    expect(action).toMatch(/ORG_DESCRIPTION_MAX/);
     expect(action).toMatch(/no-company/);
   });
 

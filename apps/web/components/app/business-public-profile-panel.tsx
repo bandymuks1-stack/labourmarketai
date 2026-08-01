@@ -6,10 +6,7 @@ import { useTranslations } from "next-intl";
 import { Globe, ExternalLink } from "lucide-react";
 
 import { setBusinessPublicProfileAction } from "@/lib/company/public-profile";
-import {
-  saveOrganizationDescriptionAction,
-  ORG_DESCRIPTION_MAX,
-} from "@/lib/company/description-actions";
+import { saveOrganizationDescriptionAction } from "@/lib/company/description-actions";
 import {
   isValidBusinessSlug,
   publicBusinessPath,

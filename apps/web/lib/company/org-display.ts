@@ -10,6 +10,10 @@
  * name" — callers render their own honest fallback (org type / relationship
  * label), NEVER an invented "Unknown company".
  */
+/** Bound for organizations.description ("use server" files may export only
+ *  async functions, so the constant lives here beside the org helpers). */
+export const ORG_DESCRIPTION_MAX = 2000;
+
 export function orgDisplayName(
   displayName: string | null | undefined,
   legalName: string | null | undefined,
