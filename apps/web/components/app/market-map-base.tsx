@@ -25,7 +25,10 @@ import {
   writeSelectedLocation,
   clearSelectedLocation,
 } from "@/lib/location/location-store";
-import { MarketMapLive } from "@/components/app/market-map-live";
+import {
+  MarketMapLive,
+  type MapIdentity,
+} from "@/components/app/market-map/location-map";
 import { resolveLocation, type LocationPrecision } from "@/lib/location/city-coordinates";
 import {
   canRetrySucceed,
@@ -70,21 +73,9 @@ const GEO_HINT_KEY: Record<GeoFailure, string> = {
  * "provider not configured" message. The choice persists on this device
  * (localStorage) and is one-tap updatable/removable. No DB, no env key.
  */
-/** The active identity for the map marker (real data only). `kind` keeps the
- *  marker honest to the active context — a company context never reuses the
- *  personal identity. When present, the map renders a premium identity pin at
- *  the chosen location instead of a plain dot. */
-export type MapIdentity = {
-  kind: "person" | "company";
-  name: string;
-  initial: string;
-  avatarUrl: string | null;
-  statusLabel?: string | null;
-  /** Real localized profession / lead-capability label (omit when unset). */
-  professionLabel?: string | null;
-  /** Real localized availability label (omit when unknown). */
-  availabilityLabel?: string | null;
-};
+/** The active identity for the map marker — the ONE definition lives with the
+ *  map module's location presentation (W3 row 28: no duplicated map types). */
+export type { MapIdentity };
 
 export function MarketMapBase({
   identity,

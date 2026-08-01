@@ -17,7 +17,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
 const PAGE = "app/[locale]/dashboard/market-map/page.tsx";
-const LIVE = "components/app/market-map-live.tsx";
+const LIVE = "components/app/market-map/location-map.tsx";
 const LEGEND = "components/app/map-layers-legend.tsx";
 
 describe("map page is map-first on mobile", () => {

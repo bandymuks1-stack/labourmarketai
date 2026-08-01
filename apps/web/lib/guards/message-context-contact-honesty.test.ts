@@ -78,7 +78,7 @@ describe("list page surfaces the honest origin", () => {
 describe("no stranger contact: CV / player card / map expose NO contact CTA", () => {
   const NO_CONTACT_SURFACES = [
     "components/app/worker-player-card.tsx",
-    "components/app/market-map-live.tsx",
+    "components/app/market-map/location-map.tsx",
     "components/app/market-map-base.tsx",
     "app/[locale]/dashboard/journal/page.tsx",
     "app/[locale]/dashboard/reports/evidence/page.tsx",

@@ -65,24 +65,26 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 17 | Module grid | `DashboardModuleGrid` | **OBSOLETE** | this IS the second dashboard's navigation | delete with the route |
 | 18 | "More" section | `DashboardMoreSection` | **OBSOLETE** | same | delete with the route |
 | 19 | Status strip | `DashboardStatusStrip` | **ALREADY** | the spine IS the bell; extra doors survive layout-level | **CONFIRMED 2026-08-01** — see the rows 19/14 audit |
-| 20 | Command finder | `CommandFinder` | CHAT | the conversation composer already is this | TODO — likely OBSOLETE |
+| 20 | Command finder | `CommandFinder` | **ALREADY** | the LAYOUT-mounted header-search overlay (every page) | **CONFIRMED 2026-08-01** — guard-pinned; the advanced inline mount dies with the route |
 | 21 | My zone | `MyZone` | **ALREADY / OBSOLETE** | readiness → the player-card result's work editor (richer 5-dim model); explainer dies with the route | **CONFIRMED 2026-08-01** — see the row 21 audit |
-| 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` exists | repoint |
-| 23 | Telemetry view | `TelemetryView` | DETAIL | admin surface | repoint |
+| 22 | Privacy status | `PrivacyStatusCard` | DETAIL | `/dashboard/privacy` owns the capability | **CONFIRMED 2026-08-01** — a 51-line status DOOR (read + link, no write; guard-pinned); dies with the route |
+| 23 | Telemetry view | `TelemetryView` | DETAIL | generic product-wide component | **CONFIRMED 2026-08-01** — the advanced mount is only that page's own view event; dies with it |
 | 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (gated `unverified`) | **BLOCKED** — missing data source documented 2026-08-01, see the row 24 note |
 | 25 | Demand intake section | inline, `demand-intake-section` | CHAT | the advanced host of row 7 | **RESOLVED 2026-08-01** — died with row 7's move; the advanced page carries no demand surface (guard-pinned) |
 | 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
-| 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE?** | preferences for a card grid that will not exist | decide during migration |
-| 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **OBSOLETE?** | the canonical `MarketMap` | TODO — see below |
+| 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE** | preferences FOR the advanced card grid | **DECIDED 2026-08-01** — removed together with the grid in Package 4 |
+| 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **COLLAPSED** | the ONE `leaflet-engine.ts` (three presentations) | **DONE 2026-08-01** — see the P3 section; guard + 3/3 ×2 browser proof |
 
 **Counts: 28 capabilities. 4 MIGRATED (rows 1, 4, 5, 6); rows 11/12, 16, 19,
 14, 21 CONFIRMED; rows 7/8/25 CONSOLIDATED (employer package); rows 2/3/9/10
-CONFIRMED 2026-08-01 (company package — 9/10 ALREADY via the spine, 2/3
-verified door-panels that die with the route). ZERO ABSORB rows remain
-except row 24, BLOCKED on data and transferred to W6 by owner ruling (does
-not block W3 closure). Remaining before the route deletion: Package 3 —
-rows 22/23 (DETAIL repoints), 20/27/28 (OBSOLETE decisions + the second
-MarketMap chain) — then Package 4 deletes `/dashboard/advanced`.**
+CONFIRMED (company package); rows 20/22/23/27 CONFIRMED and row 28 COLLAPSED
+2026-08-01 (Package 3 — one Leaflet engine, three presentations). EVERY row
+is now FULL / ALREADY / DETAIL / OBSOLETE-decided / CONSOLIDATED, except
+row 24 — BLOCKED on data and transferred to W6 by owner ruling (does not
+block W3 closure). Remaining: Package 4 — delete `/dashboard/advanced` (+
+grid card-prefs, surface-registry + route-truth-map in the SAME commit, the
+3 allowlisted hrefs, dead guards/nav), full W3 proof, production-prove, mark
+W3 COMPLETE.**
 
 ## Row 4 — DONE, and what it proved about the method
 
@@ -250,7 +252,7 @@ Job → Calendar → Journal → Skill evidence → Profile update → Return to
 | 16 | Identity actions | Profile update | **DONE** — CONFIRMED `ALREADY` 2026-08-01, per-role browser pass |
 | 19 | Status strip | Return to chat (active context) | **DONE** — CONFIRMED `ALREADY` 2026-08-01 |
 | 14 | Chain actions | Return to chat | **DONE** — CONFIRMED `ALREADY` 2026-08-01; stale advanced door fixed |
-| 28 | Second Leaflet chain | (cross-cutting) map collapse | TODO |
+| 28 | Second Leaflet chain | (cross-cutting) map collapse | **COLLAPSED 2026-08-01** |
 
 **P1 — EMPLOYER JOURNEY**: rows 7, 8, 25 (demand create / readback / intake).
 **P2 — COMPANY JOURNEY**: rows 2, 9, 10 (organization card, service and
@@ -562,18 +564,35 @@ Audited 2026-08-01 (parallel planning during the Package 2 window):
 - **Row 27 (card preferences)** — preferences FOR the advanced card grid;
   dies with the grid in Package 4. `server prefs` reads/writes stay unused
   after deletion → remove in the same commit as the grid.
-- **Row 28 (second Leaflet chain) — the ONE real implementation slice left.**
-  `/dashboard/market-map` renders `MarketMapShell` + `MarketMapBase` →
-  `market-map-live.tsx` (295 lines, a second Leaflet engine with a location
-  PICKER + signal-capture write path), plus REAL unique capabilities that
-  must survive: preferred-locations / demand-locations capture,
-  `MarketMapOwnerReadiness`, `MarketMapEntityLayers`, `MapLayersLegend`. The
-  canonical engine (`components/app/market-map/market-map.tsx`) is consumed
-  by the panel drill-down + the marketing hero. The collapse: the route's
-  map rendering moves onto the canonical engine (or the canonical engine
-  gains the picker mode), base/live chain deleted, capture writes proven in
-  the browser. NOT bundled into Package 2 — it needs its own preservation
-  map of `market-map-live`'s picker API before any edit.
+- **Row 28 (second Leaflet chain) — COLLAPSED 2026-08-01.** The audit found
+  THREE Leaflet bootstraps (canonical `market-map/market-map.tsx` ·
+  `market-map-live.tsx` picker · `world-state/workspace-map.tsx`), with
+  drifted tile options (maxZoom 12/18/19) and a duplicated `MapIdentity`
+  type. The collapse: ONE engine —
+  `components/app/market-map/leaflet-engine.ts` (single dynamic import,
+  single OSM tile URL, single attribution) — booted by all three
+  presentations; `market-map-live.tsx` MOVED into the module as
+  `market-map/location-map.tsx` (identical picker capability: geolocation,
+  manual fallback, F12 safe-edit preview, radius, identity pin,
+  suppressOwnMarker — nothing dropped, no new architecture, no new provider,
+  no new route); `market-map-base.tsx` re-exports the ONE `MapIdentity`.
+  Guard `w3-row28-one-leaflet-engine.test.ts`: the tile URL exists in
+  exactly one source file repo-wide, presentations must boot via
+  `mountLeafletMap`, a fourth bootstrap cannot appear silently.
+  Browser proof `w3-row28-map-collapse.spec.ts` (3/3 ×2 runs): the route
+  renders the engine-booted picker with a real tile pane, the manual
+  country save round-trips with the honest precision label, the market
+  RESULT still renders the canonical presentation in the panel, 375px clean.
+  The deeper capture write path was ALSO proven once through the collapsed
+  chain (`market-map-capture-authenticated.spec.ts` preferred-location
+  create→disable passed post-collapse).
+  **Honest debt recorded, not hidden**: the pre-existing
+  capture/readiness authenticated specs were RED ON MAIN before this slice
+  (baselined at `37ce8245`: 7/7 fail — PR #921 folded their surface into a
+  collapsed `<details>` and their assumed fixture state has drifted). This
+  slice repaired the fold navigation (3 recovered) and filed the
+  deterministic-state repair as its own task; those failures are harness
+  debt, not a row 28 regression.
 
 ## Row 21 — MYZONE: the audit and the confirmation
 

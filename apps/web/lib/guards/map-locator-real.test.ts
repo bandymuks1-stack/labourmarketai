@@ -20,19 +20,24 @@ import {
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const comp = read("components/app/market-map-base.tsx");
-const live = read("components/app/market-map-live.tsx");
+const live = read("components/app/market-map/location-map.tsx");
 const env = read("lib/env.ts");
 
 describe("real provider map, no paid/secret provider", () => {
-  it("the live map uses OpenStreetMap tiles via Leaflet (free, no key)", () => {
+  // W3 row 28: the tile source + attribution live in the ONE Leaflet engine
+  // the presentation boots through (`w3-row28-one-leaflet-engine.test.ts`
+  // pins the single-source property repo-wide).
+  const engine = read("components/app/market-map/leaflet-engine.ts");
+  it("the live map uses OpenStreetMap tiles via the ONE Leaflet engine (free, no key)", () => {
     expect(live).toMatch(/from "leaflet"/);
-    expect(live).toMatch(/tile\.openstreetmap\.org/);
-    expect(live).toMatch(/L\.tileLayer/);
+    expect(live).toMatch(/mountLeafletMap\(/);
+    expect(engine).toMatch(/tile\.openstreetmap\.org/);
+    expect(engine).toMatch(/tileLayer\(/);
   });
   it("shows the required OpenStreetMap attribution", () => {
-    expect(live).toMatch(/attribution/);
-    expect(live).toMatch(/OpenStreetMap/);
-    expect(live).toMatch(/openstreetmap\.org\/copyright/);
+    expect(engine).toMatch(/attribution/);
+    expect(engine).toMatch(/OpenStreetMap/);
+    expect(engine).toMatch(/openstreetmap\.org\/copyright/);
   });
   it("no Google Maps loader / key anywhere", () => {
     expect(existsSync(join(ROOT, "lib/maps/google-maps-loader.ts"))).toBe(false);
