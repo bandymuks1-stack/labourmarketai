@@ -238,7 +238,10 @@ export function VoiceJournalRecorder({
       return;
     }
     setHandedOff(true);
-    router.push("/dashboard/journal#journal-composer");
+    // W5 slice 2: hand off to the CHAT — the one canonical intake since the
+    // chat-first change (the journal page's create-mode composer no longer
+    // mounts, so the old composer-anchor target silently ate the draft).
+    router.push("/dashboard");
   }
 
   const minutes = String(Math.floor(elapsedS / 60)).padStart(2, "0");

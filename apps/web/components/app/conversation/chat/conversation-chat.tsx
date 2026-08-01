@@ -24,6 +24,7 @@ import { baseIdentityForRole } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import { classifyIntent } from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
+import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
@@ -751,6 +752,34 @@ export function ConversationChat({
     },
     [assistant, pushEmbed, locale, workLogLabels, labels.clarifyWorkLog, labels.playerCardAfterLog],
   );
+
+  /**
+   * Voice hand-off (W5 slice 2). The voice surface stores the worker-REVIEWED
+   * transcript under a read-once sessionStorage key. Chat-first intake means
+   * the CHAT consumes it: the transcript appears as the worker's own visible
+   * turn, then the SAME deterministic work-log flow runs on it (preview +
+   * explicit confirm + createJournalEntry — no second write path). An unclear
+   * transcript gets the one clarify question and the text stays on screen.
+   */
+  const voiceDraftConsumedRef = useRef(false);
+  useEffect(() => {
+    if (voiceDraftConsumedRef.current) return;
+    if (!auth?.profile || identity !== "person") return;
+    let draft: string | null = null;
+    try {
+      draft = window.sessionStorage.getItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+      if (draft !== null) {
+        window.sessionStorage.removeItem(VOICE_TRANSCRIPT_DRAFT_KEY);
+      }
+    } catch {
+      draft = null;
+    }
+    const text = (draft ?? "").trim();
+    if (!text) return;
+    voiceDraftConsumedRef.current = true;
+    user(text);
+    startWorkLog(text);
+  }, [auth?.profile, identity, user, startWorkLog]);
 
   /**
    * The ONE work-context readback (Context Intelligence, rebuild phase 3):

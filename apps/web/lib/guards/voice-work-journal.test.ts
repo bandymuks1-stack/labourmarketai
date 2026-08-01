@@ -21,6 +21,7 @@ const ACTION = "lib/voice/transcribe-action.ts";
 const CONSTANTS = "lib/voice/constants.ts";
 const PAGE = "app/[locale]/dashboard/journal/voice/page.tsx";
 const COMPOSER = "components/app/journal-entry-composer.tsx";
+const CHAT = "components/app/conversation/chat/conversation-chat.tsx";
 
 describe("voice env stays server-only", () => {
   it("no NEXT_PUBLIC voice variable exists anywhere in lib/env.ts", () => {
@@ -119,11 +120,29 @@ describe("one canonical journal — voice adds NO second write path", () => {
     expect(src).not.toMatch(/\.rpc\(/);
   });
 
-  it("hand-off goes through the read-once composer key into the ONE composer", () => {
+  it("hand-off goes through the read-once key into the CHAT — the one intake (W5 slice 2)", () => {
     expect(read(CONSTANTS)).toMatch(/VOICE_TRANSCRIPT_DRAFT_KEY/);
+    // The chat consumes the transcript and runs the SAME deterministic
+    // work-log flow (startWorkLog → explicit confirm → createJournalEntry).
+    const chat = read(CHAT);
+    expect(chat).toMatch(/VOICE_TRANSCRIPT_DRAFT_KEY/);
+    expect(chat).toMatch(/removeItem\(VOICE_TRANSCRIPT_DRAFT_KEY\)/);
+    expect(chat).toMatch(/startWorkLog\(text\)/);
+    // The recorder targets the chat workspace, never the journal page's
+    // composer anchor — since chat-first intake that composer mounts only in
+    // edit mode, so the old target silently swallowed the transcript.
+    const recorder = read(RECORDER);
+    expect(recorder).toMatch(/router\.push\("\/dashboard"\)/);
+    expect(recorder).not.toMatch(/#journal-composer/);
+    // The composer's dead consumer stays deleted.
     const composer = read(COMPOSER);
-    expect(composer).toMatch(/VOICE_TRANSCRIPT_DRAFT_KEY/);
-    expect(composer).toMatch(/removeItem\(VOICE_TRANSCRIPT_DRAFT_KEY\)/);
+    expect(composer).not.toMatch(/VOICE_TRANSCRIPT_DRAFT_KEY/);
+  });
+
+  it("the voice surface has a real door from the journal page", () => {
+    const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
+    expect(journalPage).toMatch(/journal-log-via-voice-cta/);
+    expect(journalPage).toMatch(/\/dashboard\/journal\/voice/);
   });
 
   it("the voice route nests under the journal (no new top-level module)", () => {
