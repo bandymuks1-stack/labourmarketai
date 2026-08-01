@@ -113,7 +113,8 @@ export async function ProfileHubOverview({
     },
     // Availability pillar (PR9): matching's availability tier is honest —
     // unknown is missing data, never an assumed yes. The tap target is the
-    // ONE canonical Work Card editor on the dashboard.
+    // ONE canonical Work Card editor — it lives inside the player-card result
+    // since W3 (the #work-card anchor died with /dashboard/advanced).
     ...(hasWorker && availability
       ? [
           {
@@ -123,7 +124,7 @@ export async function ProfileHubOverview({
               ? t("pillars.availability.yes")
               : t("pillars.availability.no"),
             ok: availability.set,
-            href: "/dashboard#work-card",
+            href: "/dashboard?result=player-card",
           },
         ]
       : []),

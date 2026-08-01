@@ -350,7 +350,6 @@ test.describe("navigation discovery", () => {
   /** Every route the brief's matrix names, plus the role-restricted ones. */
   const ROUTES = [
     "/lt/dashboard",
-    "/lt/dashboard/advanced",
     "/lt/dashboard/communication",
     "/lt/dashboard/planning",
     "/lt/dashboard/market-map",
@@ -428,7 +427,9 @@ test.describe("navigation discovery", () => {
     expect(simple.calendar, "Calendar is persistent in the chat shell").toBeGreaterThan(0);
     await shot(page, "messages-calendar-ownership-simple", "light", "desktop");
 
-    await page.goto("/lt/dashboard/advanced", { waitUntil: "domcontentloaded" });
+    // A surviving full-chrome module route (the advanced dashboard itself was
+    // deleted by W3 Package 4).
+    await page.goto("/lt/dashboard/bookings", { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
     const advanced = await page.evaluate(() => ({
       tabs: [...document.querySelectorAll('[data-testid^="dashboard-tab-"]')].map(
@@ -496,11 +497,13 @@ test.describe("navigation discovery", () => {
   });
 
   test("command search reaches a destination that has no persistent tab", async ({ page }) => {
-    await page.goto("/lt/dashboard/advanced", { waitUntil: "domcontentloaded" });
+    // A surviving full-chrome route hosts the header search (W3 Package 4
+    // deleted the advanced landing this test once used).
+    await page.goto("/lt/dashboard/bookings", { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
-    // The Advanced landing is the heaviest page in the app; a click that lands
-    // before React attaches listeners is silently dropped. Retry until the
-    // dialog actually opens rather than asserting on the first attempt.
+    // A click that lands before React attaches listeners is silently dropped.
+    // Retry until the dialog actually opens rather than asserting on the
+    // first attempt.
     const dialog = page.getByTestId("header-search-dialog");
     await expect
       .poll(

@@ -447,11 +447,6 @@ describe("7. registered everywhere a module must be", () => {
     expect(SPINE_SIGNALS.some((s) => s.id.includes("finance"))).toBe(false);
   });
 
-  it("the grid icon map carries the coins icon", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/coins: Coins/);
-  });
-
   it("primary-route smoke inventory carries /dashboard/finance", () => {
     const entry = PRIMARY_ROUTES.find(
       (r) => r.urlPattern === "/dashboard/finance",

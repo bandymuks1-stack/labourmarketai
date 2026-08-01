@@ -8,8 +8,9 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
  *
  * The logged-in navigation must follow the human, action-first logic
  * (Mano erdvė / Žemėlapis / Darbo žurnalas / Žinutės), settings live in the
- * avatar menu, every surface stays reachable, and the dashboard keeps no
- * duplicate doors / card wall.
+ * avatar menu, and every surface stays reachable. (The card-wall pins that
+ * watched the second dashboard retired with it — W3 Package 4 deleted the
+ * page itself.)
  */
 
 const root = join(__dirname, "..", "..");
@@ -18,7 +19,6 @@ const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 const tabs = (j: Record<string, unknown>) =>
   ((j.auth as { dashboard: { tabs: Record<string, string> } }).dashboard).tabs;
-const DASH = "app/[locale]/dashboard/advanced/page.tsx";
 
 describe("primary nav uses human, action-first labels (not module words)", () => {
   it("LT primary tabs read as erdvė / žemėlapis / darbo žurnalas / žinutės", () => {
@@ -73,11 +73,11 @@ describe("compact action-first global nav + sub-surface reachability", () => {
     );
   });
 
-  it("profile stays reachable as a sub-surface (account page / overview actions)", () => {
+  it("profile stays reachable as a sub-surface (account page)", () => {
+    // IdentityActions died with the second dashboard (W3 Package 4); the
+    // account page keeps the profile door.
     const account = read("app/[locale]/dashboard/account/page.tsx");
     expect(account).toMatch(/\/dashboard\/profile/);
-    const identity = read("components/app/identity-actions.tsx");
-    expect(identity).toMatch(/\/dashboard\/profile/);
   });
 
   it("account/settings stays reachable via the avatar account menu", () => {
@@ -86,26 +86,14 @@ describe("compact action-first global nav + sub-surface reachability", () => {
   });
 });
 
-describe("worker dashboard has no duplicate doors / card wall", () => {
-  const page = read(DASH);
-  it("removed the bottom 'other spaces' account handle (duplicate doorway)", () => {
-    expect(page).not.toMatch(/my-space-account-handle/);
-  });
-  it("removed the profile/journal duplicate cards (the nav tabs own those doors)", () => {
-    expect(page).not.toMatch(/tMy\("activities|tMy\("proofCard|mySpace\.activities/);
-  });
-  it("still surfaces the worker's folded next action + current-space header (identity preserved)", () => {
-    // WorkCard was removed (dedup v1); the worker identity/card area is the hub
-    // person block, which carries the folded next action + inline editor.
-    // W3 row 1: the editor left this page with the person card and lives in
-    // the `player-card` result. Both halves pinned.
-    expect(page).not.toMatch(/workEditor/);
+describe("the work-card editor keeps its canonical home", () => {
+  // The duplicate-door / card-wall pins targeted the second dashboard's
+  // page, which W3 Package 4 deleted outright — the strongest form of
+  // duplicate removal. The surviving half of that contract: the work-card
+  // editor lives in the player-card result.
+  it("the player-card result carries the work-card editor", () => {
     expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
       /<WorkCardEditor/,
     );
-    expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-  });
-  it("keeps the page free of inline primary gradient CTAs (the one CTA is the work card's)", () => {
-    expect(page).not.toMatch(/from-brand-blue to-brand-cyan/);
   });
 });

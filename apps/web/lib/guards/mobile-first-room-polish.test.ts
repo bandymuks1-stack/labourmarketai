@@ -12,18 +12,9 @@ import { join } from "node:path";
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
-describe("the overview no longer crams a journey stepper on mobile", () => {
-  const page = read("app/[locale]/dashboard/advanced/page.tsx");
-  // dashboard-active-role-overview-v1: the heavy stage-rail was removed so the
-  // first screen leads with one clear next action, not a desktop stepper.
-  it("the compressed journey rail is gone", () => {
-    expect(page).not.toMatch(/data-testid="journey-current-step"/);
-    expect(page).not.toMatch(/<nav aria-label=\{label\}/);
-  });
-  it("the room still reads as one focused space (current-space header kept)", () => {
-    expect(page).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-  });
-});
+// The overview room (/dashboard/advanced) and its journey rail / current-space
+// header were deleted whole by W3 Package 4 — that mobile posture no longer
+// needs a pin. What survives of the slice is below.
 
 describe("room primary action is a full-width tap target on mobile", () => {
   it("pilot CTA is w-full on mobile, compact at sm+", () => {
@@ -33,16 +24,12 @@ describe("room primary action is a full-width tap target on mobile", () => {
 });
 
 describe("no broad redesign / no logic change", () => {
-  it("the worker entry keeps its folded next action and the org entry its next action", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    // WorkCard was removed (dedup v1); the worker's state-aware next action +
-    // inline editor now live in the hub person block via workEditor.
-    // W3 row 1: the editor left this page with the person card and lives in
-    // the `player-card` result. Both halves pinned.
-    expect(page).not.toMatch(/workEditor/);
+  it("the worker keeps the inline work-card editor in its canonical home", () => {
+    // WorkCard was removed (dedup v1); W3 row 1 moved the state-aware editor
+    // into the workspace `player-card` result — its one home after W3
+    // Package 4 deleted the second dashboard.
     expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
       /<WorkCardEditor/,
     );
-    expect(page).toMatch(/<DashboardNextAction\b/);
   });
 });

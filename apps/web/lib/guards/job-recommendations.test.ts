@@ -224,16 +224,12 @@ describe("shown model — rendering a recommendation IS the read event", () => {
   /**
    * W3 row 5 — the capability MOVED, and this is the pin that says so.
    *
-   * The old assertion was "the second dashboard mounts the card". Deleting a
-   * capability would also satisfy a deleted assertion, so the replacement is
-   * deliberately two-sided: the card is gone from `/dashboard/advanced` AND
-   * the result surface renders it. One without the other is a regression.
+   * The old assertion was "the second dashboard mounts the card". W3
+   * Package 4 then deleted `/dashboard/advanced` outright (the deletion
+   * ratchet owns that absence), so the surviving half of the pin is the one
+   * that matters: the result surface renders the recommendations.
    */
-  it("the recommendation surface lives in the result panel, not on /dashboard/advanced", () => {
-    const overview = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(overview).not.toMatch(/<JobRecommendationsCard/);
-    expect(overview).not.toMatch(/job-recommendations-card/);
-
+  it("the recommendation surface lives in the workspace result panel", () => {
     const body = read("components/app/workspace/result-body.tsx");
     expect(body).toMatch(/case "opportunities":/);
     expect(body).toMatch(/<OpportunitiesResult/);

@@ -9,8 +9,11 @@ import { DASHBOARD_MODULES, getModuleRoute } from "@/lib/dashboard/dashboard-mod
  * Role Value-to-Action Alignment v1 guard (Wave 5, owner-approved).
  *
  * Every changed value statement must sit next to a REAL action and promise
- * no more than the product does. This guard pins the six VALUE-IDs of the
- * wave (register: docs/audit/role-value-to-action-register-v1.csv):
+ * no more than the product does. This guard pins the wave's VALUE-IDs
+ * (register: docs/audit/role-value-to-action-register-v1.csv). The three
+ * worker statements carried by the MyZone control room left with the second
+ * dashboard — W3 Package 4 deleted /dashboard/advanced — so the surviving
+ * IDs are pinned here:
  *
  *  - the statements resolve in every ACTIVE locale;
  *  - no banned technical vocabulary or unsupported guarantee appears in
@@ -34,9 +37,6 @@ const resolve = (msgs: unknown, path: string): unknown =>
 
 /** The wave's changed statements — one entry per VALUE-ID. */
 const VALUE_KEYS: readonly { id: string; key: string }[] = [
-  { id: "VALUE-WORKER-PROFILE-001", key: "auth.dashboard.myZone.missing.profession.hint" },
-  { id: "VALUE-WORKER-JOURNAL-001", key: "auth.dashboard.myZone.missing.firstEntry.hint" },
-  { id: "VALUE-WORKER-JOURNAL-002", key: "auth.dashboard.myZone.actions.recordWork.desc" },
   { id: "VALUE-PROVIDER-SERVICES-001", key: "marketplace.hubOfferNote" },
   { id: "VALUE-COMPANY-NEED-001", key: "auth.dashboard.wow.demand.hire.body" },
   { id: "VALUE-ALL-PLANNING-001", key: "features.planning.description" },
@@ -71,20 +71,9 @@ describe("changed value statements resolve honestly in every active locale", () 
 });
 
 describe("each value line sits next to its REAL action", () => {
-  it("the journal value line is attached to the real journal composer action", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    // MyZone's firstEntry missing-item deep-links the composer — the promise
-    // and the action share one surface.
-    expect(page).toContain('href: "/dashboard/journal#journal-composer"');
-    expect(
-      existsSync(join(ROOT, "app", "[locale]", "dashboard", "journal", "page.tsx")),
-    ).toBe(true);
-  });
-
-  it("the profile value line is attached to the real profile edit action", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).toContain('href: "/dashboard/profile#profile-edit"');
-  });
+  // The journal / profile MyZone value lines died with their statements
+  // (W3 Package 4) — no surface renders them, so there is nothing left to
+  // sit next to an action.
 
   it("the services value line describes the module whose route really exists", () => {
     const services = DASHBOARD_MODULES.find((m) => m.id === "services");

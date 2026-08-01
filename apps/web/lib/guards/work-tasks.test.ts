@@ -298,11 +298,8 @@ describe("6. registered everywhere a module must be", () => {
     expect(m.iconKey).toBe("checklist");
   });
 
-  it("the grid icon map carries the checklist icon", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/checklist: ListChecks/);
-  });
-
+  // The grid icon-map pin died with the module grid (W3 Package 4 deleted
+  // the second dashboard); the registry's iconKey stays pinned above.
   it("primary-route smoke inventory carries /dashboard/tasks", () => {
     const entry = PRIMARY_ROUTES.find((r) => r.urlPattern === "/dashboard/tasks");
     expect(entry).toBeTruthy();

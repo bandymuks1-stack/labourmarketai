@@ -7,7 +7,6 @@ import {
   getDashboardModule,
   getModuleRoute,
 } from "@/lib/dashboard/dashboard-module-registry";
-import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-model";
 import { COMMAND_REGISTRY } from "@/lib/navigation/command-registry";
 import {
   OPS_BOARD_ANCHOR,
@@ -25,7 +24,6 @@ import {
 } from "@/lib/projects/operations-centre-model";
 import type { ReadinessItem, WorkerOps } from "@/lib/projects/operations-derive";
 import type { WorkTask } from "@/lib/tasks/task-model";
-import type { SpineCounts } from "@/lib/notifications/spine-signals";
 import { PRIMARY_ROUTES } from "./primary-route-smoke";
 import { activeLocales } from "@/lib/i18n/config";
 
@@ -469,17 +467,6 @@ describe("6. the page keeps the board AND renders the composed sections honestly
 });
 
 describe("7. registered everywhere a module must be", () => {
-  const ZERO: SpineCounts = {
-    unreadConversations: 0,
-    pendingIncomingServiceRequests: 0,
-    serviceRequestResponsesNew: 0,
-    pendingIncomingBookings: 0,
-    bookingResponsesNew: 0,
-    pendingInvitations: 0,
-    openTaskAttention: 0,
-    newJobMatches: 0,
-  };
-
   it("module registry: projects → /dashboard/projects, grid+command, ORG roles, briefcase icon", () => {
     const m = getDashboardModule("projects");
     expect(getModuleRoute("projects")).toBe("/dashboard/projects");
@@ -496,15 +483,9 @@ describe("7. registered everywhere a module must be", () => {
     expect(m.descriptionKey).toBe("projects.intro");
   });
 
-  it("org grids carry the projects module; worker/customer grids do not", () => {
-    const grid = (role: "worker" | "company" | "agency" | "customer") =>
-      buildControlRoomViewModel({ role, counts: ZERO, hasCompany: role !== "worker" })
-        .modules.map((m) => m.id);
-    expect(grid("company")).toContain("projects");
-    expect(grid("agency")).toContain("projects");
-    expect(grid("worker")).not.toContain("projects");
-    expect(grid("customer")).not.toContain("projects");
-  });
+  // The per-role grid projection and its icon-map pin left with the control
+  // room itself — W3 Package 4 deleted the second dashboard that rendered
+  // them; the module's ORG-only role set stays pinned at the registry above.
 
   it("primary-route smoke inventory carries /dashboard/projects (id-routes stay excluded)", () => {
     const entry = PRIMARY_ROUTES.find(
@@ -527,11 +508,6 @@ describe("7. registered everywhere a module must be", () => {
         expect(entry!.labels[loc]?.trim().length, `${id} label ${loc}`).toBeGreaterThan(0);
       }
     }
-  });
-
-  it("the grid icon map carries the briefcase icon", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/briefcase: Briefcase/);
   });
 
   it("exactly one module owns each surface route (no duplicate doors)", () => {

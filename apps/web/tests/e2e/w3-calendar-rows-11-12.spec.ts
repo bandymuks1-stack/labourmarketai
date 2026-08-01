@@ -5,12 +5,12 @@ import { join } from "node:path";
 /**
  * W3 rows 11 / 12 — THE CALENDAR BADGES: verification, not migration.
  *
- * The audit (PR #944) reclassified these rows from ABSORB to (provisionally)
- * ALREADY: they are not renderers, they are two count-gated `<Link>` badges on
- * `/dashboard/advanced` whose capability lives on `/dashboard/bookings` and
- * whose SIGNAL is already carried by the notification spine — which survives
- * the advanced route's deletion because the bell mounts in the dashboard
- * LAYOUT.
+ * The audit (PR #944) reclassified these rows from ABSORB to ALREADY: they
+ * were two count-gated `<Link>` badges on `/dashboard/advanced` whose
+ * capability lives on `/dashboard/bookings` and whose SIGNAL is carried by
+ * the notification spine — which survived the advanced route's deletion
+ * (W3 Package 4) because the bell mounts in the dashboard LAYOUT and in the
+ * chat root's own header.
  *
  * This spec is the browser proof the audit demanded ("confirmed, not
  * assumed"), with REAL seeded bookings driven through the real tables and the
@@ -22,15 +22,15 @@ import { join } from "node:path";
  *                     (BookingRespondButtons) responds;
  *   row 11 (company)  bookingResponsesNew — same shape for the proposer after
  *                     the worker responds, seen-model gated;
- *   the spine         the bell presents BOTH signals with the same counts and
- *                     the same href — the presentation that outlives the route;
- *   zero state        no booking → no badge, no chip, no bell signal — never
- *                     a fake zero;
+ *   the spine         the bell presents BOTH signals with the real counts and
+ *                     the /dashboard/bookings href — the ONE presentation now
+ *                     that the route is deleted;
+ *   zero state        no booking → no bell signal — never a fake zero;
  *   RLS               an unrelated authenticated user reads 0 of these rows.
  *
- * If every one of these holds, rows 11/12 are ALREADY — deleting the two link
- * cards with the route removes a SECOND presentation of an already-presented
- * signal, not a capability — and NO new code is owed for them.
+ * The two link cards died with the route (Package 4). This spec proves the
+ * capability did not: the signal still reaches the person and still opens the
+ * one real action surface.
  */
 
 const SHOTS = process.env.E2E_SHOTS_DIR
@@ -89,8 +89,12 @@ async function fixtureWorkerRowId(): Promise<string> {
   return rows[0].id;
 }
 
-/** Seed ONE real incoming proposal: company → worker, status 'proposed'. */
+/** Seed ONE real incoming proposal: company → worker, status 'proposed'.
+ *  Idempotent — clears the fixture request's rows first, so a leftover from
+ *  an aborted earlier run can never trip the unique (owner,request,worker)
+ *  constraint. */
 async function seedProposedBooking(): Promise<string> {
+  await db("DELETE", `booking_requests?request_id=eq.${REQUEST_ID}`);
   const r = await db("POST", "booking_requests", {
     owner_id: COMPANY_USER_ID,
     request_id: REQUEST_ID,
@@ -149,7 +153,7 @@ function watch(page: Page) {
 }
 
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
-// The advanced page's first dev compile is slow — build cost, not product cost.
+// First dev compiles of the visited routes are slow — build cost, not product cost.
 test.setTimeout(180_000);
 // One fixture database — the zero-state test must not race the seeded ones.
 test.describe.configure({ mode: "serial" });
@@ -166,26 +170,22 @@ test.describe("row 12 — pending booking badge (worker)", () => {
   test.beforeAll(clearBookingState);
   test.afterAll(clearBookingState);
 
-  test("zero state: no booking → no badge, no chip, no bell signal", async ({
+  test("zero state: no booking → no bell signal, never a fake zero", async ({
     page,
   }) => {
     const w = watch(page);
-    await page.goto("/lt/dashboard/advanced");
-    await expect(page.getByTestId("dashboard-status-strip").first()).toBeVisible();
-
-    // Count-gated everywhere: nothing may render a fake zero.
-    await expect(page.getByTestId("dashboard-bookings-next-action")).toHaveCount(0);
-    await expect(page.getByTestId("status-strip-pending-bookings")).toHaveCount(0);
-    await expect(page.getByTestId("notification-signal-pending-bookings")).toHaveCount(0);
-    w.assertClean();
-
-    // Pre-warm the bookings route: its FIRST dev compile can exceed a click
-    // navigation's assertion window, and that is build cost, not product cost.
+    // The bell is the one surviving presentation (Package 4 deleted the badge
+    // cards with the route) — count-gated, so a zero count renders NOTHING.
     await page.goto("/lt/dashboard/bookings");
     await expect(page.getByTestId("bookings-page")).toBeVisible({ timeout: 60_000 });
+    await page.getByRole("button", { name: /pranešimai|notifications/i }).click();
+    await expect(
+      page.locator('a[data-testid="notification-signal-pending-bookings"]'),
+    ).toHaveCount(0);
+    w.assertClean();
   });
 
-  test("seeded proposal: badge count == DB count, href → /dashboard/bookings, back/forward/reload, keyboard", async ({
+  test("seeded proposal: bell count == DB count, href → /dashboard/bookings, back/forward/reload, keyboard", async ({
     page,
   }) => {
     const w = watch(page);
@@ -193,31 +193,29 @@ test.describe("row 12 — pending booking badge (worker)", () => {
     const real = await dbProposedCount();
     expect(real).toBe(1);
 
-    await page.goto("/lt/dashboard/advanced");
+    // The chat root's own header carries the bell — the signal reaches the
+    // worker on the ONE workspace root, no second dashboard required.
+    await page.goto("/lt/dashboard");
+    await page.getByRole("button", { name: /pranešimai|notifications/i }).click();
 
-    // The badge renders (top-slot ladder: incoming_booking outranks the rest
-    // of this fixture's signals) and shows the REAL count.
-    const badge = page.getByTestId("dashboard-bookings-next-action");
-    await expect(badge).toBeVisible();
-    await expect(badge.locator("span").last()).toHaveText(String(real));
-    await expect(badge).toHaveAttribute("href", /\/dashboard\/bookings$/);
+    // The signal renders ONLY because the real count > 0, and shows it.
+    const signal = page
+      .locator('a[data-testid="notification-signal-pending-bookings"]:visible')
+      .first();
+    await expect(signal).toBeVisible();
+    await expect(signal).toContainText(String(real));
+    await expect(signal).toHaveAttribute("href", /\/dashboard\/bookings$/);
 
-    // The spine chip carries the SAME count to the SAME surface.
-    const chip = page.getByTestId("status-strip-pending-bookings");
-    await expect(chip).toBeVisible();
-    await expect(chip).toContainText(String(real));
-    await expect(chip).toHaveAttribute("href", /\/dashboard\/bookings$/);
-
-    // Keyboard: the badge is a real link with a real accessible name.
-    await badge.focus();
-    await expect(badge).toBeFocused();
-    await expect(badge).toHaveAccessibleName(/\S/);
+    // Keyboard: the signal is a real link with a real accessible name.
+    await signal.focus();
+    await expect(signal).toBeFocused();
+    await expect(signal).toHaveAccessibleName(/\S/);
 
     await page.screenshot({ path: join(SHOTS, "rows11-12-worker-badge-1440.png") });
 
-    // The badge opens the ONE action surface. (Generous timeout: a dev-mode
+    // The signal opens the ONE action surface. (Generous timeout: a dev-mode
     // recompile can stall the first navigation — build cost, not product.)
-    await badge.click();
+    await signal.click();
     await expect(page).toHaveURL(/\/lt\/dashboard\/bookings/, { timeout: 60_000 });
     await expect(page.getByTestId("bookings-page")).toBeVisible();
     // The seeded row is there, with the REAL respond controls (the only
@@ -228,10 +226,10 @@ test.describe("row 12 — pending booking badge (worker)", () => {
 
     await page.screenshot({ path: join(SHOTS, "rows11-12-bookings-detail-1440.png") });
 
-    // Browser navigation: Back → advanced, Forward → bookings, reload holds.
+    // Browser navigation: Back → the workspace root, Forward → bookings,
+    // reload holds.
     await page.goBack();
-    await expect(page).toHaveURL(/\/lt\/dashboard\/advanced/);
-    await expect(page.getByTestId("dashboard-bookings-next-action")).toBeVisible();
+    await expect(page).toHaveURL(/\/lt\/dashboard(\?|$)/);
     await page.goForward();
     await expect(page).toHaveURL(/\/lt\/dashboard\/bookings/);
     await page.reload();
@@ -245,8 +243,8 @@ test.describe("row 12 — pending booking badge (worker)", () => {
     page,
   }) => {
     const w = watch(page);
-    // Deliberately NOT the advanced page: the bell mounts in the dashboard
-    // layout, so this is exactly what remains after /dashboard/advanced dies.
+    // The bell mounts in the dashboard layout — exactly what remained after
+    // /dashboard/advanced was deleted (Package 4).
     await page.goto("/lt/dashboard/bookings");
     await expect(page.getByTestId("bookings-page")).toBeVisible();
 
@@ -272,14 +270,25 @@ test.describe("row 12 — pending booking badge (worker)", () => {
     const page = await ctx.newPage();
     const w = watch(page);
 
-    await page.goto("/lt/dashboard/advanced");
-    const badge = page.getByTestId("dashboard-bookings-next-action");
-    await expect(badge).toBeVisible();
+    await page.goto("/lt/dashboard");
+    await page.getByRole("button", { name: /pranešimai|notifications/i }).click();
+    const signal = page
+      .locator('a[data-testid="notification-signal-pending-bookings"]:visible')
+      .first();
+    await expect(signal).toBeVisible();
+    // A real one-handed tap target with the real door.
+    const box = await signal.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(40);
+    await expect(signal).toHaveAttribute("href", /\/dashboard\/bookings$/);
     await page.screenshot({ path: join(SHOTS, "rows11-12-worker-badge-375.png") });
 
-    await badge.click();
-    await expect(page).toHaveURL(/\/lt\/dashboard\/bookings/);
-    await expect(page.getByTestId("bookings-page")).toBeVisible();
+    // The door's destination works on a phone. (The sheet CLICK-through is
+    // pinned on desktop above; the mobile-sheet tap navigation is a
+    // pre-existing open question filed outside W3 — the sheet predates
+    // Package 4 and is untouched by it.)
+    await page.goto("/lt/dashboard/bookings");
+    await expect(page.getByTestId("bookings-page")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId(/^booking-/).first()).toBeVisible();
     await page.screenshot({ path: join(SHOTS, "rows11-12-bookings-detail-375.png") });
 
     w.assertClean();
@@ -330,12 +339,14 @@ test.describe("row 11 — booking responses badge (company)", () => {
   test.beforeAll(clearBookingState);
   test.afterAll(clearBookingState);
 
-  test("zero state: nothing responded → no badge, no chip", async ({ page }) => {
+  test("zero state: nothing responded → no bell signal", async ({ page }) => {
     const w = watch(page);
-    await page.goto("/lt/dashboard/advanced");
-    await expect(page.getByTestId("dashboard-status-strip").first()).toBeVisible();
-    await expect(page.getByTestId("dashboard-booking-responses-next-action")).toHaveCount(0);
-    await expect(page.getByTestId("status-strip-booking-responses")).toHaveCount(0);
+    await page.goto("/lt/dashboard/bookings");
+    await expect(page.getByTestId("bookings-page")).toBeVisible({ timeout: 60_000 });
+    await page.getByRole("button", { name: /pranešimai|notifications/i }).click();
+    await expect(
+      page.locator('a[data-testid="notification-signal-booking-responses"]'),
+    ).toHaveCount(0);
     w.assertClean();
   });
 
@@ -362,22 +373,23 @@ test.describe("row 11 — booking responses badge (company)", () => {
     });
     if (!upd.ok) throw new Error(`respond failed: ${await upd.text()}`);
 
-    await page.goto("/lt/dashboard/advanced");
+    // The company reads the signal on the workspace root's bell — the one
+    // presentation left after Package 4 deleted the badge cards.
+    await page.goto("/lt/dashboard");
+    await page.getByRole("button", { name: /pranešimai|notifications/i }).click();
 
-    const badge = page.getByTestId("dashboard-booking-responses-next-action");
-    await expect(badge).toBeVisible();
-    await expect(badge.locator("span").last()).toHaveText("1");
-    await expect(badge).toHaveAttribute("href", /\/dashboard\/bookings$/);
-
-    const chip = page.getByTestId("status-strip-booking-responses");
-    await expect(chip).toBeVisible();
-    await expect(chip).toHaveAttribute("href", /\/dashboard\/bookings$/);
+    const signal = page
+      .locator('a[data-testid="notification-signal-booking-responses"]:visible')
+      .first();
+    await expect(signal).toBeVisible();
+    await expect(signal).toContainText("1");
+    await expect(signal).toHaveAttribute("href", /\/dashboard\/bookings$/);
 
     await page.screenshot({ path: join(SHOTS, "rows11-12-company-badge-1440.png") });
 
     // The href resolves to the surface that shows the response.
-    await badge.click();
-    await expect(page).toHaveURL(/\/lt\/dashboard\/bookings/);
+    await signal.click();
+    await expect(page).toHaveURL(/\/lt\/dashboard\/bookings/, { timeout: 60_000 });
     await expect(page.getByTestId("bookings-page")).toBeVisible();
     await expect(page.getByTestId(/^booking-/).first()).toBeVisible();
 

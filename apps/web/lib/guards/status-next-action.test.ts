@@ -13,7 +13,9 @@ import { countOwnerResponsesSince } from "../booking/booking-state";
  *   2. the worker sees "contacted" as a link, never a bare chip;
  *   3. real unread = counterpart message newer than last_read (one shared
  *      source for badge, list and bell);
- *   4. booking responses surface via the seen model + dashboard card;
+ *   4. booking responses surface via the seen model + the spine's
+ *      booking-responses signal (W3 Package 4 deleted the second dashboard
+ *      and its count-gated card; the signal is the surviving presentation);
  *   5. the bell renders only real derived signals, each linking the exact
  *      surface that clears it — no local "mark read" for signals;
  *   6. accepted marketplace rows keep their message next step (PR4).
@@ -90,20 +92,9 @@ describe("4. booking responses are visible, never silent", () => {
     expect(countOwnerResponsesSince(rows as never, "2026-07-05T00:00:00Z")).toBe(2);
     expect(countOwnerResponsesSince(rows as never, "not-a-date")).toBe(0);
   });
-  it("the dashboard renders the count-gated responses card into both branches", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).toMatch(/data-testid="dashboard-booking-responses-next-action"/);
-    expect(page).toMatch(/"\/dashboard\/bookings"/);
-    // Org branch: mounted directly. Worker branch (D-01 duplicate removal,
-    // Wave 3): promoted into the state-driven top slot when it wins the
-    // ladder; otherwise the status-strip chip (same spineCounts number,
-    // booking-responses signal → /dashboard/bookings) carries it — the
-    // repeated card below the hub is deliberately gone. Responses stay
-    // visible either way, never silent.
-    expect(page).toMatch(/\{bookingResponsesNextAction\}/);
-    expect(page).toMatch(/"booking_response" \? \(\s*bookingResponsesNextAction/);
-    expect(page).toMatch(/const bookingResponsesNew = spineCounts\.bookingResponsesNew/);
-  });
+  // The count-gated dashboard card died with /dashboard/advanced (W3
+  // Package 4). Visibility is carried by the spine's booking-responses
+  // signal, pinned in section 5 below.
   it("opening the bookings page IS the read event", () => {
     const bookings = read("app/[locale]/dashboard/bookings/page.tsx");
     expect(bookings).toMatch(/<MarkBookingsSeen \/>/);

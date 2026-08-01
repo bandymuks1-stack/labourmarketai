@@ -10,10 +10,10 @@ import { join } from "node:path";
  * presentation that survives the /dashboard/advanced deletion. The canonical
  * surface is /dashboard/service-requests.
  *
- * Rows 2/3 (premium-hub company/project cards) are DOOR-PANELS: real
- * RLS-scoped counts + deep links only — no write, no editor, no data chain
- * of their own. They die with the route; every destination is canonical.
- * (Browser proof: tests/e2e/w3-company-rows-2-3-9-10.spec.ts.)
+ * Rows 2/3 (premium-hub company/project cards) were DOOR-PANELS: counts +
+ * deep links only, no capability of their own. W3 Package 4 deleted them
+ * with the route; what stays pinned is that every destination they pointed
+ * at is a canonical surface that still exists.
  */
 
 const APP = join(__dirname, "..", "..");
@@ -44,22 +44,10 @@ describe("rows 9/10 — the spine carries both service-request signals", () => {
   });
 });
 
-describe("rows 2/3 — the hub cards are door-panels, not editors", () => {
-  for (const rel of [
-    "components/app/premium-hub/premium-hub-company-card.tsx",
-    "components/app/premium-hub/premium-hub-project-card.tsx",
-  ]) {
-    it(`${rel}: no client interactivity, no write path, no own data read`, () => {
-      const src = read(rel);
-      expect(src).not.toMatch(/"use client"/);
-      expect(src).not.toMatch(/<form|action=/);
-      expect(src).not.toMatch(/supabase|createClient|\brpc\(/i);
-      // Doors only — every zone links a canonical surface.
-      expect(src).toMatch(/HubZoneLink/);
-    });
-  }
-
-  it("the destinations the cards deep-link are real canonical anchors/routes", () => {
+describe("rows 2/3 — the hub cards' destinations stay canonical", () => {
+  // The door-panel cards themselves died with the route (W3 Package 4);
+  // their per-file no-write pins went with them.
+  it("the destinations the cards deep-linked are real canonical anchors/routes", () => {
     const company = read("app/[locale]/dashboard/company/page.tsx");
     expect(company).toMatch(/id="company-team"/);
     // The surviving spaces hub carries the company door (route-deletion safe).

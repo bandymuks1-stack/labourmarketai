@@ -16,7 +16,6 @@ export type ConversationNavLabels = {
   messages: string;
   calendar: string;
   profile: string;
-  advanced: string;
 };
 
 /**

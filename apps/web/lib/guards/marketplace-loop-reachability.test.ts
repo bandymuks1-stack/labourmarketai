@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { DASHBOARD_MODULES } from "@/lib/dashboard/dashboard-module-registry";
-import { buildControlRoomViewModel } from "@/lib/dashboard/control-room-view-model";
-import type { SpineCounts } from "@/lib/notifications/spine-signals";
+import {
+  DASHBOARD_MODULES,
+  moduleAttentionSignalsAreValid,
+} from "@/lib/dashboard/dashboard-module-registry";
 import type { Role } from "@/lib/auth/actions";
 
 /**
@@ -16,30 +17,18 @@ import type { Role } from "@/lib/auth/actions";
  * anywhere in the app, and /dashboard/service-requests was only reachable
  * through the count-gated action cards.
  *
- * PR B moved the always-on access from a hard-coded page-level block
- * (marketplaceAccess) into the ONE dashboard module registry: `services` and
- * `service_requests` are grid modules for EVERY role, rendered by the
- * registry-driven DashboardModuleGrid in both branch layouts. This guard
- * pins that reachability at the registry level (stronger than the old
- * source-text pin — the routes cannot drift), plus the page-to-page
- * cross-links between the two halves.
+ * PR B moved the always-on access into the ONE dashboard module registry:
+ * `services` and `service_requests` are grid modules for EVERY role. W3
+ * Package 4 deleted the second dashboard that used to render that grid, but
+ * the registry stays the single reachability truth for every surviving
+ * consumer — this guard pins the loop at the registry level (the routes
+ * cannot drift), plus the page-to-page cross-links between the two halves.
  */
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-const ZERO: SpineCounts = {
-  unreadConversations: 0,
-  pendingIncomingServiceRequests: 0,
-  serviceRequestResponsesNew: 0,
-  pendingIncomingBookings: 0,
-  bookingResponsesNew: 0,
-  pendingInvitations: 0,
-  openTaskAttention: 0,
-  newJobMatches: 0,
-};
-
-describe("the control-room grid exposes always-on access to both loop halves", () => {
+describe("the module registry exposes always-on access to both loop halves", () => {
   it("services + service_requests are registry grid modules with the real routes", () => {
     const services = DASHBOARD_MODULES.find((m) => m.id === "services");
     const requests = DASHBOARD_MODULES.find((m) => m.id === "service_requests");
@@ -49,38 +38,24 @@ describe("the control-room grid exposes always-on access to both loop halves", (
     expect(requests?.surfaceRoute).toBe("/dashboard/service-requests");
   });
 
-  it("EVERY role's grid carries both halves (worker, company, agency, customer)", () => {
+  it("EVERY role sees both halves (worker, company, agency, customer)", () => {
+    const services = DASHBOARD_MODULES.find((m) => m.id === "services");
+    const requests = DASHBOARD_MODULES.find((m) => m.id === "service_requests");
     for (const role of ["worker", "company", "agency", "customer"] as Role[]) {
-      const ids = buildControlRoomViewModel({
+      expect(services?.roles, `${role} must reach services`).toContain(role);
+      expect(requests?.roles, `${role} must reach service_requests`).toContain(
         role,
-        counts: ZERO,
-        hasCompany: false,
-      }).modules.map((m) => m.id);
-      expect(ids, `${role} grid must carry services`).toContain("services");
-      expect(ids, `${role} grid must carry service_requests`).toContain(
-        "service_requests",
       );
     }
   });
 
-  it("the grid renders in BOTH the org and worker branches", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect((page.match(/<DashboardModuleGrid\b/g) ?? []).length).toBe(2);
-  });
-
   it("access is calm — the loop modules carry no fabricated urgency", () => {
     // `services` has no spine signal at all (no fake count); the request
-    // half may badge ONLY from the real spine counts.
+    // half may badge ONLY from real spine-catalogue signals.
     const services = DASHBOARD_MODULES.find((m) => m.id === "services");
     expect(services?.attentionSignalIds ?? []).toEqual([]);
-    const vm = buildControlRoomViewModel({
-      role: "worker",
-      counts: ZERO,
-      hasCompany: false,
-    });
-    for (const m of vm.modules) {
-      expect(m.badgeCount, `${m.id} badge at zero counts`).toBe(0);
-    }
+    const requests = DASHBOARD_MODULES.find((m) => m.id === "service_requests")!;
+    expect(moduleAttentionSignalsAreValid(requests)).toBe(true);
   });
 
   it("labels come from i18n keys (no hardcoded UI copy)", () => {
@@ -93,8 +68,10 @@ describe("the control-room grid exposes always-on access to both loop halves", (
   });
 
   it("never the doctrine-killed /discover", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).not.toMatch(/\/dashboard\/discover/);
+    // No module may quietly re-route to the removed discovery surface.
+    for (const m of DASHBOARD_MODULES) {
+      expect(m.surfaceRoute ?? "", m.id).not.toMatch(/\/dashboard\/discover/);
+    }
   });
 });
 

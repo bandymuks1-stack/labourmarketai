@@ -33,19 +33,9 @@ describe("vague 'poreikis' CTA wording is gone from the dashboard namespace", ()
   }
 });
 
-describe("buyer chain-action wording uses 'užklausa', not 'poreikis'", () => {
-  it("LT buyerTitle/buyerRequests are request-based", () => {
-    const ca = lt.auth.dashboard.chainActions;
-    expect(ca.buyerTitle).toBe("Pirkėjo užklausos");
-    expect(ca.buyerRequests).toBe("Mano užklausos");
-    expect(`${ca.buyerTitle} ${ca.buyerSubtitle} ${ca.buyerRequests} ${ca.buyerRequestsDesc}`).not.toMatch(/poreik/i);
-  });
-  it("EN buyer wording is request-based", () => {
-    const ca = en.auth.dashboard.chainActions;
-    expect(ca.buyerTitle).toBe("Buyer requests");
-    expect(ca.buyerRequests).toBe("My requests");
-  });
-});
+// The buyer chain-actions card and its auth.dashboard.chainActions copy were
+// deleted with the second dashboard (W3 Package 4) — the banned-phrase scan
+// above still polices the surviving auth.dashboard namespace.
 
 describe("company hiring is NOT presented as a generic buyer 'poreikis' by default", () => {
   it("pilot copy is intent-specific (hire vs partner), not a single generic 'need' CTA", () => {

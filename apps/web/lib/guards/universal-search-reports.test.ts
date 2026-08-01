@@ -71,8 +71,8 @@ const SEARCH_READS_REL = "lib/search/dashboard-search.ts";
 const SEARCH_ROUTE_REL = "app/api/dashboard-search/route.ts";
 const FINDER_REL = "components/app/command-finder.tsx";
 // NOTE (canonical-user-journey v1): the unlinked /dashboard/search router page
-// was removed — the ONE CommandFinder is embedded on /dashboard itself.
-const DASHBOARD_PAGE_REL = "app/[locale]/dashboard/advanced/page.tsx";
+// was removed. W3 Package 4 then deleted the second dashboard's inline mount —
+// the ONE CommandFinder now lives in the layout-level header-search overlay.
 const HUB_READS_REL = "lib/reports/reports-hub.ts";
 const HUB_PAGE_REL = "app/[locale]/dashboard/reports/page.tsx";
 
@@ -80,7 +80,6 @@ const SEARCH_MODEL = read(SEARCH_MODEL_REL);
 const SEARCH_READS = read(SEARCH_READS_REL);
 const SEARCH_ROUTE = read(SEARCH_ROUTE_REL);
 const FINDER = read(FINDER_REL);
-const DASHBOARD_PAGE = read(DASHBOARD_PAGE_REL);
 const HUB_READS = read(HUB_READS_REL);
 const HUB_PAGE = read(HUB_PAGE_REL);
 
@@ -359,11 +358,14 @@ describe("3. CommandFinder stays registry-first and accessible", () => {
     expect(FINDER).toMatch(/typeof v === "string"/);
   });
 
-  it("the dashboard embeds the ONE finder (one search truth; no separate search page)", () => {
-    expect(DASHBOARD_PAGE).toContain(
-      'from "@/components/app/command-finder"',
-    );
-    expect(DASHBOARD_PAGE).toMatch(/<CommandFinder \/>/);
+  it("every dashboard page reaches the ONE finder (one search truth; no separate search page)", () => {
+    // W3 Package 4 deleted the second dashboard's inline mount; the finder's
+    // surviving presentation is the header-search overlay the layout mounts
+    // on every dashboard page.
+    const headerSearch = read("components/app/header-search.tsx");
+    expect(headerSearch).toContain('from "@/components/app/command-finder"');
+    expect(headerSearch).toMatch(/<CommandFinder \/>/);
+    expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(/<HeaderSearch/);
     // The removed /dashboard/search router page must not come back.
     expect(
       existsSync(join(ROOT, "app", "[locale]", "dashboard", "search", "page.tsx")),
@@ -505,11 +507,8 @@ describe("5. reports module is registered everywhere a module must be", () => {
     expect(m.attentionSignalIds).toBeUndefined();
   });
 
-  it("the grid icon map carries the chart icon", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/chart: BarChart3/);
-  });
-
+  // The grid icon-map pin died with the module grid (W3 Package 4 deleted
+  // the second dashboard); the registry's iconKey stays pinned above.
   it("primary-route smoke inventory carries /dashboard/reports", () => {
     const entry = PRIMARY_ROUTES.find(
       (r) => r.urlPattern === "/dashboard/reports",

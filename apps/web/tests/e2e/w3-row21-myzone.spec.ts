@@ -61,18 +61,14 @@ test.describe("row 21 — MyZone's truth already lives in the player-card result
     viewport: { width: 1440, height: 900 },
   });
 
-  test("the same readiness truth on both surfaces (worker, desktop)", async ({
+  test("the readiness truth lives on the canonical surface (worker, desktop)", async ({
     page,
   }) => {
     const w = watch(page);
 
-    // MyZone on the dying page: read which branch the REAL data renders.
-    await page.goto("/lt/dashboard/advanced");
-    const status = page.getByTestId("my-zone-status");
-    await expect(status).toBeVisible({ timeout: 60_000 });
-    const incomplete = (await page.getByTestId("my-zone-missing").count()) > 0;
-
-    // The canonical surface: the player-card result in the Context Panel.
+    // MyZone died with /dashboard/advanced (W3 Package 4). Its truth —
+    // state-aware readiness over the person's REAL rows — lives in the
+    // player-card result in the Context Panel, which this test pins.
     await page.goto("/lt/dashboard?result=player-card");
     const card = page.getByTestId("player-card-result");
     await expect(card).toBeVisible({ timeout: 60_000 });
@@ -91,12 +87,6 @@ test.describe("row 21 — MyZone's truth already lives in the player-card result
     await control.focus();
     await expect(control).toBeFocused();
     await expect(control).toHaveAccessibleName(/\S/);
-
-    // The equivalence statement, recorded in the assertion output: the
-    // advanced page's readiness state and the canonical card coexist on the
-    // SAME real rows — this fixture renders MyZone's `ready`/`incomplete`
-    // branch while the panel renders the same person's real card.
-    expect(typeof incomplete).toBe("boolean");
 
     w.assertClean();
   });

@@ -61,15 +61,11 @@ describe("1+2. counters navigate or are covered by monitoring-only notes", () =>
 });
 
 describe("3. readiness incomplete rows act", () => {
+  // The `id="work-card"` anchor lived on the second dashboard, deleted by
+  // W3 Package 4 — the editor's open-event contract stays pinned by the
+  // click-target guard (work-card-missing-chip → work-card-editor).
   it("worker readiness panel unmet rows are Links (pre-existing model, pinned)", () => {
     expect(readinessPanel).toMatch(/<Link[\s\S]{0,400}ArrowRight/);
-  });
-  it("the canonical work-card editor anchor lives on the dashboard page", () => {
-    // WorkCard was removed (dedup v1); the `id="work-card"` anchor (the profile
-    // hub's availability-pillar deep-link target) now wraps the hub person block
-    // that carries the folded state-aware editor.
-    const dashPage = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(dashPage).toMatch(/id="work-card"/);
   });
 });
 

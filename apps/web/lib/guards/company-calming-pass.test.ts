@@ -12,23 +12,13 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
-const page = read("app/[locale]/dashboard/advanced/page.tsx");
 const note = (j: Record<string, unknown>) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (j as any).auth.dashboard.wow.flow.company.calmNote as string;
 
-describe("active-role overview is action-first (calm explanation note removed)", () => {
-  // Superseded by dashboard-active-role-overview-v1 (owner decision A-minimal):
-  // the company/agency overview leads with one clear next action, not an
-  // explanation note. The calm-note copy is retained in i18n (honesty pinned
-  // below) but is no longer rendered on the first screen.
-  it("the dashboard no longer renders the calm explanation note", () => {
-    expect(page).not.toMatch(/data-testid="company-calm-note"/);
-  });
-  it("the overview leads with the role's single next action", () => {
-    expect(page).toMatch(/<DashboardNextAction\b/);
-  });
-});
+// W3 Package 4 deleted the /dashboard/advanced second dashboard — the overview
+// that once rendered (and later dropped) the calm note is gone. The calm-note
+// COPY stays in i18n, so its honesty contract stays pinned below.
 
 describe("the calm note reassures AND restates the honesty contract", () => {
   it("LT: one step at a time + nothing fabricated", () => {

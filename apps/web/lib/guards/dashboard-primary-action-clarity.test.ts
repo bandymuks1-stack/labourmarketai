@@ -29,9 +29,9 @@ function read(rel: string): string {
 }
 
 const ROOM_PAGES = [
-  // The card-overview home moved to Advanced mode; `/dashboard` is now the
-  // conversation surface (its own interaction contract).
-  "advanced/page.tsx",
+  // `/dashboard` is the conversation surface (its own interaction
+  // contract); the card-overview second dashboard was deleted outright
+  // (W3 Package 4), so no advanced/page.tsx entry remains.
   "account/page.tsx",
   "profile/page.tsx",
   "buyer/page.tsx",
@@ -141,20 +141,9 @@ describe("Guard: at most one primary action per room (page level)", () => {
     });
   }
 
-  it("the /dashboard primary CTA is a real interactive element (not a dead card)", () => {
-    // The single /dashboard primary CTA moved into <DashboardNextAction>
-    // (slice role-next-action-simplicity-v1): one role-based gradient CTA,
-    // mounted from the page. Assert it's mounted and the gradient lives in a
-    // real interactive element inside that component.
-    // The card-overview home (with its Next Action CTA) is now Advanced mode.
-    const page = read(`${DASH}/advanced/page.tsx`);
-    expect(page).toMatch(/<DashboardNextAction\b/);
-    const src = read("components/app/dashboard-next-action.tsx");
-    const idx = src.indexOf("from-brand-blue to-brand-cyan");
-    expect(idx, "expected the Next Action primary CTA gradient").toBeGreaterThan(0);
-    expect(
-      isInteractive(controllingOpener(src, idx)?.tag ?? null),
-      "the Next Action primary CTA must be a <Link>/<Button>/<a>, not a styled <div>",
-    ).toBe(true);
-  });
+  // <DashboardNextAction> (the old /dashboard gradient CTA) was deleted with
+  // the second dashboard (W3 Package 4), so its dead-card check left with
+  // it. The fake-clickable scan above still covers every room page and
+  // every components/app/*.tsx file, so a new dead primary CTA cannot land
+  // unnoticed.
 });

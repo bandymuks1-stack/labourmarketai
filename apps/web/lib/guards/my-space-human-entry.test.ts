@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { workerNextAction } from "../dashboard/next-action";
 
 /**
  * "Mano erdvė" human-entry guard (slice my-space-human-entry-v1).
@@ -31,18 +30,17 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 
-const DASH_PAGE = "app/[locale]/dashboard/advanced/page.tsx";
+// W3 Package 4 deleted the second dashboard (/dashboard/advanced) and with it
+// the workerNextAction resolver — the worker's calm entry is the workspace.
+// The pins that remain are the ones with a surviving home: the inline work
+// card in the player-card result, and the copy/surface invariants below.
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
-describe("worker entry opens with the state-aware work card (folded into the hub)", () => {
-  const page = read(DASH_PAGE);
-  it("surfaces the worker's folded next action + inline editor in the hub person block", () => {
-    // WorkCard was removed (dedup v1); the state-aware next action + inline
-    // availability/location/pay editor now live in the hub Asmens kortelė via
-    // the workEditor prop.
-    // W3 row 1: the editor left this page with the person card and lives in
-    // the `player-card` result. Both halves pinned.
-    expect(page).not.toMatch(/workEditor/);
+describe("worker entry opens with the state-aware work card (canonical home)", () => {
+  it("the inline editor lives in the workspace player-card result", () => {
+    // WorkCard was removed (dedup v1); W3 row 1 moved the state-aware
+    // availability/location/pay editor into the `player-card` result — its
+    // one home after the second dashboard was deleted.
     expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
       /<WorkCardEditor/,
     );
@@ -52,36 +50,10 @@ describe("worker entry opens with the state-aware work card (folded into the hub
     // No system/score field is ever surfaced to the user.
     expect(editor).not.toMatch(/trust_score|profile_completeness/);
   });
-  it("the worker entry no longer renders the role/module activity-setup link", () => {
-    // The "start a company/agency/buyer" card is not a person's next natural
-    // step; it lives under /dashboard/account now.
-    expect(page).not.toMatch(/dashboard-activity-setup-link/);
-    expect(page).not.toMatch(/activitySetup\./);
-  });
-});
-
-describe("profile/CV CTA is gated to the incomplete state (no duplicate nag)", () => {
-  it("a completed profile never returns the complete-profile action", () => {
-    const complete = workerNextAction({
-      hasProfile: true,
-      entriesTotal: 3,
-      confirmedCount: 1,
-    });
-    expect(complete.key).not.toBe("worker_complete_profile");
-  });
-  it("an empty profile DOES return the complete-profile action (real route)", () => {
-    const empty = workerNextAction({
-      hasProfile: false,
-      entriesTotal: 0,
-      confirmedCount: 0,
-    });
-    expect(empty.key).toBe("worker_complete_profile");
-    expect(empty.href).toBe("/dashboard/profile");
-  });
 });
 
 describe("no standalone 'Įgūdžių patvirtinimai' card on user-facing entry surfaces", () => {
-  for (const rel of [DASH_PAGE, PROFILE_PAGE]) {
+  for (const rel of [PROFILE_PAGE]) {
     it(`${rel} has no hardcoded skill-verification card title`, () => {
       const src = read(rel);
       expect(src).not.toMatch(/Įgūdžių patvirtinim/i);

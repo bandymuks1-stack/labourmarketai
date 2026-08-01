@@ -2,11 +2,12 @@
  * Source-level guards for fix/pilot-ready-stability-trust-sprint Phase 3
  * (small perf fixes only).
  *
- * The dashboard layout, dashboard overview, and dashboard/profile pages
- * each previously issued the bulk of their independent SSR reads
- * sequentially. The fix groups them under `Promise.all` so the round
- * trips overlap — measurable win on the slowest authenticated paths,
- * zero behaviour change.
+ * The dashboard layout and dashboard/profile pages each previously
+ * issued the bulk of their independent SSR reads sequentially. The fix
+ * groups them under `Promise.all` so the round trips overlap —
+ * measurable win on the slowest authenticated paths, zero behaviour
+ * change. (The dashboard-overview guard died with its page: W3 Package 4
+ * deleted the /dashboard/advanced second dashboard.)
  *
  * Lock the parallelization shape so a future edit can't accidentally
  * de-parallelize back to a serial chain (the historic "feels slow"
@@ -50,16 +51,6 @@ describe("Guard: dashboard layout parallelizes profile + profile_roles reads", (
     // Old serial shape: `const { data: profile } = await supabase.from('profiles')...; const { data: rolesRows } = await supabase.from('profile_roles')...`
     expect(layout).not.toMatch(
       /const\s*\{\s*data:\s*profile\s*\}\s*=\s*await\s+supabase[\s\S]{0,500}const\s*\{\s*data:\s*rolesRows\s*\}\s*=\s*await\s+supabase/,
-    );
-  });
-});
-
-describe("Guard: dashboard overview parallelizes worker reads", () => {
-  const page = read("app/[locale]/dashboard/advanced/page.tsx");
-
-  it("uses Promise.all for worker_professions + worker_skills + journal_entries", () => {
-    expect(page).toMatch(
-      /Promise\.all\(\s*\[[\s\S]{0,1500}from\(["']worker_professions["']\)[\s\S]{0,1500}from\(["']worker_skills["']\)[\s\S]{0,1500}from\(["']journal_entries["']\)/,
     );
   });
 });

@@ -19,14 +19,13 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
  * screen is one chat (greeting → starter chips → dialogue with inline CV /
- * profile / booking flows). The card control room now lives at
- * `/dashboard/advanced` (Advanced mode).
+ * profile / booking flows). The former card control room (`/dashboard/advanced`)
+ * was DELETED by W3 Package 4 — this chat is the one workspace root.
  *
  * The wide module navbar is NOT hidden with an overlay any more: the layout's
  * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is absent,
  * not painted over), so the chat fills the viewport and supplies its own
- * simple-mode header + bottom nav (the 5-item nav). Advanced mode is the one
- * escape hatch. Deterministic (LLM off).
+ * simple-mode header + bottom nav (the 5-item nav). Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,

@@ -196,14 +196,9 @@ describe("PR #30 production smoke checklist", () => {
 // ── 8. Dashboard first-use panel + non-locking role copy (Phase 3 / 6) ───
 
 describe("dashboard first-use guidance", () => {
-  it("worker dashboard guides first-use via the action-first control room", () => {
-    // Action-first IA v1: first-use guidance moved from a separate panel into
-    // the MyZone control room (real readiness status + fast actions). The home
-    // no longer stacks a separate first-use panel.
-    const txt = readWeb("app/[locale]/dashboard/advanced/page.tsx");
-    expect(txt).toMatch(/<MyZone\b/);
-    expect(txt).toMatch(/incomplete=\{isFirstUse\}/);
-  });
+  // The MyZone control-room mount left with the second dashboard — W3
+  // Package 4 deleted /dashboard/advanced; the first-use copy itself
+  // survives and stays pinned below.
   it("LT + EN expose firstUse.title via auth.dashboard.firstUse", () => {
     const lt = readWeb("messages/lt.json");
     const en = readWeb("messages/en.json");

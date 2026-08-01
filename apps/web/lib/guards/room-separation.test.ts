@@ -13,7 +13,6 @@ import { join } from "node:path";
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
-const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
 const account = read("app/[locale]/dashboard/account/page.tsx");
 const buyer = read("app/[locale]/dashboard/buyer/page.tsx");
 const company = read("app/[locale]/dashboard/company/page.tsx");
@@ -21,16 +20,9 @@ const profile = read("app/[locale]/dashboard/profile/page.tsx");
 
 const journal = read("app/[locale]/dashboard/journal/page.tsx");
 
-describe("active /dashboard room stays focused", () => {
-  it("renders no all-roles catalogue and no future-module grid", () => {
-    expect(dashboard).not.toMatch(/<RoleCatalogueGrid\b/);
-    expect(dashboard).not.toMatch(/getVisibleRoleOptions/);
-    expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
-  });
-  it("keeps the current-space header", () => {
-    expect(dashboard).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-  });
-});
+// The "/dashboard room stays focused" pins died with the room itself — W3
+// Package 4 deleted the /dashboard/advanced second dashboard (and its
+// CurrentSpaceHeader); the chat root is the one home now.
 
 describe("/dashboard/account is settings only (marketplace IA cleanup)", () => {
   // Superseded PR #204: account no longer hosts the cross-space catalogue or
@@ -105,19 +97,12 @@ describe("profile room shows personal profile only (+ compact switcher)", () => 
 });
 
 describe("my-space navigation truth (owner P0 2026-07-02)", () => {
-  // /dashboard/account is SETTINGS-ONLY. The workspace/space chips must never
+  // /dashboard/account is SETTINGS-ONLY. The room space chips must never
   // route there; settings stays reachable via the avatar AccountMenu under the
   // unambiguous settings label; the worker's CV hub stays reachable without a
-  // settings detour: dashboard → profile hub → /cv.
-  const header = read("components/app/current-space-header.tsx");
+  // settings detour. (The CurrentSpaceHeader chip pin left with the header —
+  // W3 Package 4 deleted the second dashboard that mounted it.)
   const menu = read("components/app/account-menu.tsx");
-
-  it("(a) the current-space chip never points at settings — it opens the active space hub", () => {
-    expect(header).not.toMatch(/["'`]\/dashboard\/account["'`]/);
-    expect(header).toMatch(/href=\{SPACE_ROUTE\[key\]\}/);
-    expect(header).toMatch(/profile: "\/dashboard\/profile"/);
-    expect(header).toMatch(/company: "\/dashboard\/company"/);
-  });
 
   it("(a) no room 'Mano erdvės' chip points at settings", () => {
     for (const [name, src] of [
@@ -141,11 +126,10 @@ describe("my-space navigation truth (owner P0 2026-07-02)", () => {
     expect(menu).not.toMatch(/mySpaces/);
   });
 
-  it("(c) the CV hub chain holds: dashboard → profile hub → /cv", () => {
-    // dashboard mounts the header whose worker space routes to the profile hub
-    expect(dashboard).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-    expect(header).toMatch(/worker:\s*"profile"/);
-    expect(header).toMatch(/profile: "\/dashboard\/profile"/);
+  it("(c) the CV hub chain holds: account menu → profile hub → /cv", () => {
+    // W3 Package 4 deleted the space header; the avatar AccountMenu is the
+    // worker's door into the profile hub now.
+    expect(menu).toMatch(/href: "\/dashboard\/profile"[\s\S]{0,160}testid: "account-menu-profile-link"/);
     // the profile hub links to the CV page (no settings detour)
     expect(profile).toMatch(/href="\/cv"/);
   });
@@ -154,11 +138,11 @@ describe("my-space navigation truth (owner P0 2026-07-02)", () => {
 describe("buyer copy: no worker-purchase, no internal tech text", () => {
   const lt = JSON.parse(read("messages/lt.json"));
   const en = JSON.parse(read("messages/en.json"));
+  // (The chainActions buyer subtitle left with the second dashboard's chain
+  // actions — W3 Package 4.)
   const buyerBlob = [
     JSON.stringify(lt.roleDashboards.buyer),
     JSON.stringify(en.roleDashboards.buyer),
-    lt.auth.dashboard.chainActions.buyerSubtitle,
-    en.auth.dashboard.chainActions.buyerSubtitle,
     JSON.stringify(lt.spaces.buyer),
     JSON.stringify(en.spaces.buyer),
   ].join(" ");

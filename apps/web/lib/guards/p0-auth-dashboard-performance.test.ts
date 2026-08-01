@@ -149,8 +149,9 @@ describe("request-cached worker core readers", () => {
   });
 
   it("hot per-navigation consumers read through the cached core", () => {
+    // W3 Package 4 deleted the premium hub (second dashboard), so its data
+    // loader left this list; the surviving hot readers stay pinned.
     for (const rel of [
-      "lib/premium-hub/premium-hub-data.ts",
       "lib/opportunities/recommendations-model.ts",
       "lib/player-card/player-card.ts",
     ]) {

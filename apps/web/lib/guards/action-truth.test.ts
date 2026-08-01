@@ -22,11 +22,12 @@ const ROOM_PAGES = [
   "app/[locale]/dashboard/journal/page.tsx",
 ] as const;
 
+// W3 Package 4 deleted the /dashboard/advanced second dashboard and its
+// action components (dashboard-chain-actions, current-space-header) — only
+// the surviving action surfaces are audited here.
 const ACTION_COMPONENTS = [
   "components/app/role-catalogue-card.tsx",
   "components/app/feature-availability-grid.tsx",
-  "components/app/dashboard-chain-actions.tsx",
-  "components/app/current-space-header.tsx",
   "components/app/demand-request-button.tsx",
 ] as const;
 

@@ -37,12 +37,12 @@ describe("F7/F16 — no internal/technical vocabulary in primary UI copy", () =>
   // Banned in the PRIMARY user hierarchy (LT forms; per-locale equivalents
   // are covered by translating from these keys, which no longer exist).
   it("the 'gyvi duomenys' data-provenance badge keys are gone", () => {
+    // W3 Package 4 deleted the premium hub with the second dashboard — the
+    // whole namespace, badges included, left every active locale.
     for (const loc of ACTIVE) {
       const hub = (messages(loc) as { premiumHub?: Record<string, unknown> })
         .premiumHub;
-      expect(hub, `${loc}: premiumHub exists`).toBeTruthy();
-      expect(hub!.liveBadge, `${loc}: liveBadge removed`).toBeUndefined();
-      expect(hub!.partialBadge, `${loc}: partialBadge removed`).toBeUndefined();
+      expect(hub, `${loc}: premiumHub namespace removed`).toBeUndefined();
     }
   });
 

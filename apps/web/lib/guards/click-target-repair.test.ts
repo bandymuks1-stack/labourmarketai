@@ -11,11 +11,9 @@ import { join } from "node:path";
  *   2. accepted marketplace rows carry a Message next step (never inert);
  *   3. #capabilities deep links land on an OPEN disclosure;
  *   4. work-card inline "+" chips open the editor (never self-anchor);
- *   5. the role gate never bounces silently (?notice= + dashboard banner);
+ *   5. the role gate never bounces silently (?notice= redirect + copy);
  *   6. company "submit for real" switches workspace first (no branch-dependent
  *      anchor link);
- *   7. chain actions land on the #company-team control;
- *   8. "manage spaces" leads to the spaces hub;
  *   9. demand submit success links scouting + refreshes the read-back;
  *  10. instruction clarify surfaces failure and links the thread.
  */
@@ -88,14 +86,11 @@ describe("4. work-card inline '+' chips open the editor, never self-anchor", () 
 });
 
 describe("5. role gate never bounces silently", () => {
+  // W3 Package 4 deleted the /dashboard/advanced second dashboard that
+  // rendered the notice banner; the redirect contract + its copy survive.
   it("the redirect carries a notice param", () => {
     const gate = read("lib/auth/require-role.ts");
     expect(gate).toMatch(/\?notice=needs_\$\{expectedRole\}_role/);
-  });
-  it("the dashboard renders the notice banner with a connected next action", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).toMatch(/data-testid="dashboard-role-notice"/);
-    expect(page).toMatch(/roleNotice\.cta/);
   });
   it("banner copy exists in every active locale", () => {
     for (const loc of LOCALES) {
@@ -130,23 +125,10 @@ describe("6. company demand intake is reachable for every held-role user", () =>
   });
 });
 
-describe("7. chain actions land on the exact team control", () => {
-  it("invite + enable-review use the #company-team anchor, which exists", () => {
-    const chain = read("components/app/dashboard-chain-actions.tsx");
-    expect(chain).toMatch(/\/dashboard\/company#company-team/);
-    const company = read("app/[locale]/dashboard/company/page.tsx");
-    expect(company).toMatch(/id="company-team"/);
-  });
-});
-
-describe("8. 'manage spaces' leads to the spaces hub", () => {
-  it("identity-manage-spaces targets /dashboard/start (not the read-only account page)", () => {
-    const ia = read("components/app/identity-actions.tsx");
-    const block = ia.slice(ia.indexOf("function ManageSpacesLink"));
-    expect(block).toMatch(/"\/dashboard\/start"/);
-    expect(block).not.toMatch(/"\/dashboard\/account"/);
-  });
-});
+// Targets 7 (chain actions → #company-team) and 8 (manage spaces) were
+// carried by dashboard-chain-actions / identity-actions, both deleted with
+// the W3 Package 4 second dashboard. The #company-team anchor itself stays
+// pinned by the company-page guards (w3-company-rows-2-3-9-10).
 
 describe("9. demand submit success is not a dead end", () => {
   const btn = read("components/app/demand-request-button.tsx");

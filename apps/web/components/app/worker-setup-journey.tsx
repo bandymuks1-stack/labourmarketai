@@ -52,9 +52,11 @@ export async function WorkerSetupJourney(): Promise<React.ReactElement | null> {
     {
       key: "location",
       // The work card carries the location + preferred countries and is
-      // only "done" when the worker explicitly confirmed it.
+      // only "done" when the worker explicitly confirmed it. Its editor
+      // lives inside the player-card result since W3 (the #work-card anchor
+      // died with /dashboard/advanced).
       done: pillar("workCard"),
-      href: "/dashboard#work-card",
+      href: "/dashboard?result=player-card",
     },
     {
       key: "availability",

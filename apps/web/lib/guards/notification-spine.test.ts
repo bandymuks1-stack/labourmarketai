@@ -190,10 +190,8 @@ describe("visiting the destination IS the read event", () => {
     expect(read("components/app/world-state/context-panel.tsx")).toMatch(
       /<WorkerInvitations\b/,
     );
-    // …and it is NOT still on the old page, which would be two homes.
-    expect(read("app/[locale]/dashboard/advanced/page.tsx")).not.toMatch(
-      /listMyPendingWorkerInvitations/,
-    );
+    // The old second-dashboard home is gone entirely (W3 Package 4), so the
+    // workspace context panel is the ONE home — no two-homes check needed.
   });
 });
 
