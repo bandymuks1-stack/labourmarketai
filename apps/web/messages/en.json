@@ -6679,7 +6679,22 @@
     },
     "needsLegalReview": "needs legal review",
     "sourceLink": "source",
-    "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice."
+    "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice.",
+    "editor": {
+      "title": "Add or update a document",
+      "typeLabel": "Document type",
+      "countryLabel": "Country (optional)",
+      "countryNone": "No specific country",
+      "statusLabel": "Status",
+      "validFromLabel": "Valid from",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "e.g. certificate number or issuer",
+      "save": "Save document",
+      "saving": "Saving…",
+      "saved": "Saved. The list above is updated.",
+      "invalid": "Please check the fields — something is not valid.",
+      "errorMsg": "Could not save right now. Try again shortly."
+    }
   },
   "documentCentre": {
     "attention": {

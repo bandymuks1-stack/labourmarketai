@@ -6679,7 +6679,22 @@
     },
     "needsLegalReview": "juridische beoordeling nodig",
     "sourceLink": "bron",
-    "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies."
+    "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies.",
+    "editor": {
+      "title": "Document toevoegen of bijwerken",
+      "typeLabel": "Documenttype",
+      "countryLabel": "Land (optioneel)",
+      "countryNone": "Geen specifiek land",
+      "statusLabel": "Status",
+      "validFromLabel": "Geldig vanaf",
+      "noteLabel": "Notitie (optioneel)",
+      "notePlaceholder": "bijv. certificaatnummer of uitgever",
+      "save": "Document opslaan",
+      "saving": "Opslaan…",
+      "saved": "Opgeslagen. De lijst hierboven is bijgewerkt.",
+      "invalid": "Controleer de velden — er klopt iets niet.",
+      "errorMsg": "Opslaan lukt nu niet. Probeer het zo opnieuw."
+    }
   },
   "documentCentre": {
     "attention": {
