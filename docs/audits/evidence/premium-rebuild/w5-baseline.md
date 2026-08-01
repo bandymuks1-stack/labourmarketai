@@ -42,3 +42,37 @@ this baseline could not verify without guessing.
 - No fabricated verification; claims stay visibly unverified until a real confirmation row exists.
 - Row-by-row browser assertions before any deletion/port; mobile 375px + keyboard/accessible-name legs on accepted rows.
 - Production acceptance stays local-stack until the owner provisions `PROD_QA_*` (standing).
+
+---
+
+## AUDIT COMPLETE — 2026-08-01 (three parallel read-only audits; file:line evidence in the audit transcripts)
+
+### Consolidated classification (replaces the PENDING_AUDIT rows)
+
+| Domain | Class | The one-line truth |
+|---|---|---|
+| Journal write path | FULL | ONE canonical chain: chat sentence → deterministic `extractWorkLog` → explicit confirm → `createJournalEntry` → `create_journal_entry_full` RPC (applied in prod; legacy fallback is dead-in-prod insurance). The AI journal agent persists nothing |
+| Chat-first doctrine | FULL (implemented) | `/dashboard/journal` composer renders ONLY in `?editing=` mode; fresh records start in chat; the journal page is explicitly the history/evidence PROJECTION |
+| Structured journal | FULL | Hybrid: `original_text` never dropped + typed `journal_entry_metrics` (slug/value/unit/source) + photos (private bucket, supersede continuity) + `journal_entry_skills` links + sha256 hash chain + append-only supersede/soft-delete lifecycle |
+| Journal surfaces | FULL + one DUPLICATE | All writes funnel through `lib/journal/actions.ts`; ~12 read projections. DUPLICATE: `journal-spreadsheet-entry.tsx` — a full bulk-write component rendered NOWHERE (orphan; second-journal risk if ever mounted) |
+| `visibility_scope` | carried claim CORRECTED | NOT "consulted by no policy": the applied INSERT policy pins `visibility_scope='closed'` (20260530130000). It never GRANTS anything; the other 4 enum values are dead vocabulary. Write-pinned invariant, not removable residue |
+| Voice journal | BLOCKED (infra) + DEFECTIVE (handoff) | Service code FULL (`services/transcribe`, honest `unavailable` when env unset) but undeployed, env unset, `voice_journal_jobs` migration never committed, NO UI links to `/dashboard/journal/voice`. Handoff DEAD both ways: recorder pushes to a composer that only mounts in edit mode, and the composer's mount effect refuses edit mode — the reviewed transcript silently dies in sessionStorage |
+| Skills stores | FULL ladder + 2 defects | Canonical ladder is clean: `skills` (taxonomy) → `worker_skills` (holding, honest post-#963) → `journal_entry_skills` (single-chokepoint evidence writer with provenance) → `verified` flag. Free-text capture exists in FOUR lanes (claims / skill_claim metrics / clarifications / candidate_skills) |
+| `candidate_skills` | DEFECTIVE (ghost, broken pipe) | ZERO writers ever existed; the designed capture slice shipped to `skill_candidate_clarifications` + `profile_skill_claims` instead; the approval queue was never built. Both matching engines read an eternally-empty set and silently degrade |
+| Clarify flow | PARTIAL (answers = confirmed sink) | Label rows DO gate the ambiguity lifecycle + card count; the three answer columns (`related_to`/`tools_materials`/`often_with`) are consumed by NOTHING |
+| Extraction pipeline | FULL (deterministic) | Lexicon-based, explicitly NOT AI; optional AI lane produces suggestion chips only (never persists, never raises trust). Every write `verified:false, source:'self_declared'` — guard-pinned |
+| Claim evidence pointers | PARTIAL | `journal_entry_skills` is FK-linked end-to-end; `profile_skill_claims` have NO entry pointer — linkage reconstructed by normalized-label join via metric rows |
+| Evidence on the Player Card | PARTIAL | Catalogued skills render count+tier bars (real rows, honest zero floor) but NO drill-down to the backing entries; free-text claims and clarifications render bare (promotion flow is the designed remedy) |
+| Tier model | FULL | One semantics everywhere (verified only from `verified=true`; W4's cv-engagement-cards defect confirmed fixed); cosmetic drift: four naming vocabularies for the same three rungs |
+| Confirmation flow (org side) | FULL | Quadruple-enforced (app authorizer + RLS + DB CHECK + RPC re-validation); review (3 decisions, gated on `journal_review_enabled`) vs per-named-skill verification (the ONLY `verified=true` writer); auto-confirm writes a REAL honestly-labelled confirmation row under an owner-enabled policy |
+| Worker requests confirmation | MISSING | No surface, no table, zero repo hits — the gate is entirely org-side; the worker only sees `submitted` status |
+| Dormant ungated confirms | DUPLICATE (dead) | `confirmEntry`/`rejectEntry` exports have no UI caller and bypass the `journal_review_enabled` gate via the legacy 0013 RLS — reopening risk on any future import |
+| Ledger truth | PARTIAL | `20260720100000` + `20260720150000` are applied in prod but ABSENT from APPLIED_LEDGER; batch review applied but never exercised; `20260714180000` templates stay owner-DEFERRED |
+| W6 boundary inventory | FULL (inventory) | Objective evidence ready for W6: confirmations, metrics, skill links + provenance, photo continuity, review results, trust columns (all derived from countable rows), audit_logs, learning signals. NO subjective store exists (guard-pinned absent); dormant `organizations.trust_score` column is schema residue, guard-blocked from every surface |
+
+### W5 slice plan (owner order: complete PARTIAL, launch-critical MISSING only, no rebuilds)
+
+1. **SLICE 1 — dead-surface deletion + ledger truth (code-only, the #963 method):** delete orphan `journal-spreadsheet-entry.tsx` (+ its guard reference); delete dormant ungated `confirmEntry`/`rejectEntry` exports and pin the absence in a guard; remove the two dead `candidate_skills` joins (match-subject + matching-workbench read an eternally-empty set) and record the table OBSOLETE pending an owner drop migration; add the two missing APPLIED_LEDGER rows.
+2. **SLICE 2 — voice handoff repair (code-only, chat-first):** the reviewed transcript must land in the ONE intake — seed the chat work-log flow on `/dashboard` instead of the unmounting composer; add the missing UI entry point to `/dashboard/journal/voice`; keep the honest `unavailable` state. Live transcription stays owner-gated (deploy + env), but the handoff must not eat data the day it's enabled.
+3. **SLICE 3 — evidence drill-down (complete the PARTIAL):** skill-evidence bars link to the backing journal entries (worker self view only — no visibility change).
+4. **OWNER-GATED, reported once:** transcribe service deploy + `VOICE_TRANSCRIBE_*` env; `voice_journal_jobs` persistence migration (never committed); `candidate_skills` DROP migration; journal profession templates 20260714180000; append-only trigger guards (known deferred). **DECISION-GATED (design, not owner-legal):** worker-side "request confirmation" surface (MISSING; needs product ruling on notification path) and the clarify-answers consumer (use in recognizer disambiguation vs stop collecting) — both deferred to after slices 1–3, not silently dropped.
