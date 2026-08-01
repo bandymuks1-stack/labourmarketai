@@ -150,26 +150,10 @@ describe("server helpers are rollout-safe + visit marks seen", () => {
   });
 });
 
-describe("dashboard renders count-gated 'new' markers (no fake unread)", () => {
-  const page = read("app/[locale]/dashboard/advanced/page.tsx");
-
-  it("computes both new counts via the marketplace helper", () => {
-    // Called inside the page's parallel batch (P0 latency audit); both counts
-    // land via the Promise.all destructure.
-    expect(page).toMatch(/getServiceRequestsNewCounts\(\),/);
-    expect(page).toMatch(/\{ providerNew, buyerNew \},/);
-  });
-
-  it("provider marker shows ONLY when providerNew > 0", () => {
-    expect(page).toMatch(/providerNew > 0 &&/);
-    expect(page).toMatch(/data-testid="dashboard-service-requests-new"/);
-  });
-
-  it("buyer marker shows ONLY when buyerNew > 0", () => {
-    expect(page).toMatch(/buyerNew > 0 &&/);
-    expect(page).toMatch(/data-testid="dashboard-outgoing-requests-new"/);
-  });
-});
+// The count-gated dashboard markers lived on the second dashboard, deleted by
+// W3 Package 4. The new-count surface that remains is the notification spine
+// (serviceRequestResponsesNew), pinned by lib/guards/notification-spine.test.ts;
+// the pure logic, RPC boundary and visit-marks-seen wiring stay pinned above.
 
 describe("new-badge copy present across active locales", () => {
   for (const loc of ["en", "lt", "ru"] as const) {

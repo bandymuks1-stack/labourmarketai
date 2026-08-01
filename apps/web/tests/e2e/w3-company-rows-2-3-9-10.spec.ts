@@ -186,7 +186,7 @@ test.describe("rows 9/10 — the spine carries the service-request signals (comp
   test.beforeAll(clearSeeded);
   test.afterAll(clearSeeded);
 
-  test("zero state: no rows → no signals, no advanced cards (count-gated)", async ({
+  test("zero state: no rows → no signals (count-gated)", async ({
     page,
   }) => {
     const w = watch(page);
@@ -199,9 +199,8 @@ test.describe("rows 9/10 — the spine carries the service-request signals (comp
     await expect(
       page.locator('a[data-testid="notification-signal-service-request-responses"]'),
     ).toHaveCount(0);
-    await page.goto("/lt/dashboard/advanced");
-    await expect(page.getByTestId("dashboard-service-requests-next-action")).toHaveCount(0);
-    await expect(page.getByTestId("dashboard-outgoing-requests-next-action")).toHaveCount(0);
+    // (The advanced next-action cards died with /dashboard/advanced — W3
+    // Package 4. The bell above is the one count-gated presentation.)
     w.assertClean();
   });
 
@@ -259,17 +258,9 @@ test.describe("rows 2/3 — door-panels: every destination is canonical without 
     viewport: { width: 1440, height: 900 },
   });
 
-  test("the advanced cards render real counts today (they die with the route)", async ({
-    page,
-  }) => {
-    const w = watch(page);
-    await page.goto("/lt/dashboard/advanced");
-    // The hub folds into the collapsed more-section — open it first.
-    await page.getByTestId("dashboard-more-section").locator("> summary").click();
-    await expect(page.getByTestId("premium-hub-company").first()).toBeVisible();
-    await expect(page.getByTestId("premium-hub-project").first()).toBeVisible();
-    w.assertClean();
-  });
+  // (The "advanced cards render real counts today" test died with the route —
+  // W3 Package 4 deleted /dashboard/advanced and the premium-hub cards with
+  // it. What remains to prove is that every door's DESTINATION is canonical.)
 
   test("company card destinations exist canonically", async ({ page }) => {
     const w = watch(page);

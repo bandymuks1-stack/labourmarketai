@@ -414,19 +414,6 @@
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     }
   },
-  "opportunityDirections": {
-    "heading": "Wo Ihre Fähigkeiten noch passen könnten",
-    "intro": "Auf Basis Ihres Profils und Ihrer vorhandenen Fähigkeiten haben wir verwandte berufliche Richtungen gefunden, in denen Sie mehr Möglichkeiten haben könnten.",
-    "fitBecause": "Passt aufgrund von:",
-    "couldStrengthen": "Um die Übereinstimmung zu stärken, benötigen Sie möglicherweise:",
-    "viewOpportunities": "Möglichkeiten ansehen",
-    "addSkills": "Fähigkeiten hinzufügen",
-    "addProfileCta": "Profil vervollständigen",
-    "showMore": "Mehr anzeigen",
-    "showLess": "Weniger anzeigen",
-    "insufficientBody": "Fügen Sie weitere Fähigkeiten hinzu, damit wir Ihnen mehr berufliche Richtungen zeigen können.",
-    "noneBody": "Wir haben noch nicht genügend zuverlässige verwandte Richtungen aus Ihren Fähigkeiten gefunden. Vervollständigen Sie Ihr Profil, um mehr zu sehen."
-  },
   "activityCentre": {
     "eyebrow": "Aktivitätszentrum",
     "title": "Aktivität",
@@ -788,79 +775,6 @@
     "buyer": {
       "name": "Meine Anfragen",
       "purpose": "Erstellen und verwalten Sie Anfragen für Produkte, Dienstleistungen, Spezialisten, Lieferanten oder Teams."
-    }
-  },
-  "identityActions": {
-    "ariaLabel": "Ihre Identitäten und Aktionen",
-    "manageSpaces": "Rolle wechseln / Bereiche verwalten",
-    "person": {
-      "title": "Sie als Person",
-      "subtitle": "Ihr persönliches Konto.",
-      "actions": {
-        "profile": {
-          "title": "Profil & Lebenslauf",
-          "desc": "Erstellen Sie Ihr Profil, Ihre Fähigkeiten und Ihren Lebenslauf."
-        },
-        "findWork": {
-          "title": "Arbeit finden",
-          "desc": "Sehen Sie Arbeitsmöglichkeiten in allen Branchen."
-        },
-        "readiness": {
-          "title": "Bereitschaft",
-          "desc": "Verwalten Sie Ihre Dokumente und Ihren Arbeitsstatus."
-        },
-        "playerCard": {
-          "title": "Meine Karte",
-          "desc": "Ihre Karte für Bereitschaft und Fähigkeiten."
-        },
-        "communication": {
-          "title": "Kommunikation",
-          "desc": "Unterhaltungen und Nachrichten."
-        },
-        "marketMap": {
-          "title": "Marktkarte",
-          "desc": "Sehen Sie Marktsignale: Nachfrage, Bereitschaft, Dokumentlücken und Risiken. Wenn Daten noch eine Vorschau sind, sind sie als Vorschau markiert."
-        }
-      }
-    },
-    "company": {
-      "title": "Ihr Unternehmen",
-      "workspaceSubtitle": "Unternehmensbereich",
-      "subtitle": "Ihr Organisationskonto und was es kann.",
-      "actions": {
-        "need": {
-          "title": "Bedarf einreichen",
-          "desc": "Beschreiben Sie die Arbeitskräfte oder Dienstleistungen, die Sie brauchen."
-        },
-        "hire": {
-          "title": "Einstellen",
-          "desc": "Durchsuchen Sie Kandidaten und Shortlists."
-        },
-        "buy": {
-          "title": "Dienstleistungen kaufen",
-          "desc": "Erstellen und verfolgen Sie Anfragen."
-        },
-        "offer": {
-          "title": "Arbeitskräfte / Teams anbieten",
-          "desc": "Präsentieren Sie Kandidaten oder Teams als Partner."
-        },
-        "projects": {
-          "title": "Projekte verwalten",
-          "desc": "Führen Sie Ihre Projekte und Abläufe."
-        },
-        "communication": {
-          "title": "Kommunikation",
-          "desc": "Unterhaltungen mit Personen und über Projekte."
-        },
-        "marketMap": {
-          "title": "Marktkarte",
-          "desc": "Sehen Sie Marktsignale: Nachfrage, Bereitschaft, Dokumentlücken und Risiken. Wenn Daten noch eine Vorschau sind, sind sie als Vorschau markiert."
-        }
-      },
-      "empty": {
-        "cta": "Unternehmen erstellen",
-        "desc": "Fügen Sie Ihre Organisation hinzu, um Unternehmensaktionen zu nutzen. Nichts wird erstellt, bis Sie es ausfüllen."
-      }
     }
   },
   "companyActionRooms": {
@@ -3569,91 +3483,11 @@
       "clarityNote": "Ein Konto, zwei Identitäten — Sie als Person und Ihr Unternehmen. Der Wechsel ändert nur, welche Aktionen Sie sehen (Arbeit finden, Dienstleistungen anbieten, einstellen, einen Bedarf einreichen); Agentur und Einkauf sind Aktionen, keine separaten Systeme. Einige Unternehmensaktionen benötigen später möglicherweise ein Organisationsprofil."
     },
     "dashboard": {
-      "topSlot": {
-        "eyebrow": "Jetzt am wichtigsten"
-      },
-      "statusStrip": {
-        "title": "Was jetzt auf Sie wartet",
-        "allClear": "Im Moment wartet nichts auf Ihre Aufmerksamkeit.",
-        "viewAll": "Alle Aktivitäten",
-        "calendar": "Kalender"
-      },
-      "moduleGrid": {
-        "manage": "Karten anpassen",
-        "done": "Fertig",
-        "moveUp": "Nach oben",
-        "moveDown": "Nach unten",
-        "hide": "Ausblenden",
-        "hiddenTitle": "Ausgeblendete Karten",
-        "showAll": "Alle Aktionen anzeigen ({count})",
-        "showLess": "Weniger anzeigen"
-      },
       "jobsCard": {
         "title": "Passende Jobs für mich",
         "viewAll": "Alle Anzeigen",
         "empty": "Derzeit keine passenden Anzeigen — ergänzen Sie Ihre Fähigkeiten im Profil.",
         "emptyCta": "Profil ergänzen"
-      },
-      "myZone": {
-        "actionsHeading": "Aktionen",
-        "incompleteStatus": "Ihre Angaben sind noch nicht vollständig",
-        "readyStatus": "Ihr Profil ist bereit",
-        "missing": {
-          "progress": "{n, plural, one {Noch # Schritt} other {Noch # Schritte}} — tippen Sie auf einen Punkt und füllen Sie ihn direkt aus.",
-          "profession": {
-            "title": "Geben Sie Ihren Beruf an",
-            "hint": "Öffnet die Profilbearbeitung — wählen Sie Ihren Hauptberuf. Ein ausgefülltes Profil lässt Arbeitgeber Sie gemäß Ihren Datenschutzeinstellungen finden."
-          },
-          "firstEntry": {
-            "title": "Erfassen Sie Ihren ersten Arbeitseintrag",
-            "hint": "Öffnet das Arbeitsjournal — beschreiben Sie kurz, woran Sie gearbeitet haben. Einträge ergänzen Ihr Profil und Ihren Lebenslauf."
-          }
-        },
-        "actions": {
-          "recordWork": {
-            "title": "Arbeit erfassen",
-            "desc": "Einträge ergänzen Profil und Lebenslauf"
-          },
-          "improveProfile": {
-            "title": "Profil verbessern",
-            "desc": "Profil und Lebenslauf"
-          },
-          "mapVisibility": {
-            "title": "Auf der Karte sichtbar sein",
-            "desc": "Wo Sie gesehen werden"
-          },
-          "findOpportunities": {
-            "title": "Chancen ansehen",
-            "desc": "Arbeit, die zu Ihnen passt"
-          },
-          "planning": {
-            "title": "Kalender",
-            "desc": "Buchungen, Projekte und Fristen in einer Agenda"
-          },
-          "bookings": {
-            "title": "Buchungen",
-            "desc": "Vorschläge und Zusagen"
-          },
-          "documents": {
-            "title": "Berichte und Dokumente",
-            "desc": "Ihre Berichte und Dateien"
-          },
-          "checkMessages": {
-            "title": "Nachrichten prüfen",
-            "desc": "Ihre Unterhaltungen"
-          },
-          "companyActions": {
-            "title": "Unternehmensaktionen",
-            "desc": "Ihr Unternehmen"
-          }
-        },
-        "improvesHeading": "Was was verbessert",
-        "improves": {
-          "journal": "Ihr Arbeitsjournal baut Ihre Fähigkeiten, Ihr Profil und Ihren Lebenslauf auf.",
-          "profile": "Ihr Profil und Ihr Lebenslauf erhöhen Ihre Sichtbarkeit.",
-          "map": "Die Karte steuert, wo Sie sichtbar sind.",
-          "messages": "Nachrichten sind nur für vertrauenswürdigen, erlaubten Kontakt."
-        }
       },
       "firstUse": {
         "eyebrow": "Hier starten",
@@ -4028,7 +3862,6 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netzwerk",
-        "advanced": "Erweiterte Steuerung",
         "playerCard": "Meine Karte"
       },
       "roleNotice": {
@@ -4037,60 +3870,6 @@
         "needs_agency_role": "Dieser Link öffnet den Personalagentur-Bereich, den Ihr Konto noch nicht hat. Öffnen Sie den Bereichs-Hub und wählen Sie den Personalagentur-Pfad.",
         "needs_customer_role": "Dieser Link öffnet den Kundenbereich, den Ihr Konto noch nicht hat. Starten Sie den Kunden-Pfad im Bereichs-Hub.",
         "cta": "Bereichs-Hub öffnen"
-      },
-      "chainActions": {
-        "buyerTitle": "Käuferanfragen",
-        "buyerSubtitle": "Erstellen und verfolgen Sie Ihre Anfragen — was Sie auf dem Marktplatz suchen (Produkt, Dienstleistung, Spezialist, Meister, Auftragnehmer, Lieferant oder Team).",
-        "buyerRequests": "Meine Anfragen",
-        "buyerRequestsDesc": "Erstellen oder aktualisieren Sie eine Anfrage und verfolgen Sie ihren Status.",
-        "title": "Arbeitsjournal-Prüfkette",
-        "subtitle": "Beginnen Sie hier: Laden Sie eine Arbeitskraft ein, aktivieren Sie die Prüfung und prüfen Sie ihre Einträge.",
-        "inviteWorker": "Arbeitskraft einladen",
-        "inviteWorkerDesc": "Verknüpfen Sie eine Arbeitskraft per E-Mail mit Ihrer Organisation.",
-        "enableReview": "Arbeitsjournal-Prüfung aktivieren",
-        "enableReviewDesc": "Weisen Sie eine Rolle zu, verbinden Sie den Journal-Kontext, schalten Sie die Prüfung ein.",
-        "reviewEntries": "Arbeitseinträge prüfen",
-        "reviewEntriesDesc": "Genehmigen, ablehnen oder Änderungen zu eingereichten Einträgen anfordern.",
-        "workJournal": "Arbeitsjournal",
-        "workJournalDesc": "Erfassen Sie einen echten Arbeitsjournal-Eintrag."
-      },
-      "nextAction": {
-        "eyebrow": "Nächster Schritt",
-        "worker_complete_profile": {
-          "title": "Vervollständigen Sie Ihr Profil",
-          "body": "Geben Sie an, was Sie machen, und fügen Sie Ihre Fähigkeiten hinzu, damit Ihr Arbeitsnachweis etwas aussagt.",
-          "cta": "Profil vervollständigen"
-        },
-        "worker_first_entry": {
-          "title": "Ersten Arbeitseintrag hinzufügen",
-          "body": "Ihr Profil ist eingerichtet. Schreiben Sie etwas auf, das Sie getan haben — es bleibt privat, bis Sie sich entscheiden, es zu teilen.",
-          "cta": "Eintrag erstellen"
-        },
-        "worker_waiting": {
-          "title": "Ihre Einträge warten auf die Prüfung",
-          "body": "Gespeichert und privat. Warten auf Prüfung durch einen Manager: {waiting}. Im Moment ist nichts weiter von Ihnen erforderlich.",
-          "cta": "Nachweisstatus prüfen"
-        },
-        "worker_all_confirmed": {
-          "title": "Alles erledigt",
-          "body": "Jeder Eintrag ist geprüft. Fügen Sie einen neuen hinzu, damit Ihr Arbeitsnachweis weiter wächst.",
-          "cta": "Eintrag hinzufügen"
-        },
-        "manager_review_pending": {
-          "title": "Einträge der Arbeitskräfte prüfen",
-          "body": "Einträge, die auf Ihre Prüfung warten: {pending}.",
-          "cta": "Einträge prüfen"
-        },
-        "manager_invite": {
-          "title": "Arbeitskraft einladen",
-          "body": "Keine Einträge warten. Laden Sie eine Arbeitskraft ein oder öffnen Sie Ihr Team, um zu beginnen.",
-          "cta": "Arbeitsbereich öffnen"
-        },
-        "customer_requests": {
-          "title": "Verwalten Sie Ihre Anfragen",
-          "body": "Erstellen Sie eine neue Anfrage oder verfolgen Sie den Status der bereits gesendeten.",
-          "cta": "Anfragen öffnen"
-        }
       },
       "section": {
         "offer": {
@@ -4189,9 +3968,33 @@
         "bookings": "Buchungen",
         "skills": "Meine Fähigkeiten"
       },
-      "moreSection": {
-        "title": "Ausführliche Übersicht",
-        "hint": "Status, Anfragen und weitere Karten"
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Arbeit erfassen",
+            "desc": "Einträge ergänzen Profil und Lebenslauf"
+          },
+          "improveProfile": {
+            "title": "Profil verbessern",
+            "desc": "Profil und Lebenslauf"
+          },
+          "findOpportunities": {
+            "title": "Chancen ansehen",
+            "desc": "Arbeit, die zu Ihnen passt"
+          },
+          "bookings": {
+            "title": "Buchungen",
+            "desc": "Vorschläge und Zusagen"
+          },
+          "documents": {
+            "title": "Berichte und Dokumente",
+            "desc": "Ihre Berichte und Dateien"
+          },
+          "companyActions": {
+            "title": "Unternehmensaktionen",
+            "desc": "Ihr Unternehmen"
+          }
+        }
       }
     },
     "middleware": {
@@ -8709,88 +8512,6 @@
     "prepared": "Bezahlte Pläne sind vorbereitet, aber nicht kaufbar. Zahlungen sind nicht aktiviert und es wird keine Zahlungsmethode benötigt.",
     "pricingLink": "Sehen Sie, was kostenlos ist und was kostenpflichtig sein wird"
   },
-  "premiumHub": {
-    "brand": "LabourMarket.ai",
-    "pageTitle": "Kontrollzentrum",
-    "pageLead": "Ein Ort, um Ihre berufliche Identität, Ihr Team, Ihren Markt und Ihr Projekt zu überblicken.",
-    "unavailable": "Diese Daten sind derzeit nicht verfügbar.",
-    "openHint": "Öffnen",
-    "yes": "Ja",
-    "no": "Nein",
-    "person": {
-      "title": "Persönliche Karte",
-      "openProfile": "Profil öffnen",
-      "availability": {
-        "available": "Verfügbar für Arbeit",
-        "busy": "Beschäftigt",
-        "unavailable": "Nicht verfügbar"
-      },
-      "stats": {
-        "skills": "Fähigkeiten",
-        "supported": "Durch Arbeit belegt",
-        "entries": "Arbeitseinträge",
-        "legend": "Fähigkeiten — alles, was Sie angegeben haben. Durch Arbeit belegt — die, die Ihre Journaleinträge stützen."
-      },
-      "empty": {
-        "title": "Profil noch nicht ausgefüllt",
-        "body": "Laden Sie einen Lebenslauf hoch oder vervollständigen Sie Ihr Profil, um diese Karte sichtbar zu machen.",
-        "cta": "Profil vervollständigen"
-      }
-    },
-    "company": {
-      "title": "Unternehmenskarte",
-      "openSpace": "Unternehmensbereich öffnen",
-      "unnamed": "Unternehmen",
-      "stats": {
-        "team": "Team",
-        "projects": "Projekte",
-        "invites": "Einladungen"
-      },
-      "empty": {
-        "title": "Noch kein Unternehmen",
-        "body": "Erstellen Sie eine Unternehmenskarte, wenn Sie einstellen, ein Team verwalten oder Baustellen betreiben möchten.",
-        "cta": "Unternehmen erstellen"
-      }
-    },
-    "map": {
-      "title": "Marktkarte",
-      "open": "Marktkarte öffnen",
-      "lead": "Ein Überblick über Ihre Marktsignale.",
-      "signals": {
-        "preferred": "Bevorzugte Standorte",
-        "needs": "Bedarfe",
-        "login": "Login-Signal"
-      },
-      "empty": {
-        "title": "Noch keine Marktsignale",
-        "body": "Fügen Sie bevorzugte Standorte oder Bedarfe hinzu, damit die Karte beginnt, Chancen anzuzeigen.",
-        "cta": "Signale hinzufügen"
-      }
-    },
-    "project": {
-      "title": "Projektkarte",
-      "open": "Projekt öffnen",
-      "openGallery": "Projektfotos und Arbeitsnachweise öffnen",
-      "unnamed": "Projekt",
-      "imageAlt": "Ansicht der Baustelle des Projekts",
-      "handover": {
-        "preparation": "In Vorbereitung",
-        "in_progress": "In Bearbeitung",
-        "handover_declared": "Übergabe erklärt",
-        "closed": "Abgeschlossen"
-      },
-      "stats": {
-        "ready": "Bereit",
-        "team": "Team",
-        "photos": "Fotos"
-      },
-      "empty": {
-        "title": "Arbeitspass noch nicht begonnen",
-        "body": "Sobald eine Baustelle, Arbeitseinträge oder Übergabeaktionen erscheinen, werden sie hier angezeigt.",
-        "cta": "Projekte ansehen"
-      }
-    }
-  },
   "privacyConsent": {
     "sections": {
       "visibility": "Sichtbarkeit für Arbeitgeber",
@@ -11032,7 +10753,6 @@
       "headerTitle": "LabourMarket",
       "assistantName": "LabourMarket AI",
       "speakerYou": "Du",
-      "advanced": "Erweiterter Modus",
       "composerPlaceholder": "Schreib, was du brauchst…",
       "send": "Senden",
       "attach": "Datei anhängen",

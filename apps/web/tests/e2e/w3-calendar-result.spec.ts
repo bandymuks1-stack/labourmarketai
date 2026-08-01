@@ -64,8 +64,11 @@ function isoDay(offsetDays: number): string {
   return new Date(Date.now() + offsetDays * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** Seed ONE real proposed booking inside the agenda window. */
+/** Seed ONE real proposed booking inside the agenda window. Idempotent —
+ *  clears the fixture request's rows first so an aborted earlier run can
+ *  never trip the unique (owner,request,worker) constraint. */
 async function seedWindowBooking(): Promise<void> {
+  await clearBookings();
   const r = await db("POST", "booking_requests", {
     owner_id: COMPANY_USER_ID,
     request_id: REQUEST_ID,

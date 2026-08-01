@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -22,48 +22,15 @@ import { join } from "node:path";
  *      ACTION IS — the work-card model's `whyKey` per dimension. Help
  *      detached from action dies with the route.
  *
- * These guards pin the facts that make the classification safe to keep.
+ * W3 Package 4 executed the deletion: MyZone and its single advanced-page
+ * mount are gone. What remains pinned here is the SURVIVING side of the
+ * classification — the canonical work-card model and its player-card home.
  */
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-function walk(dir: string, out: string[] = []): string[] {
-  for (const entry of readdirSync(dir)) {
-    const p = join(dir, entry);
-    const s = statSync(p);
-    if (s.isDirectory()) {
-      if (entry === "node_modules" || entry === ".next" || entry === ".turbo") continue;
-      walk(p, out);
-    } else if (
-      (p.endsWith(".ts") || p.endsWith(".tsx")) &&
-      !p.endsWith(".test.ts")
-    ) {
-      out.push(p);
-    }
-  }
-  return out;
-}
-
-describe("W3 row 21 — MyZone is presentation over state that lives elsewhere", () => {
-  it("MyZone reads nothing and writes nothing — presentation only", () => {
-    const src = read("components/app/my-zone.tsx");
-    expect(src).not.toMatch(/supabase/i);
-    expect(src).not.toMatch(/\.from\(/);
-    expect(src).not.toMatch(/\.rpc\(/);
-    expect(src).not.toMatch(/fetch\(/);
-    expect(src).not.toMatch(/"use server"/);
-  });
-
-  it("MyZone has exactly ONE mount — the dying advanced page", () => {
-    const mounts = ["app", "components", "lib"]
-      .flatMap((d) => walk(join(ROOT, d)))
-      .filter((p) => /<MyZone[\s>]/.test(readFileSync(p, "utf8")))
-      .map((p) => p.replaceAll("\\", "/"));
-    expect(mounts).toHaveLength(1);
-    expect(mounts[0]).toContain("dashboard/advanced/page.tsx");
-  });
-
+describe("W3 row 21 — the canonical work-card model carries MyZone's capabilities", () => {
   it("MyZone's two dimensions are a strict subset of the canonical work-card model", () => {
     const model = read("lib/worker/work-card-state.ts");
     // `work` covers the profession dimension…
@@ -84,12 +51,7 @@ describe("W3 row 21 — MyZone is presentation over state that lives elsewhere",
     expect(result).toMatch(/WorkCardEditor/);
   });
 
-  it("the explainer copy has no consumer besides MyZone — deletion is clean", () => {
-    const consumers = ["app", "components", "lib"]
-      .flatMap((d) => walk(join(ROOT, d)))
-      .filter((p) => readFileSync(p, "utf8").includes("improvesHeading"))
-      .map((p) => p.replaceAll("\\", "/"));
-    expect(consumers).toHaveLength(1);
-    expect(consumers[0]).toContain("components/app/my-zone.tsx");
-  });
+  // The single-mount and explainer-single-consumer pins proved the deletion
+  // was clean BEFORE Package 4 ran it; both are now facts of history, and
+  // absence is owned by the deletion ratchet (w3-return-to-workspace).
 });

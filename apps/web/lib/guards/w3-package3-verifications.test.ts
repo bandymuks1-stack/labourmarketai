@@ -9,7 +9,8 @@ import { join } from "node:path";
  *   header-search overlay, mounted on every dashboard page. The advanced
  *   page's inline mount dies with the route.
  * - Row 22 (`PrivacyStatusCard`): a status DOOR (read + link) whose canonical
- *   destination `/dashboard/privacy` owns the capability. Dies with the route.
+ *   destination `/dashboard/privacy` owns the capability. Died with the route
+ *   (W3 Package 4); the canonical surface pin below is what survives.
  * - Row 23 (`TelemetryView`): a generic product-wide telemetry component; the
  *   advanced mount is only that page's own view event.
  * - Row 27 (card preferences): preferences FOR the advanced card grid —
@@ -26,13 +27,8 @@ describe("row 20 — the command finder survives at the layout level", () => {
   });
 });
 
-describe("row 22 — the privacy card is a door onto the canonical privacy surface", () => {
-  it("reads status, links /dashboard/privacy, writes nothing", () => {
-    const src = read("components/app/privacy-status-card.tsx");
-    expect(src).toMatch(/href="\/dashboard\/privacy"/);
-    expect(src).not.toMatch(/<form|action=\{|\brpc\(/);
-  });
-
+describe("row 22 — the canonical privacy surface owns the capability", () => {
+  // The card (a read+link door) died with the route in W3 Package 4.
   it("the canonical privacy surface exists and owns the real capability", () => {
     expect(existsSync(join(APP, "app/[locale]/dashboard/privacy/page.tsx"))).toBe(true);
     const page = read("app/[locale]/dashboard/privacy/page.tsx");

@@ -40,11 +40,6 @@ describe("Guard: the company page wires the canonical demand read-back (W3 7/8/2
     expect(page).toMatch(/listOwnCustomerRequests\(EMPLOYER_DEMAND_KINDS\)/);
     expect(page).toMatch(/"company_request",\s*"agency_offer"/);
   });
-
-  it("the advanced page no longer mounts the read-back", () => {
-    const advanced = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(advanced).not.toMatch(/DemandRequestsReadback/);
-  });
 });
 
 describe("Guard: the read-back component is honest + status-only", () => {

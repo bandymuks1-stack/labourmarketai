@@ -69,7 +69,6 @@ export type ChatLabels = {
   headerTitle: string;
   assistantName: string;
   speakerYou: string;
-  advanced: string;
   navChat: string;
   navJournal: string;
   navMessages: string;
@@ -967,7 +966,6 @@ export function ConversationChat({
     messages: labels.navMessages,
     calendar: labels.navCalendar,
     profile: labels.navProfile,
-    advanced: labels.advanced,
   };
 
   /** OPENING state (owner audit §4.1) — mirrors the thread's own predicate:

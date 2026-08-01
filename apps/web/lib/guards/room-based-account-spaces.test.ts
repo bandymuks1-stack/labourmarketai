@@ -16,24 +16,9 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const lt = JSON.parse(read("messages/lt.json"));
 const en = JSON.parse(read("messages/en.json"));
 
-describe("current-space header makes the active space obvious + focused", () => {
-  const comp = read("components/app/current-space-header.tsx");
-  const page = read("app/[locale]/dashboard/advanced/page.tsx");
-  it("maps every role to exactly one space", () => {
-    for (const role of ["worker", "company", "agency", "customer"]) {
-      expect(comp).toMatch(new RegExp(`${role}:\\s*"(profile|company|agency|buyer)"`));
-    }
-  });
-  it("renders space name + purpose + a compact open-space link", () => {
-    expect(comp).toMatch(/t\(`\$\{key\}\.name`\)/);
-    expect(comp).toMatch(/t\(`\$\{key\}\.purpose`\)/);
-    expect(comp).toMatch(/t\("openSpace"\)/);
-    expect(comp).toMatch(/data-testid="open-space-link"/);
-  });
-  it("is mounted on the dashboard (current space shown at the top)", () => {
-    expect((page.match(/<CurrentSpaceHeader role=\{role\} \/>/g) ?? []).length).toBeGreaterThanOrEqual(2);
-  });
-});
+// The CurrentSpaceHeader pins left with the header and the page that
+// mounted it — W3 Package 4 deleted the /dashboard/advanced second
+// dashboard. The spaces copy the rooms still use stays pinned below.
 
 describe("spaces namespace exists in LT + EN with switcher labels", () => {
   for (const [name, json] of [["lt", lt], ["en", en]] as const) {
@@ -59,12 +44,12 @@ describe("spaces namespace exists in LT + EN with switcher labels", () => {
 });
 
 describe("a buyer never buys workers", () => {
-  // Buyer-context copy: the spaces.buyer block + the dashboard buyer chain-action subtitle.
+  // Buyer-context copy: the spaces.buyer block + the buyer role dashboard.
+  // (The chain-action subtitle left with the second dashboard's chain
+  // actions — W3 Package 4.)
   const buyerBlobs = [
     JSON.stringify(lt.spaces.buyer),
     JSON.stringify(en.spaces.buyer),
-    lt.auth.dashboard.chainActions.buyerSubtitle,
-    en.auth.dashboard.chainActions.buyerSubtitle,
     JSON.stringify(lt.roleDashboards.buyer),
     JSON.stringify(en.roleDashboards.buyer),
   ].join(" ");
@@ -94,39 +79,17 @@ describe("spaces stay separated", () => {
   });
 });
 
-describe("active /dashboard room shows only the current space (no cross-space soup)", () => {
-  const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
+describe("account never becomes a second dashboard", () => {
+  // The advanced-room and CurrentSpaceHeader pins above/below died with the
+  // second dashboard itself — W3 Package 4 deleted /dashboard/advanced.
   const account = read("app/[locale]/dashboard/account/page.tsx");
-  it("the active dashboard room renders NO all-roles catalogue as permanent content", () => {
-    expect(dashboard).not.toMatch(/<RoleCatalogueGrid\b/);
-    expect(dashboard).not.toMatch(/getVisibleRoleOptions/);
-  });
-  it("the active dashboard room renders NO generic future-module grid", () => {
-    expect(dashboard).not.toMatch(/<FeatureAvailabilityGrid\b/);
-  });
   it("account is settings only — it does NOT host the cross-space catalogue (superseded PR #204)", () => {
     // Owner override 2026-06-25: account must not be a second dashboard. The
     // catalogue + future-module grid were removed from account; identity
-    // switching is the header role switcher, person↔company actions live on the
-    // dashboard overview. The active room staying clean (above) is unchanged.
+    // switching is the header role switcher.
     expect(account).not.toMatch(/<RoleCatalogueGrid\b/);
     expect(account).not.toMatch(/<FeatureAvailabilityGrid\b/);
     expect(account).not.toMatch(/<IdentityActions\b/);
-  });
-  it("the current-space header opens the ACTIVE space's hub, never settings", () => {
-    // Owner P0 2026-07-02: account is settings-only, so the header chip must
-    // NOT route there. Rebuild W5: the agency room is a REDIRECT_STUB and the
-    // buyer room is DUPLICATE_DRIFT — both spaces open the CANONICAL company
-    // workspace directly (no live links into stub/drift routes). Settings
-    // stays reachable via the avatar AccountMenu ("Nustatymai").
-    const comp = read("components/app/current-space-header.tsx");
-    expect(dashboard).toMatch(/<CurrentSpaceHeader role=\{role\} \/>/);
-    // no account route as a VALUE (the constraint comment may name the path)
-    expect(comp).not.toMatch(/["'`]\/dashboard\/account["'`]/);
-    expect(comp).toMatch(/profile: "\/dashboard\/profile"/);
-    expect(comp).toMatch(/company: "\/dashboard\/company"/);
-    expect(comp).toMatch(/agency: "\/dashboard\/company"/);
-    expect(comp).toMatch(/buyer: "\/dashboard\/company"/);
   });
 });
 

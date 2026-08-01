@@ -252,8 +252,12 @@ describe("activation funnel — key surfaces emit their events", () => {
       mustContain: ["companyDemandActionClicked"],
     },
     {
-      file: "app/[locale]/dashboard/advanced/page.tsx",
-      mustContain: ["dashboardViewed", "firstActionCardViewed"],
+      // W3 Package 4 deleted the /dashboard/advanced second dashboard; the
+      // chat root's action registry is the surviving dashboard_viewed emitter
+      // (worker.what-next). first_action_card_viewed lost its surface with
+      // that page — the event itself stays in the registry contract above.
+      file: "lib/conversation/action-registry.ts",
+      mustContain: ["dashboardViewed"],
     },
     {
       file: "app/[locale]/dashboard/profile/page.tsx",

@@ -33,12 +33,9 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
     expect(page).toMatch(/<DemandRequestButton/);
   });
 
-  it("the advanced page carries NO demand surface any more", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(page).not.toMatch(/id="demand-intake"/);
-    expect(page).not.toMatch(/DemandRequestButton/);
-    expect(page).not.toMatch(/DemandRequestsReadback/);
-  });
+  // W3 Package 4 deleted the advanced page itself, so "the advanced page
+  // carries no demand surface" no longer needs a file-level check here — the
+  // deletion ratchet (w3-return-to-workspace / route-truth-map) owns absence.
 
   it("the workspace-switching action targets the company route's anchor", () => {
     const action = read("lib/company/demand-intake-navigation.ts");

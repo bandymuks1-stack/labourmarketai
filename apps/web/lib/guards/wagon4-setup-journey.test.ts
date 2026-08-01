@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -55,14 +55,23 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
 
   it("each step links to an existing canonical surface", () => {
     expect(JOURNEY).toMatch(/\/dashboard\/profile#profile-edit/);
-    expect(JOURNEY).toMatch(/\/dashboard#work-card/);
+    // The `id="work-card"` anchor died with the second dashboard (W3
+    // Package 4); the location step now opens the work-card capability's
+    // canonical home — the player-card result in the workspace panel.
+    expect(JOURNEY).toMatch(/\/dashboard\?result=player-card/);
+    expect(JOURNEY).not.toMatch(/href: "\/dashboard#work-card"/);
     expect(JOURNEY).toMatch(/\/dashboard\/profile#cv-availability/);
-    // the anchors actually exist on their target pages
+    // the profile anchors actually exist on their target page
     const profile = read("app/[locale]/dashboard/profile/page.tsx");
     expect(profile).toMatch(/id="profile-edit"/);
     expect(profile).toMatch(/id="cv-availability"/);
-    const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
-    expect(dashboard).toMatch(/id="work-card"/);
+    // …and the player-card result really carries the editor.
+    expect(
+      existsSync(join(APP, "app", "[locale]", "dashboard", "page.tsx")),
+    ).toBe(true);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /<WorkCardEditor/,
+    );
   });
 });
 

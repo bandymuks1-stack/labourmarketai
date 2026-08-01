@@ -188,40 +188,10 @@ describe("company switcher wiring", () => {
 });
 
 // ── 5. server-side dashboard preferences wiring ─────────────────────────────
-
-describe("server-side dashboard card preferences", () => {
-  it("read + write both feature-detect the unapplied migration (42P01) and fall back honestly", () => {
-    const reader = read("lib/dashboard/preferences.ts");
-    expect(reader).toMatch(/42P01/);
-    expect(reader).toMatch(/unavailable/);
-    const action = read("lib/dashboard/preferences-actions.ts");
-    expect(action).toMatch(/42P01/);
-    expect(action).toMatch(/sanitizeCardPrefs/);
-    expect(action).toMatch(/fitsPreferencesByteBudget/);
-  });
-
-  it("the grid keeps the device-local fallback ONLY when the server store is unavailable", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/serverPrefs/);
-    expect(grid).toMatch(/saveDashboardCardPreferences/);
-    expect(grid).toMatch(/CARD_PREFS_STORAGE_KEY/); // fallback still exists
-    expect(grid).toMatch(/if \(serverMode\) return/); // no local read in server mode
-  });
-
-  it("the overview passes per-context server prefs to BOTH grid render sites", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    // Wagon 2: the prefs read is kicked off BEFORE the main batch (overlapped
-    // promise chained off the request-cached session profile) — still strictly
-    // per-(profile, context): worker → person, everything else → company.
-    expect(page).toMatch(
-      /getDashboardCardPreferences\(\s*prefsRole === "worker" \? "person" : "company",?\s*\)/,
-    );
-    expect(page).toMatch(/await cardPrefsPromise/);
-    expect(
-      (page.match(/serverPrefs=\{serverCardPrefs\}/g) ?? []).length,
-    ).toBe(2);
-  });
-});
+// W3 Package 4 deleted the second dashboard and its card-preference layer
+// (lib/dashboard/preferences*, the module grid); decision 4's client wiring is
+// gone with it. The migration + ledger pins above stay — the deferred schema
+// remains owner-gated regardless of the deleted consumer.
 
 // ── 6. decision-first company overview ──────────────────────────────────────
 

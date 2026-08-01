@@ -266,13 +266,11 @@ test.describe("Conversation UI — authenticated /dashboard (desktop)", () => {
     }
   });
 
-  test("Advanced mode still renders the module dashboard", async ({ page }) => {
-    // `networkidle` is the wrong wait for this route: the module dashboard is
-    // the heaviest page in the app and keeps fetching after it is usable, so
-    // idling can outlast the timeout while the chrome is already on screen.
-    // Wait for the thing being asserted instead.
-    await page.goto("/lt/dashboard/advanced", { waitUntil: "domcontentloaded" });
-    // The full chrome IS present here (the card overview / module surface).
+  test("module routes still render the full chrome", async ({ page }) => {
+    // The second dashboard (`/dashboard/advanced`) was deleted by W3 Package 4;
+    // the full module chrome survives on the legitimate detail routes. Wait for
+    // the thing being asserted, not for network idle.
+    await page.goto("/lt/dashboard/bookings", { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-chrome="full"]')).toBeVisible({ timeout: 60_000 });
   });
 });

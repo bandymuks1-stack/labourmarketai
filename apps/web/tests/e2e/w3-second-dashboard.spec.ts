@@ -3,19 +3,14 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * W3 — REMOVING THE SECOND DASHBOARD, ONE PROVEN ROW AT A TIME.
+ * W3 — THE SECOND DASHBOARD IS DELETED, AND NO CAPABILITY DIED WITH IT.
  *
- * `/dashboard/advanced` is a 916-line parallel dashboard composing ~27
- * capabilities. It is the architecture violation the owner command names, and
- * it is also the only place several real capabilities currently live — so the
- * migration matrix
+ * `/dashboard/advanced` WAS a 916-line parallel dashboard composing ~27
+ * capabilities. The migration matrix
  * (`docs/audits/evidence/premium-rebuild/w3-capability-migration-matrix.md`)
- * moves one row at a time, and every row gets a browser assertion before the
- * route can be deleted.
- *
- * This file grows one describe-block per migrated row. It is deliberately NOT
- * a "the advanced page renders" smoke test: the point is to prove that
- * REMOVING something did not remove a capability.
+ * moved one row at a time, every row got a browser assertion, and Package 4
+ * deleted the route. This file is now the DELETION PROOF: the route 404s,
+ * and every absorbed capability still answers on its canonical home.
  */
 
 const SHOTS = process.env.E2E_SHOTS_DIR
@@ -30,72 +25,43 @@ test.use({
 });
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
 
-// `/dashboard/advanced` is 916 lines composing ~27 components. Its FIRST dev
-// compile genuinely exceeds the 30s default — that is build cost, not product
-// latency, and shrinking the assertion to hide it would prove less.
+// Cold dev compiles of the surviving routes still exceed the 30s default —
+// that is build cost, not product latency.
 test.setTimeout(180_000);
 
-test.describe("row 4 — the fake market map is gone, the capability is not", () => {
-  test("the advanced route still renders, without a drawn pseudo-map", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    const failed: string[] = [];
-    page.on("console", (m) => {
-      if (m.type() === "error" && !/upgrade-insecure-requests/i.test(m.text())) {
-        consoleErrors.push(m.text());
-      }
+test.describe("Package 4 — /dashboard/advanced is DELETED", () => {
+  /**
+   * The route is GONE, not moved and not redirected. An authenticated user —
+   * the only kind who ever reached it — gets the app's 404, and none of the
+   * page's former markup leaks. Every capability the page carried is proven
+   * on its canonical home by the row blocks below and by the sibling W3 specs
+   * (calendar rows 11/12, company rows 2/3/9/10, demand consolidation, row 28
+   * map collapse).
+   */
+  test("the route 404s for an authenticated user and leaks no advanced markup", async ({
+    page,
+  }) => {
+    const resp = await page.goto("/lt/dashboard/advanced", {
+      waitUntil: "domcontentloaded",
     });
-    page.on("requestfailed", (r) => {
-      const why = r.failure()?.errorText ?? "";
-      if (!why.includes("ERR_ABORTED")) failed.push(`${r.url()} — ${why}`);
-    });
-    page.on("response", (r) => {
-      if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`);
-    });
+    expect(resp?.status(), "a deleted route answers 404, not a render and not a redirect").toBe(404);
 
-    await page.goto("/lt/dashboard/advanced");
-
-    // The market panel lives inside the "More" disclosure — a native <details>,
-    // closed by default. Open it the way a person would, rather than asserting
-    // against a collapsed element and calling the collapse a bug.
-    const more = page.getByTestId("dashboard-more-section");
-    await expect(more).toBeAttached();
-    await more.locator("summary").click();
-
-    // The route is intact — removing the drawing did not break the page.
-    const panel = page.getByTestId("premium-hub-map");
-    await expect(panel).toBeVisible();
-
-    // THE CAPABILITY SURVIVED — in whichever of its two REAL branches this
-    // identity lands in. The fixture worker has no market signals yet, so the
-    // panel correctly renders its honest empty state; a seeded identity renders
-    // the three counts. Asserting only one branch would have made this test a
-    // statement about the fixture rather than about the panel.
-    const values = await panel.locator("dl dd").allTextContents();
-    if (values.length > 0) {
-      expect(values.length, "the three market signal values must survive").toBe(3);
-      for (const v of values) expect(v.trim()).not.toBe("");
-      const door = page.getByTestId("hub-map-open-link");
-      await expect(door).toBeVisible();
-      await expect(door).toHaveAttribute("href", /\/dashboard\/market-map/);
-    } else {
-      // Honest empty state — it must still say something and still open the map.
-      await expect(panel).toContainText(/\S/);
-      await expect(panel.locator('a[href*="/dashboard/market-map"]')).toHaveCount(1);
+    // None of the second dashboard's own surfaces may leak from anywhere.
+    for (const id of [
+      "dashboard-more-section",
+      "dashboard-module-grid",
+      "dashboard-status-strip",
+      "premium-hub-screen",
+      "premium-hub-map",
+      "my-zone",
+      "dashboard-next-action",
+    ]) {
+      await expect(page.getByTestId(id)).toHaveCount(0);
     }
-
-    // THE FAKE MAP IS GONE. The panel drew a 400x260 <svg> of dots at invented
-    // positions; a picture of a map is not a map.
-    expect(
-      await panel.locator("svg[viewBox='0 0 400 260']").count(),
-      "the decorative pseudo-map must not come back",
-    ).toBe(0);
-
-    await page.screenshot({ path: join(SHOTS, "row4-market-panel-1440.png") });
-
-    expect(failed, failed.join("\n")).toEqual([]);
-    expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
   });
+});
 
+test.describe("row 4 — the fake market map is gone, the capability is not", () => {
   test("the door leads to a REAL map, not another drawing", async ({ page }) => {
     // The other half of "no capability was lost": the door has to lead
     // somewhere real.
@@ -210,29 +176,9 @@ test.describe("row 5 — the recommendations card became a result", () => {
     expect(errors, errors.join("\n")).toEqual([]);
   });
 
-  test("the card is gone from /dashboard/advanced, and the route still works", async ({
-    page,
-  }) => {
-    const { errors, failed } = consoleErrorsOf(page);
-
-    await page.goto("/lt/dashboard/advanced");
-
-    // GONE — the second dashboard no longer carries this capability.
-    expect(
-      await page.getByTestId("dashboard-jobs-card").count(),
-      "the recommendations card must not come back to the second dashboard",
-    ).toBe(0);
-
-    // …and removing it did not break the section that hosted it: the "More"
-    // disclosure still opens and still renders its remaining real cards.
-    const more = page.getByTestId("dashboard-more-section");
-    await expect(more).toBeAttached();
-    await more.locator("summary").click();
-    await expect(more).toContainText(/\S/);
-
-    expect(failed, failed.join("\n")).toEqual([]);
-    expect(errors, errors.join("\n")).toEqual([]);
-  });
+  // (The "card is gone from /dashboard/advanced" negative died with the route
+  // itself — Package 4; the deletion-proof block at the top of this file pins
+  // the stronger fact that the whole page 404s.)
 
   test("the result holds up on a phone", async ({ page }) => {
     // The panel docks under the composer on phones. A result that overflows
@@ -588,24 +534,7 @@ test.describe("row 6 — the invitation card became the panel's work context", (
     expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
   });
 
-  test("the card is gone from /dashboard/advanced and that route still works", async ({
-    page,
-  }) => {
-    await seedAgencyInvitation();
-    await page.goto("/lt/dashboard/advanced");
-
-    // The route is intact …
-    const more = page.getByTestId("dashboard-more-section");
-    await expect(more).toBeAttached();
-    await more.locator("summary").click();
-
-    // … and BOTH mounts are gone — including the one inside the disclosure,
-    // which is why the disclosure is opened before asserting.
-    await expect(page.getByTestId("worker-invitations")).toHaveCount(0);
-    await expect(
-      page.locator('[data-testid^="worker-invitation-accept-"]'),
-    ).toHaveCount(0);
-  });
+  // (The advanced-page absence negative died with the route — Package 4.)
 
   test("accepting really links: the REAL RPC returns `linked`", async ({ page }) => {
     await seedAgencyInvitation();
@@ -886,22 +815,8 @@ test.describe("row 1 — the player card became a result", () => {
       .toBe(next);
   });
 
-  test("the card is gone from /dashboard/advanced and that route still works", async ({
-    page,
-  }) => {
-    await page.goto("/lt/dashboard/advanced");
-    const more = page.getByTestId("dashboard-more-section");
-    await expect(more).toBeAttached();
-    await more.locator("summary").click();
-
-    // The hub survives — it still carries the company / market / project
-    // blocks, which are their own W3 rows …
-    await expect(page.getByTestId("premium-hub-screen").first()).toBeVisible();
-    // … but the person block and its editor are gone from this route.
-    await expect(page.getByTestId("premium-hub-person")).toHaveCount(0);
-    await expect(page.getByTestId("premium-hub-person-next")).toHaveCount(0);
-    await expect(page.getByTestId("worker-player-card")).toHaveCount(0);
-  });
+  // (The advanced-page absence negative died with the route — Package 4; the
+  // deletion-proof block pins that the page and the whole hub are gone.)
 
   test("reload, close and Back/Forward all keep the result honest", async ({
     page,

@@ -71,20 +71,40 @@ proof) · `DETAIL` (legitimate separate detail route, not a competing dashboard)
 | 23 | Telemetry view | `TelemetryView` | DETAIL | generic product-wide component | **CONFIRMED 2026-08-01** — the advanced mount is only that page's own view event; dies with it |
 | 24 | Trust insight | `TrustInsightCard` | ABSORB | `reputation` result (gated `unverified`) | **BLOCKED** — missing data source documented 2026-08-01, see the row 24 note |
 | 25 | Demand intake section | inline, `demand-intake-section` | CHAT | the advanced host of row 7 | **RESOLVED 2026-08-01** — died with row 7's move; the advanced page carries no demand surface (guard-pinned) |
-| 26 | Control-room view model | `buildControlRoomViewModel` | — | server model, reusable by the result surface | keep |
+| 26 | Control-room view model | `buildControlRoomViewModel` | **OBSOLETE** | none — "keep-reusable" was re-audited at deletion time: ZERO consumers outside the dying chain (advanced page, module grid, status strip); it is not a kill switch | **DELETED 2026-08-01** (Package 4) |
 | 27 | Card preferences | `getDashboardCardPreferences` | **OBSOLETE** | preferences FOR the advanced card grid | **DECIDED 2026-08-01** — removed together with the grid in Package 4 |
 | 28 | **NEW — found 2026-07-31** | `market-map-base` → `market-map-live` | **COLLAPSED** | the ONE `leaflet-engine.ts` (three presentations) | **DONE 2026-08-01** — see the P3 section; guard + 3/3 ×2 browser proof |
 
 **Counts: 28 capabilities. 4 MIGRATED (rows 1, 4, 5, 6); rows 11/12, 16, 19,
 14, 21 CONFIRMED; rows 7/8/25 CONSOLIDATED (employer package); rows 2/3/9/10
 CONFIRMED (company package); rows 20/22/23/27 CONFIRMED and row 28 COLLAPSED
-2026-08-01 (Package 3 — one Leaflet engine, three presentations). EVERY row
-is now FULL / ALREADY / DETAIL / OBSOLETE-decided / CONSOLIDATED, except
-row 24 — BLOCKED on data and transferred to W6 by owner ruling (does not
-block W3 closure). Remaining: Package 4 — delete `/dashboard/advanced` (+
-grid card-prefs, surface-registry + route-truth-map in the SAME commit, the
-3 allowlisted hrefs, dead guards/nav), full W3 proof, production-prove, mark
-W3 COMPLETE.**
+2026-08-01 (Package 3 — one Leaflet engine, three presentations). Row 24
+BLOCKED on data and TRANSFERRED TO W6 by owner ruling. Package 4 EXECUTED
+2026-08-01: `/dashboard/advanced` and its whole dead chain are DELETED — see
+the Package 4 record below.**
+
+## Package 4 — EXECUTED 2026-08-01: the route is deleted
+
+One atomic commit removed the route, 11 advanced-exclusive components (16
+files incl. the premium-hub tree), the dead loader chain
+(`control-room-view-model`, `top-slot`, the card-preferences trio,
+`premium-hub-data` ×2), the dead `NextAction` role resolvers (the profile
+half of `next-action.ts` survives with its live consumer), 11 dead i18n
+namespaces ×5 locales (−1 540 lines), the account-menu escape hatch, the
+surface-registry primary-surface entry, and the route-truth-map pin. The
+`w3-return-to-workspace` ratchet allowlist dropped 3 → **0** — no live
+`"/dashboard/advanced"` href may ever return. Two stale `/dashboard#work-card`
+doors (profile hub availability pillar, setup-journey location step) were
+repaired to `/dashboard?result=player-card` — the anchor only ever existed on
+the deleted page.
+
+Final dispositions (§6 of the owner command): rows 1/4/5/6 MIGRATED · rows
+9–16, 19, 20, 21 ALREADY · rows 22/23 DETAIL · rows 2/3/17/18/26/27 OBSOLETE ·
+rows 7/8/25 CONSOLIDATED · row 28 COLLAPSED · row 24 TRANSFERRED TO W6 (no
+subjective reputation store exists; no fabricated replacement, no stars, no
+total score). Every deleted item's capability either lives on its canonical
+home (browser-proven in the per-row records above) or was proven to be a
+duplicate presentation.
 
 ## Row 4 — DONE, and what it proved about the method
 

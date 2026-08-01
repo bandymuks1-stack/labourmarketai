@@ -11,7 +11,8 @@ import { join } from "node:path";
  * logic and confirms the product routes stay reachable from their PRODUCT
  * context (no dead routes):
  *   - skills        → the Profile surface (#candidate-skills),
- *   - projects      → identity-actions / project-operations-board,
+ *   - projects      → project-operations-board (identity-actions died with the
+ *                     second dashboard — W3 Package 4),
  *   - instructions  → attention-instructions / project-operations-board,
  *   - bookings      → no primary-IA home yet → documented RED (needs-IA) in
  *                     docs/owner-input/contact-message-demand-cleanup-p0-audit.md;
@@ -51,12 +52,12 @@ describe("the account dropdown is utility-only (no hidden product exits)", () =>
 });
 
 describe("product routes stay reachable from their product context (no dead route)", () => {
-  it("projects is reachable from a product surface (identity / ops board)", () => {
-    const identity = read("components/app/identity-actions.tsx");
+  it("projects is reachable from a product surface (ops board)", () => {
+    // W3 Package 4 deleted identity-actions with the second dashboard; the
+    // ops board is the surviving product-context door to projects.
     const ops = read("components/app/project-operations-board.tsx");
     expect(
-      identity.includes("/dashboard/projects") ||
-        ops.includes("/dashboard/projects"),
+      ops.includes("/dashboard/projects"),
       "projects must stay reachable from a product surface",
     ).toBe(true);
   });

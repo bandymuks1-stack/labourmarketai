@@ -12,9 +12,7 @@ const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
 
 const consentComponent = read("components/app/discoverability-consent.tsx");
-const statusCard = read("components/app/privacy-status-card.tsx");
 const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
-const dashboardPage = read("app/[locale]/dashboard/advanced/page.tsx");
 const signupForm = read("components/app/signup-form.tsx");
 const actions = read("lib/privacy/discoverability-actions.ts");
 const preview = read("lib/privacy/discoverability-preview.ts");
@@ -80,18 +78,10 @@ describe("consent is separate from Terms and signup (test 4)", () => {
   });
 });
 
-describe("private profile stays usable without consent (tests 5, 18 + Phase 10)", () => {
-  it("dashboard shows the status card but never gates content on consent", () => {
-    expect(dashboardPage).toMatch(/<PrivacyStatusCard \/>/);
-    expect(dashboardPage).not.toMatch(/discoverability.*redirect|redirect.*discoverability/);
-  });
-
-  it("status card is non-blocking (renders null on unknown, no dialog element)", () => {
-    expect(statusCard).toMatch(/return null/);
-    const code = statusCard.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\*.*$/gm, "");
-    expect(code).not.toMatch(/<dialog|<Dialog|createPortal/);
-  });
-});
+// "Private profile stays usable without consent" was pinned through the
+// PrivacyStatusCard on the second dashboard; W3 Package 4 deleted both. The
+// consent surfaces below (privacy page + consent component) are the
+// remaining canonical homes of that promise.
 
 describe("canonical privacy screen (Phase 6)", () => {
   it("has the four required sections", () => {

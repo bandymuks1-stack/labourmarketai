@@ -35,12 +35,10 @@ describe("ActionCard is the single navigation-card pattern", () => {
     expect(card).toMatch(/from "@\/lib\/i18n\/navigation"/);
   });
 
-  it("is adopted by the reference grid and the navigation-card call sites", () => {
-    // Control room PR B: the reference grid is the registry-driven
-    // DashboardModuleGrid (the former MyZone grid + page-level marketplace
-    // cards folded into it) — the pattern's origin moved with the grid.
+  it("is adopted by the navigation-card call sites", () => {
+    // The registry-driven DashboardModuleGrid died with the second dashboard
+    // (W3 Package 4); the surviving call sites keep the pattern adopted.
     for (const rel of [
-      "components/app/dashboard/dashboard-module-grid.tsx",
       "app/[locale]/dashboard/service-requests/page.tsx",
       "app/[locale]/dashboard/bookings/page.tsx",
     ]) {
@@ -59,11 +57,8 @@ describe("StatusChip maps status to semantic tokens only", () => {
     expect(stripComments(chip)).not.toMatch(/emerald-|amber-|red-\d|green-\d/);
   });
 
-  it("MyZone's readiness status uses it (raw emerald is gone from MyZone)", () => {
-    const zone = read("components/app/my-zone.tsx");
-    expect(zone).toMatch(/<StatusChip/);
-    expect(stripComments(zone)).not.toMatch(/emerald-/);
-  });
+  // The MyZone adoption pin died with MyZone (W3 Package 4 deleted the
+  // second dashboard); the chip contract above is what must not fragment.
 });
 
 describe("EmptyState is the shared empty treatment in the marketplace loop", () => {

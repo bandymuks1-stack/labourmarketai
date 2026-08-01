@@ -416,11 +416,8 @@ describe("6. registered everywhere a module must be", () => {
     expect(bookings.iconKey).not.toBe(planning.iconKey);
   });
 
-  it("the grid icon map carries both icons", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/calendar: CalendarDays/);
-    expect(grid).toMatch(/handshake: Handshake/);
-  });
+  // The grid icon-map pin left with the module grid itself — W3 Package 4
+  // deleted the second dashboard that rendered it.
 
   it("primary-route smoke inventory carries /dashboard/planning", () => {
     const entry = PRIMARY_ROUTES.find(
@@ -704,11 +701,9 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.month.hint",
     "planning.day.empty",
     "planning.year.count",
-    // The re-pointed module labels.
-    "auth.dashboard.myZone.actions.planning.title",
-    "auth.dashboard.myZone.actions.planning.desc",
-    "auth.dashboard.myZone.actions.bookings.title",
-    "auth.dashboard.myZone.actions.bookings.desc",
+    // The myZone module-label keys left with the second dashboard's control
+    // room (W3 Package 4); planning's own catalogue copy above is the label
+    // source that survives.
     // The bookings-page bridge copy.
     "bookings.connections.planning",
     "bookings.connections.planningNote",

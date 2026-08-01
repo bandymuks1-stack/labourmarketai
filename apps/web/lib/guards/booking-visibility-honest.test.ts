@@ -9,10 +9,11 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
  *
  * Owner IA decision: bookings / reservation requests do NOT return to the
  * account dropdown and are NOT a separate primary nav item. Their home is
- * Žinutės (they are communication/request objects); a dashboard next-action may
- * appear ONLY when there is a REAL pending incoming count (> 0). No fake badge,
- * no fake count, no fake card — `getPendingIncomingBookingCount` returns 0 on
- * any non-ok state.
+ * Žinutės (they are communication/request objects). No fake badge, no fake
+ * count, no fake card — `getPendingIncomingBookingCount` returns 0 on any
+ * non-ok state. (W3 Package 4 deleted the second dashboard and with it the
+ * count-gated bookings next-action card; the Žinutės surface remains the one
+ * count-gated entry point.)
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -30,19 +31,12 @@ describe("the real pending-booking count is honest (0 on any non-ok state)", () 
 
 describe("bookings surface under Žinutės, count-gated — never a fake badge", () => {
   const comm = read("app/[locale]/dashboard/communication/page.tsx");
-  const dash = read("app/[locale]/dashboard/advanced/page.tsx");
 
   it("Žinutės shows a booking link ONLY when pendingBookings > 0", () => {
     expect(comm).toMatch(/getPendingIncomingBookingCount/);
     expect(comm).toMatch(/pendingBookings\s*>\s*0/);
     expect(comm).toMatch(/communication-bookings-link/);
     expect(comm).toMatch(/\/dashboard\/bookings/);
-  });
-
-  it("the dashboard next-action card is count-gated (> 0), not a generic tile", () => {
-    expect(dash).toMatch(/getPendingIncomingBookingCount/);
-    expect(dash).toMatch(/pendingBookings\s*>\s*0/);
-    expect(dash).toMatch(/dashboard-bookings-next-action/);
   });
 });
 

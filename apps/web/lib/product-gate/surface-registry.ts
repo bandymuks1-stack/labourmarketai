@@ -236,7 +236,8 @@ export const BASELINE_DATE = "2026-07-28";
  */
 export const BASELINE_PRIMARY_SURFACES: readonly string[] = [
   "/dashboard", // the canonical chat-first root (PR #864)
-  "/dashboard/advanced", // documented module escape hatch
+  // `/dashboard/advanced` was the documented module escape hatch — DELETED
+  // by W3 Package 4 (the second dashboard is gone; chat-first is the one root).
   "/dashboard/visual-os", // NOT in any registry — audit finding PC-01
   "/dashboard/start", // activity setup hub — audit finding PC-04
 ] as const;

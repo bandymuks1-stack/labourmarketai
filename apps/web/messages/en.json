@@ -414,19 +414,6 @@
       "error": "Something went wrong. Please try again."
     }
   },
-  "opportunityDirections": {
-    "heading": "Where else your skills could fit",
-    "intro": "Based on your profile and the skills you already have, we found related professional directions where you may have more options.",
-    "fitBecause": "Fits because of:",
-    "couldStrengthen": "To make the match stronger, you may need:",
-    "viewOpportunities": "View opportunities",
-    "addSkills": "Add skills",
-    "addProfileCta": "Complete your profile",
-    "showMore": "Show more",
-    "showLess": "Show less",
-    "insufficientBody": "Add more skills so we can show you more professional directions.",
-    "noneBody": "We haven't found enough reliable related directions from your skills yet. Complete your profile to see more."
-  },
   "activityCentre": {
     "eyebrow": "Activity centre",
     "title": "Activity",
@@ -788,79 +775,6 @@
     "buyer": {
       "name": "My requests",
       "purpose": "Create and manage requests for products, services, specialists, suppliers, or teams."
-    }
-  },
-  "identityActions": {
-    "ariaLabel": "Your identities and actions",
-    "manageSpaces": "Switch role / Manage spaces",
-    "person": {
-      "title": "You as a person",
-      "subtitle": "Your individual account.",
-      "actions": {
-        "profile": {
-          "title": "Profile & CV",
-          "desc": "Build your profile, skills and CV."
-        },
-        "findWork": {
-          "title": "Find work",
-          "desc": "See work opportunities across sectors."
-        },
-        "readiness": {
-          "title": "Readiness",
-          "desc": "Manage your documents and work status."
-        },
-        "playerCard": {
-          "title": "My card",
-          "desc": "Your readiness and skills card."
-        },
-        "communication": {
-          "title": "Communication",
-          "desc": "Conversations and messages."
-        },
-        "marketMap": {
-          "title": "Market map",
-          "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview."
-        }
-      }
-    },
-    "company": {
-      "title": "Your company",
-      "workspaceSubtitle": "Company workspace",
-      "subtitle": "Your organization account and what it can do.",
-      "actions": {
-        "need": {
-          "title": "Submit a need",
-          "desc": "Describe the workers or services you need."
-        },
-        "hire": {
-          "title": "Hire",
-          "desc": "Browse candidates and shortlists."
-        },
-        "buy": {
-          "title": "Buy services",
-          "desc": "Create and track requests."
-        },
-        "offer": {
-          "title": "Offer workers / teams",
-          "desc": "Present candidates or teams as a partner."
-        },
-        "projects": {
-          "title": "Manage projects",
-          "desc": "Run your projects and operations."
-        },
-        "communication": {
-          "title": "Communication",
-          "desc": "Conversations with people and about projects."
-        },
-        "marketMap": {
-          "title": "Market map",
-          "desc": "See market signals: demand, readiness, document gaps and risks. If data is still preview, it is marked as preview."
-        }
-      },
-      "empty": {
-        "cta": "Create a company",
-        "desc": "Add your organization to use company actions. Nothing is created until you fill it in."
-      }
     }
   },
   "companyActionRooms": {
@@ -3569,91 +3483,11 @@
       "clarityNote": "One account, two identities — you as a person and your company. Switching only changes which actions you see (find work, offer services, hire, submit a need); agency and buying are actions, not separate systems. Some company actions may need an organization profile later."
     },
     "dashboard": {
-      "topSlot": {
-        "eyebrow": "Most important now"
-      },
-      "statusStrip": {
-        "title": "Waiting for you now",
-        "allClear": "Nothing is waiting for your attention right now.",
-        "viewAll": "All activity",
-        "calendar": "Calendar"
-      },
-      "moduleGrid": {
-        "manage": "Customize cards",
-        "done": "Done",
-        "moveUp": "Move up",
-        "moveDown": "Move down",
-        "hide": "Hide",
-        "hiddenTitle": "Hidden cards",
-        "showAll": "Show all actions ({count})",
-        "showLess": "Show fewer"
-      },
       "jobsCard": {
         "title": "Jobs that fit me",
         "viewAll": "All listings",
         "empty": "No matching listings right now — add skills to your profile.",
         "emptyCta": "Update profile"
-      },
-      "myZone": {
-        "actionsHeading": "Actions",
-        "incompleteStatus": "Your information is not complete yet",
-        "readyStatus": "Your profile is ready",
-        "missing": {
-          "progress": "{n, plural, one {# step left} other {# steps left}} — tap an item to complete it directly.",
-          "profession": {
-            "title": "Set your profession",
-            "hint": "Opens profile editing — choose your main profession. A completed profile lets employers find you according to your privacy settings."
-          },
-          "firstEntry": {
-            "title": "Record your first work entry",
-            "hint": "Opens the work journal — briefly describe what you worked on. Entries build up your profile and CV."
-          }
-        },
-        "actions": {
-          "recordWork": {
-            "title": "Record work",
-            "desc": "Entries build your profile and CV"
-          },
-          "improveProfile": {
-            "title": "Improve your profile",
-            "desc": "Profile and CV"
-          },
-          "mapVisibility": {
-            "title": "Be visible on the map",
-            "desc": "Where you are seen"
-          },
-          "findOpportunities": {
-            "title": "See opportunities",
-            "desc": "Work that fits you"
-          },
-          "planning": {
-            "title": "Calendar",
-            "desc": "Bookings, projects and deadlines in one agenda"
-          },
-          "bookings": {
-            "title": "Bookings",
-            "desc": "Proposals and acceptances"
-          },
-          "documents": {
-            "title": "Reports and documents",
-            "desc": "Your reports and files"
-          },
-          "checkMessages": {
-            "title": "Check messages",
-            "desc": "Your conversations"
-          },
-          "companyActions": {
-            "title": "Company actions",
-            "desc": "Your company"
-          }
-        },
-        "improvesHeading": "What improves what",
-        "improves": {
-          "journal": "Your work journal builds your skills, profile and CV.",
-          "profile": "Your profile and CV increase your visibility.",
-          "map": "The map controls where you are visible.",
-          "messages": "Messages are only for trusted, allowed contact."
-        }
       },
       "firstUse": {
         "eyebrow": "Start here",
@@ -4028,7 +3862,6 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "advanced": "Advanced controls",
         "playerCard": "My card"
       },
       "roleNotice": {
@@ -4037,60 +3870,6 @@
         "needs_agency_role": "That link opens the agency space, which your account does not have yet. Open the spaces hub and pick the agency path.",
         "needs_customer_role": "That link opens the customer space, which your account does not have yet. Start the customer path in the spaces hub.",
         "cta": "Open the spaces hub"
-      },
-      "chainActions": {
-        "buyerTitle": "Buyer requests",
-        "buyerSubtitle": "Create and track your requests — what you're looking for in the marketplace (product, service, specialist, master, contractor, supplier, or team).",
-        "buyerRequests": "My requests",
-        "buyerRequestsDesc": "Create or update a request and track its status.",
-        "title": "Work-journal review chain",
-        "subtitle": "Start here: invite a worker, enable review, and review their entries.",
-        "inviteWorker": "Invite a worker",
-        "inviteWorkerDesc": "Link a worker to your organisation by email.",
-        "enableReview": "Enable work-journal review",
-        "enableReviewDesc": "Assign a role, connect the journal context, turn review on.",
-        "reviewEntries": "Review work entries",
-        "reviewEntriesDesc": "Approve, reject, or request changes on submitted entries.",
-        "workJournal": "Work journal",
-        "workJournalDesc": "Log a real work-journal entry."
-      },
-      "nextAction": {
-        "eyebrow": "Next step",
-        "worker_complete_profile": {
-          "title": "Complete your profile",
-          "body": "Add what you do and your skills, so your work record means something.",
-          "cta": "Complete profile"
-        },
-        "worker_first_entry": {
-          "title": "Add your first work entry",
-          "body": "Your profile is set. Write down something you did — it stays private until you choose to share it.",
-          "cta": "Create entry"
-        },
-        "worker_waiting": {
-          "title": "Your entries are waiting for review",
-          "body": "Saved and private. Waiting for a manager to review: {waiting}. Nothing else is needed from you right now.",
-          "cta": "Check records status"
-        },
-        "worker_all_confirmed": {
-          "title": "You're all set",
-          "body": "Every entry is reviewed. Add a new one to keep your work record growing.",
-          "cta": "Add an entry"
-        },
-        "manager_review_pending": {
-          "title": "Review worker entries",
-          "body": "Entries waiting for your review: {pending}.",
-          "cta": "Review entries"
-        },
-        "manager_invite": {
-          "title": "Invite a worker",
-          "body": "No entries are waiting. Invite a worker or open your team to get started.",
-          "cta": "Open workspace"
-        },
-        "customer_requests": {
-          "title": "Manage your requests",
-          "body": "Create a new request or track the status of the ones you already sent.",
-          "cta": "Open requests"
-        }
       },
       "section": {
         "offer": {
@@ -4189,9 +3968,33 @@
         "bookings": "Bookings",
         "skills": "My skills"
       },
-      "moreSection": {
-        "title": "Detailed overview",
-        "hint": "Status, requests and additional cards"
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Record work",
+            "desc": "Entries build your profile and CV"
+          },
+          "improveProfile": {
+            "title": "Improve your profile",
+            "desc": "Profile and CV"
+          },
+          "findOpportunities": {
+            "title": "See opportunities",
+            "desc": "Work that fits you"
+          },
+          "bookings": {
+            "title": "Bookings",
+            "desc": "Proposals and acceptances"
+          },
+          "documents": {
+            "title": "Reports and documents",
+            "desc": "Your reports and files"
+          },
+          "companyActions": {
+            "title": "Company actions",
+            "desc": "Your company"
+          }
+        }
       }
     },
     "middleware": {
@@ -8709,88 +8512,6 @@
     "prepared": "Paid plans are prepared, not purchasable. Payments are not enabled and no payment method is needed.",
     "pricingLink": "See what is free and what will be paid"
   },
-  "premiumHub": {
-    "brand": "LabourMarket.ai",
-    "pageTitle": "Control hub",
-    "pageLead": "One place to review your professional identity, team, market and project.",
-    "unavailable": "This data is not available right now.",
-    "openHint": "Open",
-    "yes": "Yes",
-    "no": "No",
-    "person": {
-      "title": "Personal card",
-      "openProfile": "Open profile",
-      "availability": {
-        "available": "Available for work",
-        "busy": "Busy",
-        "unavailable": "Unavailable"
-      },
-      "stats": {
-        "skills": "Skills",
-        "supported": "Work-backed",
-        "entries": "Work entries",
-        "legend": "Skills — everything you have declared. Work-backed — the ones your work journal entries support."
-      },
-      "empty": {
-        "title": "Profile not filled in yet",
-        "body": "Upload a CV or complete your profile to make this card visible.",
-        "cta": "Complete profile"
-      }
-    },
-    "company": {
-      "title": "Company card",
-      "openSpace": "Open company space",
-      "unnamed": "Company",
-      "stats": {
-        "team": "Team",
-        "projects": "Projects",
-        "invites": "Invites"
-      },
-      "empty": {
-        "title": "No company yet",
-        "body": "Create a company card when you want to hire, manage a team or run sites.",
-        "cta": "Create company"
-      }
-    },
-    "map": {
-      "title": "Market map",
-      "open": "Open the market map",
-      "lead": "An overview of your market signals.",
-      "signals": {
-        "preferred": "Preferred locations",
-        "needs": "Needs",
-        "login": "Login signal"
-      },
-      "empty": {
-        "title": "No market signals yet",
-        "body": "Add preferred locations or needs so the map starts showing opportunities.",
-        "cta": "Add signals"
-      }
-    },
-    "project": {
-      "title": "Project card",
-      "open": "Open project",
-      "openGallery": "Open project photos and work evidence",
-      "unnamed": "Project",
-      "imageAlt": "View of the project site",
-      "handover": {
-        "preparation": "Preparing",
-        "in_progress": "In progress",
-        "handover_declared": "Handover declared",
-        "closed": "Closed"
-      },
-      "stats": {
-        "ready": "Ready",
-        "team": "Team",
-        "photos": "Photos"
-      },
-      "empty": {
-        "title": "Work passport not started yet",
-        "body": "When a site, work entries or handover actions appear, they will show here.",
-        "cta": "View projects"
-      }
-    }
-  },
   "privacyConsent": {
     "sections": {
       "visibility": "Employer visibility",
@@ -11032,7 +10753,6 @@
       "headerTitle": "LabourMarket",
       "assistantName": "LabourMarket AI",
       "speakerYou": "You",
-      "advanced": "Advanced mode",
       "composerPlaceholder": "Write what you need…",
       "send": "Send",
       "attach": "Attach a file",

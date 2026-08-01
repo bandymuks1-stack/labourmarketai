@@ -18,8 +18,9 @@ import {
  *     navbar exists here at all.
  *   • panel (`/dashboard/communication|planning|profile`) — the simple-mode
  *     shell (the SAME 5-item nav the conversation uses), NOT the module navbar.
- *   • full (every other module route incl. `/dashboard/advanced`) — the full
- *     Advanced chrome, verbatim, so Advanced mode loses nothing.
+ *   • full (every other module route — detail/admin surfaces) — the full
+ *     module chrome, verbatim. (`/dashboard/advanced` itself was deleted by
+ *     W3 Package 4; "full" now serves only the legitimate detail routes.)
  *
  * `usePathname()` (locale-stripped) is client-reactive, so switching modes on a
  * client navigation flips the chrome correctly — no overlay, no file moves.

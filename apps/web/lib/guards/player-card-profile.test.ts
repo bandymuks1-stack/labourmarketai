@@ -129,10 +129,17 @@ describe("5. empty profile gets honest next actions (never a percentage)", () =>
   it("the profile hub carries the availability pillar and the opportunities action", () => {
     const hub = read("components/app/profile-hub-overview.tsx");
     expect(hub).toMatch(/pillars\.availability/);
-    expect(hub).toMatch(/\/dashboard#work-card/);
+    // The #work-card anchor died with /dashboard/advanced (W3 Package 4);
+    // the pillar now deep-links the player-card RESULT, whose editor is the
+    // one canonical Work Card surface.
+    expect(hub).toMatch(/\/dashboard\?result=player-card/);
     expect(hub).toMatch(/profile-hub-opportunities-link/);
-    // The deep-link target exists on the dashboard.
-    expect(read("app/[locale]/dashboard/advanced/page.tsx")).toMatch(/id="work-card"/);
+    // The deep-link target is real: a registered result kind whose component
+    // renders the work editor.
+    expect(read("lib/conversation/result-registry.ts")).toMatch(/kind: "player-card"/);
+    expect(read("components/app/workspace/player-card-result.tsx")).toMatch(
+      /player-card-work-editor/,
+    );
   });
 });
 

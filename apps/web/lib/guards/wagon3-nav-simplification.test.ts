@@ -12,12 +12,10 @@ import { join } from "node:path";
  *      system/network jargon) in ANY active locale;
  *   2. the route-consolidation redirects stay in place (one canonical
  *      surface per capability — no second dashboard, no duplicate entries);
- *   3. the org (company/agency) overview keeps the owner's task order.
- *      Compact home v1 (owner directive 2026-07-16) superseded the Wagon 3
- *      readback-first order: new responses → next action → compact planning
- *      status lead the first screen; the workforce-need readback and the
- *      market context still render, folded into the collapsed more-section
- *      (the full order lives in dashboard-hierarchy.test.ts).
+ *   3. the workforce-need readback keeps its ONE canonical home. The org
+ *      overview page that carried the compact-home order died with the
+ *      second dashboard (W3 Package 4); the readback moved to
+ *      /dashboard/company (W3 rows 7/8/25) and must stay single-mounted.
  */
 
 const APP = process.cwd();
@@ -77,41 +75,10 @@ describe("Wagon 3 — route consolidation redirects stay canonical", () => {
   }
 });
 
-describe("Wagon 3 — org overview keeps the owner's task order (compact home v1)", () => {
-  it("responses → next action → planning status lead; readback + market context stay in the fold", () => {
-    const page = read("app/[locale]/dashboard/advanced/page.tsx");
-    // Work inside the org branch only (starts at the compact-home-v1 order note).
-    const orgBranch = page.slice(page.indexOf("Compact home v1 (owner directive"));
-    expect(orgBranch.length).toBeGreaterThan(100);
-
-    const responses = orgBranch.indexOf("{serviceRequestsNextAction}");
-    const nextAction = orgBranch.indexOf("<DashboardNextAction");
-    const planning = orgBranch.indexOf("<DashboardStatusStrip");
-    const fold = orgBranch.indexOf("<DashboardMoreSection");
-    const market = orgBranch.indexOf("<HubCompanyIntelligence");
-
-    for (const [name, idx] of Object.entries({
-      responses,
-      nextAction,
-      planning,
-      fold,
-      market,
-    })) {
-      expect(idx, `${name} section missing from the org branch`).toBeGreaterThan(-1);
-    }
-    expect(responses).toBeLessThan(nextAction);
-    expect(nextAction).toBeLessThan(planning);
-    expect(planning).toBeLessThan(fold);
-    // The market context renders inside the fold. (The workforce-need
-    // readback MOVED to /dashboard/company with W3 rows 7/8/25.)
-    expect(market).toBeGreaterThan(fold);
-  });
-
+describe("Wagon 3 — the workforce-need readback keeps its one canonical home", () => {
+  // The compact-home order pin died with the org overview page (W3 Package 4
+  // deleted the second dashboard and its section components).
   it("the workforce-need readback renders exactly once, on the company page", () => {
-    expect(
-      (read("app/[locale]/dashboard/advanced/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
-        .length,
-    ).toBe(0);
     expect(
       (read("app/[locale]/dashboard/company/page.tsx").match(/<DemandRequestsReadback/g) ?? [])
         .length,

@@ -439,11 +439,8 @@ describe("5. registered everywhere a module must be", () => {
     expect(m.attentionSignalIds).toBeUndefined();
   });
 
-  it("the grid icon map carries the sparkles icon", () => {
-    const grid = read("components/app/dashboard/dashboard-module-grid.tsx");
-    expect(grid).toMatch(/sparkles: Sparkles/);
-  });
-
+  // W3 Package 4 deleted the second dashboard's module grid (and its icon
+  // map) — the registry iconKey pin above is the surviving icon contract.
   it("primary-route smoke inventory carries /dashboard/assist", () => {
     const entry = PRIMARY_ROUTES.find((r) => r.urlPattern === "/dashboard/assist");
     expect(entry).toBeTruthy();

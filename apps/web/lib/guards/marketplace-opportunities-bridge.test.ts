@@ -16,10 +16,10 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 // Control room PR B: the hub cards moved from hard-coded page markup into
-// the ONE dashboard module registry, rendered by the registry-driven grid
-// in both branches. The bridge is now pinned at the registry level.
+// the ONE dashboard module registry. W3 Package 4 deleted the second
+// dashboard that rendered the grid; the registry stays the bridge's single
+// source of truth, so the bridge is pinned at the registry level.
 const REGISTRY = read("lib/dashboard/dashboard-module-registry.ts");
-const DASH = read("app/[locale]/dashboard/advanced/page.tsx");
 
 describe("the hub carries BOTH halves of the one supply/demand system", () => {
   it("supply half: offer + discover modules", () => {
@@ -27,8 +27,6 @@ describe("the hub carries BOTH halves of the one supply/demand system", () => {
     expect(REGISTRY).toMatch(
       /id: "service_requests",\s*\n\s*surfaceRoute: "\/dashboard\/service-requests"/,
     );
-    // ...rendered by the one grid in both branch layouts.
-    expect((DASH.match(/<DashboardModuleGrid\b/g) ?? []).length).toBe(2);
   });
 
   it("demand half: worker-gated opportunities module", () => {

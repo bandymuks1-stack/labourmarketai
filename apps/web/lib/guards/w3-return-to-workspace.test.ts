@@ -26,16 +26,9 @@ import { join, relative } from "node:path";
 const ROOT = join(__dirname, "..", "..");
 
 /** Files allowed to carry the QUOTED live literal "/dashboard/advanced".
- *  Everything here is deleted or rewritten in the same commit that deletes
- *  the route — the allowlist is the countdown, not a permission. */
-const ADVANCED_HREF_ALLOWLIST = new Set([
-  // The route's own segment.
-  "app/[locale]/dashboard/advanced/page.tsx",
-  // Admin-only escape hatch (owner audit §4.4) — dies with the route.
-  "components/app/account-menu.tsx",
-  // Product-gate registry entry — "documented module escape hatch".
-  "lib/product-gate/surface-registry.ts",
-]);
+ *  W3 Package 4 deleted the route and every allowlisted survivor with it —
+ *  the countdown reached ZERO. Nothing may ever re-add a live advanced href. */
+const ADVANCED_HREF_ALLOWLIST = new Set<string>([]);
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {

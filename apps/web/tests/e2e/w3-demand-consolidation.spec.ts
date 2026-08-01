@@ -17,7 +17,8 @@ import { join } from "node:path";
  *     exactly one canonical demand row remains;
  *   - describe → criteria (estimate builder) → review → submit echoes the
  *     entered values and lands in the readback with its scouting deep link;
- *   - /dashboard/advanced renders no wizard and no readback;
+ *   - no other surface renders a wizard or a readback (the advanced page
+ *     that once did was deleted by W3 Package 4);
  *   - the #demand-intake anchor works as a direct URL and across Back;
  *   - 375px mobile has no sideways scroll;
  *   - a worker-only user is DENIED /dashboard/company (honest notice);
@@ -232,7 +233,7 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
     w.assertClean();
   });
 
-  test("the advanced page carries NO demand surface; Back returns to the wizard", async ({
+  test("the direct anchor URL works; a detour and Back return to the wizard", async ({
     page,
   }) => {
     const w = watch(page);
@@ -240,9 +241,10 @@ test.describe("W3 7/8/25 — the company page is the ONE demand home (company se
     await page.goto("/lt/dashboard/company#demand-intake");
     await expect(page.getByTestId("demand-intake-section")).toBeVisible();
 
-    // The advanced page: no wizard, no readback — and the page still works.
-    await page.goto("/lt/dashboard/advanced");
-    await expect(page.getByTestId("dashboard-module-grid").first()).toBeVisible();
+    // A detour to another canonical surface carries no demand surface —
+    // the ONE wizard lives on the company page. (The advanced page this test
+    // once probed was deleted outright by W3 Package 4.)
+    await page.goto("/lt/dashboard/service-requests");
     await expect(page.getByTestId("demand-intake-section")).toHaveCount(0);
     await expect(page.getByTestId("demand-requests-readback")).toHaveCount(0);
 

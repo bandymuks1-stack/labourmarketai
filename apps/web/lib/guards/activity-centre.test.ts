@@ -208,13 +208,8 @@ describe("4. the route is registered everywhere it must be", () => {
     }
   });
 
-  it("the status strip links the activity centre as its full view", () => {
-    const strip = read("components/app/dashboard/dashboard-status-strip.tsx");
-    expect(strip).toMatch(/\/dashboard\/activity/);
-    expect(strip).toMatch(/status-strip-view-all/);
-    expect(strip).toMatch(/t\("viewAll"\)/);
-  });
-
+  // W3 Package 4 deleted the second dashboard's status strip — the bell panel
+  // below is the surviving view-all entry point into the activity centre.
   it("the bell panel carries the view-all footer link", () => {
     const panel = read("components/app/notification-panel.tsx");
     expect(panel).toMatch(/\/dashboard\/activity/);
@@ -246,7 +241,6 @@ describe("5. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "activityCentre.allClear",
     "activityCentre.rowClear",
     "auth.notifications.viewAll",
-    "auth.dashboard.statusStrip.viewAll",
   ];
 
   for (const loc of activeLocales) {

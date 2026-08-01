@@ -44,7 +44,8 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  *   - `/dashboard`                              → conversation (bare; the chat
  *                                                  supplies its own simple nav)
  *   - `/dashboard/communication|planning|profile` → simple-mode shell (5-item nav)
- *   - every other module route (incl. `/advanced`) → the full Advanced chrome
+ *   - every other module route (detail/admin surfaces) → the full module chrome
+ *     (`/dashboard/advanced` itself was deleted by W3 Package 4)
  *
  * This is the real replacement for the previous `fixed inset-0` overlay: the
  * wide navbar is not painted over in simple mode — it is simply never rendered
@@ -153,7 +154,6 @@ export default async function DashboardLayout({
     messages: tChat("navMessages"),
     calendar: tChat("navCalendar"),
     profile: tChat("navProfile"),
-    advanced: tChat("advanced"),
   };
 
   // Full (Advanced-mode) chrome, authored here so the shell contract the guard

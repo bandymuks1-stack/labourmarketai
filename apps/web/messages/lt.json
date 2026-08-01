@@ -414,19 +414,6 @@
       "error": "Įvyko klaida. Bandykite dar kartą."
     }
   },
-  "opportunityDirections": {
-    "heading": "Kur dar gali pritaikyti savo įgūdžius",
-    "intro": "Pagal tavo profilį ir turimus įgūdžius radome artimas profesines kryptis, kuriose gali turėti daugiau galimybių.",
-    "fitBecause": "Tinka dėl:",
-    "couldStrengthen": "Kad atitikimas būtų stipresnis, gali reikėti:",
-    "viewOpportunities": "Peržiūrėti galimybes",
-    "addSkills": "Papildyti įgūdžius",
-    "addProfileCta": "Papildyti profilį",
-    "showMore": "Rodyti daugiau",
-    "showLess": "Rodyti mažiau",
-    "insufficientBody": "Papildyk savo įgūdžius, kad galėtume parodyti daugiau profesinių krypčių.",
-    "noneBody": "Kol kas neradome pakankamai patikimų gretimų krypčių pagal tavo įgūdžius. Papildyk profilį, kad pamatytum daugiau."
-  },
   "activityCentre": {
     "eyebrow": "Veiklos centras",
     "title": "Veikla",
@@ -788,79 +775,6 @@
     "buyer": {
       "name": "Mano užklausos",
       "purpose": "Kurkite ir valdykite užklausas dėl prekių, paslaugų, specialistų, tiekėjų ar komandų."
-    }
-  },
-  "identityActions": {
-    "ariaLabel": "Jūsų tapatybės ir veiksmai",
-    "manageSpaces": "Keisti vaidmenį / Tvarkyti erdves",
-    "person": {
-      "title": "Jūs kaip asmuo",
-      "subtitle": "Jūsų asmeninė paskyra.",
-      "actions": {
-        "profile": {
-          "title": "Profilis ir CV",
-          "desc": "Kurkite profilį, įgūdžius ir CV."
-        },
-        "findWork": {
-          "title": "Ieškoti darbo",
-          "desc": "Peržiūrėkite darbo galimybes įvairiuose sektoriuose."
-        },
-        "readiness": {
-          "title": "Pasirengimas",
-          "desc": "Tvarkykite dokumentus ir darbo statusą."
-        },
-        "playerCard": {
-          "title": "Mano kortelė",
-          "desc": "Jūsų pasiruošimo ir įgūdžių kortelė."
-        },
-        "communication": {
-          "title": "Komunikacija",
-          "desc": "Pokalbiai ir žinutės."
-        },
-        "marketMap": {
-          "title": "Rinkos žemėlapis",
-          "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview."
-        }
-      }
-    },
-    "company": {
-      "title": "Jūsų įmonė",
-      "workspaceSubtitle": "Įmonės darbo erdvė",
-      "subtitle": "Jūsų organizacijos paskyra ir ką ji gali.",
-      "actions": {
-        "need": {
-          "title": "Pateikti poreikį",
-          "desc": "Aprašykite reikalingus darbuotojus ar paslaugas."
-        },
-        "hire": {
-          "title": "Samdyti",
-          "desc": "Peržiūrėkite kandidatus ir trumpuosius sąrašus."
-        },
-        "buy": {
-          "title": "Pirkti paslaugas",
-          "desc": "Kurkite ir sekite užklausas."
-        },
-        "offer": {
-          "title": "Siūlyti darbuotojus / komandas",
-          "desc": "Pristatykite kandidatus ar komandas kaip partneris."
-        },
-        "projects": {
-          "title": "Valdyti projektus",
-          "desc": "Vykdykite projektus ir operacijas."
-        },
-        "communication": {
-          "title": "Komunikacija",
-          "desc": "Pokalbiai su žmonėmis ir dėl projektų."
-        },
-        "marketMap": {
-          "title": "Rinkos žemėlapis",
-          "desc": "Matykite rinkos signalus: poreikius, pasirengimą, dokumentų trūkumus ir rizikas. Jei duomenys dar preview, jie pažymimi kaip preview."
-        }
-      },
-      "empty": {
-        "cta": "Sukurti įmonę",
-        "desc": "Pridėkite organizaciją, kad galėtumėte naudoti įmonės veiksmus. Jokie duomenys nesukuriami, kol jų neįvesite."
-      }
     }
   },
   "companyActionRooms": {
@@ -3569,91 +3483,11 @@
       "clarityNote": "Viena paskyra, dvi tapatybės — jūs kaip asmuo ir jūsų įmonė. Perjungimas keičia tik matomus veiksmus (ieškoti darbo, siūlyti paslaugas, samdyti, pateikti poreikį); agentūros veikla ir pirkimas yra veiksmai, ne atskiros sistemos. Kai kuriems įmonės veiksmams vėliau gali prireikti organizacijos profilio."
     },
     "dashboard": {
-      "topSlot": {
-        "eyebrow": "Svarbiausia dabar"
-      },
-      "statusStrip": {
-        "title": "Kas laukia dabar",
-        "allClear": "Šiuo metu niekas nelaukia jūsų dėmesio.",
-        "viewAll": "Visa veikla",
-        "calendar": "Kalendorius"
-      },
-      "moduleGrid": {
-        "manage": "Tvarkyti korteles",
-        "done": "Baigta",
-        "moveUp": "Perkelti aukščiau",
-        "moveDown": "Perkelti žemiau",
-        "hide": "Slėpti",
-        "hiddenTitle": "Paslėptos kortelės",
-        "showAll": "Rodyti visus veiksmus ({count})",
-        "showLess": "Rodyti mažiau"
-      },
       "jobsCard": {
         "title": "Man tinkantys darbai",
         "viewAll": "Visi skelbimai",
         "empty": "Šiuo metu atitinkančių skelbimų nėra — papildykite įgūdžius profilyje.",
         "emptyCta": "Papildyti profilį"
-      },
-      "myZone": {
-        "actionsHeading": "Veiksmai",
-        "incompleteStatus": "Jūsų informacija dar nepilna",
-        "readyStatus": "Jūsų profilis paruoštas",
-        "missing": {
-          "progress": "{n, plural, one {Liko # žingsnis} few {Liko # žingsniai} other {Liko # žingsnių}} — paspauskite ir užpildykite tiesiogiai.",
-          "profession": {
-            "title": "Nurodykite savo profesiją",
-            "hint": "Atsidarys profilio redagavimas — pasirinkite pagrindinę profesiją. Užpildytas profilis leidžia darbdaviams jus rasti pagal jūsų privatumo nustatymus."
-          },
-          "firstEntry": {
-            "title": "Įrašykite pirmą darbo įrašą",
-            "hint": "Atsidarys darbo žurnalas — trumpai aprašykite, ką dirbote. Įrašai pildo jūsų profilį ir CV."
-          }
-        },
-        "actions": {
-          "recordWork": {
-            "title": "Įrašyti darbą",
-            "desc": "Įrašai pildo profilį ir CV"
-          },
-          "improveProfile": {
-            "title": "Papildyti profilį",
-            "desc": "Profilis ir CV"
-          },
-          "mapVisibility": {
-            "title": "Būti matomam žemėlapyje",
-            "desc": "Kur jus mato"
-          },
-          "findOpportunities": {
-            "title": "Žiūrėti galimybes",
-            "desc": "Jums tinkantis darbas"
-          },
-          "planning": {
-            "title": "Kalendorius",
-            "desc": "Rezervacijos, projektai ir terminai vienoje dienotvarkėje"
-          },
-          "bookings": {
-            "title": "Rezervacijos",
-            "desc": "Pasiūlymai ir sutikimai"
-          },
-          "documents": {
-            "title": "Ataskaitos ir dokumentai",
-            "desc": "Jūsų ataskaitos ir failai"
-          },
-          "checkMessages": {
-            "title": "Patikrinti žinutes",
-            "desc": "Jūsų pokalbiai"
-          },
-          "companyActions": {
-            "title": "Įmonės veiksmai",
-            "desc": "Jūsų įmonė"
-          }
-        },
-        "improvesHeading": "Kas ką gerina",
-        "improves": {
-          "journal": "Darbo žurnalas pildo jūsų įgūdžius, profilį ir CV.",
-          "profile": "Profilis ir CV didina jūsų matomumą.",
-          "map": "Žemėlapis nustato, kur esate matomi.",
-          "messages": "Žinutės skirtos tik patikimam, leistinam bendravimui."
-        }
       },
       "firstUse": {
         "eyebrow": "Pradžia",
@@ -4028,7 +3862,6 @@
         "admin": "Administravimas",
         "planning": "Kalendorius",
         "network": "Ryšiai",
-        "advanced": "Išplėstinis valdymas",
         "playerCard": "Mano kortelė"
       },
       "roleNotice": {
@@ -4037,60 +3870,6 @@
         "needs_agency_role": "Ta nuoroda veda į agentūros erdvę, kurios jūsų paskyra dar neturi. Atidarykite erdvių centrą ir pasirinkite agentūros kelią.",
         "needs_customer_role": "Ta nuoroda veda į užsakovo erdvę, kurios jūsų paskyra dar neturi. Pradėkite užsakovo kelią erdvių centre.",
         "cta": "Atidaryti erdvių centrą"
-      },
-      "chainActions": {
-        "buyerTitle": "Pirkėjo užklausos",
-        "buyerSubtitle": "Sukurkite ir sekite savo užklausas — ko ieškote rinkoje (prekės, paslaugos, specialisto, meistro, rangovo, tiekėjo ar komandos).",
-        "buyerRequests": "Mano užklausos",
-        "buyerRequestsDesc": "Sukurkite ar papildykite užklausą ir sekite jos būseną.",
-        "title": "Darbo žurnalo peržiūros grandinė",
-        "subtitle": "Pradėkite čia: pakvieskite darbuotoją, įjunkite peržiūrą ir peržiūrėkite jo įrašus.",
-        "inviteWorker": "Pakviesti darbuotoją",
-        "inviteWorkerDesc": "Susiekite darbuotoją su organizacija el. paštu.",
-        "enableReview": "Įjungti darbo žurnalo peržiūrą",
-        "enableReviewDesc": "Priskirkite rolę, sujunkite žurnalo kontekstą, įjunkite peržiūrą.",
-        "reviewEntries": "Peržiūrėti darbo įrašus",
-        "reviewEntriesDesc": "Patvirtinkite, atmeskite arba paprašykite pataisymų.",
-        "workJournal": "Darbo žurnalas",
-        "workJournalDesc": "Užregistruokite realų darbo žurnalo įrašą."
-      },
-      "nextAction": {
-        "eyebrow": "Kitas žingsnis",
-        "worker_complete_profile": {
-          "title": "Užpildykite profilį",
-          "body": "Nurodykite, ką dirbate, ir savo įgūdžius — kad jūsų darbo įrašai turėtų vertę.",
-          "cta": "Užpildyti profilį"
-        },
-        "worker_first_entry": {
-          "title": "Sukurkite pirmą darbo įrašą",
-          "body": "Profilis paruoštas. Užrašykite, ką nuveikėte — įrašas privatus, kol nuspręsite jį parodyti.",
-          "cta": "Sukurti įrašą"
-        },
-        "worker_waiting": {
-          "title": "Jūsų įrašai laukia peržiūros",
-          "body": "Išsaugota ir privatu. Laukia peržiūros: {waiting}. Daugiau iš jūsų nieko nereikia.",
-          "cta": "Peržiūrėti būseną"
-        },
-        "worker_all_confirmed": {
-          "title": "Viskas padaryta",
-          "body": "Visi jūsų įrašai jau peržiūrėti. Pridėkite naują, kad darbo istorija augtų.",
-          "cta": "Pridėti įrašą"
-        },
-        "manager_review_pending": {
-          "title": "Peržiūrėkite darbuotojų įrašus",
-          "body": "Jūsų peržiūros laukia įrašų: {pending}.",
-          "cta": "Peržiūrėti įrašus"
-        },
-        "manager_invite": {
-          "title": "Pakvieskite darbuotoją",
-          "body": "Laukiančių įrašų nėra. Pakvieskite darbuotoją arba atidarykite komandą.",
-          "cta": "Atidaryti erdvę"
-        },
-        "customer_requests": {
-          "title": "Tvarkykite užklausas",
-          "body": "Sukurkite naują užklausą arba sekite jau išsiųstų būseną.",
-          "cta": "Atidaryti užklausas"
-        }
       },
       "section": {
         "offer": {
@@ -4189,9 +3968,33 @@
         "bookings": "Rezervacijos",
         "skills": "Mano įgūdžiai"
       },
-      "moreSection": {
-        "title": "Išsami apžvalga",
-        "hint": "Būsena, poreikiai ir papildomos kortelės"
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Įrašyti darbą",
+            "desc": "Įrašai pildo profilį ir CV"
+          },
+          "improveProfile": {
+            "title": "Papildyti profilį",
+            "desc": "Profilis ir CV"
+          },
+          "findOpportunities": {
+            "title": "Žiūrėti galimybes",
+            "desc": "Jums tinkantis darbas"
+          },
+          "bookings": {
+            "title": "Rezervacijos",
+            "desc": "Pasiūlymai ir sutikimai"
+          },
+          "documents": {
+            "title": "Ataskaitos ir dokumentai",
+            "desc": "Jūsų ataskaitos ir failai"
+          },
+          "companyActions": {
+            "title": "Įmonės veiksmai",
+            "desc": "Jūsų įmonė"
+          }
+        }
       }
     },
     "middleware": {
@@ -8709,88 +8512,6 @@
     "prepared": "Mokami planai paruošti, bet neįsigyjami. Mokėjimai neįjungti, mokėjimo būdo pridėti nereikia.",
     "pricingLink": "Kas nemokama ir kas bus mokama"
   },
-  "premiumHub": {
-    "brand": "LabourMarket.ai",
-    "pageTitle": "Valdymo centras",
-    "pageLead": "Viena vieta apžvelgti savo profesinę tapatybę, komandą, rinką ir projektą.",
-    "unavailable": "Duomenys šiuo metu neprieinami.",
-    "openHint": "Atidaryti",
-    "yes": "Taip",
-    "no": "Ne",
-    "person": {
-      "title": "Asmens kortelė",
-      "openProfile": "Atidaryti profilį",
-      "availability": {
-        "available": "Laisvas darbui",
-        "busy": "Užimtas",
-        "unavailable": "Neprieinamas"
-      },
-      "stats": {
-        "skills": "Įgūdžiai",
-        "supported": "Pagrįsti darbu",
-        "entries": "Darbo įrašai",
-        "legend": "Įgūdžiai — visi jūsų nurodyti. Pagrįsti darbu — tie, kuriuos patvirtina jūsų darbo žurnalo įrašai."
-      },
-      "empty": {
-        "title": "Profilis dar neužpildytas",
-        "body": "Įkelkite CV arba papildykite profilį, kad kortelė taptų matoma.",
-        "cta": "Papildyti profilį"
-      }
-    },
-    "company": {
-      "title": "Įmonės kortelė",
-      "openSpace": "Atidaryti įmonės erdvę",
-      "unnamed": "Įmonė",
-      "stats": {
-        "team": "Komanda",
-        "projects": "Projektai",
-        "invites": "Kvietimai"
-      },
-      "empty": {
-        "title": "Įmonė dar nesukurta",
-        "body": "Sukurkite įmonės kortelę, kai norite samdyti, valdyti komandą ar objektus.",
-        "cta": "Sukurti įmonę"
-      }
-    },
-    "map": {
-      "title": "Rinkos žemėlapis",
-      "open": "Atidaryti rinkos žemėlapį",
-      "lead": "Jūsų rinkos signalų apžvalga.",
-      "signals": {
-        "preferred": "Pageidaujamos vietos",
-        "needs": "Poreikiai",
-        "login": "Prisijungimo signalas"
-      },
-      "empty": {
-        "title": "Rinkos signalų dar nėra",
-        "body": "Pridėkite pageidaujamas vietas arba poreikius, kad žemėlapis pradėtų rodyti galimybes.",
-        "cta": "Pridėti signalų"
-      }
-    },
-    "project": {
-      "title": "Projekto kortelė",
-      "open": "Atidaryti projektą",
-      "openGallery": "Atidaryti projekto nuotraukas ir darbo įrodymus",
-      "unnamed": "Projektas",
-      "imageAlt": "Projekto objekto vaizdas",
-      "handover": {
-        "preparation": "Ruošiamasi",
-        "in_progress": "Vykdoma",
-        "handover_declared": "Perdavimas deklaruotas",
-        "closed": "Uždaryta"
-      },
-      "stats": {
-        "ready": "Pasiruošę",
-        "team": "Komanda",
-        "photos": "Nuotraukos"
-      },
-      "empty": {
-        "title": "Projekto darbo pasas dar nepradėtas",
-        "body": "Kai atsiras objektas, darbų įrašai ar perdavimo veiksmai, jie bus matomi čia.",
-        "cta": "Peržiūrėti projektus"
-      }
-    }
-  },
   "privacyConsent": {
     "sections": {
       "visibility": "Darbdavių matomumas",
@@ -11032,7 +10753,6 @@
       "headerTitle": "LabourMarket",
       "assistantName": "LabourMarket AI",
       "speakerYou": "Tu",
-      "advanced": "Išplėstinis valdymas",
       "composerPlaceholder": "Parašyk, ko tau reikia…",
       "send": "Siųsti",
       "attach": "Prisegti failą",

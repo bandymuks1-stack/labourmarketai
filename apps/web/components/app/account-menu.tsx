@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 
 /**
@@ -72,13 +72,10 @@ export function AccountMenu() {
     // §5.1) — deep-links to the canonical card block on the Mano CV surface.
     { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
+    // (The advanced control-room escape hatch died with the route — W3
+    // Package 4 deleted /dashboard/advanced entirely.)
     ...(isAdmin && !adminUiHidden
       ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
-      : []),
-    // Advanced control room — GONE from the top bar for the ordinary user
-    // (owner audit §4.4); admins keep an entry here.
-    ...(isAdmin && !adminUiHidden
-      ? [{ href: "/dashboard/advanced", label: t("tabs.advanced"), icon: SlidersHorizontal, testid: "account-menu-advanced-link" }]
       : []),
   ];
 

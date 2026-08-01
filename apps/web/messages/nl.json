@@ -414,19 +414,6 @@
       "error": "Er ging iets mis. Probeer opnieuw."
     }
   },
-  "opportunityDirections": {
-    "heading": "Waar je vaardigheden nog meer passen",
-    "intro": "Op basis van je profiel en de vaardigheden die je al hebt, vonden we verwante professionele richtingen waar je meer mogelijkheden kunt hebben.",
-    "fitBecause": "Past vanwege:",
-    "couldStrengthen": "Om de match sterker te maken, heb je mogelijk nodig:",
-    "viewOpportunities": "Kansen bekijken",
-    "addSkills": "Vaardigheden toevoegen",
-    "addProfileCta": "Profiel aanvullen",
-    "showMore": "Meer tonen",
-    "showLess": "Minder tonen",
-    "insufficientBody": "Voeg meer vaardigheden toe zodat we je meer professionele richtingen kunnen tonen.",
-    "noneBody": "We hebben nog niet genoeg betrouwbare verwante richtingen op basis van je vaardigheden gevonden. Vul je profiel aan om meer te zien."
-  },
   "activityCentre": {
     "eyebrow": "Activiteitencentrum",
     "title": "Activiteit",
@@ -788,79 +775,6 @@
     "buyer": {
       "name": "Mijn aanvragen",
       "purpose": "Maak en beheer aanvragen voor producten, diensten, specialisten, leveranciers of ploegen."
-    }
-  },
-  "identityActions": {
-    "ariaLabel": "Je identiteiten en acties",
-    "manageSpaces": "Van rol wisselen / Ruimtes beheren",
-    "person": {
-      "title": "Jij als persoon",
-      "subtitle": "Je individuele account.",
-      "actions": {
-        "profile": {
-          "title": "Profiel & CV",
-          "desc": "Bouw je profiel, vaardigheden en CV op."
-        },
-        "findWork": {
-          "title": "Werk vinden",
-          "desc": "Bekijk werkkansen in verschillende sectoren."
-        },
-        "readiness": {
-          "title": "Gereedheid",
-          "desc": "Beheer je documenten en werkstatus."
-        },
-        "playerCard": {
-          "title": "Mijn kaart",
-          "desc": "Je kaart met gereedheid en vaardigheden."
-        },
-        "communication": {
-          "title": "Communicatie",
-          "desc": "Gesprekken en berichten."
-        },
-        "marketMap": {
-          "title": "Marktkaart",
-          "desc": "Bekijk marktsignalen: vraag, gereedheid, ontbrekende documenten en risico’s. Als data nog een preview is, wordt dat als preview gemarkeerd."
-        }
-      }
-    },
-    "company": {
-      "title": "Jouw bedrijf",
-      "workspaceSubtitle": "Bedrijfswerkruimte",
-      "subtitle": "Je organisatieaccount en wat het kan doen.",
-      "actions": {
-        "need": {
-          "title": "Behoefte indienen",
-          "desc": "Beschrijf de werknemers of diensten die je nodig hebt."
-        },
-        "hire": {
-          "title": "Werven",
-          "desc": "Blader door kandidaten en shortlists."
-        },
-        "buy": {
-          "title": "Diensten inkopen",
-          "desc": "Maak en volg aanvragen."
-        },
-        "offer": {
-          "title": "Werknemers / ploegen aanbieden",
-          "desc": "Presenteer kandidaten of ploegen als partner."
-        },
-        "projects": {
-          "title": "Projecten beheren",
-          "desc": "Beheer je projecten en werkzaamheden."
-        },
-        "communication": {
-          "title": "Communicatie",
-          "desc": "Gesprekken met mensen en over projecten."
-        },
-        "marketMap": {
-          "title": "Marktkaart",
-          "desc": "Bekijk marktsignalen: vraag, gereedheid, ontbrekende documenten en risico’s. Als data nog een preview is, wordt dat als preview gemarkeerd."
-        }
-      },
-      "empty": {
-        "cta": "Bedrijf aanmaken",
-        "desc": "Voeg je organisatie toe om bedrijfsacties te gebruiken. Er wordt niets aangemaakt totdat je het invult."
-      }
     }
   },
   "companyActionRooms": {
@@ -3569,91 +3483,11 @@
       "clarityNote": "Eén account, twee identiteiten — jij als persoon en je bedrijf. Wisselen verandert alleen welke acties je ziet (werk vinden, diensten aanbieden, personeel aannemen, een behoefte indienen); uitzendbureau en inkopen zijn acties, geen aparte systemen. Voor sommige bedrijfsacties kan later een organisatieprofiel nodig zijn."
     },
     "dashboard": {
-      "topSlot": {
-        "eyebrow": "Nu het belangrijkst"
-      },
-      "statusStrip": {
-        "title": "Wat nu op u wacht",
-        "allClear": "Er wacht op dit moment niets op uw aandacht.",
-        "viewAll": "Alle activiteit",
-        "calendar": "Kalender"
-      },
-      "moduleGrid": {
-        "manage": "Kaarten aanpassen",
-        "done": "Klaar",
-        "moveUp": "Omhoog verplaatsen",
-        "moveDown": "Omlaag verplaatsen",
-        "hide": "Verbergen",
-        "hiddenTitle": "Verborgen kaarten",
-        "showAll": "Alle acties tonen ({count})",
-        "showLess": "Minder tonen"
-      },
       "jobsCard": {
         "title": "Banen die bij mij passen",
         "viewAll": "Alle advertenties",
         "empty": "Momenteel geen passende advertenties — vul je vaardigheden in je profiel aan.",
         "emptyCta": "Profiel aanvullen"
-      },
-      "myZone": {
-        "actionsHeading": "Acties",
-        "incompleteStatus": "Je gegevens zijn nog niet compleet",
-        "readyStatus": "Je profiel is klaar",
-        "missing": {
-          "progress": "{n, plural, one {Nog # stap} other {Nog # stappen}} — tik op een item om het direct in te vullen.",
-          "profession": {
-            "title": "Geef uw beroep op",
-            "hint": "Opent profielbewerking — kies je hoofdberoep. Een ingevuld profiel laat werkgevers je vinden volgens jouw privacyinstellingen."
-          },
-          "firstEntry": {
-            "title": "Maak uw eerste werkregistratie",
-            "hint": "Opent het werkjournaal — beschrijf kort waaraan je hebt gewerkt. Notities vullen je profiel en cv aan."
-          }
-        },
-        "actions": {
-          "recordWork": {
-            "title": "Werk vastleggen",
-            "desc": "Notities vullen je profiel en cv aan"
-          },
-          "improveProfile": {
-            "title": "Verbeter je profiel",
-            "desc": "Profiel en cv"
-          },
-          "mapVisibility": {
-            "title": "Wees zichtbaar op de kaart",
-            "desc": "Waar je gezien wordt"
-          },
-          "findOpportunities": {
-            "title": "Bekijk kansen",
-            "desc": "Werk dat bij je past"
-          },
-          "planning": {
-            "title": "Kalender",
-            "desc": "Boekingen, projecten en deadlines in één agenda"
-          },
-          "bookings": {
-            "title": "Boekingen",
-            "desc": "Voorstellen en acceptaties"
-          },
-          "documents": {
-            "title": "Rapporten en documenten",
-            "desc": "Je rapporten en bestanden"
-          },
-          "checkMessages": {
-            "title": "Berichten bekijken",
-            "desc": "Je gesprekken"
-          },
-          "companyActions": {
-            "title": "Bedrijfsacties",
-            "desc": "Je bedrijf"
-          }
-        },
-        "improvesHeading": "Wat wat verbetert",
-        "improves": {
-          "journal": "Je werkjournaal bouwt je vaardigheden, profiel en cv op.",
-          "profile": "Je profiel en cv vergroten je zichtbaarheid.",
-          "map": "De kaart bepaalt waar je zichtbaar bent.",
-          "messages": "Berichten zijn alleen voor vertrouwd, toegestaan contact."
-        }
       },
       "firstUse": {
         "eyebrow": "Begin hier",
@@ -4028,7 +3862,6 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netwerk",
-        "advanced": "Geavanceerd beheer",
         "playerCard": "Mijn kaart"
       },
       "roleNotice": {
@@ -4037,60 +3870,6 @@
         "needs_agency_role": "Die link opent de uitzendbureauruimte, die je account nog niet heeft. Open de ruimtehub en kies het pad voor uitzendbureaus.",
         "needs_customer_role": "Die link opent de klantruimte, die je account nog niet heeft. Start het klantpad in de ruimtehub.",
         "cta": "Open de ruimtehub"
-      },
-      "chainActions": {
-        "buyerTitle": "Aanvragen als koper",
-        "buyerSubtitle": "Maak en volg je aanvragen — wat je zoekt op de marktplaats (product, dienst, specialist, vakman, aannemer, leverancier of ploeg).",
-        "buyerRequests": "Mijn aanvragen",
-        "buyerRequestsDesc": "Maak of werk een aanvraag bij en volg de status.",
-        "title": "Beoordelingsketen voor het werkjournaal",
-        "subtitle": "Begin hier: nodig een werknemer uit, schakel beoordeling in en beoordeel de registraties.",
-        "inviteWorker": "Nodig een werknemer uit",
-        "inviteWorkerDesc": "Koppel een werknemer via e-mail aan je organisatie.",
-        "enableReview": "Schakel werkjournaalbeoordeling in",
-        "enableReviewDesc": "Wijs een rol toe, koppel de journaalcontext en zet beoordeling aan.",
-        "reviewEntries": "Beoordeel werkregistraties",
-        "reviewEntriesDesc": "Keur ingediende registraties goed of af, of vraag wijzigingen aan.",
-        "workJournal": "Werkjournaal",
-        "workJournalDesc": "Leg een echte werkjournaalregistratie vast."
-      },
-      "nextAction": {
-        "eyebrow": "Volgende stap",
-        "worker_complete_profile": {
-          "title": "Voltooi je profiel",
-          "body": "Voeg toe wat je doet en wat je vaardigheden zijn, zodat je werkdossier iets betekent.",
-          "cta": "Voltooi profiel"
-        },
-        "worker_first_entry": {
-          "title": "Voeg je eerste werkregistratie toe",
-          "body": "Je profiel staat klaar. Schrijf iets op wat je hebt gedaan — het blijft privé totdat jij ervoor kiest het te delen.",
-          "cta": "Maak registratie"
-        },
-        "worker_waiting": {
-          "title": "Je registraties wachten op beoordeling",
-          "body": "Opgeslagen en privé. Wachten op beoordeling door een manager: {waiting}. Er is nu verder niets van je nodig.",
-          "cta": "Bekijk dossierstatus"
-        },
-        "worker_all_confirmed": {
-          "title": "Je bent helemaal bij",
-          "body": "Elke registratie is beoordeeld. Voeg een nieuwe toe om je werkdossier te laten groeien.",
-          "cta": "Voeg registratie toe"
-        },
-        "manager_review_pending": {
-          "title": "Beoordeel werknemersregistraties",
-          "body": "Registraties die op je beoordeling wachten: {pending}.",
-          "cta": "Beoordeel registraties"
-        },
-        "manager_invite": {
-          "title": "Nodig een werknemer uit",
-          "body": "Er wachten geen registraties. Nodig een werknemer uit of open je ploeg om te beginnen.",
-          "cta": "Open werkruimte"
-        },
-        "customer_requests": {
-          "title": "Beheer je aanvragen",
-          "body": "Maak een nieuwe aanvraag of volg de status van de aanvragen die je al hebt verstuurd.",
-          "cta": "Open aanvragen"
-        }
       },
       "section": {
         "offer": {
@@ -4189,9 +3968,33 @@
         "bookings": "Boekingen",
         "skills": "Mijn vaardigheden"
       },
-      "moreSection": {
-        "title": "Uitgebreid overzicht",
-        "hint": "Status, aanvragen en extra kaarten"
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Werk vastleggen",
+            "desc": "Notities vullen je profiel en cv aan"
+          },
+          "improveProfile": {
+            "title": "Verbeter je profiel",
+            "desc": "Profiel en cv"
+          },
+          "findOpportunities": {
+            "title": "Bekijk kansen",
+            "desc": "Werk dat bij je past"
+          },
+          "bookings": {
+            "title": "Boekingen",
+            "desc": "Voorstellen en acceptaties"
+          },
+          "documents": {
+            "title": "Rapporten en documenten",
+            "desc": "Je rapporten en bestanden"
+          },
+          "companyActions": {
+            "title": "Bedrijfsacties",
+            "desc": "Je bedrijf"
+          }
+        }
       }
     },
     "middleware": {
@@ -8709,88 +8512,6 @@
     "prepared": "Betaalde abonnementen zijn voorbereid, niet te koop. Betalingen zijn niet ingeschakeld en er is geen betaalmethode nodig.",
     "pricingLink": "Bekijk wat gratis is en wat betaald zal worden"
   },
-  "premiumHub": {
-    "brand": "LabourMarket.ai",
-    "pageTitle": "Controlecentrum",
-    "pageLead": "Eén plek om je professionele identiteit, team, markt en project te bekijken.",
-    "unavailable": "Deze gegevens zijn momenteel niet beschikbaar.",
-    "openHint": "Openen",
-    "yes": "Ja",
-    "no": "Nee",
-    "person": {
-      "title": "Persoonlijke kaart",
-      "openProfile": "Profiel openen",
-      "availability": {
-        "available": "Beschikbaar voor werk",
-        "busy": "Bezet",
-        "unavailable": "Niet beschikbaar"
-      },
-      "stats": {
-        "skills": "Vaardigheden",
-        "supported": "Door werk gestaafd",
-        "entries": "Werkvermeldingen",
-        "legend": "Vaardigheden — alles wat je hebt opgegeven. Door werk gestaafd — die welke je werkjournaal ondersteunt."
-      },
-      "empty": {
-        "title": "Profiel nog niet ingevuld",
-        "body": "Upload een CV of vul je profiel aan om deze kaart zichtbaar te maken.",
-        "cta": "Profiel aanvullen"
-      }
-    },
-    "company": {
-      "title": "Bedrijfskaart",
-      "openSpace": "Bedrijfsruimte openen",
-      "unnamed": "Bedrijf",
-      "stats": {
-        "team": "Team",
-        "projects": "Projecten",
-        "invites": "Uitnodigingen"
-      },
-      "empty": {
-        "title": "Nog geen bedrijf",
-        "body": "Maak een bedrijfskaart aan wanneer je mensen wilt aannemen, een team wilt beheren of werklocaties wilt aansturen.",
-        "cta": "Bedrijf aanmaken"
-      }
-    },
-    "map": {
-      "title": "Marktkaart",
-      "open": "Marktkaart openen",
-      "lead": "Een overzicht van je marktsignalen.",
-      "signals": {
-        "preferred": "Voorkeurslocaties",
-        "needs": "Behoeften",
-        "login": "Inlogsignaal"
-      },
-      "empty": {
-        "title": "Nog geen marktsignalen",
-        "body": "Voeg voorkeurslocaties of behoeften toe zodat de kaart kansen begint te tonen.",
-        "cta": "Signalen toevoegen"
-      }
-    },
-    "project": {
-      "title": "Projectkaart",
-      "open": "Project openen",
-      "openGallery": "Projectfoto's en werkbewijzen openen",
-      "unnamed": "Project",
-      "imageAlt": "Zicht op de projectlocatie",
-      "handover": {
-        "preparation": "In voorbereiding",
-        "in_progress": "In uitvoering",
-        "handover_declared": "Oplevering gemeld",
-        "closed": "Afgesloten"
-      },
-      "stats": {
-        "ready": "Gereed",
-        "team": "Team",
-        "photos": "Foto's"
-      },
-      "empty": {
-        "title": "Werkpaspoort nog niet gestart",
-        "body": "Wanneer een locatie, werkvermeldingen of opleveringsacties verschijnen, worden ze hier getoond.",
-        "cta": "Projecten bekijken"
-      }
-    }
-  },
   "privacyConsent": {
     "sections": {
       "visibility": "Zichtbaarheid voor werkgevers",
@@ -11032,7 +10753,6 @@
       "headerTitle": "LabourMarket",
       "assistantName": "LabourMarket AI",
       "speakerYou": "Jij",
-      "advanced": "Geavanceerde modus",
       "composerPlaceholder": "Schrijf wat je nodig hebt…",
       "send": "Verzenden",
       "attach": "Bestand bijvoegen",

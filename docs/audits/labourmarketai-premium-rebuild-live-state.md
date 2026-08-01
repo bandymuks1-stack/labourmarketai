@@ -109,6 +109,18 @@ guarded acceptance stack; the distinction is deliberate and stated.
 | Proof | `w3-company-rows-2-3-9-10.spec.ts` 8/8 × 2 consecutive runs + 6 source guards; net production LOC **0** |
 | Matrix | **ZERO ABSORB rows remain** (row 24 → W6 by owner ruling). Left before deletion: Package 3 (rows 22/23 DETAIL repoints; 20/27/28 OBSOLETE decisions; collapse the second MarketMap chain; the 3 allowlisted advanced hrefs) → Package 4 (delete `/dashboard/advanced`) |
 
+### CONTINUATION — 2026-08-01 (Package 4: /dashboard/advanced DELETED — W3 closure)
+
+| | |
+|---|---|
+| Slice | **W3 Package 4** — the final deletion, one guarded atomic commit on `feat/cc/w3-package4-delete-advanced` |
+| Deleted | the 802-line route; 11 advanced-exclusive components (16 files incl. the premium-hub tree ×6); dead loaders `control-room-view-model`, `top-slot`(+test), `preferences` + `preferences-actions` + `dashboard-preferences-shared`(+test), `premium-hub-data` ×2; the dead `NextAction` role resolvers (profile half of `next-action.ts` survives — live consumer `/dashboard/profile`); 11 dead i18n namespaces ×5 locales; the account-menu escape hatch; the surface-registry primary-surface entry; the route-truth-map pin |
+| Ratchet | `w3-return-to-workspace` advanced-href allowlist **3 → 0** — the guard now bans any live `"/dashboard/advanced"` href repo-wide, forever |
+| Kept-by-proof | `dashboard-module-registry` (activity page + command-registry consumers) — its `myZone.actions.*` label keys retained (6 live, 3 unreferenced pruned); `next-action.ts` profile half; `market-map-base` |
+| Stale doors repaired | `/dashboard#work-card` (profile-hub availability pillar + setup-journey location step) → `/dashboard?result=player-card` — the anchor only ever existed on the deleted page |
+| Guards | ~67 guard files repaired by absence-rewrite/retarget (dispositions in the PR); e2e: `w3-second-dashboard.spec.ts` is now the DELETION PROOF (route 404s, no advanced markup leaks), calendar rows 11/12 + company rows retargeted to the bell, ux-2-0 + conversation retargeted to surviving full-chrome routes |
+| Matrix | ALL 28 rows terminally dispositioned — see "Package 4 — EXECUTED" in the matrix; row 24 formally TRANSFERRED TO W6 (no subjective store, no fabricated replacement) |
+
 ### CONTINUATION — 2026-08-01 (Package 3: rows 20/22/23/27 confirmed, row 28 COLLAPSED)
 
 | | |

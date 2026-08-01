@@ -9,9 +9,10 @@ import { join } from "node:path";
  *   RC1 — stat/operation cards that LOOK tappable must BE tappable
  *         (full-surface control, keyboard, focus ring, pressed state) and a
  *         zero value must land on an explained empty state, never a dead tile;
- *   RC2 — a warning ("Jūsų informacija dar nepilna") may only look actionable
- *         if it IS actionable: exact missing items, each deep-linking to the
- *         precise section that fixes it;
+ *   RC2 — (retired) the incomplete-profile warning was MyZone's checklist;
+ *         W3 Package 4 deleted the second dashboard and MyZone with it. The
+ *         surviving actionable-missing-item contract is the work-card model
+ *         inside the player-card result, pinned in w3-row21-myzone.test.ts;
  *   RC3 — presentational cards must NOT advertise interactivity (no hover
  *         elevation without a link/handler).
  */
@@ -21,10 +22,6 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 const board = read("components/app/project-operations-board.tsx");
 const opsPage = read("app/[locale]/dashboard/projects/[id]/operations/page.tsx");
-const myZone = read("components/app/my-zone.tsx");
-const dashboard = read("app/[locale]/dashboard/advanced/page.tsx");
-const profilePage = read("app/[locale]/dashboard/profile/page.tsx");
-const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("RC1 — operation counter cards are real controls", () => {
   it("Counter renders as a button (filter) or link (navigation), never a bare div", () => {
@@ -68,30 +65,10 @@ describe("RC1 — operation counter cards are real controls", () => {
   });
 });
 
-describe("RC2 — incomplete-profile warning is an actionable checklist", () => {
-  it("MyZone renders the exact missing items as real links (when incomplete)", () => {
-    expect(myZone).toMatch(/my-zone-missing/);
-    expect(myZone).toMatch(/my-zone-missing-\$\{m\.key\}/);
-    expect(myZone).toMatch(/missing\.\$\{m\.key\}\.title/);
-    // Full-surface, mobile-safe, focusable link.
-    expect(myZone).toMatch(/min-h-11[\s\S]{0,200}focus-visible:ring-2/);
-  });
-  it("the dashboard passes precise deep links for each real missing item", () => {
-    expect(dashboard).toMatch(/missingItems=\{\[/);
-    expect(dashboard).toContain("/dashboard/profile#profile-edit");
-    expect(dashboard).toContain("/dashboard/journal#journal-composer");
-    // Item presence is driven by REAL data, never hard-coded.
-    expect(dashboard).toMatch(/!professionName\s*\?/);
-    expect(dashboard).toMatch(/entriesCount === 0\s*\?/);
-  });
-  it("both deep-link anchors exist on their target pages", () => {
-    expect(profilePage).toMatch(/id="profile-edit"/);
-    expect(journalPage).toMatch(/id="journal-composer"/);
-  });
-  it("the ready state stays a plain informational chip (no fake action)", () => {
-    expect(myZone).toMatch(/variant="success"/);
-  });
-});
+// RC2 tests retired with MyZone (W3 Package 4 deleted the second dashboard).
+// The surviving contract — every missing dimension yields one real next
+// action with an explanation — lives in the work-card model and is pinned by
+// w3-row21-myzone.test.ts.
 
 describe("RC3 — presentational cards do not impersonate buttons", () => {
   for (const rel of ["components/visual/worker-card.tsx", "components/visual/job-demand-card.tsx"]) {
@@ -105,13 +82,13 @@ describe("RC3 — presentational cards do not impersonate buttons", () => {
 
 describe("locale copy for the new interaction states (LT/EN)", () => {
   for (const loc of ["lt", "en"] as const) {
-    it(`${loc}: projectOps filter/empty + myZone missing keys exist`, () => {
+    it(`${loc}: projectOps filter/empty keys exist`, () => {
+      // The myZone.missing keys left the catalogues with MyZone (W3 Package 4).
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         projectOps: {
           counters: Record<string, string>;
           filters: { needsEvidence: string; docsChecked: string; showAll: string; empty: Record<string, string> };
         };
-        auth: { dashboard: { myZone: { missing: { progress: string; profession: Record<string, string>; firstEntry: Record<string, string> } } } };
       };
       expect(msgs.projectOps.counters.openHint?.trim().length).toBeGreaterThan(0);
       for (const k of ["needsEvidence", "docsChecked", "showAll"] as const) {
@@ -119,12 +96,6 @@ describe("locale copy for the new interaction states (LT/EN)", () => {
       }
       for (const k of ["missingDocs", "ready", "needsSkillInfo", "needsEvidence", "docsChecked", "followUp"]) {
         expect(msgs.projectOps.filters.empty[k]?.trim().length, `filters.empty.${k}`).toBeGreaterThan(0);
-      }
-      const missing = msgs.auth.dashboard.myZone.missing;
-      expect(missing.progress?.trim().length).toBeGreaterThan(0);
-      for (const item of [missing.profession, missing.firstEntry]) {
-        expect(item.title?.trim().length).toBeGreaterThan(0);
-        expect(item.hint?.trim().length).toBeGreaterThan(0);
       }
     });
   }
