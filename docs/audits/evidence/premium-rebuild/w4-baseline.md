@@ -95,3 +95,13 @@ Employer person-page skills render FIXED (was zero for every worker; browser-pro
 - Worker-facing /business/<slug> links on opportunities/invitations + sitemap entries for published org pages — enhancement, next slice or W5.
 - A24 systemic error-vs-empty on own-RLS reads — highest-risk instance (employer page) fixed with a visible error state; the rest is a design-level pass.
 - Org logo, OG images, certificate file bucket, declared-cert expiry, country requirement curation, public worker profile (consent purpose wording), employer-visible card scope, is_employer org-membership gate, contact-disclosure delivery — ALL owner-gated, listed once above.
+
+---
+
+## STAGE CLOSED — 2026-08-01
+
+`W4_PROFESSIONAL_IDENTITY_COMPLETE_WITH_OWNER_GATED_ITEMS` at `426e87aa`,
+production deployment `5703997684` (success). Deploy confirmation, production
+smoke, permission matrix and the single owner-gated list: `w4-acceptance.md`.
+Permission matrix: `w4-permission-matrix.md`. Next stage: `w5-baseline.md`.
+W4 is frozen except real regressions.
