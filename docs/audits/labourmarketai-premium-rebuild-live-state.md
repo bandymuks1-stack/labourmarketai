@@ -89,6 +89,9 @@ guarded acceptance stack; the distinction is deliberate and stated.
 
 | | |
 |---|---|
+| `main` HEAD | **`447c1f45`** — PR **#954** squash-merged (base `b1ad0263`) |
+| Production deployment | **`5699957946`** — Production, **success**, sha `447c1f45` |
+| Production smoke (anonymous) | landing renders, 0 console errors; `/lt/dashboard/company` → `/lt/auth/login?next=%2Flt%2Fdashboard%2Fcompany`, **zero demand markup leaked**, 0 console errors |
 | Slice | **W3 rows 7/8/25** — one canonical demand flow, per the owner's Package 1 |
 | What shipped | FULL wizard moved to `/dashboard/company#demand-intake` (+ save-draft leg absorbing `DemandDraftForm`'s company mount); ONE owner readback on the company page, employer-kind-scoped; advanced page carries ZERO demand surfaces; 5 stale `/dashboard#demand-intake` doors repaired (they dead-ended on the chat since the root went chat-first) |
 | Proof | `w3-demand-consolidation.spec.ts` 9/9 × 2 consecutive runs (company + worker-only sessions, DB-row assertions, RLS negative); legacy demand/estimate specs retargeted and green; 795 files / 12 851 unit tests; typecheck clean; lint 0 errors |
