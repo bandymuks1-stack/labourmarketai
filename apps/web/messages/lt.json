@@ -6679,7 +6679,22 @@
     },
     "needsLegalReview": "reikia teisinės peržiūros",
     "sourceLink": "šaltinis",
-    "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija."
+    "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija.",
+    "editor": {
+      "title": "Pridėti ar atnaujinti dokumentą",
+      "typeLabel": "Dokumento tipas",
+      "countryLabel": "Šalis (nebūtina)",
+      "countryNone": "Be konkrečios šalies",
+      "statusLabel": "Būsena",
+      "validFromLabel": "Galioja nuo",
+      "noteLabel": "Pastaba (nebūtina)",
+      "notePlaceholder": "pvz., pažymėjimo numeris ar išdavėjas",
+      "save": "Išsaugoti dokumentą",
+      "saving": "Saugoma…",
+      "saved": "Išsaugota. Sąrašas viršuje atnaujintas.",
+      "invalid": "Patikrinkite laukus — kažkas netinka.",
+      "errorMsg": "Šiuo metu išsaugoti nepavyko. Pabandykite netrukus."
+    }
   },
   "documentCentre": {
     "attention": {

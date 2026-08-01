@@ -6679,7 +6679,22 @@
     },
     "needsLegalReview": "rechtliche Prüfung erforderlich",
     "sourceLink": "Quelle",
-    "scopeNote": "Basierend auf offiziellen EU-Quellen zu entsandten Arbeitskräften — bestätigen Sie die nationalen Besonderheiten bei der zuständigen Behörde. Dies ist eine Information, keine Rechtsberatung."
+    "scopeNote": "Basierend auf offiziellen EU-Quellen zu entsandten Arbeitskräften — bestätigen Sie die nationalen Besonderheiten bei der zuständigen Behörde. Dies ist eine Information, keine Rechtsberatung.",
+    "editor": {
+      "title": "Dokument hinzufügen oder aktualisieren",
+      "typeLabel": "Dokumenttyp",
+      "countryLabel": "Land (optional)",
+      "countryNone": "Kein bestimmtes Land",
+      "statusLabel": "Status",
+      "validFromLabel": "Gültig ab",
+      "noteLabel": "Notiz (optional)",
+      "notePlaceholder": "z. B. Zertifikatsnummer oder Aussteller",
+      "save": "Dokument speichern",
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert. Die Liste oben ist aktualisiert.",
+      "invalid": "Bitte prüfen Sie die Felder — etwas ist ungültig.",
+      "errorMsg": "Speichern gerade nicht möglich. Bitte gleich erneut versuchen."
+    }
   },
   "documentCentre": {
     "attention": {

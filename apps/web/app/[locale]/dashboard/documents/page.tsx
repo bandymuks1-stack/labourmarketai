@@ -25,6 +25,7 @@ import {
 } from "@/lib/documents/document-centre-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
 import { DocsConsentToggle } from "@/components/app/docs-consent-toggle";
+import { WorkerDocumentForm } from "@/components/app/worker-document-form";
 import { LtDocumentGuidance } from "@/components/app/lt-document-guidance";
 import {
   workerReadinessFromChecklist,
@@ -451,6 +452,36 @@ export default async function WorkerDocumentsPage({
             >
               {tc("uploadNote")}
             </p>
+            {/* (e) W4 Slice 2 — the FIRST write path into worker_documents:
+                the audited upsert RPC finally has a caller. Facts about a
+                document the worker HOLDS (the note above stays honest about
+                files). Renders only when the schema is present (inv ok). */}
+            <WorkerDocumentForm
+              labels={{
+                title: t("editor.title"),
+                typeLabel: t("editor.typeLabel"),
+                countryLabel: t("editor.countryLabel"),
+                countryNone: t("editor.countryNone"),
+                statusLabel: t("editor.statusLabel"),
+                validFromLabel: t("editor.validFromLabel"),
+                validUntilLabel: t("fields.validUntil"),
+                noteLabel: t("editor.noteLabel"),
+                notePlaceholder: t("editor.notePlaceholder"),
+                save: t("editor.save"),
+                saving: t("editor.saving"),
+                saved: t("editor.saved"),
+                invalid: t("editor.invalid"),
+                needsMigration: t("needsMigration"),
+                errorMsg: t("editor.errorMsg"),
+              }}
+              typeOptions={inv.typeSlugs
+                .filter((s) => t.has(`types.${s}` as never))
+                .map((s) => [s, t(`types.${s}` as never)] as const)}
+              statusOptions={(["ready", "missing", "blocked"] as const).map(
+                (s) => [s, t(`status.${s}` as never)] as const,
+              )}
+              countryOptions={DOCUMENT_COUNTRIES}
+            />
           </section>
 
           <section className="flex flex-col gap-3" data-testid="documents-country">
