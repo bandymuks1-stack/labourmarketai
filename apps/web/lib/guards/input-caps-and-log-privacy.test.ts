@@ -30,11 +30,9 @@ describe("waitlist route logs no PII", () => {
 });
 
 describe("free-text inputs are length-capped", () => {
-  it("journal reject reason is capped", () => {
-    const src = read("lib/journal/confirm-actions.ts");
-    expect(src).toMatch(/reason\.length > 2000/);
-  });
-
+  // The ungated confirmEntry/rejectEntry actions (and their reason cap) were
+  // deleted in W5 slice 1 — rejection free text now travels ONLY as the gated
+  // review chain's note, capped below.
   it("journal review note is capped", () => {
     const src = read("lib/journal/review-actions.ts");
     expect(src).toMatch(/note\.length > 2000/);
