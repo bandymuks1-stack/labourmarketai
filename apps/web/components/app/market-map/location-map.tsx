@@ -5,25 +5,20 @@ import { useEffect, useRef } from "react";
 import type * as LeafletTypes from "leaflet";
 import { type SelectedLocation } from "@/lib/location/location-model";
 import { resolveLocation } from "@/lib/location/city-coordinates";
+import { mountLeafletMap } from "./leaflet-engine";
 
 /**
- * Real interactive Market Map — OpenStreetMap raster tiles via Leaflet.
+ * THE OWN-LOCATION PICKER PRESENTATION of the one map module (W3 row 28 —
+ * formerly `components/app/market-map-live.tsx`, the product's second
+ * standalone Leaflet chain; now a sibling of the canonical `MarketMap` on the
+ * SAME engine, `./leaflet-engine.ts`).
  *
- * A REAL online map provider (free OSM tiles, no API key, no secret, no
- * paid/proprietary provider): the worker sees actual geography, streets and regions, can
- * pan/zoom, and taps the map to set a real coordinate. The only marker drawn is
- * the worker's OWN chosen location (privacy: no other users' locations, no fake
- * market points) plus their search radius. Honest empty state = the real map
- * with no markers until the worker sets a location.
- *
- * Leaflet is loaded with a dynamic import inside an effect so it never evaluates
- * during SSR (it touches `window`). A vector `circleMarker` is used instead of
- * the default icon to avoid bundler image-path issues.
- *
- * MVP ONLY: `tile.openstreetmap.org` is the OSM community tile server — fine for
- * owner review / low traffic, NOT production-scale infra. The migration target
- * (free, key-free, no paid vendor) is documented separately in
- * docs/audits/market-map-long-term-map-strategy.md.
+ * A REAL online map (free OSM tiles, no API key, no secret, no
+ * paid/proprietary provider): the worker sees actual geography, streets and
+ * regions, can pan/zoom, and taps the map to set a real coordinate. The only
+ * marker drawn is the worker's OWN chosen location (privacy: no other users'
+ * locations, no fake market points) plus their search radius. Honest empty
+ * state = the real map with no markers until the worker sets a location.
  */
 
 /** WORLD default view before any location is set (PR-G global location model:
@@ -157,35 +152,36 @@ export function MarketMapLive({
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
 
-  // Initialise the Leaflet map once (client only).
+  // Initialise the map once (client only) via the ONE Leaflet engine.
   useEffect(() => {
     let cancelled = false;
     let created: LeafletTypes.Map | null = null;
     void (async () => {
       try {
-        const L = (await import("leaflet")).default;
-        if (cancelled || !containerRef.current || mapRef.current) return;
-        created = L.map(containerRef.current, {
-          scrollWheelZoom: false,
-          attributionControl: true,
-        }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        if (!containerRef.current || mapRef.current) return;
+        const { L, map } = await mountLeafletMap(containerRef.current, {
+          mapOptions: { scrollWheelZoom: false, attributionControl: true },
           maxZoom: 19,
-        }).addTo(created);
-        created.on("click", (e: LeafletTypes.LeafletMouseEvent) => {
+        });
+        created = map;
+        if (cancelled) {
+          map.remove();
+          created = null;
+          return;
+        }
+        map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+        map.on("click", (e: LeafletTypes.LeafletMouseEvent) => {
           onPickRef.current(e.latlng.lat, e.latlng.lng);
         });
-        mapRef.current = created;
-        layerRef.current = L.layerGroup().addTo(created);
-        previewLayerRef.current = L.layerGroup().addTo(created);
+        mapRef.current = map;
+        layerRef.current = L.layerGroup().addTo(map);
+        previewLayerRef.current = L.layerGroup().addTo(map);
         // Tiles can mis-size when the container animates in.
-        created.invalidateSize();
+        map.invalidateSize();
       } catch (err) {
         // A map-runtime failure must never crash the page — the location +
         // radius controls below stay usable as a provider-free fallback.
-        console.error("[market-map-live] init failed:", err);
+        console.error("[location-map] init failed:", err);
       }
     })();
     return () => {

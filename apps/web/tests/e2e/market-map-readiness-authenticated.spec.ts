@@ -21,6 +21,9 @@ test.use({ storageState: STORAGE_STATE });
 async function gotoMap(page: Page) {
   await page.goto("/lt/dashboard/market-map", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/lt\/dashboard\/market-map/, { timeout: 20_000 });
+  // PR #921 folded the capture/readiness tools into the collapsed
+  // "advanced" <details> (progressive disclosure) — open it first.
+  await page.getByTestId("market-map-advanced").locator("> summary").click();
   await page.getByTestId("market-map-readiness").waitFor({ state: "visible", timeout: 30_000 });
 }
 

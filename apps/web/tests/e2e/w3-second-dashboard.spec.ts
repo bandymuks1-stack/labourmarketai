@@ -100,14 +100,11 @@ test.describe("row 4 — the fake market map is gone, the capability is not", ()
     // The other half of "no capability was lost": the door has to lead
     // somewhere real.
     //
-    // NOTE — a duplication found while writing this test, recorded in the W3
-    // matrix rather than silently accommodated: `/dashboard/market-map` does
-    // NOT render the canonical <MarketMap>. It renders `market-map-base` →
-    // `market-map-live`, a SECOND Leaflet chain. `market-map.tsx`'s own header
-    // says it was meant to collapse `market-map-live.tsx` into itself; that
-    // collapse never finished. Both are real maps, so no user is being lied
-    // to — but two map implementations is one too many, and it is now a
-    // tracked W3 row instead of a surprise.
+    // NOTE — the second Leaflet chain this test once recorded (row 28) was
+    // COLLAPSED 2026-08-01: `/dashboard/market-map` renders the location
+    // picker presentation (`market-map/location-map.tsx`) on the SAME
+    // `leaflet-engine.ts` the canonical <MarketMap> boots through — one
+    // engine, guard-pinned by `w3-row28-one-leaflet-engine.test.ts`.
     await page.goto("/lt/dashboard/market-map");
     await expect(page.getByTestId("market-map-base")).toBeVisible();
     // Real Leaflet, real coordinates — not an illustration.

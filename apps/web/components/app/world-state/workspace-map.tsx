@@ -12,6 +12,7 @@ import {
   type WorkspaceMapView,
 } from "@/lib/world-state/workspace-map-model";
 import { entityKey, type EntityRef } from "@/lib/world-state/world-state";
+import { mountLeafletMap } from "@/components/app/market-map/leaflet-engine";
 import { useWorldState } from "./world-state-provider";
 
 /**
@@ -73,25 +74,27 @@ export function WorkspaceMap({
     };
   }, []);
 
-  // ── map init (client only; leaflet touches window) ──────────────────────
+  // ── map init (via the ONE Leaflet engine, W3 row 28) ────────────────────
   useEffect(() => {
     if (!view || (view.clusters.length === 0 && !view.home)) return;
     let disposed = false;
     (async () => {
-      const L = (await import("leaflet")).default as unknown as typeof LeafletTypes;
-      if (disposed || !containerRef.current || mapRef.current) return;
-      leafletRef.current = L;
-      const map = L.map(containerRef.current, {
-        zoomControl: false,
-        attributionControl: true,
-        scrollWheelZoom: false, // a card inside a panel must not hijack page scroll
-        dragging: true,
-      });
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+      if (!containerRef.current || mapRef.current) return;
+      const { L, map } = await mountLeafletMap(containerRef.current, {
+        mapOptions: {
+          zoomControl: false,
+          attributionControl: true,
+          scrollWheelZoom: false, // a card inside a panel must not hijack page scroll
+          dragging: true,
+        },
         maxZoom: 18,
-      }).addTo(map);
+      });
+      if (disposed || mapRef.current) {
+        map.remove();
+        return;
+      }
+      leafletRef.current = L;
+      L.control.zoom({ position: "bottomright" }).addTo(map);
       // Bounds include the viewer's OWN market anchor (owner audit §9.2):
       // the map opens on THEIR market, not on a lone foreign pin.
       const bounds = boundsFor(view.clusters, view.home);

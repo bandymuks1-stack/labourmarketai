@@ -18,7 +18,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 const playerCard = read("components/app/worker-player-card.tsx");
-const mapLive = read("components/app/market-map-live.tsx");
+const mapLive = read("components/app/market-map/location-map.tsx");
 const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
 
 describe("shared monogram is the single source of person initials", () => {

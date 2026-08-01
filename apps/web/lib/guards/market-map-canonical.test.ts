@@ -13,7 +13,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const page = read("app/[locale]/dashboard/market-map/page.tsx");
 const base = read("components/app/market-map-base.tsx");
-const live = read("components/app/market-map-live.tsx");
+const live = read("components/app/market-map/location-map.tsx");
 
 function idx(src: string, needle: string): number {
   const i = src.indexOf(needle);
@@ -61,9 +61,12 @@ describe("market map page — canonical coordinate map leads the flow", () => {
   it("the canonical map is the REAL provider map, not an SVG/coordinate-only locator", () => {
     expect(base).toMatch(/<MarketMapLive\b/);
     expect(base).not.toMatch(/<LocationMap\b/);
-    // The real map renders OSM tiles via Leaflet (free, no key).
+    // The real map renders OSM tiles via the ONE Leaflet engine (W3 row 28).
     expect(live).toMatch(/from "leaflet"/);
-    expect(live).toMatch(/tile\.openstreetmap\.org/);
+    expect(live).toMatch(/mountLeafletMap\(/);
+    expect(read("components/app/market-map/leaflet-engine.ts")).toMatch(
+      /tile\.openstreetmap\.org/,
+    );
     // The superseded SVG locator + its projection are gone.
     expect(existsSync(join(ROOT, "components/app/location-map.tsx"))).toBe(false);
     expect(existsSync(join(ROOT, "lib/location/map-projection.ts"))).toBe(false);

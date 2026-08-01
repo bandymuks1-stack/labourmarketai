@@ -86,7 +86,7 @@ describe("(b) no silent 'LT' country default", () => {
 
 describe("(c) live market map defaults to a WORLD view", () => {
   it("DEFAULT_CENTER/DEFAULT_ZOOM are the world view, not a Europe crop", () => {
-    const src = strip(read("components/app/market-map-live.tsx"));
+    const src = strip(read("components/app/market-map/location-map.tsx"));
     const center = src.match(/DEFAULT_CENTER[^=]*=\s*\[([^\]]+)\]/);
     const zoom = src.match(/DEFAULT_ZOOM\s*=\s*(\d+)/);
     expect(center, "DEFAULT_CENTER present").toBeTruthy();

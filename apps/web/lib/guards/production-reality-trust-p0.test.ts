@@ -87,7 +87,7 @@ describe("issue 3 — no approve/reject buttons when the reviewer is not permitt
 });
 
 describe("issue 4 — the map own-marker is a real player card (real data only)", () => {
-  const live = read("components/app/market-map-live.tsx");
+  const live = read("components/app/market-map/location-map.tsx");
   const page = read("app/[locale]/dashboard/market-map/page.tsx");
 
   it("MapIdentity carries the real player-card signals", () => {

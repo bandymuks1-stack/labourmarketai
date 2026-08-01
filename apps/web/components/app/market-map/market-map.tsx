@@ -15,16 +15,18 @@ import {
   type MarketMapView,
   type MarketRegion,
 } from "./market-map-model";
+import { mountLeafletMap } from "./leaflet-engine";
 
 /**
  * THE CANONICAL MARKET MAP.
  *
- * One Leaflet map for every geographic surface in the product — landing hero,
- * conversation ResultPanel, dashboard module, fullscreen. Previously this was
- * four things: `live-map.tsx` (real Europe polygons but fed from
- * `content/placeholders`), `market-map-live.tsx` (real Leaflet, location
- * picker), `workspace-map.tsx` (real Leaflet inside the panel) and
- * `labour-market-world-map.tsx` (a radial diagram that is not geography at all).
+ * The market-data presentation of the ONE map module. Every geographic
+ * surface boots through `./leaflet-engine.ts` (W3 row 28 finished the
+ * long-promised collapse): this component draws market anchors;
+ * `./location-map.tsx` (ex `market-map-live.tsx`) draws the own-location
+ * picker; `world-state/workspace-map.tsx` draws the workspace clusters — one
+ * engine, one tile source, three presentations. (`live-map.tsx` and the
+ * non-geographic `labour-market-world-map.tsx` radial diagram died earlier.)
  *
  * REAL ENGINE, REAL COORDINATES. Leaflet + OpenStreetMap tiles, WGS84
  * throughout. No SVG illustration standing in for a map, no scattered dots, no
@@ -86,33 +88,31 @@ export function MarketMap({
   const LRef = useRef<typeof LeafletTypes | null>(null);
   const [ready, setReady] = useState(false);
 
-  // ── mount the map once ────────────────────────────────────────────────────
+  // ── mount the map once (via the ONE Leaflet engine, W3 row 28) ────────────
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Leaflet touches `window`, so it can only be imported on the client.
-      const L = (await import("leaflet")).default as unknown as typeof LeafletTypes;
-      if (cancelled || !hostRef.current || mapRef.current) return;
-      LRef.current = L;
-
-      const map = L.map(hostRef.current, {
-        center: [...EUROPE_CENTER] as [number, number],
-        zoom: EUROPE_ZOOM,
-        // The landing map is a demonstration, not a tool: it must never trap
-        // the page scroll under the cursor.
-        scrollWheelZoom: mode !== "landing",
-        zoomControl: mode === "dashboard" || mode === "fullscreen",
-        attributionControl: true,
-        dragging: mode !== "landing",
-        doubleClickZoom: mode !== "landing",
-      });
-
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      if (!hostRef.current || mapRef.current) return;
+      const { L, map } = await mountLeafletMap(hostRef.current, {
+        mapOptions: {
+          center: [...EUROPE_CENTER] as [number, number],
+          zoom: EUROPE_ZOOM,
+          // The landing map is a demonstration, not a tool: it must never trap
+          // the page scroll under the cursor.
+          scrollWheelZoom: mode !== "landing",
+          zoomControl: mode === "dashboard" || mode === "fullscreen",
+          attributionControl: true,
+          dragging: mode !== "landing",
+          doubleClickZoom: mode !== "landing",
+        },
         maxZoom: 12,
         minZoom: 3,
-        attribution: "&copy; OpenStreetMap",
-      }).addTo(map);
-
+      });
+      if (cancelled || mapRef.current) {
+        map.remove();
+        return;
+      }
+      LRef.current = L;
       layerGroupRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
       setReady(true);
