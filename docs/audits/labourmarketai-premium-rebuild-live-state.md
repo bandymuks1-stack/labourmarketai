@@ -6,6 +6,23 @@
 
 ---
 
+## W3 — COMPLETE AND FROZEN (2026-08-01)
+
+**Verdict: `W3_CHAT_FIRST_WORKSPACE_CONSOLIDATION_COMPLETE`.**
+
+| | |
+|---|---|
+| `main` HEAD | **`7a4babba`** — PR **#961** squash-merged (Package 4: `/dashboard/advanced` DELETED) |
+| Production deployment | **`5703264161`** — Production, **success**, sha `7a4babba` |
+| Production smoke (anonymous) | landing 200; `/lt/dashboard/advanced` → 307 `/lt/auth/login?next=…` with ZERO advanced markup leaked; `/lt/dashboard` → login redirect. The authenticated 404 proof ran on the local guarded stack (middleware answers anon before routing — a login 200 is not a route render) |
+| §13 criteria | ALL met — route deleted; 28/28 rows dispositioned; row 24 formally → W6; 0 advanced runtime refs (ratchet at ZERO); one Chat / one Context Panel / one result surface / one MarketMap engine; full W3 tests pass (789 files / 12,560 unit; e2e record in the completion report); deploy + public smoke clean; gaps honestly recorded |
+| Standing gap | authenticated PRODUCTION proof still blocked by absent `PROD_QA_*` secrets (unchanged since Package 1; not looped on) |
+| Full record | `docs/audits/evidence/premium-rebuild/w3-final-completion-report.md` + the matrix's "Package 4 — EXECUTED" section |
+| Sibling fix landed mid-closure | PR #959 — the mobile sheet's links navigate again (a CSS-hidden AnchoredOverlay owned outside-close); the calendar 375px spec may now restore its true click-through leg (small follow-up, not W3-blocking) |
+
+**W3 is FROZEN except for regressions. W4 starts from
+`docs/audits/evidence/premium-rebuild/w4-baseline.md`.**
+
 ## CURRENT STATE — 2026-08-01 (calendar: rows 11/12 + the calendar result)
 
 | | |
