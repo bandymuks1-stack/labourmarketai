@@ -754,13 +754,24 @@ export default async function JournalPage({
             <p className="text-sm leading-relaxed text-text-secondary">
               {t("logViaChatBody")}
             </p>
-            <Link
-              href="/dashboard"
-              className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
-              data-testid="journal-log-via-chat-cta"
-            >
-              {t("logViaChatCta")}
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+                data-testid="journal-log-via-chat-cta"
+              >
+                {t("logViaChatCta")}
+              </Link>
+              {/* W5 slice 2: the voice surface finally gets a door. The page
+                  itself stays honest when transcription is unconfigured. */}
+              <Link
+                href="/dashboard/journal/voice"
+                className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md border border-border px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+                data-testid="journal-log-via-voice-cta"
+              >
+                {t("logViaVoiceCta")}
+              </Link>
+            </div>
           </div>
         )}
       </div>
