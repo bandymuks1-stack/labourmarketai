@@ -215,11 +215,24 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // destination for professional identity — the fallback path the registry
     // requires — and it is the ONLY route this result names.
     advancedRoute: "/dashboard/profile",
-    // PERSONAL ONLY, on the same reasoning as `opportunities`: these are the
-    // experiences other people submitted about THIS PERSON. Standing inside an
-    // organization, "experiences about me" answers a question nobody asked
-    // there, so it is not offered rather than offered and quietly wrong.
-    contexts: ["personal"],
+    // EVERY CONTEXT — the `journal` pattern, NOT the `opportunities` one.
+    //
+    // This was `["personal"]` first, copying the opportunities reasoning ("my
+    // matches answer a question nobody asked inside an organization"), and the
+    // authenticated browser proof refuted it immediately: the employer in the
+    // Dev Construction workspace got "this result is not available in the
+    // current context" instead of their own submissions. That is not an edge
+    // case — the AUTHOR side of this domain is normally an employer acting
+    // from inside their organization, so personal-only hid half the domain
+    // from the half of the product that produces it.
+    //
+    // The opportunities precedent does not transfer: "jobs that fit me" really
+    // is meaningless to an organization, whereas "the experiences I submitted,
+    // and the ones written about me" is a fact about the SIGNED-IN PERSON that
+    // stays true whichever workspace they are standing in — exactly like the
+    // work journal. The read is RLS-scoped to the viewer either way, so the
+    // context changes nothing about what comes back.
+    contexts: ["personal", "organization", "project"],
     // PROMOTED unverified → real by W6 slice 3. The store is now canonical:
     // `experience_records` / `experience_responses`, read through
     // `lib/trust/experience-records.ts`, counted by the ONE aggregation rule
