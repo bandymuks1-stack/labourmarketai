@@ -1899,6 +1899,7 @@ describe("no migration files added by this sprint", () => {
     // prod-apply autonomy (governance 2026-06-12) a GREEN classification
     // permits MCP apply_migration after merge. TS writes degrade honestly
     // (retry unstamped on undefined_column) until it is applied.
+
     // Bumped 168 -> 169 for W9 slice 1 organization membership revocation
     // (20260802160000_org_membership_revocation_v1, paired rollback). ONE new
     // SECURITY DEFINER function, zero schema change, zero RLS change, zero
@@ -1906,7 +1907,26 @@ describe("no migration files added by this sprint", () => {
     // ALREADY-EXISTING terminal `engagement_contexts.status = 'ended'`.
     // SECURITY DEFINER + GRANT EXECUTE classify it RED, so it ships UNAPPLIED
     // and stays owner-gated; no `@human-gate-approved` marker was added.
-    const SPRINT_BASELINE = 169;
+    // Bumped 169 -> 170 for W12 Slice 1 atomic double-booking prevention
+    // (20260802150000_booking_atomic_double_booking_v1, paired rollback).
+    // Closes the audited P0: all three public accept RPCs shared a race-prone
+    // read -> EXISTS -> UPDATE body with no row lock, no worker-scoped
+    // serialisation and no status guard, so two concurrent accepts of
+    // overlapping bookings for one worker both committed. Adds a row lock +
+    // advisory lock + status-guarded UPDATE in the ONE canonical body (v3),
+    // turns v1/v2 into thin delegators, and installs a PARTIAL
+    // `EXCLUDE USING gist` invariant (btree_gist) so the bad state is
+    // unrepresentable. RED by design (SECURITY DEFINER + GRANT + constraint),
+    // deliberately NOT human-gate-annotated — the owner applies it. Ships
+    // UNAPPLIED; production preflight showed booking_requests = 0 rows, so
+    // there is no data conflict blocking the constraint.
+    //
+    // MERGE-ORDER NOTE: this line is a shared ratchet. W9 slice 1 (#975) took
+    // it 168 -> 169 and is already on main; W12 takes it 169 -> 170. The W6
+    // slice 3 branch (#974) also adds one migration and must resolve to 171
+    // if it merges after this PR. Never take either side verbatim — recount
+    // the real migration files after every rebase.
+    const SPRINT_BASELINE = 170;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
