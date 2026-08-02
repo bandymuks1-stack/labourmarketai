@@ -277,7 +277,10 @@
     "preparing": "Ruošiama nuotrauka…",
     "prepared": "Nuotrauka sumažinta ir paruošta įkėlimui.",
     "tooLargeAfter": "Nuotrauka vis dar per didelė. Pabandykite kitą nuotrauką.",
-    "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandykite nuotrauką pridėti vėliau."
+    "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandykite nuotrauką pridėti vėliau.",
+    "uploading": "Įkeliama nuotrauka…",
+    "remove": "Pašalinti nuotrauką",
+    "previewAlt": "Pasirinkta nuotrauka"
   },
   "modes": {
     "title": "Įrašo tipas",

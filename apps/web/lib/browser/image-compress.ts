@@ -21,12 +21,24 @@ export interface CompressOptions {
   readonly mimeType?: "image/jpeg" | "image/webp";
 }
 
+/** Why an input was returned untouched. `null` = it was actually re-encoded. */
+export type CompressSkipReason =
+  | "not-an-image"
+  | "no-browser"
+  | "too-large-to-decode"
+  | "decode-failed"
+  | "no-gain";
+
 export interface CompressResult {
   readonly file: File;
   readonly originalBytes: number;
   readonly outputBytes: number;
   /** True when the output is a genuinely smaller/resized re-encode. */
   readonly resized: boolean;
+  /** Why the original was kept. Null when `resized` is true. Callers use this
+   *  to tell "we chose not to shrink it" from "we could not even look at it",
+   *  which are different sentences to a person. */
+  readonly skipped: CompressSkipReason | null;
 }
 
 export const IMAGE_COMPRESS_DEFAULTS = {
@@ -35,9 +47,33 @@ export const IMAGE_COMPRESS_DEFAULTS = {
   mimeType: "image/jpeg",
 } as const;
 
+/**
+ * Hard ceiling on what we will hand to the decoder.
+ *
+ * Decoding is where the memory goes, not the file: a 100 MB JPEG is ~20000 ×
+ * 15000 px, and `createImageBitmap` materialises that as RGBA — roughly 1.2 GB
+ * — BEFORE any of our own size logic can run. On a phone that is a tab crash,
+ * and a crash is a worse answer than a refusal. So the byte size is checked
+ * first and an absurd file never reaches `decode()` at all.
+ *
+ * 40 MB is deliberately far above any real phone photo (4–12 MB) so this guard
+ * only ever fires on input the product was never going to accept anyway — the
+ * upload ceiling downstream is 5 MB.
+ */
+export const MAX_DECODE_BYTES = 40 * 1024 * 1024;
+
 /** Image types we can safely re-encode in-browser. */
 export function isCompressibleImage(file: File): boolean {
   return /^image\/(jpeg|png|webp)$/.test(file.type);
+}
+
+/** True when the file is too large to decode safely — see MAX_DECODE_BYTES.
+ *  Pure, so the refusal is unit-testable without a canvas. */
+export function isTooLargeToDecode(
+  bytes: number,
+  limit: number = MAX_DECODE_BYTES,
+): boolean {
+  return bytes > limit;
 }
 
 /**
@@ -109,13 +145,21 @@ export async function compressImageFile(
   file: File,
   options: CompressOptions = {},
 ): Promise<CompressResult> {
-  const unchanged: CompressResult = {
+  const keep = (skipped: CompressSkipReason): CompressResult => ({
     file,
     originalBytes: file.size,
     outputBytes: file.size,
     resized: false,
-  };
-  if (typeof document === "undefined" || !isCompressibleImage(file)) return unchanged;
+    skipped,
+  });
+  if (!isCompressibleImage(file)) return keep("not-an-image");
+  // BEFORE decode — see MAX_DECODE_BYTES. Checked ahead of the environment
+  // probe because "too large to decode" is a property of the FILE, true in
+  // every environment, and this is the branch that must never fall through to
+  // a decoder. The caller's size validation then rejects it honestly; nothing
+  // was allocated to find that out.
+  if (isTooLargeToDecode(file.size)) return keep("too-large-to-decode");
+  if (typeof document === "undefined") return keep("no-browser");
 
   const maxEdge = options.maxEdge ?? IMAGE_COMPRESS_DEFAULTS.maxEdge;
   const quality = options.quality ?? IMAGE_COMPRESS_DEFAULTS.quality;
@@ -125,21 +169,21 @@ export async function compressImageFile(
   try {
     decoded = await decode(file);
     const target = computeTargetDimensions(decoded.width, decoded.height, maxEdge);
-    if (target.width === 0 || target.height === 0) return unchanged;
+    if (target.width === 0 || target.height === 0) return keep("decode-failed");
 
     const canvas = document.createElement("canvas");
     canvas.width = target.width;
     canvas.height = target.height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return unchanged;
+    if (!ctx) return keep("decode-failed");
     decoded.draw(ctx, target.width, target.height);
 
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob((b) => resolve(b), mimeType, quality),
     );
-    if (!blob || blob.size === 0) return unchanged;
+    if (!blob || blob.size === 0) return keep("decode-failed");
     // Never inflate: if the re-encode is not smaller, keep the original.
-    if (blob.size >= file.size) return unchanged;
+    if (blob.size >= file.size) return keep("no-gain");
 
     const out = new File([blob], renameForOutput(file.name, mimeType), {
       type: mimeType,
@@ -150,9 +194,10 @@ export async function compressImageFile(
       originalBytes: file.size,
       outputBytes: out.size,
       resized: true,
+      skipped: null,
     };
   } catch {
-    return unchanged;
+    return keep("decode-failed");
   } finally {
     decoded?.done();
   }

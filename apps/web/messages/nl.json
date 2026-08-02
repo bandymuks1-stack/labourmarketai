@@ -10856,7 +10856,11 @@
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}.",
-      "playerCardOpened": "Je kaart staat open in het paneel — echte gegevens uit je eigen records."
+      "playerCardOpened": "Je kaart staat open in het paneel — echte gegevens uit je eigen records.",
+      "attachChoice": "Waarvoor is dit bestand?",
+      "chipAttachPhoto": "Werkfoto",
+      "chipAttachCv": "Cv",
+      "userAttachPhoto": "Ik wil een werkfoto toevoegen"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

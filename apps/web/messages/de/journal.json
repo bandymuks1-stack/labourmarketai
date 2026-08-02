@@ -277,7 +277,10 @@
     "preparing": "Foto wird vorbereitet…",
     "prepared": "Foto verkleinert und bereit zum Hochladen.",
     "tooLargeAfter": "Das Foto ist immer noch zu groß. Versuchen Sie es mit einem anderen Foto.",
-    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
+    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
+    "uploading": "Foto wird hochgeladen…",
+    "remove": "Foto entfernen",
+    "previewAlt": "Ausgewähltes Foto"
   },
   "modes": {
     "title": "Eintragsart",

@@ -277,7 +277,10 @@
     "preparing": "Foto voorbereiden…",
     "prepared": "Foto verkleind en klaar om te uploaden.",
     "tooLargeAfter": "De foto is nog steeds te groot. Probeer een andere foto.",
-    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
+    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
+    "uploading": "Foto uploaden…",
+    "remove": "Foto verwijderen",
+    "previewAlt": "Geselecteerde foto"
   },
   "modes": {
     "title": "Itemtype",

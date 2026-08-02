@@ -3353,7 +3353,11 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Ditt kort är öppet i panelen — riktiga data från dina egna poster."
+      "playerCardOpened": "Ditt kort är öppet i panelen — riktiga data från dina egna poster.",
+      "attachChoice": "Vad är den här filen till för?",
+      "chipAttachPhoto": "Arbetsfoto",
+      "chipAttachCv": "CV",
+      "userAttachPhoto": "Jag vill bifoga ett arbetsfoto"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
