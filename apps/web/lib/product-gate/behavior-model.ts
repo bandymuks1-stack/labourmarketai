@@ -360,8 +360,14 @@ export const BEHAVIOR_CONFORMANCE = {
   behaviorsAreContextual: false,
   actionsKeyedTo: "rbac_role" as const,
   actorTypesWithoutBehaviors: ["customer"] as readonly string[],
-  conversationActions: 30,
-  actionsAnchoredToAPage: 30,
+  // Census of `action-registry.ts`, pinned against the real source by
+  // `product-gate.test.ts` ("the audit's claims still hold"). 30 → 31 in W6
+  // slice 3: `worker.review-experiences`, the action that opens the
+  // `experiences` result. The audit's CLAIM is unchanged by it — the new
+  // action is anchored to a page like every other one, which is exactly the
+  // conformance gap this census exists to keep visible.
+  conversationActions: 31,
+  actionsAnchoredToAPage: 31,
   actionsThatOnlyDeepLink: 9,
   verdict: "special_case_per_actor_type" as const,
   /** The one thing that is already right, and is the seed of the migration. */

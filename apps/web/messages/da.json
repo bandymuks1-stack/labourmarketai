@@ -3079,6 +3079,10 @@
           "label": "[EN] Review offers",
           "description": "[EN] See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "[EN] Review experiences",
+          "description": "[EN] See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "[EN] Accept or decline an offer",
           "description": "[EN] Accepting confirms the engagement — a strong step."
@@ -3856,8 +3860,7 @@
       "aboutMe": "Om mig",
       "aboutMeEmpty": "Der er endnu ingen offentliggjorte erfaringer om dig.",
       "mine": "Indsendt af mig",
-      "mineEmpty": "Du har endnu ikke indsendt nogen erfaringer.",
-      "backToChat": "Tilbage til samtalen"
+      "mineEmpty": "Du har endnu ikke indsendt nogen erfaringer."
     },
     "counts": {
       "title": "Offentliggjorte erfaringer",
@@ -4003,6 +4006,16 @@
         "not_found": "Ikke fundet.",
         "error": "Noget gik galt. Intet blev gemt."
       }
+    },
+    "result": {
+      "loading": "Indlæser…",
+      "error": "Vi kunne ikke læse erfaringerne. Intet blev ændret.",
+      "retry": "Prøv igen",
+      "signIn": "Log ind for at se dine erfaringer."
+    },
+    "panel": {
+      "title": "Moderation af erfaringer",
+      "help": "Intern kø. Hver beslutning kræver en begrundelse; den gemmes i revisionssporet og offentliggøres aldrig."
     }
   }
 }

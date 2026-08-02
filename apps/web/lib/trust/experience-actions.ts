@@ -21,6 +21,15 @@ import type { EligibleInteractionKind } from "./experience-eligibility";
  * re-derives eligibility and authorization server-side, and this layer only
  * shapes the form payload and maps the honest outcome. Absent migration →
  * `needs_migration`, surfaced as a product-level unavailable state.
+ *
+ * REVALIDATION TARGETS follow the surfaces that actually exist. Slice 3B
+ * pointed these at `/dashboard/experiences` and
+ * `/dashboard/admin/experience-moderation`; the Product Gate refused both
+ * screens (A-09) and they were deleted. The domain now lives in the
+ * `?result=experiences` Workspace Result under `/dashboard`, and the moderator
+ * queue is a band on the EXISTING `/dashboard/admin` control room — so those
+ * are the two paths revalidated. Revalidating a route that no longer exists
+ * would be a silent no-op dressed up as a refresh.
  */
 
 export type ExperienceFormState = ExperienceActionResult | null;
@@ -44,7 +53,7 @@ export async function submitExperienceAction(
     sentiment,
     body: str(formData, "body"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/experiences`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard`);
   return result;
 }
 
@@ -57,7 +66,7 @@ export async function submitExperienceResponseAction(
     experienceId: str(formData, "experience_id"),
     body: str(formData, "body"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/experiences`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard`);
   return result;
 }
 
@@ -70,7 +79,7 @@ export async function openExperienceDisputeAction(
     experienceId: str(formData, "experience_id"),
     reason: str(formData, "reason"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/experiences`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard`);
   return result;
 }
 
@@ -82,7 +91,7 @@ export async function startModerationAction(
 ): Promise<ExperienceFormState> {
   const locale = str(formData, "locale") || "lt";
   const result = await startExperienceModeration(str(formData, "experience_id"));
-  if (result.ok) revalidatePath(`/${locale}/dashboard/admin/experience-moderation`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
   return result;
 }
 
@@ -100,7 +109,7 @@ export async function decideModerationAction(
     decision,
     reason: str(formData, "reason"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/admin/experience-moderation`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
   return result;
 }
 
@@ -118,6 +127,6 @@ export async function resolveDisputeAction(
     resolution,
     reason: str(formData, "reason"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/admin/experience-moderation`);
+  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
   return result;
 }

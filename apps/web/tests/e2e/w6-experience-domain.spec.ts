@@ -11,8 +11,21 @@ import { dbOk, HAS_LOCAL_STACK } from "./market-map-db-state";
  * layer by apps/web/scripts/w6-experience-domain-proof.sql (43/43). This
  * spec proves the PRODUCT surfaces on top of it: honest state rendering,
  * count-only reputation with no score anywhere, the dispute marker, the
- * admin gate, the chat handoff, and mobile.
+ * admin gate, and mobile.
+ *
+ * THE SURFACES MOVED. Slice 3B proved this against two screens,
+ * `/dashboard/experiences` and `/dashboard/admin/experience-moderation`. The
+ * Product Gate refused both (A-09, undeclared surface) and they were deleted:
+ * the workspace is chat-first, so the domain is the `?result=experiences`
+ * Workspace Result, and the moderator queue is a band on the EXISTING
+ * `/dashboard/admin` control room. This spec follows the domain to its
+ * canonical homes — the assertions about honesty are unchanged, because the
+ * doctrine did not move, only the surface did.
  */
+
+/** The canonical address of the experience domain. Deep-linkable, survives a
+ *  reload, shareable — the whole reason a result lives in the query string. */
+const EXPERIENCES = "/lt/dashboard?result=experiences";
 const WORKER_STATE = join(__dirname, ".storage-state.worker.json");
 const COMPANY_STATE = join(__dirname, ".storage-state.company.json");
 const HAS_SESSIONS = existsSync(WORKER_STATE) && existsSync(COMPANY_STATE);
@@ -118,8 +131,8 @@ test.describe("worker self view", () => {
   test("count-only reputation renders real counts, a dispute marker, and no score", async ({
     page,
   }) => {
-    await page.goto("/lt/dashboard/experiences");
-    await expect(page.getByTestId("experiences-page")).toBeVisible({ timeout: 60_000 });
+    await page.goto(EXPERIENCES);
+    await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
 
     const counts = page.getByTestId("experience-counts");
     await expect(counts).toBeVisible();
@@ -137,7 +150,7 @@ test.describe("worker self view", () => {
   test("a published record about me carries its dispute marker and the reply door", async ({
     page,
   }) => {
-    await page.goto("/lt/dashboard/experiences");
+    await page.goto(EXPERIENCES);
     const items = page.getByTestId("experience-about-me-item");
     await expect(items.first()).toBeVisible({ timeout: 60_000 });
     const disputed = items.filter({ has: page.getByTestId("experience-dispute-marker") });
@@ -146,18 +159,41 @@ test.describe("worker self view", () => {
     await expect(page.getByTestId("experience-response").first()).toBeVisible();
   });
 
-  test("the surface hands back to the ONE work surface (chat)", async ({ page }) => {
-    await page.goto("/lt/dashboard/experiences");
-    const back = page.getByTestId("experiences-back-to-chat");
-    await expect(back).toBeVisible({ timeout: 60_000 });
-    await back.click();
-    await expect(page).toHaveURL(/\/lt\/dashboard$/, { timeout: 60_000 });
+  test("the result IS the work surface — it survives reload and closes back to the conversation", async ({
+    page,
+  }) => {
+    // Slice 3B needed a "back to chat" link because the domain lived on its
+    // own screen. It does not any more: the result opens INSIDE the workspace,
+    // so there is nowhere to go back FROM. What must hold instead is that the
+    // address is real — `?result=` is state in the URL, not a modal.
+    await page.goto(EXPERIENCES);
+    await expect(page.getByTestId("context-panel")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
+
+    await page.reload();
+    await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
+
+    // The conversation is never left behind — closing the result drops the
+    // param and the workspace is still there.
+    await page.goto("/lt/dashboard");
+    await expect(page.getByTestId("experiences-result")).toHaveCount(0);
+  });
+
+  test("the deleted screen is really gone — /dashboard/experiences is not a route", async ({
+    page,
+  }) => {
+    // The Product Gate refusal is only honoured if the screen actually left
+    // the tree. A soft-deleted route that still renders would be the second
+    // dashboard by another name.
+    const response = await page.goto("/lt/dashboard/experiences");
+    expect(response?.status()).toBe(404);
+    await expect(page.getByTestId("experiences-result")).toHaveCount(0);
   });
 
   test("mobile 375px: nothing overflows", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/lt/dashboard/experiences");
-    await expect(page.getByTestId("experiences-page")).toBeVisible({ timeout: 60_000 });
+    await page.goto(EXPERIENCES);
+    await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -168,9 +204,22 @@ test.describe("worker self view", () => {
   test("the moderator queue is server-side gated — a worker never reaches it", async ({
     page,
   }) => {
-    await page.goto("/lt/dashboard/admin/experience-moderation");
-    await expect(page.getByTestId("experience-moderation-page")).toHaveCount(0);
-    await expect(page).not.toHaveURL(/experience-moderation$/, { timeout: 60_000 });
+    // The queue is now a BAND on the existing control room, so the gate being
+    // tested is the control room's own `requireSuperadmin` — which is the
+    // point: the queue inherited a gate that already existed instead of
+    // bringing a new one of its own.
+    await page.goto("/lt/dashboard/admin");
+    await expect(page.getByTestId("admin-experience-moderation")).toHaveCount(0);
+    await expect(page.getByTestId("experience-moderation-queue")).toHaveCount(0);
+    await expect(page).not.toHaveURL(/\/dashboard\/admin$/, { timeout: 60_000 });
+  });
+
+  test("the old moderator route is really gone", async ({ page }) => {
+    const response = await page.goto("/lt/dashboard/admin/experience-moderation");
+    // Either 404 (route deleted) or bounced by the admin gate — never a
+    // rendered queue.
+    await expect(page.getByTestId("experience-moderation-queue")).toHaveCount(0);
+    expect(response?.status()).toBeLessThan(500);
   });
 });
 
@@ -178,8 +227,8 @@ test.describe("employer view", () => {
   test.use({ storageState: COMPANY_STATE });
 
   test("the author sees their own submissions in their REAL state", async ({ page }) => {
-    await page.goto("/lt/dashboard/experiences");
-    await expect(page.getByTestId("experiences-page")).toBeVisible({ timeout: 60_000 });
+    await page.goto(EXPERIENCES);
+    await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
     const mine = page.getByTestId("experience-mine-item");
     await expect(mine.first()).toBeVisible();
     // Every row states its real moderation state — never a fake "published".
@@ -188,7 +237,8 @@ test.describe("employer view", () => {
   });
 
   test("the employer cannot reach the moderator queue either", async ({ page }) => {
-    await page.goto("/lt/dashboard/admin/experience-moderation");
-    await expect(page.getByTestId("experience-moderation-page")).toHaveCount(0);
+    await page.goto("/lt/dashboard/admin");
+    await expect(page.getByTestId("admin-experience-moderation")).toHaveCount(0);
+    await expect(page.getByTestId("experience-moderation-queue")).toHaveCount(0);
   });
 });

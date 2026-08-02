@@ -10578,6 +10578,10 @@
           "label": "Peržiūrėti pasiūlymus",
           "description": "Pamatyk tau atsiųstus darbo pasiūlymus."
         },
+        "reviewExperiences": {
+          "label": "Peržiūrėti patirtis",
+          "description": "Pamatyk patirtis apie tave ir tavo pateiktas patirtis."
+        },
         "respondBooking": {
           "label": "Priimti ar atmesti pasiūlymą",
           "description": "Priėmimas patvirtina įsipareigojimą — svarbus žingsnis."
@@ -10997,8 +11001,8 @@
       "evidence": {
         "title": "Įrodymai"
       },
-      "reputation": {
-        "title": "Reputacija"
+      "experiences": {
+        "title": "Patirtys"
       },
       "invoice": {
         "title": "Sąskaitos pagrindas"
@@ -11560,8 +11564,7 @@
       "aboutMe": "Apie mane",
       "aboutMeEmpty": "Apie jus dar nėra paskelbtų patirčių.",
       "mine": "Mano pateiktos",
-      "mineEmpty": "Dar nepateikėte nė vienos patirties.",
-      "backToChat": "Grįžti į pokalbį"
+      "mineEmpty": "Dar nepateikėte nė vienos patirties."
     },
     "counts": {
       "title": "Paskelbtos patirtys",
@@ -11707,6 +11710,16 @@
         "not_found": "Nerasta.",
         "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
       }
+    },
+    "result": {
+      "loading": "Kraunama…",
+      "error": "Nepavyko perskaityti patirčių. Niekas nebuvo pakeista.",
+      "retry": "Bandyti dar kartą",
+      "signIn": "Prisijunk, kad matytum savo patirtis."
+    },
+    "panel": {
+      "title": "Patirčių moderavimas",
+      "help": "Vidinė eilė. Kiekvienam sprendimui privaloma priežastis; ji patenka į audito įrašą ir nėra skelbiama."
     }
   }
 }

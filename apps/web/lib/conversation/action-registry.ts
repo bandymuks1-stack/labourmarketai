@@ -277,6 +277,26 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "createJournalEntry" },
   },
   {
+    // W6 slice 3 — the door to the `experiences` result. A READ: it opens the
+    // panel, it writes nothing. Submitting, replying and disputing are
+    // separate RPC-backed writes that need an eligible interaction, and none
+    // of them hides behind this action.
+    id: "worker.review-experiences",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.reviewExperiences.label",
+    descriptionKey: "conversation.actions.worker.reviewExperiences.description",
+    confirmation: "read",
+    precondition: "authenticated",
+    // The experience domain migration is owner-gated; the read degrades to an
+    // honest "not available in this environment" state rather than an empty
+    // list, so the sensitivity is declared here too.
+    migrationSensitive: true,
+    telemetryEvent: E.profileViewed,
+    advancedRoute: "/dashboard/profile",
+    handler: { kind: "deep_link" },
+  },
+  {
     id: "worker.what-next",
     subject: "worker",
     allowedRoles: ["worker"],

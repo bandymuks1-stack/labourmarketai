@@ -10578,6 +10578,10 @@
           "label": "Angebote ansehen",
           "description": "Sieh dir die an dich gesendeten Angebote an."
         },
+        "reviewExperiences": {
+          "label": "Erfahrungen ansehen",
+          "description": "Sieh die Erfahrungen über dich und die, die du eingereicht hast."
+        },
         "respondBooking": {
           "label": "Angebot annehmen oder ablehnen",
           "description": "Annahme bestätigt das Engagement — ein wichtiger Schritt."
@@ -10997,8 +11001,8 @@
       "evidence": {
         "title": "Nachweise"
       },
-      "reputation": {
-        "title": "Reputation"
+      "experiences": {
+        "title": "Erfahrungen"
       },
       "invoice": {
         "title": "Rechnungsgrundlage"
@@ -11560,8 +11564,7 @@
       "aboutMe": "Über mich",
       "aboutMeEmpty": "Noch keine veröffentlichten Erfahrungen über dich.",
       "mine": "Von mir eingereicht",
-      "mineEmpty": "Du hast noch keine Erfahrungen eingereicht.",
-      "backToChat": "Zurück zum Gespräch"
+      "mineEmpty": "Du hast noch keine Erfahrungen eingereicht."
     },
     "counts": {
       "title": "Veröffentlichte Erfahrungen",
@@ -11707,6 +11710,16 @@
         "not_found": "Nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
       }
+    },
+    "result": {
+      "loading": "Wird geladen…",
+      "error": "Die Erfahrungen konnten nicht gelesen werden. Es wurde nichts geändert.",
+      "retry": "Erneut versuchen",
+      "signIn": "Melde dich an, um deine Erfahrungen zu sehen."
+    },
+    "panel": {
+      "title": "Erfahrungs-Moderation",
+      "help": "Interne Warteschlange. Jede Entscheidung braucht einen Grund; er wird im Audit-Trail festgehalten und nie veröffentlicht."
     }
   }
 }

@@ -10578,6 +10578,10 @@
           "label": "Review offers",
           "description": "See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "Review experiences",
+          "description": "See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "Accept or decline an offer",
           "description": "Accepting confirms the engagement — a strong step."
@@ -10997,8 +11001,8 @@
       "evidence": {
         "title": "Evidence"
       },
-      "reputation": {
-        "title": "Reputation"
+      "experiences": {
+        "title": "Experiences"
       },
       "invoice": {
         "title": "Invoice basis"
@@ -11560,8 +11564,7 @@
       "aboutMe": "About me",
       "aboutMeEmpty": "No published experiences about you yet.",
       "mine": "Submitted by me",
-      "mineEmpty": "You have not submitted any experiences yet.",
-      "backToChat": "Back to the conversation"
+      "mineEmpty": "You have not submitted any experiences yet."
     },
     "counts": {
       "title": "Published experiences",
@@ -11707,6 +11710,16 @@
         "not_found": "Not found.",
         "error": "Something went wrong. Nothing was saved."
       }
+    },
+    "result": {
+      "loading": "Loading…",
+      "error": "We could not read the experiences. Nothing was changed.",
+      "retry": "Try again",
+      "signIn": "Sign in to see your experiences."
+    },
+    "panel": {
+      "title": "Experience moderation",
+      "help": "Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
     }
   }
 }

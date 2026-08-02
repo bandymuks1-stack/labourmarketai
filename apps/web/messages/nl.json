@@ -10578,6 +10578,10 @@
           "label": "Aanbiedingen bekijken",
           "description": "Bekijk de aan jou verstuurde vacatures."
         },
+        "reviewExperiences": {
+          "label": "Ervaringen bekijken",
+          "description": "Bekijk de ervaringen over jou en de ervaringen die je zelf hebt ingediend."
+        },
         "respondBooking": {
           "label": "Aanbod accepteren of weigeren",
           "description": "Accepteren bevestigt de opdracht — een belangrijke stap."
@@ -10997,8 +11001,8 @@
       "evidence": {
         "title": "Bewijs"
       },
-      "reputation": {
-        "title": "Reputatie"
+      "experiences": {
+        "title": "Ervaringen"
       },
       "invoice": {
         "title": "Factuurbasis"
@@ -11560,8 +11564,7 @@
       "aboutMe": "Over mij",
       "aboutMeEmpty": "Nog geen gepubliceerde ervaringen over jou.",
       "mine": "Door mij ingediend",
-      "mineEmpty": "Je hebt nog geen ervaringen ingediend.",
-      "backToChat": "Terug naar het gesprek"
+      "mineEmpty": "Je hebt nog geen ervaringen ingediend."
     },
     "counts": {
       "title": "Gepubliceerde ervaringen",
@@ -11707,6 +11710,16 @@
         "not_found": "Niet gevonden.",
         "error": "Er ging iets mis. Er is niets opgeslagen."
       }
+    },
+    "result": {
+      "loading": "Laden…",
+      "error": "We konden de ervaringen niet lezen. Er is niets gewijzigd.",
+      "retry": "Opnieuw proberen",
+      "signIn": "Log in om je ervaringen te zien."
+    },
+    "panel": {
+      "title": "Ervaringsmoderatie",
+      "help": "Interne wachtrij. Elk besluit heeft een reden nodig; die komt in het auditspoor en wordt nooit gepubliceerd."
     }
   }
 }

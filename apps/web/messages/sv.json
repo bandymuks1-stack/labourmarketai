@@ -3079,6 +3079,10 @@
           "label": "[EN] Review offers",
           "description": "[EN] See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "[EN] Review experiences",
+          "description": "[EN] See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "[EN] Accept or decline an offer",
           "description": "[EN] Accepting confirms the engagement — a strong step."
@@ -3856,8 +3860,7 @@
       "aboutMe": "[EN] About me",
       "aboutMeEmpty": "[EN] No published experiences about you yet.",
       "mine": "[EN] Submitted by me",
-      "mineEmpty": "[EN] You have not submitted any experiences yet.",
-      "backToChat": "[EN] Back to the conversation"
+      "mineEmpty": "[EN] You have not submitted any experiences yet."
     },
     "counts": {
       "title": "[EN] Published experiences",
@@ -4003,6 +4006,16 @@
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
       }
+    },
+    "result": {
+      "loading": "[EN] Loading…",
+      "error": "[EN] We could not read the experiences. Nothing was changed.",
+      "retry": "[EN] Try again",
+      "signIn": "[EN] Sign in to see your experiences."
+    },
+    "panel": {
+      "title": "[EN] Experience moderation",
+      "help": "[EN] Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
     }
   }
 }

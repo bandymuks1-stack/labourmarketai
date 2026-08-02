@@ -1,4 +1,6 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ExperienceCountsState } from "@/lib/trust/experience-records";
 
 /**
@@ -11,15 +13,22 @@ import type { ExperienceCountsState } from "@/lib/trust/experience-records";
  *
  * When negatives outnumber positives the block carries a plain caution line
  * (owner rule 4): a signal to look closer, never a verdict or a block.
+ *
+ * A CLIENT component, and deliberately so: after W6 slice 3B's route removal
+ * the counts render inside the `experiences` Workspace Result, which is a
+ * client tree. Rather than grow a second counts renderer for that tree — the
+ * duplication this file exists to prevent — the ONE renderer moved. It stays
+ * purely presentational: `counts` arrives already read, and nothing here
+ * touches supabase, so the server tree can hand it a value just as before.
  */
-export async function ExperienceCountsBlock({
+export function ExperienceCountsBlock({
   counts,
   testId = "experience-counts",
 }: {
   counts: ExperienceCountsState;
   testId?: string;
 }) {
-  const t = await getTranslations("experience");
+  const t = useTranslations("experience");
 
   if (counts.state === "needs_migration" || counts.state === "error") {
     // Product-level unavailability. No SQL text, no migration jargon.
