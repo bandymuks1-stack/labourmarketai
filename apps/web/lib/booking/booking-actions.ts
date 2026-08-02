@@ -14,6 +14,7 @@ import {
   type BookingStatus,
 } from "@/lib/booking/booking-state";
 import { hasFeature } from "@/lib/billing/effective-entitlements";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   COMPANY_REQUEST_LIMITS,
   evaluateRequestBudget,
@@ -101,6 +102,11 @@ export async function proposeBookingAction(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
+
+  // W8 slice 1 — WORKSPACE GATE. Proposing a booking is an employer act; it
+  // requires an active company context, not merely a signed-in profile.
+  // Mapped onto the existing `not-entitled` kind (no second vocabulary).
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") return { kind: "not-entitled" };
 
   // Entitlement enforcement (PR5). Permissive while billing is disabled (pilot
   // preserved); enforced once test mode is active + no active Company Pilot.

@@ -2,6 +2,8 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
@@ -90,6 +92,29 @@ export default async function CompanyScoutingPage({
   await requireRoleOrRedirect(locale, "company");
 
   const t = await getTranslations("scouting");
+
+  // W8 slice 1 — ACTING CONTEXT FIRST. Holding the company role gets you onto
+  // this route; it does not say which company you are acting for. Without an
+  // active company context the page renders its honest state and reads
+  // NOTHING, so a personal workspace (or an organization with no company
+  // binding) can never be shown another context's demands and candidates.
+  const employerContext = await resolveEmployerCompanyContext();
+  if (employerContext.kind !== "ok") {
+    return (
+      <main className="mx-auto flex w-full max-w-content flex-col gap-6">
+        <header className="flex flex-col gap-1">
+          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h1>
+          <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
+        </header>
+        <EmployerContextNotice
+          reason={employerContext.reason}
+          activeWorkspaceName={employerContext.activeWorkspaceName}
+        />
+      </main>
+    );
+  }
   // Contract-v2 criterion vocabulary is localized ONCE, in the shared
   // opportunities.discovery namespace (same tier explanation both sides see).
   const tCrit = await getTranslations("opportunities.discovery.criterion");

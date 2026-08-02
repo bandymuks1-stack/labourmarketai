@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { deriveNeedSkills } from "@/lib/market/need-skills";
 import {
   canCloseFrom,
@@ -33,6 +34,12 @@ async function ownRequest(requestId: string) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { supabase, user: null, req: null };
+  // W8 slice 1 — the ONE workspace gate for all three lifecycle writes
+  // (confirm / close / reopen). Not acting for a company ⇒ `not-owner`, which
+  // is what every caller already renders honestly.
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") {
+    return { supabase, user: null, req: null };
+  }
   const { data: req } = await asAny(supabase)
     .from("customer_requests")
     .select("id, status, title, need_summary, role_or_work_type, notes, payload")

@@ -2,6 +2,7 @@
 
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { canStartCommunicationOrBooking } from "@/lib/visibility/worker-profile-visibility";
 import {
@@ -42,7 +43,18 @@ function asAny<T>(c: T): any {
 
 export type RequestWorkerConversationResult =
   | { ok: true; conversationId: string }
-  | { ok: false; reason: CommunicationRequestDecision | "not_authenticated" | "worker_unavailable" | "needs_migration" | "rate_limited" | "error" };
+  | {
+      ok: false;
+      reason:
+        | CommunicationRequestDecision
+        | "not_authenticated"
+        // W8 slice 1: not acting for a company right now.
+        | "no_company_context"
+        | "worker_unavailable"
+        | "needs_migration"
+        | "rate_limited"
+        | "error";
+    };
 
 export async function requestWorkerConversationAction(input: {
   locale: string;
@@ -57,6 +69,12 @@ export async function requestWorkerConversationAction(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, reason: "not_authenticated" };
+
+  // W8 slice 1 — WORKSPACE GATE, ahead of the rate budget so a context that
+  // may not act at all never consumes another context's allowance.
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") {
+    return { ok: false, reason: "no_company_context" };
+  }
 
   // 0) Bounded request budget (Wagon 1): max 30 conversations opened by this
   //    account in the rolling last 24h, counted over the caller's own

@@ -2,6 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  requireEmployerCompany,
+  resolveEmployerCompanyContext,
+  type EmployerContextReason,
+} from "@/lib/company/employer-company-context";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
@@ -71,13 +76,28 @@ export interface CompanyDemand {
 // lib/market/need-from-request.ts (Wagon 4) so scouting AND the admin
 // workbench share the ONE need-assembly path.
 
-/** The company's own demands (most recent first). */
+/**
+ * The active company's demands (most recent first).
+ *
+ * W8 slice 1 — WORKSPACE GATE. The rows are still keyed on `profile_id`
+ * (`customer_requests` has no organization/company column — the W9 structural
+ * block recorded in the W8 audit), so this cannot yet filter BY company. What
+ * it can do, and now does, is refuse to answer at all unless the caller is
+ * really acting for a company right now. Without this gate the same demands
+ * rendered in every workspace the person could switch to, which is exactly the
+ * "active organization is decorative" defect (audit P0-1).
+ *
+ * Empty array = no demands OR no company context. Surfaces that need to tell
+ * those apart call `resolveEmployerCompanyContext()` and render the reason —
+ * see `/dashboard/company/scouting`.
+ */
 export async function listCompanyDemands(): Promise<CompanyDemand[]> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") return [];
   try {
     const { data } = await asAny(supabase)
       .from("customer_requests")
@@ -125,6 +145,10 @@ export type ScoutResult =
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
   | { kind: "needs-migration" }
+  /** W8 slice 1: the caller is not acting for a company right now. Its own
+   *  kind, never "not-found" — "you are in your personal space" and "that
+   *  demand does not exist" are different truths and must read differently. */
+  | { kind: "no-company-context"; reason: EmployerContextReason }
   | { kind: "error"; message: string };
 
 /** Run scouting for ONE of the company's own demands. Optional bounded
@@ -139,6 +163,12 @@ export async function runScouting(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-found" };
+
+  // W8 slice 1 — WORKSPACE GATE, before any demand row is read. A deep link
+  // carrying another workspace's request id can therefore never resolve from a
+  // context that is not acting for a company.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "no-company-context", reason: employer.reason };
 
   // Own demand only (RLS also enforces profile_id = auth.uid()).
   const { data: req, error } = await asAny(supabase)
@@ -316,6 +346,12 @@ export async function setShortlist(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-owner" };
+
+  // W8 slice 1 — a WRITE from a context that is not acting for a company is
+  // refused before it reaches the demand row. Mapped onto the existing
+  // `not-owner` kind on purpose: no second error vocabulary, and the surface
+  // already renders it honestly.
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") return { kind: "not-owner" };
 
   // Verify the demand is the caller's own (RLS would also filter, but we want
   // a clean not-owner signal, not a silent FK error).
