@@ -109,8 +109,34 @@
 --   + APPLIED_LEDGER.md row.
 --
 -- TIER: owner-gated RED by design (SECURITY DEFINER + GRANT + new constraint).
--- This file deliberately carries NO `@human-gate-approved` marker: the agent
--- does not self-approve its own gate. The owner applies it manually.
+--
+-- ── OWNER HUMAN GATE — GRANTED 2026-08-02 ──────────────────────────────────
+-- The marker below was added ONLY on the owner's explicit written approval in
+-- chat. The agent did not self-approve this gate at any point; the file shipped
+-- without the marker until that approval arrived.
+--
+-- SCOPE OF THE APPROVAL — exactly these four migration-safety findings, for
+-- THIS pull request (#976) and no other:
+--   1. `security-definer-function` — the three respond_booking_request* RPCs
+--      stay SECURITY DEFINER with a pinned `search_path`, as they already were.
+--   2. `grant-or-revoke`          — REVOKE from public/anon + GRANT EXECUTE to
+--      authenticated, for those same three functions only.
+--   3. `create-extension`         — `btree_gist`, required for `uuid WITH =`
+--      inside the gist exclusion constraint.
+--   4. `data-dml`                 — the classifier matching
+--      `update public.booking_requests` INSIDE the v3 function body. Verified
+--      with `$$ … $$` bodies stripped: this migration performs ZERO
+--      statement-level DML.
+--
+-- WHAT THE APPROVAL EXPLICITLY DOES **NOT** COVER:
+--   * applying this migration to PRODUCTION — NOT approved. Production apply
+--     stays PENDING_SEPARATE_OWNER_APPROVAL. Merging this PR and deploying the
+--     application are NOT permission to run the migration.
+--   * any mutation of production data — NOT approved. No seed, no status
+--     rewrite, no destructive proof, no production concurrency test.
+--   * installing `btree_gist` in production — NOT approved.
+-- ============================================================================
+-- @human-gate-approved
 -- ============================================================================
 
 begin;

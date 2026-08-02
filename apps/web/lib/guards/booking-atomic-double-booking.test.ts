@@ -246,15 +246,39 @@ describe("W12 slice 1 — migration governance", () => {
     expect(statements).toMatch(/drop constraint if exists/i);
   });
 
-  it("does NOT self-approve its own human gate", () => {
-    // RED-class (SECURITY DEFINER + GRANT + constraint). The agent never adds
-    // the marker to its own migration — the owner applies it.
+  it("carries the OWNER-GRANTED human gate marker, with its scope recorded", () => {
+    // RED-class (SECURITY DEFINER + GRANT + constraint). The agent shipped this
+    // file WITHOUT the marker and never self-approved; the owner granted the
+    // gate in writing on 2026-08-02 for PR #976, and only then was it added.
     // Uses the EXACT anchored pattern from .github/scripts/migration-safety.mjs
-    // (a comment line that *is* the annotation), so prose that merely mentions
-    // the marker — as this migration's header deliberately does — is not a
-    // false positive, and a real annotation cannot slip past.
+    // (a comment line that *is* the annotation), so header prose that merely
+    // mentions the marker can neither satisfy nor defeat this assertion.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(migration())).toBe(false);
+    expect(ANNOTATION.test(migration())).toBe(true);
+
+    // The approval must stay auditable and bounded: who granted it, for which
+    // PR, and which findings it covers.
+    const header = migration();
+    expect(header).toMatch(/OWNER HUMAN GATE — GRANTED 2026-08-02/);
+    expect(header).toMatch(/#976/);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "create-extension",
+      "data-dml",
+    ]) {
+      expect(header, `approval must name ${finding}`).toContain(finding);
+    }
+  });
+
+  it("the approval explicitly withholds production apply and data mutation", () => {
+    // Merging and deploying the app are NOT permission to run the migration.
+    // If a future edit ever quietly drops these carve-outs, this guard fails.
+    const header = migration();
+    expect(header).toMatch(/PRODUCTION[\s\S]{0,40}NOT approved/i);
+    expect(header).toMatch(/PENDING_SEPARATE_OWNER_APPROVAL/);
+    expect(header).toMatch(/mutation of production data[\s\S]{0,40}NOT approved/i);
+    expect(header).toMatch(/btree_gist` in production[\s\S]{0,40}NOT approved/i);
   });
 
   it("declares a reversible rollback block (migration-safety rule b)", () => {
