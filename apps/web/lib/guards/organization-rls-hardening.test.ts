@@ -93,13 +93,31 @@ describe("W9 slice 2 — the migration is definer-safe and self-contained", () =
     expect(code).not.toMatch(/\btruncate\b/);
   });
 
-  it("does NOT self-approve the human gate", () => {
+  it("carries the OWNER-GRANTED human gate, with its scope written down", () => {
+    // Until the owner decided on PR #980 this asserted the marker was ABSENT —
+    // an agent must never self-approve. The owner granted the gate on
+    // 2026-08-02, so the assertion flips: the marker must now be present AND
+    // must carry its scope, because a bare marker is indistinguishable from a
+    // self-approval when read six months later.
+    //
     // Byte-identical to ANNOTATION in .github/scripts/migration-safety.mjs, so
     // this asserts exactly what CI asserts: the marker only counts as a comment
-    // line that STARTS with it. The header discusses the marker in prose (to
-    // explain why it is absent), which must not read as an approval.
+    // line that STARTS with it.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(rawMigration)).toBe(false);
+    expect(ANNOTATION.test(rawMigration)).toBe(true);
+
+    // The scope record: which PR, which findings, and what is NOT covered.
+    expect(rawMigration).toMatch(/OWNER APPROVAL — SCOPE/i);
+    expect(rawMigration).toMatch(/PR #980/);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "alter-drop-policy",
+    ]) {
+      expect(rawMigration).toContain(finding);
+    }
+    // The approval must still explicitly exclude production apply.
+    expect(rawMigration).toMatch(/NOT APPROVED — production apply/i);
   });
 
   it("states that production apply is not authorised by merge", () => {

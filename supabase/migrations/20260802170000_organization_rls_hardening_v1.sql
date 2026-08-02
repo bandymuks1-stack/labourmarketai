@@ -2,10 +2,33 @@
 -- 20260802170000 — organization RLS hardening v1 (W9 slice 2).
 --
 -- SAFETY CLASS: RED. This migration creates SECURITY DEFINER functions, changes
--- GRANTs (REVOKE on a table) and REPLACES two existing RLS policies. It carries
--- NO `-- @human-gate-approved` marker: at the time of writing the owner has not
--- reviewed the human-gate package, and an agent must never self-approve.
--- The marker is added ONLY after an explicit owner decision on the PR.
+-- GRANTs (REVOKE on a table) and REPLACES two existing RLS policies.
+--
+-- @human-gate-approved
+--
+-- OWNER APPROVAL — SCOPE, verbatim from the decision on PR #980 (2026-08-02).
+-- The marker above was NOT self-added by an agent; it records an explicit owner
+-- decision made after reviewing the human-gate package on that PR. What it
+-- covers, and nothing else:
+--
+--   APPROVED — the three migration-safety findings, and only these three:
+--     1. `security-definer-function`  (belongs_to_organization,
+--                                      search_organizations_directory_v1)
+--     2. `grant-or-revoke`            (REVOKE insert/update/delete on
+--                                      engagement_contexts; the two definer
+--                                      `grant execute` lines)
+--     3. `alter-drop-policy`          (organizations_select,
+--                                      engagement_contexts_write)
+--   The owner confirmed there is NO data backfill and NO production-data DML in
+--   this migration, that all three findings are necessary to the RLS + RPC-only
+--   model, and that they must remain VISIBLE as human-gated notices rather than
+--   be silenced.
+--   APPROVED — marking the gate, rebasing onto the latest main, pushing, and
+--     merging PR #980; plus the ordinary application deploy that follows.
+--
+--   NOT APPROVED — production apply (`apply_migration`), manual production SQL,
+--     production policy or grant/revoke changes, production seed, production
+--     data mutation, destructive production proof, and production rollback.
 --
 -- PRODUCTION APPLY IS NOT APPROVED AND IS NOT REQUESTED BY MERGE.
 -- Application deploy is not migration apply. Status after any merge:
