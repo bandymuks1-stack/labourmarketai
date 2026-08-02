@@ -1,5 +1,49 @@
--- DRAFT — needs-human-gate — DO NOT APPLY without explicit owner OK.
--- Apply ONLY via Supabase MCP apply_migration after owner review. Never `db push`.
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE OWNER APPROVAL (Owner Decision 2, 2026-08-02) ──────────────
+--
+-- The owner reviewed the human-gate package on PR #974 and approved the
+-- migration-safety findings for THIS PR. The annotation above downgrades those
+-- findings from job-level errors to acknowledged notices. It is NOT a claim
+-- that the migration is low-risk, and it grants nothing beyond what is listed.
+--
+-- APPROVAL APPLIES TO: pull request #974 (W6 slice 3 — experience records,
+-- moderation and disputes) and to these FOUR findings, each confirmed as real:
+--
+--   1. security-definer-function — 9 SECURITY DEFINER functions (1 audit
+--      helper + 8 domain RPCs), each `set search_path = public`. Required
+--      because eligibility is re-derived across booking_requests /
+--      engagement_contexts / service_offering_requests / workers rows the
+--      caller often cannot read, and the tables are RLS-write-closed.
+--   2. grant-or-revoke — REVOKE ALL from anon+authenticated on both tables,
+--      GRANT SELECT back to authenticated only, EXECUTE revoked from
+--      public+anon on all 9 functions and granted to authenticated on the 8
+--      domain RPCs. The audit helper is granted to nobody.
+--   3. RLS policy changes — `drop policy if exists` + `create policy` for
+--      experience_records_select and experience_responses_select (the
+--      idempotent re-runnable form; Postgres has no `create policy if not
+--      exists`). No INSERT/UPDATE/DELETE policy is created on either table.
+--   4. DML inside function bodies — UPDATE statements in the moderation and
+--      dispute RPCs. There is no DELETE statement anywhere in this migration.
+--
+-- APPROVAL DOES **NOT** COVER:
+--
+--   * APPLYING THIS MIGRATION IN PRODUCTION. Owner Decision 3 is a SEPARATE
+--     decision and has NOT been given. Do not run Supabase `apply_migration`,
+--     do not run manual production SQL, do not seed experience rows, and do
+--     not run a destructive authenticated production proof.
+--   * RUNNING THE PAIRED ROLLBACK AGAINST REAL PRODUCTION DATA. The rollback
+--     drops both tables and would destroy any rows in them. It is acceptable
+--     ONLY while production has never had this domain applied (rows: 0). Once
+--     production carries real experience records, the rollback is destructive
+--     and needs its own owner decision, plus a backup/restore plan and a
+--     non-destructive forward-fix path.
+--
+-- Until Decision 3 is given the post-merge state is
+-- `W6_SLICE_3_MERGED_PENDING_PRODUCTION_MIGRATION_APPROVAL`.
+--
+-- Apply ONLY via Supabase MCP apply_migration after the SEPARATE production
+-- approval. Never `db push`.
 --
 -- 20260802120000 — experience records v1 (W6 slice 3: subjective experiences,
 -- moderation, right of reply, disputes — ONE canonical domain).

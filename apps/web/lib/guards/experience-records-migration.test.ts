@@ -20,10 +20,51 @@ const MIG = "supabase/migrations/20260802120000_experience_records_v1.sql";
 const ROLLBACK = "supabase/rollbacks/20260802120000_experience_records_v1.down.sql";
 const sql = readFileSync(join(REPO, MIG), "utf8");
 
-describe("draft migration hygiene", () => {
-  it("carries the draft header and NO self-added approval", () => {
-    expect(sql).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY/);
-    expect(sql).not.toMatch(/@human-gate-approved/);
+describe("human-gate approval hygiene", () => {
+  /**
+   * This test used to assert that `@human-gate-approved` was ABSENT — the
+   * "an agent never approves its own migration" rule, and it did its job for
+   * the whole of slices 3A–3D.
+   *
+   * The owner reviewed the human-gate package on PR #974 and gave Owner
+   * Decision 2 on 2026-08-02, approving the four migration-safety findings.
+   * So the marker is now legitimately present, and the rule it enforced has to
+   * MOVE rather than disappear: an approval that does not say what it covers
+   * is indistinguishable from a self-added one six months later. What is
+   * pinned now is that the marker never travels alone — it must carry its
+   * scope, and that scope must still exclude the two things the owner did NOT
+   * grant.
+   */
+  it("the approval marker is present and canonical", () => {
+    expect(sql).toMatch(/^--\s*@human-gate-approved\s*$/m);
+  });
+
+  it("the approval names the PR and the four findings it covers", () => {
+    expect(sql).toMatch(/Owner Decision 2/);
+    expect(sql).toMatch(/pull request #974/i);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "RLS policy changes",
+      "DML inside function bodies",
+    ]) {
+      expect(sql, `approval must name: ${finding}`).toContain(finding);
+    }
+  });
+
+  it("the approval EXCLUDES production apply and destructive rollback", () => {
+    // The two limits the owner stated explicitly. If either sentence is ever
+    // dropped, the marker would read as blanket permission — which it is not.
+    expect(sql).toMatch(/APPROVAL DOES \*\*NOT\*\* COVER|APPROVAL DOES NOT COVER/);
+    expect(sql).toMatch(/APPLYING THIS MIGRATION IN PRODUCTION/);
+    expect(sql).toMatch(/Owner Decision 3[\s\S]{0,120}has NOT been given/);
+    expect(sql).toMatch(/ROLLBACK AGAINST REAL PRODUCTION DATA/);
+    expect(sql).toMatch(/W6_SLICE_3_MERGED_PENDING_PRODUCTION_MIGRATION_APPROVAL/);
+  });
+
+  it("still forbids `db push` and points at the gated apply path", () => {
+    expect(sql).toMatch(/Never `db push`/);
+    expect(sql).toMatch(/apply_migration/);
   });
   it("has a paired rollback and a ledger Deferred entry", () => {
     expect(existsSync(join(REPO, ROLLBACK))).toBe(true);
