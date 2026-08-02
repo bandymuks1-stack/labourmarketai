@@ -437,6 +437,9 @@ export function WorkerPlayerCard({
         <SkillEvidenceChart
           skills={card.skillEvidence}
           labels={labels.visuals.skills}
+          // W5 slice 3: this card renders the worker's OWN rows only, so the
+          // drill-down never widens visibility — it opens their own journal.
+          linkBarsToJournal
         />
       </div>
 

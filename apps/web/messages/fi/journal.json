@@ -228,6 +228,8 @@
   "logViaChatBody": "[EN] Work is logged in the conversation — say what you did and the record appears here.",
   "logViaChatCta": "[EN] Log work in the chat",
   "logViaVoiceCta": "[EN] Record by voice",
+  "skillFilterActive": "[EN] Showing records linked to “{name}” ({count})",
+  "skillFilterClear": "[EN] Show all records",
   "listTitle": "Työkirjaukset",
   "navTitle": "Työtiedot",
   "navSubtitle": "Näytä mitä teit — se vahvistaa työkorttiasi.",
