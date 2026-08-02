@@ -1927,7 +1927,23 @@ describe("no migration files added by this sprint", () => {
     // slice 3 branch (#974) also adds one migration and must resolve to 171
     // if it merges after this PR. Never take either side verbatim — recount
     // the real migration files after every rebase.
-    const SPRINT_BASELINE = 172;
+    const SPRINT_BASELINE = 173;
+    // Bumped 172 -> 173 for W11 assigned-worker project read
+    // (20260803090000_project_assigned_worker_read_v1, paired rollback). Closes
+    // W11 P0-2 (the assigned worker cannot read their own project, so their
+    // calendar's project band is structurally empty and project↔booking
+    // conflict detection can never fire) and P1-2 (the tenant-blind
+    // `status='live' and auth.uid() is not null` read branch) in ONE policy
+    // replacement. One policy + one SECURITY DEFINER helper; write policies
+    // untouched; ZERO DML. RED by classification (SECURITY DEFINER +
+    // GRANT/REVOKE + policy replacement) and deliberately NOT
+    // human-gate-annotated: the owner reviews the package
+    // (docs/human-gates/project-assigned-worker-read-gate.md) and applies it.
+    // Ships UNAPPLIED.
+    //
+    // MERGE-ORDER NOTE: this line is a shared ratchet. Recount the real
+    // migration files after every rebase — never take either side verbatim.
+    //
     // Bumped 171 -> 172 for W9 slice 2 organization RLS hardening
     // (20260802170000_organization_rls_hardening_v1, paired rollback). Closes
     // the P0 `organizations_select using (true)` (every authenticated user

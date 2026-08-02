@@ -382,7 +382,16 @@ describe("NO new DB migration in this PR", () => {
     // writes RPC-only. Policy/grant only — ZERO DML. RED by classification,
     // deliberately NOT human-gate-annotated, ships UNAPPLIED. Still no
     // migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(172);
+    //
+    // Bumped 172 -> 173 for W11 assigned-worker project read
+    // (20260803090000_project_assigned_worker_read_v1, paired rollback).
+    // Replaces the tenant-blind `status='live'` branch of `projects_select`
+    // with an active-assignment branch, closing W11 P0-2 and P1-2 together.
+    // One policy + one SECURITY DEFINER helper (anon revoked BY NAME); write
+    // policies untouched; ZERO DML. RED by classification, deliberately NOT
+    // human-gate-annotated, ships UNAPPLIED. Still no migration from the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(173);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
