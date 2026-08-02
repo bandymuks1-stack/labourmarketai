@@ -7,6 +7,7 @@ import {
   buildWeekView,
   buildYearOverview,
   conflictItemIds,
+  hiddenConflictSources,
   detectConflicts,
   isPlanningSourceType,
   isPlanningView,
@@ -135,7 +136,24 @@ export default async function PlanningPage({
   const visibleItems = sourceFilter
     ? result.items.filter((i) => i.sourceType === sourceFilter)
     : result.items;
-  const conflictIds = conflictItemIds(detectConflicts(visibleItems));
+
+  // W12 slice 3 — a filter changes what is SHOWN, never what is TRUE.
+  // Conflicts are derived from the FULL model (`result.items`) and only the
+  // rendering is filtered. Deriving them from `visibleItems` meant
+  // `?source=booking` removed the absence rows from the input, so the overlap
+  // stopped being computed at all: a worker filtering to bookings saw a clean
+  // plan while approved leave sat on the same days.
+  const conflicts = detectConflicts(result.items);
+  const conflictIds = conflictItemIds(conflicts);
+  // …which alone would leave a red flag beside a row with no visible partner.
+  // This says WHICH hidden source causes it. Only the source TYPE — every
+  // partner is the caller's own commitment (see `isConflictEligible`), so
+  // naming its type discloses nothing the filter was protecting.
+  const hiddenConflicts = hiddenConflictSources(
+    conflicts,
+    result.items,
+    visibleItems,
+  );
 
   const dayFmt = new Intl.DateTimeFormat(locale, {
     weekday: "long",
@@ -177,6 +195,8 @@ export default async function PlanningPage({
 
   function ItemRow({ item }: { item: PlanningItem }) {
     const conflict = conflictIds.has(item.id);
+    // Non-empty only when the filter is hiding every partner of this conflict.
+    const hiddenSources = hiddenConflicts.get(item.id) ?? [];
     const contextKey =
       item.sourceType === "booking" || item.sourceType === "invitation"
         ? `context.${item.roleContext}`
@@ -208,6 +228,18 @@ export default async function PlanningPage({
               </span>
             ) : null}
           </span>
+          {hiddenSources.length > 0 ? (
+            <span
+              className="text-meta text-state-danger"
+              data-testid={`planning-conflict-hidden-${item.id}`}
+            >
+              {t("conflict.hiddenByFilter", {
+                sources: hiddenSources
+                  .map((s) => t(`source.${s}`))
+                  .join(", "),
+              })}
+            </span>
+          ) : null}
           <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
             {item.startDate ? (
               <span>

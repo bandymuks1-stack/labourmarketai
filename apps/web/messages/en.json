@@ -8691,7 +8691,8 @@
     "empty": "Nothing planned yet. Accepted bookings, project dates and task deadlines appear here.",
     "pastHidden": "Finished items are not shown here: {count}. You can still find them on their own pages.",
     "conflict": {
-      "flag": "Dates overlap"
+      "flag": "Dates overlap",
+      "hiddenByFilter": "Overlaps with {sources} hidden by this filter."
     },
     "context": {
       "incoming": "Proposed to me",
