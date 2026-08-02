@@ -12,13 +12,14 @@ _Last updated: 2026-08-01 (W4 closed)._
 | W1–W2 | complete (journal → capability-extraction → confirm loop exists) | W1/W2 records |
 | W3 — chat-first workspace consolidation | `W3_CHAT_FIRST_WORKSPACE_CONSOLIDATION_COMPLETE` at `7a4babba` (#961), deploy `5703264161`, −7,487 LOC, ratchet ZERO. **FROZEN** except real regressions | `evidence/premium-rebuild/w3-final-completion-report.md` |
 | W4 — professional identity | `W4_PROFESSIONAL_IDENTITY_COMPLETE_WITH_OWNER_GATED_ITEMS` at `426e87aa` (#963/#964/#965), deploy `5703997684` success. **FROZEN** except real regressions | `evidence/premium-rebuild/w4-acceptance.md` |
-| W5 — Work Journal / Evidence / Skills pipeline | **OPEN** — audit consolidated (#967); slice 1 dead-surface deletion MERGED (#968); slice 2 voice handoff repair MERGED (#969); slice 3 evidence drill-down in flight; then the two decision-gated items or W5 close | `evidence/premium-rebuild/w5-baseline.md` (classification + slice log) |
+| W5 — Work Journal / Evidence / Skills pipeline | `W5_JOURNAL_EVIDENCE_SKILLS_COMPLETE_WITH_OWNER_GATED_ITEMS` at `7621acab` (#967 audit, #968/#969/#970 slices, all deployed). **FROZEN** except real regressions | `evidence/premium-rebuild/w5-baseline.md` (classification + slice log + close) |
+| W6 — Trust | **OPEN** | `evidence/premium-rebuild/w6-baseline.md` |
 
 ## Production
 
 - Origin: `https://labourmarket.ai` (apex; `app.` is `LEGACY_APP_HOST`, 301).
-- Production SHA: `426e87aa`, GitHub deployment `5703997684` (success, 2026-08-01T11:09:30Z).
-- Unauthenticated smoke at that SHA: landing spec 4/4 + route-gating matrix — `evidence/premium-rebuild/w4-acceptance.md` §2.
+- Production SHA: `7621acab` (W5 slice 3; deployments `5704258456`/`5704366161`/`5704688549` + slice-3's all success).
+- Unauthenticated smoke at `426e87aa`: landing spec 4/4 + route-gating matrix — `evidence/premium-rebuild/w4-acceptance.md` §2. W5 surfaces are authenticated → local-stack proof (2 e2e specs, 6/6).
 - Authenticated production proof: BLOCKED on `PROD_QA_*` provisioning (`evidence/premium-rebuild/prod-qa-account.md`, `PROVISIONED: NO`).
 
 ## The single owner-gated list
