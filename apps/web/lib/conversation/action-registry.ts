@@ -453,7 +453,14 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     precondition: "has_company",
     migrationSensitive: true,
     telemetryEvent: E.companyDemandActionClicked,
-    advancedRoute: "/dashboard/company/projects",
+    // W11 audit P2-4: this was `/dashboard/company/projects`, which has no
+    // `page.tsx` — that directory holds only `new/`. The "open full screen"
+    // affordance for an irreversible action led to a 404. Every other caller in
+    // the tree already uses either `/dashboard/company/projects/new` (create) or
+    // `/dashboard/projects` (the list); this action assigns a worker to an
+    // EXISTING project, so the list is its screen. `dashboard/projects` is
+    // REAL_LAUNCH_SURFACE in the route truth map.
+    advancedRoute: "/dashboard/projects",
     handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
   },
   {

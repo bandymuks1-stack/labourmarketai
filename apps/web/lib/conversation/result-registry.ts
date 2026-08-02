@@ -130,8 +130,21 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     openedBy: ["worker.log-work"],
     advancedRoute: "/dashboard/journal",
     contexts: ["personal", "organization", "project"],
-    // lib/journal/* — the richest domain in the tree (50+ modules).
-    dataReadiness: "real",
+    // lib/journal/* — the richest domain in the tree (50+ modules), and that
+    // richness is exactly what made this entry misleading: the DATA is real,
+    // the RESULT is not. There is no `case "journal"` in `InlineResult`, so
+    // `real` made `canRenderInline` true, suppressed the fallback and rendered
+    // "Preparing this result." with no route to `/dashboard/journal`.
+    //
+    // The W11 audit named `project`, `evidence` and `invoice` (P0-4) and missed
+    // this one. It is the WORST of the four: `journal` and `invoice` are both
+    // opened by `worker.log-work`, and `resultForAction` is first-match-wins,
+    // so `journal` — declared earlier — is the one that action actually
+    // resolves to. The other three need a hand-typed `?result=`; this one sits
+    // on a live action.
+    //
+    // `real` again only once `case "journal"` exists.
+    dataReadiness: "unverified",
   },
   {
     kind: "calendar",
@@ -189,7 +202,19 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     openedBy: ["company.assign-worker", "company.who-waits"],
     advancedRoute: "/dashboard/projects",
     contexts: ["organization", "project"],
-    dataReadiness: "real",
+    // W11 audit P0-4: this said `real` while `InlineResult` has no `case
+    // "project"`. `real` + meaningful context makes `canRenderInline` true, so
+    // `ResultBody` took the inline branch and SKIPPED the fallback that the
+    // module's own doc-comment calls "the NO REGRESSION guarantee". The person
+    // got one sentence — "Preparing this result." — and no button to
+    // `/dashboard/projects`. A readiness flag that suppresses the way forward
+    // is worse than no result at all.
+    //
+    // `unverified` is the honest state: the project domain is real and
+    // reachable, but it has no inline renderer, so the panel says so plainly
+    // and hands over the working full screen. Flip this back to `real` in the
+    // same PR that adds `case "project"` — never before it.
+    dataReadiness: "unverified",
   },
   {
     kind: "evidence",
@@ -197,7 +222,9 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     openedBy: ["worker.add-work-history", "worker.add-achievement"],
     advancedRoute: "/dashboard/documents",
     contexts: ["personal", "project"],
-    dataReadiness: "real",
+    // Same defect as `project` (W11 audit P0-4). No `case "evidence"` in
+    // `InlineResult`, so `real` bought a dead end instead of a renderer.
+    dataReadiness: "unverified",
   },
   {
     kind: "experiences",
@@ -251,7 +278,13 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     contexts: ["personal", "organization", "project"],
     // lib/finance + journal aggregation. NOTE: preview/export only — any
     // payment, Stripe or billing behaviour is an explicit owner gate (§16).
-    dataReadiness: "real",
+    //
+    // Same defect as `project` and `evidence` (W11 audit P0-4): no `case
+    // "invoice"` in `InlineResult`, so `real` suppressed the fallback and the
+    // person reached "Preparing this result." with no route to
+    // `/dashboard/finance`. Money is the worst place to show a stub that calls
+    // itself ready.
+    dataReadiness: "unverified",
   },
 ] as const;
 
