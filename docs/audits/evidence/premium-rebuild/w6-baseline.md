@@ -80,6 +80,31 @@ Caller map pinned: ONE writer (`confirm-actions.ts` approval recompute, columns 
 
 *Known gap, not papered over.* `ExperienceSubmitForm` still has **no mount point**. Submitting an experience needs an eligible finished interaction (accepted booking / completed engagement / concluded service request) as its context, and no surface hands it one yet. It was unmounted in 3B too. This slice did not invent an entry point for it — that is a real product decision about where a person is asked for an experience, and inventing one here would have been the same mistake 3B made with routes.
 
-**Re-validation after the correction.** Product Gate: `0 violations` (was 2 × A-09). `next build` clean — both deleted routes are gone from the generated route table. `tsc` clean, `lint` 0 errors (22 pre-existing warnings in unrelated files). Full vitest green. E2E specs retargeted to the canonical surfaces: `w6-experience-domain.spec.ts` now drives `?result=experiences` and the control room band, and adds two REGRESSION tests that the deleted routes are actually gone (a soft-deleted route that still rendered would be the second dashboard by another name); `w6-experience-fail-closed.spec.ts` proves the unavailable state inside the panel with the conversation still intact.
+**One real defect the browser proof caught in this very slice.** The first draft set `contexts: ["personal"]`, copying the `opportunities` reasoning. The authenticated employer session refuted it immediately: standing in the Dev Construction workspace, the employer got "this result is not available in the current context" instead of their own submissions. The AUTHOR side of this domain is normally an employer acting from inside their organization, so personal-only hid half the domain from the half of the product that produces it. Corrected to all three contexts (the `journal` pattern) — "jobs that fit me" really is meaningless to an organization, but "the experiences I submitted, and the ones about me" is a fact about the signed-in PERSON in any workspace, and the read is RLS-scoped to the viewer either way.
 
-**Migration-safety stays RED — deliberately, and it must.** SECURITY DEFINER + GRANT/REVOKE is the repo's documented human-gate class. `@human-gate-approved` was NOT self-added, no CI check was bypassed, and no SECURITY DEFINER was stripped to buy a green light. PR #974 stays **Draft + `needs-human-gate`**. Production migration NOT applied. Not merged. W7 not started.
+**Re-validation after the correction.**
+
+| Gate | Result |
+|---|---|
+| Product Gate | **GREEN — 0 violations, 0 new surfaces** (was 2 × A-09) |
+| `next build` | clean; both deleted routes absent from the generated route table |
+| `tsc --noEmit` | clean |
+| `lint` | 0 errors (22 pre-existing warnings, unrelated files) |
+| vitest | **12616 / 12616**, 792 files |
+| Browser — canonical surfaces | `w6-experience-domain.spec.ts` **9/9** |
+| Browser — positive admin | `w6-experience-moderation-admin.spec.ts` **2/2** (NEW) |
+| Browser — fail-closed (domain rolled back) | `w6-experience-fail-closed.spec.ts` **2/2** |
+| SQL domain proof, re-run after rollback + re-apply | **43 / 43, 0 failed** |
+| CI | `quality` pass · CodeQL pass · Vercel pass · **`migration-safety` RED by design** |
+
+The e2e specs were retargeted rather than deleted: `w6-experience-domain.spec.ts` drives `?result=experiences` and the control room band, and gained two REGRESSION tests that the deleted routes are actually gone (a soft-deleted route that still rendered would be the second dashboard by another name). `w6-experience-moderation-admin.spec.ts` is new and closes the gap 3B left — it proves the queue RENDERS in its new home for a real moderator, provisioned out-of-band through `profile_roles` (the P0 admin-grant guard strips self-assigned admin, correctly) with the grant removed in `afterAll` pass or fail, and the session deliberately NOT re-minted: the cookie carries no role, `is_admin()` reads the DB per request, which is the security property. Gated behind `W6_ADMIN_PROOF=1`. Local DB was returned to the applied state and re-verified (2 tables, 10 functions, 43/43).
+
+**Migration-safety stays RED — deliberately, and it must.** The gate names four blocking findings on the UNCHANGED migration file (3C touched no SQL): `security-definer-function`, `grant-or-revoke`, `alter-drop-policy`, `data-dml`. That is the repo's documented human-gate class, exactly as intended. `@human-gate-approved` was NOT self-added, no CI check was bypassed, and no SECURITY DEFINER was stripped to buy a green light. PR #974 stays **Draft + `needs-human-gate`**. Production migration NOT applied. Not merged. Telegram not sent. W7 not started.
+
+### THREE SEPARATE OWNER DECISIONS (do not bundle)
+
+1. **Architectural approval** — confirm `?result=experiences` as the canonical home of the experience domain, and BAND 2d of `/dashboard/admin` as the moderator queue's home.
+2. **Merge Draft PR #974.**
+3. **Apply the production migration** `20260802120000_experience_records_v1.sql`.
+
+They are three different decisions with three different blast radii. Decision 1 costs nothing to reverse; decision 3 changes production schema and privileges.
