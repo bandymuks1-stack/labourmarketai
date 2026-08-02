@@ -89,3 +89,40 @@ The skill-evidence bars are now inspectable, not just stated: a bar with ≥1 li
 
 ### Slice 2 — voice handoff repair, chat-first (PR #969, MERGED, main `9e014e5b`)
 The reviewed transcript now lands in the ONE intake: the conversation chat consumes the read-once `VOICE_TRANSCRIPT_DRAFT_KEY`, shows it as the worker's own visible turn, and runs the SAME deterministic `startWorkLog` flow (preview → explicit confirm → `createJournalEntry`). Recorder targets `/dashboard`; the composer's dead consumer (could never mount post chat-first) deleted; the voice surface finally has a door (`journal-log-via-voice-cta` on the journal page, honest `unavailable` state preserved; `logViaVoiceCta` key ×12 locales). Guard updated to pin the new topology. Browser proof `w5-voice-handoff.spec.ts` 3/3 on the local stack: desktop handoff, mobile 375px + no horizontal overflow, journal door navigates. Full vitest 12559/12559. Live transcription itself stays owner-gated (service deploy + env) — the handoff no longer eats data the day it's enabled.
+
+---
+
+## STAGE CLOSED — 2026-08-02
+
+```text
+W5_JOURNAL_EVIDENCE_SKILLS_COMPLETE_WITH_OWNER_GATED_ITEMS
+```
+
+All three planned slices MERGED and production-deployed (#968 `53aeb8ad`,
+#969 `9e014e5b`, #970 `7621acab`; each Vercel Production deployment success;
+authenticated W5 surfaces proven on the local stack — production stays
+gated on `PROD_QA_*`, the standing item). The canonical chain is now honest
+end-to-end: ONE intake (chat, with voice handed off into it), ONE skills
+truth ladder (dead ghost reads and dead write surfaces deleted,
+absence guard-pinned), and evidence that is inspectable (bars → filtered
+diary), not just stated.
+
+Owner-gated (carried in the W4 §4 list + W5 additions, reported once):
+transcribe service deploy + env; `voice_journal_jobs` migration (never
+committed); `candidate_skills` DROP migration; profession templates
+20260714180000; append-only trigger guards; APPLIED_LEDGER's remaining 24
+retroactive rows (PR-history reconstruction).
+
+Decision-gated, routed forward (recorded, not silently dropped):
+- Worker-side "request confirmation" surface → **W7 (employee journey)** —
+  it is a journey interaction between parties, not pipeline plumbing.
+- Clarify-answers consumer (use `related_to`/`tools_materials`/`often_with`
+  in recognizer disambiguation vs stop collecting) → decide when the
+  recognizer next changes; collecting stops being harmless the moment the
+  form grows.
+
+W5 is frozen except real regressions. Next stage: **W6 — Trust**
+(`w6-baseline.md`): subjective feedback (owner ruling from W4 row 23 —
+no store exists today, nothing may be fabricated), journal-derived
+objective evidence (inventory ready in the W5 audit §W6 boundary),
+reputation.
