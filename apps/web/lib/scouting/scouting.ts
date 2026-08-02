@@ -296,13 +296,33 @@ export async function runScouting(
     )
     // Rank via the SHARED need-context comparator (§19 — strength, coverage,
     // confirmed share, explicit availability; never a global person score).
-    // Wagon 1: DORMANT profiles are DEMOTED below the rest first — shown
-    // honestly with their freshness badge, never silently excluded.
+    //
+    // W10 audit P0-2: these two keys used to be the other way round —
+    // `freshnessDemotionRank` FIRST, `compareMatches` second. That made an
+    // activity signal outrank a competence signal unconditionally: a worker
+    // with 100% coverage, every skill manager_confirmed, `strong` and
+    // `eligible`, whose last profile write was 91 days ago, sorted BELOW a
+    // worker with zero skills and `insufficient_data` who saved a field
+    // yesterday. On every demand. The employer's best candidate was pushed
+    // under every recently-active account, and the way to outrank competence
+    // was to touch a form.
+    //
+    // FIT IS THE PRIMARY KEY. Freshness still earns its place — a dormant
+    // profile really is less likely to reply — but only as a TIE-BREAK between
+    // candidates the need-context comparator has already judged equal. It can
+    // reorder equals; it can no longer overturn the ranking.
+    //
+    // The freshness badge on the card is unchanged: the fact stays visible,
+    // it just stops deciding the order.
     .sort(
       (a, b) =>
+        compareMatches(a.match, b.match) ||
         freshnessDemotionRank(a.lastActiveBucket) -
           freshnessDemotionRank(b.lastActiveBucket) ||
-        compareMatches(a.match, b.match),
+        // Deterministic last resort. Two candidates equal on fit AND freshness
+        // must not swap places between two loads of the same page — an
+        // unstable list reads as a changing recommendation.
+        a.workerId.localeCompare(b.workerId),
     );
 
   return { kind: "ok", demand, candidates, interestByWorker, facets, filters };
