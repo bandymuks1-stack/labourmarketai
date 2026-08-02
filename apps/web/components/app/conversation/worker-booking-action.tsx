@@ -38,6 +38,8 @@ type Phase =
   | { kind: "idle" }
   | { kind: "confirm"; decision: "accepted" | "declined"; token: string }
   | { kind: "done"; status: "accepted" | "declined" }
+  /** W12 Slice 1: a REAL date conflict — terminal, never a retryable error. */
+  | { kind: "conflict" }
   | { kind: "error"; message: string };
 
 /**
@@ -95,16 +97,33 @@ export function WorkerBookingAction({
         );
         setPhase({ kind: "done", status: decision });
         router.refresh();
+      } else if (res.code === "conflict") {
+        // W12 Slice 1: the dates really are taken by an already-accepted
+        // booking. Terminal — the offer card stops showing accept/decline
+        // (retrying can only fail identically), and the conversation re-reads
+        // server state so nothing downstream still reads as "open".
+        setPhase({ kind: "conflict" });
+        router.refresh();
       } else {
         const message =
           res.code === "stale_confirmation"
             ? labels.errorStale
-            : res.code === "conflict"
-              ? labels.errorConflict
-              : labels.errorGeneric;
+            : labels.errorGeneric;
         setPhase({ kind: "error", message });
       }
     });
+  }
+
+  if (phase.kind === "conflict") {
+    return (
+      <div
+        className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support font-semibold text-state-warning"
+        role="status"
+        data-testid="conversation-booking-conflict"
+      >
+        {labels.errorConflict}
+      </div>
+    );
   }
 
   if (phase.kind === "done") {

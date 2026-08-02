@@ -72,7 +72,12 @@ export function BookingRespondButtons({
         setState({ kind: "done", status: decision, reasonStored: res.reasonStored });
         router.refresh();
       } else if (res.kind === "conflict") {
+        // W12 Slice 1: a conflict is a TERMINAL, truthful outcome — the dates
+        // really are taken by an already-accepted booking. Re-read the server
+        // state so the row stops presenting a stale "proposed" offer, and stop
+        // rendering the accept CTA (retrying can only fail the same way).
         setState({ kind: "conflict" });
+        router.refresh();
       } else if (res.kind === "needs-migration") {
         setState({ kind: "unavailable" });
       } else {
@@ -98,6 +103,20 @@ export function BookingRespondButtons({
           </span>
         ) : null}
       </div>
+    );
+  }
+
+  if (state.kind === "conflict") {
+    // Terminal: no accept/decline CTA is rendered, because the slot is really
+    // taken. The row itself is refreshed above and now reflects server truth.
+    return (
+      <span
+        className="text-meta text-state-warning"
+        role="status"
+        data-testid="booking-conflict"
+      >
+        {labels.conflict}
+      </span>
     );
   }
 
@@ -176,9 +195,7 @@ export function BookingRespondButtons({
           </div>
         </div>
       ) : null}
-      {state.kind === "conflict" ? (
-        <span className="text-meta text-state-warning">{labels.conflict}</span>
-      ) : state.kind === "unavailable" ? (
+      {state.kind === "unavailable" ? (
         <span className="text-meta text-text-muted">{labels.unavailable}</span>
       ) : state.kind === "error" ? (
         <span className="text-meta text-state-danger">{labels.error}</span>

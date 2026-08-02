@@ -360,11 +360,19 @@ describe("NO new DB migration in this PR", () => {
     // no drops, no DML), UNAPPLIED at merge; per the doctrine's conditional
     // prod-apply autonomy a GREEN classification permits MCP apply_migration
     // after merge. Still no migration from the market-map read layer.
+
     // Bumped 168 -> 169 for W9 slice 1 organization membership revocation
     // (20260802160000_org_membership_revocation_v1, paired rollback). ONE new
     // SECURITY DEFINER function on the engagement_contexts membership spine;
     // RED by classification (SECURITY DEFINER + GRANT), UNAPPLIED at merge,
     // owner-gated. Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(169);
+    // Bumped 169 -> 170 for W12 Slice 1 atomic double-booking prevention
+    // (20260802150000_booking_atomic_double_booking_v1, paired rollback).
+    // Row lock + worker-scoped advisory lock + status-guarded UPDATE in the ONE
+    // canonical accept RPC (v3; v1/v2 become thin delegators) plus a PARTIAL
+    // `EXCLUDE USING gist` invariant. RED by design, deliberately NOT
+    // human-gate-annotated, ships UNAPPLIED. Still no migration from the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(170);
   });
 });
