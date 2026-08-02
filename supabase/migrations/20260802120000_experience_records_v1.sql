@@ -108,6 +108,7 @@ alter table public.experience_responses enable row level security;
 -- about them once it is PUBLISHED (the moderation queue is not a notification
 -- channel). Admin sees all. Nobody else reads rows — public consumption is
 -- the count-only RPC.
+drop policy if exists experience_records_select on public.experience_records;
 create policy experience_records_select on public.experience_records
   for select using (
     author_profile_id = auth.uid()
@@ -117,6 +118,7 @@ create policy experience_records_select on public.experience_records
         and public.manages_organization(subject_organization_id))
   );
 
+drop policy if exists experience_responses_select on public.experience_responses;
 create policy experience_responses_select on public.experience_responses
   for select using (
     author_profile_id = auth.uid()
@@ -130,9 +132,18 @@ create policy experience_responses_select on public.experience_responses
   );
 
 -- No INSERT/UPDATE/DELETE policies exist: every write goes through the
--- SECURITY DEFINER RPCs below. Revoke direct DML from every app role.
-revoke insert, update, delete on public.experience_records from anon, authenticated;
-revoke insert, update, delete on public.experience_responses from anon, authenticated;
+-- SECURITY DEFINER RPCs below.
+--
+-- REVOKE ALL first, then grant back exactly one privilege. Supabase's default
+-- privileges hand every new public table SELECT (plus TRUNCATE/REFERENCES/
+-- TRIGGER) to BOTH anon and authenticated, so a `revoke insert, update,
+-- delete` alone would leave anon holding SELECT. RLS would still return no
+-- rows — but anon evaluating the policy hits public.is_admin(), which anon
+-- cannot execute, so the read ERRORS instead of coming back empty. Anon must
+-- hold nothing at all in this domain (defence in depth, caught by the
+-- behavioural proof script).
+revoke all on public.experience_records from anon, authenticated;
+revoke all on public.experience_responses from anon, authenticated;
 grant select on public.experience_records to authenticated;
 grant select on public.experience_responses to authenticated;
 

@@ -51,9 +51,17 @@ describe("domain invariants in the SQL", () => {
   it("no self-review at the DB layer", () => {
     expect(sql).toMatch(/subject_profile_id <> author_profile_id/);
   });
-  it("writes are RPC-only; anon has nothing", () => {
-    expect(sql).toMatch(/revoke insert, update, delete on public\.experience_records from anon, authenticated/);
-    expect(sql).toMatch(/revoke insert, update, delete on public\.experience_responses from anon, authenticated/);
+  it("writes are RPC-only; anon has NOTHING (revoke all, then grant back one)", () => {
+    // Supabase's default privileges hand every new public table SELECT to BOTH
+    // anon and authenticated. A `revoke insert, update, delete` alone leaves
+    // anon holding SELECT — RLS still returns no rows, but anon evaluating the
+    // policy hits is_admin(), which anon cannot execute, so the read ERRORS
+    // instead of coming back empty. The behavioural proof caught this; the
+    // migration now revokes ALL first.
+    expect(sql).toMatch(/revoke all on public\.experience_records from anon, authenticated/);
+    expect(sql).toMatch(/revoke all on public\.experience_responses from anon, authenticated/);
+    expect(sql).toMatch(/grant select on public\.experience_records to authenticated/);
+    expect(sql).not.toMatch(/grant select on public\.experience_\w+ to anon/);
     for (const fn of [
       "submit_experience_record",
       "decide_experience_moderation",
@@ -173,7 +181,12 @@ describe("fail-closed app side", () => {
   });
   it("no fallback write path into legacy artifacts", () => {
     expect(src).not.toMatch(/journal_entry_confirmations|booking_request_events|learning_review_queue/);
-    expect(src).not.toMatch(/\.from\(/); // RPC-only, no direct table writes
+    // Reads go through RLS-scoped .from().select(); WRITES are RPC-only —
+    // no .insert/.update/.upsert/.delete anywhere in the domain module.
+    expect(src).not.toMatch(/\.(insert|update|upsert|delete)\(/);
+    // and the only tables it reads are its own
+    const tables = [...src.matchAll(/\.from\("([^"]+)"\)/g)].map((m) => m[1]);
+    expect(new Set(tables)).toEqual(new Set(["experience_records"]));
   });
   it("old subjective artifacts stay unmigrated (no backfill anywhere)", () => {
     // The only INSERT into experience_records is the submit RPC's VALUES

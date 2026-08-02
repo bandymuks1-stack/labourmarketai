@@ -248,3 +248,123 @@ export function deriveExperienceCounts(
     totalConsidered: considered.length,
   };
 }
+
+// ── Reads (RLS-scoped; the policy decides what comes back) ─────────────────
+
+export type ExperienceRow = {
+  readonly id: string;
+  readonly sentiment: ExperienceSentiment;
+  readonly body: string;
+  readonly moderationStatus: "submitted" | "in_moderation" | "published" | "rejected";
+  readonly disputeStatus:
+    | "none"
+    | "opened"
+    | "under_review"
+    | "resolved_upheld"
+    | "resolved_changed"
+    | "resolved_removed";
+  readonly interactionKind: string;
+  readonly submittedAt: string | null;
+  readonly isAuthor: boolean;
+};
+
+export type ExperienceListState =
+  | { readonly state: "list"; readonly mine: ExperienceRow[]; readonly aboutMe: ExperienceRow[] }
+  | { readonly state: "needs_migration" }
+  | { readonly state: "error" };
+
+/** Everything the caller may see, split by side. RLS returns author rows in
+ *  every state and subject-side rows only once PUBLISHED — this function adds
+ *  no filtering of its own beyond that split. Internal moderation notes and
+ *  actor ids are never selected. */
+export async function listExperiencesForViewer(
+  viewerProfileId: string,
+): Promise<ExperienceListState> {
+  const sb = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_records")
+    .select(
+      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
+    )
+    .order("submitted_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    sentiment: r.sentiment as ExperienceSentiment,
+    body: String(r.body ?? ""),
+    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
+    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
+    interactionKind: String(r.interaction_kind ?? ""),
+    submittedAt: (r.submitted_at as string | null) ?? null,
+    isAuthor: r.author_profile_id === viewerProfileId,
+  }));
+  return {
+    state: "list",
+    mine: rows.filter((r) => r.isAuthor),
+    aboutMe: rows.filter((r) => !r.isAuthor),
+  };
+}
+
+/** The moderator queue. Authorization is the RLS policy's `is_admin()` — a
+ *  non-admin simply gets their own rows, never the queue. */
+export async function listModerationQueue(): Promise<ExperienceListState> {
+  const sb = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_records")
+    .select(
+      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
+    )
+    .in("moderation_status", ["submitted", "in_moderation"])
+    .order("submitted_at", { ascending: true })
+    .limit(100);
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    sentiment: r.sentiment as ExperienceSentiment,
+    body: String(r.body ?? ""),
+    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
+    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
+    interactionKind: String(r.interaction_kind ?? ""),
+    submittedAt: (r.submitted_at as string | null) ?? null,
+    isAuthor: false,
+  }));
+  return { state: "list", mine: [], aboutMe: rows };
+}
+
+/** Disputes needing a moderator decision (separate dimension, separate view). */
+export async function listDisputeQueue(): Promise<ExperienceListState> {
+  const sb = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb as any)
+    .from("experience_records")
+    .select(
+      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
+    )
+    .in("dispute_status", ["opened", "under_review"])
+    .order("submitted_at", { ascending: true })
+    .limit(100);
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    sentiment: r.sentiment as ExperienceSentiment,
+    body: String(r.body ?? ""),
+    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
+    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
+    interactionKind: String(r.interaction_kind ?? ""),
+    submittedAt: (r.submitted_at as string | null) ?? null,
+    isAuthor: false,
+  }));
+  return { state: "list", mine: [], aboutMe: rows };
+}

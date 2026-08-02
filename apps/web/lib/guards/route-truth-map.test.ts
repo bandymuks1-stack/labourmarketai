@@ -52,6 +52,10 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",
+  // W6 slice 3B — the experience domain surface (submitted by me / about me,
+  // right of reply, dispute door). Fails closed until the owner-gated domain
+  // migration is applied.
+  "dashboard/experiences": "REAL_LAUNCH_SURFACE",
   // Operational finance records (control room PR I) — repo-safe layer over
   // the human-gated finance_records migration (I2); degrades honestly until
   // applied. Manual records only — no payment processing.
@@ -118,6 +122,9 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/candidate-pool": "INTERNAL_ADMIN",
   "dashboard/admin/company-need-intakes": "INTERNAL_ADMIN",
   "dashboard/admin/company-verification": "INTERNAL_ADMIN",
+  // W6 slice 3B — the moderator queue lives inside the EXISTING admin
+  // architecture (no second admin dashboard).
+  "dashboard/admin/experience-moderation": "INTERNAL_ADMIN",
   // Observation inspector (Intelligence Trust Layer v1) — developer-only,
   // READ-ONLY view of raw intelligence observations; superadmin + explicit
   // INTELLIGENCE_INSPECTOR_ENABLED flag, honest disabled/needs-migration

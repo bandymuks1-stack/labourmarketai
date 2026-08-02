@@ -11550,5 +11550,163 @@
     "entryConfirmed": "Patvirtinta vadovo",
     "managerConfirmedCount": "Vadovo patvirtinti įgūdžiai",
     "managerConfirmations": "Vadovo patvirtinimai"
+  },
+  "experience": {
+    "page": {
+      "title": "Patirtys",
+      "lead": "Subjektyvios patirtys iš realių, užbaigtų darbo sąveikų. Patirtis yra vieno žmogaus pasakojimas — ne faktas apie kito profesinį gebėjimą.",
+      "unavailableTitle": "Patirtys šioje aplinkoje dar neveikia.",
+      "unavailableBody": "Niekas nebuvo išsaugota. Galite dirbti kaip įprasta.",
+      "aboutMe": "Apie mane",
+      "aboutMeEmpty": "Apie jus dar nėra paskelbtų patirčių.",
+      "mine": "Mano pateiktos",
+      "mineEmpty": "Dar nepateikėte nė vienos patirties.",
+      "backToChat": "Grįžti į pokalbį"
+    },
+    "counts": {
+      "title": "Paskelbtos patirtys",
+      "positive": "teigiamos",
+      "negative": "neigiamos",
+      "disputed": "{count} iš jų ginčijamos",
+      "caution": "Neigiamų patirčių daugiau nei teigiamų — verta pasidomėti atidžiau prieš sprendžiant.",
+      "meaning": "Tai subjektyvūs realių sąveikų pasakojimai. Tai nėra reitingas, balas ar platformos nuosprendis.",
+      "notEnough": "Paskelbtų patirčių dar per mažai.",
+      "unavailable": "Patirčių skaičiai šioje aplinkoje dar neprieinami."
+    },
+    "sentiment": {
+      "positive": "Teigiama patirtis",
+      "negative": "Neigiama patirtis"
+    },
+    "interaction": {
+      "accepted_booking": "Rezervacija",
+      "completed_engagement": "Darbo santykis",
+      "concluded_service_request": "Paslaugos užklausa"
+    },
+    "moderation": {
+      "submitted": "Pateikta",
+      "in_moderation": "Moderuojama",
+      "published": "Paskelbta",
+      "rejected": "Atmesta",
+      "title": "Patirčių moderavimas",
+      "lead": "Kiekviena patirtis prieš paskelbimą praeina moderavimą. Kiekvienam sprendimui reikia priežasties ir jis įrašomas į audito istoriją.",
+      "unavailable": "Patirčių sritis šioje aplinkoje neprieinama.",
+      "queueTitle": "Laukia moderavimo",
+      "queueEmpty": "Moderavimo nelaukia nė viena patirtis.",
+      "disputeQueueTitle": "Ginčai",
+      "disputeQueueEmpty": "Atvirų ginčų nėra.",
+      "take": "Imti moderuoti",
+      "publish": "Paskelbti",
+      "reject": "Atmesti",
+      "reasonLabel": "Sprendimo priežastis",
+      "reasonNotPublic": "Priežastis įrašoma į audito istoriją ir nėra skelbiama viešai.",
+      "decidedWithAudit": "Sprendimas įrašytas į audito istoriją.",
+      "resolve": {
+        "upheld": "Palikti galioti",
+        "changed": "Pažymėti kaip pakeistą",
+        "removed": "Pašalinti iš viešo rodymo"
+      },
+      "errors": {
+        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "not_authenticated": "Pirma prisijunkite.",
+        "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
+        "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
+        "self_review": "Negalite pateikti patirties apie save.",
+        "invalid": "Patikrinkite formą ir bandykite dar kartą.",
+        "not_authorized": "Neturite teisės atlikti šio veiksmo.",
+        "not_subject": "Tai gali padaryti tik asmuo ar organizacija, apie kuriuos ši patirtis.",
+        "not_published": "Tai įmanoma tik tada, kai patirtis paskelbta.",
+        "response_exists": "Atsakymas jau pateiktas.",
+        "dispute_exists": "Ginčas jau atidarytas.",
+        "reason_required": "Priežastis privaloma.",
+        "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "not_found": "Nerasta.",
+        "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
+      }
+    },
+    "dispute": {
+      "none": "Neginčijama",
+      "opened": "Ginčijama",
+      "under_review": "Ginčas nagrinėjamas",
+      "resolved_upheld": "Ginčas išspręstas — patirtis palikta galioti",
+      "resolved_changed": "Ginčas išspręstas — patirtis pakeista",
+      "resolved_removed": "Pašalinta iš viešo rodymo po ginčo",
+      "open": "Ginčyti šią patirtį",
+      "rules": "Kol moderatorius nagrinėja ginčą, patirtis lieka paskelbta. Priežastis privaloma.",
+      "cta": "Atidaryti ginčą",
+      "sending": "Atidaroma…",
+      "openedNote": "Ginčas atidarytas. Patirtis lieka paskelbta, kol moderatorius priims sprendimą.",
+      "errors": {
+        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "not_authenticated": "Pirma prisijunkite.",
+        "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
+        "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
+        "self_review": "Negalite pateikti patirties apie save.",
+        "invalid": "Patikrinkite formą ir bandykite dar kartą.",
+        "not_authorized": "Neturite teisės atlikti šio veiksmo.",
+        "not_subject": "Tai gali padaryti tik asmuo ar organizacija, apie kuriuos ši patirtis.",
+        "not_published": "Tai įmanoma tik tada, kai patirtis paskelbta.",
+        "response_exists": "Atsakymas jau pateiktas.",
+        "dispute_exists": "Ginčas jau atidarytas.",
+        "reason_required": "Priežastis privaloma.",
+        "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "not_found": "Nerasta.",
+        "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
+      }
+    },
+    "response": {
+      "open": "Atsakyti į šią patirtį",
+      "rules": "Galite pateikti vieną atsakymą. Jis praeina moderavimą, nekeičia teigiamų ar neigiamų skaičiaus ir negali redaguoti ar pašalinti originalo.",
+      "cta": "Pateikti atsakymą",
+      "sending": "Siunčiama…",
+      "submitted": "Atsakymas pateiktas. Jis taps matomas po moderavimo.",
+      "errors": {
+        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "not_authenticated": "Pirma prisijunkite.",
+        "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
+        "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
+        "self_review": "Negalite pateikti patirties apie save.",
+        "invalid": "Patikrinkite formą ir bandykite dar kartą.",
+        "not_authorized": "Neturite teisės atlikti šio veiksmo.",
+        "not_subject": "Tai gali padaryti tik asmuo ar organizacija, apie kuriuos ši patirtis.",
+        "not_published": "Tai įmanoma tik tada, kai patirtis paskelbta.",
+        "response_exists": "Atsakymas jau pateiktas.",
+        "dispute_exists": "Ginčas jau atidarytas.",
+        "reason_required": "Priežastis privaloma.",
+        "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "not_found": "Nerasta.",
+        "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
+      }
+    },
+    "submit": {
+      "about": "Jūsų patirtis su {name}",
+      "sentimentLegend": "Kokia buvo patirtis?",
+      "sentiment": {
+        "positive": "Teigiama patirtis",
+        "negative": "Neigiama patirtis"
+      },
+      "bodyLabel": "Kas įvyko",
+      "moderationNote": "Patirtis prieš paskelbimą praeina moderavimą.",
+      "cta": "Pateikti patirtį",
+      "sending": "Siunčiama…",
+      "submitted": "Patirtis pateikta.",
+      "awaitingModeration": "Ji laukia moderavimo ir dar nėra paskelbta.",
+      "errors": {
+        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "not_authenticated": "Pirma prisijunkite.",
+        "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
+        "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
+        "self_review": "Negalite pateikti patirties apie save.",
+        "invalid": "Patikrinkite formą ir bandykite dar kartą.",
+        "not_authorized": "Neturite teisės atlikti šio veiksmo.",
+        "not_subject": "Tai gali padaryti tik asmuo ar organizacija, apie kuriuos ši patirtis.",
+        "not_published": "Tai įmanoma tik tada, kai patirtis paskelbta.",
+        "response_exists": "Atsakymas jau pateiktas.",
+        "dispute_exists": "Ginčas jau atidarytas.",
+        "reason_required": "Priežastis privaloma.",
+        "invalid_transition": "Šis žingsnis iš dabartinės būsenos negalimas.",
+        "not_found": "Nerasta.",
+        "error": "Kažkas nepavyko. Niekas nebuvo išsaugota."
+      }
+    }
   }
 }
