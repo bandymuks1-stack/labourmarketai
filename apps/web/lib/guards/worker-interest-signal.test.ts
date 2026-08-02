@@ -74,7 +74,11 @@ describe("snapshot comes from the canonical pipeline (slugs, never display names
       "utf8",
     );
     for (const src of [loader, interest]) {
-      expect(src).toMatch(/needFromRoleText/);
+      // W10 P0-1: ONE derivation, and it is the row-based one. If these two
+      // ever disagree, the match a worker sees stops being the match stored
+      // against their interest — which is the whole reason this pin exists.
+      expect(src).toMatch(/needFromDemandRow/);
+      expect(src).not.toMatch(/needFromRoleText/);
       expect(src).toMatch(/buildOwnWorkerContext/);
     }
     expect(interest).toMatch(/isApprovedRouteRow/); // same visibility gate

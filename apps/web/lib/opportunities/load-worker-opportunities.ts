@@ -12,7 +12,7 @@ import {
   type WorkerNextAction,
   type WorkerOpportunityProfile,
 } from "./opportunity-fit";
-import { needFromRoleText } from "./opportunity-need";
+import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
 import { listMySavedOpportunities } from "./saved-opportunities";
@@ -179,11 +179,12 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
             createdAt: (row.created_at as string | null) ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
-          const { need: matchNeed } = needFromRoleText(
-            need.roleText,
-            need.country,
-            need.locationLabel ?? null,
-          );
+          // W10 P0-1: derived from the ROW, so the match is computed against
+          // the same structured demand this card renders below (`structured:`).
+          // It used to be built from `role_text` alone — the card showed the
+          // employer's engagement form, pay, licence and shifts, and the match
+          // beside them had evaluated none of them.
+          const { need: matchNeed } = needFromDemandRow(row);
           const match = matchWorkerToNeed(matchNeed, ctx.subject);
           const nextAction = workerOpportunityNextAction({
             profileFitStatus: fit.status,
