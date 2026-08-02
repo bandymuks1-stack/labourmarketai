@@ -8691,7 +8691,8 @@
     "empty": "Kol kas nieko nesuplanuota. Čia atsiras priimtos rezervacijos, projektų datos ir užduočių terminai.",
     "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Juos rasite jų pačių puslapiuose.",
     "conflict": {
-      "flag": "Datos persidengia"
+      "flag": "Datos persidengia",
+      "hiddenByFilter": "Sutampa su {sources}, kurį slepia šis filtras."
     },
     "context": {
       "incoming": "Pasiūlyta man",

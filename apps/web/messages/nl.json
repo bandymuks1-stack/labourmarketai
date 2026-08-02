@@ -8691,7 +8691,8 @@
     "empty": "Nog niets gepland. Geaccepteerde boekingen, projectdata en taakdeadlines verschijnen hier.",
     "pastHidden": "Afgeronde items worden hier niet getoond: {count}. Je vindt ze terug op hun eigen pagina's.",
     "conflict": {
-      "flag": "Data overlappen"
+      "flag": "Data overlappen",
+      "hiddenByFilter": "Overlapt met {sources} die door dit filter wordt verborgen."
     },
     "context": {
       "incoming": "Aan mij voorgesteld",

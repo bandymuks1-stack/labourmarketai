@@ -401,6 +401,55 @@ export function conflictItemIds(
   return ids;
 }
 
+/**
+ * W12 slice 3 — which SOURCES a visible item conflicts with that the current
+ * filter is hiding.
+ *
+ * THE DEFECT THIS EXISTS FOR. Conflicts used to be derived from the FILTERED
+ * list, so `?source=booking` removed the absence rows from the input and the
+ * overlap simply stopped being computed. A worker who filtered to bookings saw
+ * a clean plan while approved leave sat on the same days. A filter is a
+ * question about what to SHOW; it must never change what is TRUE.
+ *
+ * Conflicts are now derived from the full model and the rows are still
+ * rendered filtered, which alone would leave a flag with no visible partner —
+ * a red badge next to a row that looks fine. This returns the source types of
+ * the hidden partners so the UI can say WHY.
+ *
+ * NO DATA LEAK. `isConflictEligible` admits only the caller's OWN dated
+ * commitments (their incoming accepted bookings, projects they are personally
+ * assigned to, their approved absences), so every partner named here is
+ * already the caller's own record — the filter was hiding it from them, not
+ * protecting it from them. Only the SOURCE TYPE is returned, never a label,
+ * a date or an id.
+ */
+export function hiddenConflictSources(
+  conflicts: readonly PlanningConflict[],
+  allItems: readonly PlanningItem[],
+  visibleItems: readonly PlanningItem[],
+): ReadonlyMap<string, readonly PlanningItem["sourceType"][]> {
+  const visibleIds = new Set(visibleItems.map((i) => i.id));
+  const byId = new Map(allItems.map((i) => [i.id, i]));
+  const out = new Map<string, PlanningItem["sourceType"][]>();
+
+  const note = (visibleId: string, hiddenId: string): void => {
+    if (!visibleIds.has(visibleId) || visibleIds.has(hiddenId)) return;
+    const hidden = byId.get(hiddenId);
+    if (!hidden) return;
+    const list = out.get(visibleId) ?? [];
+    if (!list.includes(hidden.sourceType)) list.push(hidden.sourceType);
+    out.set(visibleId, list);
+  };
+
+  for (const c of conflicts) {
+    note(c.aId, c.bId);
+    note(c.bId, c.aId);
+  }
+  // Deterministic order so the rendered note never reshuffles between requests.
+  for (const [, list] of out) list.sort();
+  return out;
+}
+
 /* ------------------------------------------------------------------ */
 /* Agenda — compact, mobile-safe day grouping (no calendar library)    */
 /* ------------------------------------------------------------------ */
