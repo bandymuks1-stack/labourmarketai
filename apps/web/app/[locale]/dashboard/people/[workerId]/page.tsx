@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import { MessageButton } from "@/components/app/message-button";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 
@@ -92,11 +93,14 @@ export default async function PersonPage({
     const slug = r.skills?.slug ?? null;
     const label =
       slug && tSkillNames.has(slug) ? tSkillNames(slug) : (slug ?? null);
-    const state: "verified" | "work" | "declared" = r.verified
-      ? "verified"
-      : r.source === "work_journal"
-        ? "work"
-        : "declared";
+    // W6 slice 1: chip token derived from the ONE canonical tier.
+    const tier = deriveEvidenceTier(r);
+    const state: "verified" | "work" | "declared" =
+      tier === "manager_confirmed"
+        ? "verified"
+        : tier === "work_journal"
+          ? "work"
+          : "declared";
     return { id: r.skill_id, label, state };
   });
   const shown = skills.filter((s) => s.label);

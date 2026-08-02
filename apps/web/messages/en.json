@@ -491,7 +491,7 @@
       "evidence": {
         "title": "Profile & evidence figures",
         "totalSkills": "Skills",
-        "workSupported": "Backed by work entries",
+        "workSupported": "Backed by work journal entries",
         "confirmed": "Confirmed",
         "journalEntries": "Journal entries",
         "confirmations": "Confirmations",
@@ -1046,7 +1046,7 @@
       "addAction": "Add skills in your profile",
       "legend": "Self-declared — what you listed; From work — backed by your journal entries; With records — backed by your reviewed entries.",
       "status": {
-        "confirmed": "With records",
+        "confirmed": "Confirmed by a manager's record",
         "suggested": "From work",
         "self_declared": "Not reviewed yet"
       }
@@ -1173,13 +1173,13 @@
     "note": "These are signals from existing data, not a rating or score. Workers are not ranked by who is \"best\".",
     "journalEntries": "Journal entries",
     "declaredSkills": "Declared skills",
-    "confirmedSkills": "Linked skills",
+    "confirmedSkills": "Manager-confirmed skills",
     "openReview": "Awaiting review",
     "lastActivity": "Last activity"
   },
   "workerEvidence": {
     "title": "Work records & skills",
-    "confirmed": "With records",
+    "confirmed": "Confirmed by a manager's record",
     "selfDeclared": "Waiting for review",
     "systemEntries": "Work entries",
     "empty": "Start building your CV — create your first entry.",
@@ -1197,7 +1197,7 @@
       "hint": "Waiting for your manager, the business owner, or an external (client) manager to review it."
     },
     "confirmed": {
-      "label": "With records",
+      "label": "Confirmed by a manager",
       "hint": "Backed by your reviewed work records."
     }
   },
@@ -1315,7 +1315,7 @@
     "profileLink": "My skills",
     "source": {
       "recognized": "Recognized from text",
-      "confirmed": "With records",
+      "confirmed": "Confirmed by a manager",
       "manual": "Manually linked"
     },
     "reviewHeading": "Earlier links",
@@ -6493,9 +6493,9 @@
         "workCard": "Work card"
       }
     },
-    "verifiedTitle": "Skills with records",
+    "verifiedTitle": "Manager-confirmed skills",
     "verifiedEmpty": "None yet. They build from your work records.",
-    "journalSupportedLabel": "Work-backed",
+    "journalSupportedLabel": "Backed by work journal entries",
     "journalSupportedHint": "Skills your work-journal entries back up.",
     "latestEvidenceLabel": "Latest records",
     "latestEvidenceEmpty": "No records entries yet — your first journal entry will be the first.",
@@ -6541,7 +6541,7 @@
       "skillsEntries": "{count, plural, one {# record} other {# records}}",
       "skillsNoEvidence": "No records yet",
       "skillsLegendTitle": "What the colours mean",
-      "skillsTierVerified": "Marked accurate by others",
+      "skillsTierVerified": "Confirmed by a manager's record",
       "skillsTierJournal": "Visible in your work records",
       "skillsTierDeclared": "You listed it — no records yet",
       "skillsAria": "Skills and how many of your work records mention each one.",
@@ -6747,8 +6747,8 @@
   "trust": {
     "title": "Trust signals",
     "caption": "These counts come straight from your work records.",
-    "verifiedSkills": "Linked skills",
-    "managerConfirmations": "Reviewed records",
+    "verifiedSkills": "Manager-confirmed skills",
+    "managerConfirmations": "Manager confirmations",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust signals grow from real work: log a journal entry and complete your profile."
   },
@@ -6769,13 +6769,13 @@
     "skills": "Skills",
     "skillsEmpty": "No skills saved yet.",
     "tiers": {
-      "confirmed": "With records",
-      "evidence": "Backed by work entries",
-      "declared": "Listed by you"
+      "confirmed": "Confirmed by a manager's record",
+      "evidence": "Backed by work journal entries",
+      "declared": "Self-declared"
     },
     "summary": {
-      "verifiedSkills": "Linked skills",
-      "managerConfirmations": "Reviewed records",
+      "verifiedSkills": "Manager-confirmed skills",
+      "managerConfirmations": "Manager confirmations",
       "journalEntries": "Journal entries"
     },
     "proofTitle": "CV work records",
@@ -6798,7 +6798,7 @@
     "achievementsTitle": "Achievements",
     "projectsTitle": "Projects",
     "projectsHint": "From work records",
-    "confirmedByManager": "With records",
+    "confirmedByManager": "Confirmed by a manager",
     "templates": {
       "label": "Template",
       "standard": "Standard",
@@ -6847,7 +6847,7 @@
       "writtenHeadline": "{n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
       "emptyHeadline": "A new week — its first entry is still ahead of you.",
       "entries": "Entries",
-      "confirmed": "Reviewed",
+      "confirmed": "Confirmed by a manager",
       "hours": "Reviewed hours"
     },
     "path": {
@@ -8938,7 +8938,7 @@
       "worker": {
         "title": "Profile & evidence summary",
         "totalSkills": "Skills",
-        "workSupported": "Backed by work entries",
+        "workSupported": "Backed by work journal entries",
         "confirmed": "Confirmed",
         "journalEntries": "Journal entries",
         "confirmations": "Confirmations",
@@ -9541,8 +9541,8 @@
     "experienceYears": "{n} yrs experience",
     "skillsTitle": "Skills",
     "skillsEmpty": "No skills you are permitted to see.",
-    "skillVerified": "With manager record",
-    "skillWorkBacked": "Work-backed",
+    "skillVerified": "Confirmed by a manager's record",
+    "skillWorkBacked": "Backed by work journal entries",
     "skillDeclared": "Self-declared",
     "skillsLegend": "With manager record — a manager record accompanies the skill. Work-backed — visible from work journal entries. Self-declared — added by the person.",
     "skillsReadError": "Skills could not be loaded right now. Try again shortly."
@@ -9775,8 +9775,8 @@
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
       "selfStated": "Entered by you.",
-      "declaredBadge": "Listed by you",
-      "confirmedBadge": "With records"
+      "declaredBadge": "Self-declared",
+      "confirmedBadge": "Confirmed by a manager"
     },
     "achievementTypes": {
       "achievement": "Achievement",
@@ -11518,5 +11518,18 @@
       "unmapped": "{count, plural, one {# more opportunity has no stated place — it shows in the chat search} other {# more opportunities have no stated place — they show in the chat search}}",
       "unmappedOnly": "{count, plural, one {# real opportunity has no stated place, so it cannot be drawn — find it in the chat search} other {# real opportunities have no stated place, so they cannot be drawn — find them in the chat search}}."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "Confirmed by a manager's record",
+    "workJournal": "Backed by work journal entries",
+    "selfDeclared": "Self-declared",
+    "autoConfirmQualifier": "confirmed by a preset rule",
+    "binLegendTitle": "Evidence assurance",
+    "binLegendRed": "no records yet",
+    "binLegendGreen": "first records",
+    "binLegendYellow": "substantiated by records and confirmations",
+    "entryConfirmed": "Confirmed by a manager",
+    "managerConfirmedCount": "Manager-confirmed skills",
+    "managerConfirmations": "Manager confirmations"
   }
 }

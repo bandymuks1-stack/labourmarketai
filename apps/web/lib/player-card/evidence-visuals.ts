@@ -1,4 +1,8 @@
 import type { WorkHistoryEntry } from "./work-history-model";
+import {
+  deriveEvidenceTier,
+  type EvidenceTier,
+} from "@/lib/evidence/evidence-tier";
 
 /**
  * §5.2 PLAYER CARD VISUALS — PURE derivations for the card's real data
@@ -31,6 +35,14 @@ export interface EvidenceMonth {
 
 /** The honest evidence ladder. NOT a score and NOT a medal tier. */
 export type SkillEvidenceTier = "verified" | "journal" | "declared";
+
+/** Render tokens for the canonical ladder (W6 slice 1) — visual names only,
+ *  never a second interpretation of the row. */
+const CANONICAL_TO_VISUAL: Record<EvidenceTier, SkillEvidenceTier> = {
+  manager_confirmed: "verified",
+  work_journal: "journal",
+  self_declared: "declared",
+};
 
 /** One skill and how much of the worker's own journal evidence backs it. */
 export interface SkillEvidenceBar {
@@ -141,11 +153,9 @@ export function deriveSkillEvidence(
   for (const d of declared) {
     const slug = (d.slug ?? "").trim();
     if (slug === "") continue;
-    const tier: SkillEvidenceTier = d.verified
-      ? "verified"
-      : d.source === "work_journal"
-        ? "journal"
-        : "declared";
+    // W6 slice 1: render token derived from the ONE canonical tier — this
+    // file no longer interprets the row itself.
+    const tier: SkillEvidenceTier = CANONICAL_TO_VISUAL[deriveEvidenceTier(d)];
     // A worker can hold several rows for one skill; the strongest real tier
     // wins — never the weakest, and never an averaged/invented one.
     const rank: Record<SkillEvidenceTier, number> = {

@@ -30,15 +30,19 @@ const WORKER_NAMESPACES = [
 const AUTH_WORKER_SUBTREES = ["dashboard", "onboarding"];
 
 // Forbidden worker-facing term families (values only).
+// W6 slice 1 (2026-08-02): the confirmer-naming and self-declaration bans
+// (vadovo patvirtin / manager-confirmed / confirmed by a manager /
+// self-declared / RU confirmer stems) were REMOVED — the precise-origin
+// doctrine REQUIRES naming who stands behind a record. Process/technical
+// jargon stays banned.
 const FORBIDDEN: RegExp[] = [
   // LT
-  /įrodym/i, /\bpaties nurodyt/i, /savideklaruot/i, /vadovo patvirtin/i, /patvirtins vadovas/i, /patvirtino vadovas/i,
+  /įrodym/i,
   // EN
-  /\bevidence\b/i, /\bproofs?\b/i, /\bself-declared\b/i, /\bmanager-confirmed\b/i,
-  /confirmed by (a |your |an |the )?(responsible )?(person|people|manager|owner)/i,
+  /\bevidence\b/i, /\bproofs?\b/i,
   /who can confirm/i, /confirmations can be checked/i, /checked on the platform/i, /\bprovenance\b/i,
   // RU
-  /доказательств/i, /подтверд\w*\s+руководител/i, /руководител\w*\s+подтверд/i, /самостоятельно заявлен/i,
+  /доказательств/i,
   // raw source-taxonomy enums (must never appear in a visible value)
   /recognized_from_text|manually_linked_to_entry|confirmed_by_person|stale_needs_review|profile_skill_available_to_link/,
 ];
@@ -97,7 +101,8 @@ describe("Guard: detector is real", () => {
   it("flags evidence/proof/confirmer/enum, passes quiet CV wording", () => {
     const hit = (s: string) => FORBIDDEN.some((rx) => rx.test(s));
     expect(hit("Darbo įrodymai")).toBe(true);
-    expect(hit("Confirmed by a manager")).toBe(true);
+    // W6: precise confirmer naming is now REQUIRED, not banned.
+    expect(hit("Confirmed by a manager")).toBe(false);
     expect(hit("recognized_from_text")).toBe(true);
     expect(hit("Mano CV")).toBe(false);
     expect(hit("Patvirtinta")).toBe(false);

@@ -1546,8 +1546,8 @@
   "trust": {
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
-    "verifiedSkills": "[EN] Confirmed skills",
-    "managerConfirmations": "[EN] Manager confirmations",
+    "verifiedSkills": "Leder-bekræftede færdigheder",
+    "managerConfirmations": "Leder-bekræftelser",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
   },
@@ -1561,8 +1561,8 @@
     "skills": "Færdigheder",
     "skillsEmpty": "Ingen færdigheder gemt endnu.",
     "tiers": {
-      "confirmed": "Bekræftet af leder",
-      "evidence": "Understøttet af arbejdsregistreringer",
+      "confirmed": "Bekræftet af en leders registrering",
+      "evidence": "Underbygget af arbejdsjournal-indførsler",
       "declared": "Selvangivet"
     },
     "tierHints": {
@@ -1571,8 +1571,8 @@
       "declared": "personens egen angivelse, ikke eksternt bekræftet"
     },
     "summary": {
-      "verifiedSkills": "Bekræftede færdigheder",
-      "managerConfirmations": "Lederbekræftelser",
+      "verifiedSkills": "Leder-bekræftede færdigheder",
+      "managerConfirmations": "Leder-bekræftelser",
       "journalEntries": "Journalregistreringer"
     },
     "proofTitle": "Bekræftet arbejdsdokumentation",
@@ -1602,7 +1602,7 @@
       "writtenHeadline": "{n, plural, one {Du har registreret # arbejdspost i denne uge} other {Du har registreret # arbejdsposter i denne uge}}",
       "emptyHeadline": "En ny uge — dens første post venter stadig på dig.",
       "entries": "Poster",
-      "confirmed": "Bekræftet",
+      "confirmed": "Bekræftet af en leder",
       "hours": "Bekræftede timer"
     },
     "path": {
@@ -1629,9 +1629,9 @@
     }
   },
   "playerCard": {
-    "verifiedTitle": "Bekræftede færdigheder",
+    "verifiedTitle": "Leder-bekræftede færdigheder",
     "verifiedEmpty": "Ingen bekræftede færdigheder endnu. De vises, når en leder bekræfter dine journalposter.",
-    "journalSupportedLabel": "Understøttet af journal",
+    "journalSupportedLabel": "Underbygget af arbejdsjournal-indførsler",
     "journalSupportedHint": "Færdigheder, som dine arbejdsjournalposter understøtter — stærkere end selvangivet; afventer lederens bekræftelse.",
     "latestEvidenceLabel": "Seneste bevis",
     "latestEvidenceEmpty": "Ingen beviser endnu — din første journalpost bliver den første.",
@@ -1694,7 +1694,7 @@
       "skillsEntries": "{count, plural, one {# post} other {# poster}}",
       "skillsNoEvidence": "Ingen poster endnu",
       "skillsLegendTitle": "Hvad farverne betyder",
-      "skillsTierVerified": "Markeret som korrekt af andre",
+      "skillsTierVerified": "Bekræftet af en leders registrering",
       "skillsTierJournal": "Synligt i dine arbejdsposter",
       "skillsTierDeclared": "Du har angivet det — ingen poster endnu",
       "skillsAria": "Kompetencer og hvor mange af dine arbejdsposter der nævner hver af dem.",
@@ -2429,8 +2429,8 @@
     "experienceYears": "{n} års erfaring",
     "skillsTitle": "Kompetencer",
     "skillsEmpty": "Ingen kompetencer, du må se.",
-    "skillVerified": "Bekræftet",
-    "skillWorkBacked": "Underbygget af arbejde",
+    "skillVerified": "Bekræftet af en leders registrering",
+    "skillWorkBacked": "Underbygget af arbejdsjournal-indførsler",
     "skillDeclared": "Selvangivet",
     "skillsLegend": "Bekræftet — godkendt af en leder. Underbygget af arbejde — fremgår af arbejdsjournalens indlæg. Selvangivet — tilføjet af personen, endnu ikke kontrolleret."
   },
@@ -3813,5 +3813,18 @@
       "unmapped": "[EN] {count} without a mappable place",
       "unmappedOnly": "[EN] {count} items have no mappable place yet, so there is nothing to draw."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "Bekræftet af en leders registrering",
+    "workJournal": "Underbygget af arbejdsjournal-indførsler",
+    "selfDeclared": "Selvangivet",
+    "autoConfirmQualifier": "bekræftet efter en forudindstillet regel",
+    "binLegendTitle": "Evidenssikkerhed",
+    "binLegendRed": "ingen registreringer endnu",
+    "binLegendGreen": "første registreringer",
+    "binLegendYellow": "underbygget af registreringer og bekræftelser",
+    "entryConfirmed": "Bekræftet af en leder",
+    "managerConfirmedCount": "Leder-bekræftede færdigheder",
+    "managerConfirmations": "Leder-bekræftelser"
   }
 }

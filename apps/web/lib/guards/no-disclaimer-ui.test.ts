@@ -43,19 +43,18 @@ const FORBIDDEN_PHRASES: RegExp[] = [
   /vadovas ar klientas/i,
   /vartotojo pateikti įgūdžiai/i,
   /darbuotojo pateikti įgūdžiai/i,
-  // CV-evidence-card confirmer/process wording (fix/cv final cleanup):
+  // CV-evidence-card process wording (fix/cv final cleanup). W6 slice 1
+  // (2026-08-02) REMOVED the confirmer-naming bans from this list
+  // (confirmed by / Patvirtinta vadov / verifier-as-fact) — the precise-origin
+  // doctrine requires naming who stands behind a record:
   /who can confirm/i,
-  /confirmed by/i,
-  /\bverifier\b/i,
   /patvirtina žmogus/i,
-  /Patvirtinta vadov/i,
   /Laukia vadov/i,
   /Awaiting manager/i,
-  /Confirmed by manager/i,
-  // CV-tier surface (fix/cv final): status only, never who confirmed it.
-  /manager[\s-]?confirmed/i,
-  /confirmed by .{0,5}manager/i,
-  /vadovo patvirtin/i,
+  // W6 slice 1 (2026-08-02): the old "status only, never who confirmed it"
+  // bans (manager-confirmed / confirmed by manager / vadovo patvirtin) were
+  // REMOVED — the precise-origin doctrine requires naming the manager behind
+  // a confirmed record. Process-jargon stays banned:
   /\bprovenance\b/i,
   // CV-export proof-sheet wording (fix/cv final): use CV/status language.
   /confirmed work proof/i,

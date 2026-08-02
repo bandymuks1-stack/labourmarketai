@@ -151,25 +151,25 @@ describe("Guard: cvExport copy is present + honest in all 10 locales", () => {
     // from the export sheet per the owner (quiet UI, no process note).
   }
 
-  it("LT: tier labels are neutral records language (silent-trust rule)", () => {
+  it("LT: tier labels name their origin (W6 precise-origin doctrine)", () => {
+    // W6 slice 1 (2026-08-02): the silent-trust "Su įrašais" wording is the
+    // banned VAGUE class now — the strongest tier must say who stands behind
+    // the record, reading from the ONE canonical evidenceTier namespace.
     const ns = cvNs("lt");
-    // Silent-trust rule: the tiers describe the RECORD state, never a public
-    // certification. No "patvirtin*"/"verified" stem on ANY tier; the strongest
-    // tier reads as "with records", the baseline as "listed by self".
-    expect(ns.tiers.confirmed).toBe("Su įrašais");
-    expect(ns.tiers.declared).toBe("Nurodyta pačių");
-    expect(ns.tiers.confirmed).not.toMatch(/patvirtin|vadov/i);
-    expect(ns.tiers.declared).not.toMatch(/patvirtin/i);
-    expect(ns.tiers.evidence).not.toMatch(/patvirtin/i);
+    const canon = baseMessages("lt").evidenceTier as Record<string, string>;
+    expect(ns.tiers.confirmed).toBe(canon.managerConfirmed);
+    expect(ns.tiers.declared).toBe(canon.selfDeclared);
+    expect(ns.tiers.evidence).toBe(canon.workJournal);
+    expect(ns.tiers.confirmed).not.toMatch(/^su įrašais$/i);
   });
 
-  it("EN: tier labels are neutral records language (silent-trust rule)", () => {
+  it("EN: tier labels name their origin (W6 precise-origin doctrine)", () => {
     const ns = cvNs("en");
-    expect(ns.tiers.confirmed).toBe("With records");
-    expect(ns.tiers.declared).toBe("Listed by you");
-    expect(ns.tiers.confirmed).not.toMatch(/verif|confirm/i);
-    expect(ns.tiers.declared).not.toMatch(/verif|confirm/i);
-    expect(ns.tiers.evidence).not.toMatch(/verif|confirm/i);
+    const canon = baseMessages("en").evidenceTier as Record<string, string>;
+    expect(ns.tiers.confirmed).toBe(canon.managerConfirmed);
+    expect(ns.tiers.declared).toBe(canon.selfDeclared);
+    expect(ns.tiers.evidence).toBe(canon.workJournal);
+    expect(ns.tiers.confirmed).not.toMatch(/^with records$/i);
   });
 
   // The "PDF" is the browser's print of the CV sheet — rendering sanity for

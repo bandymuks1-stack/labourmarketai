@@ -120,6 +120,18 @@ export interface ReviewTimelineEvent {
   readonly role: string | null;
   readonly at: string | null;
   readonly note: string | null;
+  /** W6 slice 1: true when the row was written by the policy-gated
+   *  auto-confirm RPC (confirmation_scope.action === 'auto_confirm').
+   *  Rendered as a small qualifier — an automatic confirmation must never
+   *  look identical to a hand confirmation. */
+  readonly automatic: boolean;
+}
+
+/** True when a confirmation row was produced by the auto-confirm policy RPC.
+ *  Never invents: anything but the exact marker reads as manual. */
+export function rowIsAutomatic(row: ConfirmationRow): boolean {
+  const scope = row.confirmation_scope as { action?: unknown } | null;
+  return scope?.action === "auto_confirm";
 }
 
 /** Pull the real reason note off a confirmation row, or null. Never invents. */
@@ -154,6 +166,7 @@ export function deriveReviewTimeline(
       role: row.confirmer_role ?? null,
       at: row.created_at ?? null,
       note: rowNote(row),
+      automatic: rowIsAutomatic(row),
     });
   }
   return events;

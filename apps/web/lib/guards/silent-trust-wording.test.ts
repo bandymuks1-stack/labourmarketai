@@ -3,29 +3,27 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Guard: Silent-trust wording cleanup (sprint silent-trust-wording-cleanup-p0).
+ * Guard: trust wording — PRECISE ORIGIN doctrine (W6 slice 1, 2026-08-02).
  *
- * Owner rule: normal / public / self-view UI must NEVER show wording or a badge
- * that suggests the platform publicly CERTIFIES a person, skill, work record,
- * company, or service — unless the owner later explicitly approves a separate
- * public trust model. Confirmation / review / verification stay REAL and stored;
- * they are used internally (ranking, matching, review, fraud, future trust
- * scoring) as SILENT signals — but the worker/public surfaces describe the
- * record state in neutral records language, never an affirmative trust badge.
+ * DOCTRINE TRANSITION. The original silent-trust rule (sprint
+ * silent-trust-wording-cleanup-p0) banned every confirmation stem on
+ * worker/public surfaces "unless the owner later explicitly approves a
+ * separate public trust model". The W6 owner directive IS that explicit
+ * approval — and it inverts the wording half: a record's REAL origin must be
+ * named precisely (a manager's confirmation may — must — say so), while
+ * VAGUE substitutes ("With records", "Linked skills", "Reviewed records")
+ * are now the banned class, because they hide who stands behind a record.
  *
- * This guard pins both halves of that contract so it cannot silently regress:
- *   A. The positive-state LABELS on the trust-signal namespaces carry no
- *      affirmative certification stem (LT patvirtin/tvirtin/verifik, EN
- *      verified/confirmed, RU подтверж/верифиц) in the three served locales.
- *   B. The self-view surfaces (player card, own map marker, trust block, CV
- *      sheet, worker-evidence card, evidence-status strip) carry no gold/green
- *      certification visual token (trust ring, trust accent, tier gold, the
- *      green verified glow, a verified count/badge, a ShieldCheck "verified"
- *      icon, a ✓ certified checkmark).
- *
- * It deliberately does NOT forbid the honest PENDING copy ("Laukia
- * patvirtinimo" / "Awaiting confirmation"): that states the ABSENCE of
- * certification, which is exactly what the owner wants surfaced.
+ * What this guard now pins:
+ *   A. Positive-state labels NAME THE ORIGIN (manager / work-journal / self)
+ *      — a certification stem WITHOUT a named origin is still banned, and
+ *      the old vague wordings may never return.
+ *   B. UNCHANGED from silent-trust: no gold/green certification VISUAL token
+ *      on self-view surfaces (trust ring, tier gold, verified glow,
+ *      ShieldCheck, ✓ badge) — naming a fact precisely is honest; dressing a
+ *      person in a certification visual is not.
+ *   C. UNCHANGED: no PERSON-level certification or platform-endorsement
+ *      claims, and no employer/external "reviewed history" framing.
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
@@ -43,6 +41,21 @@ const get = (obj: any, path: string) =>
 // (which states the absence of certification) is handled separately and is NOT
 // forbidden here.
 const CERT_STEM = /verif|confirm|tvirtin|подтверж|верифиц/i;
+
+// W6: a certification stem is allowed ONLY when the label names the origin in
+// the same breath (manager / vadovo / руководител…, work-journal, or self).
+const ORIGIN =
+  /manager|vadov|руковод|žurnal|journal|журнал|paties|self[-\s]?declared|самостоятельн|zelf|selbst|record of|įraš/i;
+// The vague substitutes the W6 directive bans outright.
+const VAGUE = [
+  /^linked skills$/i,
+  /^with records$/i,
+  /^with manager record$/i,
+  /^reviewed records?$/i,
+  /^marked accurate by others$/i,
+  /^susieti įgūdžiai$/i,
+  /^peržiūrėti įrašai$/i,
+];
 
 // Employer/external REVIEW-as-trust-claim framing. The owner forbids presenting
 // employer/external review or approval of a worker's history/skills as a public
@@ -75,16 +88,20 @@ const POSITIVE_LABELS = [
   "journalSkillLinks.source.confirmed",
 ];
 
-describe("Silent-trust: positive-state labels are neutral records language", () => {
+describe("W6: positive-state labels name their origin precisely", () => {
   for (const loc of SERVED) {
-    it(`${loc}: no affirmative certification stem on any positive-state label`, () => {
+    it(`${loc}: every positive-state label names the origin; vague substitutes banned`, () => {
       const m = msgs(loc);
       for (const path of POSITIVE_LABELS) {
         const value = get(m, path);
         expect(typeof value === "string" && value.length > 0, `${loc}: ${path} missing`).toBe(true);
-        expect(value, `${loc}: ${path} = "${value}" reads as a public certification`).not.toMatch(
-          CERT_STEM,
-        );
+        for (const rx of VAGUE) {
+          expect(value, `${loc}: ${path} = "${value}" is the banned vague class`).not.toMatch(rx);
+        }
+        expect(
+          ORIGIN.test(value as string),
+          `${loc}: ${path} = "${value}" must name the origin (manager/journal/self)`,
+        ).toBe(true);
       }
     });
   }
@@ -131,7 +148,10 @@ describe("Silent-trust: no pending/affirmative certification wording in trust UI
           const p = path ? `${path}.${k}` : k;
           if (typeof v === "string") {
             const text = stripBraces(v);
-            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+            if (
+              (CERT_STEM.test(text) && !ORIGIN.test(text)) ||
+              EXTERNAL_REVIEW.some((rx) => rx.test(text))
+            )
               offenders.push(`${p} = ${JSON.stringify(v)}`);
           } else if (v && typeof v === "object") walk(v, p);
         }
@@ -160,7 +180,10 @@ describe("Silent-trust: worker-facing journal copy is neutral (inbox.* excluded)
           if (p === "inbox" || p.startsWith("inbox.")) continue; // reviewer-only
           if (typeof v === "string") {
             const text = stripBraces(v);
-            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+            if (
+              (CERT_STEM.test(text) && !ORIGIN.test(text)) ||
+              EXTERNAL_REVIEW.some((rx) => rx.test(text))
+            )
               offenders.push(`${p} = ${JSON.stringify(v)}`);
           } else if (v && typeof v === "object") walk(v, p);
         }
@@ -189,7 +212,10 @@ describe("Silent-trust: worker-facing learning copy is neutral (manager.* exclud
           if (p === "manager" || p.startsWith("manager.")) continue; // reviewer-only
           if (typeof v === "string") {
             const text = stripBraces(v);
-            if (CERT_STEM.test(text) || EXTERNAL_REVIEW.some((rx) => rx.test(text)))
+            if (
+              (CERT_STEM.test(text) && !ORIGIN.test(text)) ||
+              EXTERNAL_REVIEW.some((rx) => rx.test(text))
+            )
               offenders.push(`${p} = ${JSON.stringify(v)}`);
           } else if (v && typeof v === "object") walk(v, p);
         }

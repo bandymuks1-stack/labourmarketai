@@ -84,14 +84,15 @@ describe("Guard: composer skill suggestions use friendly, not technical, copy", 
   });
 });
 
-describe("Guard: CV tier label is neutral records language (silent-trust rule)", () => {
-  it("cvExport.tiers.confirmed reads as a record state, never a certification", () => {
-    // Silent-trust rule: no public "patvirtinta/confirmed/verified" certification.
-    expect(base("lt").cvExport.tiers.confirmed).toBe("Su įrašais");
-    expect(base("en").cvExport.tiers.confirmed).toBe("With records");
-    expect(base("lt").cvExport.tiers.confirmed).not.toMatch(/patvirtin|vadov/i);
-    expect(base("en").cvExport.tiers.confirmed).not.toMatch(/verif|confirm/i);
-    // the process-explanation hints are removed entirely
+describe("Guard: CV tier label names its origin (W6 precise-origin doctrine)", () => {
+  it("cvExport.tiers.confirmed equals the canonical manager-record wording", () => {
+    // W6 slice 1 (2026-08-02): the silent-trust "Su įrašais / With records"
+    // wording is the banned VAGUE class now — the label must say who stands
+    // behind the record, reading from the ONE canonical namespace.
+    expect(base("lt").cvExport.tiers.confirmed).toBe(base("lt").evidenceTier.managerConfirmed);
+    expect(base("en").cvExport.tiers.confirmed).toBe(base("en").evidenceTier.managerConfirmed);
+    expect(base("en").cvExport.tiers.confirmed).not.toMatch(/^with records$/i);
+    // the process-explanation hints stay removed
     expect(base("lt").cvExport.tierHints).toBeUndefined();
   });
 });

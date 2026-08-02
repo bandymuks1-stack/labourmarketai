@@ -71,7 +71,7 @@ route-gating production-proven.
 7. `is_employer()` org-membership gate (RLS migration).
 8. Contact-disclosure delivery scope confirmation (`record_personal_data_disclosure` has zero callers).
 9. `country_document_requirements` curation.
-10. Column-level privileges on `workers` (matrix finding M1: a consented employer session can select `bio`/`salary_min_eur`/`salary_max_eur`/`trust_score`/`preferred_countries` at the DB layer though no app surface renders them — fix is a column-privilege migration).
+10. Column-level privileges on `workers` AND `worker_skills` (matrix finding M1 + W6 finding L4, one migration, same gate): a consented employer session can select at the DB layer, though no app surface renders them — `workers.bio`/`salary_min_eur`/`salary_max_eur`/`trust_score`/`preferred_countries`, and `worker_skills.verified_by` (the confirming manager's profile UUID — the sharpest edge), `confidence_score`, `confidence_bin`, `verified_at`, `self_rated_level`, `current_pace_value`/`current_pace_unit`. W6 finding L5 recorded alongside (no action, boundary note): org managers can read `journal_entry_confirmations.confirmer_id` + full `confirmation_scope` jsonb while every render deliberately shows role only — inside the manager viewer class the matrix already grants; UI must NOT widen onto those extra fields.
 
 W4 is frozen except real regressions. Next stage: **W5 — Work Journal /
 Evidence / Skills pipeline** (`w5-baseline.md`).
