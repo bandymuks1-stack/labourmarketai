@@ -277,7 +277,10 @@
     "preparing": "Preparing photo…",
     "prepared": "Photo resized and ready to upload.",
     "tooLargeAfter": "The photo is still too large. Try a different photo.",
-    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later."
+    "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
+    "uploading": "Uploading photo…",
+    "remove": "Remove photo",
+    "previewAlt": "Selected photo"
   },
   "modes": {
     "title": "Entry type",

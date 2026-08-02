@@ -17,6 +17,8 @@ const CHAT_KEYS = [
   "chipCompanyHub", "companyDemandNext", "chipTasks",
   "clarifyWorkLog", "calendarHint", "messagesHint", "reminderBlocked", "translateBlocked",
   "writeEmployerHint",
+  // W7 slice 2 — intent-aware attach.
+  "attachChoice", "chipAttachPhoto", "chipAttachCv", "userAttachPhoto",
 ] as const;
 
 const WORKLOG_KEYS = [

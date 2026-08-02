@@ -10841,7 +10841,11 @@
       "briefLogToday": "You are working today and nothing is logged yet.",
       "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}.",
-      "playerCardOpened": "Your card is open in the panel — real data from your own records."
+      "playerCardOpened": "Your card is open in the panel — real data from your own records.",
+      "attachChoice": "What is this file for?",
+      "chipAttachPhoto": "Work photo",
+      "chipAttachCv": "CV",
+      "userAttachPhoto": "I want to attach a work photo"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

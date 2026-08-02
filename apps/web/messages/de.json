@@ -10841,7 +10841,11 @@
       "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
       "briefUnreadMessages": "Du hast {count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}.",
       "briefProfileGap": "Deinem Profil fehlt noch: {step}.",
-      "playerCardOpened": "Deine Karte ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen."
+      "playerCardOpened": "Deine Karte ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen.",
+      "attachChoice": "Wofür ist diese Datei?",
+      "chipAttachPhoto": "Arbeitsfoto",
+      "chipAttachCv": "Lebenslauf",
+      "userAttachPhoto": "Ich möchte ein Arbeitsfoto anhängen"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

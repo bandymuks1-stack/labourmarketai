@@ -10841,7 +10841,11 @@
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
       "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
       "briefProfileGap": "Profilyje dar trūksta: {step}.",
-      "playerCardOpened": "Tavo kortelė atidaryta šone — ten matai tikrus savo duomenis."
+      "playerCardOpened": "Tavo kortelė atidaryta šone — ten matai tikrus savo duomenis.",
+      "attachChoice": "Kam skirtas šis failas?",
+      "chipAttachPhoto": "Darbo nuotrauka",
+      "chipAttachCv": "CV",
+      "userAttachPhoto": "Noriu pridėti darbo nuotrauką"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  compressImageFile,
   computeTargetDimensions,
   isCompressibleImage,
+  isTooLargeToDecode,
+  MAX_DECODE_BYTES,
 } from "@/lib/browser/image-compress";
+
+/** A File stand-in with a declared size — enough for every branch that runs
+ *  before the canvas, which is all of the logic under test here. */
+const fileOf = (bytes: number, type = "image/jpeg"): File =>
+  ({ size: bytes, type, name: "photo.jpg", lastModified: 0 }) as File;
+
+const MB = 1024 * 1024;
 
 /** Pure dimension math for client-side photo resize (orientation-preserving
  *  canvas path runs only in the browser; the math is deterministic + tested). */
@@ -39,6 +49,62 @@ describe("isCompressibleImage", () => {
     }
     for (const type of ["application/pdf", "text/plain", "image/gif", "image/svg+xml", ""]) {
       expect(isCompressibleImage({ type } as File)).toBe(false);
+    }
+  });
+});
+
+/**
+ * MEMORY SAFETY (W7 slice 2). Decoding is where the memory goes: a 100 MB JPEG
+ * materialises as ~1.2 GB of RGBA, and on a phone that is a tab crash — a worse
+ * answer than a refusal. The byte size is therefore judged BEFORE anything is
+ * handed to a decoder.
+ */
+describe("oversized input never reaches the decoder", () => {
+  it("the ceiling sits far above a real phone photo but well under a crash", () => {
+    // Real phone photos are 4–12 MB; the upload ceiling downstream is 5 MB.
+    expect(MAX_DECODE_BYTES).toBeGreaterThan(12 * MB);
+    expect(MAX_DECODE_BYTES).toBeLessThanOrEqual(64 * MB);
+  });
+
+  it("isTooLargeToDecode is an exclusive boundary", () => {
+    expect(isTooLargeToDecode(MAX_DECODE_BYTES)).toBe(false);
+    expect(isTooLargeToDecode(MAX_DECODE_BYTES + 1)).toBe(true);
+    expect(isTooLargeToDecode(0)).toBe(false);
+  });
+
+  it("a 100 MB image is refused by size, not by decoding it", async () => {
+    const res = await compressImageFile(fileOf(100 * MB));
+    expect(res.skipped).toBe("too-large-to-decode");
+    expect(res.resized).toBe(false);
+    // The ORIGINAL comes back untouched, so the caller's own size validation
+    // is what rejects it — one authority for "too big", not two.
+    expect(res.file.size).toBe(100 * MB);
+    expect(res.outputBytes).toBe(100 * MB);
+  });
+
+  it("size is judged before the environment, so the guard cannot be skipped", async () => {
+    // Under vitest `document` is undefined. A 100 MB file must still report
+    // the SIZE reason — if this ever returns "no-browser" the ordering
+    // regressed and a browser build would decode before checking.
+    const huge = await compressImageFile(fileOf(100 * MB));
+    expect(huge.skipped).toBe("too-large-to-decode");
+    // A normal photo in the same environment reports the environment.
+    const normal = await compressImageFile(fileOf(3 * MB));
+    expect(normal.skipped).toBe("no-browser");
+  });
+
+  it("a non-image is refused before size or environment are consulted", async () => {
+    const res = await compressImageFile(fileOf(100 * MB, "application/pdf"));
+    expect(res.skipped).toBe("not-an-image");
+  });
+
+  it("every non-resized result states WHY, and a resize states none", async () => {
+    // `skipped` is the honesty contract: callers must be able to tell "we chose
+    // not to shrink it" from "we could not even look at it".
+    for (const f of [fileOf(3 * MB), fileOf(100 * MB), fileOf(1 * MB, "text/plain")]) {
+      const res = await compressImageFile(f);
+      expect(res.resized).toBe(false);
+      expect(res.skipped).not.toBeNull();
     }
   });
 });

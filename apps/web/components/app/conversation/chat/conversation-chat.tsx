@@ -120,6 +120,12 @@ export type ChatLabels = {
   reminderBlocked: string;
   translateBlocked: string;
   writeEmployerHint: string;
+  /** W7 slice 2 — the paperclip's one-off "what is this file for?" turn, shown
+   *  ONLY when no flow that owns files is open. */
+  attachChoice: string;
+  chipAttachPhoto: string;
+  chipAttachCv: string;
+  userAttachPhoto: string;
 };
 
 
@@ -728,20 +734,35 @@ export function ConversationChat({
       });
   }, [assistant, pushEmbed, locale, labels.navMessages, labels.messagesHint]);
 
+  /**
+   * What a file the person attaches would be FOR, based on what the
+   * conversation is currently doing. Set when a flow that owns files opens —
+   * never guessed from a file name (a photo called `cv.jpg` is still a photo).
+   * `null` = we genuinely do not know, and the paperclip asks instead of
+   * choosing for them.
+   */
+  const attachContextRef = useRef<"worklog" | "cv" | null>(null);
+
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string) => {
+    (text: string, opts?: { photoFirst?: boolean }) => {
       const draft = extractWorkLog(text, todayIso());
-      if (!draft.hasSignal) {
+      // A photo-led log is a deliberate request to attach evidence, so the
+      // flow opens even with nothing parsed — the short text stays required
+      // inside it. A TYPED sentence with no signal still gets the one clarify
+      // question rather than a form nobody asked for.
+      if (!draft.hasSignal && !opts?.photoFirst) {
         // Data unclear → ask ONE concrete question (brief §3).
         assistant(labels.clarifyWorkLog);
         return;
       }
+      attachContextRef.current = "worklog";
       pushEmbed(
         <WorkerWorkLogFlow
           draft={draft}
           locale={locale}
           labels={workLogLabels}
+          photoFirst={opts?.photoFirst ?? false}
           // After a work log lands, the person SEES their card change
           // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
           // canonical Player Card re-renders with the just-strengthened
@@ -825,6 +846,10 @@ export function ConversationChat({
       });
   }, [assistant, locale, labels.calendarHint, labels.chipTasks, labels.chipLogWork, labels.navCalendar]);
 
+  /** Late-bound self-reference so one chip case can reuse another's behaviour
+   *  without a second copy of it (same pattern as `startProfileSummaryRef`). */
+  const handleChipRef = useRef<(chip: ChoiceChip) => void>(() => {});
+
   const handleChip = useCallback(
     (chip: ChoiceChip) => {
       switch (chip.id) {
@@ -841,9 +866,20 @@ export function ConversationChat({
           break;
         case "cv":
           user(labels.userCv);
+          attachContextRef.current = "cv";
           // CV import ends with the refreshed REAL profile state, so the user
           // sees what the import actually changed.
           withTyping(() => pushEmbed(<WorkerCvFlow onClose={() => startProfileSummaryRef.current("profile")} />));
+          break;
+        // The two answers to "what is this file for?" — reached only from the
+        // attach choice below, so they are a one-off pair, not a standing CTA
+        // row under every message.
+        case "attach:photo":
+          user(labels.userAttachPhoto);
+          withTyping(() => startWorkLog("", { photoFirst: true }));
+          break;
+        case "attach:cv":
+          handleChipRef.current({ id: "cv", label: "" });
           break;
         case "profile":
           user(labels.userProfile);
@@ -892,6 +928,48 @@ export function ConversationChat({
     },
     [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, router],
   );
+  handleChipRef.current = handleChip;
+
+  /**
+   * THE PAPERCLIP, INTENT-AWARE (W7 slice 2).
+   *
+   * It used to send every file into the CV importer, whatever the conversation
+   * was about — so a worker mid-work-log who tapped it to attach a site photo
+   * got a CV parser. The context now decides, and the context is the ACTIVE
+   * FLOW, never the file's name:
+   *
+   *   work-log open  → the work photo path (evidence for that entry)
+   *   CV open        → CV import, exactly as before
+   *   neither        → ask, once, with the two real answers
+   *
+   * The unknown case is a single message with two chips — not a permanent CTA
+   * row, which is the button wall the owner ruling removed.
+   */
+  const handleAttach = useCallback(() => {
+    const context = attachContextRef.current;
+    if (context === "worklog") {
+      user(labels.userAttachPhoto);
+      withTyping(() => startWorkLog("", { photoFirst: true }));
+      return;
+    }
+    if (context === "cv") {
+      handleChipRef.current({ id: "cv", label: "" });
+      return;
+    }
+    assistant(labels.attachChoice, [
+      { id: "attach:photo", label: labels.chipAttachPhoto },
+      { id: "attach:cv", label: labels.chipAttachCv },
+    ]);
+  }, [
+    user,
+    assistant,
+    withTyping,
+    startWorkLog,
+    labels.userAttachPhoto,
+    labels.attachChoice,
+    labels.chipAttachPhoto,
+    labels.chipAttachCv,
+  ]);
 
   const handleSend = useCallback(
     (text: string) => {
@@ -1131,7 +1209,7 @@ export function ConversationChat({
                   attachLabel={labels.attach}
                   sendLabel={labels.send}
                   onSend={handleSend}
-                  onAttach={() => handleChip({ id: "cv", label: "" })}
+                  onAttach={handleAttach}
                 />
               }
             />
@@ -1141,7 +1219,7 @@ export function ConversationChat({
                 attachLabel={labels.attach}
                 sendLabel={labels.send}
                 onSend={handleSend}
-                onAttach={() => handleChip({ id: "cv", label: "" })}
+                onAttach={handleAttach}
               />
             )}
           </div>

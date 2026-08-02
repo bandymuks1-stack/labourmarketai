@@ -3337,7 +3337,11 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Sinu kaart on paneelil avatud — päris andmed sinu enda kirjetest."
+      "playerCardOpened": "Sinu kaart on paneelil avatud — päris andmed sinu enda kirjetest.",
+      "attachChoice": "[EN] What is this file for?",
+      "chipAttachPhoto": "[EN] Work photo",
+      "chipAttachCv": "[EN] CV",
+      "userAttachPhoto": "[EN] I want to attach a work photo"
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

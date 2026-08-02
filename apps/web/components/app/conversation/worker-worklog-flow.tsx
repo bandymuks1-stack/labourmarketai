@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
-import { Clock } from "lucide-react";
+import { Clock, X } from "lucide-react";
 import { Link, useRouter } from "@/lib/i18n/navigation";
+import { compressImageFile } from "@/lib/browser/image-compress";
+import {
+  isValidJournalPhoto,
+  uploadJournalEntryPhoto,
+  type JournalPhotoUploadResult,
+} from "@/lib/journal/photo-upload";
 import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
 import {
   listWorkLogEngagements,
@@ -57,6 +63,15 @@ type WorkLogSkillsOutcome = {
   cvUpdated: boolean;
 };
 
+/** The saved entry's id, straight off the dispatcher result. The photo can only
+ *  be attached once a REAL entry exists, so a missing id means no upload is
+ *  attempted at all (rather than an upload aimed at nothing). */
+function parseEntryId(data: unknown): string | null {
+  if (typeof data !== "object" || data === null) return null;
+  const id = (data as { entryId?: unknown }).entryId;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
 function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
   if (typeof data !== "object" || data === null) return null;
   const s = (data as { skills?: unknown }).skills;
@@ -93,8 +108,34 @@ type Phase =
   | { kind: "blocked"; reason: "no-context" | "no-worker" | "not-authed" }
   | { kind: "ready"; token: null }
   | { kind: "confirm"; token: string }
-  | { kind: "done"; skills: WorkLogSkillsOutcome | null }
+  /** The entry is ALREADY saved and the photo is going up. A distinct phase so
+   *  the person is never shown "saved" while a file is still in flight, and
+   *  never shown a spinner that implies the entry might still be lost. */
+  | { kind: "uploading" }
+  | {
+      kind: "done";
+      skills: WorkLogSkillsOutcome | null;
+      /** null = no photo was attached; otherwise the REAL upload outcome. */
+      photo: JournalPhotoUploadResult | null;
+    }
   | { kind: "error"; message: string };
+
+/** Client-side preparation state for the picked photo. */
+type PhotoPrep = "idle" | "preparing" | "ready";
+
+/**
+ * Upload outcome → the ONE honest sentence for it, in the SAME `journal.photo`
+ * lexicon the journal composer uses. TOTAL by construction: a new outcome in
+ * `JournalPhotoUploadResult` fails to typecheck here rather than silently
+ * rendering nothing, so no state can ever reach the person as blank space.
+ */
+const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
+  uploaded: "uploaded",
+  invalid: "invalidFile",
+  limit: "limitReached",
+  "not-ready": "notReady",
+  failed: "uploadFailed",
+};
 
 /**
  * Conversation-first work-log (Phase 3). The worker types a natural sentence
@@ -117,11 +158,16 @@ export function WorkerWorkLogFlow({
   locale,
   labels,
   onClose,
+  photoFirst = false,
 }: {
   draft: WorkLogParse;
   locale: string;
   labels: WorkLogLabels;
   onClose?: () => void;
+  /** Opened via the composer's attach path — the photo field leads and is the
+   *  reason the flow is on screen. The short text stays REQUIRED either way: a
+   *  photo alone is evidence without a claim, which the journal cannot store. */
+  photoFirst?: boolean;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
@@ -131,6 +177,67 @@ export function WorkerWorkLogFlow({
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
   const [pending, start] = useTransition();
+  /**
+   * PHOTO EVIDENCE (W7 slice 2). The SAME three modules the journal composer
+   * uses — `compressImageFile` → `isValidJournalPhoto` → `uploadJournalEntryPhoto`
+   * — in the same order, so there is ONE compression rule, ONE 5 MB rule and
+   * ONE write path across both surfaces. Nothing about photos is re-decided here.
+   */
+  const tPhoto = useTranslations("journal.photo");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // The object URL is a live handle, not a value — revoke it whenever it is
+  // replaced or the flow unmounts, or a long chat session leaks every photo
+  // the person previewed.
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(photoFile);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photoFile]);
+
+  function clearPhoto() {
+    setPhotoFile(null);
+    setPhotoError(null);
+    setPhotoPrep("idle");
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  }
+
+  async function pickPhoto(f: File | null) {
+    if (!f) {
+      clearPhoto();
+      return;
+    }
+    // Wrong format → honest, specific error. Size is NOT judged here: that is
+    // what compression is for, and judging it first is the 5 MB wall this
+    // slice exists to remove.
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+      setPhotoFile(null);
+      setPhotoPrep("idle");
+      setPhotoError(tPhoto("invalidFile"));
+      return;
+    }
+    setPhotoError(null);
+    setPhotoPrep("preparing");
+    const { file: prepared } = await compressImageFile(f);
+    // Still over the server's ceiling after a real attempt → say exactly that,
+    // and attach nothing. The server rule stays the authority.
+    if (!isValidJournalPhoto(prepared)) {
+      setPhotoFile(null);
+      setPhotoPrep("idle");
+      setPhotoError(tPhoto("tooLargeAfter"));
+      return;
+    }
+    setPhotoFile(prepared);
+    setPhotoPrep("ready");
+  }
   // Localized taxonomy skill names for the completion summary (slug → name,
   // falling back to the raw slug so an uncatalogued name never blanks a fact).
   const tSkill = useTranslations("skillNames");
@@ -203,17 +310,43 @@ export function WorkerWorkLogFlow({
         locale,
         confirmationToken: token,
       });
-      if (res.ok) {
-        trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
-          surface: "conversation",
-          role_context: "worker",
-          success: true,
-        });
-        setPhase({ kind: "done", skills: parseSkillsOutcome(res.data) });
-        router.refresh();
-      } else {
+      if (!res.ok) {
         setPhase({ kind: "error", message: res.message || labels.errorGeneric });
+        return;
       }
+      trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
+        surface: "conversation",
+        role_context: "worker",
+        success: true,
+      });
+      const skills = parseSkillsOutcome(res.data);
+      const entryId = parseEntryId(res.data);
+
+      // ORDER MATTERS, and it is the journal composer's order: the entry is
+      // saved FIRST and the photo is attached to it afterwards. A storage
+      // failure then costs the photo, never the work record — the opposite
+      // order would let a flaky upload lose a day of real work.
+      if (photoFile && entryId) {
+        setPhase({ kind: "uploading" });
+        let outcome: JournalPhotoUploadResult;
+        try {
+          outcome = await uploadJournalEntryPhoto(entryId, photoFile);
+        } catch {
+          // A thrown uploader is a FAILED upload, never a silent success.
+          outcome = "failed";
+        }
+        setPhase({ kind: "done", skills, photo: outcome });
+        router.refresh();
+        return;
+      }
+      // A photo was prepared but the id never arrived — report the entry
+      // honestly and say the photo did not attach, rather than implying it did.
+      setPhase({
+        kind: "done",
+        skills,
+        photo: photoFile ? "failed" : null,
+      });
+      router.refresh();
     });
   }
 
@@ -240,6 +373,21 @@ export function WorkerWorkLogFlow({
             {labels.noContextCta}
           </Link>
         )}
+      </div>
+    );
+  }
+
+  // ── uploading — the entry is SAFE, the photo is in flight ──────────────────
+  if (phase.kind === "uploading") {
+    return (
+      <div
+        className="flex flex-col gap-1 rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support"
+        data-testid="worklog-photo-uploading"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="font-semibold text-state-success">{labels.saved}</p>
+        <p className="text-text-secondary">{tPhoto("uploading")}</p>
       </div>
     );
   }
@@ -289,17 +437,110 @@ export function WorkerWorkLogFlow({
         {skillsTouched && (
           <p className="text-text-muted" data-testid="worklog-matching-note">{labels.matchingNote}</p>
         )}
+        {/* PHOTO OUTCOME — the real result of the real upload, one sentence per
+            state. `uploaded` is the ONLY line that claims evidence is attached;
+            every other state says plainly that it is not, and the entry above
+            stays truthfully saved either way (fail-closed, §7). */}
+        {phase.photo !== null && (
+          <p
+            className={
+              phase.photo === "uploaded"
+                ? "text-state-success"
+                : "text-state-warning"
+            }
+            data-testid="worklog-photo-outcome"
+            data-photo-outcome={phase.photo}
+          >
+            {tPhoto(PHOTO_OUTCOME_KEY[phase.photo])}
+          </p>
+        )}
       </div>
     );
   }
 
   const confirming = phase.kind === "confirm";
 
+  /* ONE photo field, placed by `photoFirst`: the attach path leads with it, a
+     typed work log keeps it after the text. Same field, same free-tier rule,
+     same after-save upload either way — mirroring the journal composer so the
+     two surfaces cannot drift apart. */
+  const photoField = (
+    <div
+      className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      data-testid="worklog-photo-field"
+    >
+      <span className="text-support text-text-muted">{tPhoto("label")}</span>
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        disabled={confirming || pending}
+        data-testid="worklog-photo-input"
+        onChange={(e) => {
+          void pickPhoto(e.target.files?.[0] ?? null);
+        }}
+        className="text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+      />
+
+      {photoError ? (
+        <p className="text-meta text-state-danger" role="alert" data-testid="worklog-photo-error">
+          {photoError}
+        </p>
+      ) : null}
+
+      {photoPrep === "preparing" ? (
+        <p
+          className="text-meta text-text-secondary"
+          role="status"
+          aria-live="polite"
+          data-testid="worklog-photo-preparing"
+        >
+          {tPhoto("preparing")}
+        </p>
+      ) : null}
+
+      {/* PREVIEW + REMOVE. The person sees exactly what they are about to
+          attach and can drop it before anything is written — nothing has been
+          uploaded at this point. */}
+      {photoPrep === "ready" && photoFile ? (
+        <div className="flex items-center gap-3" data-testid="worklog-photo-preview">
+          {photoPreview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photoPreview}
+              alt={tPhoto("previewAlt")}
+              className="size-16 flex-none rounded-md border border-ink-500 object-cover"
+            />
+          ) : null}
+          <p className="min-w-0 flex-1 text-meta text-state-success" role="status" aria-live="polite">
+            {tPhoto("prepared")}
+          </p>
+          <button
+            type="button"
+            onClick={clearPhoto}
+            disabled={confirming || pending}
+            aria-label={tPhoto("remove")}
+            data-testid="worklog-photo-remove"
+            className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+      ) : null}
+
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="worklog-photo-free-tier-note">
+        {tPhoto("freeTierNote")}
+      </p>
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4" data-testid="worklog-flow">
       <p className="flex items-center gap-1.5 text-support font-semibold text-text-primary">
         <Clock className="size-4 text-brand-blue" aria-hidden /> {labels.understood}
       </p>
+
+      {photoFirst ? photoField : null}
 
       {/* Parse summary — read-only display of what was understood. */}
       <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-support">
@@ -364,6 +605,8 @@ export function WorkerWorkLogFlow({
           </select>
         </label>
       )}
+
+      {photoFirst ? null : photoField}
 
       {confirming ? (
         <div className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3">
