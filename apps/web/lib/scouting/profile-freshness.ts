@@ -11,9 +11,18 @@
  *
  * The bucket is computed at query time, shown honestly on the scouting card
  * (same vocabulary as components/visual/worker-card.tsx lastActiveBucket),
- * and DEMOTES dormant profiles in the ranking — it never hides them. No
- * timestamp is ever fabricated: an unparseable value lands in "dormant"
- * (fail conservative), never in "active".
+ * and never hides anyone. No timestamp is ever fabricated: an unparseable
+ * value lands in "dormant" (fail conservative), never in "active".
+ *
+ * WHERE IT SITS IN THE RANKING (W10 audit P0-2). This used to be the PRIMARY
+ * sort key on discovery, ahead of the match comparator — so recency
+ * unconditionally outranked competence, and a fully-confirmed `strong`
+ * candidate sorted below an empty profile that had saved a field yesterday.
+ * It is now a TIE-BREAK applied AFTER `compareMatches`: it reorders candidates
+ * the need-context comparator judged equal, and cannot overturn fit.
+ *
+ * Do not promote it back above fit. "How recently someone touched their
+ * profile" is an activity fact, not evidence that they can do the work.
  *
  * Pure, deterministic, unit-tested.
  */
@@ -42,8 +51,8 @@ export function lastActiveBucket(
   return "dormant";
 }
 
-/** Ranking demotion weight: dormant sinks below active/recent, which keep
- *  their existing match-quality order relative to each other. */
+/** Tie-break weight: among candidates of EQUAL fit, dormant sinks below
+ *  active/recent. Never a primary sort key — see the module docblock. */
 export function freshnessDemotionRank(bucket: LastActiveBucket): number {
   return bucket === "dormant" ? 1 : 0;
 }
