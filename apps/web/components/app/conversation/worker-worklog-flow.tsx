@@ -205,7 +205,12 @@ export function WorkerWorkLogFlow({
       setPhotoPreview(null);
       return;
     }
-    const url = URL.createObjectURL(photoFile);
+    // Preview from a NAMELESS Blob, not from the File itself. A File carries
+    // `name`, which is DOM-supplied text; a Blob carries only bytes and a MIME
+    // type. Nothing the person's filesystem chose can reach the image sink.
+    const url = URL.createObjectURL(
+      new Blob([photoFile], { type: photoFile.type }),
+    );
     setPhotoPreview(url.startsWith("blob:") ? url : null);
     return () => URL.revokeObjectURL(url);
   }, [photoFile]);
