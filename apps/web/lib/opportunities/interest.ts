@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
-import { needFromRoleText } from "./opportunity-need";
+import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import {
   buildInterestCvStash,
@@ -81,11 +81,13 @@ export async function expressInterest(input: {
   if (!visibleRow) return { kind: "not-visible" };
 
   // Canonical match at click time — the ONE shared pipeline.
-  const { need, source } = needFromRoleText(
-    (visibleRow.role_text as string | null) ?? null,
-    (visibleRow.country as string | null) ?? null,
-    (visibleRow.location_label as string | null) ?? null,
-  );
+  //
+  // W10 P0-1: derived from the server-re-read ROW, so the snapshot stored
+  // against this interest is computed from the same structured demand the
+  // board showed. Previously both sides built the need from `role_text` alone,
+  // which meant the snapshot recorded a match that had never evaluated the
+  // engagement form, licence or pay the worker had just read on the card.
+  const { need, source } = needFromDemandRow(visibleRow);
   const match = matchWorkerToNeed(need, ctx.subject);
   const nowIso = new Date().toISOString();
   // Canonical Ideas Integration v1: the snapshot additionally stashes

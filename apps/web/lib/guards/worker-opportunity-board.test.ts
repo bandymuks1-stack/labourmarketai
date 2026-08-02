@@ -163,7 +163,10 @@ describe("7. no ESCO dependency", () => {
     }
     expect(workerSubject).toMatch(/skills \( slug \)/);
     expect(needModule).toMatch(/deriveNeedSkills/);
-    expect(loader).toMatch(/needFromRoleText/);
+    // W10 P0-1: the loader must build its need from the ROW (structured demand
+    // included), not from `role_text` alone via `needFromRoleText`.
+    expect(loader).toMatch(/needFromDemandRow/);
+    expect(loader).not.toMatch(/needFromRoleText/);
     expect(loader).toMatch(/buildOwnWorkerContext/);
     expect(loader).toMatch(/compareMatches/);
   });
