@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, type Dirent } from "node:fs";
 import { join, relative } from "node:path";
 
 /**
@@ -118,19 +118,36 @@ describe("the surfaces this renders on are company surfaces", () => {
     // never this one silently widening again.
     const adminRoot = join(APP, "app", "[locale]", "dashboard", "admin");
     const offenders: string[] = [];
+    // `withFileTypes` + try/catch on purpose: an `existsSync`/`statSync` check
+    // followed by a read is a check-then-use pattern (CodeQL js/file-system-race,
+    // flagged on the first draft of this file). The entry type comes from the
+    // directory listing itself, and a missing directory is handled by failing
+    // the read rather than by asking first.
     const walk = (dir: string): void => {
-      for (const entry of readdirSync(dir)) {
-        const abs = join(dir, entry);
-        if (statSync(abs).isDirectory()) walk(abs);
-        else if (
-          /\.tsx?$/.test(entry) &&
-          readFileSync(abs, "utf8").includes("getCompanyDemandIntelligence")
-        ) {
-          offenders.push(relative(APP, abs));
+      let entries: Dirent[];
+      try {
+        entries = readdirSync(dir, { withFileTypes: true });
+      } catch {
+        return; // no admin route tree → nothing to check
+      }
+      for (const entry of entries) {
+        const abs = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(abs);
+        } else if (/\.tsx?$/.test(entry.name)) {
+          let src = "";
+          try {
+            src = readFileSync(abs, "utf8");
+          } catch {
+            continue;
+          }
+          if (src.includes("getCompanyDemandIntelligence")) {
+            offenders.push(relative(APP, abs));
+          }
         }
       }
     };
-    if (existsSync(adminRoot)) walk(adminRoot);
+    walk(adminRoot);
     expect(offenders, offenders.join("\n")).toEqual([]);
   });
 });
