@@ -3079,6 +3079,10 @@
           "label": "[EN] Review offers",
           "description": "[EN] See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "[EN] Review experiences",
+          "description": "[EN] See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "[EN] Accept or decline an offer",
           "description": "[EN] Accepting confirms the engagement — a strong step."
@@ -3319,6 +3323,11 @@
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
+      "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
+      "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
+      "experiencesUnavailable": "[EN] I could not read the experiences. Nothing was changed.",
+      "experienceLeave": "[EN] Leave an experience",
       "userLogWork": "Chcę zapisać swoją pracę",
       "userFindWork": "[EN] Find work",
       "historyTitle": "Wcześniejsza rozmowa",
@@ -3846,5 +3855,182 @@
     "entryConfirmed": "[EN] Confirmed by a manager",
     "managerConfirmedCount": "[EN] Manager-confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations"
+  },
+  "experience": {
+    "page": {
+      "title": "[EN] Experiences",
+      "lead": "[EN] Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
+      "unavailableTitle": "[EN] Experiences are not available in this environment yet.",
+      "unavailableBody": "[EN] Nothing was saved. You can keep working as usual.",
+      "aboutMe": "[EN] About me",
+      "aboutMeEmpty": "[EN] No published experiences about you yet.",
+      "mine": "[EN] Submitted by me",
+      "mineEmpty": "[EN] You have not submitted any experiences yet."
+    },
+    "counts": {
+      "title": "[EN] Published experiences",
+      "positive": "[EN] positive",
+      "negative": "[EN] negative",
+      "disputed": "[EN] {count} of them are being disputed",
+      "caution": "[EN] More negative than positive experiences — worth looking closer before deciding.",
+      "meaning": "[EN] These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
+      "notEnough": "[EN] Not enough published experiences yet.",
+      "unavailable": "[EN] Experience counts are not available in this environment yet."
+    },
+    "sentiment": {
+      "positive": "[EN] Positive experience",
+      "negative": "[EN] Negative experience"
+    },
+    "interaction": {
+      "accepted_booking": "[EN] Booking",
+      "completed_engagement": "[EN] Engagement",
+      "concluded_service_request": "[EN] Service request"
+    },
+    "moderation": {
+      "submitted": "[EN] Submitted",
+      "in_moderation": "[EN] In moderation",
+      "published": "[EN] Published",
+      "rejected": "[EN] Rejected",
+      "title": "[EN] Experience moderation",
+      "lead": "[EN] Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
+      "unavailable": "[EN] The experience domain is not available in this environment.",
+      "queueTitle": "[EN] Awaiting moderation",
+      "queueEmpty": "[EN] Nothing is waiting for moderation.",
+      "disputeQueueTitle": "[EN] Disputes",
+      "disputeQueueEmpty": "[EN] No open disputes.",
+      "take": "[EN] Take into moderation",
+      "publish": "[EN] Publish",
+      "reject": "[EN] Reject",
+      "reasonLabel": "[EN] Reason for the decision",
+      "reasonNotPublic": "[EN] The reason is recorded in the audit trail and is not published.",
+      "decidedWithAudit": "[EN] Decision recorded in the audit trail.",
+      "resolve": {
+        "upheld": "[EN] Uphold the experience",
+        "changed": "[EN] Mark as changed",
+        "removed": "[EN] Remove from public view"
+      },
+      "errors": {
+        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "[EN] Please sign in first.",
+        "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
+        "self_review": "[EN] You cannot submit an experience about yourself.",
+        "invalid": "[EN] Please check the form and try again.",
+        "not_authorized": "[EN] You do not have permission for this action.",
+        "not_subject": "[EN] Only the person or organization this experience is about can do this.",
+        "not_published": "[EN] This is only possible once the experience is published.",
+        "response_exists": "[EN] A reply has already been submitted.",
+        "dispute_exists": "[EN] A dispute is already open.",
+        "reason_required": "[EN] A reason is required.",
+        "invalid_transition": "[EN] That step is not possible from the current state.",
+        "not_found": "[EN] Not found.",
+        "error": "[EN] Something went wrong. Nothing was saved."
+      }
+    },
+    "dispute": {
+      "none": "[EN] Not disputed",
+      "opened": "[EN] Disputed",
+      "under_review": "[EN] Dispute under review",
+      "resolved_upheld": "[EN] Dispute resolved — experience upheld",
+      "resolved_changed": "[EN] Dispute resolved — experience changed",
+      "resolved_removed": "[EN] Removed from public view after a dispute",
+      "open": "[EN] Dispute this experience",
+      "rules": "[EN] The experience stays published while a moderator reviews the dispute. A reason is required.",
+      "cta": "[EN] Open a dispute",
+      "sending": "[EN] Opening…",
+      "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
+      "errors": {
+        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "[EN] Please sign in first.",
+        "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
+        "self_review": "[EN] You cannot submit an experience about yourself.",
+        "invalid": "[EN] Please check the form and try again.",
+        "not_authorized": "[EN] You do not have permission for this action.",
+        "not_subject": "[EN] Only the person or organization this experience is about can do this.",
+        "not_published": "[EN] This is only possible once the experience is published.",
+        "response_exists": "[EN] A reply has already been submitted.",
+        "dispute_exists": "[EN] A dispute is already open.",
+        "reason_required": "[EN] A reason is required.",
+        "invalid_transition": "[EN] That step is not possible from the current state.",
+        "not_found": "[EN] Not found.",
+        "error": "[EN] Something went wrong. Nothing was saved."
+      }
+    },
+    "response": {
+      "open": "[EN] Reply to this experience",
+      "rules": "[EN] You can leave one reply. It passes moderation, it does not change the positive or negative counts, and it cannot edit or remove the original.",
+      "cta": "[EN] Submit the reply",
+      "sending": "[EN] Sending…",
+      "submitted": "[EN] Reply submitted. It becomes visible once moderation is finished.",
+      "errors": {
+        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "[EN] Please sign in first.",
+        "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
+        "self_review": "[EN] You cannot submit an experience about yourself.",
+        "invalid": "[EN] Please check the form and try again.",
+        "not_authorized": "[EN] You do not have permission for this action.",
+        "not_subject": "[EN] Only the person or organization this experience is about can do this.",
+        "not_published": "[EN] This is only possible once the experience is published.",
+        "response_exists": "[EN] A reply has already been submitted.",
+        "dispute_exists": "[EN] A dispute is already open.",
+        "reason_required": "[EN] A reason is required.",
+        "invalid_transition": "[EN] That step is not possible from the current state.",
+        "not_found": "[EN] Not found.",
+        "error": "[EN] Something went wrong. Nothing was saved."
+      }
+    },
+    "submit": {
+      "about": "[EN] Your experience with {name}",
+      "sentimentLegend": "[EN] How was the experience?",
+      "sentiment": {
+        "positive": "[EN] Positive experience",
+        "negative": "[EN] Negative experience"
+      },
+      "bodyLabel": "[EN] What happened",
+      "moderationNote": "[EN] The experience passes moderation before it is published.",
+      "cta": "[EN] Submit the experience",
+      "sending": "[EN] Sending…",
+      "submitted": "[EN] Experience submitted.",
+      "awaitingModeration": "[EN] It is waiting for moderation and is not published yet.",
+      "errors": {
+        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "[EN] Please sign in first.",
+        "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
+        "self_review": "[EN] You cannot submit an experience about yourself.",
+        "invalid": "[EN] Please check the form and try again.",
+        "not_authorized": "[EN] You do not have permission for this action.",
+        "not_subject": "[EN] Only the person or organization this experience is about can do this.",
+        "not_published": "[EN] This is only possible once the experience is published.",
+        "response_exists": "[EN] A reply has already been submitted.",
+        "dispute_exists": "[EN] A dispute is already open.",
+        "reason_required": "[EN] A reason is required.",
+        "invalid_transition": "[EN] That step is not possible from the current state.",
+        "not_found": "[EN] Not found.",
+        "error": "[EN] Something went wrong. Nothing was saved."
+      }
+    },
+    "result": {
+      "loading": "[EN] Loading…",
+      "error": "[EN] We could not read the experiences. Nothing was changed.",
+      "retry": "[EN] Try again",
+      "signIn": "[EN] Sign in to see your experiences."
+    },
+    "panel": {
+      "title": "[EN] Experience moderation",
+      "help": "[EN] Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
+    },
+    "entry": {
+      "backToExperiences": "[EN] Back to experiences",
+      "alreadySubmitted": "[EN] You have already described this interaction.",
+      "alreadySubmittedHint": "[EN] One interaction, one experience. The existing record's state is in your experiences list.",
+      "notYet": "[EN] This interaction cannot be described yet.",
+      "notAvailable": "[EN] This interaction cannot be described.",
+      "blockedHint": "[EN] Nothing was saved.",
+      "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
+      "noContextLabel": "[EN] no further description"
+    }
   }
 }

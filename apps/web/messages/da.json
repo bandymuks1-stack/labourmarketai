@@ -3079,6 +3079,10 @@
           "label": "[EN] Review offers",
           "description": "[EN] See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "[EN] Review experiences",
+          "description": "[EN] See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "[EN] Accept or decline an offer",
           "description": "[EN] Accepting confirms the engagement — a strong step."
@@ -3319,6 +3323,11 @@
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "Jeg fandt afsluttede samarbejder, du kan beskrive. Vælg hvilket.",
+      "experiencesAllSubmitted": "Du har allerede beskrevet alle afsluttede samarbejder. Ét samarbejde, én erfaring.",
+      "experiencesNothingYet": "Der er endnu ikke et afsluttet samarbejde at beskrive. En erfaring bygger på reelt arbejde, der er afsluttet.",
+      "experiencesUnavailable": "Jeg kunne ikke læse erfaringerne. Intet blev ændret.",
+      "experienceLeave": "Efterlad en erfaring",
       "userLogWork": "Jeg vil registrere mit arbejde",
       "userFindWork": "[EN] Find work",
       "historyTitle": "Tidligere samtale",
@@ -3846,5 +3855,182 @@
     "entryConfirmed": "Bekræftet af en leder",
     "managerConfirmedCount": "Leder-bekræftede færdigheder",
     "managerConfirmations": "Leder-bekræftelser"
+  },
+  "experience": {
+    "page": {
+      "title": "Erfaringer",
+      "lead": "Subjektive erfaringer fra rigtige, afsluttede arbejdsinteraktioner. En erfaring er én persons beretning — ikke en kendsgerning om nogens faglige evner.",
+      "unavailableTitle": "Erfaringer er endnu ikke tilgængelige i dette miljø.",
+      "unavailableBody": "Intet blev gemt. Du kan arbejde videre som sædvanligt.",
+      "aboutMe": "Om mig",
+      "aboutMeEmpty": "Der er endnu ingen offentliggjorte erfaringer om dig.",
+      "mine": "Indsendt af mig",
+      "mineEmpty": "Du har endnu ikke indsendt nogen erfaringer."
+    },
+    "counts": {
+      "title": "Offentliggjorte erfaringer",
+      "positive": "positive",
+      "negative": "negative",
+      "disputed": "{count} af dem bestrides",
+      "caution": "Flere negative end positive erfaringer — værd at se nærmere efter, før du beslutter.",
+      "meaning": "Det er subjektive beretninger om rigtige interaktioner. Ikke en bedømmelse, ikke en score og ikke en dom fra platformen.",
+      "notEnough": "Der er endnu ikke nok offentliggjorte erfaringer.",
+      "unavailable": "Erfaringstællinger er endnu ikke tilgængelige i dette miljø."
+    },
+    "sentiment": {
+      "positive": "Positiv erfaring",
+      "negative": "Negativ erfaring"
+    },
+    "interaction": {
+      "accepted_booking": "Booking",
+      "completed_engagement": "Ansættelsesforhold",
+      "concluded_service_request": "Serviceanmodning"
+    },
+    "moderation": {
+      "submitted": "Indsendt",
+      "in_moderation": "Under moderation",
+      "published": "Offentliggjort",
+      "rejected": "Afvist",
+      "title": "Moderation af erfaringer",
+      "lead": "Hver erfaring gennemgår moderation før offentliggørelse. Hver beslutning kræver en begrundelse og registreres i revisionssporet.",
+      "unavailable": "Erfaringsområdet er ikke tilgængeligt i dette miljø.",
+      "queueTitle": "Venter på moderation",
+      "queueEmpty": "Intet venter på moderation.",
+      "disputeQueueTitle": "Tvister",
+      "disputeQueueEmpty": "Ingen åbne tvister.",
+      "take": "Tag til moderation",
+      "publish": "Offentliggør",
+      "reject": "Afvis",
+      "reasonLabel": "Begrundelse for beslutningen",
+      "reasonNotPublic": "Begrundelsen registreres i revisionssporet og offentliggøres ikke.",
+      "decidedWithAudit": "Beslutning registreret i revisionssporet.",
+      "resolve": {
+        "upheld": "Fasthold erfaringen",
+        "changed": "Markér som ændret",
+        "removed": "Fjern fra offentlig visning"
+      },
+      "errors": {
+        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "not_authenticated": "Log venligst ind først.",
+        "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
+        "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
+        "self_review": "Du kan ikke indsende en erfaring om dig selv.",
+        "invalid": "Tjek formularen, og prøv igen.",
+        "not_authorized": "Du har ikke tilladelse til denne handling.",
+        "not_subject": "Kun den person eller organisation, erfaringen handler om, kan gøre dette.",
+        "not_published": "Det er først muligt, når erfaringen er offentliggjort.",
+        "response_exists": "Der er allerede indsendt et svar.",
+        "dispute_exists": "En tvist er allerede åben.",
+        "reason_required": "En begrundelse er påkrævet.",
+        "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
+        "not_found": "Ikke fundet.",
+        "error": "Noget gik galt. Intet blev gemt."
+      }
+    },
+    "dispute": {
+      "none": "Ikke bestridt",
+      "opened": "Bestridt",
+      "under_review": "Tvist under behandling",
+      "resolved_upheld": "Tvist afgjort — erfaringen fastholdt",
+      "resolved_changed": "Tvist afgjort — erfaringen ændret",
+      "resolved_removed": "Fjernet fra offentlig visning efter en tvist",
+      "open": "Bestrid denne erfaring",
+      "rules": "Erfaringen forbliver offentliggjort, mens en moderator behandler tvisten. En begrundelse er påkrævet.",
+      "cta": "Åbn en tvist",
+      "sending": "Åbner…",
+      "openedNote": "Tvist åbnet. Erfaringen forbliver offentliggjort, indtil en moderator beslutter.",
+      "errors": {
+        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "not_authenticated": "Log venligst ind først.",
+        "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
+        "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
+        "self_review": "Du kan ikke indsende en erfaring om dig selv.",
+        "invalid": "Tjek formularen, og prøv igen.",
+        "not_authorized": "Du har ikke tilladelse til denne handling.",
+        "not_subject": "Kun den person eller organisation, erfaringen handler om, kan gøre dette.",
+        "not_published": "Det er først muligt, når erfaringen er offentliggjort.",
+        "response_exists": "Der er allerede indsendt et svar.",
+        "dispute_exists": "En tvist er allerede åben.",
+        "reason_required": "En begrundelse er påkrævet.",
+        "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
+        "not_found": "Ikke fundet.",
+        "error": "Noget gik galt. Intet blev gemt."
+      }
+    },
+    "response": {
+      "open": "Svar på denne erfaring",
+      "rules": "Du kan afgive ét svar. Det gennemgår moderation, ændrer ikke tællingerne og kan hverken redigere eller fjerne originalen.",
+      "cta": "Indsend svaret",
+      "sending": "Sender…",
+      "submitted": "Svar indsendt. Det bliver synligt efter moderation.",
+      "errors": {
+        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "not_authenticated": "Log venligst ind først.",
+        "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
+        "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
+        "self_review": "Du kan ikke indsende en erfaring om dig selv.",
+        "invalid": "Tjek formularen, og prøv igen.",
+        "not_authorized": "Du har ikke tilladelse til denne handling.",
+        "not_subject": "Kun den person eller organisation, erfaringen handler om, kan gøre dette.",
+        "not_published": "Det er først muligt, når erfaringen er offentliggjort.",
+        "response_exists": "Der er allerede indsendt et svar.",
+        "dispute_exists": "En tvist er allerede åben.",
+        "reason_required": "En begrundelse er påkrævet.",
+        "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
+        "not_found": "Ikke fundet.",
+        "error": "Noget gik galt. Intet blev gemt."
+      }
+    },
+    "submit": {
+      "about": "Din erfaring med {name}",
+      "sentimentLegend": "Hvordan var erfaringen?",
+      "sentiment": {
+        "positive": "Positiv erfaring",
+        "negative": "Negativ erfaring"
+      },
+      "bodyLabel": "Hvad der skete",
+      "moderationNote": "Erfaringen gennemgår moderation før offentliggørelse.",
+      "cta": "Indsend erfaringen",
+      "sending": "Sender…",
+      "submitted": "Erfaring indsendt.",
+      "awaitingModeration": "Den venter på moderation og er endnu ikke offentliggjort.",
+      "errors": {
+        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "not_authenticated": "Log venligst ind først.",
+        "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
+        "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
+        "self_review": "Du kan ikke indsende en erfaring om dig selv.",
+        "invalid": "Tjek formularen, og prøv igen.",
+        "not_authorized": "Du har ikke tilladelse til denne handling.",
+        "not_subject": "Kun den person eller organisation, erfaringen handler om, kan gøre dette.",
+        "not_published": "Det er først muligt, når erfaringen er offentliggjort.",
+        "response_exists": "Der er allerede indsendt et svar.",
+        "dispute_exists": "En tvist er allerede åben.",
+        "reason_required": "En begrundelse er påkrævet.",
+        "invalid_transition": "Det trin er ikke muligt fra den nuværende tilstand.",
+        "not_found": "Ikke fundet.",
+        "error": "Noget gik galt. Intet blev gemt."
+      }
+    },
+    "result": {
+      "loading": "Indlæser…",
+      "error": "Vi kunne ikke læse erfaringerne. Intet blev ændret.",
+      "retry": "Prøv igen",
+      "signIn": "Log ind for at se dine erfaringer."
+    },
+    "panel": {
+      "title": "Moderation af erfaringer",
+      "help": "Intern kø. Hver beslutning kræver en begrundelse; den gemmes i revisionssporet og offentliggøres aldrig."
+    },
+    "entry": {
+      "backToExperiences": "Tilbage til erfaringer",
+      "alreadySubmitted": "Du har allerede beskrevet denne interaktion.",
+      "alreadySubmittedHint": "Én interaktion, én erfaring. Den eksisterende posts status står på din liste.",
+      "notYet": "Denne interaktion kan endnu ikke beskrives.",
+      "notAvailable": "Denne interaktion kan ikke beskrives.",
+      "blockedHint": "Intet blev gemt.",
+      "groundedIn": "Bygger på denne interaktion: {interaction} · {context}",
+      "noContextLabel": "ingen yderligere beskrivelse"
+    }
   }
 }

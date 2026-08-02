@@ -1900,6 +1900,7 @@ describe("no migration files added by this sprint", () => {
     // permits MCP apply_migration after merge. TS writes degrade honestly
     // (retry unstamped on undefined_column) until it is applied.
 
+
     // Bumped 168 -> 169 for W9 slice 1 organization membership revocation
     // (20260802160000_org_membership_revocation_v1, paired rollback). ONE new
     // SECURITY DEFINER function, zero schema change, zero RLS change, zero
@@ -1926,7 +1927,18 @@ describe("no migration files added by this sprint", () => {
     // slice 3 branch (#974) also adds one migration and must resolve to 171
     // if it merges after this PR. Never take either side verbatim — recount
     // the real migration files after every rebase.
-    const SPRINT_BASELINE = 170;
+    const SPRINT_BASELINE = 171;
+    // Bumped 170 -> 171 for the W6 slice 3 experience domain
+    // (20260802120000_experience_records_v1, paired rollback). Experience
+    // records + moderation queue + disputes, RPC-only writes, fail-closed app
+    // side. RED by classification; the owner granted a SCOPED human gate, so it
+    // carries `@human-gate-approved` while production apply stays NOT approved.
+    // Ships UNAPPLIED.
+    //
+    // MERGE-ORDER NOTE: this line is a shared ratchet. #975 took it 168 -> 169,
+    // #976 took it 169 -> 170 (both already on main); this PR takes it to 171.
+    // Never take either side of a rebase verbatim — recount the real migration
+    // files under supabase/migrations after every rebase.
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

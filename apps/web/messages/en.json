@@ -10578,6 +10578,10 @@
           "label": "Review offers",
           "description": "See job offers sent to you."
         },
+        "reviewExperiences": {
+          "label": "Review experiences",
+          "description": "See the experiences about you and the ones you submitted."
+        },
         "respondBooking": {
           "label": "Accept or decline an offer",
           "description": "Accepting confirms the engagement — a strong step."
@@ -10821,6 +10825,11 @@
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "I found finished interactions you can describe. Pick which one.",
+      "experiencesAllSubmitted": "You have already described every finished interaction. One interaction, one experience.",
+      "experiencesNothingYet": "There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
+      "experiencesUnavailable": "I could not read the experiences. Nothing was changed.",
+      "experienceLeave": "Leave an experience",
       "userLogWork": "I want to log my work",
       "userFindWork": "Find work",
       "historyTitle": "Earlier conversation",
@@ -10997,8 +11006,8 @@
       "evidence": {
         "title": "Evidence"
       },
-      "reputation": {
-        "title": "Reputation"
+      "experiences": {
+        "title": "Experiences"
       },
       "invoice": {
         "title": "Invoice basis"
@@ -11550,5 +11559,182 @@
     "entryConfirmed": "Confirmed by a manager",
     "managerConfirmedCount": "Manager-confirmed skills",
     "managerConfirmations": "Manager confirmations"
+  },
+  "experience": {
+    "page": {
+      "title": "Experiences",
+      "lead": "Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
+      "unavailableTitle": "Experiences are not available in this environment yet.",
+      "unavailableBody": "Nothing was saved. You can keep working as usual.",
+      "aboutMe": "About me",
+      "aboutMeEmpty": "No published experiences about you yet.",
+      "mine": "Submitted by me",
+      "mineEmpty": "You have not submitted any experiences yet."
+    },
+    "counts": {
+      "title": "Published experiences",
+      "positive": "positive",
+      "negative": "negative",
+      "disputed": "{count} of them are being disputed",
+      "caution": "More negative than positive experiences — worth looking closer before deciding.",
+      "meaning": "These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
+      "notEnough": "Not enough published experiences yet.",
+      "unavailable": "Experience counts are not available in this environment yet."
+    },
+    "sentiment": {
+      "positive": "Positive experience",
+      "negative": "Negative experience"
+    },
+    "interaction": {
+      "accepted_booking": "Booking",
+      "completed_engagement": "Engagement",
+      "concluded_service_request": "Service request"
+    },
+    "moderation": {
+      "submitted": "Submitted",
+      "in_moderation": "In moderation",
+      "published": "Published",
+      "rejected": "Rejected",
+      "title": "Experience moderation",
+      "lead": "Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
+      "unavailable": "The experience domain is not available in this environment.",
+      "queueTitle": "Awaiting moderation",
+      "queueEmpty": "Nothing is waiting for moderation.",
+      "disputeQueueTitle": "Disputes",
+      "disputeQueueEmpty": "No open disputes.",
+      "take": "Take into moderation",
+      "publish": "Publish",
+      "reject": "Reject",
+      "reasonLabel": "Reason for the decision",
+      "reasonNotPublic": "The reason is recorded in the audit trail and is not published.",
+      "decidedWithAudit": "Decision recorded in the audit trail.",
+      "resolve": {
+        "upheld": "Uphold the experience",
+        "changed": "Mark as changed",
+        "removed": "Remove from public view"
+      },
+      "errors": {
+        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "Please sign in first.",
+        "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
+        "self_review": "You cannot submit an experience about yourself.",
+        "invalid": "Please check the form and try again.",
+        "not_authorized": "You do not have permission for this action.",
+        "not_subject": "Only the person or organization this experience is about can do this.",
+        "not_published": "This is only possible once the experience is published.",
+        "response_exists": "A reply has already been submitted.",
+        "dispute_exists": "A dispute is already open.",
+        "reason_required": "A reason is required.",
+        "invalid_transition": "That step is not possible from the current state.",
+        "not_found": "Not found.",
+        "error": "Something went wrong. Nothing was saved."
+      }
+    },
+    "dispute": {
+      "none": "Not disputed",
+      "opened": "Disputed",
+      "under_review": "Dispute under review",
+      "resolved_upheld": "Dispute resolved — experience upheld",
+      "resolved_changed": "Dispute resolved — experience changed",
+      "resolved_removed": "Removed from public view after a dispute",
+      "open": "Dispute this experience",
+      "rules": "The experience stays published while a moderator reviews the dispute. A reason is required.",
+      "cta": "Open a dispute",
+      "sending": "Opening…",
+      "openedNote": "Dispute opened. The experience stays published until a moderator decides.",
+      "errors": {
+        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "Please sign in first.",
+        "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
+        "self_review": "You cannot submit an experience about yourself.",
+        "invalid": "Please check the form and try again.",
+        "not_authorized": "You do not have permission for this action.",
+        "not_subject": "Only the person or organization this experience is about can do this.",
+        "not_published": "This is only possible once the experience is published.",
+        "response_exists": "A reply has already been submitted.",
+        "dispute_exists": "A dispute is already open.",
+        "reason_required": "A reason is required.",
+        "invalid_transition": "That step is not possible from the current state.",
+        "not_found": "Not found.",
+        "error": "Something went wrong. Nothing was saved."
+      }
+    },
+    "response": {
+      "open": "Reply to this experience",
+      "rules": "You can leave one reply. It passes moderation, it does not change the positive or negative counts, and it cannot edit or remove the original.",
+      "cta": "Submit the reply",
+      "sending": "Sending…",
+      "submitted": "Reply submitted. It becomes visible once moderation is finished.",
+      "errors": {
+        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "Please sign in first.",
+        "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
+        "self_review": "You cannot submit an experience about yourself.",
+        "invalid": "Please check the form and try again.",
+        "not_authorized": "You do not have permission for this action.",
+        "not_subject": "Only the person or organization this experience is about can do this.",
+        "not_published": "This is only possible once the experience is published.",
+        "response_exists": "A reply has already been submitted.",
+        "dispute_exists": "A dispute is already open.",
+        "reason_required": "A reason is required.",
+        "invalid_transition": "That step is not possible from the current state.",
+        "not_found": "Not found.",
+        "error": "Something went wrong. Nothing was saved."
+      }
+    },
+    "submit": {
+      "about": "Your experience with {name}",
+      "sentimentLegend": "How was the experience?",
+      "sentiment": {
+        "positive": "Positive experience",
+        "negative": "Negative experience"
+      },
+      "bodyLabel": "What happened",
+      "moderationNote": "The experience passes moderation before it is published.",
+      "cta": "Submit the experience",
+      "sending": "Sending…",
+      "submitted": "Experience submitted.",
+      "awaitingModeration": "It is waiting for moderation and is not published yet.",
+      "errors": {
+        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "not_authenticated": "Please sign in first.",
+        "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
+        "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
+        "self_review": "You cannot submit an experience about yourself.",
+        "invalid": "Please check the form and try again.",
+        "not_authorized": "You do not have permission for this action.",
+        "not_subject": "Only the person or organization this experience is about can do this.",
+        "not_published": "This is only possible once the experience is published.",
+        "response_exists": "A reply has already been submitted.",
+        "dispute_exists": "A dispute is already open.",
+        "reason_required": "A reason is required.",
+        "invalid_transition": "That step is not possible from the current state.",
+        "not_found": "Not found.",
+        "error": "Something went wrong. Nothing was saved."
+      }
+    },
+    "result": {
+      "loading": "Loading…",
+      "error": "We could not read the experiences. Nothing was changed.",
+      "retry": "Try again",
+      "signIn": "Sign in to see your experiences."
+    },
+    "panel": {
+      "title": "Experience moderation",
+      "help": "Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
+    },
+    "entry": {
+      "backToExperiences": "Back to experiences",
+      "alreadySubmitted": "You have already described this interaction.",
+      "alreadySubmittedHint": "One interaction, one experience. The existing record's state is in your experiences list.",
+      "notYet": "This interaction cannot be described yet.",
+      "notAvailable": "This interaction cannot be described.",
+      "blockedHint": "Nothing was saved.",
+      "groundedIn": "Grounded in this interaction: {interaction} · {context}",
+      "noContextLabel": "no further description"
+    }
   }
 }

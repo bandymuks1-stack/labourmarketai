@@ -49,7 +49,17 @@ export type ResultKind =
   | "opportunities"
   | "project"
   | "evidence"
-  | "reputation"
+  /**
+   * W6 slice 3 — the experience domain. This slot used to be called
+   * `reputation` and was gated `unverified` while it waited for a real
+   * subjective-experience store (W3 capability matrix row 24). W6 built that
+   * store, so the slot is PROMOTED here rather than joined by a second one:
+   * two reputation results would be exactly the second reputation system the
+   * W6 directive forbids. The world element it extends is still `reputation`
+   * (`lib/product-gate/world-elements.ts`); the RESULT is named after the
+   * canonical domain that fills it — `experience_records`.
+   */
+  | "experiences"
   | "invoice";
 
 /**
@@ -190,16 +200,48 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     dataReadiness: "real",
   },
   {
-    kind: "reputation",
-    titleKey: "conversation.results.reputation.title",
-    openedBy: ["worker.what-next"],
+    kind: "experiences",
+    titleKey: "conversation.results.experiences.title",
+    // Its OWN action, not a share of `worker.what-next`. The old `reputation`
+    // entry listed `worker.what-next`, which `market` also lists — and
+    // `resultForAction` is first-match-wins, so the market always won and the
+    // reputation slot was unreachable except by hand-typing the query string.
+    // A result nobody can open from the conversation is not a result.
+    openedBy: ["worker.review-experiences"],
+    // NOT `/dashboard/experiences`. W6 slice 3B briefly created that screen and
+    // the Product Gate refused it (A-09, undeclared surface): the workspace is
+    // chat-first, so an answer belongs in the result panel, not in a 73rd
+    // route. The screen was deleted. This route stays the honest full-screen
+    // destination for professional identity — the fallback path the registry
+    // requires — and it is the ONLY route this result names.
     advancedRoute: "/dashboard/profile",
-    contexts: ["personal"],
-    // GATED: the canonical reputation model (one positive / one negative, no
-    // stars, no single human score) is NOT confirmed to have real rows yet
-    // (dependency map U1). Rendering it now risks inventing a score — the exact
-    // thing the owner command forbids.
-    dataReadiness: "unverified",
+    // EVERY CONTEXT — the `journal` pattern, NOT the `opportunities` one.
+    //
+    // This was `["personal"]` first, copying the opportunities reasoning ("my
+    // matches answer a question nobody asked inside an organization"), and the
+    // authenticated browser proof refuted it immediately: the employer in the
+    // Dev Construction workspace got "this result is not available in the
+    // current context" instead of their own submissions. That is not an edge
+    // case — the AUTHOR side of this domain is normally an employer acting
+    // from inside their organization, so personal-only hid half the domain
+    // from the half of the product that produces it.
+    //
+    // The opportunities precedent does not transfer: "jobs that fit me" really
+    // is meaningless to an organization, whereas "the experiences I submitted,
+    // and the ones written about me" is a fact about the SIGNED-IN PERSON that
+    // stays true whichever workspace they are standing in — exactly like the
+    // work journal. The read is RLS-scoped to the viewer either way, so the
+    // context changes nothing about what comes back.
+    contexts: ["personal", "organization", "project"],
+    // PROMOTED unverified → real by W6 slice 3. The store is now canonical:
+    // `experience_records` / `experience_responses`, read through
+    // `lib/trust/experience-records.ts`, counted by the ONE aggregation rule
+    // (published positive / published negative; disputed stays counted and is
+    // marked; resolved_removed leaves the count). Same precedent as
+    // `opportunities`: the underlying migration is owner-gated, and that is a
+    // DISTINCT rendered state (`unavailable`), never an empty result and never
+    // a fabricated zero — so the data path is real even before the apply.
+    dataReadiness: "real",
   },
   {
     kind: "invoice",

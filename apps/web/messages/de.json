@@ -10578,6 +10578,10 @@
           "label": "Angebote ansehen",
           "description": "Sieh dir die an dich gesendeten Angebote an."
         },
+        "reviewExperiences": {
+          "label": "Erfahrungen ansehen",
+          "description": "Sieh die Erfahrungen über dich und die, die du eingereicht hast."
+        },
         "respondBooking": {
           "label": "Angebot annehmen oder ablehnen",
           "description": "Annahme bestätigt das Engagement — ein wichtiger Schritt."
@@ -10821,6 +10825,11 @@
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
+      "experiencesEligible": "Ich habe abgeschlossene Interaktionen gefunden, die du schildern kannst. Wähle welche.",
+      "experiencesAllSubmitted": "Du hast bereits jede abgeschlossene Interaktion geschildert. Eine Interaktion, eine Erfahrung.",
+      "experiencesNothingYet": "Es gibt noch keine abgeschlossene Interaktion zum Schildern. Eine Erfahrung beruht auf echter, beendeter Arbeit.",
+      "experiencesUnavailable": "Die Erfahrungen konnten nicht gelesen werden. Es wurde nichts geändert.",
+      "experienceLeave": "Erfahrung schildern",
       "userLogWork": "Ich möchte meine Arbeit erfassen",
       "userFindWork": "Arbeit suchen",
       "historyTitle": "Früheres Gespräch",
@@ -10997,8 +11006,8 @@
       "evidence": {
         "title": "Nachweise"
       },
-      "reputation": {
-        "title": "Reputation"
+      "experiences": {
+        "title": "Erfahrungen"
       },
       "invoice": {
         "title": "Rechnungsgrundlage"
@@ -11550,5 +11559,182 @@
     "entryConfirmed": "Vom Manager bestätigt",
     "managerConfirmedCount": "Vom Manager bestätigte Fähigkeiten",
     "managerConfirmations": "Manager-Bestätigungen"
+  },
+  "experience": {
+    "page": {
+      "title": "Erfahrungen",
+      "lead": "Subjektive Erfahrungen aus echten, abgeschlossenen Arbeitsinteraktionen. Eine Erfahrung ist die Schilderung einer Person — keine Tatsache über die fachliche Fähigkeit eines anderen.",
+      "unavailableTitle": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar.",
+      "unavailableBody": "Es wurde nichts gespeichert. Du kannst wie gewohnt weiterarbeiten.",
+      "aboutMe": "Über mich",
+      "aboutMeEmpty": "Noch keine veröffentlichten Erfahrungen über dich.",
+      "mine": "Von mir eingereicht",
+      "mineEmpty": "Du hast noch keine Erfahrungen eingereicht."
+    },
+    "counts": {
+      "title": "Veröffentlichte Erfahrungen",
+      "positive": "positiv",
+      "negative": "negativ",
+      "disputed": "{count} davon werden bestritten",
+      "caution": "Mehr negative als positive Erfahrungen — genauer hinsehen, bevor du entscheidest.",
+      "meaning": "Das sind subjektive Schilderungen echter Interaktionen. Keine Bewertung, keine Punktzahl und kein Urteil der Plattform.",
+      "notEnough": "Noch nicht genug veröffentlichte Erfahrungen.",
+      "unavailable": "Erfahrungszählungen sind in dieser Umgebung noch nicht verfügbar."
+    },
+    "sentiment": {
+      "positive": "Positive Erfahrung",
+      "negative": "Negative Erfahrung"
+    },
+    "interaction": {
+      "accepted_booking": "Buchung",
+      "completed_engagement": "Arbeitsverhältnis",
+      "concluded_service_request": "Serviceanfrage"
+    },
+    "moderation": {
+      "submitted": "Eingereicht",
+      "in_moderation": "In Moderation",
+      "published": "Veröffentlicht",
+      "rejected": "Abgelehnt",
+      "title": "Erfahrungsmoderation",
+      "lead": "Jede Erfahrung durchläuft vor der Veröffentlichung die Moderation. Jede Entscheidung braucht eine Begründung und wird im Audit-Protokoll festgehalten.",
+      "unavailable": "Der Erfahrungsbereich ist in dieser Umgebung nicht verfügbar.",
+      "queueTitle": "Wartet auf Moderation",
+      "queueEmpty": "Nichts wartet auf Moderation.",
+      "disputeQueueTitle": "Streitfälle",
+      "disputeQueueEmpty": "Keine offenen Streitfälle.",
+      "take": "In Moderation nehmen",
+      "publish": "Veröffentlichen",
+      "reject": "Ablehnen",
+      "reasonLabel": "Begründung der Entscheidung",
+      "reasonNotPublic": "Die Begründung wird im Audit-Protokoll festgehalten und nicht veröffentlicht.",
+      "decidedWithAudit": "Entscheidung im Audit-Protokoll festgehalten.",
+      "resolve": {
+        "upheld": "Erfahrung aufrechterhalten",
+        "changed": "Als geändert markieren",
+        "removed": "Aus der öffentlichen Ansicht nehmen"
+      },
+      "errors": {
+        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "not_authenticated": "Bitte melde dich zuerst an.",
+        "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
+        "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
+        "self_review": "Du kannst keine Erfahrung über dich selbst einreichen.",
+        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "not_authorized": "Dir fehlt die Berechtigung für diese Aktion.",
+        "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
+        "not_published": "Das ist erst nach der Veröffentlichung möglich.",
+        "response_exists": "Eine Antwort wurde bereits eingereicht.",
+        "dispute_exists": "Ein Streitfall ist bereits offen.",
+        "reason_required": "Eine Begründung ist erforderlich.",
+        "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "not_found": "Nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+      }
+    },
+    "dispute": {
+      "none": "Nicht bestritten",
+      "opened": "Bestritten",
+      "under_review": "Streitfall in Prüfung",
+      "resolved_upheld": "Streitfall geklärt — Erfahrung bleibt bestehen",
+      "resolved_changed": "Streitfall geklärt — Erfahrung geändert",
+      "resolved_removed": "Nach einem Streitfall aus der öffentlichen Ansicht genommen",
+      "open": "Diese Erfahrung bestreiten",
+      "rules": "Die Erfahrung bleibt veröffentlicht, während ein Moderator den Streitfall prüft. Eine Begründung ist erforderlich.",
+      "cta": "Streitfall eröffnen",
+      "sending": "Wird eröffnet…",
+      "openedNote": "Streitfall eröffnet. Die Erfahrung bleibt veröffentlicht, bis ein Moderator entscheidet.",
+      "errors": {
+        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "not_authenticated": "Bitte melde dich zuerst an.",
+        "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
+        "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
+        "self_review": "Du kannst keine Erfahrung über dich selbst einreichen.",
+        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "not_authorized": "Dir fehlt die Berechtigung für diese Aktion.",
+        "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
+        "not_published": "Das ist erst nach der Veröffentlichung möglich.",
+        "response_exists": "Eine Antwort wurde bereits eingereicht.",
+        "dispute_exists": "Ein Streitfall ist bereits offen.",
+        "reason_required": "Eine Begründung ist erforderlich.",
+        "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "not_found": "Nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+      }
+    },
+    "response": {
+      "open": "Auf diese Erfahrung antworten",
+      "rules": "Du kannst eine Antwort abgeben. Sie durchläuft die Moderation, ändert die Zählungen nicht und kann das Original weder bearbeiten noch entfernen.",
+      "cta": "Antwort einreichen",
+      "sending": "Wird gesendet…",
+      "submitted": "Antwort eingereicht. Sie wird nach der Moderation sichtbar.",
+      "errors": {
+        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "not_authenticated": "Bitte melde dich zuerst an.",
+        "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
+        "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
+        "self_review": "Du kannst keine Erfahrung über dich selbst einreichen.",
+        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "not_authorized": "Dir fehlt die Berechtigung für diese Aktion.",
+        "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
+        "not_published": "Das ist erst nach der Veröffentlichung möglich.",
+        "response_exists": "Eine Antwort wurde bereits eingereicht.",
+        "dispute_exists": "Ein Streitfall ist bereits offen.",
+        "reason_required": "Eine Begründung ist erforderlich.",
+        "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "not_found": "Nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+      }
+    },
+    "submit": {
+      "about": "Deine Erfahrung mit {name}",
+      "sentimentLegend": "Wie war die Erfahrung?",
+      "sentiment": {
+        "positive": "Positive Erfahrung",
+        "negative": "Negative Erfahrung"
+      },
+      "bodyLabel": "Was passiert ist",
+      "moderationNote": "Die Erfahrung durchläuft vor der Veröffentlichung die Moderation.",
+      "cta": "Erfahrung einreichen",
+      "sending": "Wird gesendet…",
+      "submitted": "Erfahrung eingereicht.",
+      "awaitingModeration": "Sie wartet auf die Moderation und ist noch nicht veröffentlicht.",
+      "errors": {
+        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "not_authenticated": "Bitte melde dich zuerst an.",
+        "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
+        "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
+        "self_review": "Du kannst keine Erfahrung über dich selbst einreichen.",
+        "invalid": "Bitte prüfe das Formular und versuche es erneut.",
+        "not_authorized": "Dir fehlt die Berechtigung für diese Aktion.",
+        "not_subject": "Das kann nur die Person oder Organisation tun, um die es geht.",
+        "not_published": "Das ist erst nach der Veröffentlichung möglich.",
+        "response_exists": "Eine Antwort wurde bereits eingereicht.",
+        "dispute_exists": "Ein Streitfall ist bereits offen.",
+        "reason_required": "Eine Begründung ist erforderlich.",
+        "invalid_transition": "Dieser Schritt ist aus dem aktuellen Status nicht möglich.",
+        "not_found": "Nicht gefunden.",
+        "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
+      }
+    },
+    "result": {
+      "loading": "Wird geladen…",
+      "error": "Die Erfahrungen konnten nicht gelesen werden. Es wurde nichts geändert.",
+      "retry": "Erneut versuchen",
+      "signIn": "Melde dich an, um deine Erfahrungen zu sehen."
+    },
+    "panel": {
+      "title": "Erfahrungs-Moderation",
+      "help": "Interne Warteschlange. Jede Entscheidung braucht einen Grund; er wird im Audit-Trail festgehalten und nie veröffentlicht."
+    },
+    "entry": {
+      "backToExperiences": "Zurück zu den Erfahrungen",
+      "alreadySubmitted": "Du hast diese Interaktion bereits geschildert.",
+      "alreadySubmittedHint": "Eine Interaktion, eine Erfahrung. Den Stand des vorhandenen Eintrags siehst du in deiner Liste.",
+      "notYet": "Diese Interaktion kann noch nicht geschildert werden.",
+      "notAvailable": "Diese Interaktion kann nicht geschildert werden.",
+      "blockedHint": "Es wurde nichts gespeichert.",
+      "groundedIn": "Beruht auf dieser Interaktion: {interaction} · {context}",
+      "noContextLabel": "ohne weitere Beschreibung"
+    }
   }
 }

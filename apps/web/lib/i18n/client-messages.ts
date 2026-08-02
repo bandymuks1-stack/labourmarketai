@@ -52,6 +52,8 @@ export const CLIENT_MESSAGE_ROOTS = [
   "capabilityProfile",
   // W6 slice 1: the ONE canonical evidence-tier lexicon (legend + qualifier).
   "evidenceTier",
+  // W6 slice 3B: the experience domain (submit/response/dispute client forms).
+  "experience",
   "commandFinder",
   "common",
   "communication",

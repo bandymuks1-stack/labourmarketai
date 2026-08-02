@@ -47,3 +47,104 @@ ONE canonical `EvidenceTier` module (`lib/evidence/evidence-tier.ts`): `verified
 
 ### Slice 2 — computeConfidence containment (this PR)
 Caller map pinned: ONE writer (`confirm-actions.ts` approval recompute, columns `confidence_score/bin/last_recompute_at` only), ONE render (profile bin dots + slice-1 legend), zero other consumers. Containment: `SELF_LOGGED_CONFIDENCE_CAP = 15` — the self-logged term is capped BELOW the ≥30 substantiated boundary, so 30/100/10 000 unconfirmed self entries read as honest early evidence (green), never substantiation; crossing requires manager confirmations / distinct confirmers / real recency. Scope doctrine written into the module: evidence assurance for a skill's records — never reputation/trust/person score, never renamed, never merged with experience counts. Truth-table tests: self-only volumes never yellow; cap < 30 by construction; real confirmations cross honestly; photos/streaks/learning-signals are not and cannot become inputs (type + source pins on the module AND its only writer); no reputation-named exports; the writer never sets `verified`. Existing formula tests unchanged (no case exercised self>15 — W5 pipeline behaviour preserved). Full vitest 12574/12574. Browser: no visual change by design — the same dots, honest earlier.
+
+### Slice 3 — experience records, moderation, disputes (Draft PR #974, PENDING_HUMAN_GATE)
+
+**3A — domain.** ONE canonical subjective-experience domain on the `experience-eligibility.ts` contract. DRAFT migration `20260802120000_experience_records_v1.sql` (needs-human-gate, paired rollback, ledger Deferred entry, migration baselines 168→169): `experience_records` (binary sentiment, worker-or-org subject, canonical interaction ref, server-side eligibility re-derived IN the submit RPC, one record per author+subject+interaction with an idempotent duplicate outcome) + `experience_responses` (ONE moderated right of reply). Moderation (`submitted→in_moderation→published|rejected`, admin-only, reason mandatory) is a SEPARATE dimension from dispute (`none/opened/under_review/resolved_*`) — a published record stays published while disputed. No DELETE anywhere; removal is `resolved_removed`. 8 audited actions into the ONE `audit_logs` chain. Count-only aggregation: published only, positive/negative separate, **disputed rows stay counted AND are surfaced**, `resolved_removed` excluded, nothing else feeds it. App side fails closed (`needs_migration`), RPC-only writes, no legacy fallback, no backfill of old subjective artifacts.
+
+**3B — surfaces + proofs (SUPERSEDED BY 3C — the two routes below no longer exist).** `/dashboard/experiences` (submitted-by-me in real state, published-about-me with the reply door and dispute door, count-only block, chat handoff) and `/dashboard/admin/experience-moderation` (moderation queue + dispute queue as separate lists; only the canonical transition available from the current state; reason mandatory; decisions confirm their audit row). Both routes classified in the route truth map. `experience` i18n namespace ×12 locales (lt/en/ru/nl/de/da really translated — the i18n-debt ratchet did not move). **The Product Gate refused both screens (A-09, undeclared surface) and it was right to** — see 3C.
+
+**Local test apply (LOCAL ONLY, 127.0.0.1:54322 verified; production untouched).** Applied in sequence via `supabase db reset`; rollback verified (0 tables, 0 functions, `audit_logs` survives); re-apply verified; made fully re-runnable after the first re-apply flagged `create policy` (Postgres has no `if not exists`) — 0 errors on repeat.
+
+**Behavioural + RLS proof: `apps/web/scripts/w6-experience-domain-proof.sql` — 43/43 PASS**, one transaction, rolled back, real `authenticated`/`anon` roles. Covers eligibility (non-party, self-review, fabricated interaction id, unfinished interaction, non-binary sentiment all refused), idempotent duplicate, the full moderation lifecycle incl. shortcut and reason refusals, count-only rules, right of reply permissions and single-response rule, dispute as a separate dimension incl. the disputed-stays-counted and removed-leaves-counts rules, no-silent-delete, audit prev/new+reason, and the RLS matrix (author / subject / unrelated / anon).
+
+**Two real defects the proof caught (both fixed):** (1) Supabase's default privileges grant SELECT on every new public table to BOTH `anon` and `authenticated`; a `revoke insert, update, delete` alone left anon holding SELECT, so an anon read reached the RLS policy and ERRORED on `is_admin()` instead of returning empty — the migration now does `revoke all` then grants back exactly `select` to `authenticated`. (2) The proof's own admin actor could not be provisioned via `profiles.active_role='admin'`: the platform's P0 `trg_profiles_admin_grant_guard` strips a self-assigned admin role (nobody self-promotes) — the proof now provisions the moderator out-of-band through `profile_roles`, which is how a real admin exists.
+
+**Browser proof (local, domain applied): `w6-experience-domain.spec.ts` 7/7** — count-only block with real 1 positive / 1 negative / 1 disputed, dispute marker, meaning line, no rating surface (structural check: no `score|rating|ovr|stars` testid anywhere — a lexical check was rejected because the product's honest "this is NOT a rating" copy would flag itself), reply door, chat handoff, mobile 375px no overflow, and the moderator queue server-side gated against BOTH a worker and an employer.
+
+**Fail-closed proof (domain rolled back): `w6-experience-fail-closed.spec.ts` 2/2** — route serves (<500), product-level unavailable state, zero fabricated counts, and no technical leakage (`needs_migration`, SQLSTATEs, `pgrst`, relation names, `postgres`, `supabase` all absent from the worker-facing body), back-to-chat still available, mobile clean.
+
+**Full vitest 12616/12616; tsc + lint clean.** `migration-safety` stays RED by design (SECURITY DEFINER + GRANT/REVOKE = the repo's documented human-gate class); `@human-gate-approved` was NOT self-added. PR #974 stays Draft + `needs-human-gate`. Production migration NOT applied. W7 not started.
+
+**3C — architecture correction: the domain moves onto the canonical chat-first topology.**
+
+3B was code-complete and behaviourally proven, and it was still architecturally wrong. It answered "where does the experience domain live?" with two new screens. The Product Gate refused both under A-09 (`undeclared_surface`), and the refusal is the finding: labourmarket.ai is a chat-first workspace, an answer the person asked for belongs in the RESULT PANEL, and a 73rd authenticated route is precisely the failure mode the unified-product work exists to undo. The screens were **deleted, not declared** — declaring them would have bought a green gate with a second dashboard.
+
+*Worker/employer side.* The domain is now the canonical Workspace Result at **`?result=experiences`**, the same mechanism the Player Card, the calendar, the market and the opportunities results already use. The `reputation` slot in `lib/conversation/result-registry.ts` was **renamed and promoted**, not joined by a second entry: it was created as a gated `unverified` placeholder for exactly this store (W3 capability matrix row 24 — "the `reputation` result registry entry may then flip `unverified` → `real`"), and adding an `experiences` entry beside it would have been the second reputation system the W6 directive forbids. The world element it extends is still `reputation`; the result is named after the canonical domain that fills it. It also gained **its own action** — `worker.review-experiences` — instead of sharing `worker.what-next` with the market result: `resultForAction` is first-match-wins, so the market always won and the old reputation slot was unreachable except by hand-typing the query string. A result nobody can open from the conversation is not a result.
+
+*Admin side.* The moderator queue is now **BAND 2d on the existing `/dashboard/admin` control room**, beside `FollowUpQueuePanel` and `SalesIntakePanel`. The control room already models exactly this shape — band 1 overview KPIs, band 2 action queues (live signals needing a decision), band 3 grouped navigation — so the queue needed a home, not a route. It inherits the control room's `requireSuperadmin` layout+page gate rather than bringing its own, and every write still re-checks `is_admin()` inside the RPC. Moderation and disputes stay two lists, because they are two dimensions.
+
+*What did NOT change.* The domain, the RPCs, the RLS, the migration, the eligibility contract, the count-only aggregation rule, and the fail-closed behaviour are untouched — this slice moved surfaces, not truth. `ExperienceCountsBlock` stayed the ONE counts renderer and became a client component rather than growing a second copy for the panel's client tree. `revalidatePath` targets moved to the two routes that actually exist (`/dashboard`, `/dashboard/admin`); revalidating a deleted route would be a no-op dressed up as a refresh.
+
+*Guard change, stated plainly.* `result-registry.test.ts` asserted `unverified.length > 0` ("the gate is meaningless if nothing is gated"). Both entries it named have since been verified and promoted, so that assertion would have meant holding a result back from a data source that IS real just to keep a counter above zero. It was replaced with a stronger test that pins the gate on the FUNCTION for every entry in every context (`canRenderInline === real && contexts.includes(ctx)`), which cannot rot away when the gated list is empty.
+
+*Known gap, not papered over.* `ExperienceSubmitForm` still has **no mount point**. Submitting an experience needs an eligible finished interaction (accepted booking / completed engagement / concluded service request) as its context, and no surface hands it one yet. It was unmounted in 3B too. This slice did not invent an entry point for it — that is a real product decision about where a person is asked for an experience, and inventing one here would have been the same mistake 3B made with routes.
+
+**One real defect the browser proof caught in this very slice.** The first draft set `contexts: ["personal"]`, copying the `opportunities` reasoning. The authenticated employer session refuted it immediately: standing in the Dev Construction workspace, the employer got "this result is not available in the current context" instead of their own submissions. The AUTHOR side of this domain is normally an employer acting from inside their organization, so personal-only hid half the domain from the half of the product that produces it. Corrected to all three contexts (the `journal` pattern) — "jobs that fit me" really is meaningless to an organization, but "the experiences I submitted, and the ones about me" is a fact about the signed-in PERSON in any workspace, and the read is RLS-scoped to the viewer either way.
+
+**Re-validation after the correction.**
+
+| Gate | Result |
+|---|---|
+| Product Gate | **GREEN — 0 violations, 0 new surfaces** (was 2 × A-09) |
+| `next build` | clean; both deleted routes absent from the generated route table |
+| `tsc --noEmit` | clean |
+| `lint` | 0 errors (22 pre-existing warnings, unrelated files) |
+| vitest | **12616 / 12616**, 792 files |
+| Browser — canonical surfaces | `w6-experience-domain.spec.ts` **9/9** |
+| Browser — positive admin | `w6-experience-moderation-admin.spec.ts` **2/2** (NEW) |
+| Browser — fail-closed (domain rolled back) | `w6-experience-fail-closed.spec.ts` **2/2** |
+| SQL domain proof, re-run after rollback + re-apply | **43 / 43, 0 failed** |
+| CI | `quality` pass · CodeQL pass · Vercel pass · **`migration-safety` RED by design** |
+
+The e2e specs were retargeted rather than deleted: `w6-experience-domain.spec.ts` drives `?result=experiences` and the control room band, and gained two REGRESSION tests that the deleted routes are actually gone (a soft-deleted route that still rendered would be the second dashboard by another name). `w6-experience-moderation-admin.spec.ts` is new and closes the gap 3B left — it proves the queue RENDERS in its new home for a real moderator, provisioned out-of-band through `profile_roles` (the P0 admin-grant guard strips self-assigned admin, correctly) with the grant removed in `afterAll` pass or fail, and the session deliberately NOT re-minted: the cookie carries no role, `is_admin()` reads the DB per request, which is the security property. Gated behind `W6_ADMIN_PROOF=1`. Local DB was returned to the applied state and re-verified (2 tables, 10 functions, 43/43).
+
+**Migration-safety stays RED — deliberately, and it must.** The gate names four blocking findings on the UNCHANGED migration file (3C touched no SQL): `security-definer-function`, `grant-or-revoke`, `alter-drop-policy`, `data-dml`. That is the repo's documented human-gate class, exactly as intended. `@human-gate-approved` was NOT self-added, no CI check was bypassed, and no SECURITY DEFINER was stripped to buy a green light. PR #974 stays **Draft + `needs-human-gate`**. Production migration NOT applied. Not merged. Telegram not sent. W7 not started.
+
+### THREE SEPARATE OWNER DECISIONS (do not bundle)
+
+1. **Architectural approval** — confirm `?result=experiences` as the canonical home of the experience domain, and BAND 2d of `/dashboard/admin` as the moderator queue's home.
+2. **Merge Draft PR #974.**
+3. **Apply the production migration** `20260802120000_experience_records_v1.sql`.
+
+They are three different decisions with three different blast radii. Decision 1 costs nothing to reverse; decision 3 changes production schema and privileges.
+
+**3D — the entry point: submission becomes reachable, and only from a real interaction.**
+
+3C closed the architecture and left one honest gap: `ExperienceSubmitForm` had no mount point. The shortest path to a working button was a generic "leave a review" control on the profile, the CV, the person page or the experiences result — and every one of those forces the SERVER to accept a subject the client picked. The owner directive forbids all six placements, and the reason is the design: **a generic entry point makes the interaction an argument instead of a fact.**
+
+*The entry point is the interaction itself.* `lib/trust/experience-entry.ts` answers two questions entirely server-side: which of my REAL interactions could ground an experience right now (`eligible` / `already_submitted` / `not_yet`), and — for one named interaction — may this viewer submit and who is the subject. The client sends a `kind:uuid` token and nothing else that matters. **The subject is RESOLVED from the canonical row, never accepted from the caller**, so a forged subject/interaction pair cannot even be expressed. Participation, completion and duplicate state are re-derived here — and again in SQL inside `submit_experience_record` under `security definer`. Two independent derivations, because the UI layer is allowed to be wrong.
+
+*The eligibility doctrine was not relaxed to suit the UI.* Completion runs through `isInteractionCompleted` from the pure contract — the same predicate the SQL encodes — so an accepted booking before its start date renders `not_yet` rather than widening the rule. All three contract kinds are covered: `accepted_booking` (booking_requests), `completed_engagement` (engagement_contexts, both directions — worker→organization and manager→worker, which produce DIFFERENT subject types and is precisely why the subject cannot come from the client), `concluded_service_request` (service_offering_requests).
+
+*The surfaces.* The chat asks the server which interactions qualify and emits **one chip per interaction**, carrying that interaction's own token (`xp:<kind>:<uuid>`) — there is no chip id meaning "leave an experience" in general, so no chip can open an unbound form. The three no-chip states are three different sentences: everything already described, nothing finished yet, and could-not-read — the last is never rendered as "you have nothing to describe". The chip opens `?result=experiences&interaction=<kind>:<uuid>`, a new DEPTH on the existing result (same mechanism as the market result's `geo`/`project`) — **no new route, no new screen**. The form mounts only inside the loader's `eligible` branch; already-submitted, not-yet, not-available, unavailable and not-authenticated each return before it. A duplicate shows the existing record's state instead of a second form.
+
+*One deliberate coarseness.* `not_a_party` and `does_not_exist` return the SAME answer. Two distinct answers would be an existence oracle for interactions between other people.
+
+**Guard and test honesty notes.**
+- `goal3-project-evaluation` pinned the depth-clearing list as a literal string; a third depth was added, so it is now pinned as an INVARIANT (whatever opening a result clears, closing must clear too), which survives a fourth.
+- The i18n-debt ratchet correctly caught 5 untranslated Danish keys. They were **translated, not baselined away**.
+- Two of my own new tests first used LEXICAL checks for "rating" and "neutral" and flagged the product's own honesty copy ("never a rating", "no neutral option") — the same trap already documented in `w6-experience-domain.spec.ts`. Both are now structural: star glyphs, scored testids, numeric inputs, and the literal sentiment pair.
+- The mobile fail-closed test failed once on a COLD dev server (1.3m per test) and passed warm (15s). The product was fine; the spec was racing the panel's post-hydration auto-expand. All three mobile tests now open the Context Panel fold explicitly instead of relying on that race.
+
+**Slice 3D validation.**
+
+| Gate | Result |
+|---|---|
+| Product Gate | **GREEN — 0 violations, 0 new surfaces** |
+| vitest | **12642 / 12642**, 793 files |
+| `tsc` / `lint` | clean / 0 errors (22 pre-existing warnings, none in the new files) |
+| `next build` | clean, 799 static pages |
+| Browser — entry point | `w6-experience-entry-point.spec.ts` **8/8** (chip-per-interaction, not-yet, forged token, malformed token, duplicate, mobile 375, other-party independence) |
+| Browser — domain | `w6-experience-domain.spec.ts` **9/9** |
+| Browser — positive admin | `w6-experience-moderation-admin.spec.ts` **2/2** |
+| Browser — fail-closed (rolled back) | `w6-experience-fail-closed.spec.ts` **2/2** |
+| SQL domain proof | **43 / 43** (unchanged — 3D touched no SQL) |
+
+Local DB was returned to the applied state after the fail-closed run.
+
+### VERDICT
+
+`W6_SLICE_3_EXPERIENCE_MODERATION_DISPUTES_CODE_COMPLETE_PENDING_HUMAN_GATE`
+
+Migration-safety stays RED by design. PR #974 stays Draft + `needs-human-gate`. Not merged. Production migration NOT applied. Telegram not sent. W7 not started.

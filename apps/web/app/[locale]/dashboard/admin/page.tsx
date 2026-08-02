@@ -8,7 +8,9 @@ import { listRequestsForAdminReview } from "@/lib/buyer/admin-request-review";
 import { getFollowUpQueue } from "@/lib/followup/follow-up-tasks";
 import { getLeadIntakeOverview } from "@/lib/sales/lead-intake";
 import { getLaunchSignals } from "@/lib/admin/launch-signals";
+import { listDisputeQueue, listModerationQueue } from "@/lib/trust/experience-records";
 import { AdminLaunchBoard } from "@/components/app/admin-launch-board";
+import { ExperienceModerationPanel } from "@/components/app/experience-moderation-panel";
 import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
 import { SalesIntakePanel } from "@/components/app/sales-intake-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
@@ -126,6 +128,14 @@ export default async function AdminDashboardPage({
   // EXISTING intake rows (leads / waitlist / customer_requests in review
   // states) — read-only, honest per-source availability, no CRM writes.
   const leadIntake = await getLeadIntakeOverview();
+
+  // W6 slice 3 — the experience moderator queues. Two separate reads because
+  // moderation and disputes are separate dimensions (a published record can be
+  // under dispute). Both fail closed to an honest unavailable state while the
+  // owner-gated domain migration is unapplied — never an empty queue, which
+  // would read as "nothing needs a decision".
+  const experienceQueue = await listModerationQueue();
+  const experienceDisputes = await listDisputeQueue();
 
   // 10 most recent profile rows.
   const { data: recent } = await supabase
@@ -611,6 +621,13 @@ export default async function AdminDashboardPage({
           Existing intake rows only; the only action is the reused internal
           follow-up task — nothing here contacts anyone. */}
       <SalesIntakePanel data={leadIntake} />
+
+      {/* BAND 2d — Experience moderation (W6 slice 3). An action queue in the
+          band-2 slot, NOT a route: the Product Gate refused
+          /dashboard/admin/experience-moderation as an undeclared screen, and
+          the control room already models "items awaiting a decision". Every
+          decision needs a reason and lands in the audit trail. */}
+      <ExperienceModerationPanel queue={experienceQueue} disputes={experienceDisputes} />
 
       <section className="flex flex-col gap-3" data-testid="admin-pilot-drafts">
         <div className="flex flex-col gap-0.5">

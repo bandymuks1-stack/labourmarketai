@@ -373,6 +373,10 @@ describe("NO new DB migration in this PR", () => {
     // `EXCLUDE USING gist` invariant. RED by design, deliberately NOT
     // human-gate-annotated, ships UNAPPLIED. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(170);
+    expect(count).toBeLessThanOrEqual(171);
   });
 });
+    // Bumped 170 -> 171 for the W6 slice 3 experience domain
+    // (20260802120000_experience_records_v1, paired rollback). RED by
+    // classification with a SCOPED owner human gate; production apply NOT
+    // approved; ships UNAPPLIED. Still no migration from the market-map layer.

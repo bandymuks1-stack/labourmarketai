@@ -10578,6 +10578,10 @@
           "label": "Aanbiedingen bekijken",
           "description": "Bekijk de aan jou verstuurde vacatures."
         },
+        "reviewExperiences": {
+          "label": "Ervaringen bekijken",
+          "description": "Bekijk de ervaringen over jou en de ervaringen die je zelf hebt ingediend."
+        },
         "respondBooking": {
           "label": "Aanbod accepteren of weigeren",
           "description": "Accepteren bevestigt de opdracht — een belangrijke stap."
@@ -10821,6 +10825,11 @@
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
+      "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
+      "experiencesAllSubmitted": "Je hebt elke afgeronde interactie al beschreven. Eén interactie, één ervaring.",
+      "experiencesNothingYet": "Er is nog geen afgeronde interactie om te beschrijven. Een ervaring is gebaseerd op echt werk dat is afgerond.",
+      "experiencesUnavailable": "Ik kon de ervaringen niet lezen. Er is niets gewijzigd.",
+      "experienceLeave": "Ervaring achterlaten",
       "userLogWork": "Ik wil mijn werk vastleggen",
       "userFindWork": "Werk zoeken",
       "historyTitle": "Eerder gesprek",
@@ -10997,8 +11006,8 @@
       "evidence": {
         "title": "Bewijs"
       },
-      "reputation": {
-        "title": "Reputatie"
+      "experiences": {
+        "title": "Ervaringen"
       },
       "invoice": {
         "title": "Factuurbasis"
@@ -11550,5 +11559,182 @@
     "entryConfirmed": "Bevestigd door een manager",
     "managerConfirmedCount": "Door manager bevestigde vaardigheden",
     "managerConfirmations": "Managerbevestigingen"
+  },
+  "experience": {
+    "page": {
+      "title": "Ervaringen",
+      "lead": "Subjectieve ervaringen uit echte, afgeronde werkinteracties. Een ervaring is het verhaal van één persoon — geen feit over iemands vakbekwaamheid.",
+      "unavailableTitle": "Ervaringen zijn nog niet beschikbaar in deze omgeving.",
+      "unavailableBody": "Er is niets opgeslagen. Je kunt gewoon verder werken.",
+      "aboutMe": "Over mij",
+      "aboutMeEmpty": "Nog geen gepubliceerde ervaringen over jou.",
+      "mine": "Door mij ingediend",
+      "mineEmpty": "Je hebt nog geen ervaringen ingediend."
+    },
+    "counts": {
+      "title": "Gepubliceerde ervaringen",
+      "positive": "positief",
+      "negative": "negatief",
+      "disputed": "{count} daarvan worden betwist",
+      "caution": "Meer negatieve dan positieve ervaringen — het loont om beter te kijken voordat je beslist.",
+      "meaning": "Dit zijn subjectieve verslagen van echte interacties. Geen beoordeling, geen score en geen oordeel van het platform.",
+      "notEnough": "Nog niet genoeg gepubliceerde ervaringen.",
+      "unavailable": "Ervaringstellingen zijn nog niet beschikbaar in deze omgeving."
+    },
+    "sentiment": {
+      "positive": "Positieve ervaring",
+      "negative": "Negatieve ervaring"
+    },
+    "interaction": {
+      "accepted_booking": "Boeking",
+      "completed_engagement": "Dienstverband",
+      "concluded_service_request": "Serviceverzoek"
+    },
+    "moderation": {
+      "submitted": "Ingediend",
+      "in_moderation": "In moderatie",
+      "published": "Gepubliceerd",
+      "rejected": "Afgewezen",
+      "title": "Ervaringsmoderatie",
+      "lead": "Elke ervaring gaat vóór publicatie door moderatie. Elk besluit vereist een reden en wordt vastgelegd in het auditspoor.",
+      "unavailable": "Het ervaringsdomein is niet beschikbaar in deze omgeving.",
+      "queueTitle": "Wacht op moderatie",
+      "queueEmpty": "Er wacht niets op moderatie.",
+      "disputeQueueTitle": "Geschillen",
+      "disputeQueueEmpty": "Geen open geschillen.",
+      "take": "In moderatie nemen",
+      "publish": "Publiceren",
+      "reject": "Afwijzen",
+      "reasonLabel": "Reden voor het besluit",
+      "reasonNotPublic": "De reden wordt vastgelegd in het auditspoor en wordt niet gepubliceerd.",
+      "decidedWithAudit": "Besluit vastgelegd in het auditspoor.",
+      "resolve": {
+        "upheld": "Ervaring handhaven",
+        "changed": "Als gewijzigd markeren",
+        "removed": "Uit publieke weergave halen"
+      },
+      "errors": {
+        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "not_authenticated": "Log eerst in.",
+        "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
+        "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
+        "self_review": "Je kunt geen ervaring over jezelf indienen.",
+        "invalid": "Controleer het formulier en probeer het opnieuw.",
+        "not_authorized": "Je hebt geen rechten voor deze actie.",
+        "not_subject": "Alleen de persoon of organisatie waarover deze ervaring gaat kan dit doen.",
+        "not_published": "Dit kan pas nadat de ervaring is gepubliceerd.",
+        "response_exists": "Er is al een reactie ingediend.",
+        "dispute_exists": "Er loopt al een geschil.",
+        "reason_required": "Een reden is verplicht.",
+        "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
+        "not_found": "Niet gevonden.",
+        "error": "Er ging iets mis. Er is niets opgeslagen."
+      }
+    },
+    "dispute": {
+      "none": "Niet betwist",
+      "opened": "Betwist",
+      "under_review": "Geschil in behandeling",
+      "resolved_upheld": "Geschil afgehandeld — ervaring gehandhaafd",
+      "resolved_changed": "Geschil afgehandeld — ervaring gewijzigd",
+      "resolved_removed": "Uit publieke weergave gehaald na een geschil",
+      "open": "Deze ervaring betwisten",
+      "rules": "De ervaring blijft gepubliceerd terwijl een moderator het geschil beoordeelt. Een reden is verplicht.",
+      "cta": "Geschil openen",
+      "sending": "Bezig…",
+      "openedNote": "Geschil geopend. De ervaring blijft gepubliceerd tot een moderator beslist.",
+      "errors": {
+        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "not_authenticated": "Log eerst in.",
+        "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
+        "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
+        "self_review": "Je kunt geen ervaring over jezelf indienen.",
+        "invalid": "Controleer het formulier en probeer het opnieuw.",
+        "not_authorized": "Je hebt geen rechten voor deze actie.",
+        "not_subject": "Alleen de persoon of organisatie waarover deze ervaring gaat kan dit doen.",
+        "not_published": "Dit kan pas nadat de ervaring is gepubliceerd.",
+        "response_exists": "Er is al een reactie ingediend.",
+        "dispute_exists": "Er loopt al een geschil.",
+        "reason_required": "Een reden is verplicht.",
+        "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
+        "not_found": "Niet gevonden.",
+        "error": "Er ging iets mis. Er is niets opgeslagen."
+      }
+    },
+    "response": {
+      "open": "Reageren op deze ervaring",
+      "rules": "Je kunt één reactie plaatsen. Die gaat door moderatie, verandert de tellingen niet en kan het origineel niet bewerken of verwijderen.",
+      "cta": "Reactie indienen",
+      "sending": "Bezig…",
+      "submitted": "Reactie ingediend. Ze wordt zichtbaar na moderatie.",
+      "errors": {
+        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "not_authenticated": "Log eerst in.",
+        "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
+        "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
+        "self_review": "Je kunt geen ervaring over jezelf indienen.",
+        "invalid": "Controleer het formulier en probeer het opnieuw.",
+        "not_authorized": "Je hebt geen rechten voor deze actie.",
+        "not_subject": "Alleen de persoon of organisatie waarover deze ervaring gaat kan dit doen.",
+        "not_published": "Dit kan pas nadat de ervaring is gepubliceerd.",
+        "response_exists": "Er is al een reactie ingediend.",
+        "dispute_exists": "Er loopt al een geschil.",
+        "reason_required": "Een reden is verplicht.",
+        "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
+        "not_found": "Niet gevonden.",
+        "error": "Er ging iets mis. Er is niets opgeslagen."
+      }
+    },
+    "submit": {
+      "about": "Jouw ervaring met {name}",
+      "sentimentLegend": "Hoe was de ervaring?",
+      "sentiment": {
+        "positive": "Positieve ervaring",
+        "negative": "Negatieve ervaring"
+      },
+      "bodyLabel": "Wat er gebeurde",
+      "moderationNote": "De ervaring gaat vóór publicatie door moderatie.",
+      "cta": "Ervaring indienen",
+      "sending": "Bezig…",
+      "submitted": "Ervaring ingediend.",
+      "awaitingModeration": "Ze wacht op moderatie en is nog niet gepubliceerd.",
+      "errors": {
+        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "not_authenticated": "Log eerst in.",
+        "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
+        "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
+        "self_review": "Je kunt geen ervaring over jezelf indienen.",
+        "invalid": "Controleer het formulier en probeer het opnieuw.",
+        "not_authorized": "Je hebt geen rechten voor deze actie.",
+        "not_subject": "Alleen de persoon of organisatie waarover deze ervaring gaat kan dit doen.",
+        "not_published": "Dit kan pas nadat de ervaring is gepubliceerd.",
+        "response_exists": "Er is al een reactie ingediend.",
+        "dispute_exists": "Er loopt al een geschil.",
+        "reason_required": "Een reden is verplicht.",
+        "invalid_transition": "Die stap is vanuit de huidige status niet mogelijk.",
+        "not_found": "Niet gevonden.",
+        "error": "Er ging iets mis. Er is niets opgeslagen."
+      }
+    },
+    "result": {
+      "loading": "Laden…",
+      "error": "We konden de ervaringen niet lezen. Er is niets gewijzigd.",
+      "retry": "Opnieuw proberen",
+      "signIn": "Log in om je ervaringen te zien."
+    },
+    "panel": {
+      "title": "Ervaringsmoderatie",
+      "help": "Interne wachtrij. Elk besluit heeft een reden nodig; die komt in het auditspoor en wordt nooit gepubliceerd."
+    },
+    "entry": {
+      "backToExperiences": "Terug naar ervaringen",
+      "alreadySubmitted": "Je hebt deze interactie al beschreven.",
+      "alreadySubmittedHint": "Eén interactie, één ervaring. De status van het bestaande record staat in je lijst.",
+      "notYet": "Deze interactie kan nog niet beschreven worden.",
+      "notAvailable": "Deze interactie kan niet beschreven worden.",
+      "blockedHint": "Er is niets opgeslagen.",
+      "groundedIn": "Gebaseerd op deze interactie: {interaction} · {context}",
+      "noContextLabel": "geen verdere omschrijving"
+    }
   }
 }

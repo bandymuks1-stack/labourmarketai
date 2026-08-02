@@ -277,6 +277,44 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "createJournalEntry" },
   },
   {
+    // W6 slice 3 — the door to the `experiences` result. A READ: it opens the
+    // panel, it writes nothing. Submitting, replying and disputing are
+    // separate RPC-backed writes that need an eligible interaction, and none
+    // of them hides behind this action.
+    id: "worker.review-experiences",
+    subject: "worker",
+    // EVERY SIGNED-IN ROLE, matching the result's own `contexts`
+    // ["personal","organization","project"]. The mismatch was reported by the
+    // employer-organization-context audit; the fix below is W6's, not that
+    // slice's — `employer-organization-context.test.ts` §6 pins that the
+    // employer slice itself never edited this file.
+    // The result was opened to organization context because the AUTHOR side of
+    // this domain is normally an employer acting from inside their workspace —
+    // but this gate stayed `["worker"]`, so a company-only employer could never
+    // reach the door the result had already opened. `experience-entry.ts`
+    // resolves the two parties SYMMETRICALLY from the canonical row
+    // (`viewerId === ownerId` → subject is the worker; `viewerId ===
+    // workerProfile` → subject is the employer), so the employer was always a
+    // first-class viewer here; only this list disagreed.
+    //
+    // Widening this ONE gate is the whole fix: no second action, no second
+    // experience system. The role list never grants anything — eligibility is
+    // still re-derived server-side per interaction from real rows, and a viewer
+    // who is not a party gets the same `not_available` as a forged token.
+    allowedRoles: ["worker", "company", "agency"],
+    labelKey: "conversation.actions.worker.reviewExperiences.label",
+    descriptionKey: "conversation.actions.worker.reviewExperiences.description",
+    confirmation: "read",
+    precondition: "authenticated",
+    // The experience domain migration is owner-gated; the read degrades to an
+    // honest "not available in this environment" state rather than an empty
+    // list, so the sensitivity is declared here too.
+    migrationSensitive: true,
+    telemetryEvent: E.profileViewed,
+    advancedRoute: "/dashboard/profile",
+    handler: { kind: "deep_link" },
+  },
+  {
     id: "worker.what-next",
     subject: "worker",
     allowedRoles: ["worker"],

@@ -538,11 +538,36 @@ describe("every depth is a real, restorable address", () => {
     expect(src).toMatch(/serializeGeography\(g\), project: null \}, "push"\)/);
     expect(src).toMatch(/write\(\{ project: id \}, "push"\)/);
     expect(src).toMatch(/write\(\{ project: null \}, "replace"\)/);
-    expect(src).toMatch(/result: null, geo: null, project: null \}, "replace"\)/);
+    // W6 slice 3D added a THIRD depth (`interaction`, the experiences result's
+    // submit step). Closing must clear every depth, so the list grew — the
+    // rule is unchanged, and pinning it as a set rather than a literal string
+    // is what keeps that true when a fourth depth arrives.
+    expect(src).toMatch(/result: null, geo: null, project: null, interaction: null \}, "replace"\)/);
   });
 
-  it("opening a result clears any stale depth", () => {
-    expect(read(HOOK)).toMatch(/result: kind, geo: null, project: null \}, "replace"/);
+  it("opening a result clears any stale depth — EVERY depth", () => {
+    const src = read(HOOK);
+    expect(src).toMatch(/result: kind, geo: null, project: null, interaction: null \}, "replace"/);
+    // Stated as an invariant, not a snapshot: whatever `write` clears when a
+    // result opens must also be cleared when it closes. A depth that survived
+    // one but not the other is how a result reopens onto a stale answer.
+    const openClears = /openResult[\s\S]{0,200}?write\(\s*\{([^}]*)\}/.exec(src)?.[1] ?? "";
+    const closeClears = /closeResult[\s\S]{0,200}?write\(\s*\{([^}]*)\}/.exec(src)?.[1] ?? "";
+    // `result` itself is not a DEPTH: closing nulls it, opening sets it to the
+    // new kind. The invariant is about everything BELOW the result.
+    const nulled = (block: string) =>
+      [...block.matchAll(/(\w+):\s*null/g)]
+        .map((m) => m[1])
+        .filter((k) => k !== "result")
+        .sort();
+    expect(nulled(openClears).length).toBeGreaterThan(0);
+    expect(nulled(openClears)).toEqual(nulled(closeClears));
+  });
+
+  it("the interaction depth pushes, so Back returns to the experiences list", () => {
+    const src = read(HOOK);
+    expect(src).toMatch(/interaction: token \},\s*"push",?\s*\)/);
+    expect(src).toMatch(/write\(\{ interaction: null \}, "replace"\)/);
   });
 
   it("re-reads the live location on POPSTATE, not only when params change", () => {

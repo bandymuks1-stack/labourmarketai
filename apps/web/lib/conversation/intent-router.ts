@@ -42,6 +42,7 @@ export type ConversationIntent =
   | "context" // "ką tu apie mane žinai?"
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
+  | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
   | "unknown";
 
 export type IntentMatch = {
@@ -266,6 +267,19 @@ const RULES: IntentRule[] = [
       p("(mano|my|моя)\\s+(kortel|card\\b|карточк)", 6),
       p("player\\s*card", 6),
       p("(darbuotojo|worker)\\s+(kortel|card\\b)", 5),
+    ],
+  },
+  {
+    // W6 slice 3D. Saying it is how the domain is REACHED — the answer is
+    // always the person's real state (what is about them, what they submitted,
+    // and which finished interactions they could describe). Saying "I want to
+    // leave an experience" never conjures a form: it lists the real eligible
+    // interactions, and the form belongs to one of those.
+    intent: "experiences",
+    patterns: [
+      p("(patirt|experienc|опыт\\s+взаимодейств|ervaring|erfahrung)", 6),
+      p("(palikti|parašyti|pateikti|leave|write|submit|оставить)\\s*.{0,14}(patirt|experienc|отзыв\\s+о\\s+взаимодейств)", 7),
+      p("(patirtys|patirtis)\\s+(apie|about)\\s+(mane|me)", 7),
     ],
   },
   {

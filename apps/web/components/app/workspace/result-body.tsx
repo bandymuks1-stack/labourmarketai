@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { CalendarResult } from "@/components/app/workspace/calendar-result";
+import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
 import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
@@ -25,6 +26,14 @@ export interface ResultNavigation {
   readonly geography: GeographySelection | null;
   readonly geoToken: string | null;
   readonly projectId: string | null;
+  /**
+   * W6 slice 3D — which interaction the `experiences` result is describing, as
+   * a validated `kind:uuid` token, or null for the list depth. Opaque here:
+   * the panel never learns what a booking or an engagement is, and the token
+   * buys nothing on its own — the server re-derives participation, completion,
+   * the subject and duplicate state before any form is mounted.
+   */
+  readonly interactionToken: string | null;
   /** Active organization name, or null when the person is in their own space.
    *  Carried into the people continuation (W4.5). */
   readonly workspace: string | null;
@@ -32,6 +41,8 @@ export interface ResultNavigation {
   readonly onSelectProject: (projectId: string) => void;
   readonly onBackToMarket: () => void;
   readonly onBackToProjects: () => void;
+  /** Step back out of one interaction to the list of experiences. */
+  readonly onBackToExperiences: () => void;
 }
 
 /**
@@ -155,6 +166,20 @@ function InlineResult({
       // agenda sentence read; no second calendar, no second truth store. The
       // full calendar stays one action away via `onOpenFull`.
       return <CalendarResult onOpenFull={onOpenFull} />;
+    case "experiences":
+      // W6 slice 3 — the experience domain. This is the ONLY surface it has:
+      // the `/dashboard/experiences` screen slice 3B briefly added was refused
+      // by the Product Gate (A-09) and deleted, so there is no full screen to
+      // fall back to and none is offered. Everything the domain can show — the
+      // count-only block, published-about-me with reply and dispute, my own
+      // submissions in their real lifecycle state, and (slice 3D) the
+      // interaction-bound submit depth — lives here.
+      return (
+        <ExperiencesResult
+          interactionToken={navigation.interactionToken}
+          onBack={navigation.onBackToExperiences}
+        />
+      );
     // The remaining kinds follow, one verified data path at a time.
     default:
       return (

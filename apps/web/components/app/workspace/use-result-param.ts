@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { isResultKind, type ResultKind } from "@/lib/conversation/result-registry";
+import { canonicalInteractionToken } from "@/lib/trust/experience-interaction-token";
 import {
   parseGeography,
   serializeGeography,
@@ -59,8 +60,25 @@ export function useResultParam(): {
   geoToken: string | null;
   /** The selected project id, or null. Only meaningful with a geography. */
   projectId: string | null;
+  /**
+   * W6 slice 3D — the `experiences` result's depth: which INTERACTION the
+   * person is describing, as a validated `kind:uuid` token.
+   *
+   * Same idea as `geo`/`project` above: depth belongs in the query string so
+   * refresh and Back work without a modal or a second screen. The token is
+   * validated here (`parseInteractionToken`), so a hand-typed value never
+   * reaches a loader as a half-understood interaction — and even a
+   * well-formed one is only a REQUEST: the server re-derives participation,
+   * completion, the subject and duplicate state before any form appears.
+   */
+  interactionToken: string | null;
   /** Show a result — replaces the query, never pushes a new page. */
   openResult: (kind: ResultKind) => void;
+  /** Drill into one interaction to describe it. Pushes, so Back returns to
+   *  the list of experiences. */
+  selectInteraction: (token: string) => void;
+  /** Step back up out of the submit depth. Replaces. */
+  clearInteraction: () => void;
   /** Drill into a place. Pushes, so Back returns to the market. */
   selectGeography: (g: GeographySelection) => void;
   /** Drill into a project. Pushes, so Back returns to the project list. */
@@ -132,6 +150,14 @@ export function useResultParam(): {
     [geography],
   );
 
+  // W6 slice 3D — the experiences result's depth. Validated to canonical form
+  // here, so an invented token is simply not depth at all.
+  const rawInteraction = readParam("interaction");
+  const interactionToken = useMemo(
+    () => canonicalInteractionToken(rawInteraction),
+    [rawInteraction],
+  );
+
   const rawProject = readParam("project");
   const projectId = useMemo(() => {
     if (!geography) return null;
@@ -161,12 +187,34 @@ export function useResultParam(): {
     geography,
     geoToken,
     projectId,
+    interactionToken,
     // Opening a result from scratch clears any stale depth: a market result
     // that reopened straight into last week's project would be showing an
-    // answer nobody asked for.
+    // answer nobody asked for — and an experiences result that reopened onto
+    // last week's interaction would be inviting a description nobody asked
+    // for, which is worse.
     openResult: useCallback(
       (kind: ResultKind) =>
-        write({ result: kind, geo: null, project: null }, "replace"),
+        write({ result: kind, geo: null, project: null, interaction: null }, "replace"),
+      [write],
+    ),
+    // Going DEEPER pushes, like selecting a place or a project: opening the
+    // form for one interaction is a step the person expects Back to undo.
+    //
+    // ONE write, not `openResult` followed by a second call: both would read
+    // the same not-yet-updated query string, so the second would clobber the
+    // first and the result would open at the wrong depth. The address is
+    // assembled once and pushed once.
+    selectInteraction: useCallback(
+      (token: string) =>
+        write(
+          { result: "experiences", geo: null, project: null, interaction: token },
+          "push",
+        ),
+      [write],
+    ),
+    clearInteraction: useCallback(
+      () => write({ interaction: null }, "replace"),
       [write],
     ),
     selectGeography: useCallback(
@@ -184,7 +232,7 @@ export function useResultParam(): {
       [write],
     ),
     closeResult: useCallback(
-      () => write({ result: null, geo: null, project: null }, "replace"),
+      () => write({ result: null, geo: null, project: null, interaction: null }, "replace"),
       [write],
     ),
   };

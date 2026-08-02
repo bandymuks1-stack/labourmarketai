@@ -92,14 +92,34 @@ describe("result registry — REAL DATA ONLY gate", () => {
     const unverified = CONVERSATION_RESULTS.filter(
       (r) => r.dataReadiness === "unverified",
     );
-    // The gate is meaningless if nothing is gated — the audit found two
-    // (market, reputation), so this also pins that they stay gated until their
-    // data sources are actually verified.
-    expect(unverified.length).toBeGreaterThan(0);
+    // NOTE, W6 slice 3: this used to also assert `unverified.length > 0`, on
+    // the reasoning that "the gate is meaningless if nothing is gated". Both
+    // entries it named have since been verified and promoted — `market` in
+    // Goal 3, and `reputation` (now `experiences`) by the W6 experience
+    // domain. Keeping that assertion would have meant holding a result back
+    // from a data source that IS real just to keep a counter above zero, which
+    // is the opposite of what the gate is for. The invariant that matters is
+    // unverified ⇒ never inline, and the NEXT test pins it on the gate
+    // function itself rather than on a sample, so it cannot rot away when the
+    // gated list happens to be empty.
     for (const r of unverified) {
       for (const ctx of CONTEXTS) {
         expect(canRenderInline(r.kind, ctx), `${r.kind} inline in ${ctx}`).toBe(
           false,
+        );
+      }
+    }
+  });
+
+  it("the gate itself is readiness AND context — for every entry, always", () => {
+    // Pinned on the FUNCTION, not on whichever entries happen to be gated
+    // today: `canRenderInline` must agree with the two declared conditions for
+    // every kind in every context. A future entry that flips to `unverified`
+    // is then covered the moment it is added, with no test to remember.
+    for (const r of CONVERSATION_RESULTS) {
+      for (const ctx of CONTEXTS) {
+        expect(canRenderInline(r.kind, ctx), `${r.kind} in ${ctx}`).toBe(
+          r.dataReadiness === "real" && r.contexts.includes(ctx),
         );
       }
     }
