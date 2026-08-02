@@ -3,6 +3,7 @@ import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
 import { env } from "@/lib/env";
+import { buildReturnValue } from "@/lib/auth/redirect";
 import {
   CANONICAL_ORIGIN,
   isLegacyRedirectHost,
@@ -218,7 +219,29 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = `/${locale}/auth/login`;
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    // W7 slice 3 — deep-link continuity. Two defects were fixed here:
+    //
+    //  1. `next` was built from `pathname` ALONE, so every query the workspace
+    //     uses to address itself (`?result=experiences&interaction=…`, the
+    //     planning `?view`/`date`, the journal `?editing`) was dropped. After
+    //     login the person landed on the bare route and had to find their way
+    //     back to the thing they had clicked.
+    //  2. `clone()` copies the ORIGINAL query onto the login URL, so those
+    //     params were not merely lost — they were smeared onto `/auth/login`,
+    //     where nothing reads them and a token-shaped one would sit in logs.
+    //
+    // `buildReturnValue` applies the same path rules as the sanitiser that
+    // reads this value back, and strips credential-shaped / chaining params.
+    // Clearing the cloned query first is what fixes (2); `next` is then the
+    // ONLY param on the login URL.
+    const returnValue = buildReturnValue(
+      request.nextUrl.pathname,
+      request.nextUrl.search,
+    );
+    for (const key of [...loginUrl.searchParams.keys()]) {
+      loginUrl.searchParams.delete(key);
+    }
+    if (returnValue) loginUrl.searchParams.set("next", returnValue);
     return NextResponse.redirect(loginUrl);
   }
 
