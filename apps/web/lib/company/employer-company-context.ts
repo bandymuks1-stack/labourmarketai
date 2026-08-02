@@ -160,8 +160,12 @@ export const resolveEmployerCompanyContext = cache(
     }
     const label = active.name || null;
 
-    // The org row itself (readable by any authenticated user — see rule 2; the
-    // gate above already ran). `limit(2)` so a duplicated id would surface as
+    // The org row itself. The membership gate above already ran, which is what
+    // makes this read legitimate: after 20260802170000 (W9 slice 2)
+    // `organizations_select` is owner / active-member / admin, so a caller who
+    // failed that gate reads 0 rows here too. Before that migration the policy
+    // was `using (true)` and this read was unscoped — the gate was the ONLY
+    // thing protecting it. `limit(2)` so a duplicated id would surface as
     // ambiguity rather than being silently reduced by `maybeSingle`.
     const orgRes = await asAny(supabase)
       .from("organizations")

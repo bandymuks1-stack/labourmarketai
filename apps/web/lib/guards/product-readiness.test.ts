@@ -1927,7 +1927,21 @@ describe("no migration files added by this sprint", () => {
     // slice 3 branch (#974) also adds one migration and must resolve to 171
     // if it merges after this PR. Never take either side verbatim — recount
     // the real migration files after every rebase.
-    const SPRINT_BASELINE = 171;
+    const SPRINT_BASELINE = 172;
+    // Bumped 171 -> 172 for W9 slice 2 organization RLS hardening
+    // (20260802170000_organization_rls_hardening_v1, paired rollback). Closes
+    // the P0 `organizations_select using (true)` (every authenticated user
+    // could read every organization row in full) and the latent
+    // `engagement_contexts` self-write escalation. Policy/grant only — ZERO
+    // DML. RED by classification (SECURITY DEFINER + GRANT/REVOKE + policy
+    // replacement) and deliberately NOT human-gate-annotated: the owner
+    // reviews the package and applies it. Ships UNAPPLIED.
+    //
+    // MERGE-ORDER NOTE: this line is a shared ratchet. #975 -> 169, #976 ->
+    // 170, #974 -> 171 (all three on main at c05a4802); this PR takes it to
+    // 172. Never take either side of a rebase verbatim — recount the real
+    // migration files under supabase/migrations after every rebase.
+    //
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
     // (20260802120000_experience_records_v1, paired rollback). Experience
     // records + moderation queue + disputes, RPC-only writes, fail-closed app

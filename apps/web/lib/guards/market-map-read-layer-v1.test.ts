@@ -373,7 +373,16 @@ describe("NO new DB migration in this PR", () => {
     // `EXCLUDE USING gist` invariant. RED by design, deliberately NOT
     // human-gate-annotated, ships UNAPPLIED. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(171);
+    // Bumped 170 -> 171 for W6 slice 3 experience records
+    // (20260802120000_experience_records_v1, paired rollback), merged as #974.
+    // Bumped 171 -> 172 for W9 slice 2 organization RLS hardening
+    // (20260802170000_organization_rls_hardening_v1, paired rollback). Replaces
+    // `organizations_select using (true)` with owner/active-member/admin, adds
+    // a minimum-width invitation-directory RPC, and makes engagement_contexts
+    // writes RPC-only. Policy/grant only — ZERO DML. RED by classification,
+    // deliberately NOT human-gate-annotated, ships UNAPPLIED. Still no
+    // migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(172);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

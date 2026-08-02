@@ -175,12 +175,68 @@ export type PeopleCompanySearchResult = {
   companies: NetworkCompany[];
 };
 
+/** PostgREST code for "function does not exist" — the migration is not applied. */
+const UNDEFINED_FUNCTION_CODE = "42883";
+
+type DirectoryOrgRow = {
+  id: string;
+  display_name: string | null;
+  legal_name?: string | null;
+  organization_type: string;
+  country: string | null;
+};
+
+/**
+ * Organization directory read.
+ *
+ * Canonical path: `search_organizations_directory_v1` (20260802170000) — a
+ * SECURITY DEFINER function whose projection is fixed by its signature, so the
+ * caller cannot widen it to owner_profile_id / vat_number / contact fields.
+ *
+ * Fallback path: the pre-hardening direct table read, used ONLY when the RPC
+ * is absent (42883). That is the real production state until the migration is
+ * approved and applied; degrading to an empty directory instead would silently
+ * break invitations on an unrelated deploy.
+ */
+async function searchOrganizationsDirectory(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  term: string,
+): Promise<{ data: DirectoryOrgRow[] | null; error: unknown }> {
+  const rpc = await asAny(supabase).rpc("search_organizations_directory_v1", {
+    p_term: term,
+  });
+  if (!rpc.error) {
+    return { data: (rpc.data ?? []) as DirectoryOrgRow[], error: null };
+  }
+  if (rpc.error?.code !== UNDEFINED_FUNCTION_CODE) {
+    return { data: null, error: rpc.error };
+  }
+  const legacy = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, organization_type, country")
+    .or(`display_name.ilike.%${term}%,legal_name.ilike.%${term}%`)
+    .limit(20);
+  return {
+    data: legacy.error ? null : ((legacy.data ?? []) as DirectoryOrgRow[]),
+    error: legacy.error ?? null,
+  };
+}
+
 /**
  * People & companies search — RLS does the privacy work: the workers read
  * goes through the fail-closed `can_view_worker` SELECT policy (only
  * consented-discoverable people or real work relationships come back), and
- * organizations expose only their public display fields. No email, no
- * phone, no exact address is selected — ever.
+ * organizations come back through `search_organizations_directory_v1`
+ * (20260802170000), whose fixed projection is id + display name + type +
+ * country. No email, no phone, no exact address is selected — ever.
+ *
+ * W9 slice 2: this is the ONE surface that legitimately reads organizations
+ * the caller is not a member of, so it is the one that gets an RPC. Before
+ * 20260802170000 it leaned on `organizations_select using (true)`, which let
+ * ANY authenticated session read every column of every org row directly.
+ * Until that migration is applied the RPC does not exist, so a 42883 is an
+ * expected state, not an error: we fall back to the pre-hardening table read,
+ * which still works precisely because the old permissive policy is still live.
  */
 export async function searchPeopleAndCompanies(
   query: string,
@@ -198,11 +254,7 @@ export async function searchPeopleAndCompanies(
       .select("id, profile_id, full_name, city, country")
       .ilike("full_name", `%${term}%`)
       .limit(20),
-    asAny(supabase)
-      .from("organizations")
-      .select("id, display_name, legal_name, organization_type, country")
-      .or(`display_name.ilike.%${term}%,legal_name.ilike.%${term}%`)
-      .limit(20),
+    searchOrganizationsDirectory(supabase, term),
   ]);
 
   type WorkerRow = {
@@ -212,13 +264,10 @@ export async function searchPeopleAndCompanies(
     city: string | null;
     country: string | null;
   };
-  type OrgRow = {
-    id: string;
-    display_name: string | null;
-    legal_name: string | null;
-    organization_type: string;
-    country: string | null;
-  };
+  // The RPC path already coalesces the display name server-side and returns no
+  // `legal_name` column at all; the 42883 fallback still carries one. The
+  // `?? o.legal_name` below therefore covers the fallback shape only.
+  type OrgRow = DirectoryOrgRow;
 
   const people: NetworkPerson[] = workersRes.error
     ? []
