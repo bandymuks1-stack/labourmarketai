@@ -6360,7 +6360,22 @@
     "noAddable": "Nėra darbuotojų pridėti. Pirma pakvieskite darbuotoją, tada jis atsiras čia.",
     "allAdded": "Visi priimti darbuotojai jau pridėti į organizaciją.",
     "reviewEnabledBadge": "Peržiūra",
-    "reviewDisabledBadge": "Be peržiūros"
+    "reviewDisabledBadge": "Be peržiūros",
+    "remove": "Pašalinti iš organizacijos",
+    "removeConfirm": "Patvirtinti pašalinimą",
+    "removeCancel": "Atšaukti",
+    "removeReasonLabel": "Priežastis (nebūtina)",
+    "ownerLocked": "Savininkas — pašalinti negalima",
+    "removed": "Narystė užbaigta. Prieiga prie šios organizacijos panaikinta.",
+    "roles": {
+      "owner": "Savininkas",
+      "manager": "Vadovas",
+      "employee": "Darbuotojas",
+      "collaborator": "Partneris",
+      "consultant": "Konsultantas",
+      "freelancer": "Laisvai samdomas",
+      "viewer": "Stebėtojas"
+    }
   },
   "services": {
     "eyebrow": "Mes padarome už jus",

@@ -6360,7 +6360,22 @@
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "allAdded": "Alle angenommenen Arbeitskräfte sind der Organisation bereits hinzugefügt.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "remove": "Aus Organisation entfernen",
+    "removeConfirm": "Entfernen bestätigen",
+    "removeCancel": "Abbrechen",
+    "removeReasonLabel": "Grund (optional)",
+    "ownerLocked": "Inhaber — kann nicht entfernt werden",
+    "removed": "Mitgliedschaft beendet. Der Zugriff auf diese Organisation ist entzogen.",
+    "roles": {
+      "owner": "Inhaber",
+      "manager": "Leitung",
+      "employee": "Mitarbeitende:r",
+      "collaborator": "Partner",
+      "consultant": "Berater:in",
+      "freelancer": "Freiberuflich",
+      "viewer": "Betrachter:in"
+    }
   },
   "services": {
     "eyebrow": "Für Sie umgesetzt",

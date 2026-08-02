@@ -395,6 +395,22 @@ export default async function CompanyDashboardPage({
     allAdded: tOrg("allAdded"),
     reviewEnabledBadge: tOrg("reviewEnabledBadge"),
     reviewDisabledBadge: tOrg("reviewDisabledBadge"),
+    // W9 slice 1 — membership revocation.
+    remove: tOrg("remove"),
+    removeConfirm: tOrg("removeConfirm"),
+    removeCancel: tOrg("removeCancel"),
+    removeReasonLabel: tOrg("removeReasonLabel"),
+    ownerLocked: tOrg("ownerLocked"),
+    removed: tOrg("removed"),
+    roles: {
+      owner: tOrg("roles.owner"),
+      manager: tOrg("roles.manager"),
+      employee: tOrg("roles.employee"),
+      collaborator: tOrg("roles.collaborator"),
+      consultant: tOrg("roles.consultant"),
+      freelancer: tOrg("roles.freelancer"),
+      viewer: tOrg("roles.viewer"),
+    },
   };
 
   const workersLabels = {

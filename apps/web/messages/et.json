@@ -1144,7 +1144,23 @@
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "allAdded": "Kõik vastuvõetud töötajad on organisatsiooni juba lisatud.",
+    "remove": "Eemalda organisatsioonist",
+    "removeConfirm": "Kinnita eemaldamine",
+    "removeCancel": "Loobu",
+    "removeReasonLabel": "Põhjus (valikuline)",
+    "ownerLocked": "Omanik — ei saa eemaldada",
+    "removed": "Liikmesus lõpetatud. Juurdepääs sellele organisatsioonile on tühistatud.",
+    "roles": {
+      "owner": "Omanik",
+      "manager": "Juht",
+      "employee": "Töötaja",
+      "collaborator": "Partner",
+      "consultant": "Konsultant",
+      "freelancer": "Vabakutseline",
+      "viewer": "Vaataja"
+    }
   },
   "admin": {
     "mode": {

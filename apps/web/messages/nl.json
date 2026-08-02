@@ -6360,7 +6360,22 @@
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "allAdded": "Alle geaccepteerde werknemers zijn al aan de organisatie toegevoegd.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "remove": "Uit organisatie verwijderen",
+    "removeConfirm": "Verwijderen bevestigen",
+    "removeCancel": "Annuleren",
+    "removeReasonLabel": "Reden (optioneel)",
+    "ownerLocked": "Eigenaar — kan niet worden verwijderd",
+    "removed": "Lidmaatschap beëindigd. De toegang tot deze organisatie is ingetrokken.",
+    "roles": {
+      "owner": "Eigenaar",
+      "manager": "Leidinggevende",
+      "employee": "Medewerker",
+      "collaborator": "Partner",
+      "consultant": "Adviseur",
+      "freelancer": "Zzp'er",
+      "viewer": "Kijker"
+    }
   },
   "services": {
     "eyebrow": "Done-for-you",

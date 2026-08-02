@@ -1144,7 +1144,23 @@
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "allAdded": "Wszyscy przyjęci pracownicy są już dodani do organizacji.",
+    "remove": "Usuń z organizacji",
+    "removeConfirm": "Potwierdź usunięcie",
+    "removeCancel": "Anuluj",
+    "removeReasonLabel": "Powód (opcjonalnie)",
+    "ownerLocked": "Właściciel — nie można usunąć",
+    "removed": "Członkostwo zakończone. Dostęp do tej organizacji został cofnięty.",
+    "roles": {
+      "owner": "Właściciel",
+      "manager": "Kierownik",
+      "employee": "Pracownik",
+      "collaborator": "Partner",
+      "consultant": "Konsultant",
+      "freelancer": "Freelancer",
+      "viewer": "Obserwator"
+    }
   },
   "admin": {
     "mode": {

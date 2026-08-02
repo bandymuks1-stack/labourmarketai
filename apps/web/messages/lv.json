@@ -1144,7 +1144,23 @@
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "allAdded": "Visi pieņemtie darbinieki jau ir pievienoti organizācijai.",
+    "remove": "Noņemt no organizācijas",
+    "removeConfirm": "Apstiprināt noņemšanu",
+    "removeCancel": "Atcelt",
+    "removeReasonLabel": "Iemesls (nav obligāts)",
+    "ownerLocked": "Īpašnieks — nevar noņemt",
+    "removed": "Dalība beigta. Piekļuve šai organizācijai ir atsaukta.",
+    "roles": {
+      "owner": "Īpašnieks",
+      "manager": "Vadītājs",
+      "employee": "Darbinieks",
+      "collaborator": "Partneris",
+      "consultant": "Konsultants",
+      "freelancer": "Frīlanceris",
+      "viewer": "Skatītājs"
+    }
   },
   "admin": {
     "mode": {
