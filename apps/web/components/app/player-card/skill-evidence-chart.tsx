@@ -2,6 +2,7 @@ import type {
   SkillEvidenceBar,
   SkillEvidenceTier,
 } from "@/lib/player-card/evidence-visuals";
+import { Link } from "@/lib/i18n/navigation";
 
 /**
  * §5.2 SKILL EVIDENCE STRENGTH + EVIDENCE SOURCES — how much of the person's
@@ -76,9 +77,18 @@ const TIER_DOT: Record<SkillEvidenceTier, string> = {
 export function SkillEvidenceChart({
   skills,
   labels,
+  linkBarsToJournal = false,
 }: {
   skills: readonly SkillEvidenceBar[];
   labels: SkillEvidenceLabels;
+  /**
+   * W5 slice 3 — evidence drill-down. When set (the worker's OWN card only),
+   * a bar with at least one linked record links to the journal filtered to
+   * that skill, so the count is inspectable, not just stated. Bars with no
+   * records stay plain — there is nothing to drill into, and a dead link
+   * would dress the honest zero up as a feature.
+   */
+  linkBarsToJournal?: boolean;
 }) {
   if (skills.length === 0) {
     return (
@@ -133,14 +143,8 @@ export function SkillEvidenceChart({
             s.entries > 0
               ? Math.min(s.entries / EVIDENCE_SCALE_MAX, 1) * 100
               : 0;
-          return (
-            <li
-              key={s.slug}
-              className="flex flex-col gap-1"
-              data-skill={s.slug}
-              data-entries={s.entries}
-              data-tier={s.tier}
-            >
+          const row = (
+            <>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="line-clamp-2 min-w-0 text-basis text-text-primary">
                   {labels.skillNames[i] ?? s.slug.replace(/-/g, " ")}
@@ -158,6 +162,27 @@ export function SkillEvidenceChart({
                   data-testid="player-card-skill-bar"
                 />
               </div>
+            </>
+          );
+          const drilldown = linkBarsToJournal && s.entries > 0;
+          return (
+            <li
+              key={s.slug}
+              data-skill={s.slug}
+              data-entries={s.entries}
+              data-tier={s.tier}
+            >
+              {drilldown ? (
+                <Link
+                  href={`/dashboard/journal?skill=${encodeURIComponent(s.slug)}`}
+                  className="flex min-h-[2.75rem] flex-col justify-center gap-1 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue [&:hover_span:first-child]:underline"
+                  data-testid="player-card-skill-drilldown"
+                >
+                  {row}
+                </Link>
+              ) : (
+                <div className="flex flex-col gap-1">{row}</div>
+              )}
             </li>
           );
         })}

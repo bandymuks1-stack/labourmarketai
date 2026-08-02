@@ -229,6 +229,8 @@
   "logViaChatBody": "Arbeit wird im Gespräch erfasst — sag, was du getan hast, und der Eintrag erscheint hier.",
   "logViaChatCta": "Arbeit im Chat erfassen",
   "logViaVoiceCta": "Per Sprache erfassen",
+  "skillFilterActive": "Einträge mit der Fähigkeit „{name}“ ({count})",
+  "skillFilterClear": "Alle Einträge anzeigen",
   "listTitle": "Arbeitseinträge",
   "navTitle": "Arbeitsjournal",
   "navSubtitle": "Zeigen Sie, was Sie getan haben — das stärkt Ihre Arbeitskarte.",

@@ -229,6 +229,8 @@
   "logViaChatBody": "Werk wordt in het gesprek vastgelegd — vertel wat je deed en het record verschijnt hier.",
   "logViaChatCta": "Werk vastleggen in de chat",
   "logViaVoiceCta": "Inspreken met je stem",
+  "skillFilterActive": "Records gekoppeld aan “{name}” ({count})",
+  "skillFilterClear": "Alle records tonen",
   "listTitle": "Werkitems",
   "navTitle": "Werkjournaal",
   "navSubtitle": "Laat zien wat je hebt gedaan — het versterkt je werkkaart.",

@@ -229,6 +229,8 @@
   "logViaChatBody": "Work is logged in the conversation — say what you did and the record appears here.",
   "logViaChatCta": "Log work in the chat",
   "logViaVoiceCta": "Record by voice",
+  "skillFilterActive": "Showing records linked to “{name}” ({count})",
+  "skillFilterClear": "Show all records",
   "listTitle": "Work entries",
   "navTitle": "Work journal",
   "navSubtitle": "Show what you did — it strengthens your work card.",

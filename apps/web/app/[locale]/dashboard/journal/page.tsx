@@ -70,7 +70,11 @@ export default async function JournalPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ editing?: string | string[]; date?: string | string[] }>;
+  searchParams?: Promise<{
+    editing?: string | string[];
+    date?: string | string[];
+    skill?: string | string[];
+  }>;
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
@@ -83,6 +87,13 @@ export default async function JournalPage({
   const selectedDate =
     typeof sp.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.date)
       ? sp.date
+      : null;
+  // Evidence drill-down (W5 slice 3): ?skill=<slug> filters the records to
+  // those linked to ONE of the worker's own skills — the player-card evidence
+  // bars land here. Same shape as ?date=; anything not a plain slug is ignored.
+  const skillFilterSlug =
+    typeof sp.skill === "string" && /^[a-z0-9_-]{1,80}$/.test(sp.skill)
+      ? sp.skill
       : null;
   setRequestLocale(locale);
   const t = await getTranslations("journal");
@@ -529,7 +540,21 @@ export default async function JournalPage({
       d.getDate(),
     ).padStart(2, "0")}`;
   };
-  for (const e of entries ?? []) {
+  // Evidence drill-down (W5 slice 3): resolve ?skill= against the worker's
+  // OWN skill set and narrow the diary to entries linked to it. Unknown slug
+  // or links unavailable → no filter, never an invented empty diary. The
+  // filter feeds ONLY the diary grouping — profile strips and CV-bridge
+  // counts stay global truths (the ?date= precedent).
+  const skillFilter =
+    skillFilterSlug && skillLinksReady
+      ? (availableSkillsForLinks.find((s) => s.slug === skillFilterSlug) ?? null)
+      : null;
+  const diaryEntries = skillFilter
+    ? (entries ?? []).filter((e) =>
+        (linksByEntry.get(e.id) ?? []).includes(skillFilter.id),
+      )
+    : (entries ?? []);
+  for (const e of diaryEntries) {
     const label = new Date(e.created_at).toLocaleDateString(locale);
     // Day total = sum of each entry's time metric (hours/minutes only). "days"
     // and non-time quantities are never summed, so the figure is real, not
@@ -799,6 +824,29 @@ export default async function JournalPage({
           {/* The ONE primary action lives in the log-via-chat block above
               (owner audit §6.1) — no duplicate gradient CTA here. */}
         </div>
+        {/* Evidence drill-down (W5 slice 3): a player-card evidence bar lands
+            here with ?skill=<slug>. The strip names the active filter and the
+            REAL count, and offers the one way back — never a silent subset. */}
+        {skillFilter && (
+          <div
+            className="flex flex-wrap items-center gap-2 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2"
+            data-testid="journal-skill-filter"
+          >
+            <span className="text-sm leading-relaxed text-text-primary">
+              {t("skillFilterActive", {
+                name: skillFilter.name,
+                count: diaryEntries.length,
+              })}
+            </span>
+            <Link
+              href={"/dashboard/journal#journal-entries" as "/dashboard"}
+              data-testid="journal-skill-filter-clear"
+              className="inline-flex min-h-[2rem] items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+            >
+              {t("skillFilterClear")}
+            </Link>
+          </div>
+        )}
         {/* Calendar-driven day navigation (owner UX recovery v1): the diary's
             days as compact chips — tap a day to see exactly that day, tap the
             calendar link to see the SAME day with bookings, projects and

@@ -12,7 +12,7 @@ _Last updated: 2026-08-01 (W4 closed)._
 | W1–W2 | complete (journal → capability-extraction → confirm loop exists) | W1/W2 records |
 | W3 — chat-first workspace consolidation | `W3_CHAT_FIRST_WORKSPACE_CONSOLIDATION_COMPLETE` at `7a4babba` (#961), deploy `5703264161`, −7,487 LOC, ratchet ZERO. **FROZEN** except real regressions | `evidence/premium-rebuild/w3-final-completion-report.md` |
 | W4 — professional identity | `W4_PROFESSIONAL_IDENTITY_COMPLETE_WITH_OWNER_GATED_ITEMS` at `426e87aa` (#963/#964/#965), deploy `5703997684` success. **FROZEN** except real regressions | `evidence/premium-rebuild/w4-acceptance.md` |
-| W5 — Work Journal / Evidence / Skills pipeline | **OPEN** — audit consolidated (#967); slice 1 dead-surface deletion MERGED (#968); slice 2 voice handoff repair in flight; slice 3 (evidence drill-down) next | `evidence/premium-rebuild/w5-baseline.md` (classification + slice log) |
+| W5 — Work Journal / Evidence / Skills pipeline | **OPEN** — audit consolidated (#967); slice 1 dead-surface deletion MERGED (#968); slice 2 voice handoff repair MERGED (#969); slice 3 evidence drill-down in flight; then the two decision-gated items or W5 close | `evidence/premium-rebuild/w5-baseline.md` (classification + slice log) |
 
 ## Production
 
