@@ -193,13 +193,20 @@ export function WorkerWorkLogFlow({
   // The object URL is a live handle, not a value — revoke it whenever it is
   // replaced or the flow unmounts, or a long chat session leaks every photo
   // the person previewed.
+  //
+  // ONLY a browser-minted `blob:` URL is ever stored. `createObjectURL` cannot
+  // return anything else, but the preview `src` is fed by a value that
+  // originates at a DOM file input, so the invariant is asserted here rather
+  // than assumed: anything that is not `blob:` becomes null and simply does
+  // not render. This is the barrier between a picked file and an image sink —
+  // it also keeps `js/xss-through-dom` satisfied without suppressing it.
   useEffect(() => {
     if (!photoFile) {
       setPhotoPreview(null);
       return;
     }
     const url = URL.createObjectURL(photoFile);
-    setPhotoPreview(url);
+    setPhotoPreview(url.startsWith("blob:") ? url : null);
     return () => URL.revokeObjectURL(url);
   }, [photoFile]);
 
@@ -504,9 +511,11 @@ export function WorkerWorkLogFlow({
           uploaded at this point. */}
       {photoPrep === "ready" && photoFile ? (
         <div className="flex items-center gap-3" data-testid="worklog-photo-preview">
-          {photoPreview ? (
+          {photoPreview?.startsWith("blob:") ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              // Re-checked AT the sink, not only at the source: a local
+              // object URL is the one thing this preview may ever load.
               src={photoPreview}
               alt={tPhoto("previewAlt")}
               className="size-16 flex-none rounded-md border border-ink-500 object-cover"
