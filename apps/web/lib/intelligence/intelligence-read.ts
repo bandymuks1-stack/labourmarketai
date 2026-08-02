@@ -403,9 +403,33 @@ const COMPANY_DEMAND_READ_LIMIT = 500;
 
 /**
  * The signed-in COMPANY viewer's demand intelligence over their OWN
- * customer_requests (RLS keeps other tenants' rows invisible), aggregated
- * with cohort policy over the trailing 90-day window. Query is logged
- * best-effort.
+ * `customer_requests`, aggregated with cohort policy over the trailing 90-day
+ * window. Query is logged best-effort.
+ *
+ * W14 audit P0-3. The docblock used to say "RLS keeps other tenants' rows
+ * invisible" and the query carried NO owner predicate — it leaned entirely on
+ * `customer_requests_select`, which is:
+ *
+ *     profile_id = auth.uid() OR public.is_admin()
+ *
+ * That second branch is the whole defect. This function is rendered on COMPANY
+ * surfaces — `/dashboard/company/planning` and `/dashboard/intelligence` — not
+ * on a platform-admin screen. So an operator with an admin role opening a
+ * customer's workforce plan got EVERY tenant's demand for the window,
+ * aggregated and labelled as that company's demand signal, with nothing in the
+ * UI indicating the scope had changed. A shortfall figure reported back to the
+ * customer would have been built from their competitors' data.
+ *
+ * The predicate below makes the read mean what the surface claims. It is
+ * defence in depth, not a replacement for RLS: `auth.uid()` is the server's
+ * own session, never a client-supplied id.
+ *
+ * KNOWN AND DELIBERATELY NOT FIXED HERE: the same predicate is also too
+ * NARROW. `customer_requests` has a `profile_id` and no organization column,
+ * so a legitimate co-manager of the same organization sees their own requests
+ * only, not their organization's. Fixing that requires an organization column
+ * and a policy change — schema work, owner-gated, and a different slice.
+ * Being consistently too narrow is honest; being silently too wide is not.
  */
 export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntelligence> {
   const supabase = await createClient();
@@ -423,6 +447,10 @@ export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntel
   const { data, error } = await asAny(supabase)
     .from("customer_requests")
     .select("role_or_work_type, country, location, team_size, created_at")
+    // W14 P0-3: the owner predicate. Without it an admin viewer cross-
+    // aggregated every tenant on a company surface. `user.id` is the server's
+    // own session — never a client-supplied organization or profile id.
+    .eq("profile_id", user.id)
     .gte("created_at", windowStart)
     .limit(COMPANY_DEMAND_READ_LIMIT);
   if (error || !Array.isArray(data) || data.length === 0) {
