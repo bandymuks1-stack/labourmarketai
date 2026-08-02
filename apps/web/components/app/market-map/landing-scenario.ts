@@ -64,15 +64,24 @@ export interface LandingScenario {
    * to do next. Keys under `landing.hero.decision`.
    */
   readonly decisionKey: string;
-  /**
-   * How strongly the system stands behind this recommendation, 0..1.
+  /*
+   * NO CONFIDENCE FIELD — deliberately.
    *
-   * Shown to the visitor. A recommendation without a stated confidence asks to
-   * be trusted blindly; one that admits 0.72 is making a claim a person can
-   * weigh. Derived here from how much the underlying signal actually supports
-   * the answer — never a decorative number.
+   * This scenario used to carry `confidence: 0.86 / 0.74 / 0.68`, rendered on
+   * the public landing as "86% Confidence". Those were literals. The comment
+   * that used to sit here claimed they were "derived from how much the
+   * underlying signal actually supports the answer"; that was false, and a
+   * fabricated number on the most-seen surface of the product poisons every
+   * honest number next to it.
+   *
+   * The landing runs no model and reads no live supply, so there is no
+   * confidence value to state. The result card therefore states WHAT the
+   * answer rests on — the reasoning the visitor just watched, and the fact
+   * that this is a demonstration — instead of scoring itself. Do not add a
+   * numeric confidence, certainty, accuracy, trust or match score here until a
+   * real, explainable one exists and its interpretation is part of the product
+   * contract.
    */
-  readonly confidence: number;
   /** Terms that route a free-text question to this scenario. */
   readonly match: readonly string[];
 }
@@ -208,7 +217,6 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r1",
     reasoningKeys: ["r1a", "r1b", "r1c"],
     decisionKey: "d1",
-    confidence: 0.86,
     match: ["elektrik", "electric", "электрик", "elektro"],
   },
   {
@@ -220,7 +228,6 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r2",
     reasoningKeys: ["r2a", "r2b", "r2c"],
     decisionKey: "d2",
-    confidence: 0.74,
     match: ["suvirin", "weld", "сварщик", "lasser", "schweiss", "schweiß"],
   },
   {
@@ -232,7 +239,6 @@ export const LANDING_SCENARIOS: readonly LandingScenario[] = [
     resultKey: "r3",
     reasoningKeys: ["r3a", "r3b", "r3c"],
     decisionKey: "d3",
-    confidence: 0.68,
     match: ["laisv", "available", "people", "žmon", "работник", "mensen", "verfügbar"],
   },
 ];

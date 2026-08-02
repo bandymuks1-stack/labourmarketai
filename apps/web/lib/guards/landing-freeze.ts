@@ -17,6 +17,19 @@ import { join } from "node:path";
  * test run and fails on any drift. Regenerating the baseline
  * (scripts/generate-landing-freeze-baseline.ts) is an owner-gated act: do it
  * only inside the explicit landing real-data replacement work.
+ *
+ * BASELINE REGENERATIONS ON RECORD
+ * --------------------------------
+ * W14 Slice 1 (owner directive 2026-08-02) — "Remove fabricated AI
+ * confidence". The hero rendered "Confidence 86%" from a literal in
+ * `landing-scenario.ts` (W14 audit P0-1). Removing it necessarily changed a
+ * frozen file (`hero-live-demo.tsx`) and the frozen `landing` namespace in
+ * lt/en/ru, so the baseline was regenerated as part of that directive. The
+ * regeneration touched exactly four hashes — the hero file and the three
+ * `*.landing` namespaces — and nothing else in the frozen set moved. The
+ * replacement is guarded permanently by `public-no-fabricated-confidence.test.ts`,
+ * so the freeze is not the only thing standing between the landing and that
+ * number coming back.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.

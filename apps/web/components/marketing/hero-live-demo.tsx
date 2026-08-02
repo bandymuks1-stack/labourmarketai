@@ -252,26 +252,25 @@ export function HeroLiveDemo() {
                 ))}
               </dl>
 
-              {/* CONFIDENCE — a recommendation without one asks to be trusted
-                  blindly. This one makes a claim the visitor can weigh. */}
-              <div className="mt-3 flex items-center gap-2.5 border-t border-ink-600 pt-2.5">
+              {/* WHAT THIS RESTS ON — a recommendation has to say what it is
+                  built from. It must NOT say how SURE it is.
+
+                  This row used to be a "Confidence 86%" meter driven by a
+                  literal in landing-scenario.ts. The landing runs no model and
+                  reads no live supply, so there was nothing to measure and the
+                  number was fabricated. It is replaced by the honest version of
+                  the same job: name the basis, and put the demonstration
+                  qualifier NEXT TO the claim instead of ~180 lines away in the
+                  badge. No score, no meter, no percentage. */}
+              <div
+                className="mt-3 flex flex-col gap-0.5 border-t border-ink-600 pt-2.5"
+                data-testid="hero-basis"
+              >
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                  {t("confidenceLabel")}
+                  {t("basisLabel")}
                 </span>
-                <span
-                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-700"
-                  aria-hidden
-                >
-                  <span
-                    className="block h-full rounded-full bg-brand-cyan"
-                    style={{ width: `${Math.round(scenario.confidence * 100)}%` }}
-                  />
-                </span>
-                <span
-                  className="font-mono text-meta text-brand-cyan"
-                  data-testid="hero-confidence"
-                >
-                  {Math.round(scenario.confidence * 100)}%
+                <span className="text-basis text-text-secondary">
+                  {t("basisNote", { count: scenario.reasoningKeys.length })}
                 </span>
               </div>
 
