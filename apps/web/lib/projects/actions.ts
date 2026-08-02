@@ -84,6 +84,12 @@ export async function assignWorkerToProjectAction(
   const workerProfileId = String(formData.get("worker_profile_id") ?? "").trim();
   if (!projectId || !workerProfileId) return { ok: false, code: "invalid" };
 
+  // W8 slice 1 — WORKSPACE GATE. `assign_worker_to_project` already enforces
+  // `can_manage_project` at the DB; this adds the missing ACTING-CONTEXT check
+  // so a project cannot be staffed from a workspace that is not acting for the
+  // owning company. Defence in depth, not a replacement for the RPC's own gate.
+  if (!(await callerCompanyId())) return { ok: false, code: "no_company" };
+
   const { error } = await asAny(supabase).rpc("assign_worker_to_project", {
     p_project_id: projectId,
     p_worker_profile_id: workerProfileId,

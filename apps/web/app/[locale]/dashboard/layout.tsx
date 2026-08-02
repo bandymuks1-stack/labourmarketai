@@ -16,6 +16,7 @@ import { SpineStream } from "@/components/app/spine-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
 import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
@@ -170,6 +171,19 @@ export default async function DashboardLayout({
         >
           LabourMarket<span className="text-gradient-accent">.ai</span>
         </Link>
+        {/* W8 slice 1 — THE ACTIVE WORKSPACE, in the FULL chrome too.
+            Every employer surface (/dashboard/company, …/scouting,
+            /dashboard/bookings, /dashboard/projects) renders here, and until
+            now the chip existed only in the conversation header — so the
+            employer had no organization indicator on exactly the screens where
+            they work, while the data behind those screens ignored the
+            workspace entirely (audit P0-1). This is the SAME component reading
+            the SAME auth-context workspace state; it is not a second switcher,
+            and `min-w-0` lets it truncate on a phone instead of pushing the
+            right-hand controls off screen. */}
+        <span className="flex min-w-0">
+          <WorkspaceChip />
+        </span>
         <DashboardTabs className="hidden md:flex" />
         <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
           <HeaderSearch />

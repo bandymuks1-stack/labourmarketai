@@ -9,6 +9,7 @@ import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportuniti
 import { getReportsView } from "@/lib/reports/reports-hub";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
 import { visibleRange } from "@/lib/planning/planning-model";
 import { loadAiWorkspaceContext } from "./ai-context";
@@ -388,6 +389,14 @@ export async function runFindWorkers(): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (ctx.identity !== "company") {
+    return blocked(t("blockedNotEmployer"), t("whyNotEmployer"));
+  }
+  // W8 slice 1: the company IDENTITY is not the same fact as an active company
+  // CONTEXT. Without the second one `listCompanyDemands` returns an empty list,
+  // and answering "your company has not posted a demand yet" would state
+  // something this workflow does not know. Blocked with the switch-space
+  // explanation instead of an invented emptiness.
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") {
     return blocked(t("blockedNotEmployer"), t("whyNotEmployer"));
   }
 

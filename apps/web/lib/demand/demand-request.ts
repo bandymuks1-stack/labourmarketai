@@ -17,6 +17,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import {
   hasMeaningfulEstimate,
@@ -132,6 +133,9 @@ export type DemandRequestResult =
         // update" instead of a generic "try again" that hides the real cause.
         | "needs_migration"
         | "empty_description"
+        // W8 slice 1: the caller is not acting for a company right now
+        // (personal workspace, unbound organization, company not owned…).
+        | "no_company_context"
         | "invalid_estimate";
     };
 
@@ -196,6 +200,13 @@ export async function submitDemandRequest(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "unauthenticated" };
+
+  // W8 slice 1 — WORKSPACE GATE. A structured employer need belongs to the
+  // company the person is acting for; creating one from the personal space (or
+  // from an organization with no company binding) would produce a row nothing
+  // can later attribute. Refused, never silently written to the profile.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { ok: false, code: "no_company_context" };
 
   const kind = INTENT_KIND[intent];
   const role = clamp(fields?.role, MAX_TITLE);

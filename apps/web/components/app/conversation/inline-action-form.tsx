@@ -12,6 +12,7 @@ import {
   dispatchWorkerAction,
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
+import { roleContextForAction } from "@/lib/conversation/action-role-context";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -98,7 +99,15 @@ export function InlineActionForm({
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.profileSaved, {
           surface: "conversation",
-          role_context: "worker",
+          // W8 slice 1 — TELEMETRY TRUTH. This was hardcoded `"worker"`, so
+          // every employer demand created in the chat was recorded as worker
+          // activity: the one funnel that could show employer intake was
+          // measuring the wrong role. Derived from the action id (the SAME
+          // `company.` / `agency.` namespaces the dispatcher routes on), using
+          // the EXISTING coarse role vocabulary from lib/telemetry/actions.ts
+          // — no new enum. No organization or company id is attached: the
+          // metadata contract is coarse role only.
+          role_context: roleContextForAction(spec.actionId),
           success: true,
         });
         setPhase({ kind: "done" });

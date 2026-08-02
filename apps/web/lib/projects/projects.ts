@@ -2,6 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  isEmployerContextFailure,
+  resolveEmployerCompanyContext,
+  type EmployerCompanyContext,
+} from "@/lib/company/employer-company-context";
 
 /**
  * Project read service (slice f4-worker-project-assignment-v1).
@@ -123,17 +128,45 @@ export async function listProjectAssignments(
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);
 }
 
-/** The caller's company id (for creating a project), or null. */
+/**
+ * The company the caller is ACTING FOR, resolved from the active workspace
+ * (W8 slice 1). Prefer this over `callerCompanyId` in any surface that can
+ * render a state, because it carries WHY there is no company.
+ */
+export async function callerCompanyContext(): Promise<EmployerCompanyContext> {
+  return resolveEmployerCompanyContext();
+}
+
+/**
+ * The caller's company id, or null.
+ *
+ * W8 slice 1 rewrote the body. It used to be
+ * `companies.select("id").eq("profile_id", user.id).maybeSingle()` with the
+ * `error` half of the response discarded — three separate defects in four
+ * lines:
+ *
+ *   1. it ignored the ACTIVE WORKSPACE entirely, so switching organizations
+ *      could not change which company's projects, planning, workforce, finance
+ *      or reports the person saw (audit P0-1);
+ *   2. `maybeSingle()` over a table whose uniqueness constraint is applied
+ *      CONDITIONALLY (`20260604120000` only adds `companies_profile_id_key`
+ *      when no duplicates existed at apply time) errors on a second row — and
+ *      with `error` dropped the caller received `null`, i.e. projects and the
+ *      planning project source went silently EMPTY instead of failing closed;
+ *   3. any transient DB or authorization failure was likewise indistinguishable
+ *      from "this person has no company".
+ *
+ * It now delegates to the ONE canonical resolver and returns null only for
+ * legitimately company-less states. An infrastructure failure is logged with
+ * its real reason before returning null, so observability never has to guess —
+ * and callers that can render a state should use `callerCompanyContext()`
+ * instead of collapsing every reason into a bare null.
+ */
 export async function callerCompanyId(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await asAny(supabase)
-    .from("companies")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  return data?.id ?? null;
+  const ctx = await resolveEmployerCompanyContext();
+  if (ctx.kind === "ok") return ctx.companyId;
+  if (isEmployerContextFailure(ctx.reason)) {
+    console.error("[projects] no employer company context", { reason: ctx.reason });
+  }
+  return null;
 }
