@@ -47,10 +47,34 @@ export async function runAiAgent<T = unknown>(
 
   // Append-only audit trail for real (live) runs — never blocks the outcome.
   if (cfg.state === "live" && outcome.routing) {
-    await persistAiRunAudit(outcome.routing, {
+    const persisted = await persistAiRunAudit(outcome.routing, {
       profileId: opts.profileId ?? null,
       requestContext: agent,
     });
+    if (!persisted) {
+      // W14 audit P0-2. `persistAiRunAudit` reports whether the row landed,
+      // and this boolean used to be DISCARDED — so a live run whose cost was
+      // never recorded looked exactly like one that was. The run itself is
+      // deliberately unaffected (persistence is best-effort and must never
+      // break a user-facing feature), but the loss is no longer silent: it is
+      // named where it happens, under a stable marker an operator can grep and
+      // alert on, and it says whether real money went unattributed.
+      //
+      // NOT an error: with the owner-gated `ai_runs` migration unapplied this
+      // is the EXPECTED steady state, and logging it at error level would
+      // train everyone to ignore it. It becomes actionable the moment the
+      // table exists.
+      //
+      // Deliberately omits the profile id, the prompt, the payload and the
+      // cost VALUE — the fact that attribution was lost is operational, the
+      // contents are not.
+      console.warn("[ai/cost] run not attributed — ai_runs insert did not land", {
+        agent,
+        tier: outcome.routing.selectedTier,
+        modelAlias: outcome.routing.modelAlias ?? "none",
+        hadActualCost: outcome.routing.actualCostUsd != null,
+      });
+    }
   }
 
   return outcome;
