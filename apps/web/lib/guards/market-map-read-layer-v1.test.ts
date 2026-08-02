@@ -360,6 +360,11 @@ describe("NO new DB migration in this PR", () => {
     // no drops, no DML), UNAPPLIED at merge; per the doctrine's conditional
     // prod-apply autonomy a GREEN classification permits MCP apply_migration
     // after merge. Still no migration from the market-map read layer.
-    expect(count).toBeLessThanOrEqual(168);
+    // Bumped 168 -> 169 for W9 slice 1 organization membership revocation
+    // (20260802160000_org_membership_revocation_v1, paired rollback). ONE new
+    // SECURITY DEFINER function on the engagement_contexts membership spine;
+    // RED by classification (SECURITY DEFINER + GRANT), UNAPPLIED at merge,
+    // owner-gated. Still no migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(169);
   });
 });

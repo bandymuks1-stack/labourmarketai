@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   addOrgMember,
+  endOrgMembership,
   setEngagementJournalReview,
 } from "@/lib/operations/org-membership";
 import type { OrgMember, AddableWorker } from "@/lib/operations/org-members";
@@ -23,6 +24,14 @@ export type OrgMembersPanelLabels = {
   allAdded: string;
   reviewEnabledBadge: string;
   reviewDisabledBadge: string;
+  /** W9 slice 1 — membership revocation. */
+  remove: string;
+  removeConfirm: string;
+  removeCancel: string;
+  removeReasonLabel: string;
+  ownerLocked: string;
+  removed: string;
+  roles: Readonly<Record<string, string>>;
 };
 
 /**
@@ -47,6 +56,23 @@ export function OrgMembersPanel({
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
   const [selected, setSelected] = useState<string>(addable[0]?.workerId ?? "");
+  // Removing a member is destructive for that person's access — it asks first,
+  // inline, and the reason it captures goes into the audit row.
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [reason, setReason] = useState<string>("");
+
+  function remove(engagementId: string) {
+    setMsg(null);
+    const why = reason.trim();
+    startTransition(async () => {
+      const res = await endOrgMembership(engagementId, why.length > 0 ? why : null);
+      setConfirming(null);
+      setReason("");
+      // `already_ended` is a success (idempotent), so ok covers both.
+      setMsg(res.ok ? labels.removed : (res.message ?? res.code));
+      router.refresh();
+    });
+  }
 
   function toggleReview(engagementId: string, next: boolean) {
     setMsg(null);
@@ -86,7 +112,13 @@ export function OrgMembersPanel({
               className="flex flex-col gap-2 rounded-md border border-ink-600 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               data-testid={`org-member-${m.engagementId}`}
             >
-              <span className="flex items-center gap-2 text-sm text-text-primary">
+              <span className="flex flex-wrap items-center gap-2 text-sm text-text-primary">
+                <span
+                  className="rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
+                  data-testid={`org-member-role-${m.engagementId}`}
+                >
+                  {labels.roles[m.role] ?? m.role}
+                </span>
                 <span
                   className={
                     m.reviewEnabled
@@ -98,16 +130,84 @@ export function OrgMembersPanel({
                 </span>
                 {m.name}
               </span>
-              <Button
-                type="button"
-                size="sm"
-                variant={m.reviewEnabled ? "ghost" : "primary"}
-                disabled={pending}
-                onClick={() => toggleReview(m.engagementId, !m.reviewEnabled)}
-                data-testid={`toggle-review-${m.engagementId}`}
-              >
-                {m.reviewEnabled ? labels.disable : labels.enable}
-              </Button>
+              <span className="flex flex-wrap items-center gap-2">
+                {/* Journal review is an employee-engagement flag — the RPC
+                    rejects any other slug, so the control is not offered. */}
+                {m.role === "employee" && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={m.reviewEnabled ? "ghost" : "primary"}
+                    disabled={pending}
+                    onClick={() => toggleReview(m.engagementId, !m.reviewEnabled)}
+                    data-testid={`toggle-review-${m.engagementId}`}
+                  >
+                    {m.reviewEnabled ? labels.disable : labels.enable}
+                  </Button>
+                )}
+                {m.isRegisteredOwner ? (
+                  <span
+                    className="text-meta text-text-muted"
+                    data-testid={`org-member-owner-locked-${m.engagementId}`}
+                  >
+                    {labels.ownerLocked}
+                  </span>
+                ) : confirming === m.engagementId ? (
+                  <span className="flex flex-wrap items-center gap-2">
+                    <label className="sr-only" htmlFor={`remove-reason-${m.engagementId}`}>
+                      {labels.removeReasonLabel}
+                    </label>
+                    <input
+                      id={`remove-reason-${m.engagementId}`}
+                      type="text"
+                      value={reason}
+                      maxLength={500}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder={labels.removeReasonLabel}
+                      className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 text-sm text-text-primary sm:w-56"
+                      data-testid={`remove-reason-${m.engagementId}`}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      disabled={pending}
+                      onClick={() => remove(m.engagementId)}
+                      data-testid={`confirm-remove-${m.engagementId}`}
+                    >
+                      {labels.removeConfirm}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={pending}
+                      onClick={() => {
+                        setConfirming(null);
+                        setReason("");
+                      }}
+                      data-testid={`cancel-remove-${m.engagementId}`}
+                    >
+                      {labels.removeCancel}
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={pending}
+                    onClick={() => {
+                      setMsg(null);
+                      setReason("");
+                      setConfirming(m.engagementId);
+                    }}
+                    data-testid={`remove-member-${m.engagementId}`}
+                  >
+                    {labels.remove}
+                  </Button>
+                )}
+              </span>
             </li>
           ))}
         </ul>

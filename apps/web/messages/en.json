@@ -6360,7 +6360,22 @@
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "allAdded": "All accepted workers are already added to the organization.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "remove": "Remove from organization",
+    "removeConfirm": "Confirm removal",
+    "removeCancel": "Cancel",
+    "removeReasonLabel": "Reason (optional)",
+    "ownerLocked": "Owner — cannot be removed",
+    "removed": "Membership ended. Their access to this organization is revoked.",
+    "roles": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "employee": "Employee",
+      "collaborator": "Partner",
+      "consultant": "Consultant",
+      "freelancer": "Freelancer",
+      "viewer": "Viewer"
+    }
   },
   "services": {
     "eyebrow": "Done-for-you",

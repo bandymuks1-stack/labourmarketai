@@ -1144,7 +1144,23 @@
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "allAdded": "Alle aksepterte arbeidere er allerede lagt til i organisasjonen.",
+    "remove": "Fjern fra organisasjonen",
+    "removeConfirm": "Bekreft fjerning",
+    "removeCancel": "Avbryt",
+    "removeReasonLabel": "Årsak (valgfritt)",
+    "ownerLocked": "Eier — kan ikke fjernes",
+    "removed": "Medlemskapet er avsluttet. Tilgangen til denne organisasjonen er trukket tilbake.",
+    "roles": {
+      "owner": "Eier",
+      "manager": "Leder",
+      "employee": "Ansatt",
+      "collaborator": "Partner",
+      "consultant": "Konsulent",
+      "freelancer": "Frilanser",
+      "viewer": "Leser"
+    }
   },
   "admin": {
     "mode": {

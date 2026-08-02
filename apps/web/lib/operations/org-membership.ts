@@ -83,6 +83,51 @@ export async function grantOrgManager(
   return { ok: code === "granted" || code === "already_manager", code };
 }
 
+/**
+ * END an organization membership (W9 slice 1, P0-1). The canonical revocation
+ * path: `end_org_membership_v1` moves the engagement to the existing terminal
+ * `status = 'ended'` — never a DELETE — after which EVERY server-side helper
+ * that gates organization authority stops recognising the person, because they
+ * all already filter `status = 'active'`:
+ *
+ *   - `manages_organization()`            (migration 0013)  → false
+ *   - `engagement_contexts_select` RLS    (0013)            → org rows hidden
+ *   - `journal_entries_select` RLS        (0013)            → org journal hidden
+ *   - `create_invitation_v1` sender gate  (20260712200000)  → not_authorized
+ *   - `review_journal_entry` authority    (20260530140000)  → not_authorized
+ *   - W6 experience org-subject rights    (experience_records v1) → lost
+ *
+ * There is deliberately NO W6-specific branch anywhere: authorization is
+ * recomputed naturally from the one canonical membership fact.
+ *
+ * Outcomes surfaced to the caller: `ended`, `already_ended` (idempotent),
+ * `last_owner`, `not_authorized`, `not_found`, `not_org_scoped`,
+ * `needs_migration` (42883 — the owner-gated migration is not applied yet, so
+ * the control is honestly unavailable rather than fake).
+ */
+export async function endOrgMembership(
+  engagementId: string,
+  reason: string | null = null,
+): Promise<MembershipResult> {
+  const supabase = await createClient();
+  await requireUser(supabase);
+  const { data, error } = await rpc(supabase, "end_org_membership_v1", {
+    p_engagement_id: engagementId,
+    p_reason: reason,
+  });
+  if (error) {
+    // 42883 = undefined_function: migration 20260802160000 not applied yet.
+    if (/42883/.test(error.message) || /end_org_membership_v1/.test(error.message)) {
+      return { ok: false, code: "needs_migration" };
+    }
+    return { ok: false, code: "error", message: error.message };
+  }
+  const outcome = String(
+    (data as { outcome?: unknown } | null)?.outcome ?? "error",
+  );
+  return { ok: outcome === "ended" || outcome === "already_ended", code: outcome };
+}
+
 /** Owner/manager opens a worker's journal for review (flag on the worker's
  *  employee engagement). */
 export async function setEngagementJournalReview(

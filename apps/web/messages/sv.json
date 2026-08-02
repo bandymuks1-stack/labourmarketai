@@ -1144,7 +1144,23 @@
     "noMembers": "No organization members yet. Add a worker below.",
     "noAddable": "No workers available to add. Invite a worker first, then they appear here.",
     "reviewEnabledBadge": "Review",
-    "reviewDisabledBadge": "No review"
+    "reviewDisabledBadge": "No review",
+    "allAdded": "Alla accepterade medarbetare är redan tillagda i organisationen.",
+    "remove": "Ta bort från organisationen",
+    "removeConfirm": "Bekräfta borttagning",
+    "removeCancel": "Avbryt",
+    "removeReasonLabel": "Orsak (valfritt)",
+    "ownerLocked": "Ägare — kan inte tas bort",
+    "removed": "Medlemskapet har avslutats. Åtkomsten till den här organisationen är återkallad.",
+    "roles": {
+      "owner": "Ägare",
+      "manager": "Chef",
+      "employee": "Medarbetare",
+      "collaborator": "Partner",
+      "consultant": "Konsult",
+      "freelancer": "Frilans",
+      "viewer": "Läsare"
+    }
   },
   "admin": {
     "mode": {

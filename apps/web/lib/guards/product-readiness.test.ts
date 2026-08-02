@@ -1899,7 +1899,14 @@ describe("no migration files added by this sprint", () => {
     // prod-apply autonomy (governance 2026-06-12) a GREEN classification
     // permits MCP apply_migration after merge. TS writes degrade honestly
     // (retry unstamped on undefined_column) until it is applied.
-    const SPRINT_BASELINE = 168;
+    // Bumped 168 -> 169 for W9 slice 1 organization membership revocation
+    // (20260802160000_org_membership_revocation_v1, paired rollback). ONE new
+    // SECURITY DEFINER function, zero schema change, zero RLS change, zero
+    // table-grant change, no DML, no DELETE — it moves a membership to the
+    // ALREADY-EXISTING terminal `engagement_contexts.status = 'ended'`.
+    // SECURITY DEFINER + GRANT EXECUTE classify it RED, so it ships UNAPPLIED
+    // and stays owner-gated; no `@human-gate-approved` marker was added.
+    const SPRINT_BASELINE = 169;
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });
