@@ -358,3 +358,98 @@ describe("entry point — no rating mechanism leaked in with it", () => {
     expect(FORM).not.toMatch(/value="neutral"|"neutral"\s*[,\]]/);
   });
 });
+
+/**
+ * W8 SLICE 1 ROLE DEFECT — the door must be open to every role the RESULT is.
+ *
+ * The `experiences` result declares `contexts: ["personal","organization",
+ * "project"]` precisely because the AUTHOR side of this domain is normally an
+ * employer acting from inside their organization. The action that opens it
+ * nevertheless kept `allowedRoles: ["worker"]`, so a company-only employer hit
+ * `not_authorized` at the conversation boundary and could never reach the
+ * result the registry had already opened to them.
+ *
+ * These pin the fix as a WIDENING of the existing action — never a second
+ * action and never a second experience system — and pin that widening a role
+ * list grants nothing: eligibility stays a server-side re-derivation.
+ */
+describe("W6 experiences — the entry action is reachable by every role the result serves", () => {
+  const REGISTRY = readFileSync(
+    join(__dirname, "..", "conversation", "action-registry.ts"),
+    "utf8",
+  );
+  const RESULTS = readFileSync(
+    join(__dirname, "..", "conversation", "result-registry.ts"),
+    "utf8",
+  );
+
+  /** The `allowedRoles` array of the experiences action, as source text. */
+  function experiencesAllowedRoles(): string[] {
+    const at = REGISTRY.indexOf('id: "worker.review-experiences"');
+    expect(at, "the experiences action must exist").toBeGreaterThan(-1);
+    const slice = REGISTRY.slice(at, at + 2000);
+    const m = slice.match(/allowedRoles:\s*\[([^\]]*)\]/);
+    expect(m, "the experiences action must declare allowedRoles").toBeTruthy();
+    return (m![1].match(/"([a-z]+)"/g) ?? []).map((s) => s.replace(/"/g, ""));
+  }
+
+  it("a company-only employer can invoke it (the W8 defect)", () => {
+    expect(experiencesAllowedRoles()).toContain("company");
+  });
+
+  it("an agency and a worker can invoke it too", () => {
+    const roles = experiencesAllowedRoles();
+    expect(roles).toContain("agency");
+    expect(roles).toContain("worker");
+  });
+
+  it("a role outside the registry vocabulary is never granted", () => {
+    for (const r of experiencesAllowedRoles()) {
+      expect(["worker", "company", "agency", "customer"]).toContain(r);
+    }
+  });
+
+  it("the action's roles cover every context the result declares", () => {
+    // The result is open in `organization`, which only company/agency identities
+    // ever stand in. If the result is organization-open, the action must admit
+    // an organization role — otherwise the door is narrower than the room.
+    const at = RESULTS.indexOf('kind: "experiences"');
+    expect(at).toBeGreaterThan(-1);
+    const ctx = RESULTS.slice(at, at + 3000).match(/contexts:\s*\[([^\]]*)\]/);
+    expect(ctx).toBeTruthy();
+    const contexts = (ctx![1].match(/"([a-z]+)"/g) ?? []).map((s) => s.replace(/"/g, ""));
+    expect(contexts).toContain("organization");
+    const roles = experiencesAllowedRoles();
+    expect(
+      roles.some((r) => r === "company" || r === "agency"),
+      "an organization-open result needs an organization-capable role",
+    ).toBe(true);
+  });
+
+  it("the fix stays ONE action — no second experiences entry point appeared", () => {
+    const ids = [...REGISTRY.matchAll(/id:\s*"([a-z]+\.[a-z-]*experience[a-z-]*)"/gi)]
+      .map((m) => m[1]);
+    expect(ids).toEqual(["worker.review-experiences"]);
+    // …and exactly one result kind opens from it.
+    const openedBy = [...RESULTS.matchAll(/openedBy:\s*\[([^\]]*)\]/g)]
+      .map((m) => m[1])
+      .filter((s) => s.includes("review-experiences"));
+    expect(openedBy).toHaveLength(1);
+  });
+
+  it("widening roles grants nothing — eligibility is still re-derived server-side", () => {
+    const entry = readFileSync(
+      join(__dirname, "..", "trust", "experience-entry.ts"),
+      "utf8",
+    );
+    // The subject is resolved from the canonical row, symmetrically, and the
+    // viewer must be a real party — a role can never stand in for that.
+    expect(entry).toMatch(/viewerId === ownerId/);
+    expect(entry).toMatch(/viewerId === workerProfile/);
+    // A non-party (or forged token) is answered `not_available`, never a leak.
+    expect(entry).toMatch(/not_available/);
+    // The action itself is a READ that writes nothing.
+    const at = REGISTRY.indexOf('id: "worker.review-experiences"');
+    expect(REGISTRY.slice(at, at + 2000)).toMatch(/confirmation:\s*"read"/);
+  });
+});
