@@ -34,6 +34,24 @@ const COMPANY_PROFILE = "aaaaaaaa-0000-0000-0000-000000000002";
 /** An interaction between two OTHER people — the forged-token target. */
 const STRANGER_INTERACTION = "dddddddd-0000-0000-0000-0000000000ff";
 
+/**
+ * Open the Context Panel's mobile fold if it is still closed.
+ *
+ * Below `lg` the panel is a collapsed sheet. It auto-expands when a result
+ * shows, but that effect runs after hydration — and under a COLD dev-server
+ * compile hydration can lose the race with the assertion timeout. That is
+ * exactly how this spec first failed: 1.3m per test on a cold server, passing
+ * in 15s warm. The product behaviour is fine; the spec was racing it. Opening
+ * the fold explicitly makes the assertion deterministic either way.
+ */
+async function openPanelFold(page: import("@playwright/test").Page): Promise<void> {
+  const toggle = page.getByTestId("context-panel-toggle");
+  await toggle.waitFor({ state: "visible", timeout: 60_000 }).catch(() => {});
+  if ((await toggle.count()) > 0 && (await toggle.getAttribute("aria-expanded")) === "false") {
+    await toggle.click();
+  }
+}
+
 let workerRowId = "";
 let requestId = "";
 /** Accepted + already started → eligible. */
@@ -215,6 +233,7 @@ test.describe("the chat offers one chip per real interaction", () => {
     await page.goto(
       `/lt/dashboard?result=experiences&interaction=accepted_booking:${futureBooking}`,
     );
+    await openPanelFold(page);
     await expect(page.getByTestId("experience-submit-blocked-not_yet")).toBeVisible({
       timeout: 60_000,
     });

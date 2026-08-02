@@ -54,6 +54,24 @@ async function assertNoRatingUi(page: Page): Promise<void> {
   await expect(page.locator("text=/\\b\\d{1,3}\\s?% (patikim|reliab|trust)/i")).toHaveCount(0);
 }
 
+/**
+ * Open the Context Panel's mobile fold if it is still closed.
+ *
+ * Below `lg` the panel is a collapsed sheet. It auto-expands when a result
+ * shows, but that effect runs after hydration — and under a COLD dev-server
+ * compile hydration can lose the race with the assertion timeout. That is
+ * exactly how this spec first failed: 1.3m per test on a cold server, passing
+ * in 15s warm. The product behaviour is fine; the spec was racing it. Opening
+ * the fold explicitly makes the assertion deterministic either way.
+ */
+async function openPanelFold(page: import("@playwright/test").Page): Promise<void> {
+  const toggle = page.getByTestId("context-panel-toggle");
+  await toggle.waitFor({ state: "visible", timeout: 60_000 }).catch(() => {});
+  if ((await toggle.count()) > 0 && (await toggle.getAttribute("aria-expanded")) === "false") {
+    await toggle.click();
+  }
+}
+
 let workerProfileId = "";
 let recordId = "";
 
@@ -193,6 +211,7 @@ test.describe("worker self view", () => {
   test("mobile 375px: nothing overflows", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(EXPERIENCES);
+    await openPanelFold(page);
     await expect(page.getByTestId("experiences-result")).toBeVisible({ timeout: 60_000 });
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

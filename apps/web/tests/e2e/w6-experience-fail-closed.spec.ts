@@ -29,6 +29,24 @@ test.skip(
   "fail-closed run only: set W6_FAIL_CLOSED=1 with the domain migration rolled back",
 );
 
+/**
+ * Open the Context Panel's mobile fold if it is still closed.
+ *
+ * Below `lg` the panel is a collapsed sheet. It auto-expands when a result
+ * shows, but that effect runs after hydration — and under a COLD dev-server
+ * compile hydration can lose the race with the assertion timeout. That is
+ * exactly how this spec first failed: 1.3m per test on a cold server, passing
+ * in 15s warm. The product behaviour is fine; the spec was racing it. Opening
+ * the fold explicitly makes the assertion deterministic either way.
+ */
+async function openPanelFold(page: import("@playwright/test").Page): Promise<void> {
+  const toggle = page.getByTestId("context-panel-toggle");
+  await toggle.waitFor({ state: "visible", timeout: 60_000 }).catch(() => {});
+  if ((await toggle.count()) > 0 && (await toggle.getAttribute("aria-expanded")) === "false") {
+    await toggle.click();
+  }
+}
+
 test.use({ storageState: HAS_SESSION ? WORKER_STATE : undefined });
 test.setTimeout(120_000);
 
@@ -71,6 +89,7 @@ test("the result degrades to a product-level unavailable state — no crash, no 
 test("mobile 375px: the unavailable state is readable and does not overflow", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(EXPERIENCES);
+  await openPanelFold(page);
   await expect(page.getByTestId("experiences-result-unavailable")).toBeVisible({
     timeout: 60_000,
   });

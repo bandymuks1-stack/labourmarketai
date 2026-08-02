@@ -108,3 +108,43 @@ The e2e specs were retargeted rather than deleted: `w6-experience-domain.spec.ts
 3. **Apply the production migration** `20260802120000_experience_records_v1.sql`.
 
 They are three different decisions with three different blast radii. Decision 1 costs nothing to reverse; decision 3 changes production schema and privileges.
+
+**3D — the entry point: submission becomes reachable, and only from a real interaction.**
+
+3C closed the architecture and left one honest gap: `ExperienceSubmitForm` had no mount point. The shortest path to a working button was a generic "leave a review" control on the profile, the CV, the person page or the experiences result — and every one of those forces the SERVER to accept a subject the client picked. The owner directive forbids all six placements, and the reason is the design: **a generic entry point makes the interaction an argument instead of a fact.**
+
+*The entry point is the interaction itself.* `lib/trust/experience-entry.ts` answers two questions entirely server-side: which of my REAL interactions could ground an experience right now (`eligible` / `already_submitted` / `not_yet`), and — for one named interaction — may this viewer submit and who is the subject. The client sends a `kind:uuid` token and nothing else that matters. **The subject is RESOLVED from the canonical row, never accepted from the caller**, so a forged subject/interaction pair cannot even be expressed. Participation, completion and duplicate state are re-derived here — and again in SQL inside `submit_experience_record` under `security definer`. Two independent derivations, because the UI layer is allowed to be wrong.
+
+*The eligibility doctrine was not relaxed to suit the UI.* Completion runs through `isInteractionCompleted` from the pure contract — the same predicate the SQL encodes — so an accepted booking before its start date renders `not_yet` rather than widening the rule. All three contract kinds are covered: `accepted_booking` (booking_requests), `completed_engagement` (engagement_contexts, both directions — worker→organization and manager→worker, which produce DIFFERENT subject types and is precisely why the subject cannot come from the client), `concluded_service_request` (service_offering_requests).
+
+*The surfaces.* The chat asks the server which interactions qualify and emits **one chip per interaction**, carrying that interaction's own token (`xp:<kind>:<uuid>`) — there is no chip id meaning "leave an experience" in general, so no chip can open an unbound form. The three no-chip states are three different sentences: everything already described, nothing finished yet, and could-not-read — the last is never rendered as "you have nothing to describe". The chip opens `?result=experiences&interaction=<kind>:<uuid>`, a new DEPTH on the existing result (same mechanism as the market result's `geo`/`project`) — **no new route, no new screen**. The form mounts only inside the loader's `eligible` branch; already-submitted, not-yet, not-available, unavailable and not-authenticated each return before it. A duplicate shows the existing record's state instead of a second form.
+
+*One deliberate coarseness.* `not_a_party` and `does_not_exist` return the SAME answer. Two distinct answers would be an existence oracle for interactions between other people.
+
+**Guard and test honesty notes.**
+- `goal3-project-evaluation` pinned the depth-clearing list as a literal string; a third depth was added, so it is now pinned as an INVARIANT (whatever opening a result clears, closing must clear too), which survives a fourth.
+- The i18n-debt ratchet correctly caught 5 untranslated Danish keys. They were **translated, not baselined away**.
+- Two of my own new tests first used LEXICAL checks for "rating" and "neutral" and flagged the product's own honesty copy ("never a rating", "no neutral option") — the same trap already documented in `w6-experience-domain.spec.ts`. Both are now structural: star glyphs, scored testids, numeric inputs, and the literal sentiment pair.
+- The mobile fail-closed test failed once on a COLD dev server (1.3m per test) and passed warm (15s). The product was fine; the spec was racing the panel's post-hydration auto-expand. All three mobile tests now open the Context Panel fold explicitly instead of relying on that race.
+
+**Slice 3D validation.**
+
+| Gate | Result |
+|---|---|
+| Product Gate | **GREEN — 0 violations, 0 new surfaces** |
+| vitest | **12642 / 12642**, 793 files |
+| `tsc` / `lint` | clean / 0 errors (22 pre-existing warnings, none in the new files) |
+| `next build` | clean, 799 static pages |
+| Browser — entry point | `w6-experience-entry-point.spec.ts` **8/8** (chip-per-interaction, not-yet, forged token, malformed token, duplicate, mobile 375, other-party independence) |
+| Browser — domain | `w6-experience-domain.spec.ts` **9/9** |
+| Browser — positive admin | `w6-experience-moderation-admin.spec.ts` **2/2** |
+| Browser — fail-closed (rolled back) | `w6-experience-fail-closed.spec.ts` **2/2** |
+| SQL domain proof | **43 / 43** (unchanged — 3D touched no SQL) |
+
+Local DB was returned to the applied state after the fail-closed run.
+
+### VERDICT
+
+`W6_SLICE_3_EXPERIENCE_MODERATION_DISPUTES_CODE_COMPLETE_PENDING_HUMAN_GATE`
+
+Migration-safety stays RED by design. PR #974 stays Draft + `needs-human-gate`. Not merged. Production migration NOT applied. Telegram not sent. W7 not started.
