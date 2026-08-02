@@ -1,5 +1,4 @@
 # Applied Migration Ledger
-# Applied Migration Ledger
 
 > Human-readable record of migrations **actually applied to prod**
 > (`gorgitwvdzxbnaxhrsrw`), who approved each, and what it did. Source of truth

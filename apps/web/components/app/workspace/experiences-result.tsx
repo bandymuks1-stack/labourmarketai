@@ -6,10 +6,13 @@ import { useTranslations } from "next-intl";
 import { ExperienceCountsBlock } from "@/components/app/experience-counts-block";
 import { ExperienceDisputeForm } from "@/components/app/experience-dispute-form";
 import { ExperienceResponseForm } from "@/components/app/experience-response-form";
+import { ExperienceSubmitForm } from "@/components/app/experience-submit-form";
 import {
   loadExperiencesResultAction,
   type ExperiencesResultView,
 } from "@/lib/trust/experience-result-actions";
+import { loadExperienceSubmitContextAction } from "@/lib/trust/experience-entry-actions";
+import type { ExperienceSubmitContext } from "@/lib/trust/experience-entry";
 import type { ExperienceRow } from "@/lib/trust/experience-records";
 
 /**
@@ -52,7 +55,24 @@ type Phase =
   | { readonly kind: "failed" }
   | { readonly kind: "loaded"; readonly view: ExperiencesResultView };
 
-export function ExperiencesResult() {
+export function ExperiencesResult({
+  interactionToken = null,
+  onBack,
+}: {
+  /** Slice 3D: the submit depth. Null = the list. */
+  interactionToken?: string | null;
+  onBack?: () => void;
+} = {}) {
+  // THE SUBMIT DEPTH IS A DIFFERENT QUESTION, so it is a different render —
+  // not a form spliced into the list. A person who arrived here from one
+  // finished interaction is answering about THAT interaction and nothing else.
+  if (interactionToken) {
+    return <ExperienceSubmitDepth token={interactionToken} onBack={onBack} />;
+  }
+  return <ExperiencesList />;
+}
+
+function ExperiencesList() {
   const t = useTranslations("experience");
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
   // Bumping this re-runs the read — that is the whole of RETRY.
@@ -185,6 +205,173 @@ export function ExperiencesResult() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+/**
+ * THE SUBMIT DEPTH — `?result=experiences&interaction=<kind>:<uuid>`.
+ *
+ * The form mounts if and ONLY if the server says this viewer may describe this
+ * interaction. The token in the URL is a REQUEST, never a permission: the
+ * loader re-reads the canonical interaction row, confirms the viewer is one of
+ * its two real parties, confirms it is finished by the pure contract's own
+ * predicate, RESOLVES THE SUBJECT from the row, and checks whether this author
+ * already described it. Only then does a form exist.
+ *
+ * A forged `subject`/`interaction` pair is not merely rejected here — it
+ * cannot be expressed. The client never sends a subject at all; it names an
+ * interaction, and the server decides who that interaction was with.
+ *
+ * The four ways there is no form are four different sentences, because they
+ * mean four different things to the person: not finished yet, not something
+ * you can describe, you already described it, and the domain is unavailable
+ * here. None of them is a technical error message, and none is a fake success.
+ */
+function ExperienceSubmitDepth({
+  token,
+  onBack,
+}: {
+  token: string;
+  onBack?: () => void;
+}) {
+  const t = useTranslations("experience");
+  const [ctx, setCtx] = useState<ExperienceSubmitContext | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setCtx(null);
+    setFailed(false);
+    loadExperienceSubmitContextAction(token)
+      .then((c) => {
+        if (!cancelled) setCtx(c);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const back = onBack ? (
+    <button
+      type="button"
+      onClick={onBack}
+      data-testid="experience-submit-back"
+      className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+    >
+      {t("entry.backToExperiences")}
+    </button>
+  ) : null;
+
+  if (failed) {
+    return (
+      <div className="flex flex-col gap-3" data-testid="experience-submit-error">
+        <p role="alert" className="text-basis text-text-primary">
+          {t("result.error")}
+        </p>
+        {back}
+      </div>
+    );
+  }
+
+  if (ctx === null) {
+    return (
+      <p
+        className="text-basis text-text-muted"
+        data-testid="experience-submit-loading"
+        role="status"
+      >
+        {t("result.loading")}
+      </p>
+    );
+  }
+
+  if (ctx.state === "not_authenticated") {
+    return (
+      <p className="text-basis text-text-secondary" data-testid="experiences-result-signin" role="status">
+        {t("result.signIn")}
+      </p>
+    );
+  }
+
+  if (ctx.state === "unavailable") {
+    return (
+      <section
+        className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-1/40 p-3"
+        data-testid="experiences-result-unavailable"
+        role="status"
+      >
+        <p className="text-basis text-text-primary">{t("page.unavailableTitle")}</p>
+        <p className="text-meta leading-relaxed text-text-secondary">
+          {t("page.unavailableBody")}
+        </p>
+      </section>
+    );
+  }
+
+  if (ctx.state === "error") {
+    return (
+      <div className="flex flex-col gap-3" data-testid="experience-submit-error">
+        <p role="alert" className="text-basis text-text-primary">
+          {t("result.error")}
+        </p>
+        {back}
+      </div>
+    );
+  }
+
+  if (ctx.state === "already_submitted") {
+    // NO second form. One interaction, one record — and the person is told
+    // the record exists rather than being allowed to write a second one and
+    // discover the duplicate only after pressing send.
+    return (
+      <div className="flex flex-col gap-3" data-testid="experience-submit-duplicate">
+        <p className="text-basis text-text-primary" role="status">
+          {t("entry.alreadySubmitted")}
+        </p>
+        <p className="text-meta leading-relaxed text-text-secondary">
+          {t("entry.alreadySubmittedHint")}
+        </p>
+        {back}
+      </div>
+    );
+  }
+
+  if (ctx.state === "not_eligible") {
+    return (
+      <div className="flex flex-col gap-3" data-testid={`experience-submit-blocked-${ctx.reason}`}>
+        <p className="text-basis text-text-primary" role="status">
+          {ctx.reason === "not_yet" ? t("entry.notYet") : t("entry.notAvailable")}
+        </p>
+        <p className="text-meta leading-relaxed text-text-secondary">
+          {t("entry.blockedHint")}
+        </p>
+        {back}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="experience-submit-depth">
+      <p className="text-meta leading-relaxed text-text-secondary">
+        {t("entry.groundedIn", {
+          interaction: t(`interaction.${ctx.kind}`),
+          context: ctx.contextLabel ?? t("entry.noContextLabel"),
+        })}
+      </p>
+      {/* Subject and interaction come from the SERVER's resolution, not from
+          anything the client chose. The RPC re-derives them anyway. */}
+      <ExperienceSubmitForm
+        subjectType={ctx.subjectType}
+        subjectId={ctx.subjectId}
+        interactionKind={ctx.kind}
+        interactionId={ctx.interactionId}
+        subjectLabel={ctx.contextLabel ?? t(`interaction.${ctx.kind}`)}
+      />
+      {back}
     </div>
   );
 }

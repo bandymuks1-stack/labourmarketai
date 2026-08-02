@@ -38,6 +38,7 @@ import {
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
+import { loadExperienceInvitationsAction } from "@/lib/trust/experience-entry-actions";
 import type { ResultContext, ResultKind } from "@/lib/conversation/result-registry";
 import {
   AiWorkspaceBridge,
@@ -126,6 +127,19 @@ export type ChatLabels = {
   chipAttachPhoto: string;
   chipAttachCv: string;
   userAttachPhoto: string;
+  // ── W6 slice 3D — the experience entry point ──────────────────────────────
+  /** Eligible finished interactions exist; one chip follows per interaction. */
+  experiencesEligible: string;
+  /** Everything finished has already been described — an honest full stop. */
+  experiencesAllSubmitted: string;
+  /** Nothing finished yet. Said plainly, never dressed up as an invitation. */
+  experiencesNothingYet: string;
+  /** The domain is not available here (owner-gated migration) or the read
+   *  failed — never rendered as "you have nothing to describe". */
+  experiencesUnavailable: string;
+  /** The chip verb. Always followed by the interaction it belongs to. */
+  experienceLeave: string;
+
 };
 
 
@@ -470,6 +484,10 @@ export function ConversationChat({
    * `startProfileSummaryRef` — a ref, not a second copy of the hook.
    */
   const openResultRef = useRef<(kind: ResultKind) => void>(() => {});
+  /** Late-bound for the same reason as `openResultRef`: the chip handler is
+   *  declared above `useResultParam()`, and the experience handoff needs the
+   *  ONE writer that sets result + interaction in a single push. */
+  const selectInteractionRef = useRef<(token: string) => void>(() => {});
 
   /** The REAL search request (employer/opportunity read) — its own typing
    *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
@@ -707,6 +725,75 @@ export function ConversationChat({
   startPlayerCardRef.current = startPlayerCard;
 
   /**
+   * THE EXPERIENCE ENTRY POINT (W6 slice 3D).
+   *
+   * This is the ONLY way a person reaches the experience submit form, and it
+   * is deliberately not a button. `ExperienceSubmitForm` needs a real finished
+   * interaction as its context — an interaction kind, an id, both parties and
+   * a resolved subject — and a generic "leave a review" control anywhere would
+   * force the SERVER to accept a subject the client picked. So the chat asks
+   * the server which of the person's REAL interactions could ground an
+   * experience, and offers one chip per interaction.
+   *
+   * THE ANSWER IS ALWAYS THE REAL STATE, and the three states are three
+   * different sentences because they mean different things:
+   *   - eligible interactions exist → one chip each, each carrying its own
+   *     `kind:uuid` token;
+   *   - everything finished is already described → said plainly, no chips;
+   *   - nothing is finished yet → said plainly, no chips.
+   * There is never a chip that opens an empty form, and never a prompt to
+   * describe someone the person has not actually worked with.
+   *
+   * The panel still SHOWS and the chat EXPLAINS — same split as the player
+   * card and the calendar. The chip pushes the depth into the URL, so the form
+   * survives a reload and Back returns to the list.
+   */
+  const startExperiences = useCallback(() => {
+    setTyping(true);
+    loadExperienceInvitationsAction()
+      .then((res) => {
+        setTyping(false);
+        if (res.state !== "list") {
+          // Unavailable / not authenticated / read failure are NOT rendered as
+          // "you have nothing to describe" — that would be a claim about the
+          // person's work, made because a table was missing.
+          assistant(labels.experiencesUnavailable);
+          openResultRef.current("experiences");
+          return;
+        }
+        const eligible = res.invitations.filter((i) => i.state === "eligible");
+        const submitted = res.invitations.filter((i) => i.state === "already_submitted");
+        if (eligible.length > 0) {
+          const chips: ChoiceChip[] = eligible.slice(0, 4).map((i) => ({
+            // The token IS the chip: there is no chip that means "leave an
+            // experience" in general.
+            id: `xp:${i.kind}:${i.interactionId}`,
+            label: i.contextLabel
+              ? `${labels.experienceLeave}: ${i.contextLabel}`
+              : labels.experienceLeave,
+          }));
+          assistant(labels.experiencesEligible, chips);
+        } else if (submitted.length > 0) {
+          assistant(labels.experiencesAllSubmitted);
+        } else {
+          assistant(labels.experiencesNothingYet);
+        }
+        openResultRef.current("experiences");
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.experiencesUnavailable);
+      });
+  }, [
+    assistant,
+    labels.experiencesUnavailable,
+    labels.experiencesEligible,
+    labels.experiencesAllSubmitted,
+    labels.experiencesNothingYet,
+    labels.experienceLeave,
+  ]);
+
+  /**
    * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
    * inbox (same RLS-scoped reads the messages page uses), shows only the
    * threads that genuinely await this person, and offers a reply that is
@@ -916,7 +1003,14 @@ export function ConversationChat({
           startFindWork();
           break;
         default:
-          if (chip.id.startsWith("f:")) {
+          if (chip.id.startsWith("xp:")) {
+            // W6 slice 3D — the interaction-bound handoff. The chip carries a
+            // `kind:uuid` token and NOTHING else; it opens the result at the
+            // submit depth, where the SERVER re-derives participation,
+            // completion, the subject and duplicate state before any form
+            // exists. A chip is a request to look, never a permission.
+            selectInteractionRef.current(chip.id.slice(3));
+          } else if (chip.id.startsWith("f:")) {
             openForm(chip.id.slice(2));
           } else if (chip.id.startsWith("link:")) {
             // Contextual navigation to a REAL canonical surface (rebuild W4)
@@ -1012,6 +1106,12 @@ export function ConversationChat({
         startPlayerCard();
         return;
       }
+      if (intent === "experiences") {
+        // W6 slice 3D — the real state of the person's experiences, plus one
+        // chip per interaction they could actually describe. Never a form.
+        startExperiences();
+        return;
+      }
       if (intent === "calendar-view") {
         // Real agenda readback from the canonical Time Engine (async, own
         // typing cue) — no longer a bare navigation hint.
@@ -1064,7 +1164,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, openForm, identity],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, openForm, identity],
   );
 
   const nav = {
@@ -1109,16 +1209,20 @@ export function ConversationChat({
     geography,
     geoToken,
     projectId,
+    interactionToken,
     openResult,
     closeResult,
     selectGeography,
     selectProject,
+    selectInteraction,
     clearGeography,
     clearProject,
+    clearInteraction,
   } = useResultParam();
   // Bind the late-bound opener: the find-work flow above calls this to put its
   // answer in the panel instead of drawing a second card list in the thread.
   openResultRef.current = openResult;
+  selectInteractionRef.current = selectInteraction;
   const resultContext: ResultContext = auth0?.activeOrgName
     ? "organization"
     : "personal";
@@ -1140,6 +1244,10 @@ export function ConversationChat({
       geography,
       geoToken,
       projectId,
+      // W6 slice 3D — the experiences result's depth travels the same way: an
+      // opaque validated token in, a "step back up" callback out. The panel
+      // still learns nothing about interactions, bookings or engagements.
+      interactionToken,
       // Null means "no organization is active" — the panel renders its own
       // localized word for that rather than this layer inventing one.
       workspace: auth0?.activeOrgName ?? null,
@@ -1147,16 +1255,19 @@ export function ConversationChat({
       onSelectProject: selectProject,
       onBackToMarket: clearGeography,
       onBackToProjects: clearProject,
+      onBackToExperiences: clearInteraction,
     }),
     [
       geography,
       geoToken,
       projectId,
+      interactionToken,
       auth0?.activeOrgName,
       selectGeography,
       selectProject,
       clearGeography,
       clearProject,
+      clearInteraction,
     ],
   );
 

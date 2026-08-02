@@ -3323,6 +3323,11 @@
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
+      "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
+      "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
+      "experiencesUnavailable": "[EN] I could not read the experiences. Nothing was changed.",
+      "experienceLeave": "[EN] Leave an experience",
       "userLogWork": "Jeg vil registrere arbeidet mitt",
       "userFindWork": "[EN] Find work",
       "historyTitle": "Tidligere samtale",
@@ -4016,6 +4021,16 @@
     "panel": {
       "title": "[EN] Experience moderation",
       "help": "[EN] Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
+    },
+    "entry": {
+      "backToExperiences": "[EN] Back to experiences",
+      "alreadySubmitted": "[EN] You have already described this interaction.",
+      "alreadySubmittedHint": "[EN] One interaction, one experience. The existing record's state is in your experiences list.",
+      "notYet": "[EN] This interaction cannot be described yet.",
+      "notAvailable": "[EN] This interaction cannot be described.",
+      "blockedHint": "[EN] Nothing was saved.",
+      "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
+      "noContextLabel": "[EN] no further description"
     }
   }
 }

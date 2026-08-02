@@ -10825,6 +10825,11 @@
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "translateBlocked": "Ik heb nog geen echte vertaling, dus ik verzin er geen. Je ziet het bericht in de originele taal; zodra vertaling is ingeschakeld toon ik beide teksten.",
       "writeEmployerHint": "Een werkgever kun je berichten vanuit een concrete vacature. Typ “werk zoeken” — ik toon echte behoeften, van daaruit kun je contact opnemen.",
+      "experiencesEligible": "Ik vond afgeronde interacties die je kunt beschrijven. Kies welke.",
+      "experiencesAllSubmitted": "Je hebt elke afgeronde interactie al beschreven. Eén interactie, één ervaring.",
+      "experiencesNothingYet": "Er is nog geen afgeronde interactie om te beschrijven. Een ervaring is gebaseerd op echt werk dat is afgerond.",
+      "experiencesUnavailable": "Ik kon de ervaringen niet lezen. Er is niets gewijzigd.",
+      "experienceLeave": "Ervaring achterlaten",
       "userLogWork": "Ik wil mijn werk vastleggen",
       "userFindWork": "Werk zoeken",
       "historyTitle": "Eerder gesprek",
@@ -11720,6 +11725,16 @@
     "panel": {
       "title": "Ervaringsmoderatie",
       "help": "Interne wachtrij. Elk besluit heeft een reden nodig; die komt in het auditspoor en wordt nooit gepubliceerd."
+    },
+    "entry": {
+      "backToExperiences": "Terug naar ervaringen",
+      "alreadySubmitted": "Je hebt deze interactie al beschreven.",
+      "alreadySubmittedHint": "Eén interactie, één ervaring. De status van het bestaande record staat in je lijst.",
+      "notYet": "Deze interactie kan nog niet beschreven worden.",
+      "notAvailable": "Deze interactie kan niet beschreven worden.",
+      "blockedHint": "Er is niets opgeslagen.",
+      "groundedIn": "Gebaseerd op deze interactie: {interaction} · {context}",
+      "noContextLabel": "geen verdere omschrijving"
     }
   }
 }

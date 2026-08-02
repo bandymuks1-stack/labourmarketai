@@ -3323,6 +3323,11 @@
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "Jeg fandt afsluttede samarbejder, du kan beskrive. Vælg hvilket.",
+      "experiencesAllSubmitted": "Du har allerede beskrevet alle afsluttede samarbejder. Ét samarbejde, én erfaring.",
+      "experiencesNothingYet": "Der er endnu ikke et afsluttet samarbejde at beskrive. En erfaring bygger på reelt arbejde, der er afsluttet.",
+      "experiencesUnavailable": "Jeg kunne ikke læse erfaringerne. Intet blev ændret.",
+      "experienceLeave": "Efterlad en erfaring",
       "userLogWork": "Jeg vil registrere mit arbejde",
       "userFindWork": "[EN] Find work",
       "historyTitle": "Tidligere samtale",
@@ -4016,6 +4021,16 @@
     "panel": {
       "title": "Moderation af erfaringer",
       "help": "Intern kø. Hver beslutning kræver en begrundelse; den gemmes i revisionssporet og offentliggøres aldrig."
+    },
+    "entry": {
+      "backToExperiences": "Tilbage til erfaringer",
+      "alreadySubmitted": "Du har allerede beskrevet denne interaktion.",
+      "alreadySubmittedHint": "Én interaktion, én erfaring. Den eksisterende posts status står på din liste.",
+      "notYet": "Denne interaktion kan endnu ikke beskrives.",
+      "notAvailable": "Denne interaktion kan ikke beskrives.",
+      "blockedHint": "Intet blev gemt.",
+      "groundedIn": "Bygger på denne interaktion: {interaction} · {context}",
+      "noContextLabel": "ingen yderligere beskrivelse"
     }
   }
 }

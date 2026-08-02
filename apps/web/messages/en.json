@@ -10825,6 +10825,11 @@
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "experiencesEligible": "I found finished interactions you can describe. Pick which one.",
+      "experiencesAllSubmitted": "You have already described every finished interaction. One interaction, one experience.",
+      "experiencesNothingYet": "There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
+      "experiencesUnavailable": "I could not read the experiences. Nothing was changed.",
+      "experienceLeave": "Leave an experience",
       "userLogWork": "I want to log my work",
       "userFindWork": "Find work",
       "historyTitle": "Earlier conversation",
@@ -11720,6 +11725,16 @@
     "panel": {
       "title": "Experience moderation",
       "help": "Internal queue. Every decision needs a reason; the reason goes into the audit trail and is never published."
+    },
+    "entry": {
+      "backToExperiences": "Back to experiences",
+      "alreadySubmitted": "You have already described this interaction.",
+      "alreadySubmittedHint": "One interaction, one experience. The existing record's state is in your experiences list.",
+      "notYet": "This interaction cannot be described yet.",
+      "notAvailable": "This interaction cannot be described.",
+      "blockedHint": "Nothing was saved.",
+      "groundedIn": "Grounded in this interaction: {interaction} · {context}",
+      "noContextLabel": "no further description"
     }
   }
 }

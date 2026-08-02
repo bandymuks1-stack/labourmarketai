@@ -10825,6 +10825,11 @@
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "translateBlocked": "Ich habe noch keine echte Übersetzung, also fälsche ich keine. Du siehst die Nachricht in der Originalsprache; sobald Übersetzung aktiviert ist, zeige ich beide Texte.",
       "writeEmployerHint": "Einem Arbeitgeber kannst du aus einem konkreten Angebot schreiben. Schreib „Arbeit suchen“ — ich zeige echte Bedarfe, von dort kannst du Kontakt aufnehmen.",
+      "experiencesEligible": "Ich habe abgeschlossene Interaktionen gefunden, die du schildern kannst. Wähle welche.",
+      "experiencesAllSubmitted": "Du hast bereits jede abgeschlossene Interaktion geschildert. Eine Interaktion, eine Erfahrung.",
+      "experiencesNothingYet": "Es gibt noch keine abgeschlossene Interaktion zum Schildern. Eine Erfahrung beruht auf echter, beendeter Arbeit.",
+      "experiencesUnavailable": "Die Erfahrungen konnten nicht gelesen werden. Es wurde nichts geändert.",
+      "experienceLeave": "Erfahrung schildern",
       "userLogWork": "Ich möchte meine Arbeit erfassen",
       "userFindWork": "Arbeit suchen",
       "historyTitle": "Früheres Gespräch",
@@ -11720,6 +11725,16 @@
     "panel": {
       "title": "Erfahrungs-Moderation",
       "help": "Interne Warteschlange. Jede Entscheidung braucht einen Grund; er wird im Audit-Trail festgehalten und nie veröffentlicht."
+    },
+    "entry": {
+      "backToExperiences": "Zurück zu den Erfahrungen",
+      "alreadySubmitted": "Du hast diese Interaktion bereits geschildert.",
+      "alreadySubmittedHint": "Eine Interaktion, eine Erfahrung. Den Stand des vorhandenen Eintrags siehst du in deiner Liste.",
+      "notYet": "Diese Interaktion kann noch nicht geschildert werden.",
+      "notAvailable": "Diese Interaktion kann nicht geschildert werden.",
+      "blockedHint": "Es wurde nichts gespeichert.",
+      "groundedIn": "Beruht auf dieser Interaktion: {interaction} · {context}",
+      "noContextLabel": "ohne weitere Beschreibung"
     }
   }
 }

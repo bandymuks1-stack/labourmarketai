@@ -19,6 +19,10 @@ const CHAT_KEYS = [
   "writeEmployerHint",
   // W7 slice 2 — intent-aware attach.
   "attachChoice", "chipAttachPhoto", "chipAttachCv", "userAttachPhoto",
+  // W6 slice 3D — the experience entry point. Four states because the answer
+  // is always the person's REAL state, never a prompt to write something.
+  "experiencesEligible", "experiencesAllSubmitted", "experiencesNothingYet",
+  "experiencesUnavailable", "experienceLeave",
 ] as const;
 
 const WORKLOG_KEYS = [
