@@ -70,18 +70,11 @@ export type {
   WorkerLanguageFact,
 } from "./match-criteria-v2";
 
-/** Real `worker_skills.source` tiers, strongest first. */
-export type EvidenceTier = "manager_confirmed" | "work_journal" | "self_declared";
-
-/** Map a stored `worker_skills.source` value to the evidence tier. Pure;
- *  unknown/missing sources fall back to the weakest (self_declared) — never
- *  inflated. Lives here (not in the server-only read layer) so it is
- *  unit-testable. */
-export function sourceToEvidence(source: string | null | undefined): EvidenceTier {
-  if (source === "manager_confirmed") return "manager_confirmed";
-  if (source === "work_journal") return "work_journal";
-  return "self_declared";
-}
+/** W6 slice 1: the tier type + mapper were promoted to the ONE canonical
+ *  module — re-exported here so every existing import keeps working. */
+export type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+export { sourceToEvidence } from "@/lib/evidence/evidence-tier";
+import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 
 /** Need-context coverage weight per evidence tier (manager > journal > self).
  *  Used ONLY to classify the need-context match status — never exposed or

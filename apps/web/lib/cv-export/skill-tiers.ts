@@ -12,6 +12,8 @@
  * Pure + deterministic so the honesty guard can pin it with fixtures.
  */
 
+import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
+
 export type CvSkillTier = "confirmed" | "evidence" | "declared";
 
 export type CvSkillTierInput = {
@@ -23,14 +25,14 @@ export type CvSkillTierInput = {
 };
 
 export function cvSkillTier(s: CvSkillTierInput): CvSkillTier {
-  if (s.verified === true) return "confirmed";
-  // An inconsistent row (manager_confirmed provenance but verified flag not
-  // true) is deliberately UNDER-stated as evidence, never as confirmed.
-  if (
-    s.journalSupported === true ||
-    s.source === "work_journal" ||
-    s.source === "manager_confirmed"
-  ) {
+  // W6 slice 1: derived from the ONE canonical tier. The CV's deliberate
+  // extra rule stays: an inconsistent row (manager_confirmed source WITHOUT
+  // the verified flag) is UNDER-stated as evidence, never as confirmed —
+  // deriveEvidenceTier only awards the top rung on verified===true, so that
+  // rule is now enforced by the canonical derivation itself.
+  const tier = deriveEvidenceTier(s);
+  if (tier === "manager_confirmed") return "confirmed";
+  if (tier === "work_journal" || s.journalSupported === true || s.source === "manager_confirmed") {
     return "evidence";
   }
   return "declared";

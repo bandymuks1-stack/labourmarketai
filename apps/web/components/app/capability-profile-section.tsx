@@ -65,6 +65,7 @@ export function CapabilityProfileSection({
 }) {
   const t = useTranslations("capabilityProfile");
   const tEng = useTranslations("journal.cv");
+  const tTier = useTranslations("evidenceTier");
   const tRel = useTranslations("relationshipTypes");
   const tGroups = useTranslations();
   const locale = useLocale();
@@ -363,6 +364,34 @@ export function CapabilityProfileSection({
                       className="mt-3 flex flex-col gap-3 border-t border-ink-600 pt-3"
                       data-testid="capability-worker-skill-groups"
                     >
+                      {/* W6 slice 1: the dots finally carry their meaning —
+                          an EVIDENCE-assurance legend, never a person
+                          reputation. The numeric score stays unrendered. */}
+                      <ul
+                        className="flex flex-wrap items-center gap-x-4 gap-y-1"
+                        data-testid="confidence-bin-legend"
+                        aria-label={tTier("binLegendTitle")}
+                      >
+                        {([
+                          ["red", "binLegendRed"],
+                          ["green", "binLegendGreen"],
+                          ["yellow", "binLegendYellow"],
+                        ] as const).map(([bin, key]) => (
+                          <li
+                            key={bin}
+                            className="flex items-center gap-1.5 text-meta leading-relaxed text-text-muted"
+                          >
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "inline-block size-2 flex-none rounded-full",
+                                BIN_DOT[bin],
+                              )}
+                            />
+                            {tTier(key)}
+                          </li>
+                        ))}
+                      </ul>
                       {groupSkillsByFunction(workerSkillDots).map(
                         ({ group, items }) => (
                           <div key={group} className="flex flex-col gap-1.5">

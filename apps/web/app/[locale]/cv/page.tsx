@@ -65,6 +65,7 @@ export default async function VerifiedCvPage({
   const tProf = await getTranslations("professions");
   const tSkill = await getTranslations("skillNames");
   const tRel = await getTranslations("relationshipTypes");
+  const tTier = await getTranslations("evidenceTier");
   const tRole = await getTranslations("auth.signup.role");
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
@@ -658,6 +659,15 @@ export default async function VerifiedCvPage({
                       {tRel.has(row.confirmerRole)
                         ? tRel(row.confirmerRole)
                         : row.confirmerRole}
+                      {/* W6 slice 1: automatic never renders identically. */}
+                      {row.automatic ? (
+                        <span
+                          className="text-zinc-500"
+                          data-testid="cv-proof-auto-confirm-qualifier"
+                        >
+                          {" "}· {tTier("autoConfirmQualifier")}
+                        </span>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

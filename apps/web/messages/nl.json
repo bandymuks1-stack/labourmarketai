@@ -491,7 +491,7 @@
       "evidence": {
         "title": "Profiel- en bewijscijfers",
         "totalSkills": "Vaardigheden",
-        "workSupported": "Onderbouwd met werkregels",
+        "workSupported": "Onderbouwd door werkdagboek-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Journaalregels",
         "confirmations": "Bevestigingen",
@@ -1046,7 +1046,7 @@
       "addAction": "Voeg vaardigheden toe in je profiel",
       "legend": "Zelf opgegeven — wat je zelf hebt vermeld; Uit werk — onderbouwd door je journaalvermeldingen; Met registraties — onderbouwd door je beoordeelde vermeldingen.",
       "status": {
-        "confirmed": "Met registraties",
+        "confirmed": "Bevestigd door een managersvermelding",
         "suggested": "Uit werk",
         "self_declared": "Nog niet beoordeeld"
       }
@@ -1173,13 +1173,13 @@
     "note": "Dit zijn signalen uit bestaande gegevens, geen beoordeling of score. Werknemers worden niet gerangschikt op wie de \"beste\" is.",
     "journalEntries": "Journaalvermeldingen",
     "declaredSkills": "Opgegeven vaardigheden",
-    "confirmedSkills": "Gekoppelde vaardigheden",
+    "confirmedSkills": "Door manager bevestigde vaardigheden",
     "openReview": "Wacht op beoordeling",
     "lastActivity": "Laatste activiteit"
   },
   "workerEvidence": {
     "title": "Werkregistraties & vaardigheden",
-    "confirmed": "Met registraties",
+    "confirmed": "Bevestigd door een managersvermelding",
     "selfDeclared": "Wacht op beoordeling",
     "systemEntries": "Werkvermeldingen",
     "empty": "Begin met het opbouwen van je CV — maak je eerste vermelding aan.",
@@ -1197,7 +1197,7 @@
       "hint": "Wacht tot je manager, de bedrijfseigenaar of een externe (klant)manager het beoordeelt."
     },
     "confirmed": {
-      "label": "Met registraties",
+      "label": "Bevestigd door een manager",
       "hint": "Onderbouwd door je beoordeelde werkregistraties."
     }
   },
@@ -1315,7 +1315,7 @@
     "profileLink": "Mijn vaardigheden",
     "source": {
       "recognized": "Herkend uit tekst",
-      "confirmed": "Met registraties",
+      "confirmed": "Bevestigd door een manager",
       "manual": "Handmatig gekoppeld"
     },
     "reviewHeading": "Eerdere koppelingen",
@@ -6493,9 +6493,9 @@
         "workCard": "Werkkaart"
       }
     },
-    "verifiedTitle": "Vaardigheden met registraties",
+    "verifiedTitle": "Door manager bevestigde vaardigheden",
     "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
-    "journalSupportedLabel": "Door werk gestaafd",
+    "journalSupportedLabel": "Onderbouwd door werkdagboek-invoer",
     "journalSupportedHint": "Vaardigheden die je werklogboek ondersteunt — sterker dan zelfverklaard; wachten op bevestiging door de manager.",
     "latestEvidenceLabel": "Laatste registraties",
     "latestEvidenceEmpty": "Nog geen registraties — je eerste journaalitem wordt de eerste.",
@@ -6541,7 +6541,7 @@
       "skillsEntries": "{count, plural, one {# notitie} other {# notities}}",
       "skillsNoEvidence": "Nog geen notities",
       "skillsLegendTitle": "Wat de kleuren betekenen",
-      "skillsTierVerified": "Door anderen als juist gemarkeerd",
+      "skillsTierVerified": "Bevestigd door een managersvermelding",
       "skillsTierJournal": "Zichtbaar in je werknotities",
       "skillsTierDeclared": "Zelf opgegeven — nog geen notities",
       "skillsAria": "Vaardigheden en hoeveel van je werknotities elk daarvan noemen.",
@@ -6747,8 +6747,8 @@
   "trust": {
     "title": "Vertrouwenssignalen",
     "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
-    "verifiedSkills": "Gekoppelde vaardigheden",
-    "managerConfirmations": "Beoordeelde registraties",
+    "verifiedSkills": "Door manager bevestigde vaardigheden",
+    "managerConfirmations": "Managerbevestigingen",
     "journalEntries": "Journaalitems",
     "zeroHint": "Vertrouwenssignalen groeien door echt werk: schrijf een journaalitem en maak je profiel compleet."
   },
@@ -6769,12 +6769,12 @@
     "skills": "Vaardigheden",
     "skillsEmpty": "Nog geen vaardigheden opgeslagen.",
     "tiers": {
-      "confirmed": "Door manager bevestigd",
-      "evidence": "Onderbouwd door werkregistraties",
+      "confirmed": "Bevestigd door een managersvermelding",
+      "evidence": "Onderbouwd door werkdagboek-invoer",
       "declared": "Zelf opgegeven"
     },
     "summary": {
-      "verifiedSkills": "Bevestigde vaardigheden",
+      "verifiedSkills": "Door manager bevestigde vaardigheden",
       "managerConfirmations": "Managerbevestigingen",
       "journalEntries": "Dagboekregistraties"
     },
@@ -6798,7 +6798,7 @@
     "achievementsTitle": "Prestaties",
     "projectsTitle": "Projecten",
     "projectsHint": "Uit werkregistraties",
-    "confirmedByManager": "Met registraties",
+    "confirmedByManager": "Bevestigd door een manager",
     "templates": {
       "label": "Sjabloon",
       "standard": "Standaard",
@@ -6847,7 +6847,7 @@
       "writtenHeadline": "{n, plural, one {Je hebt deze week # werkitem vastgelegd} other {Je hebt deze week # werkitems vastgelegd}}",
       "emptyHeadline": "Een nieuwe week — het eerste item ligt nog voor je.",
       "entries": "Items",
-      "confirmed": "Beoordeeld",
+      "confirmed": "Bevestigd door een manager",
       "hours": "Beoordeelde uren"
     },
     "path": {
@@ -8938,7 +8938,7 @@
       "worker": {
         "title": "Profiel- en bewijssamenvatting",
         "totalSkills": "Vaardigheden",
-        "workSupported": "Onderbouwd met werkregistraties",
+        "workSupported": "Onderbouwd door werkdagboek-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Dagboekregistraties",
         "confirmations": "Bevestigingen",
@@ -9541,8 +9541,8 @@
     "experienceYears": "{n} jr ervaring",
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die je mag zien.",
-    "skillVerified": "Met managerregistratie",
-    "skillWorkBacked": "Door werk gestaafd",
+    "skillVerified": "Bevestigd door een managersvermelding",
+    "skillWorkBacked": "Onderbouwd door werkdagboek-invoer",
     "skillDeclared": "Zelf opgegeven",
     "skillsLegend": "Met managerregistratie — een managerregistratie hoort bij de vaardigheid. Door werk gestaafd — zichtbaar uit werkjournaal-invoeren. Zelf opgegeven — door de persoon toegevoegd.",
     "skillsReadError": "Vaardigheden konden nu niet worden geladen. Probeer het zo opnieuw."
@@ -9776,7 +9776,7 @@
       "limit": "Limiet bereikt.",
       "selfStated": "Door jou ingevuld.",
       "declaredBadge": "Zelf opgegeven",
-      "confirmedBadge": "Met registraties"
+      "confirmedBadge": "Bevestigd door een manager"
     },
     "achievementTypes": {
       "achievement": "Prestatie",
@@ -11518,5 +11518,18 @@
       "unmapped": "{count, plural, one {nog # kans zonder opgegeven plaats — te vinden in de chatzoekfunctie} other {nog # kansen zonder opgegeven plaats — te vinden in de chatzoekfunctie}}",
       "unmappedOnly": "{count, plural, one {# echte kans heeft geen opgegeven plaats en kan niet getekend worden — vind hem in de chatzoekfunctie} other {# echte kansen hebben geen opgegeven plaats en kunnen niet getekend worden — vind ze in de chatzoekfunctie}}."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "Bevestigd door een managersvermelding",
+    "workJournal": "Onderbouwd door werkdagboek-invoer",
+    "selfDeclared": "Zelf opgegeven",
+    "autoConfirmQualifier": "bevestigd volgens een vooraf ingestelde regel",
+    "binLegendTitle": "Bewijszekerheid",
+    "binLegendRed": "nog geen registraties",
+    "binLegendGreen": "eerste registraties",
+    "binLegendYellow": "onderbouwd door registraties en bevestigingen",
+    "entryConfirmed": "Bevestigd door een manager",
+    "managerConfirmedCount": "Door manager bevestigde vaardigheden",
+    "managerConfirmations": "Managerbevestigingen"
   }
 }

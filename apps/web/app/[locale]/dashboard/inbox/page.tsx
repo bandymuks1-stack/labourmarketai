@@ -31,6 +31,7 @@ export default async function InboxPage({
   setRequestLocale(locale);
   const t = await getTranslations("journal");
   const tField = await getTranslations("journal");
+  const tTier = await getTranslations("evidenceTier");
   const tUnit = await getTranslations("productivityUnits");
   const tSkill = await getTranslations("skillNames");
 
@@ -143,11 +144,19 @@ export default async function InboxPage({
   const { data: confRows } = await supabase
     .from("journal_entry_confirmations")
     .select("confirmation_scope");
+  let autoConfirmedCount = 0;
   if (Array.isArray(confRows)) {
-    confirmedCount = confRows.filter((r) => {
-      const s = (r as { confirmation_scope?: { action?: string; decision?: string } | null }).confirmation_scope ?? null;
-      return s?.decision === "approved" || s?.action === "confirm";
-    }).length;
+    const scopes = confRows.map(
+      (r) =>
+        (r as { confirmation_scope?: { action?: string; decision?: string } | null })
+          .confirmation_scope ?? null,
+    );
+    confirmedCount = scopes.filter(
+      (s) => s?.decision === "approved" || s?.action === "confirm" || s?.action === "auto_confirm",
+    ).length;
+    // W6 slice 1: policy-written rows are surfaced with their honest marker —
+    // an automatic confirmation never hides inside the confirmed count.
+    autoConfirmedCount = scopes.filter((s) => s?.action === "auto_confirm").length;
   }
 
   // Manager Evidence Review Clarity v1 — the inbox lists only unconfirmed
@@ -193,6 +202,14 @@ export default async function InboxPage({
           {t("inbox.reviewClarity.lead")}
         </p>
         <EvidenceStatusStrip active={reviewLegend} data-testid="inbox-evidence-status-strip" />
+        {autoConfirmedCount > 0 ? (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="inbox-auto-confirm-note"
+          >
+            {autoConfirmedCount} · {tTier("autoConfirmQualifier")}
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-x-4">
           <Link
             href="/dashboard/inbox/quick"

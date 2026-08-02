@@ -491,7 +491,7 @@
       "evidence": {
         "title": "Profilio ir įrodymų rodikliai",
         "totalSkills": "Įgūdžiai",
-        "workSupported": "Pagrįsti darbo įrašais",
+        "workSupported": "Pagrįsta darbo žurnalo įrašais",
         "confirmed": "Patvirtinti",
         "journalEntries": "Žurnalo įrašai",
         "confirmations": "Patvirtinimai",
@@ -1046,7 +1046,7 @@
       "addAction": "Pridėti įgūdžių profilyje",
       "legend": "Savideklaruota — jūsų nurodyta; Iš darbų — pagrįsta jūsų žurnalo įrašais; Su įrašais — pagrįsta jūsų peržiūrėtais įrašais.",
       "status": {
-        "confirmed": "Su įrašais",
+        "confirmed": "Patvirtinta vadovo įrašu",
         "suggested": "Iš darbų",
         "self_declared": "Savideklaruota"
       }
@@ -1173,13 +1173,13 @@
     "note": "Tai signalai iš esamų duomenų, o ne reitingas ar įvertinimas. Darbuotojai nerikiuojami pagal „geriausią“.",
     "journalEntries": "Žurnalo įrašai",
     "declaredSkills": "Nurodyti įgūdžiai",
-    "confirmedSkills": "Susieti įgūdžiai",
+    "confirmedSkills": "Vadovo patvirtinti įgūdžiai",
     "openReview": "Laukia peržiūros",
     "lastActivity": "Paskutinė veikla"
   },
   "workerEvidence": {
     "title": "Darbo įrašai ir įgūdžiai",
-    "confirmed": "Su įrašais",
+    "confirmed": "Patvirtinta vadovo įrašu",
     "selfDeclared": "Laukia peržiūros",
     "systemEntries": "Darbo įrašai",
     "empty": "Pradėkite pildyti CV — sukurkite pirmą įrašą.",
@@ -1197,7 +1197,7 @@
       "hint": "Laukia, kol jūsų vadovas, įmonės savininkas arba išorinis (kliento) vadovas tai peržiūrės."
     },
     "confirmed": {
-      "label": "Su įrašais",
+      "label": "Patvirtinta vadovo",
       "hint": "Pagrįsta jūsų peržiūrėtais darbo įrašais."
     }
   },
@@ -1315,7 +1315,7 @@
     "profileLink": "Mano įgūdžiai",
     "source": {
       "recognized": "Atpažinta iš teksto",
-      "confirmed": "Su įrašais",
+      "confirmed": "Patvirtinta vadovo",
       "manual": "Susieta rankiniu būdu"
     },
     "reviewHeading": "Ankstesni ryšiai",
@@ -6493,9 +6493,9 @@
         "workCard": "Darbo kortelė"
       }
     },
-    "verifiedTitle": "Įgūdžiai su įrašais",
+    "verifiedTitle": "Vadovo patvirtinti įgūdžiai",
     "verifiedEmpty": "Tokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.",
-    "journalSupportedLabel": "Pagrįsta darbu",
+    "journalSupportedLabel": "Pagrįsta darbo žurnalo įrašais",
     "journalSupportedHint": "Įgūdžiai, kuriuos paremia tavo darbo žurnalo įrašai.",
     "latestEvidenceLabel": "Naujausias įrašas",
     "latestEvidenceEmpty": "Įrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.",
@@ -6541,7 +6541,7 @@
       "skillsEntries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
       "skillsNoEvidence": "Dar be įrašų",
       "skillsLegendTitle": "Ką rodo spalvos",
-      "skillsTierVerified": "Kiti pažymėjo kaip tikslų",
+      "skillsTierVerified": "Patvirtinta vadovo įrašu",
       "skillsTierJournal": "Matosi tavo darbo įrašuose",
       "skillsTierDeclared": "Nurodei pats — dar be įrašų",
       "skillsAria": "Įgūdžiai ir kiek tavo darbo įrašų kiekvieną jų mini.",
@@ -6747,8 +6747,8 @@
   "trust": {
     "title": "Pasitikėjimo signalai",
     "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
-    "verifiedSkills": "Susieti įgūdžiai",
-    "managerConfirmations": "Peržiūrėti įrašai",
+    "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
+    "managerConfirmations": "Vadovo patvirtinimai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimo signalai auga iš realaus darbo: užfiksuok žurnalo įrašą ir papildyk savo profilį."
   },
@@ -6769,13 +6769,13 @@
     "skills": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių dar neišsaugota.",
     "tiers": {
-      "confirmed": "Su įrašais",
-      "evidence": "Paremta darbo įrašais",
-      "declared": "Nurodyta pačių"
+      "confirmed": "Patvirtinta vadovo įrašu",
+      "evidence": "Pagrįsta darbo žurnalo įrašais",
+      "declared": "Pateikta paties"
     },
     "summary": {
-      "verifiedSkills": "Susieti įgūdžiai",
-      "managerConfirmations": "Peržiūrėti įrašai",
+      "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
+      "managerConfirmations": "Vadovo patvirtinimai",
       "journalEntries": "Žurnalo įrašai"
     },
     "proofTitle": "CV darbo įrašai",
@@ -6798,7 +6798,7 @@
     "achievementsTitle": "Pasiekimai",
     "projectsTitle": "Projektai",
     "projectsHint": "Iš darbo įrašų",
-    "confirmedByManager": "Su įrašais",
+    "confirmedByManager": "Patvirtinta vadovo",
     "templates": {
       "label": "Šablonas",
       "standard": "Standartinis",
@@ -6847,7 +6847,7 @@
       "writtenHeadline": "{n, plural, one {Šią savaitę užrašei # darbo įrašą} few {Šią savaitę užrašei # darbo įrašus} other {Šią savaitę užrašei # darbo įrašų}}",
       "emptyHeadline": "Nauja savaitė — pirmas jos įrašas dar laukia tavęs.",
       "entries": "Įrašai",
-      "confirmed": "Peržiūrėta",
+      "confirmed": "Patvirtinta vadovo",
       "hours": "Peržiūrėtos val."
     },
     "path": {
@@ -8938,7 +8938,7 @@
       "worker": {
         "title": "Profilio ir įrodymų santrauka",
         "totalSkills": "Įgūdžiai",
-        "workSupported": "Pagrįsti darbo įrašais",
+        "workSupported": "Pagrįsta darbo žurnalo įrašais",
         "confirmed": "Patvirtinti",
         "journalEntries": "Žurnalo įrašai",
         "confirmations": "Patvirtinimai",
@@ -9541,9 +9541,9 @@
     "experienceYears": "{n} m. patirtis",
     "skillsTitle": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių, kuriuos galite matyti, nėra.",
-    "skillVerified": "Su vadovo įrašu",
-    "skillWorkBacked": "Pagrįsta darbu",
-    "skillDeclared": "Nurodyta paties",
+    "skillVerified": "Patvirtinta vadovo įrašu",
+    "skillWorkBacked": "Pagrįsta darbo žurnalo įrašais",
+    "skillDeclared": "Pateikta paties",
     "skillsLegend": "Su vadovo įrašu — įgūdį lydi vadovo įrašas. Pagrįsta darbu — matoma iš darbo žurnalo įrašų. Nurodyta paties — žmogaus įrašyta.",
     "skillsReadError": "Įgūdžių šiuo metu nepavyko įkelti. Pabandykite netrukus dar kartą."
   },
@@ -9775,8 +9775,8 @@
       "invalid": "Netinkama reikšmė.",
       "limit": "Pasiektas įrašų limitas.",
       "selfStated": "Įrašyta jūsų pačių.",
-      "declaredBadge": "Nurodyta pačių",
-      "confirmedBadge": "Su įrašais"
+      "declaredBadge": "Pateikta paties",
+      "confirmedBadge": "Patvirtinta vadovo"
     },
     "achievementTypes": {
       "achievement": "Pasiekimas",
@@ -11518,5 +11518,18 @@
       "unmapped": "{count, plural, one {dar # galimybė be nurodytos vietos — ji matoma pokalbio paieškoje} few {dar # galimybės be nurodytos vietos — jos matomos pokalbio paieškoje} other {dar # galimybių be nurodytos vietos — jos matomos pokalbio paieškoje}}",
       "unmappedOnly": "{count, plural, one {# reali galimybė yra be nurodytos vietos, todėl žemėlapyje jos parodyti negalima — ją rasi pokalbio paieškoje} other {# realios galimybės yra be nurodytos vietos, todėl žemėlapyje jų parodyti negalima — jas rasi pokalbio paieškoje}}."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "Patvirtinta vadovo įrašu",
+    "workJournal": "Pagrįsta darbo žurnalo įrašais",
+    "selfDeclared": "Pateikta paties",
+    "autoConfirmQualifier": "patvirtinta pagal iš anksto nustatytą taisyklę",
+    "binLegendTitle": "Įrodymų užtikrintumas",
+    "binLegendRed": "įrašų dar nėra",
+    "binLegendGreen": "pirmieji įrašai",
+    "binLegendYellow": "pagrįsta įrašais ir patvirtinimais",
+    "entryConfirmed": "Patvirtinta vadovo",
+    "managerConfirmedCount": "Vadovo patvirtinti įgūdžiai",
+    "managerConfirmations": "Vadovo patvirtinimai"
   }
 }

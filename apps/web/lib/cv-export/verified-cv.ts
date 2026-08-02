@@ -67,6 +67,9 @@ export type VerifiedCvProofRow = {
   /** Confirmer's relationship ROLE (manager / owner / external_manager) —
    *  deliberately never the person's name (default-closed, §4). */
   confirmerRole: string;
+  /** W6 slice 1: true when the confirmation was written by the policy-gated
+   *  auto-confirm RPC — rendered with a factual qualifier, never hidden. */
+  automatic: boolean;
 };
 
 export type VerifiedCvLanguage = { lang: string; level: string };
@@ -390,6 +393,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       entryId: string;
       confirmedAt: string;
       confirmerRole: string;
+      automatic: boolean;
     }[] = [];
     for (const c of confs ?? []) {
       const scope = c.confirmation_scope as {
@@ -404,6 +408,9 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         entryId: c.entry_id,
         confirmedAt: c.created_at,
         confirmerRole: c.confirmer_role,
+        // W6 slice 1: policy-written rows carry their honest marker through
+        // to the render — automatic never looks identical to hand-confirmed.
+        automatic: scope?.action === "auto_confirm",
       });
       const pid = entryById.get(c.entry_id)?.projectId;
       if (pid) projectIds.add(pid);
@@ -430,6 +437,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         entryDate: entry?.createdAt ?? row.confirmedAt,
         projectTitle: pid ? (projectTitleById.get(pid) ?? null) : null,
         confirmerRole: row.confirmerRole,
+        automatic: row.automatic,
       });
     }
     proof.sort((a, b) => (a.confirmedAt < b.confirmedAt ? 1 : -1));

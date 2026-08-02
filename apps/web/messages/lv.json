@@ -1546,7 +1546,7 @@
   "trust": {
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
-    "verifiedSkills": "[EN] Confirmed skills",
+    "verifiedSkills": "[EN] Manager-confirmed skills",
     "managerConfirmations": "[EN] Manager confirmations",
     "journalEntries": "[EN] Journal entries",
     "zeroHint": "[EN] Trust grows from real work: log a journal entry, and ask the manager who was there to confirm it."
@@ -1561,9 +1561,9 @@
     "skills": "Prasmes",
     "skillsEmpty": "Prasmes vēl nav saglabātas.",
     "tiers": {
-      "confirmed": "Vadītāja apstiprināts",
-      "evidence": "Pamatots ar darba ierakstiem",
-      "declared": "Paša norādīts"
+      "confirmed": "[EN] Confirmed by a manager's record",
+      "evidence": "[EN] Backed by work journal entries",
+      "declared": "[EN] Self-declared"
     },
     "tierHints": {
       "confirmed": "vadītājs apstiprināja, pamatojoties uz īstu darba ierakstu",
@@ -1571,8 +1571,8 @@
       "declared": "paša cilvēka norādīts, ārēji neapstiprināts"
     },
     "summary": {
-      "verifiedSkills": "Apstiprinātas prasmes",
-      "managerConfirmations": "Vadītāja apstiprinājumi",
+      "verifiedSkills": "[EN] Manager-confirmed skills",
+      "managerConfirmations": "[EN] Manager confirmations",
       "journalEntries": "Žurnāla ieraksti"
     },
     "proofTitle": "Apstiprināti darba pierādījumi",
@@ -1602,7 +1602,7 @@
       "writtenHeadline": "[EN] {n, plural, one {You recorded # work entry this week} other {You recorded # work entries this week}}",
       "emptyHeadline": "[EN] A new week — its first entry is still ahead of you.",
       "entries": "[EN] Entries",
-      "confirmed": "[EN] Confirmed",
+      "confirmed": "[EN] Confirmed by a manager",
       "hours": "[EN] Confirmed hrs"
     },
     "path": {
@@ -1629,9 +1629,9 @@
     }
   },
   "playerCard": {
-    "verifiedTitle": "[EN] Confirmed skills",
+    "verifiedTitle": "[EN] Manager-confirmed skills",
     "verifiedEmpty": "[EN] No confirmed skills yet. They appear when a manager confirms your journal entries.",
-    "journalSupportedLabel": "Balstīts žurnālā",
+    "journalSupportedLabel": "[EN] Backed by work journal entries",
     "journalSupportedHint": "Prasmes, ko apstiprina jūsu darba žurnāla ieraksti — spēcīgāk nekā pašdeklarēts; gaida vadītāja apstiprinājumu.",
     "latestEvidenceLabel": "[EN] Latest records",
     "latestEvidenceEmpty": "[EN] No records entries yet — your first journal entry will be the first.",
@@ -1694,7 +1694,7 @@
       "skillsEntries": "[EN] {count, plural, one {# record} other {# records}}",
       "skillsNoEvidence": "[EN] No records yet",
       "skillsLegendTitle": "[EN] What the colours mean",
-      "skillsTierVerified": "[EN] Marked accurate by others",
+      "skillsTierVerified": "[EN] Confirmed by a manager's record",
       "skillsTierJournal": "[EN] Visible in your work records",
       "skillsTierDeclared": "[EN] You listed it — no records yet",
       "skillsAria": "[EN] Skills and how many of your work records mention each one.",
@@ -2429,9 +2429,9 @@
     "experienceYears": "{n} g. pieredze",
     "skillsTitle": "Prasmes",
     "skillsEmpty": "Nav prasmju, ko drīkstat redzēt.",
-    "skillVerified": "Apstiprināts",
-    "skillWorkBacked": "Pamatots ar darbu",
-    "skillDeclared": "Paša norādīts",
+    "skillVerified": "[EN] Confirmed by a manager's record",
+    "skillWorkBacked": "[EN] Backed by work journal entries",
+    "skillDeclared": "[EN] Self-declared",
     "skillsLegend": "Apstiprināts — apstiprinājis vadītājs. Pamatots ar darbu — redzams no darba žurnāla ierakstiem. Paša norādīts — pievienojusi pati persona, vēl nav pārbaudīts."
   },
   "marketMapBase": {
@@ -3813,5 +3813,18 @@
       "unmapped": "[EN] {count} without a mappable place",
       "unmappedOnly": "[EN] {count} items have no mappable place yet, so there is nothing to draw."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "[EN] Confirmed by a manager's record",
+    "workJournal": "[EN] Backed by work journal entries",
+    "selfDeclared": "[EN] Self-declared",
+    "autoConfirmQualifier": "[EN] confirmed by a preset rule",
+    "binLegendTitle": "[EN] Evidence assurance",
+    "binLegendRed": "[EN] no records yet",
+    "binLegendGreen": "[EN] first records",
+    "binLegendYellow": "[EN] substantiated by records and confirmations",
+    "entryConfirmed": "[EN] Confirmed by a manager",
+    "managerConfirmedCount": "[EN] Manager-confirmed skills",
+    "managerConfirmations": "[EN] Manager confirmations"
   }
 }

@@ -43,6 +43,7 @@ export async function EvidenceDecisionTimeline({
   events: readonly ReviewTimelineEvent[];
 }) {
   const t = await getTranslations("journal");
+  const tTier = await getTranslations("evidenceTier");
 
   return (
     <ol
@@ -93,6 +94,16 @@ export async function EvidenceDecisionTimeline({
                   {roleLabel ? (
                     <span className="text-text-muted">
                       · {t("entry.reviewedBy")} {roleLabel}
+                    </span>
+                  ) : null}
+                  {/* W6 slice 1: an automatic confirmation never looks
+                      identical to a hand one — small, factual qualifier. */}
+                  {ev.automatic ? (
+                    <span
+                      className="text-text-muted"
+                      data-testid="timeline-auto-confirm-qualifier"
+                    >
+                      · {tTier("autoConfirmQualifier")}
                     </span>
                   ) : null}
                   {ev.at ? (

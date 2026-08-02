@@ -491,7 +491,7 @@
       "evidence": {
         "title": "Profil- und Nachweiskennzahlen",
         "totalSkills": "Fähigkeiten",
-        "workSupported": "Durch Arbeitseinträge belegt",
+        "workSupported": "Durch Arbeitstagebuch-Einträge belegt",
         "confirmed": "Bestätigt",
         "journalEntries": "Journaleinträge",
         "confirmations": "Bestätigungen",
@@ -1046,7 +1046,7 @@
       "addAction": "Fügen Sie Fähigkeiten in Ihrem Profil hinzu",
       "legend": "Selbst angegeben — was Sie eingetragen haben; Aus Arbeit — gestützt durch Ihre Journaleinträge; Mit Nachweisen — gestützt durch Ihre geprüften Einträge.",
       "status": {
-        "confirmed": "Mit Nachweisen",
+        "confirmed": "Durch einen Manager-Eintrag bestätigt",
         "suggested": "Aus Arbeit",
         "self_declared": "Noch nicht geprüft"
       }
@@ -1173,13 +1173,13 @@
     "note": "Dies sind Signale aus vorhandenen Daten, keine Bewertung und kein Score. Arbeitskräfte werden nicht danach gereiht, wer „am besten“ ist.",
     "journalEntries": "Journaleinträge",
     "declaredSkills": "Angegebene Fähigkeiten",
-    "confirmedSkills": "Verknüpfte Fähigkeiten",
+    "confirmedSkills": "Vom Manager bestätigte Fähigkeiten",
     "openReview": "Wartet auf Prüfung",
     "lastActivity": "Letzte Aktivität"
   },
   "workerEvidence": {
     "title": "Arbeitsnachweise & Fähigkeiten",
-    "confirmed": "Mit Nachweisen",
+    "confirmed": "Durch einen Manager-Eintrag bestätigt",
     "selfDeclared": "Wartet auf Prüfung",
     "systemEntries": "Arbeitseinträge",
     "empty": "Bauen Sie Ihren Lebenslauf auf — erstellen Sie Ihren ersten Eintrag.",
@@ -1197,7 +1197,7 @@
       "hint": "Wartet darauf, dass Ihr Vorgesetzter, der Geschäftsinhaber oder ein externer (Kunden-)Manager es prüft."
     },
     "confirmed": {
-      "label": "Mit Nachweisen",
+      "label": "Vom Manager bestätigt",
       "hint": "Gestützt durch Ihre geprüften Arbeitsnachweise."
     }
   },
@@ -1315,7 +1315,7 @@
     "profileLink": "Meine Fähigkeiten",
     "source": {
       "recognized": "Aus Text erkannt",
-      "confirmed": "Mit Nachweisen",
+      "confirmed": "Vom Manager bestätigt",
       "manual": "Manuell verknüpft"
     },
     "reviewHeading": "Frühere Verknüpfungen",
@@ -6493,9 +6493,9 @@
         "workCard": "Arbeitskarte"
       }
     },
-    "verifiedTitle": "Fähigkeiten mit Einträgen",
+    "verifiedTitle": "Vom Manager bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",
-    "journalSupportedLabel": "Durch Arbeit belegt",
+    "journalSupportedLabel": "Durch Arbeitstagebuch-Einträge belegt",
     "journalSupportedHint": "Fähigkeiten, die deine Arbeitsjournal-Einträge belegen — stärker als selbst angegeben; warten auf Bestätigung durch die Führungskraft.",
     "latestEvidenceLabel": "Neuester Nachweis",
     "latestEvidenceEmpty": "Noch keine Nachweise — dein erster Journaleintrag wird der erste sein.",
@@ -6541,7 +6541,7 @@
       "skillsEntries": "{count, plural, one {# Eintrag} other {# Einträge}}",
       "skillsNoEvidence": "Noch keine Einträge",
       "skillsLegendTitle": "Was die Farben bedeuten",
-      "skillsTierVerified": "Von anderen als zutreffend markiert",
+      "skillsTierVerified": "Durch einen Manager-Eintrag bestätigt",
       "skillsTierJournal": "In deinen Arbeitseinträgen sichtbar",
       "skillsTierDeclared": "Selbst angegeben — noch keine Einträge",
       "skillsAria": "Fähigkeiten und wie viele deiner Arbeitseinträge jede davon nennen.",
@@ -6747,8 +6747,8 @@
   "trust": {
     "title": "Vertrauenssignale",
     "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
-    "verifiedSkills": "Verknüpfte Fähigkeiten",
-    "managerConfirmations": "Geprüfte Einträge",
+    "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
+    "managerConfirmations": "Manager-Bestätigungen",
     "journalEntries": "Journaleinträge",
     "zeroHint": "Vertrauenssignale wachsen aus echter Arbeit: Erfassen Sie einen Journaleintrag und vervollständigen Sie Ihr Profil."
   },
@@ -6769,13 +6769,13 @@
     "skills": "Fähigkeiten",
     "skillsEmpty": "Noch keine Fähigkeiten gespeichert.",
     "tiers": {
-      "confirmed": "Vom Vorgesetzten bestätigt",
-      "evidence": "Durch Arbeitseinträge belegt",
+      "confirmed": "Durch einen Manager-Eintrag bestätigt",
+      "evidence": "Durch Arbeitstagebuch-Einträge belegt",
       "declared": "Selbst angegeben"
     },
     "summary": {
-      "verifiedSkills": "Bestätigte Fähigkeiten",
-      "managerConfirmations": "Bestätigungen durch Vorgesetzte",
+      "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
+      "managerConfirmations": "Manager-Bestätigungen",
       "journalEntries": "Journaleinträge"
     },
     "proofTitle": "Bestätigte Arbeitsnachweise",
@@ -6798,7 +6798,7 @@
     "achievementsTitle": "Erfolge",
     "projectsTitle": "Projekte",
     "projectsHint": "Aus Arbeitseinträgen",
-    "confirmedByManager": "Mit Einträgen",
+    "confirmedByManager": "Vom Manager bestätigt",
     "templates": {
       "label": "Vorlage",
       "standard": "Standard",
@@ -6847,7 +6847,7 @@
       "writtenHeadline": "{n, plural, one {Du hast diese Woche # Arbeitseintrag erfasst} other {Du hast diese Woche # Arbeitseinträge erfasst}}",
       "emptyHeadline": "Eine neue Woche — ihr erster Eintrag liegt noch vor dir.",
       "entries": "Einträge",
-      "confirmed": "Bestätigt",
+      "confirmed": "Vom Manager bestätigt",
       "hours": "Bestätigte Std."
     },
     "path": {
@@ -8938,7 +8938,7 @@
       "worker": {
         "title": "Profil- und Nachweiszusammenfassung",
         "totalSkills": "Fähigkeiten",
-        "workSupported": "Durch Arbeitseinträge belegt",
+        "workSupported": "Durch Arbeitstagebuch-Einträge belegt",
         "confirmed": "Bestätigt",
         "journalEntries": "Journaleinträge",
         "confirmations": "Bestätigungen",
@@ -9541,8 +9541,8 @@
     "experienceYears": "{n} J. Erfahrung",
     "skillsTitle": "Fähigkeiten",
     "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
-    "skillVerified": "Mit Führungskraft-Eintrag",
-    "skillWorkBacked": "Durch Arbeit belegt",
+    "skillVerified": "Durch einen Manager-Eintrag bestätigt",
+    "skillWorkBacked": "Durch Arbeitstagebuch-Einträge belegt",
     "skillDeclared": "Selbst angegeben",
     "skillsLegend": "Mit Führungskraft-Eintrag — ein Eintrag der Führungskraft begleitet die Fähigkeit. Durch Arbeit belegt — aus Journaleinträgen ersichtlich. Selbst angegeben — von der Person hinzugefügt.",
     "skillsReadError": "Die Fähigkeiten konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich erneut."
@@ -9776,7 +9776,7 @@
       "limit": "Limit erreicht.",
       "selfStated": "Von Ihnen eingetragen.",
       "declaredBadge": "Selbst angegeben",
-      "confirmedBadge": "Mit Einträgen"
+      "confirmedBadge": "Vom Manager bestätigt"
     },
     "achievementTypes": {
       "achievement": "Erfolg",
@@ -11518,5 +11518,18 @@
       "unmapped": "{count, plural, one {noch # Chance ohne angegebenen Ort — sie erscheint in der Chat-Suche} other {noch # Chancen ohne angegebenen Ort — sie erscheinen in der Chat-Suche}}",
       "unmappedOnly": "{count, plural, one {# echte Chance hat keinen angegebenen Ort und kann nicht gezeichnet werden — finde sie in der Chat-Suche} other {# echte Chancen haben keinen angegebenen Ort und können nicht gezeichnet werden — finde sie in der Chat-Suche}}."
     }
+  },
+  "evidenceTier": {
+    "managerConfirmed": "Durch einen Manager-Eintrag bestätigt",
+    "workJournal": "Durch Arbeitstagebuch-Einträge belegt",
+    "selfDeclared": "Selbst angegeben",
+    "autoConfirmQualifier": "nach einer voreingestellten Regel bestätigt",
+    "binLegendTitle": "Nachweis-Absicherung",
+    "binLegendRed": "noch keine Einträge",
+    "binLegendGreen": "erste Einträge",
+    "binLegendYellow": "durch Einträge und Bestätigungen belegt",
+    "entryConfirmed": "Vom Manager bestätigt",
+    "managerConfirmedCount": "Vom Manager bestätigte Fähigkeiten",
+    "managerConfirmations": "Manager-Bestätigungen"
   }
 }
