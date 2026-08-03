@@ -11722,5 +11722,35 @@
       "groundedIn": "Gebaseerd op deze interactie: {interaction} · {context}",
       "noContextLabel": "geen verdere omschrijving"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mijn ruimte",
+    "intro": "Hier stel je je werkprofiel samen, zie je wat er al over je bekend is en wat de volgende zinvolle stap is. Het werk zelf begint in het gesprek hieronder.",
+    "workProfile": "Mijn werkprofiel",
+    "unverifiedNote": "Dit is wat je zelf over jezelf vertelt. Nog niet door een mens bekeken — en dat is prima.",
+    "dimension": {
+      "whatICanDo": "Wat ik kan",
+      "whatIAmLookingFor": "Wat ik zoek",
+      "whenICanWork": "Wanneer ik kan werken",
+      "whereICanWork": "Waar ik kan werken",
+      "whatPayIExpect": "Welke beloning ik verwacht",
+      "howIProveExperience": "Waarmee ik mijn ervaring kan onderbouwen"
+    },
+    "readiness": {
+      "label": "Werkgereedheid",
+      "known": "Al ingevuld:",
+      "next": "Nu het belangrijkst:",
+      "complete": "Alles wat belangrijk is, is al ingevuld.",
+      "unavailable": "De werkgereedheid kon nu niet worden getoond. Het gesprek werkt zoals altijd."
+    },
+    "action": {
+      "startWithYourself": "Begin bij jezelf",
+      "whenICanWork": "Aangeven wanneer ik kan werken",
+      "whereICanWork": "Aangeven waar ik kan werken",
+      "addSkills": "Vaardigheden toevoegen",
+      "addExperienceEvidence": "Bewijs van ervaring toevoegen",
+      "viewWorkProfile": "Mijn werkprofiel bekijken",
+      "completeWorkProfile": "Mijn werkprofiel aanvullen"
+    }
   }
 }

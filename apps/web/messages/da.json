@@ -4013,5 +4013,35 @@
       "groundedIn": "Bygger på denne interaktion: {interaction} · {context}",
       "noContextLabel": "ingen yderligere beskrivelse"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mit rum",
+    "intro": "Her sætter du din arbejdsprofil sammen, ser hvad der allerede vides om dig, og hvad der giver mening som det næste. Selve arbejdet begynder i samtalen nedenfor.",
+    "workProfile": "Min arbejdsprofil",
+    "unverifiedNote": "Det her er, hvad du selv fortæller om dig. Endnu ikke gennemset af et menneske — og det er helt fint.",
+    "dimension": {
+      "whatICanDo": "Hvad jeg kan",
+      "whatIAmLookingFor": "Hvad jeg søger",
+      "whenICanWork": "Hvornår jeg kan arbejde",
+      "whereICanWork": "Hvor jeg kan arbejde",
+      "whatPayIExpect": "Hvilken løn jeg forventer",
+      "howIProveExperience": "Hvad jeg kan underbygge min erfaring med"
+    },
+    "readiness": {
+      "label": "Arbejdsparathed",
+      "known": "Allerede angivet:",
+      "next": "Vigtigst lige nu:",
+      "complete": "Alt det vigtige er allerede angivet.",
+      "unavailable": "Arbejdsparatheden kunne ikke vises lige nu. Samtalen fungerer som altid."
+    },
+    "action": {
+      "startWithYourself": "Start med dig selv",
+      "whenICanWork": "Angiv, hvornår jeg kan arbejde",
+      "whereICanWork": "Angiv, hvor jeg kan arbejde",
+      "addSkills": "Tilføj færdigheder",
+      "addExperienceEvidence": "Tilføj dokumentation for erfaring",
+      "viewWorkProfile": "Se min arbejdsprofil",
+      "completeWorkProfile": "Udbyg min arbejdsprofil"
+    }
   }
 }

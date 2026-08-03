@@ -15,6 +15,8 @@ import type {
   BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
+import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 
 /**
  * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
@@ -45,6 +47,21 @@ export default async function DashboardHomePage({
   const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
 
   const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
+  // "Mano erdvė" (S2) — resolved on the server from the readers this request
+  // already runs (session profile, workspace context, worker activity, the
+  // canonical player card). It decides ONLY whether the personal block is
+  // shown and what it says; the chat below is unchanged. Its copy is resolved
+  // here too (label-bag idiom), so no new message namespace reaches the
+  // client bundle — and only when there is actually a block to render.
+  const personalIntro = await loadPersonalWorkspaceIntro();
+  const personalIntroLabels =
+    personalIntro.kind === "hidden"
+      ? null
+      : resolvePersonalWorkspaceLabels(
+          await getTranslations("personalWorkspace"),
+          await getTranslations("playerCard.readinessSteps.pillar"),
+          await getTranslations("conversation.chat"),
+        );
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
@@ -60,6 +77,8 @@ export default async function DashboardHomePage({
       workLogLabels={workLogLabels}
       bookingOffers={offers}
       bookingLabels={bookingLabels}
+      personalIntro={personalIntro}
+      personalIntroLabels={personalIntroLabels}
     />
   );
 }

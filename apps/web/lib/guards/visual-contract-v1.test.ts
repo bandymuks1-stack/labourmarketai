@@ -42,9 +42,11 @@ const countMatches = (src: string, needle: string): number =>
   src.split(needle).length - 1;
 
 describe("Ratchet: raw card styling only shrinks", () => {
-  // Baseline captured at S1 (2026-08-03): 327 raw `card-border` usages across
-  // app/ + components/ outside the canonical Card primitive.
-  const CARD_BORDER_BASELINE = 327;
+  // Baseline captured at S1 (2026-08-03): 327 raw usages across app/ +
+  // components/ outside the canonical Card primitive. S3 removed one with the
+  // FUT concept card; S2 migrated ProfileStateStrip onto <Card>. MEASURED 325
+  // — the ratchet is tightened to the real count so it can only shrink again.
+  const CARD_BORDER_BASELINE = 325;
 
   it(`raw card-border usage stays ≤ ${CARD_BORDER_BASELINE}`, () => {
     const total = surfaceFiles()

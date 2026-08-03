@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { deriveWorkerReadiness } from "@/lib/player-card/readiness";
+import { Card } from "@/components/ui/Card";
 
 /**
  * Profile state strip (human-first launch train v1).
@@ -114,13 +115,18 @@ export async function ProfileStateStrip({ workerId }: { workerId: string }) {
   const tileCls =
     "flex min-h-[3.25rem] flex-col gap-1 rounded-md border border-border/40 p-3 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue";
 
+  // S2: the strip and the conversation-first "Mano erdvė" block now share ONE
+  // surface grammar — the canonical Card primitive (visual contract v1)
+  // instead of a hand-typed surface class. The list itself carries the label
+  // and the test id, so the block keeps its accessible name with no extra
+  // wrapper element.
   return (
-    <section
-      className="card-border p-4"
-      aria-label={t("readiness.label")}
-      data-testid="profile-state-strip"
-    >
-      <ul className="grid gap-2 sm:grid-cols-3">
+    <Card compact>
+      <ul
+        className="grid gap-2 sm:grid-cols-3"
+        aria-label={t("readiness.label")}
+        data-testid="profile-state-strip"
+      >
         {tiles.map((tile) => {
           const body = (
             <>
@@ -163,6 +169,6 @@ export async function ProfileStateStrip({ workerId }: { workerId: string }) {
           );
         })}
       </ul>
-    </section>
+    </Card>
   );
 }

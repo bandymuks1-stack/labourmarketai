@@ -4013,5 +4013,35 @@
       "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
       "noContextLabel": "[EN] no further description"
     }
+  },
+  "personalWorkspace": {
+    "title": "Moja przestrzeń",
+    "intro": "Tutaj układasz swój profil zawodowy, widzisz, co już o tobie wiadomo, i co warto zrobić dalej. Sama praca zaczyna się w rozmowie poniżej.",
+    "workProfile": "Mój profil zawodowy",
+    "unverifiedNote": "To, co sam o sobie mówisz. Jeszcze nie sprawdzone przez człowieka — i to normalne.",
+    "dimension": {
+      "whatICanDo": "Co potrafię",
+      "whatIAmLookingFor": "Czego szukam",
+      "whenICanWork": "Kiedy mogę pracować",
+      "whereICanWork": "Gdzie mogę pracować",
+      "whatPayIExpect": "Jakiego wynagrodzenia oczekuję",
+      "howIProveExperience": "Czym mogę potwierdzić doświadczenie"
+    },
+    "readiness": {
+      "label": "Gotowość do pracy",
+      "known": "Już podane:",
+      "next": "Teraz najważniejsze:",
+      "complete": "Wszystko, co najważniejsze, jest już podane.",
+      "unavailable": "Nie udało się teraz pokazać gotowości do pracy. Rozmowa działa jak zawsze."
+    },
+    "action": {
+      "startWithYourself": "Zacznij od siebie",
+      "whenICanWork": "Podaj, kiedy mogę pracować",
+      "whereICanWork": "Podaj, gdzie mogę pracować",
+      "addSkills": "Dodaj umiejętności",
+      "addExperienceEvidence": "Dodaj potwierdzenie doświadczenia",
+      "viewWorkProfile": "Zobacz mój profil zawodowy",
+      "completeWorkProfile": "Uzupełnij mój profil zawodowy"
+    }
   }
 }

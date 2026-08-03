@@ -11722,5 +11722,35 @@
       "groundedIn": "Remiasi šia sąveika: {interaction} · {context}",
       "noContextLabel": "be papildomo aprašymo"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mano erdvė",
+    "intro": "Čia susidėlioji savo darbo profilį, matai, ką sistema apie tave jau žino, ir ką verta padaryti toliau. Pats darbas prasideda pokalbyje žemiau.",
+    "workProfile": "Mano darbo profilis",
+    "unverifiedNote": "Tai, ką pasakojate apie save. Dar neperžiūrėta žmogaus — ir tai normalu.",
+    "dimension": {
+      "whatICanDo": "Ką moku",
+      "whatIAmLookingFor": "Ko ieškau",
+      "whenICanWork": "Kada galiu dirbti",
+      "whereICanWork": "Kur galiu dirbti",
+      "whatPayIExpect": "Kokio atlygio tikiuosi",
+      "howIProveExperience": "Kuo galiu pagrįsti patirtį"
+    },
+    "readiness": {
+      "label": "Darbo pasiruošimas",
+      "known": "Jau nurodyta:",
+      "next": "Svarbiausia dabar:",
+      "complete": "Viskas, kas svarbiausia, jau nurodyta.",
+      "unavailable": "Darbo pasiruošimo dabar parodyti nepavyko. Pokalbis veikia kaip visada."
+    },
+    "action": {
+      "startWithYourself": "Pradėti nuo savęs",
+      "whenICanWork": "Nurodyti, kada galiu dirbti",
+      "whereICanWork": "Nurodyti, kur galiu dirbti",
+      "addSkills": "Pridėti įgūdžius",
+      "addExperienceEvidence": "Pridėti patirties įrodymų",
+      "viewWorkProfile": "Peržiūrėti mano darbo profilį",
+      "completeWorkProfile": "Papildyti mano darbo profilį"
+    }
   }
 }

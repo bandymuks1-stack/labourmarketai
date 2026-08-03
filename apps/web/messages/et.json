@@ -4013,5 +4013,35 @@
       "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
       "noContextLabel": "[EN] no further description"
     }
+  },
+  "personalWorkspace": {
+    "title": "Minu ruum",
+    "intro": "Siin paned kokku oma tööprofiili, näed, mida sinust juba teatakse, ja mida tasub järgmisena teha. Töö ise algab allpool olevas vestluses.",
+    "workProfile": "Minu tööprofiil",
+    "unverifiedNote": "See on see, mida sa ise enda kohta räägid. Inimene pole seda veel üle vaadanud — ja see on normaalne.",
+    "dimension": {
+      "whatICanDo": "Mida ma oskan",
+      "whatIAmLookingFor": "Mida ma otsin",
+      "whenICanWork": "Millal ma saan töötada",
+      "whereICanWork": "Kus ma saan töötada",
+      "whatPayIExpect": "Millist tasu ma ootan",
+      "howIProveExperience": "Millega saan kogemust tõendada"
+    },
+    "readiness": {
+      "label": "Töövalmidus",
+      "known": "Juba märgitud:",
+      "next": "Praegu kõige tähtsam:",
+      "complete": "Kõik tähtis on juba märgitud.",
+      "unavailable": "Töövalmidust ei õnnestunud praegu näidata. Vestlus toimib nagu ikka."
+    },
+    "action": {
+      "startWithYourself": "Alusta endast",
+      "whenICanWork": "Märgi, millal saan töötada",
+      "whereICanWork": "Märgi, kus saan töötada",
+      "addSkills": "Lisa oskusi",
+      "addExperienceEvidence": "Lisa kogemuse tõendeid",
+      "viewWorkProfile": "Vaata minu tööprofiili",
+      "completeWorkProfile": "Täienda minu tööprofiili"
+    }
   }
 }

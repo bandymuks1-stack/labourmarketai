@@ -43,11 +43,17 @@ export function ConversationThread({
   handlers,
   emptyState,
   composer,
+  intro,
 }: {
   items: ThreadItem[];
   typing: boolean;
   handlers: MessageHandlers;
   emptyState?: ReactNode;
+  /** "Mano erdvė" (S2) — the personal-space block that opens the workspace.
+   *  Rendered ONLY while the conversation is still opening, above the
+   *  greeting: the first real turn replaces it with the conversation, so it
+   *  never becomes a permanent header and needs no dismissed-state to store. */
+  intro?: ReactNode;
   /** The chat composer, handed in by the shell. While the conversation is
    *  still OPENING (greeting + brief only) it renders HERE, centred right
    *  under the greeting (owner audit §4.1 — "composer centre pirmo atidarymo
@@ -70,7 +76,14 @@ export function ConversationThread({
 
   return (
     <div
-      className={`flex flex-1 flex-col overflow-y-auto ${isOpening ? "justify-center" : ""}`}
+      // No `justify-center` here — MEASURED at 375x640 with the S2 intro: the
+      // opening composition (956px in a 520px scroller) had offsetTop -153 and
+      // scrollHeight 738 < content, so its top 112px were unreachable by any
+      // scroll. `justify-content: center` on a scroll container positions
+      // overflow ABOVE the scrollable region; the inner block's `my-auto`
+      // (below) centres the same composition when it fits and collapses to 0
+      // when it does not, which is the only safe way to centre in a scroller.
+      className="flex flex-1 flex-col overflow-y-auto"
       // A conversation is a log: `role="log"` makes assistive tech announce
       // arriving turns instead of leaving the user to discover them.
       role="log"
@@ -79,7 +92,18 @@ export function ConversationThread({
       data-testid="conversation-thread"
       data-opening={isOpening ? "true" : undefined}
     >
-      <div className="mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6">
+      {/* `my-auto` while opening, NOT `justify-center` alone: auto margins
+          centre the composition when it fits AND collapse to 0 when it does
+          not, so a taller opening (S2 adds the personal block above the
+          greeting) stays scrollable from its first line on a short phone.
+          `justify-content: center` in a scroll container would have made the
+          overflowing top unreachable. */}
+      <div
+        className={`mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6 ${
+          isOpening ? "my-auto" : ""
+        }`}
+      >
+        {isOpening && intro ? <div className="mb-5">{intro}</div> : null}
         {items.length === 0 && emptyState}
         {/* `ua-msg-in` animates ONLY transform + opacity, and a CSS animation
             runs on mount — so a newly appended turn rises into place while the

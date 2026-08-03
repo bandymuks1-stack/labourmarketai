@@ -114,7 +114,13 @@ describe("turn-pair rhythm", () => {
 describe("the opening state is composed, not empty", () => {
   it("the thread centres itself while only the assistant's opening is present", () => {
     expect(thread).toMatch(/isOpening/);
-    expect(thread).toMatch(/justify-center/);
+    // Centring is `my-auto` on the INNER block, never `justify-center` on the
+    // scroll container: measured at 375x640 (S2 browser proof), justify-center
+    // pushed a 956px opening composition 153px above a 520px scroller and made
+    // its top unreachable — auto margins centre when it fits and collapse when
+    // it does not. The class must not come back on the scroller.
+    expect(thread).toMatch(/isOpening \? "my-auto"/);
+    expect(thread).not.toMatch(/className=[^>]*justify-center/);
     // Owner audit §4.1: the opening composition includes the state brief and
     // the composer itself, so the predicate is "assistant turns only" —
     // not "exactly one greeting".

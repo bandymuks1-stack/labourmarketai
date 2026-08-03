@@ -58,6 +58,9 @@ import { HistoryBlock } from "./history-block";
 import type { ProfileSummaryVariant } from "@/lib/conversation/profile-summary-contract";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { loadOpeningBrief } from "@/lib/conversation/opening-brief";
+import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
+import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
+import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -166,6 +169,8 @@ export function ConversationChat({
   bookingLabels = null,
   script,
   mobile = false,
+  personalIntro = null,
+  personalIntroLabels = null,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -175,6 +180,14 @@ export function ConversationChat({
   script?: ChatMessage[];
   /** Force the phone layout — used by the mobile design preview frame. */
   mobile?: boolean;
+  /** "Mano erdvė" (S2) — the server-resolved personal-space model. `null`
+   *  (organization workspace, company/agency/customer identity, no work
+   *  profile, or the design preview) renders nothing at all. */
+  personalIntro?: PersonalWorkspaceIntroModel | null;
+  /** Server-resolved copy for the block above — same label-bag pattern as
+   *  `labels` / `workLogLabels` / `bookingLabels`, so no extra message
+   *  namespace ships to the client. */
+  personalIntroLabels?: PersonalWorkspaceLabels | null;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -1304,6 +1317,21 @@ export function ConversationChat({
             <ConversationThread
               items={items}
               typing={typing}
+              /* "Mano erdvė" (S2). It sits INSIDE the opening composition, so
+                 the workspace still opens as a conversation: the block, the
+                 greeting and the composer are one centred first screen, and
+                 the first real turn scrolls it out of the way. Its actions go
+                 through the SAME dispatcher every chip uses — one set of
+                 flows, no second action system. */
+              intro={
+                personalIntro && personalIntroLabels && !script ? (
+                  <PersonalWorkspaceIntro
+                    intro={personalIntro}
+                    labels={personalIntroLabels}
+                    onAction={handlePanelChip}
+                  />
+                ) : undefined
+              }
               handlers={{
                 onChip: handleChip,
                 onConfirm: () => {},

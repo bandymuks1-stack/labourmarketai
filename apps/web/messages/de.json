@@ -11722,5 +11722,35 @@
       "groundedIn": "Beruht auf dieser Interaktion: {interaction} · {context}",
       "noContextLabel": "ohne weitere Beschreibung"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mein Bereich",
+    "intro": "Hier baust du dein Arbeitsprofil auf, siehst, was bereits über dich bekannt ist, und was als Nächstes sinnvoll ist. Die Arbeit selbst beginnt im Gespräch unten.",
+    "workProfile": "Mein Arbeitsprofil",
+    "unverifiedNote": "Das sind deine eigenen Angaben. Noch nicht von einem Menschen geprüft — und das ist in Ordnung.",
+    "dimension": {
+      "whatICanDo": "Was ich kann",
+      "whatIAmLookingFor": "Was ich suche",
+      "whenICanWork": "Wann ich arbeiten kann",
+      "whereICanWork": "Wo ich arbeiten kann",
+      "whatPayIExpect": "Welche Bezahlung ich erwarte",
+      "howIProveExperience": "Womit ich meine Erfahrung belegen kann"
+    },
+    "readiness": {
+      "label": "Arbeitsbereitschaft",
+      "known": "Bereits angegeben:",
+      "next": "Jetzt am wichtigsten:",
+      "complete": "Alles Wichtige ist bereits angegeben.",
+      "unavailable": "Die Arbeitsbereitschaft konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
+    },
+    "action": {
+      "startWithYourself": "Bei dir selbst beginnen",
+      "whenICanWork": "Angeben, wann ich arbeiten kann",
+      "whereICanWork": "Angeben, wo ich arbeiten kann",
+      "addSkills": "Fähigkeiten hinzufügen",
+      "addExperienceEvidence": "Nachweise für Erfahrung hinzufügen",
+      "viewWorkProfile": "Mein Arbeitsprofil ansehen",
+      "completeWorkProfile": "Mein Arbeitsprofil ergänzen"
+    }
   }
 }
