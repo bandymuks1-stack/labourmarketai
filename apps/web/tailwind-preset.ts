@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { colors, gradients, motion, radii, shadows, typography } from "./tokens";
+import { colors, gradients, motion, radii, shadows, typography, zIndex } from "./tokens";
 
 type FontSizeEntry = [
   fontSize: string,
@@ -72,6 +72,10 @@ const preset = {
       // UX Recovery Train Wagon 1). Pages needing full canvas (map, calendar,
       // dashboard grid) simply omit both and inherit the shell.
       maxWidth: { container: "1440px", content: "1200px" },
+      // Named stacking layers (visual contract v1) → `z-sticky`, `z-modal`, …
+      // EXTENDS the numeric scale, so no existing surface shifts; new work
+      // names the LAYER instead of picking a number.
+      zIndex: { ...zIndex },
     },
   },
 } satisfies Partial<Config>;

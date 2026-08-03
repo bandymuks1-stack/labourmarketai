@@ -1,22 +1,44 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "pill";
 type Size = "sm" | "md";
 
+// Shape and weight live in the variant strings (not `base`) because `cn` is a
+// plain joiner with no conflict resolution: a variant could never override a
+// `rounded-md`/`font-semibold` baked into the base. Each variant therefore
+// spells out its full look; the rendered class SET for the three original
+// variants is unchanged.
 const base =
-  "inline-flex items-center justify-center gap-2 font-semibold rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-gradient-cta text-white shadow-cta-glow hover:opacity-95",
+  primary:
+    "rounded-md font-semibold bg-gradient-cta text-white shadow-cta-glow hover:opacity-95",
   secondary:
-    "border border-ink-500 text-text-primary hover:border-brand-blue",
-  ghost: "text-text-secondary hover:text-text-primary",
+    "rounded-md font-semibold border border-ink-500 text-text-primary hover:border-brand-blue",
+  ghost: "rounded-md font-semibold text-text-secondary hover:text-text-primary",
+  // THE canonical quiet pill action (visual contract v1). Result components
+  // repeated this exact string by hand (~11 sites); the guard ratchets the raw
+  // string so new call sites must come here instead. min-h-11 = 44px touch
+  // target (audit PR8).
+  pill: "min-h-11 rounded-full font-medium border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue",
 };
 
 const sizes: Record<Size, string> = {
   sm: "px-4 py-2 text-sm",
   md: "px-6 py-3 text-sm",
 };
+
+/** The pill sets its own height (min-h-11) and type role; the sm/md paddings
+ *  would fight it, so it carries a fixed size. */
+const pillSize = "px-3.5 text-support";
+
+/**
+ * Link-shaped pill CTAs (next-intl <Link> / <a>) can't render a <button>; they
+ * share the exact same grammar through this constant instead of re-typing the
+ * class string. Layout (e.g. `self-start`) stays at the call site.
+ */
+export const pillLinkClassName = cn(base, variants.pill, pillSize);
 
 /** Inline pending spinner — same border-spinner idiom as `NavLinkPending`, so
  *  the loading affordance is consistent across the app. Honours
@@ -54,7 +76,12 @@ export function Button({
 }) {
   return (
     <button
-      className={cn(base, variants[variant], sizes[size], className)}
+      className={cn(
+        base,
+        variants[variant],
+        variant === "pill" ? pillSize : sizes[size],
+        className,
+      )}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       {...props}
