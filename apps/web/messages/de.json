@@ -11733,22 +11733,22 @@
       "whatIAmLookingFor": "Was ich suche",
       "whenICanWork": "Wann ich arbeiten kann",
       "whereICanWork": "Wo ich arbeiten kann",
-      "whatPayIExpect": "Welche Bezahlung ich erwarte",
-      "howIProveExperience": "Womit ich meine Erfahrung belegen kann"
+      "whatPayIExpect": "Welche Gehaltsvorstellung ich habe",
+      "howIProveExperience": "Womit ich meine Berufserfahrung nachweisen kann"
     },
     "readiness": {
-      "label": "Arbeitsbereitschaft",
+      "label": "Status des Arbeitsprofils",
       "known": "Bereits angegeben:",
       "next": "Jetzt am wichtigsten:",
       "complete": "Alles Wichtige ist bereits angegeben.",
-      "unavailable": "Die Arbeitsbereitschaft konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
+      "unavailable": "Der Status deines Arbeitsprofils konnte gerade nicht angezeigt werden. Das Gespräch funktioniert wie immer."
     },
     "action": {
       "startWithYourself": "Bei dir selbst beginnen",
       "whenICanWork": "Angeben, wann ich arbeiten kann",
       "whereICanWork": "Angeben, wo ich arbeiten kann",
       "addSkills": "Fähigkeiten hinzufügen",
-      "addExperienceEvidence": "Nachweise für Erfahrung hinzufügen",
+      "addExperienceEvidence": "Nachweise zur Berufserfahrung hinzufügen",
       "viewWorkProfile": "Mein Arbeitsprofil ansehen",
       "completeWorkProfile": "Mein Arbeitsprofil ergänzen"
     }
