@@ -11733,22 +11733,22 @@
       "whatIAmLookingFor": "Wat ik zoek",
       "whenICanWork": "Wanneer ik kan werken",
       "whereICanWork": "Waar ik kan werken",
-      "whatPayIExpect": "Welke beloning ik verwacht",
-      "howIProveExperience": "Waarmee ik mijn ervaring kan onderbouwen"
+      "whatPayIExpect": "Welk salaris ik verwacht",
+      "howIProveExperience": "Waarmee ik mijn werkervaring kan onderbouwen"
     },
     "readiness": {
-      "label": "Werkgereedheid",
+      "label": "Status van je werkprofiel",
       "known": "Al ingevuld:",
       "next": "Nu het belangrijkst:",
       "complete": "Alles wat belangrijk is, is al ingevuld.",
-      "unavailable": "De werkgereedheid kon nu niet worden getoond. Het gesprek werkt zoals altijd."
+      "unavailable": "De status van je werkprofiel kon nu niet worden getoond. Het gesprek werkt zoals altijd."
     },
     "action": {
       "startWithYourself": "Begin bij jezelf",
       "whenICanWork": "Aangeven wanneer ik kan werken",
       "whereICanWork": "Aangeven waar ik kan werken",
       "addSkills": "Vaardigheden toevoegen",
-      "addExperienceEvidence": "Bewijs van ervaring toevoegen",
+      "addExperienceEvidence": "Bewijs van werkervaring toevoegen",
       "viewWorkProfile": "Mijn werkprofiel bekijken",
       "completeWorkProfile": "Mijn werkprofiel aanvullen"
     }
