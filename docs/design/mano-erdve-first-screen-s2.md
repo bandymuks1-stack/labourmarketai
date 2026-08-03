@@ -265,3 +265,30 @@ secondary pills render **44px** (`min-h-11`). The single most important action w
 Fixed by dropping `size="sm"` (the default `md` is `px-6 py-3` → 44px, and is what 74
 of the 91 `<Button>` call sites already use). Re-measured: every button ≥ 44px.
 Pinned by `the PRIMARY action is never a smaller target than the pills beside it`.
+
+## 11. i18n status of the `personalWorkspace` namespace
+
+The namespace lands in **all 11 catalogs in this PR**, per the binding rule in
+`lib/i18n/config.ts` ("new i18n keys land in all 11 in the same PR"). No `[EN]` marker
+and no empty value is introduced, so the i18n debt ratchet is unchanged
+(`check:i18n-debt` → `da=1301, de=0, nl=0, ru=0`, all within baseline).
+
+The enforced guard (`i18n-lt-en-parity.test.ts`) covers only the 5 ACTIVE locales;
+`personal-workspace-intro.test.ts` additionally asserts identical keys across **all 11**,
+so this namespace cannot drift even in the catalogs routing does not emit.
+
+| Locale | Routing | Catalog status for this namespace | Review status |
+|---|---|---|---|
+| `lt` | ACTIVE (default) | full | **Tier 1 — human-verified.** Product terms pinned by guard (`Mano erdvė`, `Mano darbo profilis`, `Darbo pasiruošimas`) |
+| `en` | ACTIVE | full | **Tier 1 — human-verified** (source language) |
+| `ru` | ACTIVE | full | Tier 2 — **needs native review** (§7.4) |
+| `nl` | ACTIVE | full | Tier 2 — **needs native review** (§7.4) |
+| `de` | ACTIVE | full | Tier 2 — **needs native review** (§7.4) |
+| `pl` `sv` `da` `no` `et` `lv` | NOT active — no routes prerender, the URL resolver rejects the code, the selector hides it | full for THIS namespace (the catalogs remain partial overall: ~4 046 lines vs ~11 755) | **needs native review** before that locale is ever promoted to active |
+
+Nothing here promotes a locale: `activeLocales` is untouched. The six non-active
+catalogs still get the namespace so that promoting one later is a one-row change in
+`config.ts` rather than a copy-hunt — which is exactly what §2.5 asks for.
+
+**Owner action:** RU / NL / DE wording is AI-seeded and should get a native pass before
+this block is considered launch-final in those markets. LT and EN are ready as shipped.
