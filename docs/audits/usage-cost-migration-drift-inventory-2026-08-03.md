@@ -211,3 +211,109 @@ Each must be demonstrated, not asserted:
 
 **No production object, row, privilege or ledger entry was modified in producing
 this document.**
+
+---
+
+## 7. RESOLUTION — Option A executed (2026-08-03, later the same day)
+
+> Everything above this line is the point-in-time inventory and is left
+> unrewritten. This section records what was actually done after the owner
+> chose **Option A — repo to production ledger** (production ledger untouched,
+> nothing applied).
+
+### 7.1 What was restored
+
+Four migration files were added to `supabase/migrations/`, each carrying
+**production's exact ledger version as its filename version** and, below a
+clearly separated banner, **production's stored statements byte-exact**:
+
+| Repo file | Body md5 (= production ledger md5) |
+|---|---|
+| `20260728114008_usage_cost_events_v1.sql` | `c05d4a1308582e9eaeda3404d4d52fe4` |
+| `20260728114254_usage_cost_events_v1_reapply.sql` | `76066638444ff54e96a56028263f63b8` |
+| `20260728114301_usage_cost_events_truncate_guard_v1.sql` | `6da7b0d1dceec7d5ac9f5c0f31ce7322` |
+| `20260728114353_usage_cost_events_v1_clean_start.sql` | `0d924cf8e4b7742b260587e331670242` |
+
+Each file's banner states: already applied in production, restored for history
+parity, never manually re-apply, the ledger version, the reconciliation PR, and
+the extraction rule for re-verifying byte parity (strip through the
+`-- PRODUCTION-EXACT-SQL-BELOW` marker line, md5 the remainder).
+
+The SQL was extracted from `supabase_migrations.schema_migrations.statements`
+(read-only) and verified by md5 equality against the ledger — not transcribed
+from any secondary source. **PR #898's files were not used as the source.**
+
+### 7.2 Proofs obtained
+
+- **Version parity:** all four production versions now exist as repo filename
+  versions; 0 duplicate versions across all 177 migration files; PR #898's
+  `20260728120000`/`20260728140000` are absent from `supabase/migrations/`
+  (they never existed on `main`; they live only on the unmerged #898 branch).
+- **Full local reset from empty** (`supabase db reset`): all 177 migrations
+  applied in order, 0 errors; the four restored files replayed as steps
+  1→2→3→4 exactly as production experienced them.
+- **Final-state parity, object by object against the production catalog:**
+  20 columns; 22 constraints (definitions textually identical); 5 indexes + PK
+  (identical definitions); both append-only triggers; **trigger-function
+  `prosrc` md5 identical to production** (`df712894…` / `61320d6d…`); RLS
+  enabled; the one admin-only SELECT policy; grants `authenticated`=SELECT,
+  `service_role`=SELECT+INSERT; the table COMMENT **including `/truncate`**;
+  row count 0. The §4.2 mismatches (comment text, function text) disappear by
+  construction — replaying the true history produces the true objects.
+  One environment-level difference, stated: the local stack's default
+  privileges leave `anon` with REFERENCES/TRIGGER/TRUNCATE on the new table
+  (no SELECT/INSERT/UPDATE/DELETE, and TRUNCATE is trigger-blocked); production
+  has no `anon` grants. This is the documented local-reset default-privilege
+  class (`secdef-local-reset` guard), not a property of the files.
+- **Runner safety:** the pending-set arithmetic is version-string equality, and
+  for all four rows local version = remote version, so the runner classifies
+  them as already applied. No DML exists in any of the four bodies, so no
+  backfill can repeat under any circumstance. The dangerous path documented in
+  §4.3 (restoring #898's files, whose versions are pending) is foreclosed by
+  not restoring those files.
+- **Rollback honesty:** the production ledger stored **zero** rollback
+  statements for all four rows, and no original rollback is claimed. Four
+  `.down.sql` files exist, each headed `RECONSTRUCTED AFTER PRODUCTION APPLY —
+  NOT PART OF THE ORIGINAL HISTORY`, zero-row-guarded where destructive, with
+  the `clean_start` down file explicitly stating it cannot restore the dropped
+  synthetic proof row.
+
+### 7.3 A finding this work surfaced — the Supabase Preview check is NOT cleared by this restore, and could not be
+
+The inventory's parent baseline attributed the red `Supabase Preview` check on
+`main` to these four migrations. Executing Option A showed that attribution was
+**incomplete**. The check's error class ("remote migration versions not found in
+the local migrations directory") is a version-string set difference, and after
+restoring the four, **151 of 170 remote versions still have no matching local
+filename version** — because almost every migration in this repository is
+applied via MCP `apply_migration`, which mints its own apply-time version, while
+the repo file keeps its authored prefix. `docs/APPLIED_LEDGER.md`'s header has
+documented exactly this since long before the usage-cost work ("the repo
+filenames don't match the ledger versions … `supabase db push` is never used"),
+and the check was already red on `main` at `426e87aa` (2026-08-01), before any
+of this train's applies.
+
+What the four usage-cost rows uniquely were — and what this restore uniquely
+fixes — is **content drift**: they were the only applied migrations whose SQL
+existed in NO file anywhere on `main`, so a local reset produced a schema
+missing a real production table. That is closed. The remaining 151 are
+**version-label drift** on migrations whose content IS on `main` under a
+different filename version.
+
+Making the Preview check green is therefore a separate decision with exactly
+two honest shapes, both owner-gated: (a) bulk-rename ~151 local files to their
+minted ledger versions (massive churn; invalidates the repo's documented naming
+doctrine and every cross-reference), or (b) `supabase migration repair` /
+ledger rewrite to match local names — **which rewrites the production ledger
+and is forbidden by the standing constraint this reconciliation ran under.**
+Neither was done. The check stays red, now for a fully-characterised reason.
+
+### 7.4 Owner decisions — updated status
+
+| # | Decision | Status |
+|---|---|---|
+| D1 | Option A vs B | **DECIDED: Option A. Executed** (this section). |
+| D2 | Accept enshrining the 4-step fix-forward history | **Implicit in the Option A direction; the files are in the reconciliation PR for review.** |
+| D3 | Were PR #898's `@human-gate-approved` markers owner-authorised? | Still open. The four RESTORED files carry **no** such marker; migration-safety classifies them RED (12 findings) and the reconciliation PR ships Draft + `needs-human-gate`. |
+| D4 | PR #898's fate | Still open. Recommendation unchanged: its two migration files must never merge; close as superseded or strip to docs/app-code only. |
+| **D5 (new)** | The 151 version-label mismatches: accept a permanently red `Supabase Preview` (documented doctrine), bulk-rename local files, or rewrite the remote ledger | **Open — owner decision. Default: accept red + documented.** |

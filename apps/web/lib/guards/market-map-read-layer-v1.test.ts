@@ -391,7 +391,13 @@ describe("NO new DB migration in this PR", () => {
     // policies untouched; ZERO DML. RED by classification, deliberately NOT
     // human-gate-annotated, ships UNAPPLIED. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(173);
+    //
+    // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
+    // four migrations ALREADY APPLIED to production 2026-07-28 (ledger
+    // versions 20260728114008/114254/114301/114353), restored to the repo
+    // byte-exact for history parity. Never re-apply. Still no migration from
+    // the market-map read layer.
+    expect(count).toBeLessThanOrEqual(177);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
