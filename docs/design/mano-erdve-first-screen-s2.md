@@ -292,3 +292,63 @@ catalogs still get the namespace so that promoting one later is a one-row change
 
 **Owner action:** RU / NL / DE wording is AI-seeded and should get a native pass before
 this block is considered launch-final in those markets. LT and EN are ready as shipped.
+
+## 12. RU / NL / DE copy review (2026-08-03) — `COPY_REVIEW_PENDING`
+
+Scope: the new `personalWorkspace` namespace only. No other namespace was touched.
+
+### What was verified mechanically (evidence, not opinion)
+
+| Check | RU | NL | DE |
+|---|---|---|---|
+| `[EN]` markers / empty values | none | none | none |
+| Key parity with LT across all 11 catalogs | ✅ | ✅ | ✅ |
+| No score / % / rating / verification claim | ✅ | ✅ | ✅ |
+| No technical state leaked (`needs_migration`, SQLSTATE, table names) | ✅ | ✅ | ✅ |
+| **Register matches the surface it renders on** | formal `вы` — `conversation.*` is 25 formal : 1 informal ✅ | informal `je` — `conversation.*` is 79 : 5 ✅ | informal `du` — `conversation.*` is 74 : 7 ✅ |
+
+The register check matters: DE looks informal against the **whole** catalog (Sie 1318 : du 234),
+which would read as a mismatch. It is not — the formal mass sits in `auth` (Sie 132 : du 7)
+and the employer/admin namespaces, while the conversation-first worker surfaces
+(`conversation` 74:7, `workspace` 59:0, `todayScreen` 9:0) are deliberately `du`.
+S2 renders inside `conversation`, so `du` is the correct register there.
+
+### Canonical terminology — already satisfied via the shared namespace
+
+The nouns this review asks about are rendered by the block, but they come from the
+**existing** `playerCard.readinessSteps.pillar` namespace, not from new S2 strings — so
+S2 introduces no competing vocabulary:
+
+| Concept | RU | NL | DE |
+|---|---|---|---|
+| availability | Доступность указана | **Beschikbaarheid** ingesteld | **Verfügbarkeit** festgelegt |
+| skills | Навыки добавлены | Vaardigheden toegevoegd | Fähigkeiten hinzugefügt |
+| evidence | Навыки подкреплены работой | Vaardigheden **onderbouwd** door werk | Durch Arbeit **belegte** Fähigkeiten |
+| work profile | Мой рабочий профиль | Mijn **werkprofiel** ✓ matches `marketRecognition` | Mein **Arbeitsprofil** ✓ matches `marketRecognition` |
+
+S2's own `dimension.*` strings are deliberately **first-person plain language**
+("Wann ich arbeiten kann", not "Verfügbarkeit"), mirroring the LT source
+("Kada galiu dirbti"). That is the product voice, not a missing term.
+
+### Findings for owner decision — NOT changed, per the "don't guess" rule
+
+| # | Sev | Locale | String | Issue | Suggested |
+|---|---|---|---|---|---|
+| 1 | **HIGH** | DE | `readiness.label` = "Arbeitsbereitschaft" | In German labour law **Arbeitsbereitschaft is a defined category of paid standby/on-call working time**, not "how complete is your profile". A German construction worker may read this as a shift type. | "Startklar für Arbeit" / "Bereit für Arbeit" |
+| 2 | MED | NL | `readiness.label` = "Werkgereedheid" | Bureaucratic HR compound; not how a NL bouwvakker speaks. | "Klaar om te werken" / "Werkklaar" |
+| 3 | MED | NL | `dimension.whatPayIExpect` = "Welke beloning ik verwacht" | "beloning" is HR-register (reward/compensation); the catalog's own field term is "Salaris". | "Wat ik wil verdienen" |
+| 4 | LOW | RU | `title` = "Моё пространство" | A calque of "My space". The established RU product term for a personal area is "Личный кабинет" — but that implies exactly the account-page/dashboard this block is deliberately **not**. Likely correct as-is; owner call. | keep, or "Моё рабочее пространство" |
+| 5 | LOW | DE | `title` = "Mein Bereich" | Neutral and safe. "Mein Arbeitsbereich" would collide with "workspace". | keep |
+
+Items 1–3 are wording judgements about markets I cannot verify natively, so **nothing was
+rewritten on a guess**. They are a concrete package for a native pass.
+
+### Status
+
+- **LT** — Tier 1, human-verified, product terms pinned by guard. **Release-ready.**
+- **EN** — Tier 1, source language. **Release-ready.**
+- **RU / NL / DE** — mechanically clean, register-correct, terminology-consistent, but
+  **`COPY_REVIEW_PENDING`** on findings 1–3 above. This PR does **not** claim these
+  markets are native-reviewed.
+- `pl sv da no et lv` — non-active locales, namespace pre-filled, native review owed
+  before any promotion to `activeLocales`.
