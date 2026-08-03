@@ -18,7 +18,7 @@ _Last updated: 2026-08-03 (post-merge release baseline)._
 | Production deployment | **`5722693900`** — sha `2813c78b`, **success**, 2026-08-03T07:49:54Z |
 | Production origin | `https://labourmarket.ai` (apex; `app.` is `LEGACY_APP_HOST`, 301) |
 | Supabase project ref | `gorgitwvdzxbnaxhrsrw` |
-| Migration baseline | **173** files on `main` · **172** ledger rows in production · **12** on `main` unapplied · **4** in production absent from `main` |
+| Migration baseline | **173** files on `main` · **170** ledger rows in production · **12** on `main` unapplied · **4** in production absent from `main` |
 | CI on `main` HEAD | `quality` ✅ · CodeQL ✅ · **`Supabase Preview` ❌** (the drift below) |
 
 ## Stage ledger
