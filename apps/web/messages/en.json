@@ -7121,6 +7121,10 @@
       "clear": "Clear filters",
       "noMatches": "No candidates match the selected filters."
     },
+    "pool": {
+      "capped": "Not everyone was compared. More discoverable workers fit this need than one list can hold, so the {count} whose skills, profession and country match it most directly were retrieved first — never the newest registrations. Narrow the need to be sure the right people are compared.",
+      "complete": "All {count} discoverable workers were compared against this need."
+    },
     "contactRequest": {
       "button": "Request contact details",
       "sending": "Sending…",

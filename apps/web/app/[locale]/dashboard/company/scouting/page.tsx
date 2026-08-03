@@ -165,6 +165,13 @@ export default async function CompanyScoutingPage({
         )
       : null;
 
+  // W10 slice 3: "we did not compare everyone" is true when the pool budget
+  // bound OR when a Stage-1 id read was truncated. Either way the employer is
+  // told, so an empty/short list is never read as a statement about the supply.
+  const poolIncomplete =
+    result?.kind === "ok" &&
+    (result.retrieval.capped || result.retrieval.truncatedStages.length > 0);
+
   const statusLabels = {
     strong: t("status.strong"),
     possible: t("status.possible"),
@@ -284,6 +291,27 @@ export default async function CompanyScoutingPage({
           ))}
         </nav>
       )}
+
+      {/* W10 slice 3 — RETRIEVAL DISCLOSURE (audit P0-3). The candidate pool
+          used to be the 200 newest registrations, applied silently: an
+          employer read "no candidates" when the truth was "we did not look
+          that far". Retrieval is now planned from this demand, and how far it
+          reached is stated either way — how many workers were compared, and
+          whether the pool bound was hit. */}
+      {result?.kind === "ok" ? (
+        <p
+          className={
+            poolIncomplete
+              ? "rounded-md border border-state-amber/40 bg-state-amber/10 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+              : "text-xs leading-relaxed text-text-muted"
+          }
+          data-testid="scouting-pool-note"
+        >
+          {poolIncomplete
+            ? t("pool.capped", { count: result.retrieval.poolSize })
+            : t("pool.complete", { count: result.retrieval.poolSize })}
+        </p>
+      ) : null}
 
       {/* Bounded facet filters (Wagon 1): chips from the VISIBLE supply only
           (server-validated allowlist), URL-param driven (shareable), strictly

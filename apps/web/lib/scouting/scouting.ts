@@ -12,6 +12,7 @@ import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
 import {
   toScoutSafeCandidate,
   type ScoutSafeCandidate,
@@ -141,6 +142,10 @@ export type ScoutResult =
       /** The filters actually applied after allowlisting (an out-of-supply
        *  probe value is dropped, honestly reflected here). */
       filters: ScoutFilters;
+      /** How this candidate pool was retrieved (W10 slice 3). Surfaces MUST
+       *  disclose `capped` — an employer reading "no candidates" is entitled
+       *  to know whether the platform actually looked at everyone. */
+      retrieval: SupplyRetrievalReport;
     }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
@@ -236,7 +241,14 @@ export async function runScouting(
   // the text, no detectable profession) → honest unstructured state.
   if (source === null) return { kind: "not-structured", demand };
 
-  const supply = await buildSupplyCandidates(supabase);
+  // W10 slice 3 (audit P0-3) — STAGED RETRIEVAL. The pool used to be the 200
+  // newest registrations, chosen before anyone looked at this demand: a
+  // qualified worker who registered earlier was never fetched, so the page
+  // said "no candidates" when the truth was "we did not look". Retrieval is
+  // now planned FROM `need` (skills → profession → country, all index-backed),
+  // with a deterministic id-ordered backfill so nobody who was reachable
+  // before became unreachable. The ranking below is unchanged.
+  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, { need });
 
   // Worker-initiated interest signals on THIS demand (owner-scoped read via
   // RLS; table absent pre-apply → empty, the view is simply unchanged).
@@ -325,7 +337,7 @@ export async function runScouting(
         a.workerId.localeCompare(b.workerId),
     );
 
-  return { kind: "ok", demand, candidates, interestByWorker, facets, filters };
+  return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval };
 }
 
 export type ShortlistWriteResult =

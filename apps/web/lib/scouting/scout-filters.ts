@@ -3,8 +3,10 @@
  *
  * URL-param driven (shareable links), SERVER-validated, and strictly
  * NARROWING: filters run in memory over the already-bounded, RLS-scoped
- * supply (buildSupplyCandidates caps at 200 rows behind can_view_worker) —
- * they can only ever REMOVE candidates, never widen visibility.
+ * supply (buildSupplyCandidates assembles a demand-driven pool bounded by
+ * SUPPLY_POOL_BUDGET behind can_view_worker — W10 slice 3 replaced the old
+ * newest-200 window) — they can only ever REMOVE candidates, never widen
+ * visibility.
  *
  * Validation is allowlist-first:
  *   - syntax bounds first (charset + length caps) so hostile input dies cheap;
