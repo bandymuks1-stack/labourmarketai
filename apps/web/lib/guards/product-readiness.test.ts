@@ -1927,7 +1927,15 @@ describe("no migration files added by this sprint", () => {
     // slice 3 branch (#974) also adds one migration and must resolve to 171
     // if it merges after this PR. Never take either side verbatim — recount
     // the real migration files after every rebase.
-    const SPRINT_BASELINE = 173;
+    const SPRINT_BASELINE = 177;
+    // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
+    // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
+    // (ledger versions 20260728114008/114254/114301/114353), restored to the
+    // repo byte-exact for history parity (Option A of
+    // docs/audits/usage-cost-migration-drift-inventory-2026-08-03.md).
+    // These files must NEVER be re-applied to production — they are already
+    // there; the restore closes the production-ahead-of-main content drift.
+    //
     // Bumped 172 -> 173 for W11 assigned-worker project read
     // (20260803090000_project_assigned_worker_read_v1, paired rollback). Closes
     // W11 P0-2 (the assigned worker cannot read their own project, so their
