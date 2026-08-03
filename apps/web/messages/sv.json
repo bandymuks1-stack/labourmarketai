@@ -4013,5 +4013,34 @@
       "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
       "noContextLabel": "[EN] no further description"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mitt utrymme",
+    "intro": "Här sätter du samman din arbetsprofil, ser vad som redan är känt om dig och vad som är nästa vettiga steg. Själva arbetet börjar i samtalet nedan.",
+    "workProfile": "Min arbetsprofil",
+    "dimension": {
+      "whatICanDo": "Vad jag kan",
+      "whatIAmLookingFor": "Vad jag söker",
+      "whenICanWork": "När jag kan arbeta",
+      "whereICanWork": "Var jag kan arbeta",
+      "whatPayIExpect": "Vilken ersättning jag förväntar mig",
+      "howIProveExperience": "Vad jag kan styrka min erfarenhet med"
+    },
+    "readiness": {
+      "label": "Arbetsberedskap",
+      "known": "Redan angett:",
+      "next": "Viktigast nu:",
+      "complete": "Allt viktigt är redan angett.",
+      "unavailable": "Arbetsberedskapen kunde inte visas just nu. Samtalet fungerar som alltid."
+    },
+    "action": {
+      "startWithYourself": "Börja med dig själv",
+      "whenICanWork": "Ange när jag kan arbeta",
+      "whereICanWork": "Ange var jag kan arbeta",
+      "addSkills": "Lägg till färdigheter",
+      "addExperienceEvidence": "Lägg till bevis på erfarenhet",
+      "viewWorkProfile": "Visa min arbetsprofil",
+      "completeWorkProfile": "Komplettera min arbetsprofil"
+    }
   }
 }

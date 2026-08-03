@@ -4013,5 +4013,34 @@
       "groundedIn": "[EN] Grounded in this interaction: {interaction} · {context}",
       "noContextLabel": "[EN] no further description"
     }
+  },
+  "personalWorkspace": {
+    "title": "Mana telpa",
+    "intro": "Šeit tu veido savu darba profilu, redzi, kas par tevi jau zināms, un ko vērts darīt tālāk. Pats darbs sākas sarunā zemāk.",
+    "workProfile": "Mans darba profils",
+    "dimension": {
+      "whatICanDo": "Ko protu",
+      "whatIAmLookingFor": "Ko meklēju",
+      "whenICanWork": "Kad varu strādāt",
+      "whereICanWork": "Kur varu strādāt",
+      "whatPayIExpect": "Kādu atalgojumu sagaidu",
+      "howIProveExperience": "Ar ko varu pamatot pieredzi"
+    },
+    "readiness": {
+      "label": "Darba gatavība",
+      "known": "Jau norādīts:",
+      "next": "Tagad svarīgākais:",
+      "complete": "Viss svarīgākais jau ir norādīts.",
+      "unavailable": "Darba gatavību pašlaik neizdevās parādīt. Saruna darbojas kā vienmēr."
+    },
+    "action": {
+      "startWithYourself": "Sākt ar sevi",
+      "whenICanWork": "Norādīt, kad varu strādāt",
+      "whereICanWork": "Norādīt, kur varu strādāt",
+      "addSkills": "Pievienot prasmes",
+      "addExperienceEvidence": "Pievienot pieredzes apliecinājumus",
+      "viewWorkProfile": "Skatīt manu darba profilu",
+      "completeWorkProfile": "Papildināt manu darba profilu"
+    }
   }
 }

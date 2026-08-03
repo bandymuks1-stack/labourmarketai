@@ -11722,5 +11722,34 @@
       "groundedIn": "Grounded in this interaction: {interaction} · {context}",
       "noContextLabel": "no further description"
     }
+  },
+  "personalWorkspace": {
+    "title": "My space",
+    "intro": "This is where you put your work profile together, see what is already known about you, and what is worth doing next. The work itself starts in the conversation below.",
+    "workProfile": "My work profile",
+    "dimension": {
+      "whatICanDo": "What I can do",
+      "whatIAmLookingFor": "What I am looking for",
+      "whenICanWork": "When I can work",
+      "whereICanWork": "Where I can work",
+      "whatPayIExpect": "What pay I expect",
+      "howIProveExperience": "How I can back up my experience"
+    },
+    "readiness": {
+      "label": "Work readiness",
+      "known": "Already set:",
+      "next": "Most important now:",
+      "complete": "Everything important is already set.",
+      "unavailable": "Work readiness could not be shown right now. The conversation works as always."
+    },
+    "action": {
+      "startWithYourself": "Start with yourself",
+      "whenICanWork": "Say when I can work",
+      "whereICanWork": "Say where I can work",
+      "addSkills": "Add skills",
+      "addExperienceEvidence": "Add proof of experience",
+      "viewWorkProfile": "View my work profile",
+      "completeWorkProfile": "Add to my work profile"
+    }
   }
 }
