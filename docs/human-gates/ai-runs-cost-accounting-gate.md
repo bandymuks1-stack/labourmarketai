@@ -1,6 +1,11 @@
 # Human gate — apply `ai_runs` so AI cost stops being unattributable
 
-**Status:** OPEN — awaiting owner decision. Nothing in this repo applies it.
+**Status:** **RESOLVED 2026-08-03 — GRANTED AND APPLIED.** The owner approved the production apply; it landed via Supabase MCP `apply_migration` as prod ledger version `20260803061937` (ledger 169 → 170), with **0 initial rows**. Full post-apply proof — schema, RLS, grants, indexes, advisors, unchanged row counts — is the `20260714150000_ai_runs_audit_v1.sql` row in `docs/APPLIED_LEDGER.md`.
+
+**Two conditions ride with that approval and are NOT satisfied by the apply:**
+
+1. **`AI_PROVIDER_MODE` stays `disabled`** until a separate owner decision to enable a real provider. The apply creates the table; it does not turn AI on.
+2. **A 90-day retention policy is a REQUIRED BLOCK before that activation** — full `ai_runs` rows and `output_excerpt` may be retained no longer than 90 days, and longer-horizon KPI history must come from aggregated, minimised data rather than indefinitely retained model output excerpts. No retention migration was created by the applying PR (it would need its own, unreviewed human gate).
 **Migration:** `supabase/migrations/20260714150000_ai_runs_audit_v1.sql`
 **Rollback:** `supabase/rollbacks/20260714150000_ai_runs_audit_v1.down.sql`
 **Raised by:** W14 audit P0-2, closed on the code side by W14 Slice 2.
@@ -20,9 +25,11 @@ finding describes. The code side is complete:
 | Attributed (model, alias, tier, task, operation, profile, tokens, latency) | `buildAiRunRow` | works |
 | Insert attempted | `lib/ai/runtime/audit-store.ts` | works |
 | Wired into the canonical entrypoint | `runAiAgent` → used by 5 feature modules | works |
-| **Row lands in production** | `ai_runs` table | **MISSING — this gate** |
+| **Row lands in production** | `ai_runs` table | **EXISTS since 2026-08-03** (was: MISSING — this gate) |
 
-So nothing needs to be built. One table needs to exist.
+So nothing needed to be built. One table needed to exist, and now does — though
+no row can land until `AI_PROVIDER_MODE` leaves `disabled`, which is condition 1
+above and a separate decision.
 
 W14 Slice 2 fixed the one part that did not need this gate: `run-agent-server.ts`
 awaited `persistAiRunAudit` and **discarded its boolean**, so a run whose cost

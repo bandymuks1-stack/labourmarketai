@@ -73,7 +73,7 @@ Runtime subtotal **2,992 LOC**; registry **934**; entrypoints **415**; evals **5
 | Item | Gate | Consequence today |
 |---|---|---|
 | Runtime state | `AI_PROVIDER_MODE` ∈ {mock, live} + known provider + non-empty key, else `disabled` | AI is off; `disabled` adapter returns an honest sentinel |
-| `ai_runs` audit table | draft migration `20260714150000_ai_runs_audit_v1.sql` (`DO NOT APPLY` header) | audit rows are not persisted **and the daily-run budget guard cannot fire** — see §5.1 |
+| `ai_runs` audit table | **applied to production 2026-08-03** (prod ledger `20260803061937`, 0 rows) | the table is no longer the blocker. Nothing is persisted and the daily-run budget guard still cannot fire, but now for one reason only: `AI_PROVIDER_MODE=disabled` gates both behind `cfg.state === "live"` — see §5.1 |
 | `runtime/providers/openai.ts` | `AI_OPENAI_ENABLED=true` **and** `OPENAI_API_KEY` | double-gated, never configured |
 | `runtime/providers/gemini.ts` | `AI_GEMINI_ENABLED=true` **and** `GEMINI_API_KEY` | double-gated, never configured |
 | `runtime/providers/xai.ts` | `AI_XAI_ENABLED=true` **and** `XAI_API_KEY` | double-gated, never configured |
