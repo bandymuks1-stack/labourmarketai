@@ -208,3 +208,60 @@ green, neither merged:
 
 `components/app/my-space/` is never created on this branch, so no parallel
 component family exists after #998 is closed as superseded.
+
+## 10. Browser proof (2026-08-03)
+
+### What was proven, and how
+
+The authenticated end-to-end proof needs a local Supabase stack. **Docker Desktop's
+Linux engine did not come up on this machine** — `docker info` hangs indefinitely
+(RC=124 at a 30s bound) with `com.docker.backend.exe` alive but the
+`dockerDesktopLinuxEngine` pipe never answering. No stack was running and no port was
+occupied, so nothing belonging to another session was touched, started or stopped, and
+no `config.toml` was patched. **The blocker is the Docker engine, not the repo.**
+
+What was possible without a database was done properly: the **real** client component
+was rendered with the **real** message catalogs through the **real** label resolver, and
+the output was served over `http://localhost:4173` with the **production CSS emitted by
+`pnpm -F web build`**. Measurements are from a real browser engine — geometry and
+computed style, not a source scan. (Pixel screenshots could not be captured: the
+Browser pane was not displayed, so the page never composited frames.)
+
+| # | State / property | Result | How |
+|---|---|---|---|
+| 1 | new worker | ✅ | browser, 375 + 1440 |
+| 2 | partial worker | ✅ | browser, 375 + 1440 |
+| 3 | complete worker — **no** completion CTA | ✅ | browser (asserted `Papildyti` absent) |
+| 4 | readiness error — plain text, **no** CTA | ✅ | browser (0 buttons in that frame) |
+| 5 | company-only → renders nothing | ✅ | browser (empty string) |
+| 6 | agency-only → renders nothing | ✅ | same `company` base identity |
+| 7 | customer → renders nothing | ✅ | same `company` base identity |
+| 8 | organization workspace → renders nothing | ✅ | browser (empty string) |
+| 9 | personal workspace | ✅ | browser (all rendering cases) |
+| 10 | no name → neutral header, no invented name | ✅ | browser |
+| 11 | desktop 1440 | ✅ | card capped at 768px (`max-w-3xl`), no overflow |
+| 12 | mobile 375 | ✅ | `scrollWidth === clientWidth === 375`, 0 elements past the viewport |
+| 13 | no horizontal overflow | ✅ | both viewports |
+| 14 | keyboard focus | ✅ | real `Tab` → `:focus-visible` matches, 2px `rgb(29,109,220)` ring |
+| 15 | touch targets | ✅ **after a fix — see below** | every button ≥ 44px |
+| 16 | no raw DB text | ✅ | browser + `user copy names no technical state` guard |
+| 17 | no console errors | ✅ | `read_console_messages` → none |
+| 18 | dark theme contrast | ✅ | 6.29–18.6:1 against the real `ink-900` page surface (AA needs 4.5) |
+| 19 | LT + EN copy renders | ✅ | browser, both catalogs |
+| 20 | **first real turn removes the intro** | ⛔ NOT PROVEN | needs the live chat — Docker |
+| 21 | **composer reachable / opening overflow** | ⛔ NOT PROVEN | needs the live thread — Docker |
+| 22 | **role gating end-to-end** | ⛔ NOT PROVEN | needs auth — Docker |
+
+Items 20–22 are proven at MODEL and RENDER level by
+`personal-workspace-intro.test.ts` (`isOpening && intro`, the `my-auto` assertion) and
+by the role matrix in the two guard suites — but **not** in a browser. They stay open
+until a local stack runs.
+
+### The defect the browser found
+
+`size="sm"` on the primary CTA renders `px-4 py-2` → a **36px** box, while the
+secondary pills render **44px** (`min-h-11`). The single most important action was the
+*hardest* to hit, and nothing in the source suggests it — both look like "a Button".
+Fixed by dropping `size="sm"` (the default `md` is `px-6 py-3` → 44px, and is what 74
+of the 91 `<Button>` call sites already use). Re-measured: every button ≥ 44px.
+Pinned by `the PRIMARY action is never a smaller target than the pills beside it`.

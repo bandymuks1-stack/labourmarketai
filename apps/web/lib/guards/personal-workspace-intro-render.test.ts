@@ -199,6 +199,16 @@ describe("the rendered surface is honest and reachable", () => {
     for (const p of pills) expect(p).toContain("min-h-11");
   });
 
+  it("the PRIMARY action is never a smaller target than the pills beside it", () => {
+    // Browser-measured at 375px: `size="sm"` (px-4 py-2) renders a 36px box
+    // while the pills render 44px — the most important action ended up the
+    // hardest to hit. The default `md` (px-6 py-3) matches them.
+    const primary = html.match(/<button[^>]*personal-workspace-intro-primary[^>]*>/)?.[0] ?? "";
+    expect(primary).not.toBe("");
+    expect(primary, "primary must not use the 36px sm padding").not.toMatch(/\bpy-2\b/);
+    expect(primary).toMatch(/\bpy-3\b/);
+  });
+
   it("the action row wraps instead of overflowing a narrow screen", () => {
     expect(html).toMatch(/class="flex flex-wrap items-center gap-2"/);
     expect(html).toMatch(/flex flex-wrap gap-x-3 gap-y-1/);

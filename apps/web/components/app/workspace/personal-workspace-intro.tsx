@@ -118,9 +118,12 @@ export function PersonalWorkspaceIntro({
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
+              {/* Default `md` size, NOT `sm`: `sm` is px-4 py-2 → a 36px box,
+                  which made the ONE most important action a SMALLER touch
+                  target than the 44px secondary pills beside it. Measured in a
+                  browser at 375px — the inversion is invisible in source. */}
               <Button
                 type="button"
-                size="sm"
                 data-testid="personal-workspace-intro-primary"
                 onClick={() => onAction(intro.primary.id)}
               >
