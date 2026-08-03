@@ -1,3 +1,13 @@
+> **SUPERSEDED AS AN ENTRY POINT — kept as the W3/W4-era historical record.**
+> This file also opens with "canonical continuation file, read this FIRST"; two
+> files cannot both be that. The single canonical entry point is
+> [`premium-rebuild-live-state.md`](./premium-rebuild-live-state.md), and the full
+> current record is
+> [`post-merge-production-readiness-baseline-2026-08-03.md`](./post-merge-production-readiness-baseline-2026-08-03.md).
+> Everything below is frozen at its original SHAs and was **not** re-scored.
+
+---
+
 # LABOURMARKET.AI — PREMIUM REBUILD LIVE STATE
 
 > Canonical continuation file. A new session reads this FIRST, verifies git and
