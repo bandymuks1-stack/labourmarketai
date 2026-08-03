@@ -166,19 +166,16 @@ describe("the landing player-card is the CANONICAL card (owner audit §3.7)", ()
     expect(showcase).not.toMatch(/gold|silver|bronze|\bOVR\b/i);
   });
 
-  it("each on-card acronym exposes its meaning as a native title tooltip", () => {
-    const card = read("components/app/player-card.tsx");
-    expect(card).toMatch(/title=\{t\(`stat\.\$\{k\}`\)\}/);
-  });
-
-  it("every active locale defines the legend intro + all six stat names", () => {
+  it("the stat-code legend died with the concept card in every active locale (S3)", () => {
+    // S3 player-card honesty: the six-acronym stat fiction (SKL/REL/…)
+    // belonged to the deleted FUT card. Its i18n keys are gone and may not
+    // come back — the canonical card explains itself with full labels.
     for (const loc of ACTIVE) {
-      const pc = (catalog(loc) as { playercards: { statLegendIntro: string; stat: Record<string, string> } })
-        .playercards;
-      expect(typeof pc.statLegendIntro).toBe("string");
-      for (const k of ["SKL", "REL", "SPD", "SAF", "ADP", "TRS"]) {
-        expect(typeof pc.stat[k]).toBe("string");
-      }
+      const pc = (catalog(loc) as { playercards: Record<string, unknown> }).playercards;
+      expect(pc.statLegendIntro, `${loc} playercards.statLegendIntro`).toBeUndefined();
+      expect(pc.stat, `${loc} playercards.stat`).toBeUndefined();
+      expect(pc.tier, `${loc} playercards.tier`).toBeUndefined();
+      expect(pc.status, `${loc} playercards.status`).toBeUndefined();
     }
   });
 });

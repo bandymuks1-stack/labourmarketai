@@ -38,13 +38,18 @@ describe("2. no construction fallback on real surfaces", () => {
       "components/app/worker-player-card.tsx",
       "lib/player-card/player-card.ts",
       "lib/identity/player-card-minimum.ts",
+      // S3: the shared public sample must stay non-construction too (§3.3).
+      "lib/player-card/sample-card.ts",
     ]) {
       const src = stripComments(read(rel)).toLowerCase();
       expect(src, rel).not.toMatch(/construction|statyba|"tiler"|"mason"|bricklay/);
     }
   });
 
-  it("the fictional FIFA concept card is imported ONLY by marketing surfaces", () => {
+  it("the fictional FIFA concept card is DELETED and imported by nothing (S3)", () => {
+    // S3 player-card honesty: the concept card is not merely quarantined to
+    // marketing any more — the file is gone and no surface may import it.
+    expect(existsSync(join(APP_ROOT, "components", "app", "player-card.tsx"))).toBe(false);
     const offenders: string[] = [];
     const walk = (dir: string) => {
       for (const name of readdirSync(join(APP_ROOT, dir), {
@@ -58,8 +63,8 @@ describe("2. no construction fallback on real surfaces", () => {
         }
       }
     };
-    walk("components/app");
-    walk("app/[locale]/dashboard");
+    walk("components");
+    walk("app");
     expect(offenders, offenders.join(", ")).toEqual([]);
   });
 });
@@ -79,14 +84,6 @@ describe("3. journal-derived skills show their evidence basis", () => {
 });
 
 describe("4. no fake verified labels", () => {
-  it("marketing concept cards carry a DEFAULT-ON placeholder marker (§18)", () => {
-    // PR15 hardening: consumers read the shared prod-forced constant, never
-    // the raw env var (see lib/guards/placeholder-marker-prod.test.ts).
-    const src = read("components/app/player-card.tsx");
-    expect(src).toMatch(/showMarker = showPlaceholderMarkers/);
-    expect(src).not.toMatch(/NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS\s*===/);
-  });
-
   it("the showcase renders the CANONICAL card with a visible not-a-real-person line (owner audit §3.7)", () => {
     const showcase = read("components/marketing/player-card-showcase.tsx");
     // Landing = product: the SAME WorkerPlayerCard, never the FUT concept.

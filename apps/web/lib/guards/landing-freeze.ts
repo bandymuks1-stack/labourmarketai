@@ -30,6 +30,21 @@ import { join } from "node:path";
  * replacement is guarded permanently by `public-no-fabricated-confidence.test.ts`,
  * so the freeze is not the only thing standing between the landing and that
  * number coming back.
+ *
+ * S3 player-card honesty (owner directive 2026-08-03) — the retired FUT-style
+ * concept card (`components/app/player-card.tsx` + `components/app/
+ * ovr-ring.tsx`) was DELETED: `/for-workers` was the last public surface
+ * rendering it, and it now renders the canonical `WorkerPlayerCard` with the
+ * shared sample from `lib/player-card/sample-card.ts` — the SAME sample the
+ * landing showcase uses. That removed a frozen file (player-card.tsx left
+ * this list; freezing a deleted file would only make the guard fail to
+ * load), extracted the showcase's inline sample into the shared module
+ * (player-card-showcase.tsx hash moved, render output unchanged), removed
+ * the card payloads + getCard from `content/placeholders.ts`, and pruned the
+ * dead `playercards.stat/tier/status/statLegendIntro` keys from the frozen
+ * `playercards` namespaces. The removal is guarded permanently by
+ * `public-worker-card-honesty.test.ts`, so the freeze is not the only thing
+ * standing between the public pages and the OVR fiction coming back.
  */
 
 /** Paths relative to apps/web. The landing page + its full render tree.
@@ -44,7 +59,6 @@ export const FROZEN_LANDING_FILES = [
   "components/app/world-geo.ts",
   "components/app/live-ticker.tsx",
   "components/app/market-counters.tsx",
-  "components/app/player-card.tsx",
   "components/app/draft-board-columns.tsx",
   "components/app/recent-matches-feed.tsx",
   "components/app/regional-heatmap.tsx",

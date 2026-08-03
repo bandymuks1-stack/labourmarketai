@@ -132,18 +132,26 @@ describe("§5.2 landing and product cannot drift apart", () => {
   });
 
   it("the landing sample goes through the SAME derivers as the real card", () => {
-    expect(SHOWCASE).toContain("deriveEvidenceTimeline(");
-    expect(SHOWCASE).toContain("deriveSkillEvidence(");
-    // It may not hand-build a series object — that is how a prettier fake
-    // marketing chart would get in.
-    expect(SHOWCASE).not.toMatch(/evidenceTimeline:\s*\[\s*\{/);
-    expect(SHOWCASE).not.toMatch(/skillEvidence:\s*\[\s*\{/);
+    // S3: the sample literal moved into the ONE shared module both public
+    // surfaces build from (the showcase must import it). The deriver rule
+    // holds inside that module — and neither file may hand-build a series
+    // object, which is how a prettier fake marketing chart would get in.
+    expect(SHOWCASE).toContain("buildSampleWorkerPlayerCard");
+    const sample = read("lib/player-card/sample-card.ts");
+    expect(sample).toContain("deriveEvidenceTimeline(");
+    expect(sample).toContain("deriveSkillEvidence(");
+    for (const src of [SHOWCASE, sample]) {
+      expect(src).not.toMatch(/evidenceTimeline:\s*\[\s*\{/);
+      expect(src).not.toMatch(/skillEvidence:\s*\[\s*\{/);
+    }
   });
 
   it("the landing sample shows the honest gap too (a skill with no records)", () => {
     // At least one declared-only skill, so the landing cannot look strictly
     // better than a real card.
-    expect(SHOWCASE).toMatch(/verified: false, source: "self"/);
+    expect(read("lib/player-card/sample-card.ts")).toMatch(
+      /verified: false, source: "self"/,
+    );
   });
 
   it("the landing still says out loud that the card is a sample", () => {

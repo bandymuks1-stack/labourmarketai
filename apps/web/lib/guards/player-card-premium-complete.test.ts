@@ -91,8 +91,13 @@ describe("§5.2 landing and product are the SAME component", () => {
   });
 
   it("the landing sample fills the SAME §5.2 fields", () => {
-    expect(SHOWCASE).toContain("locationCountry");
-    expect(SHOWCASE).toContain("documents:");
+    // S3: the sample literal moved into the ONE shared module both public
+    // surfaces build from; the showcase must import it, and the sample must
+    // still fill the same §5.2 fields.
+    expect(SHOWCASE).toContain("buildSampleWorkerPlayerCard");
+    const sample = read("lib/player-card/sample-card.ts");
+    expect(sample).toContain("locationCountry");
+    expect(sample).toContain("documents:");
   });
 
   it("the landing still says out loud that the sample is not a real person", () => {

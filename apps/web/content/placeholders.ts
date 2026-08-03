@@ -58,25 +58,11 @@ export type GeoPayload =
     }
   | { kind: "company"; country: string; coord: LngLat; name: string };
 
-/** Player-card (FUT-style worker profile) payload (5b.3). */
-export type PlayerStatKey = "SKL" | "REL" | "SPD" | "SAF" | "ADP" | "TRS";
-/** Render order of the six stat codes — shared by the card (client) and
- *  the marketing showcase legend (server), so it lives in this plain module. */
-export const STAT_KEYS: readonly PlayerStatKey[] = ["SKL", "REL", "SPD", "SAF", "ADP", "TRS"];
+/** Medal-tier scale kept ONLY for the landing DraftBoard mini-cards (5b.4).
+ *  S3 player-card honesty: the FUT-style worker profile card (PlayerCardData,
+ *  STAT_KEYS, getCard) was retired — the public worker surfaces render the
+ *  canonical `WorkerPlayerCard` with the shared sample instead. */
 export type PlayerTier = "gold" | "silver" | "bronze";
-export type PlayerStatus = "LIVE" | "AVAILABLE" | "DRAFTED" | "BUSY";
-export type PlayerCardData = {
-  name: { lt: string; en: string };
-  role: { lt: string; en: string };
-  country: string;
-  flag: string;
-  ovr: number;
-  tier: PlayerTier;
-  status: PlayerStatus;
-  photo: { src: string; alt: { lt: string; en: string } };
-  stats: Record<PlayerStatKey, number>;
-  skills: { lt: string; en: string }[];
-};
 
 /** Companies-page demand preview payload (5b.3.5). */
 export type DemandIntensity = "HOT" | "FILLING" | "OPEN";
@@ -176,8 +162,6 @@ export type Placeholder = {
   icon?: PlaceholderIcon;
   /** Structured map payload (5b.2). */
   geo?: GeoPayload;
-  /** Player-card payload (5b.3). */
-  card?: PlayerCardData;
   /** Companies-page demand preview (5b.3.5). */
   demand?: DemandData;
   /** Agencies-page pool preview (5b.3.5). */
@@ -377,135 +361,6 @@ export const placeholders: readonly Placeholder[] = [
     addedIn: "M0",
     consentRequired: true,
     notes: "consented:false — same persona as reference imagery.",
-    card: {
-      name: { lt: "Statybvietės vadovas", en: "Site Supervisor" },
-      role: { lt: "Statyba · Nyderlandai", en: "Construction · Netherlands" },
-      country: "NL",
-      flag: "🇳🇱",
-      ovr: 90,
-      tier: "gold",
-      status: "AVAILABLE",
-      photo: {
-        src: "/placeholders/worker-portrait.svg",
-        alt: {
-          lt: "Darbuotojo portretas (vietos rezervas)",
-          en: "Worker portrait (placeholder)",
-        },
-      },
-      stats: { SKL: 92, REL: 93, SPD: 86, SAF: 95, ADP: 85, TRS: 91 },
-      skills: [{ lt: "Statybvietės priežiūra", en: "Site supervision" }, { lt: "Armavimas", en: "Steel fixing" }, { lt: "Sauga+", en: "Safety+" }],
-    },
-  },
-  {
-    id: "workers.featured.1",
-    type: "person",
-    value: {
-      lt: "Sandėlio komandos vadovas · Nyderlandai",
-      en: "Warehouse Team Lead · Netherlands",
-    },
-    description: "PlayerCard showcase — gold-tier worker profile (NL, logistics).",
-    replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
-    status: "placeholder",
-    addedIn: "M0",
-    consentRequired: true,
-    notes: "consented:false — sample persona; photo is a placeholder.",
-    card: {
-      name: { lt: "Sandėlio komandos vadovas", en: "Warehouse Team Lead" },
-      role: { lt: "Logistika · Nyderlandai", en: "Logistics · Netherlands" },
-      country: "NL",
-      flag: "🇳🇱",
-      ovr: 92,
-      tier: "gold",
-      status: "AVAILABLE",
-      photo: {
-        src: "/placeholders/worker-portrait.svg",
-        alt: {
-          lt: "Darbuotojo portretas (vietos rezervas)",
-          en: "Worker portrait (placeholder)",
-        },
-      },
-      stats: { SKL: 95, REL: 94, SPD: 88, SAF: 96, ADP: 87, TRS: 93 },
-      skills: [{ lt: "Krautuvo valdymas", en: "Forklift operation" }, { lt: "Atsargų apskaita", en: "Inventory control" }, { lt: "Sauga+", en: "Safety+" }],
-    },
-  },
-  {
-    id: "workers.featured.2",
-    type: "person",
-    value: {
-      lt: "Slaugos koordinatorius · Vokietija",
-      en: "Care Coordinator · Germany",
-    },
-    description: "PlayerCard showcase — silver-tier worker profile (DE, care/health).",
-    replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
-    status: "placeholder",
-    addedIn: "M0",
-    consentRequired: true,
-    notes: "consented:false — sample persona; photo is a placeholder.",
-    card: {
-      name: { lt: "Slaugos koordinatorius", en: "Care Coordinator" },
-      role: { lt: "Slauga · Vokietija", en: "Care & health · Germany" },
-      country: "DE",
-      flag: "🇩🇪",
-      ovr: 87,
-      tier: "silver",
-      status: "AVAILABLE",
-      photo: {
-        src: "/placeholders/worker-portrait.svg",
-        alt: {
-          lt: "Darbuotojo portretas (vietos rezervas)",
-          en: "Worker portrait (placeholder)",
-        },
-      },
-      stats: { SKL: 84, REL: 95, SPD: 80, SAF: 90, ADP: 83, TRS: 94 },
-      skills: [{ lt: "Pagyvenusių priežiūra", en: "Elderly care" }, { lt: "Grafikų planavimas", en: "Scheduling" }, { lt: "Pirmoji pagalba", en: "First aid" }],
-    },
-  },
-  {
-    id: "workers.featured.3",
-    type: "person",
-    value: {
-      lt: "Virėjas · Lietuva",
-      en: "Chef de partie · Lithuania",
-    },
-    description: "PlayerCard showcase — bronze-tier worker profile (LT, hospitality).",
-    replacementSource:
-      "Real worker profile data from the `workers` table joined with `worker_skills`, plus the published contextual fit signal formula (concept).",
-    status: "placeholder",
-    addedIn: "M0",
-    consentRequired: true,
-    notes: "consented:false — sample persona; photo is a placeholder.",
-    card: {
-      name: { lt: "Virėjas", en: "Chef de partie" },
-      role: { lt: "Apgyvendinimas · Lietuva", en: "Hospitality · Lithuania" },
-      country: "LT",
-      flag: "🇱🇹",
-      ovr: 79,
-      tier: "bronze",
-      status: "AVAILABLE",
-      photo: {
-        src: "/placeholders/worker-portrait.svg",
-        alt: {
-          lt: "Darbuotojo portretas (vietos rezervas)",
-          en: "Worker portrait (placeholder)",
-        },
-      },
-      stats: { SKL: 80, REL: 78, SPD: 79, SAF: 81, ADP: 77, TRS: 80 },
-      skills: [{ lt: "Maisto gaminimas", en: "Cooking" }, { lt: "Maisto sauga", en: "Food safety" }, { lt: "Darbas komandoje", en: "Teamwork" }],
-    },
-  },
-  {
-    id: "playercards.caption.dragToCompare",
-    type: "metric",
-    value: { lt: "← Tempk palyginimui", en: "← Drag to compare" },
-    description:
-      "PlayerCard showcase — decorative caption hinting at M2 comparison.",
-    replacementSource:
-      "Real side-by-side worker comparison UX (drag/select) ships in M2.",
-    status: "placeholder",
-    addedIn: "M0",
-    consentRequired: false,
   },
   {
     id: "hero.project.featured",
@@ -1193,13 +1048,6 @@ export function placeholderCycle(id: string, locale: string): string[] {
  *  Used by LiveMap to pull its marker sets. */
 export function placeholdersByPrefix(prefix: string): Placeholder[] {
   return placeholders.filter((p) => p.id.startsWith(prefix));
-}
-
-/** Player-card payload for a registered worker profile (5b.3). */
-export function getCard(id: string): PlayerCardData {
-  const c = getPlaceholder(id).card;
-  if (!c) throw new Error(`Placeholder "${id}" has no card payload.`);
-  return c;
 }
 
 /** Demand-preview payload (5b.3.5). */

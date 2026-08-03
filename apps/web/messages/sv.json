@@ -803,26 +803,7 @@
       "line1": "[EN] Every worker, in context",
       "line2": "[EN] and ready."
     },
-    "stat": {
-      "ADP": "[EN] Adaptability",
-      "REL": "[EN] Reliability",
-      "SAF": "[EN] Safety",
-      "SKL": "[EN] Skill",
-      "SPD": "[EN] Speed",
-      "TRS": "[EN] Trust"
-    },
-    "status": {
-      "available": "[EN] Available",
-      "busy": "[EN] Busy",
-      "drafted": "[EN] Drafted",
-      "live": "[EN] Live"
-    },
     "subcopy": "[EN] Fit and readiness come from real completed work, confirmed skills and on-site proof — always shown in context, never one universal rating. Concept preview with sample profiles.",
-    "tier": {
-      "bronze": "[EN] Bronze",
-      "gold": "[EN] Gold",
-      "silver": "[EN] Silver"
-    },
     "conceptNote": "[EN] An example card with illustrative data — not a real person. Your card is built from your real work records.",
     "sample": {
       "name": "Rasa J.",
@@ -1097,10 +1078,10 @@
     },
     "profile": {
       "bullets": [
-        "[EN] Fit & readiness signals — coverage against a specific need from confirmed skills, reliability and on-site proof. Never one universal rating.",
-        "[EN] Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
-        "[EN] Skill evidence — built from confirmed work and certificates, not self-claimed.",
-        "[EN] Status badge — Available, Live, Drafted or Busy, always current."
+        "[EN] Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
+        "[EN] What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
+        "[EN] When and where I can work — availability, a from-date and the country, always current.",
+        "[EN] Evidence of experience — work history, documents and a growth timeline built from real entries."
       ],
       "eyebrow": "[EN] Your profile",
       "headline": {

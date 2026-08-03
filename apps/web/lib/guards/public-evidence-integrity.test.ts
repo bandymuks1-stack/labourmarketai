@@ -78,11 +78,16 @@ describe("public homepage is not construction-only", () => {
     ).toBeGreaterThanOrEqual(6);
   });
 
-  it("the featured player cards are diversified beyond construction", () => {
-    // The four featured hero/showcase cards used to be all construction. At
-    // least the logistics, care and hospitality roles must now be present.
-    for (const role of ["Warehouse Team Lead", "Care Coordinator", "Chef de partie"]) {
-      expect(ph.includes(role), `featured cards should include "${role}"`).toBe(true);
-    }
+  it("the public sample player card stays non-construction (S3)", () => {
+    // The four FUT-style featured cards were deleted with the concept card
+    // (S3 player-card honesty). The ONE public sample persona — shared by the
+    // landing showcase and /for-workers via lib/player-card/sample-card.ts —
+    // must stay deliberately non-construction (§3.3): a cook, not a builder.
+    const sample = read("lib/player-card/sample-card.ts");
+    expect(sample).toMatch(/professionSlug:\s*"cook"/);
+    const code = sample
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    expect(code.toLowerCase()).not.toMatch(/construction|statyba|bricklay|"mason"|"tiler"/);
   });
 });

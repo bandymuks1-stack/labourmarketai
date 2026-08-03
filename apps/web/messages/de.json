@@ -3285,26 +3285,6 @@
       "line2": "desto mehr Chancen eröffnen sich."
     },
     "subcopy": "Labourmarket.ai verwandelt Ihre Fähigkeiten, Erfahrungen, Dokumente und beschriebene Arbeit in klare Profilsignale. Je präziser Ihr Profil ausgefüllt ist, desto leichter lassen sich Einsatzbereitschaft, Zuverlässigkeit und die passenden Chancen einschätzen.",
-    "statLegendIntro": "Was die Kürzel bedeuten:",
-    "stat": {
-      "SKL": "Fähigkeit",
-      "REL": "Zuverlässigkeit",
-      "SPD": "Geschwindigkeit",
-      "SAF": "Sicherheit",
-      "ADP": "Anpassungsfähigkeit",
-      "TRS": "Vertrauen"
-    },
-    "tier": {
-      "gold": "Gold",
-      "silver": "Silber",
-      "bronze": "Bronze"
-    },
-    "status": {
-      "live": "Im Einsatz",
-      "available": "Verfügbar",
-      "drafted": "Ausgewählt",
-      "busy": "Beschäftigt"
-    },
     "conceptNote": "Eine Beispielkarte mit illustrativen Daten — keine reale Person. Deine Karte entsteht aus deinen echten Arbeitseinträgen.",
     "sample": {
       "name": "Rasa J.",
@@ -4059,10 +4039,10 @@
       },
       "subcopy": "Ihre Karte entsteht aus Ihrer tatsächlich abgeschlossenen Arbeit und Ihren Arbeitsnachweisen, nicht aus einem selbst verfassten Lebenslauf. Passungssignale werden im Kontext angezeigt — Abdeckung und Einsatzbereitschaft für einen konkreten Bedarf, nie eine universelle Gesamtbewertung.",
       "bullets": [
-        "Passungs- und Bereitschaftssignale — Abdeckung eines konkreten Bedarfs auf Basis Ihrer Arbeitsnachweise, Zuverlässigkeit und Vor-Ort-Nachweise. Nie eine universelle Gesamtbewertung.",
-        "Statistik-Balken — Fähigkeit, Zuverlässigkeit, Geschwindigkeit, Sicherheit, Anpassungsfähigkeit, Vertrauen.",
-        "Fähigkeitssignale — auf Basis Ihrer Arbeitsnachweise und Zertifikate, nicht nur eines selbst verfassten Lebenslaufs.",
-        "Status-Badge — Verfügbar, Im Einsatz, Eingeplant oder Ausgelastet, immer aktuell."
+        "Arbeitsbereitschaft — ehrliche Signale (erfüllt von insgesamt) mit einem klaren nächsten Schritt. Nie eine universelle Gesamtbewertung.",
+        "Was ich kann — angegebene Fähigkeiten, durch das Arbeitsjournal gestützte Fähigkeiten und echte Bestätigungen, nicht nur ein selbst verfasster Lebenslauf.",
+        "Wann und wo ich arbeiten kann — Verfügbarkeit, Startdatum und Land, immer aktuell.",
+        "Nachweise der Erfahrung — Arbeitshistorie, Dokumente und eine Wachstumskurve aus echten Einträgen."
       ]
     },
     "journey": {
