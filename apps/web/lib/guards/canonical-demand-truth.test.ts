@@ -1,0 +1,164 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+/**
+ * W10 slice 4 — structural guards for the canonical demand truth.
+ *
+ * The unit tests in `lib/demand/canonical-demand-model.test.ts` prove the pure
+ * rules. These prove the WIRING: that the map actually reads the canonical
+ * source, that the canonical source did not widen any privilege to get there,
+ * and that the surfaces the slice was forbidden to touch were not touched.
+ */
+
+const web = join(process.cwd(), "apps/web");
+const root = process.cwd().endsWith("apps\\web") || process.cwd().endsWith("apps/web")
+  ? process.cwd()
+  : web;
+
+const read = (rel: string) => readFileSync(join(root, rel), "utf8");
+
+/**
+ * Read a file with comments removed.
+ *
+ * These modules DOCUMENT the things they must not do ("no service-role client",
+ * "never the raw payload"), so a naive text scan flags the explanation as the
+ * violation. The claims below are about executable code, so the prose is
+ * stripped before matching — otherwise the only way to pass would be to delete
+ * the reasoning, which is the opposite of what this repo wants.
+ */
+const code = (rel: string) =>
+  read(rel)
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+
+const CANONICAL_IO = "lib/demand/canonical-demand.ts";
+const CANONICAL_MODEL = "lib/demand/canonical-demand-model.ts";
+const MARKET_RESULT = "lib/market-map/market-result.ts";
+
+describe("the market map reads the canonical demand source", () => {
+  it("market-result no longer queries job_demands directly", () => {
+    // This is the whole defect: the map read the table nothing else in the
+    // customer journey used. If this regresses, the two truths are back.
+    const src = read(MARKET_RESULT);
+    expect(src).not.toMatch(/\.from\(\s*["']job_demands["']\s*\)/);
+  });
+
+  it("market-result loads the canonical demand list", () => {
+    const src = read(MARKET_RESULT);
+    expect(src).toMatch(/from "@\/lib\/demand\/canonical-demand"/);
+    expect(src).toMatch(/loadCanonicalDemand\(/);
+  });
+
+  it("market-result dedupes BEFORE it weights, so one demand is one unit", () => {
+    const src = read(MARKET_RESULT);
+    const dedupeAt = src.indexOf("dedupeCanonicalDemand");
+    const weightAt = src.indexOf("cities.set(");
+    expect(dedupeAt).toBeGreaterThan(-1);
+    expect(weightAt).toBeGreaterThan(dedupeAt);
+  });
+
+  it("a read failure is still an error, never a silent empty market", () => {
+    const src = read(MARKET_RESULT);
+    expect(src).toMatch(/state === "error"[\s\S]{0,80}failed: true/);
+  });
+});
+
+describe("the canonical read inherits authorization and never widens it", () => {
+  it("uses no service-role client", () => {
+    const src = code(CANONICAL_IO);
+    expect(src).not.toMatch(/service[_-]?role/i);
+    expect(src).not.toMatch(/SUPABASE_SERVICE/);
+    expect(read(CANONICAL_IO)).toMatch(/from "@\/lib\/supabase\/server"/);
+  });
+
+  it("declares no SECURITY DEFINER function of its own and adds no migration", () => {
+    const src = code(CANONICAL_IO);
+    expect(src).not.toMatch(/security definer/i);
+    expect(src).not.toMatch(/create (or replace )?function/i);
+  });
+
+  it("reaches worker-visible demand only through the existing gated RPC", () => {
+    const src = read(CANONICAL_IO);
+    expect(src).toMatch(/rpc\("list_open_demand_for_workers"\)/);
+  });
+
+  it("reads customer_requests own-rows only — no tenant/org id from the caller", () => {
+    const src = read(CANONICAL_IO);
+    // An organization id accepted as an argument and pushed into a filter is
+    // the classic client-supplied-authority bug. This module takes NO input at
+    // all, so there is nothing to forge: RLS alone decides.
+    expect(src).toMatch(/export async function loadCanonicalDemand\(\): Promise/);
+    expect(src).not.toMatch(/\.eq\(\s*["'](profile_id|company_id|organization_id|owner_id)["']/);
+  });
+
+  it("requires an authenticated caller", () => {
+    expect(read(CANONICAL_IO)).toMatch(/if \(!user\) return \{ state: "error"/);
+  });
+});
+
+describe("no contact or private employer data can ride along", () => {
+  it("selects no contact, identity or private-note column", () => {
+    // Whole-word only: "vat" as a substring also lives inside "private".
+    const src = code(CANONICAL_IO);
+    for (const forbidden of [
+      "email",
+      "phone",
+      "vat",
+      "vat_number",
+      "contact_person",
+      "manual_review_note",
+      "need_summary",
+      "notes",
+      "owner_profile_id",
+    ]) {
+      expect(src).not.toMatch(new RegExp(`\\b${forbidden}\\b`, "i"));
+    }
+  });
+
+  it("the canonical row type has no field that could carry a person or a price", () => {
+    const src = read(CANONICAL_MODEL);
+    const iface = src.slice(
+      src.indexOf("export interface CanonicalDemand {"),
+      src.indexOf("export type CanonicalDemandResult"),
+    );
+    expect(iface).not.toMatch(/salary|pay|rate|price|email|phone|contact|profile_id/i);
+  });
+
+  it("makes no AI, fit or confidence claim", () => {
+    const both = code(CANONICAL_IO) + code(CANONICAL_MODEL);
+    expect(both).not.toMatch(/\bconfidence\b|\bfitScore\b|\bai_?score\b/i);
+  });
+});
+
+describe("historical demand stays distinguishable from an actionable request", () => {
+  it("every canonical row carries source and actionable", () => {
+    const src = read(CANONICAL_MODEL);
+    expect(src).toMatch(/readonly source: CanonicalDemandSource;/);
+    expect(src).toMatch(/readonly actionable: boolean;/);
+  });
+
+  it("job_demand rows are constructed as NOT actionable", () => {
+    const src = read(CANONICAL_IO);
+    expect(src).toMatch(/source: "job_demand",\s*\n\s*actionable: false,/);
+  });
+
+  it("customer_request rows are constructed as actionable", () => {
+    const src = read(CANONICAL_IO);
+    expect(src).toMatch(/source: "customer_request",\s*\n\s*actionable: true,/);
+  });
+});
+
+describe("the slice stayed inside its boundaries", () => {
+  it("does not import the W10 matching engine, booking RPC or projects layer", () => {
+    const src = read(CANONICAL_IO) + read(CANONICAL_MODEL) + read(MARKET_RESULT);
+    expect(src).not.toMatch(/@\/lib\/market\/match-v1/);
+    expect(src).not.toMatch(/respond_booking_request/);
+    expect(src).not.toMatch(/@\/lib\/projects\//);
+  });
+
+  it("touches no auth, billing or middleware module", () => {
+    const src = read(CANONICAL_IO) + read(CANONICAL_MODEL) + read(MARKET_RESULT);
+    expect(src).not.toMatch(/@\/lib\/(auth|billing|stripe)\//);
+  });
+});

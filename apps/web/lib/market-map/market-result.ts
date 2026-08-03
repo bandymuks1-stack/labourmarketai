@@ -1,6 +1,10 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { loadCanonicalDemand } from "@/lib/demand/canonical-demand";
+import {
+  dedupeCanonicalDemand,
+  placeableDemand,
+} from "@/lib/demand/canonical-demand-model";
 import { resolveCity, COUNTRY_CENTROID } from "@/lib/location/city-coordinates";
 import {
   EUROPE_CENTER,
@@ -14,10 +18,17 @@ import {
 /**
  * THE MARKET RESULT — real rows, geographic.
  *
- * Answers the market goal ("where is demand, and why there?") from the SAME
- * canonical tables the authenticated product already uses: projects carry the
- * geography, `job_demands` carry the headcount behind it. No new table, no
- * migration, no second source of truth.
+ * Answers the market goal ("where is demand, and why there?") from the ONE
+ * canonical demand read (`@/lib/demand/canonical-demand`). No new table and no
+ * migration — but, since W10 slice 4, no second source of truth either.
+ *
+ * WHAT CHANGED AND WHY. This module used to read `job_demands` directly. That
+ * was the platform's SECOND demand truth: the employer workflow, the worker
+ * board, scouting and booking all run on `customer_requests`, so an employer
+ * could submit a real need and this map — reading the other table — would show
+ * no demand at all. The map and the marketplace described different markets.
+ * The canonical read composes both stores through paths the caller is ALREADY
+ * authorized to use, so the two surfaces now answer from one list.
  *
  * HONEST BY CONSTRUCTION:
  *  - `origin` is `live` — these are real rows for this environment. The landing's
@@ -53,32 +64,33 @@ export interface MarketResultData {
   readonly failed: boolean;
 }
 
-type DemandRow = {
-  headcount_needed: number | null;
-  projects: { country: string | null; city: string | null; title: string | null } | null;
-};
-
 export async function loadMarketResult(): Promise<MarketResultData> {
-  const supabase = await createClient();
+  const canonical = await loadCanonicalDemand();
+  if (canonical.state === "error") return emptyResult({ failed: true });
 
-  // One join: open needs and the project that carries their geography.
-  const { data, error } = await supabase
-    .from("job_demands")
-    .select("headcount_needed, projects(country, city, title)")
-    .eq("status", "open")
-    .limit(500);
+  // Dedup FIRST: one canonical demand must produce one unit of weight, even
+  // when two authorized branches returned it. Then keep only rows that carry a
+  // real country — a demand with no country is real but not placeable, and it
+  // is withheld rather than given a centroid it never had.
+  const rows = placeableDemand(dedupeCanonicalDemand(canonical.rows));
 
-  if (error || !data) return emptyResult({ failed: true });
-
-  // Group by country → city, summing headcount. The map shows WHERE work is,
-  // so the unit is people needed, not rows returned.
+  // Group by country → city.
+  //
+  // THE UNIT IS DEMAND INTENSITY, NOT A HEADCOUNT CLAIM. A need whose team size
+  // is unknown contributes 1 — the floor of "at least one need exists here",
+  // which is true — and a need for 12 contributes 12. This drives marker
+  // intensity only. It is never rendered as a number of people: the drilldown
+  // reads `openHeadcount` with an explicit `missing: ["headcount"]` and shows
+  // "not stated" for exactly these rows. Excluding unknown-quantity needs
+  // instead would hide most real demand from the map, which is a worse lie
+  // than a coarse intensity.
   const byCountry = new Map<string, Map<string, number>>();
-  for (const row of data as unknown as DemandRow[]) {
-    const country = row.projects?.country?.toUpperCase();
+  for (const row of rows) {
+    const country = row.country;
     if (!country) continue;
-    const city = row.projects?.city ?? "";
+    const city = row.cityLabel ?? "";
     const cities = byCountry.get(country) ?? new Map<string, number>();
-    cities.set(city, (cities.get(city) ?? 0) + (row.headcount_needed ?? 1));
+    cities.set(city, (cities.get(city) ?? 0) + (row.quantity ?? 1));
     byCountry.set(country, cities);
   }
 
