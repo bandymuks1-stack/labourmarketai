@@ -132,9 +132,17 @@ alone was not accepted as proof.
 | | |
 |---|---|
 | Migration files on `main` | **173** |
-| Ledger rows in production | **172** |
+| Ledger rows in production | **170** |
 | On `main`, not in production | 12 |
 | In production, not on `main` | **4** (§4) |
+
+The two totals do not subtract cleanly, and that is a fact about history rather
+than an error: three legacy repo files were applied as more than one ledger row
+each (`20260612091000_journal_entry_photos.sql` → the `_table` / `_rpc` /
+`_storage` rows; `20260610190000_conversation_message_language.sql` → two rows
+plus a `_check` row), and `agency_legacy_retype` exists in production with no
+file on `main`. Reconciliation: 173 − 12 unapplied = 161 applied-from-file,
++ 5 legacy multi-row/orphan rows + 4 `usage_cost_events` rows = **170**.
 
 ---
 
