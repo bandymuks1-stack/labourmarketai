@@ -209,62 +209,74 @@ green, neither merged:
 `components/app/my-space/` is never created on this branch, so no parallel
 component family exists after #998 is closed as superseded.
 
-## 10. Browser proof (2026-08-03)
+## 10. Browser proof (2026-08-03) — EXECUTED, authenticated, full matrix
 
-### What was proven, and how
+Two rounds. Round 1 (static harness, same day) ran the real component + the real
+built CSS without a database while Docker was down; it found the 36px primary-CTA
+defect (§10.1). Round 2 — after the Docker Desktop 4.75.0 startup crash was
+root-caused (orphaned `dockerInference` socket in `AppData/Local/Docker/run`, the
+engine died initializing its Inference manager; a restart + direct WSL distro boot
+recovered it) — ran the FULL authenticated proof:
 
-The authenticated end-to-end proof needs a local Supabase stack. **Docker Desktop's
-Linux engine did not come up on this machine** — `docker info` hangs indefinitely
-(RC=124 at a 30s bound) with `com.docker.backend.exe` alive but the
-`dockerDesktopLinuxEngine` pipe never answering. No stack was running and no port was
-occupied, so nothing belonging to another session was touched, started or stopped, and
-no `config.toml` was patched. **The blocker is the Docker engine, not the repo.**
+- **local stack**: the repo's canonical `supabase start` (project `labourmarketai`,
+  `127.0.0.1:54321`) — no other session's stack existed (verified via `docker ps`
+  before starting), no config was patched, the guard was not weakened;
+- **fixtures**: `pnpm db:fixtures:local` — the three synthetic `@local.test`
+  accounts only; every extra state (organization membership, customer role,
+  removed worker row, completed pillars) was created as a temporary local row and
+  **reverted in a `finally`**, with post-run row-count checks proving zero residue;
+- **driver**: Playwright Chromium against `pnpm dev` on a dedicated port (3300,
+  `.claude/launch.json` entry `s2-proof`), logging in through the real login form.
 
-What was possible without a database was done properly: the **real** client component
-was rendered with the **real** message catalogs through the **real** label resolver, and
-the output was served over `http://localhost:4173` with the **production CSS emitted by
-`pnpm -F web build`**. Measurements are from a real browser engine — geometry and
-computed style, not a source scan. (Pixel screenshots could not be captured: the
-Browser pane was not displayed, so the page never composited frames.)
-
-| # | State / property | Result | How |
+| # | State / property | Result | Evidence |
 |---|---|---|---|
-| 1 | new worker | ✅ | browser, 375 + 1440 |
-| 2 | partial worker | ✅ | browser, 375 + 1440 |
-| 3 | complete worker — **no** completion CTA | ✅ | browser (asserted `Papildyti` absent) |
-| 4 | readiness error — plain text, **no** CTA | ✅ | browser (0 buttons in that frame) |
-| 5 | company-only → renders nothing | ✅ | browser (empty string) |
-| 6 | agency-only → renders nothing | ✅ | same `company` base identity |
-| 7 | customer → renders nothing | ✅ | same `company` base identity |
-| 8 | organization workspace → renders nothing | ✅ | browser (empty string) |
-| 9 | personal workspace | ✅ | browser (all rendering cases) |
-| 10 | no name → neutral header, no invented name | ✅ | browser |
-| 11 | desktop 1440 | ✅ | card capped at 768px (`max-w-3xl`), no overflow |
-| 12 | mobile 375 | ✅ | `scrollWidth === clientWidth === 375`, 0 elements past the viewport |
-| 13 | no horizontal overflow | ✅ | both viewports |
-| 14 | keyboard focus | ✅ | real `Tab` → `:focus-visible` matches, 2px `rgb(29,109,220)` ring |
-| 15 | touch targets | ✅ **after a fix — see below** | every button ≥ 44px |
-| 16 | no raw DB text | ✅ | browser + `user copy names no technical state` guard |
-| 17 | no console errors | ✅ | `read_console_messages` → none |
-| 18 | dark theme contrast | ✅ | 6.29–18.6:1 against the real `ink-900` page surface (AA needs 4.5) |
-| 19 | LT + EN copy renders | ✅ | browser, both catalogs |
-| 20 | **first real turn removes the intro** | ⛔ NOT PROVEN | needs the live chat — Docker |
-| 21 | **composer reachable / opening overflow** | ⛔ NOT PROVEN | needs the live thread — Docker |
-| 22 | **role gating end-to-end** | ⛔ NOT PROVEN | needs auth — Docker |
+| 1 | worker + personal → intro VISIBLE | ✅ | `01-worker-partial-desktop-1440.png` |
+| 2 | partial worker → names known + ONE next action | ✅ | same shot; "Svarbiausia dabar: Prieinamumas nurodytas" |
+| 3 | complete worker → complete message, NO completion CTA, no gap line | ✅ | `02-worker-complete-desktop-1440.png` (pillars completed via temp local rows, restored) |
+| 4 | readiness error → plain text, no CTA | ⚠ render-level only | `personal-workspace-intro-render.test.ts`; a live read failure cannot be triggered without breaking the local stack mid-request |
+| 5 | company-only → hidden | ✅ | `04-company-only.png` |
+| 6 | agency-only → hidden | ✅ | `05-agency-only.png` |
+| 7 | customer → hidden | ✅ | temp `active_role='customer'` flip, restored |
+| 8 | worker + ORGANIZATION workspace → hidden | ✅ | `06-organization-context.png`; temp `viewer` engagement + org pointer, both removed |
+| 9 | worker role, NO workers row → hidden, no error text | ✅ | workers row parked on a synthetic profile, restored |
+| 10 | signed out → hidden (redirect to login) | ✅ | — |
+| 11 | composer visible in-viewport, opening state, 1440 | ✅ | y=741, h=52 in a 900px viewport |
+| 12 | composer still reachable after the first turn | ✅ | `09-after-first-turn.png` |
+| 13 | desktop 1440 — no horizontal overflow | ✅ | measured |
+| 14 | mobile 375 — no horizontal overflow | ✅ | `03-worker-mobile-375-fixed.png` |
+| 15 | short viewport — opening top reachable | ✅ **after a fix — §10.2** | introTop 106 ≥ scrollerTop 65 at scrollTop 0; full 956px scrollable |
+| 16 | keyboard focus → visible 2px ring | ✅ | `07-keyboard-focus.png` |
+| 17 | primary CTA ≥ 44px | ✅ | 44px measured live |
+| 18 | no raw DB text / technical state | ✅ | page text scanned in every state |
+| 19 | no console errors | ✅ | only Chrome's CSP report-only notice (not an app error) |
+| 20 | **first REAL chat turn removes the intro** | ✅ | `08-before` → `09-after`; `data-opening` true → unset |
+| 21 | intro stays gone for further turns of the same conversation | ✅ | second turn sent, still absent |
+| 22 | no new dismiss persistence | ✅ | reload = new conversation (thread is not persisted), intro correctly returns there; within a conversation nothing is stored |
 
-Items 20–22 are proven at MODEL and RENDER level by
-`personal-workspace-intro.test.ts` (`isOpening && intro`, the `my-auto` assertion) and
-by the role matrix in the two guard suites — but **not** in a browser. They stay open
-until a local stack runs.
+Screenshots (all synthetic data, "Dev Worker" fixture): `docs/audits/evidence/visual-s2-mano-erdve/`.
 
-### The defect the browser found
+### 10.1 Defect №1 — found by the static round
 
-`size="sm"` on the primary CTA renders `px-4 py-2` → a **36px** box, while the
-secondary pills render **44px** (`min-h-11`). The single most important action was the
-*hardest* to hit, and nothing in the source suggests it — both look like "a Button".
-Fixed by dropping `size="sm"` (the default `md` is `px-6 py-3` → 44px, and is what 74
-of the 91 `<Button>` call sites already use). Re-measured: every button ≥ 44px.
-Pinned by `the PRIMARY action is never a smaller target than the pills beside it`.
+`size="sm"` on the primary CTA rendered a **36px** box beside **44px** pills — the
+most important action was the hardest to hit. Fixed to the default `md` (44px);
+pinned by `the PRIMARY action is never a smaller target than the pills beside it`.
+
+### 10.2 Defect №2 — found ONLY by the authenticated round
+
+At 375×640 the opening composition (956px of content in a 520px scroller) had its
+top 112px **unreachable by any scroll**. The `my-auto` fix was present and correct —
+but the scroller itself still carried `justify-center` while opening, and
+`justify-content: center` on a scroll container positions overflow ABOVE the
+scrollable region. The static harness could not see this because it renders the
+block alone, not inside the real thread scroller.
+
+Fix: `justify-center` removed from the thread scroller (`my-auto` on the inner
+block is the sole centring mechanism — it centres when content fits, measured
+242px/242px gaps at 1440×1200, and collapses to 0 when it does not). The
+`ux-2-0-composition.test.ts` guard, which pinned the literal `justify-center`, now
+pins the SAFE idiom instead and forbids the class from returning to the scroller.
+Re-measured after the fix: top reachable (106 ≥ 65), full content scrollable,
+centring preserved.
 
 ## 11. i18n status of the `personalWorkspace` namespace
 

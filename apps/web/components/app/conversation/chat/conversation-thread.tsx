@@ -76,7 +76,14 @@ export function ConversationThread({
 
   return (
     <div
-      className={`flex flex-1 flex-col overflow-y-auto ${isOpening ? "justify-center" : ""}`}
+      // No `justify-center` here — MEASURED at 375x640 with the S2 intro: the
+      // opening composition (956px in a 520px scroller) had offsetTop -153 and
+      // scrollHeight 738 < content, so its top 112px were unreachable by any
+      // scroll. `justify-content: center` on a scroll container positions
+      // overflow ABOVE the scrollable region; the inner block's `my-auto`
+      // (below) centres the same composition when it fits and collapses to 0
+      // when it does not, which is the only safe way to centre in a scroller.
+      className="flex flex-1 flex-col overflow-y-auto"
       // A conversation is a log: `role="log"` makes assistive tech announce
       // arriving turns instead of leaving the user to discover them.
       role="log"
