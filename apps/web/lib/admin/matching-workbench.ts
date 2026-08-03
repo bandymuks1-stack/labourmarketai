@@ -376,9 +376,16 @@ export async function listWorkbench(
   // (lib/market/match-subject.ts — the same assembler scouting uses), so the
   // workbench engine results carry identical explanation codes. A worker
   // outside the assembled window keeps subject=null (honest, no engine row).
+  //
+  // W10 slice 3: the workbench now NAMES the workers it wants instead of
+  // re-deriving a separate window. Before, the assembler independently fetched
+  // the 200 newest workers, so the subjects could belong to a different set of
+  // people than the rows listed right here. The `explicit_ids` strategy makes
+  // the two lists the same list, bounded by the shared pool budget.
   const subjectByWorker = new Map<string, MatchSubject>();
   try {
-    for (const c of await buildSupplyCandidates(supabase)) {
+    const pool = await buildSupplyCandidates(supabase, { workerIds });
+    for (const c of pool.candidates) {
       subjectByWorker.set(c.workerId, c.subject);
     }
   } catch {

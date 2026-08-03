@@ -7121,6 +7121,10 @@
       "clear": "Filter zurücksetzen",
       "noMatches": "Keine Kandidaten entsprechen den gewählten Filtern."
     },
+    "pool": {
+      "capped": "Es wurden nicht alle verglichen. Zu diesem Bedarf passen mehr sichtbare Arbeitskräfte, als in eine Liste passen. Deshalb wurden zuerst die {count} geladen, deren Qualifikationen, Beruf und Land am besten passen, nicht die neuesten Registrierungen. Grenzen Sie den Bedarf ein, damit die richtigen Personen verglichen werden.",
+      "complete": "Alle {count} sichtbaren Arbeitskräfte wurden mit diesem Bedarf verglichen."
+    },
     "contactRequest": {
       "button": "Kontaktdaten anfragen",
       "sending": "Wird gesendet…",

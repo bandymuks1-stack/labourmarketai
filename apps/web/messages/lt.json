@@ -7121,6 +7121,10 @@
       "clear": "Išvalyti filtrus",
       "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
     },
+    "pool": {
+      "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslinkite poreikį, kad būtų palyginti tinkami žmonės.",
+      "complete": "Su šiuo poreikiu palyginti visi {count} matomi darbuotojai."
+    },
     "contactRequest": {
       "button": "Prašyti kontaktinių duomenų",
       "sending": "Siunčiama…",

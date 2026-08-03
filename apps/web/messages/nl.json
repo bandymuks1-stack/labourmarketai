@@ -7121,6 +7121,10 @@
       "clear": "Filters wissen",
       "noMatches": "Geen kandidaten voldoen aan de gekozen filters."
     },
+    "pool": {
+      "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
+      "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
+    },
     "contactRequest": {
       "button": "Contactgegevens aanvragen",
       "sending": "Versturen…",
