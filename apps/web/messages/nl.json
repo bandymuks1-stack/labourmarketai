@@ -3285,26 +3285,6 @@
       "line2": "hoe meer kansen er ontstaan."
     },
     "subcopy": "Labourmarket.ai zet je vaardigheden, ervaring, documenten en beschreven werk om in duidelijke profielsignalen. Hoe preciezer je profiel is ingevuld, hoe makkelijker het is om gereedheid, betrouwbaarheid en de juiste kansen in te schatten.",
-    "statLegendIntro": "Wat de codes betekenen:",
-    "stat": {
-      "SKL": "Vaardigheid",
-      "REL": "Betrouwbaarheid",
-      "SPD": "Snelheid",
-      "SAF": "Veiligheid",
-      "ADP": "Aanpassingsvermogen",
-      "TRS": "Vertrouwen"
-    },
-    "tier": {
-      "gold": "Goud",
-      "silver": "Zilver",
-      "bronze": "Brons"
-    },
-    "status": {
-      "live": "Aan het werk",
-      "available": "Beschikbaar",
-      "drafted": "Gedraft",
-      "busy": "Bezet"
-    },
     "conceptNote": "Een voorbeeldkaart met illustratieve gegevens — geen echte persoon. Jouw kaart groeit uit je echte werkregistraties.",
     "sample": {
       "name": "Rasa J.",
@@ -4059,10 +4039,10 @@
       },
       "subcopy": "Je kaart wordt opgebouwd uit je echte afgeronde werk en werkrecords, niet uit een zelfgeschreven cv. Fit-signalen worden in context getoond — dekking en gereedheid voor een specifieke behoefte, nooit één universele beoordeling.",
       "bullets": [
-        "Fit- & gereedheidssignalen — dekking ten opzichte van een specifieke behoefte op basis van je werkrecords, betrouwbaarheid en records op de werkplek. Nooit één universele beoordeling.",
-        "Statbalken — Vaardigheid, Betrouwbaarheid, Snelheid, Veiligheid, Aanpassingsvermogen, Vertrouwen.",
-        "Vaardigheidssignalen — opgebouwd uit je werkrecords en certificaten, niet alleen een zelfgeschreven cv.",
-        "Statusbadge — Beschikbaar, Aan het werk, Ingepland of Bezet, altijd actueel."
+        "Werkgereedheid — eerlijke signalen (behaald van totaal) met een duidelijke volgende stap. Nooit één universele beoordeling.",
+        "Wat ik kan — opgegeven vaardigheden, door het werkjournaal onderbouwde vaardigheden en echte bevestigingen, niet alleen een zelfgeschreven cv.",
+        "Wanneer en waar ik kan werken — beschikbaarheid, startdatum en land, altijd actueel.",
+        "Bewijs van ervaring — werkgeschiedenis, documenten en een groeitijdlijn uit echte registraties."
       ]
     },
     "journey": {

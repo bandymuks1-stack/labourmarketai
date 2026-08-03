@@ -101,7 +101,6 @@ const LANDING_TS = [
   "components/app/regional-heatmap.tsx",
   "components/app/skills-demand-list.tsx",
   "components/app/supply-demand-chart.tsx",
-  "components/app/player-card.tsx",
   "components/app/mini-draft-card.tsx",
   "components/marketing/player-card-showcase.tsx",
   "components/marketing/draft-board.tsx",

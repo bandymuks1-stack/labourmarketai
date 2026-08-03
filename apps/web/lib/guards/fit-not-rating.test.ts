@@ -59,15 +59,13 @@ describe("S6 fit spec note pins the contextual ESCO-overlap form", () => {
 describe("no global person/company score identifiers in live source", () => {
   // Legacy/declared exceptions, each with a reason:
   //   - lib/supabase/types.ts      — prod schema reality (legacy columns);
-  //   - components/app/ovr-ring.tsx + player-card.tsx — the PRE-ALPHA FIFA
-  //     concept showcase, placeholder-governed (content/placeholders.ts) and
-  //     reframed by SR-6; it writes nothing and reads no real person data;
   //   - content/placeholders.ts    — the governance registry itself;
   //   - lib/guards/** and scripts/** — the police, not the suspect.
+  // S3 player-card honesty: the PRE-ALPHA FIFA concept card
+  // (components/app/ovr-ring.tsx + player-card.tsx) was DELETED, so its two
+  // allowlist holes are gone — this guard now covers every card surface.
   const ALLOW = new Set([
     "lib/supabase/types.ts",
-    "components/app/ovr-ring.tsx",
-    "components/app/player-card.tsx",
     "content/placeholders.ts",
   ]);
   const BAN =

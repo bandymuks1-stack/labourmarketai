@@ -3285,26 +3285,6 @@
       "line2": "the more opportunities open up."
     },
     "subcopy": "Labourmarket.ai turns your skills, experience, documents and described work into clear profile signals. The more precisely your profile is filled in, the easier it is to gauge readiness, reliability and the right opportunities.",
-    "statLegendIntro": "What the codes mean:",
-    "stat": {
-      "SKL": "Skill",
-      "REL": "Reliability",
-      "SPD": "Speed",
-      "SAF": "Safety",
-      "ADP": "Adaptability",
-      "TRS": "Trust"
-    },
-    "tier": {
-      "gold": "Gold",
-      "silver": "Silver",
-      "bronze": "Bronze"
-    },
-    "status": {
-      "live": "Working",
-      "available": "Available",
-      "drafted": "Drafted",
-      "busy": "Busy"
-    },
     "conceptNote": "An example card with illustrative data — not a real person. Your card is built from your real work records.",
     "sample": {
       "name": "Rasa J.",
@@ -4059,10 +4039,10 @@
       },
       "subcopy": "Your card is built from your real completed work and work records, not a self-written CV. Fit signals are shown in context — coverage and readiness for a specific need, never one universal rating.",
       "bullets": [
-        "Fit & readiness signals — coverage against a specific need from your work records, reliability and on-site records. Never one universal rating.",
-        "Stat bars — Skill, Reliability, Speed, Safety, Adaptability, Trust.",
-        "Skill signals — built from your work records and certificates, not just a self-written CV.",
-        "Status badge — Available, Working, Drafted or Busy, always current."
+        "Work readiness — honest signals (met out of total) with a clear next step. Never one universal rating.",
+        "What I can do — declared skills, journal-supported skills and real confirmations, not just a self-written CV.",
+        "When and where I can work — availability, a from-date and the country, always current.",
+        "Evidence of experience — work history, documents and a growth timeline built from real entries."
       ]
     },
     "journey": {

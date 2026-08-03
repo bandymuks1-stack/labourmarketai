@@ -3285,26 +3285,6 @@
       "line2": "tuo daugiau galimybių atsiveria."
     },
     "subcopy": "Labourmarket.ai padeda jūsų įgūdžius, patirtį, dokumentus ir atliktų darbų aprašymus paversti aiškiais profilio signalais. Kuo tiksliau pildomas profilis, tuo lengviau įvertinti pasirengimą, patikimumą ir tinkamas galimybes.",
-    "statLegendIntro": "Ką reiškia kodai:",
-    "stat": {
-      "SKL": "Įgūdis",
-      "REL": "Patikimumas",
-      "SPD": "Greitis",
-      "SAF": "Sauga",
-      "ADP": "Prisitaikymas",
-      "TRS": "Pasitikėjimas"
-    },
-    "tier": {
-      "gold": "Auksas",
-      "silver": "Sidabras",
-      "bronze": "Bronza"
-    },
-    "status": {
-      "live": "Dirba",
-      "available": "Laisvas",
-      "drafted": "Atrinktas",
-      "busy": "Užimtas"
-    },
     "conceptNote": "Pavyzdinė kortelė su iliustraciniais duomenimis — ne realus asmuo. Tavo kortelė kuriama iš tavo realių darbo įrašų.",
     "sample": {
       "name": "Rasa J.",
@@ -4059,10 +4039,10 @@
       },
       "subcopy": "Jūsų kortelė kuriama iš realiai atlikto darbo ir darbo įrašų, o ne pačių rašyto CV. Atitikimo signalai rodomi kontekste — aprėptis ir pasirengimas konkrečiam poreikiui, niekada kaip vienas universalus įvertinimas.",
       "bullets": [
-        "Atitikimo ir pasirengimo signalai — aprėptis konkrečiam poreikiui pagal darbo įrašus, patikimumą ir saugą. Niekada vienas universalus įvertinimas.",
-        "Statų juostos — Įgūdis, Patikimumas, Greitis, Sauga, Prisitaikymas, Pasitikėjimas.",
-        "Įgūdžių signalai — iš jūsų darbo įrašų ir pažymėjimų, ne tik pačių rašytas CV.",
-        "Būsenos ženklas — Laisvas, Dirba, Atrinktas ar Užimtas, visada aktualus."
+        "Darbo pasiruošimas — sąžiningi signalai (kiek iš jų įvykdyta) ir aiškus kitas žingsnis. Niekada vienas universalus įvertinimas.",
+        "Ką moku — deklaruoti įgūdžiai, darbo žurnalu pagrįsti įgūdžiai ir realūs patvirtinimai, ne tik pačių rašytas CV.",
+        "Kada ir kur galiu dirbti — prieinamumas, data nuo kada ir šalis, visada aktualu.",
+        "Patirties įrodymai — darbo istorija, dokumentai ir augimo juosta iš realių įrašų."
       ]
     },
     "journey": {

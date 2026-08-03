@@ -74,10 +74,11 @@ describe("no consumer bypasses the lock", () => {
     // marker consumer — an empty inbox is REAL product state, not fabricated
     // data, so it renders a plain empty state and must never carry the dev
     // "Placeholder" chip. Markers stay for fabricated VALUES only.
+    // S3 player-card honesty: the FUT concept card (components/app/
+    // player-card.tsx) was deleted, so it left this consumer list.
     for (const f of [
       "components/ui/Placeholder.tsx",
       "components/app/dashboard-section.tsx",
-      "components/app/player-card.tsx",
     ]) {
       expect(read(f), `${f} must import showPlaceholderMarkers`).toMatch(
         /showPlaceholderMarkers/,
