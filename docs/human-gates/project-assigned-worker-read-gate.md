@@ -1,6 +1,6 @@
 # Human gate — let the assigned worker read their own project, and close the `live` read leak
 
-**Status:** OPEN — awaiting owner decision. Nothing in this repo applies it.
+**Status:** **RESOLVED 2026-08-03 — PARTIALLY GRANTED.** The owner approved the three migration-safety findings and the read direction for PR #988, so the migration may be gate-marked, rebased and merged. **Production apply, production data mutation and production rollback were each explicitly withheld** and still need their own decision. Nothing in this repo applies it; production status is `PENDING_SEPARATE_OWNER_APPROVAL`. The scope, verbatim, is in the migration file header.
 **Migration:** `supabase/migrations/20260803090000_project_assigned_worker_read_v1.sql`
 **Rollback:** `supabase/rollbacks/20260803090000_project_assigned_worker_read_v1.down.sql`
 **Closes:** W11 audit **P0-2** and **P1-2**, in one policy replacement (audit slice 2).
@@ -61,7 +61,42 @@ using (public.owns_company(company_id)
 
 **What could break:** any surface that relied on reading *other companies'* live projects. Checked — none exists; `PLANNED_PROJECT_STATUSES` in `lib/planning/planning.ts` filters the worker's own assigned projects, which is exactly what this migration enables.
 
-## What the owner is being asked to decide
+## What the owner decided (2026-08-03, PR #988)
+
+**GRANTED** — the three migration-safety findings (`security-definer-function`,
+`grant-or-revoke`, `alter-drop-policy`) and the read direction described above:
+company owner sees their own project; platform admin per the existing contract;
+a worker with an **active** assignment sees only that project; an **ended**
+assignment grants nothing; an unrelated worker sees nothing; anon sees nothing;
+the global `status = 'live' and authenticated` branch is removed. The assigned
+worker receives the `projects` row and nothing more.
+
+**WITHHELD** — three separate things, none of them authorised by that decision:
+
+1. **Applying this migration to production.** Merging the PR does not apply it.
+   Status stays `PENDING_SEPARATE_OWNER_APPROVAL`.
+2. **Any production data mutation.** The migration contains no DML and none is
+   authorised.
+3. **Production rollback.** The paired `.down.sql` exists for completeness; it
+   is not authorised to run against production.
+
+## Local DDL proof — run 2026-08-03, 41/41
+
+`bash scripts/db-proof/w11-project-assigned-worker-read.sh` spins up a **throwaway** Postgres 15 container (`w11-project-read-proof`, port 55434 — it never touches the shared local stack) carrying the real `profiles` / `workers` / `companies` / `projects` / `project_worker_assignments` DDL, the real `owns_company` / `is_admin` bodies, and the **pre-slice `projects_select` verbatim**. Both the migration and the rollback are then executed as-is. Every probe runs under `set local role authenticated` (or `anon`), never as the superuser, so RLS is what decides each row count.
+
+| Phase | Result |
+|---|---|
+| BEFORE | P0-2 reproduces: the assigned worker reads **0** of their own project and **2** projects they have nothing to do with. P1-2 reproduces: an unrelated worker reads **2** other tenants' rows; company A's owner reads company B's project. |
+| APPLY | Clean. Helper created, `prosecdef = true`, `search_path=public` pinned, `projects_select` calls `is_assigned_to_project`, **no `live` substring survives**. |
+| AFTER — matrix | assigned worker **1** (exactly their project, not P2, not P3); ended assignment **0**; unrelated worker **0**; company A owner **2** (own only — no longer B's); company B owner **1**; admin **3**; `anon` → `permission denied`; an unrelated worker gets an **empty result, not an error** (no existence oracle). |
+| AFTER — grants | `has_function_privilege('anon', …)` = **false**; PUBLIC holds **0** ACL entries; `authenticated` = **true**. |
+| AFTER — writes | Write policies still exactly `projects_insert,projects_update`; with the write grants *armed*, the assigned worker's INSERT is refused by **row-level security** and their UPDATE affects **0 rows**. Zero data mutated. |
+| ROLLBACK | Applies cleanly and restores the original `qual` **byte for byte** (`(owns_company(company_id) OR is_admin() OR ((status = 'live'::text) AND (auth.uid() IS NOT NULL)))`); helper dropped; P1-2 re-opens and P0-2 returns, exactly as the file warns; no data mutated. |
+| RE-APPLY | Clean and idempotent — `qual` byte-identical to the first apply, matrix identical, anon EXECUTE still revoked. |
+
+**Stated limit — not fabricated.** This harness has **no PostgREST and no real JWT**; `auth.uid()` is a session GUC stub. So this is a genuine DDL + RLS-policy proof, not a browser/PostgREST proof. What a live stack would add is the transport layer, not the policy decision — the policy decision is what is measured above, under real non-superuser roles. The live-catalog checks below remain the post-apply step that no local harness can substitute for.
+
+## The remaining decision
 
 Apply `20260803090000_project_assigned_worker_read_v1.sql` to production — yes or no.
 

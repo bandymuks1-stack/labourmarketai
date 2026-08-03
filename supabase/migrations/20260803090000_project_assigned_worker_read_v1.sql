@@ -1,7 +1,41 @@
 -- 20260803090000 — assigned-worker project read + close the `live` read leak
 --
--- HUMAN GATE: do NOT apply without explicit owner OK.
--- Gate document: docs/human-gates/project-assigned-worker-read-gate.md
+-- SAFETY CLASS: RED. This migration creates a SECURITY DEFINER function,
+-- changes GRANTs/REVOKEs on it, and REPLACES an existing RLS policy.
+--
+-- @human-gate-approved
+--
+-- OWNER APPROVAL — SCOPE, from the decision on PR #988 (2026-08-03). The
+-- marker above was NOT self-added by an agent; it records an explicit owner
+-- decision made after reviewing the human-gate package
+-- (docs/human-gates/project-assigned-worker-read-gate.md). What it covers, and
+-- nothing else:
+--
+--   APPROVED — the three migration-safety findings, and only these three:
+--     1. `security-definer-function`  (is_assigned_to_project)
+--     2. `grant-or-revoke`            (revoke all from public / from anon;
+--                                      grant execute to authenticated)
+--     3. `alter-drop-policy`          (projects_select replaced)
+--
+--   APPROVED — the read direction: company owner sees their own project;
+--   platform admin per the existing contract; a worker with an ACTIVE
+--   assignment sees only that project; an ENDED assignment grants nothing;
+--   an unrelated worker sees nothing; anon sees nothing; the global
+--   `status = 'live' and authenticated` branch is removed. The assigned worker
+--   receives the `projects` row and nothing more.
+--
+--   NOT APPROVED by this decision — each of these needs its own owner gate:
+--     * applying this migration to PRODUCTION. Status stays
+--       PENDING_SEPARATE_OWNER_APPROVAL. Merging this PR does NOT apply it.
+--     * any PRODUCTION DATA MUTATION. This migration contains no DML, no
+--       backfill and no data migration, and none is authorised.
+--     * PRODUCTION ROLLBACK. The paired .down.sql exists for completeness; it
+--       is not authorised to run against production.
+--
+--   Still explicitly OUT of scope (unchanged by this approval): project manage,
+--   update/delete, budget, the full member list, finance, organization write,
+--   company ownership, and any other project. W11 P0-3 (active organization
+--   manager project read) is NOT solved by this PR.
 --
 -- W11 audit P0-2 and P1-2, closed by ONE policy replacement (audit slice 2).
 --

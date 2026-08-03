@@ -166,12 +166,50 @@ describe("the slice stayed narrow", () => {
 });
 
 describe("the gate is declared, not assumed", () => {
-  it("the migration states its human gate and points at the document", () => {
-    expect(sql).toMatch(/HUMAN GATE/);
-    expect(sql).toMatch(/docs\/human-gates\/project-assigned-worker-read-gate\.md/);
+  /**
+   * This block used to assert `@human-gate-approved` was ABSENT — "an agent
+   * never approves its own migration". That rule did its job for the whole of
+   * the draft period.
+   *
+   * The owner reviewed the human-gate package and approved the three
+   * migration-safety findings on PR #988 (2026-08-03). The marker is now
+   * legitimately present, so the rule has to MOVE rather than disappear: an
+   * approval that does not say what it covers is indistinguishable from a
+   * self-added one six months later. What is pinned now is that the marker
+   * never travels alone — it carries its PR, its three findings, and the three
+   * things the owner did NOT grant.
+   */
+  it("the approval marker is present and canonical", () => {
+    expect(sql).toMatch(/^--\s*@human-gate-approved\s*$/m);
   });
 
-  it("the gate document exists", () => {
+  it("the approval names PR #988 and the three findings it covers", () => {
+    expect(sql).toMatch(/PR #988/);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "alter-drop-policy",
+    ]) {
+      expect(sql, `approval scope omits ${finding}`).toContain(finding);
+    }
+  });
+
+  it("the approval explicitly withholds production apply, DML and rollback", () => {
+    // The owner approved the SHAPE of the migration, not running it. Three
+    // separate refusals, each of which needs its own gate.
+    expect(sql).toMatch(/NOT APPROVED/);
+    expect(sql).toMatch(/PENDING_SEPARATE_OWNER_APPROVAL/);
+    expect(sql).toMatch(/PRODUCTION DATA MUTATION/);
+    expect(sql).toMatch(/PRODUCTION ROLLBACK/);
+  });
+
+  it("the approval keeps P0-3 and the write surface out of scope", () => {
+    expect(sql).toMatch(/P0-3/);
+    expect(sql).toMatch(/is NOT solved by this PR/);
+  });
+
+  it("the migration still points at the gate document, which exists", () => {
+    expect(sql).toMatch(/docs\/human-gates\/project-assigned-worker-read-gate\.md/);
     expect(
       existsSync(
         join(REPO, "docs", "human-gates", "project-assigned-worker-read-gate.md"),
