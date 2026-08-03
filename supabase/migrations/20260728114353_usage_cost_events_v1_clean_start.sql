@@ -24,6 +24,17 @@
 --                             is NOT part of the original production history.
 -- Do NOT edit below the marker. Do NOT apply to production — it is already there.
 -- ============================================================================
+-- @human-gate-approved
+-- HUMAN GATE SCOPE (owner approval 2026-08-03, PR #995 ONLY): the owner
+-- approved exactly the 12 migration-safety findings across these four files
+-- (grant-or-revoke x3, create-trigger x4, truncate-token x3,
+-- alter-drop-policy x1, drop-without-zero-row-guard x1) AS THE RESTORATION OF
+-- HISTORICAL, ALREADY-PRODUCTION-APPLIED SQL. This SQL was applied to
+-- production on 2026-07-28, BEFORE this PR existed; the PR only restores the
+-- production history to the repository. This approval grants NO right to
+-- apply any migration to production, approves NO production data mutation,
+-- and the reconstructed rollback files are NOT part of the original
+-- production history. Findings stay visible as human-gated notices.
 -- PRODUCTION-EXACT-SQL-BELOW
 -- Remove the single synthetic proof event (aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee)
 -- created by the production verification run, so the ledger starts empty.
