@@ -166,6 +166,7 @@ export function ConversationChat({
   bookingLabels = null,
   script,
   mobile = false,
+  intro,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -175,6 +176,11 @@ export function ConversationChat({
   script?: ChatMessage[];
   /** Force the phone layout — used by the mobile design preview frame. */
   mobile?: boolean;
+  /** "Mano erdvė" (visual S2) — a server-rendered slot the dashboard page fills
+   *  ONLY for a personal workspace. The chat neither builds it nor reads any
+   *  data for it; it just forwards the node to the thread's opening state, so
+   *  this component gains no server dependency and no role logic. */
+  intro?: ReactNode;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -1323,6 +1329,9 @@ export function ConversationChat({
                   onAttach={handleAttach}
                 />
               }
+              // Forwarded verbatim; the thread decides it may only appear while
+              // the conversation is opening.
+              intro={intro}
             />
             {opening ? null : (
               <Composer

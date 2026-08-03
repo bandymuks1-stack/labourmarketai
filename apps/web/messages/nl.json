@@ -3744,7 +3744,19 @@
           "body": "Het werk dat je vastlegt, wordt geleidelijk een registratie van je vaardigheden.",
           "cta": "Werkjournaal openen"
         },
-        "otherSpaces": "Mijn andere ruimtes"
+        "otherSpaces": "Mijn andere ruimtes",
+        "title": "Mijn ruimte",
+        "readinessLabel": "Werkgereedheid",
+        "profileCta": "Mijn werkprofiel",
+        "unavailable": "We konden je werkprofiel nog niet openen. Zodra je het invult, zie je hier je gereedheid.",
+        "pillars": {
+          "profession": "Wat ik zoek",
+          "availability": "Wanneer ik kan werken",
+          "skills": "Wat ik kan",
+          "journal": "Waaraan ik heb gewerkt",
+          "evidence": "Waarmee ik mijn ervaring kan onderbouwen",
+          "workCard": "Waar ik kan werken en welk loon ik verwacht"
+        }
       },
       "workCard": {
         "eyebrow": "Mijn werkkaart",

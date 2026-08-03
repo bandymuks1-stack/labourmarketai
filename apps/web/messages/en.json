@@ -3744,7 +3744,19 @@
           "body": "The work you log gradually becomes records of your skills.",
           "cta": "Open work journal"
         },
-        "otherSpaces": "My other spaces"
+        "otherSpaces": "My other spaces",
+        "title": "My space",
+        "readinessLabel": "Work readiness",
+        "profileCta": "My work profile",
+        "unavailable": "We couldn't open your work profile yet. Once you start filling it in, your readiness shows up here.",
+        "pillars": {
+          "profession": "What I'm looking for",
+          "availability": "When I can work",
+          "skills": "What I can do",
+          "journal": "What I've worked on",
+          "evidence": "What backs up my experience",
+          "workCard": "Where I can work and what pay I expect"
+        }
       },
       "workCard": {
         "eyebrow": "My work card",

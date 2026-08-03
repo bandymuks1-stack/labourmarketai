@@ -3744,7 +3744,19 @@
           "body": "Užfiksuotas darbas pamažu virsta jūsų įgūdžių įrašais.",
           "cta": "Atidaryti darbo žurnalą"
         },
-        "otherSpaces": "Kitos mano erdvės"
+        "otherSpaces": "Kitos mano erdvės",
+        "title": "Mano erdvė",
+        "readinessLabel": "Darbo pasiruošimas",
+        "profileCta": "Mano darbo profilis",
+        "unavailable": "Jūsų darbo profilio kol kas nepavyko atverti. Kai jį pradėsite pildyti, čia matysite savo pasiruošimą.",
+        "pillars": {
+          "profession": "Ko ieškau",
+          "availability": "Kada galiu dirbti",
+          "skills": "Ką moku",
+          "journal": "Ką jau dirbau",
+          "evidence": "Kuo galiu pagrįsti patirtį",
+          "workCard": "Kur galiu dirbti ir kokio atlygio tikiuosi"
+        }
       },
       "workCard": {
         "eyebrow": "Mano darbo kortelė",

@@ -3744,7 +3744,19 @@
           "body": "Die Arbeit, die Sie erfassen, wird nach und nach zu Nachweisen Ihrer Fähigkeiten.",
           "cta": "Arbeitsjournal öffnen"
         },
-        "otherSpaces": "Meine anderen Bereiche"
+        "otherSpaces": "Meine anderen Bereiche",
+        "title": "Mein Bereich",
+        "readinessLabel": "Arbeitsbereitschaft",
+        "profileCta": "Mein Arbeitsprofil",
+        "unavailable": "Ihr Arbeitsprofil konnte noch nicht geöffnet werden. Sobald Sie es ausfüllen, sehen Sie hier Ihre Bereitschaft.",
+        "pillars": {
+          "profession": "Was ich suche",
+          "availability": "Wann ich arbeiten kann",
+          "skills": "Was ich kann",
+          "journal": "Woran ich gearbeitet habe",
+          "evidence": "Womit ich meine Erfahrung belegen kann",
+          "workCard": "Wo ich arbeiten kann und welche Bezahlung ich erwarte"
+        }
       },
       "workCard": {
         "eyebrow": "Meine Arbeitskarte",

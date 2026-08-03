@@ -43,6 +43,7 @@ export function ConversationThread({
   handlers,
   emptyState,
   composer,
+  intro,
 }: {
   items: ThreadItem[];
   typing: boolean;
@@ -54,6 +55,11 @@ export function ConversationThread({
    *  metu"); after the first real turn the shell renders it at the sticky
    *  bottom instead. */
   composer?: ReactNode;
+  /** "Mano erdvė" — the personal state of this workspace (visual S2), handed
+   *  in by the server page. It renders BELOW the composer and ONLY while the
+   *  conversation is opening, so the chat keeps the front door and the first
+   *  real turn clears the space without any dismiss state to remember. */
+  intro?: ReactNode;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -114,6 +120,12 @@ export function ConversationThread({
           <div className="mt-5" data-testid="conversation-opening-composer">
             {composer}
           </div>
+        ) : null}
+        {/* The personal space sits BELOW the composer on purpose: the composer
+            keeps its exact opening position, so the chat stays the front door
+            and the space reads as context rather than a dashboard above it. */}
+        {isOpening && intro ? (
+          <div data-testid="conversation-opening-intro">{intro}</div>
         ) : null}
         <div ref={endRef} />
       </div>

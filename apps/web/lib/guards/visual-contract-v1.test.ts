@@ -44,7 +44,11 @@ const countMatches = (src: string, needle: string): number =>
 describe("Ratchet: raw card styling only shrinks", () => {
   // Baseline captured at S1 (2026-08-03): 327 raw `card-border` usages across
   // app/ + components/ outside the canonical Card primitive.
-  const CARD_BORDER_BASELINE = 327;
+  // TIGHTENED at S2.0 → 326: S3 (#997) deleted `components/app/player-card.tsx`,
+  // which carried one raw `card-border`, so the S1 ceiling was left one unit
+  // loose. Measured 326 on main at 7fd88e40. The slack is removed rather than
+  // left available for a future PR to spend without noticing.
+  const CARD_BORDER_BASELINE = 326;
 
   it(`raw card-border usage stays ≤ ${CARD_BORDER_BASELINE}`, () => {
     const total = surfaceFiles()

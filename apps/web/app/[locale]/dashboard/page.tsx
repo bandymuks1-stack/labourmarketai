@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { listMyBookings } from "@/lib/booking/booking-actions";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import { PersonalWorkspaceIntro } from "@/components/app/my-space/personal-workspace-intro";
 import { ConversationChat } from "@/components/app/conversation/chat/conversation-chat";
 import {
   resolveChatLabels,
@@ -50,6 +52,24 @@ export default async function DashboardHomePage({
     await getTranslations("conversation.worklog"),
   );
 
+  // "Mano erdvė" (visual S2) — the PERSONAL state of this same workspace. It is
+  // a slot, not a screen: no route, no nav entry, and the thread drops it the
+  // moment the conversation stops opening.
+  //
+  // Two conditions, both real and both required:
+  //   1. the active workspace is PERSONAL — inside an organization this space
+  //      is not the subject, and the org composition is deliberately out of
+  //      scope here (S2.4, blocked behind PR #858);
+  //   2. the person is acting as a WORKER — a company/agency/customer identity
+  //      has no worker profile to be ready, so worker-only copy would be a
+  //      claim about something that does not exist.
+  // `getActiveOrganizationContext` is `cache()`-wrapped and the dashboard
+  // layout already resolved the workspace for this same request, so this adds
+  // no round trip.
+  const { activeOrganizationId } = await getActiveOrganizationContext();
+  const isPersonalWorkspace = activeOrganizationId === null;
+  const showPersonalSpace = isPersonalWorkspace && activeRole === "worker";
+
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
   // the (full) group and is never mounted here.
@@ -60,6 +80,13 @@ export default async function DashboardHomePage({
       workLogLabels={workLogLabels}
       bookingOffers={offers}
       bookingLabels={bookingLabels}
+      // RSC-passed slot elements carry an explicit key (repo precedent, PR
+      // #951): Flight-deserialized elements can't be marked as static
+      // children, so the key keeps this safe if the thread ever renders the
+      // slot beside a sibling.
+      intro={
+        showPersonalSpace ? <PersonalWorkspaceIntro key="personal-workspace-intro" /> : undefined
+      }
     />
   );
 }
