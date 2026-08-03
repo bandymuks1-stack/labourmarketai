@@ -4018,6 +4018,7 @@
     "title": "Minu ruum",
     "intro": "Siin paned kokku oma tööprofiili, näed, mida sinust juba teatakse, ja mida tasub järgmisena teha. Töö ise algab allpool olevas vestluses.",
     "workProfile": "Minu tööprofiil",
+    "unverifiedNote": "See on see, mida sa ise enda kohta räägid. Inimene pole seda veel üle vaadanud — ja see on normaalne.",
     "dimension": {
       "whatICanDo": "Mida ma oskan",
       "whatIAmLookingFor": "Mida ma otsin",

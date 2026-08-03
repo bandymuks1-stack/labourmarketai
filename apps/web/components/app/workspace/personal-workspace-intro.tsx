@@ -107,6 +107,16 @@ export function PersonalWorkspaceIntro({
               )}
             </section>
 
+            {/* Everything named above is SELF-DECLARED. The block never claims
+                verification, so it says so rather than letting "already set"
+                read as "checked by us". */}
+            <p
+              data-testid="personal-workspace-intro-self-declared"
+              className="text-meta text-text-muted"
+            >
+              {labels.unverifiedNote}
+            </p>
+
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"

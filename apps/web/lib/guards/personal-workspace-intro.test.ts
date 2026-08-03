@@ -55,6 +55,22 @@ describe("Mano erdvė is a block, not a screen", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("acquires no dashboard-like route under ANY name", () => {
+    // The Product Gate's `DASHBOARD_LIKE` rule makes /dashboard/{overview,home,
+    // control,visual-os,start,hub,main}/ an automatic A-01 RED. Pinned HERE too
+    // because this block is the exact thing a later slice would be tempted to
+    // promote to a screen — rebuilding what W3 Package 4 deleted.
+    const dashboardDir = join(APP, "app", "[locale]", "dashboard");
+    for (const name of [
+      "home", "hub", "overview", "control", "main", "visual-os", "my-space", "mano-erdve",
+    ]) {
+      expect(
+        existsSync(join(dashboardDir, name)),
+        `/dashboard/${name} must not exist — the space is a state, not a route`,
+      ).toBe(false);
+    }
+  });
+
   it("is mounted from exactly ONE place — the conversation window", () => {
     // `.tsx` only: a `Promise<PersonalWorkspaceIntro>` return type in the
     // server loader is a TYPE reference, not a mount.

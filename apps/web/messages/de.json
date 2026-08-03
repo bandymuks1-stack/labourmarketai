@@ -11727,6 +11727,7 @@
     "title": "Mein Bereich",
     "intro": "Hier baust du dein Arbeitsprofil auf, siehst, was bereits über dich bekannt ist, und was als Nächstes sinnvoll ist. Die Arbeit selbst beginnt im Gespräch unten.",
     "workProfile": "Mein Arbeitsprofil",
+    "unverifiedNote": "Das sind deine eigenen Angaben. Noch nicht von einem Menschen geprüft — und das ist in Ordnung.",
     "dimension": {
       "whatICanDo": "Was ich kann",
       "whatIAmLookingFor": "Was ich suche",

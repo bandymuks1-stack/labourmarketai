@@ -20,6 +20,11 @@ export type PersonalWorkspaceLabels = {
   readonly title: string;
   readonly intro: string;
   readonly workProfile: string;
+  /** The honesty line the deleted MyZone surface carried and this block keeps:
+   *  everything named above is SELF-DECLARED and not human-reviewed. The block
+   *  claims no verification anywhere, so this says out loud what "Jau nurodyta"
+   *  means — the platform knows it because the person said it. */
+  readonly unverifiedNote: string;
   /** The active space's own name ("Asmeninė erdvė") — the workspace chip's word. */
   readonly spaceKind: string;
   /** The six plain-language dimensions, in product order. */
@@ -81,6 +86,7 @@ export function resolvePersonalWorkspaceLabels(
     title: t("title"),
     intro: t("intro"),
     workProfile: t("workProfile"),
+    unverifiedNote: t("unverifiedNote"),
     spaceKind: tChat("workspacePersonal"),
     dimensions: DIMENSION_KEYS.map((k) => t(`dimension.${k}`)),
     readinessLabel: t("readiness.label"),

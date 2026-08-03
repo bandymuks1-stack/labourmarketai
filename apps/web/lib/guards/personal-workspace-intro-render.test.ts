@@ -207,6 +207,31 @@ describe("the rendered surface is honest and reachable", () => {
   it("carries the canonical card surface, not a hand-rolled one", () => {
     expect(html).toContain("card-border");
   });
+
+  it("says out loud that what it names is self-declared, not reviewed", () => {
+    // The block lists what is "already set". Without this line that reads as
+    // "checked by us" — the exact false-verification claim doctrine §19a bans.
+    expect(html).toContain("personal-workspace-intro-self-declared");
+    for (const locale of ACTIVE_LOCALES) {
+      const localized = render(
+        derivePersonalWorkspaceIntro({
+          ...base,
+          readiness: deriveWorkerReadiness(
+            card({ professionSlug: "welder" } as Partial<WorkerPlayerCard>),
+          ),
+        }),
+        locale,
+      );
+      expect(localized, locale).toContain(labelsFor(locale).unverifiedNote);
+    }
+  });
+
+  it("claims nothing at all when readiness could not be read", () => {
+    // Nothing is named in the degraded state, so there is nothing to disclaim —
+    // and a stray honesty note there would imply a claim that was never made.
+    const degraded = render(derivePersonalWorkspaceIntro({ ...base, readiness: null }));
+    expect(degraded).not.toContain("personal-workspace-intro-self-declared");
+  });
 });
 
 describe("every ACTIVE locale renders real copy", () => {

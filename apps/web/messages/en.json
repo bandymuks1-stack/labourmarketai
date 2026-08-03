@@ -11727,6 +11727,7 @@
     "title": "My space",
     "intro": "This is where you put your work profile together, see what is already known about you, and what is worth doing next. The work itself starts in the conversation below.",
     "workProfile": "My work profile",
+    "unverifiedNote": "This is what you say about yourself. Not reviewed by a person yet — and that is fine.",
     "dimension": {
       "whatICanDo": "What I can do",
       "whatIAmLookingFor": "What I am looking for",

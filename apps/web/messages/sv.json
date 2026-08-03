@@ -4018,6 +4018,7 @@
     "title": "Mitt utrymme",
     "intro": "Här sätter du samman din arbetsprofil, ser vad som redan är känt om dig och vad som är nästa vettiga steg. Själva arbetet börjar i samtalet nedan.",
     "workProfile": "Min arbetsprofil",
+    "unverifiedNote": "Det här är vad du själv berättar om dig. Ännu inte granskat av en människa — och det är helt okej.",
     "dimension": {
       "whatICanDo": "Vad jag kan",
       "whatIAmLookingFor": "Vad jag söker",

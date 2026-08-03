@@ -4018,6 +4018,7 @@
     "title": "Mitt rom",
     "intro": "Her setter du sammen arbeidsprofilen din, ser hva som allerede er kjent om deg, og hva som er neste fornuftige steg. Selve arbeidet begynner i samtalen nedenfor.",
     "workProfile": "Min arbeidsprofil",
+    "unverifiedNote": "Dette er det du selv forteller om deg. Ennå ikke sett gjennom av et menneske — og det er helt greit.",
     "dimension": {
       "whatICanDo": "Hva jeg kan",
       "whatIAmLookingFor": "Hva jeg ser etter",

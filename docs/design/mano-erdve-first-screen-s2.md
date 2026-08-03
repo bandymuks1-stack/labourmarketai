@@ -147,3 +147,64 @@ Migrations, rollbacks, `APPLIED_LEDGER.md`, W6/W9/W10/W11/W12 schema, matching, 
 Stripe, credits, auth, middleware, env, landing, `/for-workers`, the Player Card's
 internals, `mini-draft-card.tsx`, company pages, employer scouting, organization
 settings, production data.
+
+---
+
+## 9. Duplicate-PR consolidation (2026-08-03)
+
+Two Draft PRs implemented this same S2 goal off the same base (`7fd88e40`), both
+green, neither merged:
+
+| | PR #998 `…-personal-workspace-core` | PR #999 (this PR) |
+|---|---|---|
+| Component family | `components/app/my-space/` | `components/app/workspace/` |
+| Shape | one async **server** component that reads + decides + renders | pure model → server loader → label bag → dumb client view |
+| Actions | `<Link>` navigations **out of** the conversation | chip ids dispatched **into** the conversation's own `handleChip` |
+| Mount position | below the composer | inside the opening composition, above the greeting |
+| Role gate | `activeOrganizationId === null && activeRole === "worker"` | `signedIn` + workspace kind + `baseIdentityForRole` + `hasWorkerProfile`, 4 named hidden reasons |
+| i18n | 5 catalogs (`lt/en/ru/nl/de`) added to the **existing** `auth.dashboard.mySpace` namespace | 11 catalogs, new top-level `personalWorkspace` namespace |
+| Tests | 1 structural guard | structural + pure-model + DOM render matrix |
+| `card-border` ratchet | 327 → 326 (absorbs S3's slack) | 327 → **325** (S3's slack **plus** a real `ProfileStateStrip` → `<Card>` migration) |
+
+**Verdict: KEEP PR #999.** The four decisive facts:
+
+1. **i18n contract.** `lib/i18n/config.ts` states the binding rule: *"new i18n keys
+   land in all 11 in the same PR"*. `i18n-lt-en-parity.test.ts` only enforces the 5
+   ACTIVE locales, so #998's 5-catalog change is green while leaving 6 catalogs
+   without the namespace — green against the guard, short of the doctrine.
+2. **Namespace hygiene.** `auth.dashboard.mySpace` is an **orphan** on `main`: no
+   component renders it, it survives only because `my-space-human-entry.test.ts`
+   asserts its keys. It is the copy of the MyZone surface W3 Package 4 deleted.
+   #998 grows a new product surface inside that dead namespace; #999 opens a clean
+   `personalWorkspace` one.
+3. **Chat-first.** #998's CTAs navigate the person **away** from the conversation;
+   #999's dispatch through the conversation's single existing chip handler. One
+   action system, and the composer stays the front door.
+4. **Role safety.** #998 does not check `hasWorkerProfile`, so a `worker`-role
+   account with no worker row renders the "couldn't open your work profile" shell
+   instead of nothing. #999 hides it, with the reason named and unit-tested.
+
+### Ported FROM #998
+
+- **The `DASHBOARD_LIKE` route-name ban** — `personal-workspace-intro.test.ts` now
+  also asserts `/dashboard/{home,hub,overview,control,main,visual-os,my-space,
+  mano-erdve}` does not exist. #999 only scanned for `page.tsx` paths naming the
+  feature; #998's list pins the names a later slice would actually reach for.
+- **The self-declared honesty line** (`personalWorkspace.unverifiedNote`, all 11
+  catalogs). The block names what is "already set"; without this line that reads as
+  "checked by us". #998 carried it, #999 did not. It renders in the `intro` state
+  only — the degraded state claims nothing, so it has nothing to disclaim.
+  Its `data-testid` is `personal-workspace-intro-self-declared`, **not**
+  `…-unverified-note`: the render guard bans `/verified/i` anywhere in the markup
+  and the substring tripped it. The guard was kept and the name changed.
+
+### NOT ported from #998
+
+- The `<Link>` action model (breaks the chat-first boundary, §6).
+- The six-pillar met/unmet checklist (a met-count is one rename away from a score;
+  §7 names what is met instead of tallying it).
+- Reuse of the `auth.dashboard.mySpace` namespace (reason 2 above).
+- The `ResultShell` wrapper — this block is a first screen, not a query result.
+
+`components/app/my-space/` is never created on this branch, so no parallel
+component family exists after #998 is closed as superseded.
