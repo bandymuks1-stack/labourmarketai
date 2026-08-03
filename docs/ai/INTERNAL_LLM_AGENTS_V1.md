@@ -231,7 +231,11 @@ alias` through the pure policy core `lib/ai/runtime/task-routing.ts`:
   alias, reason, escalation/fallback, cost estimate, honest-null actual
   cost, latency, usage, schema validation, confidence, human-review state,
   and `dataCategoriesSent` — field NAMES only, never input content).
-  Persisting it to an `ai_runs` table stays the owner-gated §7.1 migration.
+  The `ai_runs` table for persisting it was applied to production 2026-08-03
+  (prod ledger `20260803061937`, 0 rows). Nothing is written yet: with
+  `AI_PROVIDER_MODE=disabled` the `cfg.state === "live"` guard means the insert
+  never executes. A **90-day retention policy** for full rows and
+  `output_excerpt` is a REQUIRED BLOCK before the provider is enabled.
 - **Adapters:** `lib/ai/runtime/providers/adapter-contract.ts` declares the
   provider-neutral registry — `anthropic` active (still the one allowlisted
   SDK importer); `openai`/`deepl`/`meta_llama`/`xai` declared-inactive

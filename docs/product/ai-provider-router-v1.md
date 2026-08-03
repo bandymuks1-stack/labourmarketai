@@ -159,9 +159,14 @@ timeout surfaces as an honest `needs_review` timeout outcome.
 
 ## 8. Owner gates (NOT done by this slice)
 
-- **Applying the `ai_runs` migration to prod** — gated draft; apply only via
-  Supabase MCP `apply_migration` after owner approval. Until then persistence
-  and the quota counter degrade honestly (logged, run unaffected).
+- ~~**Applying the `ai_runs` migration to prod**~~ — **DONE 2026-08-03.** Owner
+  approved; applied via Supabase MCP `apply_migration` as prod ledger version
+  `20260803061937`, 0 initial rows. Two conditions ride with that approval and
+  are still open: `AI_PROVIDER_MODE` stays `disabled` until a separate decision,
+  and a **90-day retention policy** for full `ai_runs` rows and `output_excerpt`
+  is a REQUIRED BLOCK before that activation. Persistence and the quota counter
+  still degrade honestly while the provider is off — with `disabled`, the
+  `cfg.state === "live"` guard means neither ever executes.
 - **Adding real API keys / flipping enable flags** (Anthropic, OpenAI, Gemini,
   xAI, DeepL) — new secrets are an owner-only gate. Everything ships OFF.
 - **Reviewing `model-pricing.ts` prices and the non-anthropic model ids** in

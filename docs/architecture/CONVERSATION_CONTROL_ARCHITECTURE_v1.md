@@ -187,7 +187,7 @@ Verified live in production (`gorgitwvdzxbnaxhrsrw`, 2026-07-24):
 | `submit_agency_candidate_offer_v1` (PR #860) | **applied** |
 | `audit_logs` | **applied** |
 | `save_agency_client_v1` (agency private CRM) | **NOT applied** → registry degrades to `needs_migration` honestly |
-| `ai_runs` (AI audit) | **NOT applied** → only needed when AI flips to `live`; not on the foundation path |
+| `ai_runs` (AI audit) | **applied 2026-08-03** (prod ledger `20260803061937`, 0 rows) → still writes nothing until AI flips to `live`; not on the foundation path either way |
 
 **Conclusion:** the conversation foundation (registry + shell + deterministic fallback + read-only journal/continuity) requires **no DB migration**. The two unapplied objects are non-blocking (agency-CRM and AI-audit), reached only by later journey PRs and handled by the uniform `needs_migration` degradation. **No owner gate needed for the foundation PR.**
 

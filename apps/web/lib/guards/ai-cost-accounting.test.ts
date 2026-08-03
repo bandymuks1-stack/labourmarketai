@@ -19,12 +19,15 @@ import type { AiRoutingAuditRecord } from "@/lib/ai/runtime/task-routing";
  *   - and the writer IS wired into the canonical entrypoint `runAiAgent`,
  *     which five real feature modules use.
  *
- * The chain is complete in code. What is missing is the TABLE: the `ai_runs`
- * migration (`20260714150000_ai_runs_audit_v1.sql`) is an explicit human gate
- * and is NOT applied to production. So in production the insert fails, and —
+ * The chain is complete in code. What WAS missing is the TABLE — and it no
+ * longer is: the owner approved the apply on 2026-08-03 and
+ * `20260714150000_ai_runs_audit_v1.sql` is live in production (prod ledger
+ * version `20260803061937`). Before that, the insert failed in production and —
  * until this slice — failed invisibly, because `run-agent-server.ts` awaited
  * `persistAiRunAudit` and DISCARDED its boolean. A run whose cost was never
- * recorded was indistinguishable from one that was.
+ * recorded was indistinguishable from one that was. That silent drop is closed;
+ * the table now exists, so a `[ai/cost]` warning is ACTIONABLE rather than the
+ * expected steady state.
  *
  * That single silent-drop is the part fixable without a migration, and it is
  * what this guard pins, together with the cost chain itself so the mapping
@@ -188,12 +191,46 @@ describe("cost accounting has no billing side effect", () => {
 });
 
 describe("the production gate is stated, not assumed", () => {
-  it("the ai_runs migration exists and is still declared human-gated", () => {
-    const ledger = readFileSync(join(WEB, "..", "..", "docs", "APPLIED_LEDGER.md"), "utf8");
+  /**
+   * This block used to assert the ledger still said HUMAN GATE next to
+   * `20260714150000` — "if this stops saying it, someone applied it, and this
+   * guard should be revisited in that PR". Someone did: the owner approved the
+   * apply on 2026-08-03 and it landed as prod ledger version `20260803061937`.
+   *
+   * So the rule MOVES rather than disappears. A closed gate needed one thing
+   * pinned (that it was still closed). An OPEN one needs more, because the
+   * table can now actually accumulate rows: the ledger must record the real
+   * apply, and it must carry the two conditions the owner attached — those are
+   * the only things standing between this table and indefinitely retained
+   * model output about real people.
+   */
+  const ledger = readFileSync(join(WEB, "..", "..", "docs", "APPLIED_LEDGER.md"), "utf8");
+
+  it("the ledger records the real production apply, not a plan to apply", () => {
     expect(ledger).toContain("20260714150000_ai_runs_audit_v1.sql");
-    // If this stops saying HUMAN GATE, someone applied it — and this guard,
-    // plus the warning it protects, should be revisited in that PR.
-    expect(ledger).toMatch(/20260714150000[\s\S]{0,400}HUMAN GATE/);
+    // The concrete prod ledger version — a date alone would let a future
+    // "we applied it, trust me" edit pass.
+    expect(ledger).toContain("20260803061937");
+    expect(ledger).toMatch(/20260714150000_ai_runs_audit_v1[\s\S]{0,600}APPLIED TO PRODUCTION/);
+  });
+
+  it("the ledger still carries BOTH conditions the approval rode on", () => {
+    // (1) the provider stays off until a separate decision, and (2) a 90-day
+    // retention policy is a REQUIRED BLOCK before that decision. If either
+    // sentence is ever quietly dropped, activation looks unconditional.
+    expect(ledger).toMatch(/AI_PROVIDER_MODE[\s\S]{0,200}disabled/);
+    expect(ledger).toMatch(/90[- ]day retention/i);
+    expect(ledger).toMatch(/REQUIRED BLOCK/);
+    expect(ledger).toMatch(/output_excerpt/);
+  });
+
+  it("the runtime default is still `disabled` — the doc is not the control", () => {
+    // The ledger says the provider is off; this is the code that makes it so.
+    // A ledger sentence with no enforcing default is a promise, not a gate.
+    const env = read("lib/env.ts");
+    expect(env).toMatch(
+      /AI_PROVIDER_MODE:\s*z\.enum\(\["disabled",\s*"mock",\s*"live"\]\)\.default\("disabled"\)/,
+    );
   });
 
   it("the app degrades honestly while the table is absent", () => {
