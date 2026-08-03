@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/Button";
 import { CalendarResult } from "@/components/app/workspace/calendar-result";
 import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
@@ -102,14 +103,15 @@ export function ResultBody({
           ? t("fallbackUnverified")
           : t("fallbackContext")}
       </p>
-      <button
+      <Button
         type="button"
+        variant="pill"
         onClick={() => onOpenFull(descriptor.advancedRoute)}
         data-testid="result-body-open-full"
-        className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+        className="self-start"
       >
         {t("openFull")}
-      </button>
+      </Button>
     </div>
   );
 }
