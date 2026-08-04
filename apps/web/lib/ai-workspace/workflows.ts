@@ -421,16 +421,23 @@ export async function runFindWorkers(): Promise<WorkflowResult> {
           state: d.structured ? t("demandStructured") : t("demandUnstructured"),
         }),
       ),
-      // Honest dead end rather than a way out of the workspace. Running the
-      // scouting engine per demand needs a `demand` entity resolver so the
-      // candidates land in the Context Panel; until that exists the AI states
-      // where the work stops instead of handing the person a route.
-      t("scoutingNotInWorkspaceYet"),
+      // W8 CLOSES THIS DEAD END. The line above used to be
+      // `scoutingNotInWorkspaceYet` — "running the scouting engine per demand
+      // needs a resolver so the candidates land in the Context Panel; until
+      // that exists the AI states where the work stops instead of handing the
+      // person a route". That resolver now exists
+      // (`lib/conversation/employer-workspace.ts`) and the panel has a
+      // `candidates` result, so the honest answer is no longer a full stop.
+      t("scoutingPickDemand"),
     ].join("\n"),
     explanation: { why: t("whyFromYourDemands") },
-    // NO chip. A `link:` chip would navigate out of the workspace, which is
-    // exactly what `AI_MAY_NEVER_CHANGE` forbids and what this phase promised
-    // not to do (W4 final review, finding A1).
+    // STILL NO `link:` CHIP — that would navigate out of the workspace, which
+    // is what `AI_MAY_NEVER_CHANGE` forbids and what the W4 final review
+    // (finding A1) pinned. A `demand:` chip is the opposite: it changes the
+    // result depth inside this workspace and never leaves the page. The id is
+    // a request to look, not a permission — `runScouting` re-derives the
+    // company context and re-verifies ownership before ranking anybody.
+    chips: open.map((d) => ({ id: `demand:${d.id}`, label: d.title })),
   };
 }
 

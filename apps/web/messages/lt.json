@@ -10856,7 +10856,12 @@
       "attachChoice": "Kam skirtas šis failas?",
       "chipAttachPhoto": "Darbo nuotrauka",
       "chipAttachCv": "CV",
-      "userAttachPhoto": "Noriu pridėti darbo nuotrauką"
+      "userAttachPhoto": "Noriu pridėti darbo nuotrauką",
+      "userCandidates": "Parodyk kandidatus",
+      "candidatesOpened": "Štai jūsų poreikiai ir žmonės už jų.",
+      "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio, todėl nėra su kuo lyginti.",
+      "candidatesNoCompany": "Šiuo metu esate asmeninėje erdvėje, todėl čia įmonės poreikių nėra. Perjunkite erdvę, kad dirbtumėte kaip įmonė.",
+      "candidatesUnavailable": "Šiuo metu nepavyko nuskaityti jūsų įmonės poreikių."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -11082,7 +11087,69 @@
       "calendarPartial": "Dalies šaltinių nepavyko nuskaityti: {sources}. Sąrašas gali būti nepilnas.",
       "calendarMoreItems": "(+{count})",
       "calendarMoreDays": "{count, plural, one {… ir dar # diena su įrašais.} few {… ir dar # dienos su įrašais.} other {… ir dar # dienų su įrašais.}}",
-      "calendarToday": "šiandien"
+      "calendarToday": "šiandien",
+      "candidates": {
+        "title": "Kandidatai"
+      },
+      "candidatesError": "Nepavyko nuskaityti kandidatų.",
+      "candidatesNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia nėra įmonės poreikių, kuriems ieškotume žmonių.",
+      "candidatesBlocked": "Šioje aplinkoje tai kol kas nepasiekiama.",
+      "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio.",
+      "candidatesPickDemand": "Kuriam poreikiui ieškote žmonių?",
+      "candidatesUnstructuredBadge": "nestruktūruotas",
+      "candidatesBackToDemands": "Atgal į poreikius",
+      "candidatesNotFound": "Toks poreikis nerastas arba jis ne jūsų.",
+      "candidatesNeedsMigration": "Kandidatų šaltinis šioje aplinkoje nepasiekiamas.",
+      "candidatesNotStructured": "Iš šio poreikio kol kas nieko negalima išvesti, todėl nėra su kuo lyginti. Tai nėra tas pats, kas „niekas netinka“.",
+      "candidatesRetrievalCapped": "Žmonių buvo pasiekiama daugiau, nei šįkart spėjome peržiūrėti, todėl šis sąrašas nėra visa pasiūla.",
+      "candidatesEmpty": "Šiuo metu matomoje pasiūloje šiam poreikiui tinkančių žmonių nėra.",
+      "candidatesCapped": "Rodoma {shown} iš {total}.",
+      "demandStatus": {
+        "draft": "Juodraštis",
+        "submitted": "Pateiktas",
+        "closed": "Uždarytas"
+      },
+      "bookingStatus": {
+        "proposed": "Pasiūlyta",
+        "accepted": "Priimta",
+        "declined": "Atmesta",
+        "withdrawn": "Atšaukta",
+        "expired": "Nebegalioja"
+      },
+      "candidateLabel": "Kandidatas {token}",
+      "candidateMatch": {
+        "strong": "Stiprus atitikimas",
+        "possible": "Galimas atitikimas",
+        "weak": "Silpnas atitikimas",
+        "insufficient_data": "Per mažai duomenų"
+      },
+      "candidateCoverage": "{pct}% reikalingų įgūdžių",
+      "candidateConfirmedLabel": "Vadovo patvirtinti įgūdžiai",
+      "candidateBookingLabel": "Rezervacija",
+      "candidateNoteLabel": "Jūsų pastaba",
+      "candidateNotEligible": "Neįvykdyta viena būtina sąlyga, todėl tai nėra tinkamas atitikimas.",
+      "candidateCannotContact": "Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo.",
+      "candidateGap": {
+        "skills_missing": "Trūksta dalies reikalingų įgūdžių",
+        "language_missing": "Trūksta reikalingos kalbos",
+        "country_mismatch": "Nesutampa šalis",
+        "location_outside_radius": "Vieta už nurodyto spindulio",
+        "pay_above_offer": "Atlygio lūkestis didesnis nei siūlomas",
+        "accommodation_needed_not_provided": "Reikia apgyvendinimo, bet jis nesuteikiamas",
+        "profession_mismatch": "Kita profesija"
+      },
+      "actionConfirmNeed": "Patvirtinti reikalavimus",
+      "actionCloseDemand": "Uždaryti poreikį",
+      "actionReopenDemand": "Atverti poreikį iš naujo",
+      "actionShortlist": "Įtraukti į trumpąjį sąrašą",
+      "actionContact": "Pradėti pokalbį",
+      "actionProposeBooking": "Siūlyti rezervaciją",
+      "actionNothingToConfirm": "Šiame poreikyje nėra ko patvirtinti.",
+      "actionReasonRequired": "Reikia trumpos priežasties.",
+      "actionNotAuthorized": "Iš čia to padaryti negalite.",
+      "bookingStart": "Pradžia",
+      "bookingEnd": "Numatoma pabaiga",
+      "bookingNote": "Pastaba"
     }
   },
   "landing": {
@@ -11498,7 +11565,6 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "reikalavimai išvesti",
       "demandUnstructured": "reikalavimų dar neišvesta",
-      "scoutingNotInWorkspaceYet": "Kandidatų paieška pagal vieną iš jų kol kas nevyksta darbo erdvėje, todėl čia sustoju, o ne siunčiu tave kitur.",
       "ctxWorkspace": "Darbo erdvė: {name}.",
       "ctxWorkspaceUnknown": "Nepavyko perskaityti, kurioje darbo erdvėje esi.",
       "ctxCompany": "Įmonė: {name}.",
@@ -11511,7 +11577,8 @@
       "personalWorkspace": "tavo asmeninė erdvė",
       "unnamedOrganization": "(organizacija be pavadinimo)",
       "chipLogWork": "Užrašyti darbą",
-      "chipCreateDemand": "Aprašyti poreikį"
+      "chipCreateDemand": "Aprašyti poreikį",
+      "scoutingPickDemand": "Pasirinkite vieną — kandidatus parodysiu čia pat, darbo erdvėje."
     },
     "project": {
       "fieldStatus": "Būsena",

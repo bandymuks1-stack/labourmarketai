@@ -542,12 +542,24 @@ describe("every depth is a real, restorable address", () => {
     // submit step). Closing must clear every depth, so the list grew — the
     // rule is unchanged, and pinning it as a set rather than a literal string
     // is what keeps that true when a fourth depth arrives.
-    expect(src).toMatch(/result: null, geo: null, project: null, interaction: null \}, "replace"\)/);
+    //
+    // W8 IS THAT FOURTH DEPTH (`demand`, the candidates result's per-need
+    // step), and this literal is exactly the line that had to be edited for
+    // it — which is the guard working: a new depth cannot be added without
+    // someone confirming, here, that closing clears it too. The invariant
+    // form lives in the next test and needed no edit at all.
+    expect(src).toMatch(
+      /result: null, geo: null, project: null, interaction: null, demand: null \}/,
+    );
+    expect(src).toMatch(/demand: null \},\s*"replace",?\s*\)/);
   });
 
   it("opening a result clears any stale depth — EVERY depth", () => {
     const src = read(HOOK);
-    expect(src).toMatch(/result: kind, geo: null, project: null, interaction: null \}, "replace"/);
+    // W8 added `demand` as the fourth depth — see the note in the test above.
+    expect(src).toMatch(
+      /result: kind, geo: null, project: null, interaction: null, demand: null \}/,
+    );
     // Stated as an invariant, not a snapshot: whatever `write` clears when a
     // result opens must also be cleared when it closes. A depth that survived
     // one but not the other is how a result reopens onto a stale answer.

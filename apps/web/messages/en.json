@@ -10856,7 +10856,12 @@
       "attachChoice": "What is this file for?",
       "chipAttachPhoto": "Work photo",
       "chipAttachCv": "CV",
-      "userAttachPhoto": "I want to attach a work photo"
+      "userAttachPhoto": "I want to attach a work photo",
+      "userCandidates": "Show me candidates",
+      "candidatesOpened": "Here are your needs and the people behind them.",
+      "candidatesNoDemands": "Your company has not described a need yet, so there is nobody to match.",
+      "candidatesNoCompany": "You are in your personal space right now, so there are no company needs here. Switch space to work as your company.",
+      "candidatesUnavailable": "I could not read your company's needs right now."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -11082,7 +11087,69 @@
       "calendarPartial": "Some sources could not be read: {sources}. The list may be incomplete.",
       "calendarMoreItems": "(+{count})",
       "calendarMoreDays": "{count, plural, one {… and # more day with items.} other {… and # more days with items.}}",
-      "calendarToday": "today"
+      "calendarToday": "today",
+      "candidates": {
+        "title": "Candidates"
+      },
+      "candidatesError": "We could not read the candidates.",
+      "candidatesNoCompany": "You are not acting for a company right now, so there are no company needs to hire for here.",
+      "candidatesBlocked": "This is not available in this environment right now.",
+      "candidatesNoDemands": "Your company has not described a need yet.",
+      "candidatesPickDemand": "Which need are you hiring for?",
+      "candidatesUnstructuredBadge": "not structured",
+      "candidatesBackToDemands": "Back to needs",
+      "candidatesNotFound": "That need was not found, or it is not yours.",
+      "candidatesNeedsMigration": "The candidate source is not available in this environment.",
+      "candidatesNotStructured": "Nothing can be derived from this need yet, so there is nothing to match against. That is not the same as nobody matching.",
+      "candidatesRetrievalCapped": "More people were reachable than we could look at this time, so this list is not the whole supply.",
+      "candidatesEmpty": "Nobody in the visible supply matches this need right now.",
+      "candidatesCapped": "Showing {shown} of {total}.",
+      "demandStatus": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "closed": "Closed"
+      },
+      "bookingStatus": {
+        "proposed": "Proposed",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "withdrawn": "Withdrawn",
+        "expired": "Expired"
+      },
+      "candidateLabel": "Candidate {token}",
+      "candidateMatch": {
+        "strong": "Strong match",
+        "possible": "Possible match",
+        "weak": "Weak match",
+        "insufficient_data": "Not enough data"
+      },
+      "candidateCoverage": "{pct}% of the required skills",
+      "candidateConfirmedLabel": "Manager-confirmed skills",
+      "candidateBookingLabel": "Booking",
+      "candidateNoteLabel": "Your note",
+      "candidateNotEligible": "A required condition is not met, so this is not an eligible match.",
+      "candidateCannotContact": "A conversation or a booking cannot start yet: this person has not stated an availability that allows it.",
+      "candidateGap": {
+        "skills_missing": "Some required skills are missing",
+        "language_missing": "A required language is missing",
+        "country_mismatch": "The country does not match",
+        "location_outside_radius": "The location is outside the stated radius",
+        "pay_above_offer": "The pay expectation is above the offer",
+        "accommodation_needed_not_provided": "Accommodation is needed but not provided",
+        "profession_mismatch": "A different profession"
+      },
+      "actionConfirmNeed": "Confirm the requirements",
+      "actionCloseDemand": "Close this need",
+      "actionReopenDemand": "Reopen this need",
+      "actionShortlist": "Shortlist",
+      "actionContact": "Start a conversation",
+      "actionProposeBooking": "Propose a booking",
+      "actionNothingToConfirm": "There is nothing to confirm on this need.",
+      "actionReasonRequired": "A short reason is required.",
+      "actionNotAuthorized": "You cannot do this from here.",
+      "bookingStart": "Start",
+      "bookingEnd": "Expected end",
+      "bookingNote": "Note"
     }
   },
   "landing": {
@@ -11498,7 +11565,6 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "requirements derived",
       "demandUnstructured": "no derived requirements yet",
-      "scoutingNotInWorkspaceYet": "Scouting for one of these does not run inside the workspace yet, so I stop here rather than send you somewhere.",
       "ctxWorkspace": "Workspace: {name}.",
       "ctxWorkspaceUnknown": "I could not read which workspace you are in.",
       "ctxCompany": "Company: {name}.",
@@ -11511,7 +11577,8 @@
       "personalWorkspace": "your personal space",
       "unnamedOrganization": "(unnamed organization)",
       "chipLogWork": "Log work",
-      "chipCreateDemand": "Describe a need"
+      "chipCreateDemand": "Describe a need",
+      "scoutingPickDemand": "Pick one and I will show its candidates right here in the workspace."
     },
     "project": {
       "fieldStatus": "Status",

@@ -50,6 +50,11 @@ export const CLIENT_MESSAGE_ROOTS = [
   "bookings",
   "businessProfile",
   "capabilityProfile",
+  // W8: the `candidates` result renders the ONE derived pipeline stage (P4).
+  // Reaching for the existing `candidatePipeline.stage.*` lexicon rather than
+  // adding a second set of stage labels under `conversation.*` — seven strings
+  // that would then have to agree with these forever.
+  "candidatePipeline",
   // W6 slice 1: the ONE canonical evidence-tier lexicon (legend + qualifier).
   "evidenceTier",
   // W6 slice 3B: the experience domain (submit/response/dispute client forms).
