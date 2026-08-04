@@ -130,7 +130,9 @@ describe("1. every executable employer action is reachable, or a declared gap", 
 
 describe("2. the employer result reuses the canonical reads", () => {
   it("candidates come from runScouting — the scouting page's own read", () => {
-    expect(adapter).toMatch(/import \{[^}]*runScouting[^}]*\} from "@\/lib\/scouting\/scouting"/s);
+    // No `s` flag: `[^}]` already spans newlines, and the repo's tsconfig
+    // target predates dotAll (TS1501).
+    expect(adapter).toMatch(/import \{[^}]*runScouting[^}]*\} from "@\/lib\/scouting\/scouting"/);
     // The page and the adapter must be the only two callers; a third reader
     // would be a second definition of "who is a candidate".
     const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
