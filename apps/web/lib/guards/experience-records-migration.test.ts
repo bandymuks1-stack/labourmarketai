@@ -4,14 +4,15 @@ import { join } from "node:path";
 import { deriveExperienceCounts } from "@/lib/trust/experience-records";
 
 /**
- * W6 slice 3 guard — the ONE experience domain (DRAFT migration
- * 20260802120000, owner-gated apply).
+ * W6 slice 3 guard — the ONE experience domain (migration 20260802120000,
+ * APPLIED to production 2026-08-04 15:12:14 UTC under Owner Decision 3).
  *
- * Pins: draft header without a self-added approval; paired rollback + ledger
- * Deferred entry; sentiment binary; moderation and dispute as SEPARATE
- * dimensions; RPC-only writes with anon revoked; reason-mandatory decisions;
- * audit on every action; count-only aggregation with the explicit disputed
- * rule; fail-closed app side with no legacy fallback.
+ * Pins: an approval marker that carries its scope; paired rollback + the
+ * APPLIED ledger entry naming the production apply; sentiment binary;
+ * moderation and dispute as SEPARATE dimensions; RPC-only writes with anon
+ * revoked; reason-mandatory decisions; audit on every action; count-only
+ * aggregation with the explicit disputed rule; fail-closed app side with no
+ * legacy fallback.
  */
 
 const WEB = join(__dirname, "..", "..");
@@ -66,11 +67,42 @@ describe("human-gate approval hygiene", () => {
     expect(sql).toMatch(/Never `db push`/);
     expect(sql).toMatch(/apply_migration/);
   });
-  it("has a paired rollback and a ledger Deferred entry", () => {
+  /**
+   * WHAT THIS PINS, AND WHY IT CHANGED ON 2026-08-04.
+   *
+   * Until then this demanded a ledger *Deferred* line carrying the words
+   * `HUMAN GATE` — correct while the migration was un-applied. Owner Decision
+   * 3 ("W6 — APPLY EXPERIENCE RECORDS MIGRATION") was then given and the
+   * migration was applied to production at 15:12:14 UTC. Keeping the old
+   * assertion would have forced the ledger to go on calling an applied
+   * migration deferred, and a guard that pins a lie is worse than no guard.
+   *
+   * So the rule MOVES rather than disappears — the same way the marker rule
+   * above moved when Owner Decision 2 landed. The migration must still never
+   * be silently absent from the ledger, and its accounting must still name the
+   * decision that authorised it, because an apply with no recorded owner
+   * decision is indistinguishable from a self-approved one. What replaces the
+   * word `HUMAN GATE` is strictly MORE specific: the real apply timestamp, the
+   * authorising decision, and the apply PATH.
+   *
+   * The production project ref is deliberately NOT asserted here.
+   * `single-domain-origin.test.ts` forbids the raw ref in user-facing source,
+   * and its allowlist is only for files that must name the ref in order to
+   * REFUSE it. This file would be a convenience exemption, so the assertion
+   * was narrowed instead of the other guard being widened.
+   */
+  it("has a paired rollback and an APPLIED ledger entry naming the production apply", () => {
     expect(existsSync(join(REPO, ROLLBACK))).toBe(true);
     const ledger = readFileSync(join(REPO, "docs/APPLIED_LEDGER.md"), "utf8");
     expect(ledger).toContain("20260802120000_experience_records_v1.sql");
-    expect(ledger).toMatch(/experience_records_v1[^\n]*HUMAN GATE/);
+    // The APPLIED row — the real apply timestamp, to the second.
+    expect(ledger).toMatch(/experience_records_v1[^\n]*2026-08-04 15:12:14 UTC/);
+    // The authorising decision stays named.
+    expect(ledger).toMatch(/experience_records_v1[^\n]*Owner Decision 3/);
+    // …and the apply PATH, so `db push` can never be recorded as the route.
+    expect(ledger).toMatch(
+      /experience_records_v1[^\n]*Applied via Supabase MCP `apply_migration` \(never `db push`\)/,
+    );
   });
 });
 
