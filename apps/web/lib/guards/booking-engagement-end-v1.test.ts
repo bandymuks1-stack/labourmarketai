@@ -523,15 +523,66 @@ describe("the migration set is exactly what this slice declared", () => {
     expect(rollbacks).toContain("20260804160000_booking_engagement_end_v2.down.sql");
   });
 
-  it("the migration is NOT self-approved", () => {
-    // The owner gate is an owner's to give. A self-added marker is the one
-    // thing that would turn a RED review into a silent apply.
+  it("the human-gate marker is present, narrow, and states what it approves", () => {
+    // This assertion used to require the marker's ABSENCE — a self-added
+    // marker was the one thing that could turn a RED review into a silent
+    // apply. The owner has since given the gate (2026-08-04, reviewed HEAD
+    // d2c4f6c8, production gorgitwvdzxbnaxhrsrw), so absence is no longer the
+    // honest invariant.
+    //
+    // It is replaced by a STRICTER one rather than deleted. A marker is only
+    // legitimate if it says which findings it covers, and a later author must
+    // not be able to widen it by editing a comment: the header must still name
+    // exactly the three approved findings, the reviewed HEAD and the project
+    // ref. A marker pasted onto some OTHER migration, or this one silently
+    // re-purposed for a fourth finding, fails here.
     const sql = readFileSync(join(MIGRATIONS, "20260804160000_booking_engagement_end_v2.sql"), "utf8");
     // The SAME regex `.github/scripts/migration-safety.mjs` uses, so this
-    // guard and the CI gate can never disagree about what an approval IS. A
-    // plain substring check would also fire on the header's own sentence
-    // saying the marker is absent, which is prose, not an approval.
-    expect(sql).not.toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+    // guard and the CI gate can never disagree about what an approval IS.
+    expect(sql).toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+
+    for (const finding of ["security-definer-function", "grant-or-revoke", "data-dml"]) {
+      expect(sql, `the marker must name ${finding}`).toContain(finding);
+    }
+    expect(sql, "the approval must name the reviewed HEAD").toContain(
+      "d2c4f6c86a6a68ff55ec0895945c75c25c601c28",
+    );
+    expect(sql, "the approval must name the production project").toContain(
+      "gorgitwvdzxbnaxhrsrw",
+    );
+
+    // The gate script itself must NOT have been touched to get here — that is
+    // the difference between an approval and a bypass.
+    const gate = readFileSync(join(WEB, "..", "..", ".github", "scripts", "migration-safety.mjs"), "utf8");
+    expect(gate).toContain("const ANNOTATION = /(^|\\r?\\n)[ \\t]*--[ \\t]*@human-gate-approved\\b/i;");
+  });
+
+  it("this branch's own migration is the ONLY newly marked one", () => {
+    // NOT a repo-wide "only this file is marked" claim — that would be false
+    // and was, on the first run: 98 migrations already carry owner markers,
+    // because every previously approved migration keeps the marker that
+    // approved it. That is the normal state of an approved history.
+    //
+    // The invariant that actually matters is narrower: this branch adds ONE
+    // migration, and the approval must not have spread to anything newer.
+    // Files dated at or after this one are the only ones this branch could
+    // have touched.
+    const newer = readdirSync(MIGRATIONS)
+      .filter((f) => f.endsWith(".sql") && f >= "20260804160000")
+      .filter((f) =>
+        /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i.test(
+          readFileSync(join(MIGRATIONS, f), "utf8"),
+        ),
+      );
+    expect(newer).toEqual(["20260804160000_booking_engagement_end_v2.sql"]);
+  });
+
+  it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {
+    const down = readFileSync(
+      join(MIGRATIONS, "..", "rollbacks", "20260804160000_booking_engagement_end_v2.down.sql"),
+      "utf8",
+    );
+    expect(down).not.toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
   });
 
   it("it is additive — v1 is deprecated, never dropped here", () => {

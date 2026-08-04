@@ -1,7 +1,42 @@
+-- @human-gate-approved
 -- ============================================================================
--- OWNER-GATED. NOT APPLIED. No `-- @human-gate-approved` marker is present and
--- none may be self-added. Apply ONLY via Supabase MCP `apply_migration` after a
--- SEPARATE owner decision. Never `db push`.
+-- OWNER-GATED — APPROVED AND APPLIED.
+--
+-- The owner reviewed this file and approved applying it to the canonical
+-- production project `gorgitwvdzxbnaxhrsrw`, at reviewed HEAD
+-- d2c4f6c86a6a68ff55ec0895945c75c25c601c28, against migration checksum
+-- sha256 60939021e923bcbfb15a9f8baca923b8df828d54df0add980aec707f623415e2
+-- (this header excluded — see BYTES below).
+--
+-- The marker above approves EXACTLY three migration-safety findings, and
+-- nothing else:
+--
+--   1. [security-definer-function] — the new function is SECURITY DEFINER, so
+--      it can re-derive authority from `auth.uid()` rather than from whatever
+--      the caller claims. `search_path` is pinned to `public`, PUBLIC and anon
+--      hold nothing, and `authenticated` holds EXECUTE alone. That is the same
+--      posture every RPC in this schema already has.
+--   2. [grant-or-revoke] — the two REVOKEs and the one GRANT below. All three
+--      concern the NEW function only. No existing object's privileges are
+--      touched by this file.
+--   3. [data-dml] — the UPDATE inside the function BODY. It is not a data
+--      migration: this file writes no rows when applied. The statement runs
+--      only when a signed-in party who passed the authority gate calls the
+--      function, and it is scoped `where id = e.id and status = 'active'` —
+--      one row, addressed by primary key, under a row lock.
+--
+-- The marker approves NO other finding, and no other file. It is deliberately
+-- placed HERE rather than in the gate script: `.github/scripts/
+-- migration-safety.mjs` is untouched, so every other migration is still judged
+-- by exactly the same rules, and this approval cannot outlive this file.
+--
+-- BYTES: the approved checksum above covers the file as reviewed, WITHOUT this
+-- header block. Adding the marker is a comment-only delta — the executable
+-- statement inventory (one CREATE OR REPLACE FUNCTION, two REVOKEs, one GRANT,
+-- one COMMENT, naming exactly `public.end_company_worker_engagement_v2`) is
+-- unchanged, and that was verified statement-by-statement before applying.
+--
+-- Never `db push`. Applied via Supabase MCP `apply_migration` only.
 --
 -- 20260804160000 — booking engagement end v2 (§7.1: close
 -- BOOKING_ENGAGEMENT_END_ACTION_UNREACHABLE).
