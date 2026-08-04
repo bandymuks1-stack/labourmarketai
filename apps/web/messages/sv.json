@@ -2671,6 +2671,7 @@
       "adminMarketRateAverages": "Admin-kurerade marknadssatsgenomsnitt",
       "statGovLt": "Litauens statistik (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen",
       "cvbankasSalary": "CVbankas lönedata — föreslagen extern referens (inte aktiv)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai interna aggregat",
@@ -2686,6 +2687,7 @@
         "adminCurated": "Ägarangivna genomsnitt med en källnot i stället för en urvalsstorlek.",
         "statGovLt": "Officiell statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "eurostat": "Officiell EU-statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
+        "arbetsformedlingen": "Föreslagen källa. Användningsvillkoren är ännu inte granskade — aktivering kräver ägarens bekräftelse. Ingenting hämtas i dag.",
         "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror.",
         "eures": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag.",
         "uztLt": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag."
@@ -4042,6 +4044,11 @@
       "addExperienceEvidence": "Lägg till bevis på erfarenhet",
       "viewWorkProfile": "Visa min arbetsprofil",
       "completeWorkProfile": "Komplettera min arbetsprofil"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Källa: Arbetsförmedlingen (JobTech Development). Annonsens innehåll tillhör den arbetsgivare som publicerat den."
     }
   }
 }

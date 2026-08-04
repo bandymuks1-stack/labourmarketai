@@ -9980,6 +9980,7 @@
       "adminMarketRateAverages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
       "statGovLt": "Lietuvos statistika (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Švedijos užimtumo tarnyba)",
       "cvbankasSalary": "CVbankas atlyginimų duomenys — siūlomas išorinis atskaitos šaltinis (neaktyvus)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai vidinės suvestinės",
@@ -9995,6 +9996,7 @@
         "adminCurated": "Savininko įvesti vidurkiai su šaltinio pastaba vietoj imties dydžio.",
         "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
+        "arbetsformedlingen": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
         "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
         "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
         "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
@@ -11751,6 +11753,11 @@
       "addExperienceEvidence": "Pridėti patirties įrodymų",
       "viewWorkProfile": "Peržiūrėti mano darbo profilį",
       "completeWorkProfile": "Papildyti mano darbo profilį"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Šaltinis: Arbetsförmedlingen (JobTech Development). Skelbimo turinys priklauso jį paskelbusiam darbdaviui."
     }
   }
 }
