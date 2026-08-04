@@ -14,6 +14,84 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260804160000_booking_engagement_end_v2`
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-04 19:09:40 UTC** via Supabase MCP `apply_migration`, name `20260804160000_booking_engagement_end_v2` (`{"success":true}`) |
+| Method | Supabase MCP `apply_migration` (never `supabase db push`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260804190940` (MCP stamps its own apply-time version — see the naming note above) |
+| PR | **#1009 — NOT merged.** The owner approved the *schema* only; the application code that calls this function is still Draft and still `needs-human-gate` |
+| Reviewed PR HEAD | `d2c4f6c86a6a68ff55ec0895945c75c25c601c28` |
+| Migration sha256 (as reviewed) | `60939021e923bcbfb15a9f8baca923b8df828d54df0add980aec707f623415e2` |
+| Migration sha256 (after the marker was added) | `4e19703cef93a2b0407fb3351cc5d8839cb98666c1b57fdac892645901c755f8` |
+| Executable SQL sha256 (comments stripped, **identical both sides**) | `302341790ef78bc00de5a2f87f205d04c35e61d2f12128b053859e456ec00113` |
+| Rollback | `supabase/rollbacks/20260804160000_booking_engagement_end_v2.down.sql`, sha256 `11454154b396f6963ba7726dd65c3e9a98d3cee7c7e810fb3be9de04ff7b4269` (unchanged) |
+| Owner gate | Approved 2026-08-04 — `-- @human-gate-approved` added to the migration file, naming exactly three findings: `security-definer-function`, `grant-or-revoke`, `data-dml` |
+
+> **THE FILE IS NOT YET ON `main`.** This row records a **production fact** that is
+> true now and does not depend on PR #1009's merge decision. The migration file
+> itself ships with that PR. Recording the apply only after the merge would leave
+> production ahead of this ledger — the exact drift the notice below documents.
+
+**Checksum note (why two migration hashes).** The owner approved the file at
+`60939021…`, then instructed that the human-gate marker be added (§3 of the
+approval). That is a **comment-only** delta and was verified statement-by-statement
+before applying: with comments stripped, the approved file and the marked file
+hash identically (`302341790e…`). The executable inventory is one
+`CREATE OR REPLACE FUNCTION`, two `REVOKE`s, one `GRANT` and one `COMMENT`, naming
+only `public.end_company_worker_engagement_v2`.
+
+**What it did.** Created one `SECURITY DEFINER` function
+`end_company_worker_engagement_v2(uuid)` returning a **tagged jsonb outcome**
+(`ended` | `already_ended` | `not_found` | `conflict`). It supersedes
+`end_company_worker_engagement_v1`, whose bare `boolean` `false` meant four
+different things (no such row / not yours / not active / no row updated) — a UI
+built on it could not tell "you may not do this" from "it was already ended", so
+it would have had to guess. `search_path=public` pinned; `PUBLIC` and `anon` hold
+nothing; `authenticated` holds `EXECUTE` alone; no `service_role` grant.
+
+**Additive — v1 was NOT dropped.** PostgreSQL cannot change a function's return
+type with `CREATE OR REPLACE`, and `end_company_worker_engagement_v1(uuid)` is an
+object owned by applied migration `20260723120000`, whose paired rollback drops
+it. Dropping and recreating it here would entangle the two rollbacks. v1 remains
+in place, still granted, still owned by its own migration, and still has **zero**
+application callers (guard-pinned). Its removal is a later, separate, owner-gated
+decision.
+
+**Zero business-row change — measured before and after, identical.**
+
+| Table | Before | After |
+|---|---|---|
+| `company_worker_engagements` (total / active / ended / with `ended_at`) | 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 |
+| `booking_requests` | 0 | 0 |
+| `projects` | 5 | 5 |
+| `project_worker_assignments` | 1 | 1 |
+| `experience_records` | 0 | 0 |
+| `audit_logs` | 34 | 34 |
+
+**Nothing else moved.** Column set, RLS policies, indexes and table grants on
+`company_worker_engagements` were fingerprinted before and after and are
+byte-identical (`md5` compared, all `true`); RLS is still enabled; v1's definition
+**and** ACL are unchanged. No engagement was ended, no `ended_at` written, no
+`audit_logs` row created, no project or assignment or organization membership
+changed, no experience record created, no auth / billing / Stripe row touched
+(`auth.users` = 32, none updated in the apply window). **The function was never
+invoked against a production row.**
+
+**Security advisors (before → after).** Exactly one delta:
+`authenticated_security_definer_function_executable` **213 → 214**, the new
+function — the same WARN each of the other 213 SECURITY DEFINER RPCs already
+carries. `anon_security_definer_function_executable` stayed at **4** (the anon
+revoke worked) and `function_search_path_mutable` stayed at **2** (search_path is
+pinned). **0** ERROR-level findings.
+
+**migration-safety:** RED → **GREEN [human-gated]**, with all three findings still
+recorded as approved notices. The gate script was not modified.
+
+---
+
 ## ⚠️ DRIFT NOTICE 2026-08-01 — 26 applied migrations were never recorded here
 
 The functional-reality audit
