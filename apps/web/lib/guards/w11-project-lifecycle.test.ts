@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -585,7 +585,53 @@ describe("11. no new surface", () => {
     }
   });
 
-  it("the migration ships UNAPPLIED — no self-approval marker", () => {
-    expect(migrationCode).not.toMatch(/@human-gate-approved/);
+  /**
+   * THE HUMAN GATE — and a note on how this assertion was wrong.
+   *
+   * It used to read `expect(migrationCode).not.toMatch(/@human-gate-approved/)`
+   * to pin "ships unapplied". That could NEVER have failed: the marker is a
+   * `--` comment and `migrationCode` strips every comment line, so the check
+   * was vacuous from the moment it was written. It kept passing after the
+   * marker was added, which is exactly how a guard that cannot fail hides a
+   * real change.
+   *
+   * It now asserts the REAL post-gate state, on the RAW file, in both
+   * directions — that the marker is present AND that it is narrow.
+   */
+  it("carries the owner's human-gate marker, and it is NARROW", () => {
+    // Present, on the raw file — the only place a `--` marker can be seen.
+    expect(migration).toMatch(/^\s*--\s*@human-gate-approved\b/m);
+
+    // Narrow: it names the three approved findings and this file's scope, and
+    // it does not claim to cover anything else.
+    for (const finding of ["security-definer-function", "grant-or-revoke", "data-dml"]) {
+      expect(migration, `marker must name ${finding}`).toContain(finding);
+    }
+    expect(migration).toMatch(/PR #1007/);
+    expect(migration).toMatch(/does not weaken, suppress, delete, bypass or/i);
+  });
+
+  it("THIS approval was not copied onto any other migration", () => {
+    // NOTE: ~97 migrations already carry a marker from their own historical
+    // approvals, so "only one gated file exists" would be false and asserting
+    // it would just be wrong. The property that actually matters is that THIS
+    // owner decision — PR #1007, 2026-08-04 — gated exactly ONE file.
+    const dir = join(REPO, "supabase", "migrations");
+    const claimingThisApproval = readdirSync(dir)
+      .filter((f) => f.endsWith(".sql"))
+      .filter((f) => readFileSync(join(dir, f), "utf8").includes("PR #1007"));
+    expect(claimingThisApproval).toEqual([
+      "20260804120000_project_lifecycle_v1.sql",
+    ]);
+  });
+
+  it("the gate script itself was not weakened", () => {
+    const gate = readFileSync(join(REPO, ".github", "scripts", "migration-safety.mjs"), "utf8");
+    // The three findings must still be RED rules that the marker BYPASSES and
+    // REPORTS — not rules that were deleted or downgraded.
+    for (const rule of ["security-definer-function", "grant-or-revoke", "data-dml"]) {
+      expect(gate, `${rule} rule missing from the gate`).toContain(rule);
+    }
+    expect(gate).toMatch(/bypassed by @human-gate-approved/);
   });
 });
