@@ -3349,7 +3349,12 @@
       "attachChoice": "Hvad er denne fil til?",
       "chipAttachPhoto": "Arbejdsfoto",
       "chipAttachCv": "CV",
-      "userAttachPhoto": "Jeg vil vedhæfte et arbejdsfoto"
+      "userAttachPhoto": "Jeg vil vedhæfte et arbejdsfoto",
+      "userCandidates": "Vis mig kandidater",
+      "candidatesOpened": "Her er dine behov og menneskene bag dem.",
+      "candidatesNoDemands": "Dit firma har endnu ikke beskrevet et behov, så der er ingen at matche.",
+      "candidatesNoCompany": "Du er i dit personlige rum lige nu, så der er ingen firmabehov her. Skift rum for at arbejde som dit firma.",
+      "candidatesUnavailable": "Jeg kunne ikke læse dit firmas behov lige nu."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3790,7 +3795,6 @@
       "demandLine": "[EN] — {title} ({state})",
       "demandStructured": "[EN] requirements derived",
       "demandUnstructured": "[EN] no derived requirements yet",
-      "scoutingNotInWorkspaceYet": "[EN] Scouting for one of these does not run inside the workspace yet, so I stop here rather than send you somewhere.",
       "ctxWorkspace": "[EN] Workspace: {name}.",
       "ctxWorkspaceUnknown": "[EN] I could not read which workspace you are in.",
       "ctxCompany": "[EN] Company: {name}.",
@@ -3803,7 +3807,8 @@
       "personalWorkspace": "[EN] your personal space",
       "unnamedOrganization": "[EN] (unnamed organization)",
       "chipLogWork": "[EN] Log work",
-      "chipCreateDemand": "[EN] Describe a need"
+      "chipCreateDemand": "[EN] Describe a need",
+      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace."
     },
     "project": {
       "fieldStatus": "[EN] Status",

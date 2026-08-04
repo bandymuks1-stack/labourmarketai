@@ -47,6 +47,18 @@ export type ResultKind =
   | "calendar"
   | "market"
   | "opportunities"
+  /**
+   * W8 — the EMPLOYER's answer shape: "who can do this work, and what happens
+   * next with them". One result for the whole demand→candidates→shortlist→
+   * contact→booking stage, because it is one question asked at increasing
+   * depth — not five screens. The depth lives in the URL (`&demand=`), the
+   * same way `market` carries `&geo=`/`&project=`.
+   *
+   * It exists because the employer half of the chat-first workspace had NO
+   * result surface at all: `project` (below) was the only employer entry and
+   * it has no inline renderer, so every employer answer had to become a route.
+   */
+  | "candidates"
   | "project"
   | "evidence"
   /**
@@ -194,6 +206,36 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // score. The two ways real data can be absent (gated RPC unapplied, no
     // worker row) are DISTINCT states in the panel, so an absent source is
     // never rendered as an empty result.
+    dataReadiness: "real",
+  },
+  {
+    kind: "candidates",
+    titleKey: "conversation.results.candidates.title",
+    // BOTH doors are real registry ids: the read that opens the surface, and
+    // the write whose outcome the surface shows. `company.review-candidates`
+    // was a `deep_link` action whose only destination was
+    // `/dashboard/company/scouting` — it now ALSO has an inline answer, which
+    // is exactly the "a result is an ADDITION, never a removal" rule: the
+    // route stays, and stays the fallback.
+    openedBy: ["company.review-candidates", "company.shortlist-candidate"],
+    advancedRoute: "/dashboard/company/scouting",
+    // ORGANIZATION ONLY, and that is the same product statement `opportunities`
+    // makes in reverse. Every read behind this result (`listCompanyDemands`,
+    // `runScouting`, the three lifecycle writes) is refused outside a company
+    // context by the W8 employer resolver — that is the slice-1 gate, not an
+    // oversight — so offering the panel in a personal space could only ever
+    // render "you are not acting for a company". The person keeps reaching the
+    // full screen through `advancedRoute`, which renders exactly that state
+    // with the switcher beside it.
+    contexts: ["organization"],
+    // VERIFIED: `lib/conversation/employer-workspace.ts` is a thin adapter over
+    // `runScouting` — the SAME canonical read `/dashboard/company/scouting`
+    // performs, over the same RLS-scoped supply, ranked by the same §19
+    // comparator, with the same Step 3A anonymization applied before anything
+    // leaves the server. No second engine and no demo path: an empty supply
+    // renders as empty, an underivable need renders as `not-structured`, and an
+    // unapplied table renders as `needs-migration` — three distinct states, so
+    // an absent source is never shown as "nobody matched".
     dataReadiness: "real",
   },
   {

@@ -10856,7 +10856,12 @@
       "attachChoice": "Для чего этот файл?",
       "chipAttachPhoto": "Рабочее фото",
       "chipAttachCv": "Резюме",
-      "userAttachPhoto": "Хочу прикрепить рабочее фото"
+      "userAttachPhoto": "Хочу прикрепить рабочее фото",
+      "userCandidates": "Покажи кандидатов",
+      "candidatesOpened": "Вот ваши потребности и люди под них.",
+      "candidatesNoDemands": "Ваша компания ещё не описала потребность, поэтому сопоставлять не с чем.",
+      "candidatesNoCompany": "Сейчас вы в личном пространстве, поэтому здесь нет потребностей компании. Переключите пространство, чтобы работать как компания.",
+      "candidatesUnavailable": "Сейчас не удалось прочитать потребности вашей компании."
     },
     "worklog": {
       "understood": "Вот что я понял — сохранить?",
@@ -11082,7 +11087,69 @@
       "calendarPartial": "Часть источников прочитать не удалось: {sources}. Список может быть неполным.",
       "calendarMoreItems": "(+{count})",
       "calendarMoreDays": "{count, plural, one {… и ещё # день с записями.} few {… и ещё # дня с записями.} other {… и ещё # дней с записями.}}",
-      "calendarToday": "сегодня"
+      "calendarToday": "сегодня",
+      "candidates": {
+        "title": "Кандидаты"
+      },
+      "candidatesError": "Не удалось прочитать кандидатов.",
+      "candidatesNoCompany": "Сейчас вы действуете не от имени компании, поэтому здесь нет потребностей компании, под которые искать людей.",
+      "candidatesBlocked": "В этой среде это сейчас недоступно.",
+      "candidatesNoDemands": "Ваша компания ещё не описала потребность.",
+      "candidatesPickDemand": "Для какой потребности вы ищете людей?",
+      "candidatesUnstructuredBadge": "не структурирована",
+      "candidatesBackToDemands": "Назад к потребностям",
+      "candidatesNotFound": "Такая потребность не найдена или принадлежит не вам.",
+      "candidatesNeedsMigration": "Источник кандидатов в этой среде недоступен.",
+      "candidatesNotStructured": "Из этой потребности пока ничего нельзя вывести, поэтому не с чем сопоставлять. Это не то же самое, что «никто не подходит».",
+      "candidatesRetrievalCapped": "Людей было доступно больше, чем мы успели просмотреть, поэтому этот список — не всё предложение.",
+      "candidatesEmpty": "Сейчас в видимом предложении нет людей, подходящих под эту потребность.",
+      "candidatesCapped": "Показано {shown} из {total}.",
+      "demandStatus": {
+        "draft": "Черновик",
+        "submitted": "Подана",
+        "closed": "Закрыта"
+      },
+      "bookingStatus": {
+        "proposed": "Предложено",
+        "accepted": "Принято",
+        "declined": "Отклонено",
+        "withdrawn": "Отозвано",
+        "expired": "Истекло"
+      },
+      "candidateLabel": "Кандидат {token}",
+      "candidateMatch": {
+        "strong": "Сильное совпадение",
+        "possible": "Возможное совпадение",
+        "weak": "Слабое совпадение",
+        "insufficient_data": "Недостаточно данных"
+      },
+      "candidateCoverage": "{pct}% требуемых навыков",
+      "candidateConfirmedLabel": "Навыки, подтверждённые руководителем",
+      "candidateBookingLabel": "Бронирование",
+      "candidateNoteLabel": "Ваша заметка",
+      "candidateNotEligible": "Одно обязательное условие не выполнено, поэтому это не подходящее совпадение.",
+      "candidateCannotContact": "Разговор или бронирование пока начать нельзя: этот человек не указал доступность, которая это допускает.",
+      "candidateGap": {
+        "skills_missing": "Не хватает части требуемых навыков",
+        "language_missing": "Не хватает требуемого языка",
+        "country_mismatch": "Страна не совпадает",
+        "location_outside_radius": "Местоположение за пределами указанного радиуса",
+        "pay_above_offer": "Ожидания по оплате выше предложения",
+        "accommodation_needed_not_provided": "Нужно жильё, но оно не предоставляется",
+        "profession_mismatch": "Другая профессия"
+      },
+      "actionConfirmNeed": "Подтвердить требования",
+      "actionCloseDemand": "Закрыть потребность",
+      "actionReopenDemand": "Открыть потребность заново",
+      "actionShortlist": "В короткий список",
+      "actionContact": "Начать разговор",
+      "actionProposeBooking": "Предложить бронирование",
+      "actionNothingToConfirm": "В этой потребности нечего подтверждать.",
+      "actionReasonRequired": "Нужна короткая причина.",
+      "actionNotAuthorized": "Отсюда это сделать нельзя.",
+      "bookingStart": "Начало",
+      "bookingEnd": "Ожидаемое окончание",
+      "bookingNote": "Заметка"
     }
   },
   "landing": {
@@ -11498,7 +11565,6 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "требования выведены",
       "demandUnstructured": "требования ещё не выведены",
-      "scoutingNotInWorkspaceYet": "Поиск кандидатов по одной из них пока не работает внутри рабочего пространства, поэтому я останавливаюсь здесь, а не отправляю вас куда-то.",
       "ctxWorkspace": "Рабочее пространство: {name}.",
       "ctxWorkspaceUnknown": "Не удалось прочитать, в каком пространстве вы находитесь.",
       "ctxCompany": "Компания: {name}.",
@@ -11511,7 +11577,8 @@
       "personalWorkspace": "ваше личное пространство",
       "unnamedOrganization": "(организация без названия)",
       "chipLogWork": "Записать работу",
-      "chipCreateDemand": "Описать потребность"
+      "chipCreateDemand": "Описать потребность",
+      "scoutingPickDemand": "Выберите одну — кандидатов покажу прямо здесь, в рабочем пространстве."
     },
     "project": {
       "fieldStatus": "Статус",

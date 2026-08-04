@@ -23,6 +23,11 @@ const CHAT_KEYS = [
   // is always the person's REAL state, never a prompt to write something.
   "experiencesEligible", "experiencesAllSubmitted", "experiencesNothingYet",
   "experiencesUnavailable", "experienceLeave",
+  // W8 — the employer's hiring stage. Five states because "no company",
+  // "no needs yet" and "the read failed" are three different truths, and
+  // none of them may be rendered as one of the others.
+  "userCandidates", "candidatesOpened", "candidatesNoDemands",
+  "candidatesNoCompany", "candidatesUnavailable",
 ] as const;
 
 const WORKLOG_KEYS = [

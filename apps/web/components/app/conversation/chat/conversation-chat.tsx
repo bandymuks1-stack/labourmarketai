@@ -28,6 +28,7 @@ import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
+import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
@@ -143,6 +144,19 @@ export type ChatLabels = {
   /** The chip verb. Always followed by the interaction it belongs to. */
   experienceLeave: string;
 
+  // ── W8 — the employer's hiring stage, in the conversation ─────────────────
+  /** The employer's own turn when they ask to see candidates. */
+  userCandidates: string;
+  /** The chat EXPLAINS, the panel SHOWS — one line above the demand chips. */
+  candidatesOpened: string;
+  /** No need described yet. Said plainly, followed by the ONE real next step. */
+  candidatesNoDemands: string;
+  /** Not acting for a company right now — a different fact from "no needs",
+   *  fixed by a different act (switch workspace, not describe a need). */
+  candidatesNoCompany: string;
+  /** The read failed or the source is not available here. NEVER rendered as
+   *  "you have no needs" — that would be a claim about the company's work. */
+  candidatesUnavailable: string;
 };
 
 
@@ -206,8 +220,13 @@ export function ConversationChat({
             // an inline conversation form (company.create-demand executor).
             // Employer greeting also honours the 1–3 cap (§D).
             { id: "f:company.create-demand", label: labels.chipNeedWorkers },
+            // W8: candidates are an ANSWER now, not a route. This chip used to
+            // be `link:/dashboard/company/scouting` — the employer's second
+            // step took them out of the workspace, which is exactly what a
+            // chat-first product must not do. The full screen is still there,
+            // one action away from every state of the result.
+            { id: "candidates", label: labels.chipCandidates },
             { id: "agenda", label: labels.chipAgenda },
-            { id: "link:/dashboard/company/scouting", label: labels.chipCandidates },
           ]
         : [
             // OWNER RULING 2026-07-29 (§D): the six-chip wall is gone. The
@@ -375,14 +394,26 @@ export function ConversationChat({
     }, 350);
   }, []);
 
-  /** Contextual follow-up after the employer demand form: where the demand
-   *  lives + describe another need — real next steps, not a generic menu. */
+  /** Contextual follow-up after the employer demand form.
+   *
+   *  W8 puts the JOURNEY'S OWN next step first: a need has just been described,
+   *  so the thing the employer actually wants is who can do it. That used to be
+   *  unreachable from here — the only follow-ups were the company hub (a route
+   *  out of the workspace) and "describe another need" — so the chat's employer
+   *  path dead-ended at the intake form it had just closed. */
   const companyFollowup = useCallback(() => {
     assistant(labels.companyDemandNext, [
+      { id: "candidates", label: labels.chipCandidates },
       { id: "link:/dashboard/company", label: labels.chipCompanyHub },
       { id: "f:company.create-demand", label: labels.chipNeedWorkers },
     ]);
-  }, [assistant, labels.companyDemandNext, labels.chipCompanyHub, labels.chipNeedWorkers]);
+  }, [
+    assistant,
+    labels.companyDemandNext,
+    labels.chipCandidates,
+    labels.chipCompanyHub,
+    labels.chipNeedWorkers,
+  ]);
 
   const openForm = useCallback(
     (actionId: string, onCloseOverride?: () => void) => {
@@ -501,6 +532,9 @@ export function ConversationChat({
    *  declared above `useResultParam()`, and the experience handoff needs the
    *  ONE writer that sets result + interaction in a single push. */
   const selectInteractionRef = useRef<(token: string) => void>(() => {});
+  /** W8 — same pattern for the employer handoff: one writer that sets result +
+   *  demand in a single push, so the panel never opens at the wrong depth. */
+  const selectDemandRef = useRef<(requestId: string) => void>(() => {});
 
   /** The REAL search request (employer/opportunity read) — its own typing
    *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
@@ -807,6 +841,77 @@ export function ConversationChat({
   ]);
 
   /**
+   * THE EMPLOYER'S HIRING STAGE (W8).
+   *
+   * The employer half of this workspace stopped at the intake form: nine of
+   * the ten employer executors were wired server-side with no client caller,
+   * and the only "candidates" affordance was a link OUT of the conversation.
+   * This is the entry point that closes it, and it follows the SAME split every
+   * other result follows — the chat EXPLAINS, the panel SHOWS AND ACTS.
+   *
+   * THE ANSWER IS ALWAYS THE REAL STATE, and the states are different sentences
+   * because they are different truths:
+   *   - one demand      → open it directly; asking someone to pick from a list
+   *                       of one is a step that answers nothing;
+   *   - several demands → one chip per REAL demand, each carrying its own id;
+   *   - no demands      → said plainly, with the one act that changes it;
+   *   - no company      → said plainly, and it is NOT "you have no needs";
+   *   - read failed     → its own sentence, never rendered as emptiness.
+   *
+   * A chip is a request to look, never a permission: the id travels to
+   * `runScouting`, which re-derives the company context and re-verifies the row
+   * belongs to the caller before ranking anybody.
+   */
+  const startEmployerCandidates = useCallback(() => {
+    setTyping(true);
+    loadEmployerDemandsForChat()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "no-company-context") {
+          assistant(labels.candidatesNoCompany);
+          return;
+        }
+        if (res.kind === "blocked") {
+          assistant(labels.candidatesUnavailable);
+          return;
+        }
+        if (res.kind === "empty") {
+          // The ONE act that changes this state — not a generic menu.
+          assistant(labels.candidatesNoDemands, [
+            { id: "f:company.create-demand", label: labels.chipNeedWorkers },
+          ]);
+          return;
+        }
+        if (res.demands.length === 1) {
+          assistant(labels.candidatesOpened);
+          selectDemandRef.current(res.demands[0].requestId);
+          return;
+        }
+        assistant(
+          labels.candidatesOpened,
+          // Owner cap (§D): at most three. The rest stay in the panel's own
+          // demand list, which this same call opens.
+          res.demands.slice(0, 3).map((d) => ({
+            id: `demand:${d.requestId}`,
+            label: d.title,
+          })),
+        );
+        openResultRef.current("candidates");
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.candidatesUnavailable);
+      });
+  }, [
+    assistant,
+    labels.candidatesNoCompany,
+    labels.candidatesUnavailable,
+    labels.candidatesNoDemands,
+    labels.candidatesOpened,
+    labels.chipNeedWorkers,
+  ]);
+
+  /**
    * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
    * inbox (same RLS-scoped reads the messages page uses), shows only the
    * threads that genuinely await this person, and offers a reply that is
@@ -1015,8 +1120,19 @@ export function ConversationChat({
           // Real search now, not a canned answer.
           startFindWork();
           break;
+        case "candidates":
+          user(labels.userCandidates);
+          // W8 — the employer's real demands, then the panel. Never a route.
+          startEmployerCandidates();
+          break;
         default:
-          if (chip.id.startsWith("xp:")) {
+          if (chip.id.startsWith("demand:")) {
+            // W8 — the demand-bound handoff. The chip carries an id and
+            // NOTHING else; it opens the candidates result at that demand's
+            // depth, where the SERVER re-derives the company context and
+            // re-verifies ownership before ranking anybody.
+            selectDemandRef.current(chip.id.slice(7));
+          } else if (chip.id.startsWith("xp:")) {
             // W6 slice 3D — the interaction-bound handoff. The chip carries a
             // `kind:uuid` token and NOTHING else; it opens the result at the
             // submit depth, where the SERVER re-derives participation,
@@ -1033,7 +1149,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, router],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, router],
   );
   handleChipRef.current = handleChip;
 
@@ -1223,19 +1339,23 @@ export function ConversationChat({
     geoToken,
     projectId,
     interactionToken,
+    demandId,
     openResult,
     closeResult,
     selectGeography,
     selectProject,
     selectInteraction,
+    selectDemand,
     clearGeography,
     clearProject,
     clearInteraction,
+    clearDemand,
   } = useResultParam();
   // Bind the late-bound opener: the find-work flow above calls this to put its
   // answer in the panel instead of drawing a second card list in the thread.
   openResultRef.current = openResult;
   selectInteractionRef.current = selectInteraction;
+  selectDemandRef.current = selectDemand;
   const resultContext: ResultContext = auth0?.activeOrgName
     ? "organization"
     : "personal";
@@ -1261,6 +1381,10 @@ export function ConversationChat({
       // opaque validated token in, a "step back up" callback out. The panel
       // still learns nothing about interactions, bookings or engagements.
       interactionToken,
+      // W8 — the candidates result's depth travels the same way: a validated
+      // id in, a "step back up" callback out. The panel still learns nothing
+      // about demands, matching or shortlists.
+      demandId,
       // Null means "no organization is active" — the panel renders its own
       // localized word for that rather than this layer inventing one.
       workspace: auth0?.activeOrgName ?? null,
@@ -1269,18 +1393,23 @@ export function ConversationChat({
       onBackToMarket: clearGeography,
       onBackToProjects: clearProject,
       onBackToExperiences: clearInteraction,
+      onSelectDemand: selectDemand,
+      onBackToDemands: clearDemand,
     }),
     [
       geography,
       geoToken,
       projectId,
       interactionToken,
+      demandId,
       auth0?.activeOrgName,
       selectGeography,
       selectProject,
+      selectDemand,
       clearGeography,
       clearProject,
       clearInteraction,
+      clearDemand,
     ],
   );
 
@@ -1291,9 +1420,19 @@ export function ConversationChat({
    *  mechanism — the SAME panel takes more of the desktop column, never a
    *  second surface. The card carries two side-by-side charts (evidence over
    *  time, evidence per skill); at 22rem their axis labels wrapped to one word
-   *  per line, which is a chart the reader cannot actually read. */
+   *  per line, which is a chart the reader cannot actually read.
+   *
+   *  W8 adds the candidates result at DEMAND depth for exactly the first
+   *  reason: an employer comparing people reads a match status, a coverage
+   *  figure, a pipeline stage and three controls per row. At 22rem that stack
+   *  wraps into an unreadable column, and the decision it exists to support
+   *  is a comparison. The demand LIST is a list of titles and keeps the
+   *  narrow column. */
   const panelWide =
-    result !== null && (geography !== null || result === "player-card");
+    result !== null &&
+    (geography !== null ||
+      result === "player-card" ||
+      (result === "candidates" && demandId !== null));
 
   return (
     /**

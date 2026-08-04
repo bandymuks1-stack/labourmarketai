@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
 import { CalendarResult } from "@/components/app/workspace/calendar-result";
+import { CandidatesResult } from "@/components/app/workspace/candidates-result";
 import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
@@ -35,6 +36,14 @@ export interface ResultNavigation {
    * the subject and duplicate state before any form is mounted.
    */
   readonly interactionToken: string | null;
+  /**
+   * W8 — which DEMAND the `candidates` result is answering for, as a validated
+   * uuid, or null for the demand list. Opaque here exactly like the two tokens
+   * above: the panel never learns what a demand is, and the id buys nothing on
+   * its own — `runScouting` re-derives the company context and verifies the row
+   * is the caller's own before a single candidate is ranked.
+   */
+  readonly demandId: string | null;
   /** Active organization name, or null when the person is in their own space.
    *  Carried into the people continuation (W4.5). */
   readonly workspace: string | null;
@@ -44,6 +53,10 @@ export interface ResultNavigation {
   readonly onBackToProjects: () => void;
   /** Step back out of one interaction to the list of experiences. */
   readonly onBackToExperiences: () => void;
+  /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
+  readonly onSelectDemand: (requestId: string) => void;
+  /** Step back up to the demand list. Replaces. */
+  readonly onBackToDemands: () => void;
 }
 
 /**
@@ -73,6 +86,7 @@ export function ResultBody({
   kind,
   context,
   navigation,
+  locale,
   onOpenFull,
 }: {
   kind: ResultKind;
@@ -80,6 +94,10 @@ export function ResultBody({
   context: ResultContext;
   /** Depth within the result — see `ResultNavigation`. */
   navigation: ResultNavigation;
+  /** The active locale. Results that DISPATCH an action (W8's `candidates`)
+   *  pass it to the canonical dispatcher so the server action revalidates the
+   *  caller's own locale path — the same value the inline form supplies. */
+  locale: string;
   /** Wired by the workspace layer to reach the result's existing full screen. */
   onOpenFull: (route: string) => void;
 }) {
@@ -91,7 +109,12 @@ export function ResultBody({
 
   if (canRenderInline(kind, context)) {
     return (
-      <InlineResult kind={kind} navigation={navigation} onOpenFull={onOpenFull} />
+      <InlineResult
+        kind={kind}
+        navigation={navigation}
+        locale={locale}
+        onOpenFull={onOpenFull}
+      />
     );
   }
 
@@ -125,10 +148,12 @@ export function ResultBody({
 function InlineResult({
   kind,
   navigation,
+  locale,
   onOpenFull,
 }: {
   kind: ResultKind;
   navigation: ResultNavigation;
+  locale: string;
   /** An inline result may still need the full screen — the opportunities
    *  result offers the board from every one of its states, so no state is a
    *  dead end. Passed through rather than re-derived: the fallback route and
@@ -180,6 +205,21 @@ function InlineResult({
         <ExperiencesResult
           interactionToken={navigation.interactionToken}
           onBack={navigation.onBackToExperiences}
+        />
+      );
+    case "candidates":
+      // W8 — the employer's whole hiring stage, in the panel. The chat
+      // EXPLAINS and the panel SHOWS AND ACTS: the demand list, one demand's
+      // ranked candidates, the §19 confirm/close/reopen lifecycle, shortlist,
+      // contact and booking — every one of them the canonical executor that
+      // already existed and had no client caller.
+      return (
+        <CandidatesResult
+          demandId={navigation.demandId}
+          locale={locale}
+          onSelectDemand={navigation.onSelectDemand}
+          onBack={navigation.onBackToDemands}
+          onOpenFull={onOpenFull}
         />
       );
     // The remaining kinds follow, one verified data path at a time.

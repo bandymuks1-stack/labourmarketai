@@ -319,6 +319,10 @@ export function ContextPanel({
             kind={result}
             context={resultContext}
             navigation={resultNavigation}
+            // The panel already knows the locale (it renders localized copy);
+            // a result that DISPATCHES an action needs the same value so the
+            // canonical server action revalidates the caller's own path.
+            locale={locale}
             onOpenFull={onOpenFull ?? (() => {})}
           />
         ) : loading ? (

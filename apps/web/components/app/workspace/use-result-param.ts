@@ -50,6 +50,10 @@ import {
  * `replace` would make Back leave the workspace entirely. Closing or stepping
  * back up still replaces, so the history never fills with the same address.
  */
+/** The one uuid shape check the depth params share (`project`, `demand`). */
+const UUID_RX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function useResultParam(): {
   /** The valid result kind in the URL, or null. An unknown value is ignored. */
   result: ResultKind | null;
@@ -72,8 +76,23 @@ export function useResultParam(): {
    * completion, the subject and duplicate state before any form appears.
    */
   interactionToken: string | null;
+  /**
+   * W8 — the `candidates` result's depth: WHICH DEMAND the employer is hiring
+   * for, as a validated uuid.
+   *
+   * Same rule as `project` above, and it is validated here for the same
+   * reason: a hand-typed value must never reach a loader as a half-understood
+   * demand. And like every other token in this hook, being well-formed buys
+   * nothing — `runScouting` re-derives the company context and re-verifies
+   * ownership of the row before any candidate is ranked.
+   */
+  demandId: string | null;
   /** Show a result — replaces the query, never pushes a new page. */
   openResult: (kind: ResultKind) => void;
+  /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
+  selectDemand: (requestId: string) => void;
+  /** Step back up to the demand list. Replaces. */
+  clearDemand: () => void;
   /** Drill into one interaction to describe it. Pushes, so Back returns to
    *  the list of experiences. */
   selectInteraction: (token: string) => void;
@@ -161,11 +180,20 @@ export function useResultParam(): {
   const rawProject = readParam("project");
   const projectId = useMemo(() => {
     if (!geography) return null;
-    return typeof rawProject === "string" &&
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawProject)
+    return typeof rawProject === "string" && UUID_RX.test(rawProject)
       ? rawProject
       : null;
   }, [rawProject, geography]);
+
+  // W8 — the candidates result's depth. Unlike `project` it has no parent
+  // token to depend on: a demand is addressable on its own, so the only gate
+  // is the shape. Anything else is simply not depth at all, and the panel
+  // renders the demand list.
+  const rawDemand = readParam("demand");
+  const demandId = useMemo(
+    () => (typeof rawDemand === "string" && UUID_RX.test(rawDemand) ? rawDemand : null),
+    [rawDemand],
+  );
 
   const write = useCallback(
     (patch: Record<string, string | null>, mode: "push" | "replace") => {
@@ -188,16 +216,40 @@ export function useResultParam(): {
     geoToken,
     projectId,
     interactionToken,
+    demandId,
     // Opening a result from scratch clears any stale depth: a market result
     // that reopened straight into last week's project would be showing an
     // answer nobody asked for — and an experiences result that reopened onto
     // last week's interaction would be inviting a description nobody asked
     // for, which is worse.
+    // …and a candidates result that reopened onto last month's closed demand
+    // would be answering a question nobody asked, for the same reason.
     openResult: useCallback(
       (kind: ResultKind) =>
-        write({ result: kind, geo: null, project: null, interaction: null }, "replace"),
+        write(
+          { result: kind, geo: null, project: null, interaction: null, demand: null },
+          "replace",
+        ),
       [write],
     ),
+    // Going deeper pushes — the same rule as a place, a project or an
+    // interaction. ONE write, for the same reason `selectInteraction` uses one:
+    // two calls would both read the not-yet-updated query string.
+    selectDemand: useCallback(
+      (requestId: string) =>
+        write(
+          {
+            result: "candidates",
+            geo: null,
+            project: null,
+            interaction: null,
+            demand: requestId,
+          },
+          "push",
+        ),
+      [write],
+    ),
+    clearDemand: useCallback(() => write({ demand: null }, "replace"), [write]),
     // Going DEEPER pushes, like selecting a place or a project: opening the
     // form for one interaction is a step the person expects Back to undo.
     //
@@ -232,7 +284,11 @@ export function useResultParam(): {
       [write],
     ),
     closeResult: useCallback(
-      () => write({ result: null, geo: null, project: null, interaction: null }, "replace"),
+      () =>
+        write(
+          { result: null, geo: null, project: null, interaction: null, demand: null },
+          "replace",
+        ),
       [write],
     ),
   };

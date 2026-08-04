@@ -10856,7 +10856,12 @@
       "attachChoice": "Waarvoor is dit bestand?",
       "chipAttachPhoto": "Werkfoto",
       "chipAttachCv": "Cv",
-      "userAttachPhoto": "Ik wil een werkfoto toevoegen"
+      "userAttachPhoto": "Ik wil een werkfoto toevoegen",
+      "userCandidates": "Laat kandidaten zien",
+      "candidatesOpened": "Hier zijn je behoeften en de mensen daarachter.",
+      "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven, dus er valt niets te matchen.",
+      "candidatesNoCompany": "Je bent nu in je persoonlijke ruimte, dus hier zijn geen bedrijfsbehoeften. Wissel van ruimte om als je bedrijf te werken.",
+      "candidatesUnavailable": "Ik kon de behoeften van je bedrijf nu niet lezen."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -11082,7 +11087,69 @@
       "calendarPartial": "Sommige bronnen konden niet worden gelezen: {sources}. De lijst kan onvolledig zijn.",
       "calendarMoreItems": "(+{count})",
       "calendarMoreDays": "{count, plural, one {… en nog # dag met items.} other {… en nog # dagen met items.}}",
-      "calendarToday": "vandaag"
+      "calendarToday": "vandaag",
+      "candidates": {
+        "title": "Kandidaten"
+      },
+      "candidatesError": "We konden de kandidaten niet lezen.",
+      "candidatesNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsbehoeften om voor te werven.",
+      "candidatesBlocked": "Dit is in deze omgeving nu niet beschikbaar.",
+      "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven.",
+      "candidatesPickDemand": "Voor welke behoefte werf je?",
+      "candidatesUnstructuredBadge": "niet gestructureerd",
+      "candidatesBackToDemands": "Terug naar behoeften",
+      "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
+      "candidatesNeedsMigration": "De kandidatenbron is in deze omgeving niet beschikbaar.",
+      "candidatesNotStructured": "Uit deze behoefte valt nog niets af te leiden, dus er is niets om mee te vergelijken. Dat is niet hetzelfde als dat niemand past.",
+      "candidatesRetrievalCapped": "Er waren meer mensen bereikbaar dan we deze keer konden bekijken, dus deze lijst is niet het hele aanbod.",
+      "candidatesEmpty": "Op dit moment past niemand in het zichtbare aanbod bij deze behoefte.",
+      "candidatesCapped": "{shown} van {total} getoond.",
+      "demandStatus": {
+        "draft": "Concept",
+        "submitted": "Ingediend",
+        "closed": "Gesloten"
+      },
+      "bookingStatus": {
+        "proposed": "Voorgesteld",
+        "accepted": "Geaccepteerd",
+        "declined": "Afgewezen",
+        "withdrawn": "Ingetrokken",
+        "expired": "Verlopen"
+      },
+      "candidateLabel": "Kandidaat {token}",
+      "candidateMatch": {
+        "strong": "Sterke match",
+        "possible": "Mogelijke match",
+        "weak": "Zwakke match",
+        "insufficient_data": "Te weinig gegevens"
+      },
+      "candidateCoverage": "{pct}% van de gevraagde vaardigheden",
+      "candidateConfirmedLabel": "Door de leidinggevende bevestigde vaardigheden",
+      "candidateBookingLabel": "Boeking",
+      "candidateNoteLabel": "Jouw notitie",
+      "candidateNotEligible": "Aan een noodzakelijke voorwaarde is niet voldaan, dus dit is geen geldige match.",
+      "candidateCannotContact": "Een gesprek of boeking kan nog niet starten: deze persoon heeft geen beschikbaarheid opgegeven die dat toelaat.",
+      "candidateGap": {
+        "skills_missing": "Een deel van de gevraagde vaardigheden ontbreekt",
+        "language_missing": "Een gevraagde taal ontbreekt",
+        "country_mismatch": "Het land komt niet overeen",
+        "location_outside_radius": "De locatie ligt buiten de opgegeven straal",
+        "pay_above_offer": "De salarisverwachting ligt boven het aanbod",
+        "accommodation_needed_not_provided": "Huisvesting is nodig maar wordt niet geboden",
+        "profession_mismatch": "Een ander beroep"
+      },
+      "actionConfirmNeed": "Bevestig de eisen",
+      "actionCloseDemand": "Deze behoefte sluiten",
+      "actionReopenDemand": "Deze behoefte heropenen",
+      "actionShortlist": "Op de shortlist",
+      "actionContact": "Gesprek starten",
+      "actionProposeBooking": "Boeking voorstellen",
+      "actionNothingToConfirm": "Er valt bij deze behoefte niets te bevestigen.",
+      "actionReasonRequired": "Een korte reden is verplicht.",
+      "actionNotAuthorized": "Dit kun je hier niet doen.",
+      "bookingStart": "Start",
+      "bookingEnd": "Verwacht einde",
+      "bookingNote": "Notitie"
     }
   },
   "landing": {
@@ -11498,7 +11565,6 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "eisen afgeleid",
       "demandUnstructured": "nog geen afgeleide eisen",
-      "scoutingNotInWorkspaceYet": "Kandidaten zoeken voor één ervan werkt nog niet binnen de werkruimte, dus ik stop hier in plaats van je ergens heen te sturen.",
       "ctxWorkspace": "Werkruimte: {name}.",
       "ctxWorkspaceUnknown": "Ik kon niet lezen in welke werkruimte je zit.",
       "ctxCompany": "Bedrijf: {name}.",
@@ -11511,7 +11577,8 @@
       "personalWorkspace": "je persoonlijke ruimte",
       "unnamedOrganization": "(organisatie zonder naam)",
       "chipLogWork": "Werk vastleggen",
-      "chipCreateDemand": "Behoefte beschrijven"
+      "chipCreateDemand": "Behoefte beschrijven",
+      "scoutingPickDemand": "Kies er één, dan laat ik de kandidaten hier in de werkruimte zien."
     },
     "project": {
       "fieldStatus": "Status",

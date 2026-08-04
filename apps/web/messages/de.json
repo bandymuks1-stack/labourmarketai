@@ -10856,7 +10856,12 @@
       "attachChoice": "Wofür ist diese Datei?",
       "chipAttachPhoto": "Arbeitsfoto",
       "chipAttachCv": "Lebenslauf",
-      "userAttachPhoto": "Ich möchte ein Arbeitsfoto anhängen"
+      "userAttachPhoto": "Ich möchte ein Arbeitsfoto anhängen",
+      "userCandidates": "Zeig mir Kandidaten",
+      "candidatesOpened": "Hier sind deine Bedarfe und die Menschen dazu.",
+      "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben, es gibt also nichts abzugleichen.",
+      "candidatesNoCompany": "Du bist gerade in deinem persönlichen Bereich, hier gibt es also keine Unternehmensbedarfe. Wechsle den Bereich, um als dein Unternehmen zu arbeiten.",
+      "candidatesUnavailable": "Die Bedarfe deines Unternehmens konnten gerade nicht gelesen werden."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11082,7 +11087,69 @@
       "calendarPartial": "Einige Quellen konnten nicht gelesen werden: {sources}. Die Liste kann unvollständig sein.",
       "calendarMoreItems": "(+{count})",
       "calendarMoreDays": "{count, plural, one {… und # weiterer Tag mit Einträgen.} other {… und # weitere Tage mit Einträgen.}}",
-      "calendarToday": "heute"
+      "calendarToday": "heute",
+      "candidates": {
+        "title": "Kandidaten"
+      },
+      "candidatesError": "Die Kandidaten konnten nicht gelesen werden.",
+      "candidatesNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensbedarfe, für die gesucht wird.",
+      "candidatesBlocked": "In dieser Umgebung ist das derzeit nicht verfügbar.",
+      "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben.",
+      "candidatesPickDemand": "Für welchen Bedarf suchst du Leute?",
+      "candidatesUnstructuredBadge": "nicht strukturiert",
+      "candidatesBackToDemands": "Zurück zu den Bedarfen",
+      "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht dir.",
+      "candidatesNeedsMigration": "Die Kandidatenquelle ist in dieser Umgebung nicht verfügbar.",
+      "candidatesNotStructured": "Aus diesem Bedarf lässt sich noch nichts ableiten, es gibt also nichts zum Abgleichen. Das ist nicht dasselbe wie „niemand passt“.",
+      "candidatesRetrievalCapped": "Es waren mehr Menschen erreichbar, als wir diesmal ansehen konnten — diese Liste ist also nicht das gesamte Angebot.",
+      "candidatesEmpty": "Im sichtbaren Angebot passt derzeit niemand zu diesem Bedarf.",
+      "candidatesCapped": "{shown} von {total} angezeigt.",
+      "demandStatus": {
+        "draft": "Entwurf",
+        "submitted": "Eingereicht",
+        "closed": "Geschlossen"
+      },
+      "bookingStatus": {
+        "proposed": "Vorgeschlagen",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "withdrawn": "Zurückgezogen",
+        "expired": "Abgelaufen"
+      },
+      "candidateLabel": "Kandidat {token}",
+      "candidateMatch": {
+        "strong": "Starke Übereinstimmung",
+        "possible": "Mögliche Übereinstimmung",
+        "weak": "Schwache Übereinstimmung",
+        "insufficient_data": "Zu wenig Daten"
+      },
+      "candidateCoverage": "{pct}% der geforderten Fähigkeiten",
+      "candidateConfirmedLabel": "Von der Führungskraft bestätigte Fähigkeiten",
+      "candidateBookingLabel": "Buchung",
+      "candidateNoteLabel": "Deine Notiz",
+      "candidateNotEligible": "Eine notwendige Bedingung ist nicht erfüllt, deshalb ist das keine zulässige Übereinstimmung.",
+      "candidateCannotContact": "Ein Gespräch oder eine Buchung kann noch nicht beginnen: Diese Person hat keine Verfügbarkeit angegeben, die das erlaubt.",
+      "candidateGap": {
+        "skills_missing": "Ein Teil der geforderten Fähigkeiten fehlt",
+        "language_missing": "Eine geforderte Sprache fehlt",
+        "country_mismatch": "Das Land passt nicht",
+        "location_outside_radius": "Der Ort liegt außerhalb des angegebenen Radius",
+        "pay_above_offer": "Die Gehaltserwartung liegt über dem Angebot",
+        "accommodation_needed_not_provided": "Unterkunft wird benötigt, aber nicht gestellt",
+        "profession_mismatch": "Ein anderer Beruf"
+      },
+      "actionConfirmNeed": "Anforderungen bestätigen",
+      "actionCloseDemand": "Diesen Bedarf schließen",
+      "actionReopenDemand": "Diesen Bedarf wieder öffnen",
+      "actionShortlist": "Auf die Auswahlliste",
+      "actionContact": "Gespräch beginnen",
+      "actionProposeBooking": "Buchung vorschlagen",
+      "actionNothingToConfirm": "Bei diesem Bedarf gibt es nichts zu bestätigen.",
+      "actionReasonRequired": "Eine kurze Begründung ist erforderlich.",
+      "actionNotAuthorized": "Das kannst du von hier aus nicht tun.",
+      "bookingStart": "Beginn",
+      "bookingEnd": "Voraussichtliches Ende",
+      "bookingNote": "Notiz"
     }
   },
   "landing": {
@@ -11498,7 +11565,6 @@
       "demandLine": "— {title} ({state})",
       "demandStructured": "Anforderungen abgeleitet",
       "demandUnstructured": "noch keine abgeleiteten Anforderungen",
-      "scoutingNotInWorkspaceYet": "Die Kandidatensuche zu einer davon läuft noch nicht innerhalb des Arbeitsbereichs, deshalb höre ich hier auf, statt dich woandershin zu schicken.",
       "ctxWorkspace": "Arbeitsbereich: {name}.",
       "ctxWorkspaceUnknown": "Ich konnte nicht lesen, in welchem Arbeitsbereich du bist.",
       "ctxCompany": "Unternehmen: {name}.",
@@ -11511,7 +11577,8 @@
       "personalWorkspace": "dein persönlicher Bereich",
       "unnamedOrganization": "(Organisation ohne Namen)",
       "chipLogWork": "Arbeit eintragen",
-      "chipCreateDemand": "Bedarf beschreiben"
+      "chipCreateDemand": "Bedarf beschreiben",
+      "scoutingPickDemand": "Wähle einen aus, dann zeige ich die Kandidaten direkt hier im Arbeitsbereich."
     },
     "project": {
       "fieldStatus": "Status",
