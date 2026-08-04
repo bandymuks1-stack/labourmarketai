@@ -16,8 +16,13 @@ import {
   COMPANY_ACTION_SCHEMAS,
   type CompanyActionId,
 } from "@/lib/conversation/company-schemas";
+import {
+  ENGAGEMENT_ACTION_SCHEMAS,
+  type EngagementActionId,
+} from "@/lib/conversation/engagement-schemas";
 import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
+import { ENGAGEMENT_EXECUTORS } from "@/lib/conversation/engagement-executors";
 import {
   canonicalInputHash,
   issueConfirmationToken,
@@ -136,10 +141,38 @@ async function stateFingerprint(
       .maybeSingle();
     return `interest:${(data?.status as string) ?? "none"}`;
   }
+  if (actionId === "engagement.end") {
+    /**
+     * §7.1 — the engagement's OWN status is the fingerprint, and that is what
+     * makes the confirmation single-use rather than merely fresh.
+     *
+     * A token minted while the row was `active` carries `engagement:active`.
+     * The moment the end succeeds the row becomes `ended`, so re-submitting
+     * that same token re-derives `engagement:ended`, the fingerprints
+     * disagree, and `verifyConfirmationToken` answers `stale_state` — which
+     * the dispatcher surfaces as `stale_confirmation`. A replay therefore
+     * cannot reach the RPC at all: it is refused one layer above it. (The RPC
+     * is idempotent regardless — it would answer `already_ended` — but a
+     * confirmation that can be spent twice is a broken consent gate even when
+     * the second spend happens to be harmless.)
+     *
+     * The read is RLS-scoped like every other one here, so a row the caller
+     * may not see yields `engagement:missing` — the same value an absent row
+     * gives. That preserves the migration's anti-oracle choice: nothing about
+     * whether the row exists leaks through the token step, and such a call is
+     * answered `not_found` by the RPC anyway.
+     */
+    const { data } = await supabase
+      .from("company_worker_engagements")
+      .select("status")
+      .eq("id", String(input.engagementId))
+      .maybeSingle();
+    return `engagement:${(data?.status as string) ?? "missing"}`;
+  }
   return "n/a";
 }
 
-type ExecutableActionId = WorkerActionId | CompanyActionId;
+type ExecutableActionId = WorkerActionId | CompanyActionId | EngagementActionId;
 
 /** The one executor call signature the dispatcher needs: every concrete
  *  executor narrows its `input` from the id-matched schema, so the safe common
@@ -167,11 +200,17 @@ type AnyActionSchema = {
 const SCHEMA_MAP: ReadonlyMap<string, AnyActionSchema> = new Map<string, AnyActionSchema>([
   ...Object.entries(WORKER_ACTION_SCHEMAS),
   ...Object.entries(COMPANY_ACTION_SCHEMAS),
+  // §7.1 — the relationship map. A THIRD source, not an entry bolted onto one
+  // of the two side maps: `engagement.end` is held by the employer AND the
+  // worker, so filing it under either side would make that side's module the
+  // home of a decision it does not own.
+  ...Object.entries(ENGAGEMENT_ACTION_SCHEMAS),
 ]);
 
 const EXECUTOR_MAP: ReadonlyMap<string, AnyExecutor> = new Map<string, AnyExecutor>([
   ...Object.entries(WORKER_EXECUTORS),
   ...Object.entries(COMPANY_EXECUTORS),
+  ...Object.entries(ENGAGEMENT_EXECUTORS),
 ]);
 
 /** An action is executable iff it carries a registered schema + executor pair
@@ -282,6 +321,13 @@ export async function dispatchWorkerAction(
   // server-side from the canonical resolver (never client-supplied). Employer
   // actions resolve with the company-identity fallback (first owned org while
   // the pointer migration is unapplied); worker actions default personal.
+  //
+  // §7.1: `engagement.*` is deliberately NOT employer-flavoured here. It is
+  // held by both parties, and its executor takes no workspace at all — the RPC
+  // re-derives authority from the row, so there is nothing for a resolved
+  // organization to decide. Resolving it as a person is therefore inert, and
+  // it is the safe direction: a workspace that is never read cannot widen
+  // anything.
   const isEmployerAction =
     actionId.startsWith("company.") || actionId.startsWith("agency.");
   const ws = await getWorkspaceContext(isEmployerAction ? "company" : "person");

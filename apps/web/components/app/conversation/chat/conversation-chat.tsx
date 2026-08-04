@@ -38,6 +38,7 @@ import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
+import { loadEngagementsForResult } from "@/lib/engagements/engagements-result";
 import {
   loadAssignableWorkersForProject,
   loadProjectsForResult,
@@ -220,6 +221,23 @@ export type ChatLabels = {
   assignDone: string;
   /** The assignment was refused by the server. The reason is the server's. */
   assignFailed: string;
+
+  // ── §7.1 — work relationships in the conversation ─────────────────────────
+  /** The contextual chip. NOT a starter: the greeting is capped at three
+   *  (owner ruling §D) and both identities have already spent theirs. */
+  chipEngagements: string;
+  /** The person's own turn when they ask who they work with. */
+  userEngagements: string;
+  /** The chat EXPLAINS, the panel SHOWS AND ACTS — one line above the list. */
+  engagementsOpened: string;
+  /** No engagement recorded. Said plainly; never conflated with the two below. */
+  engagementsNone: string;
+  /** Not acting for a company right now — a different fact from "none", fixed
+   *  by a different act (switch workspace, not end anything). */
+  engagementsNoCompany: string;
+  /** The read failed, or the source is not available here. NEVER rendered as
+   *  "you work with nobody" — that would be a claim about the person's work. */
+  engagementsUnavailable: string;
 };
 
 
@@ -981,6 +999,65 @@ export function ConversationChat({
   ]);
 
   /**
+   * WORK RELATIONSHIPS IN THE CONVERSATION (§7.1).
+   *
+   * The door `end_company_worker_engagement_v1` never had. The RPC has been
+   * applied in production since 20260723120000 with ZERO client callers — a
+   * real capability nobody could reach — and this is the entry that closes it.
+   *
+   * The SAME split every result follows: the chat EXPLAINS, the panel SHOWS
+   * AND ACTS. The chat never ends anything and never offers a confirmation;
+   * the confirmation belongs to one real row inside the panel.
+   *
+   * ONE ENTRY, BOTH SIDES. Which slice is meaningful is decided by the active
+   * identity — an employer is asking about their roster, a person about their
+   * own work — and it is decided SERVER-side by `loadEngagementsForResult`.
+   * The chat only picks which sentence is true, and the three ways there can
+   * be nothing to show stay three different sentences because they are three
+   * different truths.
+   */
+  const startEngagements = useCallback(() => {
+    setTyping(true);
+    loadEngagementsForResult(identity === "company" ? "organization" : "personal")
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "needs-migration") {
+          // The source is not available here. NOT "you work with nobody".
+          assistant(labels.engagementsUnavailable);
+          openResultRef.current("engagements");
+          return;
+        }
+        if (res.kind === "blocked") {
+          assistant(
+            identity === "company"
+              ? labels.engagementsNoCompany
+              : labels.engagementsUnavailable,
+          );
+          openResultRef.current("engagements");
+          return;
+        }
+        if (res.kind === "empty") {
+          assistant(labels.engagementsNone);
+          openResultRef.current("engagements");
+          return;
+        }
+        assistant(labels.engagementsOpened);
+        openResultRef.current("engagements");
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.engagementsUnavailable);
+      });
+  }, [
+    assistant,
+    identity,
+    labels.engagementsNone,
+    labels.engagementsNoCompany,
+    labels.engagementsOpened,
+    labels.engagementsUnavailable,
+  ]);
+
+  /**
    * PROJECTS IN THE CONVERSATION (W11).
    *
    * The same split every result follows — the chat EXPLAINS, the panel SHOWS
@@ -1003,7 +1080,15 @@ export function ConversationChat({
         if (res.kind === "empty") {
           // The panel carries the real screen where a project is created; the
           // chat does not grow a second creation path.
-          assistant(labels.projectsNone);
+          //
+          // §7.1: no project does NOT mean no engaged people — the two are
+          // unrelated rows (an engagement has no project at all). This is the
+          // one honest adjacency where the relationships chip belongs, and it
+          // is how an employer reaches the result by clicking rather than by
+          // typing. The greeting's three-starter cap (§D) is untouched.
+          assistant(labels.projectsNone, [
+            { id: "engagements", label: labels.chipEngagements },
+          ]);
           openResultRef.current("project");
           return;
         }
@@ -1027,6 +1112,7 @@ export function ConversationChat({
       });
   }, [
     assistant,
+    labels.chipEngagements,
     labels.projectsNoCompany,
     labels.projectsUnavailable,
     labels.projectsNone,
@@ -1323,8 +1409,14 @@ export function ConversationChat({
               );
             } else {
               // No offers: the contextual next step is a search, not a menu.
+              //
+              // §7.1: no new OFFER does not mean no current WORK — they are
+              // different rows entirely. This is the worker-side adjacency
+              // where the relationships chip belongs, and it is how a worker
+              // reaches the result by clicking rather than by typing.
               assistant(labels.offersEmpty, [
                 { id: "jobs", label: labels.chipJobs },
+                { id: "engagements", label: labels.chipEngagements },
                 { id: "profile", label: labels.chipProfile },
               ]);
             }
@@ -1344,6 +1436,12 @@ export function ConversationChat({
           user(labels.userProjects);
           // W11 — the employer's real projects, then the panel.
           startProjects();
+          break;
+        case "engagements":
+          user(labels.userEngagements);
+          // §7.1 — the real work relationships, then the panel. Both
+          // identities enter here; the SERVER picks the slice.
+          startEngagements();
           break;
         default:
           if (chip.id.startsWith("assign:")) {
@@ -1377,7 +1475,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, runAssignWorker, router],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, router],
   );
   handleChipRef.current = handleChip;
 
@@ -1463,6 +1561,13 @@ export function ConversationChat({
         startPlayerCard();
         return;
       }
+      if (intent === "engagements") {
+        // §7.1 — the real work relationships, in the panel. Saying "end my
+        // engagement" opens the LIST, never a confirmation: the confirmation
+        // belongs to one real row and is minted there.
+        startEngagements();
+        return;
+      }
       if (intent === "experiences") {
         // W6 slice 3D — the real state of the person's experiences, plus one
         // chip per interaction they could actually describe. Never a form.
@@ -1521,7 +1626,7 @@ export function ConversationChat({
         }
       });
     },
-    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, openForm, identity],
+    [user, withTyping, handleChip, assistant, labels, starterChips, startFindWork, startWorkLog, startProfileSummary, startCriteria, startAgenda, startPlayerCard, startMessages, startExperiences, startEngagements, openForm, identity],
   );
 
   const nav = {

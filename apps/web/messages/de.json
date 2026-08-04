@@ -10593,6 +10593,10 @@
         "logWork": {
           "label": "Arbeitszeit erfassen",
           "description": "Halte fest, was und wann du gearbeitet hast — der Eintrag geht in dein Arbeitsjournal."
+        },
+        "reviewEngagements": {
+          "label": "Meine Arbeitsbeziehungen",
+          "description": "Sieh, mit wem du arbeitest, und beende eine Arbeitsbeziehung."
         }
       },
       "company": {
@@ -10635,6 +10639,10 @@
         "whoWaits": {
           "label": "Wer wartet auf mich?",
           "description": "Sieh, was deine Aktion braucht."
+        },
+        "reviewEngagements": {
+          "label": "Arbeitsbeziehungen ansehen",
+          "description": "Sieh, wer für diese Organisation arbeitet, und beende eine Arbeitsbeziehung."
         }
       },
       "agency": {
@@ -10657,6 +10665,12 @@
         "whoWaits": {
           "label": "Wer wartet auf mich?",
           "description": "Sieh, was deine Aktion braucht."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Arbeitsbeziehung beenden",
+          "description": "Eine Arbeitsbeziehung beenden. Endgültig — sie kann nicht wieder geöffnet werden."
         }
       }
     },
@@ -10873,7 +10887,13 @@
       "assignNoWorkers": "In deinem Team ist noch niemand, den du zuweisen könntest.",
       "assignUnavailable": "Dein Team konnte gerade nicht gelesen werden.",
       "assignDone": "Dem Projekt zugewiesen.",
-      "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden."
+      "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
+      "chipEngagements": "Mit wem ich arbeite",
+      "userEngagements": "Mit wem arbeite ich?",
+      "engagementsOpened": "Das sind die erfassten Arbeitsbeziehungen. Im Panel kannst du eine davon beenden.",
+      "engagementsNone": "Es sind keine Arbeitsbeziehungen erfasst.",
+      "engagementsNoCompany": "Du handelst gerade nicht für eine Organisation, daher gibt es keine Liste zu zeigen.",
+      "engagementsUnavailable": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11199,7 +11219,33 @@
       "projectInvalidTransition": "Diese Statusänderung ist nicht möglich.",
       "projectNotAuthorized": "Du kannst den Status dieses Projekts nicht ändern.",
       "projectNeedsMigration": "Statusänderungen an Projekten sind in dieser Umgebung noch nicht verfügbar.",
-      "projectConflict": "Das Projekt hat sich geändert, während du es angesehen hast. Öffne es erneut."
+      "projectConflict": "Das Projekt hat sich geändert, während du es angesehen hast. Öffne es erneut.",
+      "engagements": {
+        "title": "Arbeitsbeziehungen"
+      },
+      "engagementsError": "Die Arbeitsbeziehungen konnten nicht geladen werden.",
+      "engagementsBlocked": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
+      "engagementsNeedsMigration": "Arbeitsbeziehungen sind in dieser Umgebung noch nicht verfügbar.",
+      "engagementsEmptyCompany": "Für diese Organisation sind keine Arbeitsbeziehungen erfasst.",
+      "engagementsEmptyWorker": "Für dich sind keine Arbeitsbeziehungen erfasst.",
+      "engagementsUnavailable": "Diese Arbeitsbeziehung ist für dich nicht verfügbar.",
+      "engagementsConflict": "Die Arbeitsbeziehung hat sich zwischenzeitlich geändert. Neu laden und erneut versuchen.",
+      "engagementsStaleConfirmation": "Diese Bestätigung ist nicht mehr gültig. Öffne die Bestätigung erneut.",
+      "engagementsStatusActive": "Aktiv",
+      "engagementsStatusEnded": "Beendet",
+      "engagementsStarted": "Begonnen",
+      "engagementsEndedOn": "Beendet",
+      "engagementsUnknownParty": "Name nicht verfügbar",
+      "engagementsEndAction": "Arbeitsbeziehung beenden",
+      "engagementsEndTitle": "Diese Arbeitsbeziehung beenden?",
+      "engagementsEndBody": "Das Beenden ist endgültig: Diese Arbeitsbeziehung kann nicht wieder geöffnet werden. Der Eintrag bleibt mit den echten Daten als Historie bestehen — nichts wird gelöscht. Kein Projekt wird abgeschlossen, keine Organisationsmitgliedschaft endet, keine Erfahrung oder Bewertung wird erstellt, und es wird nichts gezahlt oder abgerechnet.",
+      "engagementsEndCta": "Arbeitsbeziehung beenden",
+      "engagementsCancel": "Abbrechen",
+      "engagementsWorking": "Wird beendet…",
+      "engagementsEnded": "Die Arbeitsbeziehung ist beendet.",
+      "engagementsEndedAt": "Die Arbeitsbeziehung ist am {date} beendet.",
+      "engagementsAlreadyEnded": "Diese Arbeitsbeziehung war bereits beendet. Es wurde nichts geändert.",
+      "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert."
     }
   },
   "landing": {

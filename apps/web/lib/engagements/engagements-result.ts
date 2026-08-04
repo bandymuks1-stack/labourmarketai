@@ -1,8 +1,17 @@
+"use server";
+
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  ENGAGEMENTS_RESULT_LIMIT,
+  type EngagementRow,
+  type EngagementsContext,
+  type EngagementsResult,
+  type EngagementStatus,
+} from "@/lib/engagements/engagements-result-contract";
 
 /**
  * §7.1 — the `engagements` result's ONE read path, for BOTH sides.
@@ -32,45 +41,24 @@ import { createClient } from "@/lib/supabase/server";
  * an engagement under a project would be inventing a relationship the data
  * does not have, so this module never joins to, filters by, or mentions a
  * project.
+ *
+ * ─── "use server", AND THE SHAPES LIVE NEXT DOOR ────────────────────────────
+ * This module is reached from the CLIENT renderer, so it is a server-action
+ * module rather than a plain `server-only` one. Such a module may export only
+ * async functions, which is why `ENGAGEMENTS_RESULT_LIMIT` and every type now
+ * live in `engagements-result-contract.ts` — the same split
+ * `project-result-contract.ts` and `employer-workspace-contract.ts` already
+ * use. The contract is pure, so the renderer and the guards can name the same
+ * shapes without dragging supabase into the client bundle.
  */
 
 /** RPC/relation-absent signatures — the owner gate is not yet given. */
 const ABSENT = new Set(["42883", "42P01", "PGRST202", "PGRST205"]);
 
-/** A hard ceiling so the read can never become unbounded. */
-export const ENGAGEMENTS_RESULT_LIMIT = 50;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;
 }
-
-export type EngagementStatus = "active" | "ended";
-
-export interface EngagementRow {
-  readonly engagementId: string;
-  /** Canonical stored status. An unreadable value is dropped, never guessed. */
-  readonly status: EngagementStatus;
-  /** The other party's name, as far as this viewer may truthfully read it. */
-  readonly counterpartyName: string | null;
-  readonly startedAt: string;
-  /** Only ever the STORED value — never derived, never estimated. */
-  readonly endedAt: string | null;
-  /**
-   * Which side the VIEWER is on for this row. Derived server-side from the
-   * row's own relationships, never from the client, and used only to word the
-   * panel — the write re-derives authority regardless.
-   */
-  readonly viewerSide: "company" | "worker";
-}
-
-export type EngagementsResult =
-  | { kind: "engagements"; rows: readonly EngagementRow[] }
-  | { kind: "empty" }
-  /** The owner-gated table is not present in this environment. */
-  | { kind: "needs-migration" }
-  /** Read failed. NEVER rendered as "you have none". */
-  | { kind: "blocked" };
 
 function toStatus(value: unknown): EngagementStatus | null {
   return value === "active" || value === "ended" ? value : null;
@@ -95,7 +83,7 @@ function trimmedOrNull(value: unknown): string | null {
  * the database already refuses.
  */
 export async function loadEngagementsForResult(
-  context: "organization" | "personal",
+  context: EngagementsContext,
 ): Promise<EngagementsResult> {
   try {
     const supabase = await createClient();

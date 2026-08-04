@@ -10593,6 +10593,10 @@
         "logWork": {
           "label": "Log work time",
           "description": "Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "My engagements",
+          "description": "See who you are working with and end an engagement."
         }
       },
       "company": {
@@ -10635,6 +10639,10 @@
         "whoWaits": {
           "label": "Who is waiting for me?",
           "description": "See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Review engagements",
+          "description": "See who works for this organisation and end an engagement."
         }
       },
       "agency": {
@@ -10657,6 +10665,12 @@
         "whoWaits": {
           "label": "Who is waiting for me?",
           "description": "See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "End engagement",
+          "description": "End one work relationship. Final — it cannot be reopened."
         }
       }
     },
@@ -10873,7 +10887,13 @@
       "assignNoWorkers": "There is nobody on your team to assign yet.",
       "assignUnavailable": "I could not read your team right now.",
       "assignDone": "Assigned to the project.",
-      "assignFailed": "The assignment could not be made."
+      "assignFailed": "The assignment could not be made.",
+      "chipEngagements": "Who I work with",
+      "userEngagements": "Who do I work with?",
+      "engagementsOpened": "Here are the work relationships on record. You can end one from the panel.",
+      "engagementsNone": "There are no work relationships on record.",
+      "engagementsNoCompany": "You are not acting for an organisation right now, so there is no roster to show.",
+      "engagementsUnavailable": "The work relationships cannot be read right now. This is not the same as having none."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -11199,7 +11219,33 @@
       "projectInvalidTransition": "This status change cannot be made.",
       "projectNotAuthorized": "You cannot change this project's status.",
       "projectNeedsMigration": "Project status changes are not available in this environment yet.",
-      "projectConflict": "The project changed while you were looking at it. Open it again."
+      "projectConflict": "The project changed while you were looking at it. Open it again.",
+      "engagements": {
+        "title": "Engagements"
+      },
+      "engagementsError": "The engagements could not be loaded.",
+      "engagementsBlocked": "The engagements cannot be read right now. This is not the same as having none.",
+      "engagementsNeedsMigration": "Engagements are not available in this environment yet.",
+      "engagementsEmptyCompany": "This organisation has no work relationships recorded.",
+      "engagementsEmptyWorker": "You have no work relationships recorded.",
+      "engagementsUnavailable": "This engagement is not available to you.",
+      "engagementsConflict": "The engagement changed while you were acting on it. Reload and try again.",
+      "engagementsStaleConfirmation": "That confirmation is no longer valid. Open the confirmation again.",
+      "engagementsStatusActive": "Active",
+      "engagementsStatusEnded": "Ended",
+      "engagementsStarted": "Started",
+      "engagementsEndedOn": "Ended",
+      "engagementsUnknownParty": "Name not available",
+      "engagementsEndAction": "End engagement",
+      "engagementsEndTitle": "End this engagement?",
+      "engagementsEndBody": "Ending is final: this work relationship cannot be reopened. The record stays as history with its real dates — nothing is deleted. No project is completed, no organisation membership ends, no experience or review is created, and nothing is paid or invoiced.",
+      "engagementsEndCta": "End engagement",
+      "engagementsCancel": "Cancel",
+      "engagementsWorking": "Ending…",
+      "engagementsEnded": "The engagement is ended.",
+      "engagementsEndedAt": "The engagement is ended on {date}.",
+      "engagementsAlreadyEnded": "This engagement was already ended. Nothing was changed.",
+      "engagementsAlreadyEndedAt": "This engagement was already ended on {date}. Nothing was changed."
     }
   },
   "landing": {

@@ -34,6 +34,10 @@ const CHAT_KEYS = [
   "projectsNoCompany", "projectsUnavailable",
   "assignPickWorker", "assignNoWorkers", "assignUnavailable",
   "assignDone", "assignFailed",
+  // §7.1 — work relationships. Same rule again: "none recorded", "no company"
+  // and "the read failed" are three different truths and stay three sentences.
+  "chipEngagements", "userEngagements", "engagementsOpened", "engagementsNone",
+  "engagementsNoCompany", "engagementsUnavailable",
 ] as const;
 
 const WORKLOG_KEYS = [
