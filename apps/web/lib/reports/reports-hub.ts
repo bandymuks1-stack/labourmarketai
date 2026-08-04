@@ -47,7 +47,11 @@ import { listMyTasks } from "@/lib/tasks/tasks";
 
 const PROJECT_READ_LIMIT = 100;
 /** The applied projects model's status set (the assist/planning precedent). */
-export const REPORT_PROJECT_STATUSES = ["draft", "live", "paused"] as const;
+// W11: `completed` joins the set. Before the lifecycle existed no project
+// could leave `draft`, so omitting a terminal status cost nothing. Now that a
+// project can really finish, leaving it out would make the hub UNDERCOUNT the
+// company's work — the report would quietly stop matching reality.
+export const REPORT_PROJECT_STATUSES = ["draft", "live", "paused", "completed"] as const;
 export type ReportProjectStatus = (typeof REPORT_PROJECT_STATUSES)[number];
 
 /** customer_requests statuses that still need attention/action. */
@@ -204,6 +208,7 @@ async function readProjectCounts(): Promise<OrgReportsView["projects"]> {
       draft: 0,
       live: 0,
       paused: 0,
+      completed: 0,
     };
     let total = 0;
     for (const row of (res.data ?? []) as { status: string }[]) {

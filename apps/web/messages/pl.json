@@ -3354,7 +3354,18 @@
       "candidatesOpened": "[EN] Here are your needs and the people behind them.",
       "candidatesNoDemands": "[EN] Your company has not described a need yet, so there is nobody to match.",
       "candidatesNoCompany": "[EN] You are in your personal space right now, so there are no company needs here. Switch space to work as your company.",
-      "candidatesUnavailable": "[EN] I could not read your company's needs right now."
+      "candidatesUnavailable": "[EN] I could not read your company's needs right now.",
+      "chipProjects": "[EN] Projects",
+      "userProjects": "[EN] Show me my projects",
+      "projectsOpened": "[EN] Here is your running work.",
+      "projectsNone": "[EN] There is no project yet.",
+      "projectsNoCompany": "[EN] You are in your personal space right now, so there are no company projects here. Switch space to work as your company.",
+      "projectsUnavailable": "[EN] I could not read your projects right now.",
+      "assignPickWorker": "[EN] Who should work on it?",
+      "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
+      "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignDone": "[EN] Assigned to the project.",
+      "assignFailed": "[EN] The assignment could not be made."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

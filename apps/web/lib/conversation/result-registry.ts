@@ -244,19 +244,22 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     openedBy: ["company.assign-worker", "company.who-waits"],
     advancedRoute: "/dashboard/projects",
     contexts: ["organization", "project"],
-    // W11 audit P0-4: this said `real` while `InlineResult` has no `case
-    // "project"`. `real` + meaningful context makes `canRenderInline` true, so
-    // `ResultBody` took the inline branch and SKIPPED the fallback that the
-    // module's own doc-comment calls "the NO REGRESSION guarantee". The person
-    // got one sentence — "Preparing this result." — and no button to
-    // `/dashboard/projects`. A readiness flag that suppresses the way forward
-    // is worse than no result at all.
+    // W11 — PROMOTED unverified → real, in the SAME change that adds
+    // `case "project"` to `InlineResult`, exactly as the note below required
+    // ("Flip this back to `real` in the same PR that adds `case "project"` —
+    // never before it").
     //
-    // `unverified` is the honest state: the project domain is real and
-    // reachable, but it has no inline renderer, so the panel says so plainly
-    // and hands over the working full screen. Flip this back to `real` in the
-    // same PR that adds `case "project"` — never before it.
-    dataReadiness: "unverified",
+    // VERIFIED: `lib/projects/project-workspace.ts` is a thin adapter over the
+    // canonical project domain — the RLS-scoped `projects` read
+    // (`projects_select`: owner / admin / assigned worker), the existing
+    // `listProjectAssignments` and `listProjectStages`, and the existing
+    // `can_manage_project` authority. No second reader, no derived progress
+    // figure (the stage migration refuses a progress column and the contract
+    // has no field that could carry one), and the three ways data can be
+    // absent — no company context, no projects, stage source unapplied — are
+    // DISTINCT rendered states, so an absent source is never shown as an empty
+    // project.
+    dataReadiness: "real",
   },
   {
     kind: "evidence",

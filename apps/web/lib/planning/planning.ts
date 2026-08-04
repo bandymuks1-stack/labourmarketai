@@ -106,8 +106,22 @@ function asAny(c: SupabaseClient): any {
 /** Booking statuses that belong on a forward plan. */
 const PLANNED_BOOKING_STATUSES = new Set(["proposed", "accepted"]);
 
-/** Project lifecycle states with a live date band. Closed projects are
- *  history — they stay on the projects surface. */
+/**
+ * Project lifecycle states with a forward date band.
+ *
+ * W11 pins the semantics rather than changing the behaviour: the TERMINAL
+ * status is excluded, so a finished project can never produce a FUTURE
+ * conflict — it stays history on the projects surface. `paused` remains
+ * readable (the person still sees the project) but W11's shared model is the
+ * authority on whether it counts as ACTIVE work: `isActivePlanningStatus` is
+ * true for `live` only, because a paused project is precisely the case where
+ * nobody's time is claimed, and flagging it as a clash would invent a problem
+ * no record proves.
+ *
+ * The list previously named `closed`, a value nothing ever wrote; the
+ * canonical terminal status is now `completed` (owner decision D1). W12's
+ * booking-overlap invariant is untouched by any of this.
+ */
 const PLANNED_PROJECT_STATUSES = ["draft", "live", "paused"] as const;
 
 async function readBookingItems(): Promise<{

@@ -9,6 +9,7 @@ import { ExperiencesResult } from "@/components/app/workspace/experiences-result
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
 import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
+import { ProjectResult } from "@/components/app/workspace/project-result";
 import type { GeographySelection } from "@/lib/market-map/geography-selection";
 
 import {
@@ -57,6 +58,13 @@ export interface ResultNavigation {
   readonly onSelectDemand: (requestId: string) => void;
   /** Step back up to the demand list. Replaces. */
   readonly onBackToDemands: () => void;
+  /**
+   * W11 — hand an assignment back to the CONVERSATION, which owns the one flow
+   * that dispatches `company.assign-worker`. The panel asks; it never acts.
+   * Same rule as every panel chip: one dispatcher, one set of flows, whichever
+   * part of the workspace was touched.
+   */
+  readonly onAssignWorker: (projectId: string) => void;
 }
 
 /**
@@ -220,6 +228,21 @@ function InlineResult({
           onSelectDemand={navigation.onSelectDemand}
           onBack={navigation.onBackToDemands}
           onOpenFull={onOpenFull}
+        />
+      );
+    case "project":
+      // W11 — the project result finally HAS a renderer, which is why the
+      // registry entry moved back to `real` in this same change. It reuses the
+      // market result's existing `?project=` depth rather than inventing a
+      // fourth param: it is the same fact (which project) in the same URL slot.
+      return (
+        <ProjectResult
+          projectId={navigation.projectId}
+          locale={locale}
+          onSelectProject={navigation.onSelectProject}
+          onBack={navigation.onBackToProjects}
+          onOpenFull={onOpenFull}
+          onAssignWorker={navigation.onAssignWorker}
         />
       );
     // The remaining kinds follow, one verified data path at a time.

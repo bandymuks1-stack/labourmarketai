@@ -526,7 +526,8 @@
         "status": {
           "draft": "Concept",
           "live": "Lopend",
-          "paused": "Gepauzeerd"
+          "paused": "Gepauzeerd",
+          "completed": "Afgerond"
         },
         "total": "Totaal",
         "empty": "Nog geen projecten — cijfers verschijnen zodra je bedrijf projectregels heeft.",
@@ -10861,7 +10862,18 @@
       "candidatesOpened": "Hier zijn je behoeften en de mensen daarachter.",
       "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven, dus er valt niets te matchen.",
       "candidatesNoCompany": "Je bent nu in je persoonlijke ruimte, dus hier zijn geen bedrijfsbehoeften. Wissel van ruimte om als je bedrijf te werken.",
-      "candidatesUnavailable": "Ik kon de behoeften van je bedrijf nu niet lezen."
+      "candidatesUnavailable": "Ik kon de behoeften van je bedrijf nu niet lezen.",
+      "chipProjects": "Projecten",
+      "userProjects": "Laat mijn projecten zien",
+      "projectsOpened": "Hier is je lopende werk.",
+      "projectsNone": "Er is nog geen project.",
+      "projectsNoCompany": "Je bent nu in je persoonlijke ruimte, dus hier zijn geen bedrijfsprojecten. Wissel van ruimte om als je bedrijf te werken.",
+      "projectsUnavailable": "Ik kon je projecten nu niet lezen.",
+      "assignPickWorker": "Wie moet eraan werken?",
+      "assignNoWorkers": "Er is nog niemand in je team om toe te wijzen.",
+      "assignUnavailable": "Ik kon je team nu niet lezen.",
+      "assignDone": "Toegewezen aan het project.",
+      "assignFailed": "De toewijzing kon niet worden gemaakt."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -11149,7 +11161,45 @@
       "actionNotAuthorized": "Dit kun je hier niet doen.",
       "bookingStart": "Start",
       "bookingEnd": "Verwacht einde",
-      "bookingNote": "Notitie"
+      "bookingNote": "Notitie",
+      "projectError": "We konden het project niet lezen.",
+      "projectNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsprojecten.",
+      "projectBlocked": "Dit is in deze omgeving nu niet beschikbaar.",
+      "projectEmpty": "Er is nog geen project.",
+      "projectPick": "Welk project?",
+      "projectBackToList": "Terug naar projecten",
+      "projectNotFound": "Dat project is niet gevonden, of je kunt het niet zien.",
+      "projectStatus": {
+        "draft": "Concept",
+        "live": "Loopt",
+        "paused": "Gepauzeerd",
+        "completed": "Afgerond"
+      },
+      "projectStatusUnknown": "Status onbekend",
+      "projectAssigned": "Toegewezen mensen",
+      "projectAssignedCount": "Toegewezen",
+      "projectStages": "Fasen",
+      "projectStagesEmpty": "Voor dit project zijn nog geen fasen ingevoerd.",
+      "projectStagesUnavailable": "Fasen kunnen in deze omgeving niet gelezen worden, dus tonen we geen lege lijst alsof er geen zijn.",
+      "projectAssignWorker": "Een medewerker toewijzen",
+      "projectCompletedNoAssign": "Het project is afgerond, dus er kan niemand nieuw aan worden toegewezen.",
+      "projectTerminal": "Een afgerond project kan niet meer worden gewijzigd. Het blijft als historie bestaan.",
+      "projectActionPublish": "Project publiceren",
+      "projectActionPause": "Project pauzeren",
+      "projectActionResume": "Project hervatten",
+      "projectActionCompleted": "Project afronden",
+      "projectCompleteTitle": "Dit project afronden?",
+      "projectCompleteBody": "Afronden is definitief: het project kan niet heropend worden. Het blijft als historie met zijn fasen en records. Actieve werktoewijzingen op dit project worden als beëindigd gemarkeerd. Er wordt geen beoordeling aangemaakt.",
+      "projectCompleteCta": "Project afronden",
+      "projectCancel": "Annuleren",
+      "projectWorking": "Bezig…",
+      "projectTransitioned": "De projectstatus is gewijzigd.",
+      "projectCompletedEnded": "Het project is afgerond. Als beëindigd gemarkeerde werkperiodes: {count}.",
+      "projectAlreadyInState": "Het project heeft die status al. Er is niets gewijzigd.",
+      "projectInvalidTransition": "Deze statuswijziging kan niet worden uitgevoerd.",
+      "projectNotAuthorized": "Je kunt de status van dit project niet wijzigen.",
+      "projectNeedsMigration": "Statuswijzigingen van projecten zijn in deze omgeving nog niet beschikbaar.",
+      "projectConflict": "Het project is gewijzigd terwijl je ernaar keek. Open het opnieuw."
     }
   },
   "landing": {

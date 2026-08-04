@@ -55,12 +55,13 @@ const adapter = read(ADAPTER);
  * shipping a control nobody can press.
  */
 const KNOWN_GAPS: Readonly<Record<string, string>> = {
-  // The project domain's result (`project`) is declared `unverified` by W11's
-  // own audit and has no inline renderer, so there is nowhere in the panel for
-  // an assignment to happen. Its existing screen (/dashboard/projects) stays
-  // the honest destination and is reachable through the result fallback.
-  "company.assign-worker":
-    "the project result has no inline renderer (W11 audit P0-4) — assignment stays on /dashboard/projects",
+  // `company.assign-worker` USED TO BE HERE, with the reason "the project
+  // result has no inline renderer (W11 audit P0-4)". W11 built that renderer
+  // and wired the action through the chat, so the gap is closed and the entry
+  // is gone — which means the reachability assertion below now covers it, and
+  // removing the caller would fail this guard. That is the list working as
+  // designed: a gap is temporary and has to be argued for while it lasts.
+  //
   // The AGENCY journey, not the employer one. W8's scope is the company side;
   // these two belong to the agency bridge and its own surfaces.
   "agency.invite-client": "agency journey — out of W8 scope",
@@ -297,7 +298,11 @@ describe("5. the existing scouting screen is never taken away", () => {
     // A new entry may not change anybody else's readiness or route.
     const byKind = new Map(CONVERSATION_RESULTS.map((r) => [r.kind, r]));
     expect(byKind.get("opportunities")?.dataReadiness).toBe("real");
-    expect(byKind.get("project")?.dataReadiness).toBe("unverified");
+    // `project` was `unverified` when W8 landed — it had no inline renderer,
+    // which is exactly why W8 recorded `company.assign-worker` as a KNOWN GAP.
+    // W11 built the renderer and promoted the entry in the same change, so the
+    // assertion moves with it. The ROUTE is the invariant that matters here:
+    // the fallback W8 relied on must still be a real screen.
     expect(byKind.get("project")?.advancedRoute).toBe("/dashboard/projects");
     expect(CONVERSATION_ACTIONS.length).toBeGreaterThan(0);
   });

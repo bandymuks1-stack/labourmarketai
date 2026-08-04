@@ -29,6 +29,14 @@ import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat } from "@/lib/conversation/messages-chat";
 import { loadEmployerDemandsForChat } from "@/lib/conversation/employer-workspace";
+import {
+  loadAssignableWorkersForProject,
+  loadProjectsForResult,
+} from "@/lib/projects/project-workspace";
+import {
+  dispatchWorkerAction,
+  prepareConfirmationAction,
+} from "@/lib/conversation/dispatch";
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { loadCriteriaSummaryForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
@@ -157,6 +165,30 @@ export type ChatLabels = {
   /** The read failed or the source is not available here. NEVER rendered as
    *  "you have no needs" — that would be a claim about the company's work. */
   candidatesUnavailable: string;
+
+  // ── W11 — projects in the conversation ────────────────────────────────────
+  /** The employer starter chip for their running work. */
+  chipProjects: string;
+  /** The employer's own turn when they ask about projects. */
+  userProjects: string;
+  /** The chat EXPLAINS, the panel SHOWS — one line above the project chips. */
+  projectsOpened: string;
+  /** No project yet. Said plainly; the panel offers the real screen. */
+  projectsNone: string;
+  /** Not acting for a company right now — a different fact from "no projects". */
+  projectsNoCompany: string;
+  /** The read failed. NEVER rendered as "you have no projects". */
+  projectsUnavailable: string;
+  /** Ask which person to put on the project. Followed by one chip per worker. */
+  assignPickWorker: string;
+  /** Nobody on the roster can be assigned — stated, with no fake control. */
+  assignNoWorkers: string;
+  /** The roster could not be read, or its source is not available here. */
+  assignUnavailable: string;
+  /** The assignment landed. Followed by the real project result. */
+  assignDone: string;
+  /** The assignment was refused by the server. The reason is the server's. */
+  assignFailed: string;
 };
 
 
@@ -226,7 +258,11 @@ export function ConversationChat({
             // chat-first product must not do. The full screen is still there,
             // one action away from every state of the result.
             { id: "candidates", label: labels.chipCandidates },
-            { id: "agenda", label: labels.chipAgenda },
+            // W11: the employer's third meaningful start is their running
+            // work. The agenda stays reachable by typing — the owner cap is
+            // THREE starters, so a fourth chip is not an option and projects
+            // is the more employer-shaped of the two.
+            { id: "projects", label: labels.chipProjects },
           ]
         : [
             // OWNER RULING 2026-07-29 (§D): the six-chip wall is gone. The
@@ -535,6 +571,9 @@ export function ConversationChat({
   /** W8 — same pattern for the employer handoff: one writer that sets result +
    *  demand in a single push, so the panel never opens at the wrong depth. */
   const selectDemandRef = useRef<(requestId: string) => void>(() => {});
+  /** W11 — the project handoff: one writer that sets result + project in a
+   *  single push, for the same reason. */
+  const selectProjectRef = useRef<(projectId: string) => void>(() => {});
 
   /** The REAL search request (employer/opportunity read) — its own typing
    *  lifecycle (async). Reached only once the criteria dialog is satisfied. */
@@ -912,6 +951,152 @@ export function ConversationChat({
   ]);
 
   /**
+   * PROJECTS IN THE CONVERSATION (W11).
+   *
+   * The same split every result follows — the chat EXPLAINS, the panel SHOWS
+   * AND ACTS. One project opens directly; several offer one chip each; the
+   * three ways there can be nothing to show stay three different sentences.
+   */
+  const startProjects = useCallback(() => {
+    setTyping(true);
+    loadProjectsForResult()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "no-company-context") {
+          assistant(labels.projectsNoCompany);
+          return;
+        }
+        if (res.kind === "blocked") {
+          assistant(labels.projectsUnavailable);
+          return;
+        }
+        if (res.kind === "empty") {
+          // The panel carries the real screen where a project is created; the
+          // chat does not grow a second creation path.
+          assistant(labels.projectsNone);
+          openResultRef.current("project");
+          return;
+        }
+        if (res.projects.length === 1) {
+          assistant(labels.projectsOpened);
+          selectProjectRef.current(res.projects[0].projectId);
+          return;
+        }
+        assistant(
+          labels.projectsOpened,
+          res.projects.slice(0, 3).map((p) => ({
+            id: `project:${p.projectId}`,
+            label: p.title,
+          })),
+        );
+        openResultRef.current("project");
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(labels.projectsUnavailable);
+      });
+  }, [
+    assistant,
+    labels.projectsNoCompany,
+    labels.projectsUnavailable,
+    labels.projectsNone,
+    labels.projectsOpened,
+  ]);
+
+  /**
+   * ASSIGNING SOMEONE TO A PROJECT (W11) — the activation of
+   * `company.assign-worker`, the last employer executor that had no client
+   * caller.
+   *
+   * The panel asks; this flow answers. It offers ONE CHIP PER REAL PERSON the
+   * server would actually accept — `loadAssignableWorkersForProject` reads the
+   * same population the RPC's second gate (`caller_manages_worker`) allows — so
+   * there is never a control that looks like it works and is then refused.
+   *
+   * The chip carries `projectId:workerProfileId` and NOTHING else. It is a
+   * request, not a permission: the dispatcher re-checks the role, the schema
+   * and a fresh confirmation token, and the RPC re-checks BOTH gates plus the
+   * completed-project rule before a row moves.
+   */
+  const startAssignWorker = useCallback(
+    (projectId: string) => {
+      setTyping(true);
+      loadAssignableWorkersForProject()
+        .then((res) => {
+          setTyping(false);
+          if (res.kind === "workers") {
+            assistant(
+              labels.assignPickWorker,
+              res.workers.slice(0, 4).map((w) => ({
+                id: `assign:${projectId}:${w.profileId}`,
+                label: w.name,
+              })),
+            );
+            return;
+          }
+          // "Nobody is assignable", "you are not acting for a company" and
+          // "the roster could not be read" stay three different answers.
+          assistant(
+            res.kind === "empty"
+              ? labels.assignNoWorkers
+              : res.kind === "no-company-context"
+                ? labels.projectsNoCompany
+                : labels.assignUnavailable,
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.assignUnavailable);
+        });
+    },
+    [
+      assistant,
+      labels.assignPickWorker,
+      labels.assignNoWorkers,
+      labels.assignUnavailable,
+      labels.projectsNoCompany,
+    ],
+  );
+
+  /**
+   * The assignment itself. `company.assign-worker` is a STRONG-tier action
+   * (it binds a person to a project), so a fresh one-time confirmation token is
+   * minted immediately before dispatch and the dispatcher refuses the write
+   * without it. The outcome shown is the SERVER's — a refusal is never dressed
+   * up as a success, and the panel is re-opened on the project so the person
+   * sees the roster that actually resulted.
+   */
+  const runAssignWorker = useCallback(
+    (projectId: string, workerProfileId: string) => {
+      setTyping(true);
+      const input = { projectId, workerProfileId };
+      prepareConfirmationAction("company.assign-worker", input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.assignFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.assign-worker", input, {
+            locale,
+            confirmationToken: prep.token,
+          }).then((res) => {
+            setTyping(false);
+            assistant(res.ok ? labels.assignDone : labels.assignFailed);
+            // Re-open the project either way: after a success it shows the new
+            // roster, and after a refusal it shows the state that refused.
+            selectProjectRef.current(projectId);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.assignFailed);
+        });
+    },
+    [assistant, locale, labels.assignDone, labels.assignFailed],
+  );
+
+  /**
    * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
    * inbox (same RLS-scoped reads the messages page uses), shows only the
    * threads that genuinely await this person, and offers a reply that is
@@ -1125,8 +1310,21 @@ export function ConversationChat({
           // W8 — the employer's real demands, then the panel. Never a route.
           startEmployerCandidates();
           break;
+        case "projects":
+          user(labels.userProjects);
+          // W11 — the employer's real projects, then the panel.
+          startProjects();
+          break;
         default:
-          if (chip.id.startsWith("demand:")) {
+          if (chip.id.startsWith("assign:")) {
+            // W11 — `assign:<projectId>:<workerProfileId>`. Both ids are
+            // real rows the server re-verifies; the chip grants nothing.
+            const [pid, wid] = chip.id.slice(7).split(":");
+            if (pid && wid) runAssignWorker(pid, wid);
+          } else if (chip.id.startsWith("project:")) {
+            // W11 — the project-bound handoff, same shape as `demand:`.
+            selectProjectRef.current(chip.id.slice(8));
+          } else if (chip.id.startsWith("demand:")) {
             // W8 — the demand-bound handoff. The chip carries an id and
             // NOTHING else; it opens the candidates result at that demand's
             // depth, where the SERVER re-derives the company context and
@@ -1149,7 +1347,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, router],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, locale, starterChips, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, runAssignWorker, router],
   );
   handleChipRef.current = handleChip;
 
@@ -1346,6 +1544,7 @@ export function ConversationChat({
     selectProject,
     selectInteraction,
     selectDemand,
+    openProjectResult,
     clearGeography,
     clearProject,
     clearInteraction,
@@ -1356,6 +1555,7 @@ export function ConversationChat({
   openResultRef.current = openResult;
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
+  selectProjectRef.current = openProjectResult;
   const resultContext: ResultContext = auth0?.activeOrgName
     ? "organization"
     : "personal";
@@ -1395,6 +1595,8 @@ export function ConversationChat({
       onBackToExperiences: clearInteraction,
       onSelectDemand: selectDemand,
       onBackToDemands: clearDemand,
+      // W11 — the panel asks the CONVERSATION to assign; it never acts itself.
+      onAssignWorker: startAssignWorker,
     }),
     [
       geography,
@@ -1410,6 +1612,7 @@ export function ConversationChat({
       clearProject,
       clearInteraction,
       clearDemand,
+      startAssignWorker,
     ],
   );
 

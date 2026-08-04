@@ -1,0 +1,662 @@
+"use client";
+
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+
+import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
+import {
+  loadProjectDetailForResult,
+  loadProjectsForResult,
+  setProjectStatusAction,
+} from "@/lib/projects/project-workspace";
+import {
+  acceptsAssignment,
+  nextStatuses,
+  type ProjectStatus,
+} from "@/lib/projects/project-lifecycle-model";
+import type {
+  ProjectDetail,
+  ProjectDetailResult,
+  ProjectListResult,
+} from "@/lib/projects/project-result-contract";
+
+/**
+ * THE PROJECT RESULT — the third defect the W11 audit named, closed.
+ *
+ * ─── WHAT WAS WRONG ─────────────────────────────────────────────────────────
+ * The `project` entry declared `dataReadiness: "real"` while `InlineResult` had
+ * no `case "project"`. `canRenderInline` therefore returned true, `ResultBody`
+ * took the inline branch and SKIPPED the fallback its own doc-comment calls
+ * "the NO REGRESSION guarantee" — so the person got one sentence, "Preparing
+ * this result.", and no way to `/dashboard/projects`. The W11 audit filed that
+ * as P0-4; a later slice downgraded the entry to `unverified` to restore the
+ * fallback, which was the honest stopgap. This is the renderer that entry was
+ * always waiting for, and readiness returns to `real` in the SAME change.
+ *
+ * ─── ONLY REAL DATA ─────────────────────────────────────────────────────────
+ * Everything here is a stored row: the canonical status, the assignment roster,
+ * the stage rows, the real dates. There is NO progress bar, no completion
+ * percentage, no estimated finish and no worker score — the project domain
+ * stores none of those (the stage migration explicitly refuses a progress
+ * column), and the contract this renders has no field that could carry one.
+ *
+ * Two absences are stated rather than smoothed over: a project whose status is
+ * unreadable renders as unknown (never silently as draft), and stages that
+ * cannot be read here (owner-gated migration) say so instead of showing a
+ * confident empty list.
+ *
+ * ─── NO ROUTING ─────────────────────────────────────────────────────────────
+ * Like every result body, the full screen is reached through `onOpenFull`. No
+ * `<Link>`, no router. Depth lives in the URL as `?result=project&project=…`,
+ * reusing the SAME param the market result already carries.
+ */
+
+const FULL_ROUTE = "/dashboard/projects";
+
+type ListPhase =
+  | { readonly kind: "loading" }
+  | { readonly kind: "error" }
+  | { readonly kind: "loaded"; readonly view: ProjectListResult };
+
+type DetailPhase =
+  | { readonly kind: "loading" }
+  | { readonly kind: "error" }
+  | { readonly kind: "loaded"; readonly view: ProjectDetailResult };
+
+export function ProjectResult({
+  projectId,
+  locale,
+  onSelectProject,
+  onBack,
+  onOpenFull,
+  onAssignWorker,
+}: {
+  /** Which project the panel is showing, or null for the project list. */
+  projectId: string | null;
+  locale: string;
+  onSelectProject: (projectId: string) => void;
+  onBack: () => void;
+  onOpenFull: (route: string) => void;
+  /**
+   * Hand the assignment back to the conversation, which owns the ONE flow that
+   * dispatches `company.assign-worker`. The panel never grows an action of its
+   * own — the same rule the Context Panel follows for every chip.
+   */
+  onAssignWorker: (projectId: string) => void;
+}) {
+  return projectId === null ? (
+    <ProjectPicker onSelectProject={onSelectProject} onOpenFull={onOpenFull} />
+  ) : (
+    <ProjectDetailView
+      projectId={projectId}
+      locale={locale}
+      onBack={onBack}
+      onOpenFull={onOpenFull}
+      onAssignWorker={onAssignWorker}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Depth 0 — which project?
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ProjectPicker({
+  onSelectProject,
+  onOpenFull,
+}: {
+  onSelectProject: (projectId: string) => void;
+  onOpenFull: (route: string) => void;
+}) {
+  const t = useTranslations("conversation.results");
+  const [phase, setPhase] = useState<ListPhase>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPhase({ kind: "loading" });
+    loadProjectsForResult()
+      .then((view) => {
+        if (!cancelled) setPhase({ kind: "loaded", view });
+      })
+      .catch(() => {
+        if (!cancelled) setPhase({ kind: "error" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+
+  if (phase.kind === "loading") return <Pending testId="project-loading" />;
+  if (phase.kind === "error") {
+    return (
+      <Failed
+        testId="project-error"
+        text={t("projectError")}
+        retryLabel={t("retry")}
+        onRetry={() => setAttempt((n) => n + 1)}
+      />
+    );
+  }
+
+  const { view } = phase;
+  if (view.kind === "no-company-context") {
+    return (
+      <Explained
+        testId="project-no-company"
+        text={t("projectNoCompany")}
+        openLabel={t("openFull")}
+        onOpenFull={() => onOpenFull(FULL_ROUTE)}
+      />
+    );
+  }
+  if (view.kind === "blocked") {
+    return (
+      <Explained
+        testId="project-blocked"
+        text={t("projectBlocked")}
+        openLabel={t("openFull")}
+        onOpenFull={() => onOpenFull(FULL_ROUTE)}
+      />
+    );
+  }
+  if (view.kind === "empty") {
+    return (
+      <Explained
+        testId="project-empty"
+        text={t("projectEmpty")}
+        openLabel={t("openFull")}
+        onOpenFull={() => onOpenFull(FULL_ROUTE)}
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3" data-testid="project-picker">
+      <p className="text-basis text-text-secondary">{t("projectPick")}</p>
+      <ul className="flex flex-col divide-y divide-border/40">
+        {view.projects.map((p) => (
+          <li key={p.projectId}>
+            <button
+              type="button"
+              onClick={() => onSelectProject(p.projectId)}
+              data-testid={`project-row-${p.projectId}`}
+              className="flex min-h-11 w-full flex-col items-start gap-0.5 py-2 text-left hover:bg-ink-800/40"
+            >
+              <span className="text-basis font-semibold text-text-primary">{p.title}</span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <StatusWord status={p.status} />
+                {p.city ? ` · ${p.city}` : ""}
+                {p.orgName ? ` · ${p.orgName}` : ""}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Depth 1 — one project, its people, its stages, its lifecycle
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ProjectDetailView({
+  projectId,
+  locale,
+  onBack,
+  onOpenFull,
+  onAssignWorker,
+}: {
+  projectId: string;
+  locale: string;
+  onBack: () => void;
+  onOpenFull: (route: string) => void;
+  onAssignWorker: (projectId: string) => void;
+}) {
+  const t = useTranslations("conversation.results");
+  const [phase, setPhase] = useState<DetailPhase>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPhase({ kind: "loading" });
+    loadProjectDetailForResult(projectId)
+      .then((view) => {
+        if (!cancelled) setPhase({ kind: "loaded", view });
+      })
+      .catch(() => {
+        if (!cancelled) setPhase({ kind: "error" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, attempt]);
+
+  const back = (
+    <button
+      type="button"
+      onClick={onBack}
+      data-testid="project-back"
+      className="self-start text-support font-semibold text-brand-blue hover:underline"
+    >
+      {t("projectBackToList")}
+    </button>
+  );
+
+  if (phase.kind === "loading") {
+    return (
+      <div className="flex flex-col gap-3">
+        {back}
+        <Pending testId="project-loading" />
+      </div>
+    );
+  }
+  if (phase.kind === "error") {
+    return (
+      <div className="flex flex-col gap-3">
+        {back}
+        <Failed
+          testId="project-error"
+          text={t("projectError")}
+          retryLabel={t("retry")}
+          onRetry={reload}
+        />
+      </div>
+    );
+  }
+
+  const { view } = phase;
+  if (view.kind !== "project") {
+    const text =
+      view.kind === "not-found"
+        ? t("projectNotFound")
+        : view.kind === "no-company-context"
+          ? t("projectNoCompany")
+          : t("projectBlocked");
+    return (
+      <div className="flex flex-col gap-3">
+        {back}
+        <Explained
+          testId={`project-${view.kind}`}
+          text={text}
+          openLabel={t("openFull")}
+          onOpenFull={() => onOpenFull(FULL_ROUTE)}
+        />
+      </div>
+    );
+  }
+
+  const p = view.project;
+
+  return (
+    <div className="flex flex-col gap-3" data-testid="project-detail">
+      {back}
+
+      <div className="flex flex-col gap-0.5">
+        <span className="font-display text-card-title font-semibold text-text-primary">
+          {p.title}
+        </span>
+        <span
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
+          data-testid="project-status"
+          data-status={p.status ?? "unknown"}
+        >
+          <StatusWord status={p.status} />
+          {p.orgName ? ` · ${p.orgName}` : ""}
+        </span>
+      </div>
+
+      <dl className="flex flex-col gap-1 text-support">
+        {(p.city || p.country) && (
+          <Row
+            label={t("fieldPlace")}
+            value={[p.city, p.country].filter(Boolean).join(", ")}
+          />
+        )}
+        {/* Dates render ONLY when the row really carries them. The project row
+            still has no write path for start/end (a documented gap), so their
+            absence is the common case and is simply not shown — never a
+            placeholder date and never an estimate. */}
+        {p.startDate && <Row label={t("fieldStart")} value={p.startDate} />}
+        {p.endDate && <Row label={t("fieldEnd")} value={p.endDate} />}
+        <Row label={t("projectAssignedCount")} value={String(p.assignmentTotal)} />
+      </dl>
+
+      <LifecycleControls project={p} locale={locale} onDone={reload} />
+
+      {p.assignments.length > 0 && (
+        <div className="flex flex-col gap-1" data-testid="project-assignments">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("projectAssigned")}
+          </p>
+          <ul className="flex flex-col divide-y divide-border/40">
+            {p.assignments.map((a) => (
+              <li
+                key={a.workerProfileId}
+                className="flex items-center justify-between gap-2 py-1.5 text-support"
+              >
+                <span className="text-text-primary">{a.name}</span>
+                <span className="font-mono text-meta text-text-muted">
+                  {a.assignedAt.slice(0, 10)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <Stages stages={p.stages} />
+
+      {/* ASSIGNMENT. Offered only where the canonical rule allows it, and only
+          to someone the server says may manage the project. A completed
+          project shows the reason instead of a control that would be refused. */}
+      {p.canManage &&
+        (acceptsAssignment(p.status) ? (
+          <ChatActionRow>
+            <ChatAction
+              tone="secondary"
+              testId="project-assign-worker"
+              onClick={() => onAssignWorker(p.projectId)}
+            >
+              {t("projectAssignWorker")}
+            </ChatAction>
+          </ChatActionRow>
+        ) : (
+          <p className="text-meta text-text-muted" data-testid="project-no-assign">
+            {t("projectCompletedNoAssign")}
+          </p>
+        ))}
+
+      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+    </div>
+  );
+}
+
+/**
+ * The lifecycle controls.
+ *
+ * The buttons are DERIVED from the shared matrix (`nextStatuses`), not written
+ * out per state — so a control can never be offered for a transition the server
+ * would reject, and `completed` shows nothing because nothing leads out of it.
+ * Completing asks for an explicit confirmation that states, in plain words,
+ * what becomes true.
+ */
+function LifecycleControls({
+  project,
+  locale,
+  onDone,
+}: {
+  project: ProjectDetail;
+  locale: string;
+  onDone: () => void;
+}) {
+  const t = useTranslations("conversation.results");
+  const [pending, start] = useTransition();
+  const [confirming, setConfirming] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  const targets = nextStatuses(project.status);
+  if (!project.canManage || targets.length === 0) {
+    if (project.status === "completed") {
+      return (
+        <p className="text-meta text-text-muted" data-testid="project-terminal">
+          {t("projectTerminal")}
+        </p>
+      );
+    }
+    return null;
+  }
+
+  const run = (to: ProjectStatus) => {
+    setMessage(null);
+    setError(false);
+    start(async () => {
+      const res = await setProjectStatusAction(locale, project.projectId, to);
+      setConfirming(false);
+      if (res.kind === "transitioned") {
+        // The REAL count from the server — the panel never estimates it.
+        setMessage(
+          res.assignmentsEnded > 0
+            ? t("projectCompletedEnded", { count: res.assignmentsEnded })
+            : t("projectTransitioned"),
+        );
+        onDone();
+        return;
+      }
+      setError(true);
+      setMessage(
+        res.kind === "already_in_state"
+          ? t("projectAlreadyInState")
+          : res.kind === "invalid_transition"
+            ? t("projectInvalidTransition")
+            : res.kind === "not_authorized"
+              ? t("projectNotAuthorized")
+              : res.kind === "not_found"
+                ? t("projectNotFound")
+                : res.kind === "needs_migration"
+                  ? t("projectNeedsMigration")
+                  : res.kind === "conflict"
+                    ? t("projectConflict")
+                    : t("projectError"),
+      );
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-2" data-testid="project-lifecycle">
+      {confirming ? (
+        <div
+          className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3"
+          data-testid="project-complete-confirm"
+        >
+          {/* Exactly what becomes true — including the one thing this slice
+              does NOT do, so nobody expects an experience record to appear. */}
+          <p className="text-support font-semibold text-text-primary">
+            {t("projectCompleteTitle")}
+          </p>
+          <p className="text-meta leading-relaxed text-text-secondary">
+            {t("projectCompleteBody")}
+          </p>
+          <ChatActionRow>
+            <ChatAction
+              tone="primary"
+              loading={pending}
+              testId="project-complete-confirm-cta"
+              onClick={() => run("completed")}
+            >
+              {pending ? t("projectWorking") : t("projectCompleteCta")}
+            </ChatAction>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => setConfirming(false)}
+            >
+              {t("projectCancel")}
+            </ChatAction>
+          </ChatActionRow>
+        </div>
+      ) : (
+        <ChatActionRow>
+          {targets.map((to) =>
+            to === "completed" ? (
+              <ChatAction
+                key={to}
+                tone="secondary"
+                disabled={pending}
+                testId="project-action-completed"
+                onClick={() => setConfirming(true)}
+              >
+                {t("projectActionCompleted")}
+              </ChatAction>
+            ) : (
+              <ChatAction
+                key={to}
+                // Publishing / resuming is the recommended move; pausing is not.
+                tone={to === "live" ? "primary" : "secondary"}
+                loading={pending}
+                disabled={pending}
+                testId={`project-action-${to}`}
+                onClick={() => run(to)}
+              >
+                {to === "live"
+                  ? project.status === "draft"
+                    ? t("projectActionPublish")
+                    : t("projectActionResume")
+                  : t("projectActionPause")}
+              </ChatAction>
+            ),
+          )}
+        </ChatActionRow>
+      )}
+
+      {message && (
+        <p
+          role="status"
+          className={`text-meta ${error ? "text-state-danger" : "text-state-success"}`}
+          data-testid="project-lifecycle-message"
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Stages({ stages }: { stages: ProjectDetail["stages"] }) {
+  const t = useTranslations("conversation.results");
+  // `null` = the stage source is not readable here. That is NOT "no stages",
+  // and saying so is the whole point of carrying the distinction this far.
+  if (stages === null) {
+    return (
+      <p className="text-meta text-text-muted" data-testid="project-stages-unavailable">
+        {t("projectStagesUnavailable")}
+      </p>
+    );
+  }
+  if (stages.length === 0) {
+    return (
+      <p className="text-meta text-text-muted" data-testid="project-stages-empty">
+        {t("projectStagesEmpty")}
+      </p>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1" data-testid="project-stages">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+        {t("projectStages")}
+      </p>
+      <ul className="flex flex-col divide-y divide-border/40">
+        {stages.map((s) => {
+          // Real dates only: the ACTUAL span when it exists, otherwise the
+          // PLANNED one. Never an interpolation between them.
+          const span =
+            s.actualStart || s.actualEnd
+              ? [s.actualStart, s.actualEnd].filter(Boolean).join(" — ")
+              : [s.plannedStart, s.plannedEnd].filter(Boolean).join(" — ");
+          return (
+            <li key={s.id} className="flex items-center justify-between gap-2 py-1.5 text-support">
+              <span className="text-text-primary">{s.name}</span>
+              <span className="font-mono text-meta text-text-muted">{span}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** The canonical status word. An unreadable status says "unknown" rather than
+ *  borrowing another state's label. */
+function StatusWord({ status }: { status: ProjectStatus | null }) {
+  const t = useTranslations("conversation.results");
+  if (status === null) return <>{t("projectStatusUnknown")}</>;
+  return (
+    <>
+      {status === "draft"
+        ? t("projectStatus.draft")
+        : status === "live"
+          ? t("projectStatus.live")
+          : status === "paused"
+            ? t("projectStatus.paused")
+            : t("projectStatus.completed")}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Shared presentation pieces
+// ═══════════════════════════════════════════════════════════════════════════
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <dt className="text-text-muted">{label}</dt>
+      <dd className="text-text-primary">{value}</dd>
+    </div>
+  );
+}
+
+function Pending({ testId }: { testId: string }) {
+  const t = useTranslations("conversation.results");
+  return (
+    <p className="text-basis text-text-muted" data-testid={testId} aria-busy="true">
+      {t("pendingInline")}
+    </p>
+  );
+}
+
+function Failed({
+  testId,
+  text,
+  retryLabel,
+  onRetry,
+}: {
+  testId: string;
+  text: string;
+  retryLabel: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3" data-testid={testId}>
+      <p className="text-basis text-text-secondary">{text}</p>
+      <ChatActionRow>
+        <ChatAction tone="secondary" testId={`${testId}-retry`} onClick={onRetry}>
+          {retryLabel}
+        </ChatAction>
+      </ChatActionRow>
+    </div>
+  );
+}
+
+function Explained({
+  testId,
+  text,
+  openLabel,
+  onOpenFull,
+}: {
+  testId: string;
+  text: string;
+  openLabel: string;
+  onOpenFull: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3" data-testid={testId}>
+      <p className="text-basis text-text-secondary">{text}</p>
+      <OpenFull label={openLabel} onOpenFull={onOpenFull} />
+    </div>
+  );
+}
+
+function OpenFull({ label, onOpenFull }: { label: string; onOpenFull: () => void }) {
+  return (
+    <ChatActionRow>
+      <ChatAction tone="secondary" testId="project-open-full" onClick={onOpenFull}>
+        {label}
+      </ChatAction>
+    </ChatActionRow>
+  );
+}

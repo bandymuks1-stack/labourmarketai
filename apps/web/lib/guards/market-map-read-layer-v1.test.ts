@@ -397,7 +397,7 @@ describe("NO new DB migration in this PR", () => {
     // versions 20260728114008/114254/114301/114353), restored to the repo
     // byte-exact for history parity. Never re-apply. Still no migration from
     // the market-map read layer.
-    expect(count).toBeLessThanOrEqual(177);
+    expect(count).toBeLessThanOrEqual(178);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

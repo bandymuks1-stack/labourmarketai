@@ -526,7 +526,8 @@
         "status": {
           "draft": "Entwurf",
           "live": "Laufend",
-          "paused": "Pausiert"
+          "paused": "Pausiert",
+          "completed": "Abgeschlossen"
         },
         "total": "Gesamt",
         "empty": "Noch keine Projekte — Kennzahlen erscheinen, sobald Ihr Unternehmen Projektzeilen hat.",
@@ -10861,7 +10862,18 @@
       "candidatesOpened": "Hier sind deine Bedarfe und die Menschen dazu.",
       "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben, es gibt also nichts abzugleichen.",
       "candidatesNoCompany": "Du bist gerade in deinem persönlichen Bereich, hier gibt es also keine Unternehmensbedarfe. Wechsle den Bereich, um als dein Unternehmen zu arbeiten.",
-      "candidatesUnavailable": "Die Bedarfe deines Unternehmens konnten gerade nicht gelesen werden."
+      "candidatesUnavailable": "Die Bedarfe deines Unternehmens konnten gerade nicht gelesen werden.",
+      "chipProjects": "Projekte",
+      "userProjects": "Zeig mir meine Projekte",
+      "projectsOpened": "Hier ist deine laufende Arbeit.",
+      "projectsNone": "Es gibt noch kein Projekt.",
+      "projectsNoCompany": "Du bist gerade in deinem persönlichen Bereich, hier gibt es also keine Unternehmensprojekte. Wechsle den Bereich, um als dein Unternehmen zu arbeiten.",
+      "projectsUnavailable": "Deine Projekte konnten gerade nicht gelesen werden.",
+      "assignPickWorker": "Wer soll daran arbeiten?",
+      "assignNoWorkers": "In deinem Team ist noch niemand, den du zuweisen könntest.",
+      "assignUnavailable": "Dein Team konnte gerade nicht gelesen werden.",
+      "assignDone": "Dem Projekt zugewiesen.",
+      "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -11149,7 +11161,45 @@
       "actionNotAuthorized": "Das kannst du von hier aus nicht tun.",
       "bookingStart": "Beginn",
       "bookingEnd": "Voraussichtliches Ende",
-      "bookingNote": "Notiz"
+      "bookingNote": "Notiz",
+      "projectError": "Das Projekt konnte nicht gelesen werden.",
+      "projectNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensprojekte.",
+      "projectBlocked": "In dieser Umgebung ist das derzeit nicht verfügbar.",
+      "projectEmpty": "Es gibt noch kein Projekt.",
+      "projectPick": "Welches Projekt?",
+      "projectBackToList": "Zurück zu den Projekten",
+      "projectNotFound": "Dieses Projekt wurde nicht gefunden oder ist für dich nicht sichtbar.",
+      "projectStatus": {
+        "draft": "Entwurf",
+        "live": "Läuft",
+        "paused": "Pausiert",
+        "completed": "Abgeschlossen"
+      },
+      "projectStatusUnknown": "Status unbekannt",
+      "projectAssigned": "Zugewiesene Personen",
+      "projectAssignedCount": "Zugewiesen",
+      "projectStages": "Phasen",
+      "projectStagesEmpty": "Für dieses Projekt wurden noch keine Phasen erfasst.",
+      "projectStagesUnavailable": "Phasen können in dieser Umgebung nicht gelesen werden — deshalb zeigen wir keine leere Liste, als gäbe es keine.",
+      "projectAssignWorker": "Mitarbeiter zuweisen",
+      "projectCompletedNoAssign": "Das Projekt ist abgeschlossen — es kann niemand mehr zugewiesen werden.",
+      "projectTerminal": "Ein abgeschlossenes Projekt kann nicht mehr geändert werden. Es bleibt als Historie erhalten.",
+      "projectActionPublish": "Projekt veröffentlichen",
+      "projectActionPause": "Projekt pausieren",
+      "projectActionResume": "Projekt fortsetzen",
+      "projectActionCompleted": "Projekt abschließen",
+      "projectCompleteTitle": "Dieses Projekt abschließen?",
+      "projectCompleteBody": "Der Abschluss ist endgültig: Das Projekt kann nicht wieder geöffnet werden. Es bleibt als Historie mit seinen Phasen und Einträgen. Aktive Arbeitszuweisungen in diesem Projekt werden als beendet markiert. Es wird keine Bewertung erstellt.",
+      "projectCompleteCta": "Projekt abschließen",
+      "projectCancel": "Abbrechen",
+      "projectWorking": "Läuft…",
+      "projectTransitioned": "Der Projektstatus wurde geändert.",
+      "projectCompletedEnded": "Das Projekt ist abgeschlossen. Als beendet markierte Arbeitszeiträume: {count}.",
+      "projectAlreadyInState": "Das Projekt ist bereits in diesem Zustand. Es wurde nichts geändert.",
+      "projectInvalidTransition": "Diese Statusänderung ist nicht möglich.",
+      "projectNotAuthorized": "Du kannst den Status dieses Projekts nicht ändern.",
+      "projectNeedsMigration": "Statusänderungen an Projekten sind in dieser Umgebung noch nicht verfügbar.",
+      "projectConflict": "Das Projekt hat sich geändert, während du es angesehen hast. Öffne es erneut."
     }
   },
   "landing": {
