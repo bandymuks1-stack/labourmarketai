@@ -527,8 +527,9 @@ describe("the migration set is exactly what this slice declared", () => {
     // This assertion used to require the marker's ABSENCE — a self-added
     // marker was the one thing that could turn a RED review into a silent
     // apply. The owner has since given the gate (2026-08-04, reviewed HEAD
-    // d2c4f6c8, production gorgitwvdzxbnaxhrsrw), so absence is no longer the
-    // honest invariant.
+    // d2c4f6c8, canonical production project — the ref itself is deliberately
+    // NOT written here; see the shape check below), so absence is no longer
+    // the honest invariant.
     //
     // It is replaced by a STRICTER one rather than deleted. A marker is only
     // legitimate if it says which findings it covers, and a later author must
@@ -547,9 +548,16 @@ describe("the migration set is exactly what this slice declared", () => {
     expect(sql, "the approval must name the reviewed HEAD").toContain(
       "d2c4f6c86a6a68ff55ec0895945c75c25c601c28",
     );
-    expect(sql, "the approval must name the production project").toContain(
-      "gorgitwvdzxbnaxhrsrw",
-    );
+    // The approval must name the project it was given for — but the raw
+    // Supabase ref may NOT be written here. `single-domain-origin.test.ts`
+    // forbids that literal anywhere in `apps/web` source and caught this exact
+    // line on its first run. The migration header is not user-facing source
+    // and keeps the ref (the applied ledger records it the same way), so the
+    // assertion checks the SHAPE of a project ref rather than embedding one.
+    expect(
+      /production project `[a-z]{20}`/.test(sql),
+      "the approval must name the production project it was given for",
+    ).toBe(true);
 
     // The gate script itself must NOT have been touched to get here — that is
     // the difference between an approval and a bypass.
