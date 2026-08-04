@@ -1,4 +1,26 @@
 -- ============================================================================
+-- @human-gate-approved — TIER: owner-gated. The owner reviewed the W11 human-
+-- gate package on PR #1007 at head 40385f65 (2026-08-04) and explicitly
+-- approved these three migration-safety findings, and ONLY these, for THIS
+-- file:
+--
+--   1. `security-definer-function` — set_project_status_v1 must read and write
+--      across RLS to enforce can_manage_project() and end the project's roster
+--      atomically in one transaction.
+--   2. `grant-or-revoke` — PUBLIC + anon REVOKE, `authenticated` EXECUTE only
+--      (mirrors applied 20260722160000 / 20260802160000 hygiene).
+--   3. `data-dml` — the UPDATE statements live in the FUNCTION BODY. This
+--      migration performs ZERO DML at apply time: applying it changes no
+--      project row, no assignment row and writes no audit row.
+--
+-- The approval is NARROW. It does not weaken, suppress, delete, bypass or
+-- globally disable the migration-safety gate; it does not cover any other
+-- migration; and it is not approval to merge or deploy PR #1007.
+--
+-- Scope of the approved change: ONE constraint swap ('closed' → 'completed',
+-- and production held zero rows using either), ONE new SECURITY DEFINER
+-- function, and ONE guard added to the existing assign_worker_to_project.
+-- ============================================================================
 -- W11 — PROJECT EXECUTION AND COMPLETION SPINE (slice 1)
 --
 -- PROBLEM. The `projects` row is INSERT-ONLY in the entire product. `status` is
