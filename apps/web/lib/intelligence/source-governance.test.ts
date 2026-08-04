@@ -16,17 +16,41 @@ describe("intelligence source governance", () => {
     expect(isExternalSourceActive("eurostat")).toBe(true);
   });
 
-  it("every external profile EXCEPT eurostat is inactive, proposed-only and off", () => {
+  it("every external profile EXCEPT eurostat is INACTIVE", () => {
+    // The invariant is inactivity. Legal status is a separate fact about the
+    // provider, and it changes when a provider actually answers us —
+    // arbetsformedlingen confirmed its terms on 2026-08-04 and is therefore
+    // `confirmed` + `owner_review`, still importing nothing.
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
       expect(isExternalSourceActive(p.key), p.key).toBe(false);
-      expect(p.activation, p.key).toBe("off");
-      expect(p.legalStatus, p.key).toBe("unconfirmed");
-      expect(p.proposedOnly, p.key).toBe(true);
+      expect(p.activation, p.key).not.toBe("on");
     }
+  });
+
+  it("a source that has NOT answered us stays unconfirmed, off and proposed-only", () => {
+    const unanswered = INTELLIGENCE_SOURCE_PROFILES.filter(
+      (p) => p.sourceKind !== "internal_aggregated" && p.proposedOnly,
+    );
+    expect(unanswered.length).toBeGreaterThan(0);
+    for (const p of unanswered) {
+      expect(p.legalStatus, p.key).toBe("unconfirmed");
+      expect(p.activation, p.key).toBe("off");
+      expect(p.importPolicy, p.key).toBeNull();
+    }
+  });
+
+  it("arbetsformedlingen: provider-confirmed, awaiting OUR activation", () => {
+    const p = getSourceProfile("arbetsformedlingen");
+    expect(p).not.toBeNull();
+    expect(p!.legalStatus).toBe("confirmed");
+    expect(p!.proposedOnly).toBe(false);
+    expect(p!.activation).toBe("owner_review");
+    expect(p!.attributionRequired).toBe(true);
+    expect(isExternalSourceActive("arbetsformedlingen")).toBe(false);
   });
 
   it("eurostat profile is confirmed, on, not proposed-only, with a recorded policy", () => {

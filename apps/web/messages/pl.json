@@ -2671,6 +2671,7 @@
       "adminMarketRateAverages": "Kuratorowane przez administratora średnie stawki rynkowe",
       "statGovLt": "Statystyka Litwy (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Szwedzki Urząd Pracy)",
       "cvbankasSalary": "Dane płacowe CVbankas — proponowane zewnętrzne odniesienie (nieaktywne)",
       "key": {
         "internal_platform_aggregates": "Wewnętrzne agregaty LabourMarket.ai",
@@ -2686,6 +2687,7 @@
         "adminCurated": "Średnie wprowadzone przez właściciela z notą o źródle zamiast wielkości próby.",
         "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
         "eurostat": "Urzędowa statystyka UE; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
+        "arbetsformedlingen": "Proponowane źródło. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane.",
         "cvbankas": "Tylko propozycja — zgoda na użycie niepotwierdzona; nigdy nie mieszane z liczbami wewnętrznymi.",
         "eures": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane.",
         "uztLt": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane."
@@ -4042,6 +4044,16 @@
       "addExperienceEvidence": "Dodaj potwierdzenie doświadczenia",
       "viewWorkProfile": "Zobacz mój profil zawodowy",
       "completeWorkProfile": "Uzupełnij mój profil zawodowy"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Źródło: Arbetsförmedlingen (JobTech Development). Treść ogłoszenia należy do publikującego je pracodawcy."
+    },
+    "provenance": {
+      "externalPublicSource": "Opublikowane przez publiczną służbę zatrudnienia. Pokazujemy tutaj, abyś mógł je znaleźć — to nie jest ogłoszenie labourmarket.ai.",
+      "employerHasNotClaimed": "Ten pracodawca nie zarządza jeszcze tym ogłoszeniem na labourmarket.ai, więc aplikacja przebiega przez oryginalne ogłoszenie.",
+      "employerManagesHere": "Ten pracodawca zarządza tym ogłoszeniem na labourmarket.ai."
     }
   }
 }

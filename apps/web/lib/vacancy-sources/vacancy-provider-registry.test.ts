@@ -1,0 +1,172 @@
+import { describe, it, expect } from "vitest";
+import {
+  VACANCY_PROVIDERS,
+  getVacancyEndpoint,
+  getVacancyProvider,
+  providerSupportsChannel,
+  resolveProviderBounds,
+  vacancyProvidersForCountry,
+  type VacancyProviderDescriptorV1,
+} from "./vacancy-provider-registry";
+import { VACANCY_IMPORT_BOUNDS } from "./vacancy-contract";
+import { INTELLIGENCE_SOURCE_PROFILES } from "@/lib/intelligence/source-governance";
+import { getVacancyParser } from "./providers";
+
+describe("registry shape — one entry is all a new country needs", () => {
+  it("every provider has a governance row, a parser and at least one endpoint", () => {
+    expect(VACANCY_PROVIDERS.length).toBeGreaterThan(0);
+    for (const p of VACANCY_PROVIDERS) {
+      const governance = INTELLIGENCE_SOURCE_PROFILES.find(
+        (g) => g.key === p.governanceSourceKey,
+      );
+      expect(governance, `${p.key} has no governance row`).toBeTruthy();
+      expect(getVacancyParser(p.key), `${p.key} has no parser`).toBeTypeOf(
+        "function",
+      );
+      expect(p.endpoints.length).toBeGreaterThan(0);
+      expect(p.countryIso).toMatch(/^[A-Z]{2}$/);
+      expect(p.transformVersion.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("provider keys are unique and equal their governance key", () => {
+    const keys = VACANCY_PROVIDERS.map((p) => p.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const p of VACANCY_PROVIDERS) {
+      expect(p.governanceSourceKey).toBe(p.key);
+    }
+  });
+
+  it("endpoints declare BARE HOSTNAMES — the pure layer holds no fetchable URL", () => {
+    for (const p of VACANCY_PROVIDERS) {
+      for (const e of p.endpoints) {
+        expect(e.host, `${p.key}/${e.channel}`).not.toMatch(/:\/\//);
+        expect(e.host).toMatch(/^[a-z0-9.-]+\.[a-z]{2,}$/);
+        expect(e.path.startsWith("/"), `${p.key}/${e.channel}`).toBe(true);
+      }
+    }
+  });
+
+  it("channels within one provider are unique", () => {
+    for (const p of VACANCY_PROVIDERS) {
+      const channels = p.endpoints.map((e) => e.channel);
+      expect(new Set(channels).size).toBe(channels.length);
+    }
+  });
+});
+
+describe("Arbetsförmedlingen descriptor", () => {
+  const se = getVacancyProvider("arbetsformedlingen")!;
+
+  it("is registered for Sweden and writes Swedish", () => {
+    expect(se.countryIso).toBe("SE");
+    expect(se.sourceLanguage).toBe("sv");
+    expect(vacancyProvidersForCountry("se").map((p) => p.key)).toEqual([
+      "arbetsformedlingen",
+    ]);
+  });
+
+  it("offers all three channels the spec asks for", () => {
+    for (const channel of ["snapshot", "stream", "links"] as const) {
+      expect(providerSupportsChannel(se, channel), channel).toBe(true);
+    }
+    expect(getVacancyEndpoint(se, "snapshot")!.pagination).toBe("none");
+    expect(getVacancyEndpoint(se, "links")!.pagination).toBe("offset_limit");
+  });
+
+  it("requires attribution and names it with an i18n code, not a string", () => {
+    const governance = INTELLIGENCE_SOURCE_PROFILES.find(
+      (g) => g.key === "arbetsformedlingen",
+    )!;
+    expect(governance.attributionRequired).toBe(true);
+    expect(se.attributionCode).toMatch(/^[a-zA-Z]+(\.[a-zA-Z]+)+$/);
+    expect(se.displayNameCode).toMatch(/^[a-zA-Z]+(\.[a-zA-Z]+)+$/);
+  });
+
+  it("records the PROVIDER's confirmation: CC0 terms, keyless, not a proposal", () => {
+    const governance = INTELLIGENCE_SOURCE_PROFILES.find(
+      (g) => g.key === "arbetsformedlingen",
+    )!;
+    expect(governance.legalStatus).toBe("confirmed");
+    expect(governance.proposedOnly).toBe(false);
+    // Keyless: no endpoint may ask for a secret we were told is not needed.
+    for (const e of se.endpoints) {
+      expect(e.requiresApiKey, e.channel).toBe(false);
+    }
+  });
+
+  it("stays OWNER-GATED for production: approved for integration, not active", () => {
+    const governance = INTELLIGENCE_SOURCE_PROFILES.find(
+      (g) => g.key === "arbetsformedlingen",
+    )!;
+    expect(governance.activation).toBe("owner_review");
+    expect(governance.activation).not.toBe("on");
+    expect(governance.importPolicy).toBeNull();
+  });
+
+  it("returns null for an unknown key rather than a default provider", () => {
+    expect(getVacancyProvider("nowhere_employment_service")).toBeNull();
+    expect(vacancyProvidersForCountry("XX")).toEqual([]);
+  });
+});
+
+describe("bounds may only ever be TIGHTENED", () => {
+  const base = getVacancyProvider("arbetsformedlingen")!;
+
+  it("a descriptor with no overrides inherits the shared bounds", () => {
+    expect(resolveProviderBounds(base)).toEqual(VACANCY_IMPORT_BOUNDS);
+  });
+
+  it("an override that tries to WIDEN a bound is clamped to the ceiling", () => {
+    const greedy: VacancyProviderDescriptorV1 = {
+      ...base,
+      boundOverrides: {
+        maxItemsPerPage: 10_000,
+        maxAcceptedPerSession: 1_000_000,
+        maxResponseBytes: Number.MAX_SAFE_INTEGER,
+        requestTimeoutMs: 600_000,
+      },
+    };
+    const resolved = resolveProviderBounds(greedy);
+    expect(resolved.maxItemsPerPage).toBe(VACANCY_IMPORT_BOUNDS.maxItemsPerPage);
+    expect(resolved.maxAcceptedPerSession).toBe(
+      VACANCY_IMPORT_BOUNDS.maxAcceptedPerSession,
+    );
+    expect(resolved.maxResponseBytes).toBe(
+      VACANCY_IMPORT_BOUNDS.maxResponseBytes,
+    );
+    expect(resolved.requestTimeoutMs).toBe(
+      VACANCY_IMPORT_BOUNDS.requestTimeoutMs,
+    );
+  });
+
+  it("an override that tightens a bound is honoured", () => {
+    const careful: VacancyProviderDescriptorV1 = {
+      ...base,
+      boundOverrides: { maxItemsPerPage: 25, maxPagesPerSession: 2 },
+    };
+    const resolved = resolveProviderBounds(careful);
+    expect(resolved.maxItemsPerPage).toBe(25);
+    expect(resolved.maxPagesPerSession).toBe(2);
+  });
+
+  it("a zero, negative, fractional or non-numeric override cannot disable a bound", () => {
+    const broken: VacancyProviderDescriptorV1 = {
+      ...base,
+      boundOverrides: {
+        maxItemsPerPage: 0,
+        maxPagesPerSession: -5,
+        maxAcceptedPerSession: 10.9,
+        requestTimeoutMs: Number.NaN,
+      },
+    };
+    const resolved = resolveProviderBounds(broken);
+    expect(resolved.maxItemsPerPage).toBe(1);
+    expect(resolved.maxPagesPerSession).toBe(1);
+    expect(resolved.maxAcceptedPerSession).toBe(10);
+    // NaN is not a bound — fall back to the shared ceiling, never to NaN.
+    expect(resolved.requestTimeoutMs).toBe(
+      VACANCY_IMPORT_BOUNDS.requestTimeoutMs,
+    );
+  });
+});

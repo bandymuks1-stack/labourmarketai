@@ -109,19 +109,61 @@ describe("(b) lib/intelligence never imports an LLM SDK", () => {
 // ── (c) every external source stays OFF ─────────────────────────────────────
 
 describe("(c) source governance keeps every external source EXCEPT eurostat inactive", () => {
-  // eurostat is the ONE owner-activated external source (2026-07-15). Every
-  // OTHER external source stays off/unconfirmed/proposed-only/inactive.
-  it("all external profiles except eurostat: activation off, unconfirmed, proposedOnly, inactive", () => {
+  // eurostat is the ONE owner-ACTIVATED external source (2026-07-15).
+  //
+  // This guard pins INACTIVITY, not ignorance. It used to also assert that
+  // every other external source was `unconfirmed` + `proposedOnly` — but
+  // those were proxies for "not active", and they stopped being true the
+  // moment a provider actually answered us. Arbetsförmedlingen / JobTech
+  // confirmed on 2026-08-04 that its APIs are free, keyless, notification-
+  // free and CC0, so recording it as `unconfirmed` would now be a lie in the
+  // registry, and lying to satisfy a guard is the worst of both worlds.
+  //
+  // The property that carries the safety is unchanged and asserted directly:
+  // NO external source other than eurostat is active, whatever its legal
+  // status says, because activation is a separate decision.
+  it("no external profile except eurostat is ACTIVE", () => {
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
-      expect(p.activation, `${p.key} activation`).toBe("off");
-      expect(p.legalStatus, `${p.key} legalStatus`).toBe("unconfirmed");
-      expect(p.proposedOnly, `${p.key} proposedOnly`).toBe(true);
+      expect(p.activation, `${p.key} activation`).not.toBe("on");
       expect(isExternalSourceActive(p.key), `${p.key} active`).toBe(false);
     }
+  });
+
+  it("a source may only be confirmed-but-inactive, never active-but-unconfirmed", () => {
+    // The dangerous combination is importing from a source whose terms were
+    // never established. The safe one — permission granted, activation still
+    // pending — is legitimate and must stay expressible.
+    for (const p of INTELLIGENCE_SOURCE_PROFILES) {
+      if (p.sourceKind === "internal_aggregated") continue;
+      if (p.activation === "on") {
+        expect(p.legalStatus, `${p.key} active but not confirmed`).toBe(
+          "confirmed",
+        );
+      }
+      // A source whose provider has answered is no longer a proposal.
+      if (p.legalStatus === "confirmed") {
+        expect(p.proposedOnly, `${p.key} confirmed yet proposedOnly`).toBe(
+          false,
+        );
+      }
+    }
+  });
+
+  it("arbetsformedlingen is provider-confirmed and NOT active — the two are separate", () => {
+    const p = INTELLIGENCE_SOURCE_PROFILES.find(
+      (x) => x.key === "arbetsformedlingen",
+    )!;
+    // Provider permission: recorded (CC0, keyless, no prior notification).
+    expect(p.legalStatus).toBe("confirmed");
+    expect(p.proposedOnly).toBe(false);
+    expect(p.attributionRequired).toBe(true);
+    // Our activation decision: still open, so nothing may enter.
+    expect(p.activation).toBe("owner_review");
+    expect(isExternalSourceActive("arbetsformedlingen")).toBe(false);
   });
 
   it("eurostat is the only active external source (confirmed, on, policy recorded)", () => {

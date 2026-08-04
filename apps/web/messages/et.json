@@ -2671,6 +2671,7 @@
       "adminMarketRateAverages": "Administraatori kureeritud turumäärade keskmised",
       "statGovLt": "Leedu statistika (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Rootsi tööturuamet)",
       "cvbankasSalary": "CVbankase palgaandmed — kavandatav väline võrdlus (pole aktiivne)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai sisemised koondandmed",
@@ -2686,6 +2687,7 @@
         "adminCurated": "Omaniku sisestatud keskmised koos allikamärkega valimi suuruse asemel.",
         "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
         "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
+        "arbetsformedlingen": "Pakutud allikas. Kasutustingimusi ei ole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna ei laadita midagi alla.",
         "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega.",
         "eures": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita.",
         "uztLt": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita."
@@ -4042,6 +4044,16 @@
       "addExperienceEvidence": "Lisa kogemuse tõendeid",
       "viewWorkProfile": "Vaata minu tööprofiili",
       "completeWorkProfile": "Täienda minu tööprofiili"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Allikas: Arbetsförmedlingen (JobTech Development). Kuulutuse sisu kuulub selle avaldanud tööandjale."
+    },
+    "provenance": {
+      "externalPublicSource": "Avaldatud avaliku tööturuameti poolt. Näitame siin, et te selle leiaksite — see ei ole labourmarket.ai kuulutus.",
+      "employerHasNotClaimed": "See tööandja ei halda seda kuulutust veel labourmarket.ai-s, seega kandideerimine käib originaalkuulutuse kaudu.",
+      "employerManagesHere": "See tööandja haldab seda kuulutust labourmarket.ai-s."
     }
   }
 }

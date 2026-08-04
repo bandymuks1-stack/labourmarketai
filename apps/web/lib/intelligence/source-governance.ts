@@ -162,6 +162,46 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       importPolicy: null,
     },
     {
+      // Arbetsförmedlingen — the Swedish Public Employment Service, published
+      // through JobTech Development. This is the governance row for the
+      // VACANCY pipeline (lib/vacancy-sources/**), not for statistics: the
+      // provider descriptor points its `governanceSourceKey` here so ONE
+      // owner decision governs the source, whatever shape its data takes.
+      //
+      // PROVIDER PERMISSION: CONFIRMED (2026-08-04). Arbetsförmedlingen /
+      // JobTech Development confirmed to us directly that the APIs are free,
+      // that NO API key is required, that NO prior notification is required,
+      // and that the data is published under CC0. Attribution is requested by
+      // the provider and is required by our own product policy. This is a
+      // recorded fact about the source, not an assumption — `legalStatus` is
+      // therefore "confirmed", and nothing in this file should read as if the
+      // provider had not answered.
+      //
+      // ACTIVATION IS A DIFFERENT DECISION and is deliberately NOT "on".
+      // "The provider permits us to use this" and "we have decided to run it
+      // in production" are two separate things: the second still needs a
+      // persistence schema (owner), an operator env flip, and a polling
+      // budget. `activation: "owner_review"` is exactly that state —
+      // approved for integration, awaiting our own activation decision.
+      // `isExternalSourceActive` requires "on", so this stays false and the
+      // import boundary still refuses every record with `activation_off`.
+      key: "arbetsformedlingen",
+      displayNameCode: "intelligence.sources.arbetsformedlingen",
+      sourceKind: "public_official",
+      legalStatus: "confirmed",
+      activation: "owner_review",
+      termsNoteCode: "intelligence.sources.terms.arbetsformedlingen",
+      attributionRequired: true,
+      homepage: "jobtechdev.se",
+      // No longer a proposal — the provider has answered.
+      proposedOnly: false,
+      // Vacancies are not metric observations, so no METRIC policy applies.
+      // null is also the fail-closed value the boundary guard requires of
+      // every non-eurostat external source: even if activation flipped, this
+      // source could not import a single metric observation.
+      importPolicy: null,
+    },
+    {
       // CVbankas may only ever be a PROPOSED external benchmark until access
       // and usage permission are confirmed by the owner. Even then, an
       // external figure must NEVER be labelled a LabourMarket.ai average —

@@ -14,14 +14,32 @@ const EXTERNAL_UNCONFIRMED = {
 };
 
 describe("deriveSourceLifecycleState — deterministic precedence", () => {
-  it("today's registry: internal + eurostat are active, every other external is proposed", () => {
+  it("today's registry: internal + eurostat active, arbetsformedlingen approved, the rest proposed", () => {
+    // `approved` is the state this vocabulary already had for exactly this
+    // case: the provider confirmed its terms, and we have not switched it on.
+    // Arbetsförmedlingen reached it on 2026-08-04 (CC0, keyless, no prior
+    // notification). It is NOT active, and that is the property that matters.
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
       const state = deriveSourceLifecycleState(p);
       if (p.sourceKind === "internal_aggregated" || p.key === "eurostat") {
         expect(state, p.key).toBe("active");
+      } else if (p.key === "arbetsformedlingen") {
+        expect(state, p.key).toBe("approved");
       } else {
         expect(state, p.key).toBe("proposed");
       }
+    }
+  });
+
+  it("no source other than internal + eurostat reaches `active`", () => {
+    const active = INTELLIGENCE_SOURCE_PROFILES.filter(
+      (p) => deriveSourceLifecycleState(p) === "active",
+    );
+    for (const p of active) {
+      expect(
+        p.sourceKind === "internal_aggregated" || p.key === "eurostat",
+        `${p.key} unexpectedly active`,
+      ).toBe(true);
     }
   });
 

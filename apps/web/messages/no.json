@@ -2671,6 +2671,7 @@
       "adminMarketRateAverages": "Admin-kuraterte markedssats-gjennomsnitt",
       "statGovLt": "Litauens statistikk (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Sveriges arbeidsformidling)",
       "cvbankasSalary": "CVbankas-lønnsdata — foreslått ekstern referanse (ikke aktiv)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai interne aggregater",
@@ -2686,6 +2687,7 @@
         "adminCurated": "Eier-angitte gjennomsnitt med en kildenotis i stedet for en utvalgsstørrelse.",
         "statGovLt": "Offisiell statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
         "eurostat": "Offisiell EU-statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
+        "arbetsformedlingen": "Foreslått kilde. Bruksvilkårene er ennå ikke gjennomgått — aktivering krever eierens bekreftelse. Ingenting hentes i dag.",
         "cvbankas": "Kun et forslag — brukstillatelse ubekreftet; blandes aldri med interne tall.",
         "eures": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag.",
         "uztLt": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag."
@@ -4042,6 +4044,16 @@
       "addExperienceEvidence": "Legg til dokumentasjon på erfaring",
       "viewWorkProfile": "Se arbeidsprofilen min",
       "completeWorkProfile": "Fyll ut arbeidsprofilen min"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Kilde: Arbetsförmedlingen (JobTech Development). Innholdet i annonsen tilhører arbeidsgiveren som har publisert den."
+    },
+    "provenance": {
+      "externalPublicSource": "Publisert av en offentlig arbeidsformidling. Vist her slik at du kan finne den — det er ikke en labourmarket.ai-annonse.",
+      "employerHasNotClaimed": "Denne arbeidsgiveren administrerer ikke annonsen på labourmarket.ai ennå, så søknaden går via den opprinnelige annonsen.",
+      "employerManagesHere": "Denne arbeidsgiveren administrerer annonsen på labourmarket.ai."
     }
   }
 }

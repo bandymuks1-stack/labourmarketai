@@ -9980,6 +9980,7 @@
       "adminMarketRateAverages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
       "statGovLt": "Statistik Litauen (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Schwedische Arbeitsvermittlung)",
       "cvbankasSalary": "CVbankas-Gehaltsdaten — vorgeschlagener externer Referenzwert (nicht aktiv)",
       "key": {
         "internal_platform_aggregates": "Interne Aggregate von LabourMarket.ai",
@@ -9995,6 +9996,7 @@
         "adminCurated": "Vom Eigentümer eingegebene Durchschnitte mit Quellennotiz statt Stichprobengröße.",
         "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
+        "arbetsformedlingen": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Eigentümers. Heute wird nichts abgerufen.",
         "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
         "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
         "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
@@ -11751,6 +11753,16 @@
       "addExperienceEvidence": "Nachweise zur Berufserfahrung hinzufügen",
       "viewWorkProfile": "Mein Arbeitsprofil ansehen",
       "completeWorkProfile": "Mein Arbeitsprofil ergänzen"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Quelle: Arbetsförmedlingen (JobTech Development). Der Anzeigeninhalt gehört dem veröffentlichenden Arbeitgeber."
+    },
+    "provenance": {
+      "externalPublicSource": "Von einer öffentlichen Arbeitsvermittlung veröffentlicht. Hier gelistet, damit Sie es finden — es ist keine labourmarket.ai-Stellenanzeige.",
+      "employerHasNotClaimed": "Dieser Arbeitgeber verwaltet diese Anzeige noch nicht auf labourmarket.ai, daher läuft die Bewerbung über die ursprüngliche Anzeige.",
+      "employerManagesHere": "Dieser Arbeitgeber verwaltet diese Anzeige auf labourmarket.ai."
     }
   }
 }

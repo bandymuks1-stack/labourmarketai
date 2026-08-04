@@ -9980,6 +9980,7 @@
       "adminMarketRateAverages": "Admin-curated market rate averages",
       "statGovLt": "Statistics Lithuania (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Swedish Public Employment Service)",
       "cvbankasSalary": "CVbankas salary data — proposed external benchmark (not active)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai internal aggregates",
@@ -9995,6 +9996,7 @@
         "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
+        "arbetsformedlingen": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
@@ -11751,6 +11753,16 @@
       "addExperienceEvidence": "Add proof of experience",
       "viewWorkProfile": "View my work profile",
       "completeWorkProfile": "Add to my work profile"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Source: Arbetsförmedlingen (JobTech Development). The advertisement content belongs to the publishing employer."
+    },
+    "provenance": {
+      "externalPublicSource": "Published on a public employment service. Listed here so you can find it — it is not a labourmarket.ai job posting.",
+      "employerHasNotClaimed": "This employer does not manage this listing on labourmarket.ai yet, so applications go through the original advertisement.",
+      "employerManagesHere": "This employer manages this listing on labourmarket.ai."
     }
   }
 }

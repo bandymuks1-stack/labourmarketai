@@ -84,8 +84,14 @@ describe("registry names every roadmap provider — all external ones OFF", () =
         expect(isExternalSourceActive(p.key), p.key).toBe(true);
         expect(deriveSourceLifecycleState(p), p.key).toBe("active");
       } else {
+        // Not active — the invariant. A provider that has confirmed its terms
+        // (arbetsformedlingen) sits in `approved`; one that has not answered
+        // stays `proposed`. Neither imports anything.
         expect(isExternalSourceActive(p.key), p.key).toBe(false);
-        expect(deriveSourceLifecycleState(p), p.key).toBe("proposed");
+        expect(
+          ["proposed", "approved"],
+          `${p.key} lifecycle`,
+        ).toContain(deriveSourceLifecycleState(p));
       }
     }
     // eurostat is active → not all off

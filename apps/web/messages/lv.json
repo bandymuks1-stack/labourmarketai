@@ -2671,6 +2671,7 @@
       "adminMarketRateAverages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
       "statGovLt": "Lietuvas statistika (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
+      "arbetsformedlingen": "Arbetsförmedlingen (Zviedrijas Nodarbinātības dienests)",
       "cvbankasSalary": "CVbankas algu dati — ierosināta ārējā atsauce (nav aktīva)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai iekšējie kopsavilkumi",
@@ -2686,6 +2687,7 @@
         "adminCurated": "Īpašnieka ievadītie vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
         "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
         "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
+        "arbetsformedlingen": "Piedāvāts avots. Lietošanas noteikumi vēl nav pārskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
         "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem.",
         "eures": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
         "uztLt": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts."
@@ -4042,6 +4044,16 @@
       "addExperienceEvidence": "Pievienot pieredzes apliecinājumus",
       "viewWorkProfile": "Skatīt manu darba profilu",
       "completeWorkProfile": "Papildināt manu darba profilu"
+    }
+  },
+  "vacancySources": {
+    "attribution": {
+      "arbetsformedlingen": "Avots: Arbetsförmedlingen (JobTech Development). Sludinājuma saturs pieder darba devējam, kurš to publicējis."
+    },
+    "provenance": {
+      "externalPublicSource": "Publicējis valsts nodarbinātības dienests. Rādām šeit, lai jūs to atrastu — tas nav labourmarket.ai sludinājums.",
+      "employerHasNotClaimed": "Šis darba devējs vēl nepārvalda šo sludinājumu labourmarket.ai, tāpēc pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "employerManagesHere": "Šis darba devējs pārvalda šo sludinājumu labourmarket.ai."
     }
   }
 }
