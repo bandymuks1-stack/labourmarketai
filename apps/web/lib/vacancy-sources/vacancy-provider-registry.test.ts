@@ -83,13 +83,24 @@ describe("Arbetsförmedlingen descriptor", () => {
     expect(se.displayNameCode).toMatch(/^[a-zA-Z]+(\.[a-zA-Z]+)+$/);
   });
 
-  it("stays OWNER-GATED: unconfirmed, off, proposed-only, no import policy", () => {
+  it("records the PROVIDER's confirmation: CC0 terms, keyless, not a proposal", () => {
     const governance = INTELLIGENCE_SOURCE_PROFILES.find(
       (g) => g.key === "arbetsformedlingen",
     )!;
-    expect(governance.legalStatus).toBe("unconfirmed");
-    expect(governance.activation).toBe("off");
-    expect(governance.proposedOnly).toBe(true);
+    expect(governance.legalStatus).toBe("confirmed");
+    expect(governance.proposedOnly).toBe(false);
+    // Keyless: no endpoint may ask for a secret we were told is not needed.
+    for (const e of se.endpoints) {
+      expect(e.requiresApiKey, e.channel).toBe(false);
+    }
+  });
+
+  it("stays OWNER-GATED for production: approved for integration, not active", () => {
+    const governance = INTELLIGENCE_SOURCE_PROFILES.find(
+      (g) => g.key === "arbetsformedlingen",
+    )!;
+    expect(governance.activation).toBe("owner_review");
+    expect(governance.activation).not.toBe("on");
     expect(governance.importPolicy).toBeNull();
   });
 

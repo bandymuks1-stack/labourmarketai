@@ -11758,6 +11758,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Šaltinis: Arbetsförmedlingen (JobTech Development). Skelbimo turinys priklauso jį paskelbusiam darbdaviui."
+    },
+    "provenance": {
+      "externalPublicSource": "Paskelbta valstybinėje užimtumo tarnyboje. Rodome čia, kad rastumėte — tai nėra labourmarket.ai skelbimas.",
+      "employerHasNotClaimed": "Šis darbdavys dar netvarko šio skelbimo labourmarket.ai, todėl kandidatuojama per originalų skelbimą.",
+      "employerManagesHere": "Šis darbdavys tvarko šį skelbimą labourmarket.ai."
     }
   }
 }

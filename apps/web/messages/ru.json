@@ -11758,6 +11758,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Источник: Arbetsförmedlingen (JobTech Development). Содержание объявления принадлежит разместившему его работодателю."
+    },
+    "provenance": {
+      "externalPublicSource": "Опубликовано государственной службой занятости. Показываем здесь, чтобы вы могли найти — это не объявление labourmarket.ai.",
+      "employerHasNotClaimed": "Этот работодатель пока не ведёт это объявление на labourmarket.ai, поэтому отклик подаётся через оригинальное объявление.",
+      "employerManagesHere": "Этот работодатель ведёт это объявление на labourmarket.ai."
     }
   }
 }

@@ -11758,6 +11758,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Bron: Arbetsförmedlingen (JobTech Development). De inhoud van de advertentie behoort toe aan de publicerende werkgever."
+    },
+    "provenance": {
+      "externalPublicSource": "Gepubliceerd door een openbare arbeidsbemiddeling. Hier vermeld zodat u het kunt vinden — het is geen labourmarket.ai-vacature.",
+      "employerHasNotClaimed": "Deze werkgever beheert deze vacature nog niet op labourmarket.ai, dus solliciteren gaat via de oorspronkelijke advertentie.",
+      "employerManagesHere": "Deze werkgever beheert deze vacature op labourmarket.ai."
     }
   }
 }

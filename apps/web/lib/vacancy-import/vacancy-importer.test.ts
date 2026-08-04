@@ -79,15 +79,21 @@ describe("the source is NOT activated — the honest default", () => {
     expect(result.metrics.itemsAccepted).toBe(0);
   });
 
-  it("names the governance gate rather than pretending it succeeded", async () => {
+  it("names the ACTIVATION gate — the provider's terms are confirmed, our activation is not", async () => {
     enable();
     stubFetch([ad()]);
 
     const result = await runVacancyImport(request());
 
-    expect(result.blockedReason).toBe("legal_status_unconfirmed");
+    // Arbetsförmedlingen's terms ARE confirmed (CC0, keyless). What is still
+    // closed is our own activation decision, and the block must say so —
+    // reporting "legal status unconfirmed" would now be false.
+    expect(result.blockedReason).toBe("activation_off");
     expect(result.logs.some((l) => l.code === "gate_blocked")).toBe(true);
     expect(result.report?.warningCodes ?? []).toContain(
+      "vacancy_activation_off",
+    );
+    expect(result.report?.warningCodes ?? []).not.toContain(
       "vacancy_legal_status_unconfirmed",
     );
   });
@@ -106,6 +112,107 @@ describe("the source is NOT activated — the honest default", () => {
     expect(
       result.logs.find((l) => l.code === "persist_skipped")?.detail,
     ).toBe("not_activated");
+  });
+});
+
+describe("channel cadence and the stream checkpoint", () => {
+  it("a checkpointed channel REFUSES to run without a cursor", async () => {
+    enable();
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: null }),
+    );
+
+    // An unbounded stream request is a full re-read. The correct cold start
+    // is a snapshot, so this must not hit the network at all.
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(
+      result.logs.some((l) => l.code === "cursor_required_run_snapshot_first"),
+    ).toBe(true);
+    expect(result.metrics.pagesRequested).toBe(0);
+  });
+
+  it("a cursor is sent as the request bound, nudged back by the overlap", async () => {
+    enable();
+    const fetchSpy = vi.fn().mockImplementation(
+      async () =>
+        new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-03T12:00:00.000Z" }),
+    );
+
+    const url = String(fetchSpy.mock.calls[0]?.[0] ?? "");
+    expect(url).toContain("date=2026-08-03T11%3A59%3A59.000Z");
+  });
+
+  it("returns the next checkpoint, advanced over everything SEEN", async () => {
+    enable();
+    stubFetch([
+      ad({ id: "a", publication_date: "2026-08-04T08:00:00Z" }),
+      ad({ id: "b", publication_date: "2026-08-04T10:00:00Z" }),
+    ]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+    );
+
+    expect(result.nextCursor).toBe("2026-08-04T10:00:00.000Z");
+  });
+
+  it("a run that fetched nothing leaves the checkpoint untouched", async () => {
+    enable();
+    stubFetch([]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+    );
+
+    expect(result.nextCursor).toBe("2026-08-01T00:00:00.000Z");
+  });
+
+  it("a snapshot is a ONE-SHOT — a single page, never a paged sweep", async () => {
+    enable();
+    const fetchSpy = vi.fn().mockImplementation(
+      async () =>
+        new Response(JSON.stringify(Array.from({ length: 100 }, () => ad())), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await runVacancyImport(request({ channel: "snapshot" }));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(result.metrics.pagesRequested).toBe(1);
+  });
+
+  it("the provider's declared cadence is snapshot-once, stream ~60s, links daily", () => {
+    const byChannel = Object.fromEntries(
+      PROVIDER.endpoints.map((e) => [e.channel, e.cadence]),
+    );
+    expect(byChannel.snapshot).toMatchObject({
+      runOnce: true,
+      checkpointed: false,
+    });
+    expect(byChannel.stream).toMatchObject({
+      intervalSeconds: 60,
+      runOnce: false,
+      checkpointed: true,
+    });
+    expect(byChannel.links).toMatchObject({
+      intervalSeconds: 86_400,
+      runOnce: false,
+      checkpointed: true,
+    });
   });
 });
 

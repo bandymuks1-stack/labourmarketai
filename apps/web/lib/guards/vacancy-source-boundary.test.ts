@@ -120,23 +120,45 @@ describe("(b) categorization is deterministic — no LLM SDK in the pipeline", (
 // ── (c) every provider stays owner-gated ─────────────────────────────────────
 
 describe("(c) every vacancy provider is OWNER-GATED in source governance", () => {
-  it("each provider has a governance row that is off, unconfirmed and proposed-only", () => {
+  it("each provider has a governance row that is NOT active", () => {
+    // Provider permission and OUR activation are separate decisions. A
+    // provider may have confirmed its terms (Arbetsförmedlingen has: CC0,
+    // keyless, no prior notification) and still import nothing, because
+    // activation needs a persistence schema and an operator flip.
     expect(VACANCY_PROVIDERS.length).toBeGreaterThan(0);
     for (const provider of VACANCY_PROVIDERS) {
       const profile = INTELLIGENCE_SOURCE_PROFILES.find(
         (p) => p.key === provider.governanceSourceKey,
       );
       expect(profile, `${provider.key} governance row`).toBeTruthy();
-      expect(profile!.activation, `${provider.key} activation`).toBe("off");
-      expect(profile!.legalStatus, `${provider.key} legalStatus`).toBe(
-        "unconfirmed",
-      );
-      expect(profile!.proposedOnly, `${provider.key} proposedOnly`).toBe(true);
+      expect(profile!.activation, `${provider.key} activation`).not.toBe("on");
       expect(profile!.importPolicy, `${provider.key} importPolicy`).toBeNull();
       expect(
         isExternalSourceActive(provider.key),
         `${provider.key} active`,
       ).toBe(false);
+    }
+  });
+
+  it("arbetsformedlingen records the provider's actual answer, not a placeholder", () => {
+    const profile = INTELLIGENCE_SOURCE_PROFILES.find(
+      (p) => p.key === "arbetsformedlingen",
+    )!;
+    expect(profile.legalStatus).toBe("confirmed");
+    expect(profile.proposedOnly).toBe(false);
+    expect(profile.activation).toBe("owner_review");
+  });
+
+  it("no vacancy provider endpoint requires an API key", () => {
+    // JobTech is keyless. A descriptor that started demanding one would be a
+    // silent request for a secret we were told we do not need.
+    for (const provider of VACANCY_PROVIDERS) {
+      for (const endpoint of provider.endpoints) {
+        expect(
+          endpoint.requiresApiKey,
+          `${provider.key}/${endpoint.channel}`,
+        ).toBe(false);
+      }
     }
   });
 
@@ -244,6 +266,138 @@ describe("(f) shared stages never become country-aware", () => {
         provider.key,
       );
     }
+  });
+});
+
+// ── (h) no second vacancy product ────────────────────────────────────────────
+
+describe("(h) imported vacancies never become a second product", () => {
+  it("the pipeline ships NO component — there is no second card to diverge", () => {
+    const components = [...walk(PURE_DIR), ...walk(SERVER_DIR)].filter((f) =>
+      f.endsWith(".tsx"),
+    );
+    expect(components.map(rel), components.join("\n")).toEqual([]);
+  });
+
+  it("exactly one module defines the presentation contract", () => {
+    const definers = sourcesIn(PURE_DIR)
+      .filter((f) => /toCanonicalOpportunityView/.test(code(read(f))))
+      .map(rel);
+    expect(definers).toEqual(["lib/vacancy-sources/vacancy-presentation.ts"]);
+  });
+
+  it("the pipeline never claims a client, partner or managed relationship", () => {
+    // These are claims about a relationship an external public ad cannot
+    // create. They must not appear as copy, codes, or field names.
+    const FORBIDDEN =
+      /officialPartner|recruitmentPartner|isClient|ourClient|managedByUs|verifiedEmployerClient/;
+    const offenders = [...sourcesIn(PURE_DIR), ...sourcesIn(SERVER_DIR)]
+      .filter((f) => FORBIDDEN.test(code(read(f))))
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
+
+// ── (i) no contact enrichment, no outreach transport, no persistence ─────────
+
+describe("(i) the pipeline collects no contacts and sends nothing", () => {
+  it("no contact-enrichment or scraping path exists", () => {
+    const ENRICHMENT =
+      /guessEmail|emailPattern|findContact|enrichContact|scrape|crawler|linkedin\.com|hunter\.io|clearbit/i;
+    const offenders = [...sourcesIn(PURE_DIR), ...sourcesIn(SERVER_DIR)]
+      .filter((f) => ENRICHMENT.test(code(read(f))))
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the outreach policy imports nothing that could send a message", () => {
+    const src = code(
+      read(join(PURE_DIR, "employer-outreach-policy.ts")),
+    );
+    expect(src).not.toMatch(/\bfetch\s*\(/);
+    expect(src).not.toMatch(/nodemailer|resend|sendgrid|postmark|smtp/i);
+    expect(src).not.toMatch(/["']@\/lib\/email/);
+    expect(src).not.toMatch(/telegram/i);
+    // It is pure: no imports at all.
+    expect(src).not.toMatch(/^\s*import\s/m);
+  });
+
+  it("no module introduces a table, a migration or a DDL statement", () => {
+    const DDL = /create\s+table|alter\s+table|insert\s+into|supabase\.from/i;
+    const offenders = [...sourcesIn(PURE_DIR), ...sourcesIn(SERVER_DIR)]
+      .filter((f) => DDL.test(code(read(f))))
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the server layer holds no supabase client either", () => {
+    const offenders = sourcesIn(SERVER_DIR)
+      .filter((f) => /["']@?\/?(lib\/supabase|@supabase)\//.test(code(read(f))))
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
+
+// ── (j) internal state names never reach a user ──────────────────────────────
+
+describe("(j) technical state names stay internal", () => {
+  it("no outreach or provenance enum value appears in a locale catalogue", () => {
+    const INTERNAL = [
+      "ineligible_too_new",
+      "eligible_for_human_review",
+      "approved_for_single_contact",
+      "opted_out",
+      "company_claimed",
+      "unclaimed_external",
+      "external_public_source",
+      "source_original",
+      "platform_internal",
+    ];
+    const messagesDir = join(APP_ROOT, "messages");
+    const offenders: string[] = [];
+    for (const file of walk(messagesDir).filter((f) => f.endsWith(".json"))) {
+      const src = read(file);
+      for (const name of INTERNAL) {
+        if (src.includes(name)) offenders.push(`${rel(file)}: ${name}`);
+      }
+    }
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the user-facing notes are i18n codes that exist in every locale", () => {
+    const CODES = [
+      "vacancySources.attribution.arbetsformedlingen",
+      "vacancySources.provenance.externalPublicSource",
+      "vacancySources.provenance.employerHasNotClaimed",
+      "vacancySources.provenance.employerManagesHere",
+    ];
+    const messagesDir = join(APP_ROOT, "messages");
+    const catalogues = readdirSync(messagesDir).filter((f) =>
+      f.endsWith(".json"),
+    );
+    expect(catalogues.length).toBeGreaterThan(0);
+    const missing: string[] = [];
+    for (const file of catalogues) {
+      const json = JSON.parse(read(join(messagesDir, file))) as Record<
+        string,
+        unknown
+      >;
+      for (const codePath of CODES) {
+        const value = codePath
+          .split(".")
+          .reduce<unknown>(
+            (acc, key) =>
+              acc && typeof acc === "object"
+                ? (acc as Record<string, unknown>)[key]
+                : undefined,
+            json,
+          );
+        if (typeof value !== "string" || value.trim().length === 0) {
+          missing.push(`${file}: ${codePath}`);
+        }
+      }
+    }
+    expect(missing, missing.join("\n")).toEqual([]);
   });
 });
 

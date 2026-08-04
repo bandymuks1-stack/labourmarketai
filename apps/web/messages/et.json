@@ -4049,6 +4049,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Allikas: Arbetsförmedlingen (JobTech Development). Kuulutuse sisu kuulub selle avaldanud tööandjale."
+    },
+    "provenance": {
+      "externalPublicSource": "Avaldatud avaliku tööturuameti poolt. Näitame siin, et te selle leiaksite — see ei ole labourmarket.ai kuulutus.",
+      "employerHasNotClaimed": "See tööandja ei halda seda kuulutust veel labourmarket.ai-s, seega kandideerimine käib originaalkuulutuse kaudu.",
+      "employerManagesHere": "See tööandja haldab seda kuulutust labourmarket.ai-s."
     }
   }
 }

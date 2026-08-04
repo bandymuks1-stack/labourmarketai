@@ -4049,6 +4049,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Avots: Arbetsförmedlingen (JobTech Development). Sludinājuma saturs pieder darba devējam, kurš to publicējis."
+    },
+    "provenance": {
+      "externalPublicSource": "Publicējis valsts nodarbinātības dienests. Rādām šeit, lai jūs to atrastu — tas nav labourmarket.ai sludinājums.",
+      "employerHasNotClaimed": "Šis darba devējs vēl nepārvalda šo sludinājumu labourmarket.ai, tāpēc pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "employerManagesHere": "Šis darba devējs pārvalda šo sludinājumu labourmarket.ai."
     }
   }
 }

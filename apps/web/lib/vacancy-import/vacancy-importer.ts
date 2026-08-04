@@ -52,6 +52,10 @@ import {
   type VacancyDedupState,
 } from "@/lib/vacancy-sources/vacancy-dedup";
 import {
+  computeNextVacancyCursor,
+  cursorRequestBound,
+} from "@/lib/vacancy-sources/vacancy-cursor";
+import {
   evaluateVacancyBatchGate,
   validateVacancyRecord,
 } from "@/lib/vacancy-sources/vacancy-validation";
@@ -126,8 +130,17 @@ export interface VacancyImportRequestV1 {
   readonly translationProvider?: TranslationProvider;
   /** Target locale for the translation stage. Defaults to the descriptor's. */
   readonly targetLanguage?: string;
-  /** Owner-provisioned API key, for a key-requiring endpoint. Never logged. */
+  /** Owner-provisioned API key, for a key-requiring endpoint. Never logged.
+   *  No JobTech endpoint needs one — the descriptor declares that, and the
+   *  adapter refuses rather than silently calling unauthenticated. */
   readonly apiKey?: string | null;
+  /**
+   * STREAM CHECKPOINT: the last-seen publisher timestamp. A checkpointed
+   * channel resumes from here (minus a small overlap) instead of re-reading.
+   * Passing null on a checkpointed channel is refused — an unbounded stream
+   * request is a full re-read, and the correct cold-start is a snapshot.
+   */
+  readonly cursor?: string | null;
   /** REQUIRED for mode "persist": the writer. Given the exact accepted
    *  records, it stores them idempotently and reports what it wrote. */
   readonly persist?: (
@@ -151,6 +164,13 @@ export interface VacancyImportResultV1 {
   readonly logs: readonly VacancyImportLogEventV1[];
   readonly persistedInserted: number;
   readonly persistedUpdated: number;
+  /**
+   * The checkpoint to pass to the NEXT run of a checkpointed channel. Moves
+   * forward only, and stays put when the batch added nothing newer or the run
+   * was blocked — a lost checkpoint costs a re-read, a wrong one costs
+   * skipped records.
+   */
+  readonly nextCursor: string | null;
 }
 
 export async function runVacancyImport(
@@ -220,13 +240,29 @@ export async function runVacancyImport(
   // off does not stop a dry run — reading a public endpoint to count what
   // WOULD be importable is exactly the evidence the owner needs — but it does
   // stop anything from entering (enforced below and by the import boundary).
+  // A CHECKPOINTED channel must resume from a cursor. Running one without a
+  // checkpoint would request the whole stream — a full re-read wearing the
+  // costume of a one-minute poll, on an open API we were asked to be gentle
+  // with. The correct cold start is a snapshot, so this refuses instead.
+  const needsCursor = endpoint?.cadence.checkpointed === true;
+  const requestBound = cursorRequestBound(req.cursor ?? null);
+  const cursorMissing = needsCursor && requestBound === null;
+  if (cursorMissing) {
+    log("error", "cursor_required_run_snapshot_first", channel);
+    tally("cursor_missing");
+  }
+
   const runOverNetwork =
-    switchState.operational && parser !== null && endpoint !== null;
+    switchState.operational &&
+    parser !== null &&
+    endpoint !== null &&
+    !cursorMissing;
 
   if (parser === null) log("error", "no_parser_for_provider", provider.key);
   if (endpoint === null) log("error", "channel_not_supported", channel);
 
   if (runOverNetwork) {
+    // A snapshot is a one-shot: a single page, never repeated on a schedule.
     const maxPages =
       endpoint.pagination === "none" ? 1 : bounds.maxPagesPerSession;
     let offset = Number(req.query?.offset ?? 0);
@@ -236,6 +272,11 @@ export async function runVacancyImport(
       if (endpoint.pagination === "offset_limit") {
         query.offset = offset;
         query.limit = bounds.maxItemsPerPage;
+      }
+      // Resume point for a checkpointed channel, nudged back by the overlap
+      // so a same-second publication at the boundary is not dropped.
+      if (requestBound !== null) {
+        query.date = requestBound;
       }
 
       counters.pagesRequested += 1;
@@ -472,5 +513,10 @@ export async function runVacancyImport(
     logs,
     persistedInserted,
     persistedUpdated,
+    // Advance the checkpoint over everything the publisher actually gave us,
+    // not just what survived the gates — a record we rejected for our own
+    // reasons has still been SEEN, and re-reading it forever would stall the
+    // stream. Moves forward only.
+    nextCursor: computeNextVacancyCursor(req.cursor ?? null, parsed),
   };
 }

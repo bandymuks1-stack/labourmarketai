@@ -57,8 +57,14 @@ describe("evaluateActivationReadiness — ten requirements, all mandatory", () =
       // activated eurostat profile additionally greens legal_approval (a
       // profile fact, not an activation fact), so it alone has one satisfied.
       const satisfied = readiness.requirements.filter((r) => r.satisfied);
-      if (profile.key === "eurostat") {
-        expect(satisfied.map((r) => r.id)).toEqual(["legal_approval"]);
+      if (profile.legalStatus === "confirmed") {
+        // A provider that has confirmed its terms greens legal_approval (a
+        // PROFILE fact) and nothing else. eurostat has done so since
+        // 2026-07-15; arbetsformedlingen since 2026-08-04. Neither is ready:
+        // owner/technical/rate/policy facts are all still missing.
+        expect(satisfied.map((r) => r.id), profile.key).toEqual([
+          "legal_approval",
+        ]);
       } else {
         expect(satisfied.length, profile.key).toBe(0);
       }

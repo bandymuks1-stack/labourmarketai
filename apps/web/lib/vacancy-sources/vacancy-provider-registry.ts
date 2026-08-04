@@ -43,7 +43,46 @@ export interface VacancyChannelEndpointV1 {
    * never falls back to an unauthenticated call, and never logs the key.
    */
   readonly requiresApiKey: boolean;
+  /**
+   * How often this channel should run, and whether it repeats at all. This is
+   * the PROVIDER'S OWN recommendation, recorded here so an operator schedule
+   * is derived from it rather than invented. It is a contract, not a
+   * scheduler: nothing in this repo runs on a timer today.
+   */
+  readonly cadence: VacancyChannelCadenceV1;
 }
+
+/**
+ * Channel cadence. `runOnce` marks a channel that must NOT be repeated on a
+ * schedule — a full snapshot is a cold-start / reconciliation act, and
+ * re-pulling it every minute is exactly the abuse an open API asks you not to
+ * commit.
+ */
+export interface VacancyChannelCadenceV1 {
+  /** Nominal interval between runs, in seconds. */
+  readonly intervalSeconds: number;
+  /** True when the channel is a one-shot (snapshot), not a poll. */
+  readonly runOnce: boolean;
+  /**
+   * True when the channel resumes from a cursor/checkpoint rather than
+   * re-reading from the beginning. Required for any polling channel — polling
+   * without a checkpoint is a repeated full read wearing a costume.
+   */
+  readonly checkpointed: boolean;
+}
+
+/**
+ * Provider-recommended cadences for Arbetsförmedlingen / JobTech, as given to
+ * us by the provider (2026-08-04):
+ *   - JobStream: ONE initial snapshot, then poll the stream about once a
+ *     minute, resuming from the last timestamp;
+ *   - JobAd Links: refresh about once a day.
+ *
+ * Named constants rather than bare numbers so the recommendation is legible
+ * and a change is a visible edit.
+ */
+const ONE_MINUTE_SECONDS = 60;
+const ONE_DAY_SECONDS = 24 * 60 * 60;
 
 export interface VacancyProviderDescriptorV1 {
   readonly key: VacancyProviderKey;
@@ -88,10 +127,17 @@ export interface VacancyProviderDescriptorV1 {
  * through JobTech Development. Three channels: a full snapshot, a delta
  * stream, and the aggregated JobAd Links feed.
  *
- * The governance row (source-governance.ts) ships legalStatus "unconfirmed"
- * and activation "off": the terms review is an OWNER decision and this code
- * does not pre-empt it. Every stage below is therefore built and tested but
- * imports nothing until the owner activates it.
+ * PROVIDER PERMISSION IS CONFIRMED (2026-08-04): the APIs are free, keyless,
+ * require no prior notification, and the data is CC0. Attribution is
+ * requested by the provider and required by our product policy.
+ *
+ * The governance row (source-governance.ts) therefore ships legalStatus
+ * "confirmed" with activation "owner_review" — approved for integration, not
+ * running in production. Every stage below is built and tested but imports
+ * nothing until a persistence schema exists and an operator flips the env.
+ *
+ * Channel cadence is the provider's own recommendation, encoded in
+ * VACANCY_CHANNEL_CADENCE below so an operator cannot invent a harsher one.
  */
 const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
   key: "arbetsformedlingen",
@@ -103,25 +149,43 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
   defaultTargetLanguage: "en",
   endpoints: [
     {
+      // ONE initial snapshot. Never on a schedule — see `runOnce`.
       channel: "snapshot",
       host: "jobstream.api.jobtechdev.se",
       path: "/snapshot",
       pagination: "none",
       requiresApiKey: false,
+      cadence: {
+        intervalSeconds: 0,
+        runOnce: true,
+        checkpointed: false,
+      },
     },
     {
+      // Deltas, polled about once a minute, resuming from the last cursor.
       channel: "stream",
       host: "jobstream.api.jobtechdev.se",
       path: "/stream",
       pagination: "none",
       requiresApiKey: false,
+      cadence: {
+        intervalSeconds: ONE_MINUTE_SECONDS,
+        runOnce: false,
+        checkpointed: true,
+      },
     },
     {
+      // JobAd Links: a daily refresh, paged.
       channel: "links",
       host: "links.api.jobtechdev.se",
       path: "/joblinks",
       pagination: "offset_limit",
       requiresApiKey: false,
+      cadence: {
+        intervalSeconds: ONE_DAY_SECONDS,
+        runOnce: false,
+        checkpointed: true,
+      },
     },
   ],
   transformVersion: "vacancy-arbetsformedlingen-v1",

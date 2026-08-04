@@ -4049,6 +4049,11 @@
   "vacancySources": {
     "attribution": {
       "arbetsformedlingen": "Źródło: Arbetsförmedlingen (JobTech Development). Treść ogłoszenia należy do publikującego je pracodawcy."
+    },
+    "provenance": {
+      "externalPublicSource": "Opublikowane przez publiczną służbę zatrudnienia. Pokazujemy tutaj, abyś mógł je znaleźć — to nie jest ogłoszenie labourmarket.ai.",
+      "employerHasNotClaimed": "Ten pracodawca nie zarządza jeszcze tym ogłoszeniem na labourmarket.ai, więc aplikacja przebiega przez oryginalne ogłoszenie.",
+      "employerManagesHere": "Ten pracodawca zarządza tym ogłoszeniem na labourmarket.ai."
     }
   }
 }
