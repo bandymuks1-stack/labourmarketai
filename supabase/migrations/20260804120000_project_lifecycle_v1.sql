@@ -66,6 +66,30 @@
 --   set_project_status_v1('<completed>','live')            → {"outcome":"invalid_transition"}
 --   as an unrelated caller                                 → {"outcome":"not_found"}
 --
+-- ROLLBACK — supabase/rollbacks/20260804120000_project_lifecycle_v1.down.sql
+--
+-- The paired file is the authoritative one; this block states what it does and,
+-- more importantly, WHEN IT REFUSES:
+--
+--   drop function if exists public.set_project_status_v1(uuid, text);
+--   create or replace function public.assign_worker_to_project(text, text) …
+--     -- restored byte-for-byte from 20260609120000:55-99, i.e. WITHOUT the
+--     -- completed-project guard added below
+--   alter table public.projects drop constraint projects_status_check;
+--   alter table public.projects add constraint projects_status_check
+--     check (status in ('draft','live','paused','closed'));
+--
+-- TWO ZERO-ROW GUARDS ABORT IT, and they are the point of the file:
+--   1. any project already in 'completed' — reverting the CHECK would either
+--      fail or silently reopen finished work with no audit of the reopening;
+--   2. any assignment ended BY a completion (`audit_logs.action =
+--      'end_project_assignment'` with `cause = 'project_completed'`) — those
+--      people really did stop on that date, and clearing `ended_at` would
+--      falsify history.
+-- After the first real completion the correct move is a FORWARD FIX or a
+-- separate owner data decision, never this rollback. Proven in
+-- scripts/db-proof/w11-project-lifecycle.sh §F (refusal) and §G (clean path).
+--
 -- UNAPPLIED / OWNER-GATED. No `-- @human-gate-approved` marker: SECURITY
 -- DEFINER + GRANT classify this RED by design and it ships unapplied.
 -- ============================================================================

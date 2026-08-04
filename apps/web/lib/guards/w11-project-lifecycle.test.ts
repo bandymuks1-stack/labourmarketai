@@ -80,11 +80,13 @@ describe("1. one canonical project status contract", () => {
   });
 
   it("the SQL constraint agrees with the model, and drops 'closed'", () => {
-    expect(migration).toMatch(
+    expect(migrationCode).toMatch(
       /check \(status in \('draft', 'live', 'paused', 'completed'\)\)/,
     );
     // The dead value must not survive as a second word for "finished".
-    const constraintBlock = /add constraint projects_status_check[\s\S]*?;/.exec(migration)?.[0] ?? "";
+    // On CODE, not prose: the in-file ROLLBACK block legitimately quotes the
+    // OLD constraint (including 'closed') to document what reverting restores.
+    const constraintBlock = /add constraint projects_status_check[\s\S]*?;/.exec(migrationCode)?.[0] ?? "";
     expect(constraintBlock).not.toMatch(/'closed'/);
   });
 
@@ -299,8 +301,8 @@ describe("4. completion ends exactly the right assignments", () => {
 
   it("creates NO second public assignment-ending API", () => {
     // The per-worker RPC keeps its exact signature and is not redefined here.
-    expect(migration).not.toMatch(/create or replace function public\.end_worker_project_assignment/);
-    const created = migration.match(/create or replace function public\.(\w+)/g) ?? [];
+    expect(migrationCode).not.toMatch(/create or replace function public\.end_worker_project_assignment/);
+    const created = migrationCode.match(/create or replace function public\.(\w+)/g) ?? [];
     expect(created.sort()).toEqual([
       "create or replace function public.assign_worker_to_project",
       "create or replace function public.set_project_status_v1",
