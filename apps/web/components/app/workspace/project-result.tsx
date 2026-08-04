@@ -220,6 +220,28 @@ function ProjectDetailView({
   const [attempt, setAttempt] = useState(0);
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
 
+  /**
+   * THE LIFECYCLE OUTCOME LIVES HERE, NOT IN THE CONTROLS.
+   *
+   * A successful transition refreshes the panel, and the refresh puts this
+   * component back into `loading` — which unmounts `LifecycleControls` and
+   * would destroy any state it held. Found in the authenticated browser:
+   * the success line was set and then thrown away before anyone could read
+   * it, so the ONE place a person is told how many work periods their
+   * irreversible completion ended (`projectCompletedEnded`, carrying the
+   * server's real count) was effectively invisible. Failures survived only
+   * because they do not refresh.
+   *
+   * Holding it in the parent, which the refresh does not unmount, means the
+   * outcome is still on screen next to the state it produced.
+   */
+  const [outcome, setOutcome] = useState<{ text: string; error: boolean } | null>(null);
+
+  // A different project is a different question — never carry an answer over.
+  useEffect(() => {
+    setOutcome(null);
+  }, [projectId]);
+
   useEffect(() => {
     let cancelled = false;
     setPhase({ kind: "loading" });
@@ -325,7 +347,22 @@ function ProjectDetailView({
         <Row label={t("projectAssignedCount")} value={String(p.assignmentTotal)} />
       </dl>
 
-      <LifecycleControls project={p} locale={locale} onDone={reload} />
+      <LifecycleControls
+        project={p}
+        locale={locale}
+        onDone={reload}
+        onOutcome={setOutcome}
+      />
+
+      {outcome && (
+        <p
+          role="status"
+          className={`text-meta ${outcome.error ? "text-state-danger" : "text-state-success"}`}
+          data-testid="project-lifecycle-message"
+        >
+          {outcome.text}
+        </p>
+      )}
 
       {p.assignments.length > 0 && (
         <div className="flex flex-col gap-1" data-testid="project-assignments">
@@ -388,16 +425,17 @@ function LifecycleControls({
   project,
   locale,
   onDone,
+  onOutcome,
 }: {
   project: ProjectDetail;
   locale: string;
   onDone: () => void;
+  /** Reported UP, because a successful transition unmounts this component. */
+  onOutcome: (outcome: { text: string; error: boolean } | null) => void;
 }) {
   const t = useTranslations("conversation.results");
   const [pending, start] = useTransition();
   const [confirming, setConfirming] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState(false);
 
   const targets = nextStatuses(project.status);
   if (!project.canManage || targets.length === 0) {
@@ -412,37 +450,39 @@ function LifecycleControls({
   }
 
   const run = (to: ProjectStatus) => {
-    setMessage(null);
-    setError(false);
+    onOutcome(null);
     start(async () => {
       const res = await setProjectStatusAction(locale, project.projectId, to);
       setConfirming(false);
       if (res.kind === "transitioned") {
         // The REAL count from the server — the panel never estimates it.
-        setMessage(
-          res.assignmentsEnded > 0
-            ? t("projectCompletedEnded", { count: res.assignmentsEnded })
-            : t("projectTransitioned"),
-        );
+        onOutcome({
+          text:
+            res.assignmentsEnded > 0
+              ? t("projectCompletedEnded", { count: res.assignmentsEnded })
+              : t("projectTransitioned"),
+          error: false,
+        });
         onDone();
         return;
       }
-      setError(true);
-      setMessage(
-        res.kind === "already_in_state"
-          ? t("projectAlreadyInState")
-          : res.kind === "invalid_transition"
-            ? t("projectInvalidTransition")
-            : res.kind === "not_authorized"
-              ? t("projectNotAuthorized")
-              : res.kind === "not_found"
-                ? t("projectNotFound")
-                : res.kind === "needs_migration"
-                  ? t("projectNeedsMigration")
-                  : res.kind === "conflict"
-                    ? t("projectConflict")
-                    : t("projectError"),
-      );
+      onOutcome({
+        text:
+          res.kind === "already_in_state"
+            ? t("projectAlreadyInState")
+            : res.kind === "invalid_transition"
+              ? t("projectInvalidTransition")
+              : res.kind === "not_authorized"
+                ? t("projectNotAuthorized")
+                : res.kind === "not_found"
+                  ? t("projectNotFound")
+                  : res.kind === "needs_migration"
+                    ? t("projectNeedsMigration")
+                    : res.kind === "conflict"
+                      ? t("projectConflict")
+                      : t("projectError"),
+        error: true,
+      });
     });
   };
 
@@ -511,16 +551,6 @@ function LifecycleControls({
             ),
           )}
         </ChatActionRow>
-      )}
-
-      {message && (
-        <p
-          role="status"
-          className={`text-meta ${error ? "text-state-danger" : "text-state-success"}`}
-          data-testid="project-lifecycle-message"
-        >
-          {message}
-        </p>
       )}
     </div>
   );
