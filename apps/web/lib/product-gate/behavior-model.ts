@@ -366,9 +366,26 @@ export const BEHAVIOR_CONFORMANCE = {
   // `experiences` result. The audit's CLAIM is unchanged by it — the new
   // action is anchored to a page like every other one, which is exactly the
   // conformance gap this census exists to keep visible.
-  conversationActions: 31,
-  actionsAnchoredToAPage: 31,
-  actionsThatOnlyDeepLink: 9,
+  //
+  // 31 → 34 in §7.1: `company.review-engagements`, `worker.review-engagements`
+  // and `engagement.end`. All three are still anchored to a page, so the
+  // conformance gap is unchanged — but the LAST of them is the first crack in
+  // `actionsKeyedTo: "rbac_role"`, and it is recorded rather than smoothed
+  // over. `engagement.end` is keyed to a RELATIONSHIP, because the employer
+  // and the worker hold the same authority over the same row and naming the
+  // act after one of them would have been a lie about who owns it.
+  //
+  // That is a small step TOWARD the behaviour model this audit says is
+  // missing, not away from it: it is the first action whose availability is a
+  // fact about a relationship rather than about an actor type. The verdict
+  // stays `special_case_per_actor_type` because one action out of 34 does not
+  // make a layer — and overstating it here is exactly what this census exists
+  // to prevent.
+  conversationActions: 34,
+  actionsAnchoredToAPage: 34,
+  /** The one action keyed to a relationship rather than to an RBAC role. */
+  actionsKeyedToARelationship: 1,
+  actionsThatOnlyDeepLink: 11,
   verdict: "special_case_per_actor_type" as const,
   /** The one thing that is already right, and is the seed of the migration. */
   strongestExistingFoundation:
