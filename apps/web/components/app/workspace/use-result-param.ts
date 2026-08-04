@@ -91,6 +91,10 @@ export function useResultParam(): {
   openResult: (kind: ResultKind) => void;
   /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
   selectDemand: (requestId: string) => void;
+  /** W11 — open the PROJECT result at one project, in ONE push. Distinct from
+   *  `selectProject`, which drills inside the market result and assumes a
+   *  geography is already set. */
+  openProjectResult: (projectId: string) => void;
   /** Step back up to the demand list. Replaces. */
   clearDemand: () => void;
   /** Drill into one interaction to describe it. Pushes, so Back returns to
@@ -179,11 +183,21 @@ export function useResultParam(): {
 
   const rawProject = readParam("project");
   const projectId = useMemo(() => {
-    if (!geography) return null;
+    // TWO results carry a project depth, and they reach it differently.
+    //
+    // `market` drills map → place → project, so a project there is only
+    // meaningful UNDER a geography: a `?project=` with no `?geo=` would be a
+    // depth with no parent, and the drill-down would have nothing to step back
+    // to. That guard stays exactly as it was.
+    //
+    // W11's `project` result addresses a project DIRECTLY — it is the whole
+    // subject, not a leaf of a map — so it needs no geography. Same param, same
+    // validation, because it is the same fact: which project.
+    if (!geography && result !== "project") return null;
     return typeof rawProject === "string" && UUID_RX.test(rawProject)
       ? rawProject
       : null;
-  }, [rawProject, geography]);
+  }, [rawProject, geography, result]);
 
   // W8 — the candidates result's depth. Unlike `project` it has no parent
   // token to depend on: a demand is addressable on its own, so the only gate
@@ -250,6 +264,17 @@ export function useResultParam(): {
       [write],
     ),
     clearDemand: useCallback(() => write({ demand: null }, "replace"), [write]),
+    // ONE write, for the same reason `selectDemand` uses one: two calls would
+    // both read the not-yet-updated query string and the second would clobber
+    // the first, opening the panel at the wrong depth.
+    openProjectResult: useCallback(
+      (projectId: string) =>
+        write(
+          { result: "project", geo: null, interaction: null, demand: null, project: projectId },
+          "push",
+        ),
+      [write],
+    ),
     // Going DEEPER pushes, like selecting a place or a project: opening the
     // form for one interaction is a step the person expects Back to undo.
     //

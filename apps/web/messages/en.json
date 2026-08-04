@@ -526,7 +526,8 @@
         "status": {
           "draft": "Draft",
           "live": "Live",
-          "paused": "Paused"
+          "paused": "Paused",
+          "completed": "Completed"
         },
         "total": "Total",
         "empty": "No projects yet — figures appear as soon as your company has project rows.",
@@ -10861,7 +10862,18 @@
       "candidatesOpened": "Here are your needs and the people behind them.",
       "candidatesNoDemands": "Your company has not described a need yet, so there is nobody to match.",
       "candidatesNoCompany": "You are in your personal space right now, so there are no company needs here. Switch space to work as your company.",
-      "candidatesUnavailable": "I could not read your company's needs right now."
+      "candidatesUnavailable": "I could not read your company's needs right now.",
+      "chipProjects": "Projects",
+      "userProjects": "Show me my projects",
+      "projectsOpened": "Here is your running work.",
+      "projectsNone": "There is no project yet.",
+      "projectsNoCompany": "You are in your personal space right now, so there are no company projects here. Switch space to work as your company.",
+      "projectsUnavailable": "I could not read your projects right now.",
+      "assignPickWorker": "Who should work on it?",
+      "assignNoWorkers": "There is nobody on your team to assign yet.",
+      "assignUnavailable": "I could not read your team right now.",
+      "assignDone": "Assigned to the project.",
+      "assignFailed": "The assignment could not be made."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -11149,7 +11161,45 @@
       "actionNotAuthorized": "You cannot do this from here.",
       "bookingStart": "Start",
       "bookingEnd": "Expected end",
-      "bookingNote": "Note"
+      "bookingNote": "Note",
+      "projectError": "We could not read the project.",
+      "projectNoCompany": "You are not acting for a company right now, so there are no company projects here.",
+      "projectBlocked": "This is not available in this environment right now.",
+      "projectEmpty": "There is no project yet.",
+      "projectPick": "Which project?",
+      "projectBackToList": "Back to projects",
+      "projectNotFound": "That project was not found, or you cannot see it.",
+      "projectStatus": {
+        "draft": "Draft",
+        "live": "In progress",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "projectStatusUnknown": "Status unknown",
+      "projectAssigned": "Assigned people",
+      "projectAssignedCount": "Assigned",
+      "projectStages": "Stages",
+      "projectStagesEmpty": "No stages have been entered for this project.",
+      "projectStagesUnavailable": "Stages cannot be read in this environment, so we are not showing an empty list as if there were none.",
+      "projectAssignWorker": "Assign a worker",
+      "projectCompletedNoAssign": "The project is completed, so nobody new can be assigned to it.",
+      "projectTerminal": "A completed project cannot be updated. It stays as history.",
+      "projectActionPublish": "Publish project",
+      "projectActionPause": "Pause project",
+      "projectActionResume": "Resume project",
+      "projectActionCompleted": "Complete project",
+      "projectCompleteTitle": "Complete this project?",
+      "projectCompleteBody": "Completion is final: the project cannot be reopened. It stays as history with its stages and records. Active work assignments on this project are marked as ended. No review or rating is created.",
+      "projectCompleteCta": "Complete project",
+      "projectCancel": "Cancel",
+      "projectWorking": "Working…",
+      "projectTransitioned": "The project status was changed.",
+      "projectCompletedEnded": "The project is completed. Work periods marked as ended: {count}.",
+      "projectAlreadyInState": "The project is already in that state. Nothing was changed.",
+      "projectInvalidTransition": "This status change cannot be made.",
+      "projectNotAuthorized": "You cannot change this project's status.",
+      "projectNeedsMigration": "Project status changes are not available in this environment yet.",
+      "projectConflict": "The project changed while you were looking at it. Open it again."
     }
   },
   "landing": {

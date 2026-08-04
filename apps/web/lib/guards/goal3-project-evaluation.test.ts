@@ -524,8 +524,19 @@ describe("every depth is a real, restorable address", () => {
   it("the hook validates `geo` and `project` before anyone sees them", () => {
     const src = read(HOOK);
     expect(src).toMatch(/parseGeography\(rawGeo\)/);
-    // A project id without a geography is not a state this product has.
-    expect(src).toMatch(/if \(!geography\) return null;/);
+    // A project id without a geography is not a state the MARKET result has:
+    // its depth is map → place → project, so a project with no place would be
+    // a leaf with no parent and the drill-down would have nothing to step back
+    // to. That guard is unchanged.
+    //
+    // W11 added a SECOND owner of this param. The `project` result addresses a
+    // project DIRECTLY — it is the whole subject, not a leaf of a map — so it
+    // needs no geography, and the condition now names which result it applies
+    // to instead of forbidding the state outright. The VALIDATION is what this
+    // test is really about, and it is unconditional either way: the uuid shape
+    // check runs before any consumer sees the value.
+    expect(src).toMatch(/if \(!geography && result !== "project"\) return null;/);
+    expect(src).toMatch(/UUID_RX\.test\(rawProject\)/);
   });
 
   it("re-serializes the validated selection rather than passing the raw token", () => {

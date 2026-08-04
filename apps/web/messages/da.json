@@ -3354,7 +3354,18 @@
       "candidatesOpened": "Her er dine behov og menneskene bag dem.",
       "candidatesNoDemands": "Dit firma har endnu ikke beskrevet et behov, så der er ingen at matche.",
       "candidatesNoCompany": "Du er i dit personlige rum lige nu, så der er ingen firmabehov her. Skift rum for at arbejde som dit firma.",
-      "candidatesUnavailable": "Jeg kunne ikke læse dit firmas behov lige nu."
+      "candidatesUnavailable": "Jeg kunne ikke læse dit firmas behov lige nu.",
+      "chipProjects": "Projekter",
+      "userProjects": "Vis mine projekter",
+      "projectsOpened": "Her er dit igangværende arbejde.",
+      "projectsNone": "Der er endnu ingen projekter.",
+      "projectsNoCompany": "Du er i dit personlige rum lige nu, så der er ingen firmaprojekter her. Skift rum for at arbejde som dit firma.",
+      "projectsUnavailable": "Jeg kunne ikke læse dine projekter lige nu.",
+      "assignPickWorker": "Hvem skal arbejde på det?",
+      "assignNoWorkers": "Der er endnu ingen i dit team at tildele.",
+      "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
+      "assignDone": "Tildelt projektet.",
+      "assignFailed": "Tildelingen kunne ikke gennemføres."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

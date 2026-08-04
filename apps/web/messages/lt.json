@@ -526,7 +526,8 @@
         "status": {
           "draft": "Juodraštis",
           "live": "Vykdomi",
-          "paused": "Pristabdyti"
+          "paused": "Pristabdyti",
+          "completed": "Užbaigti"
         },
         "total": "Iš viso",
         "empty": "Projektų dar nėra — rodikliai atsiras, kai įmonė turės projektų eilučių.",
@@ -10861,7 +10862,18 @@
       "candidatesOpened": "Štai jūsų poreikiai ir žmonės už jų.",
       "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio, todėl nėra su kuo lyginti.",
       "candidatesNoCompany": "Šiuo metu esate asmeninėje erdvėje, todėl čia įmonės poreikių nėra. Perjunkite erdvę, kad dirbtumėte kaip įmonė.",
-      "candidatesUnavailable": "Šiuo metu nepavyko nuskaityti jūsų įmonės poreikių."
+      "candidatesUnavailable": "Šiuo metu nepavyko nuskaityti jūsų įmonės poreikių.",
+      "chipProjects": "Projektai",
+      "userProjects": "Parodyk mano projektus",
+      "projectsOpened": "Štai jūsų vykdomi darbai.",
+      "projectsNone": "Projektų kol kas nėra.",
+      "projectsNoCompany": "Šiuo metu esate asmeninėje erdvėje, todėl čia įmonės projektų nėra. Perjunkite erdvę, kad dirbtumėte kaip įmonė.",
+      "projectsUnavailable": "Šiuo metu nepavyko nuskaityti jūsų projektų.",
+      "assignPickWorker": "Kas turėtų jame dirbti?",
+      "assignNoWorkers": "Jūsų komandoje kol kas nėra ko priskirti.",
+      "assignUnavailable": "Šiuo metu nepavyko nuskaityti jūsų komandos.",
+      "assignDone": "Priskirta projektui.",
+      "assignFailed": "Priskyrimo atlikti nepavyko."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -11149,7 +11161,45 @@
       "actionNotAuthorized": "Iš čia to padaryti negalite.",
       "bookingStart": "Pradžia",
       "bookingEnd": "Numatoma pabaiga",
-      "bookingNote": "Pastaba"
+      "bookingNote": "Pastaba",
+      "projectError": "Nepavyko nuskaityti projekto.",
+      "projectNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia įmonės projektų nėra.",
+      "projectBlocked": "Šioje aplinkoje tai kol kas nepasiekiama.",
+      "projectEmpty": "Projektų kol kas nėra.",
+      "projectPick": "Kuris projektas?",
+      "projectBackToList": "Atgal į projektus",
+      "projectNotFound": "Toks projektas nerastas arba jo nematote.",
+      "projectStatus": {
+        "draft": "Juodraštis",
+        "live": "Vykdomas",
+        "paused": "Pristabdytas",
+        "completed": "Užbaigtas"
+      },
+      "projectStatusUnknown": "Būsena nežinoma",
+      "projectAssigned": "Priskirti žmonės",
+      "projectAssignedCount": "Priskirta",
+      "projectStages": "Etapai",
+      "projectStagesEmpty": "Šiam projektui etapų dar neįvesta.",
+      "projectStagesUnavailable": "Šioje aplinkoje etapų nuskaityti negalima, todėl nerodome tuščio sąrašo, tarsi jų nebūtų.",
+      "projectAssignWorker": "Priskirti darbuotoją",
+      "projectCompletedNoAssign": "Projektas užbaigtas, todėl naujų žmonių jam priskirti nebegalima.",
+      "projectTerminal": "Užbaigto projekto atnaujinti nebegalima. Jis lieka kaip istorija.",
+      "projectActionPublish": "Publikuoti projektą",
+      "projectActionPause": "Pristabdyti projektą",
+      "projectActionResume": "Tęsti projektą",
+      "projectActionCompleted": "Užbaigti projektą",
+      "projectCompleteTitle": "Užbaigti šį projektą?",
+      "projectCompleteBody": "Užbaigimas yra galutinis: projekto atverti iš naujo nebegalėsite. Jis lieka kaip istorija su savo etapais ir įrašais. Aktyvūs šio projekto darbo priskyrimai pažymimi kaip pasibaigę. Jokio atsiliepimo ar vertinimo nesukuriama.",
+      "projectCompleteCta": "Užbaigti projektą",
+      "projectCancel": "Atšaukti",
+      "projectWorking": "Vykdoma…",
+      "projectTransitioned": "Projekto būsena pakeista.",
+      "projectCompletedEnded": "Projektas užbaigtas. Darbo laikotarpių pažymėta kaip pasibaigusių: {count}.",
+      "projectAlreadyInState": "Projektas jau yra tokios būsenos. Niekas nepakeista.",
+      "projectInvalidTransition": "Šio būsenos pakeitimo atlikti negalima.",
+      "projectNotAuthorized": "Šio projekto būsenos keisti negalite.",
+      "projectNeedsMigration": "Projekto būsenos keitimai šioje aplinkoje dar nepasiekiami.",
+      "projectConflict": "Projektas pasikeitė, kol jį žiūrėjote. Atidarykite jį iš naujo."
     }
   },
   "landing": {

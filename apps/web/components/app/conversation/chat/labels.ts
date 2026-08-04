@@ -28,6 +28,12 @@ const CHAT_KEYS = [
   // none of them may be rendered as one of the others.
   "userCandidates", "candidatesOpened", "candidatesNoDemands",
   "candidatesNoCompany", "candidatesUnavailable",
+  // W11 — projects and the assignment step. Same rule as above: "no project",
+  // "no company" and "the read failed" are three different truths.
+  "chipProjects", "userProjects", "projectsOpened", "projectsNone",
+  "projectsNoCompany", "projectsUnavailable",
+  "assignPickWorker", "assignNoWorkers", "assignUnavailable",
+  "assignDone", "assignFailed",
 ] as const;
 
 const WORKLOG_KEYS = [
