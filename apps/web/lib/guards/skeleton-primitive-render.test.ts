@@ -200,9 +200,18 @@ describe("the three real route loaders render as honest placeholders", () => {
 
     it(`${name}: renders NO words — a placeholder shows no content`, () => {
       const out = html(createElement(Loader));
-      // Strip every tag; whatever is left would be visible text.
-      const visible = out.replace(/<[^>]*>/g, "").trim();
-      expect(visible, `${name} rendered text: "${visible}"`).toBe("");
+      // Collect the text nodes (anything between a `>` and the next `<`)
+      // rather than stripping tags with a replace. A tag-stripping replace is
+      // the shape of an incomplete sanitizer — CodeQL flags it as one, and it
+      // is genuinely unreliable on nested or malformed markup. Detecting is
+      // both safer and a better failure message: it names the offending text.
+      const textNodes = [...out.matchAll(/>([^<]+)</g)]
+        .map((m) => m[1].trim())
+        .filter((text) => text.length > 0);
+      expect(
+        textNodes,
+        `${name} rendered text: ${JSON.stringify(textNodes)}`,
+      ).toEqual([]);
     });
 
     it(`${name}: renders only div elements — no images, no inputs, no links`, () => {
