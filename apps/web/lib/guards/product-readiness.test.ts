@@ -1927,7 +1927,16 @@ describe("no migration files added by this sprint", () => {
     // slice 3 branch (#974) also adds one migration and must resolve to 171
     // if it merges after this PR. Never take either side verbatim — recount
     // the real migration files after every rebase.
-    const SPRINT_BASELINE = 178;
+    // Bumped 178 -> 179 for §7.1 `20260804160000_booking_engagement_end_v2`.
+    // SAFE: purely ADDITIVE — it creates ONE new function
+    // (`end_company_worker_engagement_v2`) and grants EXECUTE on it, and
+    // changes no table, column, index, policy, RLS rule or existing grant. It
+    // performs ZERO DML at apply time (the UPDATE lives in the function body).
+    // Paired rollback exists and is safe at any time because nothing it drops
+    // holds data. RED by design (SECURITY DEFINER + GRANT + in-body DML),
+    // deliberately NOT human-gate-annotated — the owner applies it. Ships
+    // UNAPPLIED.
+    const SPRINT_BASELINE = 179;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
