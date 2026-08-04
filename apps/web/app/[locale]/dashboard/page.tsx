@@ -5,7 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { type Role } from "@/lib/auth/actions";
 import { listMyBookings } from "@/lib/booking/booking-actions";
-import { ConversationChat } from "@/components/app/conversation/chat/conversation-chat";
+import {
+  ConversationChat,
+  type PersonalIntroPayload,
+} from "@/components/app/conversation/chat/conversation-chat";
 import {
   resolveChatLabels,
   resolveWorkLogLabels,
@@ -46,22 +49,25 @@ export default async function DashboardHomePage({
   const session = await getSessionProfile();
   const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
 
-  const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
   // canonical player card). It decides ONLY whether the personal block is
-  // shown and what it says; the chat below is unchanged. Its copy is resolved
-  // here too (label-bag idiom), so no new message namespace reaches the
-  // client bundle — and only when there is actually a block to render.
-  const personalIntro = await loadPersonalWorkspaceIntro();
-  const personalIntroLabels =
-    personalIntro.kind === "hidden"
-      ? null
-      : resolvePersonalWorkspaceLabels(
-          await getTranslations("personalWorkspace"),
-          await getTranslations("playerCard.readinessSteps.pillar"),
-          await getTranslations("conversation.chat"),
-        );
+  // shown and what it says; its copy is resolved in the same payload
+  // (label-bag idiom), so no new message namespace reaches the client bundle.
+  //
+  // DELIBERATELY NOT AWAITED (#1011). The worker-side readiness reads behind
+  // this payload (worker activity + the player-card model) are the slowest
+  // thing on the page — awaiting them here pushed the ENTIRE worker surface
+  // past the shell flush into the route's loading.tsx Suspense boundary, so a
+  // worker saw the skeleton for the full read (and, in a tab that has not yet
+  // painted a frame, React's batched reveal never runs at all — the page hung
+  // on the skeleton). The promise streams to the client and resolves inside
+  // the chat's own invisible Suspense boundary (SpineStream pattern): the
+  // conversation surface reaches the shell for every identity, and the intro
+  // block appears the moment it is known.
+  const personalIntroPayload: Promise<PersonalIntroPayload> =
+    loadPersonalIntroPayload();
+  const { offers, labels: bookingLabels } = await loadBookingOffers(activeRole);
   const labels = resolveChatLabels(await getTranslations("conversation.chat"));
   const workLogLabels = resolveWorkLogLabels(
     await getTranslations("conversation.worklog"),
@@ -77,10 +83,27 @@ export default async function DashboardHomePage({
       workLogLabels={workLogLabels}
       bookingOffers={offers}
       bookingLabels={bookingLabels}
-      personalIntro={personalIntro}
-      personalIntroLabels={personalIntroLabels}
+      personalIntroPayload={personalIntroPayload}
     />
   );
+}
+
+/**
+ * The S2 payload — the intro model plus its resolved copy, as ONE promise the
+ * page hands to the chat without awaiting. `resolvePersonalWorkspaceLabels`
+ * runs only when there is actually a block to render (same rule as before).
+ */
+async function loadPersonalIntroPayload(): Promise<PersonalIntroPayload> {
+  const intro = await loadPersonalWorkspaceIntro();
+  const labels =
+    intro.kind === "hidden"
+      ? null
+      : resolvePersonalWorkspaceLabels(
+          await getTranslations("personalWorkspace"),
+          await getTranslations("playerCard.readinessSteps.pillar"),
+          await getTranslations("conversation.chat"),
+        );
+  return { intro, labels };
 }
 
 async function loadBookingOffers(
