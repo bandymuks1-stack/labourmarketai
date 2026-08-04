@@ -19,10 +19,10 @@ import {
 import {
   ENGAGEMENT_ACTION_SCHEMAS,
   type EngagementActionId,
-} from "@/lib/conversation/engagement-schemas";
+} from "@/lib/engagements/engagement-schemas";
 import { WORKER_EXECUTORS, type ExecResult } from "@/lib/conversation/worker-executors";
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
-import { ENGAGEMENT_EXECUTORS } from "@/lib/conversation/engagement-executors";
+import { ENGAGEMENT_EXECUTORS } from "@/lib/engagements/engagement-executors";
 import {
   canonicalInputHash,
   issueConfirmationToken,

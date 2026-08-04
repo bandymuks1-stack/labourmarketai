@@ -12,7 +12,7 @@ import {
   getResult,
   resultForAction,
 } from "@/lib/conversation/result-registry";
-import { ENGAGEMENT_ACTION_SCHEMAS } from "@/lib/conversation/engagement-schemas";
+import { ENGAGEMENT_ACTION_SCHEMAS } from "@/lib/engagements/engagement-schemas";
 import { authorizeDispatch } from "@/lib/conversation/dispatch-core";
 import { roleContextForAction } from "@/lib/conversation/action-role-context";
 import type { Role } from "@/lib/auth/actions";
@@ -78,7 +78,7 @@ const RESULT_BODY = read("components", "app", "workspace", "result-body.tsx");
 const RENDERER = read("components", "app", "workspace", "engagements-result.tsx");
 const READER = read("lib", "engagements", "engagements-result.ts");
 const WRITER = read("lib", "engagements", "end-engagement.ts");
-const EXECUTORS = read("lib", "conversation", "engagement-executors.ts");
+const EXECUTORS = read("lib", "engagements", "engagement-executors.ts");
 const DISPATCH = read("lib", "conversation", "dispatch.ts");
 
 // ═══════════════════════════════════════════════════════════════════════════

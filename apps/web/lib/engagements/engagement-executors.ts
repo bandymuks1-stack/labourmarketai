@@ -6,11 +6,26 @@ import { endEngagementAction } from "@/lib/engagements/end-engagement";
 import {
   ENGAGEMENT_ACTION_SCHEMAS,
   type EngagementActionId,
-} from "@/lib/conversation/engagement-schemas";
+} from "@/lib/engagements/engagement-schemas";
 import type { ExecCtx, ExecResult } from "@/lib/conversation/executor-contract";
 
 /**
  * Relationship-side executors (§7.1). ONE entry, and ONE is the design.
+ *
+ * ─── WHY THIS LIVES IN lib/engagements AND NOT lib/conversation ─────────────
+ * The Product Gate's A-01 rule refuses a new `lib/conversation/*-executors.ts`:
+ * "behavior must be a binding on an entity, not a module per type". It fired on
+ * the first draft of this file, and it was RIGHT — not because this module is
+ * per-actor-type (it is the exact opposite; that is the whole point of
+ * `engagement.end`), but because that FAMILY is. `worker-executors.ts` and
+ * `company-executors.ts` are per-actor-type aggregations of many actions across
+ * many domains, and a third file beside them reads as a third actor type
+ * whatever its contents say.
+ *
+ * The gate was not weakened to let this through. The module moved to where it
+ * actually belongs: beside the server action and the reader it adapts, in its
+ * own domain. Its location now states what it is — one domain's one action —
+ * instead of implying membership in a family it does not belong to.
  *
  * Same contract as the worker and employer executor maps: a THIN adapter that
  * validates nothing new of its own — the dispatcher already parsed the input
