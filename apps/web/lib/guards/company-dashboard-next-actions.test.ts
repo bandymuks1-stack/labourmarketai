@@ -31,7 +31,8 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
 
   it("reuses the canonical company route + role gate stays first", () => {
     const gateIdx = page.search(/await\s+requireRoleOrRedirect\(\s*locale\s*,\s*["']company["']\s*\)/);
-    const readIdx = page.search(/getOwnCompanyProfile\(\)/);
+    // M-P0-3: the company read is workspace-resolved, still after the gate.
+    const readIdx = page.search(/resolveEmployerCompanyContext\(\)/);
     expect(gateIdx).toBeGreaterThan(-1);
     expect(readIdx).toBeGreaterThan(gateIdx); // company read happens after the gate
   });
@@ -46,8 +47,13 @@ describe("Guard: the company dashboard wires the next-actions surface", () => {
     expect(page).toMatch(/<CompanyNoProfileGuide\s*\/>/);
   });
 
-  it("uses the company-setup read (has verification status), not the workers-only read", () => {
-    expect(page).toMatch(/getOwnCompany as getOwnCompanyProfile.*from "@\/lib\/company\/company-setup"/);
+  it("uses the workspace-scoped company-setup read (has verification status), not a singleton lookup", () => {
+    // M-P0-3: the dashboard resolves the ACTIVE workspace's company through
+    // the canonical resolver + the creator-checked by-id read. The singleton
+    // getOwnCompany reads errored to null at 2 owned rows.
+    expect(page).toMatch(/getOwnedCompanyById.*[\s\S]*?from "@\/lib\/company\/company-setup"/);
+    expect(page).toMatch(/resolveEmployerCompanyContext/);
+    expect(page).not.toMatch(/\bgetOwnCompany\b(?! as)/);
   });
 });
 

@@ -54,14 +54,17 @@ import { getWorkerReadiness } from "@/lib/company/worker-readiness";
 import { WorkerReadinessSummary } from "@/components/app/worker-readiness-summary";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import {
-  getOwnCompany,
   listActiveCompanyWorkers,
   listCompanyWorkerInvitations,
 } from "@/lib/company/company-workers";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
-import { getOwnCompany as getOwnCompanyProfile } from "@/lib/company/company-setup";
+import {
+  getOwnedCompanyById,
+  type CompanyReadResult,
+} from "@/lib/company/company-setup";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   CompanyNextActions,
   CompanyNoProfileGuide,
@@ -89,10 +92,20 @@ export default async function CompanyDashboardPage({
   const tSpaces = await getTranslations("spaces");
   const tRooms = await getTranslations("companyActionRooms");
 
-  // Automatic-first status + next actions. Read the caller's OWN company
-  // profile (RLS-scoped). When a company-role holder has no company row yet,
-  // show a clean guide to the setup route — never empty technical blocks.
-  const companyProfile = await getOwnCompanyProfile();
+  // Automatic-first status + next actions. M-P0-3: the dashboard renders the
+  // ACTIVE WORKSPACE's company (membership-validated, `getOwnedCompanyById`
+  // still re-checks creator ownership row-side) — the singleton
+  // profile_id lookup errored to null the moment a profile owned two
+  // companies, blanking this whole dashboard for multi-org owners. When no
+  // valid company workspace is selected, show the clean setup guide — never
+  // empty technical blocks, never a first-company fallback.
+  const employerCtx = await resolveEmployerCompanyContext();
+  const companyProfile: CompanyReadResult =
+    employerCtx.kind === "ok"
+      ? await getOwnedCompanyById(employerCtx.companyId)
+      : employerCtx.reason === "needs-migration"
+        ? { kind: "needs-migration" }
+        : { kind: "ok", row: null };
   if (companyProfile.kind === "ok" && companyProfile.row === null) {
     return (
       <div className="flex flex-col gap-6" data-testid="company-dashboard">
@@ -178,7 +191,17 @@ export default async function CompanyDashboardPage({
     },
   };
 
-  const ownCompany = await getOwnCompany();
+  // M-P0-3: one workspace-scoped read serves the whole page — the roster,
+  // bridge and projects below all act on the SAME company the header names.
+  const ownCompany =
+    companyProfile.kind === "ok" && companyProfile.row
+      ? {
+          id: companyProfile.row.id,
+          legalName: companyProfile.row.legalName,
+          displayName: companyProfile.row.displayName,
+          country: companyProfile.row.country,
+        }
+      : null;
   // Real two-subject bridge (issue #859): agency side reads its connections /
   // shared requests / offer progress; the non-agency company side reads its
   // inbound connection invites. Both degrade to needs-migration honestly.
