@@ -1936,7 +1936,22 @@ describe("no migration files added by this sprint", () => {
     // holds data. RED by design (SECURITY DEFINER + GRANT + in-body DML),
     // deliberately NOT human-gate-annotated — the owner applies it. Ships
     // UNAPPLIED.
-    const SPRINT_BASELINE = 179;
+    // Bumped 179 -> 180 for Org Demand Spine Stage B
+    // (20260805100000_org_demand_row_scope_v1, paired rollback). ADDITIVE to
+    // the profile spine: nullable organization_id on customer_requests /
+    // demand_shortlist / booking_requests, an unambiguous-bridge backfill
+    // (verified 2026-08-05: 17/17 + 1/1 + 0 rows resolve, zero ambiguous),
+    // an additive org-membership leg on the three SELECT policies (write
+    // policies untouched), server-side stamping via a zero-argument bridge
+    // resolver (4 RPCs redefined byte-exact-plus-stamp; demand_shortlist gets
+    // a BEFORE trigger because its write path is direct DML). RED by
+    // classification (SECURITY DEFINER + GRANT/REVOKE + policy change +
+    // apply-time DML), deliberately NOT human-gate-annotated — the owner
+    // applies it (docs/human-gates/org-demand-row-scope-gate.md). Ships
+    // UNAPPLIED. MERGE-ORDER NOTE: this line is a shared ratchet and parallel
+    // PR #1013 also bumps it — whichever merges second must recount the real
+    // migration files after rebase, never take either side verbatim.
+    const SPRINT_BASELINE = 180;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

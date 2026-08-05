@@ -403,7 +403,21 @@ describe("NO new DB migration in this PR", () => {
     // EXECUTE grant, no table/policy/RLS/existing-grant change and zero DML at
     // apply time. Ships UNAPPLIED, owner-gated. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(179);
+    //
+    // Bumped 179 -> 180 for Org Demand Spine Stage B
+    // (20260805100000_org_demand_row_scope_v1, paired rollback). Additive
+    // nullable organization_id on customer_requests / demand_shortlist /
+    // booking_requests + unambiguous-bridge backfill + additive org-read leg
+    // on the three SELECT policies + server-side stamping (4 RPCs redefined
+    // byte-exact-plus-stamp, 1 shortlist trigger). RED by classification
+    // (SECURITY DEFINER + GRANT/REVOKE + policy change + apply-time DML),
+    // deliberately NOT human-gate-annotated, ships UNAPPLIED, owner-gated
+    // (docs/human-gates/org-demand-row-scope-gate.md). Still no migration
+    // from the market-map read layer. MERGE-ORDER NOTE: parallel PR #1013
+    // also bumps this shared ratchet — whichever merges second must recount
+    // the real files under supabase/migrations after rebase, never take
+    // either side verbatim.
+    expect(count).toBeLessThanOrEqual(180);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
