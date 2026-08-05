@@ -182,17 +182,34 @@ where coalesce(w.display_name, nullif(trim(coalesce(p.full_name, '')), ''))
 -- values recorded by the first.
 on conflict (profile_id) do nothing;
 
--- 4b. Apply exactly what the ledger says, to exactly the rows it names.
+-- 4b. Apply exactly what the ledger says, to exactly the rows it names —
+-- but a column is written ONLY while it still holds the BEFORE value the
+-- ledger recorded. This is the same current-value guard the rollback file
+-- applies, for the same reason: on a RE-apply the ledger holds run-1 values,
+-- and a worker who edited `current_location_country` (a user-editable column)
+-- between the runs must keep their edit — the stale ledger row must never
+-- revert it. On the first apply every row trivially passes the guard.
 update public.workers w
-   set display_name             = l.display_name_after,
-       current_location_country = l.location_country_after,
+   set display_name =
+         case when w.display_name is not distinct from l.display_name_before
+              then l.display_name_after
+              else w.display_name end,
+       current_location_country =
+         case when w.current_location_country
+                     is not distinct from l.location_country_before
+              then l.location_country_after
+              else w.current_location_country end,
        -- public.workers has no set_updated_at trigger; set it by hand.
-       updated_at               = now()
+       updated_at = now()
   from public.worker_display_name_backfill_20260805 l
  where l.profile_id = w.profile_id
-   -- Idempotent: on a re-run the values already match and nothing is touched.
-   and (w.display_name is distinct from l.display_name_after
-        or w.current_location_country is distinct from l.location_country_after);
+   -- Idempotent AND edit-preserving: a row is touched only when a column
+   -- both still needs the ledger's AFTER value and still holds its BEFORE.
+   and (   (w.display_name is distinct from l.display_name_after
+            and w.display_name is not distinct from l.display_name_before)
+        or (w.current_location_country is distinct from l.location_country_after
+            and w.current_location_country
+                  is not distinct from l.location_country_before));
 
 -- ── 5. After counts ───────────────────────────────────────────────────────
 do $$

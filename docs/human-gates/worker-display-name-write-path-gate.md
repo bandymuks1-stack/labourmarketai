@@ -56,7 +56,11 @@ Rollback: `supabase/rollbacks/20260805090100_worker_display_name_backfill_v1.dow
 - Copies `profiles.full_name` → `workers.display_name` (and
   `profiles.country` → `current_location_country`) ONLY where the target is
   NULL — hole-filling, never overwrites, no rows created/deleted, no-op rows
-  excluded, idempotent on re-run.
+  excluded, idempotent on re-run. A re-apply is additionally EDIT-PRESERVING:
+  each column is written only while it still holds the BEFORE value the
+  ledger recorded, so a value the person changed between two applies (e.g.
+  an updated `current_location_country`) is never reverted by the stale
+  ledger row — the same current-value guard the rollback uses.
 - The copied value is literally the string the person typed at onboarding,
   recovered from the sibling column that kept it — a repair, not a guess.
   Rows with no `full_name` stay NULL (nothing is invented).
