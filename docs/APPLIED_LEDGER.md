@@ -14,6 +14,50 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260805190000_save_company_setup_v3_multi_org` (M-P0-2)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-05 18:08:36 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260805180836`, name `save_company_setup_v3_multi_org` (MCP stamps apply-time versions — match on `name`) |
+| PR | **#1021** — merge follows this accounting commit |
+| Owner gate | "OWNER DECISION — APPLY AND MERGE M-P0-2" (2026-08-05) §1, bound to reviewed HEAD `15ff08a5`; executable SQL verified byte-identical through the guard-green + human-gate commits (comment-only header change) |
+| Migration sha256 (repo file, with approval header) | `b73a9b7e86a3125e5f121710c9b5006a13980d51cc0a3bd2673079d14569ea3e` (at approved HEAD `15ff08a5` the same file was `873840861e5b90dee310b4062fc4f9d442225ed255ac1fbe6c1859b325ed09fc`; the applied copy differs only in the approval-header comment — executable statements verbatim) |
+| Rollback sha256 | `b2dce53da559a4882c1fee2a0fd62834b6c5e8dd14745afba5564c129d7fb761` (present, NOT executed; drops v3 and restores the v1/v2 singleton bodies verbatim) |
+
+**Preflight (immediately before apply)**: 7 companies; 25 profiles owning 0 /
+7 owning 1 / **0 owning >1**; 0 duplicate `(profile_id, canonical legal_name)`
+tuples; `save_company_setup_v3` ABSENT; v1 and v2 present exactly once
+(legacy defs md5 `b24b98577368ffb347ef77920f691043`, grants = authenticated +
+postgres EXECUTE only); `companies_profile_id_key` absent +
+`companies_creator_canonical_name_key` present (M-P0-1 active); companies
+fingerprint `b0b7e585286ca9a0c0d2aa44188d144e`; ledger tail `20260805171825`
+(M-P0-1) — no collision.
+
+**Post-apply**: v3 present exactly once, signature exactly as reviewed
+(`p_company_id uuid, …, p_company_type text`), SECURITY DEFINER with
+`search_path=public`; anon CANNOT execute v3/v2/v1, authenticated CAN;
+v1 and v2 remain present, both carrying the `multiple_companies` fail-closed
+multiplicity guard; companies fingerprint **identical**
+(`b0b7e585286ca9a0c0d2aa44188d144e` — all 7 rows byte-unchanged, count 7);
+**zero company rows changed**, no organization / membership / demand /
+booking / engagement / project / experience / billing row touched (apply-time
+SQL is DDL + grants only — the scanner-visible DML lives inside the plpgsql
+bodies and runs only per-request). Security advisors: no ERROR findings; the
+three functions appear only under the pre-existing WARN class
+`authenticated_security_definer_function_executable` shared by every
+authenticated RPC. `migration-safety`: **GREEN [human-gated]** with the three
+approved findings (security-definer-function, grant-or-revoke, data-dml)
+visible as notices.
+
+**Not proven / out of scope**: no second production company was created; no
+production QA account exists; production multi-company usage is NOT claimed —
+schema-stage verdict is
+`MULTI_ORG_CREATE_SECOND_ORGANIZATION_SCHEMA_ACTIVE_LOCAL_BROWSER_PROVEN`
+(browser proof is the local evidence in
+`docs/audits/evidence/multi-org-m-p0-2/`).
+
 ### ✅ APPLIED TO PROD — `20260805170000_multi_org_company_ownership_cap_removal_v1` (M-P0-1)
 
 | Field | Value |

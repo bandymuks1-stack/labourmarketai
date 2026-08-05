@@ -597,6 +597,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/APPLIED_LEDGER.md (ledger 20260805171825) and the structural
       // train doc. Added in the same commit as that record.
       "20260805170000_multi_org_company_ownership_cap_removal_v1.sql",
+      // 2026-08-05: M-P0-2 (save_company_setup_v3) gained its marker under
+      // "OWNER DECISION — APPLY AND MERGE M-P0-2" §1, recorded in
+      // docs/APPLIED_LEDGER.md (ledger 20260805180836) and the structural
+      // train doc. Added in the same commit as that record.
+      "20260805190000_save_company_setup_v3_multi_org.sql",
     ]);
   });
 
