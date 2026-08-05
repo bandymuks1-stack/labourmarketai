@@ -20,10 +20,14 @@ import {
   assertTestEvent,
   mapStripeStatus,
 } from "./webhook-core";
+import { STRIPE_PINNED_API_VERSION } from "./providers/stripe-test";
 
 // A throwaway TEST key — only used to instantiate the SDK for signing/verifying.
-// Never a live key; never makes a network call here.
-const stripe = new Stripe("sk_test_dummy_for_local_signing");
+// Never a live key; never makes a network call here. Constructed EXACTLY like
+// the production adapter (same pinned apiVersion).
+const stripe = new Stripe("sk_test_dummy_for_local_signing", {
+  apiVersion: STRIPE_PINNED_API_VERSION,
+});
 const SECRET = "whsec_test_local_proof";
 
 function signed(payload: object): { body: string; header: string } {
@@ -36,6 +40,14 @@ function signed(payload: object): { body: string; header: string } {
 const obj = (e: Stripe.Event): any => e.data.object;
 
 describe("webhook signature E2E proof (no keys, no money)", () => {
+  it("the adapter's pinned apiVersion IS the version the installed SDK targets", () => {
+    // Belt (runtime) on top of braces (the Stripe.LatestApiVersion type pin in
+    // stripe-test.ts): the client really carries the pinned version, and the
+    // pin matches what this SDK build was generated for.
+    expect(stripe.getApiField("version")).toBe(STRIPE_PINNED_API_VERSION);
+    expect(STRIPE_PINNED_API_VERSION).toBe("2026-05-27.dahlia");
+  });
+
   it("a correctly-signed TEST event is accepted and parses to an active subscription", () => {
     const { body, header } = signed({
       id: "evt_proof_1",
@@ -101,5 +113,39 @@ describe("webhook signature E2E proof (no keys, no money)", () => {
     const event = stripe.webhooks.constructEvent(body, header, SECRET);
     const inv = parseInvoiceObject(obj(event), false);
     expect(inv.lastPaymentStatus).toBe("failed");
+  });
+
+  it("a PINNED-VERSION (post-Basil) shaped subscription event parses with item-level periods", () => {
+    // On 2025-03-31.basil and later (incl. the pinned 2026-05-27.dahlia),
+    // current_period_* live on the subscription ITEMS, not the subscription.
+    const { body, header } = signed({
+      id: "evt_dahlia_sub", type: "customer.subscription.updated", livemode: false,
+      data: {
+        object: {
+          id: "sub_dahlia", customer: "cus_d", status: "active",
+          items: { data: [{ id: "si_1", current_period_start: 1_700_000_000, current_period_end: 1_702_000_000 }] },
+          cancel_at_period_end: false,
+          metadata: { plan_key: "company_pilot", client_reference_id: "owner_d" },
+        },
+      },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    const sub = parseSubscriptionObject(obj(event), event.livemode === false);
+    expect(sub?.currentPeriodStart).toMatch(/^20/);
+    expect(sub?.currentPeriodEnd).toMatch(/^20/);
+    expect(sub?.status).toBe("active");
+  });
+
+  it("a PINNED-VERSION (post-Basil) shaped invoice.paid event parses the subscription id", () => {
+    const { body, header } = signed({
+      id: "evt_dahlia_inv", type: "invoice.paid", livemode: false,
+      data: {
+        object: { parent: { subscription_details: { subscription: "sub_dahlia" } } },
+      },
+    });
+    const event = stripe.webhooks.constructEvent(body, header, SECRET);
+    const inv = parseInvoiceObject(obj(event), true);
+    expect(inv.providerSubscriptionId).toBe("sub_dahlia");
+    expect(inv.lastPaymentStatus).toBe("succeeded");
   });
 });

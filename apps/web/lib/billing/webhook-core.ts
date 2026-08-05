@@ -23,6 +23,13 @@ const HANDLED = new Set([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.payment_succeeded",
+  // `invoice.paid` is Stripe's recommended success event (fires for
+  // out-of-band payments too) and on newer API versions it can be the ONLY
+  // success signal delivered. Handled identically to
+  // invoice.payment_succeeded; applying "succeeded" twice for the same
+  // invoice is a no-op on the subscription row, so a paid/payment_succeeded
+  // pair for one invoice is harmless.
+  "invoice.paid",
   "invoice.payment_failed",
 ]);
 
@@ -67,6 +74,58 @@ function asString(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null;
 }
 
+/** An id-or-expanded-object reference ("sub_1" or { id: "sub_1", … }) → id. */
+function idFrom(v: unknown): string | null {
+  if (typeof v === "string") return v.length > 0 ? v : null;
+  if (v && typeof v === "object") {
+    return asString((v as Record<string, unknown>).id);
+  }
+  return null;
+}
+
+/**
+ * Subscription billing period — tolerant of BOTH API shapes:
+ *  - post-Basil (2025-03-31.basil and later, incl. the pinned 2026-05-27.dahlia):
+ *    `current_period_start/end` live on each SUBSCRIPTION ITEM
+ *    (`items.data[n].current_period_*`) — the top-level fields are gone;
+ *  - pre-Basil (legacy): top-level `current_period_start/end` on the
+ *    subscription object.
+ * Reads the new location first and falls back to the legacy field, so a
+ * dashboard-default webhook on an older account version still parses.
+ */
+function periodFromSubscription(
+  obj: Record<string, unknown>,
+  key: "current_period_start" | "current_period_end",
+): string | null {
+  const items = (obj.items as { data?: unknown[] } | null | undefined)?.data;
+  if (Array.isArray(items)) {
+    for (const item of items) {
+      if (!item || typeof item !== "object") continue;
+      const iso = isoFromUnix((item as Record<string, unknown>)[key]);
+      if (iso) return iso;
+    }
+  }
+  return isoFromUnix(obj[key]);
+}
+
+/**
+ * Invoice → subscription id — tolerant of BOTH API shapes:
+ *  - post-Basil: `invoice.parent.subscription_details.subscription`
+ *    (id string or expanded object);
+ *  - pre-Basil (legacy): `invoice.subscription` (id string or expanded object).
+ */
+function subscriptionIdFromInvoice(
+  obj: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!obj) return null;
+  const parent = obj.parent as Record<string, unknown> | null | undefined;
+  const details = parent?.subscription_details as
+    | Record<string, unknown>
+    | null
+    | undefined;
+  return idFrom(details?.subscription) ?? idFrom(obj.subscription);
+}
+
 /** Parse a customer.subscription.* event object → SubscriptionUpsert. */
 export function parseSubscriptionObject(
   obj: Record<string, unknown> | null | undefined,
@@ -76,12 +135,12 @@ export function parseSubscriptionObject(
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
   return {
     providerSubscriptionId: obj.id,
-    providerCustomerId: asString(obj.customer),
+    providerCustomerId: idFrom(obj.customer),
     ownerId: asString(meta.client_reference_id) ?? asString(meta.owner_id),
     planKey: asString(meta.plan_key),
     status: mapStripeStatus(obj.status as string | undefined),
-    currentPeriodStart: isoFromUnix(obj.current_period_start),
-    currentPeriodEnd: isoFromUnix(obj.current_period_end),
+    currentPeriodStart: periodFromSubscription(obj, "current_period_start"),
+    currentPeriodEnd: periodFromSubscription(obj, "current_period_end"),
     cancelAtPeriodEnd: Boolean(obj.cancel_at_period_end),
     testMode,
   };
@@ -94,24 +153,25 @@ export function parseCheckoutSessionObject(
 ): Pick<SubscriptionUpsert, "providerSubscriptionId" | "providerCustomerId" | "ownerId" | "planKey" | "testMode"> | null {
   if (!obj) return null;
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
-  const sub = asString(obj.subscription);
+  // `subscription` may arrive as an id string or an expanded object.
+  const sub = idFrom(obj.subscription);
   if (!sub) return null;
   return {
     providerSubscriptionId: sub,
-    providerCustomerId: asString(obj.customer),
+    providerCustomerId: idFrom(obj.customer),
     ownerId: asString(obj.client_reference_id) ?? asString(meta.client_reference_id),
     planKey: asString(meta.plan_key),
     testMode,
   };
 }
 
-/** Parse an invoice.payment_* object → the last payment status + sub id. */
+/** Parse an invoice.paid / invoice.payment_* object → payment status + sub id. */
 export function parseInvoiceObject(
   obj: Record<string, unknown> | null | undefined,
   succeeded: boolean,
 ): { providerSubscriptionId: string | null; lastPaymentStatus: PaymentStatus } {
   return {
-    providerSubscriptionId: asString(obj?.subscription),
+    providerSubscriptionId: subscriptionIdFromInvoice(obj),
     lastPaymentStatus: succeeded ? "succeeded" : "failed",
   };
 }

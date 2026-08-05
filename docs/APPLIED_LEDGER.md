@@ -127,6 +127,39 @@ bucket unchanged) + the canonical current-definition home of
 writes a real honestly-labelled confirmation row), + staleness guard on the
 legacy direct-insert confirmation RLS. Rollback: paired down file.
 
+### ✅ APPLIED TO PROD (RECONCILIATION ROW 2026-08-05) — `20260613200000_billing_test_mode_records`
+
+**Ledger-integrity reconciliation, NOT a new apply. Nothing was applied,
+changed, or migrated on 2026-08-05 — this row only closes a record gap.** The
+migration was found applied in production without a row in this file. It
+pre-dates the 26-migration span in the drift notice above (that span starts at
+`20260702130000`), so it is a separate instance of the same drift class.
+
+**What was verified 2026-08-05 (read-only check, zero writes):** all three
+tables this migration creates — `billing_customers`, `billing_subscriptions`,
+`payment_webhook_events` — exist in production, each with **0 rows**. The
+table-existence check is the direct evidence; no production object was touched.
+
+**Apply context (reconstructed from the repo's own audit docs, not
+re-verified):** `docs/audits/stripe-test-mode-final-report.md` records the
+migration as "RED draft, owner-applied" during the Stripe test-mode sprint, and
+`docs/audits/labourmarketai-commercial-billing-audit-v1.md` +
+`docs/audits/stripe-test-activation-runbook.md` both record it present in the
+production ledger as version `20260613202244`, name
+`billing_test_mode_records` (the apply-time stamp — see the naming note at the
+top of this file; match on `name`, never on `version`). That places the apply
+at 2026-06-13, under the owner gate those audits describe.
+
+**What it created (all additive):** three test-mode billing tables —
+`billing_customers` (profile ↔ provider customer), `billing_subscriptions`
+(status/periods/flags, `unique (provider, provider_subscription_id)` AND
+`unique (owner_id, plan_key, provider)`), `payment_webhook_events`
+(idempotency via `unique (provider, event_id)`, `processed` default false).
+`test_mode` defaults true on every row; NO money amount stored; RLS
+owner/admin SELECT only; writes service-role only (the webhook). Legacy
+`subscriptions` (0 rows) untouched. Paired rollback:
+`supabase/rollbacks/20260613200000_billing_test_mode_records.down.sql`.
+
 ---
 
 ## ⚠️ CORRECTION 2026-07-22 — "authenticated only, no anon" was FACTUALLY WRONG
