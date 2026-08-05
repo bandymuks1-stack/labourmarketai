@@ -34,6 +34,20 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.onboardingCompleted, label: "Onboarding completed" },
   { key: FUNNEL_EVENTS.companyNeedStarted, label: "Company need started" },
   { key: FUNNEL_EVENTS.companyNeedSubmitted, label: "Company need submitted" },
+  // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1) —
+  //    the stages where a demand actually turns into work. Server-emitted
+  //    at the real action points (lib/telemetry/server-funnel.ts).
+  { key: FUNNEL_EVENTS.matchPreviewGenerated, label: "Match preview generated" },
+  { key: FUNNEL_EVENTS.shortlistAdded, label: "Shortlist added" },
+  { key: FUNNEL_EVENTS.contactRequested, label: "Contact requested" },
+  { key: FUNNEL_EVENTS.contactDisclosed, label: "Contact disclosed" },
+  { key: FUNNEL_EVENTS.bookingProposed, label: "Booking proposed" },
+  { key: FUNNEL_EVENTS.engagementCreated, label: "Engagement created" },
+  { key: FUNNEL_EVENTS.projectAssigned, label: "Project assigned" },
+  { key: FUNNEL_EVENTS.projectCompleted, label: "Project completed" },
+  { key: FUNNEL_EVENTS.experienceSubmitted, label: "Experience submitted" },
+  { key: FUNNEL_EVENTS.experiencePublished, label: "Experience published" },
+  { key: FUNNEL_EVENTS.organizationCreated, label: "Organization created" },
 ] as const;
 
 const CONVERSION_EVENTS: readonly string[] = [
@@ -156,6 +170,32 @@ export async function getAcquisitionFunnel(
         c(FUNNEL_EVENTS.companyNeedStarted),
       ),
       note: "share of started company-need forms that were submitted",
+    },
+    // ── Mid-funnel conversion (W14): event-count ratios, not per-demand
+    //    journeys — stated honestly in the note.
+    {
+      label: "Match preview → shortlist",
+      pct: pct(
+        c(FUNNEL_EVENTS.shortlistAdded),
+        c(FUNNEL_EVENTS.matchPreviewGenerated),
+      ),
+      note: "shortlist adds per generated match preview (event counts, not per-demand journeys)",
+    },
+    {
+      label: "Contact requested → booking proposed",
+      pct: pct(
+        c(FUNNEL_EVENTS.bookingProposed),
+        c(FUNNEL_EVENTS.contactRequested),
+      ),
+      note: "booking proposals per contact request (event counts)",
+    },
+    {
+      label: "Booking proposed → engagement created",
+      pct: pct(
+        c(FUNNEL_EVENTS.engagementCreated),
+        c(FUNNEL_EVENTS.bookingProposed),
+      ),
+      note: "engagements created per booking proposal (event counts)",
     },
   ];
 

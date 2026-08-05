@@ -7,6 +7,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -101,6 +103,12 @@ export async function assignWorkerToProjectAction(
     return { ok: false, code: "error", message: error.message };
   }
   revalidatePath("/", "layout");
+  // W14 mid-funnel: a worker was really assigned to a project (RPC ok).
+  // No ids in metadata. Fire-and-forget.
+  emitServerFunnelEvent(FUNNEL_EVENTS.projectAssigned, {
+    source: "projects",
+    metadata: { surface: "projects", role_context: "company" },
+  });
   return { ok: true };
 }
 

@@ -91,6 +91,8 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "utm_term",
   "referrer_host", // referrer HOST only, never the full URL
   "landing_path", // first landing path (no query string)
+  // ── Mid-funnel marketplace events (W14 Pilot Analytics slice v1).
+  "candidate_count", // number — how many candidates a match preview produced
 ]);
 
 const SCALAR_VALUE_MAX = 200;

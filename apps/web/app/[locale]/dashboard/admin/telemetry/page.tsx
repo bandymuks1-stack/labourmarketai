@@ -3,10 +3,17 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getAcquisitionFunnel } from "@/lib/admin/conversion-funnel";
+import { Card } from "@/components/ui/Card";
 import {
   formatDurationMs,
   getTimeToValueSummary,
 } from "@/lib/admin/pilot-metrics";
+import {
+  formatEurCents,
+  formatUsd,
+  getAiRunsSummary,
+  getUsageLedgerSummary,
+} from "@/lib/admin/ai-cost";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -81,6 +88,14 @@ export default async function AdminTelemetryPage({
   // limits (per-tab sessions, no unique-visitor claims, no cohort slicing
   // without the pilots migration) are stated in the section copy.
   const ttv = await getTimeToValueSummary(supabase);
+
+  // AI cost & usage (W14 Pilot Analytics slice v1) — caller's RLS client
+  // over ai_runs + usage_cost_events. Production has 0 rows while
+  // AI_PROVIDER_MODE stays 'disabled'; the section states that honestly.
+  const [aiRuns, usageLedger] = await Promise.all([
+    getAiRunsSummary(supabase),
+    getUsageLedgerSummary(supabase),
+  ]);
 
   const { data, error } = await fromAny("pilot_events")
     .select(
@@ -352,6 +367,163 @@ export default async function AdminTelemetryPage({
           )}
         </div>
       </details>
+
+      <Card compact className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            AI cost and usage
+          </h2>
+          <p className="text-meta text-text-muted">
+            First-party AI accounting: per-run audit rows (ai_runs, USD from
+            the reviewed pricing table) and the canonical EUR-cent usage
+            ledger (usage_cost_events). While the AI provider mode stays
+            disabled in production both tables hold 0 rows — the zeros below
+            are real measurements, not placeholders. Unknown cost is shown as
+            a dash, never as 0.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-md border border-ink-600/60 px-3 py-2">
+            <div className="font-mono text-lg text-text-primary">
+              {aiRuns.available ? aiRuns.totalRuns : "—"}
+            </div>
+            <div className="text-meta text-text-muted">
+              AI runs (recent window)
+            </div>
+          </div>
+          <div className="rounded-md border border-ink-600/60 px-3 py-2">
+            <div className="font-mono text-lg text-text-primary">
+              {usageLedger.available ? usageLedger.totalEvents : "—"}
+            </div>
+            <div className="text-meta text-text-muted">
+              Usage ledger events
+            </div>
+          </div>
+          <div className="rounded-md border border-ink-600/60 px-3 py-2">
+            <div className="font-mono text-lg text-text-primary">
+              {formatUsd(
+                aiRuns.byDay.reduce<number | null>(
+                  (acc, g) =>
+                    g.actualCostUsd === null
+                      ? acc
+                      : (acc ?? 0) + g.actualCostUsd,
+                  null,
+                ),
+              )}
+            </div>
+            <div className="text-meta text-text-muted">
+              Actual run cost, USD (costed runs only)
+            </div>
+          </div>
+          <div className="rounded-md border border-ink-600/60 px-3 py-2">
+            <div className="font-mono text-lg text-text-primary">
+              {formatEurCents(
+                usageLedger.byDay.reduce<number | null>(
+                  (acc, g) =>
+                    g.actualCents === null ? acc : (acc ?? 0) + g.actualCents,
+                  null,
+                ),
+              )}
+            </div>
+            <div className="text-meta text-text-muted">
+              Ledger actual cost, EUR
+            </div>
+          </div>
+        </div>
+        {!aiRuns.available && (
+          <p className="text-sm text-text-secondary">
+            ai_runs is not readable from this session (missing table or no
+            admin read) — reported as unavailable, not as zero.
+          </p>
+        )}
+        {!usageLedger.available && (
+          <p className="text-sm text-text-secondary">
+            usage_cost_events is not readable from this session (missing
+            table or no admin read) — reported as unavailable, not as zero.
+          </p>
+        )}
+        {aiRuns.available && aiRuns.totalRuns === 0 &&
+          usageLedger.available && usageLedger.totalEvents === 0 ? (
+          <p className="text-sm text-text-secondary">
+            No AI runs and no usage events recorded yet. This is the honest
+            current state — breakdowns will appear with the first live run.
+          </p>
+        ) : (
+          <details className="flex flex-col gap-2">
+            <summary className="cursor-pointer text-sm font-medium text-text-secondary">
+              Breakdowns by day, task type and provider
+            </summary>
+            <div className="flex flex-col gap-4 pt-3">
+              {(
+                [
+                  { title: "ai_runs by day", groups: aiRuns.byDay },
+                  { title: "ai_runs by task type", groups: aiRuns.byTaskType },
+                  { title: "ai_runs by provider", groups: aiRuns.byProvider },
+                ] as const
+              ).map((b) => (
+                <div key={b.title} className="flex flex-col gap-1">
+                  <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {b.title}
+                  </h3>
+                  {b.groups.length === 0 ? (
+                    <p className="text-xs text-text-secondary">No rows.</p>
+                  ) : (
+                    b.groups.map((g) => (
+                      <div
+                        key={g.key}
+                        className="flex items-center justify-between gap-3 text-xs"
+                      >
+                        <span className="font-mono text-text-secondary">
+                          {g.key}
+                        </span>
+                        <span className="font-mono text-text-primary">
+                          {g.runs} runs · {g.inputTokens}/{g.outputTokens} tok ·{" "}
+                          {formatUsd(g.actualCostUsd)}
+                          {g.actualCostUsd !== null
+                            ? ` (${g.costedRuns} costed)`
+                            : ""}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ))}
+              {(
+                [
+                  { title: "usage ledger by day", groups: usageLedger.byDay },
+                  { title: "usage ledger by service", groups: usageLedger.byService },
+                  { title: "usage ledger by provider", groups: usageLedger.byProvider },
+                ] as const
+              ).map((b) => (
+                <div key={b.title} className="flex flex-col gap-1">
+                  <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {b.title}
+                  </h3>
+                  {b.groups.length === 0 ? (
+                    <p className="text-xs text-text-secondary">No rows.</p>
+                  ) : (
+                    b.groups.map((g) => (
+                      <div
+                        key={g.key}
+                        className="flex items-center justify-between gap-3 text-xs"
+                      >
+                        <span className="font-mono text-text-secondary">
+                          {g.key}
+                        </span>
+                        <span className="font-mono text-text-primary">
+                          {g.events} events · actual{" "}
+                          {formatEurCents(g.actualCents)} · est.{" "}
+                          {formatEurCents(g.estimatedCents)}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </Card>
 
       <div
         className="flex flex-wrap items-center gap-3"
