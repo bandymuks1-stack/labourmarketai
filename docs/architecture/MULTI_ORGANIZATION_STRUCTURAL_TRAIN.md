@@ -14,7 +14,7 @@ migrations. Not one giant PR.
 | Slice | Scope | Target state | Status |
 |---|---|---|---|
 | M-P0-1 | Remove `companies_profile_id_key UNIQUE` one-person-one-company cap | `MULTI_ORG_COMPANY_OWNERSHIP_CAP_REMOVED_SCHEMA_ACTIVE` | **APPLIED to prod 2026-08-05** (ledger `20260805171825`, owner directive §3); accounting in `docs/APPLIED_LEDGER.md` |
-| M-P0-2 | Real create-second-organization path (`save_company_setup` de-singleton) | `MULTI_ORG_CREATE_AND_EDIT_PATH_CODE_COMPLETE` | Not started |
+| M-P0-2 | Real create-second-organization path (`save_company_setup` de-singleton) | `MULTI_ORG_CREATE_SECOND_ORGANIZATION_PATH_CODE_COMPLETE_PENDING_OWNER_MERGE_DECISION` | **Code complete + local browser-proven** (this branch): `save_company_setup_v3(p_company_id, …)` (insert-only create / creator-guarded explicit edit), v1+v2 hardened with the `multiple_companies` fail-closed guard, setup page targets the ACTIVE WORKSPACE or `?new=1` with a fail-closed chooser. Local proof (evidence `docs/audits/evidence/multi-org-m-p0-2/`): one actor created A then B via the real UI — A was not renamed; editing A changed only A; switching the workspace to B made the page target B; editing B changed only B. Migration `20260805190000` ships RED/unapplied, owner-gated |
 | M-P0-3 | Remove `getOwnCompany()` authority → active-workspace resolver | `ACTIVE_WORKSPACE_AUTHORITY_REPLACES_GET_OWN_COMPANY` | Not started |
 | M-P0-4 | `company_memberships` v1 (governance ≠ employment) | `COMPANY_MEMBERSHIPS_V1_CODE_COMPLETE_PENDING_HUMAN_GATE` | Not started |
 | M-P0-5 | Durable active-workspace pointer (server-validated) | `DURABLE_ACTIVE_WORKSPACE_AUTHORITY_PROVEN` | Not started |
@@ -30,6 +30,40 @@ by A and B, independent subscriptions, context-scoped analytics) must pass →
 PR #1016 stays Draft as an architectural reference until M-P0-6 supersedes
 it. Production QA accounts: forbidden until the train is merged + deployed
 and the owner approves the §13 package.
+
+## M-P0-3 — `getOwnCompany()` authority inventory (2026-08-05)
+
+Two implementations exist, both `companies WHERE profile_id = uid
+.maybeSingle()` (ERRORS once a profile owns 2 rows):
+`lib/company/company-setup.ts:getOwnCompany` and
+`lib/company/company-workers.ts:getOwnCompany`.
+
+The canonical replacement ALREADY EXISTS: `resolveEmployerCompanyContext` /
+`requireEmployerCompany` (`lib/company/employer-company-context.ts`, W8
+slice 1) — active-workspace chain (httpOnly cookie → membership-validated →
+`organizations.legacy_company_id` → company), fail-closed, no first-company
+fallback. M-P0-3 = migrating call sites onto it, not building a resolver.
+
+**AUTHORITATIVE (writes — replace first):**
+- `lib/company/actions.ts` — 4 roster writes: `inviteCompanyWorkerAction`,
+  `assignCompanyWorkerRoleAction`,
+  `provisionCompanyWorkerEngagementContextAction`,
+  `setCompanyWorkerJournalReviewAction` (invite / role assignment /
+  engagement provisioning / journal review authority).
+- `lib/company/project-context-actions.ts:51` — PROJECT CREATION authority.
+- `lib/company/company-setup.ts:saveCompanySetup` legacy branch — solved by
+  M-P0-2 (explicit target + `multiple_companies` fail-closed guard in SQL).
+
+**READ/RENDER (classify, replace second):**
+- `app/[locale]/dashboard/layout.tsx:140` (workspace display context),
+- `app/[locale]/dashboard/company/page.tsx:181`,
+- `app/[locale]/dashboard/market-map/page.tsx:89`,
+- `app/[locale]/dashboard/start/company/page.tsx` — DONE in M-P0-2 (now
+  workspace-resolved via `resolveEmployerCompanyContext`).
+
+Booking / demand / contact-disclosure / billing paths do not call
+`getOwnCompany()` — they authorize SQL-side (`owns_company`) or are not yet
+organization-scoped (M-P0-6/M-P0-7 scope).
 
 ## M-P0-1 — production audit (2026-08-05, read-only)
 

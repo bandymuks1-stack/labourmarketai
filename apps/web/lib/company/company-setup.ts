@@ -119,6 +119,13 @@ export type CompanyReadResult =
   | { kind: "error"; message: string };
 
 export interface SaveCompanyInput {
+  /** M-P0-2 explicit target. `null` = CREATE a new company (insert-only —
+   *  never renames an existing one). A string = EDIT exactly that company;
+   *  the RPC re-verifies ownership server-side, so a forged id fails with
+   *  `not-owner` instead of touching anything. `undefined` = legacy singleton
+   *  behaviour (kept for pre-M-P0-2 callers; fails closed with
+   *  `multiple-companies` once a profile owns 2+). */
+  readonly companyId?: string | null;
   readonly legalName: string;
   readonly companyType?: string;
   readonly country?: string;
@@ -141,10 +148,107 @@ export type SaveCompanyResult =
   /** Country was not one of the known countries.code values. The UI maps
    *  this to a calm localized message — never the raw FK/RPC error text. */
   | { kind: "invalid-country" }
+  /** M-P0-2: same creator already has a company with this canonical legal
+   *  name (the M-P0-1 unique key). Creating a DIFFERENT company is fine. */
+  | { kind: "duplicate-company" }
+  /** M-P0-2: the explicit companyId is not a company this caller created
+   *  (or does not exist — deliberately indistinguishable). */
+  | { kind: "not-owner" }
+  /** M-P0-2: legacy singleton save attempted while the caller owns 2+
+   *  companies — an explicit companyId is required. */
+  | { kind: "multiple-companies" }
   | { kind: "error"; message: string };
 
 const SELECT_COLUMNS =
   "id, profile_id, legal_name, display_name, company_type, country, registration_code, address, website, contact_email, contact_phone, requester_role, verification_status, verification_note, requested_at, created_at";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapCompanyRow(r: any): CompanyRow {
+  return {
+    id: r.id as string,
+    profileId: r.profile_id as string,
+    legalName: (r.legal_name as string | null) ?? null,
+    displayName: (r.display_name as string | null) ?? null,
+    companyType: (r.company_type as CompanyType | null) ?? "other",
+    country: (r.country as string | null) ?? null,
+    registrationCode: (r.registration_code as string | null) ?? null,
+    address: (r.address as string | null) ?? null,
+    website: (r.website as string | null) ?? null,
+    contactEmail: (r.contact_email as string | null) ?? null,
+    contactPhone: (r.contact_phone as string | null) ?? null,
+    requesterRole: (r.requester_role as string | null) ?? null,
+    verificationStatus:
+      (r.verification_status as CompanyVerificationStatus) ?? "active_unverified",
+    verificationNote: (r.verification_note as string | null) ?? null,
+    requestedAt: (r.requested_at as string | null) ?? null,
+    createdAt: r.created_at as string,
+  };
+}
+
+export type CompanyListResult =
+  | { kind: "ok"; rows: CompanyRow[] }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * M-P0-2 multi-company read: EVERY company the caller created, oldest first.
+ * Replaces `getOwnCompany()`'s `.maybeSingle()` (which ERRORS the moment a
+ * profile owns two rows). Callers must never treat `rows[0]` as "the"
+ * company — selection is explicit (active workspace or a picked id).
+ */
+export async function listOwnedCompanies(): Promise<CompanyListResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "ok", rows: [] };
+  const { data, error } = await asAny(supabase)
+    .from("companies")
+    .select(SELECT_COLUMNS)
+    .eq("profile_id", user.id)
+    .order("created_at", { ascending: true });
+  if (error) {
+    if (
+      error.code === UNDEFINED_COLUMN_CODE ||
+      error.code === RELATION_NOT_FOUND_CODE
+    ) {
+      return { kind: "needs-migration" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  return { kind: "ok", rows: (data ?? []).map(mapCompanyRow) };
+}
+
+/**
+ * M-P0-2 explicit-target read: exactly one company by id, and only if the
+ * caller created it (RLS + the explicit eq guard). Returns row: null for
+ * foreign/unknown ids — no oracle.
+ */
+export async function getOwnedCompanyById(
+  companyId: string,
+): Promise<CompanyReadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "ok", row: null };
+  const { data, error } = await asAny(supabase)
+    .from("companies")
+    .select(SELECT_COLUMNS)
+    .eq("id", companyId)
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (error) {
+    if (
+      error.code === UNDEFINED_COLUMN_CODE ||
+      error.code === RELATION_NOT_FOUND_CODE
+    ) {
+      return { kind: "needs-migration" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  return { kind: "ok", row: data ? mapCompanyRow(data) : null };
+}
 
 export async function getOwnCompany(): Promise<CompanyReadResult> {
   const supabase = await createClient();
@@ -199,7 +303,23 @@ export async function saveCompanySetup(
   // Read the current row first so a VERIFIED company's legal fields can be
   // locked (never overwritten by a self-service save). A read failure /
   // missing migration leaves `verified` null and the save proceeds normally.
-  const existing = await getOwnCompany();
+  //
+  // M-P0-2: the row that gets read is the EXPLICIT target. companyId string
+  // = that exact company (ownership-guarded read); companyId null = a CREATE
+  // (no existing row by definition); companyId undefined = the legacy
+  // singleton read, kept for pre-M-P0-2 callers.
+  const existing: CompanyReadResult =
+    input.companyId === null
+      ? { kind: "ok", row: null }
+      : typeof input.companyId === "string"
+        ? await getOwnedCompanyById(input.companyId)
+        : await getOwnCompany();
+  if (typeof input.companyId === "string" && existing.kind === "ok" && !existing.row) {
+    // Explicit edit of a company the caller did not create (or that does not
+    // exist) — fail closed before any RPC call. Same shape as the RPC's own
+    // guard; no existence oracle.
+    return { kind: "not-owner" };
+  }
   const verifiedRow =
     existing.kind === "ok" && existing.row?.verificationStatus === "verified"
       ? existing.row
@@ -249,18 +369,48 @@ export async function saveCompanySetup(
     p_requester_role: input.requesterRole?.trim() || null,
     p_submit: input.submit,
   };
-  let { data, error } = await asAny(supabase).rpc("save_company_setup_v2", {
-    ...params,
-    p_company_type: rawType,
-  });
-  if (error && error.code === RPC_NOT_FOUND_CODE) {
-    // v2 (migration 20260612090000) not applied yet — fall back to the v1
-    // RPC so the profile itself still saves; the type is kept client-side
-    // only until the migration lands.
-    console.warn(
-      "save_company_setup_v2 missing; falling back to v1 (company_type not persisted)",
-    );
-    ({ data, error } = await asAny(supabase).rpc("save_company_setup", params));
+  let data: unknown;
+  let error: { code?: string; message?: string } | null;
+  if (input.companyId !== undefined) {
+    // M-P0-2 explicit path: create (null) or edit exactly the named company.
+    ({ data, error } = await asAny(supabase).rpc("save_company_setup_v3", {
+      p_company_id: input.companyId,
+      ...params,
+      p_company_type: rawType,
+    }));
+    if (error && error.code === RPC_NOT_FOUND_CODE) {
+      // v3 (migration 20260805190000) not applied — the explicit
+      // create/edit contract cannot be honoured by the singleton RPCs
+      // (v2 would RENAME another company). Honest blocker, no fallback.
+      return { kind: "needs-migration" };
+    }
+  } else {
+    ({ data, error } = await asAny(supabase).rpc("save_company_setup_v2", {
+      ...params,
+      p_company_type: rawType,
+    }));
+    if (error && error.code === RPC_NOT_FOUND_CODE) {
+      // v2 (migration 20260612090000) not applied yet — fall back to the v1
+      // RPC so the profile itself still saves; the type is kept client-side
+      // only until the migration lands.
+      console.warn(
+        "save_company_setup_v2 missing; falling back to v1 (company_type not persisted)",
+      );
+      ({ data, error } = await asAny(supabase).rpc("save_company_setup", params));
+    }
+  }
+  if (error) {
+    // M-P0-2 tagged failures — mapped BEFORE the generic handlers so each
+    // gets its own calm localized message instead of "save_failed".
+    if (error.message?.includes("duplicate_company")) {
+      return { kind: "duplicate-company" };
+    }
+    if (error.message?.includes("not_owner")) {
+      return { kind: "not-owner" };
+    }
+    if (error.message?.includes("multiple_companies")) {
+      return { kind: "multiple-companies" };
+    }
   }
   if (error) {
     if (

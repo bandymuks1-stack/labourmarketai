@@ -1609,6 +1609,7 @@
         "statusSubmitted": "Manuelle Prüfung angefordert (optional). Ihr Unternehmen bleibt in der Zwischenzeit nutzbar.",
         "statusNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "statusInvalid": "Das Formular ist unvollständig. Prüfen Sie die Pflichtfelder.",
+        "statusDuplicateCompany": "Ein Unternehmen mit diesem Namen existiert bereits in Ihrem Konto. Öffnen Sie es über den Bereichswechsler oder wählen Sie einen anderen Namen.",
         "statusError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
         "migrationBlockerHeading": "Etwas ist schiefgelaufen",
         "migrationBlockerBody": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",

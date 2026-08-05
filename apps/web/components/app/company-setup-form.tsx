@@ -64,6 +64,8 @@ export interface CompanySetupFormLabels {
   readonly statusSubmitted: string;
   readonly statusNeedsMigration: string;
   readonly statusInvalid: string;
+  /** M-P0-2: same creator already has a company with this canonical name. */
+  readonly statusDuplicateCompany: string;
   readonly statusError: string;
 }
 
@@ -78,9 +80,16 @@ const REQUESTER_ROLE_ORDER: readonly CompanyRequesterRole[] = [
 export function CompanySetupForm({
   existing,
   labels,
+  targetCompanyId,
 }: {
   readonly existing: CompanyRow | null;
   readonly labels: CompanySetupFormLabels;
+  /** M-P0-2 explicit save target, posted as the hidden `company_id` field:
+   *  "new" = create a NEW company (insert-only), a uuid = edit exactly that
+   *  company (server re-verifies ownership), undefined = legacy singleton
+   *  behaviour. Editing pages pass `existing.id`; the create entry passes
+   *  "new" so a second organization NEVER renames the first. */
+  readonly targetCompanyId?: string;
 }) {
   const [state, formAction, isPending] = useActionState<
     CompanySetupFormState | null,
@@ -119,6 +128,8 @@ export function CompanySetupForm({
         return { tone: "warning", text: state.message ?? labels.statusInvalid };
       case "invalid_country":
         return { tone: "warning", text: labels.statusInvalidCountry };
+      case "duplicate_company":
+        return { tone: "warning", text: labels.statusDuplicateCompany };
       default:
         // Always the calm localized text — raw technical messages never
         // reach this banner (owner smoke: organizations_country_fkey).
@@ -133,6 +144,9 @@ export function CompanySetupForm({
       data-testid="company-setup-form"
     >
       <input type="hidden" name="intent" ref={intentRef} defaultValue="draft" />
+      {targetCompanyId !== undefined ? (
+        <input type="hidden" name="company_id" value={targetCompanyId} readOnly />
+      ) : null}
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}

@@ -14,7 +14,14 @@ export type CompanySetupFormState =
   | { ok: true; companyId: string; submitted: boolean }
   | {
       ok: false;
-      code: "needs_migration" | "invalid" | "invalid_country" | "error";
+      code:
+        | "needs_migration"
+        | "invalid"
+        | "invalid_country"
+        | "duplicate_company"
+        | "not_owner"
+        | "multiple_companies"
+        | "error";
       message?: string;
     };
 
@@ -26,7 +33,15 @@ export async function saveCompanySetupAction(
   // intent=draft. Anything else is treated as a draft (never a request).
   const submitted = String(formData.get("intent") ?? "") === "submit";
 
+  // M-P0-2 explicit target: "" (or absent) = legacy singleton; "new" = create
+  // a NEW company (insert-only); a uuid = edit exactly that company. The RPC
+  // re-verifies ownership server-side — a forged id fails with not-owner.
+  const rawCompanyId = String(formData.get("company_id") ?? "").trim();
+  const companyId: string | null | undefined =
+    rawCompanyId === "" ? undefined : rawCompanyId === "new" ? null : rawCompanyId;
+
   const r = await saveCompanySetup({
+    companyId,
     legalName: String(formData.get("legal_name") ?? ""),
     companyType: formData.get("company_type")?.toString(),
     country: formData.get("country")?.toString(),
@@ -44,6 +59,9 @@ export async function saveCompanySetupAction(
   }
   if (r.kind === "invalid") return { ok: false, code: "invalid", message: r.message };
   if (r.kind === "invalid-country") return { ok: false, code: "invalid_country" };
+  if (r.kind === "duplicate-company") return { ok: false, code: "duplicate_company" };
+  if (r.kind === "not-owner") return { ok: false, code: "not_owner" };
+  if (r.kind === "multiple-companies") return { ok: false, code: "multiple_companies" };
   // Generic failure: the localized form copy carries the user-facing text;
   // no raw technical message crosses the boundary.
   if (r.kind === "error") return { ok: false, code: "error" };

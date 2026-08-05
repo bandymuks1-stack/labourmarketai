@@ -1609,6 +1609,7 @@
         "statusSubmitted": "Manual review requested (optional). Your company stays usable in the meantime.",
         "statusNeedsMigration": "Couldn’t complete the action. Please try again.",
         "statusInvalid": "The form is incomplete. Check the required fields.",
+        "statusDuplicateCompany": "A company with this name already exists in your account. Open it from the workspace switcher, or use a different name.",
         "statusError": "Something went wrong. Please try again.",
         "migrationBlockerHeading": "Something went wrong",
         "migrationBlockerBody": "Couldn’t complete the action. Please try again.",
