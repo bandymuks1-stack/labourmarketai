@@ -189,7 +189,8 @@ end $$;
 -- on companies.profile_id → organizations.legacy_company_id — the exact
 -- fallback apps/web/lib/company/employer-company-context.ts bans, and it
 -- answered WRONGLY (the company org) for a caller who also owns team
--- organizations (create_team_v1 is live in prod). This version derives the
+-- organizations (the team-creation RPC of 20260705220000 is live in
+-- prod). This version derives the
 -- caller's ACTABLE organizations from the canonical spines:
 --   * organizations they own (organizations.owner_profile_id), plus
 --   * organizations they actively manage (engagement_contexts, the same
