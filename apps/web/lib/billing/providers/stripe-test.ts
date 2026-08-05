@@ -21,9 +21,27 @@ import type {
  * `stripe_test`.
  */
 
+/**
+ * Explicitly pinned Stripe API version — the exact version the installed SDK's
+ * types target (stripe v22 bundles `2026-05-27.dahlia`). Without an explicit
+ * pin the account's dashboard default decides the webhook/event shapes, which
+ * can silently disagree with the SDK types AND with our parsers. The
+ * SDK's `LatestApiVersion` literal (the type of `StripeConfig["apiVersion"]`)
+ * makes this a COMPILE-TIME pin: if the SDK is upgraded to a version bundling
+ * a different API version, typecheck fails here and the parsers in
+ * webhook-core.ts must be re-verified before it can ship. webhook-core
+ * parsers accept both this (post-Basil) shape and the legacy pre-Basil shape,
+ * so dashboard-default webhook deliveries stay parseable.
+ */
+export const STRIPE_PINNED_API_VERSION: NonNullable<
+  NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"]
+> = "2026-05-27.dahlia";
+
 function client(): Stripe {
   // requireStripeTestSecret enforces sk_test_ and that test mode is active.
-  return new Stripe(requireStripeTestSecret());
+  return new Stripe(requireStripeTestSecret(), {
+    apiVersion: STRIPE_PINNED_API_VERSION,
+  });
 }
 
 export function createStripeTestProvider(): BillingProvider {

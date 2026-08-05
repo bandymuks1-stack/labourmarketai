@@ -11,6 +11,7 @@ import {
 import {
   recordWebhookEvent,
   markWebhookProcessed,
+  markWebhookFailed,
   upsertSubscription,
   applyInvoicePayment,
 } from "@/lib/billing/subscription-store";
@@ -44,19 +45,30 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "live_event_rejected" }, { status: 400 });
   }
 
-  // Idempotency: record first; a duplicate is acknowledged but not reprocessed.
+  // Idempotency: record first. Only a duplicate whose FIRST delivery finished
+  // processing is short-circuited; an unprocessed duplicate is a Stripe retry
+  // after our earlier non-2xx and MUST be reprocessed.
   const recorded = await recordWebhookEvent({
     eventId: event.id,
     eventType: event.type,
     testMode: event.testMode,
     payload: { id: event.id, type: event.type },
   });
-  if (recorded === "duplicate") {
+  if (recorded === "duplicate-processed") {
     return NextResponse.json({ ok: true, received: true, duplicate: true });
   }
   if (recorded === "needs-migration") {
     return NextResponse.json({ ok: true, received: true, processed: false, reason: "needs-migration" });
   }
+  if (recorded === "error") {
+    // No idempotency record could be written or read — processing without one
+    // would break replay safety. Non-2xx so Stripe retries the delivery.
+    return NextResponse.json(
+      { ok: false, received: true, processed: false, reason: "record_failed" },
+      { status: 500 },
+    );
+  }
+  // recorded === "ok" | "duplicate-unprocessed" → process (or reprocess).
 
   if (!isHandledEventType(event.type)) {
     await markWebhookProcessed(event.id);
@@ -89,15 +101,45 @@ export async function POST(req: Request) {
           result = await upsertSubscription(sub);
         }
       }
-    } else if (event.type === "invoice.payment_succeeded" || event.type === "invoice.payment_failed") {
-      const inv = parseInvoiceObject(event.object, event.type === "invoice.payment_succeeded");
+    } else if (
+      event.type === "invoice.paid" ||
+      event.type === "invoice.payment_succeeded" ||
+      event.type === "invoice.payment_failed"
+    ) {
+      // invoice.paid ≡ invoice.payment_succeeded here; both may arrive for the
+      // same invoice (distinct event ids) — applying "succeeded" twice is a
+      // no-op on the subscription row.
+      const inv = parseInvoiceObject(event.object, event.type !== "invoice.payment_failed");
       result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
     }
-    await markWebhookProcessed(event.id, result === "ok" ? undefined : result);
   } catch (e) {
-    await markWebhookProcessed(event.id, e instanceof Error ? e.message : "process_error");
-    return NextResponse.json({ ok: true, received: true, processed: false }, { status: 200 });
+    // Keep the idempotency record OPEN (processed=false) and answer non-2xx so
+    // Stripe retries; the retry reprocesses via "duplicate-unprocessed".
+    await markWebhookFailed(event.id, e instanceof Error ? e.message : "process_error");
+    return NextResponse.json(
+      { ok: false, received: true, processed: false, reason: "process_error" },
+      { status: 500 },
+    );
   }
 
-  return NextResponse.json({ ok: true, received: true, processed: result === "ok", result });
+  if (result === "ok") {
+    await markWebhookProcessed(event.id);
+    return NextResponse.json({ ok: true, received: true, processed: true, result });
+  }
+  if (result === "needs-migration") {
+    // Honest degraded ack (tables not applied yet): a retry cannot succeed
+    // until the migration lands, so acknowledge with 200; the record stays
+    // processed=false, so a post-migration redelivery IS reprocessed.
+    await markWebhookFailed(event.id, "needs-migration");
+    return NextResponse.json({ ok: true, received: true, processed: false, reason: "needs-migration" });
+  }
+  // Store-level failure ("error" | "conflict-live-subscription"): retryable —
+  // same contract as a throw. The conflict case needs an operator decision
+  // (two live subscriptions collide on one owner+plan row); a retry after
+  // remediation succeeds, and until then the reason stays on the event row.
+  await markWebhookFailed(event.id, result);
+  return NextResponse.json(
+    { ok: false, received: true, processed: false, reason: result },
+    { status: 500 },
+  );
 }
