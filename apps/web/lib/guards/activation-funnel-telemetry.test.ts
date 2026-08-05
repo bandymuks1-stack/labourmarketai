@@ -77,14 +77,15 @@ const EXPECTED_EVENTS = [
   //    Server-emitted at the real action points via
   //    lib/telemetry/server-funnel.ts (fire-and-forget, profile_id derived
   //    server-side, allowlisted bounded scalars only).
-  //    `engagement_ended` is deliberately NOT here: the repo has no
-  //    client-callable end-engagement action today.
+  //    `engagement_ended` joined once #1009 put the shared end path on
+  //    main — it fires only on a real `ended` outcome.
   "match_preview_generated",
   "shortlist_added",
   "contact_requested",
   "contact_disclosed",
   "booking_proposed",
   "engagement_created",
+  "engagement_ended",
   "project_assigned",
   "project_completed",
   "experience_submitted",

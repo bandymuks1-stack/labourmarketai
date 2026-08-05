@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 
 /**
  * §7.1 — ending a company-worker engagement. THE one write path, shared by
@@ -118,6 +120,14 @@ export async function endEngagementAction(
     case "ended": {
       // A success whose subject we cannot read is not a success we can report.
       if (!engagement) return { kind: "error" };
+      // W14 mid-funnel: only a real state change counts — `already_ended`,
+      // refusals and errors emit nothing. `role_context` is the
+      // server-derived side of THIS engagement; other engagements of the
+      // same person are untouched and unreported.
+      emitServerFunnelEvent(FUNNEL_EVENTS.engagementEnded, {
+        source: "engagements",
+        metadata: { role_context: asSide(payload.actor_side) },
+      });
       // Every surface that renders engagement state re-reads.
       revalidatePath(`/${locale}/dashboard/projects`);
       revalidatePath(`/${locale}/dashboard`);

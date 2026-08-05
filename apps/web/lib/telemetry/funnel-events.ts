@@ -92,15 +92,19 @@ export const FUNNEL_EVENTS = {
   //    a telemetry failure never breaks the action). Bounded scalars only —
   //    candidate_count is a count, never an id list. No migration, no schema
   //    change, no new RLS.
-  //    NOTE `engagement_ended` is deliberately ABSENT: the repo has no
-  //    client-callable end-engagement action today (the end RPC has zero
-  //    callers), and an event with no real action point would be a fake hook.
+  //    `engagement_ended` fires from the ONE shared end path
+  //    (lib/engagements/end-engagement.ts, on main since #1009) only on a
+  //    real `ended` outcome — never on `already_ended`, a refusal or an
+  //    error. `role_context` carries the server-derived actor side
+  //    ("company" | "worker"); an ended engagement ends ONLY that
+  //    engagement row, so the event implies no exclusive employment.
   matchPreviewGenerated: "match_preview_generated",
   shortlistAdded: "shortlist_added",
   contactRequested: "contact_requested",
   contactDisclosed: "contact_disclosed",
   bookingProposed: "booking_proposed",
   engagementCreated: "engagement_created",
+  engagementEnded: "engagement_ended",
   projectAssigned: "project_assigned",
   projectCompleted: "project_completed",
   experienceSubmitted: "experience_submitted",
