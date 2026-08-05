@@ -160,6 +160,14 @@ create trigger protect_last_owner
   before update or delete on public.company_memberships
   for each row execute function public.company_memberships_protect_last_owner();
 
+-- §6 of the apply decision: the last-owner trigger is never a public API.
+-- The 20260722160000 secdef closure cannot reach functions created after
+-- it, so default privileges would leave this anon-reachable at the grant
+-- level (Postgres additionally refuses direct calls to trigger-returning
+-- functions). Explicit revokes close it at both layers.
+revoke all on function public.company_memberships_protect_last_owner() from public;
+revoke all on function public.company_memberships_protect_last_owner() from anon;
+
 -- ── 4. RLS + grants — read-only surface, fail-closed writes ───────────────
 alter table public.company_memberships enable row level security;
 

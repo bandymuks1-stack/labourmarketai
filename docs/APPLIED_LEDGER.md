@@ -20,7 +20,7 @@
 |---|---|
 | Applied | **2026-08-05 19:57:16 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
 | Production project | `gorgitwvdzxbnaxhrsrw` |
-| Production ledger version | `20260805195716`, name `company_memberships_v1` (MCP stamps apply-time versions — match on `name`) |
+| Production ledger version | `20260805195716`, name `company_memberships_v1` (MCP stamps apply-time versions — match on `name`) + completion entry `20260805200417`, name `company_memberships_v1_trigger_fn_revoke` — the §6 privilege closure (`revoke all on function company_memberships_protect_last_owner() from public/anon`) that the repo file carries in-place; applied minutes after the main body when the repo secdef guard surfaced the 20260722160000-closure gap. Privilege-tightening only, zero rows touched; anon AND authenticated verified unable to EXECUTE post-apply |
 | PR | **#1023** — merge follows this accounting commit |
 | Owner gate | "OWNER DECISION — APPLY COMPANY_MEMBERSHIPS V1 AND CONTINUE MULTI-ORG AUTHORITY TRAIN" (2026-08-05) §1; executable SQL byte-identical from reviewed package HEAD `cae1ff30` through the rebase onto post-M-P0-3 main `596eab7a` (git blob `a51710d3` unchanged) and through the human-gate commit (comment-only header change) |
 | Migration sha256 (repo file, with approval header) | `5f0622fc8d6e1141a919e0a000a690f84a6b46c4da642d301e3f505faf40e51c` (canonical git-LF content at rebase: `b34cb8dc43af64e53a9ac61ae279f2e6fd7bf2b94ec0432b1a2e67c02da9d32c`) |

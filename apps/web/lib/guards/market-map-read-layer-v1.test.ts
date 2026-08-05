@@ -420,7 +420,10 @@ describe("NO new DB migration in this PR", () => {
     // count under supabase/migrations is 182 (recounted, not summed).
     // Bumped 182 -> 183 for M-P0-2 (explicit create/edit company RPC,
     // `20260805190000`) — function definitions only, owner-gated, UNAPPLIED.
-    expect(count).toBeLessThanOrEqual(183);
+    // Bumped 183 -> 184 for M-P0-4 slice 1 (company_memberships v1,
+    // `20260806090000`) — governance membership table, human-gated under the
+    // recorded owner apply decision; APPLIED to prod (ledger 20260805195716).
+    expect(count).toBeLessThanOrEqual(184);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
