@@ -82,9 +82,13 @@ describe("M-P0-2 — the v3 RPC", () => {
     expect(sql).not.toMatch(/to\s+anon/i);
   });
 
-  it("ships RED — no human-gate marker before an owner apply decision", () => {
+  it("carries the recorded-decision human-gate marker", () => {
+    // OWNER APPROVAL recorded 2026-08-05 ("OWNER DECISION — APPLY AND MERGE
+    // M-P0-2" §1, bound to reviewed HEAD 15ff08a5). Before that decision this
+    // assertion enforced ABSENCE of the marker. Same line-anchored detection
+    // as .github/scripts/migration-safety.mjs.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(raw)).toBe(false);
+    expect(ANNOTATION.test(raw)).toBe(true);
   });
 
   it("has a paired rollback that documents the singleton re-opening risk", () => {

@@ -1,10 +1,21 @@
 -- 20260805190000 — explicit create/edit company path (M-P0-2)
 --
+-- @human-gate-approved — RED class: SECURITY DEFINER function creation +
+-- redefinition, EXECUTE grant changes, and scanner-visible DML text inside
+-- the plpgsql bodies (apply time itself runs NO DML). OWNER APPROVAL
+-- recorded 2026-08-05 ("OWNER DECISION — APPLY AND MERGE M-P0-2" §1),
+-- bound to the reviewed HEAD's migration bytes; decision recorded in
+-- docs/architecture/MULTI_ORGANIZATION_STRUCTURAL_TRAIN.md.
+-- Named findings the approval covers, still visible as notices:
+--   * security-definer-function — v3 created, v1/v2 redefined (all keep
+--     `set search_path = public`, auth.uid() authority checks);
+--   * grant-or-revoke — EXECUTE revoked from public/anon, granted to
+--     authenticated only, for all three functions;
+--   * data-dml — UPDATE/INSERT statements INSIDE the function bodies
+--     (runtime paths); the migration itself mutates zero rows.
+--
 -- SAFETY CLASS: RED. Creates one SECURITY DEFINER function and REDEFINES an
--- existing one (save_company_setup_v2) — human-gate classes (g)/(h). Ships
--- with NO `-- @human-gate-approved` marker: the owner commissioned the
--- M-P0-2 package (directive 2026-08-05 §8), not the apply. CI staying RED is
--- the honest state until an apply decision is recorded.
+-- existing one (save_company_setup_v2) — human-gate classes (g)/(h).
 --
 -- ── WHY ────────────────────────────────────────────────────────────────────
 -- v2 (20260612090000) is a singleton upsert: `update public.companies …
