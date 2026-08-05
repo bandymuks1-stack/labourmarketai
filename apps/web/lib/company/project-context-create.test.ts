@@ -47,19 +47,27 @@ describe("3 — no billing/payment/env/auth/outbound surfaces touched", () => {
 });
 
 describe("4 — create is scoped to the company/org context (server-resolved)", () => {
-  it("resolves the company server-side and never trusts a client company id", () => {
-    expect(actionCode).toMatch(/getOwnCompany\(\)/);
+  it("resolves the company from the ACTIVE WORKSPACE and never trusts a client company id", () => {
+    // M-P0-3: authority comes from the membership-validated active workspace
+    // resolver — never from `companies.profile_id = auth.uid()`.
+    expect(actionCode).toMatch(/requireEmployerCompany\(\)/);
+    expect(actionCode).not.toMatch(/getOwnCompany/);
     // Rebuild W5: the insert itself moved into THE ONE create core; the
     // server-resolved company id is what gets handed to it.
-    expect(actionCode).toMatch(/insertProjectForCompany\(supabase, company\.id/);
+    expect(actionCode).toMatch(/insertProjectForCompany\(supabase, company\.companyId/);
     // company_id is not read from formData.
     expect(actionCode).not.toMatch(/formData\.get\(["']company_id["']\)|formData\.get\(["']org/);
   });
 });
 
 describe("5 — unauthorized roles cannot create", () => {
-  it("action rejects when the caller owns no company (worker-only / unauth)", () => {
-    expect(actionCode).toMatch(/if \(!company\) return \{ ok: false, code: "no_company" \}/);
+  it("action fails closed when no valid company workspace is selected", () => {
+    // Legitimate non-company contexts (personal workspace, no organization,
+    // not-a-member, stale/revoked pointer) → no_company; infrastructure
+    // failures → error — never rendered as "you have no organization".
+    expect(actionCode).toMatch(/if \(!company\.ok\)/);
+    expect(actionCode).toMatch(/isEmployerContextFailure\(company\.reason\)/);
+    expect(actionCode).toMatch(/code: "no_company"/);
   });
   it("route is gated to the company role", () => {
     expect(route).toMatch(/requireRoleOrRedirect\(locale, "company"\)/);
