@@ -403,13 +403,22 @@ describe("NO new DB migration in this PR", () => {
     // EXECUTE grant, no table/policy/RLS/existing-grant change and zero DML at
     // apply time. Ships UNAPPLIED, owner-gated. Still no migration from the
     // market-map read layer.
-    // Bumped 179 -> 180 for M-P0-1 (multi-org company ownership cap removal,
-    // `20260805170000`) — schema-shape change only, owner-gated, UNAPPLIED.
-    // COLLISION NOTE: parallel PR #1013 pins 181 from the same base (its two
-    // migrations are already applied to prod). Whichever merges second must
-    // RECOUNT the real files after rebase (correct combined value: 182) —
-    // never take either side's number verbatim.
-    expect(count).toBeLessThanOrEqual(180);
+    //
+    // Bumped 179 -> 181 for the §18 worker display-name package —
+    // `20260805090000_worker_display_name_write_path_v1` (redefines
+    // complete_onboarding's worker branch DO NOTHING -> DO UPDATE, no
+    // table/policy/RLS change, zero DML) and
+    // `20260805090100_worker_display_name_backfill_v1` (hole-filling DML with
+    // a reversal ledger). Both APPLIED to prod 2026-08-05 under recorded
+    // owner decisions 1/2 (docs/human-gates/worker-display-name-write-path-gate.md),
+    // merged via PR #1020. Still no migration from the market-map read layer.
+    //
+    // Bumped 181 -> 182 for M-P0-1 (multi-org company ownership cap removal,
+    // `20260805170000`) — schema-shape change only, owner-gated, UNAPPLIED at
+    // pin time. RESOLVED COLLISION per both branches' collision notes: after
+    // rebasing M-P0-1 onto the merged display-name package the real file
+    // count under supabase/migrations is 182 (recounted, not summed).
+    expect(count).toBeLessThanOrEqual(182);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -14,6 +14,55 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260805090000_worker_display_name_write_path_v1` + `20260805090100_worker_display_name_backfill_v1`
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-05 15:55:14 UTC** (write-path) and **15:56:01 UTC** (backfill) via Supabase MCP `apply_migration`, both `{"success":true}` |
+| Method | Supabase MCP `apply_migration` (never `supabase db push`), strict order: write-path first, backfill second |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger versions | `20260805155514` name `worker_display_name_write_path_v1`; `20260805155601` name `worker_display_name_backfill_v1` (MCP stamps apply-time versions — match on `name`) |
+| PR | **#1013 — NOT merged.** Owner approved the two migrations conditionally (Decisions 1+2, 2026-08-05); merge is a separate owner gate |
+| Branch HEAD at apply | `d6046565` (rebased onto main `5e2a5458`) |
+| Write-path sha256 (as reviewed / after marker) | `c41cdc5d0767…de5c8c6693` / `873eeb29dba9…a5308765be` |
+| Backfill sha256 (as reviewed / after marker) | `e1e10f21ef49…7bfaaee06dfc78` / `6d55fc761e19…351babdadcd` |
+| Function-body byte proof | prod `pg_proc.prosrc` md5 `8b8f0ae34bc6ec6deb249ef0463dd465` **identical** to the repo file's dollar-quoted body |
+| Rollbacks (present, NOT executed, NOT authorised) | `supabase/rollbacks/20260805090000_….down.sql` (restores 0008 DO NOTHING verbatim — re-opens the defect) and `…090100_….down.sql` (ledger-driven, current-value-guarded — never reverts post-apply user edits) |
+| Owner gate | Decisions 1+2 recorded 2026-08-05 in `docs/human-gates/worker-display-name-write-path-gate.md` with exact wording, reviewed sha256 and preflight counts; `-- @human-gate-approved` markers added to exactly these two files in the same commit |
+
+**Applied-copy note.** The MCP-applied copies carry the full executable
+statements verbatim; the write-path's prose header was abridged in the applied
+copy (the repo file is canonical and its full audit header governs). The
+function-body md5 above proves the semantic payload is byte-identical; the
+backfill is DML whose effects are proven by exact counts below.
+
+**What it did.** (1) Repaired `complete_onboarding`'s worker branch:
+`ON CONFLICT (profile_id) DO NOTHING` → `DO UPDATE` with
+`coalesce(excluded.…, workers.…)` for `display_name` and
+`current_location_country`, explicit `updated_at = now()`. Single overload,
+signature unchanged, anon EXECUTE revoked, authenticated-only, PUBLIC revoked
+(verified post-apply). Zero data touched by migration 1 (workers state hash
+`11add5b764d6664998dc7af31ab54402` identical before/after). (2) Backfilled
+existing rows ledger-first from `profiles.full_name` / `profiles.country`.
+
+**Production counts (authoritative).** Preflight (read-only, before apply):
+32 profiles, 32 workers, 27 NULL `display_name` (blank-non-NULL 0),
+24 with factual `full_name`, 19 name-eligible, 21 country-eligible,
+0 conflicts, 5 rows already had a (conflict-free) nonblank `display_name`,
+8 rows `updated_at`≠`created_at`, before-state hash `11add5b7…`. Post-apply:
+ledger rows **22** (19 name-fills + 3 country-only rows whose existing names
+were provably untouched), **19 names filled**, **21 countries filled**,
+**8 residual NULL names** (= 27 − 19: no `full_name` to recover — nothing
+invented), 0 conflicts after apply. Ledger table
+`worker_display_name_backfill_20260805`: RLS enabled, **zero policies**
+(default deny), holds exact BEFORE values for reversal.
+
+**Not touched.** No organization/membership row, no engagement, no project,
+no booking, no experience record — the two migrations' statements name only
+`complete_onboarding`, `public.workers` (UPDATE-only) and the new ledger
+table. Only these two migrations were applied; every other deferred migration
+below remains deferred.
+
 ### ✅ APPLIED TO PROD — `20260804160000_booking_engagement_end_v2`
 
 | Field | Value |
