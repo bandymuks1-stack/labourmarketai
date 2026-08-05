@@ -70,8 +70,14 @@ export function workspaceAccentIndex(organizationId: string): number {
  * Membership-validated active-WORKSPACE resolution.
  *
  *   - a stored org pointer that matches a real membership always wins;
- *   - company identity with no valid pointer → the first organization
- *     (identical to today's resolveActiveOrganizationId fallback);
+ *   - company identity with EXACTLY ONE organization → that organization
+ *     (an unambiguous default is not a guess — M-P0-2's "single
+ *     unambiguous row" doctrine at the workspace level);
+ *   - company identity with SEVERAL organizations and no valid pointer →
+ *     the personal workspace, FAIL CLOSED (M-P0-5: the person explicitly
+ *     picks in the chip; the old `organizationIds[0]` fallback was exactly
+ *     the forbidden first/oldest-organization inference and made a revoked
+ *     workspace silently snap to another org);
  *   - person identity with no valid pointer → the personal workspace;
  *   - never a fabricated org, never a foreign org.
  */
@@ -86,7 +92,7 @@ export function resolveActiveWorkspaceId(
   ) {
     return storedOrganizationId;
   }
-  if (identity === "company" && organizationIds.length > 0) {
+  if (identity === "company" && organizationIds.length === 1) {
     return organizationIds[0];
   }
   return PERSONAL_WORKSPACE_ID;
@@ -103,9 +109,11 @@ export function shouldOfferOrganizationSwitch(
  * Membership-validated active-organization resolution.
  *
  *   - stored pointer matches a membership → that org;
- *   - stored pointer stale / null → the FIRST membership (readers order by
- *     created_at asc, so this matches the migration backfill's "oldest owned
- *     org" default);
+ *   - EXACTLY ONE membership → that org (unambiguous default);
+ *   - SEVERAL memberships and a stale/null pointer → null, FAIL CLOSED
+ *     (M-P0-5: the surface renders an explicit chooser state — the old
+ *     `organizations[0]` fallback silently picked the first/oldest org,
+ *     the exact inference the multi-org doctrine forbids);
  *   - no memberships → null (an honest "no company yet" — never fabricated).
  */
 export function resolveActiveOrganizationId(
@@ -119,5 +127,5 @@ export function resolveActiveOrganizationId(
   ) {
     return storedActiveOrganizationId;
   }
-  return organizations[0].id;
+  return organizations.length === 1 ? organizations[0].id : null;
 }

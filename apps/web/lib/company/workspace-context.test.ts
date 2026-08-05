@@ -29,8 +29,19 @@ describe("resolveActiveWorkspaceId", () => {
     );
   });
 
-  it("company identity with no pointer → first organization (historical fallback)", () => {
-    expect(resolveActiveWorkspaceId("company", [ORG_A, ORG_B], null)).toBe(ORG_A);
+  it("company identity + SEVERAL orgs + no pointer → Personal, FAIL CLOSED (M-P0-5)", () => {
+    // The old `organizationIds[0]` fallback was the forbidden first/oldest
+    // inference — a revoked workspace silently snapped to another org.
+    expect(resolveActiveWorkspaceId("company", [ORG_A, ORG_B], null)).toBe(
+      PERSONAL_WORKSPACE_ID,
+    );
+    expect(resolveActiveWorkspaceId("company", [ORG_A, ORG_B], "stale-id")).toBe(
+      PERSONAL_WORKSPACE_ID,
+    );
+  });
+
+  it("company identity + EXACTLY ONE org → that org (unambiguous default)", () => {
+    expect(resolveActiveWorkspaceId("company", [ORG_A], null)).toBe(ORG_A);
   });
 
   it("a membership-matching pointer wins for every identity", () => {
