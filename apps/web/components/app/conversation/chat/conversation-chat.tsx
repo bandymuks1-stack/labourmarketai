@@ -1,6 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslations } from "next-intl";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
@@ -70,6 +79,28 @@ import { loadOpeningBrief } from "@/lib/conversation/opening-brief";
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
+
+/** The S2 payload the page streams to the chat without awaiting (#1011):
+ *  the intro model plus its server-resolved label bag, as one promise. */
+export type PersonalIntroPayload = {
+  intro: PersonalWorkspaceIntroModel;
+  labels: PersonalWorkspaceLabels | null;
+};
+
+/** Resolves the streamed S2 payload inside the intro slot's invisible
+ *  Suspense boundary. A `hidden` model (or a missing label bag) renders
+ *  nothing — the same honest outcomes the awaited props produced. */
+function PersonalWorkspaceIntroStream({
+  payload,
+  onAction,
+}: {
+  payload: Promise<PersonalIntroPayload>;
+  onAction: (id: string) => void;
+}) {
+  const { intro, labels } = use(payload);
+  if (intro.kind === "hidden" || !labels) return null;
+  return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
+}
 
 /** Client-side current date as YYYY-MM-DD (the deterministic work-log extractor
  *  takes `today` as a param so it stays pure). */
@@ -215,8 +246,7 @@ export function ConversationChat({
   bookingLabels = null,
   script,
   mobile = false,
-  personalIntro = null,
-  personalIntroLabels = null,
+  personalIntroPayload = null,
 }: {
   labels: ChatLabels;
   workLogLabels: WorkLogLabels;
@@ -226,14 +256,14 @@ export function ConversationChat({
   script?: ChatMessage[];
   /** Force the phone layout — used by the mobile design preview frame. */
   mobile?: boolean;
-  /** "Mano erdvė" (S2) — the server-resolved personal-space model. `null`
-   *  (organization workspace, company/agency/customer identity, no work
-   *  profile, or the design preview) renders nothing at all. */
-  personalIntro?: PersonalWorkspaceIntroModel | null;
-  /** Server-resolved copy for the block above — same label-bag pattern as
-   *  `labels` / `workLogLabels` / `bookingLabels`, so no extra message
-   *  namespace ships to the client. */
-  personalIntroLabels?: PersonalWorkspaceLabels | null;
+  /** "Mano erdvė" (S2) — the server-resolved personal-space model plus its
+   *  label bag, as a PROMISE the page starts but never awaits (#1011): the
+   *  slow worker-readiness reads behind it must not hold the whole
+   *  conversation surface out of the shell flush. It resolves inside an
+   *  invisible Suspense boundary below (SpineStream pattern). `null`
+   *  (the design preview) renders nothing at all; a resolved `hidden`
+   *  model renders nothing either — exactly as before. */
+  personalIntroPayload?: Promise<PersonalIntroPayload> | null;
 }) {
   const auth0 = useAuthOptional();
   const router = useRouter();
@@ -1666,12 +1696,17 @@ export function ConversationChat({
                  through the SAME dispatcher every chip uses — one set of
                  flows, no second action system. */
               intro={
-                personalIntro && personalIntroLabels && !script ? (
-                  <PersonalWorkspaceIntro
-                    intro={personalIntro}
-                    labels={personalIntroLabels}
-                    onAction={handlePanelChip}
-                  />
+                personalIntroPayload && !script ? (
+                  /* Invisible boundary (#1011): the intro's slow readiness
+                     reads stream in AFTER the shell — the opening composition
+                     renders immediately and the block appears when known,
+                     exactly like the layout's SpineStream. */
+                  <Suspense fallback={null}>
+                    <PersonalWorkspaceIntroStream
+                      payload={personalIntroPayload}
+                      onAction={handlePanelChip}
+                    />
+                  </Suspense>
                 ) : undefined
               }
               handlers={{
