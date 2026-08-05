@@ -403,7 +403,13 @@ describe("NO new DB migration in this PR", () => {
     // EXECUTE grant, no table/policy/RLS/existing-grant change and zero DML at
     // apply time. Ships UNAPPLIED, owner-gated. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(179);
+    // Bumped 179 -> 180 for M-P0-1 (multi-org company ownership cap removal,
+    // `20260805170000`) — schema-shape change only, owner-gated, UNAPPLIED.
+    // COLLISION NOTE: parallel PR #1013 pins 181 from the same base (its two
+    // migrations are already applied to prod). Whichever merges second must
+    // RECOUNT the real files after rebase (correct combined value: 182) —
+    // never take either side's number verbatim.
+    expect(count).toBeLessThanOrEqual(180);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

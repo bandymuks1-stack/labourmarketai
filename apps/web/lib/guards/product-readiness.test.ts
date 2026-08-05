@@ -1936,7 +1936,18 @@ describe("no migration files added by this sprint", () => {
     // holds data. RED by design (SECURITY DEFINER + GRANT + in-body DML),
     // deliberately NOT human-gate-annotated — the owner applies it. Ships
     // UNAPPLIED.
-    const SPRINT_BASELINE = 179;
+    // Bumped 179 -> 180 for M-P0-1 `20260805170000_multi_org_company_
+    // ownership_cap_removal_v1` — drops the one-person-one-company
+    // `companies_profile_id_key` cap and replaces it with a truthful
+    // (creator, canonical legal_name) duplicate key. RED, owner-gated,
+    // ships UNAPPLIED, no marker.
+    // COLLISION NOTE: parallel PR #1013 (worker display-name package) pins
+    // this same shared ratchet at 181 (179 + its 2 migrations, both already
+    // APPLIED to prod 2026-08-05) from the same base. Whichever merges second
+    // must RECOUNT the real files under supabase/migrations after rebase
+    // (correct combined value: 182) — never take either side's number
+    // verbatim. The guard fails closed on a bad resolution.
+    const SPRINT_BASELINE = 180;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
