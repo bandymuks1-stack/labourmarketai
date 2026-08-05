@@ -1936,7 +1936,19 @@ describe("no migration files added by this sprint", () => {
     // holds data. RED by design (SECURITY DEFINER + GRANT + in-body DML),
     // deliberately NOT human-gate-annotated — the owner applies it. Ships
     // UNAPPLIED.
-    const SPRINT_BASELINE = 179;
+    // Bumped 179 -> 181 for the §18 worker display-name package: the
+    // write-path repair (`20260805090000`, DO NOTHING -> DO UPDATE inside
+    // complete_onboarding, additive-only, zero DML at apply) and its
+    // separately-approvable backfill (`20260805090100`, hole-filling DML with
+    // a ledger-first reversal design). Both RED, both UNAPPLIED, both
+    // owner-gated via docs/human-gates/worker-display-name-write-path-gate.md;
+    // paired rollbacks exist for both.
+    // COLLISION NOTE: parallel PR #1016 (org demand row scope) bumps this
+    // same shared ratchet 179 -> 180 from the same base. Whichever merges
+    // second must RECOUNT the real files under supabase/migrations after
+    // rebase (correct combined value: 182) — never take either side's
+    // number verbatim. The guard fails closed on a bad resolution.
+    const SPRINT_BASELINE = 181;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

@@ -582,7 +582,17 @@ describe("the migration set is exactly what this slice declared", () => {
           readFileSync(join(MIGRATIONS, f), "utf8"),
         ),
       );
-    expect(newer).toEqual(["20260804160000_booking_engagement_end_v2.sql"]);
+    // 2026-08-05: two additions — the worker display-name package's write-path
+    // and backfill migrations gained their markers under OWNER DECISIONS 1+2,
+    // recorded (exact wording + reviewed sha256 + production preflight) in
+    // docs/human-gates/worker-display-name-write-path-gate.md. Each marker was
+    // added in the same commit as its recorded decision, per that gate's
+    // procedure — not spread from this branch's approval.
+    expect(newer).toEqual([
+      "20260804160000_booking_engagement_end_v2.sql",
+      "20260805090000_worker_display_name_write_path_v1.sql",
+      "20260805090100_worker_display_name_backfill_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {
