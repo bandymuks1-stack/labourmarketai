@@ -413,6 +413,12 @@ describe("NO new DB migration in this PR", () => {
     // UNAPPLIED — owner decisions 1/2 recorded in
     // docs/human-gates/worker-display-name-write-path-gate.md. Still no
     // migration from the market-map read layer.
+    //
+    // COLLISION NOTE: parallel PR #1016 (org demand row scope) bumps this
+    // same shared ratchet 179 -> 180 from the same base. Whichever merges
+    // second must RECOUNT the real files under supabase/migrations after
+    // rebase (correct combined value: 182) — never take either side's
+    // number verbatim. The guard fails closed on a bad resolution.
     expect(count).toBeLessThanOrEqual(181);
   });
 });

@@ -1943,6 +1943,11 @@ describe("no migration files added by this sprint", () => {
     // a ledger-first reversal design). Both RED, both UNAPPLIED, both
     // owner-gated via docs/human-gates/worker-display-name-write-path-gate.md;
     // paired rollbacks exist for both.
+    // COLLISION NOTE: parallel PR #1016 (org demand row scope) bumps this
+    // same shared ratchet 179 -> 180 from the same base. Whichever merges
+    // second must RECOUNT the real files under supabase/migrations after
+    // rebase (correct combined value: 182) — never take either side's
+    // number verbatim. The guard fails closed on a bad resolution.
     const SPRINT_BASELINE = 181;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
