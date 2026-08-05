@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Minu töösuhted",
+          "description": "Vaata, kellega töötad, ja lõpeta töösuhe."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Vaata töösuhteid",
+          "description": "Vaata, kes selles organisatsioonis töötab, ja lõpeta töösuhe."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Lõpeta töösuhe",
+          "description": "Lõpeta üks töösuhe. Lõplik — seda ei saa uuesti avada."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignDone": "[EN] Assigned to the project.",
-      "assignFailed": "[EN] The assignment could not be made."
+      "assignFailed": "[EN] The assignment could not be made.",
+      "chipEngagements": "Kellega ma töötan",
+      "userEngagements": "Kellega ma töötan?",
+      "engagementsOpened": "Siin on registreeritud töösuhted. Ühe neist saab paneelil lõpetada.",
+      "engagementsNone": "Registreeritud töösuhteid ei ole.",
+      "engagementsNoCompany": "Sa ei tegutse praegu organisatsiooni nimel, seega pole nimekirja, mida näidata.",
+      "engagementsUnavailable": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Ava täisekraan",
+      "pendingInline": "Tulemust valmistatakse ette.",
+      "retry": "Proovi uuesti",
+      "engagements": {
+        "title": "Töösuhted"
+      },
+      "engagementsError": "Töösuhteid ei õnnestunud laadida.",
+      "engagementsBlocked": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
+      "engagementsNeedsMigration": "Töösuhted ei ole selles keskkonnas veel saadaval.",
+      "engagementsEmptyCompany": "Sellel organisatsioonil ei ole registreeritud töösuhteid.",
+      "engagementsEmptyWorker": "Sul ei ole registreeritud töösuhteid.",
+      "engagementsUnavailable": "See töösuhe ei ole sulle saadaval.",
+      "engagementsConflict": "Töösuhe muutus tegevuse ajal. Laadi uuesti ja proovi uuesti.",
+      "engagementsStaleConfirmation": "See kinnitus ei kehti enam. Ava kinnitus uuesti.",
+      "engagementsStatusActive": "Aktiivne",
+      "engagementsStatusEnded": "Lõppenud",
+      "engagementsStarted": "Algas",
+      "engagementsEndedOn": "Lõppes",
+      "engagementsUnknownParty": "Nimi pole saadaval",
+      "engagementsEndAction": "Lõpeta töösuhe",
+      "engagementsEndTitle": "Kas lõpetada see töösuhe?",
+      "engagementsEndBody": "Lõpetamine on lõplik: seda töösuhet ei saa uuesti avada. Kirje jääb ajalukku koos tegelike kuupäevadega — midagi ei kustutata. Ühtegi projekti ei lõpetata, organisatsiooni liikmesus ei lõpe, kogemust ega hinnangut ei looda ning midagi ei maksta ega arveldata.",
+      "engagementsEndCta": "Lõpeta töösuhe",
+      "engagementsCancel": "Loobu",
+      "engagementsWorking": "Lõpetamine…",
+      "engagementsEnded": "Töösuhe on lõpetatud.",
+      "engagementsEndedAt": "Töösuhe lõpetati {date}.",
+      "engagementsAlreadyEnded": "See töösuhe oli juba lõpetatud. Midagi ei muudetud.",
+      "engagementsAlreadyEndedAt": "See töösuhe oli juba lõpetatud {date}. Midagi ei muudetud."
     }
   },
   "landing": {

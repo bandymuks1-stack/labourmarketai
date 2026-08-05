@@ -72,6 +72,19 @@ export type ResultKind =
    * canonical domain that fills it — `experience_records`.
    */
   | "experiences"
+  /**
+   * §7.1 — the WORK RELATIONSHIPS themselves: who is engaged with whom, since
+   * when, and the one place either side can end one.
+   *
+   * A separate answer shape from `project` and from `calendar`, and that is a
+   * data fact rather than a preference. An engagement has NO path to a project
+   * (`source_booking_id → booking_requests → customer_requests` carries no
+   * `project_id` at any hop — the W11 audit), so it cannot be a depth of the
+   * project result without inventing the relationship. And it is not an event
+   * in time, so it is not a calendar entry either. It is its own answer to its
+   * own question: "who am I working with, and is that still true".
+   */
+  | "engagements"
   | "invoice";
 
 /**
@@ -313,6 +326,51 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // `opportunities`: the underlying migration is owner-gated, and that is a
     // DISTINCT rendered state (`unavailable`), never an empty result and never
     // a fabricated zero — so the data path is real even before the apply.
+    dataReadiness: "real",
+  },
+  {
+    kind: "engagements",
+    titleKey: "conversation.results.engagements.title",
+    // TWO doors, ONE result. The employer asks "who works for us" and the
+    // worker asks "who do I work for"; they are the same rows read from the
+    // two ends, so they are one answer shape and one renderer. `openedBy`
+    // carries both, and a guard pins that they resolve to this same kind —
+    // the `first-match-wins` trap that made the old `reputation` slot
+    // unreachable cannot bite here, because neither id appears anywhere else.
+    openedBy: ["company.review-engagements", "worker.review-engagements"],
+    // Same honest destination the employer door names. There is no
+    // engagements SCREEN on either side and none is invented: a 73rd route
+    // would be refused by Product Gate A-09, exactly as W6 slice 3B's
+    // `/dashboard/experiences` was. The projects list is where an employer
+    // already meets their engaged workers.
+    advancedRoute: "/dashboard/projects",
+    // BOTH personal and organization — the `journal` pattern, not the
+    // `opportunities` one, and for the reason `experiences` documents above:
+    // "who I am working with" is a fact about the SIGNED-IN PERSON that stays
+    // true in either space. What the context changes is which slice of the
+    // viewer's own rows is meaningful, never who may see them.
+    //
+    // NOT `project`: an engagement has no project (see the kind's note), so
+    // offering this result inside a project context could only ever show rows
+    // that have nothing to do with that project.
+    contexts: ["personal", "organization"],
+    // PROMOTED in the SAME change that adds `case "engagements"` to
+    // `InlineResult` — never before it (W11 P0-4).
+    //
+    // VERIFIED: `lib/engagements/engagements-result.ts` is one RLS-scoped read
+    // of `company_worker_engagements`, whose `_select` policy already answers
+    // `owns_company(company_id) OR the row's own worker OR is_admin()`. Every
+    // rendered fact is a stored column — canonical status, the real
+    // `started_at`, the STORED `ended_at`. No project join, no progress, no
+    // rating, no score, no payment state, because the domain stores none of
+    // them and the contract has no field that could carry one.
+    //
+    // The three ways data can be absent are three DISTINCT rendered states —
+    // an unapplied source (`needs-migration`), a failed read (`blocked`) and a
+    // genuinely empty roster — so an absent source is never shown as "you have
+    // none". The `experiences` precedent applies to the owner gate: the v2 RPC
+    // behind the END action is unapplied, and that is its own honest state,
+    // never a silent failure — so the data path is real even before the apply.
     dataReadiness: "real",
   },
   {
