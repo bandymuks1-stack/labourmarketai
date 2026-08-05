@@ -5,10 +5,11 @@
 -- REVOKE/GRANT pair. Both are human-gate classes (g) and (h) in
 -- .github/scripts/migration-safety.mjs.
 --
--- There is deliberately NO `-- @human-gate-approved` marker in this file.
--- That marker asserts the OWNER approved the change; no owner decision has
--- been recorded for it yet. CI staying RED is the honest state.
--- Approval package: docs/human-gates/worker-display-name-write-path-gate.md
+-- @human-gate-approved — RED classes (g) SECURITY DEFINER redefinition and
+-- (h) revoke/grant restatement. OWNER DECISION 1 ("Apply the canonical worker
+-- display-name write-path repair") recorded 2026-08-05 with exact wording and
+-- reviewed-file sha256 in docs/human-gates/worker-display-name-write-path-gate.md.
+-- This marker covers THIS file's findings only.
 --
 -- ── THE DEFECT ─────────────────────────────────────────────────────────────
 -- The onboarding display name a person types is discarded, so

@@ -1,11 +1,65 @@
 # HUMAN GATE — worker display-name write path + backfill
 
-Status: `WORKER_DISPLAY_NAME_CANONICAL_PATH_CODE_COMPLETE_PENDING_HUMAN_GATE`
+Status: `APPROVED_CONDITIONALLY_2026-08-05 — Decisions 1 and 2 recorded below`
+
+## RECORDED OWNER APPROVALS — 2026-08-05
+
+Source: owner directive "LABOURMARKET.AI — OWNER DECISIONS AND
+MULTI-ORGANIZATION STRUCTURAL TRAIN" (2026-08-05), section "PR #1013 —
+APPROVED CONDITIONALLY". Exact wording:
+
+> **Decision 1** — "Apply the canonical worker display-name write-path
+> repair."
+> **Decision 2** — "Apply the complete factual backfill, including the
+> guarded country/location recovery defined in the reviewed package."
+
+Conditions attached by the owner (all honoured in this episode): rebase onto
+current main; no semantic migration change beyond ratchet/conflict resolution
+and the already-reviewed stale-ledger protection; final checksums reported;
+exact production counts reported; blank/conflicting/newer values classified;
+newer post-apply values never overwritten; rollback verified; migration-safety
+findings narrowly human-gated; **only these two migrations applied**.
+
+Migration sha256 at approval/review time (pre-marker, exactly as reviewed):
+
+- `20260805090000_worker_display_name_write_path_v1.sql`
+  `c41cdc5d0767c141fceb813962c78445cd799f711240c4618b9ee7d5de8c6693`
+- `20260805090100_worker_display_name_backfill_v1.sql`
+  `e1e10f21ef49b44284a13bb29644ee6fb0f8e0c6be929e89725bfaaee06dfc78`
+
+The only change made to either file after these checksums were taken is the
+addition of the `-- @human-gate-approved` marker block itself (recorded in the
+same commit as this approval note; post-marker checksums in the PR report).
+
+Production preflight (read-only, measured 2026-08-05 against
+`labourmarket.ai` prod before apply):
+
+| measure | count |
+|---|---|
+| total profiles | 32 |
+| total workers | 32 |
+| workers with NULL display_name (blank-non-NULL: 0) | 27 |
+| workers whose profile has a factual `full_name` | 24 |
+| name-backfill eligible (NULL name + factual full_name) | 19 |
+| country-backfill eligible | 21 |
+| nonblank name conflicts (display_name ≠ full_name, both set) | 0 |
+| rows already carrying a different nonblank display_name | 5 (all conflict-free) |
+| workers rows with `updated_at` ≠ `created_at` | 8 |
+| before-state hash (profile_id|name|country, md5) | `11add5b764d6664998dc7af31ab54402` |
+
+Expected residual: 27 − 19 = 8 workers stay NULL (no `full_name` to recover
+from — not repaired by guessing).
+
+> OWNER DECISION 2b (ledger retention): not yet decided — ledger table stays
+> until the owner closes the episode; 90-day ceiling proposed.
+
+Prior status (superseded):
+`WORKER_DISPLAY_NAME_CANONICAL_PATH_CODE_COMPLETE_PENDING_HUMAN_GATE`
 Prepared: 2026-08-05 (recreated from fresh main `de38b3db`; the 2026-08-04
 parked package carried over verbatim except timestamps — see history note).
-Neither migration is applied. Both ship RED (no `@human-gate-approved`
-marker) on purpose. CI staying RED is the honest state until a decision is
-recorded HERE.
+Decisions 1 and 2 are now recorded above; both files carry the narrow
+`@human-gate-approved` marker referencing this record. The original package
+shipped RED on purpose until this decision was recorded.
 
 ## The defect (verified, reproduced)
 

@@ -94,20 +94,30 @@ describe("worker display-name write path", () => {
     ).toBe("update");
   });
 
-  it("repair and backfill ship RED — no unapproved human-gate marker", () => {
-    // The marker asserts a RECORDED owner decision. Adding it without one is
-    // forbidden (see docs/human-gates/worker-display-name-write-path-gate.md —
-    // when the owner approves, the approval is recorded THERE first and the
-    // marker added in the same commit; then this assertion is updated).
+  it("repair and backfill carry the recorded-decision human-gate marker", () => {
+    // The marker asserts a RECORDED owner decision. OWNER DECISION 1 and
+    // OWNER DECISION 2 were recorded 2026-08-05 (exact wording + reviewed-file
+    // sha256 + production preflight) in
+    // docs/human-gates/worker-display-name-write-path-gate.md, and the marker
+    // was added in the same commit as that record. Before that record the
+    // package shipped RED on purpose, and this assertion enforced ABSENCE.
     // Same line-anchored detection as .github/scripts/migration-safety.mjs —
     // prose MENTIONS of the marker in header comments do not count.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
     for (const name of [WRITE_PATH_MIGRATION, BACKFILL_MIGRATION]) {
       expect(
         ANNOTATION.test(readMigration(name)),
-        `${name} must not carry @human-gate-approved before an owner decision`,
-      ).toBe(false);
+        `${name} must carry @human-gate-approved — the owner decision is recorded`,
+      ).toBe(true);
     }
+    // The record itself must exist and name both decisions.
+    const gateDoc = readFileSync(
+      join(REPO_ROOT, "docs", "human-gates", "worker-display-name-write-path-gate.md"),
+      "utf8",
+    );
+    expect(gateDoc).toMatch(/RECORDED OWNER APPROVALS — 2026-08-05/);
+    expect(gateDoc).toMatch(/Decision 1/);
+    expect(gateDoc).toMatch(/Decision 2/);
   });
 
   it("backfill refuses to run before the write-path fix and is ledger-first", () => {

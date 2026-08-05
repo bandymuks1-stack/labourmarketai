@@ -4,12 +4,15 @@
 -- `data-mutation`, in .github/scripts/migration-safety.mjs. It also CREATEs a
 -- table and a TRIGGER-free ledger used by its own rollback.
 --
--- There is deliberately NO `-- @human-gate-approved` marker in this file.
--- This migration MUTATES PRODUCTION DATA and NO owner decision has been
--- recorded for it. It must not be applied — not by `supabase db push`, not by
--- MCP apply, not by the conditional prod-apply autonomy rule (which covers
--- GREEN migrations only). CI staying RED is the correct, honest state.
--- Approval package: docs/human-gates/worker-display-name-write-path-gate.md
+-- @human-gate-approved — RED class (n) data-mutation (production DML).
+-- OWNER DECISION 2 ("Apply the complete factual backfill, including the
+-- guarded country/location recovery defined in the reviewed package")
+-- recorded 2026-08-05 with exact wording, reviewed-file sha256 and read-only
+-- production preflight counts in
+-- docs/human-gates/worker-display-name-write-path-gate.md.
+-- Apply via Supabase MCP `apply_migration` only, AFTER 20260805090000 is
+-- confirmed live (section 1 enforces this). This marker covers THIS file's
+-- findings only.
 --
 -- ── WHY A BACKFILL IS WANTED (the recommendation, for the owner to accept) ──
 -- 20260805090000 repairs the write path from here on. It does nothing for
