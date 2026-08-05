@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { CalendarResult } from "@/components/app/workspace/calendar-result";
 import { CandidatesResult } from "@/components/app/workspace/candidates-result";
+import { EngagementsResult } from "@/components/app/workspace/engagements-result";
 import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
 import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
 import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
@@ -119,6 +120,7 @@ export function ResultBody({
     return (
       <InlineResult
         kind={kind}
+        context={context}
         navigation={navigation}
         locale={locale}
         onOpenFull={onOpenFull}
@@ -155,11 +157,21 @@ export function ResultBody({
  */
 function InlineResult({
   kind,
+  context,
   navigation,
   locale,
   onOpenFull,
 }: {
   kind: ResultKind;
+  /**
+   * §7.1 — the active work context, passed DOWN rather than re-derived.
+   *
+   * `ResultBody` has already used it to decide this result may render at all
+   * (`canRenderInline`), and `engagements` needs the same value to ask the
+   * server for the right slice of the viewer's own rows. Re-deriving it here
+   * would be a second source for one fact, and the two could disagree.
+   */
+  context: ResultContext;
   navigation: ResultNavigation;
   locale: string;
   /** An inline result may still need the full screen — the opportunities
@@ -243,6 +255,25 @@ function InlineResult({
           onBack={navigation.onBackToProjects}
           onOpenFull={onOpenFull}
           onAssignWorker={navigation.onAssignWorker}
+        />
+      );
+    case "engagements":
+      // §7.1 — the work relationships themselves, and the ONE place either
+      // side can end one. `end_company_worker_engagement_v1` had been applied
+      // in production with zero client callers since 20260723120000: the
+      // capability existed and nobody could reach it. This renderer is added
+      // BEFORE the registry entry is promoted to `real`, which is the whole
+      // lesson of W11 P0-4 — a readiness flag without a case here suppresses
+      // the honest fallback and dead-ends on "Preparing this result."
+      //
+      // ONE renderer for both sides. `context` decides which of the viewer's
+      // own rows are meaningful, and it decides that SERVER-side; it never
+      // decides who may see or end what.
+      return (
+        <EngagementsResult
+          context={context}
+          locale={locale}
+          onOpenFull={onOpenFull}
         />
       );
     // The remaining kinds follow, one verified data path at a time.

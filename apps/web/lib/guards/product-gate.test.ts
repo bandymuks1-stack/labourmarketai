@@ -1405,8 +1405,20 @@ describe("entity behavior model — behavior, not new tables", () => {
       join(repoRoot, "apps", "web", "lib", "conversation", "action-registry.ts"),
       "utf8",
     );
-    // Keyed to RBAC Role, not to an entity.
-    expect(registry).toContain("subject: Role");
+    // Keyed to an RBAC role, not to an entity. §7.1 widened the FIELD to
+    // `Role | "engagement"` for the one action both parties hold equally, so
+    // the claim is now checked where it actually lives — the descriptors —
+    // rather than on the interface's type annotation. Same claim, and it
+    // still bites: 33 of the 34 actions name a role in their own id.
+    expect(registry).toContain("export type ActionSubject = Role |");
+    const roleSubjects = registry.match(/^\s+subject: "(worker|company|agency|customer)",$/gm) ?? [];
+    const relationshipSubjects = registry.match(/^\s+subject: "engagement",$/gm) ?? [];
+    expect(roleSubjects.length + relationshipSubjects.length).toBe(
+      BEHAVIOR_CONFORMANCE.conversationActions,
+    );
+    expect(relationshipSubjects.length).toBe(
+      BEHAVIOR_CONFORMANCE.actionsKeyedToARelationship,
+    );
     // Every descriptor is anchored to a page.
     // Count the DESCRIPTORS, not the interface field declaration.
     const routes = registry.split('advancedRoute: "').length - 1;

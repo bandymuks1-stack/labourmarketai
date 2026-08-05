@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Mine arbejdsrelationer",
+          "description": "Se, hvem du arbejder med, og afslut en arbejdsrelation."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Gennemgå arbejdsrelationer",
+          "description": "Se, hvem der arbejder for denne organisation, og afslut en arbejdsrelation."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Afslut arbejdsrelation",
+          "description": "Afslut én arbejdsrelation. Endeligt — den kan ikke genåbnes."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "Der er endnu ingen i dit team at tildele.",
       "assignUnavailable": "Jeg kunne ikke læse dit team lige nu.",
       "assignDone": "Tildelt projektet.",
-      "assignFailed": "Tildelingen kunne ikke gennemføres."
+      "assignFailed": "Tildelingen kunne ikke gennemføres.",
+      "chipEngagements": "Hvem jeg arbejder med",
+      "userEngagements": "Hvem arbejder jeg med?",
+      "engagementsOpened": "Her er de registrerede arbejdsrelationer. Du kan afslutte en af dem i panelet.",
+      "engagementsNone": "Der er ingen registrerede arbejdsrelationer.",
+      "engagementsNoCompany": "Du handler ikke på vegne af en organisation lige nu, så der er ingen liste at vise.",
+      "engagementsUnavailable": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Åbn hele skærmen",
+      "pendingInline": "Dette resultat forberedes.",
+      "retry": "Prøv igen",
+      "engagements": {
+        "title": "Arbejdsrelationer"
+      },
+      "engagementsError": "Arbejdsrelationerne kunne ikke indlæses.",
+      "engagementsBlocked": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
+      "engagementsNeedsMigration": "Arbejdsrelationer er endnu ikke tilgængelige i dette miljø.",
+      "engagementsEmptyCompany": "Denne organisation har ingen registrerede arbejdsrelationer.",
+      "engagementsEmptyWorker": "Du har ingen registrerede arbejdsrelationer.",
+      "engagementsUnavailable": "Denne arbejdsrelation er ikke tilgængelig for dig.",
+      "engagementsConflict": "Arbejdsrelationen blev ændret undervejs. Genindlæs, og prøv igen.",
+      "engagementsStaleConfirmation": "Den bekræftelse er ikke gyldig længere. Åbn bekræftelsen igen.",
+      "engagementsStatusActive": "Aktiv",
+      "engagementsStatusEnded": "Afsluttet",
+      "engagementsStarted": "Startet",
+      "engagementsEndedOn": "Afsluttet",
+      "engagementsUnknownParty": "Navn ikke tilgængeligt",
+      "engagementsEndAction": "Afslut arbejdsrelation",
+      "engagementsEndTitle": "Afslut denne arbejdsrelation?",
+      "engagementsEndBody": "Afslutningen er endelig: denne arbejdsrelation kan ikke genåbnes. Posten forbliver som historik med de rigtige datoer — intet slettes. Intet projekt afsluttes, intet organisationsmedlemskab ophører, ingen erfaring eller vurdering oprettes, og intet betales eller faktureres.",
+      "engagementsEndCta": "Afslut arbejdsrelation",
+      "engagementsCancel": "Annuller",
+      "engagementsWorking": "Afslutter…",
+      "engagementsEnded": "Arbejdsrelationen er afsluttet.",
+      "engagementsEndedAt": "Arbejdsrelationen er afsluttet den {date}.",
+      "engagementsAlreadyEnded": "Denne arbejdsrelation var allerede afsluttet. Intet blev ændret.",
+      "engagementsAlreadyEndedAt": "Denne arbejdsrelation var allerede afsluttet den {date}. Intet blev ændret."
     }
   },
   "landing": {

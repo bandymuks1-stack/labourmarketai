@@ -43,6 +43,7 @@ export type ConversationIntent =
   | "messages-view" // "parodyk žinutes" — open the human-messages projection
   | "player-card" // "parodyk mano kortelę" — the card as a chat projection
   | "experiences" // "palikti patirtį" / "patirtys apie mane" — W6 slice 3D
+  | "engagements" // "su kuo dirbu" / "baigti darbo santykį" — §7.1
   | "unknown";
 
 export type IntentMatch = {
@@ -280,6 +281,34 @@ const RULES: IntentRule[] = [
       p("(patirt|experienc|опыт\\s+взаимодейств|ervaring|erfahrung)", 6),
       p("(palikti|parašyti|pateikti|leave|write|submit|оставить)\\s*.{0,14}(patirt|experienc|отзыв\\s+о\\s+взаимодейств)", 7),
       p("(patirtys|patirtis)\\s+(apie|about)\\s+(mane|me)", 7),
+    ],
+  },
+  {
+    /**
+     * §7.1 — the work RELATIONSHIPS, asked for in words.
+     *
+     * This is how the domain is reached at all: the greeting is capped at
+     * three starters (owner ruling §D) and both employer and worker slots are
+     * already spent, so a sentence and a contextual chip are the two doors.
+     *
+     * WEIGHTED ABOVE `experiences`, deliberately. "Su kuo aš dirbu" and
+     * "patirtys apie mane" are different questions, but "dirb…" stems are
+     * everywhere in this product, so the decisive patterns here are the ones
+     * that name the RELATIONSHIP or the ENDING of it — never a bare work stem,
+     * which would steal `log-work`.
+     *
+     * Asking to end something never conjures a confirmation: the sentence
+     * opens the LIST, and the confirmation belongs to one real row in it.
+     */
+    intent: "engagements",
+    patterns: [
+      p("(darbo\\s+santyk|work\\s+relationship|working\\s+relationship|рабочие\\s+отношени|werkrelatie|arbeitsbeziehung)", 7),
+      p("(su\\s+kuo)\\s*.{0,14}(dirb)", 7),
+      p("(kas)\\s+(pas\\s+mane|man)\\s+dirba", 7),
+      p("(who)\\s+(do\\s+i|am\\s+i)\\s+(work|working)\\s+(with|for)", 7),
+      p("(who\\s+works\\s+for\\s+(us|me|this))", 7),
+      p("(baigti|nutraukti|užbaigti|end|terminate|завершить|прекратить)\\s*.{0,20}(darbo\\s+santyk|engagement|рабочие\\s+отношени)", 8),
+      p("\\bengagements?\\b", 6),
     ],
   },
   {

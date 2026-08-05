@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Moje relacje robocze",
+          "description": "Zobacz, z kim pracujesz, i zakończ relację roboczą."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Przejrzyj relacje robocze",
+          "description": "Zobacz, kto pracuje dla tej organizacji, i zakończ relację roboczą."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Zakończ relację",
+          "description": "Zakończ jedną relację roboczą. Ostatecznie — nie da się jej wznowić."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignDone": "[EN] Assigned to the project.",
-      "assignFailed": "[EN] The assignment could not be made."
+      "assignFailed": "[EN] The assignment could not be made.",
+      "chipEngagements": "Z kim pracuję",
+      "userEngagements": "Z kim pracuję?",
+      "engagementsOpened": "Oto zapisane relacje robocze. Jedną z nich możesz zakończyć w panelu.",
+      "engagementsNone": "Nie ma zapisanych relacji roboczych.",
+      "engagementsNoCompany": "Nie działasz teraz w imieniu organizacji, więc nie ma listy do pokazania.",
+      "engagementsUnavailable": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Otwórz pełny ekran",
+      "pendingInline": "Trwa przygotowywanie wyniku.",
+      "retry": "Spróbuj ponownie",
+      "engagements": {
+        "title": "Relacje robocze"
+      },
+      "engagementsError": "Nie udało się wczytać relacji roboczych.",
+      "engagementsBlocked": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
+      "engagementsNeedsMigration": "Relacje robocze nie są jeszcze dostępne w tym środowisku.",
+      "engagementsEmptyCompany": "Ta organizacja nie ma zapisanych relacji roboczych.",
+      "engagementsEmptyWorker": "Nie masz zapisanych relacji roboczych.",
+      "engagementsUnavailable": "Ta relacja robocza nie jest dla Ciebie dostępna.",
+      "engagementsConflict": "Relacja robocza zmieniła się w trakcie działania. Odśwież i spróbuj ponownie.",
+      "engagementsStaleConfirmation": "To potwierdzenie straciło ważność. Otwórz potwierdzenie ponownie.",
+      "engagementsStatusActive": "Aktywna",
+      "engagementsStatusEnded": "Zakończona",
+      "engagementsStarted": "Rozpoczęto",
+      "engagementsEndedOn": "Zakończono",
+      "engagementsUnknownParty": "Nazwa niedostępna",
+      "engagementsEndAction": "Zakończ relację",
+      "engagementsEndTitle": "Zakończyć tę relację roboczą?",
+      "engagementsEndBody": "Zakończenie jest ostateczne: tej relacji roboczej nie da się wznowić. Wpis pozostaje w historii z rzeczywistymi datami — nic nie jest usuwane. Żaden projekt nie zostaje zakończony, członkostwo w organizacji nie ustaje, nie powstaje żadne doświadczenie ani opinia, nic nie jest płacone ani fakturowane.",
+      "engagementsEndCta": "Zakończ relację",
+      "engagementsCancel": "Anuluj",
+      "engagementsWorking": "Kończenie…",
+      "engagementsEnded": "Relacja robocza została zakończona.",
+      "engagementsEndedAt": "Relacja robocza została zakończona {date}.",
+      "engagementsAlreadyEnded": "Ta relacja robocza była już zakończona. Nic nie zmieniono.",
+      "engagementsAlreadyEndedAt": "Ta relacja robocza była już zakończona {date}. Nic nie zmieniono."
     }
   },
   "landing": {

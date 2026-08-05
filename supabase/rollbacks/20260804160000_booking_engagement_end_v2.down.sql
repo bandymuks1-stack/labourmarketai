@@ -1,0 +1,24 @@
+-- ============================================================================
+-- ROLLBACK for 20260804160000_booking_engagement_end_v2.sql
+--
+-- SAFE AT ANY TIME, and that is a property of the migration rather than luck:
+-- 20260804160000 is purely ADDITIVE. It creates one function and grants EXECUTE
+-- on it. It writes no row, creates no table, and alters no existing object — so
+-- there is no data state that this rollback could falsify and no zero-row guard
+-- it needs.
+--
+-- Engagements that were ended through v2 STAY ended. That is correct: those are
+-- real decisions a real person made, and the engagement row is the approved
+-- audit record. Reverting the function must never rewrite the history it wrote.
+--
+-- `end_company_worker_engagement_v1` is untouched here. It is owned by
+-- migration 20260723120000 and dropped by THAT migration's rollback, which is
+-- exactly why v2 was added alongside v1 instead of replacing it — each rollback
+-- owns only what its own migration created.
+--
+-- After this rollback the end action becomes unreachable again from the app
+-- (the client calls v2 only), which returns the product to the documented
+-- BOOKING_ENGAGEMENT_END_ACTION_UNREACHABLE state rather than to a broken one.
+-- ============================================================================
+
+drop function if exists public.end_company_worker_engagement_v2(uuid);
