@@ -134,6 +134,15 @@ are the structural work list for true multi-organization support:
 | M-P2-* | P2 | `getOwnAgency()` unbacked by any unique constraint; booking budget quota per-profile not per-company; `customers` unique(profile_id); `resolveOrganizationIdForCompany` `.limit(1).maybeSingle()` silently reduces duplicate mirrors; legacy `kind is null` demand rows shown in personal context. |
 | OK | — | Booking/calendar conflicts are WORKER-scoped across all employers (EXCLUDE gist + advisory lock) — doctrine-correct, do not "fix". `engagement_contexts` is a real many-to-many spine. `workers.profile_id` unique is CORRECT (one identity, many employers). W9 org RLS hardening applied. |
 
+§15 classifications of the session-1 journey observations (verified 2026-08-05):
+
+| Observation | Verdict | Class |
+|---|---|---|
+| Broad company legal-name readability | `companies_select using (auth.uid() is not null)` is DELIBERATE (0001, commented "authenticated users may read") — company identity (name/country/website) is legitimately marketplace-public. BUT the policy exposes ALL columns: `vat_number` and the owner `profile_id` person-linkage are broadly readable too. Not a leak of the name; a column-narrowing hygiene item (view or column privileges) for `profile_id`/`vat_number`. | P2 |
+| Employer experience stored as `subject_type='worker'` + profile id | W6 modelling gap: experience ABOUT an organization is recorded against a person subject. Needs a narrow W6 follow-up distinguishing author identity vs subject identity (worker vs organization subject) — do NOT change W6 doctrine casually; separate slice. | P2 |
+| Work-card re-render | Cosmetic. | P4 |
+| Display-name UUID fragments | Fix is PR #1013 (owner-gated, hardened `f0968cb4`) — launch blocker until Decision 1 applies. | P1 |
+
 ## Owner gates outstanding
 
 1. **PR #1013 migrations** (Decision 1 write-path repair / Decision 2 or 2b
