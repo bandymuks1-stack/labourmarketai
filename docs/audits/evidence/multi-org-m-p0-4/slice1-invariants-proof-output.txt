@@ -1,0 +1,114 @@
+BEGIN
+DO
+CREATE TABLE
+COMMENT
+COMMENT
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+ALTER TABLE
+CREATE POLICY
+REVOKE
+REVOKE
+GRANT
+GRANT
+INSERT 0 6
+INSERT 0 1
+DO
+              set_config              
+--------------------------------------
+ 07fc353d-da5d-43ba-a87f-575576f4beaf
+(1 row)
+
+              set_config              
+--------------------------------------
+ bdedf03e-7ee7-4705-a8e2-d5881ed3578a
+(1 row)
+
+              set_config              
+--------------------------------------
+ a0300000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ a0300000-0000-0000-0000-000000000002
+(1 row)
+
+PROOF-3: person holds live memberships in SEVERAL organizations
+ proof_3_multi_org 
+-------------------
+ PASS
+(1 row)
+
+PROOF-1: duplicate LIVE tuple refused (partial unique)
+psql:scripts/db-proof/mp04-slice1-invariants-proof.sql:46: NOTICE:  PASS proof-1: duplicate live tuple refused (unique_violation)
+DO
+PROOF-2: revoked history COEXISTS with a live tuple
+SAVEPOINT
+INSERT 0 1
+ proof_2_revoked_coexists 
+--------------------------
+ PASS
+(1 row)
+
+ROLLBACK
+PROOF-4: an organization holds SEVERAL members
+SAVEPOINT
+INSERT 0 1
+ proof_4_many_members 
+----------------------
+ PASS
+(1 row)
+
+ROLLBACK
+PROOF-5: FINAL active owner cannot be REVOKED
+psql:scripts/db-proof/mp04-slice1-invariants-proof.sql:80: NOTICE:  PASS proof-5: refused with last_owner_membership
+DO
+PROOF-6: FINAL active owner cannot be DEMOTED
+psql:scripts/db-proof/mp04-slice1-invariants-proof.sql:96: NOTICE:  PASS proof-6: refused with last_owner_membership
+DO
+PROOF-7: FINAL active owner cannot be DELETED
+psql:scripts/db-proof/mp04-slice1-invariants-proof.sql:112: NOTICE:  PASS proof-7: refused with last_owner_membership
+DO
+PROOF-8: a SECOND owner allows the first to step down
+SAVEPOINT
+INSERT 0 1
+UPDATE 1
+ proof_8_transition 
+--------------------
+ PASS
+(1 row)
+
+ROLLBACK
+PROOF-9: revoking membership in A leaves B untouched
+SAVEPOINT
+INSERT 0 2
+UPDATE 1
+ proof_9_b_untouched 
+---------------------
+ PASS
+(1 row)
+
+ROLLBACK
+PROOF-10: membership writes change NO engagement/project/profile row
+ proof_10_engagements_untouched 
+--------------------------------
+ PASS
+(1 row)
+
+ proof_10_projects_untouched 
+-----------------------------
+ PASS
+(1 row)
+
+ proof_10_profiles_untouched 
+-----------------------------
+ PASS
+(1 row)
+
+ROLLBACK
+ALL SAVEPOINT PROOFS COMPLETE (transaction rolled back — zero drift)
