@@ -133,7 +133,10 @@ export async function POST(req: Request) {
     await markWebhookFailed(event.id, "needs-migration");
     return NextResponse.json({ ok: true, received: true, processed: false, reason: "needs-migration" });
   }
-  // Store-level failure ("error"): retryable — same contract as a throw.
+  // Store-level failure ("error" | "conflict-live-subscription"): retryable —
+  // same contract as a throw. The conflict case needs an operator decision
+  // (two live subscriptions collide on one owner+plan row); a retry after
+  // remediation succeeds, and until then the reason stays on the event row.
   await markWebhookFailed(event.id, result);
   return NextResponse.json(
     { ok: false, received: true, processed: false, reason: result },

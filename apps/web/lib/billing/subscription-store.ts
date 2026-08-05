@@ -18,7 +18,20 @@ function admin(): any {
   return createAdminClient();
 }
 
-export type StoreResult = "ok" | "duplicate" | "needs-migration" | "error";
+export type StoreResult =
+  | "ok"
+  | "duplicate"
+  | "needs-migration"
+  | "error"
+  /** Refused: the caller's (owner, plan) row tracks a DIFFERENT live provider
+   *  subscription. Overwriting it would orphan a paid subscription (it keeps
+   *  billing in Stripe with no row here). The event stays unprocessed and the
+   *  reason lands in the webhook event's error column — an operator decision,
+   *  not a silent replace. */
+  | "conflict-live-subscription";
+
+/** Subscription states that no longer bill and may be superseded in place. */
+const DEAD_STATUSES = new Set(["cancelled", "expired"]);
 
 /**
  * Result of recording an incoming event. A duplicate is split by whether the
@@ -129,13 +142,38 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     // The upsert's conflict target is (provider, provider_subscription_id),
     // so a 23505 here comes from the OTHER unique key:
     // (owner_id, plan_key, provider). A different subscription row already
-    // exists for this owner+plan — re-subscribe after cancel, or a manual
-    // `manual_<uuid>` pilot-override row. The provider event is authoritative:
-    // the existing row for that owner+plan becomes the new subscription
-    // (provider_subscription_id, status, periods, customer id replaced).
-    // Without this, the paid subscription write fails and the user gets
-    // nothing for their money.
+    // exists for this owner+plan. Two very different worlds produce that:
+    //
+    //   REPLACEABLE — re-subscribe after cancel/expiry, or a `manual_<uuid>`
+    //   pilot-override row. The old row no longer bills; the provider event
+    //   is authoritative and the row is superseded in place.
+    //
+    //   NOT replaceable — the row tracks a LIVE provider subscription with a
+    //   different id. One person can legitimately buy the same plan for two
+    //   organizations; `unique (owner_id, plan_key, provider)` cannot store
+    //   both, and replacing the first row would leave a subscription billing
+    //   in Stripe with no local record or entitlement. That is silent data
+    //   loss on a paid row — refuse instead, keep the event unprocessed, and
+    //   surface `conflict-live-subscription` for an operator decision.
     if (!ownerId || !planKey) return "error";
+    const { data: held, error: heldErr } = await sb
+      .from("billing_subscriptions")
+      .select("provider_subscription_id, status")
+      .eq("provider", "stripe")
+      .eq("owner_id", ownerId)
+      .eq("plan_key", planKey)
+      .maybeSingle();
+    if (heldErr || !held) return "error";
+    const heldSubId =
+      typeof held.provider_subscription_id === "string"
+        ? held.provider_subscription_id
+        : null;
+    const replaceable =
+      heldSubId === null ||
+      heldSubId === u.providerSubscriptionId ||
+      heldSubId.startsWith("manual_") ||
+      DEAD_STATUSES.has(String(held.status));
+    if (!replaceable) return "conflict-live-subscription";
     const { error: updErr } = await sb
       .from("billing_subscriptions")
       .update({

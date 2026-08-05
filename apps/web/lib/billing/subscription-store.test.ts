@@ -10,10 +10,13 @@
  *     markWebhookFailed keeps it OPEN (processed=false) so a Stripe retry is
  *     reprocessed instead of skipped forever.
  *  3. upsertSubscription falls back on a 23505 from the
- *     (owner_id, plan_key, provider) unique key: the existing row for that
- *     owner+plan (re-subscribe after cancel, or a manual_<uuid> pilot
- *     override) is updated IN PLACE with the new provider subscription —
- *     the paying user never loses the write.
+ *     (owner_id, plan_key, provider) unique key ONLY when the held row no
+ *     longer bills (re-subscribe after cancel/expiry, or a manual_<uuid>
+ *     pilot override) — that row is updated IN PLACE with the new provider
+ *     subscription, so the paying user never loses the write. A held row
+ *     tracking a DIFFERENT live subscription is NEVER replaced (that would
+ *     orphan a paid subscription): the store refuses with
+ *     "conflict-live-subscription" and the event stays unprocessed.
  *  4. applyInvoicePayment is a no-op-safe repeated write (invoice.paid +
  *     invoice.payment_succeeded pairs are harmless).
  */
@@ -187,10 +190,18 @@ describe("upsertSubscription — (owner, plan, provider) collision fallback", ()
     expect(calls.map((c) => c.op)).toEqual(["select", "upsert"]);
   });
 
+  // The 23505 path issues a SECOND select (the held owner+plan row); the two
+  // selects are told apart by their filters.
+  const isHeldRowSelect = (call: Call) =>
+    call.op === "select" && call.filters.some(([col]) => col === "owner_id");
+
   it("23505 (re-subscribe after cancel) → updates the existing owner+plan row with the NEW subscription id", async () => {
-    const calls = installFakeAdmin((call) =>
-      call.op === "upsert" ? { error: { code: "23505" } } : {},
-    );
+    const calls = installFakeAdmin((call) => {
+      if (call.op === "upsert") return { error: { code: "23505" } };
+      if (isHeldRowSelect(call))
+        return { data: { provider_subscription_id: "sub_old", status: "cancelled" } };
+      return {};
+    });
     expect(await upsertSubscription(SUB)).toBe("ok");
     const upd = calls.find((c) => c.op === "update")!;
     expect(upd.table).toBe("billing_subscriptions");
@@ -214,6 +225,8 @@ describe("upsertSubscription — (owner, plan, provider) collision fallback", ()
     // the fallback must update THAT row in place — the user who just paid
     // must end up with the paid subscription, not a swallowed 23505.
     const calls = installFakeAdmin((call) => {
+      if (isHeldRowSelect(call))
+        return { data: { provider_subscription_id: "manual_ab12", status: "active" } };
       if (call.op === "select") return { data: null }; // no row for sub_new
       if (call.op === "upsert") return { error: { code: "23505" } };
       return {};
@@ -225,18 +238,48 @@ describe("upsertSubscription — (owner, plan, provider) collision fallback", ()
     expect((upd.args[0] as Record<string, unknown>).provider_subscription_id).toBe("sub_new");
   });
 
+  it("23505 while the held row tracks a DIFFERENT live subscription → conflict-live-subscription, NO overwrite", async () => {
+    // One person, two organizations, same plan: sub_A is live for org A when
+    // sub_new (org B) arrives. Replacing the row would leave sub_A billing in
+    // Stripe with no local record — the store must refuse, not replace.
+    const calls = installFakeAdmin((call) => {
+      if (isHeldRowSelect(call))
+        return { data: { provider_subscription_id: "sub_A", status: "active" } };
+      if (call.op === "select") return { data: null };
+      if (call.op === "upsert") return { error: { code: "23505" } };
+      return {};
+    });
+    expect(await upsertSubscription(SUB)).toBe("conflict-live-subscription");
+    expect(calls.filter((c) => c.op === "update")).toHaveLength(0);
+  });
+
+  it("23505 whose held row cannot be read → error (never a blind overwrite)", async () => {
+    const calls = installFakeAdmin((call) => {
+      if (isHeldRowSelect(call)) return { error: { code: "XX000" } };
+      if (call.op === "select") return { data: null };
+      if (call.op === "upsert") return { error: { code: "23505" } };
+      return {};
+    });
+    expect(await upsertSubscription(SUB)).toBe("error");
+    expect(calls.filter((c) => c.op === "update")).toHaveLength(0);
+  });
+
   it("fallback update failure is surfaced (error / needs-migration)", async () => {
+    const deadHeld = (call: Call) =>
+      isHeldRowSelect(call)
+        ? { data: { provider_subscription_id: "sub_old", status: "cancelled" } }
+        : null;
     installFakeAdmin((call) => {
       if (call.op === "upsert") return { error: { code: "23505" } };
       if (call.op === "update") return { error: { code: "XX000" } };
-      return {};
+      return deadHeld(call) ?? {};
     });
     expect(await upsertSubscription(SUB)).toBe("error");
 
     installFakeAdmin((call) => {
       if (call.op === "upsert") return { error: { code: "23505" } };
       if (call.op === "update") return { error: { code: "42P01" } };
-      return {};
+      return deadHeld(call) ?? {};
     });
     expect(await upsertSubscription(SUB)).toBe("needs-migration");
   });
