@@ -14,7 +14,7 @@ Current production main: `5be4baf6f157f08ba9ff21a227d112197a0d0986` (post-#1012)
 
 | Item | State |
 |---|---|
-| PR #1009 (§7.1 engagement end) | Draft, HEAD `eb615ea4` pushed 2026-08-05, rebased on `5be4baf6`, migration ALREADY APPLIED (ledger #1010), browser proof both sides on this HEAD. **CI all green on this exact HEAD** (quality/Analyze/CodeQL/migration-safety/Vercel). Owner merge package posted as PR comment 2026-08-05. AWAITING OWNER MERGE DECISION. |
+| PR #1009 (§7.1 engagement end) | **MERGED 2026-08-05 06:46 UTC by explicit owner approval** on exact HEAD `eb615ea4` (expected-head protected squash). Merge SHA / new main: `de38b3dbd842102161a9a186f090d0231344c88c`. No migration reapplied (file byte-identical to ledger hash `4e19703c…`). **DEPLOYED TO PRODUCTION**: Vercel deployment `5757082717`, env Production, deployment SHA = merge SHA (verified), state success; landing page smoke OK 2026-08-05. Stage 7 is now MERGED+DEPLOYED; production write proof still pending QA accounts. |
 | `launch/launch-critical-completion-train` | This tracker + owner packages (docs). |
 | Display-name slice (`fix/worker-display-name-canonical-write-path`) | PARKED per train §18 — do not touch until #1009 is no longer active. |
 
@@ -31,7 +31,7 @@ Classifications: `PROVEN_PRODUCTION` / `SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PEN
 | 4 | Matching & shortlist | PROVEN_PRODUCTION (thin) | Fit engine pure/read-time, never persisted; `demand_shortlist` 1 row, `demand_interest_signals` 4 rows. Legacy `matches`/`match_actions` deliberately neutralized (guard-pinned) — not a gap. |
 | 5 | Booking proposal & acceptance | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | v3 RPC chain + full UI shipped and applied; **0 rows in prod — never exercised**. |
 | 6 | Calendar & double-booking (W12) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING (race proof LOCAL_PROOF_ONLY) | 3-layer protection (row lock → advisory lock → EXCLUDE gist) APPLIED 2026-08-03; concurrency proof local-only; 9 calendar sources still absent (owner-gated additive slices). |
-| 7 | Company-worker engagement | CODE_COMPLETE_PENDING_MERGE | v2 RPC applied in prod with ZERO callers on main — callers ship with #1009 (CI green, merge package posted). Browser proof both sides, LOCAL only. |
+| 7 | Company-worker engagement | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING (was CODE_COMPLETE_PENDING_MERGE) | #1009 MERGED+DEPLOYED 2026-08-05 (main `de38b3db`): v2 RPC applied AND callers now live on main/prod. Browser proof both sides exists LOCAL; production write proof awaits QA accounts. |
 | 8 | Project lifecycle (W11) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | `set_project_status_v1` applied 2026-08-04, wired to real UI; prod = 5 projects all draft + 1 SELF-assignment (cannot separate assignee from owner); operations page reachable only by deep link (F7). |
 | 9 | Experience cycle (W6) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | `experience_records` applied 2026-08-04; full RPC+component set; canonical `?result=experiences` (no route — correct); 0 submissions; only groundable interaction class in prod today is `engagement_contexts` (39 rows). |
 | 10 | Analytics & cost truth (W14) | BLOCKED_BY_OWNER_GATE (usage-cost consumer MISSING) | `pilot_events` PROVEN (224 rows) but mid-funnel unmeasured; `usage_cost_events` applied with NO reader/writer; `ai_runs` applied, 0 rows (AI_PROVIDER_MODE=disabled + 90-day-retention precondition); all commercial flags hard-false (guard-pinned). Zero-migration slice implementing on `feat/w14-pilot-analytics-slice-v1`. |
