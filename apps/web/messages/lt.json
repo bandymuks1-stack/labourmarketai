@@ -10593,6 +10593,10 @@
         "logWork": {
           "label": "Įrašyti darbo laiką",
           "description": "Užrašyk, ką ir kada dirbai — įrašas patenka į darbo žurnalą."
+        },
+        "reviewEngagements": {
+          "label": "Mano darbo santykiai",
+          "description": "Pamatykite, su kuo dirbate, ir užbaikite darbo santykį."
         }
       },
       "company": {
@@ -10635,6 +10639,10 @@
         "whoWaits": {
           "label": "Kas laukia mano veiksmo?",
           "description": "Pamatyk, kas laukia tavo veiksmo."
+        },
+        "reviewEngagements": {
+          "label": "Peržiūrėti darbo santykius",
+          "description": "Pamatykite, kas dirba šioje organizacijoje, ir užbaikite darbo santykį."
         }
       },
       "agency": {
@@ -10657,6 +10665,12 @@
         "whoWaits": {
           "label": "Kas laukia mano veiksmo?",
           "description": "Pamatyk, kas laukia tavo veiksmo."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Baigti darbo santykį",
+          "description": "Užbaigti vieną darbo santykį. Galutinis veiksmas — atkurti nebegalima."
         }
       }
     },
@@ -10873,7 +10887,13 @@
       "assignNoWorkers": "Jūsų komandoje kol kas nėra ko priskirti.",
       "assignUnavailable": "Šiuo metu nepavyko nuskaityti jūsų komandos.",
       "assignDone": "Priskirta projektui.",
-      "assignFailed": "Priskyrimo atlikti nepavyko."
+      "assignFailed": "Priskyrimo atlikti nepavyko.",
+      "chipEngagements": "Su kuo dirbu",
+      "userEngagements": "Su kuo aš dirbu?",
+      "engagementsOpened": "Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti.",
+      "engagementsNone": "Įrašytų darbo santykių nėra.",
+      "engagementsNoCompany": "Šiuo metu neveikiate organizacijos vardu, todėl sąrašo nėra ką rodyti.",
+      "engagementsUnavailable": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -11199,7 +11219,33 @@
       "projectInvalidTransition": "Šio būsenos pakeitimo atlikti negalima.",
       "projectNotAuthorized": "Šio projekto būsenos keisti negalite.",
       "projectNeedsMigration": "Projekto būsenos keitimai šioje aplinkoje dar nepasiekiami.",
-      "projectConflict": "Projektas pasikeitė, kol jį žiūrėjote. Atidarykite jį iš naujo."
+      "projectConflict": "Projektas pasikeitė, kol jį žiūrėjote. Atidarykite jį iš naujo.",
+      "engagements": {
+        "title": "Darbo santykiai"
+      },
+      "engagementsError": "Nepavyko įkelti darbo santykių.",
+      "engagementsBlocked": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
+      "engagementsNeedsMigration": "Darbo santykiai šioje aplinkoje dar neprieinami.",
+      "engagementsEmptyCompany": "Ši organizacija neturi įrašytų darbo santykių.",
+      "engagementsEmptyWorker": "Neturite įrašytų darbo santykių.",
+      "engagementsUnavailable": "Šis darbo santykis jums neprieinamas.",
+      "engagementsConflict": "Darbo santykis pasikeitė, kol veikėte. Atnaujinkite ir bandykite dar kartą.",
+      "engagementsStaleConfirmation": "Šis patvirtinimas nebegalioja. Atverkite patvirtinimą iš naujo.",
+      "engagementsStatusActive": "Aktyvus",
+      "engagementsStatusEnded": "Baigtas",
+      "engagementsStarted": "Pradėta",
+      "engagementsEndedOn": "Baigta",
+      "engagementsUnknownParty": "Vardas neprieinamas",
+      "engagementsEndAction": "Baigti darbo santykį",
+      "engagementsEndTitle": "Baigti šį darbo santykį?",
+      "engagementsEndBody": "Užbaigimas yra galutinis: šio darbo santykio atkurti nebegalima. Įrašas lieka istorijoje su tikromis datomis — niekas neištrinama. Joks projektas nebaigiamas, narystė organizacijoje nenutraukiama, jokia patirtis ar atsiliepimas nesukuriamas, niekas nemokama ir nesąskaitinama.",
+      "engagementsEndCta": "Baigti darbo santykį",
+      "engagementsCancel": "Atšaukti",
+      "engagementsWorking": "Baigiama…",
+      "engagementsEnded": "Darbo santykis baigtas.",
+      "engagementsEndedAt": "Darbo santykis baigtas {date}.",
+      "engagementsAlreadyEnded": "Šis darbo santykis jau buvo baigtas. Niekas nepakeista.",
+      "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista."
     }
   },
   "landing": {

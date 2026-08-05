@@ -246,3 +246,18 @@ audit.
   chat table, nothing outbound. Failures are logged and swallowed; the run
   outcome is unaffected. Pinned in the `chat-visibility-rls.test.ts` caller
   inventory.
+
+- **2026-08-05 — `lib/usage/usage-cost-store.ts`** (W14 Pilot Analytics
+  slice v1: first writer of the canonical `usage_cost_events` ledger).
+  Best-effort INSERT of one `event_type='usage'` row per LIVE internal AI
+  run, written from `lib/ai/run-agent-server.ts` alongside the `ai_runs`
+  audit row. `usage_cost_events` by design carries NO anon/authenticated
+  write path (admin-only SELECT; INSERT granted to `service_role` only;
+  UPDATE/DELETE/TRUNCATE revoked AND trigger-blocked — applied production
+  migration `20260728114353_usage_cost_events_v1_clean_start.sql`), so the
+  service role is the only write path — the same pattern as the
+  billing-webhook writes. The row carries usage facts only (provider, model
+  id, token counts, EUR-cent cost figures with a pinned `pricingVersion`) —
+  never prompts, never model output, never a chat table, nothing outbound.
+  Failures are logged and swallowed; the run outcome is unaffected. Pinned
+  in the `chat-visibility-rls.test.ts` caller inventory.

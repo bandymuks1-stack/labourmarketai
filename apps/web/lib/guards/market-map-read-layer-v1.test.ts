@@ -397,7 +397,13 @@ describe("NO new DB migration in this PR", () => {
     // versions 20260728114008/114254/114301/114353), restored to the repo
     // byte-exact for history parity. Never re-apply. Still no migration from
     // the market-map read layer.
-    expect(count).toBeLessThanOrEqual(178);
+    //
+    // Bumped 178 -> 179 for §7.1 `20260804160000_booking_engagement_end_v2` —
+    // ONE new additive function (`end_company_worker_engagement_v2`) plus its
+    // EXECUTE grant, no table/policy/RLS/existing-grant change and zero DML at
+    // apply time. Ships UNAPPLIED, owner-gated. Still no migration from the
+    // market-map read layer.
+    expect(count).toBeLessThanOrEqual(179);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

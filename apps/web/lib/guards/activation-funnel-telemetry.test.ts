@@ -73,6 +73,24 @@ const EXPECTED_EVENTS = [
   "booking_viewed",
   "booking_accepted",
   "booking_declined",
+  // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
+  //    Server-emitted at the real action points via
+  //    lib/telemetry/server-funnel.ts (fire-and-forget, profile_id derived
+  //    server-side, allowlisted bounded scalars only).
+  //    `engagement_ended` joined once #1009 put the shared end path on
+  //    main — it fires only on a real `ended` outcome.
+  "match_preview_generated",
+  "shortlist_added",
+  "contact_requested",
+  "contact_disclosed",
+  "booking_proposed",
+  "engagement_created",
+  "engagement_ended",
+  "project_assigned",
+  "project_completed",
+  "experience_submitted",
+  "experience_published",
+  "organization_created",
 ] as const;
 
 describe("activation funnel — event registry", () => {
@@ -303,6 +321,44 @@ describe("activation funnel — key surfaces emit their events", () => {
     {
       file: "components/app/company-need-form.tsx",
       mustContain: ["companyNeedStarted", "companyNeedSubmitted"],
+    },
+    // ── Mid-funnel marketplace events (W14 Pilot Analytics slice v1) —
+    //    SERVER-SIDE emitters through lib/telemetry/server-funnel.ts.
+    {
+      file: "lib/scouting/scouting.ts",
+      mustContain: ["matchPreviewGenerated", "shortlistAdded", "candidate_count"],
+    },
+    {
+      file: "lib/communication/request-worker-conversation.ts",
+      mustContain: ["contactRequested"],
+    },
+    {
+      file: "lib/communication/contact-interested-worker.ts",
+      mustContain: ["contactDisclosed"],
+    },
+    {
+      file: "lib/booking/booking-actions.ts",
+      mustContain: ["bookingProposed", "engagementCreated"],
+    },
+    {
+      file: "lib/projects/actions.ts",
+      mustContain: ["projectAssigned"],
+    },
+    {
+      file: "lib/projects/project-workspace.ts",
+      mustContain: ["projectCompleted"],
+    },
+    {
+      file: "lib/trust/experience-actions.ts",
+      mustContain: ["experienceSubmitted", "experiencePublished"],
+    },
+    {
+      file: "lib/company/company-setup.ts",
+      mustContain: ["organizationCreated"],
+    },
+    {
+      file: "lib/company/team-brigade-actions.ts",
+      mustContain: ["organizationCreated"],
     },
   ];
 

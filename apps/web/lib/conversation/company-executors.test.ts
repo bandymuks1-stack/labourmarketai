@@ -87,11 +87,15 @@ describe("registry ↔ schema ↔ executor stay in lockstep", () => {
       });
       expect(decision, id).toEqual({ ok: false, code: "not_authorized" });
       // …and the subject role itself is allowed through the same gate.
+      // Every EMPLOYER action's subject is a role (§7.1 widened `subject` to
+      // `Role | "engagement"`, and the one relationship action is not in this
+      // map) — asserted rather than assumed, so the cast cannot go stale.
       const subject = getConversationAction(id)!.subject;
+      expect(subject, `${id} subject must be a role here`).not.toBe("engagement");
       expect(
         authorizeDispatch({
           descriptor: getConversationAction(id),
-          heldRoles: new Set<Role>([subject]),
+          heldRoles: new Set<Role>([subject as Role]),
           executable: true,
         }),
         id,

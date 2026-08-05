@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Company profile-request service.
@@ -280,6 +282,16 @@ export async function saveCompanySetup(
     // diagnostics and return a generic, localizable failure instead.
     console.error("save_company_setup failed:", error.code, error.message);
     return { kind: "error", message: "save_failed" };
+  }
+  // W14 mid-funnel: emit organization_created ONLY when this save CREATED the
+  // company (the pre-save read found none). An update, or a save whose
+  // pre-read failed (`existing.kind !== "ok"`), emits nothing — ambiguity is
+  // never counted as a creation. Fire-and-forget.
+  if (existing.kind === "ok" && !existing.row) {
+    emitServerFunnelEvent(FUNNEL_EVENTS.organizationCreated, {
+      source: "company-setup",
+      metadata: { surface: "company_setup", entity_type: "company" },
+    });
   }
   return { kind: "ok", companyId: data as string };
 }

@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Mina arbetsrelationer",
+          "description": "Se vem du arbetar med och avsluta en arbetsrelation."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Granska arbetsrelationer",
+          "description": "Se vem som arbetar för den här organisationen och avsluta en arbetsrelation."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Avsluta arbetsrelation",
+          "description": "Avsluta en arbetsrelation. Slutgiltigt — den kan inte öppnas igen."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignDone": "[EN] Assigned to the project.",
-      "assignFailed": "[EN] The assignment could not be made."
+      "assignFailed": "[EN] The assignment could not be made.",
+      "chipEngagements": "Vem jag arbetar med",
+      "userEngagements": "Vem arbetar jag med?",
+      "engagementsOpened": "Här är de registrerade arbetsrelationerna. Du kan avsluta en av dem i panelen.",
+      "engagementsNone": "Det finns inga registrerade arbetsrelationer.",
+      "engagementsNoCompany": "Du agerar inte för en organisation just nu, så det finns ingen lista att visa.",
+      "engagementsUnavailable": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Öppna helskärm",
+      "pendingInline": "Resultatet förbereds.",
+      "retry": "Försök igen",
+      "engagements": {
+        "title": "Arbetsrelationer"
+      },
+      "engagementsError": "Arbetsrelationerna kunde inte laddas.",
+      "engagementsBlocked": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några.",
+      "engagementsNeedsMigration": "Arbetsrelationer är ännu inte tillgängliga i den här miljön.",
+      "engagementsEmptyCompany": "Den här organisationen har inga registrerade arbetsrelationer.",
+      "engagementsEmptyWorker": "Du har inga registrerade arbetsrelationer.",
+      "engagementsUnavailable": "Den här arbetsrelationen är inte tillgänglig för dig.",
+      "engagementsConflict": "Arbetsrelationen ändrades under tiden. Ladda om och försök igen.",
+      "engagementsStaleConfirmation": "Bekräftelsen gäller inte längre. Öppna bekräftelsen igen.",
+      "engagementsStatusActive": "Aktiv",
+      "engagementsStatusEnded": "Avslutad",
+      "engagementsStarted": "Startade",
+      "engagementsEndedOn": "Avslutades",
+      "engagementsUnknownParty": "Namn ej tillgängligt",
+      "engagementsEndAction": "Avsluta arbetsrelation",
+      "engagementsEndTitle": "Avsluta den här arbetsrelationen?",
+      "engagementsEndBody": "Avslutet är slutgiltigt: den här arbetsrelationen kan inte öppnas igen. Posten finns kvar som historik med de verkliga datumen — inget raderas. Inget projekt slutförs, inget organisationsmedlemskap upphör, ingen erfarenhet eller omdöme skapas, och inget betalas eller faktureras.",
+      "engagementsEndCta": "Avsluta arbetsrelation",
+      "engagementsCancel": "Avbryt",
+      "engagementsWorking": "Avslutar…",
+      "engagementsEnded": "Arbetsrelationen är avslutad.",
+      "engagementsEndedAt": "Arbetsrelationen avslutades {date}.",
+      "engagementsAlreadyEnded": "Den här arbetsrelationen var redan avslutad. Inget ändrades.",
+      "engagementsAlreadyEndedAt": "Den här arbetsrelationen var redan avslutad {date}. Inget ändrades."
     }
   },
   "landing": {

@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { acknowledgeInterest } from "@/lib/opportunities/interest";
 import { revalidatePath } from "next/cache";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Company → interested worker: open the REAL thread behind "contacted"
@@ -119,6 +121,15 @@ export async function contactInterestedWorkerAction(input: {
   //    which is the safe direction; the ack stays retryable from the UI.
   await acknowledgeInterest({ requestId, workerId, status: "contacted" });
   revalidatePath(`/${locale}/dashboard/company/scouting`);
+
+  // W14 mid-funnel: contact was really disclosed — the mediated in-app
+  // channel between the company and the interested worker now exists (the
+  // product's only contact-disclosure moment; raw phone/email is never
+  // shown). No ids in metadata. Fire-and-forget.
+  emitServerFunnelEvent(FUNNEL_EVENTS.contactDisclosed, {
+    source: "communication",
+    metadata: { surface: "contact_interested_worker", role_context: "company" },
+  });
 
   return { ok: true, conversationId: conversation.data.id };
 }

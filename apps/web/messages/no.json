@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Mine arbeidsforhold",
+          "description": "Se hvem du jobber med, og avslutt et arbeidsforhold."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Se gjennom arbeidsforhold",
+          "description": "Se hvem som jobber for denne organisasjonen, og avslutt et arbeidsforhold."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Avslutt arbeidsforhold",
+          "description": "Avslutt ett arbeidsforhold. Endelig — det kan ikke gjenåpnes."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignDone": "[EN] Assigned to the project.",
-      "assignFailed": "[EN] The assignment could not be made."
+      "assignFailed": "[EN] The assignment could not be made.",
+      "chipEngagements": "Hvem jeg jobber med",
+      "userEngagements": "Hvem jobber jeg med?",
+      "engagementsOpened": "Her er de registrerte arbeidsforholdene. Du kan avslutte ett av dem i panelet.",
+      "engagementsNone": "Det er ingen registrerte arbeidsforhold.",
+      "engagementsNoCompany": "Du handler ikke på vegne av en organisasjon nå, så det finnes ingen liste å vise.",
+      "engagementsUnavailable": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Åpne fullskjerm",
+      "pendingInline": "Dette resultatet forberedes.",
+      "retry": "Prøv igjen",
+      "engagements": {
+        "title": "Arbeidsforhold"
+      },
+      "engagementsError": "Arbeidsforholdene kunne ikke lastes.",
+      "engagementsBlocked": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen.",
+      "engagementsNeedsMigration": "Arbeidsforhold er ennå ikke tilgjengelige i dette miljøet.",
+      "engagementsEmptyCompany": "Denne organisasjonen har ingen registrerte arbeidsforhold.",
+      "engagementsEmptyWorker": "Du har ingen registrerte arbeidsforhold.",
+      "engagementsUnavailable": "Dette arbeidsforholdet er ikke tilgjengelig for deg.",
+      "engagementsConflict": "Arbeidsforholdet ble endret underveis. Last inn på nytt og prøv igjen.",
+      "engagementsStaleConfirmation": "Den bekreftelsen er ikke gyldig lenger. Åpne bekreftelsen på nytt.",
+      "engagementsStatusActive": "Aktivt",
+      "engagementsStatusEnded": "Avsluttet",
+      "engagementsStarted": "Startet",
+      "engagementsEndedOn": "Avsluttet",
+      "engagementsUnknownParty": "Navn ikke tilgjengelig",
+      "engagementsEndAction": "Avslutt arbeidsforhold",
+      "engagementsEndTitle": "Avslutte dette arbeidsforholdet?",
+      "engagementsEndBody": "Avslutningen er endelig: dette arbeidsforholdet kan ikke gjenåpnes. Oppføringen blir stående som historikk med de virkelige datoene — ingenting slettes. Ingen prosjekter fullføres, ingen organisasjonsmedlemskap opphører, ingen erfaring eller vurdering opprettes, og ingenting betales eller faktureres.",
+      "engagementsEndCta": "Avslutt arbeidsforhold",
+      "engagementsCancel": "Avbryt",
+      "engagementsWorking": "Avslutter…",
+      "engagementsEnded": "Arbeidsforholdet er avsluttet.",
+      "engagementsEndedAt": "Arbeidsforholdet ble avsluttet {date}.",
+      "engagementsAlreadyEnded": "Dette arbeidsforholdet var allerede avsluttet. Ingenting ble endret.",
+      "engagementsAlreadyEndedAt": "Dette arbeidsforholdet var allerede avsluttet {date}. Ingenting ble endret."
     }
   },
   "landing": {

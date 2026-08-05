@@ -15,6 +15,8 @@ import {
   evaluateRequestBudget,
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Step 4A — company → worker "request to communicate" from the scouting surface.
@@ -161,5 +163,11 @@ export async function requestWorkerConversationAction(input: {
     { type: "scouting", id: requestId },
   );
   if (!result.ok) return { ok: false, reason: "error" };
+  // W14 mid-funnel: a company really requested contact with a worker (the
+  // in-app thread now exists). No ids in metadata. Fire-and-forget.
+  emitServerFunnelEvent(FUNNEL_EVENTS.contactRequested, {
+    source: "communication",
+    metadata: { surface: "scouting", role_context: "company" },
+  });
   return { ok: true, conversationId: result.data.id };
 }

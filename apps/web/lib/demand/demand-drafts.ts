@@ -18,11 +18,28 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 
 export type DraftType =
   | "company_request"
   | "agency_offer"
   | "buyer_request";
+
+/**
+ * Org demand spine — Stage A (surface gates, zero migration).
+ *
+ * The EMPLOYER draft kinds are demand-chain data and must be workspace-gated
+ * through the ONE canonical resolver (fail-closed, named reasons, no
+ * profile-only fallback). `buyer_request` is deliberately NOT in this set: the
+ * buyer spine is the customer identity (a person OR a company action, keyed to
+ * the self-owned `customers` row) — an employer workspace gate here would
+ * fail-closed every person-buyer in their personal space, which is a different
+ * actor, not an employer surface.
+ */
+const EMPLOYER_DRAFT_TYPES: ReadonlySet<DraftType> = new Set([
+  "company_request",
+  "agency_offer",
+]);
 
 export type CompanyRequestPayload = {
   title?: string;
@@ -172,6 +189,14 @@ export async function getDemandDraft(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Stage A workspace gate: an employer draft may only be read while the
+  // caller is actually acting for a company (fail-closed; null = the form
+  // simply starts empty, no other tenant's / context's draft is echoed).
+  if (EMPLOYER_DRAFT_TYPES.has(type)) {
+    const employer = await requireEmployerCompany();
+    if (!employer.ok) return null;
+  }
+
   const { data, error } = await cr(supabase)
     .select("id, profile_id, kind, payload, created_at, updated_at")
     .eq("profile_id", user.id)
@@ -198,6 +223,17 @@ export async function saveDemandDraft(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+
+  // Stage A workspace gate (same fail-closed contract as the submit path in
+  // lib/demand/demand-request.ts): an employer draft written from the personal
+  // space / an unbound organization would produce a row nothing can later
+  // attribute — refused with the module's established failure shape (throw).
+  if (EMPLOYER_DRAFT_TYPES.has(type)) {
+    const employer = await requireEmployerCompany();
+    if (!employer.ok) {
+      throw new Error(`no company context: ${employer.reason}`);
+    }
+  }
 
   const payload = sanitize(type, rawPayload);
   const title =
@@ -233,6 +269,14 @@ export async function deleteDemandDraft(type: DraftType): Promise<void> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
+
+  // Stage A workspace gate — same rule as the save path above.
+  if (EMPLOYER_DRAFT_TYPES.has(type)) {
+    const employer = await requireEmployerCompany();
+    if (!employer.ok) {
+      throw new Error(`no company context: ${employer.reason}`);
+    }
+  }
 
   const { error } = await cr(supabase)
     .update({ status: "closed" })

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   isMissingColumnCode,
   isMissingTableCode,
@@ -32,6 +33,12 @@ function asAny(v: unknown): any {
 
 export async function listAgencyClients(): Promise<AgencyClientsState> {
   const supabase = await createClient();
+  // Stage A workspace gate: the agency spine IS the canonical company profile
+  // (Direction A — company_type='staffing_agency'), so the ONE employer
+  // resolver is the agency-context authority too. No workspace → fail-closed
+  // to the module's established `error` shape, never a silent empty list.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "error" };
   try {
     const { data, error } = await asAny(supabase)
       .from("agency_clients")
@@ -75,6 +82,12 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", linkable: false, rows: [] };
+
+  // Stage A workspace gate — same rule as listAgencyClients above: these are
+  // the agency's EMPLOYER demand rows; no resolved company workspace → the
+  // established fail-closed `error` state.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "error" };
 
   const base = "id, title, status, created_at";
   try {

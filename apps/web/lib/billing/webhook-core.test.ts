@@ -16,6 +16,7 @@ describe("webhook-core — event mapping", () => {
       "customer.subscription.updated",
       "customer.subscription.deleted",
       "invoice.payment_succeeded",
+      "invoice.paid",
       "invoice.payment_failed",
     ]) expect(isHandledEventType(t)).toBe(true);
     expect(isHandledEventType("charge.refunded")).toBe(false);
@@ -68,6 +69,95 @@ describe("webhook-core — event mapping", () => {
   it("a failed invoice maps to last_payment_status=failed", () => {
     expect(parseInvoiceObject({ subscription: "sub_1" }, false).lastPaymentStatus).toBe("failed");
     expect(parseInvoiceObject({ subscription: "sub_1" }, true).lastPaymentStatus).toBe("succeeded");
+  });
+
+  // ── API-shape tolerance (pre-Basil legacy vs 2025-03-31.basil and later,
+  //    incl. the pinned 2026-05-27.dahlia) ─────────────────────────────────
+
+  it("subscription periods parse from the POST-BASIL item location (items.data[n].current_period_*)", () => {
+    const u = parseSubscriptionObject(
+      {
+        id: "sub_basil", customer: "cus_1", status: "active",
+        // No top-level current_period_* — gone on basil+.
+        items: {
+          data: [
+            { id: "si_1", current_period_start: 1_700_000_000, current_period_end: 1_702_000_000 },
+          ],
+        },
+        cancel_at_period_end: false,
+        metadata: { plan_key: "company_pilot", client_reference_id: "owner_1" },
+      },
+      true,
+    );
+    expect(u?.currentPeriodStart).toBe(new Date(1_700_000_000 * 1000).toISOString());
+    expect(u?.currentPeriodEnd).toBe(new Date(1_702_000_000 * 1000).toISOString());
+  });
+
+  it("subscription periods still parse from the LEGACY top-level fields (pre-Basil)", () => {
+    const u = parseSubscriptionObject(
+      {
+        id: "sub_legacy", status: "active", metadata: {},
+        current_period_start: 1_700_000_000, current_period_end: 1_702_000_000,
+      },
+      true,
+    );
+    expect(u?.currentPeriodStart).toBe(new Date(1_700_000_000 * 1000).toISOString());
+    expect(u?.currentPeriodEnd).toBe(new Date(1_702_000_000 * 1000).toISOString());
+  });
+
+  it("when both shapes are present the item-level (new) value wins", () => {
+    const u = parseSubscriptionObject(
+      {
+        id: "sub_both", status: "active", metadata: {},
+        current_period_end: 1_600_000_000,
+        items: { data: [{ current_period_end: 1_702_000_000 }] },
+      },
+      true,
+    );
+    expect(u?.currentPeriodEnd).toBe(new Date(1_702_000_000 * 1000).toISOString());
+  });
+
+  it("a subscription with NEITHER shape yields null periods (never a fake date)", () => {
+    const u = parseSubscriptionObject(
+      { id: "sub_none", status: "active", metadata: {}, items: { data: [{}] } },
+      true,
+    );
+    expect(u?.currentPeriodStart).toBeNull();
+    expect(u?.currentPeriodEnd).toBeNull();
+  });
+
+  it("invoice subscription id parses from the POST-BASIL parent.subscription_details location", () => {
+    expect(
+      parseInvoiceObject(
+        { parent: { subscription_details: { subscription: "sub_basil" } } },
+        true,
+      ).providerSubscriptionId,
+    ).toBe("sub_basil");
+    // Expanded object form.
+    expect(
+      parseInvoiceObject(
+        { parent: { subscription_details: { subscription: { id: "sub_exp" } } } },
+        true,
+      ).providerSubscriptionId,
+    ).toBe("sub_exp");
+  });
+
+  it("invoice subscription id still parses from the LEGACY invoice.subscription field", () => {
+    expect(parseInvoiceObject({ subscription: "sub_legacy" }, true).providerSubscriptionId)
+      .toBe("sub_legacy");
+    expect(parseInvoiceObject({ subscription: { id: "sub_legacy_exp" } }, true).providerSubscriptionId)
+      .toBe("sub_legacy_exp");
+    expect(parseInvoiceObject({}, true).providerSubscriptionId).toBeNull();
+    expect(parseInvoiceObject(null, true).providerSubscriptionId).toBeNull();
+  });
+
+  it("a checkout session with an EXPANDED subscription object still links", () => {
+    const link = parseCheckoutSessionObject(
+      { subscription: { id: "sub_exp" }, customer: { id: "cus_exp" }, client_reference_id: "owner_1", metadata: { plan_key: "worker_plus" } },
+      true,
+    );
+    expect(link?.providerSubscriptionId).toBe("sub_exp");
+    expect(link?.providerCustomerId).toBe("cus_exp");
   });
 
   it("a live event is rejected (test-only chain)", () => {

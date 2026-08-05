@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   toCanonicalDemand,
   type CanonicalDemand,
@@ -171,11 +172,26 @@ export async function loadCanonicalDemand(): Promise<CanonicalDemandResult> {
   // who just created a need see it on the same map everyone else reads. RLS
   // (`profile_id = auth.uid()`) is the only thing granting this; an employer
   // reaches exactly their own rows and no other tenant's.
-  const own = await supabase
+  //
+  // Stage A workspace gate: the EMPLOYER kinds of this leg (company_request /
+  // agency_offer) additionally require a resolved company workspace through
+  // the ONE canonical resolver — an employer acting in the wrong space must
+  // not have their employer demand rendered as if the workspace were real.
+  // A caller with no employer context (worker, pure buyer, personal space)
+  // keeps the NON-employer rows they own: buyer-spine rows carry a null kind
+  // (save_customer_request, 0028, predates the kind column) or the buyer /
+  // customer kinds. Fail-closed for employer demand, unchanged for the rest.
+  const employer = await requireEmployerCompany();
+  let ownQuery = supabase
     .from("customer_requests")
     .select("id, role_or_work_type, country, team_size, location, created_at")
-    .eq("status", "submitted")
-    .limit(500);
+    .eq("status", "submitted");
+  if (!employer.ok) {
+    ownQuery = ownQuery.or(
+      "kind.is.null,kind.eq.buyer_request,kind.eq.customer_request",
+    );
+  }
+  const own = await ownQuery.limit(500);
 
   if (own.error) return { state: "error", errorCode: "own_demand_read_failed" };
 

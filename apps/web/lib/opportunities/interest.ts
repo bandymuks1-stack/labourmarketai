@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { matchWorkerToNeed } from "@/lib/market/match-v1";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
@@ -283,6 +284,14 @@ export async function listDemandInterestForCompany(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-owner" };
+
+  // Stage A workspace gate: this is an EMPLOYER read of demand-chain signals
+  // — it requires a resolved company workspace via the ONE canonical resolver
+  // (fail-closed to the module's established `not-owner` shape). The
+  // row-ownership check below stays: gate = surface, ownership = row.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "not-owner" };
+
   const { data: req } = await asAny(supabase)
     .from("customer_requests")
     .select("id")

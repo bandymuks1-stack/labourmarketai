@@ -56,11 +56,30 @@ export type ActionHandler =
   | { kind: "server_action"; ref: string } // existing "use server" fn name
   | { kind: "rest"; method: "POST" | "DELETE"; ref: string }; // existing route
 
+/**
+ * Who an action BELONGS to.
+ *
+ * Almost always a `Role`: the action is one party's act, and that party's name
+ * is the id's namespace. §7.1 adds the one shape that is genuinely neither —
+ * ending a company↔worker engagement, where the employer and the worker hold
+ * the SAME authority over the SAME row (`owns_company(...) OR the engagement's
+ * own worker`, in SQL since 20260723120000). Naming such an act after one side
+ * would be a lie about who owns it, and would invite the exact drift this
+ * registry exists to prevent: a `company.end-engagement` and a
+ * `worker.end-engagement` that are two authorization models for one decision.
+ *
+ * A relationship subject is therefore held to a STRICTER rule than a role
+ * subject, pinned by the guard test: it must list BOTH party roles, so it can
+ * never quietly become a one-sided action wearing a neutral name.
+ */
+export type ActionSubject = Role | "engagement";
+
 export interface ConversationActionDescriptor {
   /** Stable kebab id, e.g. "worker.respond-booking". Namespaced by subject. */
   readonly id: string;
-  /** The primary subject role this action belongs to. */
-  readonly subject: Role;
+  /** The primary subject this action belongs to — a role, or the relationship
+   *  itself when both parties hold the same authority (see `ActionSubject`). */
+  readonly subject: ActionSubject;
   /** Roles allowed to invoke it (re-checked server-side vs HELD roles). */
   readonly allowedRoles: readonly Role[];
   /** i18n key (namespace `conversation.actions`) for the human label. */
@@ -315,6 +334,39 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "deep_link" },
   },
   {
+    // §7.1 — the WORKER's door to the `engagements` result. A READ: it opens
+    // the panel and writes nothing. Ending an engagement is a separate,
+    // confirmation-gated act (`engagement.end`) that never hides behind this.
+    //
+    // WORKER-ONLY, and that is the honest split rather than an oversight. The
+    // employer has their own door (`company.review-engagements`) because the
+    // two are asking different questions of the same table — "the work I
+    // personally do" versus "this company's roster" — and the reader keeps
+    // exactly that distinction (`context: "personal" | "organization"`). One
+    // shared read action would have to guess which of the two the person
+    // meant. Both doors open the SAME result and the SAME renderer; only the
+    // context differs, and the context is derived from where the person is
+    // standing, never from the action.
+    id: "worker.review-engagements",
+    subject: "worker",
+    allowedRoles: ["worker"],
+    labelKey: "conversation.actions.worker.reviewEngagements.label",
+    descriptionKey: "conversation.actions.worker.reviewEngagements.description",
+    confirmation: "read",
+    precondition: "authenticated",
+    // `company_worker_engagements` reaches back to an applied migration, but
+    // the v2 RPC this result's CTA needs is owner-gated — the panel degrades
+    // to an honest "not available here" state rather than an empty list.
+    migrationSensitive: true,
+    telemetryEvent: E.dashboardViewed,
+    // There is no worker-side engagements SCREEN, and none is invented for
+    // one: the `experiences` precedent applies (a 73rd route would be refused
+    // by Product Gate A-09). The planning surface is the closest honest
+    // full-screen destination for "the work I am doing".
+    advancedRoute: "/dashboard/planning",
+    handler: { kind: "deep_link" },
+  },
+  {
     id: "worker.what-next",
     subject: "worker",
     allowedRoles: ["worker"],
@@ -464,6 +516,24 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     handler: { kind: "server_action", ref: "assignWorkerToProjectAction" },
   },
   {
+    // §7.1 — the EMPLOYER's door to the `engagements` result. The mirror of
+    // `worker.review-engagements`; see that entry for why there are two doors
+    // and one result.
+    id: "company.review-engagements",
+    subject: "company",
+    allowedRoles: ["company", "agency"],
+    labelKey: "conversation.actions.company.reviewEngagements.label",
+    descriptionKey: "conversation.actions.company.reviewEngagements.description",
+    confirmation: "read",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDashboardViewed,
+    // The projects list is where an employer already meets their engaged
+    // workers (the assign picker reads the same table). No new screen.
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "deep_link" },
+  },
+  {
     id: "company.who-waits",
     subject: "company",
     allowedRoles: ["company", "agency"],
@@ -542,6 +612,54 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     telemetryEvent: E.companyDashboardViewed,
     advancedRoute: "/dashboard/company",
     handler: { kind: "deep_link" },
+  },
+
+  // ── RELATIONSHIP (neither side owns it) ───────────────────────────────────
+  {
+    /**
+     * §7.1 — END ONE COMPANY↔WORKER ENGAGEMENT. THE one write, for BOTH sides.
+     *
+     * The subject is the RELATIONSHIP, not a party, because the authority
+     * genuinely is: `end_company_worker_engagement_v2` grants the act to
+     * `owns_company(company_id) OR the engagement's own worker`, and has since
+     * v1 in 20260723120000. Splitting this into `company.end-engagement` and
+     * `worker.end-engagement` would create two ids, two schemas, two executors
+     * and two confirmation flows over ONE SQL predicate — and they would drift.
+     * See `ActionSubject`.
+     *
+     * THE INPUT IS AN ENGAGEMENT ID AND NOTHING ELSE. No company id, no worker
+     * id, no side, no project id. Authority is re-derived server-side from the
+     * authenticated actor and the row's own relationships, so a hand-typed id
+     * buys nothing: an id the caller may not act on returns `not_found`,
+     * exactly like one that does not exist (the migration's anti-oracle rule).
+     *
+     * `strong_irreversible` — the same tier as `worker.respond-booking` and
+     * `company.assign-worker`, and for the same reason: an engagement can be
+     * ended but not un-ended. There is no reopen RPC and this slice does not
+     * add one, so the confirmation card is the only step between the person
+     * and a state they cannot walk back.
+     */
+    id: "engagement.end",
+    subject: "engagement",
+    // BOTH parties — required of a relationship subject by the guard test.
+    // Agency is included on the same footing as every other employer-side
+    // action: `owns_company` is what actually decides, and it is re-derived
+    // in SQL. This list never grants anything.
+    allowedRoles: ["worker", "company", "agency"],
+    labelKey: "conversation.actions.engagement.end.label",
+    descriptionKey: "conversation.actions.engagement.end.description",
+    confirmation: "strong_irreversible",
+    // NOT `has_company`: the worker side has no company. The real gate is the
+    // per-row authority the RPC re-derives, which no precondition can express.
+    precondition: "authenticated",
+    // The v2 RPC is owner-gated (20260804160000) — until it is applied the
+    // action degrades to an honest `needs_migration`, never a generic failure.
+    migrationSensitive: true,
+    telemetryEvent: E.dashboardViewed,
+    // The same honest full-screen destination the employer door names. There
+    // is no engagements screen on either side and none is invented here.
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "endEngagementAction" },
   },
 ] as const;
 
