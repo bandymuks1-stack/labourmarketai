@@ -4,17 +4,52 @@ import { revalidatePath } from "next/cache";
 
 import {
   assignCompanyWorkerRole,
-  getOwnCompany,
   inviteCompanyWorker,
   provisionCompanyWorkerEngagementContext,
   setCompanyWorkerJournalReview,
   type InviteCompanyWorkerResult,
 } from "./company-workers";
+import {
+  isEmployerContextFailure,
+  requireEmployerCompany,
+  type EmployerContextReason,
+} from "./employer-company-context";
 import type { AssignRoleActionState } from "@/lib/operations/assign-operations-role";
 import type {
   ProvisionEngagementActionState,
   SetJournalReviewActionState,
 } from "@/lib/operations/journal-review-actions";
+
+/**
+ * M-P0-3: every roster write below derives its company from the ACTIVE
+ * WORKSPACE (`requireEmployerCompany` — httpOnly pointer, membership-validated
+ * per request), never from `companies.profile_id = auth.uid()`. A person who
+ * owns organizations A and B acts on exactly the selected one; the Personal
+ * workspace, a stale/revoked workspace and "no organization" all fail closed.
+ * The SECURITY DEFINER RPCs re-validate ownership of the forwarded id
+ * server-side, so this layer choosing the WRONG id can still never cross a
+ * tenant — it can only fail.
+ *
+ * Reason → result-code mapping stays inside each action's EXISTING tagged
+ * vocabulary: infrastructure failures (`isEmployerContextFailure`) map to
+ * "error" so a broken environment is never rendered as "you have no
+ * organization"; `needs-migration` keeps its dedicated code where the state
+ * type has one; every legitimate "not acting as a company right now" reason
+ * maps to the action's no-company/no-org code.
+ */
+function noCompanyCode(
+  reason: EmployerContextReason,
+): "no_company" | "needs_migration" | "error" {
+  if (reason === "needs-migration") return "needs_migration";
+  return isEmployerContextFailure(reason) ? "error" : "no_company";
+}
+
+function noOrgCode(
+  reason: EmployerContextReason,
+): "no_org" | "needs_migration" | "error" {
+  if (reason === "needs-migration") return "needs_migration";
+  return isEmployerContextFailure(reason) ? "error" : "no_org";
+}
 
 export type InviteCompanyFormState =
   | {
@@ -32,10 +67,12 @@ export async function inviteCompanyWorkerAction(
   const email = String(formData.get("email") ?? "");
   const note = formData.get("note") ? String(formData.get("note")) : null;
 
-  const company = await getOwnCompany();
-  if (!company) return { ok: false, code: "no_company" };
+  // M-P0-3: the invite belongs to the ACTIVE workspace's company — selected
+  // explicitly, never inferred from the first/only owned row.
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: noCompanyCode(company.reason) };
 
-  const r = await inviteCompanyWorker(company.id, email, note);
+  const r = await inviteCompanyWorker(company.companyId, email, note);
   if (r.kind === "needs-migration") return { ok: false, code: "needs_migration" };
   if (r.kind === "error") return { ok: false, code: "error", message: r.message };
 
@@ -59,12 +96,12 @@ export async function assignCompanyWorkerRoleAction(
   const titleRaw = formData.get("operationsTitle");
   const operationsTitle = titleRaw ? String(titleRaw) : null;
 
-  const company = await getOwnCompany();
-  if (!company) return { ok: false, code: "no_org" };
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
   if (workerId === "") return { ok: false, code: "error" };
 
   const r = await assignCompanyWorkerRole(
-    company.id,
+    company.companyId,
     workerId,
     operationsRole,
     operationsTitle,
@@ -88,11 +125,14 @@ export async function provisionCompanyWorkerEngagementContextAction(
 ): Promise<ProvisionEngagementActionState> {
   const workerId = String(formData.get("workerId") ?? "").trim();
 
-  const company = await getOwnCompany();
-  if (!company) return { ok: false, code: "no_org" };
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
   if (workerId === "") return { ok: false, code: "error" };
 
-  const r = await provisionCompanyWorkerEngagementContext(company.id, workerId);
+  const r = await provisionCompanyWorkerEngagementContext(
+    company.companyId,
+    workerId,
+  );
   if (r.kind === "needs-migration") return { ok: false, code: "needs_migration" };
   if (r.kind === "error") return { ok: false, code: "error", message: r.message };
 
@@ -113,11 +153,15 @@ export async function setCompanyWorkerJournalReviewAction(
   const workerId = String(formData.get("workerId") ?? "").trim();
   const enabled = String(formData.get("enabled") ?? "") === "true";
 
-  const company = await getOwnCompany();
-  if (!company) return { ok: false, code: "no_org" };
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
   if (workerId === "") return { ok: false, code: "error" };
 
-  const r = await setCompanyWorkerJournalReview(company.id, workerId, enabled);
+  const r = await setCompanyWorkerJournalReview(
+    company.companyId,
+    workerId,
+    enabled,
+  );
   if (r.kind === "needs-migration") return { ok: false, code: "needs_migration" };
   if (r.kind === "error") return { ok: false, code: "error", message: r.message };
 

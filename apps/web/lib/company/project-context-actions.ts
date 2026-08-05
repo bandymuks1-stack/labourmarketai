@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getOwnCompany } from "@/lib/company/company-workers";
+import {
+  isEmployerContextFailure,
+  requireEmployerCompany,
+} from "@/lib/company/employer-company-context";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 
 /**
@@ -13,10 +16,11 @@ import { insertProjectForCompany } from "@/lib/projects/create-project-core";
  * no fake/seed data, no service_role, no outbound, no AI.
  *
  * Security model (defence in depth):
- *   - authorization is the existing "owns a company" check — getOwnCompany()
- *     resolves the company where profile_id = auth.uid() (the OWNER). A
- *     worker-only or unauthenticated caller resolves to null → rejected. The
- *     company_id is taken from that server-side result, NEVER from client input.
+ *   - authorization derives from the ACTIVE WORKSPACE (M-P0-3):
+ *     requireEmployerCompany() resolves the membership-validated workspace's
+ *     company server-side. A worker-only, unauthenticated or personal-context
+ *     caller fails closed → rejected. The company_id is taken from that
+ *     server-side result, NEVER from client input.
  *   - the insert itself is still gated by RLS `projects_insert`
  *     (`owns_company(company_id) or is_admin()`), so cross-tenant create is
  *     impossible even if this layer were bypassed. The optional client insert is
@@ -47,15 +51,23 @@ export async function createProjectContextAction(
     return { ok: false, code: "invalid_name" };
   }
 
-  // Authorization — company-side only, resolved server-side.
-  const company = await getOwnCompany();
-  if (!company) return { ok: false, code: "no_company" };
+  // Authorization — company-side only, resolved server-side. M-P0-3: the
+  // project is created in the ACTIVE workspace's company (membership-validated
+  // per request); Personal / stale / revoked workspaces fail closed. RLS
+  // `projects_insert` (`owns_company(company_id) or is_admin()`) still gates
+  // the row itself, so a wrong id here can only fail, never cross a tenant.
+  const company = await requireEmployerCompany();
+  if (!company.ok) {
+    return isEmployerContextFailure(company.reason)
+      ? { ok: false, code: "error" }
+      : { ok: false, code: "no_company" };
+  }
 
   const supabase = await createClient();
 
   // Rebuild W5: BOTH project-create entry points insert through the ONE core
   // (validation + W10 org binding + insert shape live in exactly one place).
-  const created = await insertProjectForCompany(supabase, company.id, {
+  const created = await insertProjectForCompany(supabase, company.companyId, {
     title: name,
     city: location,
   });
