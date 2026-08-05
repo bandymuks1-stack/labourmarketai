@@ -6,9 +6,20 @@ Target: `LABOURMARKET_AI_LAUNCH_CRITICAL_PRODUCT_QUALITY_COMPLETE_READY_FOR_CONT
 Last updated: 2026-08-05 (train session 1)
 Current production main: `5be4baf6f157f08ba9ff21a227d112197a0d0986` (post-#1012)
 
-## Verdict (current)
+## Verdict (current, 2026-08-05 end of train session 1)
 
-`IN_PROGRESS — #1009 CI FULLY GREEN on eb615ea4, owner merge package posted; Tracks 2–7 auditing`
+`LABOURMARKET_AI_SAFE_TECHNICAL_WORK_COMPLETE_OWNER_GATES_PENDING`
+
+Local integrated proof achieved on exact main `de38b3db`:
+- `W7_W12_LOCAL_INTEGRATED_CUSTOMER_JOURNEY_PROVEN` (synthetic cast, real UI,
+  127 logged row dumps, 83 screenshots 1440+375, W12 concurrency 21/21;
+  evidence in session scratchpad `journey-proof/`)
+- `W6_EXPERIENCE_FULL_LOCAL_CYCLE_PROVEN_PRODUCTION_WRITE_PROOF_PENDING`
+Journey observations: display-name defect CONFIRMED live (P2 — fix is PR
+#1013, owner-gated); P3: `companies_select` lets any authenticated user read
+any company legal name (looks deliberate, flag for §15); P3: experience about
+an employer stored as `subject_type='worker'` with the profile id (W6
+follow-up); P4 cosmetic work-card re-render.
 
 ## PR / branch dependencies
 
