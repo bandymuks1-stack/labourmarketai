@@ -3089,6 +3089,10 @@
         "logWork": {
           "label": "[EN] Log work time",
           "description": "[EN] Record what and when you worked — it goes to your work journal."
+        },
+        "reviewEngagements": {
+          "label": "Manas darba attiecības",
+          "description": "Redzi, ar ko strādā, un beidz darba attiecības."
         }
       },
       "company": {
@@ -3131,6 +3135,10 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        },
+        "reviewEngagements": {
+          "label": "Pārskatīt darba attiecības",
+          "description": "Redzi, kas strādā šajā organizācijā, un beidz darba attiecības."
         }
       },
       "agency": {
@@ -3153,6 +3161,12 @@
         "whoWaits": {
           "label": "[EN] Who is waiting for me?",
           "description": "[EN] See what needs your action."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Beigt darba attiecības",
+          "description": "Beigt vienas darba attiecības. Galīgi — atjaunot nevar."
         }
       }
     },
@@ -3365,7 +3379,13 @@
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
       "assignDone": "[EN] Assigned to the project.",
-      "assignFailed": "[EN] The assignment could not be made."
+      "assignFailed": "[EN] The assignment could not be made.",
+      "chipEngagements": "Ar ko es strādāju",
+      "userEngagements": "Ar ko es strādāju?",
+      "engagementsOpened": "Šeit ir reģistrētās darba attiecības. Vienas no tām vari beigt panelī.",
+      "engagementsNone": "Reģistrētu darba attiecību nav.",
+      "engagementsNoCompany": "Pašlaik tu nerīkojies organizācijas vārdā, tāpēc nav saraksta, ko parādīt.",
+      "engagementsUnavailable": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3474,6 +3494,37 @@
       "editAgain": "[EN] Edit",
       "sending": "[EN] Sending…",
       "sent": "[EN] Reply sent."
+    },
+    "results": {
+      "openFull": "Atvērt pilnekrānu",
+      "pendingInline": "Rezultāts tiek sagatavots.",
+      "retry": "Mēģināt vēlreiz",
+      "engagements": {
+        "title": "Darba attiecības"
+      },
+      "engagementsError": "Neizdevās ielādēt darba attiecības.",
+      "engagementsBlocked": "Darba attiecības pašlaik nav nolasāmas. Tas nenozīmē, ka to nav.",
+      "engagementsNeedsMigration": "Darba attiecības šajā vidē vēl nav pieejamas.",
+      "engagementsEmptyCompany": "Šai organizācijai nav reģistrētu darba attiecību.",
+      "engagementsEmptyWorker": "Tev nav reģistrētu darba attiecību.",
+      "engagementsUnavailable": "Šīs darba attiecības tev nav pieejamas.",
+      "engagementsConflict": "Darba attiecības mainījās darbības laikā. Pārlādē un mēģini vēlreiz.",
+      "engagementsStaleConfirmation": "Šis apstiprinājums vairs nav spēkā. Atver apstiprinājumu no jauna.",
+      "engagementsStatusActive": "Aktīvas",
+      "engagementsStatusEnded": "Beigušās",
+      "engagementsStarted": "Sākums",
+      "engagementsEndedOn": "Beigas",
+      "engagementsUnknownParty": "Vārds nav pieejams",
+      "engagementsEndAction": "Beigt darba attiecības",
+      "engagementsEndTitle": "Beigt šīs darba attiecības?",
+      "engagementsEndBody": "Beigšana ir galīga: šīs darba attiecības nevar atjaunot. Ieraksts paliek vēsturē ar īstajiem datumiem — nekas netiek dzēsts. Neviens projekts netiek pabeigts, dalība organizācijā nebeidzas, netiek izveidota pieredze vai atsauksme, un nekas netiek maksāts vai rēķināts.",
+      "engagementsEndCta": "Beigt darba attiecības",
+      "engagementsCancel": "Atcelt",
+      "engagementsWorking": "Notiek beigšana…",
+      "engagementsEnded": "Darba attiecības ir beigtas.",
+      "engagementsEndedAt": "Darba attiecības beigtas {date}.",
+      "engagementsAlreadyEnded": "Šīs darba attiecības jau bija beigtas. Nekas netika mainīts.",
+      "engagementsAlreadyEndedAt": "Šīs darba attiecības jau bija beigtas {date}. Nekas netika mainīts."
     }
   },
   "landing": {

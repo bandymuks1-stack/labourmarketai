@@ -20,6 +20,8 @@ import { FUNNEL_EVENT_NAMES } from "@/lib/telemetry/funnel-events";
  */
 
 const ROLES = new Set(["worker", "company", "agency", "customer"]);
+/** Roles PLUS the one relationship subject (§7.1) — see `ActionSubject`. */
+const SUBJECTS = new Set([...ROLES, "engagement"]);
 const TIERS: ConfirmationTier[] = [
   "read",
   "reversible_write",
@@ -49,13 +51,34 @@ describe("conversation action registry — structure", () => {
   it("every action is well-formed and self-consistent", () => {
     for (const a of CONVERSATION_ACTIONS) {
       // id is namespaced by its subject, kebab-cased.
-      expect(a.id, a.id).toMatch(/^(worker|company|agency|customer)\.[a-z0-9-]+$/);
+      expect(a.id, a.id).toMatch(
+        /^(worker|company|agency|customer|engagement)\.[a-z0-9-]+$/,
+      );
       expect(a.id.startsWith(`${a.subject}.`), a.id).toBe(true);
       // roles
-      expect(ROLES.has(a.subject)).toBe(true);
+      expect(SUBJECTS.has(a.subject)).toBe(true);
       expect(a.allowedRoles.length).toBeGreaterThan(0);
       expect(a.allowedRoles.every((r) => ROLES.has(r)), a.id).toBe(true);
-      expect(a.allowedRoles.includes(a.subject), `${a.id} subject in allowedRoles`).toBe(true);
+      if (ROLES.has(a.subject)) {
+        // A ROLE subject owns its own action.
+        expect(a.allowedRoles.includes(a.subject as never), `${a.id} subject in allowedRoles`).toBe(
+          true,
+        );
+      } else {
+        // §7.1 — a RELATIONSHIP subject is held to a STRICTER rule than a role
+        // subject, not a looser one. `engagement.*` exists precisely because
+        // the employer and the worker hold the SAME authority over the same
+        // row, so it must list BOTH parties. Without this, a neutral-looking
+        // namespace could quietly become a one-sided action wearing a name
+        // that says otherwise — which is exactly the drift the shared id was
+        // introduced to prevent.
+        expect(a.allowedRoles.includes("worker"), `${a.id} relationship: worker`).toBe(true);
+        expect(
+          a.allowedRoles.includes("company") || a.allowedRoles.includes("agency"),
+          `${a.id} relationship: employer side`,
+        ).toBe(true);
+        expect(a.allowedRoles.length, `${a.id} relationship needs >=2 roles`).toBeGreaterThan(1);
+      }
       // confirmation
       expect(TIERS.includes(a.confirmation), `${a.id} tier`).toBe(true);
       // label keys live under the conversation namespace
@@ -98,6 +121,10 @@ describe("conversation action registry — structure", () => {
     // worker to a project are the canonical irreversible ones.
     expect(strong).toContain("worker.respond-booking");
     expect(strong).toContain("company.assign-worker");
+    // §7.1 — ending an engagement has no reopen RPC and this slice adds none,
+    // so the confirmation card is the only step before a state nobody can
+    // walk back. Pinned by name so a later slice cannot quietly soften it.
+    expect(strong).toContain("engagement.end");
   });
 });
 

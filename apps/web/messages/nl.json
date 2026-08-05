@@ -10593,6 +10593,10 @@
         "logWork": {
           "label": "Werktijd vastleggen",
           "description": "Leg vast wat en wanneer je hebt gewerkt — de vermelding gaat naar je werkjournaal."
+        },
+        "reviewEngagements": {
+          "label": "Mijn werkrelaties",
+          "description": "Zie met wie je werkt en beëindig een werkrelatie."
         }
       },
       "company": {
@@ -10635,6 +10639,10 @@
         "whoWaits": {
           "label": "Wie wacht op mij?",
           "description": "Bekijk wat jouw actie nodig heeft."
+        },
+        "reviewEngagements": {
+          "label": "Werkrelaties bekijken",
+          "description": "Zie wie voor deze organisatie werkt en beëindig een werkrelatie."
         }
       },
       "agency": {
@@ -10657,6 +10665,12 @@
         "whoWaits": {
           "label": "Wie wacht op mij?",
           "description": "Bekijk wat jouw actie nodig heeft."
+        }
+      },
+      "engagement": {
+        "end": {
+          "label": "Werkrelatie beëindigen",
+          "description": "Beëindig één werkrelatie. Definitief — heropenen kan niet."
         }
       }
     },
@@ -10873,7 +10887,13 @@
       "assignNoWorkers": "Er is nog niemand in je team om toe te wijzen.",
       "assignUnavailable": "Ik kon je team nu niet lezen.",
       "assignDone": "Toegewezen aan het project.",
-      "assignFailed": "De toewijzing kon niet worden gemaakt."
+      "assignFailed": "De toewijzing kon niet worden gemaakt.",
+      "chipEngagements": "Met wie ik werk",
+      "userEngagements": "Met wie werk ik?",
+      "engagementsOpened": "Dit zijn de vastgelegde werkrelaties. Je kunt er één beëindigen in het paneel.",
+      "engagementsNone": "Er zijn geen vastgelegde werkrelaties.",
+      "engagementsNoCompany": "Je handelt nu niet namens een organisatie, dus er is geen lijst om te tonen.",
+      "engagementsUnavailable": "De werkrelaties kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -11199,7 +11219,33 @@
       "projectInvalidTransition": "Deze statuswijziging kan niet worden uitgevoerd.",
       "projectNotAuthorized": "Je kunt de status van dit project niet wijzigen.",
       "projectNeedsMigration": "Statuswijzigingen van projecten zijn in deze omgeving nog niet beschikbaar.",
-      "projectConflict": "Het project is gewijzigd terwijl je ernaar keek. Open het opnieuw."
+      "projectConflict": "Het project is gewijzigd terwijl je ernaar keek. Open het opnieuw.",
+      "engagements": {
+        "title": "Werkrelaties"
+      },
+      "engagementsError": "De werkrelaties konden niet worden geladen.",
+      "engagementsBlocked": "De werkrelaties kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben.",
+      "engagementsNeedsMigration": "Werkrelaties zijn in deze omgeving nog niet beschikbaar.",
+      "engagementsEmptyCompany": "Deze organisatie heeft geen vastgelegde werkrelaties.",
+      "engagementsEmptyWorker": "Je hebt geen vastgelegde werkrelaties.",
+      "engagementsUnavailable": "Deze werkrelatie is niet voor jou beschikbaar.",
+      "engagementsConflict": "De werkrelatie is tussentijds gewijzigd. Herlaad en probeer opnieuw.",
+      "engagementsStaleConfirmation": "Die bevestiging is niet meer geldig. Open de bevestiging opnieuw.",
+      "engagementsStatusActive": "Actief",
+      "engagementsStatusEnded": "Beëindigd",
+      "engagementsStarted": "Gestart",
+      "engagementsEndedOn": "Beëindigd",
+      "engagementsUnknownParty": "Naam niet beschikbaar",
+      "engagementsEndAction": "Werkrelatie beëindigen",
+      "engagementsEndTitle": "Deze werkrelatie beëindigen?",
+      "engagementsEndBody": "Beëindigen is definitief: deze werkrelatie kan niet worden heropend. De registratie blijft als historie bestaan met de echte data — er wordt niets verwijderd. Er wordt geen project afgerond, geen organisatielidmaatschap beëindigd, geen ervaring of beoordeling aangemaakt, en er wordt niets betaald of gefactureerd.",
+      "engagementsEndCta": "Werkrelatie beëindigen",
+      "engagementsCancel": "Annuleren",
+      "engagementsWorking": "Bezig met beëindigen…",
+      "engagementsEnded": "De werkrelatie is beëindigd.",
+      "engagementsEndedAt": "De werkrelatie is beëindigd op {date}.",
+      "engagementsAlreadyEnded": "Deze werkrelatie was al beëindigd. Er is niets gewijzigd.",
+      "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd."
     }
   },
   "landing": {
