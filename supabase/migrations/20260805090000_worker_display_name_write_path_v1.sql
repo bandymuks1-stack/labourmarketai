@@ -293,6 +293,13 @@ comment on function public.complete_onboarding(text, text, text, jsonb, uuid) is
 -- function's reachable surface is unchanged by this migration.
 revoke all on function public.complete_onboarding(text, text, text, jsonb, uuid)
   from public;
+-- SECDEF hygiene (secdef-local-reset-reproducibility guard): this SECURITY
+-- DEFINER function is (re)created AFTER the 20260722160000 anon closure, so
+-- the closure cannot reach it — without an explicit anon revoke it would stay
+-- anon-reachable through the environment's default privileges. Behaviourally
+-- inert (the function raises 42501 without auth.uid()), structurally required.
+revoke all on function public.complete_onboarding(text, text, text, jsonb, uuid)
+  from anon;
 grant execute
   on function public.complete_onboarding(text, text, text, jsonb, uuid)
   to authenticated;
