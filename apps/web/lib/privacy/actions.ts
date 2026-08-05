@@ -73,7 +73,15 @@ export interface MyPrivacyRequestRow {
 }
 
 /** The caller's OWN privacy-request rows (RLS: profile_id = auth.uid()).
- *  Empty list on any missing-data state — never a fabricated queue. */
+ *  Empty list on any missing-data state — never a fabricated queue.
+ *
+ *  Stage A decision — deliberately NOT employer-workspace-gated. A privacy
+ *  request is a PERSON right (GDPR-shaped), not an employer feature: gating
+ *  it behind a resolved company workspace would block a worker's or a
+ *  person-buyer's legitimate request. The read cannot leak employer demand
+ *  data either: it is scoped to the caller's own rows and returns ONLY rows
+ *  whose payload carries `privacy_request_type` (id/type/status/date — no
+ *  demand fields leave this function). */
 export async function listMyPrivacyRequests(): Promise<MyPrivacyRequestRow[]> {
   const supabase = await createClient();
   const {
