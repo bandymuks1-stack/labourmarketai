@@ -409,17 +409,16 @@ describe("NO new DB migration in this PR", () => {
     // complete_onboarding's worker branch DO NOTHING -> DO UPDATE, no
     // table/policy/RLS change, zero DML) and
     // `20260805090100_worker_display_name_backfill_v1` (hole-filling DML with
-    // a reversal ledger). BOTH ship RED, deliberately NOT human-gate-annotated,
-    // UNAPPLIED — owner decisions 1/2 recorded in
-    // docs/human-gates/worker-display-name-write-path-gate.md. Still no
-    // migration from the market-map read layer.
+    // a reversal ledger). Both APPLIED to prod 2026-08-05 under recorded
+    // owner decisions 1/2 (docs/human-gates/worker-display-name-write-path-gate.md),
+    // merged via PR #1020. Still no migration from the market-map read layer.
     //
-    // COLLISION NOTE: parallel PR #1016 (org demand row scope) bumps this
-    // same shared ratchet 179 -> 180 from the same base. Whichever merges
-    // second must RECOUNT the real files under supabase/migrations after
-    // rebase (correct combined value: 182) — never take either side's
-    // number verbatim. The guard fails closed on a bad resolution.
-    expect(count).toBeLessThanOrEqual(181);
+    // Bumped 181 -> 182 for M-P0-1 (multi-org company ownership cap removal,
+    // `20260805170000`) — schema-shape change only, owner-gated, UNAPPLIED at
+    // pin time. RESOLVED COLLISION per both branches' collision notes: after
+    // rebasing M-P0-1 onto the merged display-name package the real file
+    // count under supabase/migrations is 182 (recounted, not summed).
+    expect(count).toBeLessThanOrEqual(182);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

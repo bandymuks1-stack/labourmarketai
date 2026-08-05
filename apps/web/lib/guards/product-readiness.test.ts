@@ -1937,18 +1937,19 @@ describe("no migration files added by this sprint", () => {
     // deliberately NOT human-gate-annotated — the owner applies it. Ships
     // UNAPPLIED.
     // Bumped 179 -> 181 for the §18 worker display-name package: the
-    // write-path repair (`20260805090000`, DO NOTHING -> DO UPDATE inside
-    // complete_onboarding, additive-only, zero DML at apply) and its
-    // separately-approvable backfill (`20260805090100`, hole-filling DML with
-    // a ledger-first reversal design). Both RED, both UNAPPLIED, both
-    // owner-gated via docs/human-gates/worker-display-name-write-path-gate.md;
-    // paired rollbacks exist for both.
-    // COLLISION NOTE: parallel PR #1016 (org demand row scope) bumps this
-    // same shared ratchet 179 -> 180 from the same base. Whichever merges
-    // second must RECOUNT the real files under supabase/migrations after
-    // rebase (correct combined value: 182) — never take either side's
-    // number verbatim. The guard fails closed on a bad resolution.
-    const SPRINT_BASELINE = 181;
+    // write-path repair (`20260805090000`) and its backfill
+    // (`20260805090100`) — both APPLIED to prod 2026-08-05 under recorded
+    // owner decisions 1/2 (docs/human-gates/worker-display-name-write-path-gate.md),
+    // merged via PR #1020; paired rollbacks exist for both.
+    // Bumped 181 -> 182 for M-P0-1 `20260805170000_multi_org_company_
+    // ownership_cap_removal_v1` — drops the one-person-one-company
+    // `companies_profile_id_key` cap and replaces it with a truthful
+    // (creator, canonical legal_name) duplicate key. RED, owner-gated, no
+    // marker at pin time. RESOLVED COLLISION per both branches' collision
+    // notes: after rebasing M-P0-1 onto the merged display-name package the
+    // real file count under supabase/migrations is 182 (recounted, not
+    // summed).
+    const SPRINT_BASELINE = 182;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
