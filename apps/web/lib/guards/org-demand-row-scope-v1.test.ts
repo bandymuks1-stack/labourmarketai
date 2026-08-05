@@ -14,11 +14,15 @@ import { resolve } from "node:path";
  *      is kept and only an org-membership leg is appended; write policies
  *      are untouched in v1;
  *   3. organization_id is stamped SERVER-SIDE only — from the caller's
- *      company/org bridge via resolve_caller_organization_id(). No RPC
+ *      MEMBERSHIP (owned + actively managed organizations, exactly-one-or-
+ *      NULL) via resolve_caller_organization_id(). The resolver must NOT
+ *      key on the banned companies.profile_id legacy bridge, and no RPC
  *      accepts an organization id from the client (no p_organization_id
  *      parameter anywhere);
- *   4. demand_shortlist (direct-DML write path, no RPC) is stamped by a
- *      BEFORE INSERT OR UPDATE trigger;
+ *   4. BOTH direct-DML-reachable tables (demand_shortlist via the scouting
+ *      upsert, customer_requests via 0028's table-level UPDATE grant) are
+ *      stamped by BEFORE INSERT OR UPDATE triggers, so the column is never
+ *      client-forgeable through a raw PostgREST PATCH;
  *   5. the file carries NO gate-approval annotation — it ships RED by
  *      design, and the owner applies it manually after review;
  *   6. a paired rollback exists and restores the original policy legs.
@@ -126,11 +130,23 @@ describe("org-demand-row-scope v1 — stamping is server-side only", () => {
     expect(code).not.toMatch(/p_org_id/);
   });
 
-  it("the bridge resolver is zero-argument (auth.uid() only) and anon-revoked", () => {
-    expect(code).toMatch(
-      /create or replace function public\.resolve_caller_organization_id\(\)/,
+  it("the resolver is zero-argument, MEMBERSHIP-derived, fail-closed and anon-revoked", () => {
+    const start = code.indexOf(
+      "create or replace function public.resolve_caller_organization_id()",
     );
-    expect(code).toMatch(/c\.profile_id = auth\.uid\(\)/);
+    expect(start).toBeGreaterThan(-1);
+    const body = code.slice(start, code.indexOf("$$;", start));
+    // Derives from the canonical spines…
+    expect(body).toMatch(/o\.owner_profile_id = auth\.uid\(\)/);
+    expect(body).toMatch(/ec\.profile_id = auth\.uid\(\)/);
+    expect(body).toMatch(
+      /relationship_slug in \('owner','manager','external_manager'\)/,
+    );
+    // …exactly-one-or-NULL (multi-org callers stamp NULL, never a guess)…
+    expect(body).toMatch(/having count\(\*\) = 1/);
+    // …and NEVER the banned companies.profile_id legacy bridge.
+    expect(body).not.toMatch(/legacy_company_id/);
+    expect(body).not.toMatch(/from public\.companies/);
     expect(code).toMatch(
       /revoke all on function public\.resolve_caller_organization_id\(\) from anon/,
     );
@@ -177,11 +193,44 @@ describe("org-demand-row-scope v1 — stamping is server-side only", () => {
     );
   });
 
+  it("customer_requests is stamped by the SAME trigger contract (0028's UPDATE grant would otherwise make the column PATCH-forgeable)", () => {
+    expect(code).toMatch(
+      /create or replace function public\.customer_requests_stamp_organization\(\)/,
+    );
+    expect(code).toMatch(
+      /create trigger customer_requests_stamp_org\s+before insert or update on public\.customer_requests/,
+    );
+    expect(code).toMatch(
+      /revoke all on function public\.customer_requests_stamp_organization\(\) from anon/,
+    );
+    expect(code).toMatch(
+      /revoke all on function public\.customer_requests_stamp_organization\(\) from authenticated/,
+    );
+    expect(code).not.toMatch(
+      /grant execute on function public\.customer_requests_stamp_organization/,
+    );
+  });
+
+  it("both triggers refuse to stamp another person's row from the caller's own membership", () => {
+    for (const [fn, ownerCol] of [
+      ["demand_shortlist_stamp_organization", "owner_id"],
+      ["customer_requests_stamp_organization", "profile_id"],
+    ] as const) {
+      const start = code.indexOf(`create or replace function public.${fn}()`);
+      const body = code.slice(start, code.indexOf("$$;", start));
+      expect(
+        new RegExp(`new\\.${ownerCol} = v_caller`).test(body),
+        `${fn} must stamp only the row's own person`,
+      ).toBe(true);
+    }
+  });
+
   it("every SECURITY DEFINER function in the file carries an explicit anon revoke", () => {
     // Belt-and-braces on top of secdef-local-reset-reproducibility.test.ts.
     const fns = [
       "resolve_caller_organization_id",
       "demand_shortlist_stamp_organization",
+      "customer_requests_stamp_organization",
       "save_customer_request",
       "save_demand_draft",
       "submit_demand_request",
@@ -236,6 +285,12 @@ describe("org-demand-row-scope v1 — paired rollback", () => {
       /alter table public\.customer_requests drop column if exists organization_id/,
     );
     expect(downCode).toMatch(/drop function if exists public\.resolve_caller_organization_id\(\)/);
+    expect(downCode).toMatch(
+      /drop trigger if exists customer_requests_stamp_org on public\.customer_requests/,
+    );
+    expect(downCode).toMatch(
+      /drop function if exists public\.customer_requests_stamp_organization\(\)/,
+    );
     expect(downCode).toMatch(/from anon/);
     // Restored bodies must NOT still stamp (byte-exact originals).
     expect(downCode).not.toMatch(/resolve_caller_organization_id\(\)\)/);

@@ -39,18 +39,32 @@
 --      reads gain org scope first; writes stay profile-derived.
 --   4. Redefines the four demand-chain write RPCs (save_customer_request,
 --      save_demand_draft, submit_demand_request, propose_booking_request) to
---      stamp organization_id SERVER-SIDE from the caller's company/org
---      bridge — never from a client argument (no p_organization_id parameter
---      exists or is accepted). Bodies are carried byte-exact from their
---      owning migrations (0028 / 20260530150000 / 20260613100100) except the
---      stamping addition. propose_booking_request_v3 (20260716121000) is a
---      pure rate-limit wrapper that delegates to v1, so stamping v1 covers
---      both call paths.
+--      stamp organization_id SERVER-SIDE from the caller's MEMBERSHIP
+--      (resolve_caller_organization_id — owned + actively managed
+--      organizations, exactly-one-or-NULL) — never from a client argument
+--      (no p_organization_id parameter exists or is accepted). Bodies are
+--      carried byte-exact from their owning migrations (0028 /
+--      20260530150000 / 20260613100100) except the stamping addition.
+--      propose_booking_request_v3 (20260716121000) is a pure rate-limit
+--      wrapper that delegates to v1, so stamping v1 covers both call paths.
 --   5. demand_shortlist has NO write RPC — the app writes it via direct
 --      owner-scoped DML (apps/web/lib/scouting/scouting.ts upsert). A BEFORE
---      INSERT OR UPDATE trigger therefore stamps organization_id from the
---      caller's bridge; an authenticated client can neither choose nor move
+--      INSERT OR UPDATE trigger therefore stamps organization_id
+--      server-side; an authenticated client can neither choose nor move
 --      the organization of a shortlist row.
+--   6. customer_requests carries the SAME BEFORE trigger: 0028 grants
+--      `update` on the table to authenticated with a profile-only WITH
+--      CHECK, so without a trigger the new column would be forgeable via a
+--      raw PostgREST PATCH. The trigger makes a stamped org immutable and
+--      every authenticated write server-derived.
+--
+-- WHAT THIS IS AND IS NOT (honest classification):
+--   ORGANIZATION_DEMAND_ROW_SCOPE_V1_SAFE_BACKFILL_BRIDGE_ACTIVE_CONTEXT_V2_REQUIRED
+--   A caller with EXACTLY ONE actable organization stamps correctly. A
+--   multi-organization caller stamps NULL (fail-closed) because the DB
+--   cannot see the cookie-held active workspace until 20260714210000
+--   applies. This is NOT complete multi-organization support; V2 (explicit
+--   workspace-selected stamping) replaces ONE function body, zero DDL.
 --
 -- SECURITY DEFINER HYGIENE: every function (re)defined here re-states its
 -- revoke/grant pair INCLUDING an explicit `revoke ... from anon` — required
@@ -60,7 +74,7 @@
 -- RED CLASSES CARRIED (why this is owner-gated): SECURITY DEFINER
 -- (re)definitions, GRANT/REVOKE statements, RLS policy changes
 -- (drop+recreate of three SELECT policies), DML at apply time (the
--- backfill UPDATEs), and a new trigger.
+-- backfill UPDATEs), and two new triggers.
 --
 -- ROLLBACK: supabase/rollbacks/20260805100000_org_demand_row_scope_v1.down.sql
 -- (restores the original policies and function bodies byte-exact, drops the
@@ -92,6 +106,12 @@ create index if not exists booking_requests_organization_idx
 -- organizations.legacy_company_id carries only a plain index — so the
 -- backfill stamps ONLY when the bridge resolves to EXACTLY ONE organization.
 -- Rows that do not resolve stay NULL (verified: none exist today).
+--
+-- The backfill DELIBERATELY uses the legacy bridge while the go-forward
+-- resolver (§3) is membership-derived: every pre-existing demand row was
+-- created through a company-owner employer surface, so the mirrored company
+-- organization IS the historically correct attribution for those rows. New
+-- rows are stamped by §3's stricter rule.
 
 do $$
 declare
@@ -160,14 +180,30 @@ begin
   raise notice 'org_demand_row_scope_v1: booking_requests AFTER backfill: % of % rows stamped', v_after, v_total;
 end $$;
 
--- ── 3. Server-side bridge resolver (the ONE stamping authority) ─────────────
+-- ── 3. Server-side membership resolver (the ONE stamping authority) ─────────
 -- Zero-argument on purpose: it resolves auth.uid() only, so it can never be
 -- used to probe another profile's organization, and no RPC can accept an
--- organization id from the client. Returns NULL when the caller's bridge is
--- absent or ambiguous — stamping then honestly stays NULL instead of guessing.
--- SECURITY DEFINER so the demand_shortlist trigger (which runs in the DML
--- caller's context) resolves the bridge without depending on the caller's
--- RLS view of companies/organizations.
+-- organization id from the client.
+--
+-- MEMBERSHIP-DERIVED, NOT legacy-bridge-derived. An earlier draft keyed this
+-- on companies.profile_id → organizations.legacy_company_id — the exact
+-- fallback apps/web/lib/company/employer-company-context.ts bans, and it
+-- answered WRONGLY (the company org) for a caller who also owns team
+-- organizations (create_team_v1 is live in prod). This version derives the
+-- caller's ACTABLE organizations from the canonical spines:
+--   * organizations they own (organizations.owner_profile_id), plus
+--   * organizations they actively manage (engagement_contexts, the same
+--     owner/manager/external_manager set as public.manages_organization).
+-- EXACTLY ONE actable organization → that one. Zero, or two-plus (multi-org
+-- callers, whose active workspace the DB cannot see — it lives in an
+-- httpOnly cookie until 20260714210000 applies) → NULL. Wrong-by-absence,
+-- never wrong-by-assertion: stamping honestly stays NULL instead of
+-- guessing. Explicit workspace-selected stamping is ACTIVE_CONTEXT_V2 —
+-- redefining this ONE function body; zero DDL.
+--
+-- SECURITY DEFINER so the stamping triggers (which run in the DML caller's
+-- context) resolve membership without depending on the caller's RLS view of
+-- organizations/engagement_contexts.
 
 create or replace function public.resolve_caller_organization_id()
 returns uuid
@@ -176,11 +212,19 @@ stable
 security definer
 set search_path = public
 as $$
-  select (array_agg(o.id))[1]
-    from public.companies c
-    join public.organizations o on o.legacy_company_id = c.id
-   where c.profile_id = auth.uid()
-  having count(o.id) = 1
+  select (array_agg(org_id))[1]
+    from (
+      select o.id as org_id
+        from public.organizations o
+       where o.owner_profile_id = auth.uid()
+      union
+      select ec.organization_id
+        from public.engagement_contexts ec
+       where ec.profile_id = auth.uid()
+         and ec.status = 'active'
+         and ec.relationship_slug in ('owner','manager','external_manager')
+    ) s
+  having count(*) = 1
 $$;
 
 revoke all on function public.resolve_caller_organization_id() from public;
@@ -216,10 +260,16 @@ begin
     -- Immutable once stamped: an authenticated caller can never move a
     -- shortlist row to another organization.
     new.organization_id := old.organization_id;
-  else
-    -- Authenticated INSERT (or UPDATE of an unstamped row): server-derived
-    -- only — any client-supplied value is overwritten, never trusted.
+  elsif new.owner_id = v_caller then
+    -- The row's own person, INSERT or heal-on-UPDATE: server-derived only —
+    -- any client-supplied value is overwritten, never trusted.
     new.organization_id := public.resolve_caller_organization_id();
+  elsif tg_op = 'UPDATE' then
+    -- A caller who is NOT the row's person (admin path) must never stamp
+    -- someone else's row from their OWN membership.
+    new.organization_id := old.organization_id;
+  else
+    new.organization_id := null;
   end if;
   return new;
 end $$;
@@ -234,6 +284,55 @@ drop trigger if exists demand_shortlist_stamp_org on public.demand_shortlist;
 create trigger demand_shortlist_stamp_org
   before insert or update on public.demand_shortlist
   for each row execute function public.demand_shortlist_stamp_organization();
+
+-- ── 4b. customer_requests trigger (closes the direct-PATCH forgery) ─────────
+-- 0028 grants `select, update` on customer_requests to authenticated, and its
+-- UPDATE policy checks only `profile_id = auth.uid()` — so without a trigger
+-- the newly added organization_id would be settable/movable/clearable by any
+-- authenticated owner via a raw PostgREST PATCH, injecting their row into an
+-- arbitrary organization's demand view (the new read leg would fire for that
+-- org's members). The RPCs stamp correctly, but the raw column must not be a
+-- side door. Same contract as the shortlist trigger:
+--   * once stamped, immutable to authenticated callers;
+--   * the row's own person gets a server-derived stamp (INSERT or heal — the
+--     heal also closes the "update branches do not stamp" gap for rows whose
+--     resolver was NULL at creation and unambiguous later);
+--   * a caller who is not the row's person (admin) never stamps it from
+--     their own membership;
+--   * no-JWT contexts (service role, migration DML) pass through untouched.
+
+create or replace function public.customer_requests_stamp_organization()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+begin
+  if v_caller is null then
+    return new;
+  end if;
+  if tg_op = 'UPDATE' and old.organization_id is not null then
+    new.organization_id := old.organization_id;
+  elsif new.profile_id = v_caller then
+    new.organization_id := public.resolve_caller_organization_id();
+  elsif tg_op = 'UPDATE' then
+    new.organization_id := old.organization_id;
+  else
+    new.organization_id := null;
+  end if;
+  return new;
+end $$;
+
+revoke all on function public.customer_requests_stamp_organization() from public;
+revoke all on function public.customer_requests_stamp_organization() from anon;
+revoke all on function public.customer_requests_stamp_organization() from authenticated;
+
+drop trigger if exists customer_requests_stamp_org on public.customer_requests;
+create trigger customer_requests_stamp_org
+  before insert or update on public.customer_requests
+  for each row execute function public.customer_requests_stamp_organization();
 
 -- ── 5. ADDITIVE RLS: org-membership read leg on the three SELECT policies ───
 -- Every existing leg is kept verbatim; the ONLY change is the appended

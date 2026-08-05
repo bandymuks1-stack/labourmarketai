@@ -1,12 +1,19 @@
 -- ============================================================================
 -- ROLLBACK for 20260805100000_org_demand_row_scope_v1.sql
 --
--- SAFE AT ANY TIME because the forward migration is strictly ADDITIVE to the
--- profile_id / owner_id spine: dropping the organization_id columns discards
--- only the org stamp (re-derivable at any time via the same bridge join the
--- forward backfill used — profile/owner → companies.profile_id →
--- organizations.legacy_company_id). No demand, shortlist or booking row is
--- deleted or altered beyond that column.
+-- SAFE while v1 stamping rules hold: dropping the organization_id columns
+-- discards only stamps that are re-derivable (backfilled rows via the bridge
+-- join — profile/owner → companies.profile_id →
+-- organizations.legacy_company_id; new rows via the caller's single actable
+-- membership). No demand, shortlist or booking row is deleted or altered
+-- beyond that column.
+--
+-- ⚠ THIS SAFETY CLAIM EXPIRES WITH V2. The moment stamping derives from an
+-- explicitly SELECTED workspace (ACTIVE_CONTEXT_V2, after 20260714210000),
+-- organization_id carries information that exists nowhere else — which
+-- workspace the person chose. This file must then be SUPERSEDED by a
+-- rollback that archives the column (rename / copy to a ledger) instead of
+-- dropping it. Do not run this file after V2 stamping is live.
 --
 -- ORDER MATTERS:
 --   1. Restore the three SELECT policies to their original text FIRST — the
@@ -17,7 +24,7 @@
 --      re-stated INCLUDING the explicit anon revokes (the post-20260722160000
 --      SECURITY DEFINER hygiene is kept even on rollback — rolling back the
 --      org spine must never widen anon reach).
---   3. Drop the trigger, the trigger function and the bridge resolver.
+--   3. Drop both triggers, their trigger functions and the resolver.
 --   4. Drop the indexes and the columns last.
 -- ============================================================================
 
@@ -329,6 +336,8 @@ grant execute on function public.propose_booking_request(uuid, uuid, text, text,
 
 drop trigger if exists demand_shortlist_stamp_org on public.demand_shortlist;
 drop function if exists public.demand_shortlist_stamp_organization();
+drop trigger if exists customer_requests_stamp_org on public.customer_requests;
+drop function if exists public.customer_requests_stamp_organization();
 drop function if exists public.resolve_caller_organization_id();
 
 -- ── 4. Drop the indexes and the added columns (additive → safe) ─────────────
