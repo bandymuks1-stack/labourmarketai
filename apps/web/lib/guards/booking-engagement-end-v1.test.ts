@@ -592,6 +592,11 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260804160000_booking_engagement_end_v2.sql",
       "20260805090000_worker_display_name_write_path_v1.sql",
       "20260805090100_worker_display_name_backfill_v1.sql",
+      // 2026-08-05: M-P0-1 (company ownership cap removal) gained its marker
+      // under the owner's directive §3 apply approval, recorded in
+      // docs/APPLIED_LEDGER.md (ledger 20260805171825) and the structural
+      // train doc. Added in the same commit as that record.
+      "20260805170000_multi_org_company_ownership_cap_removal_v1.sql",
     ]);
   });
 

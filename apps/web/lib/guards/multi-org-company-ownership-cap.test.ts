@@ -64,14 +64,17 @@ describe("M-P0-1 — company ownership cap removal", () => {
     expect(sql).not.toMatch(/\bdelete\s+from\s+public\.companies/i);
   });
 
-  it("ships RED — no human-gate marker before an owner decision", () => {
+  it("carries the recorded-decision human-gate marker", () => {
+    // OWNER APPROVAL recorded 2026-08-05 (directive §3, "OWNER APPROVES
+    // M-P0-1 APPLY"); applied to prod the same day (ledger 20260805171825).
+    // Before that decision this assertion enforced ABSENCE of the marker.
     // Same line-anchored detection as .github/scripts/migration-safety.mjs —
     // prose MENTIONS of the marker in header comments do not count.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
     expect(
       ANNOTATION.test(raw),
-      `${MIGRATION} must not carry @human-gate-approved before an owner decision`,
-    ).toBe(false);
+      `${MIGRATION} must carry @human-gate-approved — the owner decision is recorded`,
+    ).toBe(true);
   });
 
   it("rollback exists, fails loudly on a closed window, and destroys nothing", () => {

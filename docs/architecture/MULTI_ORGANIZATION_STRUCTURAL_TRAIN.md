@@ -13,7 +13,7 @@ migrations. Not one giant PR.
 
 | Slice | Scope | Target state | Status |
 |---|---|---|---|
-| M-P0-1 | Remove `companies_profile_id_key UNIQUE` one-person-one-company cap | `MULTI_ORG_COMPANY_OWNERSHIP_SCHEMA_CODE_COMPLETE_PENDING_HUMAN_GATE` | Package prepared (this branch) |
+| M-P0-1 | Remove `companies_profile_id_key UNIQUE` one-person-one-company cap | `MULTI_ORG_COMPANY_OWNERSHIP_CAP_REMOVED_SCHEMA_ACTIVE` | **APPLIED to prod 2026-08-05** (ledger `20260805171825`, owner directive §3); accounting in `docs/APPLIED_LEDGER.md` |
 | M-P0-2 | Real create-second-organization path (`save_company_setup` de-singleton) | `MULTI_ORG_CREATE_AND_EDIT_PATH_CODE_COMPLETE` | Not started |
 | M-P0-3 | Remove `getOwnCompany()` authority → active-workspace resolver | `ACTIVE_WORKSPACE_AUTHORITY_REPLACES_GET_OWN_COMPANY` | Not started |
 | M-P0-4 | `company_memberships` v1 (governance ≠ employment) | `COMPANY_MEMBERSHIPS_V1_CODE_COMPLETE_PENDING_HUMAN_GATE` | Not started |

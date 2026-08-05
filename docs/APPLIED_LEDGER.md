@@ -14,6 +14,58 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260805170000_multi_org_company_ownership_cap_removal_v1` (M-P0-1)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-05 17:18:25 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260805171825`, name `multi_org_company_ownership_cap_removal_v1` (MCP stamps apply-time versions — match on `name`) |
+| PR | **#1019** — merge follows this accounting commit |
+| Owner gate | Directive 2026-08-05 §3 "OWNER APPROVES M-P0-1 APPLY"; every condition verified (HEAD tree unchanged through rebase, no DML, no RLS/grant change, preflight matched, rollback viable, ratchet recounted to 182) |
+| Migration sha256 (as reviewed/applied) | `62fb6bfb3ec0957a4961b6b5269ffce0d639948d190b8e497a2856e723971121` (applied copy differs only in the approval-header comment; executable statements verbatim) |
+| Rollback sha256 | `a9fd3b337b4326a9f862da97a48dce82aa0645a10958e3938489d44a233382f3` (present, NOT executed; fails loudly once any profile owns two companies) |
+
+**Preflight (immediately before apply)**: 7 companies, 7 distinct owners, 0
+duplicate `(profile_id, canonical legal_name)` tuples, 0 profiles owning >1
+company, 2 NULL `legal_name` rows (outside the partial index), constraint
+present as `UNIQUE (profile_id)`, replacement absent, companies fingerprint
+`2aa9903cc274a144b3ffad293d7e5f88`.
+
+**Post-apply**: `companies_profile_id_key` ABSENT; partial unique index
+`companies_creator_canonical_name_key (profile_id, lower(btrim(legal_name)))
+WHERE legal_name IS NOT NULL` PRESENT; companies fingerprint **identical**
+(`2aa9903c…` — all 7 rows byte-unchanged); policies md5, grants md5 and
+`owns_company()` body md5 all **identical** before/after; organizations 10,
+engagement_contexts 46, customer_requests 17, booking_requests 0, projects 5
+— untouched. The migration's statements name only the companies constraint,
+the new index and two COMMENTs; zero DML.
+
+**What this does NOT claim**: no application behaviour changed — the
+singleton writers (`save_company_setup*`, `complete_onboarding` company
+branch, `getOwnCompany()`) still behave as before and are replaced in
+M-P0-2/M-P0-3. No second production company was created; creating one before
+M-P0-2 lands is owner-gated.
+
+## OWNER DECISION 2b — display-name backfill ledger retention (recorded 2026-08-05)
+
+The owner approved: **retain `public.worker_display_name_backfill_20260805`
+for 90 days from production apply**, RLS enabled with zero policies (default
+deny), never exposed to application clients, not dropped now.
+
+- Apply date: **2026-08-05** (ledger `20260805155601`).
+- Earliest eligible cleanup date: **2026-11-03** (90 days).
+- Expected cleanup preflight (for the future owner-gated package): confirm no
+  rollback of `20260805155601` is pending or contemplated; re-verify the 22
+  ledger rows still match what was applied (`display_name_after` values still
+  present on `workers` or legitimately user-changed since); confirm no open
+  incident references the backfill; then `drop table` in a dedicated
+  owner-gated migration with its own ledger row.
+- Rollback implications: the ledger IS the backfill's reversal path — while
+  it exists the backfill is exactly reversible (current-value-guarded); after
+  the cleanup drop, reversal becomes impossible by design. Scheduling or
+  executing the deletion now is explicitly out of scope.
+
 ### ✅ APPLIED TO PROD — `20260805090000_worker_display_name_write_path_v1` + `20260805090100_worker_display_name_backfill_v1`
 
 | Field | Value |

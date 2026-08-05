@@ -3,11 +3,15 @@
 -- SAFETY CLASS: RED. Drops a UNIQUE constraint on an existing production
 -- table — a schema-shape change on live data. Owner-gated.
 --
--- There is deliberately NO `-- @human-gate-approved` marker in this file.
--- The owner's 2026-08-05 directive commissioned this PACKAGE
--- ("Prepare owner-gated migration") — it did not approve the APPLY. CI
--- staying RED is the honest state until a decision is recorded in
--- docs/architecture/MULTI_ORGANIZATION_STRUCTURAL_TRAIN.md.
+-- @human-gate-approved — RED class: unique-constraint drop on a live table
+-- (schema-shape change). OWNER APPROVAL recorded 2026-08-05 ("OWNER APPROVES
+-- M-P0-1 APPLY", directive §3) with all conditions verified: reviewed sha256
+-- 62fb6bfb3ec0957a4961b6b5269ffce0d639948d190b8e497a2856e723971121 unchanged
+-- through the rebase, no DML, no RLS/grant change, preflight 7/7/0/0,
+-- rollback window open, ratchet recounted (182). APPLIED to prod 2026-08-05,
+-- ledger version 20260805171825. Full record: docs/APPLIED_LEDGER.md and
+-- docs/architecture/MULTI_ORGANIZATION_STRUCTURAL_TRAIN.md. This marker
+-- covers THIS file's findings only.
 --
 -- ── WHY ────────────────────────────────────────────────────────────────────
 -- `companies_profile_id_key UNIQUE (profile_id)` (0006) hard-caps every
