@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { isMarketCountry } from "@/lib/taxonomy/work-categories";
 import {
   summarizeDemandLocations,
@@ -68,6 +69,9 @@ export type AddDemandLocationResult =
   | { kind: "invalid"; message: string }
   | { kind: "unauthenticated" }
   | { kind: "not-owner" }
+  /** Stage A: the caller is not acting for a company right now (personal
+   *  space, unbound organization, …) — fail-closed, named, never silent. */
+  | { kind: "no-company-context" }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
 
@@ -120,6 +124,12 @@ export async function addDemandLocation(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "unauthenticated" };
+
+  // Stage A workspace gate: a demand location is EMPLOYER demand-chain data —
+  // writing one requires a resolved company workspace via the ONE canonical
+  // resolver (fail-closed, named reason).
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "no-company-context" };
 
   // Verify the demand is the caller's own — RLS would also block, but we want a
   // clean not-owner signal instead of a silent RLS/FK rejection.
@@ -187,6 +197,12 @@ async function fetchOwnDemandRows(): Promise<DemandLocation[] | null> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
+
+  // Stage A workspace gate: these rows are EMPLOYER demand signals. Without a
+  // resolved company workspace the read fails closed to null — callers already
+  // render the honest static/foundation state for null (same as unauth).
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return null;
 
   const { data, error } = await asAny(supabase)
     .from("company_demand_locations")

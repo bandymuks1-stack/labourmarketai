@@ -404,6 +404,13 @@ export async function getOwnLastDemandPrefill(
   } = await supabase.auth.getUser();
   if (!user) return { found: false };
 
+  // Stage A workspace gate: both intents are EMPLOYER draft/request kinds, so
+  // echoing a prefill without a resolved company workspace would leak demand
+  // text into the wrong acting context. Fail-closed to the module's honest
+  // empty (`found: false` — the form simply starts blank).
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { found: false };
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
   const SELECT_COLS =

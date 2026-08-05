@@ -112,7 +112,11 @@ export const COMPANY_EXECUTORS: {
       // payload uses the wizard's own keys (title/capabilities/location/
       // timing/notes) — the same aliases getOwnLastDemandPrefill reads back.
       // The canonical helper THROWS on failure; a throw is a failure, never
-      // mapped to success.
+      // mapped to success. Stage A: this leg INHERITS the employer workspace
+      // gate from lib/demand/demand-drafts.ts (requireEmployerCompany on the
+      // employer draft kinds), exactly as the submit leg inherits
+      // demand-request.ts's gate — executors stay thin, authorization stays
+      // in the canonical layer.
       try {
         const row = await saveDemandDraftAction("company_request", {
           title: input.role ?? undefined,

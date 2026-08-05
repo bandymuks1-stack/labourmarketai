@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { getWorkerProfessionRows } from "@/lib/data/worker-core";
 import {
   buildSalaryIntelligenceView,
@@ -437,6 +438,16 @@ export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntel
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "no_viewer" };
+
+  // Stage A workspace gate: this is a COMPANY surface read — it requires a
+  // resolved company workspace via the ONE canonical resolver, fail-closed.
+  // Without it there is no company viewer, so `no_viewer` is the honest
+  // state (never rendered as "the company has no demand"). The owner
+  // predicate below stays: the gate scopes the SURFACE, the predicate scopes
+  // the ROWS (W14 P0-3) — both are needed until the organization column
+  // exists (Stage B).
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "no_viewer" };
 
   const nowMs = Date.now();
   const windowStart = new Date(

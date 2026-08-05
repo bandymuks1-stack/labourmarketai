@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 
 /**
  * Customer/Buyer demand request service (Stage 2).
@@ -114,6 +115,13 @@ function mapRow(
   };
 }
 
+/** The demand kinds that belong to the EMPLOYER spine. A list scoped to any
+ *  of these is an employer read and must pass the Stage A workspace gate. */
+const EMPLOYER_REQUEST_KINDS: ReadonlySet<string> = new Set([
+  "company_request",
+  "agency_offer",
+]);
+
 export async function listOwnCustomerRequests(
   /** Optional room scoping (W3 rows 7/8/25): the company room reads ONLY the
    *  employer demand kinds so a dual-role user's buyer service requests never
@@ -125,6 +133,15 @@ export async function listOwnCustomerRequests(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", rows: [] };
+  // Stage A workspace gate: a read scoped to employer demand kinds is an
+  // employer surface read — it requires a resolved company workspace
+  // (fail-closed via the ONE canonical resolver; never a silent empty).
+  if (kinds && kinds.some((k) => EMPLOYER_REQUEST_KINDS.has(k))) {
+    const employer = await requireEmployerCompany();
+    if (!employer.ok) {
+      return { kind: "error", message: `no_company_context:${employer.reason}` };
+    }
+  }
   let query = asAny(supabase)
     .from("customer_requests")
     .select(
@@ -144,6 +161,16 @@ export async function listOwnCustomerRequests(
   return { kind: "ok", rows };
 }
 
+/**
+ * Stage A decision — deliberately NOT employer-workspace-gated. This write is
+ * the BUYER spine: its only caller is the buyer form (role `customer`), the
+ * RPC attributes the row to the caller's own self-owned `customers` identity
+ * (0028), and no organization attribution exists on this path at all. Buying
+ * is a person-OR-company action (lib/config/roles.ts), so requiring a bound,
+ * owned company here would fail-closed every legitimate person-buyer in their
+ * personal space. Organization attribution for business buyers is Stage B
+ * (row-level org scoping, owner-gated schema work), not a surface gate.
+ */
 export async function saveCustomerRequest(
   input: SaveCustomerRequestInput,
 ): Promise<SaveCustomerRequestResult> {

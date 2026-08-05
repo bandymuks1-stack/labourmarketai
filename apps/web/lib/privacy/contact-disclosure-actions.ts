@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import {
   CONSENT_LOCALES,
   EMPLOYER_DATA_DISCLOSURE_V1,
@@ -78,28 +79,6 @@ export type RequestContactDisclosureResult =
   | { kind: "already-accepted" }
   | { kind: "error" };
 
-/** The caller's first owned non-team organization — the identity the ask is
- *  made AS (and the recipient of a later grant). Null → honest no-org state. */
-async function resolveOwnOrganizationId(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<string | null> {
-  try {
-    const { data, error } = await asAny(supabase)
-      .from("organizations")
-      .select("id, organization_type")
-      .eq("owner_profile_id", userId)
-      .neq("organization_type", "team")
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-    if (error || !data) return null;
-    return (data.id as string) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 /** Count the caller's open + last-24h asks. Null on any read failure —
  *  evaluateRequestBudget then fails closed. */
 async function countOwnContactAsks(
@@ -149,8 +128,19 @@ export async function requestContactDisclosureAction(input: {
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
-  const organizationId = await resolveOwnOrganizationId(supabase, user.id);
-  if (!organizationId) return { kind: "no-organization" };
+  // G6 fix (Stage A): the identity the ask is made AS (and the recipient of a
+  // later grant) is the ACTIVE workspace's organization, derived through the
+  // ONE canonical resolver — never "the first owned org by created_at", which
+  // ignored the workspace switch and could persist the WRONG organization id
+  // into the request row. Fail-closed with the module's named reasons when
+  // the workspace resolves to no organization.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) {
+    return employer.reason === "unauthenticated"
+      ? { kind: "not-authed" }
+      : { kind: "no-organization" };
+  }
+  const organizationId = employer.organizationId;
 
   // App-layer budget FIRST (works today; the draft RPC re-checks in the DB).
   // While the ask table is unapplied the counts read null; we must not let
