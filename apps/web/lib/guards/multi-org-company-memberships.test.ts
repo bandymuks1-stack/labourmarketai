@@ -44,9 +44,13 @@ const raw = readFileSync(MIGRATION, "utf8");
 const sql = stripComments(raw);
 
 describe("M-P0-4 — company_memberships v1 package", () => {
-  it("ships RED — no human-gate marker before a separate owner apply decision", () => {
+  it("carries the recorded-decision human-gate marker", () => {
+    // OWNER APPROVAL recorded 2026-08-05 ("OWNER DECISION — APPLY
+    // COMPANY_MEMBERSHIPS V1" §1). Before that decision this assertion
+    // enforced ABSENCE of the marker. Same line-anchored detection as
+    // .github/scripts/migration-safety.mjs.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(raw)).toBe(false);
+    expect(ANNOTATION.test(raw)).toBe(true);
   });
 
   it("one LIVE membership tuple per profile/organization; revoked history stays", () => {

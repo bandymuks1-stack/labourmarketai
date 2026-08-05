@@ -3,9 +3,18 @@
 Owner directive 2026-08-05 ("OWNER DECISION — APPLY AND MERGE M-P0-2…" §14/§15).
 State target: `COMPANY_MEMBERSHIPS_V1_CODE_COMPLETE_PENDING_HUMAN_GATE`.
 
-**The migration in this package is UNAPPLIED and carries NO
-`@human-gate-approved` marker. A separate owner decision is required before
-any production apply.**
+**OWNER APPROVAL recorded 2026-08-05** ("OWNER DECISION — APPLY
+COMPANY_MEMBERSHIPS V1 AND CONTINUE MULTI-ORG AUTHORITY TRAIN" §1): apply
+the exact Slice 1 migration, merge PR #1023 after production verification,
+normal Vercel deployment, then implement Slice 2 and M-P0-5. The
+`@human-gate-approved` marker names exactly the verified findings
+(security-definer-function, grant-or-revoke, create-trigger) plus the
+backfill INSERT the decision covers explicitly. The approval does NOT
+cover: PR #1016, production QA accounts, Stripe Live, real charges,
+outreach, engagement-to-membership conversion, or application membership
+writes before the reviewed Slice 2 RPCs exist. Executable SQL is
+byte-identical to reviewed HEAD `cae1ff30` (git blob `a51710d3` preserved
+through the rebase onto post-M-P0-3 main `596eab7a`).
 
 ## 1. What membership IS (and is not)
 

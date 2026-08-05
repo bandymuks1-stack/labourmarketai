@@ -1,10 +1,21 @@
 -- 20260806090000 — company_memberships v1 (M-P0-4)
 --
--- SAFETY CLASS: RED. New table + RLS + grants + a backfill DML. Ships with
--- NO `-- @human-gate-approved` marker: the owner commissioned the M-P0-4
--- PACKAGE (directive §14/§15), not the apply. A separate owner decision is
--- required before this touches production. CI staying RED is the honest
--- state until that decision is recorded.
+-- @human-gate-approved — RED class. OWNER APPROVAL recorded 2026-08-05
+-- ("OWNER DECISION — APPLY COMPANY_MEMBERSHIPS V1" §1): apply this exact
+-- migration, merge PR #1023 after production verification, normal Vercel
+-- deploy. Executable SQL byte-identical to the reviewed package HEAD
+-- `cae1ff30` (git blob a51710d3 preserved through the rebase). Decision
+-- recorded in docs/architecture/COMPANY_MEMBERSHIPS_V1.md and the train doc.
+-- Named findings the approval covers, still visible as notices:
+--   * security-definer-function — company_memberships_protect_last_owner()
+--     (sees sibling rows regardless of caller RLS; search_path pinned);
+--   * grant-or-revoke — SELECT to authenticated, ALL to service_role,
+--     anon/public revoked;
+--   * create-trigger — set_updated_at + protect_last_owner;
+--   * (the backfill INSERT…SELECT is row-creating DML the decision covers
+--     explicitly: 10 owner rows at the verified production counts).
+--
+-- SAFETY CLASS: RED. New table + RLS + grants + a backfill DML.
 --
 -- ── WHY ────────────────────────────────────────────────────────────────────
 -- Governance ≠ employment. Today "who may act for an organization" is spread
