@@ -1,0 +1,293 @@
+BEGIN
+INSERT 0 7
+=== 1. owner invites every permitted role (incl. a second owner) ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001"}
+(1 row)
+
+ owner_invites_owner 
+---------------------
+ invited
+(1 row)
+
+ owner_invites_admin 
+---------------------
+ invited
+(1 row)
+
+ owner_invites_manager 
+-----------------------
+ invited
+(1 row)
+
+ owner_invites_extmgr 
+----------------------
+ invited
+(1 row)
+
+ owner_invites_member 
+----------------------
+ invited
+(1 row)
+
+=== 14a. duplicate invite is replay-safe ===
+ duplicate_invite_refused 
+--------------------------
+ already_invited
+(1 row)
+
+=== 7. invited user has NO active authority before acceptance ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000002"}
+(1 row)
+
+ invited_admin_cannot_administer_yet 
+-------------------------------------
+ not_authorized
+(1 row)
+
+=== 8. acceptance grants exactly the invited role ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000001"}
+(1 row)
+
+ owner2_accepts 
+----------------
+ accepted
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000002"}
+(1 row)
+
+ admin_accepts 
+---------------
+ accepted
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000003"}
+(1 row)
+
+ manager_accepts 
+-----------------
+ accepted
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000004"}
+(1 row)
+
+ extmgr_accepts 
+----------------
+ accepted
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000005"}
+(1 row)
+
+ member_accepts 
+----------------
+ accepted
+(1 row)
+
+=== 14b. accept is replay-safe ===
+ second_accept_is_noop 
+-----------------------
+ already_active
+(1 row)
+
+=== 2. admin behavior matches doctrine (may invite non-owner; never owner) ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000002"}
+(1 row)
+
+ admin_invites_member 
+----------------------
+ invited
+(1 row)
+
+ admin_cannot_grant_owner 
+--------------------------
+ not_authorized
+(1 row)
+
+=== 3/4. manager and external manager are BOUNDED (no administration) ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000003"}
+(1 row)
+
+ manager_cannot_invite 
+-----------------------
+ not_authorized
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000004"}
+(1 row)
+
+ extmgr_cannot_invite 
+----------------------
+ not_authorized
+(1 row)
+
+=== 5. member cannot administer ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000005"}
+(1 row)
+
+ member_cannot_invite 
+----------------------
+ not_authorized
+(1 row)
+
+ member_cannot_revoke 
+----------------------
+ not_found
+(1 row)
+
+=== 6. engagement-only worker has NO governance authority ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000003"}
+(1 row)
+
+ engagement_worker_cannot_invite 
+---------------------------------
+ not_authorized
+(1 row)
+
+=== 13. no oracle for unrelated actors: real id vs random id, SAME answer ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000007"}
+(1 row)
+
+ unrelated_on_real_id 
+----------------------
+ not_found
+(1 row)
+
+ unrelated_on_random_id 
+------------------------
+ not_found
+(1 row)
+
+=== admin bounded on existing rows: cannot touch owner rows ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000002"}
+(1 row)
+
+ admin_cannot_revoke_owner 
+---------------------------
+ not_authorized
+(1 row)
+
+ admin_cannot_promote_to_owner 
+-------------------------------
+ not_authorized
+(1 row)
+
+=== role change by owner works; unchanged is a no-op outcome ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001"}
+(1 row)
+
+ owner_demotes_extmgr_to_manager 
+---------------------------------
+ role_changed
+(1 row)
+
+ unchanged_noop 
+----------------
+ unchanged
+(1 row)
+
+=== 9. revocation removes authority IMMEDIATELY ===
+ owner_revokes_member 
+----------------------
+ revoked
+(1 row)
+
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000005"}
+(1 row)
+
+ revoked_member_has_no_authority 
+---------------------------------
+ not_authorized
+(1 row)
+
+=== 14c. revoke is replay-safe ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001"}
+(1 row)
+
+ second_revoke_is_noop 
+-----------------------
+ not_active
+(1 row)
+
+=== 11. second owner allows a safe owner transition ===
+ first_owner_steps_down_with_owner2_active 
+-------------------------------------------
+ revoked
+(1 row)
+
+=== 10. the LAST owner cannot be revoked / cannot leave ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000001"}
+(1 row)
+
+ last_owner_revocation_refused 
+-------------------------------
+ last_owner
+(1 row)
+
+ last_owner_leave_refused 
+--------------------------
+ last_owner
+(1 row)
+
+=== leave works for a non-final role ===
+                   set_config                   
+------------------------------------------------
+ {"sub":"a0400000-0000-0000-0000-000000000003"}
+(1 row)
+
+ manager_leaves 
+----------------
+ left
+(1 row)
+
+=== 12. organization B is COMPLETELY unaffected ===
+ org_b_untouched 
+-----------------
+ PASS
+(1 row)
+
+=== governance != employment: engagements byte-identical after ALL commands ===
+ engagements_untouched 
+-----------------------
+ PASS
+(1 row)
+
+ROLLBACK
+ACTOR MATRIX COMPLETE (transaction rolled back — zero drift)
