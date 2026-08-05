@@ -25,16 +25,36 @@ Classifications: `PROVEN_PRODUCTION` / `SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PEN
 
 | # | Stage | Classification | Notes / proof |
 |---|---|---|---|
-| 1 | Worker registration & profile | PENDING AUDIT | Track 2 audit in flight |
-| 2 | Company registration & org context | PENDING AUDIT | W9 slices 1+2 applied in prod (prior ledger) |
-| 3 | Org-scoped demand creation | PARTIAL — preflight complete 2026-08-05 | Surface gate real (`requireEmployerCompany`, fail-closed, guard-pinned 7-file spine); **row scope MISSING**: `customer_requests`/`demand_shortlist`/`booking_requests` have NO org column, zero org-aware RLS in the chain (gaps G1–G9 in [ORGANIZATION_DEMAND_SPINE_PACKAGE.md](ORGANIZATION_DEMAND_SPINE_PACKAGE.md)). No client-supplied authority anywhere (verified safe). Plan: app-layer gate fixes (no migration) first; schema package owner-gated. |
-| 4 | Matching & shortlist | PENDING AUDIT | |
-| 5 | Booking proposal & acceptance | PENDING AUDIT | |
-| 6 | Calendar & double-booking prevention | PENDING AUDIT | W12 accept-RPC race fixed (row+advisory lock, EXCLUDE gist) per prior ledger; verify applied state |
-| 7 | Company-worker engagement | CODE_COMPLETE_PENDING_MERGE | #1009: schema APPLIED, both-side browser proof LOCAL; merge = owner gate |
-| 8 | Project lifecycle (W11) | PENDING AUDIT | Migration applied 2026-08-04 per prior ledger; PR state to verify |
-| 9 | Experience cycle (W6) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | Prod schema active; full local cycle proof = Track 5 |
-| 10 | Analytics & cost truth (W14) | PARTIAL — audit complete 2026-08-05 | `pilot_events` funnel live+tenant-safe (37/38 events) but mid-funnel unmeasured (match/shortlist/contact/booking-proposed/engagement/project/experience/org-created have NO events); `usage_cost_events` + `ai_runs` applied in prod with ZERO writers (AI_PROVIDER_MODE=disabled; 90-day retention is a required block before activation); NO AI-cost admin surface. Smallest slice = zero-migration (extend funnel events + wire usage_cost_events + admin ai-cost view) → implementing on `feat/w14-pilot-analytics-slice-v1` |
+| 1 | Worker registration & profile | PROVEN_PRODUCTION | 27 profiles / 20 onboarded / 33 worker_skills through the real path; Player Card renders from real rows. Deferred panels (external profiles, profession templates, opportunity-seen) render `needs_migration` honestly. |
+| 2 | Company registration & org context | PROVEN_PRODUCTION (multi-org durable pointer BLOCKED_BY_OWNER_GATE) | 6 companies → 9 mirrored orgs; W9 RLS hardening applied 2026-08-02. `profiles.active_organization_id` needs unapplied `20260714210000` → workspace choice is cookie-only, no cross-device persistence. |
+| 3 | Org-scoped demand creation | MISSING (creation itself PROVEN_PRODUCTION, 17 rows) | Surface gate real (`requireEmployerCompany`, fail-closed, guard-pinned); **row scope MISSING**: `customer_requests`/`demand_shortlist`/`booking_requests` have NO org column, zero org-aware RLS (G1–G9 in [ORGANIZATION_DEMAND_SPINE_PACKAGE.md](ORGANIZATION_DEMAND_SPINE_PACKAGE.md)). Non-exploitable today only because `companies.profile_id` is (conditionally) unique. No client-supplied authority anywhere (verified safe). |
+| 4 | Matching & shortlist | PROVEN_PRODUCTION (thin) | Fit engine pure/read-time, never persisted; `demand_shortlist` 1 row, `demand_interest_signals` 4 rows. Legacy `matches`/`match_actions` deliberately neutralized (guard-pinned) — not a gap. |
+| 5 | Booking proposal & acceptance | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | v3 RPC chain + full UI shipped and applied; **0 rows in prod — never exercised**. |
+| 6 | Calendar & double-booking (W12) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING (race proof LOCAL_PROOF_ONLY) | 3-layer protection (row lock → advisory lock → EXCLUDE gist) APPLIED 2026-08-03; concurrency proof local-only; 9 calendar sources still absent (owner-gated additive slices). |
+| 7 | Company-worker engagement | CODE_COMPLETE_PENDING_MERGE | v2 RPC applied in prod with ZERO callers on main — callers ship with #1009 (CI green, merge package posted). Browser proof both sides, LOCAL only. |
+| 8 | Project lifecycle (W11) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | `set_project_status_v1` applied 2026-08-04, wired to real UI; prod = 5 projects all draft + 1 SELF-assignment (cannot separate assignee from owner); operations page reachable only by deep link (F7). |
+| 9 | Experience cycle (W6) | SCHEMA_ACTIVE_UI_PRESENT_WRITE_PROOF_PENDING | `experience_records` applied 2026-08-04; full RPC+component set; canonical `?result=experiences` (no route — correct); 0 submissions; only groundable interaction class in prod today is `engagement_contexts` (39 rows). |
+| 10 | Analytics & cost truth (W14) | BLOCKED_BY_OWNER_GATE (usage-cost consumer MISSING) | `pilot_events` PROVEN (224 rows) but mid-funnel unmeasured; `usage_cost_events` applied with NO reader/writer; `ai_runs` applied, 0 rows (AI_PROVIDER_MODE=disabled + 90-day-retention precondition); all commercial flags hard-false (guard-pinned). Zero-migration slice implementing on `feat/w14-pilot-analytics-slice-v1`. |
+
+**Root blocker shared by steps 5–9:** no production QA identity → no authenticated
+prod write proof anywhere. One owner decision (QA accounts package) unblocks five stages.
+
+**Production ahead of main in two places:** `20260804160000_booking_engagement_end_v2`
+(applied; file only in #1009) and 24 applied-but-unrecorded migrations (ledger DRIFT
+NOTICE 2026-08-01). The failing `Supabase Preview` CI job is this drift, not a transient.
+
+**Genuinely deferred / owner-gated migrations (the real list, 10):**
+`company_locations_v1`, `agency_clients_v1`, `multi_source_talent_v1`,
+`worker_opportunity_seen_v1`, `journal_profession_templates_v1`,
+`company_memberships_v1` (**blocks durable multi-org**), `dashboard_preferences_v1`,
+`demand_interest_seen_v1`, `agency_real_client_bridge_v1`,
+`open_markets_countries_draft_v1` (**absent from Deferred section — GE/BE/FR/ES/AT/CH
+company registration cannot work; matrix finding F2**).
+Formerly-ambiguous applies RESOLVED by read-only prod `schema_migrations` check
+2026-08-05 — all three ARE applied, ledger rows missing (add to reconciliation):
+`company_worker_engagements_v1` (prod version `20260723182516`),
+`secdef_public_grant_hygiene_v1` (`20260727125759`),
+`journal_entry_skill_provenance_v1` (`20260727183554`).
 
 ## Migration gates
 
