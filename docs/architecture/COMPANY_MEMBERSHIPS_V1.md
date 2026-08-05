@@ -110,16 +110,22 @@ Engagement rows are never mutated, deleted or re-parented by the backfill.
 6. migration ledger tail (no timestamp collision with `20260806090000`);
 7. `set_updated_at()` and `is_admin()` exist (the migration reuses both).
 
-## 8. Migration-safety findings (expected, named — for the FUTURE gate)
+## 8. Migration-safety findings (actual, named — for the FUTURE gate)
+
+Verified by running `.github/scripts/migration-safety.mjs` on this branch
+(2026-08-05): **RED — 3 blocking findings**, exactly:
 
 - `security-definer-function` — `company_memberships_protect_last_owner()`
   (SECURITY DEFINER so the trigger sees sibling rows regardless of caller
   RLS; pinned `search_path=public`);
 - `grant-or-revoke` — SELECT to authenticated, ALL to service_role, anon
   revoked;
-- `data-dml` — the backfill INSERTs (+ the INSERT text inside the DO-block
-  post-condition scanner view);
-- `create-policy` / RLS class — one SELECT policy, zero write policies.
+- `create-trigger` — `set_updated_at` + `protect_last_owner` install
+  write-time behavior.
+
+(The backfill INSERT…SELECT is not in the scanner's UPDATE/DELETE `data-dml`
+class, but it IS row-creating DML and the owner decision must treat it as
+such — 10 owner rows at today's production counts.)
 
 These stay ERRORS (RED) until an owner apply decision adds the marker — the
 package intentionally ships without it.
