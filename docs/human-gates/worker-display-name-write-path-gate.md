@@ -55,6 +55,34 @@ from — not repaired by guessing).
 
 Prior status (superseded):
 `WORKER_DISPLAY_NAME_CANONICAL_PATH_CODE_COMPLETE_PENDING_HUMAN_GATE`
+
+## APPLY + PROOF RECORD — 2026-08-05
+
+Both migrations applied to prod `gorgitwvdzxbnaxhrsrw` via Supabase MCP
+`apply_migration` in strict order (ledger `20260805155514` write-path,
+`20260805155601` backfill). Full record: `docs/APPLIED_LEDGER.md`. Results:
+19 names filled, 21 countries filled, 8 honest residual NULLs, 0 conflicts,
+0 overwrites (3 ledger rows with pre-existing names provably unchanged);
+prod function body md5 `8b8f0ae34bc6ec6deb249ef0463dd465` byte-identical to
+this branch's migration file body.
+
+**Browser proof (2026-08-05, disposable LOCAL data only, deleted after).**
+On a local stack with the write-path fix applied, a fresh worker who typed
+"Jonas Statybininkas" at onboarding (real `complete_onboarding` RPC through
+the signed-in client) was shown by name in all three required contexts:
+1. **Personal** — "Jonas Statybininkas · Personal space" header + "Hi, Jonas"
+   greeting on /dashboard;
+2. **Org-facing 1** — project board "The field — who is on the team today"
+   roster (the exact `listProjectAssignments` surface that previously showed
+   a raw UUID fragment) listed "Jonas Statybininkas";
+3. **Org-facing 2** — the employer's person-profile page
+   (/dashboard/people/…) rendered heading "Jonas Statybininkas" while the
+   active workspace was the disposable company "UAB Disposable Statyba".
+Pre-fix control: the same seed on the unfixed local stack reproduced the
+defect (display_name stayed NULL) — the repair, not coincidence, produced
+the name.
+
+Verdict: `WORKER_DISPLAY_NAME_CANONICAL_PATH_SCHEMA_ACTIVE_BROWSER_PROVEN_PENDING_OWNER_MERGE_DECISION`
 Prepared: 2026-08-05 (recreated from fresh main `de38b3db`; the 2026-08-04
 parked package carried over verbatim except timestamps — see history note).
 Decisions 1 and 2 are now recorded above; both files carry the narrow
