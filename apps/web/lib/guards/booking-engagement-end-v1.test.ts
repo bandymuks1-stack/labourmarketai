@@ -602,6 +602,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/APPLIED_LEDGER.md (ledger 20260805180836) and the structural
       // train doc. Added in the same commit as that record.
       "20260805190000_save_company_setup_v3_multi_org.sql",
+      // 2026-08-05: M-P0-4 slice 1 (company_memberships v1) gained its
+      // marker under "OWNER DECISION — APPLY COMPANY_MEMBERSHIPS V1" §1,
+      // recorded in docs/architecture/COMPANY_MEMBERSHIPS_V1.md and the
+      // train doc. Added in the same commit as that record.
+      "20260806090000_company_memberships_v1.sql",
     ]);
   });
 

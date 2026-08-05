@@ -1954,7 +1954,13 @@ describe("no migration files added by this sprint", () => {
     // insert-only create, creator-guarded edit) + multiplicity guards on the
     // legacy v1/v2 singleton entries. RED, owner-gated, ships UNAPPLIED,
     // no marker.
-    const SPRINT_BASELINE = 183;
+    // Bumped 183 -> 184 for M-P0-4 `20260806090000_company_memberships_v1`
+    // — governance membership table (live-key partial unique, last-owner
+    // survival trigger, SELECT-only for authenticated, classified backfill;
+    // employee engagements NEVER migrated). RECOUNTED after rebasing onto
+    // the post-M-P0-3 main (596eab7a): main holds 183 real files, this
+    // branch adds exactly one.
+    const SPRINT_BASELINE = 184;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

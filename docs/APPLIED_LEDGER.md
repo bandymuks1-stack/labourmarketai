@@ -14,6 +14,54 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806090000_company_memberships_v1` (M-P0-4 Slice 1)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-05 19:57:16 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260805195716`, name `company_memberships_v1` (MCP stamps apply-time versions — match on `name`) + completion entry `20260805200417`, name `company_memberships_v1_trigger_fn_revoke` — the §6 privilege closure (`revoke all on function company_memberships_protect_last_owner() from public/anon`) that the repo file carries in-place; applied minutes after the main body when the repo secdef guard surfaced the 20260722160000-closure gap. Privilege-tightening only, zero rows touched; anon AND authenticated verified unable to EXECUTE post-apply |
+| PR | **#1023** — merge follows this accounting commit |
+| Owner gate | "OWNER DECISION — APPLY COMPANY_MEMBERSHIPS V1 AND CONTINUE MULTI-ORG AUTHORITY TRAIN" (2026-08-05) §1; executable SQL byte-identical from reviewed package HEAD `cae1ff30` through the rebase onto post-M-P0-3 main `596eab7a` (git blob `a51710d3` unchanged) and through the human-gate commit (comment-only header change) |
+| Migration sha256 (repo file, with approval header) | `5f0622fc8d6e1141a919e0a000a690f84a6b46c4da642d301e3f505faf40e51c` (canonical git-LF content at rebase: `b34cb8dc43af64e53a9ac61ae279f2e6fd7bf2b94ec0432b1a2e67c02da9d32c`) |
+| Rollback sha256 | `49b6edc5a01e5b12458ed85fb26c84f5fd91e72ae5e576001d4697e78a21cd1b` (canonical git-LF; present, NOT executed; fails loudly once any non-backfill membership row exists) |
+
+**Preflight (immediately before apply)**: 10 organizations, all 10 with
+`owner_profile_id` (0 zero-owner, 3 profiles owning multiple orgs, 0 owners
+without a profiles row); engagement_contexts = 10 `owner/active` + 36
+`employee/active` + 0 manager-class + 0 ambiguous (46 total, fingerprint
+`71ae52fddb00f5999c51b2ec91f05bae`); organizations fingerprint
+`70a8a021e1b796801b7d80d0d202fc0a`; `company_memberships` ABSENT; no
+function/trigger name conflicts; no ledger collision; `set_updated_at` +
+`is_admin` present.
+
+**Backfill classification & counts (actual)**: **10 rows total** — 10 ×
+`owner/active` from `organizations.owner_profile_id`
+(`source='backfill:organizations.owner_profile_id'`), **0** from
+manager-class engagements (none exist in prod), **0 non-backfill rows**
+(rollback window OPEN). **36 employee engagements EXCLUDED** — employment,
+never governance. 0 organizations without an active owner membership.
+
+**Post-apply**: table exists, RLS enabled; 3 expected indexes incl. PARTIAL
+unique `company_memberships_live_key (organization_id, profile_id) WHERE
+status IN ('invited','active')`; 2 triggers (`set_updated_at`,
+`protect_last_owner`); exactly 1 policy, SELECT-only; anon has NO SELECT;
+authenticated has SELECT and **zero write privileges**; organizations
+fingerprint **identical** (`70a8a021…`), engagement_contexts fingerprint
+**identical** (`71ae52fd…`, 46 rows), projects 5 / profiles 32 untouched —
+zero side effects outside the new table. §5 invariants proof 10/10 PASS
+(transactional, rolled back —
+`docs/audits/evidence/multi-org-m-p0-4/slice1-invariants-proof-output.txt`).
+Security advisors: **no ERROR findings**; the trigger function appears only
+under the pre-existing SECURITY-DEFINER WARN classes and is not invokable
+as an API (Postgres refuses direct calls to `trigger`-returning functions).
+`migration-safety`: **GREEN [human-gated]** (security-definer-function,
+grant-or-revoke, create-trigger visible as notices).
+
+**Not done / out of scope**: no production invitations, no manual
+memberships, no QA accounts, no engagement conversion, no Slice 2 RPCs (the
+table has NO application write path yet — by design), #1016 untouched.
+
 ### ✅ APPLIED TO PROD — `20260805190000_save_company_setup_v3_multi_org` (M-P0-2)
 
 | Field | Value |
