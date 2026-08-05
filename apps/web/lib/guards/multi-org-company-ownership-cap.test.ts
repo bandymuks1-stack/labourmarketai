@@ -89,17 +89,31 @@ describe("M-P0-1 — company ownership cap removal", () => {
     expect(down).not.toMatch(/\bupdate\s+public\.companies/i);
   });
 
-  it("this is the LAST migration touching companies_profile_id_key", () => {
+  it("no later migration re-adds companies_profile_id_key or a profile_id unique", () => {
     // A later migration silently re-adding the cap would restore the
     // one-person-one-company product bug. Filename order = apply order.
-    const touching = readdirSync(MIGRATIONS_DIR)
+    // Later migrations MAY reference the constraint name read-only (e.g.
+    // M-P0-2's preflight raises when the cap is still present); what is
+    // forbidden is re-CREATING the cap in any spelling.
+    const readding = readdirSync(MIGRATIONS_DIR)
       .filter((f) => f.endsWith(".sql"))
-      .filter((f) =>
-        /companies_profile_id_key/i.test(
-          stripComments(readFileSync(join(MIGRATIONS_DIR, f), "utf8")),
-        ),
-      )
+      .filter((f) => f.localeCompare(MIGRATION) > 0)
+      .filter((f) => {
+        const later = stripComments(
+          readFileSync(join(MIGRATIONS_DIR, f), "utf8"),
+        );
+        return (
+          /add\s+constraint\s+companies_profile_id_key/i.test(later) ||
+          /add\s+constraint\s+\S+\s+unique\s*\(\s*profile_id\s*\)/i.test(later) ||
+          /create\s+unique\s+index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?\S+\s+on\s+(?:public\.)?companies\s*(?:using\s+\S+\s*)?\(\s*profile_id\s*\)/i.test(
+            later,
+          )
+        );
+      })
       .sort();
-    expect(touching[touching.length - 1]).toBe(MIGRATION);
+    expect(
+      readding,
+      "a later migration re-adds the one-person-one-company cap — forbidden by M-P0-1 doctrine",
+    ).toEqual([]);
   });
 });

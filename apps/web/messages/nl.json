@@ -1609,6 +1609,7 @@
         "statusSubmitted": "Handmatige beoordeling aangevraagd (optioneel). Je bedrijf blijft intussen bruikbaar.",
         "statusNeedsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
         "statusInvalid": "Het formulier is onvolledig. Controleer de verplichte velden.",
+        "statusDuplicateCompany": "Een bedrijf met deze naam bestaat al in uw account. Open het via de werkruimtewisselaar of kies een andere naam.",
         "statusError": "Er is iets misgegaan. Probeer het opnieuw.",
         "migrationBlockerHeading": "Er is iets misgegaan",
         "migrationBlockerBody": "De actie kon niet worden voltooid. Probeer het opnieuw.",

@@ -1949,7 +1949,12 @@ describe("no migration files added by this sprint", () => {
     // notes: after rebasing M-P0-1 onto the merged display-name package the
     // real file count under supabase/migrations is 182 (recounted, not
     // summed).
-    const SPRINT_BASELINE = 182;
+    // Bumped 182 -> 183 for M-P0-2 `20260805190000_save_company_setup_v3_
+    // multi_org` — explicit create/edit company RPC (p_company_id targeted,
+    // insert-only create, creator-guarded edit) + multiplicity guards on the
+    // legacy v1/v2 singleton entries. RED, owner-gated, ships UNAPPLIED,
+    // no marker.
+    const SPRINT_BASELINE = 183;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

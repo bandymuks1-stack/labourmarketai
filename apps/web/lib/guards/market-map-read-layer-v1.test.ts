@@ -418,7 +418,9 @@ describe("NO new DB migration in this PR", () => {
     // pin time. RESOLVED COLLISION per both branches' collision notes: after
     // rebasing M-P0-1 onto the merged display-name package the real file
     // count under supabase/migrations is 182 (recounted, not summed).
-    expect(count).toBeLessThanOrEqual(182);
+    // Bumped 182 -> 183 for M-P0-2 (explicit create/edit company RPC,
+    // `20260805190000`) — function definitions only, owner-gated, UNAPPLIED.
+    expect(count).toBeLessThanOrEqual(183);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

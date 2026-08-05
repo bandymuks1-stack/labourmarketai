@@ -1609,6 +1609,7 @@
         "statusSubmitted": "Rankinė peržiūra paprašyta (neprivaloma). Įmonė tuo metu lieka naudojama.",
         "statusNeedsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
         "statusInvalid": "Forma nepilna. Patikrinkite privalomus laukus.",
+        "statusDuplicateCompany": "Tokiu pavadinimu įmonę jau turite. Atidarykite ją per erdvių perjungiklį arba pasirinkite kitą pavadinimą.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
         "migrationBlockerHeading": "Nepavyko",
         "migrationBlockerBody": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
