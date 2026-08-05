@@ -4,6 +4,19 @@ Status: `STRIPE_PRODUCTION_PREFLIGHT_COMPLETE_TEST_MODE_WORK_PENDING`
 Audited: 2026-08-05 at production main `5be4baf6` (read-only; no Stripe API
 calls; no secret values in this document — env var NAMES only).
 
+> ⚠ PARTIALLY SUPERSEDED BY #1014 (merged `52c34584`, same day). The
+> "Current factual configuration" table below describes the PRE-#1014 state
+> at its stated audit point and is kept as the audit record. Now FIXED on
+> main: API version pin (compile-time `2026-05-27.dahlia`), `invoice.paid`
+> handled, retry-safe webhook idempotency (`duplicate-processed` /
+> `duplicate-unprocessed` split, `markWebhookFailed` keeps the record open),
+> re-subscribe collision guarded (a LIVE subscription of the same owner+plan
+> is never overwritten — `conflict-live-subscription`). STILL TRUE: no
+> Customer Portal; person-only billing mapping (no organization billing
+> subject — see `docs/architecture/MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md`
+> §7, required before any org plan goes live); `PAYMENTS_ENABLED=false`;
+> Stripe Live NOT authorized.
+
 ## Current factual configuration
 
 | Item | Fact |

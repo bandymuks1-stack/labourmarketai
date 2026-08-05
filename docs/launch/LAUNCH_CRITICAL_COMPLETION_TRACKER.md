@@ -3,12 +3,43 @@
 The canonical state ledger of the launch-completion train.
 Target: `LABOURMARKET_AI_LAUNCH_CRITICAL_PRODUCT_QUALITY_COMPLETE_READY_FOR_CONTROLLED_PILOT`
 
-Last updated: 2026-08-05 (train session 1)
-Current production main: `5be4baf6f157f08ba9ff21a227d112197a0d0986` (post-#1012)
+Binding product doctrine: people and companies are free — one person may work
+for several companies, one company has many workers, active organization is
+SELECTED never inferred. Full rules, cardinalities, prohibited assumptions and
+required tests:
+[MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md](../architecture/MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md).
+Every future slice must pass its §12 test requirements.
 
-## Verdict (current, 2026-08-05 end of train session 1)
+Last updated: 2026-08-05 (train session 2 — multi-organization continuation)
+Current production main: `52c34584bb284aa85ae50e0fe32a90fdbaba2ace` (post-#1014)
+
+## Verdict (current, 2026-08-05 train session 2)
 
 `LABOURMARKET_AI_SAFE_TECHNICAL_WORK_COMPLETE_OWNER_GATES_PENDING`
+
+Session 2 delivered the conditional no-migration merge train under the
+multi-organization doctrine audit:
+- **#1017 MERGED** `91b48a96` (Stage A app gates) — merged as a strict
+  improvement; the surviving upstream first-created-org inference is G10, NOT
+  fixed by this PR.
+- **#1015 MERGED** `18132663` (W14 analytics) — updated on-branch first:
+  `engagement_ended` now emitted from the shared end path (#1009 landed).
+- **#1014 MERGED** `52c34584` (Stripe Test fixes) — a P0 found by the audit
+  was FIXED before merge: the 23505 fallback would have silently overwritten
+  a LIVE subscription row when one person buys the same plan for two
+  organizations; it now refuses (`conflict-live-subscription`) unless the
+  held row is dead (cancelled/expired) or a `manual_` override.
+- **#1013 updated** `f0968cb4` (owner-gated, NOT applied) — backfill re-apply
+  made edit-preserving; ratchet collision with #1016 documented (combined
+  value 182).
+- **#1016 REWORKED** `3906c76d` (owner-gated, NOT applied) — resolver is now
+  membership-derived and fail-closed (the legacy `companies.profile_id`
+  bridge answered WRONGLY for team-org owners); `customer_requests` PATCH
+  forgery closed with a stamping trigger; gate doc corrected (the "existing
+  queries unaffected" claim was false — `canonical-demand.ts` widens at
+  apply time) and now answers the fourteen §9 owner questions. Honest
+  classification:
+  `ORGANIZATION_DEMAND_ROW_SCOPE_V1_SAFE_BACKFILL_BRIDGE_ACTIVE_CONTEXT_V2_REQUIRED`.
 
 Local integrated proof achieved on exact main `de38b3db`:
 - `W7_W12_LOCAL_INTEGRATED_CUSTOMER_JOURNEY_PROVEN` (synthetic cast, real UI,
@@ -27,11 +58,11 @@ follow-up); P4 cosmetic work-card re-render.
 |---|---|
 | PR #1009 (§7.1 engagement end) | **MERGED 2026-08-05 06:46 UTC by explicit owner approval** on exact HEAD `eb615ea4` (expected-head protected squash). Merge SHA / new main: `de38b3dbd842102161a9a186f090d0231344c88c`. No migration reapplied (file byte-identical to ledger hash `4e19703c…`). **DEPLOYED TO PRODUCTION**: Vercel deployment `5757082717`, env Production, deployment SHA = merge SHA (verified), state success; landing page smoke OK 2026-08-05. Stage 7 is now MERGED+DEPLOYED; production write proof still pending QA accounts. |
 | `launch/launch-critical-completion-train` | This tracker + owner packages (docs). |
-| **Draft PR #1014** (`feat/stripe-test-mode-launch-fixes-v1`) | Track 8 code-complete 2026-08-05: both HIGH defects closed (retry-safe webhooks; re-subscribe collision), `invoice.paid`, compile-time API-version pin w/ dual-shape parsers, ledger reconciliation row for `billing_test_mode_records`. Zero migrations; live blocking intact. Full validation green (1 known tree-scan flake, passes alone). |
-| **Draft PR #1013** (`fix/worker-display-name-canonical-write-path-v2`) | §18 package — owner-gated migrations NOT applied; Decisions 1/2/2b in the human-gate doc. CI fixes pushed `55fa4ff0`: explicit anon revoke (real secdef guard finding), baseline bumps 179→181 w/ rationale. migration-safety RED = designed state. |
-| **Draft PR #1015** (`feat/w14-pilot-analytics-slice-v1`) | W14 slice shipped: 11 mid-funnel events (server-side), usage_cost_events writer (inert until AI enabled), admin AI-cost view on existing telemetry page. `engagement_ended` honestly skipped (base predates #1009) — follow-up on current main. |
-| **Draft PR #1017** (`feat/org-demand-scope-app-gates-v1`, Stage A) | Shipped 2026-08-05: all 9 employer G5 paths gated fail-closed through the canonical resolver; G6 divergent org resolver DELETED (disclosure org id now from active workspace); 3 deliberate non-gates documented+pinned (buyer save, privacy actions, worker salary); new guard `org-demand-scope-gates.test.ts`. Full vitest 13,609/13,609, build green. Zero migrations. Residuals noted in PR (reports-hub leg, acknowledgeInterest, executor error code). |
-| **Draft PR #1016** (`feat/org-demand-spine-schema-v1`, Stage B) | `ORGANIZATION_DEMAND_SPINE_CODE_COMPLETE_PENDING_HUMAN_GATE` (schema side). One migration `20260805100000_org_demand_row_scope_v1`: org columns+backfill (verified 100% coverage: 17/17+1/1+0), additive read RLS (co-managers gain reads = G7 closed for reads), server-side stamping (zero-arg SECDEF resolver, no client org id anywhere, shortlist BEFORE-trigger), paired rollback, 17-test guard. Full vitest 13,591/13,591. RED by design; owner package `docs/human-gates/org-demand-row-scope-gate.md`. NOT applied. |
+| **PR #1014 — MERGED** `52c34584` 2026-08-05 (expected-head `b50a9eb1`) | Track 8: retry-safe webhooks, re-subscribe collision, `invoice.paid`, compile-time API-version pin w/ dual-shape parsers, ledger reconciliation row. PLUS the doctrine-audit P0 fix: the 23505 fallback refuses to overwrite a LIVE subscription of the same owner+plan (`conflict-live-subscription`, operator-decidable, event stays unprocessed) — replaceable only when the held row is cancelled/expired or a `manual_` pilot override. Zero migrations; live blocking intact. Known residual (P1, pre-existing): billing schema is person-mapped only — `unique (owner_id, plan_key, provider)` still prevents one person paying for two organizations; org billing subject model is an owner decision (see doctrine §7). |
+| **PR #1013 — Draft, owner-gated** head `f0968cb4` | §18 package — migrations NOT applied; Decisions 1/2/2b in the human-gate doc. Session-2 hardening: backfill re-apply is now EDIT-PRESERVING (per-column current-value guard, same discipline as the rollback), ratchet-collision with #1016 documented in both baseline comments (combined value 182, fails closed). migration-safety RED = designed state. Doctrine audit verdict: name lives on the PERSON (`workers.profile_id` unique, no org column) — changing employer cannot change the name; recommend approving Decision 1 now, Decision 2 with the hardened backfill. |
+| **PR #1015 — MERGED** `18132663` 2026-08-05 (expected-head `ff5eeec0`) | W14 slice: 11 mid-funnel events (server-side), usage_cost_events writer (inert until AI enabled), admin AI-cost view. `engagement_ended` ADDED on-branch before merge (shared end path from #1009; fires only on a real `ended` outcome; `role_context` = server-derived actor side). Known residuals (P1, tracked for the org-attribution follow-up): mid-funnel events and the usage-cost writer carry NO organization_id (`pilot_events` has no org column; writer hardcodes null) — a person acting for two orgs merges into one funnel until the org-attribution slice; server-emitted rows hardcode `locale: "lt"` (P2). |
+| **PR #1017 — MERGED** `91b48a96` 2026-08-05 (expected-head `480904dc`) | Stage A: all 9 employer G5 paths gated fail-closed through the canonical resolver; the LOCAL divergent org resolver in contact-disclosure deleted; 3 deliberate non-gates documented+pinned; guard `org-demand-scope-gates.test.ts`. Zero migrations. HONEST FRAMING (doctrine audit): this is a strict improvement, NOT "first-org inference deleted" — the upstream fallback survives (G10 below); rows remain unscoped until Stage B; non-owner org members still hit `company-not-owned` (G7). Residuals: reports-hub leg, `acknowledgeInterest` write ungated (P2), guard is regex-over-source (P3). |
+| **PR #1016 — Draft, owner-gated** head `3906c76d` | Stage B REWORKED after doctrine audit: membership-derived fail-closed resolver (owned + actively-managed orgs, exactly-one-or-NULL; the legacy `companies.profile_id` bridge was fail-WRONG for team-org owners and is banned from the resolver by guard pin); `customer_requests` BEFORE-trigger closes the PATCH forgery (0028's UPDATE grant + profile-only WITH CHECK); both triggers refuse to stamp another person's row; backfill unchanged (historically correct bridge, 100% coverage 17/17+1/1+0); rollback drops the new trigger pair and carries the V2 expiry warning; gate doc corrected + fourteen §9 answers. RED by design; NOT applied. Classification: `ORGANIZATION_DEMAND_ROW_SCOPE_V1_SAFE_BACKFILL_BRIDGE_ACTIVE_CONTEXT_V2_REQUIRED`. |
 | Track 4+5 journey (in progress) | Disposable-stack W7–W12 integrated + W6 full-cycle proof running on exact main `de38b3db` (local supabase + synthetic cast; evidence to scratchpad). |
 | Display-name slice (`fix/worker-display-name-canonical-write-path`) | §18 re-evaluated 2026-08-05 (read-only): defect UNFIXED on main `de38b3db` — `complete_onboarding` (0008) still `on conflict do nothing`, `workers.display_name` NULL for every account, NO app writer exists; 6 UUID-leak sites incl. 2 NEW since the parked base (`project-workspace.ts:339`, `engagements-result.ts`). Parked SQL is sound but timestamps (`202608041500xx`) now sort behind applied `20260804160000` → **RECREATE from fresh main** with new timestamps + 3 missing artifacts (human-gate doc, guard test, backfill rollback). Both migrations stay RED/owner-gated; backfill separately approvable. **DONE 2026-08-05: Draft PR #1013** (`fix/worker-display-name-canonical-write-path-v2` from `de38b3db`) — repair + backfill migrations (RED, owner-gated, NOT applied), paired rollbacks, 5-assertion guard pin (pass), human-gate doc with Decisions 1/2/2b, audit addendum. Typecheck+lint green. Verdict: `WORKER_DISPLAY_NAME_CANONICAL_PATH_CODE_COMPLETE_PENDING_HUMAN_GATE`. |
 
@@ -80,21 +111,55 @@ Formerly-ambiguous applies RESOLVED by read-only prod `schema_migrations` check
   marked-file `4e19703c…`, rollback `11454154…`. DO NOT REAPPLY.
 - Other deferred/owner-gated migrations: inventory pending (Track 2 audit).
 
+## Multi-organization doctrine audit — findings register (2026-08-05, session 2)
+
+Full doctrine: [MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md](../architecture/MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md).
+Audit scope: main `de38b3db` + PRs #1013–#1018. Merge-train items were fixed
+before merge (see PR rows above); the items below are PRE-EXISTING on main and
+are the structural work list for true multi-organization support:
+
+| # | Sev | Finding (pre-existing on main) |
+|---|---|---|
+| M-P0-1 | P0 | `companies_profile_id_key` UNIQUE (20260604120000:245, CONDITIONALLY applied) — one person can never own two companies at the DB level. The comment in the migration ("1:1, per project model") states the anti-doctrine verbatim. |
+| M-P0-2 | P0 | `save_company_setup` is a singleton upsert keyed on `profile_id` (20260604140000:131-148) — the ONLY company-creation RPC; a second call silently RENAMES company #1. No create-second-company path exists (only `create_team_v1` teams). |
+| M-P0-3 | P0 | `getOwnCompany()` (`company-workers.ts:86`) drives employer WRITE actions (invite/assign/project-create) via `.eq(profile_id).maybeSingle()`, bypassing the workspace; wrong-row writes possible in any environment lacking the conditional constraint. |
+| G10 | P1 | First-created-org inference SURVIVES upstream of Stage A: `resolveActiveWorkspaceId` falls back to `organizationIds[0]` (owned orgs ordered `created_at asc`) when no cookie/DB pointer exists — every fresh session before the first switch. #1017 did NOT fix this; v2 should fail to Personal / explicit chooser. |
+| M-P1-1 | P1 | `/dashboard/company`, market-map, start/company + dashboard-header fallback still read `getOwnCompany()` — workspace switch changes nothing there. |
+| M-P1-2 | P1 | Contact-disclosure "first owned non-team org by created_at" resolver (privacy-sensitive attribution). |
+| M-P1-3 | P1 | Planning + Workforce union ALL owned orgs after resolving the workspace — switcher decorative there. |
+| M-P1-5 | P1 | Billing is person-mapped only; `unique(owner_id, plan_key, provider)` forbids one person holding the same plan for two orgs; no org billing subject (doctrine §7 model required before Stripe Live). |
+| M-P1-6 | P1 | Canonical resolver requires OWNERSHIP (`company-not-owned`) — managers-not-owners cannot act at all (G7). Needs `company_memberships_v1` + role-aware resolution. |
+| M-P1-7 | P1 | Engagement minting returns `ambiguous_company` for multi-company owners — booking→engagement chain breaks silently under true multi-org. |
+| M-P1-9 | P1 | `pilot_events` has no organization column; employer funnel events unattributable per org (usage_cost_events HAS the column — writer stamps null, see #1015 row). |
+| M-P2-* | P2 | `getOwnAgency()` unbacked by any unique constraint; booking budget quota per-profile not per-company; `customers` unique(profile_id); `resolveOrganizationIdForCompany` `.limit(1).maybeSingle()` silently reduces duplicate mirrors; legacy `kind is null` demand rows shown in personal context. |
+| OK | — | Booking/calendar conflicts are WORKER-scoped across all employers (EXCLUDE gist + advisory lock) — doctrine-correct, do not "fix". `engagement_contexts` is a real many-to-many spine. `workers.profile_id` unique is CORRECT (one identity, many employers). W9 org RLS hardening applied. |
+
 ## Owner gates outstanding
 
-1. **Merge decision for PR #1009** — after CI green on `eb615ea4`.
-2. **Production QA accounts** — package at
-   [PRODUCTION_QA_ACCOUNT_PACKAGE.md](PRODUCTION_QA_ACCOUNT_PACKAGE.md).
-3. **Stripe Live** — NOT AUTHORIZED; Test-Mode work first (Tracks 7/8).
-4. Any new owner-gated migration surfaced by Track 3 (org demand scope).
+1. **PR #1013 migrations** (Decision 1 write-path repair / Decision 2 or 2b
+   backfill) — package hardened `f0968cb4`; audit recommends Decision 1 now.
+2. **PR #1016 migration** (`20260805100000`, reworked `3906c76d`) — apply
+   yes/not-yet; note the market-map read widening happens AT APPLY TIME.
+3. **Production QA accounts** — package at
+   [PRODUCTION_QA_ACCOUNT_PACKAGE.md](PRODUCTION_QA_ACCOUNT_PACKAGE.md);
+   §13 multi-org cast update pending below.
+4. **Stripe Live** — NOT AUTHORIZED. Additionally blocked by doctrine: the
+   person-only billing mapping (M-P1-5) must gain the billing-subject model
+   before any org plan goes live.
+5. **Multi-org structural train** (M-P0-1/2/3 + `company_memberships_v1` +
+   `20260714210000` durable pointer) — sequencing in doctrine §11 and the
+   audit's ordered list; all schema steps owner-gated.
 
 ## Next actions
 
-1. CI green on #1009 → present smallest owner merge package.
-2. Fill the matrix from Track 2/3/6/7 audit results.
-3. Track 3: implement org-demand scope only if the audit shows gaps.
-4. Track 4/5: disposable-stack integrated journey + W6 full cycle proof.
-5. Stripe preflight doc → `docs/billing/STRIPE_LAUNCH_PREFLIGHT.md`.
+1. Multi-org §13/§14 QA cast + integrated proof — blocked on QA-account gate;
+   prepare the disposable local variant meanwhile.
+2. Org-attribution telemetry slice (M-P1-9 + usage-cost org stamping) after
+   an org spine exists on the rows it would attribute to.
+3. §15 consolidated audit — fold the three journey observations + this
+   register into final P0–P4 classifications.
+4. ACTIVE_CONTEXT_V2 design (workspace-selected stamping) once
+   `20260714210000` + `company_memberships_v1` are applied.
 
 ## Confirmations (standing)
 

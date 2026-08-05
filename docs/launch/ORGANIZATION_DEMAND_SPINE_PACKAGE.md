@@ -27,6 +27,7 @@ What is MISSING (row scope):
 | G7 | Co-manager collaboration structurally absent: org you manage-but-don't-own → `company-not-owned` → manager sees zero demand. |
 | G8 | Durable org pointer `profiles.active_organization_id` (20260714210000) UNAPPLIED in prod; live pointer is the httpOnly cookie only. |
 | G9 | `mark_agency_can_offer` (applied) allows a cross-tenant append onto another tenant's demand payload, authorized from the `agencies` spine. |
+| G10 | First-created-org inference SURVIVES upstream of Stage A: `resolveActiveWorkspaceId` (`apps/web/lib/company/organization-switch.ts`) falls back to `organizationIds[0]` — owned orgs ordered `created_at asc` — whenever no cookie/DB pointer exists (every fresh session before the first switch). Stage A (#1017, merged `91b48a96`) deleted only the LOCAL duplicate resolver in contact-disclosure; this upstream fallback remains. V2: default to Personal / an explicit workspace chooser instead of inferring. |
 
 Load-bearing fragility: the surface gate holds only because
 `companies.profile_id` is (conditionally!) unique — the constraint was added

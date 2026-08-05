@@ -18,7 +18,7 @@ constraints so the owner can approve creation with one decision.
 |---|---|---|---|
 | `PROD_QA_WORKER` | `qa-worker-01@qa.labourmarket.ai` | "QA Worker One (synthetic)" | worker |
 | `PROD_QA_EMPLOYER` | `qa-employer-01@qa.labourmarket.ai` | "QA Employer One (synthetic)" | employer / organization owner |
-| `PROD_QA_MANAGER` | `qa-manager-01@qa.labourmarket.ai` | "QA Manager One (synthetic)" | org manager — **create only if the org-membership journey step requires a second member** |
+| `PROD_QA_MANAGER` | `qa-manager-01@qa.labourmarket.ai` | "QA Manager One (synthetic)" | org manager — **REQUIRED by the multi-org cast below** (anchors/manages Organization B with different authority than in A) |
 
 Notes:
 
@@ -31,14 +31,40 @@ Notes:
   journal entries are all clearly synthetic ("QA", "synthetic", fictional
   streets). No real photos.
 
-## Organization / fixtures
+## Organization / fixtures — MULTI-ORG VERSION (doctrine §13, 2026-08-05)
 
-- One synthetic organization: **"QA Statyba UAB (synthetic)"** owned by
+Per `docs/architecture/MULTI_ORGANIZATION_RELATIONSHIP_DOCTRINE.md` §12, a
+single-organization fixture is insufficient — the cast must prove
+many-to-many relationships and cross-tenant isolation:
+
+- **Organization A**: "QA Statyba UAB (synthetic)" owned by
   `PROD_QA_EMPLOYER`. No real company code, no real VAT number.
-- One demand, one project, one booking window — all clearly marked
-  `[QA]` in titles.
+- **Organization B**: "QA Montavimas UAB (synthetic)" — `PROD_QA_MANAGER`
+  holds manager authority here (different authority than in A, where they
+  are a plain member or absent).
+  ⚠ STRUCTURAL LIMIT (honest): `companies.profile_id` is unique in prod
+  (M-P0-1), so B cannot be a second company anchored by the same
+  `PROD_QA_EMPLOYER`. B is created by `PROD_QA_MANAGER` (their one
+  anchored company) or as a team organization — record which variant was
+  used; a two-companies-one-owner proof is IMPOSSIBLE until the
+  multi-org structural train lands, and must not be faked.
+- **Organization C**: "QA Kontrole UAB (synthetic)" — unrelated; NO QA
+  actor holds any membership. Exists purely as the cross-tenant negative.
+- **Worker relationships**: `PROD_QA_WORKER` has a relationship with A
+  (member/engagement) AND a separate engagement/project with B; no
+  relationship with C.
+- Two demands (one per org A/B), two bookings (one overlapping window —
+  must be REFUSED; one non-overlapping — must be accepted), two
+  engagements, two projects — all clearly marked `[QA]` in titles.
 - Worker profile completed to the minimum the funnel requires (skills,
   availability, location) with synthetic values.
+
+The §14 proof list this cast must support: A sees only A; B sees only B;
+C sees nothing; the worker's calendar spans A+B commitments; ending the A
+engagement leaves B active; completing the A project leaves B untouched;
+removing A membership leaves B membership intact; worker identity/Player
+Card unchanged throughout; experiences attach to one eligible interaction;
+no stars, no numeric score; no cross-tenant disclosure.
 
 ## Hard constraints
 
