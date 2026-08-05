@@ -167,6 +167,77 @@ async function main(): Promise<void> {
     rows.filter((r) => r.profile_id).map((r) => anon(r.profile_id as string)),
   );
 
+  // ── AI cost & usage daily summary (W14 Pilot Analytics slice v1) ──
+  // Best-effort reads of the two AI accounting tables. Both are expected to
+  // be EMPTY while AI_PROVIDER_MODE is 'disabled' in production — the report
+  // says so instead of hiding the section. An unreadable table is reported
+  // as unavailable, never as zero. No prompts/outputs are ever selected.
+  let aiCostLines: string;
+  {
+    const parts: string[] = [];
+    const { data: runData, error: runErr } = await supabase
+      .from("ai_runs")
+      .select("created_at, task_type, provider, actual_cost_usd")
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(MAX_ROWS);
+    if (runErr) {
+      parts.push(`- ai_runs: UNAVAILABLE (${runErr.message}) — not zero, unreadable.`);
+    } else {
+      type RunRow = { created_at: string; actual_cost_usd: number | null };
+      const runs = (runData ?? []) as RunRow[];
+      const byDay = new Map<string, { runs: number; costUsd: number | null; costed: number }>();
+      for (const r of runs) {
+        const d = r.created_at.slice(0, 10);
+        const agg = byDay.get(d) ?? { runs: 0, costUsd: null, costed: 0 };
+        agg.runs += 1;
+        if (typeof r.actual_cost_usd === "number" && Number.isFinite(r.actual_cost_usd)) {
+          agg.costUsd = (agg.costUsd ?? 0) + r.actual_cost_usd;
+          agg.costed += 1;
+        }
+        byDay.set(d, agg);
+      }
+      parts.push(`- ai_runs rows in window: ${runs.length}`);
+      for (const [d, a] of [...byDay.entries()].sort()) {
+        parts.push(
+          `  - ${d}: ${a.runs} runs, actual cost ${a.costUsd === null ? "unknown" : `$${a.costUsd.toFixed(4)}`} (${a.costed} costed)`,
+        );
+      }
+    }
+    const { data: useData, error: useErr } = await supabase
+      .from("usage_cost_events")
+      .select("occurred_at, service, cost")
+      .gte("occurred_at", since)
+      .order("occurred_at", { ascending: true })
+      .limit(MAX_ROWS);
+    if (useErr) {
+      parts.push(
+        `- usage_cost_events: UNAVAILABLE (${useErr.message}) — not zero, unreadable.`,
+      );
+    } else {
+      type UseRow = { occurred_at: string; cost: Record<string, unknown> | null };
+      const events = (useData ?? []) as UseRow[];
+      const byDay = new Map<string, { events: number; actualCents: number | null }>();
+      for (const e of events) {
+        const d = e.occurred_at.slice(0, 10);
+        const agg = byDay.get(d) ?? { events: 0, actualCents: null };
+        agg.events += 1;
+        const cents = e.cost?.["actualCents"];
+        if (typeof cents === "number" && Number.isFinite(cents)) {
+          agg.actualCents = (agg.actualCents ?? 0) + cents;
+        }
+        byDay.set(d, agg);
+      }
+      parts.push(`- usage_cost_events rows in window: ${events.length}`);
+      for (const [d, a] of [...byDay.entries()].sort()) {
+        parts.push(
+          `  - ${d}: ${a.events} events, actual ${a.actualCents === null ? "unknown" : `€${(a.actualCents / 100).toFixed(4)}`}`,
+        );
+      }
+    }
+    aiCostLines = parts.join("\n");
+  }
+
   const body = `# Activation Funnel Report — generated ${now.toISOString()}
 
 > Local read-only, ANONYMIZED snapshot of the last ${WINDOW_DAYS} days.
@@ -189,6 +260,14 @@ async function main(): Promise<void> {
 | Event | Count | Unique users | Unique sessions | success:false |
 |---|---|---|---|---|
 ${eventLines}
+
+## AI cost and usage (daily)
+
+> Both tables are expected to be EMPTY while the AI provider mode is
+> disabled in production. Zeros are real; "unknown" means no priced figure
+> existed (never fabricated as 0); UNAVAILABLE means the read failed.
+
+${aiCostLines}
 
 ## Read this report
 

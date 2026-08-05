@@ -235,6 +235,17 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    path — the billing-webhook pattern. The row carries field NAMES +
     //    a bounded validated-output excerpt, never input content; touches
     //    no chat table, sends nothing outbound.
+    //  - lib/usage/usage-cost-store.ts — W14 Pilot Analytics slice v1: the
+    //    canonical usage_cost_events ledger's first writer. Best-effort
+    //    INSERT of one event_type='usage' row per LIVE AI run (alongside the
+    //    ai_runs audit row above). usage_cost_events by design carries NO
+    //    anon/authenticated write path (admin-only SELECT; INSERT granted to
+    //    service_role only; UPDATE/DELETE/TRUNCATE revoked AND
+    //    trigger-blocked — applied migration 20260728114353), so the service
+    //    role is the only write path — the same billing-webhook pattern. The
+    //    row carries usage facts (provider/model/tokens/EUR-cent cost),
+    //    never prompts or outputs; touches no chat table, sends nothing
+    //    outbound.
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
     // ai_runs audit row (the reads write nothing at all).
@@ -249,6 +260,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
       "lib/sales/lead-intake.ts",
+      "lib/usage/usage-cost-store.ts",
     ]);
   });
 

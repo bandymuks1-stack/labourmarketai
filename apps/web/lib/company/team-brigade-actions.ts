@@ -12,6 +12,8 @@ import {
   type CreateTeamOutcome,
   type TeamAvailabilityStatus,
 } from "./team-brigades";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Server actions for the company-room team/brigade panel (§8.3 + Trust
@@ -41,6 +43,14 @@ export async function createTeamAction(
   name: string,
 ): Promise<{ outcome: CreateTeamOutcome }> {
   const { outcome } = await createTeamBrigade(name);
+  // W14 mid-funnel: a team organization was really created (the org spine
+  // gained a row). Entity type only — never the team name. Fire-and-forget.
+  if (outcome === "created") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.organizationCreated, {
+      source: "teams",
+      metadata: { surface: "company_teams", entity_type: "team" },
+    });
+  }
   return { outcome };
 }
 

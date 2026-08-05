@@ -20,6 +20,8 @@ import {
   evaluateRequestBudget,
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Booking server actions (Stage 6) — the live wiring of the booking-state
@@ -170,6 +172,12 @@ export async function proposeBookingAction(
     return classify(error);
   }
   revalidatePath(`/${input.locale}/dashboard/bookings`);
+  // W14 mid-funnel: a booking proposal really reached the worker (RPC ok).
+  // No ids in metadata. Fire-and-forget.
+  emitServerFunnelEvent(FUNNEL_EVENTS.bookingProposed, {
+    source: "booking",
+    metadata: { surface: "bookings", role_context: "company" },
+  });
   return { kind: "ok", status: "proposed" };
 }
 
@@ -234,6 +242,16 @@ export async function respondBookingAction(input: {
       const engagement =
         (v3.data as { engagement?: string } | null)?.engagement ?? "created";
       revalidatePath(`/${input.locale}/dashboard/bookings`);
+      // W14 mid-funnel: the accept+engagement transaction really created an
+      // engagement (v3 RPC reported it). Emitted ONLY on the real creation
+      // outcome — an accept that fell back to v1 has no engagement and emits
+      // nothing. Fire-and-forget.
+      if (engagement === "created") {
+        emitServerFunnelEvent(FUNNEL_EVENTS.engagementCreated, {
+          source: "booking",
+          metadata: { surface: "bookings", role_context: "worker" },
+        });
+      }
       return { kind: "ok", status: "accepted", engagement };
     }
     if (!isAbsentFunction(v3.error)) return classify(v3.error);

@@ -21,6 +21,7 @@ import {
   countAiRunsTodayBestEffort,
   persistAiRunAudit,
 } from "./runtime/audit-store";
+import { persistUsageCostEvent } from "@/lib/usage/usage-cost-store";
 import { getPromptEntry } from "./registry/registry";
 import { runAiAgentCore, type AiAgentOutcome, type RunAgentOptions } from "./run-agent";
 import type { AiAgentKey } from "./registry/types";
@@ -51,6 +52,16 @@ export async function runAiAgent<T = unknown>(
       profileId: opts.profileId ?? null,
       requestContext: agent,
     });
+    // W14 Pilot Analytics slice v1: the same live run also lands as ONE
+    // `usage_cost_events` row (event_type='usage', EUR cents) — the canonical
+    // cost ledger's first writer. Same best-effort contract: mock/disabled
+    // runs are never written, and a persistence failure never affects the
+    // run outcome (it is surfaced below under the same greppable marker).
+    const costPersisted = await persistUsageCostEvent(outcome.routing, {
+      profileId: opts.profileId ?? null,
+      organizationId: null, // not resolvable at this boundary today — honest null
+      requestContext: agent,
+    });
     if (!persisted) {
       // W14 audit P0-2. `persistAiRunAudit` reports whether the row landed,
       // and this boolean used to be DISCARDED — so a live run whose cost was
@@ -69,6 +80,18 @@ export async function runAiAgent<T = unknown>(
       // cost VALUE — the fact that attribution was lost is operational, the
       // contents are not.
       console.warn("[ai/cost] run not attributed — ai_runs insert did not land", {
+        agent,
+        tier: outcome.routing.selectedTier,
+        modelAlias: outcome.routing.modelAlias ?? "none",
+        hadActualCost: outcome.routing.actualCostUsd != null,
+      });
+    }
+    if (!costPersisted) {
+      // Same doctrine as above, for the cost ledger: the loss is named where
+      // it happens, under the same greppable marker, without the payload,
+      // the prompt or the person. Deliberately warn-level — while any
+      // environment lacks the service key this is expected, not an alarm.
+      console.warn("[ai/cost] run not in the cost ledger — usage_cost_events row did not land", {
         agent,
         tier: outcome.routing.selectedTier,
         modelAlias: outcome.routing.modelAlias ?? "none",

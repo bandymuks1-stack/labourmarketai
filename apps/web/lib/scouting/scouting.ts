@@ -28,6 +28,8 @@ import {
   type ScoutFilters,
 } from "@/lib/scouting/scout-filters";
 import { validateShortlistWrite } from "@/lib/scouting/shortlist-note";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -337,6 +339,13 @@ export async function runScouting(
         a.workerId.localeCompare(b.workerId),
     );
 
+  // W14 mid-funnel: a match preview was really generated for a real demand.
+  // Count only — never worker ids. Fire-and-forget; scouting is unaffected.
+  emitServerFunnelEvent(FUNNEL_EVENTS.matchPreviewGenerated, {
+    source: "scouting",
+    metadata: { candidate_count: candidates.length, surface: "scouting" },
+  });
+
   return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval };
 }
 
@@ -435,6 +444,14 @@ export async function setShortlist(input: {
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
+  }
+  // W14 mid-funnel: only a POSITIVE shortlist decision counts as "added" —
+  // `not_fit` / `reviewed` are triage, not shortlisting. Fire-and-forget.
+  if (input.status === "saved" || input.status === "interested") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.shortlistAdded, {
+      source: "scouting",
+      metadata: { step: input.status, surface: "scouting" },
+    });
   }
   return {
     kind: "ok",

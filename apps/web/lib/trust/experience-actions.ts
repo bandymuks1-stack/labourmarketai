@@ -12,6 +12,8 @@ import {
   type ExperienceActionResult,
 } from "./experience-records";
 import type { EligibleInteractionKind } from "./experience-eligibility";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * W6 slice 3B — server actions for the ONE experience domain.
@@ -53,7 +55,19 @@ export async function submitExperienceAction(
     sentiment,
     body: str(formData, "body"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard`);
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard`);
+    // W14 mid-funnel: an experience record really entered moderation (RPC
+    // accepted it). Entity type only — never subject/interaction ids.
+    emitServerFunnelEvent(FUNNEL_EVENTS.experienceSubmitted, {
+      source: "experiences",
+      metadata: {
+        surface: "experiences",
+        entity_type:
+          str(formData, "subject_type") === "organization" ? "organization" : "worker",
+      },
+    });
+  }
   return result;
 }
 
@@ -109,7 +123,17 @@ export async function decideModerationAction(
     decision,
     reason: str(formData, "reason"),
   });
-  if (result.ok) revalidatePath(`/${locale}/dashboard/admin`);
+  if (result.ok) {
+    revalidatePath(`/${locale}/dashboard/admin`);
+    // W14 mid-funnel: only a PUBLISH decision is a published experience —
+    // a rejection is moderation work, not funnel progress. Fire-and-forget.
+    if (decision === "published") {
+      emitServerFunnelEvent(FUNNEL_EVENTS.experiencePublished, {
+        source: "experiences",
+        metadata: { surface: "moderation" },
+      });
+    }
+  }
   return result;
 }
 

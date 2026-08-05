@@ -21,6 +21,8 @@ import {
   type ProjectListRow,
   type ProjectStageRow,
 } from "@/lib/projects/project-result-contract";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
  * W11 — the project workspace adapter: the `project` result's ONE data path.
@@ -274,6 +276,15 @@ export async function setProjectStatusAction(
       revalidatePath(`/${locale}/dashboard/projects`);
       revalidatePath(`/${locale}/dashboard/projects/${projectId}`);
       revalidatePath(`/${locale}/dashboard`);
+      // W14 mid-funnel: only a REAL transition into the terminal state counts
+      // as a completed project (the RPC reported `transitioned`, not
+      // `already_in_state`). No ids in metadata. Fire-and-forget.
+      if (to === "completed") {
+        emitServerFunnelEvent(FUNNEL_EVENTS.projectCompleted, {
+          source: "projects",
+          metadata: { surface: "projects", role_context: "company" },
+        });
+      }
       return {
         kind: "transitioned",
         fromStatus: from,

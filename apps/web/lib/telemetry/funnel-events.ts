@@ -82,6 +82,34 @@ export const FUNNEL_EVENTS = {
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
+  // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
+  //    The gap between "booking_*" and nothing: the stages where a demand
+  //    actually turns into work — match preview → shortlist → contact →
+  //    booking proposal → engagement → project → published experience.
+  //    All are emitted SERVER-SIDE at the real action points through the
+  //    existing RLS-safe insert path (lib/telemetry/server-funnel.ts →
+  //    recordTelemetryEvent; profile_id derived server-side, fire-and-forget,
+  //    a telemetry failure never breaks the action). Bounded scalars only —
+  //    candidate_count is a count, never an id list. No migration, no schema
+  //    change, no new RLS.
+  //    `engagement_ended` fires from the ONE shared end path
+  //    (lib/engagements/end-engagement.ts, on main since #1009) only on a
+  //    real `ended` outcome — never on `already_ended`, a refusal or an
+  //    error. `role_context` carries the server-derived actor side
+  //    ("company" | "worker"); an ended engagement ends ONLY that
+  //    engagement row, so the event implies no exclusive employment.
+  matchPreviewGenerated: "match_preview_generated",
+  shortlistAdded: "shortlist_added",
+  contactRequested: "contact_requested",
+  contactDisclosed: "contact_disclosed",
+  bookingProposed: "booking_proposed",
+  engagementCreated: "engagement_created",
+  engagementEnded: "engagement_ended",
+  projectAssigned: "project_assigned",
+  projectCompleted: "project_completed",
+  experienceSubmitted: "experience_submitted",
+  experiencePublished: "experience_published",
+  organizationCreated: "organization_created",
 } as const;
 
 export type FunnelEventName = (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
@@ -128,4 +156,7 @@ export type FunnelMetadata = {
   referrer_host?: string;
   /** The path (no query) the visitor first landed on, e.g. '/for-workers'. */
   landing_path?: string;
+  /** How many candidates a match preview produced (a COUNT, never ids —
+   *  W14 mid-funnel `match_preview_generated`). */
+  candidate_count?: number;
 };
