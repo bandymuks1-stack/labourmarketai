@@ -403,7 +403,17 @@ describe("NO new DB migration in this PR", () => {
     // EXECUTE grant, no table/policy/RLS/existing-grant change and zero DML at
     // apply time. Ships UNAPPLIED, owner-gated. Still no migration from the
     // market-map read layer.
-    expect(count).toBeLessThanOrEqual(179);
+    //
+    // Bumped 179 -> 181 for the §18 worker display-name package —
+    // `20260805090000_worker_display_name_write_path_v1` (redefines
+    // complete_onboarding's worker branch DO NOTHING -> DO UPDATE, no
+    // table/policy/RLS change, zero DML) and
+    // `20260805090100_worker_display_name_backfill_v1` (hole-filling DML with
+    // a reversal ledger). BOTH ship RED, deliberately NOT human-gate-annotated,
+    // UNAPPLIED — owner decisions 1/2 recorded in
+    // docs/human-gates/worker-display-name-write-path-gate.md. Still no
+    // migration from the market-map read layer.
+    expect(count).toBeLessThanOrEqual(181);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

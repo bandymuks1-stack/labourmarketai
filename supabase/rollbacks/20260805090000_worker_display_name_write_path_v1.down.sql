@@ -134,6 +134,12 @@ comment on function public.complete_onboarding(text, text, text, jsonb, uuid) is
 
 revoke all on function public.complete_onboarding(text, text, text, jsonb, uuid)
   from public;
+-- Deliberate deviation from byte-exact 0008: the anon revoke is KEPT on
+-- rollback. Re-opening anon default-privilege reachability on a SECURITY
+-- DEFINER function would be a strict security regression, and the revoke is
+-- behaviourally inert (the function raises 42501 without auth.uid()).
+revoke all on function public.complete_onboarding(text, text, text, jsonb, uuid)
+  from anon;
 grant execute
   on function public.complete_onboarding(text, text, text, jsonb, uuid)
   to authenticated;
