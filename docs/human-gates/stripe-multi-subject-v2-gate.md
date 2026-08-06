@@ -61,3 +61,21 @@ guard-pinned).
 
 The TEST env package (`docs/billing/STRIPE_TEST_ENV_OWNER_PACKAGE.md`):
 9 env names, TEST products/prices, webhook endpoint.
+
+
+## OWNER DECISION S1 — GIVEN 2026-08-06 (recorded)
+
+Conditional approval (command §10) against reviewed #1035 HEAD 72bba623;
+executed on successor PR #1040 HEAD b9376d2e after every condition held:
+rebase onto post-W6 main with the migration + rollback BYTE-IDENTICAL
+(sha256 fc9654c8c9100bfea43459619ed2b3827e2259bd2eeae68166f4d918fc3be80d /
+da336d0e7d4e7a8f60dded01005598228ced42e0f743868cf8e2212a1cf036d7); ratchets
+recounted to 189; billing + guard suites 217/217; production billing
+preflight ALL ZERO (billing_customers 0, billing_subscriptions 0,
+payment_webhook_events 0; billing_subjects/stripe_webhook_events absent;
+migration not in ledger); no Live logic; enables no payment by itself.
+Marker added scoped to the three emitted findings (grant-or-revoke,
+drop-constraint-bare, create-trigger). TEST-only; Stripe Live, real prices,
+charges and LMC coupling remain outside this approval.
+
+State: S1_APPROVED_APPLY_IN_PROGRESS

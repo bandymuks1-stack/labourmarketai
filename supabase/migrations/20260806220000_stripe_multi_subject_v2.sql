@@ -1,12 +1,29 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE OWNER APPROVAL (Owner Decision S1, 2026-08-06) ─────────────
+--
+-- The owner conditionally approved applying THIS TEST-only migration
+-- (command §10, PR #1035 reviewed HEAD 72bba623) and every condition was met
+-- on the successor PR #1040 (HEAD b9376d2e): rebased onto post-W6 main,
+-- migration + rollback BYTE-IDENTICAL to the reviewed content (sha256
+-- fc9654c8… / da336d0e…), billing + guard suites 217/217, production
+-- billing preflight 0 rows everywhere (billing_customers 0,
+-- billing_subscriptions 0, payment_webhook_events 0), no Stripe Live logic,
+-- and the apply enables no payment by itself. The annotation covers exactly
+-- the three emitted findings: grant-or-revoke (trigger-fn privilege
+-- closure), drop-constraint-bare (the uniqueness remodel — the matching ADD
+-- is the two partial unique indexes), create-trigger (origin-org capture).
+-- It does NOT cover Stripe Live, real prices, charges, or LMC coupling, and
+-- it does not authorize running the paired rollback against real data.
+-- Apply ONLY via Supabase MCP apply_migration. Never `db push`.
+--
 -- 20260806220000 — Stripe TEST multi-subject schema v2 (supersedes PR #844's
 -- 20260721150000, which is CLOSED unapplied — its schema content was reviewed
 -- twice and is carried here unchanged; its app-side org authority was rebuilt
 -- on company_memberships + the manage-billing capability).
 --
--- SAFETY CLASS: RED. Constraint drop + trigger + index remodel on a billing
--- table. Ships with NO `-- @human-gate-approved` marker: target state is
--- STRIPE_TEST_MULTI_SUBJECT_V2_CODE_COMPLETE_PENDING_HUMAN_GATE — a separate
--- owner decision gates any production apply.
+-- SAFETY CLASS: RED (owner-gated; gate recorded above and in
+-- docs/human-gates/stripe-multi-subject-v2-gate.md).
 --
 -- ── WHAT (the M-P0-7 canonical subject model's storage) ───────────────────
 --   1. `billing_subscriptions.organization_id` (uuid → organizations,

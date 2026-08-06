@@ -176,9 +176,14 @@ describe("subscription uniqueness model (draft migration 20260721150000)", () =>
     expect(migration).toMatch(/set search_path = ''/);
   });
 
-  it("ships RED — NO human-gate marker, with a paired guarded rollback", () => {
+  it("carries the Owner Decision S1 marker WITH its scope; the rollback carries none", () => {
+    // Flipped from "marker ABSENT" on 2026-08-06 under Owner Decision S1
+    // (the exact v1/W6-D1 precedent): the marker may exist only together
+    // with its recorded scope and limits.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(migration)).toBe(false);
+    expect(ANNOTATION.test(migration)).toBe(true);
+    expect(migration).toMatch(/Owner Decision S1/);
+    expect(migration).toMatch(/does NOT cover Stripe Live/i);
     expect(ANNOTATION.test(rollback)).toBe(false);
     // rollback archives bindings and REFUSES while multi-subject rows exist
     expect(rollback).toMatch(/billing_subject_binding_archive/);
