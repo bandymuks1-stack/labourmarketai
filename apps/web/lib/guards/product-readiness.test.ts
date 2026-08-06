@@ -1973,7 +1973,12 @@ describe("no migration files added by this sprint", () => {
     // owner's explicit production decision.
     // 186 -> 187: M-P0-6 org demand spine v2 (20260806200000) — the shared
     // ratchet slot resolved here after #1028/#1032 merged first.
-    const SPRINT_BASELINE = 188;
+    // 188 -> 189: M-P0-4 gap closure (20260807090000_org_owner_membership_
+    // seed_v1) — AFTER INSERT trigger on organizations seeding the owner
+    // membership + guarded one-time backfill for post-backfill orphan orgs
+    // (2026-08-06 PROD_QA finding). RED, owner-gated, paired rollback,
+    // ships UNAPPLIED, no marker.
+    const SPRINT_BASELINE = 189;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
