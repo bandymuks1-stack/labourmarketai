@@ -624,6 +624,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // recorded in docs/human-gates/org-demand-spine-v2-gate.md and
       // docs/APPLIED_LEDGER.md. Added in the same commit as that record.
       "20260806200000_org_demand_spine_v2.sql",
+      // 2026-08-06: Stripe TEST multi-subject v2 gained its marker under
+      // Owner Decision S1 (command §10, reviewed 72bba623, successor PR
+      // #1040), recorded in docs/human-gates/stripe-multi-subject-v2-gate.md.
+      // Added in the same commit as that record.
+      "20260806220000_stripe_multi_subject_v2.sql",
       // 2026-08-06: W6 author/subject model v1 gained its marker under
       // Owner Decision W6-D1 (reviewed HEAD 30691a60), recorded in
       // docs/human-gates/experience-author-subject-v1-gate.md and

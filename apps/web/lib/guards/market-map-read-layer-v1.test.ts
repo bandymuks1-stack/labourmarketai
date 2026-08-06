@@ -434,7 +434,10 @@ describe("NO new DB migration in this PR", () => {
     // paired rollback, unapplied until the owner's production decision).
     // Bumped 186 -> 187 for M-P0-6 (org demand spine v2, `20260806200000`,
     // supersedes #1016) — the shared slot recounted after #1032 merged.
-    expect(count).toBeLessThanOrEqual(188);
+    // Bumped 188 -> 189 for Stripe TEST multi-subject v2 (`20260806220000`,
+    // supersedes #844's schema) — owner-gated, UNAPPLIED (rebase onto the
+    // post-W6 main recounted the shared slot: 187+W6+this = 189).
+    expect(count).toBeLessThanOrEqual(189);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
