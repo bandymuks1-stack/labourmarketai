@@ -14,6 +14,25 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806220000_stripe_multi_subject_v2` (M-P0-7 / Stripe TEST v2)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 15:31:28 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production ledger version | `20260806153128`, name `20260806220000_stripe_multi_subject_v2` (apply-time version drift — match on `name`). Ledger 185 → **186** |
+| PR | **#1040** (`feat/stripe-test-multi-subject-v2-r1`, successor of #1035 per the blocked-force procedure; #1035 CLOSED superseded) |
+| Owner gate | **Owner Decision S1** (2026-08-06, command §10) — conditions verified on HEAD `b9376d2e`: migration/rollback byte-identical to reviewed #1035 content (sha256 `fc9654c8…` / `da336d0e…`), suites 217/217, ratchets 189, no timestamp collision. Marker commit `83726345` scoped to grant-or-revoke, drop-constraint-bare, create-trigger |
+
+**Preflight (immediately before apply)**: billing_customers **0**, billing_subscriptions **0**, payment_webhook_events **0**; `billing_subjects`/`stripe_webhook_events` absent; migration not in ledger — zero real billing rows anywhere, nothing to classify.
+
+**What it does**: `billing_subscriptions.organization_id` (FK, on delete set null) + immutable `origin_organization_id` (no FK, trigger-captured); uniqueness remodel — the single `(owner_id, plan_key, provider)` constraint replaced by TWO partial unique indexes (personal scope WHERE origin IS NULL; organization scope WHERE organization_id IS NOT NULL) so one payer can hold Personal + org A + org B with the same plan key. TEST-only storage; enables NO payment by itself; RLS unchanged; no LMC object touched.
+
+**Post-apply verified**: 2/2 columns, 3/3 indexes, capture trigger present, old constraint GONE, rows 0 before and after (**zero business-row changes**).
+
+**Not done / out of scope**: no Stripe object created, no key configured, no checkout run, no Live anything. S2 (TEST env setup) is a separate owner step; the paired rollback stays unexecuted and needs its own decision once real TEST rows exist.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260806230000_experience_author_subject_v1` (W6 author/subject)
 
 | Field | Value |
