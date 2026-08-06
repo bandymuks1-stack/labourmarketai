@@ -607,6 +607,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // recorded in docs/architecture/COMPANY_MEMBERSHIPS_V1.md and the
       // train doc. Added in the same commit as that record.
       "20260806090000_company_memberships_v1.sql",
+      // 2026-08-06: M-P0-4 slice 2 (membership commands v1) gained its
+      // marker under "OWNER DECISION — CLOSE MEMBERSHIP AUTHORITY, MERGE
+      // DURABLE WORKSPACE, CONTINUE M-P0-6/7/8" §1/§4, recorded in
+      // docs/architecture/COMPANY_MEMBERSHIPS_V1.md and
+      // docs/APPLIED_LEDGER.md (ledger 20260806052445). Added in the same
+      // commit as that record.
+      "20260806120000_company_membership_commands_v1.sql",
     ]);
   });
 
