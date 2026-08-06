@@ -8,6 +8,11 @@ import { getSessionProfile } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import {
+  isEmployerSurfaceRole,
+  isGovernanceRole,
+  type GovernanceRole,
+} from "@/lib/company/role-capabilities";
 
 /**
  * THE ONE employer company resolver (W8 slice 1).
@@ -54,9 +59,15 @@ import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
  * true row-level organization scoping needs a migration and is a W9 decision.
  * Recorded, not faked.
  *
- * Manager-of-an-organization collaboration is explicitly OUT of W8 slice 1: an
- * org the caller only manages resolves to `company-not-owned`, which is
- * fail-closed and honestly named, never a silent grant.
+ * M-P0-4 consumer slice (§11): the final gate is now MEMBERSHIP TRUTH — the
+ * caller's own ACTIVE `company_memberships` row proves the role, with the
+ * company creator kept as an `owner`-equivalent compatibility arm. `member`
+ * rows and engagement-only employment resolve NO employer surface
+ * (fail-closed, reason `company-not-owned`). The resolved `role` rides in the
+ * context so writes gate per-capability (`role-capabilities.ts`) — and every
+ * write below is STILL re-validated SQL-side, which today remains
+ * creator-bound until the owner-gated `manages_organization` /
+ * `save_company_setup_v3` widening applies.
  */
 
 const UNDEFINED_COLUMN_CODE = "42703";
@@ -86,8 +97,11 @@ export type EmployerContextReason =
   | "no-company-binding"
   /** The bound company row does not exist (dangling legacy pointer). */
   | "company-missing"
-  /** The bound company exists but is owned by somebody else — manager
-   *  collaboration is not enabled (W8 slice 1 scope boundary). */
+  /** The caller holds NO governance role in the organization (M-P0-4
+   *  consumer slice): no active `company_memberships` row above `member`,
+   *  and not the company creator. Engagement-only employment lands here —
+   *  an employment row is never employer authority. Name kept from W8 for
+   *  consumer compatibility. */
   | "company-not-owned"
   /** The active workspace is not in the caller's validated membership list. */
   | "not-a-member"
@@ -104,6 +118,11 @@ export type EmployerCompanyContext =
       readonly companyId: string;
       readonly organizationId: string;
       readonly organizationName: string;
+      /** The caller's governance role in THIS organization — from their own
+       *  ACTIVE `company_memberships` row (canonical truth), or `owner` via
+       *  the creator-compatibility arm. Never from the client, never from
+       *  employment. Gate writes with `hasOrganizationCapability(role, …)`. */
+      readonly role: GovernanceRole;
     }
   | {
       readonly kind: "unavailable";
@@ -201,10 +220,8 @@ export const resolveEmployerCompanyContext = cache(
       return unavailable("no-company-binding", organizationName || label);
     }
 
-    // Confirm the company row and its ownership. Ownership (not mere org
-    // membership) is the W8 slice 1 boundary: every employer write below is
-    // owner-scoped today, so granting a manager here would claim collaboration
-    // the platform has not built.
+    // Confirm the company row exists (and read the creator pointer for the
+    // compatibility arm below).
     const compRes = await asAny(supabase)
       .from("companies")
       .select("id, profile_id")
@@ -226,7 +243,44 @@ export const resolveEmployerCompanyContext = cache(
     if (compRows.length > 1) return unavailable("ambiguous-binding", organizationName || label);
     const company = compRows[0];
     if (!company) return unavailable("company-missing", organizationName || label);
-    if (company.profile_id !== user.id) {
+
+    // ── GOVERNANCE GATE (M-P0-4 consumer slice, §11) ────────────────────────
+    // Membership proves the role; the active workspace selected the target.
+    // Precedence:
+    //   1. the caller's own ACTIVE `company_memberships` row — canonical;
+    //   2. creator-compatibility arm: `companies.profile_id === auth.uid()`
+    //      resolves as `owner` (ownership metadata stays compatibility data,
+    //      not sole authority — §11 doctrine; prod's 10 memberships are the
+    //      creator backfill, so 1 and 2 agree wherever both exist);
+    //   3. everything else — `member` rows, engagement-only employment,
+    //      strangers — fails CLOSED with no employer surface.
+    // Feature-detected: environments without the memberships table (42P01)
+    // use arm 2 alone, exactly the pre-slice behaviour.
+    let role: GovernanceRole | null = null;
+    const memRes = await asAny(supabase)
+      .from("company_memberships")
+      .select("role")
+      .eq("organization_id", org.id)
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .limit(1);
+    if (memRes.error) {
+      if (
+        memRes.error.code !== RELATION_NOT_FOUND_CODE &&
+        memRes.error.code !== UNDEFINED_COLUMN_CODE
+      ) {
+        console.error("[employer-company-context] membership read failed", {
+          code: memRes.error.code,
+        });
+        return unavailable("error", organizationName || label);
+      }
+      // table absent — legacy environment, compatibility arm only
+    } else {
+      const memberRole = (memRes.data ?? [])[0]?.role as string | undefined;
+      if (isGovernanceRole(memberRole)) role = memberRole;
+    }
+    if (role === null && company.profile_id === user.id) role = "owner";
+    if (role === null || !isEmployerSurfaceRole(role)) {
       return unavailable("company-not-owned", organizationName || label);
     }
 
@@ -235,6 +289,7 @@ export const resolveEmployerCompanyContext = cache(
       companyId: company.id,
       organizationId: org.id,
       organizationName,
+      role,
     };
   },
 );
@@ -245,7 +300,13 @@ export const resolveEmployerCompanyContext = cache(
  * tagged result vocabulary instead of inventing a second one.
  */
 export async function requireEmployerCompany(): Promise<
-  | { ok: true; companyId: string; organizationId: string; organizationName: string }
+  | {
+      ok: true;
+      companyId: string;
+      organizationId: string;
+      organizationName: string;
+      role: GovernanceRole;
+    }
   | { ok: false; reason: EmployerContextReason }
 > {
   const ctx = await resolveEmployerCompanyContext();
@@ -255,6 +316,7 @@ export async function requireEmployerCompany(): Promise<
         companyId: ctx.companyId,
         organizationId: ctx.organizationId,
         organizationName: ctx.organizationName,
+        role: ctx.role,
       }
     : { ok: false, reason: ctx.reason };
 }

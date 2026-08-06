@@ -117,6 +117,9 @@ describe("the happy path", () => {
       companyId: COMPANY_A,
       organizationId: ORG_A,
       organizationName: "Alpha Statyba",
+      // No membership row in this stub — the creator-compatibility arm
+      // resolves `owner` (§11).
+      role: "owner",
     });
   });
 
@@ -304,6 +307,7 @@ describe("the client is never an authority", () => {
       companyId: COMPANY_A,
       organizationId: ORG_A,
       organizationName: "Alpha Statyba",
+      role: "owner",
     });
     workspaceContextMock.mockResolvedValue(workspace([ORG_A], "personal"));
     await expect(requireEmployerCompany()).resolves.toEqual({
@@ -361,6 +365,100 @@ describe("two organizations, two answers", () => {
     await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
       kind: "ok",
       companyId: COMPANY_B,
+    });
+  });
+});
+
+describe("§11 governance gate — membership truth decides the role", () => {
+  it("an ACTIVE membership row resolves its role (admin, without creator ownership)", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        // The company belongs to somebody ELSE — membership alone carries.
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "admin" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      companyId: COMPANY_A,
+      role: "admin",
+    });
+  });
+
+  it("a `member` row resolves NO employer surface — fail closed", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [{ role: "member" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
+  it("engagement-only (workspace listed, no membership, not creator) fails closed", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: "someone-else" }] },
+        company_memberships: { data: [] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
+  it("a membership table absent (42P01) keeps the creator-compatibility arm", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: null, error: { code: "42P01" } },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "owner",
+    });
+  });
+
+  it("a membership read FAILURE is an error, never a silent grant", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: null, error: { code: "XX000" } },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "error",
     });
   });
 });

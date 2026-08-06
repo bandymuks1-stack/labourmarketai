@@ -7,6 +7,7 @@ import {
   requireEmployerCompany,
 } from "@/lib/company/employer-company-context";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 
 /**
  * First safe company-side project/client CREATE flow (v1).
@@ -61,6 +62,10 @@ export async function createProjectContextAction(
     return isEmployerContextFailure(company.reason)
       ? { ok: false, code: "error" }
       : { ok: false, code: "no_company" };
+  }
+  // §11 capability matrix: project creation is operational governance.
+  if (!hasOrganizationCapability(company.role, "manage-projects")) {
+    return { ok: false, code: "no_company" };
   }
 
   const supabase = await createClient();

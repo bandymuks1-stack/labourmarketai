@@ -27,13 +27,6 @@ function asAny(supabase: SupabaseClient): any {
   return supabase;
 }
 
-export interface OwnCompany {
-  readonly id: string;
-  readonly legalName: string | null;
-  readonly displayName: string | null;
-  readonly country: string | null;
-}
-
 export interface LinkedCompanyWorker {
   readonly workerId: string;
   readonly profileId: string;
@@ -82,26 +75,6 @@ export type InviteCompanyWorkerResult =
     }
   | { kind: "needs-migration" }
   | { kind: "error"; message: string };
-
-export async function getOwnCompany(): Promise<OwnCompany | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data, error } = await supabase
-    .from("companies")
-    .select("id, legal_name, display_name, country")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (error || !data) return null;
-  return {
-    id: data.id,
-    legalName: data.legal_name ?? null,
-    displayName: data.display_name ?? null,
-    country: data.country ?? null,
-  };
-}
 
 export async function listActiveCompanyWorkers(
   companyId: string,
