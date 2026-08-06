@@ -441,7 +441,11 @@ describe("NO new DB migration in this PR", () => {
     // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
-    expect(count).toBeLessThanOrEqual(190);
+    // Bumped 190 -> 191 for booking→engagement org-first company resolution
+    // (`20260807120000_booking_engagement_org_resolution_v1` — single
+    // function-body replacement, owner-gated, UNAPPLIED, paired rollback).
+    // Still no migration from the market-map layer.
+    expect(count).toBeLessThanOrEqual(191);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

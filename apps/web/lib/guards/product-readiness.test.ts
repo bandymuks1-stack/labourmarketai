@@ -1980,7 +1980,14 @@ describe("no migration files added by this sprint", () => {
     // membership + guarded one-time backfill for post-backfill orphan orgs
     // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
     // shared slot: 189+this = 190.
-    const SPRINT_BASELINE = 190;
+    // 190 -> 191: booking→engagement org-first company resolution
+    // (20260807120000_booking_engagement_org_resolution_v1) — replaces ONE
+    // function body (respond_booking_request_v3) so an organization-stamped
+    // demand resolves via organizations.legacy_company_id instead of the
+    // multi-company 'ambiguous_company' dead-end (live 2026-08-06, booking
+    // 88a43ead). Owner-gated RED, UNAPPLIED, paired rollback restores the
+    // W12 body verbatim.
+    const SPRINT_BASELINE = 191;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
