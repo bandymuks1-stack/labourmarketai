@@ -1973,7 +1973,9 @@ describe("no migration files added by this sprint", () => {
     // owner's explicit production decision.
     // 186 -> 187: M-P0-6 org demand spine v2 (20260806200000) — the shared
     // ratchet slot resolved here after #1028/#1032 merged first.
-    const SPRINT_BASELINE = 188;
+    // 188 -> 189: Stripe TEST multi-subject v2 (20260806220000, supersedes
+    // #844's schema) — owner-gated, UNAPPLIED; rebased onto the post-W6 main.
+    const SPRINT_BASELINE = 189;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

@@ -6,7 +6,18 @@ import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import { getBillingConfig } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
-import { evaluateCheckoutRequest } from "@/lib/billing/checkout-core";
+import {
+  evaluateCheckoutRequest,
+  planRequiresOrganization,
+  type OrgBindingResult,
+} from "@/lib/billing/checkout-core";
+import { getPlan } from "@/lib/billing/plans";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
+import { ensureBillingCustomer } from "@/lib/billing/customer-store";
+import {
+  checkoutIdempotencyKey,
+  checkoutMetadata,
+} from "@/lib/billing/metadata-core";
 
 /**
  * TEST checkout route (Stripe sprint PR3) — STRICTLY gated. A Stripe test
@@ -19,7 +30,9 @@ import { evaluateCheckoutRequest } from "@/lib/billing/checkout-core";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const Schema = z.object({ planKey: z.string().min(1).max(40) });
+// STRICT: unknown fields (a price, an org id, a subject) are REJECTED — the
+// client's only input is the plan key.
+const Schema = z.object({ planKey: z.string().min(1).max(40) }).strict();
 
 export async function POST(req: Request) {
   let raw: unknown;
@@ -60,6 +73,24 @@ export async function POST(req: Request) {
     isAdmin = userRoles.includes("admin");
   }
 
+  // M-P0-7 subject binding (Stripe TEST multi-subject v2): the VALIDATED
+  // active workspace proposes the billing subject; the `manage-billing`
+  // capability (owner/admin membership — never bare membership, never
+  // engagement) decides authority. The client sends ONLY a plan key — no org
+  // id, no price, no subject can be supplied.
+  let orgBinding: OrgBindingResult = "not_required";
+  let organizationId: string | null = null;
+  const planAudience = getPlan(planKey)?.audience;
+  if (user && planAudience && planRequiresOrganization(planAudience)) {
+    const subject = await resolveBillingSubject();
+    if (subject.subject?.type === "organization") {
+      orgBinding = subject.billingAuthority ? "verified" : "not_member";
+      organizationId = subject.billingAuthority ? subject.subject.id : null;
+    } else {
+      orgBinding = "missing";
+    }
+  }
+
   const config = getBillingConfig();
   const gate = evaluateCheckoutRequest({
     config,
@@ -68,6 +99,7 @@ export async function POST(req: Request) {
     userRoles,
     isAdmin,
     priceConfigured: Boolean(testPriceIdFor(planKey)),
+    orgBinding,
   });
   if (!gate.ok) {
     return NextResponse.json(
@@ -83,11 +115,18 @@ export async function POST(req: Request) {
   }
 
   const provider = await getBillingProvider();
+  // Per-payer TEST customer (find-or-create, idempotent). Degrades to email
+  // prefill when unavailable — never blocks a valid checkout.
+  const customer = await ensureBillingCustomer({ id: user.id, email: user.email });
   const result = await provider.createCheckoutSession({
     planKey,
     priceId,
     clientReferenceId: user.id,
     customerEmail: user.email ?? null,
+    providerCustomerId: customer.ok ? customer.customerId : null,
+    organizationId,
+    metadata: checkoutMetadata({ planKey, ownerId: user.id, organizationId }),
+    idempotencyKey: checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId }),
     successUrl: `${origin}/dashboard/account?billing=test_success`,
     cancelUrl: `${origin}/pricing?billing=test_cancelled`,
   });
