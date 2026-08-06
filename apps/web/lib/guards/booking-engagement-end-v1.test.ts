@@ -624,6 +624,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // recorded in docs/human-gates/org-demand-spine-v2-gate.md and
       // docs/APPLIED_LEDGER.md. Added in the same commit as that record.
       "20260806200000_org_demand_spine_v2.sql",
+      // 2026-08-06: W6 author/subject model v1 gained its marker under
+      // Owner Decision W6-D1 (reviewed HEAD 30691a60), recorded in
+      // docs/human-gates/experience-author-subject-v1-gate.md and
+      // docs/APPLIED_LEDGER.md (ledger 20260806135649). Added in the marker
+      // commit 266df613 together with that record.
+      "20260806230000_experience_author_subject_v1.sql",
     ]);
   });
 
