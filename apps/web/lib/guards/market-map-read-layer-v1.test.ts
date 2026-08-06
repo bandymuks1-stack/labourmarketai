@@ -442,7 +442,7 @@ describe("NO new DB migration in this PR", () => {
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
     // Bumped 190 -> 191 for the worker board org attribution fix
-    // (`20260807120000_worker_demand_org_attribution_v1` — one row per
+    // (`20260807130000_worker_demand_org_attribution_v1` — one row per
     // demand, company resolved via the demand's organization; owner-gated
     // RED, paired rollback, ships UNAPPLIED).
     expect(count).toBeLessThanOrEqual(191);

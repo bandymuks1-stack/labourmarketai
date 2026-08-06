@@ -1,8 +1,8 @@
 # Human gate — worker board demand attribution: one row per demand, correct company
 
 **Status:** `PENDING_OWNER_APPROVAL` — nothing in this repo applies it; merging the PR does NOT apply it.
-**Migration:** `supabase/migrations/20260807120000_worker_demand_org_attribution_v1.sql`
-**Rollback:** `supabase/rollbacks/20260807120000_worker_demand_org_attribution_v1.down.sql`
+**Migration:** `supabase/migrations/20260807130000_worker_demand_org_attribution_v1.sql`
+**Rollback:** `supabase/rollbacks/20260807130000_worker_demand_org_attribution_v1.down.sql`
 **Guard:** `apps/web/lib/guards/worker-demand-org-attribution.test.ts`
 **Closes:** the multi-org demand duplication/misattribution on the worker board (observed live 2026-08-06).
 
@@ -96,7 +96,7 @@ Exactly two, both inherent to recreating this function:
 
 ## The decision
 
-Apply `20260807120000_worker_demand_org_attribution_v1.sql` to production — yes or no.
+Apply `20260807130000_worker_demand_org_attribution_v1.sql` to production — yes or no.
 
 If **yes**, in the same session:
 

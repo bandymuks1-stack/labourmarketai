@@ -1,6 +1,6 @@
 /**
  * Guard — worker board organization attribution pair
- * (20260807120000_worker_demand_org_attribution_v1).
+ * (20260807130000_worker_demand_org_attribution_v1).
  *
  * Production bug (observed live 2026-08-06): list_open_demand_for_workers
  * joined `companies` by OWNER PROFILE, so a profile owning multiple verified
@@ -25,7 +25,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const REPO = join(__dirname, "..", "..", "..", "..");
-const NAME = "20260807120000_worker_demand_org_attribution_v1";
+const NAME = "20260807130000_worker_demand_org_attribution_v1";
 const up = readFileSync(
   join(REPO, "supabase", "migrations", `${NAME}.sql`),
   "utf8",

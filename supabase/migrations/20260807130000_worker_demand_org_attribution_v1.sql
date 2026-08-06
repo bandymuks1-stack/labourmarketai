@@ -1,4 +1,4 @@
--- 20260807120000 — worker board organization attribution: one row per demand,
+-- 20260807130000 — worker board organization attribution: one row per demand,
 -- attributed to the company that actually owns it
 --
 -- SAFETY CLASS: RED. This migration recreates a SECURITY DEFINER function
@@ -44,7 +44,7 @@
 -- whitelisting via demand_structured_v2_public, status filter, ordering,
 -- limit, grants — is byte-identical to the 20260711330000 definition.
 --
--- ROLLBACK: supabase/rollbacks/20260807120000_worker_demand_org_attribution_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20260807130000_worker_demand_org_attribution_v1.down.sql
 -- restores the prior profile-join definition verbatim (it knowingly
 -- reintroduces the duplication defect — documented there).
 

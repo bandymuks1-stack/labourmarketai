@@ -1,4 +1,4 @@
--- Rollback for 20260807120000_worker_demand_org_attribution_v1.
+-- Rollback for 20260807130000_worker_demand_org_attribution_v1.
 --
 -- Restores the 20260711330000 BODY of list_open_demand_for_workers()
 -- verbatim — i.e. the profile-based company join. Grants restore to the
