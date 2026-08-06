@@ -16,7 +16,29 @@ export type CheckoutRejectReason =
   | "not_a_paid_plan"
   | "not_eligible"
   | "price_not_configured"
-  | "not_authenticated";
+  | "not_authenticated"
+  | "organization_required"
+  | "not_organization_member";
+
+/**
+ * Server-side verdict of resolving the organization for a company/agency plan:
+ *   - "not_required"  — a personal plan (worker audience); no org involved;
+ *   - "verified"      — the caller is owner/manager of the resolved org;
+ *   - "missing"       — an org is required but none could be resolved
+ *                       (none supplied and no single owned org to default to);
+ *   - "not_member"    — an org was supplied but the caller has no active
+ *                       owner/manager membership in it.
+ */
+export type OrgBindingResult =
+  | "not_required"
+  | "verified"
+  | "missing"
+  | "not_member";
+
+/** Audiences whose paid plan MUST be bound to a canonical organization. */
+export function planRequiresOrganization(audience: PlanAudience): boolean {
+  return audience === "company" || audience === "agency";
+}
 
 export type CheckoutGateResult =
   | { ok: true; planKey: string; audience: PlanAudience }
@@ -35,6 +57,12 @@ export function evaluateCheckoutRequest(input: {
   userRoles: readonly string[];
   isAdmin: boolean;
   priceConfigured: boolean;
+  /**
+   * Org binding verdict for company/agency plans (server-resolved, never
+   * trusted from the client). Personal plans pass "not_required". Callers
+   * that predate org binding may omit it ONLY for worker-audience plans.
+   */
+  orgBinding?: OrgBindingResult;
 }): CheckoutGateResult {
   // Billing must be in a valid Stripe TEST state.
   if (input.config.state === "stripe_live_blocked") {
@@ -56,6 +84,18 @@ export function evaluateCheckoutRequest(input: {
   // Eligibility: the plan's audience role, or an admin (for internal testing).
   const eligible = input.isAdmin || input.userRoles.includes(plan.audience);
   if (!eligible) return { ok: false, status: 403, reason: "not_eligible" };
+
+  // Company/agency plans are bound to a canonical organization with a
+  // verified active owner/manager membership — fail closed on anything else.
+  if (planRequiresOrganization(plan.audience)) {
+    const binding = input.orgBinding ?? "missing";
+    if (binding === "not_member") {
+      return { ok: false, status: 403, reason: "not_organization_member" };
+    }
+    if (binding !== "verified") {
+      return { ok: false, status: 400, reason: "organization_required" };
+    }
+  }
 
   if (!input.priceConfigured) {
     return { ok: false, status: 400, reason: "price_not_configured" };

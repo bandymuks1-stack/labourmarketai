@@ -1,8 +1,34 @@
 # LMC Commercial System Train v1 — canonical train document
 
-Status: **Wagon 0 (this document) + Wagon 1 (ledger foundation) only.**
-Everything commercial ships **disabled**. No production migration, no Stripe
-activation, no LMC issued to any real user, no referral rewards, no emails.
+Status (recorded 2026-08-06, owner directive "CLOSE MULTI-ORGANIZATION
+STRUCTURAL TRAIN" §9):
+
+**`LMC_LEDGER_FOUNDATION_PRODUCTION_ACTIVE_END_USER_ECONOMY_DISABLED`**
+
+Available (production-active since ledger `20260720190000`):
+- immutable ledger (append-only `lmc_transactions`, no UPDATE/DELETE);
+- `lmc_accounts` (person XOR company) / `lmc_lots` / `lmc_lot_consumptions`;
+- expiry, reversal and idempotency mechanics (`idempotency_key`,
+  `original_transaction_id`, reversal kinds);
+- the 1 LMC = 1 EUR doctrine (`currency='LMC'`, `amount_cents`).
+
+Still DISABLED (all six `lmc_settings` flags false in prod AND pinned false
+in code — `apps/web/lib/billing/lmc-flags.ts`, guard
+`stripe-lmc-separation.test.ts`): promotional issuance, purchases, top-ups,
+referrals, spending, spend-to-entitlement, and every user-economy UI.
+
+No LMC flag is activated by the multi-org train or the Stripe TEST v2
+package. Commercial/LMC pricing remains a later Commercial Train AFTER the
+W program. NOTE for that train: `lmc_accounts.subject_type` is
+person-XOR-company (keyed to `companies.id`) and predates the M-P0-7
+canonical billing subject (`profile | organization`) — aligning the LMC
+subject model with `organizations` is a design task for the Commercial
+Train, recorded here so it is not discovered late.
+
+Prior status: **Wagon 0 (this document) + Wagon 1 (ledger foundation) only.**
+Everything commercial ships **disabled**. No production migration beyond the
+foundation, no Stripe activation, no LMC issued to any real user, no
+referral rewards, no emails.
 
 Owner decisions in this document are BINDING (received 2026-07-20). Everything
 marked `OWNER GATE` requires a later explicit owner decision and is **not**

@@ -434,11 +434,14 @@ describe("NO new DB migration in this PR", () => {
     // paired rollback, unapplied until the owner's production decision).
     // Bumped 186 -> 187 for M-P0-6 (org demand spine v2, `20260806200000`,
     // supersedes #1016) — the shared slot recounted after #1032 merged.
-    // Bumped 188 -> 189 for the M-P0-4 gap closure
+    // Bumped 188 -> 189 for Stripe TEST multi-subject v2 (`20260806220000`,
+    // supersedes #844's schema) — owner-gated, UNAPPLIED (rebase onto the
+    // post-W6 main recounted the shared slot: 187+W6+this = 189).
+    // Bumped 189 -> 190 for the M-P0-4 gap closure
     // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
-    // membership seed trigger + guarded backfill, owner-gated RED, paired
-    // rollback, unapplied until the owner's production decision).
-    expect(count).toBeLessThanOrEqual(189);
+    // membership seed trigger + guarded backfill; merge of post-#1040 main
+    // recounted the shared slot: 189+this = 190).
+    expect(count).toBeLessThanOrEqual(190);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

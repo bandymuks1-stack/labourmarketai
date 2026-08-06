@@ -56,7 +56,11 @@ export interface SubscriptionUpsert {
   providerSubscriptionId: string;
   providerCustomerId: string | null;
   ownerId: string | null; // our profile id (from metadata / client_reference_id)
-  planKey: string | null; // from metadata.plan_key
+  planKey: string | null; // from metadata.canonical_plan_key / plan_key
+  /** Canonical organizations.id from signature-verified metadata — the
+   *  BILLING SUBJECT binding for company/agency plans (M-P0-7 model);
+   *  null = personal subject. */
+  organizationId: string | null;
   status: SubStatus;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
@@ -137,7 +141,8 @@ export function parseSubscriptionObject(
     providerSubscriptionId: obj.id,
     providerCustomerId: idFrom(obj.customer),
     ownerId: asString(meta.client_reference_id) ?? asString(meta.owner_id),
-    planKey: asString(meta.plan_key),
+    planKey: asString(meta.canonical_plan_key) ?? asString(meta.plan_key),
+    organizationId: asString(meta.organization_id),
     status: mapStripeStatus(obj.status as string | undefined),
     currentPeriodStart: periodFromSubscription(obj, "current_period_start"),
     currentPeriodEnd: periodFromSubscription(obj, "current_period_end"),
@@ -150,7 +155,7 @@ export function parseSubscriptionObject(
 export function parseCheckoutSessionObject(
   obj: Record<string, unknown> | null | undefined,
   testMode: boolean,
-): Pick<SubscriptionUpsert, "providerSubscriptionId" | "providerCustomerId" | "ownerId" | "planKey" | "testMode"> | null {
+): Pick<SubscriptionUpsert, "providerSubscriptionId" | "providerCustomerId" | "ownerId" | "planKey" | "organizationId" | "testMode"> | null {
   if (!obj) return null;
   const meta = (obj.metadata as Record<string, unknown> | undefined) ?? {};
   // `subscription` may arrive as an id string or an expanded object.
@@ -160,7 +165,8 @@ export function parseCheckoutSessionObject(
     providerSubscriptionId: sub,
     providerCustomerId: idFrom(obj.customer),
     ownerId: asString(obj.client_reference_id) ?? asString(meta.client_reference_id),
-    planKey: asString(meta.plan_key),
+    planKey: asString(meta.canonical_plan_key) ?? asString(meta.plan_key),
+    organizationId: asString(meta.organization_id),
     testMode,
   };
 }
