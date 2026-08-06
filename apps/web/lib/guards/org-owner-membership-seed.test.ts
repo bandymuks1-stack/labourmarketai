@@ -69,8 +69,29 @@ describe("M-P0-4 gap closure — org owner membership seed v1", () => {
     expect(sql).toMatch(
       /new\.id,\s*new\.owner_profile_id,\s*'owner',\s*'active',\s*now\(\),\s*'org-create'/i,
     );
-    // A null owner never seeds.
-    expect(sql).toMatch(/new\.owner_profile_id\s+is\s+not\s+null/i);
+  });
+
+  it("fails closed (§4): an org INSERT without an owner_profile_id is refused", () => {
+    // The canonical invariant: organization created → owner membership
+    // active, atomically. A creation that cannot establish the owner must
+    // not succeed — never a silent skip.
+    expect(sql).toMatch(/new\.owner_profile_id\s+is\s+null/i);
+    expect(sql).toMatch(/org_without_owner/);
+    expect(sql).toMatch(/errcode\s*=\s*'23514'/i);
+  });
+
+  it("backfill never writes the ambiguous class (§5)", () => {
+    // An org whose ACTIVE owner membership belongs to a DIFFERENT profile
+    // than organizations.owner_profile_id is ambiguous: reported via
+    // NOTICE, excluded from both the backfill and the post-condition,
+    // never written.
+    const exclusions = sql.match(
+      /m2\.profile_id\s*<>\s*o\.owner_profile_id/gi,
+    ) ?? [];
+    // Once in the backfill guard, twice in the post-condition census.
+    expect(exclusions.length).toBeGreaterThanOrEqual(3);
+    expect(sql).toMatch(/raise\s+notice/i);
+    expect(sql).toMatch(/AMBIGUOUS/);
   });
 
   it("is idempotent: live-tuple NOT EXISTS guard + ON CONFLICT DO NOTHING", () => {
@@ -114,6 +135,12 @@ describe("M-P0-4 gap closure — org owner membership seed v1", () => {
     );
     expect(sql).toMatch(
       /revoke\s+all\s+on\s+function\s+public\.company_memberships_seed_org_owner\(\)\s+from\s+anon/i,
+    );
+    // §7 exactness: default privileges hand authenticated an EXECUTE grant
+    // at creation — revoked explicitly, nothing but trigger machinery may
+    // hold this function.
+    expect(sql).toMatch(
+      /revoke\s+all\s+on\s+function\s+public\.company_memberships_seed_org_owner\(\)\s+from\s+authenticated/i,
     );
   });
 

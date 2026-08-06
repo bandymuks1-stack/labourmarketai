@@ -27,19 +27,31 @@
 --
 -- ── WHAT ───────────────────────────────────────────────────────────────────
 --   (a) public.company_memberships_seed_org_owner() + AFTER INSERT trigger
---       on public.organizations — every new org with a non-null
---       owner_profile_id gets ONE active owner membership
---       (role 'owner', status 'active', accepted_at now(), source
---       'org-create'). Idempotent: skipped when a LIVE (invited|active)
---       tuple already exists; ON CONFLICT DO NOTHING backstops races on
---       the company_memberships_live_key partial unique index.
+--       on public.organizations — every new org gets ONE active owner
+--       membership (role 'owner', status 'active', accepted_at now(),
+--       source 'org-create'). FAIL-CLOSED: an INSERT with a NULL
+--       owner_profile_id is REFUSED (org_without_owner) — an organization
+--       whose canonical owner membership cannot be created must not be
+--       created at all (fresh-organization-owner-membership-v1 §4). Every
+--       reviewed writer (the company mirror, the agency mirror, the
+--       team-creation RPC of 20260705220000, the 0013 backfills) always
+--       stamps the creator, so no legitimate path is affected. Idempotent: skipped when a LIVE
+--       (invited|active) tuple already exists; ON CONFLICT DO NOTHING
+--       backstops races on the company_memberships_live_key partial
+--       unique index.
 --   (b) a one-time backfill inserting the missing owner membership for
 --       every existing org whose owner has NO live membership row —
---       mirroring the original backfill rule exactly
+--       mirroring the original backfill rule
 --       (organizations.owner_profile_id → role 'owner', status 'active'),
 --       with source 'backfill:organizations.owner_profile_id:v2' so these
 --       rows stay distinguishable from the 20260806090000 wave while still
---       matching the 'backfill:%' provenance class.
+--       matching the 'backfill:%' provenance class. AMBIGUITY GUARD (§5):
+--       an org where a DIFFERENT profile already holds an active owner
+--       membership is classified ambiguous and NEVER written — the
+--       backfill must not mint a second owner where governance truth and
+--       organizations.owner_profile_id disagree. Such rows are reported
+--       via NOTICE and excluded from the post-condition (production count
+--       on 2026-08-06: zero).
 --
 -- Doctrine invariants preserved (owner directive §14):
 --   * governance ≠ employment — NO engagement_contexts row is created,
@@ -95,23 +107,35 @@ security definer
 set search_path = public
 as $$
 begin
-  if new.owner_profile_id is not null then
-    insert into public.company_memberships
-      (organization_id, profile_id, role, status, accepted_at, source)
-    select new.id, new.owner_profile_id, 'owner', 'active', now(), 'org-create'
-    where not exists (
-      select 1 from public.company_memberships m
-       where m.organization_id = new.id
-         and m.profile_id = new.owner_profile_id
-         and m.status in ('invited','active')
-    )
-    on conflict do nothing;
+  -- §4 fail-closed: creation must not succeed when the canonical owner
+  -- membership cannot be created. Every reviewed writer stamps the creator;
+  -- a NULL here is a defect, not a state to tolerate silently.
+  if new.owner_profile_id is null then
+    raise exception
+      'org_without_owner: organization % has no owner_profile_id — the canonical owner membership cannot be created, so the organization must not be created',
+      new.id
+      using errcode = '23514';
   end if;
+  insert into public.company_memberships
+    (organization_id, profile_id, role, status, accepted_at, source)
+  select new.id, new.owner_profile_id, 'owner', 'active', now(), 'org-create'
+  where not exists (
+    select 1 from public.company_memberships m
+     where m.organization_id = new.id
+       and m.profile_id = new.owner_profile_id
+       and m.status in ('invited','active')
+  )
+  on conflict do nothing;
   return new;
 end $$;
 
 revoke all on function public.company_memberships_seed_org_owner() from public;
 revoke all on function public.company_memberships_seed_org_owner() from anon;
+-- default privileges grant EXECUTE to authenticated at creation; nothing but
+-- the trigger machinery may hold this function (§7: grants are EXACT — the
+-- grant would be inert either way, Postgres refuses direct calls to
+-- trigger-returning functions, but inert is not exact).
+revoke all on function public.company_memberships_seed_org_owner() from authenticated;
 
 drop trigger if exists on_org_owner_membership_seed on public.organizations;
 create trigger on_org_owner_membership_seed
@@ -119,9 +143,13 @@ create trigger on_org_owner_membership_seed
   for each row execute function public.company_memberships_seed_org_owner();
 
 -- ── 3. One-time backfill for already-orphaned orgs ────────────────────────
--- Mirrors 20260806090000's rule verbatim: organizations.owner_profile_id →
--- owner/active. Guarded: only orgs whose owner has NO live membership row
--- gain one; revoked history never blocks a re-seed of live governance.
+-- Mirrors 20260806090000's rule: organizations.owner_profile_id →
+-- owner/active. Guarded twice:
+--   * only orgs whose canonical owner has NO live membership row gain one
+--     (revoked history never blocks a re-seed of live governance);
+--   * AMBIGUITY GUARD (§5): an org where a DIFFERENT profile already holds
+--     an active owner membership is never written — do not mint a second
+--     owner where governance truth and owner_profile_id disagree.
 insert into public.company_memberships
   (organization_id, profile_id, role, status, accepted_at, source)
 select o.id, o.owner_profile_id, 'owner', 'active', now(),
@@ -134,15 +162,45 @@ select o.id, o.owner_profile_id, 'owner', 'active', now(),
         and m.profile_id = o.owner_profile_id
         and m.status in ('invited','active')
    )
+   and not exists (
+     select 1 from public.company_memberships m2
+      where m2.organization_id = o.id
+        and m2.role = 'owner' and m2.status = 'active'
+        and m2.profile_id <> o.owner_profile_id
+   )
 on conflict do nothing;
 
 -- ── 4. Post-conditions ────────────────────────────────────────────────────
--- After this migration NO org with an owner_profile_id may lack a live
--- membership row for that owner — the exact defect the finding names.
+-- After this migration NO unambiguous org with an owner_profile_id may lack
+-- a live membership row for that owner — the exact defect the finding
+-- names. Ambiguous orgs (a different active owner already present) are the
+-- §5 do-not-write class: reported, never blocking, never written.
 do $$
 declare
-  orphaned int;
+  orphaned  int;
+  ambiguous int;
 begin
+  select count(*) into ambiguous
+    from public.organizations o
+   where o.owner_profile_id is not null
+     and not exists (
+       select 1 from public.company_memberships m
+        where m.organization_id = o.id
+          and m.profile_id = o.owner_profile_id
+          and m.status in ('invited','active')
+     )
+     and exists (
+       select 1 from public.company_memberships m2
+        where m2.organization_id = o.id
+          and m2.role = 'owner' and m2.status = 'active'
+          and m2.profile_id <> o.owner_profile_id
+     );
+  if ambiguous > 0 then
+    raise notice
+      'owner-membership seed: % organization(s) left untouched as AMBIGUOUS (a different active owner already holds governance) — resolve by hand',
+      ambiguous;
+  end if;
+
   select count(*) into orphaned
     from public.organizations o
    where o.owner_profile_id is not null
@@ -151,6 +209,12 @@ begin
         where m.organization_id = o.id
           and m.profile_id = o.owner_profile_id
           and m.status in ('invited','active')
+     )
+     and not exists (
+       select 1 from public.company_memberships m2
+        where m2.organization_id = o.id
+          and m2.role = 'owner' and m2.status = 'active'
+          and m2.profile_id <> o.owner_profile_id
      );
   if orphaned > 0 then
     raise exception
