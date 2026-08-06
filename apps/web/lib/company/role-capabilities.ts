@@ -40,6 +40,9 @@ export type OrganizationCapability =
   | "manage-projects"
   /** Demand / shortlist / scouting employer surface. */
   | "manage-demand"
+  /** Organization billing: checkout, cancel, portal (M-P0-7). Owner/admin
+   *  ONLY — membership alone is never billing authority. */
+  | "manage-billing"
   /** See the member directory of the organization. */
   | "view-directory";
 
@@ -49,6 +52,7 @@ const ALL: readonly OrganizationCapability[] = [
   "manage-roster",
   "manage-projects",
   "manage-demand",
+  "manage-billing",
   "view-directory",
 ];
 

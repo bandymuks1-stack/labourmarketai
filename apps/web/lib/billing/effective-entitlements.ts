@@ -11,6 +11,7 @@ import {
 } from "@/lib/billing/entitlements-v1";
 import type { FeatureKey, PlanAudience } from "@/lib/billing/plans";
 import type { SubStatus } from "@/lib/billing/webhook-core";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 
 /**
  * Effective entitlements (Stripe sprint PR5) — the server read path. Joins the
@@ -21,6 +22,7 @@ import type { SubStatus } from "@/lib/billing/webhook-core";
  */
 
 const RELATION_ABSENT = "42P01";
+const UNDEFINED_COLUMN = "42703";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -68,16 +70,53 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
   const roles = ((roleRows ?? []) as { role: string }[]).map((r) => r.role);
   const audience = pickAudience(roles);
 
+  // M-P0-7: the ENTITLEMENT SUBJECT is the active workspace's billing
+  // subject — an organization workspace reads ONLY that organization's
+  // subscription rows; the personal workspace reads ONLY personal rows.
+  // NO ENTITLEMENT TRANSFER on workspace switch: a personal plan never
+  // empowers an organization surface and organization A's plan never leaks
+  // into B or into Personal. Feature-detected: until the owner-gated
+  // multi-subject schema (PR #844's `organization_id` /
+  // `origin_organization_id`) applies, an organization subject has no rows
+  // (→ free, which `entitlementAllows` keeps permissive while billing is
+  // inactive) and the personal query falls back to the legacy owner-only
+  // shape.
+  const billing = await resolveBillingSubject();
+  const subject = billing.subject;
+
   // Real subscription + manual override (degrade if the billing tables are
   // not applied yet → null, i.e. free/permissive).
   let subscriptionPlanKey: string | null = null;
   let subscriptionStatus: SubStatus | null = null;
   let manualOverridePlanKey: string | null = null;
-  const { data: subs, error } = await asAny(supabase)
-    .from("billing_subscriptions")
-    .select("plan_key, status, provider_subscription_id, updated_at")
-    .eq("owner_id", user.id)
-    .order("updated_at", { ascending: false });
+  let subsQueryResult;
+  if (subject && subject.type === "organization") {
+    subsQueryResult = await asAny(supabase)
+      .from("billing_subscriptions")
+      .select("plan_key, status, provider_subscription_id, updated_at")
+      .eq("organization_id", subject.id)
+      .order("updated_at", { ascending: false });
+    if (subsQueryResult.error?.code === UNDEFINED_COLUMN) {
+      // multi-subject schema unapplied — an org subject has no rows yet
+      subsQueryResult = { data: [], error: null };
+    }
+  } else {
+    subsQueryResult = await asAny(supabase)
+      .from("billing_subscriptions")
+      .select("plan_key, status, provider_subscription_id, updated_at, origin_organization_id")
+      .eq("owner_id", user.id)
+      .is("origin_organization_id", null)
+      .order("updated_at", { ascending: false });
+    if (subsQueryResult.error?.code === UNDEFINED_COLUMN) {
+      // legacy schema — every row is personal by definition
+      subsQueryResult = await asAny(supabase)
+        .from("billing_subscriptions")
+        .select("plan_key, status, provider_subscription_id, updated_at")
+        .eq("owner_id", user.id)
+        .order("updated_at", { ascending: false });
+    }
+  }
+  const { data: subs, error } = subsQueryResult;
   if (!error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = (subs ?? []) as any[];
