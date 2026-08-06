@@ -1,0 +1,79 @@
+BEGIN
+DO
+CREATE FUNCTION
+REVOKE
+REVOKE
+GRANT
+CREATE FUNCTION
+COMMENT
+REVOKE
+REVOKE
+GRANT
+INSERT 0 4
+INSERT 0 0
+INSERT 0 3
+=== 1. ADMIN membership (non-creator) may edit the bound company ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0700000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                        case                         
+-----------------------------------------------------
+ PASS 1: admin membership edits the selected company
+(1 row)
+
+=== 2. MANAGER cannot edit company identity ===
+psql:scripts/db-proof/mp04-authority-widening-proof.sql:65: NOTICE:  PASS 2: manager refused (not_owner) — operations, not identity
+DO
+=== 3. MEMBER cannot edit ===
+psql:scripts/db-proof/mp04-authority-widening-proof.sql:80: NOTICE:  PASS 3: member refused
+DO
+=== 4. STRANGER refused with the SAME error (anti-oracle) ===
+psql:scripts/db-proof/mp04-authority-widening-proof.sql:103: NOTICE:  PASS 4a: stranger refused
+psql:scripts/db-proof/mp04-authority-widening-proof.sql:103: NOTICE:  PASS 4b: missing row → same not_owner (no existence oracle)
+DO
+=== 5. LEGACY CREATOR compatibility still edits ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                  case                   
+-----------------------------------------
+ PASS 5: creator compatibility arm edits
+(1 row)
+
+=== 6. manages_organization role matrix ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0700000-0000-0000-0000-000000000002","role":"authenticated"}
+(1 row)
+
+                case                 
+-------------------------------------
+ PASS 6a: manager membership manages
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0700000-0000-0000-0000-000000000003","role":"authenticated"}
+(1 row)
+
+              case               
+---------------------------------
+ PASS 6b: member does NOT manage
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0700000-0000-0000-0000-000000000004","role":"authenticated"}
+(1 row)
+
+               case                
+-----------------------------------
+ PASS 6c: stranger does NOT manage
+(1 row)
+
+ROLLBACK
+=== proof complete — transaction rolled back, zero drift ===

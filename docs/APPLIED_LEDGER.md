@@ -14,6 +14,22 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806180000_membership_authority_widening_v1` (M-P0-4 consumer slice, DB side)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 09:02:58 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260806090258`, name `membership_authority_widening_v1` (version/name apply-time drift — match on `name`). Ledger 182 → **183**, exactly ONE row added |
+| PR | **#1028** — merged via its successor branch after this accounting commit |
+| Owner gate | "CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" (2026-08-06) §1/§3; reviewed HEAD `47c7d818`; rebased onto `f24f55d8` with migration AND rollback byte-identical through the rebase (sha256 `b9c9e949…`, `38e9b055…`; comment-stripped executable `4f2650af…` identical before/after the marker commit) |
+
+**Preflight**: `manages_organization` prosrc = engagement arm ONLY; `save_company_setup_v3` edit guard = creator ONLY; memberships 10 (all owner/active backfill, zero unexpected writes); 10 orgs / 7 companies (all 7 org-bound, 0 creator-less); migration absent from ledger; fingerprints org `4e788740…`, membership `024490f3…`, company `caa80f9e…`.
+
+**Post-apply**: `manages_organization` carries BOTH arms (engagement + active membership owner/admin/manager/external_manager — `member` NEVER), SECURITY DEFINER, `search_path` pinned, anon EXECUTE false; `save_company_setup_v3` edit guard = creator OR active owner/admin membership on the bound organization, anti-oracle preserved, anon false. Live read-only role-play: a membership owner manages their org, a stranger is refused. **Edit-authority matrix 9/9 PASS** on the seeded local stack (transactional, rolled back — `docs/audits/evidence/multi-org-m-p0-4/authority-widening-matrix-proof-output.txt`): admin edits, manager refused (operations ≠ identity), member refused, stranger refused with the SAME `not_owner` as a missing row, creator compatibility intact, manages_organization matrix (manager yes / member no / stranger no). **ZERO business-row mutation**: every count and all three fingerprints identical before/after (audit_logs still 34); the data-dml finding is function-body statement text only. Advisors after apply: **0 ERROR**, 232 WARN + 2 INFO — identical to pre-apply. Rollback present, NOT executed (restores both originals verbatim).
+
+**Not done / out of scope**: no production QA accounts, no company edits against real identities, no #1016, no seeding.
+
 ### ✅ APPLIED TO PROD — `20260806120000_company_membership_commands_v1` (M-P0-4 Slice 2)
 
 | Field | Value |
