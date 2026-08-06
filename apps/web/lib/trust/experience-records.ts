@@ -306,8 +306,8 @@ async function readExperienceRows(
   build: (q: unknown) => unknown,
 ): Promise<RawRows> {
   const sb = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query = (select: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     build((sb as any).from("experience_records").select(select)) as PromiseLike<{
       data: unknown;
       error: { code?: string } | null;
