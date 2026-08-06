@@ -93,6 +93,17 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "landing_path", // first landing path (no query string)
   // ── Mid-funnel marketplace events (W14 Pilot Analytics slice v1).
   "candidate_count", // number — how many candidates a match preview produced
+  // ── M-P0-8 organization-aware attribution (server-resolved in
+  //    lib/telemetry/analytics-attribution.ts — a call site can pass these
+  //    but the server-funnel emitter stamps them from the VALIDATED active
+  //    workspace, so a fabricated org never enters through the front door;
+  //    ids are opaque uuids, not PII).
+  "workspace_type", // 'personal' | 'organization'
+  "organization_id", // the validated active workspace's organization (uuid)
+  "org_role", // governance role behind the workspace (owner|admin|manager|…)
+  "billing_subject", // M-P0-7 canonical subject: 'profile' | 'organization'
+  "ref_type", // referenced entity type: 'project' | 'booking' | 'engagement'
+  "ref_id", // referenced entity id (opaque uuid)
 ]);
 
 const SCALAR_VALUE_MAX = 200;
