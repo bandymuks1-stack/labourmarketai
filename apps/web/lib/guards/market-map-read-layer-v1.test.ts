@@ -434,7 +434,11 @@ describe("NO new DB migration in this PR", () => {
     // paired rollback, unapplied until the owner's production decision).
     // Bumped 186 -> 187 for M-P0-6 (org demand spine v2, `20260806200000`,
     // supersedes #1016) — the shared slot recounted after #1032 merged.
-    expect(count).toBeLessThanOrEqual(188);
+    // Bumped 188 -> 189 for the M-P0-4 gap closure
+    // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
+    // membership seed trigger + guarded backfill, owner-gated RED, paired
+    // rollback, unapplied until the owner's production decision).
+    expect(count).toBeLessThanOrEqual(189);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
