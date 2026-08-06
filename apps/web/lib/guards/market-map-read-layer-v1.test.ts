@@ -426,7 +426,11 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 184 -> 185 for M-P0-4 slice 2 (membership commands,
     // `20260806120000`) — seven SECURITY DEFINER commands, owner-gated,
     // UNAPPLIED at pin time.
-    expect(count).toBeLessThanOrEqual(185);
+    // Bumped 185 -> 186 for M-P0-6 (org demand spine v2, `20260806200000`,
+    // supersedes #1016) — owner-gated, UNAPPLIED. NOTE: PR #1028 (authority
+    // widening) claims the same slot on ITS branch; whichever merges second
+    // rebases and recounts.
+    expect(count).toBeLessThanOrEqual(186);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
