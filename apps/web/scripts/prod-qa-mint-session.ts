@@ -34,13 +34,32 @@ import { createClient } from "@supabase/supabase-js";
 
 import { CANONICAL_HOST } from "../lib/domain/canonical";
 import {
+  PROD_QA_MANAGER_EMAIL,
+  PROD_QA_OWNER_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
   describeProdQaTarget,
 } from "../lib/testing/prod-qa-guard";
 
-const OUT = join(process.cwd(), "tests", "e2e", ".storage-state.prod-qa.json");
+/** `--identity` handle → allowlisted address (never an email on the CLI). */
+const IDENTITY_EMAILS = {
+  owner: PROD_QA_OWNER_EMAIL,
+  manager: PROD_QA_MANAGER_EMAIL,
+  worker: PROD_QA_WORKER_EMAIL,
+} as const;
+type IdentityHandle = keyof typeof IDENTITY_EMAILS;
+
+function parseIdentity(argv: readonly string[]): IdentityHandle | null {
+  const arg = argv.find((a) => a.startsWith("--identity="));
+  const v = arg?.slice("--identity=".length) ?? "";
+  return v === "owner" || v === "manager" || v === "worker" ? v : null;
+}
+
+/** Per-identity state file — all matched by the `.storage-state.prod-qa.*`
+ *  gitignore family. */
+const outFor = (handle: IdentityHandle): string =>
+  join(process.cwd(), "tests", "e2e", `.storage-state.prod-qa.${handle}.json`);
 
 /**
  * The host the session cookie is scoped to — the CANONICAL apex.
@@ -57,6 +76,16 @@ async function main(): Promise<void> {
   const anonKey = process.env.PROD_QA_ANON_KEY;
   const serviceKey = process.env.PROD_QA_SERVICE_ROLE_KEY;
 
+  const handle = parseIdentity(process.argv.slice(2));
+  if (!handle) {
+    fail(
+      "pass --identity=owner | --identity=manager | --identity=worker.\n" +
+        "The selector maps only to the three code-reviewed synthetic addresses.",
+    );
+    return;
+  }
+  const OUT = outFor(handle);
+
   if (!anonKey || !serviceKey) {
     fail(
       "PROD_QA_ANON_KEY and PROD_QA_SERVICE_ROLE_KEY must both be set, through " +
@@ -69,7 +98,7 @@ async function main(): Promise<void> {
   try {
     target = assertProdQaTarget({
       url,
-      email: PROD_QA_WORKER_EMAIL,
+      email: IDENTITY_EMAILS[handle],
       anonKey,
       serviceKey,
     });

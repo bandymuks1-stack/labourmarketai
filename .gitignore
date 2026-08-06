@@ -45,6 +45,7 @@ next-env.d.ts
 # identity — it must never be committed, attached to a report, or shipped
 # inside a trace. Minted per run by scripts/prod-qa-mint-session.ts.
 /apps/web/tests/e2e/.storage-state.prod-qa.json
+/apps/web/tests/e2e/.storage-state.prod-qa.*.json
 /apps/web/test-results/
 /apps/web/playwright-report/
 

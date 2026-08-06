@@ -1,0 +1,116 @@
+[
+  {
+    "at": "2026-08-06T14:17:12.417Z",
+    "step": "smoke-landing",
+    "ok": true,
+    "note": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje"
+  },
+  {
+    "at": "2026-08-06T14:17:20.234Z",
+    "step": "smoke-auth-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/onboarding"
+  },
+  {
+    "at": "2026-08-06T14:17:26.593Z",
+    "step": "smoke-auth-manager",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/onboarding"
+  },
+  {
+    "at": "2026-08-06T14:17:33.865Z",
+    "step": "smoke-auth-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/onboarding"
+  },
+  {
+    "at": "2026-08-06T14:19:25.952Z",
+    "step": "onboard-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/onboarding"
+  },
+  {
+    "at": "2026-08-06T14:21:40.986Z",
+    "step": "onboard-owner",
+    "ok": false,
+    "note": "https://labourmarket.ai/lt/onboarding"
+  },
+  {
+    "at": "2026-08-06T14:22:20.954Z",
+    "step": "onboard-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company"
+  },
+  {
+    "at": "2026-08-06T14:23:14.522Z",
+    "step": "onboard-manager",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company"
+  },
+  {
+    "at": "2026-08-06T14:23:31.221Z",
+    "step": "onboard-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/profile"
+  },
+  {
+    "at": "2026-08-06T14:25:56.583Z",
+    "step": "02-org-a-rename",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/start/company"
+  },
+  {
+    "at": "2026-08-06T14:26:21.666Z",
+    "step": "03-org-b-create",
+    "ok": false,
+    "note": "https://labourmarket.ai/lt/dashboard/start/company?new=1"
+  },
+  {
+    "at": "2026-08-06T14:26:36.948Z",
+    "step": "04-org-c-rename",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/start/company"
+  },
+  {
+    "at": "2026-08-06T14:30:36.131Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T14:32:09.511Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T14:36:18.996Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T14:40:53.422Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T14:42:43.935Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T14:44:14.059Z",
+    "step": "07-workspace-owner-alfa",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T15:17:35.172Z",
+    "step": "demand-created",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company#company-requests"
+  }
+]

@@ -34,20 +34,27 @@ const LOCAL_GUARD = "lib/testing/local-supabase-guard.ts";
 
 const PROD_URL = `${PRODUCTION_ORIGIN}`;
 
-describe("exactly one synthetic identity is allowlisted", () => {
-  it("the allowlist has one entry, and it is unmistakably synthetic", () => {
-    expect(PROD_QA_IDENTITIES).toHaveLength(1);
-    expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
-    expect(PROD_QA_WORKER_EMAIL).toMatch(/^qa\./);
-    // `+` addressing keeps it routable to a mailbox the owner controls while
-    // being obviously not a person's address.
-    expect(PROD_QA_WORKER_EMAIL).toContain("+");
+describe("exactly the three approved synthetic identities are allowlisted", () => {
+  it("the allowlist has the three +multiw entries, each unmistakably synthetic", () => {
+    // Owner PROD_QA approval 2026-08-06 (prod-qa-account.md v2): OWNER,
+    // MANAGER, WORKER. Nothing else — and the superseded +goal3 identity is
+    // GONE, not kept around "just in case".
+    expect(PROD_QA_IDENTITIES).toHaveLength(3);
+    for (const email of PROD_QA_IDENTITIES) {
+      expect(email).toMatch(/^qa\./);
+      // `+` addressing keeps it routable to a mailbox the owner controls
+      // while being obviously not a person's address.
+      expect(email).toContain("+multiw@labourmarket.ai");
+    }
+    expect(PROD_QA_IDENTITIES[2]).toBe(PROD_QA_WORKER_EMAIL);
   });
 
-  it("accepts the allowlisted identity against production", () => {
-    const t = assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL });
-    expect(t.email).toBe(PROD_QA_WORKER_EMAIL);
-    expect(t.origin).toBe(PRODUCTION_ORIGIN);
+  it("accepts each allowlisted identity against production", () => {
+    for (const email of PROD_QA_IDENTITIES) {
+      const t = assertProdQaTarget({ url: PROD_URL, email });
+      expect(t.email).toBe(email);
+      expect(t.origin).toBe(PRODUCTION_ORIGIN);
+    }
   });
 
   it("normalises case and surrounding whitespace, and nothing else", () => {
@@ -58,13 +65,15 @@ describe("exactly one synthetic identity is allowlisted", () => {
     expect(t.email).toBe(PROD_QA_WORKER_EMAIL);
   });
 
-  it("REFUSES every identity that is not the allowlisted one", () => {
+  it("REFUSES every identity that is not allowlisted — including the superseded v1 one", () => {
     for (const email of [
       "someone@labourmarket.ai", //          a real user
       "qa.worker@labourmarket.ai", //        close, but not it
+      "qa.worker+goal3@labourmarket.ai", //  the SUPERSEDED v1 identity
       "qa.worker+goal4@labourmarket.ai", //  same prefix, different tag
-      "qa.worker+goal3@evil.example", //     same local part, other domain
-      "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
+      "qa.worker+multiw@evil.example", //    same local part, other domain
+      "qa.worker+multiw@labourmarket.ai.evil.example", // suffix attack
+      "qa.intruder+multiw@labourmarket.ai", // right tag, wrong handle
       "", //                                  nothing
       undefined,
     ]) {

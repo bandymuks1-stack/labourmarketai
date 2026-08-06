@@ -46,6 +46,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 import {
+  PROD_QA_MANAGER_EMAIL,
+  PROD_QA_OWNER_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -54,9 +56,49 @@ import {
 
 const ACK = "--i-understand-production";
 
+/**
+ * The `--identity` selector maps ONLY to the three hard-coded, guard-
+ * allowlisted addresses (prod-qa-account.md v2 cast). It is a HANDLE, never
+ * an email: an arbitrary address cannot be expressed on the command line.
+ */
+const IDENTITY_HANDLES = {
+  owner: {
+    email: PROD_QA_OWNER_EMAIL,
+    role: "company" as const,
+    fullName: "QA Ona Savininkė (test)",
+  },
+  manager: {
+    email: PROD_QA_MANAGER_EMAIL,
+    role: "company" as const,
+    fullName: "QA Marius Vadybininkas (test)",
+  },
+  worker: {
+    email: PROD_QA_WORKER_EMAIL,
+    role: "worker" as const,
+    fullName: "QA Vytas Darbininkas (test)",
+  },
+} as const;
+type IdentityHandle = keyof typeof IDENTITY_HANDLES;
+
+function parseIdentity(argv: readonly string[]): IdentityHandle | null {
+  const arg = argv.find((a) => a.startsWith("--identity="));
+  const v = arg?.slice("--identity=".length) ?? "";
+  return v === "owner" || v === "manager" || v === "worker" ? v : null;
+}
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const revoke = argv.includes("--revoke");
+
+  const handle = parseIdentity(argv);
+  if (!handle) {
+    fail(
+      "pass --identity=owner | --identity=manager | --identity=worker.\n" +
+        "The selector maps only to the three code-reviewed synthetic addresses.",
+    );
+    return;
+  }
+  const identity = IDENTITY_HANDLES[handle];
 
   // The acknowledgement is deliberate friction. A script that writes to a
   // production auth schema should never run because someone pressed up-arrow.
@@ -84,7 +126,7 @@ async function main(): Promise<void> {
   try {
     target = assertProdQaTarget({
       url,
-      email: PROD_QA_WORKER_EMAIL,
+      email: identity.email,
       serviceKey,
     });
   } catch (err) {
@@ -139,10 +181,15 @@ async function main(): Promise<void> {
     email_confirm: true,
     app_metadata: {
       qa_synthetic: true,
-      qa_purpose: "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
+      qa_purpose:
+        "labourmarket.ai production multi-W write proof (W6/W7/W8/W11/W12) — owner approval 2026-08-06",
       qa_provisioned_by: "owner",
     },
-    user_metadata: { role: "worker", locale: "lt" },
+    user_metadata: {
+      role: identity.role,
+      full_name: identity.fullName,
+      locale: "lt",
+    },
   });
 
   if (error || !data?.user) {

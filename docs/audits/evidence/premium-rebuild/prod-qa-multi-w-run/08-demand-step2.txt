@@ -1,0 +1,209 @@
+LabourMarket.ai
+QA-SYNTHETIC Alfa (testinis subjektas)
+Mano erdvė
+Darbo žurnalas
+Kalendorius
+Žinutės
+Žemėlapis
+Ryšiai
+Lietuvių
+QA-SYNTHETIC Alfa (testinis subjektas)
+▾
+Q
+← Veiksmų centras
+Mano erdvės →
+
+ĮMONĖ · PROFILIS IR POREIKIAI
+
+Įmonės darbo erdvė
+
+Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.
+
+STATYBOS ĮMONĖ
+Susiję darbuotojai
+0
+Projektai
+0
+Laukiantys pakvietimai
+0
+Vietos
+0
+Galerija
+0
+Kalendorius
+Jūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.
+QA-SYNTHETIC Alfa (testinis subjektas)LT
+AKTYVI · NEPATVIRTINTA
+
+Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.
+
+Sukurti paklausą →
+Ką čia galite padaryti
+
+Tvarkykite įmonės duomenis ir pateikite darbuotojų poreikį.
+
+1
+Įrašykite poreikį (profesija, vieta, kiek žmonių).
+2
+Sistema struktūruoja poreikį ir paruošia atrankai.
+3
+Peržiūrėkite tinkamus ir pradėkite pokalbį.
+Naujas poreikis / projektas
+
+Po to: poreikis išsaugomas jūsų paskyroje ir paruoštas atrankai.
+
+Personalo agentūros
+
+Priimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.
+
+RYŠIO KVIETIMAI
+
+Laukiančių kvietimų nėra.
+
+PRIJUNGTOS AGENTŪROS
+
+Kol kas prijungtų agentūrų nėra.
+
+Įmonės pasiruošimas
+NEUŽBAIGTA
+
+Ko realiam samdymui reikia iš tavo įmonės. Tai nėra teisinė konsultacija — detales pasitikslink su buhalteriu ar patarėju.
+
+Registracijos numeris
+Sąskaitų el. paštas
+
+DAR NEPATVIRTINTA (ŽMOGAUS ADMINISTRATORIAUS SPRENDIMAS)
+
+Operacijų erdvė
+
+Ką jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.
+
+LAUKIANTYS KVIETIMAI
+0
+PRIIMTI DARBUOTOJAI
+0
+ORGANIZACIJOS NARIAI
+1
+ĮJUNGTA PERŽIŪRA
+0
+Darbuotojai / Komanda
+
+Pakvieskite darbuotojus, matykite priimtų sąrašą, pridėkite juos prie organizacijos ir įjunkite žurnalo peržiūrą — viskas žemiau šiame puslapyje.
+
+Darbuotojai / Komanda →
+Žurnalo peržiūra
+
+1) darbuotojas priima · 2) pridedate prie organizacijos · 3) įjungiate peržiūrą · 4) darbuotojas žymi darbą · 5) jūs patvirtinate.
+
+Peržiūrėti įrašus →
+Projektai, objektai ir užsakovai
+Struktūra paruošta
+
+Čia matote projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.
+
+Projektai: 0 · dar nesukurta nė vieno projekto
+
+Susiejimas su darbo žurnalu dar neįjungtas. Projekto kontekstą jau galite sukurti, bet niekas neužpildoma automatiškai.
+
+Sukurti projekto kontekstą
+Atidaryti projektų lentą →
+Poreikiai
+
+Pateikite struktūruotą poreikį ir sekite jo būseną.
+
+Atidaryti poreikius →
+PASKYRIMAS SUSIJĘS SU
+
+Žmonių paskyrimas jungiasi su planu, žemėlapiu ir įrašu.
+
+Planas ir rezervacijos
+Paskyrimo laikai ir patvirtinimai
+Žemėlapis
+Kur yra tavo komanda ir darbas
+Įrodymai ir ataskaitos
+Atliktas darbas tampa įrašu
+Darbo jėgos planavimas
+Būsimi darbai ir pajėgumas — trūkumai, rizikos data ir siūlomas žingsnis.
+
+Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.
+
+JŪSŲ ORGANIZACIJA
+
+Ši rolė skirta realiai organizacijai ar atstovaujamam klientui. Juodraščiai lieka privatūs, kol nuspręsite kitaip. Rimtam naudojimui reikės įmonės duomenų (šalies, pavadinimo, registracijos kodo, korespondencijos adreso, atstovo vaidmens).
+
+Komandos / brigados
+
+Brigada — tai reali darbo grupė tavo įmonėje. Sukurk brigadą, pakviesk susietus darbuotojus — kiekvienas prisijungia tik pats priėmęs kvietimą — ir matyk, ką grupė deklaruoja mokanti.
+
+Įgūdžių skaičiai — pačių narių deklaruoti. „Patvirtinta“ reiškia, kad vadovas patvirtino įgūdį per dienyno peržiūrą. Tai nėra komandos sertifikatas ir ne reitingas.
+
+Brigadų dar nėra. Sukurk pirmąją žemiau — išgalvotų komandų nerodome.
+
+Naujos brigados pavadinimas
+Sukurti brigadą
+Pakviesti
+Įmonės darbuotojai
+
+Susiekite savo įmonę su realiais darbuotojais. Savaiminis užsiregistravimas lieka atviras: žmogus gali užsiregistruoti pats ir vėliau būti susietas. Pakvietimas el. paštu — papildomas kanalas, ne vienintelis.
+
+Susiję darbuotojai
+
+Dar nėra susietų darbuotojų
+
+Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.
+
+ROLIŲ KOORDINAVIMAS
+
+Šiuo metu visi susieti žmonės yra darbuotojai. Meistro, brigadininko ar vadovo rolių priskyrimas ir komandų koordinavimas dar neįjungtas.
+
+Galite pakviesti darbuotojus žemiau. Rolių priskyrimas bus pridėtas vėliau.
+
+Pakviesti darbuotoją el. paštu
+
+Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas.
+
+El. pašto adresas
+Žinutė pakviestajam (neprivaloma)
+Iki 500 simbolių. Saugoma kartu su pakvietimu.
+Sukurti kvietimą
+Laukiantys pakvietimai
+
+Šiuo metu laukiančių pakvietimų nėra.
+
+Vietos
+
+Būstinė, veiklos vietos ir norimos rinkos — keliose šalyse.
+
+PARUOŠTA — LAUKIA SAVININKO AKTYVAVIMO
+
+Vietų sąrašas paruoštas, bet dar neįjungtas. Įjungimas — savininko sprendimas.
+
+Galerija
+
+Nuotraukos iš jūsų projektų darbo žurnalų.
+
+Nuotraukų dar nėra. Jos atsiranda, kai darbuotojai prideda nuotraukas prie žurnalo įrašų projekte.
+
+Organizacijos nariai ir peržiūra
+
+Įtraukite darbuotoją į savo organizaciją ir atverkite jo darbo žurnalą peržiūrai. Vadovas tada gali patvirtinti įgūdžius, kuriuos įrodo įrašai.
+
+SAVININKAS
+BE PERŽIŪROS
+QA Ona Savininkė (test)
+Savininkas — pašalinti negalima
+
+PRIDĖTI DARBUOTOJĄ Į ORGANIZACIJĄ
+
+Visi priimti darbuotojai jau pridėti į organizaciją.
+
+Viešas verslo profilis
+
+Paskelbkite viešą savo verslo puslapį — pasiekiamą adresu labourmarket.ai/business/jusu-vardas. Numatytai išjungta.
+
+Padaryti verslo profilį viešą
+
+Įjungus, viešame puslapyje rodoma jūsų tapatybė, vieši kontaktai, aktyvios paslaugos ir aktyvūs skelbimai. Privatūs duomenys niekada nerodomi.
+
+Viešas adresas
+/b
