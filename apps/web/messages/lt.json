@@ -11737,6 +11737,13 @@
       "positive": "Teigiama patirtis",
       "negative": "Neigiama patirtis"
     },
+    "subject": {
+      "worker": "Apie darbuotoją",
+      "organization": "Apie organizaciją"
+    },
+    "authorSide": {
+      "organization": "Pateikta organizacijos vardu"
+    },
     "interaction": {
       "accepted_booking": "Rezervacija",
       "completed_engagement": "Darbo santykis",

@@ -24,6 +24,8 @@ export function ExperienceModerationItem({
   moderationStatus,
   disputeStatus,
   interactionKind,
+  subjectType,
+  authorSide,
 }: {
   id: string;
   sentiment: "positive" | "negative";
@@ -31,6 +33,11 @@ export function ExperienceModerationItem({
   moderationStatus: string;
   disputeStatus: string;
   interactionKind: string;
+  /** 'worker' = person subject, 'organization' = organization subject. */
+  subjectType: "worker" | "organization";
+  /** Null = the author-side column is not applied on this stack — the label
+   *  is omitted rather than guessed. */
+  authorSide: "person" | "organization" | null;
 }) {
   const locale = useLocale();
   const t = useTranslations("experience");
@@ -61,6 +68,17 @@ export function ExperienceModerationItem({
         <span className="text-meta text-text-muted">· {t(`moderation.${status}`)}</span>
         {/* Interaction TYPE only — never the private transaction content. */}
         <span className="text-meta text-text-muted">· {t(`interaction.${interactionKind}`)}</span>
+        {/* The moderator must see WHO the record is about and whether it was
+            authored for an organization — an org-subject row must never read
+            as a row about a worker. */}
+        <span className="text-meta text-text-muted" data-testid="experience-moderation-subject">
+          · {t(`subject.${subjectType}`)}
+        </span>
+        {authorSide === "organization" ? (
+          <span className="text-meta text-text-muted" data-testid="experience-moderation-author-side">
+            · {t("authorSide.organization")}
+          </span>
+        ) : null}
         {disputeStatus !== "none" ? (
           <span className="text-meta text-state-warning">· {t(`dispute.${disputeStatus}`)}</span>
         ) : null}

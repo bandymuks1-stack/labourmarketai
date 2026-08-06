@@ -11737,6 +11737,13 @@
       "positive": "Positive experience",
       "negative": "Negative experience"
     },
+    "subject": {
+      "worker": "About a worker",
+      "organization": "About an organization"
+    },
+    "authorSide": {
+      "organization": "Submitted on behalf of an organization"
+    },
     "interaction": {
       "accepted_booking": "Booking",
       "completed_engagement": "Engagement",

@@ -11737,6 +11737,13 @@
       "positive": "Положительный опыт",
       "negative": "Отрицательный опыт"
     },
+    "subject": {
+      "worker": "О работнике",
+      "organization": "Об организации"
+    },
+    "authorSide": {
+      "organization": "Подано от имени организации"
+    },
     "interaction": {
       "accepted_booking": "Бронирование",
       "completed_engagement": "Трудовые отношения",
