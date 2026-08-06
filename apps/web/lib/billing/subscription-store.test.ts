@@ -63,6 +63,11 @@ function installFakeAdmin(handler: Handler): Call[] {
             call.filters.push([col, val]);
             return builder;
           },
+          // M-P0-7 subject scoping filters (`.is("origin_organization_id", null)`)
+          is(col: string, val: unknown) {
+            call.filters.push([col, val]);
+            return builder;
+          },
           maybeSingle: () => Promise.resolve(finish()),
           then(onOk: (v: unknown) => unknown, onErr?: (e: unknown) => unknown) {
             return Promise.resolve(finish()).then(onOk, onErr);
@@ -96,6 +101,7 @@ const SUB: SubscriptionUpsert = {
   providerCustomerId: "cus_1",
   ownerId: "owner_1",
   planKey: "company_pilot",
+  organizationId: null,
   status: "active",
   currentPeriodStart: "2026-08-01T00:00:00.000Z",
   currentPeriodEnd: "2026-09-01T00:00:00.000Z",

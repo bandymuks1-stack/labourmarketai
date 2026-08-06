@@ -12,6 +12,7 @@ import type { SubscriptionUpsert, PaymentStatus } from "@/lib/billing/webhook-co
 
 const RELATION_ABSENT = "42P01";
 const UNIQUE_VIOLATION = "23505";
+const UNDEFINED_COLUMN = "42703";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function admin(): any {
@@ -120,7 +121,7 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     if (!existing) return "ok";
   }
 
-  const row = {
+  const row: Record<string, unknown> = {
     owner_id: ownerId,
     plan_key: planKey,
     provider: "stripe",
@@ -133,11 +134,18 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     test_mode: u.testMode,
     updated_at: new Date().toISOString(),
   };
+  // M-P0-7 subject binding: a signature-verified organization binding is
+  // NEVER discarded. The column key is included ONLY when a binding exists,
+  // so personal rows keep the legacy shape; if the multi-subject schema is
+  // unapplied (42703) the org-bound event stays unprocessed (needs-migration)
+  // instead of being persisted subject-less.
+  if (u.organizationId) row.organization_id = u.organizationId;
   const { error } = await sb
     .from("billing_subscriptions")
     .upsert(row, { onConflict: "provider,provider_subscription_id" });
   if (!error) return "ok";
   if (error.code === RELATION_ABSENT) return "needs-migration";
+  if (error.code === UNDEFINED_COLUMN) return "needs-migration";
   if (error.code === UNIQUE_VIOLATION) {
     // The upsert's conflict target is (provider, provider_subscription_id),
     // so a 23505 here comes from the OTHER unique key:
@@ -156,13 +164,29 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
     //   loss on a paid row — refuse instead, keep the event unprocessed, and
     //   surface `conflict-live-subscription` for an operator decision.
     if (!ownerId || !planKey) return "error";
-    const { data: held, error: heldErr } = await sb
+    // Conflict lookup is scoped to the BILLING SUBJECT (M-P0-7): an org-bound
+    // event collides only within its organization's scope; a personal event
+    // only within the personal (origin-null) scope. Falls back to the legacy
+    // unscoped lookup while the multi-subject schema is unapplied (42703).
+    let heldQuery = sb
       .from("billing_subscriptions")
       .select("provider_subscription_id, status")
       .eq("provider", "stripe")
       .eq("owner_id", ownerId)
-      .eq("plan_key", planKey)
-      .maybeSingle();
+      .eq("plan_key", planKey);
+    heldQuery = u.organizationId
+      ? heldQuery.eq("organization_id", u.organizationId)
+      : heldQuery.is("origin_organization_id", null);
+    let { data: held, error: heldErr } = await heldQuery.maybeSingle();
+    if (heldErr?.code === UNDEFINED_COLUMN) {
+      ({ data: held, error: heldErr } = await sb
+        .from("billing_subscriptions")
+        .select("provider_subscription_id, status")
+        .eq("provider", "stripe")
+        .eq("owner_id", ownerId)
+        .eq("plan_key", planKey)
+        .maybeSingle());
+    }
     if (heldErr || !held) return "error";
     const heldSubId =
       typeof held.provider_subscription_id === "string"
@@ -174,7 +198,9 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
       heldSubId.startsWith("manual_") ||
       DEAD_STATUSES.has(String(held.status));
     if (!replaceable) return "conflict-live-subscription";
-    const { error: updErr } = await sb
+    // Supersede-in-place, scoped to the SAME billing subject (never a row of
+    // another organization or of the personal scope). Same 42703 fallback.
+    let updQuery = sb
       .from("billing_subscriptions")
       .update({
         provider_customer_id: customerId,
@@ -189,6 +215,27 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
       .eq("provider", "stripe")
       .eq("owner_id", ownerId)
       .eq("plan_key", planKey);
+    updQuery = u.organizationId
+      ? updQuery.eq("organization_id", u.organizationId)
+      : updQuery.is("origin_organization_id", null);
+    let { error: updErr } = await updQuery;
+    if (updErr?.code === UNDEFINED_COLUMN) {
+      ({ error: updErr } = await sb
+        .from("billing_subscriptions")
+        .update({
+          provider_customer_id: customerId,
+          provider_subscription_id: u.providerSubscriptionId,
+          status: u.status,
+          current_period_start: u.currentPeriodStart,
+          current_period_end: u.currentPeriodEnd,
+          cancel_at_period_end: u.cancelAtPeriodEnd,
+          test_mode: u.testMode,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("provider", "stripe")
+        .eq("owner_id", ownerId)
+        .eq("plan_key", planKey));
+    }
     if (!updErr) return "ok";
     if (updErr.code === RELATION_ABSENT) return "needs-migration";
     return "error";

@@ -85,6 +85,7 @@ export async function POST(req: Request) {
           providerCustomerId: link.providerCustomerId,
           ownerId: link.ownerId,
           planKey: link.planKey,
+          organizationId: link.organizationId,
           status: "incomplete",
           currentPeriodStart: null,
           currentPeriodEnd: null,
