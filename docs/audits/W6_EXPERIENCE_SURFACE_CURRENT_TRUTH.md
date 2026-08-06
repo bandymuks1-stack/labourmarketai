@@ -85,14 +85,35 @@ re-learned: the main tree is never an audit target — a pinned worktree is
     this documentation reconciliation + the PRODUCTION WRITE PROOF through
     the deployed surface (the deployed app IS `779357aa`).
 
-## What W6 still needs to close
+## Production QA write proof — EXECUTED 2026-08-06/07 (closes W6)
 
-Only the production QA write proof, now executable with the retained cast:
-accepted booking `88a43ead` (worker `c267dc8b…` ↔ org QA-SYNTHETIC Alfa
-`9e4f4467…`) is the eligible interaction. Person-author → organization-subject
-and organization-author → worker-subject submissions run through
-`?result=experiences`; moderation approve/reject runs on the operator's admin
-queue at `/dashboard/admin`; response + count-only render follow. No demand
-needs reopening; no new QA identity is required.
+Run with the retained cast (booking `88a43ead`, worker `c267dc8b…` ↔ org
+QA-SYNTHETIC Alfa `9e4f4467…`), every write through the DEPLOYED surface
+(`779357aa`), every claim verified in the production DB:
 
-State: `W6_FIT_NOT_RATING_SURFACE_SHIPPED_ON_MAIN_PENDING_PRODUCTION_QA_PROOF`
+1. **Submissions** (2026-08-06 20:27 UTC): person-author → organization-subject
+   `dce74d70-…` and organization-author → worker-subject `23e52ec7-…`, both via
+   `?result=experiences`, both `[QA-SYNTHETIC]`-labelled, `author_side` correct.
+2. **Moderation** (operator, 20:49 UTC): both approved on the `/lt/dashboard/admin`
+   band-2d queue → `moderation_status=published`.
+3. **Organization response** (21:18 UTC): submitted as `qa.owner+multiw`
+   (`f394ca7f…`) through the shipped `ExperienceResponseForm`; shipped success
+   state rendered ("Atsakymas pateiktas…"). DB: `experience_responses` went
+   0 → 1; the single row (`caf2e340-…`) attaches to `dce74d70` only,
+   `moderation_status=submitted`.
+4. **Duplicate refused live**: second UI submission answered
+   `experience-response-error-response_exists` ("Atsakymas jau pateiktas.");
+   row count stayed 1.
+5. **Count-only consumption**: `get_experience_counts` returns
+   `{positive:1, negative:0, disputed:0, total_considered:1}` for both
+   subjects — unchanged by the response (right-of-reply never moves counts).
+   No stars / numeric scores / ranking anywhere: no rating column in schema,
+   no aggregate beyond the counts RPC.
+6. **Isolation**: a real unrelated authenticated prod user sees 0 experience
+   rows and 0 responses (RLS); `anon` gets 42501 on the table AND on the
+   counts RPC — the anonymous public reads nothing.
+7. **No demand reopened**; the QA session's entire prod write-set is the one
+   response row. QA login was a one-time admin-minted link (passwordless
+   identity), consumed on use, session logged out and purged after the proof.
+
+State: `W6_FIT_NOT_RATING_SURFACE_SHIPPED_AND_PRODUCTION_PROVEN`
