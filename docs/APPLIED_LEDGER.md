@@ -14,6 +14,24 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806200000_org_demand_spine_v2` (M-P0-6)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 09:24:29 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260806092429`, name `org_demand_spine_v2` (version/name apply-time drift — match on `name`). Ledger 183 → **184**, exactly ONE row added |
+| PR | **#1029** — merged via its successor branch after this accounting commit; supersedes #1016 (CLOSED) |
+| Owner gate | "CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" (2026-08-06) §1/§4; reviewed HEAD `190240b1`; rebased onto post-#1032 main with migration AND rollback byte-identical (sha256 `732fa7ab…` / `64c59ead…`; comment-stripped executable `b3b5388e…` identical through the marker commit). Shared ratchet slot resolved: 186 → **187** after #1032 took 186 |
+
+**Preflight (classified, not guessed)**: 17 customer_requests — ALL 17 owned by exactly-one-company+exactly-one-org owners (0 multi-company owners, 0 company-less owners, 0 ambiguous); 1 demand_shortlist (stampable via its demand); 0 booking_requests; kinds `agency_offer,company_request`, statuses `closed,draft,submitted`; pre-apply SELECT policies verbatim = the legs the migration re-creates; raw authenticated UPDATE grant on customer_requests confirmed (the surface the invoker-rights guard must catch); public RPC fingerprints `list_open_demand_for_workers` `0a34c1f8…`, `list_open_demand_for_agencies` `feecf625…`; migration absent from ledger.
+
+**Backfill (actual = predicted)**: **17 demand + 1 shortlist + 0 booking** rows stamped; 0 rows left NULL of the eligible set; 0 ambiguous rows stamped. The only production rows changed by the apply are these 18 authorized attribution stamps.
+
+**Post-apply verified**: 3 `organization_id` columns + 3 partial indexes; 5 triggers (3 guard + 2 inherit); 5 functions — `has_org_demand_access` / `submit_demand_request_v2` / `save_demand_draft_v2` SECURITY DEFINER + pinned search_path + anon revoked/authenticated EXECUTE, the two trigger fns granted to NOBODY; `demand_org_attribution_guard` **SECURITY INVOKER by design** (so `current_user` exposes the raw authenticated surface). Live proofs (role-played, read-only/refused-write): raw PATCH value→value rewrite **refused** (`organization_attribution_immutable`); a membership-less stranger reads **0** stamped demand rows; the demand owner's own leg intact. **Public marketplace contracts unchanged**: both RPC fingerprints identical pre/post. **Zero side effects outside the authorized stamps**: organizations/companies/memberships/engagements/projects/experiences/profiles/billing counts and fingerprints identical; audit_logs still 34; **no booking row created**. Advisors: **0 ERROR**; +3 WARN = exactly the three new authenticated callables under `authenticated_security_definer_function_executable` (intended design). Full behavioural matrix (two-context stamping, forged org refusal, inheritance, member exclusion, A↛B isolation, archive-then-drop rollback) proven 14/14 on the local stack — `docs/audits/evidence/multi-org-m-p0-6/mp06-two-org-actor-proof-output.txt`.
+
+**Not done / out of scope**: no production demand inserted, no production QA users, no #1016 apply, no marketplace read widening. Rollback (`…down.sql`) present, NOT executed — archives all attribution into `demand_org_attribution_archive` before any column drop.
+
 ### ✅ APPLIED TO PROD — `20260806180000_membership_authority_widening_v1` (M-P0-4 consumer slice, DB side)
 
 | Field | Value |
