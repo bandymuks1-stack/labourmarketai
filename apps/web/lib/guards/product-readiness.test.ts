@@ -1975,7 +1975,12 @@ describe("no migration files added by this sprint", () => {
     // ratchet slot resolved here after #1028/#1032 merged first.
     // 188 -> 189: Stripe TEST multi-subject v2 (20260806220000, supersedes
     // #844's schema) — owner-gated, UNAPPLIED; rebased onto the post-W6 main.
-    const SPRINT_BASELINE = 189;
+    // 189 -> 190: M-P0-4 gap closure (20260807090000_org_owner_membership_
+    // seed_v1) — AFTER INSERT trigger on organizations seeding the owner
+    // membership + guarded one-time backfill for post-backfill orphan orgs
+    // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
+    // shared slot: 189+this = 190.
+    const SPRINT_BASELINE = 190;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

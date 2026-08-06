@@ -14,6 +14,26 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260807090000_org_owner_membership_seed_v1` (Finding-2 / M-P0-4 gap closure)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 17:36:50 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260806173650`, name `org_owner_membership_seed_v1` (version/name apply-time drift — match on `name`). Ledger 186 → **187**, exactly ONE row added |
+| PR | **#1043** (`fix/fresh-organization-owner-membership-v1`, supersedes #1041 CLOSED) |
+| Owner gate | **Finding-2 apply approval** (2026-08-06), reviewed HEAD `61b444bd`; binding comment-stripped executable sha256 `e4aebfb657122c663e1ee46a4d319988a0b77176d851cf7adc402dcd90e51668` identical pre/post marker (marker commit `9140405a` is comments-only). Migration sha256 (pre-marker) `f4e79346…0605c`, rollback `d6e3bec5…ec81c`. Marker covers exactly the four findings (`security-definer-function`, `grant-or-revoke`, `create-trigger`, `data-dml`) |
+
+**Preflight (immediately before apply, post-#1040-merge)**: organizations 13, canonical 10, backfill-eligible EXACTLY 3 (QA-SYNTHETIC Alfa `9e4f4467` / Gama `3a2732d1` / Beta `d95280ac`), ambiguous 0, no-owner-evidence 0, active owner memberships 10, migration absent from ledger, seed trigger absent.
+
+**What it does**: AFTER INSERT trigger `on_org_owner_membership_seed` on `public.organizations` — every new org atomically gets ONE `owner/active/org-create` membership (idempotent: live-tuple NOT EXISTS + ON CONFLICT DO NOTHING on `company_memberships_live_key`); fail-closed refusal of ownerless org INSERTs (`org_without_owner`, 23514); guarded one-time backfill (`backfill:organizations.owner_profile_id:v2`) with the §5 ambiguity guard (a different active owner → never written, NOTICE'd); post-condition raises unless zero unambiguous orphans remain. Definer function pins `search_path`; EXECUTE revoked from PUBLIC, anon AND authenticated.
+
+**Post-apply verified**: active owner memberships **10 → 13**; exactly 3 v2-provenance rows; Alfa/Beta/Gama each hold exactly one active owner membership; zero duplicate live tuples; trigger present; SECDEF + pinned path confirmed; anon/authenticated EXECUTE = false; live fail-closed probe (rolled-back DO block): ownerless INSERT refused, 0 residue rows. **Zero business-row changes outside company_memberships** — organizations 13, companies 10, customer_requests 17, projects 5, booking_requests 0, engagement_contexts 52 (no employee converted), experience_records 0, billing 0/0, profiles 35: all identical pre/post. Security advisors: 0 ERROR, no new finding.
+
+**Not done / out of scope**: no membership bootstrapped by hand, no QA row touched directly, no demand created pre-verification. The paired rollback (`drops trigger + function only, never membership rows`) stays unexecuted.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260806220000_stripe_multi_subject_v2` (M-P0-7 / Stripe TEST v2)
 
 | Field | Value |
