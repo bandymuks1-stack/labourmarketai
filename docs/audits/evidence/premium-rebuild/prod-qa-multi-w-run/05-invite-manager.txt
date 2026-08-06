@@ -1,0 +1,58 @@
+LabourMarket.ai
+QA-SYNTHETIC Alfa (testinis subjektas)
+Mano erdvė
+Darbo žurnalas
+Kalendorius
+Žinutės
+Žemėlapis
+Ryšiai
+Lietuvių
+QA-SYNTHETIC Alfa (testinis subjektas)
+▾
+Q
+
+VEIKLOS PRADŽIA
+
+Nuo ko pradėti
+
+Trys realios veiklos kryptys. Kiekviena rodo dabartinę būseną — ar jau pradėta, ar dar laukia veiksmo, ar blokuojama duomenų bazės lygmenyje.
+
+Organizacijos nariai
+
+Aktyvios erdvės valdymo narystės. Narystė nėra įdarbinimas — ji nekuria ir nenutraukia darbo santykių.
+
+QA Ona Savininkė (test)
+SAVININKAS
+Palikti organizaciją
+dca5ed71
+VADOVAS
+pakviesta
+Atšaukti pakvietimą
+El. paštas
+Rolė
+Savininkas
+Administratorius
+Vadovas
+Išorinis vadovas
+Narys
+Pakviesti
+
+Pakvietimas išsiųstas.
+
+Įmonė
+dar nepradėta
+
+Sukurkite įmonės profilį. Tipą (statyba, personalo agentūra, subrangovas, gamyba, paslaugos, klientas / užsakovas, kita) pasirinksite profilyje — vienas profilis visiems tipams.
+
+Pradėti įmonės nustatymą →
+Pirkėjas
+dar nepradėta
+
+Ieškote žmogaus ar paslaugos sau? Susikurkite pirkėjo profilį ir aprašykite, ko reikia. Užklausos juodraštis išsaugomas ir lieka privatus. Jei perkate įmonės vardu — kurkite įmonės profilį su tipu „Klientas / užsakovas“.
+
+Pradėti pirkėjo profilį →
+
+Sąžiningas etapas · Be sintetinių darbuotojų · Be sugalvotų agentūrų · Visi skaičiai realūs iš DB.
+
+Sukurta Rexora
+✎

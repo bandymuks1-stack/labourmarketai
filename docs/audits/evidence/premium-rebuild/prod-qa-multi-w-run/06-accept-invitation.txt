@@ -1,0 +1,47 @@
+LabourMarket.ai
+Asmeninė erdvė
+Mano erdvė
+Darbo žurnalas
+Kalendorius
+Žinutės
+Žemėlapis
+Ryšiai
+Lietuvių
+QA-SYNTHETIC Gama (testinis subjektas)
+▾
+Q
+
+VEIKLOS PRADŽIA
+
+Nuo ko pradėti
+
+Trys realios veiklos kryptys. Kiekviena rodo dabartinę būseną — ar jau pradėta, ar dar laukia veiksmo, ar blokuojama duomenų bazės lygmenyje.
+
+Pakvietimai į organizacijas
+
+Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.
+
+Pakvietimas priimtas.
+
+Įmonė
+✓ Pradėta
+
+Įmonės profilis pradėtas.
+
+Pavadinimas
+QA-SYNTHETIC Gama (testinis subjektas)
+Šalis
+LT
+Atidaryti įmonės nustatymą →
+Eiti į įmonės dashboardą →
+Pirkėjas
+dar nepradėta
+
+Ieškote žmogaus ar paslaugos sau? Susikurkite pirkėjo profilį ir aprašykite, ko reikia. Užklausos juodraštis išsaugomas ir lieka privatus. Jei perkate įmonės vardu — kurkite įmonės profilį su tipu „Klientas / užsakovas“.
+
+Pradėti pirkėjo profilį →
+
+Sąžiningas etapas · Be sintetinių darbuotojų · Be sugalvotų agentūrų · Visi skaičiai realūs iš DB.
+
+Sukurta Rexora
+✎

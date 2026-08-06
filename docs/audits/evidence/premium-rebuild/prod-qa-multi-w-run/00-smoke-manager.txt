@@ -1,15 +1,23 @@
-LabourMarket.ai
-Pradedate kaip asmuo ar įmonė?
+L
+LabourMarket
+QA-SYNTHETIC Gama (testinis subjektas)
+Lietuvių
+Q
 
-Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau.
+L
+LABOURMARKET AI
 
-✓
-Asmuo
-Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo žurnalas.
-✓
-Įmonė
-Atstovauju organizacijai — samdyti, valdyti projektus, siūlyti darbuotojus ar komandas, pateikti poreikį.
+Labas, QA. Kuo šiandien galiu padėti?
+Reikia darbuotojų
+Kandidatai
+Projektai
+Tavo darbas dabar
++
+−
+ Leaflet | © OpenStreetMap contributors
+Realios galimybės ir projektai, sugrupuoti pagal vietą
+dar 8 galimybės be nurodytos vietos — jos matomos pokalbio paieškoje
 
-Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo žurnale. Vieną dieną tai gali būti vertingiausia tavo CV dalis.
+Skaitoma…
 
-Tęsti
+✎

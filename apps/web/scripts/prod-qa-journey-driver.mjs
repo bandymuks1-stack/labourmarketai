@@ -279,6 +279,37 @@ try {
     await snap(p, "08-demand-created");
     log({ step: "demand-created", ok: true, note: p.url() });
     console.log(text.slice(0, 700));
+  } else if (stage === "demand2") {
+    // Step 5 (corrected): the wizard's final control is demand-create (not
+    // demand-submit/demand-confirm — that was why the first attempt never
+    // submitted). Fill → next → next → create → wait for the submitted
+    // summary.
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company#company-requests`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await p.getByTestId("demand-role").fill("[QA-SYNTHETIC - nereaguoti / test] Pagalbinis darbininkas");
+    await p.getByTestId("demand-description").fill(
+      "[QA-SYNTHETIC] Sintetinis testinis poreikis - NEREAGUOTI. Vienas pagalbinis darbininkas vienai dienai Vilniuje. Sis irasas bus uzdarytas iskart po patikros.",
+    );
+    await p.waitForTimeout(500);
+    await p.getByTestId("demand-next").click();
+    await p.waitForTimeout(1500);
+    const team = p.getByTestId("demand-team-size");
+    if ((await team.count()) > 0) await team.fill("1");
+    const loc = p.getByTestId("demand-location");
+    if ((await loc.count()) > 0) await loc.fill("Vilnius");
+    await dump(p, "08b-demand-step2");
+    await snap(p, "08b-demand-step2");
+    await p.getByTestId("demand-next").click();
+    await p.waitForTimeout(2000);
+    await dump(p, "08b-demand-review");
+    await snap(p, "08b-demand-review");
+    await p.getByTestId("demand-create").click();
+    await p.waitForSelector("[data-testid=demand-submitted-summary], [data-testid=demand-error]", { timeout: 30000 });
+    const ok = (await p.locator("[data-testid=demand-submitted-summary]").count()) > 0;
+    const text = await dump(p, "08b-demand-created");
+    await snap(p, "08b-demand-created");
+    log({ step: "demand-created-v2", ok, note: ok ? "submitted-summary rendered" : text.slice(0, 200) });
   } else {
     throw new Error(`unknown stage: ${stage}`);
   }

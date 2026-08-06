@@ -112,5 +112,77 @@
     "step": "demand-created",
     "ok": true,
     "note": "https://labourmarket.ai/lt/dashboard/company#company-requests"
+  },
+  {
+    "at": "2026-08-06T17:41:55.035Z",
+    "step": "smoke-landing",
+    "ok": true,
+    "note": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje"
+  },
+  {
+    "at": "2026-08-06T17:42:05.157Z",
+    "step": "smoke-auth-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T17:42:10.085Z",
+    "step": "smoke-auth-manager",
+    "ok": false,
+    "note": "https://labourmarket.ai/lt/auth/login?next=%2Flt%2Fdashboard"
+  },
+  {
+    "at": "2026-08-06T17:42:14.669Z",
+    "step": "smoke-auth-worker",
+    "ok": false,
+    "note": "https://labourmarket.ai/lt/auth/login?next=%2Flt%2Fdashboard"
+  },
+  {
+    "at": "2026-08-06T17:43:00.972Z",
+    "step": "smoke-landing",
+    "ok": true,
+    "note": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje"
+  },
+  {
+    "at": "2026-08-06T17:43:09.542Z",
+    "step": "smoke-auth-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T17:43:16.482Z",
+    "step": "smoke-auth-manager",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T17:43:22.934Z",
+    "step": "smoke-auth-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T17:45:18.698Z",
+    "step": "demand-created",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company#company-requests"
+  },
+  {
+    "at": "2026-08-06T17:47:58.022Z",
+    "step": "demand-created-v2",
+    "ok": true,
+    "note": "submitted-summary rendered"
+  },
+  {
+    "at": "2026-08-06T17:53:56.920Z",
+    "step": "invite-manager",
+    "ok": true,
+    "note": "Pakvietimas išsiųstas."
+  },
+  {
+    "at": "2026-08-06T17:54:19.562Z",
+    "step": "accept-invitation",
+    "ok": true,
+    "note": "Pakvietimas priimtas."
   }
 ]

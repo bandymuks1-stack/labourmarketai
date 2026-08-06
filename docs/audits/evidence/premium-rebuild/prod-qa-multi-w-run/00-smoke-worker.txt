@@ -1,15 +1,47 @@
-LabourMarket.ai
-Pradedate kaip asmuo ar įmonė?
+L
+LabourMarket
+Asmeninė erdvė
+Lietuvių
+Q
 
-Pasirinkite vieną ar abu — tai tik pradžios taškas. Asmuo ir įmonė yra tapatybės; samdymas, pirkimas, darbuotojų siūlymas ar projektų valdymas yra veiksmai, kuriuos pridėsite vėliau.
+QA VYTAS DARBININKAS (TEST) · ASMENINĖ ERDVĖ
 
-✓
-Asmuo
-Ieškau darbo, siūlau savo darbą arba fiksuoju mokslus ir veiklą — profilis, įgūdžiai, CV ir darbo žurnalas.
-✓
-Įmonė
-Atstovauju organizacijai — samdyti, valdyti projektus, siūlyti darbuotojus ar komandas, pateikti poreikį.
+Mano erdvė
 
-Ką bepasirinktum — tai tik pradžios taškas; tavo darbo patirtis tyliai kaupiama Darbo žurnale. Vieną dieną tai gali būti vertingiausia tavo CV dalis.
+Čia susidėlioji savo darbo profilį, matai, ką sistema apie tave jau žino, ir ką verta padaryti toliau. Pats darbas prasideda pokalbyje žemiau.
 
-Tęsti
+MANO DARBO PROFILIS
+Ką moku
+Ko ieškau
+Kada galiu dirbti
+Kur galiu dirbti
+Kokio atlygio tikiuosi
+Kuo galiu pagrįsti patirtį
+DARBO PASIRUOŠIMAS
+
+Svarbiausia dabar: Profesija nurodyta
+
+Tai, ką pasakoji apie save. Dar neperžiūrėta žmogaus — ir tai normalu.
+
+Pradėti nuo savęs
+Papildyti mano darbo profilį
+Pridėti patirties įrodymų
+
+L
+LABOURMARKET AI
+
+Labas, QA. Kuo šiandien galiu padėti?
+Užfiksuoti darbą
+Įkelti CV
+Ieškau darbo
+Tavo darbas dabar
++
+−
+ Leaflet | © OpenStreetMap contributors
+Realios galimybės ir projektai, sugrupuoti pagal vietą
+Tavo rinka
+dar 8 galimybės be nurodytos vietos — jos matomos pokalbio paieškoje
+
+Tavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.
+
+✎
