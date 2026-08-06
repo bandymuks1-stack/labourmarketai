@@ -1,10 +1,23 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE OWNER APPROVAL (Finding-2 apply decision, 2026-08-06) ────
+--
+-- The owner reviewed the human-gate package on PR #1043 at reviewed HEAD
+-- 61b444bd (migration sha256 f4e79346…0605c; comment-stripped executable
+-- sha256 e4aebfb6…51668 — unchanged by this annotation, which is comments
+-- only) and approved applying THIS migration to production via Supabase MCP
+-- apply_migration. The approval covers exactly: atomic owner membership
+-- seeding for every new organization; fail-closed refusal of ownerless
+-- organization creation; the guarded orphan backfill (expected: exactly the
+-- three QA-SYNTHETIC organizations); and the reviewed
+-- trigger/function/grant model. Findings acknowledged and downgraded to
+-- notices for THIS file: security-definer-function, grant-or-revoke,
+-- create-trigger, data-dml. Nothing beyond that list is approved.
+--
 -- 20260807090000 — org owner membership seed v1 (M-P0-4 gap closure)
 --
 -- SAFETY CLASS: RED. SECURITY DEFINER trigger function + CREATE TRIGGER +
--- explicit revokes + a guarded one-time backfill INSERT. Ships WITHOUT a
--- human-gate marker (CODE_COMPLETE_PENDING_OWNER_GATE): CI migration-safety
--- is expected RED until a separate owner apply decision is recorded. DO NOT
--- APPLY TO PRODUCTION before that decision.
+-- explicit revokes + a guarded one-time backfill INSERT.
 --
 -- ── WHY ────────────────────────────────────────────────────────────────────
 -- PRODUCTION FINDING (2026-08-06 PROD_QA multi-org journey): organizations

@@ -635,6 +635,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/APPLIED_LEDGER.md (ledger 20260806135649). Added in the marker
       // commit 266df613 together with that record.
       "20260806230000_experience_author_subject_v1.sql",
+      // 2026-08-06: the M-P0-4 gap closure (org owner membership seed v1)
+      // gained its marker under the owner's Finding-2 apply approval
+      // (PR #1043, reviewed HEAD 61b444bd, binding executable sha256
+      // e4aebfb6…51668), recorded in
+      // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
+      // Added in the same commit as that record.
+      "20260807090000_org_owner_membership_seed_v1.sql",
     ]);
   });
 

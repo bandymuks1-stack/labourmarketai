@@ -3,10 +3,34 @@
 Migration: `supabase/migrations/20260807090000_org_owner_membership_seed_v1.sql`
 Rollback:  `supabase/rollbacks/20260807090000_org_owner_membership_seed_v1.down.sql`
 
-State: `FRESH_ORGANIZATION_OWNER_MEMBERSHIP_CODE_COMPLETE_PENDING_HUMAN_GATE`
+State: `FRESH_ORGANIZATION_OWNER_MEMBERSHIP_APPROVED_APPLY_IN_PROGRESS`
 
-NO approval marker is present. CI `migration-safety` is expected RED until the
-owner records the apply decision. This document is the decision package.
+## OWNER DECISION — GIVEN 2026-08-06 (Finding-2 apply approval)
+
+The owner approved, against reviewed PR #1043 HEAD
+`61b444bde41cb8b5988cc03b35e3c9042e0685b2` and binding executable sha256
+`e4aebfb657122c663e1ee46a4d319988a0b77176d851cf7adc402dcd90e51668`:
+
+1. applying `20260807090000_org_owner_membership_seed_v1` to production via
+   Supabase MCP `apply_migration`;
+2. exactly: atomic owner membership seeding for every new organization;
+   fail-closed refusal of ownerless organization creation; the guarded
+   orphan backfill (exactly three expected QA owner memberships); the
+   reviewed trigger/function/grant model;
+3. the four migration-safety findings (`security-definer-function`,
+   `grant-or-revoke`, `create-trigger`, `data-dml`) as acknowledged notices;
+4. merging PR #1043 after production verification and normal Vercel
+   deployment.
+
+Final production preflight re-run immediately before apply (2026-08-06,
+post-#1040-merge): total 13, canonical 10, backfill-eligible EXACTLY 3
+(QA-SYNTHETIC Alfa `9e4f4467`, Gama `3a2732d1`, Beta `d95280ac`), ambiguous
+0, no-owner-evidence 0, active owner memberships 10, migration absent from
+ledger, trigger absent, executable hash exact, no unrelated migration in
+the branch (branch delta vs main = exactly this package).
+
+The `@human-gate-approved` marker was added scoped to the four findings; the
+comment-stripped executable sha256 is UNCHANGED by the annotation.
 
 ## Checksums the approval binds to
 

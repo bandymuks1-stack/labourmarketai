@@ -48,12 +48,14 @@ const raw = readFileSync(MIGRATION, "utf8");
 const sql = stripComments(raw);
 
 describe("M-P0-4 gap closure — org owner membership seed v1", () => {
-  it("ships RED: no human-gate marker before the owner's apply decision", () => {
+  it("carries the human-gate marker recorded for the owner's apply decision", () => {
     // Same line-anchored detection as .github/scripts/migration-safety.mjs.
-    // This assertion FLIPS to `true` only when the owner's apply decision is
-    // recorded — the marker is never added on the agent's own initiative.
+    // FLIPPED to `true` on 2026-08-06: the owner's Finding-2 apply decision
+    // (PR #1043, reviewed HEAD 61b444bd, executable sha256 e4aebfb6…51668)
+    // is recorded in
+    // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(raw)).toBe(false);
+    expect(ANNOTATION.test(raw)).toBe(true);
   });
 
   it("seeds every new org via AFTER INSERT on public.organizations", () => {
