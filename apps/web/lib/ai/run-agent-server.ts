@@ -85,10 +85,11 @@ export async function runAiAgent<T = unknown>(
       // named where it happens, under a stable marker an operator can grep and
       // alert on, and it says whether real money went unattributed.
       //
-      // NOT an error: with the owner-gated `ai_runs` migration unapplied this
-      // is the EXPECTED steady state, and logging it at error level would
-      // train everyone to ignore it. It becomes actionable the moment the
-      // table exists.
+      // NOT an error: on a stack where the `ai_runs` table is absent this is
+      // the EXPECTED steady state, and logging it at error level would train
+      // everyone to ignore it. (Production HAS the table since the
+      // 2026-08-03 apply, ledger 20260803061937 — there a persistent stream
+      // of these warnings IS actionable.)
       //
       // Deliberately omits the profile id, the prompt, the payload and the
       // cost VALUE — the fact that attribution was lost is operational, the
