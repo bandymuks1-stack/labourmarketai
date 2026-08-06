@@ -29,7 +29,16 @@ import {
  */
 
 const UNDEFINED_COLUMN_CODE = "42703";
+// PostgREST reports an unknown column in an UPDATE payload as its OWN
+// schema-cache miss code, NOT Postgres 42703 — the same pair every other
+// feature-detected consumer tolerates (see entry-skill-link-write.ts).
+// Missing it here made production workspace switching DELETE the freshly
+// set session pointer: the first PROD_QA multi-org journey (2026-08-06)
+// observed `lm_active_workspace=; Expires=1970` on every org switch.
+const SCHEMA_CACHE_MISS_CODE = "PGRST204";
 const NOT_MEMBER_CODE = "42501";
+const isAbsentColumn = (code: string | undefined): boolean =>
+  code === UNDEFINED_COLUMN_CODE || code === SCHEMA_CACHE_MISS_CODE;
 
 // active_organization_id ships in the owner-gated migration 20260714210000 —
 // not in the generated DB types until applied (owned-organizations pattern).
@@ -89,7 +98,7 @@ export async function switchActiveOrganization(
     .from("profiles")
     .update({ active_organization_id: organizationId })
     .eq("id", user.id);
-  if (error && error.code !== UNDEFINED_COLUMN_CODE) {
+  if (error && !isAbsentColumn(error.code)) {
     if (error.code === NOT_MEMBER_CODE) {
       // The DB trigger disagrees with the app-level check — trust the DB and
       // roll the session pointer back.
@@ -133,7 +142,7 @@ export async function clearActiveOrganization(): Promise<SwitchOrganizationResul
     .from("profiles")
     .update({ active_organization_id: null })
     .eq("id", user.id);
-  if (error && error.code !== UNDEFINED_COLUMN_CODE) {
+  if (error && !isAbsentColumn(error.code)) {
     console.error("[clearActiveOrganization] update failed", {
       code: error.code,
       message: error.message,
