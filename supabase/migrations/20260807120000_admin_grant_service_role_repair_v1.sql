@@ -1,0 +1,121 @@
+-- ============================================================================
+-- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
+-- Never `db push`.
+--
+-- 20260807120000 — admin_grant_service_role_repair_v1
+--
+-- Repairs the documented founder admin-grant path. 2026-08-06 session:
+-- `pnpm admin:promote` and `pnpm admin:grant-superadmin --apply` both fail
+-- against production with "permission denied for table profiles".
+--
+-- ----------------------------------------------------------------------------
+-- DIAGNOSIS (corrects the initial "a hardening migration revoked the grants"
+-- theory)
+-- ----------------------------------------------------------------------------
+-- No migration ever revoked service_role's table grants on public.profiles —
+-- none existed to revoke. In this project, tables created via MCP
+-- apply_migration get NO default-privilege cascade to service_role; this is
+-- proven and documented twice already:
+--
+--   * 20260610234500_esco_service_role_grants.sql (ESCO import fix)
+--   * 20260702200000_pilot_events_service_role_report_read.sql, whose header
+--     states it verified on prod 2026-07-02 via has_table_privilege that
+--     "service_role holds ZERO table privileges ... ALSO on profiles /
+--     profile_roles".
+--
+-- service_role's ONLY grants on these tables are the column SELECTs added by
+-- 20260702200000: profiles (id, active_role) and profile_roles
+-- (profile_id, role). The founder scripts additionally need SELECT (email)
+-- (both scripts locate the target BY EMAIL), UPDATE (active_role), and an
+-- INSERT/UPDATE path into profile_roles for the durable admin signal — none
+-- of which were ever granted. The documented grant path therefore cannot
+-- have worked against this database as currently privileged.
+--
+-- ----------------------------------------------------------------------------
+-- DECISION — narrow service_role column grants, NOT a SECURITY DEFINER
+-- admin-grant RPC
+-- ----------------------------------------------------------------------------
+--   1. The founder path's primary use case is BOOTSTRAP: zero admins hold
+--      active_role='admin' (brief §10.2 — no admin row is ever seeded). An
+--      RPC "gated on an existing admin" fails exactly then, and its
+--      break-glass arm would have to be callable by service_role anyway —
+--      i.e. the RPC design collapses into these same grants PLUS a brand-new
+--      SECURITY DEFINER surface.
+--   2. Audit history (2026-07-22 anon-secdef P0; 2026-07-27 finding L-01)
+--      shows every new SECURITY DEFINER function is recurring audit surface:
+--      the PUBLIC-grant idiom, search_path pinning, existence oracles, the
+--      anon-secdef allowlist guard. Column grants add ZERO functions.
+--   3. The DB-level invariant already exists and is APPLIED in production:
+--      trg_profiles_admin_grant_guard / trg_profile_roles_admin_grant_guard
+--      (20260702130000) RAISE on any admin grant attempted by a JWT-carrying
+--      non-admin. service_role carries no user JWT (auth.uid() is null) and
+--      passes — by that migration's own design, "the owner service-role
+--      script" IS the legitimate grant path. This migration only restores
+--      REACHABILITY for that path; the protection layer is untouched.
+--      (is_admin() inside the trigger is SECURITY DEFINER, so the trigger
+--      evaluates cleanly for a service_role caller.)
+--   4. Precedent: narrow service_role column grants are this repo's
+--      established idiom for exactly this failure class (20260610234500,
+--      20260702200000, 20260713190000).
+--
+-- ----------------------------------------------------------------------------
+-- SCOPE — the MINIMUM the two founder scripts touch
+-- ----------------------------------------------------------------------------
+-- anon and authenticated are NOT widened. No policy, no function, no
+-- trigger, no RLS change, zero DML. service_role already holds BYPASSRLS;
+-- only the missing table privileges block it. Idempotent: re-granting an
+-- existing grant is a no-op.
+--
+-- ROLLBACK: supabase/rollbacks/20260807120000_admin_grant_service_role_repair_v1.down.sql
+-- ============================================================================
+
+begin;
+
+-- profiles: both scripts look the target up BY EMAIL and update active_role
+-- (admin-grant-superadmin.ts select "id, email, active_role" / update
+-- {active_role}; admin-promote.ts update ... eq("email", ...) with a
+-- RETURNING select). The (id, active_role) SELECT columns are re-stated
+-- idempotently — they belong to 20260702200000 and are NOT this migration's
+-- to revoke.
+grant select (id, email, active_role) on public.profiles to service_role;
+grant update (active_role) on public.profiles to service_role;
+
+-- profile_roles: the durable admin signal (lib/auth/superadmin.ts header,
+-- signal (b) — survives workspace switches that overwrite active_role).
+-- The script's upsert (onConflict "profile_id,role") is INSERT ... ON
+-- CONFLICT DO UPDATE, which needs INSERT + UPDATE on the payload columns
+-- and SELECT on the arbiter columns; the (profile_id, role) SELECT is
+-- 20260702200000's, re-stated idempotently.
+grant select (profile_id, role) on public.profile_roles to service_role;
+grant insert (profile_id, role) on public.profile_roles to service_role;
+grant update (profile_id, role) on public.profile_roles to service_role;
+
+commit;
+
+-- ============================================================================
+-- POST-APPLY VERIFICATION (read-only; run in the SQL editor after applying)
+--
+--   select table_name, column_name, privilege_type
+--     from information_schema.column_privileges
+--    where grantee = 'service_role'
+--      and table_schema = 'public'
+--      and table_name in ('profiles', 'profile_roles')
+--    order by table_name, column_name, privilege_type;
+--
+--   -- Expect exactly:
+--   --   profiles:      active_role SELECT+UPDATE, email SELECT, id SELECT
+--   --   profile_roles: profile_id SELECT+INSERT+UPDATE,
+--   --                  role       SELECT+INSERT+UPDATE
+--   -- and NO whole-table grants for service_role on either table.
+--
+-- FUNCTIONAL CHECK (zero writes first, then the real grant):
+--
+--   pnpm -C apps/web tsx scripts/admin-grant-superadmin.ts \
+--     --email <founder-email> --dry-run
+--   -- expect action=dry-run.would-grant (or dry-run.noop if already admin)
+--
+--   pnpm -C apps/web tsx scripts/admin-grant-superadmin.ts \
+--     --email <founder-email> --apply --i-understand-this-mutates-production
+--   -- expect action=apply.granted with profileRolesAdminUpserted=true
+-- ============================================================================
