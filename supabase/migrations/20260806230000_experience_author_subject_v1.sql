@@ -1,11 +1,39 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE OWNER APPROVAL (Owner Decision W6-D1, 2026-08-06) ──────────
+--
+-- The owner reviewed the human-gate package on PR #1037 at reviewed HEAD
+-- 30691a60 (migration sha256 4389e15e…1cf202d; comment-stripped executable
+-- sha256 fd7c2b5e…e731bb1 — unchanged by this annotation, which is comments
+-- only) and approved the migration-safety findings for THIS PR. The
+-- annotation downgrades those findings from job-level errors to acknowledged
+-- notices. It is NOT a claim that the migration is low-risk, and it grants
+-- nothing beyond what is listed.
+--
+-- APPROVAL APPLIES TO: pull request #1037 (W6 author/subject model v1) and
+-- to these THREE findings the gate actually emitted, each confirmed as real:
+--
+--   1. security-definer-function — submit_experience_record recreated as
+--      SECURITY DEFINER `set search_path = public` (unchanged v1 property:
+--      eligibility is re-derived across tables the caller cannot read).
+--   2. grant-or-revoke — REVOKE/GRANT restated for the replaced RPC (the
+--      secdef-closure rule requires the privilege state to be explicit in
+--      the redefining file); same privilege state as v1.
+--   3. data-dml — ONE guarded backfill UPDATE classifying existing
+--      engagement-kind rows' author side from canonical engagement rows.
+--      Production preflight 2026-08-06: experience_records = 0 rows, so it
+--      updates nothing in production.
+--
+-- APPROVAL DOES **NOT** COVER:
+--
+--   * Running the paired rollback against real production data once real
+--     experience rows exist (it drops the author-side classification) —
+--     that would need its own owner decision.
+--   * Anything beyond applying THIS migration via Supabase MCP
+--     apply_migration. Never `db push`.
+--
 -- 20260806230000 — experience author-vs-subject model v1 (W6 author/subject
 -- identity slice — SEQUENTIAL_W_EXECUTION_TRAIN queue item 1).
---
--- OWNER-GATED. This migration deliberately ships WITHOUT an approval
--- annotation (an agent never approves its own migration) and must NOT be
--- applied to production until the owner gives an explicit apply decision on
--- the PR that carries it. Apply ONLY via Supabase MCP apply_migration after
--- that decision. Never `db push`.
 --
 -- ── WHY THIS MIGRATION EXISTS ───────────────────────────────────────────────
 --

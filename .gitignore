@@ -65,3 +65,4 @@ BRIEF_MO.md
 # supabase local CLI state
 supabase/.branches/
 supabase/.temp/
+/apps/web/tests/e2e/.storage-state.admin.json

@@ -2,11 +2,40 @@
 
 Migration: `supabase/migrations/20260806230000_experience_author_subject_v1.sql`
 Rollback:  `supabase/rollbacks/20260806230000_experience_author_subject_v1.down.sql`
-State:     `W6_AUTHOR_SUBJECT_MODEL_CODE_COMPLETE_PENDING_HUMAN_GATE`
 
-The migration ships with **NO approval annotation** — an agent never approves
-its own migration. The owner records the approval on the PR when (and if)
-they take the apply decision.
+## OWNER DECISION W6-D1 — GIVEN 2026-08-06
+
+The owner approved, against reviewed PR #1037 HEAD
+`30691a60e35a94b4502b44efb2a554f17e1f301d`:
+
+1. applying `20260806230000_experience_author_subject_v1` to production;
+2. merging PR #1037 after production verification;
+3. normal Vercel deployment;
+4. running the W6 authenticated production proof later through the approved
+   PROD_QA identities.
+
+Identity gate executed before apply (all PASS):
+
+- merge-tree vs `origin/main` (`58d30738`): CLEAN, no rebase required;
+- migration count: main 187 + exactly this ONE file = 188 (both ratchets);
+- no `20260806230000` timestamp collision on main;
+- migration sha256 `4389e15ef601f3a3db3a976f63b26999fc83fe72b55a5a7f2656d233d1cf202d`
+  (pre-annotation), rollback sha256
+  `5155e27697d9e42f17db4f5ba7a9e0dd4ee1a21e48415591c04bc8b51d353f97`;
+- comment-stripped EXECUTABLE sha256
+  `fd7c2b5ed2c16aec0e12b9b67fcbd3f3be1e75c781b7aefdf12fd9e73e731bb1`
+  (the invariant the approval binds to — the marker annotation is comments
+  only and must leave this hash unchanged);
+- production recount: `experience_records = 0`, `experience_responses = 0`
+  (approval condition holds; no newly appeared rows to classify);
+- branch worktree clean.
+
+The `@human-gate-approved` marker was added to the migration scoped to the
+THREE findings the real gate emitted (`security-definer-function`,
+`grant-or-revoke`, `data-dml` — no bare drop-constraint finding was emitted
+because every drop pairs with an immediate add).
+
+State: `W6_D1_APPROVED_APPLY_IN_PROGRESS`
 
 ## What it fixes (the recorded W6 modelling defect)
 

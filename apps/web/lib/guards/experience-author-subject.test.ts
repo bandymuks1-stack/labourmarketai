@@ -53,16 +53,34 @@ const resultCard = readFileSync(
 );
 
 describe("owner gate hygiene", () => {
-  it("the migration carries NO self-added approval marker", () => {
-    // An agent never approves its own migration. The marker may appear ONLY
-    // once the owner records the production decision. The regex is the SAME
-    // anchored form .github/scripts/migration-safety.mjs uses, so this pin
-    // and the CI agree about what counts as an approval.
-    expect(sql).not.toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+  /**
+   * This test used to assert the marker was ABSENT — the "an agent never
+   * approves its own migration" rule — and it did its job for the whole of
+   * the slice's pre-approval life. The owner gave Owner Decision W6-D1 on
+   * 2026-08-06 (reviewed HEAD 30691a60), so the marker is now legitimately
+   * present, and the rule MOVES rather than disappears (the exact v1
+   * precedent from 20260802120000): what is pinned now is that the marker
+   * never travels alone — it must carry its scope and its limits.
+   */
+  it("the approval marker is present and canonical", () => {
+    expect(sql).toMatch(/^--\s*@human-gate-approved\s*$/m);
   });
 
-  it("the migration states the owner gate and the apply channel", () => {
-    expect(sql).toMatch(/OWNER-GATED/);
+  it("the approval names the PR, the reviewed HEAD and the three findings", () => {
+    expect(sql).toMatch(/Owner Decision W6-D1/);
+    expect(sql).toMatch(/pull request #1037/i);
+    expect(sql).toMatch(/30691a60/);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "data-dml",
+    ]) {
+      expect(sql, `approval must name: ${finding}`).toContain(finding);
+    }
+  });
+
+  it("the approval states its LIMITS and the apply channel", () => {
+    expect(sql).toMatch(/APPROVAL DOES \*\*NOT\*\* COVER/);
     expect(sql).toMatch(/apply_migration/);
     expect(sql).toMatch(/Never `db push`/);
   });
