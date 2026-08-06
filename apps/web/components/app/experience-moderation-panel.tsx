@@ -86,6 +86,8 @@ export function ExperienceModerationPanel({
                       moderationStatus={r.moderationStatus}
                       disputeStatus={r.disputeStatus}
                       interactionKind={r.interactionKind}
+                      subjectType={r.subjectType}
+                      authorSide={r.authorSide}
                     />
                   </li>
                 ))}

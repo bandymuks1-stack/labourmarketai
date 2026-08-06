@@ -266,12 +266,89 @@ export type ExperienceRow = {
   readonly interactionKind: string;
   readonly submittedAt: string | null;
   readonly isAuthor: boolean;
+  /** WHO the record is about — 'worker' = a person subject, 'organization' =
+   *  an organization subject. Present since the v1 schema; surfaced so the
+   *  moderation queue and the result stop rendering subject-blind rows. */
+  readonly subjectType: ExperienceSubjectType;
+  /** HOW it was authored — 'organization' = submitted on behalf of an
+   *  organization party of the interaction. Null while the owner-gated
+   *  author/subject migration is unapplied (column absent): the UI then
+   *  simply omits the author-side label — never a guess. */
+  readonly authorSide: "person" | "organization" | null;
 };
 
 export type ExperienceListState =
   | { readonly state: "list"; readonly mine: ExperienceRow[]; readonly aboutMe: ExperienceRow[] }
   | { readonly state: "needs_migration" }
   | { readonly state: "error" };
+
+/** Columns present since the v1 schema. */
+const BASE_SELECT =
+  "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id, subject_type";
+/** author_side arrives with the owner-gated author/subject migration. */
+const EXTENDED_SELECT = `${BASE_SELECT}, author_side`;
+
+const UNDEFINED_COLUMN_CODE = "42703";
+
+type RawRows =
+  | { rows: Record<string, unknown>[]; authorSideKnown: boolean }
+  | { state: "needs_migration" }
+  | { state: "error" };
+
+/**
+ * One read path for every experience list. Tries the author-side-aware
+ * select first; a stack where the author/subject migration is unapplied
+ * answers 42703 (undefined column) — the read then falls back to the v1
+ * column set and every row carries `authorSide: null`. The DOMAIN being
+ * absent entirely still maps to needs_migration, never to an empty list.
+ */
+async function readExperienceRows(
+  build: (q: unknown) => unknown,
+): Promise<RawRows> {
+  const sb = await createClient();
+  const query = (select: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    build((sb as any).from("experience_records").select(select)) as PromiseLike<{
+      data: unknown;
+      error: { code?: string } | null;
+    }>;
+
+  let authorSideKnown = true;
+  let { data, error } = await query(EXTENDED_SELECT);
+  if (error && (error.code ?? "") === UNDEFINED_COLUMN_CODE) {
+    authorSideKnown = false;
+    ({ data, error } = await query(BASE_SELECT));
+  }
+  if (error) {
+    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
+    return { state: "error" };
+  }
+  return { rows: (data ?? []) as Record<string, unknown>[], authorSideKnown };
+}
+
+function mapRow(
+  r: Record<string, unknown>,
+  authorSideKnown: boolean,
+  viewerProfileId: string | null,
+): ExperienceRow {
+  return {
+    id: String(r.id),
+    sentiment: r.sentiment as ExperienceSentiment,
+    body: String(r.body ?? ""),
+    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
+    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
+    interactionKind: String(r.interaction_kind ?? ""),
+    submittedAt: (r.submitted_at as string | null) ?? null,
+    isAuthor: viewerProfileId !== null && r.author_profile_id === viewerProfileId,
+    subjectType:
+      r.subject_type === "organization" ? "organization" : "worker",
+    authorSide: !authorSideKnown
+      ? null
+      : r.author_side === "organization"
+        ? "organization"
+        : "person",
+  };
+}
 
 /** Everything the caller may see, split by side. RLS returns author rows in
  *  every state and subject-side rows only once PUBLISHED — this function adds
@@ -280,29 +357,12 @@ export type ExperienceListState =
 export async function listExperiencesForViewer(
   viewerProfileId: string,
 ): Promise<ExperienceListState> {
-  const sb = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (sb as any)
-    .from("experience_records")
-    .select(
-      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
-    )
-    .order("submitted_at", { ascending: false })
-    .limit(100);
-  if (error) {
-    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
-    return { state: "error" };
-  }
-  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
-    id: String(r.id),
-    sentiment: r.sentiment as ExperienceSentiment,
-    body: String(r.body ?? ""),
-    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
-    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
-    interactionKind: String(r.interaction_kind ?? ""),
-    submittedAt: (r.submitted_at as string | null) ?? null,
-    isAuthor: r.author_profile_id === viewerProfileId,
-  }));
+  const res = await readExperienceRows((q) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (q as any).order("submitted_at", { ascending: false }).limit(100),
+  );
+  if ("state" in res) return res;
+  const rows = res.rows.map((r) => mapRow(r, res.authorSideKnown, viewerProfileId));
   return {
     state: "list",
     mine: rows.filter((r) => r.isAuthor),
@@ -313,58 +373,34 @@ export async function listExperiencesForViewer(
 /** The moderator queue. Authorization is the RLS policy's `is_admin()` — a
  *  non-admin simply gets their own rows, never the queue. */
 export async function listModerationQueue(): Promise<ExperienceListState> {
-  const sb = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (sb as any)
-    .from("experience_records")
-    .select(
-      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
-    )
-    .in("moderation_status", ["submitted", "in_moderation"])
-    .order("submitted_at", { ascending: true })
-    .limit(100);
-  if (error) {
-    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
-    return { state: "error" };
-  }
-  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
-    id: String(r.id),
-    sentiment: r.sentiment as ExperienceSentiment,
-    body: String(r.body ?? ""),
-    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
-    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
-    interactionKind: String(r.interaction_kind ?? ""),
-    submittedAt: (r.submitted_at as string | null) ?? null,
-    isAuthor: false,
-  }));
-  return { state: "list", mine: [], aboutMe: rows };
+  const res = await readExperienceRows((q) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (q as any)
+      .in("moderation_status", ["submitted", "in_moderation"])
+      .order("submitted_at", { ascending: true })
+      .limit(100),
+  );
+  if ("state" in res) return res;
+  return {
+    state: "list",
+    mine: [],
+    aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+  };
 }
 
 /** Disputes needing a moderator decision (separate dimension, separate view). */
 export async function listDisputeQueue(): Promise<ExperienceListState> {
-  const sb = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (sb as any)
-    .from("experience_records")
-    .select(
-      "id, sentiment, body, moderation_status, dispute_status, interaction_kind, submitted_at, author_profile_id",
-    )
-    .in("dispute_status", ["opened", "under_review"])
-    .order("submitted_at", { ascending: true })
-    .limit(100);
-  if (error) {
-    if (ABSENT_CODES.has(error.code ?? "")) return { state: "needs_migration" };
-    return { state: "error" };
-  }
-  const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
-    id: String(r.id),
-    sentiment: r.sentiment as ExperienceSentiment,
-    body: String(r.body ?? ""),
-    moderationStatus: r.moderation_status as ExperienceRow["moderationStatus"],
-    disputeStatus: r.dispute_status as ExperienceRow["disputeStatus"],
-    interactionKind: String(r.interaction_kind ?? ""),
-    submittedAt: (r.submitted_at as string | null) ?? null,
-    isAuthor: false,
-  }));
-  return { state: "list", mine: [], aboutMe: rows };
+  const res = await readExperienceRows((q) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (q as any)
+      .in("dispute_status", ["opened", "under_review"])
+      .order("submitted_at", { ascending: true })
+      .limit(100),
+  );
+  if ("state" in res) return res;
+  return {
+    state: "list",
+    mine: [],
+    aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+  };
 }

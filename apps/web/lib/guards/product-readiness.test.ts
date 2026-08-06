@@ -1967,9 +1967,13 @@ describe("no migration files added by this sprint", () => {
     // 185 -> 186: M-P0-4 consumer-slice DB widening (20260806180000),
     // human-gated under the 2026-08-06 owner decision; APPLIED to prod
     // (ledger 20260806090258).
+    // 187 -> 188: W6 author/subject slice (20260806230000_experience_author_
+    // subject_v1) — owner-gated RED migration with paired rollback; adds the
+    // author_side model and org-scoped booking subjects; UNAPPLIED until the
+    // owner's explicit production decision.
     // 186 -> 187: M-P0-6 org demand spine v2 (20260806200000) — the shared
     // ratchet slot resolved here after #1028/#1032 merged first.
-    const SPRINT_BASELINE = 187;
+    const SPRINT_BASELINE = 188;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

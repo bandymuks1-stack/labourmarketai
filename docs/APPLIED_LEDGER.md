@@ -14,6 +14,28 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806230000_experience_author_subject_v1` (W6 author/subject)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 13:56:49 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260806135649`, name `20260806230000_experience_author_subject_v1` (version/name apply-time drift — match on `name`). Ledger 184 → **185**, exactly ONE row added |
+| PR | **#1037** (`feat/w6-experience-author-subject-model-v1`) |
+| Owner gate | **Owner Decision W6-D1** (2026-08-06), reviewed HEAD `30691a60`; marker commit `266df613` changed comments only — comment-stripped executable sha256 `fd7c2b5ed2c16aec0e12b9b67fcbd3f3be1e75c781b7aefdf12fd9e73e731bb1` identical pre/post marker. Migration sha256 (pre-marker) `4389e15e…1cf202d`, rollback `5155e276…d353f97`. Marker covers exactly the three emitted findings (`security-definer-function`, `grant-or-revoke`, `data-dml`) |
+
+**Preflight (re-verified immediately before apply)**: `experience_records` **0**, `experience_responses` **0** (the approval's zero-row condition held — no newly appeared rows to classify); witnesses bookings 0 / engagements 46 / memberships 10 / projects 5 / profiles 32; merge-tree vs main `58d30738` clean; migration count main 187 + this ONE = 188; no `20260806230000` collision.
+
+**What it does**: adds `author_side text not null default 'person' check (person|organization)` + `author_organization_id uuid references organizations(id) on delete set null` to `experience_records`; guarded backfill (**production no-op — 0 rows, 0 rows updated**); constraints `experience_records_author_side_shape` + `experience_records_org_no_self_review`; partial unique index `experience_records_one_org_author_per_interaction` (the organization speaks once per interaction) + `experience_records_author_org_idx`; replaces `submit_experience_record` (same signature) — org-scoped bookings resolve the worker's subject to the booking ORGANIZATION, employer-side org authorship requires LIVE `manages_organization()` (revoked manager refused, history immutable), author side derived server-side (not expressible by the client).
+
+**Post-apply verified**: 2/2 columns, 2/2 constraints, 2/2 indexes present; RPC `prosecdef=true`, body carries the author-side derivation, the org-booking authority check and the org-subject inheritance; `has_function_privilege` — anon **false**, authenticated **true**; ALL business-row counts identical to preflight (0/0/0/46/10/5/32 — **zero rows rewritten**); security advisors: **0 ERROR**. Sentiment binary / no stars / no numeric score / no self-review / moderation-dispute separation / count-only consumption / anti-oracle behaviour: unchanged by construction (v1 regression proof 43/43 on identical SQL) — no numeric column exists on the table (proof 15).
+
+**Proof package**: local db-proof 35/35 (`W6_AUTHOR_SUBJECT_DATABASE_MODEL_PROVEN`), v1 regression 43/43, rollback cycle (down → v1 restored + 43/43 → up → 35/35), browser e2e 9/9 + 4 chip screenshots (`docs/audits/evidence/premium-rebuild/w6-author-subject/`), full vitest 13843/13843. Gate doc: `docs/human-gates/experience-author-subject-v1-gate.md`.
+
+**Not done / out of scope**: no experience row created during apply; no real users; production WRITE proof rides the separately-approved PROD_QA journey. Rollback (`…down.sql`) present, NOT executed — once real experience rows exist it needs its own owner decision (it drops the author-side classification).
+
+---
+
 ### ✅ APPLIED TO PROD — `20260806200000_org_demand_spine_v2` (M-P0-6)
 
 | Field | Value |

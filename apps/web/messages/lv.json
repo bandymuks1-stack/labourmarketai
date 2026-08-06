@@ -3931,6 +3931,13 @@
       "positive": "[EN] Positive experience",
       "negative": "[EN] Negative experience"
     },
+    "subject": {
+      "worker": "[EN] About a worker",
+      "organization": "[EN] About an organization"
+    },
+    "authorSide": {
+      "organization": "[EN] Submitted on behalf of an organization"
+    },
     "interaction": {
       "accepted_booking": "[EN] Booking",
       "completed_engagement": "[EN] Engagement",

@@ -406,6 +406,20 @@ function ExperienceCard({
         <span className="text-meta text-text-muted" data-testid="experience-state">
           · {t(`moderation.${row.moderationStatus}`)}
         </span>
+        {/* WHO this is about — a person subject and an organization subject
+            are different facts and are named as such (the W6 author/subject
+            model). */}
+        <span className="text-meta text-text-muted" data-testid="experience-subject-type">
+          · {t(`subject.${row.subjectType}`)}
+        </span>
+        {/* Org authorship is shown only when the row actually records it —
+            null means the author-side migration is not applied here, and an
+            unknown is omitted, never guessed. */}
+        {row.authorSide === "organization" ? (
+          <span className="text-meta text-text-muted" data-testid="experience-author-side">
+            · {t("authorSide.organization")}
+          </span>
+        ) : null}
         {row.disputeStatus !== "none" ? (
           <span className="text-meta text-state-warning" data-testid="experience-dispute-marker">
             · {t(`dispute.${row.disputeStatus}`)}

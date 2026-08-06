@@ -67,8 +67,15 @@ async function assertNoRatingUi(page: Page): Promise<void> {
 async function openPanelFold(page: import("@playwright/test").Page): Promise<void> {
   const toggle = page.getByTestId("context-panel-toggle");
   await toggle.waitFor({ state: "visible", timeout: 60_000 }).catch(() => {});
-  if ((await toggle.count()) > 0 && (await toggle.getAttribute("aria-expanded")) === "false") {
+  // A single click can land BEFORE hydration attaches the handler and is
+  // silently lost — which made this helper's one-shot click a deterministic
+  // failure on a loaded machine. Click-and-verify with retries: the loop
+  // only ends when aria-expanded actually flips (or the fold never existed).
+  for (let attempt = 0; attempt < 20; attempt++) {
+    if ((await toggle.count()) === 0) return;
+    if ((await toggle.getAttribute("aria-expanded")) !== "false") return;
     await toggle.click();
+    await toggle.page().waitForTimeout(500);
   }
 }
 

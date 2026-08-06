@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
+import { getManagedOrganizationIds } from "@/lib/company/managed-organizations";
 import {
   deriveReviewEligibility,
   type EligibleInteractionKind,
@@ -142,7 +142,7 @@ async function readBookings(
 ): Promise<ResolvedInteraction[] | "absent"> {
   let q = supabase
     .from("booking_requests")
-    .select("id, owner_id, status, start_date, role_text, workers(profile_id)")
+    .select("id, owner_id, organization_id, status, start_date, role_text, workers(profile_id)")
     .eq("status", "accepted");
   if (onlyId) q = q.eq("id", onlyId);
   const { data, error } = await q.limit(200);
@@ -155,23 +155,46 @@ async function readBookings(
       ? (workerRel[0]?.profile_id ?? null)
       : (workerRel?.profile_id ?? null);
     const ownerId = typeof row.owner_id === "string" ? row.owner_id : null;
+    const orgId = typeof row.organization_id === "string" ? row.organization_id : null;
     if (!workerProfile || !ownerId) continue;
     // The viewer must be one of the two real parties; the OTHER party is the
     // subject. This is where "who is this about" is decided — from the row.
+    //
+    // W6 author/subject correction: since org demand spine v2 a booking can
+    // belong to an ORGANIZATION. When it does, the employer party IS that
+    // organization — so the worker's experience gets an ORGANIZATION subject,
+    // never the owner's private profile. This was the recorded W6 modelling
+    // defect (employer-subject rows stored as subject_type='worker').
+    let subjectType: "worker" | "organization" | null = null;
     let subjectId: string | null = null;
-    if (viewerId === ownerId) subjectId = workerProfile;
-    else if (viewerId === workerProfile) subjectId = ownerId;
-    if (!subjectId) continue;
+    if (viewerId === ownerId) {
+      subjectType = "worker";
+      subjectId = workerProfile;
+    } else if (viewerId === workerProfile) {
+      if (orgId) {
+        subjectType = "organization";
+        subjectId = orgId;
+      } else {
+        subjectType = "worker";
+        subjectId = ownerId;
+      }
+    }
+    if (!subjectType || !subjectId) continue;
     out.push({
       facts: {
         kind: "accepted_booking",
         interactionId: String(row.id),
-        partyA: ownerId,
-        partyB: workerProfile,
+        // Mirrors the engagement pattern: when the subject is the
+        // ORGANIZATION, the two contract parties are the authoring worker and
+        // that organization — so the party check proves subject membership,
+        // not merely author identity. In every person-subject direction the
+        // parties stay the two real people.
+        partyA: subjectType === "organization" ? workerProfile : ownerId,
+        partyB: subjectType === "organization" ? subjectId : workerProfile,
         status: String(row.status ?? ""),
         startDateIso: (row.start_date as string | null) ?? null,
       },
-      subjectType: "worker",
+      subjectType,
       subjectId,
       contextLabel: (row.role_text as string | null) ?? null,
     });
@@ -307,10 +330,13 @@ async function readOwnRecords(
 }
 
 /** Organizations the viewer may act for. An engagement's org side is only
- *  the viewer's to describe when they actually manage that organization. */
+ *  the viewer's to describe when they actually manage that organization.
+ *  Uses the manages_organization() SQL-truth mirror (engagement arm +
+ *  membership arm) — the previous owner-only read was strictly narrower than
+ *  what the RPC accepts, so admin/manager members saw no org-side
+ *  invitations at all. */
 async function managedOrganizationIds(): Promise<string[]> {
-  const owned = await getOwnedOrganizations();
-  return owned.kind === "ok" ? owned.organizations.map((o) => o.id) : [];
+  return getManagedOrganizationIds();
 }
 
 /**

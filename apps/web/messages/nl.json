@@ -11737,6 +11737,13 @@
       "positive": "Positieve ervaring",
       "negative": "Negatieve ervaring"
     },
+    "subject": {
+      "worker": "Over een werknemer",
+      "organization": "Over een organisatie"
+    },
+    "authorSide": {
+      "organization": "Ingediend namens een organisatie"
+    },
     "interaction": {
       "accepted_booking": "Boeking",
       "completed_engagement": "Dienstverband",

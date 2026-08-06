@@ -11737,6 +11737,13 @@
       "positive": "Positive Erfahrung",
       "negative": "Negative Erfahrung"
     },
+    "subject": {
+      "worker": "Über eine Arbeitskraft",
+      "organization": "Über eine Organisation"
+    },
+    "authorSide": {
+      "organization": "Im Namen einer Organisation eingereicht"
+    },
     "interaction": {
       "accepted_booking": "Buchung",
       "completed_engagement": "Arbeitsverhältnis",

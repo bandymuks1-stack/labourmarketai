@@ -3931,6 +3931,13 @@
       "positive": "Positiv erfaring",
       "negative": "Negativ erfaring"
     },
+    "subject": {
+      "worker": "Om en arbejdstager",
+      "organization": "Om en organisation"
+    },
+    "authorSide": {
+      "organization": "Indsendt på vegne af en organisation"
+    },
     "interaction": {
       "accepted_booking": "Booking",
       "completed_engagement": "Ansættelsesforhold",
