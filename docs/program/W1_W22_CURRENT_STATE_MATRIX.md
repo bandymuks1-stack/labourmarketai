@@ -48,7 +48,8 @@ Classifications: `DONE` | `PARTIAL` | `SUPERSEDED` | `REMAINING` |
 
 1. ~~`PROD_QA_*` accounts unprovisioned~~ — **LIFTED 2026-08-06/07.** Synthetic
    QA cast retained and revoke-ready (owner `f394ca7f…`, manager `dca5ed71…`,
-   worker `c267dc8b…`).
+   worker `c267dc8b…`). Org verification is **done** — see §PROD_QA state for
+   the proven split and the only two pending legs.
 2. ~~`booking_requests` = 0 rows in prod~~ — **LIFTED.** Booking `88a43ead`
    accepted; conflicting booking `435488f2` refused and left `proposed`.
 3. **GitHub Actions unavailable account-wide** — every run since 2026-08-06
@@ -216,9 +217,34 @@ None of these is a new W. Each maps to an owning W or platform track.
 | PR | Defect | Owning W / track | State | Blocks |
 |---|---|---|---|---|
 | **#1044** | Admin company-verification: silent in-flight/outcome feedback — dual-channel status delivery | **Platform track: Admin operations** (surfaced by the W8 employer path; not a W-scoped feature) | OPEN, Ready for Review, `mergeStateStatus=BLOCKED` — GitHub Actions outage, not a code problem | nothing product-side; blocks operator confidence in the verification queue |
-| **#1045** | Founder admin-grant path broken — narrow `service_role` column grants | **Platform track: Auth / admin authority** (prerequisite for admin-verifying orgs; gates PROD_QA steps 6–16) | Draft, owner-gated, **UNAPPLIED** | operator admin-verification of Alfa → the remaining multi-org PROD_QA steps |
+| **#1045** | Founder admin-grant path broken — narrow `service_role` column grants | **Platform track: Auth / admin authority** | Draft, owner-gated, **UNAPPLIED** | the scripted founder admin-grant path only. It does **NOT** gate PROD_QA — the journey ran to completion without it, and org verification is already done (see §PROD_QA state) |
 | **#1046** | Worker demand board: multi-company fan-out / wrong org attribution — one row per demand, correct company | **W8** (employer demand attribution) with a **W10** read-surface effect | Draft, owner-gated, ships **UNAPPLIED** | correctness of the worker board under multi-org; does not block the proven W8 path |
 | **#1047** | Booking→engagement organization resolution — closes the `ambiguous_company` dead-end | **W12** (primary); **W8** consumes the result | Draft, owner-gated, **UNAPPLIED** | the ONLY thing between W12 and full completion; also the W8 "engagement minting" claim |
+
+## PROD_QA state — proven split (NOT globally blocked)
+
+Owner correction 2026-08-07: **`QA-SYNTHETIC Alfa` is verified in production.**
+Independently confirmed by a read-only production query — org
+`9e4f4467-71e7-4880-a128-1a22fb41a1cb` → company
+`c2a43118-a6c1-4ed5-aca7-705dc81eeb73`, `companies.verification_status =
+'verified'`. Admin-verifying Alfa is **no longer an owner gate** and no PROD_QA
+step is waiting on it.
+
+PROD_QA is therefore **not** a blocked block. It is a proven set with two named
+pending legs:
+
+| Leg | State |
+|---|---|
+| W6 production proof | **COMPLETE** — submissions, moderation, response, duplicate refusal, count-only, isolation |
+| W7 journey | **PROVEN** — consent → interest → shortlist → conversation → booking proposal |
+| W8 shipped employer path | **PROVEN** — multi-org workspace, demand attribution, shortlist, conversation, booking proposal, roster invite/accept, project creation + assignment |
+| W11 create / assign / assignment-end | **PROVEN** — project `d9d5fcd9`, worker assigned, assignment ended via `end_worker_project_assignment` |
+| W12 acceptance + cross-company conflict | **PROVEN** — booking `88a43ead` accepted; overlapping `435488f2` refused and left `proposed` |
+| W12 engagement mint | **PENDING #1047** — org-first resolution ships UNAPPLIED, owner-gated |
+| W11 project-completion production proof | **PENDING** — the control is shipped and reachable (#1007); it has not been executed in production |
+
+Exactly two legs are outstanding, and each names its own blocker. No other
+PROD_QA work is waiting on anything.
 
 ## Stripe and LMC (recorded separately from W completion)
 
@@ -287,9 +313,21 @@ skip W7 at all.
 > evidence + a proposed slice list. Then update the W7 matrix row. Do not touch
 > W8+ in the same window. No migration, no owner gate, no production write.
 
-## Standing owner gates (unchanged)
+## Remaining owner gates (corrected 2026-08-07)
 
-No Stripe Live, no live keys, no charges, no LMC flag activation, no paid
-infrastructure, no real-user/company contact, no second production company,
-no `#1016`/old-`#844` migration apply. Apply decisions for #1045, #1046 and
-#1047 are owner-only. Restoring GitHub Actions is an owner-only billing action.
+Active gates:
+
+1. **Restore GitHub Actions** (billing) — blocks every merge, repo-wide.
+2. **Apply decision for #1047** — the only thing between W12 and completion.
+3. **Apply decisions for #1045 and #1046** — neither blocks a proven path.
+4. **Stripe TEST credentials** — `docs/billing/STRIPE_TEST_ENV_OWNER_PACKAGE.md`.
+5. **Reopening W5** (frozen) and **define-or-drop for W15 / W17–W22**.
+
+Standing hard stops (unchanged): no Stripe Live, no live keys, no charges, no
+LMC flag activation, no paid infrastructure, no real-user/company contact, no
+second production company, no `#1016`/old-`#844` migration apply.
+
+**Removed from this list 2026-08-07:** ~~admin-verify Alfa~~ — already verified
+in production (`companies.verification_status = 'verified'`, company
+`c2a43118-a6c1-4ed5-aca7-705dc81eeb73`). It was never blocking; the PROD_QA
+journey completed without it.
