@@ -1,5 +1,7 @@
 # Stripe TEST-Mode Activation Runbook
 
+> **REFERENCE ONLY — operational runbook. It carries no catalogue authority: plan keys, prices, Stripe product/price slots and LMC rules come from `docs/product/commercial-system-v1.md`.**
+
 > The exact, owner-driven steps to RUN the full test checkout end-to-end. The
 > code + DB are ready and merged; the chain's signature verification + event
 > parsing are proven (`lib/billing/webhook-signature.integration.test.ts`). The

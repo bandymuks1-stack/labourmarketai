@@ -1,4 +1,12 @@
 /**
+ * REFERENCE ONLY — the canonical commercial source is
+ * `docs/product/commercial-system-v1.md` + `lib/commercial/catalogue.ts`.
+ *
+ * Runtime MIRROR of the kill-switch table in Part II.4 of the canonical document (and of public.lmc_flag_policy_v1).
+ *
+ * Guarded by lib/guards/commercial-single-source.test.ts.
+ */
+/**
  * LMC commercial kill-switches — Wagon 1 of the LMC Commercial System Train
  * (docs/product/lmc-commercial-system-train-v1.md).
  *

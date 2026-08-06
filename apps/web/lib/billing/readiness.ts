@@ -1,4 +1,12 @@
 /**
+ * REFERENCE ONLY — the canonical commercial source is
+ * `docs/product/commercial-system-v1.md` + `lib/commercial/catalogue.ts`.
+ *
+ * Reference only: readiness state + the enforcement registry. The commercial catalogue it describes is canonical in the source above.
+ *
+ * Guarded by lib/guards/commercial-single-source.test.ts.
+ */
+/**
  * Billing readiness — OWNER-EDITABLE readiness config + claim ledger
  * (Branch 29 closure, billing readiness WITHOUT a payment provider).
  *
