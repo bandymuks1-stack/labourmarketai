@@ -6,8 +6,9 @@ import { join } from "node:path";
  * M-P0-4 SLICE 2 GUARDS — membership commands v1.
  *
  * Pinned here:
- *   1. the migration ships RED — NO `@human-gate-approved` marker until an
- *      owner apply decision is recorded;
+ *   1. the migration is human-gated — the single `@human-gate-approved`
+ *      marker exists ONLY because the 2026-08-06 owner apply decision
+ *      recorded it, and it names all four findings;
  *   2. the seven commands exist, are SECURITY DEFINER with pinned
  *      search_path, and authenticated may EXECUTE them while anon may not;
  *   3. the internal authority helper carries NO authenticated grant;
@@ -51,9 +52,21 @@ const COMMANDS = [
 ] as const;
 
 describe("M-P0-4 slice 2 — membership commands package", () => {
-  it("ships RED — no human-gate marker before an owner apply decision", () => {
+  it("human-gated — owner apply decision 2026-08-06 recorded, four findings named", () => {
+    // The 2026-08-06 owner decision ("CLOSE MEMBERSHIP AUTHORITY" §1/§4)
+    // authorized exactly ONE narrow marker naming the four findings.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(raw)).toBe(false);
+    expect(ANNOTATION.test(raw)).toBe(true);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "alter-drop-policy",
+      "data-dml",
+    ]) {
+      expect(raw.includes(finding), `marker names ${finding}`).toBe(true);
+    }
+    // Exactly one marker — the gate must not spread to other migrations.
+    expect(raw.match(/@human-gate-approved/g)?.length).toBe(1);
   });
 
   it("all seven commands exist, SECURITY DEFINER, pinned search_path", () => {
