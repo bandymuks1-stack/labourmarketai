@@ -16,6 +16,30 @@ writes before the reviewed Slice 2 RPCs exist. Executable SQL is
 byte-identical to reviewed HEAD `cae1ff30` (git blob `a51710d3` preserved
 through the rebase onto post-M-P0-3 main `596eab7a`).
 
+**OWNER APPROVAL — SLICE 2 — recorded 2026-08-06** ("OWNER DECISION — CLOSE
+MEMBERSHIP AUTHORITY, MERGE DURABLE WORKSPACE, CONTINUE M-P0-6/7/8" §1):
+apply the exact Slice 2 migration `20260806120000_company_membership_commands_v1.sql`,
+merge PR #1024 after production verification, normal Vercel deployment.
+Approved reviewed HEAD `62303fb5c2487d29c82ab9c9cfbe3e50784dce13`; the PR
+was already based on the latest main `0f716b8d` (post-#1023), so no rebase
+was needed and the executable SQL is byte-identical to the reviewed package
+(comment-stripped executable sha256
+`c296ece209ff4b801254769a6d66d1f043f045b7070658c604a7cc4ba6d958dc`; full
+file sha256 pre-marker `f11b6094b9efbc7a7ea69041be3e7a13d2f7dd9762addb8045e29507a7a24cee`;
+rollback sha256 `0efd134bebd5d18b615944e98eb268c2bc9acbf9a422e72e4d4b81fb405dd7c9`).
+The `@human-gate-approved` marker names exactly the four migration-safety
+findings (security-definer-function, grant-or-revoke, alter-drop-policy,
+data-dml) — the data-dml UPDATEs live inside the PL/pgSQL command bodies
+only; apply-time business-row mutation must remain (and was verified) zero.
+Approval is valid only while: executable semantics stay identical, all
+seven membership RPC contracts stay unchanged, the recursive SELECT policy
+is replaced by the reviewed non-recursive helper, no engagement becomes a
+membership, no direct authenticated table write appears, and no unrelated
+migration rides along. The approval does NOT cover: PR #1016 (superseded by
+the M-P0-6 v2 package), production QA accounts, a second production
+company, production invitations or role mutations against real identities,
+Stripe Live, or real charges.
+
 ## 1. What membership IS (and is not)
 
 Membership = **governance**: who may ACT FOR an organization (invite, assign

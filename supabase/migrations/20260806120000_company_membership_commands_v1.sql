@@ -1,9 +1,19 @@
 -- 20260806120000 — company membership commands v1 (M-P0-4 Slice 2)
 --
+-- @human-gate-approved — RED class. OWNER APPROVAL recorded 2026-08-06
+-- ("OWNER DECISION — CLOSE MEMBERSHIP AUTHORITY, MERGE DURABLE WORKSPACE,
+-- CONTINUE M-P0-6/7/8" §1): apply this exact migration, merge PR #1024
+-- after production verification, normal Vercel deployment. Covered
+-- findings, still visible as notices: security-definer-function,
+-- grant-or-revoke, alter-drop-policy, data-dml (UPDATEs inside PL/pgSQL
+-- command bodies only — ZERO business-row mutation at apply time).
+-- Decision recorded in docs/architecture/COMPANY_MEMBERSHIPS_V1.md.
+--
 -- SAFETY CLASS: RED. Seven SECURITY DEFINER functions + EXECUTE grants.
--- Ships with NO `-- @human-gate-approved` marker: target state is
--- CODE_COMPLETE_PENDING_OWNER_MERGE_DECISION — a separate owner decision
--- gates any production apply. CI staying RED is the honest state.
+-- Built without a marker (CODE_COMPLETE_PENDING_OWNER_MERGE_DECISION);
+-- the marker above was added only after the separate 2026-08-06 owner
+-- apply decision. Executable SQL is byte-identical to reviewed HEAD
+-- `62303fb5`.
 --
 -- ── WHAT ───────────────────────────────────────────────────────────────────
 -- The ONLY write path for `company_memberships` (Slice 1 deliberately
