@@ -14,6 +14,91 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260806120000_company_membership_commands_v1` (M-P0-4 Slice 2)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-06 05:24:45 UTC** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260806052445`, name `company_membership_commands_v1` (version/name apply-time drift, SIXTH occurrence — match on `name`, never `version`). Ledger row count: exactly ONE row added |
+| PR | **#1024** — merge follows this accounting commit |
+| Owner gate | "OWNER DECISION — CLOSE MEMBERSHIP AUTHORITY, MERGE DURABLE WORKSPACE, CONTINUE M-P0-6/7/8" (2026-08-06) §1; approved reviewed HEAD `62303fb5c2487d29c82ab9c9cfbe3e50784dce13`. The PR was ALREADY based on the latest main `0f716b8d` (post-#1023) — no rebase occurred; the executable SQL transmitted to production is byte-identical to the reviewed package (comment-stripped executable sha256 `c296ece209ff4b801254769a6d66d1f043f045b7070658c604a7cc4ba6d958dc`, identical before and after the human-gate marker commit) |
+| Migration sha256 (repo file) | pre-marker `f11b6094b9efbc7a7ea69041be3e7a13d2f7dd9762addb8045e29507a7a24cee`; with approval header `a4331e4903627976703fd0f22e6605a8024072b39ae2d4223a3b7612813a9c73` (comment-only change) |
+| Rollback sha256 | `0efd134bebd5d18b615944e98eb268c2bc9acbf9a422e72e4d4b81fb405dd7c9` (present, NOT executed; drops only the functions — table and rows untouched) |
+
+**Preflight (immediately before apply)**: `company_memberships` 10 rows —
+all 10 `owner/active/source='backfill:organizations.owner_profile_id'`, 0
+invited, 0 revoked, 0 non-backfill (NO unexpected production membership
+writes); Slice 1 SELECT policy confirmed RECURSIVE in `pg_policy` (the
+self-subquery defect — fail-closed over-restriction, no leak); all 7
+command RPCs + `is_active_org_member` + `membership_actor_role_v1` +
+`membership_my_invitations_v1` ABSENT; `validate_active_organization`
+ABSENT (20260714210000 never applied to prod — the migration's
+feature-detected §7c block correctly SKIPPED it); migration absent from
+ledger (last row `20260805200417`); table grants authenticated=SELECT
+only; fingerprints organizations `4e7874098367e836de8fe6512a5778d0`
+(id+owner_profile_id), engagement_contexts
+`b6048ea356592bfacffcb35bc2fa7269` (id+status, 46 rows), memberships
+`024490f3797df7a581eebc817a47c9ea` (id+status+role); projects 5,
+assignments 1, booking_requests 0, experience_records 0, profiles 32,
+audit_logs 34, billing_subscriptions 0, subscriptions 0.
+
+**Policy repair proof (the urgent defect this apply fixes)**: post-apply
+`company_memberships_select` = `(profile_id = auth.uid()) OR
+is_active_org_member(organization_id) OR is_admin()` — the self-subquery
+is GONE. Live role-played proof (transaction-local `set_config('role',
+'authenticated')` + `request.jwt.claims`, read-only): a real owner SELECTs
+their own organization's memberships with NO recursion error (≥1 row); an
+unrelated authenticated actor gets **0 rows** for that organization and
+**0 rows** platform-wide. Invitee reads flow only through the
+caller-scoped `membership_my_invitations_v1` (returns only the CALLER's
+own invited rows).
+
+**Post-apply RPC/grant verification**: exactly the 7 reviewed commands
+exist (invite / accept / decline / cancel-invite / change-role / revoke /
+leave) + `is_active_org_member` + `membership_my_invitations_v1` +
+widened `belongs_to_organization` — ALL `prosecdef=true` with
+`search_path=public` pinned; `has_function_privilege`: anon **false** on
+all, authenticated **true** on all EXCEPT `membership_actor_role_v1`
+(anon false AND authenticated false — internal helper granted to NOBODY).
+`belongs_to_organization` prosrc verified to carry BOTH arms (active
+engagement OR active membership; legacy owner arm of the policy
+untouched). Last-owner trigger + `set_updated_at` still present on the
+table. Tagged outcomes / audit / anti-oracle / replay / final-owner
+behavior was proven by the 293-line actor-matrix db-proof on a throwaway
+local stack (`docs/audits/evidence/multi-org-m-p0-4/slice2-actor-matrix-proof-output.txt`)
+— production mutation RPCs were NOT invoked against real identities, per
+the owner decision §5.
+
+**Zero side effects (measured, not assumed)**: every preflight count and
+all three fingerprints re-read IDENTICAL after apply — organizations
+`4e788740…`, engagement_contexts `b6048ea3…`, memberships `024490f3…`
+(10 rows, still all owner/active/backfill), audit_logs still 34 (zero
+rows written by the apply), projects/assignments/profiles/billing all
+unchanged. **ZERO business-row mutation at apply time** — the data-dml
+finding lives inside the PL/pgSQL command bodies only, exactly as the
+owner decision §4 records. Security advisors after apply: **0 ERROR**
+(232 WARN + 2 INFO); every new callable appears ONLY under
+`authenticated_security_definer_function_executable` (the intended
+design); `membership_actor_role_v1` appears in NO advisor finding; no new
+function is anon-executable.
+
+**Known honest deviation**: the §7c widening of
+`validate_active_organization()` did not execute because that function
+does not exist in prod (its migration `20260714210000` remains
+owner-gated/unapplied) — the widened definition ships in the repo file
+and lands automatically whenever that family is applied. Not a blocker
+for #1025: the durable-pointer column `profiles.active_organization_id`
+is likewise absent in prod, so the pointer path #1025 uses must (and
+does) fail closed to its cookie/server-validated fallback.
+
+**Not done / out of scope**: no production invitations, no role
+mutations, no QA accounts, no second production company, no engagement
+conversion, #1016 untouched (superseded by the M-P0-6 v2 package), no
+seeding. `migration-safety`: **GREEN [human-gated]** with all four
+findings (security-definer-function, grant-or-revoke, alter-drop-policy,
+data-dml) still visible as notices.
+
 ### ✅ APPLIED TO PROD — `20260806090000_company_memberships_v1` (M-P0-4 Slice 1)
 
 | Field | Value |

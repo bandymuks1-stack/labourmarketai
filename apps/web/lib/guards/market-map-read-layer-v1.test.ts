@@ -423,7 +423,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 183 -> 184 for M-P0-4 slice 1 (company_memberships v1,
     // `20260806090000`) — governance membership table, human-gated under the
     // recorded owner apply decision; APPLIED to prod (ledger 20260805195716).
-    expect(count).toBeLessThanOrEqual(184);
+    // Bumped 184 -> 185 for M-P0-4 slice 2 (membership commands,
+    // `20260806120000`) — seven SECURITY DEFINER commands, owner-gated,
+    // UNAPPLIED at pin time.
+    expect(count).toBeLessThanOrEqual(185);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

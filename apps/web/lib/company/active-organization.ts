@@ -221,6 +221,58 @@ async function readEngagementMemberships(
   return [...byOrg.values()];
 }
 
+/**
+ * M-P0-4 Slice 2 consumer migration (§13): ACTIVE governance memberships are
+ * a workspace source. An accepted `company_memberships` row makes the
+ * organization appear in the switcher; revocation drops it on the next
+ * request (`resolveActiveWorkspaceId` only accepts listed ids — the stale
+ * pointer then fails closed). Feature-detected: environments without the
+ * Slice 1 table degrade to the two legacy sources.
+ */
+async function readGovernanceMemberships(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<WorkspaceInfo[]> {
+  const { data, error } = await asAny(supabase)
+    .from("company_memberships")
+    .select(
+      "organization_id, role, organizations(display_name, legal_name, organization_type)",
+    )
+    .eq("profile_id", profileId)
+    .eq("status", "active")
+    .limit(50);
+  if (error) return []; // honest degradation — table not applied here
+  const byOrg = new Map<string, WorkspaceInfo>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const row of (data ?? []) as any[]) {
+    const orgId = row.organization_id as string | null;
+    if (!orgId || byOrg.has(orgId)) continue;
+    const org = row.organizations as {
+      display_name?: string | null;
+      legal_name?: string | null;
+      organization_type?: string | null;
+    } | null;
+    const role = (row.role as string | null) ?? null;
+    byOrg.set(orgId, {
+      id: orgId,
+      name: org?.display_name?.trim() || org?.legal_name?.trim() || "",
+      kind: "organization",
+      organizationType: normalizeOrgType(org?.organization_type ?? null),
+      // Governance roles map onto the existing workspace vocabulary: owner
+      // stays owner; admin/manager/external_manager surface as manager;
+      // member has no management relationship.
+      relationship:
+        role === "owner"
+          ? "owner"
+          : role === "admin" || role === "manager" || role === "external_manager"
+            ? "manager"
+            : "other",
+      accentIndex: workspaceAccentIndex(orgId),
+    });
+  }
+  return [...byOrg.values()];
+}
+
 export interface WorkspaceContext {
   /** Personal workspace first, then every org membership (owner precedence). */
   readonly workspaces: readonly WorkspaceInfo[];
@@ -246,9 +298,10 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
   } = await supabase.auth.getUser();
   if (!user) return EMPTY_WORKSPACE;
 
-  const [owned, engagementWorkspaces] = await Promise.all([
+  const [owned, engagementWorkspaces, governanceWorkspaces] = await Promise.all([
     getOwnedOrganizations(),
     readEngagementMemberships(supabase, user.id),
+    readGovernanceMemberships(supabase, user.id),
   ]);
 
   const orgWorkspaces: WorkspaceInfo[] = [];
@@ -266,7 +319,10 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
       });
     }
   }
-  for (const w of engagementWorkspaces) {
+  // Governance memberships BEFORE engagement rows: a person who is both a
+  // member and an employee of the same org keeps the governance relationship
+  // label; either source alone still lists the workspace.
+  for (const w of [...governanceWorkspaces, ...engagementWorkspaces]) {
     if (!seen.has(w.id)) {
       seen.add(w.id);
       orgWorkspaces.push(w);

@@ -1960,7 +1960,11 @@ describe("no migration files added by this sprint", () => {
     // employee engagements NEVER migrated). RECOUNTED after rebasing onto
     // the post-M-P0-3 main (596eab7a): main holds 183 real files, this
     // branch adds exactly one.
-    const SPRINT_BASELINE = 184;
+    // Bumped 184 -> 185 for M-P0-4 slice 2
+    // `20260806120000_company_membership_commands_v1` — the seven SECURITY
+    // DEFINER membership commands (the table's ONLY write path). RED,
+    // owner-gated, ships UNAPPLIED, no marker.
+    const SPRINT_BASELINE = 185;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
