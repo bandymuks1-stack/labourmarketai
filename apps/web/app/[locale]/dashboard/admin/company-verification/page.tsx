@@ -50,6 +50,7 @@ export default async function AdminCompanyVerificationPage({
 
   const reviewLabels: CompanyVerificationReviewLabels = {
     approve: t("actions.approve"),
+    saving: t("result.saving"),
     keepUnverified: t("actions.keepUnverified"),
     returnToPending: t("actions.returnToPending"),
     noteLabel: t("noteLabel"),

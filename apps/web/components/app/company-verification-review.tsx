@@ -21,6 +21,7 @@ import type { AdminVerificationStatus } from "@/lib/admin/company-verification";
  */
 export interface CompanyVerificationReviewLabels {
   readonly approve: string;
+  readonly saving: string;
   readonly keepUnverified: string;
   readonly returnToPending: string;
   readonly noteLabel: string;
@@ -94,6 +95,8 @@ export function CompanyVerificationReview({
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
+          name="status"
+          value="verified"
           onClick={() => setStatus("verified")}
           disabled={isPending}
           className="rounded-md bg-state-success/90 px-3 py-1.5 text-xs font-semibold text-ink-900 hover:bg-state-success disabled:opacity-50"
@@ -103,6 +106,8 @@ export function CompanyVerificationReview({
         </button>
         <button
           type="submit"
+          name="status"
+          value="unverified"
           onClick={() => setStatus("unverified")}
           disabled={isPending}
           className="rounded-md border border-state-warning/50 px-3 py-1.5 text-xs font-semibold text-state-warning hover:border-state-warning disabled:opacity-50"
@@ -112,6 +117,8 @@ export function CompanyVerificationReview({
         </button>
         <button
           type="submit"
+          name="status"
+          value="pending_verification"
           onClick={() => setStatus("pending_verification")}
           disabled={isPending}
           className="rounded-md border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary hover:border-brand-blue disabled:opacity-50"
@@ -121,7 +128,17 @@ export function CompanyVerificationReview({
         </button>
       </div>
 
-      {banner ? (
+      {isPending ? (
+        <p
+          className="rounded-md border border-border-default bg-ink-800/30 px-2 py-1 text-meta text-text-secondary"
+          role="status"
+          data-testid={`company-verification-pending-state-${companyId}`}
+        >
+          {labels.saving}
+        </p>
+      ) : null}
+
+      {!isPending && banner ? (
         <p
           className={
             banner.tone === "success"

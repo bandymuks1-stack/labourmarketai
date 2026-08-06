@@ -2454,7 +2454,8 @@
         "invalid": "Invalid request.",
         "notFound": "Company not found.",
         "needsMigration": "Couldn’t complete the action. Please try again.",
-        "error": "Something went wrong. Please try again."
+        "error": "Something went wrong. Please try again.",
+        "saving": "Saving…"
       }
     },
     "companyNeedIntakes": {

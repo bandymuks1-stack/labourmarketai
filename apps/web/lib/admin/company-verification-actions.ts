@@ -24,11 +24,23 @@ export type CompanyVerificationActionState =
       message?: string;
     };
 
-function readStatus(v: FormDataEntryValue | null): AdminVerificationStatus | null {
-  const s = (v ?? "").toString();
-  return (ADMIN_VERIFICATION_STATUSES as readonly string[]).includes(s)
-    ? (s as AdminVerificationStatus)
-    : null;
+function readStatus(values: readonly FormDataEntryValue[]): AdminVerificationStatus | null {
+  // DUAL-CHANNEL delivery (P0 2026-08-06): the chosen status arrives EITHER
+  // via the hidden input (set on click — the React 19 function-action
+  // channel, where a submit button's name/value is dropped) OR via the
+  // submit button's own name/value (the NATIVE form-post channel — a
+  // pre-hydration click submits the raw HTML form, where the hidden input
+  // is still empty). Take the LAST non-empty entry: DOM order puts the
+  // hidden input first, so a populated button value always wins, and a
+  // hydrated click (hidden input set, button value absent from FormData)
+  // still resolves.
+  for (let i = values.length - 1; i >= 0; i -= 1) {
+    const s = (values[i] ?? "").toString();
+    if (s && (ADMIN_VERIFICATION_STATUSES as readonly string[]).includes(s)) {
+      return s as AdminVerificationStatus;
+    }
+  }
+  return null;
 }
 
 export async function setCompanyVerificationAction(
@@ -40,7 +52,7 @@ export async function setCompanyVerificationAction(
   await requireSuperadmin("lt");
 
   const companyId = String(formData.get("company_id") ?? "").trim();
-  const status = readStatus(formData.get("status"));
+  const status = readStatus(formData.getAll("status"));
   const note = formData.get("note")?.toString() ?? null;
 
   if (!companyId || !status) {
