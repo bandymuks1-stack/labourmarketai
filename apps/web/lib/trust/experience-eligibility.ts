@@ -2,10 +2,18 @@
  * Experience-record eligibility contract (marketplace precision programme
  * PR 6; canonical contract §5 — docs/launch/marketplace-precision-booking-canonical-contract-v1.md).
  *
- * OWNER_DECISION_GATED — THIS IS A CONTRACT LIBRARY ONLY. No UI, no storage,
- * no route may render or persist experience records until the owner resolves
- * the §19 "Fit, ne reitingas" reconciliation (platform doctrine: people are
- * never rated). The reconciliation this contract encodes:
+ * §19 RECONCILIATION RESOLVED (2026-08-06, recorded in
+ * docs/audits/W6_EXPERIENCE_SURFACE_CURRENT_TRUTH.md §5 Q12): the owner
+ * approved the "Fit, ne reitingas" doctrine — subjective positive/negative
+ * experience only, no stars, no numeric score, no universal rank,
+ * author-vs-subject separated, moderation always, response right, dispute
+ * separate, count-only public consumption. The W6 surface implementing it is
+ * SHIPPED (`?result=experiences`, lib/trust/experience-*, the /dashboard/admin
+ * moderation band). The original header here read "OWNER_DECISION_GATED — no
+ * UI, no storage, no route may render or persist experience records"; that
+ * sentence predates the decision and is retired BY THIS EDIT, not silently —
+ * the audit document above records the reconciliation. The doctrine this
+ * contract encodes (unchanged):
  *
  *   - an experience record is a STRUCTURED FACTUAL account of a real,
  *     completed interaction — dimension chips + bounded text;
