@@ -22,6 +22,7 @@ import {
   persistAiRunAudit,
 } from "./runtime/audit-store";
 import { persistUsageCostEvent } from "@/lib/usage/usage-cost-store";
+import { resolveAnalyticsAttribution } from "@/lib/telemetry/analytics-attribution";
 import { getPromptEntry } from "./registry/registry";
 import { runAiAgentCore, type AiAgentOutcome, type RunAgentOptions } from "./run-agent";
 import type { AiAgentKey } from "./registry/types";
@@ -57,9 +58,22 @@ export async function runAiAgent<T = unknown>(
     // cost ledger's first writer. Same best-effort contract: mock/disabled
     // runs are never written, and a persistence failure never affects the
     // run outcome (it is surfaced below under the same greppable marker).
+    // M-P0-8: attribute the cost to the VALIDATED active workspace's
+    // organization when one exists. Resolved via the same membership-truth
+    // chain as every authority consumer; outside a request context (cron)
+    // or in a personal workspace this stays an honest null — a personal
+    // run's cost is never assigned to an employer, and organization A's
+    // request can only ever carry A (B is unreachable from A's context).
+    let organizationId: string | null = null;
+    try {
+      const attribution = await resolveAnalyticsAttribution();
+      organizationId = attribution.organizationId;
+    } catch {
+      // no request context — honest null
+    }
     const costPersisted = await persistUsageCostEvent(outcome.routing, {
       profileId: opts.profileId ?? null,
-      organizationId: null, // not resolvable at this boundary today — honest null
+      organizationId,
       requestContext: agent,
     });
     if (!persisted) {

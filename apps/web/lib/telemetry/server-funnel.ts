@@ -24,6 +24,7 @@
  */
 import "server-only";
 import { recordTelemetryEvent } from "./actions";
+import { analyticsAttributionMetadata } from "./analytics-attribution";
 import type { FunnelEventName, FunnelMetadata } from "./funnel-events";
 
 export function emitServerFunnelEvent(
@@ -37,15 +38,25 @@ export function emitServerFunnelEvent(
     metadata?: FunnelMetadata;
   },
 ): void {
-  void recordTelemetryEvent({
-    sessionId: `server:${opts.source}`.slice(0, 64),
-    route: opts.route ?? "/dashboard",
-    locale: "lt",
-    eventName: event,
-    result: "info",
-    metadata: opts.metadata ?? null,
-  }).catch(() => {
-    // Best-effort by contract: the emitting action's outcome is authoritative;
-    // a lost telemetry row is acceptable, a broken product action is not.
-  });
+  // M-P0-8: every server-emitted event carries the validated workspace
+  // attribution (workspace_type / organization_id / org_role /
+  // billing_subject) — resolved HERE so all emit sites inherit it and no
+  // call site can fabricate an organization. Explicit metadata wins on key
+  // collision (there is none today; the attribution keys are reserved).
+  void analyticsAttributionMetadata()
+    .then((attribution) =>
+      recordTelemetryEvent({
+        sessionId: `server:${opts.source}`.slice(0, 64),
+        route: opts.route ?? "/dashboard",
+        locale: "lt",
+        eventName: event,
+        result: "info",
+        metadata: { ...attribution, ...(opts.metadata ?? {}) },
+      }),
+    )
+    .catch(() => {
+      // Best-effort by contract: the emitting action's outcome is
+      // authoritative; a lost telemetry row is acceptable, a broken product
+      // action is not.
+    });
 }

@@ -159,4 +159,20 @@ export type FunnelMetadata = {
   /** How many candidates a match preview produced (a COUNT, never ids —
    *  W14 mid-funnel `match_preview_generated`). */
   candidate_count?: number;
+  // ── M-P0-8 organization-aware attribution. Stamped SERVER-SIDE by the
+  //    server-funnel emitter from the validated active workspace (see
+  //    lib/telemetry/analytics-attribution.ts) — a personal workspace
+  //    carries no organization, ever; ids are opaque uuids, not PII.
+  /** 'personal' | 'organization'. */
+  workspace_type?: string;
+  /** The validated active workspace's organization id. */
+  organization_id?: string;
+  /** The caller's governance role behind that workspace. */
+  org_role?: string;
+  /** M-P0-7 billing subject for the same workspace: 'profile' | 'organization'. */
+  billing_subject?: string;
+  /** Referenced entity type: 'project' | 'booking' | 'engagement'. */
+  ref_type?: string;
+  /** Referenced entity id (opaque uuid). */
+  ref_id?: string;
 };
