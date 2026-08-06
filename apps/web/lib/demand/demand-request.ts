@@ -294,19 +294,30 @@ export async function submitDemandRequest(
     if (stored) payload.estimate = stored;
   }
 
-  const { data, error } = await (supabase as unknown as DemandRpc).rpc(
-    "submit_demand_request",
-    {
-      p_kind: kind,
-      p_title: title.slice(0, MAX_TITLE),
-      // The real user-entered description is the need summary (no fabricated
-      // placeholder text). p_original_language stays "lt" — the saved request
-      // surfaces on the LT-first owner UI.
-      p_need_summary: description,
-      p_payload: payload,
-      p_original_language: "lt",
-    },
+  // M-P0-6: prefer the v2 RPC — it stamps the demand with the VALIDATED
+  // active workspace's organization (server re-verifies live membership).
+  // Falls back honestly to v1 (unstamped, personal-keyed) while the
+  // owner-gated migration is unapplied — never a fake stamp, never a block.
+  const rpcArgs = {
+    p_kind: kind,
+    p_title: title.slice(0, MAX_TITLE),
+    // The real user-entered description is the need summary (no fabricated
+    // placeholder text). p_original_language stays "lt" — the saved request
+    // surfaces on the LT-first owner UI.
+    p_need_summary: description,
+    p_payload: payload,
+    p_original_language: "lt",
+  };
+  let { data, error } = await (supabase as unknown as DemandRpc).rpc(
+    "submit_demand_request_v2",
+    { ...rpcArgs, p_organization_id: employer.organizationId },
   );
+  if (error && ["42883", "PGRST202"].includes(error.code ?? "")) {
+    ({ data, error } = await (supabase as unknown as DemandRpc).rpc(
+      "submit_demand_request",
+      rpcArgs,
+    ));
+  }
 
   if (error) {
     // Log the code too so prod logs disambiguate a missing RPC (42883/PGRST202)

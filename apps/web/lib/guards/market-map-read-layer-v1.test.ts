@@ -428,8 +428,10 @@ describe("NO new DB migration in this PR", () => {
     // UNAPPLIED at pin time.
     // Bumped 185 -> 186 for the M-P0-4 consumer-slice DB widening
     // (`20260806180000` — manages_organization + save_company_setup_v3
-    // membership arm) — redefinitions only, owner-gated, UNAPPLIED.
-    expect(count).toBeLessThanOrEqual(186);
+    // membership arm) — human-gated, APPLIED to prod (ledger 20260806090258).
+    // Bumped 186 -> 187 for M-P0-6 (org demand spine v2, `20260806200000`,
+    // supersedes #1016) — the shared slot recounted after #1032 merged.
+    expect(count).toBeLessThanOrEqual(187);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

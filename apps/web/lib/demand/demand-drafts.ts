@@ -141,7 +141,7 @@ type DemandClient = {
   rpc: (
     name: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  ) => Promise<{ data: unknown; error: { message: string; code?: string } | null }>;
 };
 function cr(supabase: SupabaseClient) {
   return (supabase as unknown as DemandClient).from("customer_requests");
@@ -228,11 +228,13 @@ export async function saveDemandDraft(
   // lib/demand/demand-request.ts): an employer draft written from the personal
   // space / an unbound organization would produce a row nothing can later
   // attribute — refused with the module's established failure shape (throw).
+  let organizationId: string | null = null;
   if (EMPLOYER_DRAFT_TYPES.has(type)) {
     const employer = await requireEmployerCompany();
     if (!employer.ok) {
       throw new Error(`no company context: ${employer.reason}`);
     }
+    organizationId = employer.organizationId;
   }
 
   const payload = sanitize(type, rawPayload);
@@ -241,15 +243,25 @@ export async function saveDemandDraft(
       ? ((payload as { title?: string }).title ?? null)
       : null;
 
-  const { error } = await (supabase as unknown as DemandClient).rpc(
-    "save_demand_draft",
-    {
-      p_kind: type,
-      p_title: title,
-      p_payload: payload,
-      p_original_language: "lt",
-    },
+  // M-P0-6: prefer the v2 RPC (validated-workspace organization stamping;
+  // server re-verifies live membership). Falls back honestly to v1
+  // (unstamped) while the owner-gated migration is unapplied.
+  const draftArgs = {
+    p_kind: type,
+    p_title: title,
+    p_payload: payload,
+    p_original_language: "lt",
+  };
+  let { error } = await (supabase as unknown as DemandClient).rpc(
+    "save_demand_draft_v2",
+    { ...draftArgs, p_organization_id: organizationId },
   );
+  if (error && ["42883", "PGRST202"].includes(error.code ?? "")) {
+    ({ error } = await (supabase as unknown as DemandClient).rpc(
+      "save_demand_draft",
+      draftArgs,
+    ));
+  }
 
   if (error) {
     console.error("[demand-draft] save failed:", error.message);
