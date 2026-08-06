@@ -519,6 +519,19 @@ try {
     await dump(p, "15-assignment-ended");
     await snap(p, "15-assignment-ended");
     log({ step: "assignment-end", ok: true, note: "end control clicked" });
+  } else if (stage === "demand-reopen") {
+    // node driver.mjs demand-reopen <handle> <requestId> — reviewed reopen
+    // control (used ONLY to mint a today-dated booking for the W6 proof;
+    // closed again immediately after).
+    const who = arg(1), reqId = arg(2);
+    const p = await (await ctx(browser, who)).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company/scouting?request=${reqId}`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await p.getByTestId("demand-reopen").click({ timeout: 30000 });
+    await p.waitForTimeout(6000);
+    await dump(p, `17-demand-reopen-${reqId.slice(0, 8)}`);
+    await snap(p, `17-demand-reopen-${reqId.slice(0, 8)}`);
+    log({ step: `demand-reopen-${reqId.slice(0, 8)}`, ok: true, note: p.url() });
   } else if (stage === "demand-close") {
     // Step 16: neutralize a [QA-SYNTHETIC] demand via the reviewed lifecycle
     // control. node driver.mjs demand-close <handle> <requestId>
@@ -531,6 +544,43 @@ try {
     const text = await dump(p, `16-demand-close-${reqId.slice(0, 8)}`);
     await snap(p, `16-demand-close-${reqId.slice(0, 8)}`);
     log({ step: `demand-close-${reqId.slice(0, 8)}`, ok: true, note: p.url() });
+  } else if (stage === "w6-submit") {
+    // W6 production proof: submit an experience through the SHIPPED result
+    // surface. node driver.mjs w6-submit <handle> <interactionToken> <positive|negative> <name>
+    const who = arg(1), token = arg(2), sentiment = arg(3), name = arg(4);
+    const p = await (await ctx(browser, who)).newPage();
+    await p.goto(`${BASE}/lt/dashboard?result=experiences&interaction=${encodeURIComponent(token)}`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(10000);
+    await dump(p, `17-w6-${name}-open`);
+    await snap(p, `17-w6-${name}-open`);
+    const blocked = await p.locator("[data-testid^=experience-submit-blocked-]").count();
+    if (blocked > 0) {
+      const cls = await p.locator("[data-testid^=experience-submit-blocked-]").first().getAttribute("data-testid");
+      log({ step: `w6-${name}`, ok: false, note: `BLOCKED: ${cls}` });
+    } else {
+      const form = p.getByTestId("experience-submit-form");
+      await form.waitFor({ state: "visible", timeout: 30000 });
+      await p.getByTestId(`experience-sentiment-${sentiment}`).click({ timeout: 15000 });
+      await p.getByTestId("experience-body").fill(
+        "[QA-SYNTHETIC] Sintetinis testinis irasas - NEREAGUOTI. Bendradarbiavimas pagal susitarima, patikros irasas.",
+      );
+      await snap(p, `17-w6-${name}-form`);
+      await p.getByTestId("experience-submit").click({ timeout: 15000 });
+      await p.waitForSelector("[data-testid=experience-submitted], [data-testid^=experience-error-], [data-testid=experience-submit-duplicate]", { timeout: 30000 });
+      const ok = (await p.getByTestId("experience-submitted").count()) > 0;
+      const text = await dump(p, `17-w6-${name}-after`);
+      await snap(p, `17-w6-${name}-after`);
+      log({ step: `w6-${name}`, ok, note: ok ? "experience-submitted rendered" : text.slice(0, 150) });
+    }
+  } else if (stage === "w6-view") {
+    // Read-only: the experiences result for a handle (counts, mine, about-me).
+    const who = arg(1), name = arg(2);
+    const p = await (await ctx(browser, who)).newPage();
+    await p.goto(`${BASE}/lt/dashboard?result=experiences`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(10000);
+    const text = await dump(p, `17-w6-view-${name}`);
+    await snap(p, `17-w6-view-${name}`);
+    log({ step: `w6-view-${name}`, ok: (await p.getByTestId("experiences-result").count()) > 0, note: text.slice(0, 120) });
   } else {
     throw new Error(`unknown stage: ${stage}`);
   }

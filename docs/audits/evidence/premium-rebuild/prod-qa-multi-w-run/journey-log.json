@@ -340,5 +340,59 @@
     "step": "demand-close-6689f801",
     "ok": true,
     "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=6689f801-9643-4455-b3ff-de0c8db3b1b3"
+  },
+  {
+    "at": "2026-08-06T20:24:05.020Z",
+    "step": "w6-worker-about-org",
+    "ok": false,
+    "note": "BLOCKED: experience-submit-blocked-not_yet"
+  },
+  {
+    "at": "2026-08-06T20:25:46.384Z",
+    "step": "demand-reopen-02684b8a",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T20:26:05.934Z",
+    "step": "contact-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T20:26:24.713Z",
+    "step": "propose-booking",
+    "ok": true,
+    "note": "propose-booking-sent rendered"
+  },
+  {
+    "at": "2026-08-06T20:26:46.291Z",
+    "step": "demand-close-02684b8a",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T20:27:29.491Z",
+    "step": "w6-worker-about-org",
+    "ok": true,
+    "note": "experience-submitted rendered"
+  },
+  {
+    "at": "2026-08-06T20:27:56.017Z",
+    "step": "w6-org-about-worker",
+    "ok": true,
+    "note": "experience-submitted rendered"
+  },
+  {
+    "at": "2026-08-06T20:28:09.909Z",
+    "step": "w6-gama-negative-control",
+    "ok": false,
+    "note": "BLOCKED: experience-submit-blocked-not_available"
+  },
+  {
+    "at": "2026-08-06T20:30:01.188Z",
+    "step": "w6-view-worker",
+    "ok": true,
+    "note": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nQ\n\nQA VYTAS DARBININKAS (TEST) · ASMENINĖ ERDVĖ\n\nMano erdvė\n\nČia susidėlioji savo"
   }
 ]
