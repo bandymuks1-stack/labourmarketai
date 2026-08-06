@@ -14,6 +14,7 @@ import {
   requireEmployerCompany,
   type EmployerContextReason,
 } from "./employer-company-context";
+import { hasOrganizationCapability } from "./role-capabilities";
 import type { AssignRoleActionState } from "@/lib/operations/assign-operations-role";
 import type {
   ProvisionEngagementActionState,
@@ -71,6 +72,10 @@ export async function inviteCompanyWorkerAction(
   // explicitly, never inferred from the first/only owned row.
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noCompanyCode(company.reason) };
+  // §11 capability matrix: roster writes are operational governance.
+  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+    return { ok: false, code: "no_company" };
+  }
 
   const r = await inviteCompanyWorker(company.companyId, email, note);
   if (r.kind === "needs-migration") return { ok: false, code: "needs_migration" };
@@ -98,6 +103,10 @@ export async function assignCompanyWorkerRoleAction(
 
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
+  // §11 capability matrix: roster writes are operational governance.
+  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+    return { ok: false, code: "no_org" };
+  }
   if (workerId === "") return { ok: false, code: "error" };
 
   const r = await assignCompanyWorkerRole(
@@ -127,6 +136,10 @@ export async function provisionCompanyWorkerEngagementContextAction(
 
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
+  // §11 capability matrix: roster writes are operational governance.
+  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+    return { ok: false, code: "no_org" };
+  }
   if (workerId === "") return { ok: false, code: "error" };
 
   const r = await provisionCompanyWorkerEngagementContext(
@@ -155,6 +168,10 @@ export async function setCompanyWorkerJournalReviewAction(
 
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
+  // §11 capability matrix: roster writes are operational governance.
+  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+    return { ok: false, code: "no_org" };
+  }
   if (workerId === "") return { ok: false, code: "error" };
 
   const r = await setCompanyWorkerJournalReview(

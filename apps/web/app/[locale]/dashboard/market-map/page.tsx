@@ -26,7 +26,7 @@ import {
 } from "@/lib/market-map/owner-readiness";
 import { FeatureNote } from "@/components/app/feature-note";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { getOwnCompany } from "@/lib/company/company-setup";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 /**
@@ -86,11 +86,16 @@ export default async function MarketMapPage({
   );
   const activeRole = profileRes.data?.active_role ?? null;
   const isCompanyContext = activeRole === "company" || activeRole === "agency";
-  const companyRead = isCompanyContext ? await getOwnCompany() : null;
-  const companyRow =
-    companyRead && companyRead.kind === "ok" ? companyRead.row : null;
+  // §11: the map's company identity is the ACTIVE WORKSPACE's organization —
+  // workspace-aware (a person owning A and B sees the selected one), never
+  // the `companies.profile_id` singleton (which errors at 2 owned rows).
+  const employerCtx = isCompanyContext
+    ? await resolveEmployerCompanyContext()
+    : null;
   const companyName =
-    companyRow?.displayName?.trim() || companyRow?.legalName?.trim() || null;
+    employerCtx && employerCtx.kind === "ok"
+      ? employerCtx.organizationName.trim() || null
+      : null;
   // The user's OWN person identity for the player-card marker (real data only).
   // ALWAYS built — the personal layer is never suppressed by company context.
   const ownName =

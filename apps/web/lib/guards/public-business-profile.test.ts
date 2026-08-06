@@ -157,7 +157,14 @@ describe("W4 Slice 3 — the description write path", () => {
     // for every real owner.
     expect(action).toMatch(/from\("companies"\)/);
     expect(action).not.toMatch(/from\("organizations"\)[\s\S]{0,200}\.update\(/);
-    expect(action).toMatch(/profile_id.*user\.id|eq\("profile_id", user\.id\)/);
+    // §11: the target company comes from the validated active workspace
+    // (requireEmployerCompany), gated on the manage-company-profile
+    // capability — no profile_id singleton, no client-supplied id. RLS
+    // still re-validates the writer on the UPDATE itself.
+    expect(action).toMatch(/requireEmployerCompany\(\)/);
+    expect(action).toMatch(/manage-company-profile/);
+    expect(action).not.toMatch(/eq\("profile_id"/);
+    expect(action).not.toMatch(/maybeSingle/);
   });
 
   it("is bounded and honest about ownership", () => {

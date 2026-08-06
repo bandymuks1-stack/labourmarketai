@@ -1,23 +1,28 @@
 "use server";
 
 /**
- * Organization description write path (W4 Slice 3).
+ * Organization description write path (W4 Slice 3; workspace-scoped by the
+ * M-P0-4 consumer slice, §11).
  *
  * `organizations.description` is the public business page's main content
- * block — it RENDERED publicly (business/[slug]) but had no write path
- * anywhere in the product. Organizations rows are admin-RLS + RPC-only, so
- * the honest non-admin write path is the one that already exists for every
- * other company fact: the owner's own legacy `companies` row
- * (`companies_update` RLS: profile_id = auth.uid()), whose SECURITY DEFINER
- * mirror trigger propagates `description` into `organizations`.
+ * block. The write travels through the ACTIVE WORKSPACE's company row
+ * (`companies_update` RLS still enforces the creator; the SECURITY DEFINER
+ * mirror trigger propagates `description` into `organizations`).
  *
- * Owner-only by construction (a non-owner manager has no companies row to
- * update — v1 scope, same as company setup itself). Bounded to 2000 chars.
+ * BEFORE §11 this was the last workspace-BLIND company write: it looked the
+ * company up by the caller's profile as a singleton — a read that ERRORS once
+ * a profile owns two companies and ignores which workspace the person
+ * explicitly selected. Now the company comes from
+ * `requireEmployerCompany()` (validated durable workspace → membership truth)
+ * and the write is gated on the `manage-company-profile` capability
+ * (owner/admin only — a manager runs operations, not company identity).
  */
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ORG_DESCRIPTION_MAX } from "@/lib/company/org-display";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 
 export type SaveOrgDescriptionResult =
   | { kind: "ok" }
@@ -33,26 +38,23 @@ export async function saveOrganizationDescriptionAction(
   const value = description.trim().slice(0, ORG_DESCRIPTION_MAX + 1);
   if (value.length > ORG_DESCRIPTION_MAX) return { kind: "invalid" };
 
+  const company = await requireEmployerCompany();
+  if (!company.ok) {
+    return company.reason === "unauthenticated"
+      ? { kind: "not-authenticated" }
+      : { kind: "no-company" };
+  }
+  if (!hasOrganizationCapability(company.role, "manage-company-profile")) {
+    return { kind: "no-company" };
+  }
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { kind: "not-authenticated" };
-
-  // The caller's OWN company row — RLS enforces ownership; the mirror
-  // trigger carries description into organizations.
-  const { data: company, error: readError } = await supabase
-    .from("companies")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (readError) return { kind: "error" };
-  if (!company) return { kind: "no-company" };
-
+  // RLS (`companies_update`: profile_id = auth.uid()) still re-validates the
+  // writer server-side — a wrong id can only fail, never cross a tenant.
   const { error } = await supabase
     .from("companies")
     .update({ description: value === "" ? null : value })
-    .eq("id", company.id);
+    .eq("id", company.companyId);
   if (error) return { kind: "error" };
 
   const safeLocale = /^[a-z]{2}$/.test(locale) ? locale : "lt";

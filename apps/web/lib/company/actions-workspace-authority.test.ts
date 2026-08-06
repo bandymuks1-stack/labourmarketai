@@ -73,6 +73,9 @@ function okContext(companyId: string) {
     companyId,
     organizationId: `org-${companyId.slice(0, 4)}`,
     organizationName: `Org ${companyId.slice(0, 4)}`,
+    // §11: the resolved governance role rides in the context; the actions
+    // gate on capabilities derived from it.
+    role: "owner" as const,
   };
 }
 
