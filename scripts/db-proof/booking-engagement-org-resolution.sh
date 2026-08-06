@@ -8,7 +8,7 @@
 # to reproduce the live 2026-08-06 defect (org-stamped demand from a
 # TWO-company owner → 'ambiguous_company', nothing minted), then applies the
 # migration under test verbatim
-#   supabase/migrations/20260807120000_booking_engagement_org_resolution_v1.sql
+#   supabase/migrations/20260807140000_booking_engagement_org_resolution_v1.sql
 # and proves: org-first minting, byte-preserved fallback honesty, idempotent
 # replay, the surviving 23P01 overlap guard, and the untouched decline path.
 #
@@ -21,7 +21,7 @@ CT=org-bridge-proof
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
 PROD_V3="$REPO/supabase/migrations/20260802150000_booking_atomic_double_booking_v1.sql"
-MIGRATION="$REPO/supabase/migrations/20260807120000_booking_engagement_org_resolution_v1.sql"
+MIGRATION="$REPO/supabase/migrations/20260807140000_booking_engagement_org_resolution_v1.sql"
 
 P_OWN='a0000000-0000-4000-8000-00000000000a'   # owner of TWO companies
 P_W1='c0000000-0000-4000-8000-000000000001'    # worker 1's profile

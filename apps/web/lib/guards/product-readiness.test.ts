@@ -1981,7 +1981,7 @@ describe("no migration files added by this sprint", () => {
     // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
     // shared slot: 189+this = 190.
     // 190 -> 191: booking→engagement org-first company resolution
-    // (20260807120000_booking_engagement_org_resolution_v1) — replaces ONE
+    // (20260807140000_booking_engagement_org_resolution_v1) — replaces ONE
     // function body (respond_booking_request_v3) so an organization-stamped
     // demand resolves via organizations.legacy_company_id instead of the
     // multi-company 'ambiguous_company' dead-end (live 2026-08-06, booking

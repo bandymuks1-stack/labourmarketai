@@ -1,5 +1,5 @@
 -- ============================================================================
--- ROLLBACK for 20260807120000_booking_engagement_org_resolution_v1.sql.
+-- ROLLBACK for 20260807140000_booking_engagement_org_resolution_v1.sql.
 --
 -- Restores the 20260802150000 (W12 slice 1) `respond_booking_request_v3` body
 -- VERBATIM — the profile-singleton company resolution, including its honest

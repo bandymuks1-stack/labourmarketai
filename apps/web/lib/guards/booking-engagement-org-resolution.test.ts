@@ -9,7 +9,7 @@ import { join } from "node:path";
  * applied v3 resolves the company by `companies.profile_id = demand owner` and
  * the QA owner holds two companies ('ambiguous_company'). Post-M-P0-6 the
  * demand row carries the disambiguator: `customer_requests.organization_id`.
- * Migration 20260807120000 replaces v3 so the ORGANIZATION names the company
+ * Migration 20260807140000 replaces v3 so the ORGANIZATION names the company
  * (organizations.legacy_company_id — single-valued, deterministic), with the
  * profile-singleton rule kept verbatim as the NULL-org fallback.
  *
@@ -24,9 +24,9 @@ const REPO_ROOT = join(APP_ROOT, "..", "..");
 const readRepo = (rel: string) => readFileSync(join(REPO_ROOT, rel), "utf8");
 
 const MIGRATION =
-  "supabase/migrations/20260807120000_booking_engagement_org_resolution_v1.sql";
+  "supabase/migrations/20260807140000_booking_engagement_org_resolution_v1.sql";
 const ROLLBACK =
-  "supabase/rollbacks/20260807120000_booking_engagement_org_resolution_v1.down.sql";
+  "supabase/rollbacks/20260807140000_booking_engagement_org_resolution_v1.down.sql";
 const W12_MIGRATION =
   "supabase/migrations/20260802150000_booking_atomic_double_booking_v1.sql";
 

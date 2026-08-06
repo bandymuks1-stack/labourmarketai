@@ -442,7 +442,7 @@ describe("NO new DB migration in this PR", () => {
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
     // Bumped 190 -> 191 for booking→engagement org-first company resolution
-    // (`20260807120000_booking_engagement_org_resolution_v1` — single
+    // (`20260807140000_booking_engagement_org_resolution_v1` — single
     // function-body replacement, owner-gated, UNAPPLIED, paired rollback).
     // Still no migration from the market-map layer.
     expect(count).toBeLessThanOrEqual(191);

@@ -5,7 +5,7 @@
 -- `@human-gate-approved` — RED in migration-safety CI is the intended state
 -- until the owner reviews (SECURITY DEFINER replacement + grants = RED-class).
 --
--- 20260807120000 — booking→engagement bridge: organization-first company
+-- 20260807140000 — booking→engagement bridge: organization-first company
 -- resolution (post-M-P0-6 follow-through).
 --
 -- PROBLEM (observed LIVE in production, 2026-08-06): the applied
@@ -98,7 +98,7 @@
 --   + APPLIED_LEDGER.md row.
 --
 -- ROLLBACK: paired supabase/rollbacks/
--- 20260807120000_booking_engagement_org_resolution_v1.down.sql — restores the
+-- 20260807140000_booking_engagement_org_resolution_v1.down.sql — restores the
 -- 20260802150000 v3 body verbatim (profile-singleton resolution only).
 -- ============================================================================
 
@@ -328,4 +328,4 @@ grant execute on function public.respond_booking_request_v3(uuid, text, text, te
 commit;
 
 -- ROLLBACK: see
--- supabase/rollbacks/20260807120000_booking_engagement_org_resolution_v1.down.sql
+-- supabase/rollbacks/20260807140000_booking_engagement_org_resolution_v1.down.sql

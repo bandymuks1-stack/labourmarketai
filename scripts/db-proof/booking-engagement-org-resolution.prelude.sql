@@ -4,7 +4,7 @@
 -- Builds the minimal faithful prerequisites so that BOTH real migration files
 --   supabase/migrations/20260802150000_booking_atomic_double_booking_v1.sql
 --     (the CURRENT applied production v3 — the BEFORE state)
---   supabase/migrations/20260807120000_booking_engagement_org_resolution_v1.sql
+--   supabase/migrations/20260807140000_booking_engagement_org_resolution_v1.sql
 --     (the migration under test)
 -- can be executed VERBATIM against a throwaway Postgres instance. Nothing here
 -- re-implements either migration.
