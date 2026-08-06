@@ -32,12 +32,21 @@ describe("resolveActiveOrganizationId (membership-validated)", () => {
     expect(resolveActiveOrganizationId(orgs, "second")).toBe("second");
   });
 
-  it("null pointer falls back to the FIRST membership (oldest org — matches the migration backfill default)", () => {
-    expect(resolveActiveOrganizationId(orgs, null)).toBe("first");
+  it("null pointer with SEVERAL memberships FAILS CLOSED to null (M-P0-5 — no first/oldest inference)", () => {
+    expect(resolveActiveOrganizationId(orgs, null)).toBeNull();
   });
 
-  it("STALE / FOREIGN pointer never wins — falls back to the first membership", () => {
-    expect(resolveActiveOrganizationId(orgs, "not-a-membership")).toBe("first");
+  it("null pointer with EXACTLY ONE membership defaults to it (unambiguous)", () => {
+    expect(
+      resolveActiveOrganizationId([{ id: "only", name: "Only" }], null),
+    ).toBe("only");
+  });
+
+  it("STALE / FOREIGN pointer never wins — several memberships fail closed to null", () => {
+    expect(resolveActiveOrganizationId(orgs, "not-a-membership")).toBeNull();
+    expect(
+      resolveActiveOrganizationId([{ id: "only", name: "Only" }], "stale"),
+    ).toBe("only");
   });
 
   it("no memberships → null (never a fabricated organization)", () => {
