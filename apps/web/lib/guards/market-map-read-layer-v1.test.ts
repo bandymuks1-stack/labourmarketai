@@ -426,7 +426,10 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 184 -> 185 for M-P0-4 slice 2 (membership commands,
     // `20260806120000`) — seven SECURITY DEFINER commands, owner-gated,
     // UNAPPLIED at pin time.
-    expect(count).toBeLessThanOrEqual(185);
+    // Bumped 185 -> 186 for the M-P0-4 consumer-slice DB widening
+    // (`20260806180000` — manages_organization + save_company_setup_v3
+    // membership arm) — redefinitions only, owner-gated, UNAPPLIED.
+    expect(count).toBeLessThanOrEqual(186);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
