@@ -5,8 +5,8 @@ import { join } from "node:path";
 /**
  * M-P0-6 — organization demand spine v2 (supersedes PR #1016). Pinned:
  *
- *   1. the migration ships RED — NO `@human-gate-approved` marker until an
- *      owner apply decision is recorded;
+ *   1. the migration is human-gated — the single marker exists ONLY because
+ *      the 2026-08-06 owner apply decision recorded it (five findings named);
  *   2. stamping comes from the VALIDATED workspace via explicit v2 entry
  *      RPCs whose server re-verifies live membership — never from the v1
  *      exactly-one-org GUESS (#1016's resolve_caller_organization_id);
@@ -38,9 +38,20 @@ const executable = sql
   .join("\n");
 
 describe("M-P0-6 v2 migration package", () => {
-  it("ships RED — no human-gate marker before an owner apply decision", () => {
+  it("human-gated — owner apply decision 2026-08-06 recorded, five findings named", () => {
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(ANNOTATION.test(sql)).toBe(false);
+    expect(ANNOTATION.test(sql)).toBe(true);
+    for (const finding of [
+      "security-definer-function",
+      "grant-or-revoke",
+      "alter-drop-policy",
+      "create-trigger",
+      "data-dml",
+    ]) {
+      expect(sql.includes(finding), `marker names ${finding}`).toBe(true);
+    }
+    expect(sql.match(/@human-gate-approved/g)?.length).toBe(1);
+    // the ROLLBACK carries no marker — nothing to approve in undoing
     expect(ANNOTATION.test(down)).toBe(false);
   });
 

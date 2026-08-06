@@ -1,9 +1,23 @@
 -- 20260806200000 — organization demand spine v2 (M-P0-6, supersedes PR #1016)
 --
+-- @human-gate-approved — RED class. OWNER APPROVAL recorded 2026-08-06
+-- ("CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" §1/§4): apply this exact
+-- migration after #1028, merge PR #1029 after full production proof,
+-- normal deployment. Covered findings, still visible as notices:
+-- security-definer-function, grant-or-revoke, alter-drop-policy,
+-- create-trigger, data-dml (the COUNTED unambiguous single-org backfill —
+-- classified against production truth as 17 demand + 1 shortlist +
+-- 0 booking rows, zero ambiguous — plus stamp UPDATEs inside function
+-- bodies). Executable SQL byte-identical to reviewed HEAD `190240b1`
+-- (comment-stripped sha256
+-- b3b5388e23966e0556c0c8de2f015f386d0fd0879a1344aa403f8d935b278413).
+-- Decision recorded in docs/human-gates/org-demand-spine-v2-gate.md and
+-- docs/APPLIED_LEDGER.md.
+--
 -- SAFETY CLASS: RED. New SECURITY DEFINER functions, triggers, RLS policy
--- replacement, apply-time backfill DML. Ships with NO `-- @human-gate-approved`
--- marker: target state is ORGANIZATION_DEMAND_SPINE_V2_MULTI_ORG_CODE_COMPLETE_
--- PENDING_HUMAN_GATE — a separate owner decision gates any production apply.
+-- replacement, apply-time backfill DML. Built without a marker
+-- (…_CODE_COMPLETE_PENDING_HUMAN_GATE); the marker above was added only
+-- after the separate 2026-08-06 owner apply decision.
 --
 -- ── WHY V2 (what was wrong with #1016 / v1) ────────────────────────────────
 -- v1 stamped from `resolve_caller_organization_id()` — a server-side GUESS

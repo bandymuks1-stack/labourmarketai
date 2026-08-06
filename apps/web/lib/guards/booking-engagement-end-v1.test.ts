@@ -619,6 +619,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // recorded in docs/APPLIED_LEDGER.md. Added in the same commit as
       // that record.
       "20260806180000_membership_authority_widening_v1.sql",
+      // 2026-08-06: M-P0-6 (org demand spine v2) gained its marker under
+      // "OWNER DECISION — CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" §1/§4,
+      // recorded in docs/human-gates/org-demand-spine-v2-gate.md and
+      // docs/APPLIED_LEDGER.md. Added in the same commit as that record.
+      "20260806200000_org_demand_spine_v2.sql",
     ]);
   });
 
