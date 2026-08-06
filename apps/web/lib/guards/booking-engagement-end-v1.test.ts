@@ -614,6 +614,11 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/APPLIED_LEDGER.md (ledger 20260806052445). Added in the same
       // commit as that record.
       "20260806120000_company_membership_commands_v1.sql",
+      // 2026-08-06: the consumer-slice DB widening gained its marker under
+      // "OWNER DECISION — CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" §1/§3,
+      // recorded in docs/APPLIED_LEDGER.md. Added in the same commit as
+      // that record.
+      "20260806180000_membership_authority_widening_v1.sql",
     ]);
   });
 

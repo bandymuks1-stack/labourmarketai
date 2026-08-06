@@ -1,9 +1,20 @@
 -- 20260806180000 — membership authority widening v1 (M-P0-4 consumer slice, DB side)
 --
+-- @human-gate-approved — RED class. OWNER APPROVAL recorded 2026-08-06
+-- ("CLOSE MULTI-ORGANIZATION STRUCTURAL TRAIN" §1/§3): apply this exact
+-- migration, merge PR #1028 after production proof, normal deployment.
+-- Covered findings, still visible as notices: security-definer-function,
+-- grant-or-revoke, data-dml (statement text inside the reviewed function
+-- body ONLY — apply-time business-row mutation is zero, verified).
+-- Executable SQL byte-identical to reviewed HEAD `47c7d818`
+-- (comment-stripped sha256
+-- 4f2650af185a3cceed7eddcc759ad913b1c01fc302b4084aa10a380a820e4af9).
+-- Decision recorded in docs/APPLIED_LEDGER.md.
+--
 -- SAFETY CLASS: RED. Two SECURITY DEFINER redefinitions + explicit
--- privilege restatement. Ships with NO `-- @human-gate-approved` marker:
--- target state is CODE_COMPLETE_PENDING_OWNER_GATE — a separate owner
--- decision gates any production apply. CI staying RED is the honest state.
+-- privilege restatement. Built without a marker
+-- (CODE_COMPLETE_PENDING_OWNER_GATE); the marker above was added only
+-- after the separate 2026-08-06 owner apply decision.
 --
 -- ── WHAT ───────────────────────────────────────────────────────────────────
 -- The §11 consumer doctrine at the DATABASE layer: membership proves the
