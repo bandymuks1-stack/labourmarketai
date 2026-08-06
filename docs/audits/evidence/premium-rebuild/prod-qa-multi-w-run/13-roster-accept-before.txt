@@ -19,6 +19,8 @@ Kokio atlygio tikiuosi
 Kuo galiu pagrįsti patirtį
 DARBO PASIRUOŠIMAS
 
+Jau nurodyta: Prieinamumas nurodytas · Darbo kortelė pateikta
+
 Svarbiausia dabar: Profesija nurodyta
 
 Tai, ką pasakoji apie save. Dar neperžiūrėta žmogaus — ir tai normalu.
@@ -35,13 +37,20 @@ Užfiksuoti darbą
 Įkelti CV
 Ieškau darbo
 Tavo darbas dabar
+Laukiantys pakvietimai
+
+Įmonė arba agentūra pakvietė jus prisijungti kaip darbuotoją. Priimkite, kad būtumėte sujungti — tada jūsų darbo žurnalą galės peržiūrėti.
+
+ĮMONĖ
+QA-SYNTHETIC Alfa (testinis subjektas)
+Priimti
 +
 −
  Leaflet | © OpenStreetMap contributors
 Realios galimybės ir projektai, sugrupuoti pagal vietą
 Tavo rinka
-dar 10 galimybių be nurodytos vietos — jos matomos pokalbio paieškoje
+dar 11 galimybių be nurodytos vietos — jos matomos pokalbio paieškoje
 
-Skaitoma…
+Tavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.
 
 ✎

@@ -1,5 +1,5 @@
 LabourMarket.ai
-QA-SYNTHETIC Gama (testinis subjektas)
+QA-SYNTHETIC Alfa (testinis subjektas)
 Mano erdvė
 Darbo žurnalas
 Kalendorius
@@ -7,7 +7,7 @@ Kalendorius
 Žemėlapis
 Ryšiai
 Lietuvių
-QA-SYNTHETIC Gama (testinis subjektas)
+QA-SYNTHETIC Alfa (testinis subjektas)
 ▾
 Q
 ← Veiksmų centras
@@ -25,14 +25,19 @@ Susiję darbuotojai
 Projektai
 0
 Laukiantys pakvietimai
-0
+1
 Vietos
 0
 Galerija
 0
 Kalendorius
+
+LAUKIA JŪSŲ SPRENDIMO
+
+1
+Laukiantys kvietimai darbuotojams
 Jūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.
-QA-SYNTHETIC Gama (testinis subjektas)LT
+QA-SYNTHETIC Alfa (testinis subjektas)LT
 PATVIRTINTA
 
 Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros.
@@ -79,7 +84,7 @@ Operacijų erdvė
 Ką jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.
 
 LAUKIANTYS KVIETIMAI
-0
+1
 PRIIMTI DARBUOTOJAI
 0
 ORGANIZACIJOS NARIAI
@@ -166,10 +171,13 @@ El. pašto adresas
 Žinutė pakviestajam (neprivaloma)
 Iki 500 simbolių. Saugoma kartu su pakvietimu.
 Sukurti kvietimą
+
+Kvietimas sukurtas (el. paštu nesiunčiamas). Pakviestasis jį matys prisijungęs tuo pačiu el. paštu.
+
 Laukiantys pakvietimai
-
-Šiuo metu laukiančių pakvietimų nėra.
-
+qa.worker+multiw@labourmarket.ai
+PENDING
+DATA: 2026-08-06
 Vietos
 
 Būstinė, veiklos vietos ir norimos rinkos — keliose šalyse.
@@ -190,7 +198,7 @@ Organizacijos nariai ir peržiūra
 
 SAVININKAS
 BE PERŽIŪROS
-QA Marius Vadybininkas (test)
+QA Ona Savininkė (test)
 Savininkas — pašalinti negalima
 
 PRIDĖTI DARBUOTOJĄ Į ORGANIZACIJĄ
@@ -203,10 +211,4 @@ Paskelbkite viešą savo verslo puslapį — pasiekiamą adresu labourmarket.ai/
 
 Padaryti verslo profilį viešą
 
-Įjungus, viešame puslapyje rodoma jūsų tapatybė, vieši kontaktai, aktyvios paslaugos ir aktyvūs skelbimai. Privatūs duomenys niekada nerodomi.
-
-Viešas adresas
-/business/
-Šūkis
-Apie įmonę (rodoma viešame puslapyje)
-Iki 2000 ženklų. Tai pagrind
+Įjungus, viešame puslapyje rodoma jūsų tapatybė, vieši kontaktai, ak

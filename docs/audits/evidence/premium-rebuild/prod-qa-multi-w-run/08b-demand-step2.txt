@@ -1,5 +1,5 @@
 LabourMarket.ai
-QA-SYNTHETIC Alfa (testinis subjektas)
+QA-SYNTHETIC Gama (testinis subjektas)
 Mano erdvė
 Darbo žurnalas
 Kalendorius
@@ -7,7 +7,7 @@ Kalendorius
 Žemėlapis
 Ryšiai
 Lietuvių
-QA-SYNTHETIC Alfa (testinis subjektas)
+QA-SYNTHETIC Gama (testinis subjektas)
 ▾
 Q
 ← Veiksmų centras
@@ -32,10 +32,10 @@ Galerija
 0
 Kalendorius
 Jūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.
-QA-SYNTHETIC Alfa (testinis subjektas)LT
-AKTYVI · NEPATVIRTINTA
+QA-SYNTHETIC Gama (testinis subjektas)LT
+PATVIRTINTA
 
-Aktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.
+Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros.
 
 Sukurti paklausą →
 Ką čia galite padaryti
@@ -72,7 +72,7 @@ Ko realiam samdymui reikia iš tavo įmonės. Tai nėra teisinė konsultacija �
 Registracijos numeris
 Sąskaitų el. paštas
 
-DAR NEPATVIRTINTA (ŽMOGAUS ADMINISTRATORIAUS SPRENDIMAS)
+PATVIRTINTA ADMINISTRATORIAUS
 
 Operacijų erdvė
 
@@ -190,7 +190,7 @@ Organizacijos nariai ir peržiūra
 
 SAVININKAS
 BE PERŽIŪROS
-QA Ona Savininkė (test)
+QA Marius Vadybininkas (test)
 Savininkas — pašalinti negalima
 
 PRIDĖTI DARBUOTOJĄ Į ORGANIZACIJĄ
@@ -206,4 +206,7 @@ Padaryti verslo profilį viešą
 Įjungus, viešame puslapyje rodoma jūsų tapatybė, vieši kontaktai, aktyvios paslaugos ir aktyvūs skelbimai. Privatūs duomenys niekada nerodomi.
 
 Viešas adresas
-/b
+/business/
+Šūkis
+Apie įmonę (rodoma viešame puslapyje)
+Iki 2000 ženklų. Tai pagrind

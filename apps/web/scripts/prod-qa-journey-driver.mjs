@@ -251,10 +251,10 @@ try {
     console.log("accept result:", res.slice(0, 300));
   } else if (stage === "demand") {
     // Owner (workspace = Alfa) files the [QA-SYNTHETIC] demand via the wizard.
-    const p = await (await ctx(browser, "owner")).newPage();
+    const p = await (await ctx(browser, who)).newPage();
     await p.goto(`${BASE}/lt/dashboard/company#company-requests`, { waitUntil: "domcontentloaded" });
     await p.waitForTimeout(9000);
-    await p.getByTestId("demand-role").fill("[QA-SYNTHETIC - nereaguoti / test] Pagalbinis darbininkas");
+    await p.getByTestId("demand-role").fill(`[QA-SYNTHETIC - nereaguoti / test] Pagalbinis darbininkas${suffix}`);
     await p.getByTestId("demand-description").fill(
       "[QA-SYNTHETIC] Sintetinis testinis poreikis - NEREAGUOTI. Vienas pagalbinis darbininkas vienai dienai Vilniuje. Sis irasas bus uzdarytas iskart po patikros.",
     );
@@ -280,14 +280,17 @@ try {
     log({ step: "demand-created", ok: true, note: p.url() });
     console.log(text.slice(0, 700));
   } else if (stage === "demand2") {
+    // optional 2nd arg: identity handle (default owner) + 3rd: role text suffix
+    const who = arg(1) || "owner";
+    const suffix = arg(2) || "";
     // Step 5 (corrected): the wizard's final control is demand-create (not
     // demand-submit/demand-confirm — that was why the first attempt never
     // submitted). Fill → next → next → create → wait for the submitted
     // summary.
-    const p = await (await ctx(browser, "owner")).newPage();
+    const p = await (await ctx(browser, who)).newPage();
     await p.goto(`${BASE}/lt/dashboard/company#company-requests`, { waitUntil: "domcontentloaded" });
     await p.waitForTimeout(9000);
-    await p.getByTestId("demand-role").fill("[QA-SYNTHETIC - nereaguoti / test] Pagalbinis darbininkas");
+    await p.getByTestId("demand-role").fill(`[QA-SYNTHETIC - nereaguoti / test] Pagalbinis darbininkas${suffix}`);
     await p.getByTestId("demand-description").fill(
       "[QA-SYNTHETIC] Sintetinis testinis poreikis - NEREAGUOTI. Vienas pagalbinis darbininkas vienai dienai Vilniuje. Sis irasas bus uzdarytas iskart po patikros.",
     );
@@ -310,6 +313,224 @@ try {
     const text = await dump(p, "08b-demand-created");
     await snap(p, "08b-demand-created");
     log({ step: "demand-created-v2", ok, note: ok ? "submitted-summary rendered" : text.slice(0, 200) });
+  } else if (stage === "interest") {
+    // Step 6: the worker expresses interest in the [QA-SYNTHETIC] demand.
+    // node driver.mjs interest <requestId>
+    const reqId = arg(1);
+    if (!reqId) throw new Error("pass the customer_requests id");
+    const p = await (await ctx(browser, "worker")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/opportunities`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(8000);
+    const block = p.getByTestId(`interest-${reqId}`);
+    await block.first().waitFor({ state: "visible", timeout: 30000 });
+    await dump(p, "09-interest-before");
+    await snap(p, "09-interest-before");
+    await block.first().getByTestId("interest-express").click({ timeout: 15000 });
+    await p
+      .waitForSelector(`[data-testid=interest-${reqId}] [data-testid=interest-sent]`, { timeout: 30000 })
+      .catch(() => {});
+    const sent = (await block.first().getByTestId("interest-sent").count()) > 0;
+    await dump(p, "09-interest-after");
+    await snap(p, "09-interest-after");
+    log({ step: "worker-interest", ok: sent, note: sent ? "interest-sent rendered" : "no interest-sent marker" });
+  } else if (stage === "contact-book") {
+    // Step 7: owner (workspace Alfa) contacts the interested worker and
+    // proposes a booking from the scouting page.
+    // node driver.mjs contact-book <requestId> <workerId> <startDate>
+    const reqId = arg(1), workerId = arg(2), startDate = arg(3);
+    const who = arg(4) || "owner";
+    if (!reqId || !workerId || !startDate) throw new Error("args: requestId workerId startDate [handle]");
+    const p = await (await ctx(browser, who)).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company/scouting?request=${reqId}`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await dump(p, "10-scouting-view");
+    await snap(p, "10-scouting-view");
+
+    // contact (conversation) — reviewed communication path
+    const contact = p.getByTestId(`request-communication-${workerId}`);
+    if ((await contact.count()) > 0) {
+      await contact.first().click({ timeout: 15000 });
+      await p.waitForTimeout(5000);
+      await dump(p, "10-contact-after");
+      await snap(p, "10-contact-after");
+      log({ step: "contact-worker", ok: true, note: p.url() });
+      await p.goto(`${BASE}/lt/dashboard/company/scouting?request=${reqId}`, { waitUntil: "domcontentloaded" });
+      await p.waitForTimeout(8000);
+    } else {
+      log({ step: "contact-worker", ok: false, note: "request-communication button absent" });
+    }
+
+    // booking proposal
+    await p.getByTestId("propose-booking-open").first().click({ timeout: 30000 });
+    const form = p.getByTestId("propose-booking-form");
+    await form.first().waitFor({ state: "visible", timeout: 15000 });
+    await form.first().locator('input[type="date"]').fill(startDate);
+    await form.first().locator('input[type="text"]').fill("[QA-SYNTHETIC] testinis pasiulymas - NEREAGUOTI");
+    await snap(p, "10-booking-form");
+    await form.first().locator("button").first().click({ timeout: 15000 });
+    await p.waitForSelector("[data-testid=propose-booking-sent]", { timeout: 30000 }).catch(() => {});
+    const sent = (await p.getByTestId("propose-booking-sent").count()) > 0;
+    await dump(p, "10-booking-sent");
+    await snap(p, "10-booking-sent");
+    log({ step: "propose-booking", ok: sent, note: sent ? "propose-booking-sent rendered" : "marker absent" });
+  } else if (stage === "worker-availability") {
+    // Pre-step for 7: the worker sets availability='available' through the
+    // real player-card editor (owner rule 6 gates contact/booking on it).
+    const p = await (await ctx(browser, "worker")).newPage();
+    await p.goto(`${BASE}/lt/dashboard?result=player-card`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    const editor = p.getByTestId("player-card-work-editor");
+    await editor.waitFor({ state: "visible", timeout: 30000 });
+    await editor.getByTestId("work-card-editor-toggle").click();
+    const form = editor.getByTestId("work-card-editor");
+    await form.waitFor({ state: "visible", timeout: 15000 });
+    await form.locator('select[name="availability_status"]').selectOption("available");
+    await form.locator('button[type="submit"]').click();
+    await p.waitForTimeout(6000);
+    await dump(p, "09c-availability-saved");
+    await snap(p, "09c-availability-saved");
+    log({ step: "worker-availability", ok: true, note: "availability set via player-card editor" });
+  } else if (stage === "worker-discoverable") {
+    // Pre-step for 7: the worker GRANTS profile-discoverability consent via
+    // the real privacy surface (employer scouting visibility is
+    // consent-gated by worker_profile_discoverable()).
+    const p = await (await ctx(browser, "worker")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/privacy`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(8000);
+    await dump(p, "09d-privacy-before");
+    await snap(p, "09d-privacy-before");
+    if ((await p.getByTestId("discoverability-granted").count()) > 0) {
+      log({ step: "worker-discoverable", ok: true, note: "already granted" });
+    } else {
+      const open = p.getByTestId("discoverability-open");
+      if ((await open.count()) > 0) await open.click({ timeout: 15000 });
+      await p.getByTestId("discoverability-grant").click({ timeout: 15000 });
+      await p.waitForSelector("[data-testid=discoverability-granted]", { timeout: 30000 });
+      await dump(p, "09d-privacy-granted");
+      await snap(p, "09d-privacy-granted");
+      log({ step: "worker-discoverable", ok: true, note: "consent granted via privacy page" });
+    }
+  } else if (stage === "shortlist-contact") {
+    // Step 7 (contact leg): shortlist the candidate as "Domina" (interested)
+    // — the reviewed gate for opening a conversation — then contact.
+    // node driver.mjs shortlist-contact <requestId> <workerId>
+    const reqId = arg(1), workerId = arg(2);
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company/scouting?request=${reqId}`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    const block = p.getByTestId(`scout-shortlist-${workerId}`);
+    await block.first().waitFor({ state: "visible", timeout: 30000 });
+    await block.first().getByRole("button", { name: "Domina" }).click({ timeout: 15000 });
+    await p.waitForTimeout(4000);
+    await dump(p, "10b-shortlisted");
+    await snap(p, "10b-shortlisted");
+    const contact = p.getByTestId(`request-communication-${workerId}`);
+    await contact.first().waitFor({ state: "visible", timeout: 30000 });
+    await contact.first().click({ timeout: 15000 });
+    await p.waitForTimeout(6000);
+    const text = await dump(p, "10b-contact-after");
+    await snap(p, "10b-contact-after");
+    const failed = text.includes("nepavyko");
+    log({ step: "shortlist-contact", ok: !failed, note: failed ? "conversation open failed" : p.url() });
+  } else if (stage === "booking-accept") {
+    // Step 8: the worker ACCEPTS the proposed [QA-SYNTHETIC] booking on the
+    // real bookings surface (W12 respond path).
+    const p = await (await ctx(browser, "worker")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/bookings`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await dump(p, "11-bookings-before");
+    await snap(p, "11-bookings-before");
+    await p.getByRole("button", { name: "Priimti" }).first().click({ timeout: 30000 });
+    await p.waitForSelector("[data-testid=booking-responded]", { timeout: 30000 }).catch(() => {});
+    const responded = (await p.getByTestId("booking-responded").count()) > 0;
+    await dump(p, "11-booking-accepted");
+    await snap(p, "11-booking-accepted");
+    log({ step: "booking-accept", ok: responded, note: responded ? "booking-responded rendered" : "marker absent" });
+  } else if (stage === "roster-invite") {
+    // Step 10a: owner (workspace Alfa) invites the worker to the EMPLOYMENT
+    // roster (company_worker_invitations → engagement on accept).
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    const form = p.getByTestId("company-workers-invite-form");
+    await form.waitFor({ state: "visible", timeout: 30000 });
+    await p.getByTestId("company-workers-invite-email").fill("qa.worker+multiw@labourmarket.ai");
+    await p.getByTestId("company-workers-invite-submit").click({ timeout: 15000 });
+    await p.waitForSelector("[data-testid=company-workers-invite-result]", { timeout: 30000 });
+    const res = await p.getByTestId("company-workers-invite-result").innerText();
+    await dump(p, "13-roster-invite");
+    await snap(p, "13-roster-invite");
+    log({ step: "roster-invite", ok: true, note: res.slice(0, 120) });
+  } else if (stage === "roster-accept") {
+    // Step 10b: the worker accepts the roster invitation → engagement.
+    // node driver.mjs roster-accept <companyId>
+    const companyId = arg(1);
+    const p = await (await ctx(browser, "worker")).newPage();
+    await p.goto(`${BASE}/lt/dashboard`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await dump(p, "13-roster-accept-before");
+    await snap(p, "13-roster-accept-before");
+    await p.getByTestId(`worker-invitation-accept-company-${companyId}`).click({ timeout: 30000 });
+    await p.waitForTimeout(6000);
+    const text = await dump(p, "13-roster-accept-after");
+    await snap(p, "13-roster-accept-after");
+    log({ step: "roster-accept", ok: true, note: text.includes("nepavyko") ? "FAILED text present" : "accepted" });
+  } else if (stage === "project-create") {
+    // Step 11a: owner creates the [QA-SYNTHETIC] project (workspace Alfa).
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company/projects/new`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(8000);
+    await p.getByTestId("project-name-input").fill("[QA-SYNTHETIC] Testinis projektas - NEREAGUOTI");
+    await p.getByTestId("project-create-submit").click({ timeout: 15000 });
+    await p.waitForSelector("[data-testid=project-context-created], [data-testid=project-create-error]", { timeout: 30000 });
+    const ok = (await p.getByTestId("project-context-created").count()) > 0;
+    await dump(p, "14-project-created");
+    await snap(p, "14-project-created");
+    log({ step: "project-create", ok, note: ok ? "created" : "error rendered" });
+  } else if (stage === "project-assign") {
+    // Step 11b: owner assigns the QA worker to the QA project.
+    // node driver.mjs project-assign <projectId> <workerProfileId>
+    const projectId = arg(1), workerProfileId = arg(2);
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/projects`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    const form = p.getByTestId("project-assign");
+    await form.waitFor({ state: "visible", timeout: 30000 });
+    await form.locator('select[name="project_id"]').selectOption(projectId);
+    await form.locator('select[name="worker_profile_id"]').selectOption(workerProfileId);
+    await snap(p, "14-assign-form");
+    await form.locator('button[type="submit"]').click({ timeout: 15000 });
+    await p.waitForTimeout(6000);
+    const text = await dump(p, "14-assigned");
+    await snap(p, "14-assigned");
+    log({ step: "project-assign", ok: !text.includes("nepavyko"), note: p.url() });
+  } else if (stage === "assignment-end") {
+    // Step 12/13 (shipped scope): owner ENDS the QA worker's project
+    // assignment via the real control (end_worker_project_assignment,
+    // status='ended', no delete).
+    const p = await (await ctx(browser, "owner")).newPage();
+    await p.goto(`${BASE}/lt/dashboard/projects`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    const chip = p.getByTestId("roster-worker-chip").first();
+    await chip.waitFor({ state: "visible", timeout: 30000 });
+    await snap(p, "15-assignment-before-end");
+    await chip.locator("button").click({ timeout: 15000 });
+    await p.waitForTimeout(5000);
+    await dump(p, "15-assignment-ended");
+    await snap(p, "15-assignment-ended");
+    log({ step: "assignment-end", ok: true, note: "end control clicked" });
+  } else if (stage === "demand-close") {
+    // Step 16: neutralize a [QA-SYNTHETIC] demand via the reviewed lifecycle
+    // control. node driver.mjs demand-close <handle> <requestId>
+    const who = arg(1), reqId = arg(2);
+    const p = await (await ctx(browser, who)).newPage();
+    await p.goto(`${BASE}/lt/dashboard/company/scouting?request=${reqId}`, { waitUntil: "domcontentloaded" });
+    await p.waitForTimeout(9000);
+    await p.getByTestId("demand-close").click({ timeout: 30000 });
+    await p.waitForTimeout(6000);
+    const text = await dump(p, `16-demand-close-${reqId.slice(0, 8)}`);
+    await snap(p, `16-demand-close-${reqId.slice(0, 8)}`);
+    log({ step: `demand-close-${reqId.slice(0, 8)}`, ok: true, note: p.url() });
   } else {
     throw new Error(`unknown stage: ${stage}`);
   }

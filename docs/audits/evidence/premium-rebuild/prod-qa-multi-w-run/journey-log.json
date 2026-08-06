@@ -184,5 +184,161 @@
     "step": "accept-invitation",
     "ok": true,
     "note": "Pakvietimas priimtas."
+  },
+  {
+    "at": "2026-08-06T18:40:52.169Z",
+    "step": "smoke-landing",
+    "ok": true,
+    "note": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje"
+  },
+  {
+    "at": "2026-08-06T18:41:02.428Z",
+    "step": "smoke-auth-owner",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T18:41:09.431Z",
+    "step": "smoke-auth-manager",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T18:41:15.520Z",
+    "step": "smoke-auth-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T19:05:01.947Z",
+    "step": "worker-interest",
+    "ok": true,
+    "note": "interest-sent rendered"
+  },
+  {
+    "at": "2026-08-06T19:07:16.072Z",
+    "step": "contact-worker",
+    "ok": false,
+    "note": "request-communication button absent"
+  },
+  {
+    "at": "2026-08-06T19:08:11.173Z",
+    "step": "contact-worker",
+    "ok": false,
+    "note": "request-communication button absent"
+  },
+  {
+    "at": "2026-08-06T19:12:14.906Z",
+    "step": "worker-availability",
+    "ok": true,
+    "note": "availability set via player-card editor"
+  },
+  {
+    "at": "2026-08-06T19:13:13.474Z",
+    "step": "contact-worker",
+    "ok": false,
+    "note": "request-communication button absent"
+  },
+  {
+    "at": "2026-08-06T19:17:27.165Z",
+    "step": "worker-discoverable",
+    "ok": true,
+    "note": "consent granted via privacy page"
+  },
+  {
+    "at": "2026-08-06T19:18:06.023Z",
+    "step": "contact-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T19:18:26.081Z",
+    "step": "propose-booking",
+    "ok": true,
+    "note": "propose-booking-sent rendered"
+  },
+  {
+    "at": "2026-08-06T19:21:06.489Z",
+    "step": "shortlist-contact",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T19:23:00.026Z",
+    "step": "booking-accept",
+    "ok": true,
+    "note": "booking-responded rendered"
+  },
+  {
+    "at": "2026-08-06T19:28:57.073Z",
+    "step": "12-manager-gama",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard"
+  },
+  {
+    "at": "2026-08-06T19:29:19.627Z",
+    "step": "demand-created-v2",
+    "ok": true,
+    "note": "submitted-summary rendered"
+  },
+  {
+    "at": "2026-08-06T19:30:06.346Z",
+    "step": "contact-worker",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=6689f801-9643-4455-b3ff-de0c8db3b1b3"
+  },
+  {
+    "at": "2026-08-06T19:30:24.974Z",
+    "step": "propose-booking",
+    "ok": true,
+    "note": "propose-booking-sent rendered"
+  },
+  {
+    "at": "2026-08-06T19:31:22.917Z",
+    "step": "booking-accept",
+    "ok": false,
+    "note": "marker absent"
+  },
+  {
+    "at": "2026-08-06T19:33:06.000Z",
+    "step": "roster-invite",
+    "ok": true,
+    "note": "Kvietimas sukurtas (el. paštu nesiunčiamas). Pakviestasis jį matys prisijungęs tuo pačiu el. paštu."
+  },
+  {
+    "at": "2026-08-06T19:35:17.518Z",
+    "step": "roster-accept",
+    "ok": true,
+    "note": "accepted"
+  },
+  {
+    "at": "2026-08-06T19:37:23.304Z",
+    "step": "project-create",
+    "ok": true,
+    "note": "created"
+  },
+  {
+    "at": "2026-08-06T19:38:13.456Z",
+    "step": "project-assign",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/projects"
+  },
+  {
+    "at": "2026-08-06T19:41:39.289Z",
+    "step": "assignment-end",
+    "ok": true,
+    "note": "end control clicked"
+  },
+  {
+    "at": "2026-08-06T19:46:36.284Z",
+    "step": "demand-close-02684b8a",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=02684b8a-be22-4cc0-b63e-013b54889ed2"
+  },
+  {
+    "at": "2026-08-06T19:47:07.974Z",
+    "step": "demand-close-6689f801",
+    "ok": true,
+    "note": "https://labourmarket.ai/lt/dashboard/company/scouting?request=6689f801-9643-4455-b3ff-de0c8db3b1b3"
   }
 ]

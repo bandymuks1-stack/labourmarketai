@@ -1,6 +1,6 @@
 L
 LabourMarket
-Asmeninė erdvė
+QA-SYNTHETIC Gama (testinis subjektas)
 Lietuvių
 Q
 
@@ -18,6 +18,6 @@ Tavo darbas dabar
 Realios galimybės ir projektai, sugrupuoti pagal vietą
 dar 10 galimybių be nurodytos vietos — jos matomos pokalbio paieškoje
 
-Skaitoma…
+Tavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.
 
 ✎

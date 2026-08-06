@@ -1,0 +1,74 @@
+LabourMarket.ai
+QA-SYNTHETIC Alfa (testinis subjektas)
+Mano erdvė
+Darbo žurnalas
+Kalendorius
+Žinutės
+Žemėlapis
+Ryšiai
+Lietuvių
+QA-SYNTHETIC Alfa (testinis subjektas)
+▾
+Q
+← Veiksmų centras
+
+ĮMONĖ · PROJEKTAI
+
+Projektai ir priskyrimai
+
+Sukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.
+
+Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs. Kaip veikia šis modelis →
+
+Ką čia galite padaryti
+
+Valdykite projektus ir operacijas vienoje vietoje.
+
+1
+Sukurkite projektą (pavadinimas, vieta).
+2
+Priskirkite darbuotojus prie projekto.
+3
+Sekite eigą ir komandas projekto eigos rodinyje.
+Naujas projektas
+
+Po to: sekite eigą ir komandas, kol projektas juda.
+
+Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.
+Peržiūros eilė →
+TAVO PROJEKTAI
+[QA-SYNTHETIC] Testinis projektas - NEREAGUOTI
+1
+KOMANDOJE
+ATIDARYTI PROJEKTO EIGĄ →
+POKALBIS DĖL PROJEKTO
+RUOŠIAMA — PROJEKTAI IR KOMANDOS
+
+Naujas projektas
+
+PAVADINIMAS
+MIESTAS (NEPRIVALOMA)
+Sukurti projektą
+
+Priskirti darbuotoją projektui
+
+PROJEKTAS
+Pasirinkite projektą
+[QA-SYNTHETIC] Testinis projektas - NEREAGUOTI
+DARBUOTOJAS
+Pasirinkite darbuotoją
+QA Vytas Darbininkas (test)
+Priskirti
+Priskirta
+
+[QA-SYNTHETIC] Testinis projektas - NEREAGUOTI
+
+PRISKIRTI DARBUOTOJAI
+
+QV
+QA Vytas Darbininkas (test)
+Užbaigti
+PRISKIRTI DARBUOTOJĄ ŠIAM OBJEKTUI ↑
+ATIDARYTI PROJEKTO EIGĄ →
+Sukurta Rexora
+✎
