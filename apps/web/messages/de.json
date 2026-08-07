@@ -451,6 +451,7 @@
     "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Zuletzt geöffnet",
+    "startersLabel": "Hier starten",
     "objectsLabel": "Ihre eigenen Einträge",
     "objectsLoading": "Ihre eigenen Einträge werden durchsucht…",
     "objectsError": "Ihre Einträge konnten gerade nicht durchsucht werden. Die Seitenlinks oben funktionieren weiterhin.",

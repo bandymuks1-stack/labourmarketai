@@ -48,6 +48,23 @@ import {
  */
 
 const RECENT_COMMANDS_STORAGE_KEY = "lm.commandFinder.recentCommandIds";
+
+/**
+ * The canonical destinations offered to a person with no command history.
+ * Ids only — labels, routes and audience gating stay in COMMAND_REGISTRY, so
+ * this list can never point somewhere the registry's own guard has not already
+ * proven to exist. Order = the core work loop (journal → calendar → messages),
+ * then the two spatial/relational surfaces, then the person's own profile.
+ * Audience filtering happens at render, so a worker never sees a company-only
+ * row and vice versa.
+ */
+const STARTER_COMMAND_IDS: readonly string[] = [
+  "work_journal",
+  "planning",
+  "messages",
+  "market_map",
+  "profile",
+];
 const RECENT_COMMANDS_MAX = 5;
 const OBJECT_SEARCH_DEBOUNCE_MS = 300;
 const OBJECT_SEARCH_TIMEOUT_MS = 8000;
@@ -300,6 +317,40 @@ export function CommandFinder() {
       );
   }, [recentIds, query, allowedAudiences]);
 
+  /**
+   * STARTERS — the canonical destinations, shown only to someone who has no
+   * recents yet and has typed nothing.
+   *
+   * Why this exists (UX audit 2026-08-07). `/dashboard` deliberately carries
+   * no tab row: `conversation-header.tsx` records the owner ruling that the
+   * journal, calendar, messages and the card are PROJECTIONS opened from the
+   * conversation — "chips, commands, the opening brief, the command search" —
+   * never from a parallel tab system. That ruling stands and this change does
+   * not touch it.
+   *
+   * But the measured state was that NONE of those four channels named a
+   * calendar, an inbox or a map for a first-time person: the opening brief
+   * offers three worker chips, the account menu four items (profile, card, CV,
+   * settings), and this finder opened as a bare input — because recents come
+   * from localStorage and a first session has none. So the surface the ruling
+   * relies on to make projections reachable was empty exactly when it was
+   * needed most, and the product's own home offered no visible route to a
+   * calendar, an inbox or a map at all.
+   *
+   * These are the SAME registry rows the finder already serves — no second
+   * navigation model, no new route, no catalogue edit. They disappear the
+   * moment the person has a real history or starts typing.
+   */
+  const starterEntries = useMemo(() => {
+    if (query.trim().length > 0 || recentEntries.length > 0) return [];
+    return STARTER_COMMAND_IDS.map((id) =>
+      COMMAND_REGISTRY.find((e) => e.id === id),
+    ).filter(
+      (e): e is CommandEntry =>
+        e !== undefined && allowedAudiences.has(e.audience),
+    );
+  }, [query, recentEntries, allowedAudiences]);
+
   const objectResultCount = objectGroups.reduce(
     (n, g) => n + g.results.length,
     0,
@@ -404,6 +455,39 @@ export function CommandFinder() {
                   href={entry.route as "/dashboard"}
                   onClick={() => rememberCommand(entry.id)}
                   data-testid={`command-finder-recent-${entry.id}`}
+                  className={rowClass}
+                >
+                  <span className="min-w-0 truncate font-medium">
+                    {entry.labels[locale]}
+                  </span>
+                  <span className="shrink-0 font-mono text-meta text-text-muted">
+                    {entry.route}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {/* Starters — only for a person with no recents and no query. Same
+          registry rows, same audience gating; they vanish on first keystroke
+          and are permanently replaced by real recents. */}
+      {starterEntries.length > 0 && (
+        <nav aria-label={t("startersLabel")}>
+          <p className="mb-1 font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("startersLabel")}
+          </p>
+          <ul
+            data-testid="command-finder-starters"
+            className="flex flex-col gap-1"
+          >
+            {starterEntries.map((entry) => (
+              <li key={entry.id}>
+                <Link
+                  href={entry.route as "/dashboard"}
+                  onClick={() => rememberCommand(entry.id)}
+                  data-testid={`command-finder-starter-${entry.id}`}
                   className={rowClass}
                 >
                   <span className="min-w-0 truncate font-medium">
