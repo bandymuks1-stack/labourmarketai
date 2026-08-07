@@ -9409,6 +9409,7 @@
       }
     },
     "organizations": {
+      "title": "Mano įmonės",
       "noCompanyCta": "Pridėti įmonę",
       "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.",
       "individualDesc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje."

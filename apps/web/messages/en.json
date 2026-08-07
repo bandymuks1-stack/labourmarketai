@@ -9409,6 +9409,7 @@
       }
     },
     "organizations": {
+      "title": "My companies",
       "noCompanyCta": "Add company",
       "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel.",
       "individualDesc": "Act as an independent provider — managed in your personal profile."
