@@ -8,6 +8,7 @@ import {
   acceptInviteFormAction,
   declineInviteFormAction,
 } from "@/lib/invitations/invite-page-actions";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Invitation landing page (core-network area B) — the destination of every
@@ -180,9 +181,7 @@ export default async function InvitePage({
 
       <p className="text-meta text-text-muted">
         {t("expiresNote", {
-          date: preview.expires_at
-            ? new Date(preview.expires_at).toLocaleDateString(locale)
-            : "—",
+          date: formatUtcDate(preview.expires_at, locale) ?? "—",
         })}
       </p>
     </>,

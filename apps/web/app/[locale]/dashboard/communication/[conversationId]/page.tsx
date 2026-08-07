@@ -18,6 +18,7 @@ import {
   type ConversationMessageAttachment,
 } from "@/lib/communication/attachments";
 import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 type MessageRow = {
   id: string;
@@ -269,7 +270,7 @@ export default async function ConversationDetailPage({
                     {isMine ? t("byYou") : t("byOther")}
                   </span>
                   <span className="font-mono text-meta text-text-muted">
-                    {new Date(m.created_at).toLocaleString(locale)}
+                    {formatUtcDateTime(m.created_at, locale)}
                   </span>
                 </div>
                 {(() => {

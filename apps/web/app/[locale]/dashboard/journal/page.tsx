@@ -51,6 +51,7 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
+import { formatUtcDate, utcDayKey } from "@/lib/time/display";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -522,10 +523,12 @@ export default async function JournalPage({
 
   // Diary day-grouping (CV/records feed cleanup): the feed reads as a dated
   // diary — entries collapse under ONE day header instead of repeating the
-  // date on every card. The day key/label is exactly the per-entry date that
-  // was already shown (`toLocaleDateString(locale)`), so grouping never shifts
-  // a day boundary vs. what the worker saw. Entries arrive created_at-desc, so
-  // consecutive same-day rows group in order; no sort, no new data.
+  // date on every card. Key AND label are both the canonical UTC day (W12
+  // timezone consistency): the key feeds `?date=`, which the planning
+  // projection resolves in UTC, so deriving it in the ambient zone put the
+  // group header and the agenda on different days for anyone off UTC.
+  // Entries arrive created_at-desc, so consecutive same-day rows group in
+  // order; no sort, no new data.
   const entryDayGroups: {
     key: string;
     label: string;
@@ -534,12 +537,7 @@ export default async function JournalPage({
     totalMinutes: number;
     entries: JournalEntryRow[];
   }[] = [];
-  const isoDayOf = (createdAt: string): string => {
-    const d = new Date(createdAt);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-      d.getDate(),
-    ).padStart(2, "0")}`;
-  };
+  const isoDayOf = (createdAt: string): string => utcDayKey(createdAt) ?? "";
   // Evidence drill-down (W5 slice 3): resolve ?skill= against the worker's
   // OWN skill set and narrow the diary to entries linked to it. Unknown slug
   // or links unavailable → no filter, never an invented empty diary. The
@@ -555,7 +553,7 @@ export default async function JournalPage({
       )
     : (entries ?? []);
   for (const e of diaryEntries) {
-    const label = new Date(e.created_at).toLocaleDateString(locale);
+    const label = formatUtcDate(e.created_at, locale) ?? "";
     // Day total = sum of each entry's time metric (hours/minutes only). "days"
     // and non-time quantities are never summed, so the figure is real, not
     // invented; days with no time entry simply show no hours.
@@ -886,7 +884,7 @@ export default async function JournalPage({
                     : "border-ink-500 text-text-secondary hover:border-brand-blue"
                 }`}
               >
-                {new Date(g.isoKey).toLocaleDateString(locale, {
+                {formatUtcDate(g.isoKey, locale, {
                   month: "short",
                   day: "numeric",
                 })}

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Admin support inbox (v1). Lists `kind='support'` conversations
@@ -81,7 +82,7 @@ export default async function AdminSupportInboxPage({
                     {r.subject ?? t("unnamed")}
                   </span>
                   <span className="font-mono text-meta text-text-muted whitespace-nowrap">
-                    {new Date(r.updated_at).toLocaleString(locale)}
+                    {formatUtcDateTime(r.updated_at, locale)}
                   </span>
                 </div>
                 <span className="font-mono text-meta text-text-muted">

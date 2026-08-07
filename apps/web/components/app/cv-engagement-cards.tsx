@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatUtcDate } from "@/lib/time/display";
 
 export type EngagementCard = {
   id: string;
@@ -60,7 +61,7 @@ export function CvEngagementCards({
   if (cards.length === 0) return null;
 
   const fmt = (d: string | null) =>
-    d ? new Date(d).toLocaleDateString(locale, { year: "numeric", month: "short" }) : null;
+    formatUtcDate(d, locale, { year: "numeric", month: "short" });
   const hasProfIcon = professionIconSlug
     ? PROFESSION_ICON_SLUGS.has(professionIconSlug)
     : false;

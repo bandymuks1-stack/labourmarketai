@@ -23,6 +23,7 @@ import {
   CvCompletenessGrid,
   type CvSectionCard,
 } from "@/components/app/cv-completeness-grid";
+import { formatUtcDate, utcDayKey } from "@/lib/time/display";
 
 /**
  * THE PROFILE HUB — the ONE overview on `/dashboard/profile` (W7-S1).
@@ -227,7 +228,7 @@ export async function ProfileHubOverview({
     missingStepless.length === 0;
 
   // ── freshness + today's activity (absorbed from ProfileStateStrip) ──────
-  const dayKey = (d: Date): string => d.toISOString().slice(0, 10);
+  const dayKey = (d: Date): string => utcDayKey(d) ?? "";
   const now = new Date();
   const latest = playerCard?.latestEvidenceAt
     ? new Date(playerCard.latestEvidenceAt)
@@ -241,11 +242,12 @@ export async function ProfileHubOverview({
         : k === dayKey(new Date(now.getTime() - 86_400_000))
           ? tState("freshness.yesterday")
           : tState("freshness.onDate", {
-              date: latest.toLocaleDateString(locale, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }),
+              date:
+                formatUtcDate(latest, locale, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }) ?? "",
             });
   }
 

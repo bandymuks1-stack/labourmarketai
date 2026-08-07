@@ -63,6 +63,7 @@ import type {
   OpportunityNeed,
   OpportunityStatus,
 } from "@/lib/opportunities/opportunity-fit";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Worker-facing opportunities board ("Man tinkamos galimybės"). Shows the
@@ -285,7 +286,7 @@ export default async function OpportunitiesPage({
   //    as precomputed display rows (RSC-serializable — no functions cross the
   //    client boundary). Live board facts win; a closed demand keeps its row
   //    with the honest "no longer active" label from the click-time snapshot.
-  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
   const myInterestDisplayRows: MyInterestDisplayRow[] =
     result.kind === "ready"
       ? result.myInterestRows.map((r) => {
@@ -296,7 +297,10 @@ export default async function OpportunitiesPage({
           } else if (r.country) {
             parts.push(countryLabel(r.country));
           }
-          if (r.dateIso) parts.push(dateFmt.format(new Date(r.dateIso)));
+          if (r.dateIso) {
+            const when = dateFmt(r.dateIso);
+            if (when) parts.push(when);
+          }
           return {
             requestId: r.requestId,
             status: r.status,

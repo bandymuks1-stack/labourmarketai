@@ -1,5 +1,6 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import type { WorkerReadiness } from "@/lib/company/worker-readiness";
+import { formatUtcDate } from "@/lib/time/display";
 
 export type ReadinessRow = {
   workerName: string;
@@ -56,7 +57,7 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
                 <span>
                   {t("lastActivity")}:{" "}
                   <span className="font-semibold text-text-primary">
-                    {new Date(r.readiness.lastActivity).toLocaleDateString(locale)}
+                    {formatUtcDate(r.readiness.lastActivity, locale)}
                   </span>
                 </span>
               )}

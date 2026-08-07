@@ -13,6 +13,7 @@ import {
   type ReviewActionState,
 } from "@/lib/journal/review-actions";
 import { isTerminalStaleOutcome } from "@/lib/learning/learning-shared";
+import { formatUtcDate } from "@/lib/time/display";
 
 export type QuickConfirmEntryView = {
   id: string;
@@ -145,7 +146,7 @@ export function QuickConfirmCard({ entry }: { entry: QuickConfirmEntryView }) {
           {entry.workerName}
         </p>
         <p className="shrink-0 text-xs text-text-muted">
-          {new Date(entry.createdAt).toLocaleDateString(locale)}
+          {formatUtcDate(entry.createdAt, locale)}
         </p>
       </div>
 

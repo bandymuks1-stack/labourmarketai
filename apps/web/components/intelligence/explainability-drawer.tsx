@@ -6,6 +6,7 @@ import { freshnessLabel } from "@/lib/intelligence/freshness";
 import type { IntelligenceTimelineV1 } from "@/lib/intelligence/timeline";
 import { IntelligenceTimeline } from "./intelligence-timeline";
 import { ConfidenceBadge, FreshnessNote, OriginBadge } from "./trust-badges";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * EXPLAINABILITY drawer (Contextual Intelligence UI v1) — the ONE
@@ -44,7 +45,7 @@ export async function ExplainabilityDrawer({
   const tc = (code: string, params?: Record<string, string | number>) =>
     t(code.replace(/^intelligence\./, "") as never, params as never) as string;
 
-  const dateFmt = new Intl.DateTimeFormat(locale, {
+  const dateFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -52,7 +53,7 @@ export async function ExplainabilityDrawer({
   const fmtIso = (iso: string | null): string | null => {
     if (!iso) return null;
     const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? dateFmt.format(new Date(ms)) : null;
+    return Number.isFinite(ms) ? dateFmt(ms) : null;
   };
 
   const e = explanation;
