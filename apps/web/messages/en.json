@@ -8663,6 +8663,7 @@
     "pastHidden": "Finished items are not shown here: {count}. You can still find them on their own pages.",
     "conflict": {
       "flag": "Dates overlap",
+      "withVisible": "Overlaps with {partners} from {date}.",
       "hiddenByFilter": "Overlaps with {sources} hidden by this filter."
     },
     "context": {

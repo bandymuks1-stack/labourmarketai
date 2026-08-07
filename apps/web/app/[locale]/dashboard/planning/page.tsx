@@ -7,6 +7,7 @@ import {
   buildWeekView,
   buildYearOverview,
   conflictItemIds,
+  visibleConflictPartners,
   hiddenConflictSources,
   detectConflicts,
   isPlanningSourceType,
@@ -155,6 +156,13 @@ export default async function PlanningPage({
     result.items,
     visibleItems,
   );
+  // The other half of the same question: when the partner IS on screen, name
+  // it, so a flagged row explains itself instead of just alarming.
+  const shownConflicts = visibleConflictPartners(
+    conflicts,
+    result.items,
+    visibleItems,
+  );
 
   const dayFmt = createUtcFormatter(locale, {
     weekday: "long",
@@ -198,6 +206,8 @@ export default async function PlanningPage({
     const conflict = conflictIds.has(item.id);
     // Non-empty only when the filter is hiding every partner of this conflict.
     const hiddenSources = hiddenConflicts.get(item.id) ?? [];
+    // Non-empty when at least one partner is rendered on this same page.
+    const shownPartners = shownConflicts.get(item.id) ?? [];
     const contextKey =
       item.sourceType === "booking" || item.sourceType === "invitation"
         ? `context.${item.roleContext}`
@@ -229,6 +239,22 @@ export default async function PlanningPage({
               </span>
             ) : null}
           </span>
+          {shownPartners.length > 0 ? (
+            <span
+              className="text-meta text-state-danger"
+              data-testid={`planning-conflict-with-${item.id}`}
+            >
+              {t("conflict.withVisible", {
+                partners: shownPartners
+                  .map(
+                    (p) =>
+                      `${t(`source.${p.sourceType}`)}: ${p.label ?? t(`fallback.${p.sourceType}`)}`,
+                  )
+                  .join(", "),
+                date: fmtShort(shownPartners[0].overlapStart),
+              })}
+            </span>
+          ) : null}
           {hiddenSources.length > 0 ? (
             <span
               className="text-meta text-state-danger"

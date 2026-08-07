@@ -450,6 +450,86 @@ export function hiddenConflictSources(
   return out;
 }
 
+/** One counterpart of a conflict that the reader can actually see on the page. */
+export interface VisibleConflictPartner {
+  readonly id: string;
+  readonly sourceType: PlanningItem["sourceType"];
+  /** The partner's own label, or null → the caller renders its fallback noun. */
+  readonly label: string | null;
+  /** First shared day of the two inclusive ranges, "YYYY-MM-DD" (UTC). */
+  readonly overlapStart: string;
+}
+
+/**
+ * W12 item C — the VISIBLE counterpart of `hiddenConflictSources`.
+ *
+ * THE DEFECT THIS EXISTS FOR. A conflicted row rendered a bare red badge:
+ * "Dates overlap". Overlap with *what*? The page already knew — `detectConflicts`
+ * returns the pair and the first shared day — and it already said so when the
+ * partner was HIDDEN by a filter. So the reader learned strictly LESS when the
+ * partner was on screen than when it was filtered away, which is backwards.
+ * Naming the counterpart turns a flag into something a person can act on
+ * without opening every row on the day to find the collision themselves.
+ *
+ * NO NEW DISCLOSURE, BY CONSTRUCTION. Two independent reasons: every conflict
+ * partner is already the caller's OWN dated commitment (`isConflictEligible`
+ * admits only incoming accepted bookings, personally assigned projects and own
+ * approved absences), and this function returns partners that are in
+ * `visibleItems` — i.e. rows whose label and dates the same page is rendering
+ * anyway. It adds no field the reader cannot already read one row away.
+ *
+ * That is why this may carry the LABEL while `hiddenConflictSources`
+ * deliberately carries only the source TYPE: a hidden partner is one the
+ * reader's own filter removed, so it is named as narrowly as still explains
+ * the badge.
+ *
+ * Pure. No new read, no new store — it re-reads the conflicts the page has
+ * already computed from the full (unfiltered) model.
+ */
+export function visibleConflictPartners(
+  conflicts: readonly PlanningConflict[],
+  allItems: readonly PlanningItem[],
+  visibleItems: readonly PlanningItem[],
+): ReadonlyMap<string, readonly VisibleConflictPartner[]> {
+  const visibleIds = new Set(visibleItems.map((i) => i.id));
+  const byId = new Map(allItems.map((i) => [i.id, i]));
+  const out = new Map<string, VisibleConflictPartner[]>();
+
+  const note = (ownerId: string, partnerId: string, overlapStart: string): void => {
+    // Both ends must be on screen: the hidden case is the other function's job,
+    // and naming an off-screen row here would duplicate that note.
+    if (!visibleIds.has(ownerId) || !visibleIds.has(partnerId)) return;
+    const partner = byId.get(partnerId);
+    if (!partner) return;
+    const list = out.get(ownerId) ?? [];
+    if (list.some((p) => p.id === partner.id)) return;
+    list.push({
+      id: partner.id,
+      sourceType: partner.sourceType,
+      label: partner.label,
+      overlapStart,
+    });
+    out.set(ownerId, list);
+  };
+
+  for (const c of conflicts) {
+    note(c.aId, c.bId, c.overlapStart);
+    note(c.bId, c.aId, c.overlapStart);
+  }
+
+  // Earliest overlap first, then a stable tiebreak, so the rendered sentence
+  // never reshuffles between two requests over identical data.
+  for (const [, list] of out) {
+    list.sort(
+      (x, y) =>
+        x.overlapStart.localeCompare(y.overlapStart) ||
+        x.sourceType.localeCompare(y.sourceType) ||
+        x.id.localeCompare(y.id),
+    );
+  }
+  return out;
+}
+
 /* ------------------------------------------------------------------ */
 /* Agenda — compact, mobile-safe day grouping (no calendar library)    */
 /* ------------------------------------------------------------------ */

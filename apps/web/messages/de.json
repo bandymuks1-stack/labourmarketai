@@ -8663,6 +8663,7 @@
     "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Sie bleiben auf ihren eigenen Seiten.",
     "conflict": {
       "flag": "Termine überschneiden sich",
+      "withVisible": "Überschneidet sich mit {partners} ab {date}.",
       "hiddenByFilter": "Überschneidet sich mit {sources}, das dieser Filter ausblendet."
     },
     "context": {
