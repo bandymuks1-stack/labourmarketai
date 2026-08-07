@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 /**
@@ -40,13 +40,18 @@ const READ = "lib/planning/planning.ts";
 function sourceFiles(): { rel: string; src: string; code: string }[] {
   const out: { rel: string; src: string; code: string }[] = [];
   const walk = (dir: string): void => {
-    for (const name of readdirSync(dir)) {
+    // `withFileTypes` answers "directory?" from the SAME directory read, so
+    // there is no stat-then-read gap on the path (CodeQL js/file-system-race)
+    // and one syscall per entry instead of two.
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const name = entry.name;
       if (name === "node_modules" || name === ".next") continue;
       const full = join(dir, name);
-      if (statSync(full).isDirectory()) {
+      if (entry.isDirectory()) {
         walk(full);
         continue;
       }
+      if (!entry.isFile()) continue;
       if (!/\.tsx?$/.test(name) || /\.test\.tsx?$/.test(name)) continue;
       const src = readFileSync(full, "utf8");
       out.push({
