@@ -79,16 +79,91 @@ the only one whose host table already exists.
 
 ---
 
+## 3.5 Time presentation — the canonical model, determined from code (2026-08-07)
+
+**Status: `W12_TIMEZONE_MODEL_DETERMINED_UTC__PRESENTATION_INCONSISTENCY_FOUND`**
+
+The train asked whether the canonical model is *UTC storage → user-local
+display*, or something else actually supported by the code. It is neither of the
+two obvious answers:
+
+> **The canonical model is UTC storage → *UTC* display.** Not user-local.
+
+Every server-side formatter pins it explicitly — `lib/planning/calendar-result.ts`,
+`lib/conversation/agenda-summary.ts`, `lib/player-card/labels.ts`,
+`lib/opportunities/structured-public.ts`, `lib/ai-workspace/workflows.ts` all pass
+`timeZone: "UTC"` — and every calendar-day computation in
+`lib/planning/planning-model.ts` is UTC string math (`getUTCHours`,
+`setUTCDate`, `toISOString().slice(0,10)`), with the doc comments saying so.
+
+**That is a defensible choice, not an accident.** A labour-market "work day" is a
+business date, not an instant; pinning UTC keeps a booking on the same calendar
+day for everyone who reads it. **No organisation timezone exists in the schema,
+and none is invented here.**
+
+### 3.5.1 ⚠️ The inconsistency: 15 surfaces render in BROWSER-LOCAL time
+
+The canonical projection is UTC, but every date rendered directly by a client
+component uses `toLocaleDateString(locale)` with **no `timeZone`**, so it formats
+in the *viewer's* timezone:
+
+`capability-profile-section` · `cv-engagement-cards` · `handover-passport-panel` ·
+`invitation-list` · `journal-inbox-entry` · `manager-evidence-card` ·
+`profile-hub-overview` · `quick-confirm-batch` · `quick-confirm-card` ·
+`worker-readiness-summary` · `cv/page` · `admin/pilots/[id]/page` ·
+`inbox/report/page` · `journal/page` · `invite/[token]/page`
+
+**The consequence is concrete.** For a viewer at UTC+3, a journal entry recorded
+at 23:30 UTC on the 7th shows as **the 7th** in the planning agenda and **the
+8th** in the journal inbox. Same row, same person, two calendar days — and
+nothing on screen explains the difference.
+
+This is exactly the "duplicate time truth" the train's §5 asks about. Earlier
+this was reported as *"nothing to eliminate — there is no second calendar
+store"*. That remains true of **storage**; this is a second time truth in
+**presentation**, which the storage-level check could not see.
+
+### 3.5.2 One strictly-worse instance
+
+`components/app/handover-passport-panel.tsx:154` calls
+`new Date(e.createdAt).toLocaleDateString()` with **no locale argument at all** —
+the only such call in the codebase. It therefore ignores the user's chosen app
+locale as well as UTC, rendering in the browser's locale (an LT user can see
+US month-day order). The component has no `locale` in scope, so the fix is a
+small thread-through, not a one-character change.
+
+### 3.5.3 The prepared slice (zero migration, NOT implemented)
+
+1. one shared client formatter that pins `timeZone: "UTC"` and takes the app
+   locale, mirroring what the five server formatters already do;
+2. the 15 call sites routed through it;
+3. `handover-passport-panel` additionally given its locale;
+4. a guard: no `toLocaleDateString` / `toLocaleTimeString` outside that helper —
+   the same ratchet shape the repo already uses elsewhere;
+5. browser proof at 1440 + 375 with the browser timezone forced to a non-UTC
+   zone, which is the only way this class of bug is visible at all.
+
+**Not done in this train** — it touches 15 surfaces and needs the forced-timezone
+browser proof to be worth anything. Recorded here with the exact file list so the
+next session starts from evidence rather than from a grep.
+
+**No owner decision is required for the fix**, because it makes the client agree
+with the canonical projection that already exists. An owner decision *would* be
+required only to change the model itself (UTC → viewer-local everywhere), which
+this audit does not propose.
+
+---
+
 ## 4. Safe work available (none blocked on the owner)
 
 | Item | Why it is safe |
 |---|---|
 | **A — source inventory** | done, this document |
-| **B — timezone clarity** | the projection groups by `"YYYY-MM-DD" (UTC)` while items originate from date-only and timestamptz columns. Worth an explicit statement in the UI; no schema change |
+| **B — timezone clarity** | **DONE as an audit (§3.5)**: the canonical model is UTC storage → **UTC** display, pinned in all five server formatters. But 15 client surfaces render in BROWSER-LOCAL time, so the same row can show two different calendar days. Prepared slice in §3.5.3, zero migration, not implemented |
 | **C — UI explanation of conflicts** | conflicts are already marked and counted on the item; explaining *why* two items conflict is presentation only |
 | **D — projection consistency** | already guaranteed by §2's single-calculation rule; a guard pinning that no second reader appears would make it enforced rather than conventional |
 | **E — date-format consistency** | one formatter is already used server-side for the panel; verify the planning page and chat sentence share it |
-| **F — duplicate time truth elimination** | **nothing to eliminate** — the audit found no second calendar store. This item can be closed |
+| **F — duplicate time truth elimination** | **REOPENED (§3.5.1).** True of STORAGE — there is no second calendar store. NOT true of PRESENTATION: the UTC projection and 15 browser-local client renderers are a second time truth, which the storage-level check could not see |
 | **G — travel-time seam** | interface-only, no paid provider. Genuinely safe, but it is the seam for a source with no model, so it is scaffolding for owner-gated work |
 | **H — browser/mobile proof** | safe |
 
@@ -101,6 +176,7 @@ the W10 matching-truth fix.
 ## 5. Resulting state
 
 `W12_SAFE_TECHNICAL_WORK_AVAILABLE_NOT_STARTED`
+· `W12_TIMEZONE_MODEL_DETERMINED_UTC__PRESENTATION_INCONSISTENCY_FOUND` (§3.5, 2026-08-07)
 
 W12's blockers are **not** architectural. The projection is single-source, the
 guard is applied and proven, and the honesty contract holds. What remains is
