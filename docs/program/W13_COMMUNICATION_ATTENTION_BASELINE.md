@@ -1,8 +1,12 @@
 # W13 — Communication & attention: the canonical baseline
 
 **Status:** `W13_BASELINE_DEFINED_FROM_SHIPPED_NOTIFICATION_SPINE`
-**Date:** 2026-08-07
-**Method:** written **from current code truth on `main` (`0bdee5c4`)**, not from a wish list.
+· `W13_SIGNAL_ADMISSION_MODEL_PROVEN` (§2.9, 2026-08-07)
+· `W13_SEEN_CLEAR_LIFECYCLE_AUDITED_ONE_OWNER_GATED_PACKAGE_PREPARED` (§5.7, 2026-08-07)
+**Date:** 2026-08-07 (revised same day, after the production ledger reconciliation)
+**Method:** written **from current code truth**, not from a wish list. Every
+migration state below is **production-verified read-only** rather than inferred
+from a code comment — two comments turned out to disagree with production.
 **Scope of this document:** definition only. It ships **no** signal, **no** migration
 and **no** infrastructure.
 
@@ -82,7 +86,7 @@ Ordered as they display (the ladder: *a person waiting on you outranks passive n
 | Route | `/dashboard/communication` · `featureKey: "communication"` |
 | Fail-closed | any error → empty set → 0 |
 | Class | **ACTIONABLE** |
-| Known bound | the message scan is `.limit(500)` newest-first. Correct for today's volume; on a busy account an unread thread older than the newest 500 counterpart messages would be missed. **STALE-RISK (bounded, documented here for the first time).** |
+| Known bound | the message scan is `.limit(500)` newest-first, so a conversation whose newest counterpart message falls outside that window is counted as READ. The error is always an **undercount**. **STALE-RISK** — full analysis and the prepared fix in **§5.7.3 / §5.7.4**. |
 
 ### 2.3 `incoming-service-requests`
 
@@ -156,7 +160,9 @@ Ordered as they display (the ladder: *a person waiting on you outranks passive n
 > *"0 while the work_tasks migration is unapplied (control room PR D)"*. That
 > comment is **stale**: the migration was applied on 2026-07-11. A reader
 > trusting the comment would conclude the signal is dead in production; it is
-> not. Filed as **W13-0b** in §6 — a one-line comment fix, no behaviour change.
+> not. **FIXED 2026-08-07** — the comment now states the applied date and that
+> the count reads 0 because `work_tasks` holds **0 rows** in production, which is
+> a different and truthful fact.
 
 ### 2.8 `new-job-matches`
 
@@ -171,6 +177,60 @@ Ordered as they display (the ladder: *a person waiting on you outranks passive n
 | Fail-closed | any throw → 0; non-worker → 0 |
 | Migration | `20260714170000_worker_opportunity_seen_v1` — **owner-gated, UNAPPLIED** ⇒ **structurally 0 in production today** |
 | Class | **PARTIALLY IMPLEMENTED** (code complete, data absent) |
+
+---
+
+## 2.9 THE SIGNAL ADMISSION MODEL (W13-0b) — the full contract, stated once
+
+`W13_SIGNAL_ADMISSION_MODEL_PROVEN`, 2026-08-07.
+
+A signal may enter the spine **only** when all four hold. Three were documented
+in code comments; the fourth (host module) was discovered by attempting an
+admission and being refused (§3.1).
+
+| # | Requirement | Enforced by |
+|---|---|---|
+| 1 | A **real count** from an RLS-scoped per-surface reader that degrades to 0, never fabricates | `notification-spine.test.ts` |
+| 2 | A **route that clears or resolves it** — visiting IS the read event, so no fake "mark read" ever exists | `notification-spine.test.ts` (href must be a real page under `/dashboard`) |
+| 3 | **Copy for the type** in every active locale (`auth.notifications.types.<type>`) | `notification-spine.test.ts` |
+| 4 | **A dashboard module that declares it** in `attentionSignalIds` | `activity-centre.test.ts` (×4) + `activityCentre.readSemantics.<type>` copy in all five active locales |
+
+**Why #4 is not bureaucracy.** `lib/dashboard/activity-centre.ts` builds
+`MODULE_BY_SIGNAL` by *inverting* the module registry. A signal with no
+declaring module has no filter chip, no label source, and silently disappears
+from `/dashboard/activity` — it would exist in the bell and nowhere else. The
+module is what gives a signal a **presentation and action path**; without one,
+the signal is not real to the product even if its count is.
+
+### 2.9.1 Every shipped signal, against the contract
+
+| Signal | Source truth | Audience | Host module | Destination | Clearing action | Context |
+|---|---|---|---|---|---|---|
+| `pending-invitations` | `company_worker_invitations` + `agency_worker_invitations` by **email** | anyone invited | `overview` | `/dashboard` | accept / decline on the overview card | Personal |
+| `unread-messages` | `conversation_participants.last_read_at` vs `conversation_messages` | every participant | `communication` | `/dashboard/communication` | opening the thread stamps `last_read_at` | Personal |
+| `incoming-service-requests` | `service_offering_requests.provider_id` | the provider | `service_requests` | `/dashboard/service-requests` | responding changes the status | Personal |
+| `service-request-responses` | vs `service_offering_requests_seen` (**applied, 2 rows**) | the requester | `service_requests` | `/dashboard/service-requests` | visiting stamps seen | Personal |
+| `pending-bookings` | incoming `booking_requests` | the worker booked | `bookings` | `/dashboard/bookings` | responding changes the status | Personal |
+| `booking-responses` | vs `booking_requests_seen` (applied) | the proposer | `bookings` | `/dashboard/bookings` | visiting stamps seen | Personal |
+| `open-task-attention` | `work_tasks` overdue+blocked (**applied, 0 rows**) | assignee or creator | `tasks` | `/dashboard/tasks` | resolve / unblock / reschedule | Personal |
+| `new-job-matches` | recommendations vs `worker_opportunity_seen` (**absent**) | workers | `opportunities` | `/dashboard/opportunities` | rendering marks seen | Personal |
+
+**8 of 8 satisfy all four requirements.** Two carry a `featureKey` and badge a
+nav tab (`overview`, `communication`); the other six badge module cards only —
+correct, because a `featureKey` is set *only* where the feature's primary
+surface is the signal's own clearing surface.
+
+**Every host module is distinct from every aggregating surface.** `activity`,
+`assist`, the hubs and the workspace all declare **no** `attentionSignalIds`,
+with explicit comments saying a badge there would double-count. Anti-double-
+counting is already an enforced property, not a convention.
+
+### 2.9.2 What happens when no host exists
+
+The signal **cannot be admitted**. That is not a gap to route around — it is the
+model working. A signal without a module has no place to be seen, no filter, and
+no label, so admitting it would put a number in the bell that leads nowhere the
+rest of the product acknowledges. §3 is the live instance.
 
 ---
 
@@ -226,6 +286,41 @@ confirm queue lives in the module catalogue, which is an IA decision (a new modu
 card is a visible product surface, and Product Gate A-09 governs new surfaces).
 
 The attempt cost nothing and produced this finding; the code is unchanged.
+
+### 3.2 ConfirmPulse — the classification, decided
+
+The brief asks for an honest verdict among: canonical signal · separate
+subsystem · obsolete · future candidate. Against the §2.9 contract:
+
+| Requirement | ConfirmPulse |
+|---|---|
+| 1 — real count | ✅ gated `reviewable_journal_entry_ids` RPC, 0 when absent |
+| 2 — clearing route | ✅ `/dashboard/inbox/quick`, a real one-tap confirm queue |
+| 3 — type copy | ❌ none — `pending_confirmations` does not exist in any catalog |
+| 4 — host module | ❌ **none.** No `inbox` module exists, and `journal` is `roles: ["worker"]` while confirming is a **manager** act |
+
+**Verdict: `FUTURE_CANDIDATE`.** Not canonical, not obsolete, not a subsystem.
+
+- **Not canonical** — it fails two of four requirements, and both failures are
+  structural rather than clerical.
+- **Not obsolete** — it renders a real, live, RLS-gated count on three project
+  surfaces and its clearing route works today.
+- **Not a separate subsystem** — it has no store, no lifecycle and no
+  presentation of its own beyond a single card. Calling it a subsystem would
+  dignify one component.
+
+**Blocked on exactly one product question:** where does a manager's confirm queue
+live in the module catalogue? A new module card is a visible product surface
+governed by Product Gate A-09; widening `journal` to non-worker roles changes who
+sees a worker-framed module. Either is a real decision; neither is a wiring task.
+
+**Deliberately not forced into the spine** (the brief's instruction, and the
+right call regardless): repeating the reverted wiring would produce a bell row
+that `/dashboard/activity` cannot render and no filter chip can reach.
+
+**The honest interim state is what ships today** — the count is visible where the
+work is, and this baseline records that a manager who never opens a project is
+not told. A stated limitation, not a silent one.
 
 ---
 
@@ -327,6 +422,89 @@ trust domain still owns the confirmation itself.
 
 ---
 
+## 5.7 W13-7 — the seen/clear lifecycle, audited
+
+`W13_SEEN_CLEAR_LIFECYCLE_AUDITED_ONE_OWNER_GATED_PACKAGE_PREPARED`, 2026-08-07.
+
+### 5.7.1 Two clear models, and only two
+
+| Model | Signals | How it clears | Needs a table? |
+|---|---|---|---|
+| **State-derived** | `pending-invitations`, `incoming-service-requests`, `pending-bookings`, `open-task-attention` | the underlying row changes state (accept, respond, resolve) | no |
+| **Seen-marker** | `service-request-responses`, `booking-responses`, `new-job-matches` | visiting the surface stamps `seen_at` | yes |
+| **Read-pointer** | `unread-messages` | opening a thread stamps `conversation_participants.last_read_at` | no (column) |
+
+There is no third model and **no `mark all read` that fakes a clear** — the panel
+has a `markAllReadLabel`, but every real clear happens on the destination
+surface. That is the property to protect.
+
+### 5.7.2 Seen-marker migrations — production-verified 2026-08-07
+
+| Table | State | Consequence |
+|---|---|---|
+| `booking_requests_seen` | **applied** | `booking-responses` fully functional |
+| `service_offering_requests_seen` | **applied, 2 rows** | `service-request-responses` fully functional — this replaced the previous "unknown" |
+| `worker_opportunity_seen` | **ABSENT** (owner-gated) | `new-job-matches` pinned to 0 — correct under the first principle |
+| `demand_interest_seen` | **ABSENT** (owner-gated) | interest-response signal deliberately unwired |
+
+No stale seen-marker table was found: every seen table that exists has a live
+reader, and every reader whose table is absent degrades to 0 rather than erroring.
+
+### 5.7.3 ⚠️ The 500-row unread scan — the one real correctness defect
+
+`getUnreadConversationIds` fetches the **newest 500 counterpart messages across
+all of the caller's conversations**, then marks a conversation unread if its
+newest message in that window post-dates `last_read_at`.
+
+**Failure mode:** a conversation whose newest counterpart message falls *outside*
+the 500-message window is simply absent from the result and is counted as
+**read**. The error is always an **undercount** — the product can say "nothing
+needs your attention" when something does. It can never over-report.
+
+**Saturation condition:** more than 500 counterpart messages in the recent
+window, with at least one unread conversation older than the 500th. Not
+reachable at today's production volume — and that is a volume bet, not a
+correctness argument, which is why it is recorded as a defect rather than
+dismissed.
+
+The empty state currently asserts **"Nothing needs your attention right now."**
+Under saturation that sentence is unproven.
+
+### 5.7.4 The prepared package (NOT implemented — owner-gated)
+
+It is two halves, and the honest-copy half cannot ship alone because it depends
+on the same plumbing.
+
+**Half A — correctness (needs a migration ⇒ OWNER-GATED).**
+The scan needs *one row per conversation*: `max(created_at) where author_id <>
+me`, grouped by conversation. PostgREST cannot express that without an RPC, so
+the fix is a `SECURITY DEFINER` reader (`auth.uid()`-bound, no parameters, RLS-
+equivalent scoping) returning `(conversation_id, last_counterpart_at)` per
+participant row. Cost: one indexed aggregate instead of a 500-row scan — also
+**faster** than today on the hot dashboard path.
+*Not written here:* preparing a migration file is itself a gated act in this
+repo, and this train applies none.
+
+**Half B — honest copy (no migration, but NOT a one-liner).**
+The completeness flag has to cross the server→client hydration boundary:
+
+`unread.ts` (return `{ids, complete}`) → `spine.ts` → `spine-stream.tsx` →
+`SpineHydrator` → `applySpine()` → `AuthState` → `notification-panel.tsx`
+empty-state branch → new copy in **five** active locales → a guard pinning that
+the "nothing needs your attention" line is unreachable while `complete === false`.
+
+**Explicitly rejected shortcut:** putting a boolean on `SpineCounts`. The guard
+*"every spine count feeds at least one visible signal — no orphan loads"*
+iterates every field of `SpineCounts` and requires each to render a row. A
+non-count field would break it, and weakening that guard to allow one would
+remove a real protection.
+
+**Interim state, stated honestly:** the undercount is not reachable at current
+production volume, and this baseline now records the exact condition under which
+it becomes reachable. Nothing in the product claims otherwise.
+
+---
+
 ## 6. W13 canonical scope
 
 | # | Slice | Contains | Depends on |
@@ -334,7 +512,7 @@ trust domain still owns the confirmation itself.
 | ~~**W13-0**~~ | ~~Ledger reconciliation~~ | **DONE 2026-08-07** — `20260627181500_service_requests_seen` is APPLIED (2 rows). Full sweep in `docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md` | — |
 | ~~**W13-0b**~~ | ~~Stale-comment fix~~ | **DONE 2026-08-07** — `spine-signals.ts` corrected. `20260711210000_work_tasks_v1` applied 2026-07-11; `work_tasks` verified present in production with **0 rows**, so the signal is a live count that is legitimately zero | — |
 | **W13-1** | In-app attention | The 8 shipped signals + admit `ConfirmPulse` as the 9th (§3). One source, five consumers — preserved | **a host-module decision (§3.1)** — no migration, but not zero-decision |
-| **W13-2** | Unread / seen lifecycle | The two models already in use: *state-derived* (bookings, service requests, tasks) and *seen-marker* (responses, job matches). No third model. No fake "mark read" | applied seen tables |
+| **W13-2** | Unread / seen lifecycle | **AUDITED 2026-08-07 (§5.7)** — exactly three clear models (state-derived, seen-marker, read-pointer), no fake clear anywhere, no stale seen table. ONE correctness defect found: the 500-row unread scan can UNDERCOUNT (§5.7.3), so "nothing needs your attention" is unproven under saturation. Package prepared in §5.7.4: Half A needs an RPC ⇒ **owner-gated**; Half B (honest copy) is blocked on the same plumbing | Half A: a migration |
 | **W13-3** | Actionable notifications | Every row reaches a route that resolves it. Already true for 8/8; keep it true | none |
 | **W13-4** | Digest / escalation | **NOT STARTED.** Needs a delivery channel first, so it is blocked behind W13-5 | W13-5 |
 | **W13-5** | Email / push policy | **NOT STARTED.** Requires an owner decision on channel, cadence and consent before any code. The transactional adapter is the seam | owner decision |
