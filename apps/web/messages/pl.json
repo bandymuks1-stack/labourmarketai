@@ -4129,5 +4129,13 @@
       "employerHasNotClaimed": "Ten pracodawca nie zarządza jeszcze tym ogłoszeniem na labourmarket.ai, więc aplikacja przebiega przez oryginalne ogłoszenie.",
       "employerManagesHere": "Ten pracodawca zarządza tym ogłoszeniem na labourmarket.ai."
     }
+  },
+  "profileIdentityNotice": {
+    "title": "[EN] This is your person profile",
+    "bodySectionsEmpty": "[EN] Your account currently has an organisation identity only — the person identity has not been added. The person sections below (CV, availability and work preferences, languages, education, achievements, trust signals) belong to this page but are empty, because there is no person data yet. Nothing is filled in automatically.",
+    "bodySectionsHidden": "[EN] Your account currently has an organisation identity only — a person identity does not exist yet. Person sections (CV, availability and work preferences, languages, education, achievements, trust signals) are not shown because there is no person data to show. Nothing is hidden by mistake and nothing was lost.",
+    "companyProfileHint": "[EN] Your organisation's details live in the company profile.",
+    "companyProfileLink": "[EN] Open company profile",
+    "addIdentityHint": "[EN] To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
   }
 }

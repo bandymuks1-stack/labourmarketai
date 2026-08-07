@@ -1209,7 +1209,10 @@
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
     "doneDisclosure": "What is already in place",
     "askWorkspace": "Ask in the workspace",
-    "state": { "done": "Done", "todo": "Still needed" },
+    "state": {
+      "done": "Done",
+      "todo": "Still needed"
+    },
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
     "journalLink": "Work journal",
@@ -2825,6 +2828,14 @@
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
+  },
+  "profileIdentityNotice": {
+    "title": "This is your person profile",
+    "bodySectionsEmpty": "Your account currently has an organisation identity only — the person identity has not been added. The person sections below (CV, availability and work preferences, languages, education, achievements, trust signals) belong to this page but are empty, because there is no person data yet. Nothing is filled in automatically.",
+    "bodySectionsHidden": "Your account currently has an organisation identity only — a person identity does not exist yet. Person sections (CV, availability and work preferences, languages, education, achievements, trust signals) are not shown because there is no person data to show. Nothing is hidden by mistake and nothing was lost.",
+    "companyProfileHint": "Your organisation's details live in the company profile.",
+    "companyProfileLink": "Open company profile",
+    "addIdentityHint": "To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
   },
   "skillGroups": {
     "profession": "Profession / work direction",

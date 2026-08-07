@@ -1209,7 +1209,10 @@
     "notVerified": "Dit is informatie die je zelf hebt opgegeven — nog niet beoordeeld. Registraties bouwen vertrouwen op, maar je kunt dat later toevoegen.",
     "doneDisclosure": "Wat er al is",
     "askWorkspace": "Vraag het in de werkruimte",
-    "state": { "done": "Klaar", "todo": "Nog nodig" },
+    "state": {
+      "done": "Klaar",
+      "todo": "Nog nodig"
+    },
     "primaryAction": "Vul aan wat ontbreekt",
     "primaryActionJournal": "Werkregistratie toevoegen",
     "journalLink": "Werkjournaal",
@@ -2825,6 +2828,14 @@
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
     "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
+  },
+  "profileIdentityNotice": {
+    "title": "Dit is je persoonsprofiel",
+    "bodySectionsEmpty": "Je account heeft op dit moment alleen een organisatie-identiteit — de persoonsidentiteit is niet toegevoegd. De persoonssecties hieronder (cv, beschikbaarheid en werkvoorkeuren, talen, opleiding, prestaties, vertrouwenssignalen) horen bij deze pagina maar zijn leeg, omdat er nog geen persoonsgegevens zijn. Er wordt niets automatisch ingevuld.",
+    "bodySectionsHidden": "Je account heeft op dit moment alleen een organisatie-identiteit — er is nog geen persoonsidentiteit. Persoonssecties (cv, beschikbaarheid en werkvoorkeuren, talen, opleiding, prestaties, vertrouwenssignalen) worden niet getoond omdat er geen persoonsgegevens zijn. Er is niets per ongeluk verborgen en niets verloren gegaan.",
+    "companyProfileHint": "De gegevens van je organisatie staan in het bedrijfsprofiel.",
+    "companyProfileLink": "Bedrijfsprofiel openen",
+    "addIdentityHint": "Wil je ook als persoon werken, voeg dan de persoonsidentiteit toe via de rolwisselaar bovenaan de pagina. Er wordt niets automatisch aangemaakt of ingevuld."
   },
   "skillGroups": {
     "profession": "Beroep / werkrichting",

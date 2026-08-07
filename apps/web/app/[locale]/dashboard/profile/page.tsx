@@ -6,6 +6,8 @@ import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
 import { FeatureNote } from "@/components/app/feature-note";
+import { NonWorkerIdentityNotice } from "@/components/app/non-worker-identity-notice";
+import { deriveNonWorkerIdentityNotice } from "@/lib/profile/non-worker-identity";
 import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import {
@@ -118,6 +120,7 @@ export default async function ProfilePage({
     tLangs,
     tExt,
     tFeatureNotes,
+    tIdentityNotice,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -141,6 +144,9 @@ export default async function ProfilePage({
     // which is the worst possible place: it suspends the render after the tree
     // has begun. Same namespace, resolved with the rest.
     getTranslations("featureNotes"),
+    // W7-S5b: the non-worker identity notice joins the ONE batch — never a
+    // standalone await (W7-S3 ratchet).
+    getTranslations("profileIdentityNotice"),
   ]);
 
   /**
@@ -228,6 +234,9 @@ export default async function ProfilePage({
     .filter((r): r is Role => ROLES.has(r as Role));
 
   const workerId = worker?.id ?? null;
+
+  // W7-S5b: derived from data already read above — no new request stage.
+  const identityNotice = deriveNonWorkerIdentityNotice({ workerId, roles });
 
   // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
   // translate + sort by the localized name here.
@@ -699,6 +708,34 @@ export default async function ProfilePage({
         ]}
       />
 
+      {/* W7-S5b: when the account holds NO person identity (identity truth =
+          `profile_roles`, the same set the RoleSwitcher offers "add person"
+          from), this page is worker-framed copy around person sections that
+          are either empty (normal: the 0009 trigger gives every profile a
+          workers row) or genuinely hidden (legacy/degraded: no workers row)
+          — and it says nothing about either. THE one honest notice
+          (EmployerContextNotice precedent): which identity the person is
+          viewing with, what state the person sections are actually in, where
+          the organisation's information lives, and how a person identity can
+          be added. It explains — it never fabricates person data. */}
+      {identityNotice.kind === "visible" ? (
+        <NonWorkerIdentityNotice
+          reason={identityNotice.reason}
+          presentation={identityNotice.presentation}
+          labels={{
+            title: tIdentityNotice("title"),
+            body: tIdentityNotice(
+              identityNotice.presentation === "sections-empty"
+                ? "bodySectionsEmpty"
+                : "bodySectionsHidden",
+            ),
+            companyProfileHint: tIdentityNotice("companyProfileHint"),
+            companyProfileLink: tIdentityNotice("companyProfileLink"),
+            addIdentityHint: tIdentityNotice("addIdentityHint"),
+          }}
+        />
+      ) : null}
+
       {/* W7-S1: the readiness/summary surfaces that used to stand here —
           `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
           standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
@@ -767,8 +804,17 @@ export default async function ProfilePage({
           read went with the block; it had no other consumer here, so the
           profile does one fewer DB round trip. */}
 
+      {/* W7-S5b: "Your professional passport: CV, skills and work journal…"
+          was rendered unconditionally — worker-framed copy shown verbatim to
+          accounts holding no person identity. Keyed on identity (roles), NOT
+          `workerId`: the 0009 trigger makes `workerId` non-null for every
+          normal account, so a workerId gate would never fire. A non-worker
+          identity gets the two-identities model note instead; the identity
+          notice above carries the full explanation. */}
       <FeatureNote testId="feature-note-profile">
-        {tFeatureNotes("workerProfile")}
+        {identityNotice.kind === "hidden"
+          ? tFeatureNotes("workerProfile")
+          : tFeatureNotes("identityModel")}
       </FeatureNote>
 
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
