@@ -169,7 +169,10 @@ describe("W7-S5 — scope boundary is deliberate", () => {
       conversation?: { forms?: { fields?: Record<string, string> } };
     };
     const fields = en.conversation?.forms?.fields ?? {};
-    expect(fields.hasTransport).toMatch(/your own transport\?$/);
+    // W7 transport reconciliation: the wording moved from ownership ("your
+    // own transport") to mobility ("get to work on your own") — still a
+    // second-person question, which is what this boundary pins.
+    expect(fields.hasTransport).toMatch(/^Can you .*\?$/);
     expect(fields.willingToRelocate).toMatch(/\?$/);
   });
 
