@@ -25,7 +25,36 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["lib/**/*.test.ts"],
     environment: "node",
+    // W19 platform debt: the repo-wide structural guards in `lib/guards/`
+    // walk the whole app tree (readdirSync over app/ + components/ + lib/)
+    // and re-read dozens of source files per suite. Under CPU contention —
+    // CI shared runners, a dev server on the same machine, the full suite's
+    // own worker parallelism — a single scan can exceed vitest's 5s default
+    // and fail as a TIMEOUT with nothing actually wrong, which reads as a
+    // red guard. The timeout is raised for the guards project ONLY; every
+    // other unit test keeps the 5s default, so a genuinely hung pure-logic
+    // test still fails fast. A larger timeout can only mask slowness, never
+    // a failing assertion — real guard failures fail on expect(), not time.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "guards",
+          include: ["lib/guards/**/*.test.ts"],
+          environment: "node",
+          testTimeout: 30_000,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          include: ["lib/**/*.test.ts"],
+          exclude: ["**/node_modules/**", "lib/guards/**"],
+          environment: "node",
+        },
+      },
+    ],
   },
 });
