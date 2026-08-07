@@ -11192,6 +11192,8 @@
       "projectStagesEmpty": "Для этого проекта этапы ещё не внесены.",
       "projectStagesUnavailable": "В этой среде этапы прочитать нельзя, поэтому мы не показываем пустой список так, будто их нет.",
       "projectAssignWorker": "Назначить работника",
+      "projectOpenOperations": "Открыть управление проектом",
+      "projectOpenProject": "Открыть проект",
       "projectCompletedNoAssign": "Проект завершён, поэтому назначить в него новых людей нельзя.",
       "projectTerminal": "Завершённый проект изменить нельзя. Он остаётся как история.",
       "projectActionPublish": "Опубликовать проект",

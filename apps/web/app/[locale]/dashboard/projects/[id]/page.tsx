@@ -154,6 +154,21 @@ export default async function ProjectStadiumPage({
             {t("fieldCount", { n: ops.counters.totalAssigned })}
           </span>
         </div>
+
+        {/* W11 F7 — the way into this project's operating centre sits WITH the
+            project's identity, not below the whole arena. It used to be the
+            last element on a page that runs location → communication → confirm
+            pulse → today's pulse → the field → the gallery → positions, so on
+            a phone it was several screens of scrolling past the answer the
+            manager already had. Same route, same manager-only destination;
+            only its position changed, so nothing new is claimed. */}
+        <Link
+          href={`/${locale}/dashboard/projects/${id}/operations`}
+          data-testid="stadium-open-operations"
+          className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 px-4 py-2.5 text-sm font-medium text-brand-blue transition-colors duration-fast hover:bg-brand-blue/10"
+        >
+          {t("openOps")} →
+        </Link>
       </header>
 
       {/* ── Location: a project is a real work object, with honest place
@@ -366,15 +381,6 @@ export default async function ProjectStadiumPage({
           {t("positionsEmpty")}
         </p>
       </section>
-
-      {/* ── One step deeper: the management ARENA ── */}
-      <Link
-        href={`/${locale}/dashboard/projects/${id}/operations`}
-        data-testid="stadium-open-operations"
-        className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 px-4 py-2.5 text-sm font-medium text-brand-blue transition-colors duration-fast hover:bg-brand-blue/10"
-      >
-        {t("openOps")} →
-      </Link>
     </div>
   );
 }

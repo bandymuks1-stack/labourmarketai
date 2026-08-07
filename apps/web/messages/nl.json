@@ -11192,6 +11192,8 @@
       "projectStagesEmpty": "Voor dit project zijn nog geen fasen ingevoerd.",
       "projectStagesUnavailable": "Fasen kunnen in deze omgeving niet gelezen worden, dus tonen we geen lege lijst alsof er geen zijn.",
       "projectAssignWorker": "Een medewerker toewijzen",
+      "projectOpenOperations": "Open projectbeheer",
+      "projectOpenProject": "Open het project",
       "projectCompletedNoAssign": "Het project is afgerond, dus er kan niemand nieuw aan worden toegewezen.",
       "projectTerminal": "Een afgerond project kan niet meer worden gewijzigd. Het blijft als historie bestaan.",
       "projectActionPublish": "Project publiceren",

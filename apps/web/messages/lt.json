@@ -11192,6 +11192,8 @@
       "projectStagesEmpty": "Šiam projektui etapų dar neįvesta.",
       "projectStagesUnavailable": "Šioje aplinkoje etapų nuskaityti negalima, todėl nerodome tuščio sąrašo, tarsi jų nebūtų.",
       "projectAssignWorker": "Priskirti darbuotoją",
+      "projectOpenOperations": "Atidaryti projekto valdymą",
+      "projectOpenProject": "Atidaryti projektą",
       "projectCompletedNoAssign": "Projektas užbaigtas, todėl naujų žmonių jam priskirti nebegalima.",
       "projectTerminal": "Užbaigto projekto atnaujinti nebegalima. Jis lieka kaip istorija.",
       "projectActionPublish": "Publikuoti projektą",

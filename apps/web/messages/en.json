@@ -11192,6 +11192,8 @@
       "projectStagesEmpty": "No stages have been entered for this project.",
       "projectStagesUnavailable": "Stages cannot be read in this environment, so we are not showing an empty list as if there were none.",
       "projectAssignWorker": "Assign a worker",
+      "projectOpenOperations": "Open project management",
+      "projectOpenProject": "Open the project",
       "projectCompletedNoAssign": "The project is completed, so nobody new can be assigned to it.",
       "projectTerminal": "A completed project cannot be updated. It stays as history.",
       "projectActionPublish": "Publish project",

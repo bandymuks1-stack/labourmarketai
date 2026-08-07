@@ -11192,6 +11192,8 @@
       "projectStagesEmpty": "Für dieses Projekt wurden noch keine Phasen erfasst.",
       "projectStagesUnavailable": "Phasen können in dieser Umgebung nicht gelesen werden — deshalb zeigen wir keine leere Liste, als gäbe es keine.",
       "projectAssignWorker": "Mitarbeiter zuweisen",
+      "projectOpenOperations": "Projektsteuerung öffnen",
+      "projectOpenProject": "Projekt öffnen",
       "projectCompletedNoAssign": "Das Projekt ist abgeschlossen — es kann niemand mehr zugewiesen werden.",
       "projectTerminal": "Ein abgeschlossenes Projekt kann nicht mehr geändert werden. Es bleibt als Historie erhalten.",
       "projectActionPublish": "Projekt veröffentlichen",
