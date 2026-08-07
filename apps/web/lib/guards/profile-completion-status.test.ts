@@ -28,7 +28,20 @@ describe("Guard: profile completion status is consolidated into the hub", () => 
   });
 
   it("counts journal entries from the real table (read-back, not invented)", () => {
-    expect(page).toMatch(/from\(["']journal_entries["']\)/);
-    expect(page).toMatch(/journalCount\s*=\s*jCount\s*\?\?\s*0/);
+    // W7-S1: the PAGE's own `journal_entries` count was removed — it was a
+    // second read of exactly the rows the canonical player card already counts,
+    // and its only consumer was the hub's journal pillar. The rule this guard
+    // protects (the number is read back from the real table, never invented) is
+    // unchanged; it is now enforced where the count actually lives.
+    const card = readFileSync(
+      join(APP, "lib", "player-card", "player-card.ts"),
+      "utf8",
+    );
+    expect(card).toMatch(/from\(["']journal_entries["']\)/);
+    expect(card).toMatch(/count: ["']exact["']/);
+    // …and the hub renders THAT count, not one of its own.
+    const hub = read("components/app/profile-hub-overview.tsx");
+    expect(hub).toMatch(/playerCard\.evidenceEntries/);
+    expect(hub).not.toMatch(/from\(["']journal_entries["']\)/);
   });
 });

@@ -3,15 +3,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
-import { WorkerSetupJourney } from "@/components/app/worker-setup-journey";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
-import { ProfileStateStrip } from "@/components/app/profile-state-strip";
-import { LiveProfileSection } from "@/components/app/live-profile-section";
 import { FeatureNote } from "@/components/app/feature-note";
 import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { SkillsReviewBanner } from "@/components/app/skills-review-banner";
 import {
   deriveSkillEvidence,
   type SkillEvidenceInput,
@@ -65,10 +61,7 @@ import { PageQuickNav } from "@/components/app/page-quick-nav";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
 import { Building2 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
-import {
-  CvCompletenessGrid,
-  type CvSectionCard,
-} from "@/components/app/cv-completeness-grid";
+import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -196,7 +189,6 @@ export default async function ProfilePage({
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
-  let journalCount = 0;
   // Per-skill evidence-support inputs (provenance + DURABLE journal links).
   let skillEvidenceInputs: SkillEvidenceInput[] = [];
   // Skills the worker is allowed to pick from across all their directions.
@@ -260,12 +252,11 @@ export default async function ProfilePage({
     const wp = (wpAll ?? []).find((r) => r.is_primary) ?? null;
     currentProfessionId = wp?.profession_id ?? null;
 
-    // Journal entries count — feeds the real profile-completion status.
-    const { count: jCount } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId);
-    journalCount = jCount ?? 0;
+    // W7-S1: the page's own journal-entry count query was REMOVED. It was a
+    // second read of exactly the rows the canonical player card already counts
+    // (`playerCard.evidenceEntries`), and its only consumer was the hub's
+    // journal pillar — which the consolidated overview now sources from that
+    // card. One fewer DB round trip, one fewer number that could disagree.
     // Resolve the employing company owner (if any) so the worker can message
     // them — read-only, RLS-scoped to the worker's own accepted invitation.
     employerOwnerProfileId = await getEmployerOwnerProfileId();
@@ -425,6 +416,84 @@ export default async function ProfilePage({
     }
   }
 
+  /**
+   * W7-S1 — derived ONCE, then shared.
+   *
+   * `deriveSkillEvidence` used to run three times per render (the hub's props,
+   * the review banner's IIFE, and the hub's own internal recomputation) from
+   * identical inputs. The CV section states were assembled inside a JSX IIFE
+   * that only the standalone grid could see; the hub now owns the grid, so the
+   * list is computed here and passed in. Same inputs, same outputs, no new
+   * reads — this is the duplicate-work removal the slice measured.
+   */
+  const skillEvidenceSummary = workerId
+    ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
+    : undefined;
+
+  const cvSectionCards: CvSectionCard[] | undefined = (() => {
+    if (!workerId) return undefined;
+    const eduCount =
+      workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
+    const achEntries =
+      workerAchievements?.kind === "ok" ? workerAchievements.entries : [];
+    const declaredCerts = achEntries.filter(
+      (a) => a.achievementTypeSlug === "declared_certificate",
+    ).length;
+    return [
+      {
+        key: "summary",
+        filled: savedProfileText.trim().length > 0,
+        href: "#profile-edit",
+      },
+      {
+        key: "workHistory",
+        filled: engagementCards.length > 0,
+        href: "#capabilities",
+      },
+      { key: "education", filled: eduCount > 0, href: "#cv-education" },
+      {
+        key: "languages",
+        filled:
+          workerLanguages?.kind === "ok" && workerLanguages.languages.length > 0,
+        href: "#cv-languages",
+      },
+      {
+        key: "certificates",
+        filled: certificateDocCount > 0 || declaredCerts > 0,
+        href: DOCUMENTS_READINESS_ENABLED
+          ? `/${locale}/dashboard/documents`
+          : "#cv-achievements",
+      },
+      {
+        key: "skills",
+        filled: savedSkillClaims.length + savedSkills.length > 0,
+        href: "#profile-edit",
+      },
+      {
+        key: "projects",
+        filled: projectLinkedEntryCount > 0,
+        href: `/${locale}/dashboard/journal`,
+      },
+      {
+        key: "achievements",
+        filled: achEntries.length > 0,
+        href: "#cv-achievements",
+      },
+      {
+        key: "salary",
+        filled: worker?.salary_min_eur != null || worker?.salary_max_eur != null,
+        href: `/${locale}/dashboard`,
+      },
+      {
+        key: "availability",
+        filled:
+          worker?.availability_status === "available" ||
+          Boolean(worker?.available_from),
+        href: "#cv-availability",
+      },
+    ];
+  })();
+
   return (
     <div className="flex flex-col gap-6">
       <TelemetryView
@@ -505,24 +574,53 @@ export default async function ProfilePage({
         ]}
       />
 
-      {/* Three plain state concepts, separated on purpose (human-first
-          profile pass): parengtis (readiness — same canonical model the
-          setup journey uses), aktualumas (newest journal-entry date) and
-          šiandienos aktyvumas (today's real entry count). Workers only. */}
-      {workerId ? <ProfileStateStrip workerId={workerId} /> : null}
+      {/* W7-S1: the readiness/summary surfaces that used to stand here —
+          `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
+          standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
+          ABSORBED into the ONE `ProfileHubOverview` below. They rendered the
+          same `deriveWorkerReadiness` output four times and the same journal
+          counts three times, ≈1350 px before the first editable field. Nothing
+          was dropped: the old→new map is in
+          `docs/audits/W7_S1_PROFILE_HUB_OVERVIEW.md` §5, and the hub inherits
+          the `#setup-journey` anchor `completeOnboarding` deep-links to. */}
 
-      {/* W5 Slice 1 — the LIVE profile: what is missing (named, never scored),
-          where the work happened (real engagements), what the journal backs,
-          and how many visible opportunities match, with the §19 basis of the
-          closest one. Reads the SAME canonical card model as the strip above,
-          so the numbers cannot disagree. */}
-      {workerId ? <LiveProfileSection /> : null}
-
-      {/* Wagon 4 — guided setup journey: registration → goal → experience →
-          review → location → availability → ready. A guide over the
-          canonical sections below (self-gates to workers; renders nothing
-          for a pure company identity). */}
-      <WorkerSetupJourney />
+      {/* THE ONE OVERVIEW (W7-S1). Identity, status, what is missing and the
+          single next action — with completed steps, work history, evidence
+          counts, today's activity, the opportunity signal and the optional CV
+          section grid behind one disclosure. Absorbs the four surfaces that
+          used to precede it plus the review banner that used to follow it. */}
+      <ProfileHubOverview
+        personName={personName}
+        avatarUrl={avatar.signedUrl}
+        workerId={workerId}
+        cvProvided={savedProfileText.trim().length > 0}
+        selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
+        hasWorker={workerId !== null}
+        // Derived ONCE and shared (it was computed three times per render).
+        skillEvidence={skillEvidenceSummary}
+        cvSections={cvSectionCards}
+        // Identity-essential presence sourced from the ONE minimum card contract
+        // (launch audit §7.3) — only data already fetched above, no new reads.
+        cardSource={{
+          fullName: profile?.full_name ?? null,
+          email: profile?.email ?? null,
+          avatarUrl: avatar.signedUrl,
+          about: savedProfileText,
+          skillsDeclared: savedSkillClaims.length + savedSkills.length,
+          // Real saved country signal (worker-owned) — lets the ONE minimum
+          // contract count "location" honestly instead of always-missing.
+          location: worker?.current_location_country ?? null,
+        }}
+        /* W7-S1 — two props deliberately NOT passed any more.
+           `availability` and `journalCount` existed to render the availability
+           and journal PILLARS from this page's own `workers` / `journal_entries`
+           reads. The hub now takes both from the ONE canonical player card
+           (`pillarMet("availability")`, `playerCard.evidenceEntries`), so
+           passing a second computation of the same facts would reintroduce
+           exactly the disagreement this slice removed. The page's own
+           journal-entry count query went with them — it had no other consumer,
+           so the slice removes one DB round trip as well as one number. */
+      />
 
       <section
         id="profile-identity"
@@ -591,138 +689,6 @@ export default async function ProfilePage({
       <FeatureNote testId="feature-note-profile">
         {(await getTranslations("featureNotes"))("workerProfile")}
       </FeatureNote>
-
-      {/* Unifying "professional passport" lead: states that CV, skills and
-          work-journal evidence are ONE profile, shows each pillar's honest
-          status from real saved data, carries the single not-verified
-          disclaimer, and gives one primary next action + a bridge to the
-          Work Journal. Uses only data already fetched above — no new reads,
-          no invented counts. */}
-      <ProfileHubOverview
-        cvProvided={savedProfileText.trim().length > 0}
-        selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
-        hasWorker={workerId !== null}
-        journalCount={journalCount}
-        skillEvidence={
-          workerId
-            ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
-            : undefined
-        }
-        // Identity-essential presence sourced from the ONE minimum card contract
-        // (launch audit §7.3) — only data already fetched above, no new reads.
-        cardSource={{
-          fullName: profile?.full_name ?? null,
-          email: profile?.email ?? null,
-          avatarUrl: avatar.signedUrl,
-          about: savedProfileText,
-          skillsDeclared: savedSkillClaims.length + savedSkills.length,
-          // Real saved country signal (worker-owned) — lets the ONE minimum
-          // contract count "location" honestly instead of always-missing.
-          location: worker?.current_location_country ?? null,
-        }}
-        // Availability presence (PR9): real workers columns; the pillar
-        // deep-links the canonical dashboard Work Card editor.
-        availability={
-          workerId
-            ? {
-                set:
-                  worker?.availability_status === "available" ||
-                  Boolean(worker?.available_from),
-              }
-            : undefined
-        }
-      />
-
-      {/* CV completeness grid (Full CV System v1) — one dense card per CV
-          section with a REAL filled/empty state from the data loaded above;
-          each links to its editor. Order-free: the worker starts anywhere. */}
-      {workerId
-        ? (() => {
-            const eduCount =
-              workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
-            const achEntries =
-              workerAchievements?.kind === "ok" ? workerAchievements.entries : [];
-            const declaredCerts = achEntries.filter(
-              (a) => a.achievementTypeSlug === "declared_certificate",
-            ).length;
-            const cards: CvSectionCard[] = [
-              {
-                key: "summary",
-                filled: savedProfileText.trim().length > 0,
-                href: "#profile-edit",
-              },
-              {
-                key: "workHistory",
-                filled: engagementCards.length > 0,
-                href: "#capabilities",
-              },
-              { key: "education", filled: eduCount > 0, href: "#cv-education" },
-              {
-                key: "languages",
-                filled:
-                  workerLanguages?.kind === "ok" &&
-                  workerLanguages.languages.length > 0,
-                href: "#cv-languages",
-              },
-              {
-                key: "certificates",
-                filled: certificateDocCount > 0 || declaredCerts > 0,
-                href: DOCUMENTS_READINESS_ENABLED
-                  ? `/${locale}/dashboard/documents`
-                  : "#cv-achievements",
-              },
-              {
-                key: "skills",
-                filled: savedSkillClaims.length + savedSkills.length > 0,
-                href: "#profile-edit",
-              },
-              {
-                key: "projects",
-                filled: projectLinkedEntryCount > 0,
-                href: `/${locale}/dashboard/journal`,
-              },
-              {
-                key: "achievements",
-                filled: achEntries.length > 0,
-                href: "#cv-achievements",
-              },
-              {
-                key: "salary",
-                filled:
-                  worker?.salary_min_eur != null || worker?.salary_max_eur != null,
-                href: `/${locale}/dashboard`,
-              },
-              {
-                key: "availability",
-                filled:
-                  worker?.availability_status === "available" ||
-                  Boolean(worker?.available_from),
-                href: "#cv-availability",
-              },
-            ];
-            return <CvCompletenessGrid sections={cards} />;
-          })()
-        : null}
-
-      {/* Honest "needs review" banner — only when real data shows declared
-          skills not yet backed by work evidence (unsupported, incl. unmapped
-          free-label claims). Never says "verified"; count is real. */}
-      {workerId
-        ? (() => {
-            const ev = deriveSkillEvidence(
-              skillEvidenceInputs,
-              savedSkillClaims.length,
-            );
-            return (
-              <SkillsReviewBanner
-                count={ev.unsupported}
-                title={t("reviewBanner.title")}
-                body={t("reviewBanner.body")}
-                cta={t("reviewBanner.cta")}
-              />
-            );
-          })()
-        : null}
 
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
           straight from canonical tables (verified skills, manager

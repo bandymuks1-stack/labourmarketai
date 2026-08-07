@@ -19,13 +19,20 @@ import { join } from "node:path";
 const APP = process.cwd();
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 
-const JOURNEY = read("components/app/worker-setup-journey.tsx");
+/**
+ * W7-S1: `worker-setup-journey.tsx` was ABSORBED into the profile hub. The
+ * journey is still a GUIDE over canonical surfaces with the same 5 steps, the
+ * same copy namespace and the same destinations — it is no longer a separate
+ * component. Every assertion below is unchanged in intent and re-pointed at
+ * the surface that now renders it.
+ */
+const JOURNEY = read("components/app/profile-hub-overview.tsx");
 const STEP_KEYS = ["goal", "experience", "review", "location", "availability"];
 
 describe("Wagon 4 — the guide exists and fresh workers land on it", () => {
-  it("profile page mounts WorkerSetupJourney", () => {
+  it("profile page mounts the surface that carries the journey", () => {
     const page = read("app/[locale]/dashboard/profile/page.tsx");
-    expect(page).toMatch(/<WorkerSetupJourney \/>/);
+    expect(page).toMatch(/<ProfileHubOverview/);
   });
 
   it("completeOnboarding sends a fresh worker to the setup journey", () => {
@@ -49,18 +56,25 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
     expect(JOURNEY).not.toMatch(/%/);
   });
 
-  it("self-gates: renders nothing for a non-worker identity", () => {
-    expect(JOURNEY).toMatch(/if \(!card\) return null/);
+  it("self-gates: renders no steps for a non-worker identity", () => {
+    // The hub itself renders for every identity (it is also the non-worker's
+    // overview); the JOURNEY inside it self-gates on the player card, exactly
+    // as the standalone component did with `if (!card) return null`.
+    expect(JOURNEY).toMatch(/playerCard\s*$/m);
+    expect(JOURNEY).toMatch(/\?\s*\[\s*$/m);
+    expect(JOURNEY).toMatch(/steps\.length > 0 &&/);
   });
 
   it("each step links to an existing canonical surface", () => {
-    expect(JOURNEY).toMatch(/\/dashboard\/profile#profile-edit/);
+    // In-page anchors now, because the guide renders ON the profile page —
+    // the destinations are the same editors as before.
+    expect(JOURNEY).toMatch(/href: "#profile-edit"/);
     // The `id="work-card"` anchor died with the second dashboard (W3
     // Package 4); the location step now opens the work-card capability's
     // canonical home — the player-card result in the workspace panel.
     expect(JOURNEY).toMatch(/\/dashboard\?result=player-card/);
     expect(JOURNEY).not.toMatch(/href: "\/dashboard#work-card"/);
-    expect(JOURNEY).toMatch(/\/dashboard\/profile#cv-availability/);
+    expect(JOURNEY).toMatch(/href: "#cv-availability"/);
     // the profile anchors actually exist on their target page
     const profile = read("app/[locale]/dashboard/profile/page.tsx");
     expect(profile).toMatch(/id="profile-edit"/);

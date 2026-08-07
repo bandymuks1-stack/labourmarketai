@@ -1,0 +1,152 @@
+[
+  {
+    "phase": "after",
+    "tag": "worker-complete",
+    "viewport": "1440",
+    "ttfbRuns": [
+      2454,
+      2737,
+      2805,
+      2950,
+      3484
+    ],
+    "ttfbMedian": 2805,
+    "primaryEarly": 861,
+    "primaryLate": 861,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 4943,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "cardBorders": 16,
+    "sections": 14,
+    "h1": 1,
+    "h2": [
+      "Įmonės kanalai",
+      "Dev Worker",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 6,
+    "buttons": 57,
+    "links": 33,
+    "unlabelledInputs": 34,
+    "smallTargets": 71,
+    "hub": {
+      "y": 670,
+      "h": 318
+    },
+    "stateStrip": null,
+    "liveProfile": null,
+    "setupJourney": null,
+    "cvGrid": {
+      "y": 1603,
+      "h": 168
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 861,
+      "h": 44
+    },
+    "doneSummary": {
+      "y": 922,
+      "h": 44
+    },
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nDW\nDev Worker\n\nParuoštas · 5 iš 5 · Paskutinis įrašas — 2026-07-25\n\nDAR TRŪKSTA\n\nNieko esminio netrūksta.\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nPaklausti darbo erdvėje →\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\n›\nKAS JAU PARUOŠTA\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\nVADOVO PATVIRTINIMAI\n0\nŽURNALO ĮRAŠAI\n14\nDarbo pageidavimai\n\nNurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n\nGALIU PERSIKELTI DĖL DARBO\nNenurodyta\nTaip\nNe\nREIKALINGAS APGYVENDINIMAS\nNenurodyta\nTaip\nNe\nTURIU NUOSAVĄ TRANSPORTĄ\nNenurodyta\nTaip\nNe\nGALIU DIRBTI KOMANDOJE\nNenurodyta\nTaip\nNe\nGALIU DIRBTI VIENAS\nNenurodyta\nTaip\nNe\nILGIAUSIA KOMANDIRUOTĖ (DIENOMIS)\nPAGEIDAUJAMA SUTARTIES FORMA\nNenurodyta\n▾\nPASTABA A"
+  },
+  {
+    "phase": "after",
+    "tag": "worker-complete",
+    "viewport": "375",
+    "ttfbRuns": [
+      1915,
+      2421,
+      2855,
+      2980,
+      3078
+    ],
+    "ttfbMedian": 2855,
+    "primaryEarly": 1115,
+    "primaryLate": 1115,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 7078,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "cardBorders": 16,
+    "sections": 14,
+    "h1": 1,
+    "h2": [
+      "Įmonės kanalai",
+      "Dev Worker",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 6,
+    "buttons": 57,
+    "links": 33,
+    "unlabelledInputs": 34,
+    "smallTargets": 70,
+    "hub": {
+      "y": 891,
+      "h": 575
+    },
+    "stateStrip": null,
+    "liveProfile": null,
+    "setupJourney": null,
+    "cvGrid": {
+      "y": 2199,
+      "h": 483
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 1115,
+      "h": 44
+    },
+    "doneSummary": {
+      "y": 1400,
+      "h": 44
+    },
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nAsmeninė erdvė\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nDW\nDev Worker\n\nParuoštas · 5 iš 5 · Paskutinis įrašas — 2026-07-25\n\nDAR TRŪKSTA\n\nNieko esminio netrūksta.\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nPaklausti darbo erdvėje →\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\n›\nKAS JAU PARUOŠTA\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\nVADOVO PATVIRTINIMAI\n0\nŽURNALO ĮRAŠAI\n14\nDarbo pageidavimai\n\nNurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n\nGALIU PERSIKELTI DĖL DARBO\nNenurodyta\nTaip\nNe\nREIKALINGAS APGYVENDINIMAS\nNenurodyta\nTaip\nNe\nTURIU NUOSAVĄ TRANSPORTĄ\nNenurodyta\nTaip\nNe\nGALIU DIRBTI KOMANDOJE\nNenurodyta\nTaip\nNe\nGALIU DIRBTI VIENAS\nNenurodyta\nTaip\nNe\nILGIAUSIA KOMANDIRUOTĖ (DIENOMIS)\nPAGEIDAUJAMA SUTARTIES FORMA\nNenurodyta\n▾\nPASTABA APIE UŽIMTUMĄ\nPAPILDOMI"
+  }
+]

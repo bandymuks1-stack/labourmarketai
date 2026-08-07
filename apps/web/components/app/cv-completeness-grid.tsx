@@ -20,21 +20,39 @@ export interface CvSectionCard {
 
 export async function CvCompletenessGrid({
   sections,
+  nested = false,
 }: {
   sections: CvSectionCard[];
+  /**
+   * W7-S1: the grid moved INSIDE the profile hub's "already done" disclosure,
+   * where it is the OPTIONAL improvement list next to the required readiness
+   * work. Nested mode drops its own card surface and demotes the heading, so
+   * the hub does not become a card inside a card. Every section card, its real
+   * filled/empty state and its editor link are unchanged.
+   */
+  nested?: boolean;
 }) {
   const t = await getTranslations("cvSections.grid");
   const tName = await getTranslations("cvSections.names");
 
   return (
     <section
-      className="card-border flex flex-col gap-3 p-5"
+      className={
+        nested ? "flex flex-col gap-2" : "card-border flex flex-col gap-3 p-5"
+      }
       data-testid="cv-completeness-grid"
+      data-nested={nested || undefined}
     >
       <header className="flex flex-col gap-0.5">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          {t("title")}
-        </h2>
+        {nested ? (
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("title")}
+          </h3>
+        ) : (
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("title")}
+          </h2>
+        )}
         <p className="text-xs leading-relaxed text-text-secondary">{t("hint")}</p>
       </header>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
