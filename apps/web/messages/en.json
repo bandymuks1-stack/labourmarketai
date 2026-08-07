@@ -451,6 +451,7 @@
     "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Recently opened",
+    "startersLabel": "Start here",
     "objectsLabel": "Your own records",
     "objectsLoading": "Searching your own records…",
     "objectsError": "Your records could not be searched right now. The page links above still work.",

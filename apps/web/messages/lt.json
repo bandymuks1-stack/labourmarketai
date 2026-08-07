@@ -451,6 +451,7 @@
     "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Neseniai atidaryta",
+    "startersLabel": "Pradėkite nuo čia",
     "objectsLabel": "Jūsų įrašai",
     "objectsLoading": "Ieškoma jūsų įrašuose…",
     "objectsError": "Šiuo metu jūsų įrašų paieška nepavyko. Puslapių nuorodos viršuje veikia toliau.",

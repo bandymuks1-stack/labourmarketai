@@ -113,7 +113,15 @@ export function LoginForm() {
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    /* `method="post"` is the PRE-HYDRATION fallback, not a real endpoint.
+       Without it a submit issued before React attaches `onSubmit` falls back to
+       the browser default — a GET to this URL with every field as a query
+       parameter — which put the password in the address bar, the history, the
+       server access log and any Referer:
+         /lt/auth/login?email=…&password=…
+       Reproduced in a real browser on 2026-08-07. POST keeps the values in a
+       request body that nothing here reads. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}

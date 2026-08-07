@@ -1,0 +1,2285 @@
+[
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin",
+    "label": "admin-home",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 23952,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 3855,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Savininko / operacijų valdymo centras"
+    ],
+    "h2": [
+      "Apžvalga",
+      "Pirkėjų užklausos — rankinė peržiūra",
+      "Tolimesnių veiksmų sąrašas",
+      "Pardavimų srautas",
+      "Patirčių moderavimas",
+      "Operaciniai juodraščiai",
+      "Žmonės",
+      "Paleidimo lenta"
+    ],
+    "cardBorders": 21,
+    "sections": 9,
+    "buttons": 7,
+    "links": 48,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 46,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 62
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 80
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "dashboard-tab-admin",
+        "y": 22,
+        "h": 32,
+        "w": 133
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 113
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 101,
+        "h": 44,
+        "w": 1344
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 110,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-dashboard",
+        "y": 161,
+        "h": 3598,
+        "w": 1344
+      },
+      {
+        "id": "admin-overview-kpis",
+        "y": 267,
+        "h": 178,
+        "w": 1344
+      },
+      {
+        "id": "admin-kpi-people",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-peopleIncomplete",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-companies",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-demand",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-reviewQueue",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-claims",
+        "y": 325,
+        "h": 88,
+        "w": 214
+      },
+      {
+        "id": "admin-kpi-monitoring-note",
+        "y": 425,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "admin-request-review",
+        "y": 469,
+        "h": 100,
+        "w": 1344
+      },
+      {
+        "id": "admin-follow-up-queue",
+        "y": 593,
+        "h": 347,
+        "w": 1344
+      },
+      {
+        "id": "follow-up-empty",
+        "y": 695,
+        "h": 42,
+        "w": 1344
+      },
+      {
+        "id": "follow-up-note",
+        "y": 786,
+        "h": 50,
+        "w": 1344
+      },
+      {
+        "id": "follow-up-subject-profile",
+        "y": 844,
+        "h": 26,
+        "w": 668
+      },
+      {
+        "id": "follow-up-subject-company",
+        "y": 844,
+        "h": 26,
+        "w": 668
+      },
+      {
+        "id": "follow-up-submit",
+        "y": 904,
+        "h": 36,
+        "w": 76
+      },
+      {
+        "id": "admin-sales-intake",
+        "y": 964,
+        "h": 396,
+        "w": 1344
+      },
+      {
+        "id": "intake-view-pipeline",
+        "y": 1032,
+        "h": 16,
+        "w": 158
+      },
+      {
+        "id": "intake-requests-empty",
+        "y": 1084,
+        "h": 42,
+        "w": 1344
+      },
+      {
+        "id": "intake-help-requests-empty",
+        "y": 1162,
+        "h": 42,
+        "w": 1344
+      },
+      {
+        "id": "intake-waitlist-empty",
+        "y": 1240,
+        "h": 42,
+        "w": 1344
+      },
+      {
+        "id": "intake-leads-empty",
+        "y": 1318,
+        "h": 42,
+        "w": 1344
+      },
+      {
+        "id": "admin-experience-moderation",
+        "y": 1384,
+        "h": 169,
+        "w": 1344
+      },
+      {
+        "id": "experience-moderation-queue",
+        "y": 1442,
+        "h": 50,
+        "w": 1344
+      },
+      {
+        "id": "experience-dispute-queue",
+        "y": 1503,
+        "h": 50,
+        "w": 1344
+      },
+      {
+        "id": "admin-pilot-drafts",
+        "y": 1577,
+        "h": 156,
+        "w": 1344
+      },
+      {
+        "id": "admin-drafts-monitoring-note",
+        "y": 1625,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "admin-recent-users",
+        "y": 1814,
+        "h": 362,
+        "w": 1344
+      },
+      {
+        "id": "admin-recent-users-more",
+        "y": 2188,
+        "h": 24,
+        "w": 1344
+      },
+      {
+        "id": "admin-launch-band",
+        "y": 2236,
+        "h": 949,
+        "w": 1344
+      },
+      {
+        "id": "admin-launch-signals",
+        "y": 2302,
+        "h": 82,
+        "w": 1344
+      },
+      {
+        "id": "admin-launch-signals-monitoring-note",
+        "y": 2400,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "admin-launch-board",
+        "y": 2435,
+        "h": 714,
+        "w": 1344
+      },
+      {
+        "id": "admin-control-areas",
+        "y": 3209,
+        "h": 550,
+        "w": 1344
+      },
+      {
+        "id": "admin-area-companies",
+        "y": 3209,
+        "h": 200,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-company-verification",
+        "y": 3278,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-area-demand",
+        "y": 3209,
+        "h": 200,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-need-structuring",
+        "y": 3278,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-company-need-intakes",
+        "y": 3318,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-pipeline",
+        "y": 3358,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-area-matching",
+        "y": 3209,
+        "h": 200,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-matching",
+        "y": 3278,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-candidate-pool",
+        "y": 3318,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-area-marketSignals",
+        "y": 3421,
+        "h": 338,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-market",
+        "y": 3490,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-league",
+        "y": 3530,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-area-quality",
+        "y": 3421,
+        "h": 338,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-launch-readiness",
+        "y": 3490,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-readiness",
+        "y": 3530,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-pilots",
+        "y": 3616,
+        "h": 40,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-project-truth",
+        "y": 3702,
+        "h": 40,
+        "w": 406
+      },
+      {
+        "id": "admin-area-operations",
+        "y": 3421,
+        "h": 338,
+        "w": 440
+      },
+      {
+        "id": "admin-tools-hub-billing",
+        "y": 3530,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "admin-tools-hub-permission-matrix",
+        "y": 3656,
+        "h": 34,
+        "w": 406
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nAdministravimas\nLietuvių\nAsmuo\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nOPERACIJŲ VALDYMAS\n\nSavininko / operacijų valdymo centras\n\nViskas, ką savininkui reikia matyti ir daryti — vienoje vietoje.\n\nApžvalga\n\nDabartinė sistemos būklė.\n\nAKTYVŪS ŽMONĖS\n\n9\n\nNEPILNI PROFILIAI\n\n9\n\nĮMONĖS\n\n6\n\nATVIRA PAKLAUSA\n\n0\n\nLAUKIA PERŽIŪROS\n\n0\n\nĮGŪDŽIŲ DEKLARACIJOS\n\n0\n\nSkaičiai be nuorodos yra tik stebėsenai — jie niekur neveda ir nieko nekeičia.\n\nPirkėjų užklausos — rankinė peržiūra\n\nPirmenybė nustatoma deterministiškai pagal realius laukus (aprašymą, failų skaičių, būseną). Be dirbtinio intelekto, be automatinio nuskaitymo.\n\nPirkėjų užklausų dar nėra.\n\nTolimesnių veiksmų sąrašas\n\nVidiniai komandos veiksmai: ką reikia padaryti toliau, dėl ko ir kokia būsena. Rodomi tik realiai užfiksuoti įrašai.\n\nTik vidinis įrankis. Sukūrus ar užbaigus įrašą niekam nieko neišsiunčiama — nei el. laiško, nei SMS, nei žinutės. Tai komandos atmintis apie tolimesnius veiksmus.\n\nATVIRI · 0\n\nAtvirų tolimesnių veiksmų nėra. Kai komanda užfiksuos veiksmą, jis atsiras čia.\n\nNaujas tolimesnis veiksmas\n\nNebūtina: įklijuokite vieną ID (asmens arba įmonės, ne abu). Saugomas tik ID — kontaktiniai duomenys nekopijuojami.\n\nPridėti\nPardavimų srautas\n\nTik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.\n\nTik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.\n\nPeržiūrėti paklausos eigą →\nPOREIKIO UŽKLAUSOS PERŽIŪROJE · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nPAGALBOS UŽKLAUSOS · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nLAUKIANČIŲJŲ SĄRAŠO REGISTRACIJOS · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nĮRAŠYTI KONTAKTAI · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nPatirčių moderavimas\n\nVidinė eilė. Kiekvienam sprendimui privaloma priežastis; ji patenka į audito įrašą ir nėra skelbiama.\n\nLAUKIA MODERAVIMO\n\nModeravimo nelaukia nė viena patirtis.\n\nGINČAI\n\nAtvirų ginčų nėra.\n\nOperaciniai juodraščiai\n\nĮmonių / agentūrų / pirkėjų privatūs juodraščiai. Skaityti gali tik savininkas ir adminas.\n\nSkaičiai be nuorodo",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-home-1440.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/company-verification",
+    "label": "admin-company-verification",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 8033,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/company-verification",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 2547,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Įmonių patvirtinimo užklausos"
+    ],
+    "h2": [],
+    "cardBorders": 6,
+    "sections": 0,
+    "buttons": 24,
+    "links": 18,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 33,
+    "unlabelledInputs": 36,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 62
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 80
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "dashboard-tab-admin",
+        "y": 22,
+        "h": 32,
+        "w": 133
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 113
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 101,
+        "h": 44,
+        "w": 1344
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 110,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-company-verification",
+        "y": 161,
+        "h": 2290,
+        "w": 1344
+      },
+      {
+        "id": "admin-company-verification-count",
+        "y": 311,
+        "h": 16,
+        "w": 1344
+      },
+      {
+        "id": "admin-company-verification-list",
+        "y": 351,
+        "h": 2100,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-row-cccccccc-0000-0000-0000-000000000001",
+        "y": 351,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-cccccccc-0000-0000-0000-000000000001",
+        "y": 368,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-cccccccc-0000-0000-0000-000000000001",
+        "y": 572,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-cccccccc-0000-0000-0000-000000000001",
+        "y": 594,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-cccccccc-0000-0000-0000-000000000001",
+        "y": 644,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-cccccccc-0000-0000-0000-000000000001",
+        "y": 644,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-cccccccc-0000-0000-0000-000000000001",
+        "y": 644,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 703,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 720,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 924,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 946,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 996,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 996,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 996,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1055,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1072,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1276,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1298,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1348,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1348,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1348,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1407,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1424,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1628,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1650,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1700,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1700,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 1700,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 1759,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 1776,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 1980,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2002,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2052,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2052,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2052,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-ad222222-0000-4000-8000-000000000001",
+        "y": 2111,
+        "h": 340,
+        "w": 1344
+      },
+      {
+        "id": "company-verification-status-ad222222-0000-4000-8000-000000000001",
+        "y": 2128,
+        "h": 24,
+        "w": 113
+      },
+      {
+        "id": "company-verification-review-ad222222-0000-4000-8000-000000000001",
+        "y": 2332,
+        "h": 102,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-note-ad222222-0000-4000-8000-000000000001",
+        "y": 2354,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "company-verification-approve-ad222222-0000-4000-8000-000000000001",
+        "y": 2404,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-ad222222-0000-4000-8000-000000000001",
+        "y": 2404,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-ad222222-0000-4000-8000-000000000001",
+        "y": 2404,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nAdministravimas\nLietuvių\nAsmuo\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nĮMONIŲ PATVIRTINIMAS\n\nĮmonių patvirtinimo užklausos\n\nIšimčių / eskalavimo peržiūra. Įmonės sukuriamos ir naudojamos automatiškai — tai NĖRA patvirtinimo eilė. Naudokite norėdami patvirtinti paprašius, ištaisyti pažymėtas patikras ar perrašyti įtartiną įmonę. Patvirtinimą rankiniu būdu atlieka žmogus; niekas nepatvirtinama automatiškai.\n\n← Grįžti į operacijų skydą\n\nNėra užklausų, laukiančių patvirtinimo\n\nDev Construction BV\nVARTOTOJAS: DEV.COMPANY@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nNL\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\n—\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Beta 1786034185234\nVARTOTOJAS: FRESH.OWNER.1786034185234@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786034185234\nVARTOTOJAS: FRESH.OWNER.1786034185234@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786034063285\nVARTOTOJAS: FRESH.OWNER.1786034063285@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786033530128\nVARTOTOJAS: FRESH.OWNER.1786033530128@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nRepro Unverified UAB\nVARTOTOJAS: REPRO.COMPANY@LOCAL.TEST\nPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\n—\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtin",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-company-verification-1440.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/users",
+    "label": "admin-users",
+    "viewport": "1440",
+    "status": 404,
+    "ttfbMs": 4656,
+    "console": [
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/users",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 900,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Puslapis nerastas"
+    ],
+    "h2": [],
+    "cardBorders": 0,
+    "sections": 0,
+    "buttons": 0,
+    "links": 1,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 1,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "branded-not-found",
+        "y": 0,
+        "h": 900,
+        "w": 1440
+      },
+      {
+        "id": "not-found-home-cta",
+        "y": 511,
+        "h": 36,
+        "w": 130
+      }
+    ],
+    "text": "404\n\nPuslapis nerastas\n\nTokio adreso nėra — galbūt jis įvestas klaidingai arba puslapis buvo perkeltas.\n\nGrįžti į pradžią",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-users-1440.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/pipeline",
+    "label": "admin-pipeline",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 7594,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/pipeline",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 900,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Paklausos eiga"
+    ],
+    "h2": [
+      "Etapų suvestinė"
+    ],
+    "cardBorders": 6,
+    "sections": 1,
+    "buttons": 7,
+    "links": 29,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 22,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 62
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 80
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "dashboard-tab-admin",
+        "y": 22,
+        "h": 32,
+        "w": 133
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 113
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 101,
+        "h": 44,
+        "w": 1344
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 110,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-pipeline",
+        "y": 161,
+        "h": 544,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-honest-note",
+        "y": 291,
+        "h": 34,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-summary",
+        "y": 349,
+        "h": 170,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-stage-card-new",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-stage-card-contacted",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-stage-card-qualifying",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-stage-card-follow_up",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-stage-card-active",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-stage-card-closed",
+        "y": 385,
+        "h": 80,
+        "w": 217
+      },
+      {
+        "id": "pipeline-source-breakdown",
+        "y": 473,
+        "h": 18,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-filters",
+        "y": 543,
+        "h": 84,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-filter-source-all",
+        "y": 543,
+        "h": 36,
+        "w": 46
+      },
+      {
+        "id": "pipeline-filter-source-customer_request",
+        "y": 543,
+        "h": 36,
+        "w": 137
+      },
+      {
+        "id": "pipeline-filter-source-public_intake",
+        "y": 543,
+        "h": 36,
+        "w": 99
+      },
+      {
+        "id": "pipeline-filter-source-lead",
+        "y": 543,
+        "h": 36,
+        "w": 138
+      },
+      {
+        "id": "pipeline-filter-source-waitlist",
+        "y": 543,
+        "h": 36,
+        "w": 144
+      },
+      {
+        "id": "pipeline-search-form",
+        "y": 591,
+        "h": 36,
+        "w": 1344
+      },
+      {
+        "id": "pipeline-search-submit",
+        "y": 591,
+        "h": 36,
+        "w": 63
+      },
+      {
+        "id": "pipeline-empty",
+        "y": 651,
+        "h": 54,
+        "w": 1344
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nAdministravimas\nLietuvių\nAsmuo\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nOPERATORIAUS EILĖ\n\nPaklausos eiga\n\nVisi paklausos šaltiniai viename peržiūros lange: pateiktos užklausos, viešos įmonių poreikio anketos, išsaugoti potencialūs klientai ir laukiančiųjų sąrašas.\n\n← Grįžti į valdymo pultą\n\nTik peržiūra. Kiekviena eilutė rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.\n\nEtapų suvestinė\n\nNAUJA\n\n0\n\nSUSISIEKTA\n\n0\n\nVERTINAMA\n\n0\n\nLAUKIA TĘSINIO\n\n0\n\nAKTYVI\n\n0\n\nUŽDARYTA\n\n0\n\nPAKLAUSOS UŽKLAUSA: 0\nVIEŠA ANKETA: 0\nPOTENCIALUS KLIENTAS: 0\nLAUKIANČIŲJŲ SĄRAŠAS: 0\n\nSkaičiai skaičiuojami tik iš realiai užkrautų eilučių (pardavimų šaltiniai užkrauna po 50 naujausių) — niekada nespėjami.\n\nŠALTINIS\nVisi\nPaklausos užklausa\nVieša anketa\nPotencialus klientas\nLaukiančiųjų sąrašas\nPAIEŠKA\nTaikyti\n\nPaklausos eilučių dar nėra. Kai atsiras užklausa, anketa, potencialus klientas ar registracija, ji bus rodoma čia.\n\nSukurta Rexora\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-pipeline-1440.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin",
+    "label": "admin-home",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 3769,
+    "console": [
+      "warning: [pilot-events] fire failed {eventName: login_succeeded, name: TypeError, message: Failed to fetch}",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 6104,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Savininko / operacijų valdymo centras"
+    ],
+    "h2": [
+      "Apžvalga",
+      "Pirkėjų užklausos — rankinė peržiūra",
+      "Tolimesnių veiksmų sąrašas",
+      "Pardavimų srautas",
+      "Patirčių moderavimas",
+      "Operaciniai juodraščiai",
+      "Žmonės",
+      "Paleidimo lenta"
+    ],
+    "cardBorders": 21,
+    "sections": 9,
+    "buttons": 7,
+    "links": 48,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 40,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 81,
+        "h": 72,
+        "w": 343
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 118,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-dashboard",
+        "y": 169,
+        "h": 5791,
+        "w": 343
+      },
+      {
+        "id": "admin-overview-kpis",
+        "y": 331,
+        "h": 433,
+        "w": 343
+      },
+      {
+        "id": "admin-kpi-people",
+        "y": 389,
+        "h": 106,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-peopleIncomplete",
+        "y": 389,
+        "h": 106,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-companies",
+        "y": 507,
+        "h": 88,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-demand",
+        "y": 507,
+        "h": 88,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-reviewQueue",
+        "y": 607,
+        "h": 106,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-claims",
+        "y": 607,
+        "h": 106,
+        "w": 166
+      },
+      {
+        "id": "admin-kpi-monitoring-note",
+        "y": 725,
+        "h": 39,
+        "w": 343
+      },
+      {
+        "id": "admin-request-review",
+        "y": 788,
+        "h": 132,
+        "w": 343
+      },
+      {
+        "id": "admin-follow-up-queue",
+        "y": 944,
+        "h": 467,
+        "w": 343
+      },
+      {
+        "id": "follow-up-empty",
+        "y": 1098,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "follow-up-note",
+        "y": 1205,
+        "h": 50,
+        "w": 343
+      },
+      {
+        "id": "follow-up-subject-profile",
+        "y": 1263,
+        "h": 26,
+        "w": 343
+      },
+      {
+        "id": "follow-up-subject-company",
+        "y": 1297,
+        "h": 26,
+        "w": 343
+      },
+      {
+        "id": "follow-up-submit",
+        "y": 1375,
+        "h": 36,
+        "w": 76
+      },
+      {
+        "id": "admin-sales-intake",
+        "y": 1435,
+        "h": 528,
+        "w": 343
+      },
+      {
+        "id": "intake-view-pipeline",
+        "y": 1571,
+        "h": 16,
+        "w": 158
+      },
+      {
+        "id": "intake-requests-empty",
+        "y": 1623,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "intake-help-requests-empty",
+        "y": 1717,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "intake-waitlist-empty",
+        "y": 1811,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "intake-leads-empty",
+        "y": 1905,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "admin-experience-moderation",
+        "y": 1987,
+        "h": 185,
+        "w": 343
+      },
+      {
+        "id": "experience-moderation-queue",
+        "y": 2061,
+        "h": 50,
+        "w": 343
+      },
+      {
+        "id": "experience-dispute-queue",
+        "y": 2123,
+        "h": 50,
+        "w": 343
+      },
+      {
+        "id": "admin-pilot-drafts",
+        "y": 2196,
+        "h": 455,
+        "w": 343
+      },
+      {
+        "id": "admin-drafts-monitoring-note",
+        "y": 2260,
+        "h": 39,
+        "w": 343
+      },
+      {
+        "id": "admin-recent-users",
+        "y": 2749,
+        "h": 362,
+        "w": 343
+      },
+      {
+        "id": "admin-recent-users-more",
+        "y": 3123,
+        "h": 24,
+        "w": 343
+      },
+      {
+        "id": "admin-launch-band",
+        "y": 3171,
+        "h": 1423,
+        "w": 343
+      },
+      {
+        "id": "admin-launch-signals",
+        "y": 3276,
+        "h": 334,
+        "w": 343
+      },
+      {
+        "id": "admin-launch-signals-monitoring-note",
+        "y": 3626,
+        "h": 20,
+        "w": 343
+      },
+      {
+        "id": "admin-launch-board",
+        "y": 3661,
+        "h": 858,
+        "w": 343
+      },
+      {
+        "id": "admin-control-areas",
+        "y": 4618,
+        "h": 1342,
+        "w": 343
+      },
+      {
+        "id": "admin-area-companies",
+        "y": 4618,
+        "h": 120,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-company-verification",
+        "y": 4687,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-area-demand",
+        "y": 4750,
+        "h": 200,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-need-structuring",
+        "y": 4819,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-company-need-intakes",
+        "y": 4859,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-pipeline",
+        "y": 4899,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-area-matching",
+        "y": 4962,
+        "h": 178,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-matching",
+        "y": 5049,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-candidate-pool",
+        "y": 5089,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-area-marketSignals",
+        "y": 5152,
+        "h": 160,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-market",
+        "y": 5221,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-league",
+        "y": 5261,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-area-quality",
+        "y": 5324,
+        "h": 338,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-launch-readiness",
+        "y": 5393,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-readiness",
+        "y": 5433,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-pilots",
+        "y": 5519,
+        "h": 40,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-project-truth",
+        "y": 5605,
+        "h": 40,
+        "w": 309
+      },
+      {
+        "id": "admin-area-operations",
+        "y": 5674,
+        "h": 286,
+        "w": 343
+      },
+      {
+        "id": "admin-tools-hub-billing",
+        "y": 5783,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "admin-tools-hub-permission-matrix",
+        "y": 5909,
+        "h": 34,
+        "w": 309
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nOPERACIJŲ VALDYMAS\n\nSavininko / operacijų valdymo centras\n\nViskas, ką savininkui reikia matyti ir daryti — vienoje vietoje.\n\nApžvalga\n\nDabartinė sistemos būklė.\n\nAKTYVŪS ŽMONĖS\n\n9\n\nNEPILNI PROFILIAI\n\n9\n\nĮMONĖS\n\n6\n\nATVIRA PAKLAUSA\n\n0\n\nLAUKIA PERŽIŪROS\n\n0\n\nĮGŪDŽIŲ DEKLARACIJOS\n\n0\n\nSkaičiai be nuorodos yra tik stebėsenai — jie niekur neveda ir nieko nekeičia.\n\nPirkėjų užklausos — rankinė peržiūra\n\nPirmenybė nustatoma deterministiškai pagal realius laukus (aprašymą, failų skaičių, būseną). Be dirbtinio intelekto, be automatinio nuskaitymo.\n\nPirkėjų užklausų dar nėra.\n\nTolimesnių veiksmų sąrašas\n\nVidiniai komandos veiksmai: ką reikia padaryti toliau, dėl ko ir kokia būsena. Rodomi tik realiai užfiksuoti įrašai.\n\nTik vidinis įrankis. Sukūrus ar užbaigus įrašą niekam nieko neišsiunčiama — nei el. laiško, nei SMS, nei žinutės. Tai komandos atmintis apie tolimesnius veiksmus.\n\nATVIRI · 0\n\nAtvirų tolimesnių veiksmų nėra. Kai komanda užfiksuos veiksmą, jis atsiras čia.\n\nNaujas tolimesnis veiksmas\n\nNebūtina: įklijuokite vieną ID (asmens arba įmonės, ne abu). Saugomas tik ID — kontaktiniai duomenys nekopijuojami.\n\nPridėti\nPardavimų srautas\n\nTik peržiūrai skirtas vaizdas, kas ateina: pateiktos poreikio užklausos peržiūroje, laukiančiųjų sąrašo registracijos ir įrašyti kontaktai. Tik realūs įrašai.\n\nTik skaitymui. Niekas čia su niekuo nesusisiekia — jokių el. laiškų, SMS ar žinučių. Vienintelis veiksmas — vidinės tolesnio veiksmo užduoties įrašymas komandai.\n\nPeržiūrėti paklausos eigą →\nPOREIKIO UŽKLAUSOS PERŽIŪROJE · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nPAGALBOS UŽKLAUSOS · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nLAUKIANČIŲJŲ SĄRAŠO REGISTRACIJOS · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nĮRAŠYTI KONTAKTAI · 0\n\nĮrašų kol kas nėra. Kai kas nors užsiregistruos ar pateiks užklausą, tai atsiras čia.\n\nPatirčių moderavimas\n\nVidinė eilė. Kiekvienam sprendimui privaloma priežastis; ji patenka į audito įrašą ir nėra skelbiama.\n\nLAUKIA MODERAVIMO\n\nModeravimo nelaukia nė viena patirtis.\n\nGINČAI\n\nAtvirų ginčų nėra.\n\nOperaciniai juodraščiai\n\nĮmonių / agentūrų / pirkėjų privatūs juodraščiai. Skaityti gali tik savininkas ir adminas.\n\nSkaičiai be nuorodos yra tik stebėsenai — jie niekur neveda ir nieko nekeičia.\n\nIŠ VISO\n\n0\n\nĮMONĖS PAKLAUSA\n\n0\n\nA",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-home-375.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/company-verification",
+    "label": "admin-company-verification",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 2146,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/company-verification",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 4093,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Įmonių patvirtinimo užklausos"
+    ],
+    "h2": [],
+    "cardBorders": 6,
+    "sections": 0,
+    "buttons": 24,
+    "links": 18,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 27,
+    "unlabelledInputs": 36,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 81,
+        "h": 72,
+        "w": 343
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 118,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-company-verification",
+        "y": 169,
+        "h": 3780,
+        "w": 343
+      },
+      {
+        "id": "admin-company-verification-count",
+        "y": 435,
+        "h": 16,
+        "w": 343
+      },
+      {
+        "id": "admin-company-verification-list",
+        "y": 475,
+        "h": 3474,
+        "w": 343
+      },
+      {
+        "id": "company-verification-row-cccccccc-0000-0000-0000-000000000001",
+        "y": 475,
+        "h": 554,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-cccccccc-0000-0000-0000-000000000001",
+        "y": 540,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-cccccccc-0000-0000-0000-000000000001",
+        "y": 872,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-cccccccc-0000-0000-0000-000000000001",
+        "y": 894,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-cccccccc-0000-0000-0000-000000000001",
+        "y": 944,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-cccccccc-0000-0000-0000-000000000001",
+        "y": 944,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-cccccccc-0000-0000-0000-000000000001",
+        "y": 982,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1041,
+        "h": 572,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1124,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1456,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1478,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1528,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1528,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-75b95e97-c743-4ead-bf0d-4c180cedb43a",
+        "y": 1566,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1625,
+        "h": 572,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 1708,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 2040,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 2062,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 2112,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 2112,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-8d964154-3ae3-4099-991d-bcb3e013756d",
+        "y": 2150,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2209,
+        "h": 572,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2292,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2624,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2646,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2696,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2696,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-7dfed935-e55b-474c-9295-697c42c33617",
+        "y": 2734,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2793,
+        "h": 572,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 2876,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-verification-review-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 3208,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 3230,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 3280,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 3280,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-3ea463b3-93c0-498a-9e8a-0c480c628f2c",
+        "y": 3318,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "company-verification-row-ad222222-0000-4000-8000-000000000001",
+        "y": 3377,
+        "h": 572,
+        "w": 343
+      },
+      {
+        "id": "company-verification-status-ad222222-0000-4000-8000-000000000001",
+        "y": 3460,
+        "h": 24,
+        "w": 113
+      },
+      {
+        "id": "company-verification-review-ad222222-0000-4000-8000-000000000001",
+        "y": 3792,
+        "h": 140,
+        "w": 309
+      },
+      {
+        "id": "company-verification-note-ad222222-0000-4000-8000-000000000001",
+        "y": 3814,
+        "h": 42,
+        "w": 309
+      },
+      {
+        "id": "company-verification-approve-ad222222-0000-4000-8000-000000000001",
+        "y": 3864,
+        "h": 30,
+        "w": 80
+      },
+      {
+        "id": "company-verification-unverify-ad222222-0000-4000-8000-000000000001",
+        "y": 3864,
+        "h": 30,
+        "w": 138
+      },
+      {
+        "id": "company-verification-pending-ad222222-0000-4000-8000-000000000001",
+        "y": 3902,
+        "h": 30,
+        "w": 144
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nĮMONIŲ PATVIRTINIMAS\n\nĮmonių patvirtinimo užklausos\n\nIšimčių / eskalavimo peržiūra. Įmonės sukuriamos ir naudojamos automatiškai — tai NĖRA patvirtinimo eilė. Naudokite norėdami patvirtinti paprašius, ištaisyti pažymėtas patikras ar perrašyti įtartiną įmonę. Patvirtinimą rankiniu būdu atlieka žmogus; niekas nepatvirtinama automatiškai.\n\n← Grįžti į operacijų skydą\n\nNėra užklausų, laukiančių patvirtinimo\n\nDev Construction BV\nVARTOTOJAS: DEV.COMPANY@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nNL\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\n—\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Beta 1786034185234\nVARTOTOJAS: FRESH.OWNER.1786034185234@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786034185234\nVARTOTOJAS: FRESH.OWNER.1786034185234@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786034063285\nVARTOTOJAS: FRESH.OWNER.1786034063285@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nFresh Alpha 1786033530128\nVARTOTOJAS: FRESH.OWNER.1786033530128@LOCAL.TEST\nAKTYVI · NEPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\nSavininkas\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nRepro Unverified UAB\nVARTOTOJAS: REPRO.COMPANY@LOCAL.TEST\nPATVIRTINTA\nŠalis\nLT\nRegistracijos kodas\n—\nAdresas / vieta\n—\nSvetainė\n—\nKontaktinis el. paštas\n—\nKontaktinis telefonas\n—\nVaidmuo įmonėje\n—\nPateikta\n—\nPatvirtinimo pastaba (neprivaloma)\nPatvirtinti\nPalikti nepatvirtintą\nGrąžinti į laukiančias\nSukurta Rexora\nMano erdvė\nDarbo žurnalas\nKalen",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-company-verification-375.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/users",
+    "label": "admin-users",
+    "viewport": "375",
+    "status": 404,
+    "ttfbMs": 611,
+    "console": [
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/users",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 812,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Puslapis nerastas"
+    ],
+    "h2": [],
+    "cardBorders": 0,
+    "sections": 0,
+    "buttons": 0,
+    "links": 1,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 1,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "branded-not-found",
+        "y": 0,
+        "h": 812,
+        "w": 375
+      },
+      {
+        "id": "not-found-home-cta",
+        "y": 467,
+        "h": 36,
+        "w": 130
+      }
+    ],
+    "text": "404\n\nPuslapis nerastas\n\nTokio adreso nėra — galbūt jis įvestas klaidingai arba puslapis buvo perkeltas.\n\nGrįžti į pradžią",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-users-375.png"
+  },
+  {
+    "identity": "admin",
+    "route": "/lt/dashboard/admin/pipeline",
+    "label": "admin-pipeline",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 1564,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/admin/pipeline",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 1406,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Paklausos eiga"
+    ],
+    "h2": [
+      "Etapų suvestinė"
+    ],
+    "cardBorders": 6,
+    "sections": 1,
+    "buttons": 7,
+    "links": 29,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 16,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 129
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-admin-badge",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "admin-context-banner",
+        "y": 81,
+        "h": 72,
+        "w": 343
+      },
+      {
+        "id": "admin-context-exit",
+        "y": 118,
+        "h": 26,
+        "w": 141
+      },
+      {
+        "id": "admin-pipeline",
+        "y": 169,
+        "h": 1093,
+        "w": 343
+      },
+      {
+        "id": "pipeline-honest-note",
+        "y": 359,
+        "h": 66,
+        "w": 343
+      },
+      {
+        "id": "pipeline-summary",
+        "y": 449,
+        "h": 429,
+        "w": 343
+      },
+      {
+        "id": "pipeline-stage-card-new",
+        "y": 485,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-stage-card-contacted",
+        "y": 485,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-stage-card-qualifying",
+        "y": 573,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-stage-card-follow_up",
+        "y": 573,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-stage-card-active",
+        "y": 661,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-stage-card-closed",
+        "y": 661,
+        "h": 80,
+        "w": 168
+      },
+      {
+        "id": "pipeline-source-breakdown",
+        "y": 749,
+        "h": 62,
+        "w": 343
+      },
+      {
+        "id": "pipeline-filters",
+        "y": 902,
+        "h": 242,
+        "w": 343
+      },
+      {
+        "id": "pipeline-filter-source-all",
+        "y": 902,
+        "h": 36,
+        "w": 46
+      },
+      {
+        "id": "pipeline-filter-source-customer_request",
+        "y": 902,
+        "h": 36,
+        "w": 137
+      },
+      {
+        "id": "pipeline-filter-source-public_intake",
+        "y": 946,
+        "h": 36,
+        "w": 99
+      },
+      {
+        "id": "pipeline-filter-source-lead",
+        "y": 946,
+        "h": 36,
+        "w": 138
+      },
+      {
+        "id": "pipeline-filter-source-waitlist",
+        "y": 990,
+        "h": 36,
+        "w": 144
+      },
+      {
+        "id": "pipeline-search-form",
+        "y": 1038,
+        "h": 106,
+        "w": 343
+      },
+      {
+        "id": "pipeline-search-submit",
+        "y": 1108,
+        "h": 36,
+        "w": 63
+      },
+      {
+        "id": "pipeline-empty",
+        "y": 1168,
+        "h": 94,
+        "w": 343
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nAsmeninė erdvė\n▾\nR\nAdmin režimas — valdote platformą\n← Grįžti į savo erdvę\n\nOPERATORIAUS EILĖ\n\nPaklausos eiga\n\nVisi paklausos šaltiniai viename peržiūros lange: pateiktos užklausos, viešos įmonių poreikio anketos, išsaugoti potencialūs klientai ir laukiančiųjų sąrašas.\n\n← Grįžti į valdymo pultą\n\nTik peržiūra. Kiekviena eilutė rodo tikrą įrašytą būseną, o būsenos keičiamos tik jos pačios puslapyje. Niekas čia su niekuo nesusisiekia ir nieko nekeičia.\n\nEtapų suvestinė\n\nNAUJA\n\n0\n\nSUSISIEKTA\n\n0\n\nVERTINAMA\n\n0\n\nLAUKIA TĘSINIO\n\n0\n\nAKTYVI\n\n0\n\nUŽDARYTA\n\n0\n\nPAKLAUSOS UŽKLAUSA: 0\nVIEŠA ANKETA: 0\nPOTENCIALUS KLIENTAS: 0\nLAUKIANČIŲJŲ SĄRAŠAS: 0\n\nSkaičiai skaičiuojami tik iš realiai užkrautų eilučių (pardavimų šaltiniai užkrauna po 50 naujausių) — niekada nespėjami.\n\nŠALTINIS\nVisi\nPaklausos užklausa\nVieša anketa\nPotencialus klientas\nLaukiančiųjų sąrašas\nPAIEŠKA\nTaikyti\n\nPaklausos eilučių dar nėra. Kai atsiras užklausa, anketa, potencialus klientas ar registracija, ji bus rodoma čia.\n\nSukurta Rexora\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\admin-admin-pipeline-375.png"
+  }
+]
