@@ -9265,11 +9265,11 @@
   "workerPrefs": {
     "title": "Work preferences",
     "hint": "State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
-    "willingToRelocate": "Willing to relocate for work",
-    "needsAccommodation": "Needs accommodation provided",
-    "hasTransport": "Has own transport",
-    "teamAvailable": "Can work in a team",
-    "soloAvailable": "Can work solo",
+    "willingToRelocate": "I am willing to relocate for work",
+    "needsAccommodation": "I need accommodation provided",
+    "hasTransport": "I have my own transport",
+    "teamAvailable": "I can work in a team",
+    "soloAvailable": "I can work on my own",
     "maxTripDays": "Longest work trip (days)",
     "contractType": "Preferred contract type",
     "note": "Availability note",
@@ -9298,12 +9298,12 @@
         "gross": "Gross (before taxes)",
         "net": "Net (take-home)"
       },
-      "nightShifts": "Willing to work night shifts",
-      "weekendShifts": "Willing to work weekends",
-      "overtime": "Willing to work overtime",
+      "nightShifts": "I am willing to work night shifts",
+      "weekendShifts": "I am willing to work weekends",
+      "overtime": "I am willing to work overtime",
       "licenceCategories": "Driving licence categories",
-      "ownVehicle": "Has own vehicle",
-      "ownTools": "Has own tools",
+      "ownVehicle": "I have my own vehicle",
+      "ownTools": "I have my own tools",
       "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
       "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
     }
@@ -9819,10 +9819,10 @@
     "chooseLevel": "Choose level",
     "perMonth": "€/month",
     "availabilityKeys": {
-      "willingToRelocate": "Willing to relocate",
-      "hasTransport": "Has own transport",
-      "nightShiftsOk": "Can work night shifts",
-      "weekendShiftsOk": "Can work weekends"
+      "willingToRelocate": "I am willing to relocate",
+      "hasTransport": "I have my own transport",
+      "nightShiftsOk": "I can work night shifts",
+      "weekendShiftsOk": "I can work weekends"
     },
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",

@@ -9265,11 +9265,11 @@
   "workerPrefs": {
     "title": "Arbeitspräferenzen",
     "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
-    "willingToRelocate": "Bereit, für die Arbeit umzuziehen",
-    "needsAccommodation": "Benötigt gestellte Unterkunft",
-    "hasTransport": "Eigenes Fahrzeug vorhanden",
-    "teamAvailable": "Kann im Team arbeiten",
-    "soloAvailable": "Kann allein arbeiten",
+    "willingToRelocate": "Ich bin bereit, für die Arbeit umzuziehen",
+    "needsAccommodation": "Ich benötige eine gestellte Unterkunft",
+    "hasTransport": "Ich habe ein eigenes Fahrzeug",
+    "teamAvailable": "Ich kann im Team arbeiten",
+    "soloAvailable": "Ich kann allein arbeiten",
     "maxTripDays": "Längste Montagereise (Tage)",
     "contractType": "Bevorzugte Vertragsform",
     "note": "Hinweis zur Verfügbarkeit",
@@ -9298,12 +9298,12 @@
         "gross": "Brutto (vor Steuern)",
         "net": "Netto (ausgezahlt)"
       },
-      "nightShifts": "Bereit, Nachtschichten zu arbeiten",
-      "weekendShifts": "Bereit, am Wochenende zu arbeiten",
-      "overtime": "Bereit, Überstunden zu machen",
+      "nightShifts": "Ich bin bereit, Nachtschichten zu arbeiten",
+      "weekendShifts": "Ich bin bereit, am Wochenende zu arbeiten",
+      "overtime": "Ich bin bereit, Überstunden zu machen",
       "licenceCategories": "Führerscheinklassen",
-      "ownVehicle": "Hat eigenes Fahrzeug",
-      "ownTools": "Hat eigenes Werkzeug",
+      "ownVehicle": "Ich habe ein eigenes Fahrzeug",
+      "ownTools": "Ich habe eigenes Werkzeug",
       "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
       "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
     }
@@ -9819,10 +9819,10 @@
     "chooseLevel": "Niveau wählen",
     "perMonth": "€/Monat",
     "availabilityKeys": {
-      "willingToRelocate": "Umzugsbereit",
-      "hasTransport": "Eigenes Fahrzeug",
-      "nightShiftsOk": "Kann Nachtschichten arbeiten",
-      "weekendShiftsOk": "Kann am Wochenende arbeiten"
+      "willingToRelocate": "Ich bin umzugsbereit",
+      "hasTransport": "Ich habe ein eigenes Fahrzeug",
+      "nightShiftsOk": "Ich kann Nachtschichten arbeiten",
+      "weekendShiftsOk": "Ich kann am Wochenende arbeiten"
     },
     "imageOcr": {
       "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
