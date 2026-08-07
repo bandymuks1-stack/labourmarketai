@@ -100,10 +100,19 @@ describe("the structured demand actually reaches the engine", () => {
     const fromRow = needFromDemandRow(bare).need;
     const fromText = needFromRoleText("welder", "NL", "Rotterdam").need;
     expect(fromRow.structuredV2).toBeNull();
-    expect({ ...fromRow, structuredV2: undefined }).toEqual({
-      ...fromText,
+    // `languageRequirementUnknown` is normalised out alongside `structuredV2`:
+    // both are ADDITIVE declarations this builder makes about its own limits,
+    // not derived requirements. The point of this test is that nothing the old
+    // path derived changed, and neither flag can make a match worse — the
+    // engine treats the language declaration as missing DATA, never as
+    // "not met" (w10-7-match-symmetry.test.ts pins that behaviour).
+    const withoutDeclarations = (n: typeof fromRow) => ({
+      ...n,
       structuredV2: undefined,
+      languageRequirementUnknown: undefined,
     });
+    expect(fromRow.languageRequirementUnknown).toBe(true);
+    expect(withoutDeclarations(fromRow)).toEqual(withoutDeclarations(fromText));
   });
 });
 

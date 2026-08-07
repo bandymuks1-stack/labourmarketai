@@ -118,6 +118,32 @@ export interface MatchNeed {
   readonly radiusKm?: number | null;
   /** Language codes/labels the need requires. */
   readonly languages?: readonly string[];
+  /**
+   * W10 — the reduction is DECLARED, not silent.
+   *
+   * `languages` absent means one of two very different things, and the engine
+   * could not previously tell them apart:
+   *   (a) the demand states no language requirement — nothing to check;
+   *   (b) the BUILDER could not see one.
+   *
+   * (b) is real. `buildNeedFromRequestRow` (scouting) reads the legacy
+   * `customer_requests.language_requirement` column; `needFromDemandRow` (the
+   * worker board) builds from the gated `list_open_demand_for_workers` RPC row,
+   * which does not project that column. A required language the worker lacks is
+   * a HARD BLOCK — so for a demand that stated its languages in the legacy
+   * column and not in structured v2, scouting capped the match at `weak` while
+   * the board could print `strong`, with nothing on screen saying why.
+   *
+   * A builder that cannot see the column sets this flag. The engine then
+   * reports the gap as MISSING DATA on the demand side — visible on the same
+   * card that prints the tier — instead of silently skipping the check.
+   *
+   * Deliberately NOT a block: the engine's doctrine is that absent facts
+   * degrade to "unknown", never to "not met" (the same rule `subject.languages
+   * == null` already follows on the worker side). Closing the divergence for
+   * real needs the RPC to project the column, which is a migration.
+   */
+  readonly languageRequirementUnknown?: boolean;
   /** Pay the company offers (ceiling, EUR). */
   readonly payOfferedEurMax?: number | null;
   /** Does the need provide accommodation? */
@@ -248,7 +274,14 @@ export type MatchMissingDataCode =
   | "availability_unknown"
   | "location_unknown"
   | "pay_unknown"
-  | "language_unknown";
+  | "language_unknown"
+  /** The NEED was built by a reducer that cannot see the demand's legacy
+   *  `customer_requests.language_requirement` column, and the demand stated no
+   *  structured-v2 language requirement either. So "no language requirement"
+   *  and "a language requirement we could not read" are indistinguishable on
+   *  this path, and the honest answer is that it is unknown — never that the
+   *  demand has none. See `need.languageRequirementUnknown`. */
+  | "language_requirement_unknown";
 
 /** The single clear next step for THIS result (owner mandate: matching must
  *  produce a next action, not just a number). Codes only — the UI localizes. */
@@ -610,6 +643,22 @@ export function matchWorkerToNeed(
           source: "customer_requests.language_requirement",
         });
       }
+    }
+  } else if (need.languageRequirementUnknown) {
+    // W10 — the reduced need could not read the demand's legacy language
+    // column. Say so on the DEMAND side rather than letting the silence read
+    // as "this demand requires no languages". Suppressed when the demand
+    // stated its languages in structured v2, because the CEFR check below
+    // then evaluates the real requirement and nothing is unknown.
+    const statedInV2 =
+      (need.structuredV2?.requirements?.languages ?? []).length > 0;
+    if (!statedInV2) {
+      missingData.push("language_requirement_unknown");
+      missingFacts.push({
+        criterion: "language",
+        side: "demand",
+        source: "customer_requests.language_requirement",
+      });
     }
   }
 

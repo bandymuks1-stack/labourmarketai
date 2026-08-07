@@ -114,5 +114,26 @@ export function needFromDemandRow(row: unknown): {
   // `structuredV2: null` is passed explicitly rather than omitted: the engine
   // reads `need.structuredV2 ?? null` and treats both identically, and being
   // explicit keeps "this demand stated no structure" visible at the call site.
-  return { need: { ...base.need, structuredV2 }, source: base.source };
+  return {
+    need: {
+      ...base.need,
+      structuredV2,
+      // W10 — DECLARE the one remaining consequential reduction rather than
+      // let it read as an absence. The gated board RPC
+      // (`list_open_demand_for_workers`) does not project the legacy
+      // `customer_requests.language_requirement` column that
+      // `buildNeedFromRequestRow` reads on the scouting side, and a required
+      // language the worker lacks is a HARD BLOCK there. Without this flag the
+      // engine could not tell "no language requirement" from "we cannot see
+      // one", so the board could print `strong` for a demand scouting caps at
+      // `weak`. The engine now reports it as demand-side missing data, on the
+      // same card that prints the tier.
+      //
+      // Unconditional and true by construction: this builder can NEVER see
+      // that column. The engine suppresses the report when structured v2
+      // carries a real language requirement, because then it is not unknown.
+      languageRequirementUnknown: true,
+    },
+    source: base.source,
+  };
 }
