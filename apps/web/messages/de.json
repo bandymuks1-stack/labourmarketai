@@ -1209,7 +1209,10 @@
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
     "doneDisclosure": "Was bereits vorhanden ist",
     "askWorkspace": "Im Arbeitsbereich fragen",
-    "state": { "done": "Erledigt", "todo": "Noch offen" },
+    "state": {
+      "done": "Erledigt",
+      "todo": "Noch offen"
+    },
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
     "journalLink": "Arbeitsjournal",
@@ -2825,6 +2828,14 @@
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
     "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
+  },
+  "profileIdentityNotice": {
+    "title": "Dies ist Ihr Personenprofil",
+    "bodySectionsEmpty": "Ihr Konto hat derzeit nur eine Organisationsidentität — die Personenidentität wurde nicht hinzugefügt. Die Personenbereiche unten (Lebenslauf, Verfügbarkeit und Arbeitspräferenzen, Sprachen, Ausbildung, Erfolge, Vertrauenssignale) gehören zu dieser Seite, sind aber leer, weil es noch keine Personendaten gibt. Es wird nichts automatisch ausgefüllt.",
+    "bodySectionsHidden": "Ihr Konto hat derzeit nur eine Organisationsidentität — eine Personenidentität existiert noch nicht. Personenbereiche (Lebenslauf, Verfügbarkeit und Arbeitspräferenzen, Sprachen, Ausbildung, Erfolge, Vertrauenssignale) werden nicht angezeigt, weil es keine Personendaten gibt. Nichts ist versehentlich verborgen und nichts ist verloren gegangen.",
+    "companyProfileHint": "Die Angaben Ihrer Organisation finden Sie im Unternehmensprofil.",
+    "companyProfileLink": "Unternehmensprofil öffnen",
+    "addIdentityHint": "Um auch als Person zu arbeiten, fügen Sie die Personenidentität im Rollenwechsler oben auf der Seite hinzu. Es wird nichts automatisch angelegt oder ausgefüllt."
   },
   "skillGroups": {
     "profession": "Beruf / Arbeitsrichtung",

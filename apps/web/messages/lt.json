@@ -1209,7 +1209,10 @@
     "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
     "doneDisclosure": "Kas jau paruošta",
     "askWorkspace": "Paklausti darbo erdvėje",
-    "state": { "done": "Atlikta", "todo": "Dar reikia" },
+    "state": {
+      "done": "Atlikta",
+      "todo": "Dar reikia"
+    },
     "primaryAction": "Pridėti, ko trūksta",
     "primaryActionJournal": "Pridėti darbo įrašą",
     "journalLink": "Darbo žurnalas",
@@ -2825,6 +2828,14 @@
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
+  },
+  "profileIdentityNotice": {
+    "title": "Čia — jūsų asmens profilis",
+    "bodySectionsEmpty": "Šiuo metu jūsų paskyra turi tik organizacijos tapatybę — asmens tapatybė nepridėta. Žemiau esančios asmens skiltys (CV, prieinamumas ir darbo nuostatos, kalbos, išsilavinimas, pasiekimai, pasitikėjimo signalai) priklauso šiam puslapiui, bet yra tuščios, nes asmens duomenų dar nėra. Automatiškai niekas neužpildoma.",
+    "bodySectionsHidden": "Šiuo metu jūsų paskyra turi tik organizacijos tapatybę — asmens tapatybės dar nėra. Asmens skiltys (CV, prieinamumas ir darbo nuostatos, kalbos, išsilavinimas, pasiekimai, pasitikėjimo signalai) nerodomos, nes nėra asmens duomenų. Niekas nepaslėpta per klaidą ir niekas neprarasta.",
+    "companyProfileHint": "Jūsų organizacijos informacija yra įmonės profilyje.",
+    "companyProfileLink": "Atidaryti įmonės profilį",
+    "addIdentityHint": "Norėdami veikti ir kaip asmuo, pridėkite asmens tapatybę vaidmenų perjungiklyje puslapio viršuje. Automatiškai niekas nesukuriama ir neužpildoma."
   },
   "skillGroups": {
     "profession": "Profesija / darbo kryptis",

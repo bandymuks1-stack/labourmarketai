@@ -4129,5 +4129,13 @@
       "employerHasNotClaimed": "Denne arbejdsgiver administrerer ikke opslaget på labourmarket.ai endnu, så ansøgningen sker via den oprindelige annonce.",
       "employerManagesHere": "Denne arbejdsgiver administrerer opslaget på labourmarket.ai."
     }
+  },
+  "profileIdentityNotice": {
+    "title": "Dette er din personprofil",
+    "bodySectionsEmpty": "Din konto har i øjeblikket kun en organisationsidentitet — personidentiteten er ikke tilføjet. Personsektionerne nedenfor (CV, tilgængelighed og arbejdspræferencer, sprog, uddannelse, resultater, tillidssignaler) hører til denne side, men er tomme, fordi der endnu ikke er persondata. Intet udfyldes automatisk.",
+    "bodySectionsHidden": "Din konto har i øjeblikket kun en organisationsidentitet — der findes endnu ingen personidentitet. Personsektioner (CV, tilgængelighed og arbejdspræferencer, sprog, uddannelse, resultater, tillidssignaler) vises ikke, fordi der ikke er persondata. Intet er skjult ved en fejl, og intet er gået tabt.",
+    "companyProfileHint": "Din organisations oplysninger findes i virksomhedsprofilen.",
+    "companyProfileLink": "Åbn virksomhedsprofil",
+    "addIdentityHint": "Vil du også arbejde som person, kan du tilføje personidentiteten i rolleskifteren øverst på siden. Intet oprettes eller udfyldes automatisk."
   }
 }
