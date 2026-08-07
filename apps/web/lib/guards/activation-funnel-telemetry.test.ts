@@ -270,11 +270,21 @@ describe("activation funnel — key surfaces emit their events", () => {
       mustContain: ["companyDemandActionClicked"],
     },
     {
-      // W3 Package 4 deleted the /dashboard/advanced second dashboard; the
-      // chat root's action registry is the surviving dashboard_viewed emitter
-      // (worker.what-next). first_action_card_viewed lost its surface with
-      // that page — the event itself stays in the registry contract above.
-      file: "lib/conversation/action-registry.ts",
+      // CORRECTED 2026-08-08. This entry used to name
+      // `lib/conversation/action-registry.ts` and call it "the surviving
+      // dashboard_viewed emitter". That was FALSE, and this check is why it
+      // survived: the registry does contain the string `dashboardViewed`, as
+      // `telemetryEvent: E.dashboardViewed` — but NOTHING READS THAT FIELD.
+      // It is declared on the entry type, assigned on 13 entries, asserted by
+      // action-registry.test.ts to be a valid event NAME, and never passed to
+      // any emitter. So `dashboard_viewed` was never sent at all, and a guard
+      // grepping for an identifier certified coverage that did not exist.
+      //
+      // The real emitter is now the workspace root itself (W3 Package 4
+      // deleted /dashboard/advanced, so /dashboard is the one root).
+      // `w14-dashboard-viewed-emitter.test.ts` pins EMISSION rather than the
+      // presence of a string.
+      file: "app/[locale]/dashboard/page.tsx",
       mustContain: ["dashboardViewed"],
     },
     {
