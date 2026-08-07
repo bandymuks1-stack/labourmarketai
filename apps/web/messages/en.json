@@ -702,42 +702,6 @@
       "trust": "Trust / readiness"
     }
   },
-  "marketplaceHub": {
-    "title": "Marketplace",
-    "subtitle": "One compact place that connects you, your companies, the map and messages.",
-    "notFakeNote": "Only real listings, companies and products are shown. Anything still being prepared is marked as “preparing”.",
-    "map": {
-      "title": "Map",
-      "desc": "Your real signals and market signals on the map.",
-      "cta": "Open map"
-    },
-    "opportunities": {
-      "title": "Work, needs, opportunities",
-      "desc": "Real opportunities and search.",
-      "cta": "View opportunities"
-    },
-    "offers": {
-      "title": "Company & personal offers",
-      "desc": "The offers section is still being prepared."
-    },
-    "shop": {
-      "title": "Shop, services, rentals, real estate",
-      "desc": "Products, services, rentals and real-estate listings are still being prepared."
-    },
-    "individual": {
-      "title": "Individual activity",
-      "desc": "Act as an independent provider — managed in your personal profile.",
-      "cta": "Open profile"
-    },
-    "company": {
-      "title": "Company channels",
-      "desc": "The selected company’s commercial channel and settings.",
-      "cta": "Open company",
-      "noCompanyCta": "Add company",
-      "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel."
-    },
-    "prepareBadge": "Preparing"
-  },
   "profileAvatar": {
     "upload": "Upload photo",
     "change": "Change photo",
@@ -9439,7 +9403,9 @@
       }
     },
     "organizations": {
-      "title": "My companies"
+      "noCompanyCta": "Add company",
+      "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel.",
+      "individualDesc": "Act as an independent provider — managed in your personal profile."
     },
     "relationships": {
       "title": "Active relationships",
