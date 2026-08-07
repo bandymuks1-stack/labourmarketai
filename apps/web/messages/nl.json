@@ -9409,6 +9409,7 @@
       }
     },
     "organizations": {
+      "title": "Mijn bedrijven",
       "noCompanyCta": "Bedrijf toevoegen",
       "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen.",
       "individualDesc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel."

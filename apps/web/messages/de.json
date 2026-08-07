@@ -9409,6 +9409,7 @@
       }
     },
     "organizations": {
+      "title": "Meine Unternehmen",
       "noCompanyCta": "Unternehmen hinzufügen",
       "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten.",
       "individualDesc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil."
