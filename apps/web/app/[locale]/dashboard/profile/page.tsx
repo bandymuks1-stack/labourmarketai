@@ -95,54 +95,122 @@ export default async function ProfilePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("skills");
-  const tSpaces = await getTranslations("spaces");
-  const tGallery = await getTranslations("personalGallery");
-  const tProf = await getTranslations("professions");
-  const tSkill = await getTranslations("skillNames");
-  const tRole = await getTranslations("auth.signup.role");
-  const tTrust = await getTranslations("trust");
-  const tCv = await getTranslations("cvExport");
-  const tDocs = await getTranslations("documents");
-  const tOpp = await getTranslations("opportunities");
-  const tQuick = await getTranslations("quickNav");
-  const tHub = await getTranslations("marketplaceHub");
-  const tPrefs = await getTranslations("workerPrefs");
-  const tLangs = await getTranslations("workerLanguages");
-  const tExt = await getTranslations("externalProfiles");
 
+  /**
+   * ── W7-S3 STAGE 1 — every namespace, ONE stage ──────────────────────────
+   *
+   * These were sixteen consecutive `await`s. They read the same already-loaded
+   * message bundle, so nothing about them was ever sequential except the
+   * syntax: each one parked the render for a microtask before the next could
+   * start, and none of them can fail in a way the next one depends on.
+   * `setRequestLocale` above is the only ordering requirement, and it stays.
+   */
+  const [
+    t,
+    tSpaces,
+    tGallery,
+    tProf,
+    tSkill,
+    tRole,
+    tTrust,
+    tCv,
+    tDocs,
+    tOpp,
+    tQuick,
+    tHub,
+    tPrefs,
+    tLangs,
+    tExt,
+    tFeatureNotes,
+  ] = await Promise.all([
+    getTranslations("skills"),
+    getTranslations("spaces"),
+    getTranslations("personalGallery"),
+    getTranslations("professions"),
+    getTranslations("skillNames"),
+    getTranslations("auth.signup.role"),
+    getTranslations("trust"),
+    getTranslations("cvExport"),
+    getTranslations("documents"),
+    getTranslations("opportunities"),
+    getTranslations("quickNav"),
+    getTranslations("marketplaceHub"),
+    getTranslations("workerPrefs"),
+    getTranslations("workerLanguages"),
+    getTranslations("externalProfiles"),
+    // Was awaited INSIDE the JSX (`{(await getTranslations(…))("workerProfile")}`),
+    // which is the worst possible place: it suspends the render after the tree
+    // has begun. Same namespace, resolved with the rest.
+    getTranslations("featureNotes"),
+  ]);
+
+  /**
+   * ── W7-S3 STAGE 2+3 — the AUTHORIZATION GATE, deliberately still serial ──
+   *
+   * `createClient()` must resolve before `auth.getUser()` can be called, and
+   * `getUser()` must resolve before ANY read runs — a redirect on a missing
+   * user is the fail-closed check every read below depends on. These two
+   * stages are ordered on purpose and this slice does not touch them.
+   */
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // These five top-level reads are independent — run them in parallel to
-  // cut the slowest authenticated SSR page's tail latency. The worker
-  // branch's inner queries (further down) still depend on workerId /
-  // currentProfessionId / workerProfIds, so they stay sequential.
-  const [profileRes, savedSkillClaims, roleRowsRes, workerRes, profRowsRes] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("full_name, email, active_role, profile_text")
-        .eq("id", user.id)
-        .single(),
-      listProfileSkillClaims(),
-      supabase
-        .from("profile_roles")
-        .select("role")
-        .eq("profile_id", user.id)
-        .eq("is_active", true),
-      supabase
-        .from("workers")
-        .select(
-          "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
-        )
-        .eq("profile_id", user.id)
-        .maybeSingle(),
-      supabase.from("professions").select("id, slug").eq("is_active", true),
-    ]);
+  /**
+   * ── W7-S3 STAGE 4 — everything that needs only `user`, ONE stage ────────
+   *
+   * `getOwnAvatar()` and `getOwnedOrganizations()` were two further serial
+   * awaits after this batch, although neither reads anything the batch
+   * produces — both resolve the signed-in user themselves. They join the
+   * batch.
+   *
+   * Managed companies (IA cleanup v2 #4): the profile is the person identity
+   * surface, so it shows the REAL companies this person owns/manages
+   * (account-linked professional identities) with a name + add action. No fake
+   * companies — an empty list simply renders the add CTA.
+   *
+   * ACCEPTED, NOT OVERLOOKED: `getOwnAvatar()` reads the `profiles` row a
+   * second time (for `avatar_url`). Folding that column into the select above
+   * would remove the duplicate — but that select is a `.single()` the whole
+   * page depends on, and the avatar reader carries its own try/catch precisely
+   * because `avatar_url` may not be provisioned. Trading a CONCURRENT read for
+   * a fail-closed risk on the page's critical row is the wrong direction for a
+   * behaviour-identical slice. The read costs no stage; it is recorded as
+   * remaining debt instead.
+   */
+  const [
+    profileRes,
+    savedSkillClaims,
+    roleRowsRes,
+    workerRes,
+    profRowsRes,
+    avatar,
+    ownedOrgsResult,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, email, active_role, profile_text")
+      .eq("id", user.id)
+      .single(),
+    listProfileSkillClaims(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .eq("is_active", true),
+    supabase
+      .from("workers")
+      .select(
+        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+      )
+      .eq("profile_id", user.id)
+      .maybeSingle(),
+    supabase.from("professions").select("id, slug").eq("is_active", true),
+    getOwnAvatar(),
+    getOwnedOrganizations(),
+  ]);
   const profile = profileRes.data;
   const roleRows = roleRowsRes.data;
   const worker = workerRes.data;
@@ -150,12 +218,6 @@ export default async function ProfilePage({
 
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
-  const avatar = await getOwnAvatar();
-  // Managed companies (IA cleanup v2 #4): the profile is the person identity
-  // surface, so it shows the REAL companies this person owns/manages (account-
-  // linked professional identities) with a name + add action. No fake
-  // companies — an empty list simply renders the add CTA.
-  const ownedOrgsResult = await getOwnedOrganizations();
   const managedCompanies =
     ownedOrgsResult.kind === "ok"
       ? ownedOrgsResult.organizations.filter((o) => o.organizationType !== "agency")
@@ -216,50 +278,108 @@ export default async function ProfilePage({
   let workerAchievements: WorkerAchievementsRead | null = null;
   let projectLinkedEntryCount = 0;
   let certificateDocCount = 0;
+  // Trust signals were awaited inside the JSX; resolved in stage 5 now.
+  let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
-    [
-      availabilityPrefs,
-      workerLanguages,
-      externalProfiles,
-      workerEducation,
-      workerAchievements,
+    /**
+     * ── W7-S3 STAGE 5 — everything that needs only `workerId` / `user.id` ──
+     *
+     * These thirteen reads were EIGHT serial stages: one batch of five,
+     * followed by six standalone awaits and a thirteenth (`getOwnTrustSignals`)
+     * that was awaited inside the JSX. Not one of them consumes another's
+     * result — every single one is keyed by `workerId` or `user.id`, both
+     * already known. The waterfall was accidental, not structural.
+     *
+     * W7-S1 already removed the page's own `journal_entries` count (a second
+     * read of rows the canonical player card counts); what remains here is the
+     * project-linked subset, which is a different question.
+     */
+    const [
+      prefsRes,
+      langsRes,
+      extRes,
+      eduRes,
+      achRes,
+      projCountRes,
+      certDocsRes,
+      wpAllRes,
+      employerOwner,
+      wsRes,
+      linkRes,
+      ecRes,
+      trust,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       getOwnWorkerLanguages(),
       getOwnExternalProfiles(),
       getOwnWorkerEducation(),
       getOwnWorkerAchievements(),
+      supabase
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerId)
+        .not("project_id", "is", null),
+      // Certificate/licence documents count (worker_documents is applied prod
+      // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
+      supabase
+        .from("worker_documents")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerId)
+        .in("document_type_slug", [
+          "professional_certificate",
+          "a1_certificate",
+        ]),
+      supabase
+        .from("worker_professions")
+        .select("profession_id, is_primary")
+        .eq("worker_id", workerId)
+        .order("is_primary", { ascending: false }),
+      // The employing company owner (if any) so the worker can message them —
+      // read-only, RLS-scoped to the worker's own accepted invitation.
+      getEmployerOwnerProfileId(),
+      // ALL of the worker's saved skills (read model — never filtered down).
+      supabase
+        .from("worker_skills")
+        .select("skill_id, confidence_bin, verified, source, skills(slug)")
+        .eq("worker_id", workerId)
+        .order("created_at", { ascending: true }),
+      // DURABLE journal→skill links (v1) — graceful no-op if the migration is
+      // not applied yet.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .eq("worker_id", workerId),
+      // Engagement-context cards (current first): primary first, then
+      // most-recent.
+      supabase
+        .from("engagement_contexts")
+        .select(
+          "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+        )
+        .eq("profile_id", user.id)
+        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .order("is_primary", { ascending: false })
+        .order("started_at", { ascending: false, nullsFirst: false }),
+      // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
+      // so it could not overlap anything at all.
+      getOwnTrustSignals(workerId),
     ]);
-    const { count: projCount } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId)
-      .not("project_id", "is", null);
-    projectLinkedEntryCount = projCount ?? 0;
-    // Certificate/licence documents count (worker_documents is applied prod
-    // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
-    const { count: certDocs } = await supabase
-      .from("worker_documents")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId)
-      .in("document_type_slug", ["professional_certificate", "a1_certificate"]);
-    certificateDocCount = certDocs ?? 0;
-    const { data: wpAll } = await supabase
-      .from("worker_professions")
-      .select("profession_id, is_primary")
-      .eq("worker_id", workerId)
-      .order("is_primary", { ascending: false });
+
+    availabilityPrefs = prefsRes;
+    workerLanguages = langsRes;
+    externalProfiles = extRes;
+    workerEducation = eduRes;
+    workerAchievements = achRes;
+    projectLinkedEntryCount = projCountRes.count ?? 0;
+    certificateDocCount = certDocsRes.count ?? 0;
+    employerOwnerProfileId = employerOwner;
+    trustSignals = trust;
+
+    const wpAll = wpAllRes.data;
     const wp = (wpAll ?? []).find((r) => r.is_primary) ?? null;
     currentProfessionId = wp?.profession_id ?? null;
 
-    // W7-S1: the page's own journal-entry count query was REMOVED. It was a
-    // second read of exactly the rows the canonical player card already counts
-    // (`playerCard.evidenceEntries`), and its only consumer was the hub's
-    // journal pillar — which the consolidated overview now sources from that
-    // card. One fewer DB round trip, one fewer number that could disagree.
-    // Resolve the employing company owner (if any) so the worker can message
-    // them — read-only, RLS-scoped to the worker's own accepted invitation.
-    employerOwnerProfileId = await getEmployerOwnerProfileId();
     // All of the worker's directions (primary + additional) — non-locking (§1).
     workerDirections = (wpAll ?? [])
       .map((r) => {
@@ -271,23 +391,53 @@ export default async function ProfilePage({
       .filter((d): d is WorkerDirection => d !== null)
       .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
 
-    // is_core per skill for the current profession (for the [PAGRINDINIS] tag).
-    const coreMap = new Map<string, boolean>();
-    if (currentProfessionId) {
-      const { data: ps } = await supabase
-        .from("profession_skills")
-        .select("skill_id, is_core")
-        .eq("profession_id", currentProfessionId);
-      for (const r of ps ?? []) coreMap.set(r.skill_id, r.is_core);
-    }
+    /**
+     * ── W7-S3 STAGE 6 — the only reads that GENUINELY depend on stage 5 ────
+     *
+     * Three reads, and all three need `currentProfessionId` / `workerProfIds`,
+     * which only exist once `worker_professions` has resolved. This is a real
+     * dependency, so it stays a second stage — but the three run together
+     * instead of one after another, and the two conditionals resolve to
+     * `null` rather than skipping into their own awaits.
+     */
+    const workerProfIds = (wpAll ?? [])
+      .map((r) => r.profession_id)
+      .filter((id): id is string => !!id);
+    const [coreRes, allowedRes, tmplRes] = await Promise.all([
+      // is_core per skill for the current profession (the [PAGRINDINIS] tag).
+      currentProfessionId
+        ? supabase
+            .from("profession_skills")
+            .select("skill_id, is_core")
+            .eq("profession_id", currentProfessionId)
+        : Promise.resolve(null),
+      // Catalogue of skills allowed for this worker (all directions). Used by
+      // the text-first flow to resolve confirmed parser matches to skill_ids.
+      workerProfIds.length > 0
+        ? supabase
+            .from("profession_skills")
+            .select("skills(id, slug)")
+            .in("profession_id", workerProfIds)
+        : Promise.resolve(null),
+      // Profession-level icon — stored in
+      // profession_templates.template->>'icon_slug' (the spec referenced a flat
+      // icon_slug column; the actual schema nests it in the template jsonb).
+      // Platform default for the worker's primary profession.
+      currentProfessionId
+        ? supabase
+            .from("profession_templates")
+            .select("template")
+            .eq("profession_id", currentProfessionId)
+            .eq("is_platform_default", true)
+            .is("organization_id", null)
+            .maybeSingle()
+        : Promise.resolve(null),
+    ]);
 
-    // ALL of the worker's saved skills (read model — never filtered down).
-    const { data: ws } = await supabase
-      .from("worker_skills")
-      .select("skill_id, confidence_bin, verified, source, skills(slug)")
-      .eq("worker_id", workerId)
-      .order("created_at", { ascending: true });
-    const rows = ws ?? [];
+    const coreMap = new Map<string, boolean>();
+    for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
+
+    const rows = wsRes.data ?? [];
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);
@@ -296,11 +446,6 @@ export default async function ProfilePage({
     // applied yet. Replaces the loose provenance-only "supported" assumption:
     // a skill counts as supported when a real journal entry links it.
     let durableSupported = new Set<string>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const linkRes = await (supabase as any)
-      .from("journal_entry_skills")
-      .select("journal_entry_id, skill_id")
-      .eq("worker_id", workerId);
     if (!linkRes.error) {
       durableSupported = supportedSkillIds(
         (linkRes.data ?? []) as EntrySkillLinkRow[],
@@ -341,16 +486,7 @@ export default async function ProfilePage({
       .sort((a, b) => Number(b.isCore) - Number(a.isCore));
 
     // Engagement-context cards (current first): primary first, then most-recent.
-    const { data: ecRows } = await supabase
-      .from("engagement_contexts")
-      .select(
-        "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
-      )
-      .eq("profile_id", user.id)
-      .in("relationship_slug", WORKER_RELATIONSHIPS)
-      .order("is_primary", { ascending: false })
-      .order("started_at", { ascending: false, nullsFirst: false });
-    engagementCards = (ecRows ?? []).map((e) => {
+    engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
         | {
             display_name: string | null;
@@ -379,41 +515,20 @@ export default async function ProfilePage({
       };
     });
 
-    // Catalogue of skills allowed for this worker (all directions). Used by
-    // the text-first flow to resolve confirmed parser matches to skill_ids.
-    const workerProfIds = (wpAll ?? [])
-      .map((r) => r.profession_id)
-      .filter((id): id is string => !!id);
-    if (workerProfIds.length > 0) {
-      const { data: psRows } = await supabase
-        .from("profession_skills")
-        .select("skills(id, slug)")
-        .in("profession_id", workerProfIds);
-      const seen = new Set<string>();
-      for (const row of psRows ?? []) {
-        const s = row.skills as { id: string | null; slug: string | null } | null;
-        if (s?.id && s.slug && !seen.has(s.id)) {
-          seen.add(s.id);
-          allowedSkills.push({ id: s.id, slug: s.slug, name: tSkill(s.slug) });
-        }
+    // Catalogue of skills allowed for this worker (all directions). Resolved
+    // in stage 6; the shaping below is pure.
+    const seen = new Set<string>();
+    for (const row of allowedRes?.data ?? []) {
+      const s = row.skills as { id: string | null; slug: string | null } | null;
+      if (s?.id && s.slug && !seen.has(s.id)) {
+        seen.add(s.id);
+        allowedSkills.push({ id: s.id, slug: s.slug, name: tSkill(s.slug) });
       }
-      allowedSkills.sort((a, b) => a.name.localeCompare(b.name));
     }
+    allowedSkills.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Profession-level icon — stored in profession_templates.template->>'icon_slug'
-    // (spec referenced a flat icon_slug column; actual schema nests it in the
-    // template jsonb). Platform default for the worker's primary profession.
-    if (currentProfessionId) {
-      const { data: tmpl } = await supabase
-        .from("profession_templates")
-        .select("template")
-        .eq("profession_id", currentProfessionId)
-        .eq("is_platform_default", true)
-        .is("organization_id", null)
-        .maybeSingle();
-      const tpl = tmpl?.template as { icon_slug?: string } | null;
-      professionIconSlug = tpl?.icon_slug ?? null;
-    }
+    const tpl = tmplRes?.data?.template as { icon_slug?: string } | null;
+    professionIconSlug = tpl?.icon_slug ?? null;
   }
 
   /**
@@ -687,15 +802,15 @@ export default async function ProfilePage({
       </section>
 
       <FeatureNote testId="feature-note-profile">
-        {(await getTranslations("featureNotes"))("workerProfile")}
+        {tFeatureNotes("workerProfile")}
       </FeatureNote>
 
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
           straight from canonical tables (verified skills, manager
           confirmations, journal entries). Honest zeros with a growth hint. */}
-      {workerId ? (
+      {workerId && trustSignals ? (
         <TrustBlock
-          signals={await getOwnTrustSignals(workerId)}
+          signals={trustSignals}
           labels={{
             title: tTrust("title"),
             caption: tTrust("caption"),

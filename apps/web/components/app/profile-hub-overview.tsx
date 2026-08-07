@@ -124,16 +124,24 @@ export async function ProfileHubOverview({
    *  journal-entry count — the same prop the absorbed state strip took. */
   workerId?: string | null;
 }) {
-  const t = await getTranslations("profileHub");
-  const tStep = await getTranslations("setupJourney");
-  const tState = await getTranslations("profileState");
-  const tLive = await getTranslations("playerCard.live");
-  const tAction = await getTranslations("playerCard.readinessSteps.action");
-  // The absorbed SkillsReviewBanner's own copy, reused verbatim — the message
-  // and the destination the worker already knows, minus the second card.
-  const tReview = await getTranslations("skills.reviewBanner");
-  const tSkill = await getTranslations("skillNames");
-  const locale = await getLocale();
+  /**
+   * W7-S3: seven namespaces and the locale in ONE stage. They were eight
+   * consecutive awaits over the same already-loaded bundle — sequential in
+   * syntax only, and each one parked the render before the reads below could
+   * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
+   * reused verbatim — the message and destination the worker already knows.
+   */
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, locale] =
+    await Promise.all([
+      getTranslations("profileHub"),
+      getTranslations("setupJourney"),
+      getTranslations("profileState"),
+      getTranslations("playerCard.live"),
+      getTranslations("playerCard.readinessSteps.action"),
+      getTranslations("skills.reviewBanner"),
+      getTranslations("skillNames"),
+      getLocale(),
+    ]);
 
   // Consolidation (launch audit §7.3): identity-essential presence flows through
   // the contract's `missing` list, not a parallel ad-hoc computation.
