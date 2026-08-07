@@ -14,6 +14,7 @@ import {
   RecordOutcomeForm,
   RemoveParticipantButton,
 } from "@/components/app/admin-pilots-forms";
+import { formatUtcDate, formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Pilot cohort detail — participants, status and the owner-recorded outcome
@@ -139,7 +140,7 @@ export default async function AdminPilotDetailPage({
                   <span className="font-mono text-meta text-text-muted">
                     {p.email ?? p.profileId} ·{" "}
                     {t(`participants.joinedVia.${p.joinedVia}`)} ·{" "}
-                    {new Date(p.joinedAt).toLocaleDateString(locale)}
+                    {formatUtcDate(p.joinedAt, locale)}
                   </span>
                 </span>
                 {p.leftAt === null ? (
@@ -150,7 +151,7 @@ export default async function AdminPilotDetailPage({
                 ) : (
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("participants.left", {
-                      date: new Date(p.leftAt).toLocaleDateString(locale),
+                      date: formatUtcDate(p.leftAt, locale) ?? "",
                     })}
                   </span>
                 )}
@@ -221,7 +222,7 @@ export default async function AdminPilotDetailPage({
                       {o.participantName ?? t("outcomes.wholePilot")}
                     </span>
                     <span className="font-mono text-meta text-text-muted">
-                      {new Date(o.createdAt).toLocaleString(locale)}
+                      {formatUtcDateTime(o.createdAt, locale)}
                     </span>
                   </span>
                   {o.note ? (

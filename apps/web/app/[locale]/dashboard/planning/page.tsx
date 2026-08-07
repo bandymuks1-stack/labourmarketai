@@ -25,6 +25,7 @@ import {
   getPlanning,
   type PlanningSources,
 } from "@/lib/planning/planning";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -155,24 +156,24 @@ export default async function PlanningPage({
     visibleItems,
   );
 
-  const dayFmt = new Intl.DateTimeFormat(locale, {
+  const dayFmt = createUtcFormatter(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
-  const shortFmt = new Intl.DateTimeFormat(locale, {
+  const shortFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
   });
-  const monthFmt = new Intl.DateTimeFormat(locale, {
+  const monthFmt = createUtcFormatter(locale, {
     month: "long",
     year: "numeric",
   });
-  const monthOnlyFmt = new Intl.DateTimeFormat(locale, { month: "long" });
-  const stripFmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
+  const monthOnlyFmt = createUtcFormatter(locale, { month: "long" });
+  const stripFmt = createUtcFormatter(locale, { weekday: "narrow" });
   const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
-  const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
-  const fmtShort = (dayIso: string) => shortFmt.format(utc(dayIso));
+  const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
+  const fmtShort = (dayIso: string) => shortFmt(dayIso) ?? "";
 
   /**
    * Localized duration. Two honest shapes only, both from real source data:
@@ -352,7 +353,7 @@ export default async function PlanningPage({
     view === "year"
       ? anchor.slice(0, 4)
       : view === "month"
-        ? monthFmt.format(utc(firstOf(anchor)))
+        ? (monthFmt(firstOf(anchor)) ?? "")
         : view === "week"
           ? `${fmtShort(weekDays?.[0]?.day ?? anchor)} – ${fmtShort(weekDays?.[6]?.day ?? anchor)}`
           : fmtDay(anchor);
@@ -488,7 +489,7 @@ export default async function PlanningPage({
                 key={`hdr-${cell.day}`}
                 className="text-center font-mono text-meta uppercase tracking-label text-text-muted"
               >
-                {stripFmt.format(utc(cell.day))}
+                {stripFmt(cell.day)}
               </span>
             ))}
             {monthGrid.weeks.flat().map((cell) => (
@@ -589,7 +590,7 @@ export default async function PlanningPage({
               }`}
             >
               <span className="text-sm font-semibold capitalize text-text-primary">
-                {monthOnlyFmt.format(utc(`${m.month}-01`))}
+                {monthOnlyFmt(`${m.month}-01`)}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("year.count", { count: m.count })}
@@ -624,7 +625,7 @@ export default async function PlanningPage({
                   }`}
                 >
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {stripFmt.format(utc(d.day))}
+                    {stripFmt(d.day)}
                   </span>
                   <span className="text-sm font-semibold tabular-nums text-text-primary">
                     {d.day.slice(8, 10)}

@@ -14,6 +14,7 @@ import {
   type ZoneAction,
 } from "@/lib/workforce/planning-zone-view";
 import type { GapRiskLevel } from "@/lib/workforce/gap-timeline";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Workforce planning zone (Labour Market OS P10) — ONE visual planning zone
@@ -130,18 +131,17 @@ export default async function CompanyWorkforcePlanningPage({
     },
   });
 
-  const monthFmt = new Intl.DateTimeFormat(locale, {
+  const monthFmt = createUtcFormatter(locale, {
     month: "long",
     year: "numeric",
   });
-  const dayFmt = new Intl.DateTimeFormat(locale, {
+  const dayFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-  const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
-  const fmtMonth = (monthIso: string) => monthFmt.format(utc(`${monthIso}-01`));
-  const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
+  const fmtMonth = (monthIso: string) => monthFmt(`${monthIso}-01`) ?? "";
+  const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
 
   /** THE one primary CTA of the zone (guard-pinned single testid). Renders a
    *  real Link, the audited demand-intake server action, or nothing. */

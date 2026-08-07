@@ -14,6 +14,7 @@ import {
   getAiRunsSummary,
   getUsageLedgerSummary,
 } from "@/lib/admin/ai-cost";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -674,7 +675,7 @@ export default async function AdminTelemetryPage({
                   data-testid={`pilot-event-${r.id}`}
                 >
                   <td className="px-3 py-2 font-mono text-meta text-text-secondary whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString(locale)}
+                    {formatUtcDateTime(r.created_at, locale)}
                   </td>
                   <td className="px-3 py-2 font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.result}

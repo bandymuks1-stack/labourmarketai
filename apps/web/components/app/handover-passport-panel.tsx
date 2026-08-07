@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
 import { addHandoverEntryAction } from "@/lib/projects/handover-passport-actions";
@@ -11,6 +11,7 @@ import {
   type HandoverPassportData,
   type HandoverStatus,
 } from "@/lib/projects/handover-passport-model";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Job/project handover passport shell on the EXISTING project operations
@@ -37,6 +38,7 @@ export function HandoverPassportPanel({
 }) {
   const router = useRouter();
   const t = useTranslations("handoverPassport");
+  const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [entryType, setEntryType] = useState<"note" | "status">("note");
   const [statusValue, setStatusValue] = useState<HandoverStatus>("preparation");
@@ -151,7 +153,7 @@ export function HandoverPassportPanel({
                           : t("entryNoteLabel")}
                       </span>
                       <span className="text-meta text-text-muted">
-                        {new Date(e.createdAt).toLocaleDateString()}
+                        {formatUtcDate(e.createdAt, locale)}
                       </span>
                     </div>
                     {e.entryType === "status" && e.statusValue ? (

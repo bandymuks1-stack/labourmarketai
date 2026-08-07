@@ -87,9 +87,7 @@ export async function buildPlayerCardLabels(
         : null,
     availabilityFrom: card.availableFrom
       ? t("availabilityFrom", {
-          date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-            new Date(card.availableFrom),
-          ),
+          date: dateFmt.format(new Date(card.availableFrom)),
         })
       : null,
     // §5.2 LOCATION — the country NAME for the worker's own stated code.
@@ -137,9 +135,7 @@ export async function buildPlayerCardLabels(
     ),
     latestEvidenceLabel: t("latestEvidenceLabel"),
     latestEvidenceValue: card.latestEvidenceAt
-      ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-          new Date(card.latestEvidenceAt),
-        )
+      ? dateFmt.format(new Date(card.latestEvidenceAt))
       : null,
     latestEvidenceEmpty: t("latestEvidenceEmpty"),
     thermoLabel: t("thermoLabel"),

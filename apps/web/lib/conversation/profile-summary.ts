@@ -15,6 +15,7 @@ import type {
   ChatProfileSummary,
   ProfileSummaryVariant,
 } from "./profile-summary-contract";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Conversation "profile summary" — a THIN presentation adapter over the
@@ -120,10 +121,11 @@ async function lastActivityLine(
   if (Number.isNaN(when.getTime())) return null;
   return t("lastActivity", {
     event: tEvents(event.key),
-    date: when.toLocaleDateString(locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }),
+    date:
+      formatUtcDate(when, locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }) ?? "",
   });
 }

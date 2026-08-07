@@ -10,6 +10,7 @@ import {
   type ReviewActionState,
   type ConfirmSkillsState,
 } from "@/lib/journal/review-actions";
+import { formatUtcDate } from "@/lib/time/display";
 
 export type InboxSkill = { id: string; name: string; verified: boolean };
 
@@ -172,7 +173,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             {entry.workerName}
           </p>
           <p className="mt-0.5 text-meta text-text-muted">
-            {new Date(entry.createdAt).toLocaleDateString(locale)}
+            {formatUtcDate(entry.createdAt, locale)}
           </p>
         </div>
       </div>

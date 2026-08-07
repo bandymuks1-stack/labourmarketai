@@ -19,6 +19,7 @@ import {
   groupSkillsByFunction,
   skillGroupLabelKey,
 } from "@/lib/skills/skill-groups";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -206,12 +207,7 @@ export function CapabilityProfileSection({
   // entry; the form's small footprint is acceptable to always show.
 
   const fmt = (d: string | null) =>
-    d
-      ? new Date(d).toLocaleDateString(locale, {
-          year: "numeric",
-          month: "short",
-        })
-      : null;
+    formatUtcDate(d, locale, { year: "numeric", month: "short" });
   const hasProfIcon = professionIconSlug
     ? PROFESSION_ICON_SLUGS.has(professionIconSlug)
     : false;

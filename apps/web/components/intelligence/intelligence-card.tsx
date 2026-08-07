@@ -12,6 +12,7 @@ import {
   INTEL_STATE_TONE,
 } from "./badge-styles";
 import { ExplainabilityDrawer } from "./explainability-drawer";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * ONE insight card (Labour Market Intelligence v1) — a pure server renderer
@@ -66,7 +67,7 @@ export async function IntelligenceCard({
   const tc = (code: string, params?: Record<string, string | number>) =>
     t(leaf(code) as never, params as never) as string;
 
-  const dateFmt = new Intl.DateTimeFormat(locale, {
+  const dateFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -74,7 +75,7 @@ export async function IntelligenceCard({
   const fmtIso = (iso: string | null): string | null => {
     if (!iso) return null;
     const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? dateFmt.format(new Date(ms)) : null;
+    return Number.isFinite(ms) ? dateFmt(ms) : null;
   };
 
   const observed = fmtIso(card.sourceBadge.observedAtIso);
