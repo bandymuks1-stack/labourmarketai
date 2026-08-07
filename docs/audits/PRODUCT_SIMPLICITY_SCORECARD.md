@@ -18,7 +18,7 @@ Dimensions: **IC** immediate clarity · **NV** navigation · **AC** action clari
 | Onboarding `[s]` | 2 | 1 | 2 | 2 | 1 | 2 | 2 | 1.7 | NEEDS_POLISH |
 | **Personal dashboard `[m]`** | 2 | **0** | 2 | 1 | 3 | 1 | 2 | **1.6** | **PILOT_BLOCKER** |
 | **Organization dashboard `[m]`** | 1 | **0** | 2 | 2 | 3 | 1 | 2 | **1.6** | **PILOT_BLOCKER** |
-| **Profile `[m]`** — *rescored after W7-S1* | 2 | 2 | 2 | 2 | 2 | 1 | 2 | **1.86** | **NEEDS_POLISH** |
+| **Profile `[m]`** — *rescored after W7-S1, then W7-S2* | 2 | 3 | 2 | 2 | 2 | 2 | 2 | **2.14** | **NEEDS_POLISH** |
 | Demand / company workspace `[m]` | 1 | 1 | 1 | **0** | 1 | **0** | 2 | **0.9** | **PILOT_BLOCKER** |
 | Candidate selection `[s]` | 2 | 1 | 2 | 2 | 2 | 1 | 2 | 1.7 | NEEDS_POLISH |
 | Booking `[s]` | 2 | 1 | 2 | 2 | 2 | 1 | 2 | 1.7 | NEEDS_POLISH |
@@ -56,9 +56,18 @@ organisation it will affect.
 competing readiness summaries totalling ≈1350 px before the first editable
 field. After W7-S1: **5273 px / 7486 px (9.2 folds)**, 16 cards, 12 `<h2>`, ONE
 overview carrying status → what is missing → next action, moved from the 4th
-block to the 1st with all three inside the first fold. **MB stays at 1** — 9.2
-mobile folds is better, not good — and the 34 unlabelled inputs are untouched
-(W7-S2). Full working: `W7_S1_PROFILE_HUB_OVERVIEW.md` §10.
+block to the 1st with all three inside the first fold.
+
+**Then W7-S2 moved NV 2→3 and MB 1→2.** The availability/preferences editor —
+the longest on the page — went from 30 tab stops with no arrow-key support to
+10 with a working radiogroup contract, and from 36 sub-44px controls to 0.
+Page-wide sub-44px targets 71→35.
+
+**A correction carried from that slice:** the "34 unlabelled inputs" in the
+original audit counted `input[type=hidden]`, which is not focusable and not
+exposed to assistive technology. The honest page-wide figure is **2** (the
+external-profile URL field and the CV file input). Full working:
+`W7_S1_PROFILE_HUB_OVERVIEW.md` §10 and `W7_S2_PROFILE_ACCESSIBILITY.md` §4/§13.
 
 **Company workspace — VH 0, MB 0.** 7028 px at 1440, **10419 px (12.8 folds) at
 375**, 16 `<h2>` covering the entire employer domain on one scroll: identity,
