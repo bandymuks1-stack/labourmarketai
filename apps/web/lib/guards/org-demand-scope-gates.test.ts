@@ -108,11 +108,17 @@ describe("2. the gates are scoped to the EMPLOYER paths only", () => {
     expect(workerBody).not.toMatch(/requireEmployerCompany/);
   });
 
-  it("the company demand intelligence read IS gated, and keeps the W14 row predicate", () => {
+  it("the company demand intelligence read IS gated, and keeps a W14 row predicate", () => {
     const src = read("lib/intelligence/intelligence-read.ts");
     const body = src.slice(src.indexOf("export async function getCompanyDemandIntelligence"));
     expect(body).toMatch(/requireEmployerCompany\(\)/);
-    expect(body).toMatch(/\.eq\(\s*"profile_id"\s*,\s*user\.id\s*\)/);
+    // W8 Stage B: the row predicate widened from `profile_id = user.id` to
+    // the RESOLVED organization (spine 20260806200000) — still a server-side
+    // scope, still unreachable for the is_admin RLS branch. Pinned in full by
+    // company-intelligence-owner-scope.test.ts.
+    expect(body).toMatch(
+      /\.eq\(\s*"organization_id"\s*,\s*employer\.organizationId\s*\)/,
+    );
   });
 
   it("the market-map employer leg is gated; non-employer kinds keep flowing", () => {

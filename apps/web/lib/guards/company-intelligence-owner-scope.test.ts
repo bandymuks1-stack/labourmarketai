@@ -49,19 +49,27 @@ function companyDemandBody(): string {
   return SOURCE.slice(start, next === -1 ? undefined : next);
 }
 
-describe("the company demand read is scoped to its owner", () => {
+describe("the company demand read is scoped to its organization", () => {
   const body = companyDemandBody();
 
-  it("filters customer_requests by the viewer's own profile", () => {
+  it("filters customer_requests by the RESOLVED organization (W8 Stage B)", () => {
+    // Stage B (migration 20260806200000 gave customer_requests an
+    // organization column): the predicate widened from `profile_id =
+    // user.id` to the resolved organization — a co-manager sees their
+    // organization's demand, and the admin RLS branch stays unreachable.
     expect(
       body,
-      "no owner predicate — an admin viewer cross-aggregates every tenant on a " +
+      "no org predicate — an admin viewer cross-aggregates every tenant on a " +
         "company surface (W14 P0-3)",
-    ).toMatch(/\.eq\(\s*"profile_id"\s*,\s*user\.id\s*\)/);
+    ).toMatch(/\.eq\(\s*"organization_id"\s*,\s*employer\.organizationId\s*\)/);
+    // The old owner predicate must not silently return alongside it — the
+    // two would intersect to the pre-Stage-B too-narrow read.
+    expect(body).not.toMatch(/\.eq\(\s*"profile_id"/);
   });
 
-  it("the scope comes from the server session, never from client input", () => {
-    // `user` is resolved from `supabase.auth.getUser()` inside the function.
+  it("the scope comes from the server's own resolution, never client input", () => {
+    // `employer` is resolved by the ONE canonical fail-closed resolver.
+    expect(body).toMatch(/requireEmployerCompany\(\)/);
     expect(body).toMatch(/supabase\.auth\.getUser\(\)/);
     // No parameter is accepted at all, so there is nothing a caller could forge.
     expect(body).toMatch(/getCompanyDemandIntelligence\(\s*\)/);

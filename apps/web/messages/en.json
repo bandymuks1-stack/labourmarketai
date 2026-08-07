@@ -486,7 +486,8 @@
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
       "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
       "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
-      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data."
+      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data.",
+      "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests."
     },
     "worker": {
       "evidence": {
@@ -520,7 +521,12 @@
         "title": "Demand requests",
         "open": "Open",
         "total": "Total",
-        "link": "Open the demand intake"
+        "link": "Open the demand intake",
+        "structured": "Structured",
+        "shortlisted": "Shortlisted",
+        "interest": "Worker interest",
+        "timeToFillDays": "Median days to fill",
+        "timeToFillUnmeasured": "Time to fill is not measurable yet — no accepted bookings exist. No number is shown instead of real data."
       },
       "projects": {
         "title": "Projects by status",

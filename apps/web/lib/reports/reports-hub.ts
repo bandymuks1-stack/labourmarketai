@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Role } from "@/lib/auth/actions";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import {
+  getOrgDemandRollup,
+  type OrgDemandRollup,
+} from "@/lib/company/org-demand-rollup";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import {
   getOrgDocumentCentre,
@@ -85,10 +89,30 @@ export interface WorkerReportsView {
 
 export type SectionState = "ok" | "needs-migration" | "unavailable";
 
+/** The org rollup's ok-variant, reused so the two can never drift. */
+type OrgRollup = Extract<OrgDemandRollup, { kind: "ok" }>;
+
 export interface OrgReportsView {
   readonly kind: "org";
+  /**
+   * W8/W14-6: two honest scopes, never both. `ok` = the ORGANIZATION rollup
+   * (org demand spine, `getOrgDemandRollup`) for a resolved org context;
+   * `own` = the caller's OWN requests (the pre-spine read) when no org
+   * context resolves — a personal customer's demand is their own
+   * `customer_requests`. The basis label names which scope is rendered, so
+   * the two counts can never be confused for one another.
+   */
   readonly demand:
-    | { readonly state: "ok"; readonly open: number; readonly total: number }
+    | {
+        readonly state: "ok";
+        readonly open: number;
+        readonly total: number;
+        readonly structured: number;
+        readonly shortlisted: number;
+        readonly interest: OrgRollup["interest"] | null;
+        readonly timeToFill: OrgRollup["timeToFill"] | null;
+      }
+    | { readonly state: "own"; readonly open: number; readonly total: number }
     | { readonly state: Exclude<SectionState, "ok"> };
   readonly projects:
     | {
@@ -179,13 +203,32 @@ async function getWorkerReportsView(): Promise<WorkerReportsView> {
 
 async function readDemandCounts(): Promise<OrgReportsView["demand"]> {
   try {
+    // W8/W14-6: org scope first. A resolved org context gets the rollup over
+    // organization-attributed rows (spine `20260806200000`); only when NO org
+    // context resolves (a personal customer) does the section fall back to
+    // the caller's OWN requests — and it says so via its basis label.
+    const rollup = await getOrgDemandRollup();
+    if (rollup.kind === "ok") {
+      return {
+        state: "ok",
+        open: rollup.open,
+        total: rollup.total,
+        structured: rollup.structured,
+        shortlisted: rollup.shortlisted,
+        interest: rollup.interest,
+        timeToFill: rollup.timeToFill,
+      };
+    }
+    if (rollup.kind === "needs-migration") return { state: "needs-migration" };
+    if (rollup.kind === "unavailable") return { state: "unavailable" };
+    // no-company-context → the personal-scope fallback.
     const result = await listOwnCustomerRequests();
     if (result.kind === "needs-migration") return { state: "needs-migration" };
     if (result.kind !== "ok") return { state: "unavailable" };
     const open = result.rows.filter((r) =>
       (OPEN_DEMAND_STATUSES as readonly string[]).includes(r.status),
     ).length;
-    return { state: "ok", open, total: result.rows.length };
+    return { state: "own", open, total: result.rows.length };
   } catch {
     return { state: "unavailable" };
   }
