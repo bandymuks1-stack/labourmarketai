@@ -21,7 +21,7 @@ exist *because* a code comment disagreed with the ledger.
 | 8 | **Tasks** | `SHIPPED_AND_REACHABLE` | `openProjectTasks` on the operations page; `/dashboard/tasks` module. `20260711210000_work_tasks_v1` **APPLIED 2026-07-11** (row 828) — see §3, a stale comment says otherwise |
 | 9 | **Assignment** | `SHIPPED_AND_REACHABLE` | `ProjectAssignmentManager` on the list; `company.assign-worker` from the chat result, gated on the server's `canManage` |
 | 10 | **Documents** | `PARTIAL` | Real per-worker document signals roll up into the operations board (`docsMissing` / `docsChecked` chips on the stadium; readiness items on the centre). There is **no project-level document library** — the `/dashboard/documents` surface is worker-scoped |
-| 11 | **Handover passport** | `SCHEMA_ONLY` | `HandoverPassportPanel` ships and `lib/projects/handover-passport.ts` degrades honestly to `{ applied: false }`. `20260705230000_project_handover_passport` appears **nowhere in `APPLIED_LEDGER.md`, in either direction** — see §4 |
+| 11 | **Handover passport** | `SHIPPED_AND_REACHABLE` **(corrected 2026-08-07)** | `20260705230000_project_handover_passport` is **APPLIED** — prod ledger version `20260705092111`, and `project_handover_entries` exists with **1 row**. Verified read-only against production. See §4 for what the earlier `SCHEMA_ONLY` call got wrong |
 | 12 | **Completion** | `PARTIAL` | The control exists and is real: `setProjectStatusAction` → `completed` behind an explicit confirmation that states what becomes true, and it reports the **server's real count** of ended assignments. **Never run by a real user in production** — prod holds 5 projects, all `draft` |
 
 **No capability is `NOT_IMPLEMENTED`.** The honest summary of W11 is not "half
@@ -65,22 +65,37 @@ only, no behaviour change).
 
 ---
 
-## 4. Finding — the handover passport migration is unrecorded
+## 4. CORRECTED 2026-08-07 — the handover passport is applied, and the ledger sweep happened
 
-`20260705230000_project_handover_passport.sql` exists in
-`supabase/migrations/`, its reader degrades correctly, and its panel ships — but
-the file appears **nowhere in `APPLIED_LEDGER.md`**: not in the applied table,
-not in the deferred list.
+**What this section said before:** that `20260705230000_project_handover_passport`
+appeared nowhere in `APPLIED_LEDGER.md`, that ledger silence therefore meant
+UNKNOWN, and that `SCHEMA_ONLY` was the conservative call pending a production
+read.
 
-The ledger is this repo's source of truth for what production holds, so its
-silence means the state is **unknown**, not "unapplied". Resolving it needs a
-production read. Until then `SCHEMA_ONLY` is the conservative classification and
-the panel's `{ applied: false }` degradation makes an unapplied state harmless.
+**The production read has now been done** (read-only, `list_migrations` +
+`to_regclass` + row count), and it overturns the classification:
 
-*(This is structurally the same bookkeeping gap the W13 baseline found for
-`20260627181500_service_requests_seen`. Two unrecorded migrations in one day of
-auditing suggests the ledger discipline slipped in a specific window — worth a
-sweep, not just two spot fixes.)*
+* prod ledger version `20260705092111`, name `20260705230000_project_handover_passport`;
+* `project_handover_entries` **exists** and holds **1 row**.
+
+The migration is **applied and exercised**. Capability 11 moves to
+`SHIPPED_AND_REACHABLE`.
+
+**What the original call got wrong, and it is worth naming precisely:** it
+treated "no row in the applied table" as "no information", when the ledger
+*already carried* a `⚠️ DRIFT NOTICE 2026-08-01` documenting a 26-migration
+window in which applies happened without rows — and
+`20260705230000_project_handover_passport` is **one of the 26 named there**. The
+information existed; the audit looked in the table and not at the notice above
+it. The lesson is not "read production sooner" (though that too) but *read the
+whole ledger, including its exception notices, before calling a state unknown.*
+
+The suggested sweep was carried out the same day:
+`docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md` reconciles all 190
+repo migrations against all 187 production rows. It confirms both this migration
+and `20260627181500_service_requests_seen` as **APPLIED**, and finds three
+genuinely new unrecorded applies plus one migration whose gate state needs owner
+review.
 
 ---
 

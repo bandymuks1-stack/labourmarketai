@@ -37,8 +37,16 @@ export interface SpineCounts {
   readonly pendingInvitations: number;
   /** Open work tasks needing attention (overdue or blocked) for the caller
    *  (assignee or creator). State-derived like pending bookings — resolving
-   *  or rescheduling the task IS what clears it; 0 while the work_tasks
-   *  migration is unapplied (control room PR D). */
+   *  or rescheduling the task IS what clears it.
+   *
+   *  W13-0b CORRECTION (2026-08-07): this comment used to say the count is
+   *  "0 while the work_tasks migration is unapplied (control room PR D)".
+   *  That is stale — `20260711210000_work_tasks_v1` was APPLIED on 2026-07-11
+   *  (prod ledger version `20260711204521`), and `work_tasks` was verified
+   *  present in production read-only. So this is a LIVE count, not a dead one.
+   *  It reads 0 today because the table holds 0 rows, which is a different
+   *  fact and a truthful signal. The reader still degrades to 0 on
+   *  42P01/42703, so an unapplied environment stays honest. */
   readonly openTaskAttention: number;
   /** UNSEEN job recommendations for the signed-in worker — eligible /
    *  near-miss matches from the ONE recommendation read model

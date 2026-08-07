@@ -109,7 +109,7 @@ Ordered as they display (the ladder: *a person waiting on you outranks passive n
 | Route | `/dashboard/service-requests` |
 | Fail-closed | no seen row → 0 |
 | Class | **INFORMATIONAL** (a response is news; the persistent accepted total lives on the page itself) |
-| Ledger gap | the migration `20260627181500_service_requests_seen.sql` (table `service_offering_requests_seen`) has **no `APPLIED_LEDGER.md` entry at all**. See §5.1 — this is a **bookkeeping** finding, not a claim that it is unapplied. |
+| Migration | **RESOLVED 2026-08-07: `20260627181500_service_requests_seen` is APPLIED.** `service_offering_requests_seen` exists in production with **2 rows** — the seen model is live and in real use. It has no `APPLIED_LEDGER.md` row, which is a bookkeeping gap in the pre-`20260702130000` era the ledger never claimed to cover (see the coverage boundary now stated at the top of that file). Verified read-only. |
 
 ### 2.5 `pending-bookings`
 
@@ -263,15 +263,21 @@ answers and no code change can be honest until it is answered.
 | Migration | Table | State |
 |---|---|---|
 | `20260706120000_booking_requests_seen` | `booking_requests_seen` | **APPLIED** 2026-07-06 |
-| `20260714170000_worker_opportunity_seen_v1` | `worker_opportunity_seen` | **UNAPPLIED**, owner-gated → §2.8 sits at 0 |
-| `20260717150000_demand_interest_seen_v1` | `demand_interest_seen` | **UNAPPLIED**, owner-gated → the interest-response signal is deliberately unwired |
-| `20260627181500_service_requests_seen` | `service_offering_requests_seen` | **NOT RECORDED in `APPLIED_LEDGER.md`** |
+| `20260714170000_worker_opportunity_seen_v1` | `worker_opportunity_seen` | **UNAPPLIED**, owner-gated — table verified ABSENT in production 2026-08-07 → §2.8 sits at 0, correctly |
+| `20260717150000_demand_interest_seen_v1` | `demand_interest_seen` | **UNAPPLIED**, owner-gated — table verified ABSENT in production 2026-08-07 → the interest-response signal is deliberately unwired |
+| `20260627181500_service_requests_seen` | `service_offering_requests_seen` | **APPLIED** — table exists, **2 rows** (verified 2026-08-07) |
 
-The last row is a finding of this audit and is **bookkeeping, not a defect claim**:
-the file exists, the reader depends on it, and §2.4 degrades to 0 without it — but
-the ledger, which is the repo's source of truth for what production holds, does not
-mention it in either direction. Reconciling it needs a production read, which this
-audit does not perform. Filed as **W13-0** (§6).
+**W13-0 CLOSED 2026-08-07.** All four rows above are now production-verified
+read-only, and the one open question is answered: `service_offering_requests_seen`
+is applied and carries real data, so the `service-request-responses` signal has a
+working seen model in production.
+
+Its missing `APPLIED_LEDGER.md` row is a **bookkeeping** artefact of the
+pre-`20260702130000` era, which that file has now been amended to say it never
+claimed to cover. The full sweep —
+`docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md` — reconciles all 190
+repo migrations against all 187 production rows and found three genuinely new
+unrecorded applies plus one migration whose gate state needs owner review.
 
 ### 5.2 The missing interest-response signal
 
@@ -325,8 +331,8 @@ trust domain still owns the confirmation itself.
 
 | # | Slice | Contains | Depends on |
 |---|---|---|---|
-| **W13-0** | Ledger reconciliation | Record the real production state of `20260627181500_service_requests_seen` (§5.1) | a production read |
-| **W13-0b** | Stale-comment fix | `spine-signals.ts` still calls `work_tasks` unapplied; it was applied 2026-07-11 (§2.7). Comment only | none — **safe** |
+| ~~**W13-0**~~ | ~~Ledger reconciliation~~ | **DONE 2026-08-07** — `20260627181500_service_requests_seen` is APPLIED (2 rows). Full sweep in `docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md` | — |
+| ~~**W13-0b**~~ | ~~Stale-comment fix~~ | **DONE 2026-08-07** — `spine-signals.ts` corrected. `20260711210000_work_tasks_v1` applied 2026-07-11; `work_tasks` verified present in production with **0 rows**, so the signal is a live count that is legitimately zero | — |
 | **W13-1** | In-app attention | The 8 shipped signals + admit `ConfirmPulse` as the 9th (§3). One source, five consumers — preserved | **a host-module decision (§3.1)** — no migration, but not zero-decision |
 | **W13-2** | Unread / seen lifecycle | The two models already in use: *state-derived* (bookings, service requests, tasks) and *seen-marker* (responses, job matches). No third model. No fake "mark read" | applied seen tables |
 | **W13-3** | Actionable notifications | Every row reaches a route that resolves it. Already true for 8/8; keep it true | none |
@@ -358,8 +364,9 @@ comment claiming otherwise is stale. See §2.7.)*
 
 ## 8. What is safe to build next, without any owner input
 
-**W13-0b** (the stale `work_tasks` comment) and **W13-7** (the panel accessibility
-pass). Neither needs a migration, a channel, or a product decision.
+**W13-7** (the panel accessibility pass). W13-0 and W13-0b are **both DONE**
+(2026-08-07), settled by a read-only production reconciliation rather than left
+as open questions.
 
 **W13-1 was attempted in this slice and correctly refused** — see §3.1. It is the
 highest-value remaining item, but it needs one IA answer first (owner decision 5),
