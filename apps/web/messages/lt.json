@@ -771,13 +771,13 @@
     "candidates": {
       "context": "Įmonė · Samdyti",
       "whatTitle": "Ką čia galite padaryti",
-      "whatBody": "Peržiūrėkite kandidatus ir trumpuosius sąrašus pagal savo poreikius.",
-      "primaryLabel": "Ieškoti darbuotojų",
-      "nextLine": "Po to: pažymėkite tinkamus ir pradėkite pokalbį.",
+      "whatBody": "Laikykite savo privačius užrašus apie žmones ir paslaugų teikėjus, su kuriais norite dirbti — įskaitant tuos, kurie dar neužsiregistravę.",
+      "primaryLabel": "Rasti registruotų darbuotojų",
+      "nextLine": "Po to: kai kuris nors iš jų užsiregistruos, susiekite juodraštį su tikra paskyra.",
       "flow": {
-        "step1": "Įrašykite kandidatą arba peržiūrėkite juodraščius.",
-        "step2": "Sistema laiko juos privačiai, kol nuspręsite.",
-        "step3": "Pažymėkite tinkamus ir pradėkite pokalbį."
+        "step1": "Pridėkite žmogų ar paslaugų teikėją, kurį norite įsiminti, arba peržiūrėkite juodraščius.",
+        "step2": "Šiuos užrašus matote tik jūs — jie nėra dalijami su jūsų organizacija.",
+        "step3": "Kai jie užsiregistruos, susiekite juodraštį su tikra jų paskyra."
       }
     },
     "buyer": {
@@ -8748,7 +8748,7 @@
       "title": "Kiti pradžios taškai",
       "demand": "Sukurti darbo poreikį ar poziciją",
       "project": "Sukurti projektą",
-      "candidates": "Peržiūrėti kandidatus",
+      "candidates": "Kandidatų juodraščiai",
       "network": "Rasti žmones ir įmones"
     },
     "summary": {
