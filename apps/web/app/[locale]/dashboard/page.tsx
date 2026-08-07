@@ -1,4 +1,7 @@
 import { redirect } from "next/navigation";
+
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -77,14 +80,25 @@ export default async function DashboardHomePage({
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
   // the (full) group and is never mounted here.
   return (
-    <ConversationChat
-      locale={locale as ActiveLocale}
-      labels={labels}
-      workLogLabels={workLogLabels}
-      bookingOffers={offers}
-      bookingLabels={bookingLabels}
-      personalIntroPayload={personalIntroPayload}
-    />
+    <>
+      {/* W14 — `dashboard_viewed` had NO emitter. The action registry declares
+          `telemetryEvent: E.dashboardViewed` on two entries, but that field is
+          never read by anything, so the event was never sent: the activation
+          funnel's first step measured nothing. This is the emitter, on the one
+          workspace root (`/dashboard/advanced` was deleted by W3 Package 4). */}
+      <TelemetryView
+        event={FUNNEL_EVENTS.dashboardViewed}
+        metadata={{ surface: "dashboard_root" }}
+      />
+      <ConversationChat
+        locale={locale as ActiveLocale}
+        labels={labels}
+        workLogLabels={workLogLabels}
+        bookingOffers={offers}
+        bookingLabels={bookingLabels}
+        personalIntroPayload={personalIntroPayload}
+      />
+    </>
   );
 }
 
