@@ -702,42 +702,6 @@
       "trust": "Vertrauen / Bereitschaft"
     }
   },
-  "marketplaceHub": {
-    "title": "Marktplatz",
-    "subtitle": "Ein kompakter Ort, der Sie, Ihre Unternehmen, die Karte und Nachrichten verbindet.",
-    "notFakeNote": "Es werden nur echte Einträge, Unternehmen und Produkte angezeigt. Was noch vorbereitet wird, ist als „In Vorbereitung“ markiert.",
-    "map": {
-      "title": "Karte",
-      "desc": "Ihre echten Signale und Marktsignale auf der Karte.",
-      "cta": "Karte öffnen"
-    },
-    "opportunities": {
-      "title": "Arbeit, Bedarfe, Chancen",
-      "desc": "Echte Chancen und Suche.",
-      "cta": "Chancen ansehen"
-    },
-    "offers": {
-      "title": "Unternehmens- & persönliche Angebote",
-      "desc": "Der Angebotsbereich wird noch vorbereitet."
-    },
-    "shop": {
-      "title": "Shop, Dienstleistungen, Vermietungen, Immobilien",
-      "desc": "Produkte, Dienstleistungen, Vermietungen und Immobilien werden noch vorbereitet."
-    },
-    "individual": {
-      "title": "Individuelle Tätigkeit",
-      "desc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil.",
-      "cta": "Profil öffnen"
-    },
-    "company": {
-      "title": "Unternehmenskanäle",
-      "desc": "Der kommerzielle Kanal und die Einstellungen des ausgewählten Unternehmens.",
-      "cta": "Unternehmen öffnen",
-      "noCompanyCta": "Unternehmen hinzufügen",
-      "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten."
-    },
-    "prepareBadge": "In Vorbereitung"
-  },
   "profileAvatar": {
     "upload": "Foto hochladen",
     "change": "Foto ändern",
@@ -9439,7 +9403,9 @@
       }
     },
     "organizations": {
-      "title": "Meine Unternehmen"
+      "noCompanyCta": "Unternehmen hinzufügen",
+      "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten.",
+      "individualDesc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil."
     },
     "relationships": {
       "title": "Aktive Beziehungen",

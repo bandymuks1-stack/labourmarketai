@@ -49,16 +49,13 @@ export default async function NetworkPage({
   setRequestLocale(locale);
   const { q, type, org, project } = await searchParams;
 
+  // W7 marketplaceHub reconciliation: the three strings the W7-S4 move
+  // carried here were the LAST live keys of the `marketplaceHub` namespace —
+  // a misnomer since the marketplace hub surface itself was removed. The
+  // values moved verbatim per locale to `network.organizations.*` and the
+  // dead namespace (title "Marketplace", map/offers/shop cards, prepareBadge)
+  // was deleted; the user reads exactly the same sentences.
   const t = await getTranslations("network");
-  // W7-S4: the organizations block absorbed from `/dashboard/profile`
-  // (`#managed-companies`) keeps its EXACT existing copy — the same
-  // `marketplaceHub.company.*` / `marketplaceHub.individual.desc` keys it
-  // rendered on the profile. No key is added, renamed or retranslated, so the
-  // move cannot introduce i18n debt or change what the user reads. (The
-  // `marketplaceHub` namespace name is now a misnomer — it has no marketplace
-  // caller left. Renaming it is copy debt recorded in the S4 audit, not part
-  // of an information-architecture move.)
-  const tHub = await getTranslations("marketplaceHub");
   const supabase = await createClient();
   const {
     data: { user },
@@ -308,7 +305,7 @@ export default async function NetworkPage({
               className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
               data-testid="network-add-company"
             >
-              + {tHub("company.noCompanyCta")}
+              + {t("organizations.noCompanyCta")}
             </Link>
           </>
         ) : (
@@ -317,14 +314,14 @@ export default async function NetworkPage({
              the explanation and the first-company action. */
           <>
             <p className="text-sm text-text-secondary">
-              {tHub("company.noCompanyDesc")}
+              {t("organizations.noCompanyDesc")}
             </p>
             <Link
               href="/dashboard/start/company"
               className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
               data-testid="network-add-company"
             >
-              + {tHub("company.noCompanyCta")}
+              + {t("organizations.noCompanyCta")}
             </Link>
           </>
         )}
@@ -333,7 +330,7 @@ export default async function NetworkPage({
             list it contrasts with — and it now points at the personal profile
             from a different page instead of at the page you are already on. */}
         <p className="text-xs leading-relaxed text-text-muted">
-          {tHub("individual.desc")}
+          {t("organizations.individualDesc")}
         </p>
       </section>
 

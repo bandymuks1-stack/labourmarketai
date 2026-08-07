@@ -91,26 +91,42 @@ describe("W7-S4 — organizations: capability preserved on /dashboard/network", 
     // to a profile holding no company identity at all.
     expect(NETWORK).toMatch(/data-testid="network-add-company"/);
     expect(NETWORK).toMatch(/\/dashboard\/start\/company/);
-    expect(NETWORK).toMatch(/company\.noCompanyCta/);
+    expect(NETWORK).toMatch(/organizations\.noCompanyCta/);
   });
 
   it("the zero-company state came with the block", () => {
     // The section used to render only when `organizations.length > 0`, so a
     // person with no company would have been shown nothing at all.
-    expect(NETWORK).toMatch(/company\.noCompanyDesc/);
+    expect(NETWORK).toMatch(/organizations\.noCompanyDesc/);
     expect(NETWORK).not.toMatch(/\{organizations\.length > 0 && \(/);
   });
 
   it("the individual-activity note came with the block", () => {
-    expect(NETWORK).toMatch(/individual\.desc/);
+    expect(NETWORK).toMatch(/organizations\.individualDesc/);
   });
 
-  it("the copy is the same keys, not a retranslation", () => {
-    // Reusing the exact `marketplaceHub.*` keys the profile rendered is what
-    // makes this a move rather than a rewrite: no new key, no new string, no
-    // locale left behind.
-    expect(NETWORK).toMatch(/getTranslations\("marketplaceHub"\)/);
-    expect(PROFILE).not.toMatch(/getTranslations\("marketplaceHub"\)/);
+  it("the copy moved home without a retranslation, and the misnomer is gone", () => {
+    // W7-S4 moved the block reusing the exact `marketplaceHub.*` keys so no
+    // string changed. The W7 namespace reconciliation then moved those three
+    // VALUES verbatim to `network.organizations.*` — the namespace's last
+    // live keys — and deleted the dead `marketplaceHub` namespace (title
+    // "Marketplace", map/offers/shop cards) that no surface rendered. Same
+    // sentences, honest home: neither page may reference the dead namespace.
+    expect(NETWORK).not.toMatch(/marketplaceHub/);
+    expect(PROFILE).not.toMatch(/marketplaceHub/);
+    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+      const messages = JSON.parse(read(`messages/${locale}.json`)) as {
+        marketplaceHub?: unknown;
+        network?: { organizations?: Record<string, string> };
+      };
+      expect(messages.marketplaceHub, `${locale} dead namespace`).toBeUndefined();
+      for (const key of ["noCompanyCta", "noCompanyDesc", "individualDesc"]) {
+        expect(
+          (messages.network?.organizations?.[key] ?? "").trim(),
+          `${locale} network.organizations.${key}`,
+        ).not.toBe("");
+      }
+    }
   });
 });
 

@@ -702,42 +702,6 @@
       "trust": "Vertrouwen / gereedheid"
     }
   },
-  "marketplaceHub": {
-    "title": "Marktplaats",
-    "subtitle": "Eén compacte plek die jou, je bedrijven, de kaart en berichten verbindt.",
-    "notFakeNote": "Alleen echte vermeldingen, bedrijven en producten worden getoond. Wat nog wordt voorbereid, is gemarkeerd als “in voorbereiding”.",
-    "map": {
-      "title": "Kaart",
-      "desc": "Je echte signalen en marktsignalen op de kaart.",
-      "cta": "Open kaart"
-    },
-    "opportunities": {
-      "title": "Werk, behoeften, kansen",
-      "desc": "Echte kansen en zoeken.",
-      "cta": "Bekijk kansen"
-    },
-    "offers": {
-      "title": "Bedrijfs- en persoonlijke aanbiedingen",
-      "desc": "Het aanbiedingenonderdeel wordt nog voorbereid."
-    },
-    "shop": {
-      "title": "Winkel, diensten, verhuur, vastgoed",
-      "desc": "Producten, diensten, verhuur en vastgoed worden nog voorbereid."
-    },
-    "individual": {
-      "title": "Individuele activiteit",
-      "desc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel.",
-      "cta": "Open profiel"
-    },
-    "company": {
-      "title": "Bedrijfskanalen",
-      "desc": "Het commerciële kanaal en de instellingen van het geselecteerde bedrijf.",
-      "cta": "Open bedrijf",
-      "noCompanyCta": "Bedrijf toevoegen",
-      "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen."
-    },
-    "prepareBadge": "In voorbereiding"
-  },
   "profileAvatar": {
     "upload": "Foto uploaden",
     "change": "Foto wijzigen",
@@ -9439,7 +9403,9 @@
       }
     },
     "organizations": {
-      "title": "Mijn bedrijven"
+      "noCompanyCta": "Bedrijf toevoegen",
+      "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen.",
+      "individualDesc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel."
     },
     "relationships": {
       "title": "Actieve relaties",

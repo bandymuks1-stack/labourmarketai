@@ -702,42 +702,6 @@
       "trust": "Pasitikėjimas / pasirengimas"
     }
   },
-  "marketplaceHub": {
-    "title": "Prekyvietė",
-    "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",
-    "notFakeNote": "Rodomi tik tikri skelbimai, įmonės ir prekės. Kas dar ruošiama — pažymėta „ruošiama“ būsena.",
-    "map": {
-      "title": "Žemėlapis",
-      "desc": "Tikri tavo ir rinkos signalai žemėlapyje.",
-      "cta": "Atidaryti žemėlapį"
-    },
-    "opportunities": {
-      "title": "Darbai, poreikiai, galimybės",
-      "desc": "Tikros galimybės ir paieška.",
-      "cta": "Žiūrėti galimybes"
-    },
-    "offers": {
-      "title": "Įmonių ir asmenų pasiūlymai",
-      "desc": "Pasiūlymų skiltis dar ruošiama."
-    },
-    "shop": {
-      "title": "Parduotuvė, paslaugos, nuoma, NT",
-      "desc": "Prekių, paslaugų, nuomos ir NT skelbimai dar ruošiami."
-    },
-    "individual": {
-      "title": "Individuali veikla",
-      "desc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.",
-      "cta": "Atidaryti profilį"
-    },
-    "company": {
-      "title": "Įmonės kanalai",
-      "desc": "Pasirinktos įmonės komercinis kanalas ir nustatymai.",
-      "cta": "Atidaryti įmonę",
-      "noCompanyCta": "Pridėti įmonę",
-      "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas."
-    },
-    "prepareBadge": "Ruošiama"
-  },
   "profileAvatar": {
     "upload": "Įkelti nuotrauką",
     "change": "Pakeisti nuotrauką",
@@ -9439,7 +9403,9 @@
       }
     },
     "organizations": {
-      "title": "Mano įmonės"
+      "noCompanyCta": "Pridėti įmonę",
+      "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.",
+      "individualDesc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje."
     },
     "relationships": {
       "title": "Aktyvūs ryšiai",
