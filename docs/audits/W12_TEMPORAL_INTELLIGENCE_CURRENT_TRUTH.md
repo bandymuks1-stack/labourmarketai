@@ -226,7 +226,7 @@ Corrected totals: **22 files**, **32 `toLocale*` sites**, **16 unpinned
 |---|---|
 | **A — source inventory** | done, this document |
 | **B — timezone clarity** | **DONE AND SHIPPED 2026-08-08.** Doctrine written (§3.6); one UTC-pinned formatter (`lib/time/display.ts`); 31 files migrated; ratchet guard (47 assertions, proven to fail on a reintroduced violation); browser proof in real Chromium under Europe/Vilnius + America/New_York at 1440+375 with a control proving the override fires. Zero migration. NOTE: the §3.5 inventory was incomplete in four ways — see §3.6.1 |
-| **C — UI explanation of conflicts** | conflicts are already marked and counted on the item; explaining *why* two items conflict is presentation only |
+| **C — UI explanation of conflicts** | **DONE AND SHIPPED 2026-08-08 (#1077).** The row rendered a bare "Dates overlap" badge while the page already held the PAIR and the first shared day — and already named the counterpart when a filter HIDDEN it, so the reader learned strictly LESS when the partner was on screen. `visibleConflictPartners` is the symmetric counterpart of `hiddenConflictSources`: derived from the FULL model, renders "Overlaps with {partners} from {date}", carries the LABEL (safe twice over — the partner is the caller's own commitment AND is a row this same page already renders), and formats the day through the canonical UTC formatter so the explanation cannot name a different day than the row it explains. Zero migration |
 | **D — projection consistency** | already guaranteed by §2's single-calculation rule; a guard pinning that no second reader appears would make it enforced rather than conventional |
 | **E — date-format consistency** | one formatter is already used server-side for the panel; verify the planning page and chat sentence share it |
 | **F — duplicate time truth elimination** | **CLOSED 2026-08-08.** Was true of STORAGE all along; the PRESENTATION half is now closed too — every date surface renders through the one UTC-pinned formatter, and the two day-grouping keys that disagreed with their own labels were moved to `utcDayKey`. See `W12_TIMEZONE_CONSISTENCY_SLICE.md` |
@@ -237,11 +237,11 @@ Corrected totals: **22 files**, **32 `toLocale*` sites**, **16 unpinned
 recorded as available, not done — that train's implementation effort went to
 W11 F7, W8 candidates and the W10 matching-truth fix.
 
-**Update 2026-08-08:** items **B** and **F** are now implemented and shipped.
-**C** (conflict explanation UX), **D** (projection-consistency guard), **E**
-(date-format consistency — largely absorbed by B, since all surfaces now share
-one formatter), **G** (travel-time seam) and **H** (browser/mobile proof of the
-authenticated surfaces) remain available and unstarted.
+**Update 2026-08-08:** items **B**, **C** and **F** are now implemented and
+shipped. **D** (projection-consistency guard), **E** (date-format consistency —
+largely absorbed by B, since all surfaces now share one formatter), **G**
+(travel-time seam) and **H** (browser/mobile proof of the authenticated
+surfaces) remain available and unstarted.
 
 ---
 
