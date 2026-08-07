@@ -11186,6 +11186,7 @@
       "actionNotAuthorized": "Dit kun je hier niet doen.",
       "bookingStart": "Start",
       "bookingEnd": "Verwacht einde",
+      "bookingEndHint": "Leeg laten boekt één dag — een leeg einde houdt de persoon niet vast na de startdatum.",
       "bookingNote": "Notitie",
       "projectError": "We konden het project niet lezen.",
       "projectNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsprojecten.",

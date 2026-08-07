@@ -690,8 +690,28 @@ function BookingProposal({
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
           data-testid="candidate-booking-end"
+          aria-describedby="candidate-booking-end-hint"
           className={inputCls}
         />
+        {/* W7 P2-1: an empty end date is NOT an open-ended booking, and until
+            now nothing said so. The double-booking guard
+            (`booking_atomic_double_booking_v1.sql`) computes the conflict band
+            as `daterange(start_date, coalesce(expected_end_date, start_date))`
+            — with no end it collapses to the START DAY, so the worker is
+            protected against a clashing booking on day one and on no other
+            day. Leaving this blank therefore reserves a single day; it does
+            not hold the worker indefinitely. Saying that here costs nothing
+            and stops an employer believing they hold a worker they do not.
+            Making genuinely open-ended bookings conflict-safe is a schema
+            change and stays owner-gated — see
+            `docs/audits/W7_CLOSURE_AUDIT.md` §3. */}
+        <span
+          id="candidate-booking-end-hint"
+          className="text-meta leading-snug text-text-muted"
+          data-testid="candidate-booking-end-hint"
+        >
+          {t("bookingEndHint")}
+        </span>
       </label>
       <label className="flex flex-col gap-1 text-meta text-text-muted">
         {t("bookingNote")}
