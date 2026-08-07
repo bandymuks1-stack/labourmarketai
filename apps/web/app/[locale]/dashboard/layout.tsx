@@ -24,12 +24,8 @@ import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { baseIdentityForRole } from "@/lib/config/roles";
-import {
-  getActiveOrganizationContext,
-  getWorkspaceContext,
-} from "@/lib/company/active-organization";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
-import { getOwnCompany } from "@/lib/company/company-setup";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -119,31 +115,39 @@ export default async function DashboardLayout({
   const identity = activeRole ? baseIdentityForRole(activeRole) : null;
   const workspace = await getWorkspaceContext(identity);
 
-  // Company identity → surface WHICH organization is active. Read-only,
-  // RLS-scoped; resolved ONLY for the company identity. Null (never fabricated)
-  // when no company row exists yet.
-  let activeOrgName: string | null = null;
-  let organizations: SwitchableOrganization[] = [];
-  let activeOrganizationId: string | null = null;
-  if (identity === "company") {
-    const orgContext = await getActiveOrganizationContext();
-    if (orgContext.activeOrganization) {
-      activeOrgName = orgContext.activeOrganization.name;
-      activeOrganizationId = orgContext.activeOrganizationId;
-      if (orgContext.canSwitch) {
-        organizations = orgContext.organizations.map((o) => ({
-          id: o.id,
-          name: o.name,
-        }));
-      }
-    } else {
-      const company = await getOwnCompany();
-      if (company.kind === "ok" && company.row) {
-        activeOrgName =
-          company.row.displayName ?? company.row.legalName ?? null;
-      }
-    }
-  }
+  // WHICH organization is active — derived from the ONE workspace context
+  // resolved above, never from a second reader.
+  //
+  // W9 (last `getOwnCompany()` read site): this block used to ask
+  // `getActiveOrganizationContext()`, which lists OWNED organizations only,
+  // and fall back to `getOwnCompany()` (`companies.profile_id = auth.uid()`)
+  // — the single-company-per-person assumption the multi-org train removed.
+  // Both readers are blind to `company_memberships`, so a manager or admin of
+  // an organization they do not OWN got `activeOrgName = null`: the workspace
+  // chip (fed by `getWorkspaceContext`, which merges owned + governance +
+  // engagement rows) named their organization while the role switcher and the
+  // chat's result context said nothing. One acting context cannot have two
+  // answers, so both readers are gone from this layout and the name comes
+  // from the workspace the chip itself is showing.
+  //
+  // The WORKSPACE is the acting context (owner audit P0.1), so the name
+  // follows the active workspace rather than the base identity — a person
+  // whose validated pointer is an organization really is acting there.
+  // `resolveActiveWorkspaceId` already fail-closes to the personal workspace
+  // for an ambiguous or revoked pointer, so nothing here can fabricate an org.
+  const organizationWorkspaces = workspace.workspaces.filter(
+    (w) => w.kind === "organization",
+  );
+  const activeWorkspace =
+    organizationWorkspaces.find((w) => w.id === workspace.activeWorkspaceId) ??
+    null;
+  const activeOrgName: string | null = activeWorkspace?.name ?? null;
+  const activeOrganizationId: string | null = activeWorkspace?.id ?? null;
+  // The full list is passed; `<RoleSwitcher>` applies the SAME
+  // `shouldOfferOrganizationSwitch` rule (>1) the layout used to duplicate.
+  const organizations: SwitchableOrganization[] = organizationWorkspaces.map(
+    (w) => ({ id: w.id, name: w.name }),
+  );
 
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
