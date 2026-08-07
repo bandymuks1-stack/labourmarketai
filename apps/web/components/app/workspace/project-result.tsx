@@ -49,9 +49,31 @@ import type {
  * Like every result body, the full screen is reached through `onOpenFull`. No
  * `<Link>`, no router. Depth lives in the URL as `?result=project&project=…`,
  * reusing the SAME param the market result already carries.
+ *
+ * ─── W11 F7: THE EXIT KEEPS THE PROJECT ─────────────────────────────────────
+ * The picker's exit is the LIST, because at that depth no project is chosen.
+ * The DETAIL view's exit used to be that same list — so a manager who had
+ * already picked a project, and was reading its status, roster and stages,
+ * was thrown back to a list to find it a second time. The project's operating
+ * centre was consequently reachable only by typing the URL or by walking
+ * list → stadium → the link at the very bottom of the arena.
+ *
+ * The detail exit is now project-scoped, and which surface it names follows
+ * the SAME authority the assignment control already respects:
+ *   - `canManage` → `/dashboard/projects/{id}/operations`, the operating
+ *     centre (stages, Gantt, economics, defects, assets, handover, readiness);
+ *   - otherwise  → `/dashboard/projects/{id}`, which is role-aware and
+ *     fail-closed on its own (manager arena / assigned-worker panel / an
+ *     honest no-access state).
+ *
+ * `canManage` is the SERVER's `can_manage_project` answer carried on the
+ * contract — not a client guess, and not the active role. Both destinations
+ * re-check on arrival, so an offered route is never itself an authority claim.
  */
 
 const FULL_ROUTE = "/dashboard/projects";
+const projectRoute = (projectId: string) => `/dashboard/projects/${projectId}`;
+const operationsRoute = (projectId: string) => `${projectRoute(projectId)}/operations`;
 
 type ListPhase =
   | { readonly kind: "loading" }
@@ -407,7 +429,16 @@ function ProjectDetailView({
           </p>
         ))}
 
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      {/* W11 F7 — the exit carries the project the person already chose. */}
+      <OpenFull
+        label={p.canManage ? t("projectOpenOperations") : t("projectOpenProject")}
+        testId={p.canManage ? "project-open-operations" : "project-open-project"}
+        onOpenFull={() =>
+          onOpenFull(
+            p.canManage ? operationsRoute(p.projectId) : projectRoute(p.projectId),
+          )
+        }
+      />
     </div>
   );
 }
@@ -681,10 +712,20 @@ function Explained({
   );
 }
 
-function OpenFull({ label, onOpenFull }: { label: string; onOpenFull: () => void }) {
+function OpenFull({
+  label,
+  onOpenFull,
+  testId = "project-open-full",
+}: {
+  label: string;
+  onOpenFull: () => void;
+  /** The detail exit names its real destination, so a proof can tell the
+   *  operating centre apart from the list without reading the label. */
+  testId?: string;
+}) {
   return (
     <ChatActionRow>
-      <ChatAction tone="secondary" testId="project-open-full" onClick={onOpenFull}>
+      <ChatAction tone="secondary" testId={testId} onClick={onOpenFull}>
         {label}
       </ChatAction>
     </ChatActionRow>
