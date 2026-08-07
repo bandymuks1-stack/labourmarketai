@@ -9265,11 +9265,11 @@
   "workerPrefs": {
     "title": "Werkvoorkeuren",
     "hint": "Geef alleen op wat echt voor u geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven. Deze voorkeuren worden alleen gedeeld volgens uw privacytoestemmingen.",
-    "willingToRelocate": "Bereid te verhuizen voor werk",
-    "needsAccommodation": "Heeft huisvesting nodig",
-    "hasTransport": "Heeft eigen vervoer",
-    "teamAvailable": "Kan in teamverband werken",
-    "soloAvailable": "Kan zelfstandig werken",
+    "willingToRelocate": "Ik ben bereid te verhuizen voor werk",
+    "needsAccommodation": "Ik heb huisvesting nodig",
+    "hasTransport": "Ik heb eigen vervoer",
+    "teamAvailable": "Ik kan in teamverband werken",
+    "soloAvailable": "Ik kan zelfstandig werken",
     "maxTripDays": "Langste werkreis (dagen)",
     "contractType": "Gewenste contractvorm",
     "note": "Opmerking over beschikbaarheid",
@@ -9298,12 +9298,12 @@
         "gross": "Bruto (voor belastingen)",
         "net": "Netto (op de hand)"
       },
-      "nightShifts": "Bereid om nachtdiensten te werken",
-      "weekendShifts": "Bereid om in het weekend te werken",
-      "overtime": "Bereid om overuren te werken",
+      "nightShifts": "Ik ben bereid om nachtdiensten te werken",
+      "weekendShifts": "Ik ben bereid om in het weekend te werken",
+      "overtime": "Ik ben bereid om overuren te werken",
       "licenceCategories": "Rijbewijscategorieën",
-      "ownVehicle": "Heeft eigen voertuig",
-      "ownTools": "Heeft eigen gereedschap",
+      "ownVehicle": "Ik heb een eigen voertuig",
+      "ownTools": "Ik heb eigen gereedschap",
       "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
       "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
     }
@@ -9819,10 +9819,10 @@
     "chooseLevel": "Kies niveau",
     "perMonth": "€/maand",
     "availabilityKeys": {
-      "willingToRelocate": "Bereid te verhuizen",
-      "hasTransport": "Eigen vervoer",
-      "nightShiftsOk": "Kan nachtdiensten werken",
-      "weekendShiftsOk": "Kan in het weekend werken"
+      "willingToRelocate": "Ik ben bereid te verhuizen",
+      "hasTransport": "Ik heb eigen vervoer",
+      "nightShiftsOk": "Ik kan nachtdiensten werken",
+      "weekendShiftsOk": "Ik kan in het weekend werken"
     },
     "imageOcr": {
       "label": "Cv-foto / afbeelding (JPG, PNG)",

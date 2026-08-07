@@ -75,11 +75,60 @@ shared `MessageButton`'s own ~26 px styling). Both are reported in
 
 | field | value |
 |---|---|
-| PR | see branch `feat/cc/w7-s4-profile-ia-cleanup` |
-| merge SHA | pending |
+| PR | #1054 — MERGED |
+| merge SHA | `d5f3f9a539992d05b450e1af28dde7a8f52bf703` (PR #1054, squash-merged) |
 | deployment | n/a (no migration; ships with the next main deploy) |
 | owner gates hit | none |
 | resulting W7 | ~82% |
 | next action | W7-S5 — worker-profile copy consistency |
+
+---
+
+## W7-S5 — worker profile copy consistency
+
+| field | value |
+|---|---|
+| start SHA | `d5f3f9a539992d05b450e1af28dde7a8f52bf703` (W7-S4 merged) |
+| branch | `feat/cc/w7-s5-worker-copy-consistency` |
+| worktree | `C:/Users/Mano/Documents/claud darbai/labourmarketai-wt/w7-s5` (new, own `node_modules`, own dev server `:3471`) |
+| objective | the worker's own profile speaks with one voice — the worker's |
+| before state | three voices mixed across `workerPrefs` v1/v2 and `cvImport.availabilityKeys`, in all 5 locales |
+
+### Changes
+
+**63 strings, 5 locales, 2 namespaces. No key added, renamed or removed; diff
+is exactly 63 insertions / 63 deletions.**
+
+The matrix recorded this as a Lithuanian v1-vs-v2 mismatch. It was one symptom
+of a three-surface, five-locale problem: a person filling in their own profile
+was reading a dossier written about them (`Has own transport`, `Gali dirbti…`,
+`Может работать…`). Two gender defects were found in the same pass and fixed —
+Lithuanian `Galiu dirbti vienas` (masculine-only) and Russian `Готов` where v2
+two fields below already used the inclusive `Готов(а)`.
+
+Scope boundary is deliberate and pinned in BOTH directions: instructions and
+chat questions stay second person, because that is correct for them.
+
+### Verification
+
+| check | result |
+|---|---|
+| typecheck | clean |
+| tests | 860 files / 13993 pass |
+| i18n-debt | baseline unchanged (no key added or removed) |
+| constitution / plain-language / pilot-honesty | pass |
+| browser proof | rendered form read in lt/en/ru at 1440 + 375; 12 screenshots + 2 JSONs; **zero overflow, zero console errors, zero hydration warnings** |
+| new guard | `w7-s5-worker-self-declaration-voice.test.ts`, 19 assertions |
+| migration | none |
+
+Cost: **+16 px (en) / +32 px (ru) on mobile only** from longer labels wrapping;
+desktop unchanged. Reported rather than omitted.
+
+| field | value |
+|---|---|
+| PR | pending |
+| owner gates hit | none |
+| resulting W7 | ~88% |
+| next action | W7 P1-3 — conversation-memory reality audit |
 
 ---
