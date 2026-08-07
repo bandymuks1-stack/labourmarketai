@@ -82,7 +82,7 @@ export function CvImportUpload({
 
   return (
     <div className="flex flex-col gap-2" data-testid="cv-import-upload">
-      <label className="flex cursor-pointer items-center gap-2 rounded-md border border-ink-500 bg-ink-700 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue">
+      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-ink-500 bg-ink-700 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue">
         {busy ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
         ) : (

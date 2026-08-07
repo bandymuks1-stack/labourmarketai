@@ -1070,7 +1070,7 @@ export default async function ProfilePage({
           steps link this anchor (audit PR4). */}
       <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("capabilities")}
@@ -1079,7 +1079,7 @@ export default async function ProfilePage({
         <div className="flex flex-col gap-3 px-4 pb-4">
           <Link
             href="/dashboard/journal"
-            className="w-fit font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+            className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
             data-testid="profile-mano-cv-records-link"
           >
             {tQuick("fullRecordsInCv")} →

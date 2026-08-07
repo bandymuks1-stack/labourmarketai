@@ -94,7 +94,7 @@ function LanguageRow({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger disabled:opacity-50"
+          className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger disabled:opacity-50"
           data-testid={`worker-language-remove-${entry.lang}`}
         >
           {labels.remove}
@@ -205,6 +205,7 @@ export function WorkerLanguagesSection({
               <Button
                 type="submit"
                 size="sm"
+                className="min-h-11"
                 loading={addPending}
                 disabled={addPending || lang === "" || level === ""}
                 data-testid="worker-languages-add"
