@@ -771,13 +771,13 @@
     "candidates": {
       "context": "Bedrijf · Werven",
       "whatTitle": "Wat je hier kunt doen",
-      "whatBody": "Bekijk kandidaten en shortlists voor je behoeften.",
-      "primaryLabel": "Werknemers vinden",
-      "nextLine": "Volgende: markeer wie past en start een gesprek.",
+      "whatBody": "Houd je eigen privénotities bij over mensen en aanbieders met wie je wilt werken — ook als ze zich nog niet hebben geregistreerd.",
+      "primaryLabel": "Geregistreerde werknemers zoeken",
+      "nextLine": "Volgende: zodra iemand zich registreert, koppel je het concept aan hun echte account.",
       "flow": {
-        "step1": "Voeg een kandidaat toe of bekijk je concepten.",
-        "step2": "Het systeem houdt ze privé totdat jij beslist.",
-        "step3": "Markeer wie past en start een gesprek."
+        "step1": "Voeg een persoon of aanbieder toe die je wilt onthouden, of bekijk je concepten.",
+        "step2": "Alleen jij ziet deze notities — ze worden niet gedeeld met je organisatie.",
+        "step3": "Zodra ze zich registreren, koppel je het concept aan hun echte account."
       }
     },
     "buyer": {
@@ -8748,7 +8748,7 @@
       "title": "Andere startpunten",
       "demand": "Werkbehoefte of positie aanmaken",
       "project": "Project aanmaken",
-      "candidates": "Kandidaten bekijken",
+      "candidates": "Kandidaat-concepten",
       "network": "Mensen en bedrijven vinden"
     },
     "summary": {

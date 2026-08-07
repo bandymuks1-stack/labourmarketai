@@ -771,13 +771,13 @@
     "candidates": {
       "context": "Unternehmen · Einstellen",
       "whatTitle": "Was Sie hier tun können",
-      "whatBody": "Prüfen Sie Kandidaten und Shortlists für Ihre Bedarfe.",
-      "primaryLabel": "Arbeitskräfte finden",
-      "nextLine": "Als Nächstes: Markieren Sie die Passenden und starten Sie eine Unterhaltung.",
+      "whatBody": "Halten Sie Ihre eigenen privaten Notizen zu Personen und Anbietern fest, mit denen Sie arbeiten möchten — auch zu noch nicht registrierten.",
+      "primaryLabel": "Registrierte Mitarbeiter finden",
+      "nextLine": "Als Nächstes: Sobald sich jemand registriert, verknüpfen Sie den Entwurf mit dem echten Konto.",
       "flow": {
-        "step1": "Fügen Sie einen Kandidaten hinzu oder prüfen Sie Ihre Entwürfe.",
-        "step2": "Das System hält sie privat, bis Sie sich entscheiden.",
-        "step3": "Markieren Sie die Passenden und starten Sie eine Unterhaltung."
+        "step1": "Fügen Sie eine Person oder einen Anbieter hinzu, oder sehen Sie Ihre Entwürfe durch.",
+        "step2": "Diese Notizen sehen nur Sie — sie werden nicht mit Ihrer Organisation geteilt.",
+        "step3": "Sobald sie sich registrieren, verknüpfen Sie den Entwurf mit dem echten Konto."
       }
     },
     "buyer": {
@@ -8748,7 +8748,7 @@
       "title": "Weitere Einstiegspunkte",
       "demand": "Arbeitsbedarf oder Position anlegen",
       "project": "Projekt anlegen",
-      "candidates": "Kandidaten ansehen",
+      "candidates": "Kandidaten-Entwürfe",
       "network": "Personen und Firmen finden"
     },
     "summary": {

@@ -771,13 +771,13 @@
     "candidates": {
       "context": "Company · Hire",
       "whatTitle": "What you can do here",
-      "whatBody": "Review candidates and shortlists for your needs.",
-      "primaryLabel": "Find workers",
-      "nextLine": "Next: mark the ones who fit and start a conversation.",
+      "whatBody": "Keep your own private notes about people and providers you want to engage — including those who have not registered yet.",
+      "primaryLabel": "Find registered workers",
+      "nextLine": "Next: when one of them registers, link the draft to their real account.",
       "flow": {
-        "step1": "Add a candidate or review your drafts.",
-        "step2": "The system keeps them private until you decide.",
-        "step3": "Mark the ones who fit and start a conversation."
+        "step1": "Add a person or provider you want to remember, or review your drafts.",
+        "step2": "Only you can see these notes — they are not shared with your organisation.",
+        "step3": "When they register, link the draft to their real account."
       }
     },
     "buyer": {
@@ -8748,7 +8748,7 @@
       "title": "Other starting points",
       "demand": "Create a work need or position",
       "project": "Create a project",
-      "candidates": "Browse candidates",
+      "candidates": "Your candidate drafts",
       "network": "Find people and companies"
     },
     "summary": {
