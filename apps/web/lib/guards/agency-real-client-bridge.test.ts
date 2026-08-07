@@ -143,9 +143,20 @@ describe("7. owner-gated DRAFT — RED, unapplied", () => {
   it("APPLIED_LEDGER carries the Deferred entry", () => {
     const ledger = readRepo("docs/APPLIED_LEDGER.md");
     const d = ledger.indexOf("## Deferred");
-    const e = ledger.indexOf("20260723180000_agency_real_client_bridge");
     expect(d).toBeGreaterThan(-1);
-    expect(e).toBeGreaterThan(d);
+    // Search the DEFERRED SLICE, not the whole file by first occurrence.
+    //
+    // The old assertion was `indexOf(name) > indexOf("## Deferred")`, which
+    // silently required that the migration be mentioned NOWHERE earlier in the
+    // ledger. The 2026-08-07 reconciliation added a placement note above the
+    // Deferred list (this migration is applied in production and recorded
+    // inside a heading that says "NOT applied" — see
+    // docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md §3.1), and the
+    // guard failed on a doc note rather than on any change of substance.
+    //
+    // What this guard actually means is "the Deferred list carries the entry",
+    // so it now checks exactly that. Mentions elsewhere are free.
+    expect(ledger.slice(d)).toContain("20260723180000_agency_real_client_bridge");
   });
 });
 
