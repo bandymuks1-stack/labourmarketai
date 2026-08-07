@@ -8663,6 +8663,7 @@
     "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Juos rasite jų pačių puslapiuose.",
     "conflict": {
       "flag": "Datos persidengia",
+      "withVisible": "Sutampa su {partners} nuo {date}.",
       "hiddenByFilter": "Sutampa su {sources}, kurį slepia šis filtras."
     },
     "context": {
