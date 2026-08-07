@@ -19,6 +19,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
+import { serverEventLocale } from "@/lib/telemetry/server-locale";
 import {
   hasMeaningfulEstimate,
   validateEstimateInputs,
@@ -351,15 +352,20 @@ export async function submitDemandRequest(
       // Observable drift signal (audit F-E3): if RLS/columns ever drift, the
       // worker board silently loses country/team/start metadata — surface it
       // in pilot_events instead of console-only. Fire-and-forget.
-      void recordTelemetryEvent({
-        sessionId: "server:demand-request",
-        route: "/dashboard",
-        locale: "lt",
-        eventName: "task_error",
-        taskName: "demand_structured_fields",
-        result: "error",
-        errorCode: upErr.code ?? "update_failed",
-      }).catch(() => {});
+      void serverEventLocale()
+        .then((locale) =>
+          recordTelemetryEvent({
+            sessionId: "server:demand-request",
+            route: "/dashboard",
+            // The REAL request locale, or "unknown" — never a guessed "lt".
+            locale,
+            eventName: "task_error",
+            taskName: "demand_structured_fields",
+            result: "error",
+            errorCode: upErr.code ?? "update_failed",
+          }),
+        )
+        .catch(() => {});
     }
   }
 

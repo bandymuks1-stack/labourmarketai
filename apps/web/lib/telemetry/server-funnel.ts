@@ -25,6 +25,7 @@
 import "server-only";
 import { recordTelemetryEvent } from "./actions";
 import { analyticsAttributionMetadata } from "./analytics-attribution";
+import { serverEventLocale } from "./server-locale";
 import type { FunnelEventName, FunnelMetadata } from "./funnel-events";
 
 export function emitServerFunnelEvent(
@@ -43,12 +44,15 @@ export function emitServerFunnelEvent(
   // billing_subject) — resolved HERE so all emit sites inherit it and no
   // call site can fabricate an organization. Explicit metadata wins on key
   // collision (there is none today; the attribution keys are reserved).
-  void analyticsAttributionMetadata()
-    .then((attribution) =>
+  void Promise.all([analyticsAttributionMetadata(), serverEventLocale()])
+    .then(([attribution, locale]) =>
       recordTelemetryEvent({
         sessionId: `server:${opts.source}`.slice(0, 64),
         route: opts.route ?? "/dashboard",
-        locale: "lt",
+        // W14 analytics locale truth: the REAL request locale, or "unknown".
+        // This used to be hardcoded "lt", which quietly over-reported
+        // Lithuanian by every server-emitted event in the funnel.
+        locale,
         eventName: event,
         result: "info",
         metadata: { ...attribution, ...(opts.metadata ?? {}) },
