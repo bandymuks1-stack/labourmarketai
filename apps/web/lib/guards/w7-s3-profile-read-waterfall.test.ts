@@ -109,8 +109,12 @@ describe("W7-S3 — no read runs twice", () => {
   it("every canonical reader is called exactly once in the render path", () => {
     for (const reader of [
       "getOwnAvatar",
-      "getOwnedOrganizations",
-      "getEmployerOwnerProfileId",
+      // W7-S4 removed two readers from this page along with the blocks they
+      // fed: `getOwnedOrganizations` (→ `/dashboard/network`, which already
+      // called it) and `getEmployerOwnerProfileId` (→
+      // `/dashboard/communication`). Neither is listed here any more because
+      // this guard asserts "exactly once", and the honest count on this page
+      // is now zero — see the dedicated assertion below.
       "getOwnTrustSignals",
       "getOwnAvailabilityPrefs",
       "getOwnWorkerLanguages",
@@ -123,6 +127,22 @@ describe("W7-S3 — no read runs twice", () => {
     ]) {
       const calls = (both.match(new RegExp(`\\b${reader}\\(`, "g")) ?? []).length;
       expect(calls, `${reader} is called ${calls}× — expected exactly 1`).toBe(1);
+    }
+  });
+
+  it("W7-S4 — the two moved readers do not run on this page at all", () => {
+    // The waterfall only shrinks if the read LEAVES, not if it is merely
+    // unrendered. A reader called here for a block that no longer exists
+    // would be a pure cost, so zero is the assertion, not "at most one".
+    // Counted over CODE: both names still appear in the comments that record
+    // where they went, and that documentation is worth keeping.
+    const stripped = both
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^[ \t]*\/\/.*$/gm, "");
+    for (const moved of ["getOwnedOrganizations", "getEmployerOwnerProfileId"]) {
+      const calls = (stripped.match(new RegExp(`\\b${moved}\\(`, "g")) ?? [])
+        .length;
+      expect(calls, `${moved} still runs on the profile ${calls}×`).toBe(0);
     }
   });
 

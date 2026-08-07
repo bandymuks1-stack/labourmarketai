@@ -16,8 +16,6 @@ import {
   supportedSkillIds,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
-import { MessageButton } from "@/components/app/message-button";
-import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
@@ -58,8 +56,6 @@ import {
   type ExternalProfilesRead,
 } from "@/lib/worker/external-profiles";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
-import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import { Building2 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
@@ -117,7 +113,7 @@ export default async function ProfilePage({
     tDocs,
     tOpp,
     tQuick,
-    tHub,
+    tNetwork,
     tPrefs,
     tLangs,
     tExt,
@@ -134,7 +130,10 @@ export default async function ProfilePage({
     getTranslations("documents"),
     getTranslations("opportunities"),
     getTranslations("quickNav"),
-    getTranslations("marketplaceHub"),
+    // W7-S4: `marketplaceHub` left with the managed-companies block; the only
+    // namespace this page still needs from that move is the network label for
+    // the handoff link.
+    getTranslations("network"),
     getTranslations("workerPrefs"),
     getTranslations("workerLanguages"),
     getTranslations("externalProfiles"),
@@ -161,15 +160,15 @@ export default async function ProfilePage({
   /**
    * ── W7-S3 STAGE 4 — everything that needs only `user`, ONE stage ────────
    *
-   * `getOwnAvatar()` and `getOwnedOrganizations()` were two further serial
-   * awaits after this batch, although neither reads anything the batch
-   * produces — both resolve the signed-in user themselves. They join the
-   * batch.
+   * `getOwnAvatar()` was a further serial await after this batch, although it
+   * reads nothing the batch produces — it resolves the signed-in user itself.
+   * It joins the batch.
    *
-   * Managed companies (IA cleanup v2 #4): the profile is the person identity
-   * surface, so it shows the REAL companies this person owns/manages
-   * (account-linked professional identities) with a name + add action. No fake
-   * companies — an empty list simply renders the add CTA.
+   * W7-S4: `getOwnedOrganizations()` was in this batch too, for the
+   * `#managed-companies` block. That block now lives on `/dashboard/network`,
+   * which was already calling the same reader — so the call moved rather than
+   * multiplied, and this page dropped a read it no longer renders anything
+   * from.
    *
    * ACCEPTED, NOT OVERLOOKED: `getOwnAvatar()` reads the `profiles` row a
    * second time (for `avatar_url`). Folding that column into the select above
@@ -187,7 +186,6 @@ export default async function ProfilePage({
     workerRes,
     profRowsRes,
     avatar,
-    ownedOrgsResult,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -209,7 +207,6 @@ export default async function ProfilePage({
       .maybeSingle(),
     supabase.from("professions").select("id, slug").eq("is_active", true),
     getOwnAvatar(),
-    getOwnedOrganizations(),
   ]);
   const profile = profileRes.data;
   const roleRows = roleRowsRes.data;
@@ -218,10 +215,6 @@ export default async function ProfilePage({
 
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
-  const managedCompanies =
-    ownedOrgsResult.kind === "ok"
-      ? ownedOrgsResult.organizations.filter((o) => o.organizationType !== "agency")
-      : [];
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : null;
@@ -244,7 +237,6 @@ export default async function ProfilePage({
     .map(({ id, slug }) => ({ id, slug }));
 
   let currentProfessionId: string | null = null;
-  let employerOwnerProfileId: string | null = null;
   let workerDirections: WorkerDirection[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
@@ -284,15 +276,19 @@ export default async function ProfilePage({
     /**
      * ── W7-S3 STAGE 5 — everything that needs only `workerId` / `user.id` ──
      *
-     * These thirteen reads were EIGHT serial stages: one batch of five,
-     * followed by six standalone awaits and a thirteenth (`getOwnTrustSignals`)
-     * that was awaited inside the JSX. Not one of them consumes another's
-     * result — every single one is keyed by `workerId` or `user.id`, both
-     * already known. The waterfall was accidental, not structural.
+     * These reads were EIGHT serial stages: one batch of five, followed by six
+     * standalone awaits and a last one (`getOwnTrustSignals`) that was awaited
+     * inside the JSX. Not one of them consumes another's result — every single
+     * one is keyed by `workerId` or `user.id`, both already known. The
+     * waterfall was accidental, not structural.
      *
      * W7-S1 already removed the page's own `journal_entries` count (a second
      * read of rows the canonical player card counts); what remains here is the
      * project-linked subset, which is a different question.
+     *
+     * W7-S4 removed `getEmployerOwnerProfileId()` — it existed only to decide
+     * whether the "Rašyti įmonei" button could render, and that button now
+     * lives on `/dashboard/communication`, which resolves it there.
      */
     const [
       prefsRes,
@@ -303,7 +299,6 @@ export default async function ProfilePage({
       projCountRes,
       certDocsRes,
       wpAllRes,
-      employerOwner,
       wsRes,
       linkRes,
       ecRes,
@@ -334,9 +329,6 @@ export default async function ProfilePage({
         .select("profession_id, is_primary")
         .eq("worker_id", workerId)
         .order("is_primary", { ascending: false }),
-      // The employing company owner (if any) so the worker can message them —
-      // read-only, RLS-scoped to the worker's own accepted invitation.
-      getEmployerOwnerProfileId(),
       // ALL of the worker's saved skills (read model — never filtered down).
       supabase
         .from("worker_skills")
@@ -373,7 +365,6 @@ export default async function ProfilePage({
     workerAchievements = achRes;
     projectLinkedEntryCount = projCountRes.count ?? 0;
     certificateDocCount = certDocsRes.count ?? 0;
-    employerOwnerProfileId = employerOwner;
     trustSignals = trust;
 
     const wpAll = wpAllRes.data;
@@ -623,7 +614,12 @@ export default async function ProfilePage({
           {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
               stacks to a 2-column grid on mobile (max 2 actions across) and
               flows inline only from sm+. */}
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:text-center sm:[&>a]:text-left">
+          {/* W7-S4: every link in this row is `min-h-11` (44 px). They were
+              26 px — the largest single cluster of W7-S2's remaining sub-44
+              debt (A-2), and the row had to be consistent to take the network
+              handoff below without one odd-sized chip. Visual size is
+              unchanged; only the tap area grew. */}
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
             {workerId ? (
               <Link
                 href={"/dashboard/opportunities" as "/dashboard"}
@@ -663,6 +659,17 @@ export default async function ProfilePage({
                 {tGallery("title")}
               </Link>
             ) : null}
+            {/* W7-S4 handoff: `#managed-companies` left this page for
+                `/dashboard/network`. That route is a primary nav tab, so this
+                is a courtesy pointer for the habit the move breaks — one link
+                in an existing row, not a replacement card. */}
+            <Link
+              href={"/dashboard/network" as "/dashboard"}
+              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="profile-network-link"
+            >
+              {tNetwork("title")} →
+            </Link>
             <Link
               href="/dashboard"
               className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -684,7 +691,10 @@ export default async function ProfilePage({
         items={[
           { href: "#profile-top", label: tQuick("top") },
           { href: "#profile-identity", label: tQuick("identity") },
-          { href: "#managed-companies", label: tQuick("companies") },
+          // W7-S4: `#managed-companies` removed — the anchor's target moved to
+          // `/dashboard/network`. A jump chip pointing at a section that is no
+          // longer on the page is a dead control, and this bar is in-page
+          // anchors only. The route link lives in the header action row.
           { href: "#profile-edit", label: tQuick("skills") },
         ]}
       />
@@ -745,61 +755,17 @@ export default async function ProfilePage({
         <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
       </section>
 
-      {/* Managed companies + individual activity (IA cleanup v2 #4): the person
-          identity carries the account-linked company identities (real owned
-          organizations, by name) and the add-company action. Self-employed /
-          individual activity is the person acting WITHOUT a company — framed
-          here, not as a separate top-level menu item. No fake companies. */}
-      <section
-        id="managed-companies"
-        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
-        data-testid="profile-managed-companies"
-      >
-        <div className="flex items-center gap-2 text-text-primary">
-          <Building2 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-          <h2 className="font-display text-lg font-semibold">
-            {tHub("company.title")}
-          </h2>
-        </div>
-        {managedCompanies.length > 0 ? (
-          <>
-            <ul className="flex flex-col gap-2">
-              {managedCompanies.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href="/dashboard/company"
-                    className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-primary hover:border-brand-blue hover:text-brand-blue"
-                  >
-                    <span className="truncate font-medium">{c.name}</span>
-                    <span aria-hidden className="shrink-0 text-text-muted">→</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/dashboard/start/company"
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
-              data-testid="profile-add-company"
-            >
-              + {tHub("company.noCompanyCta")}
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-text-secondary">{tHub("company.noCompanyDesc")}</p>
-            <Link
-              href="/dashboard/start/company"
-              className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
-              data-testid="profile-add-company"
-            >
-              + {tHub("company.noCompanyCta")}
-            </Link>
-          </>
-        )}
-        <p className="text-xs leading-relaxed text-text-muted">
-          {tHub("individual.desc")}
-        </p>
-      </section>
+      {/* W7-S4 — `#managed-companies` MOVED to `/dashboard/network`
+          (`network-organizations`), which already rendered this exact
+          `getOwnedOrganizations()` list against the same `/dashboard/company`
+          destination. This page is the PERSON identity; "which organizations
+          does my account own" is an organization-relationship fact, and it now
+          has one home instead of two that could disagree. The add-company
+          action, the zero-company state and the individual-activity note went
+          with it — see `docs/audits/W7_S4_PROFILE_INFORMATION_ARCHITECTURE.md`
+          §3 for the row-by-row map. The page's own `getOwnedOrganizations()`
+          read went with the block; it had no other consumer here, so the
+          profile does one fewer DB round trip. */}
 
       <FeatureNote testId="feature-note-profile">
         {tFeatureNotes("workerProfile")}
@@ -999,9 +965,14 @@ export default async function ProfilePage({
           standalone ProfileProcessAssistant) were removed so the profile no
           longer splits into competing summary/evidence/helper panels. */}
 
-      {workerId && employerOwnerProfileId && (
-        <MessageButton profileId={employerOwnerProfileId} labelKey="messageCompany" />
-      )}
+      {/* W7-S4 — the worker→employer "Rašyti įmonei" entry MOVED to
+          `/dashboard/communication`. It opened a conversation and navigated
+          away from this page, and its one failure state
+          (`?notice=cannot_open`) already renders THERE — so the control lived
+          on the person-identity surface while both its success and its failure
+          belonged to the communication surface. Same button, same
+          `getEmployerOwnerProfileId()` resolution, same no-dead-button rule;
+          only the page changed. */}
 
       {/* Text-first composer — universal. Available to every authenticated
           user regardless of role. The catalogued worker_skills picker

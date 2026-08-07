@@ -109,11 +109,13 @@ for (const vp of [
 
   // 4 — the detailed editors below the overview are still reachable
   const editors = await page.evaluate(() =>
-    ["#profile-edit", "#cv-availability", "#cv-languages", "#capabilities", "#managed-companies", "#profile-identity"].filter(
+    ["#profile-edit", "#cv-availability", "#cv-languages", "#capabilities", "#profile-identity"].filter(
       (id) => document.querySelector(id) !== null,
     ),
   );
-  ok("all 6 editor anchors still on the page", editors.length === 6, editors.join(" "));
+    // W7-S4 removed `#managed-companies` from this page (the block moved to
+    // `/dashboard/network`), so the editor set this proof checks is 5, not 6.
+  ok("all 5 editor anchors still on the page", editors.length === 5, editors.join(" "));
 
   // 5 — an absorbed destination actually navigates
   await page.click('[data-testid="profile-hub-opportunities-link"]');
