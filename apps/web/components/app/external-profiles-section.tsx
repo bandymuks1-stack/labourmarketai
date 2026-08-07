@@ -268,9 +268,16 @@ export function ExternalProfilesSection({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>{labels.url}</Label>
+                {/* W7-S4 (W7-S2 debt A-1): `Label` renders a `<span>`, not a
+                    `<label htmlFor>`, so this field had a VISIBLE name and no
+                    programmatic one — one of the last two unnamed perceivable
+                    inputs on the profile. Named by pointing at the visible
+                    label (the W7-S2 precedent) rather than repeating the
+                    string in an `aria-label`, so the two can never drift. */}
+                <Label id="external-profile-url-label">{labels.url}</Label>
                 <Input
                   id="external-profile-url"
+                  aria-labelledby="external-profile-url-label"
                   name="url"
                   type="url"
                   inputMode="url"

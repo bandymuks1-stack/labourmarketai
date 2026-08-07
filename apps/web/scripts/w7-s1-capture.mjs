@@ -131,7 +131,7 @@ for (const vp of [
         "#cv-availability",
         "#cv-languages",
         "#capabilities",
-        "#managed-companies",
+        // W7-S4: `#managed-companies` moved to /dashboard/network.
         "#profile-identity",
       ].filter((id) => document.querySelector(id) !== null),
       text: document.body.innerText.replace(/\n{3,}/g, "\n\n").slice(0, 1600),

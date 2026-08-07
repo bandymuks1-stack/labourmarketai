@@ -12,6 +12,7 @@ import {
   searchPeopleAndCompanies,
 } from "@/lib/invitations/network";
 import { listMyTeamEnquiries } from "@/lib/company/team-enquiries";
+import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { InvitePanel } from "@/components/app/invite-panel";
 import {
   IncomingInvitationList,
@@ -49,21 +50,40 @@ export default async function NetworkPage({
   const { q, type, org, project } = await searchParams;
 
   const t = await getTranslations("network");
+  // W7-S4: the organizations block absorbed from `/dashboard/profile`
+  // (`#managed-companies`) keeps its EXACT existing copy — the same
+  // `marketplaceHub.company.*` / `marketplaceHub.individual.desc` keys it
+  // rendered on the profile. No key is added, renamed or retranslated, so the
+  // move cannot introduce i18n debt or change what the user reads. (The
+  // `marketplaceHub` namespace name is now a misnomer — it has no marketplace
+  // caller left. Renaming it is copy debt recorded in the S4 audit, not part
+  // of an information-architecture move.)
+  const tHub = await getTranslations("marketplaceHub");
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/network`);
 
-  const [orgsResult, projects, engagements, sent, incoming, myTeamEnquiries] =
-    await Promise.all([
-      getOwnedOrganizations(),
-      listManagedProjects(),
-      listMyEngagements(),
-      listMySentInvitations(),
-      listInvitationsForMe(),
-      listMyTeamEnquiries(),
-    ]);
+  const [
+    orgsResult,
+    projects,
+    engagements,
+    sent,
+    incoming,
+    myTeamEnquiries,
+    // W7-S4: joins the existing batch rather than adding a serial stage — the
+    // move must not re-introduce the waterfall W7-S3 removed from the profile.
+    employerOwnerProfileId,
+  ] = await Promise.all([
+    getOwnedOrganizations(),
+    listManagedProjects(),
+    listMyEngagements(),
+    listMySentInvitations(),
+    listInvitationsForMe(),
+    listMyTeamEnquiries(),
+    getEmployerOwnerProfileId(),
+  ]);
   const organizations =
     orgsResult.kind === "ok"
       ? orgsResult.organizations.map((o) => ({ id: o.id, name: o.name }))
@@ -243,33 +263,107 @@ export default async function NetworkPage({
         </section>
       )}
 
-      {/* My organizations. */}
-      {organizations.length > 0 && (
-        <section className="flex flex-col gap-2" data-testid="network-organizations">
-          <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
-            {t("organizations.title")}
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {organizations.map((o) => (
-              <li key={o.id}>
-                <Link
-                  href={"/dashboard/company" as "/dashboard"}
-                  className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-                  data-testid={`network-org-${o.id}`}
-                >
-                  {o.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* My organizations — the ONE surface (W7-S4).
+          `/dashboard/profile#managed-companies` rendered this SAME
+          `getOwnedOrganizations()` list with the SAME `/dashboard/company`
+          destination, so the person-identity page and this page disagreed
+          about nothing except which of them you happened to be on. The profile
+          copy is gone; the three things it carried that this section did not
+          are folded in below: the add-company action, the honest zero-company
+          state, and the individual-activity note.
+
+          Why here and not `/dashboard/company` (which `W7_S1_PROFILE_HUB_
+          OVERVIEW.md` §11 proposed): that route is role-gated by
+          `requireRoleOrRedirect(locale, "company")` and renders only the
+          ACTIVE workspace's single company. A person with zero companies —
+          exactly the reader the add-company action is for — is redirected away
+          from it. Moving the block there would have deleted the capability
+          instead of rehoming it. */}
+      <section className="flex flex-col gap-2" data-testid="network-organizations">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+          {t("organizations.title")}
+        </h2>
+        {organizations.length > 0 ? (
+          <>
+            <ul className="flex flex-col gap-2">
+              {organizations.map((o) => (
+                <li key={o.id}>
+                  <Link
+                    href={"/dashboard/company" as "/dashboard"}
+                    className="flex min-h-11 items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
+                    data-testid={`network-org-${o.id}`}
+                  >
+                    {o.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {/* Absorbed from the profile: owning one company must never hide
+                the way to add a second. The header role-switcher only offers
+                the "add Įmonė" path to a profile that holds NO company
+                identity, so without this link a one-company owner had no
+                route to a second organization anywhere in the product. */}
+            <Link
+              href="/dashboard/start/company"
+              className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+              data-testid="network-add-company"
+            >
+              + {tHub("company.noCompanyCta")}
+            </Link>
+          </>
+        ) : (
+          /* Absorbed from the profile: this page used to render NOTHING at
+             zero organizations, so the move would have silently dropped both
+             the explanation and the first-company action. */
+          <>
+            <p className="text-sm text-text-secondary">
+              {tHub("company.noCompanyDesc")}
+            </p>
+            <Link
+              href="/dashboard/start/company"
+              className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
+              data-testid="network-add-company"
+            >
+              + {tHub("company.noCompanyCta")}
+            </Link>
+          </>
+        )}
+        {/* Absorbed from the profile: self-employed / individual activity is
+            the person acting WITHOUT a company. Said once, next to the company
+            list it contrasts with — and it now points at the personal profile
+            from a different page instead of at the page you are already on. */}
+        <p className="text-xs leading-relaxed text-text-muted">
+          {tHub("individual.desc")}
+        </p>
+      </section>
 
       {/* My active relationships (the other side of the network). */}
       <section className="flex flex-col gap-2" data-testid="network-relationships">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("relationships.title")}
         </h2>
+        {/* W7-S4: the worker→employer "Rašyti įmonei" entry, moved here from
+            `/dashboard/profile`. Same reader, same RLS scope (the caller's own
+            accepted `company_worker_invitations` row), same no-dead-button
+            rule — null resolves to nothing rendered.
+
+            NOT `/dashboard/communication`, which
+            `W7_S1_PROFILE_HUB_OVERVIEW.md` §11 named: the counterpart-trust
+            P0 guard (`message-counterpart-restricted.test.ts`) forbids ANY
+            contact button on the two thread surfaces, because a CTA beside a
+            permission-restricted counterparty is a route to a stranger. This
+            page is the relationships surface and already contacts people the
+            viewer has a real relationship with through this exact component
+            (`messageWorker`, on the search rows). Being employed by someone
+            is such a relationship, so the entry sits with the others. */}
+        {employerOwnerProfileId && (
+          <div data-testid="network-message-employer">
+            <MessageButton
+              profileId={employerOwnerProfileId}
+              labelKey="messageCompany"
+            />
+          </div>
+        )}
         {/* Why each row is here: only ACTIVE work relationships appear, and
             the chip on every row names the relationship (owner UX recovery
             v1: no unexplained people). */}
