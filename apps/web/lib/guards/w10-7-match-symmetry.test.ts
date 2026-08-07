@@ -324,7 +324,7 @@ describe("w10-7 §5.3 — pinned asymmetry: the worker-board need is REDUCED", (
     expect(full.structuredV2?.engagement_form).toBe("company_subcontract");
   });
 
-  it("needFromDemandRow (the P0-1 fix) restores structuredV2; the remaining drop-list is EXACTLY {escoSkillUris, languages}", () => {
+  it("needFromDemandRow (the P0-1 fix) restores structuredV2; the remaining drop-list is EXACTLY {escoSkillUris, languages}, and `languages` is now DECLARED as unknown", () => {
     const { need: board } = needFromDemandRow({
       role_text: ROLE,
       country: COUNTRY,
@@ -334,13 +334,96 @@ describe("w10-7 §5.3 — pinned asymmetry: the worker-board need is REDUCED", (
     expect(Object.keys(board).sort()).toEqual([
       "city",
       "country",
+      // W10 — the reduction is declared, not silent. This key exists ONLY on
+      // the reduced builder, on purpose: it is the board saying "I cannot see
+      // customer_requests.language_requirement", which is true by construction
+      // of the gated RPC row it builds from.
+      "languageRequirementUnknown",
       "needSource",
       "professionSlug",
       "skillIds",
       "structuredV2",
     ]);
+    expect(board.languageRequirementUnknown).toBe(true);
+    // The scouting builder reads the column, so it must NEVER claim unknown.
+    expect(full.languageRequirementUnknown).toBeUndefined();
+
     const dropped = Object.keys(full).filter((k) => !(k in board));
     expect(dropped.sort()).toEqual(["escoSkillUris", "languages"]);
+  });
+
+  it("the `languages` drop is CONSEQUENTIAL — and the board now says so instead of staying silent", () => {
+    // A demand that stated its languages in the LEGACY column and not in
+    // structured v2, matched against a worker who speaks neither. This is the
+    // exact shape the two paths disagreed about.
+    const LANG_ROW = requestRow({
+      language_requirement: "English, Russian",
+      payload: null,
+    });
+    const facts = factsFor(needFromRoleText(ROLE, COUNTRY, null).need);
+    // The subject mirrors carry no `languages` field (neither real builder
+    // sets one on this path), so it is stated explicitly here — the point of
+    // the test is the DEMAND side, and an unknown worker side would mask it.
+    const speaksOnlyLt = { languages: ["lt"] as readonly string[] };
+
+    const { need: scouting } = buildNeedFromRequestRow(LANG_ROW, new Map());
+    const resScouting = matchWorkerToNeed(scouting, {
+      ...supplySideSubject(facts),
+      ...speaksOnlyLt,
+    });
+
+    // Scouting reads the column: a required language the worker lacks is a
+    // HARD block, so the match cannot be better than weak.
+    expect(resScouting.blocking.map((b) => b.criterion)).toContain("language");
+    expect(resScouting.eligible).toBe(false);
+    expect(resScouting.status).toBe("weak");
+
+    const { need: board } = needFromDemandRow({
+      role_text: ROLE,
+      country: COUNTRY,
+      location_label: null,
+    });
+    const resBoard = matchWorkerToNeed(board, {
+      ...workerSideSubject(facts),
+      ...speaksOnlyLt,
+    });
+
+    // The board still cannot BLOCK — it never receives the requirement, and
+    // the engine's doctrine is that an absent fact degrades to unknown, never
+    // to "not met". What changed is that the absence is now REPORTED on the
+    // demand side, on the same card that prints the tier, rather than reading
+    // as "this demand requires no languages".
+    expect(resBoard.missingData).toContain("language_requirement_unknown");
+    expect(
+      resBoard.missingFacts.some(
+        (m) => m.criterion === "language" && m.side === "demand",
+      ),
+    ).toBe(true);
+  });
+
+  it("a demand that DID state languages in structured v2 is not reported as unknown", () => {
+    // The v2 CEFR check evaluates the real requirement on both paths, so
+    // claiming "unknown" there would be noise — and worse, wrong.
+    const { need: board } = needFromDemandRow({
+      role_text: ROLE,
+      country: COUNTRY,
+      location_label: null,
+      structured: {
+        requirements: { languages: [{ lang: "en", level: "B2" }] },
+      },
+    });
+    // The flag is still set — this builder genuinely cannot read the legacy
+    // column — but the ENGINE suppresses the report, because the demand did
+    // state a requirement and the v2 CEFR check evaluates it.
+    expect(board.languageRequirementUnknown).toBe(true);
+    expect(board.structuredV2?.requirements?.languages?.length).toBe(1);
+
+    const facts = factsFor(board);
+    const res = matchWorkerToNeed(board, {
+      ...workerSideSubject(facts),
+      languages: ["lt"] as readonly string[],
+    });
+    expect(res.missingData).not.toContain("language_requirement_unknown");
   });
 
   it("the reduction is consequential: an engagement-form conflict BLOCKS scouting but is invisible to the role-text need", () => {
