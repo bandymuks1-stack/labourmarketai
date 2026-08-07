@@ -1,0 +1,306 @@
+{
+  "generatedFor": "2026-08-07T23:30:00Z",
+  "results": [
+    {
+      "timezoneId": "UTC",
+      "viewport": "1440x900",
+      "consoleErrors": [],
+      "resolvedZone": "UTC",
+      "offsetMinutes": 0,
+      "ambientDay": "7",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    },
+    {
+      "timezoneId": "UTC",
+      "viewport": "375x812",
+      "consoleErrors": [],
+      "resolvedZone": "UTC",
+      "offsetMinutes": 0,
+      "ambientDay": "7",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    },
+    {
+      "timezoneId": "Europe/Vilnius",
+      "viewport": "1440x900",
+      "consoleErrors": [],
+      "resolvedZone": "Europe/Vilnius",
+      "offsetMinutes": -180,
+      "ambientDay": "8",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    },
+    {
+      "timezoneId": "Europe/Vilnius",
+      "viewport": "375x812",
+      "consoleErrors": [],
+      "resolvedZone": "Europe/Vilnius",
+      "offsetMinutes": -180,
+      "ambientDay": "8",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    },
+    {
+      "timezoneId": "America/New_York",
+      "viewport": "1440x900",
+      "consoleErrors": [],
+      "resolvedZone": "America/New_York",
+      "offsetMinutes": 240,
+      "ambientDay": "7",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    },
+    {
+      "timezoneId": "America/New_York",
+      "viewport": "375x812",
+      "consoleErrors": [],
+      "resolvedZone": "America/New_York",
+      "offsetMinutes": 240,
+      "ambientDay": "7",
+      "rows": {
+        "lt": {
+          "late": "2026-08-07",
+          "lateDay": "07",
+          "early": "2026-08-07",
+          "dateOnly": "2026-08-07",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "en": {
+          "late": "8/7/2026",
+          "lateDay": "7",
+          "early": "8/7/2026",
+          "dateOnly": "8/7/2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "ru": {
+          "late": "07.08.2026",
+          "lateDay": "7",
+          "early": "07.08.2026",
+          "dateOnly": "07.08.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "nl": {
+          "late": "7-8-2026",
+          "lateDay": "7",
+          "early": "7-8-2026",
+          "dateOnly": "7-8-2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        },
+        "de": {
+          "late": "7.8.2026",
+          "lateDay": "7",
+          "early": "7.8.2026",
+          "dateOnly": "7.8.2026",
+          "dateTime": "23:30",
+          "dayKey": "2026-08-07"
+        }
+      }
+    }
+  ],
+  "failures": []
+}

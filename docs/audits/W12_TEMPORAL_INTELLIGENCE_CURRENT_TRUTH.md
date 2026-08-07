@@ -81,6 +81,13 @@ the only one whose host table already exists.
 
 ## 3.5 Time presentation — the canonical model, determined from code (2026-08-07)
 
+> **STATUS SUPERSEDED 2026-08-08 — the inconsistency below is FIXED.**
+> The slice §3.5.3 prepared has shipped; see §3.6 for the doctrine and
+> `W12_TIMEZONE_CONSISTENCY_SLICE.md` for the record. §3.5.1–§3.5.3 are kept as
+> written because they are the diagnosis the fix started from — but **four of
+> their specifics were wrong**, and each error would have left a live surface
+> broken. Read §3.6.1 before trusting the file list or the counts here.
+
 **Status: `W12_TIMEZONE_MODEL_DETERMINED_UTC__PRESENTATION_INCONSISTENCY_FOUND`**
 
 The train asked whether the canonical model is *UTC storage → user-local
@@ -154,29 +161,96 @@ this audit does not propose.
 
 ---
 
+## 3.6 CURRENT PRODUCT TIMEZONE MODEL (doctrine, 2026-08-08)
+
+This is the binding statement. Anything above it that disagrees is history.
+
+| Layer | Model |
+|---|---|
+| **Storage** | **UTC.** Every timestamp column is stored and compared in UTC. |
+| **Canonical display** | **UTC.** A date is shown as the UTC calendar day/time, on every surface, for every viewer. |
+| **Localization** | **Locale only.** The locale chooses ordering, separators, month and weekday names. It never chooses a timezone. |
+| **User-local timezone** | **NOT IMPLEMENTED.** No preference exists in the schema and none is inferred from the browser. |
+| **Organisation timezone** | **NOT IMPLEMENTED.** No column, no inference. |
+| **Travel-time timezone intelligence** | **FUTURE.** Depends on a source that has no model yet. |
+
+**Why UTC display rather than viewer-local.** A labour-market "work day" is a
+business date, not an instant. A booking on the 7th must be the 7th for the
+worker, the employer and a manager reading the same row from another country.
+Viewer-local display would make the same row name different days to different
+readers — which is precisely the defect §3.5.1 reported.
+
+**How it is enforced.** One module — `apps/web/lib/time/display.ts` — forces
+`timeZone: "UTC"` after spreading the caller's options, so no call shape can
+format in another zone. `lib/guards/w12-utc-time-presentation.test.ts` bans the
+ambient-zone platform calls repo-wide and pins the 32 surfaces to the module.
+
+**Changing this model is an owner decision.** Moving to viewer-local or
+per-organisation timezones is a product change with schema, UX and honesty
+consequences; it is not a refactor and must not be done as one.
+
+### 3.6.1 Corrections to §3.5, found while implementing it
+
+§3.5's central claim was right: presentation disagreed with the projection.
+Its inventory was not. Full detail in `W12_TIMEZONE_CONSISTENCY_SLICE.md` §1.
+
+1. **"15 client surfaces" — only 7 are client components.** The other 8 are
+   Server Components, where the ambient zone is the *server process* (UTC on
+   Vercel), not the browser. Latent rather than live, but equally unpinned.
+2. **7 files were missing** from the list: `communication/page`,
+   `communication/[conversationId]/page`, `admin/telemetry`, `admin/support`,
+   `admin/language-feedback`, `worker-instruction-card`, `profile-summary`.
+3. **§3.5.2's "the only such call in the codebase" is wrong.**
+   `worker-instruction-card.tsx:64` was a second locale-less call, and worse —
+   it rendered a date *and* a time. §3.5.2's predicted "small thread-through"
+   for the handover panel was also unnecessary: it is a client component, so
+   `useLocale()` was always in scope.
+4. **A second, larger class was never scanned for: 16 `Intl.DateTimeFormat`
+   sites with no `timeZone`** — including **all five formatters on
+   `/dashboard/planning`**, the canonical W12 surface, and **two in
+   `lib/player-card/labels.ts`**, a file §3.5 names among the formatters that
+   "pin it explicitly". Three of its four pin it; two inline calls did not.
+5. **Two day-GROUPING keys** (`journal/page`, `inbox/quick/page`) were derived
+   in the ambient zone while their labels came from a UTC instant — the actual
+   mechanism behind "agenda says the 7th, journal says the 8th", since that key
+   is the `?date=` value the UTC projection resolves.
+
+Corrected totals: **22 files**, **32 `toLocale*` sites**, **16 unpinned
+`Intl.DateTimeFormat` sites**, **2 locale-less calls**, **2 ambient day keys**.
+
+---
+
 ## 4. Safe work available (none blocked on the owner)
 
 | Item | Why it is safe |
 |---|---|
 | **A — source inventory** | done, this document |
-| **B — timezone clarity** | **DONE as an audit (§3.5)**: the canonical model is UTC storage → **UTC** display, pinned in all five server formatters. But 15 client surfaces render in BROWSER-LOCAL time, so the same row can show two different calendar days. Prepared slice in §3.5.3, zero migration, not implemented |
+| **B — timezone clarity** | **DONE AND SHIPPED 2026-08-08.** Doctrine written (§3.6); one UTC-pinned formatter (`lib/time/display.ts`); 31 files migrated; ratchet guard (47 assertions, proven to fail on a reintroduced violation); browser proof in real Chromium under Europe/Vilnius + America/New_York at 1440+375 with a control proving the override fires. Zero migration. NOTE: the §3.5 inventory was incomplete in four ways — see §3.6.1 |
 | **C — UI explanation of conflicts** | conflicts are already marked and counted on the item; explaining *why* two items conflict is presentation only |
 | **D — projection consistency** | already guaranteed by §2's single-calculation rule; a guard pinning that no second reader appears would make it enforced rather than conventional |
 | **E — date-format consistency** | one formatter is already used server-side for the panel; verify the planning page and chat sentence share it |
-| **F — duplicate time truth elimination** | **REOPENED (§3.5.1).** True of STORAGE — there is no second calendar store. NOT true of PRESENTATION: the UTC projection and 15 browser-local client renderers are a second time truth, which the storage-level check could not see |
+| **F — duplicate time truth elimination** | **CLOSED 2026-08-08.** Was true of STORAGE all along; the PRESENTATION half is now closed too — every date surface renders through the one UTC-pinned formatter, and the two day-grouping keys that disagreed with their own labels were moved to `utcDayKey`. See `W12_TIMEZONE_CONSISTENCY_SLICE.md` |
 | **G — travel-time seam** | interface-only, no paid provider. Genuinely safe, but it is the seam for a source with no model, so it is scaffolding for owner-gated work |
 | **H — browser/mobile proof** | safe |
 
-**None of A–H was implemented in this train.** They are recorded as available,
-not done — the train's implementation effort went to W11 F7, W8 candidates and
-the W10 matching-truth fix.
+**None of A–H was implemented in the train that wrote this document.** They were
+recorded as available, not done — that train's implementation effort went to
+W11 F7, W8 candidates and the W10 matching-truth fix.
+
+**Update 2026-08-08:** items **B** and **F** are now implemented and shipped.
+**C** (conflict explanation UX), **D** (projection-consistency guard), **E**
+(date-format consistency — largely absorbed by B, since all surfaces now share
+one formatter), **G** (travel-time seam) and **H** (browser/mobile proof of the
+authenticated surfaces) remain available and unstarted.
 
 ---
 
 ## 5. Resulting state
 
-`W12_SAFE_TECHNICAL_WORK_AVAILABLE_NOT_STARTED`
-· `W12_TIMEZONE_MODEL_DETERMINED_UTC__PRESENTATION_INCONSISTENCY_FOUND` (§3.5, 2026-08-07)
+`W12_SAFE_TECHNICAL_WORK_PARTIALLY_DONE`
+· ~~`W12_TIMEZONE_MODEL_DETERMINED_UTC__PRESENTATION_INCONSISTENCY_FOUND`~~ (§3.5, 2026-08-07) —
+  **SUPERSEDED 2026-08-08 by `W12_TIMEZONE_PRESENTATION_CONSISTENT__UTC_PINNED_AND_GUARDED`**
+  (§3.6 doctrine + `W12_TIMEZONE_CONSISTENCY_SLICE.md`)
 
 W12's blockers are **not** architectural. The projection is single-source, the
 guard is applied and proven, and the honesty contract holds. What remains is
