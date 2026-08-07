@@ -109,6 +109,7 @@ export function CvInputPanel({
           <Button
             type="button"
             size="sm"
+            className="min-h-11"
             onClick={() => onPasteSubmit(pasted)}
             disabled={!canSubmit}
           >

@@ -83,7 +83,7 @@ export function TextFirstComposer({
           <button
             type="button"
             onClick={onManual}
-            className="text-xs text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
+            className="inline-flex min-h-11 items-center text-xs text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
           >
             {manualLabel}
           </button>

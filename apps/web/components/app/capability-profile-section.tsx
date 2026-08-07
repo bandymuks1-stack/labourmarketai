@@ -253,7 +253,7 @@ export function CapabilityProfileSection({
             value={manualLabel}
             onChange={(e) => setManualLabel(e.target.value)}
             placeholder={t("manualAddPlaceholder")}
-            className="rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+            className="min-h-11 rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
             data-testid="capability-profile-manual-input"
             disabled={isAdding}
             maxLength={80}
@@ -262,7 +262,7 @@ export function CapabilityProfileSection({
         <button
           type="submit"
           disabled={isAdding || manualLabel.trim().length === 0}
-          className="rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-sm font-semibold text-state-success hover:border-state-success disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-11 rounded-md border border-state-success/40 bg-state-success/5 px-3 py-2 text-sm font-semibold text-state-success hover:border-state-success disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="capability-profile-manual-add-button"
         >
           {isAdding ? t("manualAdding") : t("manualAddButton")}
@@ -292,14 +292,14 @@ export function CapabilityProfileSection({
             {savedClaims.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-2 py-1 text-sm text-text-primary"
+                className="flex min-h-11 items-center gap-2 rounded-md border border-state-success/40 bg-state-success/5 px-2 text-sm text-text-primary"
               >
                 <span>{c.label}</span>
                 <button
                   type="button"
                   onClick={() => removeClaim(c.id)}
                   disabled={isDeleting}
-                  className="text-xs text-text-muted hover:text-state-danger"
+                  className="flex items-center self-stretch px-2 text-xs text-text-muted hover:text-state-danger"
                   aria-label={t("removeLabel")}
                 >
                   ×
@@ -441,7 +441,7 @@ export function CapabilityProfileSection({
           CV file can still record a job with a month/year period. Writes via
           the same canonical RPC as the CV import (no migration). */}
       <details className="flex flex-col gap-3 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
           <span aria-hidden>+</span>
           {t("addExperienceTitle")}
         </summary>
@@ -455,7 +455,7 @@ export function CapabilityProfileSection({
               onChange={(e) => setExpTitle(e.target.value)}
               placeholder={t("expTitlePlaceholder")}
               data-testid="add-experience-title"
-              className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+              className="min-h-11 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
             />
           </label>
           <div className="flex flex-wrap gap-3">
@@ -471,7 +471,7 @@ export function CapabilityProfileSection({
                   onChange={(e) => setExpStartMonth(e.target.value)}
                   placeholder={t("expMonthPlaceholder")}
                   aria-label={t("expStartLabel")}
-                  className="w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                  className="min-h-11 w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
                 <input
                   type="number"
@@ -482,7 +482,7 @@ export function CapabilityProfileSection({
                   onChange={(e) => setExpStartYear(e.target.value)}
                   placeholder={t("expYearPlaceholder")}
                   aria-label={t("expStartLabel")}
-                  className="w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                  className="min-h-11 w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </div>
             </label>
@@ -499,7 +499,7 @@ export function CapabilityProfileSection({
                   onChange={(e) => setExpEndMonth(e.target.value)}
                   placeholder={t("expMonthPlaceholder")}
                   aria-label={t("expEndLabel")}
-                  className="w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
+                  className="min-h-11 w-16 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
                 />
                 <input
                   type="number"
@@ -511,14 +511,15 @@ export function CapabilityProfileSection({
                   onChange={(e) => setExpEndYear(e.target.value)}
                   placeholder={t("expYearPlaceholder")}
                   aria-label={t("expEndLabel")}
-                  className="w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
+                  className="min-h-11 w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-40"
                 />
               </div>
             </label>
           </div>
-          <label className="flex items-center gap-2 text-meta text-text-secondary">
+          <label className="inline-flex min-h-11 items-center gap-2 text-meta text-text-secondary">
             <input
               type="checkbox"
+              className="size-5"
               checked={expCurrent}
               onChange={(e) => setExpCurrent(e.target.checked)}
               data-testid="add-experience-current"
@@ -535,7 +536,7 @@ export function CapabilityProfileSection({
             disabled={isSavingExp}
             onClick={addExperience}
             data-testid="add-experience-save"
-            className="w-fit rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-50"
+            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-50"
           >
             {isSavingExp ? t("expSaving") : t("expSave")}
           </button>

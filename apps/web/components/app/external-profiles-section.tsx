@@ -121,7 +121,7 @@ function ProfileRow({
             <button
               type="submit"
               disabled={visPending}
-              className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary disabled:opacity-50"
               data-testid={`external-profile-visibility-${entry.id}`}
             >
               {labels.visibility}:{" "}
@@ -139,7 +139,7 @@ function ProfileRow({
                 <button
                   type="submit"
                   disabled={discPending}
-                  className="rounded-md border border-state-danger px-2 py-1 text-xs text-state-danger transition-colors hover:bg-state-danger/10 disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center rounded-md border border-state-danger px-2 py-1 text-xs text-state-danger transition-colors hover:bg-state-danger/10 disabled:opacity-50"
                   data-testid={`external-profile-disconnect-confirm-${entry.id}`}
                 >
                   {labels.confirmDisconnect}
@@ -148,7 +148,7 @@ function ProfileRow({
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary"
+                className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary"
               >
                 {labels.cancel}
               </button>
@@ -157,7 +157,7 @@ function ProfileRow({
             <button
               type="button"
               onClick={() => setConfirming(true)}
-              className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
+              className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
               data-testid={`external-profile-disconnect-${entry.id}`}
             >
               {labels.disconnect}
@@ -294,6 +294,7 @@ export function ExternalProfilesSection({
               <Button
                 type="submit"
                 size="sm"
+                className="min-h-11"
                 loading={addPending}
                 disabled={
                   addPending ||

@@ -40,7 +40,7 @@ export interface SkillClarifyLabels {
 }
 
 const field =
-  "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
+  "min-h-11 rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 
 export function SkillClarifyForm({ labels }: { labels: SkillClarifyLabels }) {
   const locale = useLocale();
@@ -95,7 +95,7 @@ export function SkillClarifyForm({ labels }: { labels: SkillClarifyLabels }) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
+          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
         >
           {pending ? labels.saving : labels.save}
         </button>

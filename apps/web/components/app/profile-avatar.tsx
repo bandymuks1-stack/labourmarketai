@@ -90,7 +90,7 @@ export function ProfileAvatar({
       <AvatarDisplay signedUrl={signedUrl} displayName={displayName} alt={t("alt")} size="lg" />
       <div className="flex flex-col gap-1.5">
         <label
-          className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20"
+          className="inline-flex min-h-11 w-fit cursor-pointer items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20"
           data-testid="profile-avatar-label"
         >
           {working ? (
@@ -114,7 +114,7 @@ export function ProfileAvatar({
             onClick={onRemove}
             disabled={busy !== "idle"}
             data-testid="profile-avatar-remove"
-            className="inline-flex w-fit items-center gap-1 text-xs text-text-muted transition-colors hover:text-state-danger disabled:opacity-50"
+            className="inline-flex min-h-11 w-fit items-center gap-1 text-xs text-text-muted transition-colors hover:text-state-danger disabled:opacity-50"
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
             {busy === "removing" ? t("removing") : t("remove")}
