@@ -486,7 +486,8 @@
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
       "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
       "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
-      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų."
+      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų.",
+      "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis."
     },
     "worker": {
       "evidence": {
@@ -520,7 +521,12 @@
         "title": "Paklausos užklausos",
         "open": "Atviros",
         "total": "Iš viso",
-        "link": "Atidaryti paklausos pateikimą"
+        "link": "Atidaryti paklausos pateikimą",
+        "structured": "Struktūruotos",
+        "shortlisted": "Atrinkti kandidatai",
+        "interest": "Darbuotojų susidomėjimas",
+        "timeToFillDays": "Mediana d. iki užpildymo",
+        "timeToFillUnmeasured": "Užpildymo laiko dar neįmanoma išmatuoti — nėra priimtų rezervacijų. Vietoje tikrų duomenų skaičius nerodomas."
       },
       "projects": {
         "title": "Projektai pagal būseną",

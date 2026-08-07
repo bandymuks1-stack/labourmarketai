@@ -486,7 +486,8 @@
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
       "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
-      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten."
+      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten.",
+      "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben."
     },
     "worker": {
       "evidence": {
@@ -520,7 +521,12 @@
         "title": "Bedarfsanfragen",
         "open": "Offen",
         "total": "Gesamt",
-        "link": "Bedarfserfassung öffnen"
+        "link": "Bedarfserfassung öffnen",
+        "structured": "Strukturiert",
+        "shortlisted": "Auf der Shortlist",
+        "interest": "Interesse von Arbeitskräften",
+        "timeToFillDays": "Median-Tage bis zur Besetzung",
+        "timeToFillUnmeasured": "Die Besetzungszeit ist noch nicht messbar — es gibt keine angenommenen Buchungen. Anstelle echter Daten wird keine Zahl angezeigt."
       },
       "projects": {
         "title": "Projekte nach Status",

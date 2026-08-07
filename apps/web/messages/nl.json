@@ -486,7 +486,8 @@
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
       "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
       "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
-      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens."
+      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens.",
+      "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken."
     },
     "worker": {
       "evidence": {
@@ -520,7 +521,12 @@
         "title": "Vraagaanvragen",
         "open": "Open",
         "total": "Totaal",
-        "link": "Open de vraagintake"
+        "link": "Open de vraagintake",
+        "structured": "Gestructureerd",
+        "shortlisted": "Op de shortlist",
+        "interest": "Interesse van werkers",
+        "timeToFillDays": "Mediane dagen tot invulling",
+        "timeToFillUnmeasured": "De invultijd is nog niet meetbaar — er zijn geen geaccepteerde boekingen. Er wordt geen getal getoond in plaats van echte data."
       },
       "projects": {
         "title": "Projecten per status",
