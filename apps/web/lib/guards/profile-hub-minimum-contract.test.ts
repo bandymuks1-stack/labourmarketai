@@ -37,9 +37,14 @@ describe("the hub references the minimum contract's missing list", () => {
   });
 
   it("still falls back to the raw booleans when no source is provided", () => {
-    // backward-compatible: cardSource is optional, no regression for callers
-    expect(hub).toMatch(/card \? !card\.missing\.includes\("about"\) : cvProvided/);
-    expect(hub).toMatch(/card \? !card\.missing\.includes\("skills"\) : selfDeclaredCount > 0/);
+    // backward-compatible: cardSource is optional, no regression for callers.
+    // Whitespace-tolerant — prettier may wrap either ternary across lines.
+    expect(hub).toMatch(
+      /card\s*\?\s*!card\.missing\.includes\("about"\)\s*:\s*cvProvided/,
+    );
+    expect(hub).toMatch(
+      /card\s*\?\s*!card\.missing\.includes\("skills"\)\s*:\s*selfDeclaredCount > 0/,
+    );
   });
 });
 

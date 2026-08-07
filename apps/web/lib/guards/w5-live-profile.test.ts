@@ -21,7 +21,14 @@ const CARD_MODEL = "lib/player-card/player-card.ts";
 const HISTORY_MODEL = "lib/player-card/work-history-model.ts";
 const HISTORY_READ = "lib/player-card/work-history.ts";
 const SIGNAL = "lib/player-card/opportunity-signal.ts";
-const SECTION = "components/app/live-profile-section.tsx";
+/**
+ * W7-S1: `live-profile-section.tsx` was ABSORBED into the profile hub. The W5
+ * surface — the named missing list, the real work history, the three separate
+ * skill populations and the opportunity signal with its §19 basis — is
+ * rendered there now, from the same canonical models. This constant is the
+ * only thing the migration changed; every assertion below is unchanged.
+ */
+const SECTION = "components/app/profile-hub-overview.tsx";
 
 const LOCALES = ["lt", "en", "ru", "nl", "de", "da", "et", "lv", "no", "pl", "sv"] as const;
 

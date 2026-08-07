@@ -1,0 +1,168 @@
+[
+  {
+    "phase": "before",
+    "tag": "company-org",
+    "viewport": "1440",
+    "ttfbRuns": [
+      2162,
+      2365,
+      2673,
+      2794,
+      3181
+    ],
+    "ttfbMedian": 2673,
+    "primaryEarly": 1894,
+    "primaryLate": 1894,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 6203,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "cardBorders": 20,
+    "sections": 16,
+    "h1": 1,
+    "h2": [
+      "Parenkime jūsų profilį",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 5,
+    "buttons": 57,
+    "links": 40,
+    "unlabelledInputs": 34,
+    "smallTargets": 76,
+    "hub": {
+      "y": 1690,
+      "h": 257
+    },
+    "stateStrip": {
+      "y": 276,
+      "h": 64
+    },
+    "liveProfile": {
+      "y": 381,
+      "h": 323
+    },
+    "setupJourney": {
+      "y": 728,
+      "h": 525
+    },
+    "cvGrid": {
+      "y": 1971,
+      "h": 224
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 1894,
+      "h": 32
+    },
+    "doneSummary": null,
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nLabourMarket\nDev Construction\nLietuvių\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nTik pradėtas\nAKTUALUMAS\n→\nĮrašų dar nėra\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\nNurodyti profesiją\nNurodyti prieinamumą\nPridėti įgūdžių\nRašyti įrašą\nPridėti darbo įrašą\nPateikti kortelę\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n3 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n0 įrašyti įgūdžiai · 0 paremti tavo žurnalu · 0 su vadovo įrašu · 0 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nParenkime jūsų profilį\n0 IŠ 5\n\nKeli žingsniai — ir darbdaviai matys, ką mokate. Kiekvienas žingsnis atsidaro toje vietoje, kur jį užbaigsite.\n\n1. Kokio darbo ieškote?\nPasirinkite savo profesiją.\n2. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\n3. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\n4. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\n5. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDC\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\nDev Construction\n→\n+ PRIDĖTI ĮMONĘ\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profes"
+  },
+  {
+    "phase": "before",
+    "tag": "company-org",
+    "viewport": "375",
+    "ttfbRuns": [
+      2456,
+      2671,
+      2759,
+      2812,
+      4477
+    ],
+    "ttfbMedian": 2759,
+    "primaryEarly": 2675,
+    "primaryLate": 2675,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 8952,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "cardBorders": 20,
+    "sections": 16,
+    "h1": 1,
+    "h2": [
+      "Parenkime jūsų profilį",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 5,
+    "buttons": 57,
+    "links": 40,
+    "unlabelledInputs": 34,
+    "smallTargets": 75,
+    "hub": {
+      "y": 2216,
+      "h": 576
+    },
+    "stateStrip": {
+      "y": 418,
+      "h": 208
+    },
+    "liveProfile": {
+      "y": 667,
+      "h": 403
+    },
+    "setupJourney": {
+      "y": 1094,
+      "h": 626
+    },
+    "cvGrid": {
+      "y": 2816,
+      "h": 451
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 2675,
+      "h": 32
+    },
+    "doneSummary": null,
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nDev Construction\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nTik pradėtas\nAKTUALUMAS\n→\nĮrašų dar nėra\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\nNurodyti profesiją\nNurodyti prieinamumą\nPridėti įgūdžių\nRašyti įrašą\nPridėti darbo įrašą\nPateikti kortelę\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n3 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n0 įrašyti įgūdžiai · 0 paremti tavo žurnalu · 0 su vadovo įrašu · 0 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nParenkime jūsų profilį\n0 IŠ 5\n\nKeli žingsniai — ir darbdaviai matys, ką mokate. Kiekvienas žingsnis atsidaro toje vietoje, kur jį užbaigsite.\n\n1. Kokio darbo ieškote?\nPasirinkite savo profesiją.\n2. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\n3. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\n4. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\n5. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDC\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\nDev Construction\n→\n+ PRIDĖTI ĮMONĘ\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdži"
+  }
+]

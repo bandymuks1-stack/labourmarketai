@@ -127,9 +127,15 @@ describe("5. empty profile gets honest next actions (never a percentage)", () =>
     for (const s of steps) expect(s.href.startsWith("/dashboard")).toBe(true);
   });
 
-  it("the profile hub carries the availability pillar and the opportunities action", () => {
+  it("the profile hub carries the availability step and the opportunities action", () => {
     const hub = read("components/app/profile-hub-overview.tsx");
-    expect(hub).toMatch(/pillars\.availability/);
+    // W7-S1: the four-pillar grid became ONE readiness list, so availability is
+    // now a named step (`steps.availability.*`, `#cv-availability`) plus the
+    // canonical readiness pillar — the capability is unchanged, its presentation
+    // is not. Both halves are asserted so neither can quietly disappear.
+    expect(hub).toMatch(/key: "availability"/);
+    expect(hub).toMatch(/#cv-availability/);
+    expect(hub).toMatch(/pillarMet\("availability"\)/);
     // The #work-card anchor died with /dashboard/advanced (W3 Package 4);
     // the pillar now deep-links the player-card RESULT, whose editor is the
     // one canonical Work Card surface.
@@ -185,10 +191,16 @@ describe("8./9. one card system, no duplicate routes, mobile-safe", () => {
     ).toBe(false);
   });
 
-  it("hub pillars keep mobile tap targets and a responsive grid", () => {
+  it("hub rows and actions keep mobile tap targets", () => {
     const hub = read("components/app/profile-hub-overview.tsx");
-    expect(hub).toMatch(/min-h-\[3\.25rem\]/);
-    expect(hub).toMatch(/sm:grid-cols-2 lg:grid-cols-4/);
+    // W7-S1: the 2/4-column pillar grid became a single vertical list, so the
+    // responsive-grid assertion no longer describes the surface. The rule it
+    // protected — a finger-sized target — is now asserted on BOTH the rows and
+    // every action link, at the 44px accessibility floor (`min-h-11`).
+    expect(hub).toMatch(/min-h-11 items-start/); // the step / pillar rows
+    expect(hub).toMatch(/data-testid="profile-hub-primary-action"/);
+    const actionLinks = hub.match(/inline-flex min-h-11 w-fit items-center/g) ?? [];
+    expect(actionLinks.length).toBeGreaterThanOrEqual(4);
   });
 });
 

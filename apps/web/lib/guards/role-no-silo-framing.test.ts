@@ -129,14 +129,27 @@ describe("company action rooms (buyer/agency) read as actions under Įmonė", ()
   }
 });
 
-describe("skills review banner is wired into the profile page", () => {
-  const page = read("app/[locale]/dashboard/profile/page.tsx");
-  it("imports + renders SkillsReviewBanner with reviewBanner copy", () => {
-    expect(page).toMatch(/SkillsReviewBanner/);
-    expect(page).toMatch(/reviewBanner\.title/);
+/**
+ * W7-S1: `SkillsReviewBanner` was ABSORBED into the profile hub. The
+ * capability is unchanged — when real data shows declared skills not yet
+ * backed by work evidence, the person is told so, with the real count and a
+ * route to fix it — but it is a line inside the ONE overview instead of a
+ * fifth competing card. The banner's own `skills.reviewBanner` copy is reused
+ * verbatim, so nothing a worker reads changed.
+ */
+describe("skills review note is wired into the profile hub", () => {
+  const hub = read("components/app/profile-hub-overview.tsx");
+  it("renders the review note with the original reviewBanner copy", () => {
+    expect(hub).toMatch(/skills\.reviewBanner/);
+    expect(hub).toMatch(/profile-hub-review-note/);
+    expect(hub).toMatch(/profile-hub-review-cta/);
   });
-  it("the banner component hides itself when count is 0", () => {
-    const comp = read("components/app/skills-review-banner.tsx");
-    expect(comp).toMatch(/count\s*<=\s*0/);
+  it("hides itself when nothing is unsupported", () => {
+    expect(hub).toMatch(/skillEvidence\.unsupported > 0/);
+  });
+  it("the count is the real derived one, never a constant", () => {
+    expect(hub).toMatch(/\{skillEvidence\.unsupported\}/);
+    const page = read("app/[locale]/dashboard/profile/page.tsx");
+    expect(page).toMatch(/deriveSkillEvidence\(skillEvidenceInputs/);
   });
 });

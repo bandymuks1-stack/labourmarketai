@@ -1,0 +1,168 @@
+[
+  {
+    "phase": "before",
+    "tag": "worker-complete",
+    "viewport": "1440",
+    "ttfbRuns": [
+      2800,
+      3073,
+      3186,
+      3481,
+      3629
+    ],
+    "ttfbMedian": 3186,
+    "primaryEarly": 1848,
+    "primaryLate": 1848,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 6104,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "cardBorders": 19,
+    "sections": 16,
+    "h1": 1,
+    "h2": [
+      "Profilis paruoštas",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 5,
+    "buttons": 57,
+    "links": 39,
+    "unlabelledInputs": 34,
+    "smallTargets": 75,
+    "hub": {
+      "y": 1539,
+      "h": 362
+    },
+    "stateStrip": {
+      "y": 276,
+      "h": 64
+    },
+    "liveProfile": {
+      "y": 381,
+      "h": 295
+    },
+    "setupJourney": {
+      "y": 700,
+      "h": 405
+    },
+    "cvGrid": {
+      "y": 1925,
+      "h": 224
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 1848,
+      "h": 32
+    },
+    "doneSummary": null,
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nParuoštas\nAKTUALUMAS\n→\nPaskutinis įrašas — 2026-07-25\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\n\nNieko esminio netrūksta.\n\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n2 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n3 įrašyti įgūdžiai · 3 paremti tavo žurnalu · 0 su vadovo įrašu · 14 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nProfilis paruoštas\n5 IŠ 5\n\nVisi žingsniai atlikti. Jūsų profilis paruoštas — darbdaviai matys, ką mokate.\n\n1. Kokio darbo ieškote?\n2. Įkelkite CV arba atsakykite į kelis klausimus\n3. Patikrinkite, ką radome\n4. Kur norite dirbti?\n5. Kada galite pradėti?\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nŠtai ką apie jus jau žinome.\n\nPagal tai darbdavys sprendžia, kokiam darbui tinkate.\n\nCV\n↓\nNepateiktas\nĮGŪDŽIAI\n↓\nSavarankiškai nurodyta: 3\nDARBO ĮRAŠAI\n→\nŽurnalo įrašai: 14\nPRIEINAMUMAS\n→\nNustatyta\n\nĮgūdžiai stipresni, k"
+  },
+  {
+    "phase": "before",
+    "tag": "worker-complete",
+    "viewport": "375",
+    "ttfbRuns": [
+      2161,
+      2430,
+      2773,
+      2847,
+      3041
+    ],
+    "ttfbMedian": 2773,
+    "primaryEarly": 2548,
+    "primaryLate": 2548,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 8752,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "cardBorders": 19,
+    "sections": 16,
+    "h1": 1,
+    "h2": [
+      "Profilis paruoštas",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 5,
+    "buttons": 57,
+    "links": 39,
+    "unlabelledInputs": 34,
+    "smallTargets": 74,
+    "hub": {
+      "y": 1965,
+      "h": 701
+    },
+    "stateStrip": {
+      "y": 418,
+      "h": 208
+    },
+    "liveProfile": {
+      "y": 667,
+      "h": 315
+    },
+    "setupJourney": {
+      "y": 1006,
+      "h": 446
+    },
+    "cvGrid": {
+      "y": 2689,
+      "h": 451
+    },
+    "reviewBanner": null,
+    "missing": null,
+    "primaryAction": {
+      "y": 2548,
+      "h": 32
+    },
+    "doneSummary": null,
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nAsmeninė erdvė\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nParuoštas\nAKTUALUMAS\n→\nPaskutinis įrašas — 2026-07-25\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\n\nNieko esminio netrūksta.\n\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n2 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n3 įrašyti įgūdžiai · 3 paremti tavo žurnalu · 0 su vadovo įrašu · 14 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nProfilis paruoštas\n5 IŠ 5\n\nVisi žingsniai atlikti. Jūsų profilis paruoštas — darbdaviai matys, ką mokate.\n\n1. Kokio darbo ieškote?\n2. Įkelkite CV arba atsakykite į kelis klausimus\n3. Patikrinkite, ką radome\n4. Kur norite dirbti?\n5. Kada galite pradėti?\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nŠtai ką apie jus jau žinome.\n\nPagal tai darbdavys sprendžia, kokiam darbui tinkate.\n\nCV\n↓\nNepateiktas\nĮGŪDŽIAI\n↓\nSavarankiškai nurodyta: 3\nDARBO ĮRAŠAI\n→\nŽurnalo įrašai: 14\nPRIEINAMUMAS\n→\nNustatyta\n\nĮgūdžiai stipresni, kai juos paremia tikri "
+  }
+]

@@ -18,7 +18,7 @@ Dimensions: **IC** immediate clarity · **NV** navigation · **AC** action clari
 | Onboarding `[s]` | 2 | 1 | 2 | 2 | 1 | 2 | 2 | 1.7 | NEEDS_POLISH |
 | **Personal dashboard `[m]`** | 2 | **0** | 2 | 1 | 3 | 1 | 2 | **1.6** | **PILOT_BLOCKER** |
 | **Organization dashboard `[m]`** | 1 | **0** | 2 | 2 | 3 | 1 | 2 | **1.6** | **PILOT_BLOCKER** |
-| **Profile `[m]`** | 1 | 2 | 1 | **0** | 1 | **0** | 2 | **1.0** | **PILOT_BLOCKER** |
+| **Profile `[m]`** — *rescored after W7-S1* | 2 | 2 | 2 | 2 | 2 | 1 | 2 | **1.86** | **NEEDS_POLISH** |
 | Demand / company workspace `[m]` | 1 | 1 | 1 | **0** | 1 | **0** | 2 | **0.9** | **PILOT_BLOCKER** |
 | Candidate selection `[s]` | 2 | 1 | 2 | 2 | 2 | 1 | 2 | 1.7 | NEEDS_POLISH |
 | Booking `[s]` | 2 | 1 | 2 | 2 | 2 | 1 | 2 | 1.7 | NEEDS_POLISH |
@@ -31,7 +31,12 @@ Dimensions: **IC** immediate clarity · **NV** navigation · **AC** action clari
 | Map (workspace) `[m]` | 1 | **0** | 1 | 1 | 2 | 1 | 2 | 1.1 | **PILOT_BLOCKER** |
 | Map (`/dashboard/market-map`) `[m]` | 2 | 1 | 2 | 1 | 1 | 2 | 2 | 1.6 | NEEDS_POLISH |
 
-**PASS: 0 of 17.**
+**PASS: 0 of 17. PILOT_BLOCKER: 6** (was 7 — Profile cleared by W7-S1).
+
+> **Rescoring rule.** A row may only be rescored against the SAME seven
+> dimensions and the same 0–3 scale, from a fresh measurement, with the
+> before/after reasoning written down. Profile is the only row rescored so far;
+> its working is in `W7_S1_PROFILE_HUB_OVERVIEW.md` §10.
 
 ## Why each PILOT_BLOCKER scores as it does
 
@@ -46,9 +51,14 @@ after interactivity.
 name appears only in a 162 px header chip, and no creating action names the
 organisation it will affect.
 
-**Profile — VH 0, MB 0.** 6104 px at 1440 and **8823 px (10.9 folds) at 375**,
-19 card blocks, 14 `<h2>`, six competing readiness summaries totalling ≈1350 px
-before the first editable field. 34 unlabelled inputs, 73 sub-44 px targets.
+**Profile — was VH 0, MB 0; now VH 2, MB 1 (W7-S1).** The original score:
+6104 px at 1440 and 8823 px (10.9 folds) at 375, 19 card blocks, 14 `<h2>`, six
+competing readiness summaries totalling ≈1350 px before the first editable
+field. After W7-S1: **5273 px / 7486 px (9.2 folds)**, 16 cards, 12 `<h2>`, ONE
+overview carrying status → what is missing → next action, moved from the 4th
+block to the 1st with all three inside the first fold. **MB stays at 1** — 9.2
+mobile folds is better, not good — and the 34 unlabelled inputs are untouched
+(W7-S2). Full working: `W7_S1_PROFILE_HUB_OVERVIEW.md` §10.
 
 **Company workspace — VH 0, MB 0.** 7028 px at 1440, **10419 px (12.8 folds) at
 375**, 16 `<h2>` covering the entire employer domain on one scroll: identity,

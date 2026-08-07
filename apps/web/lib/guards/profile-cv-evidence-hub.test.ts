@@ -48,8 +48,14 @@ describe("Guard: /dashboard/profile renders the unified hub overview", () => {
   it("feeds the hub all three pillars from real saved data", () => {
     expect(page).toMatch(/cvProvided=\{/);
     expect(page).toMatch(/selfDeclaredCount=\{/);
-    expect(page).toMatch(/journalCount=\{/);
     expect(page).toMatch(/hasWorker=\{/);
+    // W7-S1: `journalCount` is no longer a prop, and the page no longer runs
+    // its own count query — both were a second read of exactly the rows the
+    // canonical player card already counts. The journal figure the hub DISPLAYS
+    // now comes from that one card, so the two can never disagree.
+    const hub = read(HUB);
+    expect(hub).toMatch(/playerCard\.evidenceEntries/);
+    expect(page).not.toMatch(/journalCount=\{/);
   });
 
   it("exposes the #profile-edit anchor the primary action targets", () => {
@@ -66,10 +72,21 @@ describe("Guard: the hub unifies CV + skills + journal and bridges to the room",
     expect(existsSync(join(APP_ROOT, HUB))).toBe(true);
   });
 
-  it("references all three pillars (cv + skills + journal)", () => {
-    expect(hub).toMatch(/pillars\.cv\./);
-    expect(hub).toMatch(/pillars\.skills\./);
-    expect(hub).toMatch(/pillars\.journal\./);
+  it("speaks about all three pillars (cv + skills + journal)", () => {
+    // W7-S1: the labelled pillar grid became ONE readiness list plus a
+    // disclosure. The unification the guard protects — that CV, skills and
+    // journal evidence are ONE profile on ONE surface — is unchanged; only its
+    // presentation is. Each pillar is asserted at its new home.
+    expect(hub, "CV: the completeness grid + the CV import path").toMatch(
+      /CvCompletenessGrid/,
+    );
+    expect(hub, "CV import entry point").toMatch(/profile-hub-cv-import-link/);
+    expect(hub, "skills: the minimum-contract skills essential").toMatch(
+      /!card\.missing\.includes\("skills"\)/,
+    );
+    expect(hub, "journal: the evidence line from the canonical card").toMatch(
+      /evidenceLine/,
+    );
   });
 
   it("bridges to the Work Journal room (no dead-end evidence count)", () => {
