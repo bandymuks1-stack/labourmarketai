@@ -132,3 +132,50 @@ desktop unchanged. Reported rather than omitted.
 | next action | W7 P1-3 — conversation-memory reality audit |
 
 ---
+
+## W7 closure audit — P1-3 + P2-1
+
+| field | value |
+|---|---|
+| start SHA | `7632f428e109f3710c6a61c2459c16c93f7a024a` (W7-S5 merged) |
+| branch | `feat/cc/w7-closure-audit` |
+| objective | reality-audit the two W7 items that were never slices; ship whatever needs no schema change |
+
+### Findings
+
+**P1-3 conversation memory — BLOCKED / MIGRATION_GATE.** Stronger than the
+matrix recorded: the AI-control thread has NO persistence layer at all (plain
+`useState`, re-seeded each mount; the one `sessionStorage` use is a read-once
+voice hand-off). No `assistant_*` table exists. The design package is complete
+and its SHA-256 pins re-verified INTACT — with an operational note that on
+Windows the working-tree hashes differ because of CRLF checkout, which would
+otherwise look like a failed integrity check on an owner-gated migration.
+Package already exists as Draft PR #883; no duplicate work done.
+
+**P2-1 open-ended booking — PARTIAL.** Mechanism located exactly:
+`daterange(start_date, coalesce(expected_end_date, start_date), '[]')` collapses
+an end-less booking to its START DAY, in both the EXCLUDE constraint and
+`respond_booking_request_v3`. Worker double-booking protection is therefore
+absent from day two onward. Three parts of the system read the same NULL three
+different ways (one day / ongoing / not stated). The honesty half SHIPPED with
+no schema change; the capability half needs five product definitions before a
+migration can even be written.
+
+### Verification
+
+| check | result |
+|---|---|
+| typecheck / lint | clean |
+| tests | 861 files / 14003 pass |
+| i18n-debt | within baseline |
+| new guard | `w7-p2-1-open-ended-booking-honesty.test.ts`, 10 assertions |
+| migration | none |
+
+| field | value |
+|---|---|
+| PR | pending |
+| owner gates hit | **2** — #883 conversation-memory migration; open-ended booking conflict model |
+| resulting W7 | **PARTIAL — `W7_REMAINING_GAPS_EXPLICIT`**, not DONE |
+| next action | W7-S5b (safe, unblocked), then W8 |
+
+---

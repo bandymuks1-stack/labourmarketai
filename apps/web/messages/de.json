@@ -11186,6 +11186,7 @@
       "actionNotAuthorized": "Das kannst du von hier aus nicht tun.",
       "bookingStart": "Beginn",
       "bookingEnd": "Voraussichtliches Ende",
+      "bookingEndHint": "Leer lassen bucht nur einen einzelnen Tag — ein leeres Ende hält die Person nicht über das Startdatum hinaus.",
       "bookingNote": "Notiz",
       "projectError": "Das Projekt konnte nicht gelesen werden.",
       "projectNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensprojekte.",

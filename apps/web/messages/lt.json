@@ -11186,6 +11186,7 @@
       "actionNotAuthorized": "Iš čia to padaryti negalite.",
       "bookingStart": "Pradžia",
       "bookingEnd": "Numatoma pabaiga",
+      "bookingEndHint": "Palikus tuščia rezervuojama tik viena diena — tuščia pabaiga darbuotojo po pradžios datos nerezervuoja.",
       "bookingNote": "Pastaba",
       "projectError": "Nepavyko nuskaityti projekto.",
       "projectNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia įmonės projektų nėra.",

@@ -11186,6 +11186,7 @@
       "actionNotAuthorized": "You cannot do this from here.",
       "bookingStart": "Start",
       "bookingEnd": "Expected end",
+      "bookingEndHint": "Leave empty to book a single day — an empty end does not hold the worker beyond the start date.",
       "bookingNote": "Note",
       "projectError": "We could not read the project.",
       "projectNoCompany": "You are not acting for a company right now, so there are no company projects here.",
