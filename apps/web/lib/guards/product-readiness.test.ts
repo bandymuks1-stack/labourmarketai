@@ -2003,7 +2003,26 @@ describe("no migration files added by this sprint", () => {
     // capability + an operator health read + one daily job. Rollback paired.
     // Shared slot RECOUNTED against post-#1047 main as #1047's own note
     // predicted: 193 files there, this branch adds one.
-    const SPRINT_BASELINE = 194;
+    // 194 -> 195: `20260809120000_can_view_worker_booking_engagement_v1` —
+    // ONE `create or replace function public.can_view_worker(uuid)` adding a
+    // single OR-branch (an ACTIVE accepted-booking engagement owned by the
+    // caller) to the legitimate-interest arm of the GDPR identity-disclosure
+    // predicate. No table, column, index, constraint, trigger or RLS policy is
+    // created, dropped or altered; no grant is widened (the three existing
+    // REVOKE/GRANT statements are re-stated verbatim); zero DML at apply time.
+    // Owner decision memo:
+    // docs/human-gates/can-view-worker-booking-engagement-gate.md. RED by
+    // classification (SECURITY DEFINER replacement of the GDPR predicate) and
+    // deliberately NOT `@human-gate-approved`. Rollback paired; DB proof at
+    // scripts/db-proof/can-view-worker-booking-engagement.sh (62/62 per-role
+    // checks). Ships UNAPPLIED.
+    // MERGE-ORDER NOTE: PR #1095 (`20260808150000`) also claims this shared
+    // slot 194 -> 195 and is unmerged. The two migrations are independent —
+    // neither references the other's objects — but whichever merges second
+    // must RECOUNT `git ls-tree -r origin/main supabase/migrations/` and take
+    // the slot to 196. Never sum, and never take either side of a rebase
+    // verbatim.
+    const SPRINT_BASELINE = 195;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

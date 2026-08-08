@@ -468,7 +468,18 @@ describe("NO new DB migration in this PR", () => {
     // health read, and one daily job. Rollback paired. RECOUNTED against
     // post-#1047 main as that branch's own note predicted: origin/main holds
     // 193 .sql files, this branch adds exactly one.
-    expect(count).toBeLessThanOrEqual(194);
+    // Bumped 194 -> 195 for the `can_view_worker` booking-engagement branch
+    // (`20260809120000_can_view_worker_booking_engagement_v1`) — a single
+    // `create or replace function` adding one OR-branch to the GDPR
+    // identity-disclosure predicate's legitimate-interest arm. No table,
+    // policy, index, trigger or grant change and zero DML at apply time.
+    // Owner-gated (docs/human-gates/can-view-worker-booking-engagement-gate.md),
+    // NOT `@human-gate-approved`, rollback paired, ships UNAPPLIED. RECOUNTED
+    // against post-#1091/#1047 main: origin/main holds 194 .sql files and this
+    // branch adds exactly one. Still no migration from the market-map read
+    // layer. MERGE-ORDER: PR #1095 claims the same slot — whichever merges
+    // second recounts to 196 rather than summing.
+    expect(count).toBeLessThanOrEqual(195);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
