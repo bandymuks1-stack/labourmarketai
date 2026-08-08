@@ -222,13 +222,28 @@ export default async function AdminTelemetryPage({
           <p className="text-meta text-text-muted">
             First-party conversion counts for paid-ad readiness — landing →
             CTA → registration, and company-need submissions. Event
-            occurrences over the recent window, not unique visitors; no
-            revenue attribution. Use the &ldquo;exclude admins&rdquo; filter
-            below to remove owner/test navigation.
+            occurrences over the last {funnel.windowDays} days, not unique
+            visitors; no revenue attribution. Use the &ldquo;exclude
+            admins&rdquo; filter below to remove owner/test navigation.
             {funnel.excludedPreview > 0
               ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
               : ""}
           </p>
+          {/* The window returned more events than one read covers. Every share
+              is withheld rather than computed from a partial population, and
+              the counts below are floors — saying so is the difference between
+              a cautious number and a wrong one. */}
+          {funnel.truncated ? (
+            <p
+              className="rounded-md border border-state-warning/50 bg-state-warning/5 px-3 py-2 text-meta text-state-warning"
+              data-testid="telemetry-funnel-truncated"
+            >
+              This window holds more events than a single read covers, so the
+              counts below are lower bounds (&ldquo;at least&rdquo;) and no
+              conversion share can be stated. Narrow the window to get exact
+              figures.
+            </p>
+          ) : null}
         </div>
         {!funnel.available ? (
           <p className="text-sm text-text-secondary">
@@ -243,7 +258,7 @@ export default async function AdminTelemetryPage({
                   className="rounded-md border border-ink-600/60 px-3 py-2"
                 >
                   <div className="font-mono text-lg text-text-primary">
-                    {s.count}
+                    {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
                   </div>
                   <div className="text-meta text-text-muted">{s.label}</div>
                 </div>

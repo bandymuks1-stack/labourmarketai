@@ -20,9 +20,47 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  * and the allowlisted, non-identifying metadata (utm_*). Counts are event
  * occurrences over a bounded recent window, not deduplicated unique visitors,
  * and include no revenue attribution.
+ *
+ * ── W14 item 4: THE POPULATION BEHIND EVERY RATE ────────────────────────────
+ *
+ * This read used to be `.select("event_name, metadata").in(…).limit(5000)` —
+ * no ORDER BY and no time predicate. Postgres promises nothing about which
+ * rows an unordered LIMIT returns, so once `pilot_events` passed 5000 rows
+ * every numerator and denominator came from an ARBITRARY subset of all
+ * history, and the panel went on printing a confident percentage. The prose
+ * above already said "a bounded recent window"; the query never implemented
+ * one.
+ *
+ * The truncation was also BIASED, not just noisy: within one visitor's journey
+ * `landing_viewed` precedes `registration_started`, so dropping a slice
+ * removes disproportionately many top-of-funnel events and INFLATES every
+ * conversion rate — wrong in the flattering direction, for the one reader
+ * deciding whether to spend money on ads.
+ *
+ * Three changes, and the third is the one that matters:
+ *   1. a real `created_at >= now - FUNNEL_WINDOW_DAYS` predicate;
+ *   2. `order(created_at desc)`, so the cap keeps the MOST RECENT rows rather
+ *      than an arbitrary slice;
+ *   3. when the read comes back AT the cap the window was not read completely,
+ *      so every rate reports `null` and the counts are declared lower bounds.
+ *      An incomplete population yields UNKNOWN — never a percentage derived
+ *      from whatever rows happened to arrive.
  */
 
-const WINDOW_ROWS = 5000;
+/** Rows one read may return. Hitting it means the window is saturated. */
+export const FUNNEL_MAX_ROWS = 5000;
+/** The window the rates actually describe — stated to the reader. */
+export const FUNNEL_WINDOW_DAYS = 90;
+
+const DAY_MS = 86_400_000;
+
+/** Inclusive lower bound of the funnel window, as an ISO timestamp. */
+export function funnelWindowStart(
+  now: Date,
+  windowDays: number = FUNNEL_WINDOW_DAYS,
+): string {
+  return new Date(now.getTime() - windowDays * DAY_MS).toISOString();
+}
 
 /** Ordered funnel stages the panel renders. */
 export const FUNNEL_STAGES = [
@@ -66,6 +104,13 @@ export type AcquisitionFunnel = {
   totalEvents: number;
   /** Count of non-production (localhost / preview) events excluded. */
   excludedPreview: number;
+  /** Days of history the numbers describe — the panel states it. */
+  windowDays: number;
+  /** The read came back AT the row cap: more events exist in the window than
+   *  were read, so the population behind any rate is incomplete. */
+  truncated: boolean;
+  /** Implied by `truncated` — every count is "at least N", not "N". */
+  countsAreLowerBound: boolean;
 };
 
 type FunnelRow = {
@@ -73,13 +118,20 @@ type FunnelRow = {
   metadata: Record<string, unknown> | null;
 };
 
+/** A rate, or null. Null covers BOTH "no denominator" and "the denominator we
+ *  can see is incomplete" — in neither case does the product know the answer,
+ *  and in neither case is the answer 0%. */
 function pct(numerator: number, denominator: number): number | null {
   if (denominator <= 0) return null;
   return Math.round((numerator / denominator) * 1000) / 10;
 }
 
+const TRUNCATED_NOTE =
+  "population incomplete — the window returned more events than one read can cover, so no share can be stated";
+
 export async function getAcquisitionFunnel(
   supabase: SupabaseClient,
+  now: Date = new Date(),
 ): Promise<AcquisitionFunnel> {
   const names = FUNNEL_STAGES.map((s) => s.key);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,18 +143,33 @@ export async function getAcquisitionFunnel(
         col: string,
         vals: readonly string[],
       ) => {
-        limit: (n: number) => Promise<{
-          data: FunnelRow[] | null;
-          error: { message?: string } | null;
-        }>;
+        gte: (
+          col: string,
+          value: string,
+        ) => {
+          order: (
+            col: string,
+            opts: { ascending: boolean },
+          ) => {
+            limit: (n: number) => Promise<{
+              data: FunnelRow[] | null;
+              error: { message?: string } | null;
+            }>;
+          };
+        };
       };
     };
   };
 
+  // `created_at` is SELECTED as well as filtered: a window cannot be applied
+  // to a column the read does not carry, and the ordering below is what makes
+  // the cap keep the most recent rows instead of an arbitrary slice.
   const { data, error } = await fromAny("pilot_events")
-    .select("event_name, metadata")
+    .select("event_name, metadata, created_at")
     .in("event_name", names)
-    .limit(WINDOW_ROWS);
+    .gte("created_at", funnelWindowStart(now))
+    .order("created_at", { ascending: false })
+    .limit(FUNNEL_MAX_ROWS);
 
   if (error) {
     return {
@@ -112,10 +179,29 @@ export async function getAcquisitionFunnel(
       sources: [],
       totalEvents: 0,
       excludedPreview: 0,
+      windowDays: FUNNEL_WINDOW_DAYS,
+      truncated: false,
+      countsAreLowerBound: false,
     };
   }
 
-  const allRows: FunnelRow[] = (data ?? []) as FunnelRow[];
+  return summariseFunnel((data ?? []) as FunnelRow[]);
+}
+
+/**
+ * Pure summary over the rows a read returned. Separated from the IO so the
+ * population rules — preview exclusion, truncation, zero denominators — are
+ * driven directly by tests rather than inferred from the query's source text.
+ */
+export function summariseFunnel(
+  allRows: readonly FunnelRow[],
+): AcquisitionFunnel {
+  // TRUNCATION IS JUDGED ON ROWS READ, BEFORE ANY FILTERING. Preview rows are
+  // dropped below, which shrinks the array; deciding completeness afterwards
+  // would let a fully saturated read look complete again and hand back
+  // confident percentages built on a partial population.
+  const truncated = allRows.length >= FUNNEL_MAX_ROWS;
+
   // Exclude events fired from non-production origins (localhost / Vercel
   // preview) so dev/preview traffic never inflates the owner's real funnel.
   const rows = allRows.filter((r) => r.metadata?.["preview_host"] !== true);
@@ -204,12 +290,22 @@ export async function getAcquisitionFunnel(
     .slice(0, 10)
     .map(([source, count]) => ({ source, count }));
 
+  // ONE PLACE decides whether a share may be stated at all. Applying it to the
+  // whole list rather than to each construction above means a rate added later
+  // cannot forget the rule and quietly publish a number from a partial read.
+  const finalRates: FunnelRate[] = truncated
+    ? rates.map((r) => ({ ...r, pct: null, note: `${r.note} — ${TRUNCATED_NOTE}` }))
+    : rates;
+
   return {
     available: true,
     counts,
-    rates,
+    rates: finalRates,
     sources,
     totalEvents: rows.length,
     excludedPreview,
+    windowDays: FUNNEL_WINDOW_DAYS,
+    truncated,
+    countsAreLowerBound: truncated,
   };
 }
