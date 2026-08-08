@@ -503,3 +503,50 @@ completed by a person.
 - **Production behaviour is not established by any local run.** Everything in
   session 2 was verified against the LOCAL stack. Preview and production
   verification are recorded separately.
+
+---
+
+# Session 3 — post-gate continuous delivery (2026-08-08)
+
+**Base:** `main` = `a04cb609`. Worktree `lmai-auth`, branch
+`feat/cc/auth-provider-readiness-v1`.
+
+## D-21 — CORRECTION: Google OAuth is configured in production, not gated
+
+**This overturns the session-2 classification.** Gate 1 recorded Google as
+`CONFIGURATION_GATED` on the reasoning that the credential half lives outside
+the repo and no round trip had been performed. The first half of that was wrong,
+and it was checkable without any credential.
+
+| | |
+|---|---|
+| **Method** | A read-only GET to the production Supabase authorize endpoint — `https://<ref>.supabase.co/auth/v1/authorize?provider=google` — creates nothing. A disabled provider answers with a validation error; an enabled one redirects to Google. |
+| **Result** | It redirects to `accounts.google.com/v3/signin/identifier` — the real account chooser. |
+| **Parameters observed** (all public by construction) | `client_id` present, ending `…29t.apps.googleusercontent.com` · `redirect_uri=https://<ref>.supabase.co/auth/v1/callback` · `scope=email profile` · `response_type=code` |
+| **Status** | `VERIFIED_CONFIGURED` — provider enabled, real OAuth client registered, callback correct. **No owner action is required for Google.** |
+| **Still NOT verified** | The completion of a round trip. Consenting would create a real production account, so it was not done. That step belongs to human acceptance. |
+| **Why it looked gated** | `supabase/config.toml` has no `[auth.external.google]` block, so Google genuinely cannot be exercised on the LOCAL stack. Local absence was read as production absence. |
+| **Incidental finding** | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is declared in `lib/env.ts` but is **vestigial** — the current flow is `signInWithOAuth`, which resolves the client id server-side at the Supabase auth host. Nothing reads the variable. Not removed here (out of scope for a context fix); recorded as `DEFER_P2` cleanup. |
+
+**Lesson recorded:** "the credentials are outside the repo" describes where a
+secret lives, not whether a provider works. The provider's own public endpoint
+answers the question, and it costs one request.
+
+## D-22 — LinkedIn / Facebook / Instagram: unchanged, and unchanged deliberately
+
+Re-derived from current `main`; no new evidence. LinkedIn and Facebook remain
+`NOT_IMPLEMENTED` (their only occurrences in app source are a CV-import slug and
+in-app-browser detection for geolocation errors). Meta/Instagram remains
+`NOT_APPROPRIATE`.
+
+Per the standing rule — **no dead buttons** — no provider button was added.
+Adding one before the provider can complete authentication would be exactly the
+"decorative promise" the Google row exists to warn about.
+
+## D-20 — FIXED (was P1, unfixed at gate 1)
+
+The product decision was made: an explicit personal selection must be respected.
+Implemented in the smallest existing mechanism (session cookie + the two pure
+resolvers), **no migration**, authorization unchanged. See the commit for the
+three-layer root cause and both negative controls. `20260714210000` remains
+owner-gated and unapplied, so the choice is session-scoped by design.
