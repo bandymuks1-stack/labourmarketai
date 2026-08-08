@@ -373,10 +373,20 @@ export default async function PlanningPage({
 
   /* ---------------- view-specific projections ---------------- */
 
+  // Both builders DERIVE truth of their own (conflicts, the journal mark, the
+  // "unfilled" mark), so each gets the render list AND the full model. Passing
+  // only `visibleItems` re-created the slice-3 defect inside them: the month
+  // cell showed no conflict while the row beneath it showed one, and a day the
+  // person had recorded was marked unfilled because `?source=booking` had
+  // removed the journal rows that prove it. Count still follows the filter.
   const agenda =
-    view === "agenda" ? buildAgenda(visibleItems, utc(anchor)) : null;
+    view === "agenda"
+      ? buildAgenda(visibleItems, utc(anchor), undefined, result.items)
+      : null;
   const monthGrid =
-    view === "month" ? buildMonthGrid(anchor, visibleItems, today) : null;
+    view === "month"
+      ? buildMonthGrid(anchor, visibleItems, today, result.items)
+      : null;
   const weekDays =
     view === "week" ? buildWeekView(anchor, visibleItems, today) : null;
   const yearCells =
