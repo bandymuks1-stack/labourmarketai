@@ -98,7 +98,27 @@ const CONVERSION_EVENTS: readonly string[] = [
   FUNNEL_EVENTS.companyNeedSubmitted,
 ];
 
-export type FunnelRate = { label: string; pct: number | null; note: string };
+/**
+ * WHICH KIND OF ANSWER a rate is. `pct === null` covers two genuinely
+ * different facts and the panel used to render one dash for both:
+ *
+ *   insufficient_data — nothing to divide by yet;
+ *   truncated         — a share exists, but the read hit its cap so it cannot
+ *                       honestly be stated.
+ *
+ * A real measured 0% is `ok` and is not a kind of nothing at all. The state is
+ * carried explicitly so the UI branches on a value rather than string-matching
+ * the note, which would put the distinction one refactor away from collapsing
+ * again.
+ */
+export type FunnelRateState = "ok" | "insufficient_data" | "truncated";
+
+export type FunnelRate = {
+  label: string;
+  pct: number | null;
+  note: string;
+  state: FunnelRateState;
+};
 
 export type AcquisitionFunnel = {
   available: boolean;
@@ -286,7 +306,10 @@ export function summariseFunnel(
   }));
 
   const c = (k: string) => countByEvent.get(k) ?? 0;
-  const rates: FunnelRate[] = [
+  // The state is assigned once, below, for every rate at the same time — so
+  // these literals deliberately carry only label/pct/note and cannot disagree
+  // with it.
+  const rates: Omit<FunnelRate, "state">[] = [
     {
       label: "Landing → CTA click",
       pct: pct(c(FUNNEL_EVENTS.ctaClicked), c(FUNNEL_EVENTS.landingViewed)),
@@ -349,12 +372,27 @@ export function summariseFunnel(
     .slice(0, 10)
     .map(([source, count]) => ({ source, count }));
 
-  // ONE PLACE decides whether a share may be stated at all. Applying it to the
-  // whole list rather than to each construction above means a rate added later
-  // cannot forget the rule and quietly publish a number from a partial read.
-  const finalRates: FunnelRate[] = truncated
-    ? rates.map((r) => ({ ...r, pct: null, note: `${r.note} — ${TRUNCATED_NOTE}` }))
-    : rates;
+  // ONE PLACE decides whether a share may be stated at all, and what KIND of
+  // non-answer it is when it cannot be. Applying it to the whole list rather
+  // than to each construction above means a rate added later cannot forget the
+  // rule and quietly publish a number from a partial read.
+  const finalRates: FunnelRate[] = rates.map((r) =>
+    truncated
+      ? {
+          ...r,
+          pct: null,
+          note: `${r.note} — ${TRUNCATED_NOTE}`,
+          state: "truncated" as const,
+        }
+      : {
+          ...r,
+          // A real measured zero is an ANSWER. A missing denominator is not,
+          // and the two must not render the same way.
+          state: (r.pct === null
+            ? "insufficient_data"
+            : "ok") as FunnelRateState,
+        },
+  );
 
   return {
     available: true,
