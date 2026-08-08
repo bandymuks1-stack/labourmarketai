@@ -642,6 +642,20 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
       // Added in the same commit as that record.
       "20260807090000_org_owner_membership_seed_v1.sql",
+      // 2026-08-08: W12 employer absence privacy hardening. The marker records
+      // that the RED content (a GRANT and an ALTER/DROP POLICY) is INTENTIONAL
+      // — narrowing the policy IS the change. Owner decision given 2026-08-08,
+      // merged in #1089 and APPLIED to production the same day. Gate record:
+      // docs/human-gates/w12-absence-privacy-hardening-gate.md; design + proof:
+      // docs/audits/W12_EMPLOYER_ABSENCE_PRIVACY_HARDENING.md.
+      "20260808120000_worker_absence_scheduling_view_v1.sql",
+      // 2026-08-08: W14 item 6 retention redaction. The marker records that the
+      // RED content (a SECURITY DEFINER function + a GRANT) is INTENTIONAL —
+      // the constrained mutation path IS the mechanism. Owner decision given
+      // 2026-08-08 (REDACT-NOT-DELETE at 90 days). Gate record:
+      // docs/human-gates/w14-ai-runs-retention-gate.md; contract + proof:
+      // docs/audits/W14_ITEM6_AI_RUNS_RETENTION.md.
+      "20260808130000_ai_runs_retention_redaction_v1.sql",
     ]);
   });
 

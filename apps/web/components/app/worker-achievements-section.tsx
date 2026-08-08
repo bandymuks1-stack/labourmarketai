@@ -180,14 +180,14 @@ export function WorkerAchievementsSection({
                         });
                         setOpen(true);
                       }}
-                      className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
                     >
                       {t("edit")}
                     </button>
                     <button
                       type="button"
                       onClick={() => remove(entry.id)}
-                      className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
                       data-testid={`worker-achievements-remove-${entry.id}`}
                     >
                       {t("remove")}
@@ -206,7 +206,7 @@ export function WorkerAchievementsSection({
             <Button
               type="button"
               size="sm"
-              className="w-fit"
+              className="w-fit min-h-11"
               onClick={() => {
                 setForm(EMPTY_FORM);
                 setOpen(true);
@@ -222,13 +222,14 @@ export function WorkerAchievementsSection({
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label>{t("achTitle")}</Label>
+                  <Label id="achievement-title-label">{t("achTitle")}</Label>
                   <input
                     type="text"
+                    aria-labelledby="achievement-title-label"
                     value={form.title}
                     maxLength={160}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
                     data-testid="worker-achievements-title"
                   />
                 </div>
@@ -244,18 +245,20 @@ export function WorkerAchievementsSection({
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>{t("date")}</Label>
+                  <Label id="achievement-date-label">{t("date")}</Label>
                   <input
                     type="date"
+                    aria-labelledby="achievement-date-label"
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                    className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <Label>{t("description")}</Label>
+                  <Label id="achievement-desc-label">{t("description")}</Label>
                   <textarea
                     rows={2}
+                    aria-labelledby="achievement-desc-label"
                     value={form.description}
                     maxLength={2000}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -267,6 +270,7 @@ export function WorkerAchievementsSection({
                 <Button
                   type="button"
                   size="sm"
+                  className="min-h-11"
                   loading={pending}
                   disabled={pending || form.title.trim().length < 2}
                   onClick={submit}
@@ -281,7 +285,7 @@ export function WorkerAchievementsSection({
                     setForm(EMPTY_FORM);
                     setError(null);
                   }}
-                  className="text-xs text-text-secondary hover:text-text-primary"
+                  className="inline-flex min-h-11 items-center text-xs text-text-secondary hover:text-text-primary"
                 >
                   {t("cancel")}
                 </button>

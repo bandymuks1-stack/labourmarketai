@@ -107,11 +107,26 @@ describe("future market layers stay disabled/preparing", () => {
   });
 });
 
-describe("floating feedback button does not obstruct the map", () => {
-  it("the feedback widget is hidden on the market-map route", () => {
+describe("the feedback control does not obstruct the map", () => {
+  /**
+   * THIS USED TO REQUIRE THE FEATURE TO BE MISSING HERE.
+   *
+   * The feedback trigger floated over the page, so on a map-first surface it
+   * covered the controls — and the fix was to render nothing at all on this
+   * route. That guard then PINNED the hole: reporting a problem was impossible
+   * on the map, and the assertion said that was correct.
+   *
+   * The trigger lives in the account menu now and covers nothing anywhere, so
+   * the exception is gone and the map keeps the feature. What is pinned is the
+   * property the route-exception was crudely approximating: nothing floats over
+   * this surface.
+   */
+  it("no floating control is rendered over the map, and reporting still works here", () => {
     const w = read("components/app/language-feedback-widget.tsx");
-    expect(w).toMatch(/\/dashboard\/market-map/);
-    expect(w).toMatch(/return null/);
+    // No resting floating trigger at all — so no route needs an exception.
+    expect(w).not.toMatch(/className="fixed right-3/);
+    // …and specifically no market-map opt-out remains.
+    expect(w).not.toMatch(/market-map[\s\S]{0,80}return null/);
   });
 });
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 const MIN_PASSWORD = 8;
 
@@ -74,8 +75,6 @@ export function ResetPasswordForm() {
     }
   }
 
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   if (ready === "checking") {
     return (
@@ -105,7 +104,9 @@ export function ResetPasswordForm() {
   const disabled = status === "saving";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
+       it an early submit GETs the new password into the URL. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -125,7 +126,7 @@ export function ResetPasswordForm() {
           minLength={MIN_PASSWORD}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
@@ -138,7 +139,7 @@ export function ResetPasswordForm() {
           required
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useLocale } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { requestInstructionClarificationAction } from "@/lib/instructions/actions";
 import type { WorkerInstruction } from "@/lib/instructions/instructions";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Worker view of a single work instruction (slice work-instructions-v1).
@@ -42,6 +44,7 @@ export function WorkerInstructionCard({
   instruction: WorkerInstruction;
   labels: InstructionCardLabels;
 }) {
+  const locale = useLocale();
   const hasTranslation =
     instruction.translationStatus === "available" &&
     !!instruction.translatedText;
@@ -61,7 +64,7 @@ export function WorkerInstructionCard({
           {instruction.authorName ?? "—"}
         </span>
         <span className="font-mono text-meta text-text-muted">
-          {new Date(instruction.createdAt).toLocaleString()}
+          {formatUtcDateTime(instruction.createdAt, locale)}
         </span>
       </div>
 

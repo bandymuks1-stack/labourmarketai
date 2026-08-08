@@ -17,6 +17,7 @@ import {
   captureFirstTouchAttribution,
   getFirstTouchAttribution,
 } from "@/lib/telemetry/attribution";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -139,8 +140,6 @@ export function SignupForm() {
     /[A-Z]/.test(password) &&
     /[0-9]/.test(password) &&
     /[^A-Za-z0-9]/.test(password);
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   // Confirm-email state: signUp returned no session (Supabase "Confirm email"
   // is ON). Tell the user to verify instead of silently bouncing to login.
@@ -164,7 +163,9 @@ export function SignupForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
+       it an early submit GETs the password into the URL. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -205,7 +206,7 @@ export function SignupForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("email_placeholder")}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
@@ -219,7 +220,7 @@ export function SignupForm() {
           minLength={MIN_PASSWORD}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
           aria-describedby="password-help"
         />
         <span
@@ -243,7 +244,7 @@ export function SignupForm() {
           required
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 

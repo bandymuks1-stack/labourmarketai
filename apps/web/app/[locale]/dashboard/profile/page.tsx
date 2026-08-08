@@ -3,15 +3,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { WorkerTradeProfile } from "@/components/app/worker-trade-profile";
-import { WorkerSetupJourney } from "@/components/app/worker-setup-journey";
 import { ProfileTextFirstFlow } from "@/components/app/profile-text-first-flow";
 import { ProfileHubOverview } from "@/components/app/profile-hub-overview";
-import { ProfileStateStrip } from "@/components/app/profile-state-strip";
-import { LiveProfileSection } from "@/components/app/live-profile-section";
 import { FeatureNote } from "@/components/app/feature-note";
+import { NonWorkerIdentityNotice } from "@/components/app/non-worker-identity-notice";
+import { deriveNonWorkerIdentityNotice } from "@/lib/profile/non-worker-identity";
 import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { SkillsReviewBanner } from "@/components/app/skills-review-banner";
 import {
   deriveSkillEvidence,
   type SkillEvidenceInput,
@@ -20,8 +18,6 @@ import {
   supportedSkillIds,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
-import { MessageButton } from "@/components/app/message-button";
-import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
@@ -62,13 +58,8 @@ import {
   type ExternalProfilesRead,
 } from "@/lib/worker/external-profiles";
 import { PageQuickNav } from "@/components/app/page-quick-nav";
-import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import { Building2 } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
-import {
-  CvCompletenessGrid,
-  type CvSectionCard,
-} from "@/components/app/cv-completeness-grid";
+import { type CvSectionCard } from "@/components/app/cv-completeness-grid";
 import { WorkerEducationSection } from "@/components/app/worker-education-section";
 import { WorkerAchievementsSection } from "@/components/app/worker-achievements-section";
 import {
@@ -102,54 +93,127 @@ export default async function ProfilePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("skills");
-  const tSpaces = await getTranslations("spaces");
-  const tGallery = await getTranslations("personalGallery");
-  const tProf = await getTranslations("professions");
-  const tSkill = await getTranslations("skillNames");
-  const tRole = await getTranslations("auth.signup.role");
-  const tTrust = await getTranslations("trust");
-  const tCv = await getTranslations("cvExport");
-  const tDocs = await getTranslations("documents");
-  const tOpp = await getTranslations("opportunities");
-  const tQuick = await getTranslations("quickNav");
-  const tHub = await getTranslations("marketplaceHub");
-  const tPrefs = await getTranslations("workerPrefs");
-  const tLangs = await getTranslations("workerLanguages");
-  const tExt = await getTranslations("externalProfiles");
 
+  /**
+   * ── W7-S3 STAGE 1 — every namespace, ONE stage ──────────────────────────
+   *
+   * These were sixteen consecutive `await`s. They read the same already-loaded
+   * message bundle, so nothing about them was ever sequential except the
+   * syntax: each one parked the render for a microtask before the next could
+   * start, and none of them can fail in a way the next one depends on.
+   * `setRequestLocale` above is the only ordering requirement, and it stays.
+   */
+  const [
+    t,
+    tSpaces,
+    tGallery,
+    tProf,
+    tSkill,
+    tRole,
+    tTrust,
+    tCv,
+    tDocs,
+    tOpp,
+    tQuick,
+    tNetwork,
+    tPrefs,
+    tLangs,
+    tExt,
+    tFeatureNotes,
+    tIdentityNotice,
+  ] = await Promise.all([
+    getTranslations("skills"),
+    getTranslations("spaces"),
+    getTranslations("personalGallery"),
+    getTranslations("professions"),
+    getTranslations("skillNames"),
+    getTranslations("auth.signup.role"),
+    getTranslations("trust"),
+    getTranslations("cvExport"),
+    getTranslations("documents"),
+    getTranslations("opportunities"),
+    getTranslations("quickNav"),
+    // W7-S4: `marketplaceHub` left with the managed-companies block; the only
+    // namespace this page still needs from that move is the network label for
+    // the handoff link.
+    getTranslations("network"),
+    getTranslations("workerPrefs"),
+    getTranslations("workerLanguages"),
+    getTranslations("externalProfiles"),
+    // Was awaited INSIDE the JSX (`{(await getTranslations(…))("workerProfile")}`),
+    // which is the worst possible place: it suspends the render after the tree
+    // has begun. Same namespace, resolved with the rest.
+    getTranslations("featureNotes"),
+    // W7-S5b: the non-worker identity notice joins the ONE batch — never a
+    // standalone await (W7-S3 ratchet).
+    getTranslations("profileIdentityNotice"),
+  ]);
+
+  /**
+   * ── W7-S3 STAGE 2+3 — the AUTHORIZATION GATE, deliberately still serial ──
+   *
+   * `createClient()` must resolve before `auth.getUser()` can be called, and
+   * `getUser()` must resolve before ANY read runs — a redirect on a missing
+   * user is the fail-closed check every read below depends on. These two
+   * stages are ordered on purpose and this slice does not touch them.
+   */
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // These five top-level reads are independent — run them in parallel to
-  // cut the slowest authenticated SSR page's tail latency. The worker
-  // branch's inner queries (further down) still depend on workerId /
-  // currentProfessionId / workerProfIds, so they stay sequential.
-  const [profileRes, savedSkillClaims, roleRowsRes, workerRes, profRowsRes] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("full_name, email, active_role, profile_text")
-        .eq("id", user.id)
-        .single(),
-      listProfileSkillClaims(),
-      supabase
-        .from("profile_roles")
-        .select("role")
-        .eq("profile_id", user.id)
-        .eq("is_active", true),
-      supabase
-        .from("workers")
-        .select(
-          "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
-        )
-        .eq("profile_id", user.id)
-        .maybeSingle(),
-      supabase.from("professions").select("id, slug").eq("is_active", true),
-    ]);
+  /**
+   * ── W7-S3 STAGE 4 — everything that needs only `user`, ONE stage ────────
+   *
+   * `getOwnAvatar()` was a further serial await after this batch, although it
+   * reads nothing the batch produces — it resolves the signed-in user itself.
+   * It joins the batch.
+   *
+   * W7-S4: `getOwnedOrganizations()` was in this batch too, for the
+   * `#managed-companies` block. That block now lives on `/dashboard/network`,
+   * which was already calling the same reader — so the call moved rather than
+   * multiplied, and this page dropped a read it no longer renders anything
+   * from.
+   *
+   * ACCEPTED, NOT OVERLOOKED: `getOwnAvatar()` reads the `profiles` row a
+   * second time (for `avatar_url`). Folding that column into the select above
+   * would remove the duplicate — but that select is a `.single()` the whole
+   * page depends on, and the avatar reader carries its own try/catch precisely
+   * because `avatar_url` may not be provisioned. Trading a CONCURRENT read for
+   * a fail-closed risk on the page's critical row is the wrong direction for a
+   * behaviour-identical slice. The read costs no stage; it is recorded as
+   * remaining debt instead.
+   */
+  const [
+    profileRes,
+    savedSkillClaims,
+    roleRowsRes,
+    workerRes,
+    profRowsRes,
+    avatar,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, email, active_role, profile_text")
+      .eq("id", user.id)
+      .single(),
+    listProfileSkillClaims(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", user.id)
+      .eq("is_active", true),
+    supabase
+      .from("workers")
+      .select(
+        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+      )
+      .eq("profile_id", user.id)
+      .maybeSingle(),
+    supabase.from("professions").select("id, slug").eq("is_active", true),
+    getOwnAvatar(),
+  ]);
   const profile = profileRes.data;
   const roleRows = roleRowsRes.data;
   const worker = workerRes.data;
@@ -157,16 +221,6 @@ export default async function ProfilePage({
 
   const personName =
     profile?.full_name ?? (profile?.email ? profile.email.split("@")[0] : "");
-  const avatar = await getOwnAvatar();
-  // Managed companies (IA cleanup v2 #4): the profile is the person identity
-  // surface, so it shows the REAL companies this person owns/manages (account-
-  // linked professional identities) with a name + add action. No fake
-  // companies — an empty list simply renders the add CTA.
-  const ownedOrgsResult = await getOwnedOrganizations();
-  const managedCompanies =
-    ownedOrgsResult.kind === "ok"
-      ? ownedOrgsResult.organizations.filter((o) => o.organizationType !== "agency")
-      : [];
   const activeRole = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : null;
@@ -181,6 +235,9 @@ export default async function ProfilePage({
 
   const workerId = worker?.id ?? null;
 
+  // W7-S5b: derived from data already read above — no new request stage.
+  const identityNotice = deriveNonWorkerIdentityNotice({ workerId, roles });
+
   // Names live in JSON keyed by slug (PLATFORM_DOCTRINE §2); fetch id+slug,
   // translate + sort by the localized name here.
   const professions = (profRows ?? [])
@@ -189,14 +246,12 @@ export default async function ProfilePage({
     .map(({ id, slug }) => ({ id, slug }));
 
   let currentProfessionId: string | null = null;
-  let employerOwnerProfileId: string | null = null;
   let workerDirections: WorkerDirection[] = [];
   let initialSkillIds: string[] = [];
   let savedSkills: CvSkill[] = [];
   let skillDots: SkillDot[] = [];
   let engagementCards: EngagementCard[] = [];
   let professionIconSlug: string | null = null;
-  let journalCount = 0;
   // Per-skill evidence-support inputs (provenance + DURABLE journal links).
   let skillEvidenceInputs: SkillEvidenceInput[] = [];
   // Skills the worker is allowed to pick from across all their directions.
@@ -224,51 +279,107 @@ export default async function ProfilePage({
   let workerAchievements: WorkerAchievementsRead | null = null;
   let projectLinkedEntryCount = 0;
   let certificateDocCount = 0;
+  // Trust signals were awaited inside the JSX; resolved in stage 5 now.
+  let trustSignals: Awaited<ReturnType<typeof getOwnTrustSignals>> | null = null;
   if (workerId) {
-    [
-      availabilityPrefs,
-      workerLanguages,
-      externalProfiles,
-      workerEducation,
-      workerAchievements,
+    /**
+     * ── W7-S3 STAGE 5 — everything that needs only `workerId` / `user.id` ──
+     *
+     * These reads were EIGHT serial stages: one batch of five, followed by six
+     * standalone awaits and a last one (`getOwnTrustSignals`) that was awaited
+     * inside the JSX. Not one of them consumes another's result — every single
+     * one is keyed by `workerId` or `user.id`, both already known. The
+     * waterfall was accidental, not structural.
+     *
+     * W7-S1 already removed the page's own `journal_entries` count (a second
+     * read of rows the canonical player card counts); what remains here is the
+     * project-linked subset, which is a different question.
+     *
+     * W7-S4 removed `getEmployerOwnerProfileId()` — it existed only to decide
+     * whether the "Rašyti įmonei" button could render, and that button now
+     * lives on `/dashboard/communication`, which resolves it there.
+     */
+    const [
+      prefsRes,
+      langsRes,
+      extRes,
+      eduRes,
+      achRes,
+      projCountRes,
+      certDocsRes,
+      wpAllRes,
+      wsRes,
+      linkRes,
+      ecRes,
+      trust,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       getOwnWorkerLanguages(),
       getOwnExternalProfiles(),
       getOwnWorkerEducation(),
       getOwnWorkerAchievements(),
+      supabase
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerId)
+        .not("project_id", "is", null),
+      // Certificate/licence documents count (worker_documents is applied prod
+      // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
+      supabase
+        .from("worker_documents")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerId)
+        .in("document_type_slug", [
+          "professional_certificate",
+          "a1_certificate",
+        ]),
+      supabase
+        .from("worker_professions")
+        .select("profession_id, is_primary")
+        .eq("worker_id", workerId)
+        .order("is_primary", { ascending: false }),
+      // ALL of the worker's saved skills (read model — never filtered down).
+      supabase
+        .from("worker_skills")
+        .select("skill_id, confidence_bin, verified, source, skills(slug)")
+        .eq("worker_id", workerId)
+        .order("created_at", { ascending: true }),
+      // DURABLE journal→skill links (v1) — graceful no-op if the migration is
+      // not applied yet.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .eq("worker_id", workerId),
+      // Engagement-context cards (current first): primary first, then
+      // most-recent.
+      supabase
+        .from("engagement_contexts")
+        .select(
+          "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+        )
+        .eq("profile_id", user.id)
+        .in("relationship_slug", WORKER_RELATIONSHIPS)
+        .order("is_primary", { ascending: false })
+        .order("started_at", { ascending: false, nullsFirst: false }),
+      // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
+      // so it could not overlap anything at all.
+      getOwnTrustSignals(workerId),
     ]);
-    const { count: projCount } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId)
-      .not("project_id", "is", null);
-    projectLinkedEntryCount = projCount ?? 0;
-    // Certificate/licence documents count (worker_documents is applied prod
-    // schema; cert-type slugs mirror lib/cv-export/cv-sections.ts).
-    const { count: certDocs } = await supabase
-      .from("worker_documents")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId)
-      .in("document_type_slug", ["professional_certificate", "a1_certificate"]);
-    certificateDocCount = certDocs ?? 0;
-    const { data: wpAll } = await supabase
-      .from("worker_professions")
-      .select("profession_id, is_primary")
-      .eq("worker_id", workerId)
-      .order("is_primary", { ascending: false });
+
+    availabilityPrefs = prefsRes;
+    workerLanguages = langsRes;
+    externalProfiles = extRes;
+    workerEducation = eduRes;
+    workerAchievements = achRes;
+    projectLinkedEntryCount = projCountRes.count ?? 0;
+    certificateDocCount = certDocsRes.count ?? 0;
+    trustSignals = trust;
+
+    const wpAll = wpAllRes.data;
     const wp = (wpAll ?? []).find((r) => r.is_primary) ?? null;
     currentProfessionId = wp?.profession_id ?? null;
 
-    // Journal entries count — feeds the real profile-completion status.
-    const { count: jCount } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId);
-    journalCount = jCount ?? 0;
-    // Resolve the employing company owner (if any) so the worker can message
-    // them — read-only, RLS-scoped to the worker's own accepted invitation.
-    employerOwnerProfileId = await getEmployerOwnerProfileId();
     // All of the worker's directions (primary + additional) — non-locking (§1).
     workerDirections = (wpAll ?? [])
       .map((r) => {
@@ -280,23 +391,53 @@ export default async function ProfilePage({
       .filter((d): d is WorkerDirection => d !== null)
       .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
 
-    // is_core per skill for the current profession (for the [PAGRINDINIS] tag).
-    const coreMap = new Map<string, boolean>();
-    if (currentProfessionId) {
-      const { data: ps } = await supabase
-        .from("profession_skills")
-        .select("skill_id, is_core")
-        .eq("profession_id", currentProfessionId);
-      for (const r of ps ?? []) coreMap.set(r.skill_id, r.is_core);
-    }
+    /**
+     * ── W7-S3 STAGE 6 — the only reads that GENUINELY depend on stage 5 ────
+     *
+     * Three reads, and all three need `currentProfessionId` / `workerProfIds`,
+     * which only exist once `worker_professions` has resolved. This is a real
+     * dependency, so it stays a second stage — but the three run together
+     * instead of one after another, and the two conditionals resolve to
+     * `null` rather than skipping into their own awaits.
+     */
+    const workerProfIds = (wpAll ?? [])
+      .map((r) => r.profession_id)
+      .filter((id): id is string => !!id);
+    const [coreRes, allowedRes, tmplRes] = await Promise.all([
+      // is_core per skill for the current profession (the [PAGRINDINIS] tag).
+      currentProfessionId
+        ? supabase
+            .from("profession_skills")
+            .select("skill_id, is_core")
+            .eq("profession_id", currentProfessionId)
+        : Promise.resolve(null),
+      // Catalogue of skills allowed for this worker (all directions). Used by
+      // the text-first flow to resolve confirmed parser matches to skill_ids.
+      workerProfIds.length > 0
+        ? supabase
+            .from("profession_skills")
+            .select("skills(id, slug)")
+            .in("profession_id", workerProfIds)
+        : Promise.resolve(null),
+      // Profession-level icon — stored in
+      // profession_templates.template->>'icon_slug' (the spec referenced a flat
+      // icon_slug column; the actual schema nests it in the template jsonb).
+      // Platform default for the worker's primary profession.
+      currentProfessionId
+        ? supabase
+            .from("profession_templates")
+            .select("template")
+            .eq("profession_id", currentProfessionId)
+            .eq("is_platform_default", true)
+            .is("organization_id", null)
+            .maybeSingle()
+        : Promise.resolve(null),
+    ]);
 
-    // ALL of the worker's saved skills (read model — never filtered down).
-    const { data: ws } = await supabase
-      .from("worker_skills")
-      .select("skill_id, confidence_bin, verified, source, skills(slug)")
-      .eq("worker_id", workerId)
-      .order("created_at", { ascending: true });
-    const rows = ws ?? [];
+    const coreMap = new Map<string, boolean>();
+    for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
+
+    const rows = wsRes.data ?? [];
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);
@@ -305,11 +446,6 @@ export default async function ProfilePage({
     // applied yet. Replaces the loose provenance-only "supported" assumption:
     // a skill counts as supported when a real journal entry links it.
     let durableSupported = new Set<string>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const linkRes = await (supabase as any)
-      .from("journal_entry_skills")
-      .select("journal_entry_id, skill_id")
-      .eq("worker_id", workerId);
     if (!linkRes.error) {
       durableSupported = supportedSkillIds(
         (linkRes.data ?? []) as EntrySkillLinkRow[],
@@ -350,16 +486,7 @@ export default async function ProfilePage({
       .sort((a, b) => Number(b.isCore) - Number(a.isCore));
 
     // Engagement-context cards (current first): primary first, then most-recent.
-    const { data: ecRows } = await supabase
-      .from("engagement_contexts")
-      .select(
-        "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
-      )
-      .eq("profile_id", user.id)
-      .in("relationship_slug", WORKER_RELATIONSHIPS)
-      .order("is_primary", { ascending: false })
-      .order("started_at", { ascending: false, nullsFirst: false });
-    engagementCards = (ecRows ?? []).map((e) => {
+    engagementCards = (ecRes.data ?? []).map((e) => {
       const org = e.organizations as
         | {
             display_name: string | null;
@@ -388,42 +515,99 @@ export default async function ProfilePage({
       };
     });
 
-    // Catalogue of skills allowed for this worker (all directions). Used by
-    // the text-first flow to resolve confirmed parser matches to skill_ids.
-    const workerProfIds = (wpAll ?? [])
-      .map((r) => r.profession_id)
-      .filter((id): id is string => !!id);
-    if (workerProfIds.length > 0) {
-      const { data: psRows } = await supabase
-        .from("profession_skills")
-        .select("skills(id, slug)")
-        .in("profession_id", workerProfIds);
-      const seen = new Set<string>();
-      for (const row of psRows ?? []) {
-        const s = row.skills as { id: string | null; slug: string | null } | null;
-        if (s?.id && s.slug && !seen.has(s.id)) {
-          seen.add(s.id);
-          allowedSkills.push({ id: s.id, slug: s.slug, name: tSkill(s.slug) });
-        }
+    // Catalogue of skills allowed for this worker (all directions). Resolved
+    // in stage 6; the shaping below is pure.
+    const seen = new Set<string>();
+    for (const row of allowedRes?.data ?? []) {
+      const s = row.skills as { id: string | null; slug: string | null } | null;
+      if (s?.id && s.slug && !seen.has(s.id)) {
+        seen.add(s.id);
+        allowedSkills.push({ id: s.id, slug: s.slug, name: tSkill(s.slug) });
       }
-      allowedSkills.sort((a, b) => a.name.localeCompare(b.name));
     }
+    allowedSkills.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Profession-level icon — stored in profession_templates.template->>'icon_slug'
-    // (spec referenced a flat icon_slug column; actual schema nests it in the
-    // template jsonb). Platform default for the worker's primary profession.
-    if (currentProfessionId) {
-      const { data: tmpl } = await supabase
-        .from("profession_templates")
-        .select("template")
-        .eq("profession_id", currentProfessionId)
-        .eq("is_platform_default", true)
-        .is("organization_id", null)
-        .maybeSingle();
-      const tpl = tmpl?.template as { icon_slug?: string } | null;
-      professionIconSlug = tpl?.icon_slug ?? null;
-    }
+    const tpl = tmplRes?.data?.template as { icon_slug?: string } | null;
+    professionIconSlug = tpl?.icon_slug ?? null;
   }
+
+  /**
+   * W7-S1 — derived ONCE, then shared.
+   *
+   * `deriveSkillEvidence` used to run three times per render (the hub's props,
+   * the review banner's IIFE, and the hub's own internal recomputation) from
+   * identical inputs. The CV section states were assembled inside a JSX IIFE
+   * that only the standalone grid could see; the hub now owns the grid, so the
+   * list is computed here and passed in. Same inputs, same outputs, no new
+   * reads — this is the duplicate-work removal the slice measured.
+   */
+  const skillEvidenceSummary = workerId
+    ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
+    : undefined;
+
+  const cvSectionCards: CvSectionCard[] | undefined = (() => {
+    if (!workerId) return undefined;
+    const eduCount =
+      workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
+    const achEntries =
+      workerAchievements?.kind === "ok" ? workerAchievements.entries : [];
+    const declaredCerts = achEntries.filter(
+      (a) => a.achievementTypeSlug === "declared_certificate",
+    ).length;
+    return [
+      {
+        key: "summary",
+        filled: savedProfileText.trim().length > 0,
+        href: "#profile-edit",
+      },
+      {
+        key: "workHistory",
+        filled: engagementCards.length > 0,
+        href: "#capabilities",
+      },
+      { key: "education", filled: eduCount > 0, href: "#cv-education" },
+      {
+        key: "languages",
+        filled:
+          workerLanguages?.kind === "ok" && workerLanguages.languages.length > 0,
+        href: "#cv-languages",
+      },
+      {
+        key: "certificates",
+        filled: certificateDocCount > 0 || declaredCerts > 0,
+        href: DOCUMENTS_READINESS_ENABLED
+          ? `/${locale}/dashboard/documents`
+          : "#cv-achievements",
+      },
+      {
+        key: "skills",
+        filled: savedSkillClaims.length + savedSkills.length > 0,
+        href: "#profile-edit",
+      },
+      {
+        key: "projects",
+        filled: projectLinkedEntryCount > 0,
+        href: `/${locale}/dashboard/journal`,
+      },
+      {
+        key: "achievements",
+        filled: achEntries.length > 0,
+        href: "#cv-achievements",
+      },
+      {
+        key: "salary",
+        filled: worker?.salary_min_eur != null || worker?.salary_max_eur != null,
+        href: `/${locale}/dashboard`,
+      },
+      {
+        key: "availability",
+        filled:
+          worker?.availability_status === "available" ||
+          Boolean(worker?.available_from),
+        href: "#cv-availability",
+      },
+    ];
+  })();
 
   return (
     <div className="flex flex-col gap-6">
@@ -439,7 +623,12 @@ export default async function ProfilePage({
           {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
               stacks to a 2-column grid on mobile (max 2 actions across) and
               flows inline only from sm+. */}
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:text-center sm:[&>a]:text-left">
+          {/* W7-S4: every link in this row is `min-h-11` (44 px). They were
+              26 px — the largest single cluster of W7-S2's remaining sub-44
+              debt (A-2), and the row had to be consistent to take the network
+              handoff below without one odd-sized chip. Visual size is
+              unchanged; only the tap area grew. */}
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
             {workerId ? (
               <Link
                 href={"/dashboard/opportunities" as "/dashboard"}
@@ -479,6 +668,17 @@ export default async function ProfilePage({
                 {tGallery("title")}
               </Link>
             ) : null}
+            {/* W7-S4 handoff: `#managed-companies` left this page for
+                `/dashboard/network`. That route is a primary nav tab, so this
+                is a courtesy pointer for the habit the move breaks — one link
+                in an existing row, not a replacement card. */}
+            <Link
+              href={"/dashboard/network" as "/dashboard"}
+              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="profile-network-link"
+            >
+              {tNetwork("title")} →
+            </Link>
             <Link
               href="/dashboard"
               className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
@@ -500,114 +700,67 @@ export default async function ProfilePage({
         items={[
           { href: "#profile-top", label: tQuick("top") },
           { href: "#profile-identity", label: tQuick("identity") },
-          { href: "#managed-companies", label: tQuick("companies") },
+          // W7-S4: `#managed-companies` removed — the anchor's target moved to
+          // `/dashboard/network`. A jump chip pointing at a section that is no
+          // longer on the page is a dead control, and this bar is in-page
+          // anchors only. The route link lives in the header action row.
           { href: "#profile-edit", label: tQuick("skills") },
         ]}
       />
 
-      {/* Three plain state concepts, separated on purpose (human-first
-          profile pass): parengtis (readiness — same canonical model the
-          setup journey uses), aktualumas (newest journal-entry date) and
-          šiandienos aktyvumas (today's real entry count). Workers only. */}
-      {workerId ? <ProfileStateStrip workerId={workerId} /> : null}
+      {/* W7-S5b: when the account holds NO person identity (identity truth =
+          `profile_roles`, the same set the RoleSwitcher offers "add person"
+          from), this page is worker-framed copy around person sections that
+          are either empty (normal: the 0009 trigger gives every profile a
+          workers row) or genuinely hidden (legacy/degraded: no workers row)
+          — and it says nothing about either. THE one honest notice
+          (EmployerContextNotice precedent): which identity the person is
+          viewing with, what state the person sections are actually in, where
+          the organisation's information lives, and how a person identity can
+          be added. It explains — it never fabricates person data. */}
+      {identityNotice.kind === "visible" ? (
+        <NonWorkerIdentityNotice
+          reason={identityNotice.reason}
+          presentation={identityNotice.presentation}
+          labels={{
+            title: tIdentityNotice("title"),
+            body: tIdentityNotice(
+              identityNotice.presentation === "sections-empty"
+                ? "bodySectionsEmpty"
+                : "bodySectionsHidden",
+            ),
+            companyProfileHint: tIdentityNotice("companyProfileHint"),
+            companyProfileLink: tIdentityNotice("companyProfileLink"),
+            addIdentityHint: tIdentityNotice("addIdentityHint"),
+          }}
+        />
+      ) : null}
 
-      {/* W5 Slice 1 — the LIVE profile: what is missing (named, never scored),
-          where the work happened (real engagements), what the journal backs,
-          and how many visible opportunities match, with the §19 basis of the
-          closest one. Reads the SAME canonical card model as the strip above,
-          so the numbers cannot disagree. */}
-      {workerId ? <LiveProfileSection /> : null}
+      {/* W7-S1: the readiness/summary surfaces that used to stand here —
+          `ProfileStateStrip`, `LiveProfileSection`, `WorkerSetupJourney`, the
+          standalone `CvCompletenessGrid` and `SkillsReviewBanner` — are
+          ABSORBED into the ONE `ProfileHubOverview` below. They rendered the
+          same `deriveWorkerReadiness` output four times and the same journal
+          counts three times, ≈1350 px before the first editable field. Nothing
+          was dropped: the old→new map is in
+          `docs/audits/W7_S1_PROFILE_HUB_OVERVIEW.md` §5, and the hub inherits
+          the `#setup-journey` anchor `completeOnboarding` deep-links to. */}
 
-      {/* Wagon 4 — guided setup journey: registration → goal → experience →
-          review → location → availability → ready. A guide over the
-          canonical sections below (self-gates to workers; renders nothing
-          for a pure company identity). */}
-      <WorkerSetupJourney />
-
-      <section
-        id="profile-identity"
-        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
-        data-testid="profile-avatar-section"
-      >
-        <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
-      </section>
-
-      {/* Managed companies + individual activity (IA cleanup v2 #4): the person
-          identity carries the account-linked company identities (real owned
-          organizations, by name) and the add-company action. Self-employed /
-          individual activity is the person acting WITHOUT a company — framed
-          here, not as a separate top-level menu item. No fake companies. */}
-      <section
-        id="managed-companies"
-        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
-        data-testid="profile-managed-companies"
-      >
-        <div className="flex items-center gap-2 text-text-primary">
-          <Building2 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-          <h2 className="font-display text-lg font-semibold">
-            {tHub("company.title")}
-          </h2>
-        </div>
-        {managedCompanies.length > 0 ? (
-          <>
-            <ul className="flex flex-col gap-2">
-              {managedCompanies.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href="/dashboard/company"
-                    className="flex items-center justify-between gap-3 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-primary hover:border-brand-blue hover:text-brand-blue"
-                  >
-                    <span className="truncate font-medium">{c.name}</span>
-                    <span aria-hidden className="shrink-0 text-text-muted">→</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/dashboard/start/company"
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
-              data-testid="profile-add-company"
-            >
-              + {tHub("company.noCompanyCta")}
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-text-secondary">{tHub("company.noCompanyDesc")}</p>
-            <Link
-              href="/dashboard/start/company"
-              className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-sm text-brand-blue hover:bg-brand-blue/10"
-              data-testid="profile-add-company"
-            >
-              + {tHub("company.noCompanyCta")}
-            </Link>
-          </>
-        )}
-        <p className="text-xs leading-relaxed text-text-muted">
-          {tHub("individual.desc")}
-        </p>
-      </section>
-
-      <FeatureNote testId="feature-note-profile">
-        {(await getTranslations("featureNotes"))("workerProfile")}
-      </FeatureNote>
-
-      {/* Unifying "professional passport" lead: states that CV, skills and
-          work-journal evidence are ONE profile, shows each pillar's honest
-          status from real saved data, carries the single not-verified
-          disclaimer, and gives one primary next action + a bridge to the
-          Work Journal. Uses only data already fetched above — no new reads,
-          no invented counts. */}
+      {/* THE ONE OVERVIEW (W7-S1). Identity, status, what is missing and the
+          single next action — with completed steps, work history, evidence
+          counts, today's activity, the opportunity signal and the optional CV
+          section grid behind one disclosure. Absorbs the four surfaces that
+          used to precede it plus the review banner that used to follow it. */}
       <ProfileHubOverview
+        personName={personName}
+        avatarUrl={avatar.signedUrl}
+        workerId={workerId}
         cvProvided={savedProfileText.trim().length > 0}
         selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
         hasWorker={workerId !== null}
-        journalCount={journalCount}
-        skillEvidence={
-          workerId
-            ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
-            : undefined
-        }
+        // Derived ONCE and shared (it was computed three times per render).
+        skillEvidence={skillEvidenceSummary}
+        cvSections={cvSectionCards}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{
@@ -620,116 +773,56 @@ export default async function ProfilePage({
           // contract count "location" honestly instead of always-missing.
           location: worker?.current_location_country ?? null,
         }}
-        // Availability presence (PR9): real workers columns; the pillar
-        // deep-links the canonical dashboard Work Card editor.
-        availability={
-          workerId
-            ? {
-                set:
-                  worker?.availability_status === "available" ||
-                  Boolean(worker?.available_from),
-              }
-            : undefined
-        }
+        /* W7-S1 — two props deliberately NOT passed any more.
+           `availability` and `journalCount` existed to render the availability
+           and journal PILLARS from this page's own `workers` / `journal_entries`
+           reads. The hub now takes both from the ONE canonical player card
+           (`pillarMet("availability")`, `playerCard.evidenceEntries`), so
+           passing a second computation of the same facts would reintroduce
+           exactly the disagreement this slice removed. The page's own
+           journal-entry count query went with them — it had no other consumer,
+           so the slice removes one DB round trip as well as one number. */
       />
 
-      {/* CV completeness grid (Full CV System v1) — one dense card per CV
-          section with a REAL filled/empty state from the data loaded above;
-          each links to its editor. Order-free: the worker starts anywhere. */}
-      {workerId
-        ? (() => {
-            const eduCount =
-              workerEducation?.kind === "ok" ? workerEducation.entries.length : 0;
-            const achEntries =
-              workerAchievements?.kind === "ok" ? workerAchievements.entries : [];
-            const declaredCerts = achEntries.filter(
-              (a) => a.achievementTypeSlug === "declared_certificate",
-            ).length;
-            const cards: CvSectionCard[] = [
-              {
-                key: "summary",
-                filled: savedProfileText.trim().length > 0,
-                href: "#profile-edit",
-              },
-              {
-                key: "workHistory",
-                filled: engagementCards.length > 0,
-                href: "#capabilities",
-              },
-              { key: "education", filled: eduCount > 0, href: "#cv-education" },
-              {
-                key: "languages",
-                filled:
-                  workerLanguages?.kind === "ok" &&
-                  workerLanguages.languages.length > 0,
-                href: "#cv-languages",
-              },
-              {
-                key: "certificates",
-                filled: certificateDocCount > 0 || declaredCerts > 0,
-                href: DOCUMENTS_READINESS_ENABLED
-                  ? `/${locale}/dashboard/documents`
-                  : "#cv-achievements",
-              },
-              {
-                key: "skills",
-                filled: savedSkillClaims.length + savedSkills.length > 0,
-                href: "#profile-edit",
-              },
-              {
-                key: "projects",
-                filled: projectLinkedEntryCount > 0,
-                href: `/${locale}/dashboard/journal`,
-              },
-              {
-                key: "achievements",
-                filled: achEntries.length > 0,
-                href: "#cv-achievements",
-              },
-              {
-                key: "salary",
-                filled:
-                  worker?.salary_min_eur != null || worker?.salary_max_eur != null,
-                href: `/${locale}/dashboard`,
-              },
-              {
-                key: "availability",
-                filled:
-                  worker?.availability_status === "available" ||
-                  Boolean(worker?.available_from),
-                href: "#cv-availability",
-              },
-            ];
-            return <CvCompletenessGrid sections={cards} />;
-          })()
-        : null}
+      <section
+        id="profile-identity"
+        className="card-border flex flex-col gap-3 p-5 scroll-mt-20"
+        data-testid="profile-avatar-section"
+      >
+        <ProfileAvatar signedUrl={avatar.signedUrl} displayName={personName} />
+      </section>
 
-      {/* Honest "needs review" banner — only when real data shows declared
-          skills not yet backed by work evidence (unsupported, incl. unmapped
-          free-label claims). Never says "verified"; count is real. */}
-      {workerId
-        ? (() => {
-            const ev = deriveSkillEvidence(
-              skillEvidenceInputs,
-              savedSkillClaims.length,
-            );
-            return (
-              <SkillsReviewBanner
-                count={ev.unsupported}
-                title={t("reviewBanner.title")}
-                body={t("reviewBanner.body")}
-                cta={t("reviewBanner.cta")}
-              />
-            );
-          })()
-        : null}
+      {/* W7-S4 — `#managed-companies` MOVED to `/dashboard/network`
+          (`network-organizations`), which already rendered this exact
+          `getOwnedOrganizations()` list against the same `/dashboard/company`
+          destination. This page is the PERSON identity; "which organizations
+          does my account own" is an organization-relationship fact, and it now
+          has one home instead of two that could disagree. The add-company
+          action, the zero-company state and the individual-activity note went
+          with it — see `docs/audits/W7_S4_PROFILE_INFORMATION_ARCHITECTURE.md`
+          §3 for the row-by-row map. The page's own `getOwnedOrganizations()`
+          read went with the block; it had no other consumer here, so the
+          profile does one fewer DB round trip. */}
+
+      {/* W7-S5b: "Your professional passport: CV, skills and work journal…"
+          was rendered unconditionally — worker-framed copy shown verbatim to
+          accounts holding no person identity. Keyed on identity (roles), NOT
+          `workerId`: the 0009 trigger makes `workerId` non-null for every
+          normal account, so a workerId gate would never fire. A non-worker
+          identity gets the two-identities model note instead; the identity
+          notice above carries the full explanation. */}
+      <FeatureNote testId="feature-note-profile">
+        {identityNotice.kind === "hidden"
+          ? tFeatureNotes("workerProfile")
+          : tFeatureNotes("identityModel")}
+      </FeatureNote>
 
       {/* Workstream C: the trust chain made VISIBLE on the person — counts
           straight from canonical tables (verified skills, manager
           confirmations, journal entries). Honest zeros with a growth hint. */}
-      {workerId ? (
+      {workerId && trustSignals ? (
         <TrustBlock
-          signals={await getOwnTrustSignals(workerId)}
+          signals={trustSignals}
           labels={{
             title: tTrust("title"),
             caption: tTrust("caption"),
@@ -918,9 +1011,14 @@ export default async function ProfilePage({
           standalone ProfileProcessAssistant) were removed so the profile no
           longer splits into competing summary/evidence/helper panels. */}
 
-      {workerId && employerOwnerProfileId && (
-        <MessageButton profileId={employerOwnerProfileId} labelKey="messageCompany" />
-      )}
+      {/* W7-S4 — the worker→employer "Rašyti įmonei" entry MOVED to
+          `/dashboard/communication`. It opened a conversation and navigated
+          away from this page, and its one failure state
+          (`?notice=cannot_open`) already renders THERE — so the control lived
+          on the person-identity surface while both its success and its failure
+          belonged to the communication surface. Same button, same
+          `getEmployerOwnerProfileId()` resolution, same no-dead-button rule;
+          only the page changed. */}
 
       {/* Text-first composer — universal. Available to every authenticated
           user regardless of role. The catalogued worker_skills picker
@@ -972,7 +1070,7 @@ export default async function ProfilePage({
           steps link this anchor (audit PR4). */}
       <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("capabilities")}
@@ -981,7 +1079,7 @@ export default async function ProfilePage({
         <div className="flex flex-col gap-3 px-4 pb-4">
           <Link
             href="/dashboard/journal"
-            className="w-fit font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+            className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
             data-testid="profile-mano-cv-records-link"
           >
             {tQuick("fullRecordsInCv")} →

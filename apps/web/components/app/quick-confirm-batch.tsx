@@ -8,6 +8,7 @@ import {
   type BatchQuickConfirmState,
 } from "@/lib/journal/quick-confirm-actions";
 import type { QuickConfirmEntryView } from "./quick-confirm-card";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Batch "confirm all of today" (S3.5 + DESIGN_SOUL §3 exceptions pyramid).
@@ -156,7 +157,7 @@ export function QuickConfirmBatch({
                         {e.workerName}
                       </span>
                       <span className="text-meta text-text-muted">
-                        {new Date(e.createdAt).toLocaleDateString(locale)}
+                        {formatUtcDate(e.createdAt, locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-meta text-text-secondary">

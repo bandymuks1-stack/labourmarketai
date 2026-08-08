@@ -14,6 +14,7 @@ import type {
   IncomingInvitationRow,
   SentInvitationRow,
 } from "@/lib/invitations/network";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Sent-invitation manager + incoming-invitation cards (core-network area B).
@@ -138,7 +139,7 @@ export function SentInvitationList({
                 </span>
               )}
               <span className="text-text-muted">
-                {new Date(row.createdAt).toLocaleDateString(locale)}
+                {formatUtcDate(row.createdAt, locale)}
               </span>
             </div>
             {row.status === "pending" && (
@@ -260,7 +261,7 @@ export function IncomingInvitationList({
               </button>
               <span className="text-meta text-text-muted">
                 {t("expires", {
-                  date: new Date(row.expiresAt).toLocaleDateString(locale),
+                  date: formatUtcDate(row.expiresAt, locale) ?? "",
                 })}
               </span>
             </div>

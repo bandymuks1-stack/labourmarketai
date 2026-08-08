@@ -124,10 +124,13 @@ export const getActiveOrganizationContext = cache(
         ?.active_organization_id as string | null) ?? null;
   }
   const sessionPointer = await readSessionWorkspacePointer();
-  const storedId =
-    sessionPointer === PERSONAL_WORKSPACE_ID
-      ? null
-      : (sessionPointer ?? dbPointer);
+  // D-20: the pointer is passed THROUGH, including an explicit
+  // `PERSONAL_WORKSPACE_ID`. Flattening that sentinel to null here made "I
+  // chose personal" indistinguishable from "I never chose", and the resolver's
+  // single-org default then overruled the person's own choice. The resolvers
+  // understand the sentinel now; deciding it here would put the same rule in
+  // two places and let them drift apart.
+  const storedId = sessionPointer ?? dbPointer;
 
   const activeOrganizationId = resolveActiveOrganizationId(
     owned.organizations,
@@ -347,10 +350,13 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(
         ?.active_organization_id as string | null) ?? null;
   }
   const sessionPointer = await readSessionWorkspacePointer();
-  const storedId =
-    sessionPointer === PERSONAL_WORKSPACE_ID
-      ? null
-      : (sessionPointer ?? dbPointer);
+  // D-20: the pointer is passed THROUGH, including an explicit
+  // `PERSONAL_WORKSPACE_ID`. Flattening that sentinel to null here made "I
+  // chose personal" indistinguishable from "I never chose", and the resolver's
+  // single-org default then overruled the person's own choice. The resolvers
+  // understand the sentinel now; deciding it here would put the same rule in
+  // two places and let them drift apart.
+  const storedId = sessionPointer ?? dbPointer;
 
   const personal: WorkspaceInfo = {
     id: PERSONAL_WORKSPACE_ID,

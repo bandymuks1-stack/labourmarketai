@@ -1,0 +1,292 @@
+[
+  {
+    "phase": "after",
+    "viewport": "1440",
+    "docHeight": 5355,
+    "totalFields": 51,
+    "hiddenFields": 32,
+    "perceivableFields": 19,
+    "unlabelledPerceivable": 2,
+    "unlabelledPerceivableDetail": [
+      "INPUT:url",
+      "INPUT:file"
+    ],
+    "unlabelledIncludingHidden": 34,
+    "interactiveTotal": 113,
+    "sub44Total": 35,
+    "sub44InPrefsForm": 0,
+    "sub44Elsewhere": 35,
+    "sub44Sample": [
+      {
+        "id": "BUTTON:Lietuvių",
+        "w": 109,
+        "h": 30
+      },
+      {
+        "id": "BUTTON:Mano pranešimai",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "id": "profile-opportunities-link",
+        "w": 182,
+        "h": 26
+      },
+      {
+        "id": "profile-cv-export-link",
+        "w": 144,
+        "h": 26
+      },
+      {
+        "id": "profile-documents-link",
+        "w": 125,
+        "h": 26
+      },
+      {
+        "id": "profile-gallery-link",
+        "w": 65,
+        "h": 26
+      },
+      {
+        "id": "room-my-spaces-link",
+        "w": 113,
+        "h": 26
+      },
+      {
+        "id": "profile-add-company",
+        "w": 126,
+        "h": 34
+      },
+      {
+        "id": "worker-languages-add",
+        "w": 116,
+        "h": 36
+      },
+      {
+        "id": "worker-education-add-open",
+        "w": 89,
+        "h": 36
+      },
+      {
+        "id": "worker-achievements-add-open",
+        "w": 89,
+        "h": 36
+      },
+      {
+        "id": "external-profiles-add",
+        "w": 136,
+        "h": 36
+      },
+      {
+        "id": "external-profiles-import-link",
+        "w": 277,
+        "h": 16
+      },
+      {
+        "id": "BUTTON:Pridėti rankiniu būdu",
+        "w": 117,
+        "h": 16
+      },
+      {
+        "id": "INPUT:",
+        "w": 1,
+        "h": 1
+      },
+      {
+        "id": "INPUT:",
+        "w": 597,
+        "h": 22
+      },
+      {
+        "id": "BUTTON:Naudoti CV tekstą",
+        "w": 615,
+        "h": 36
+      },
+      {
+        "id": "SUMMARY:›Įgūdžiai ir darbo ist",
+        "w": 1342,
+        "h": 38
+      },
+      {
+        "id": "profile-mano-cv-records-link",
+        "w": 173,
+        "h": 18
+      },
+      {
+        "id": "capability-profile-manual-input",
+        "w": 1206,
+        "h": 38
+      },
+      {
+        "id": "capability-profile-manual-add-button",
+        "w": 70,
+        "h": 38
+      },
+      {
+        "id": "SUMMARY:+Pridėti darbo patirtį",
+        "w": 1308,
+        "h": 34
+      },
+      {
+        "id": "add-experience-title",
+        "w": 1284,
+        "h": 34
+      },
+      {
+        "id": "INPUT:Nuo (mėnuo / metai)",
+        "w": 64,
+        "h": 34
+      },
+      {
+        "id": "INPUT:Nuo (mėnuo / metai)",
+        "w": 96,
+        "h": 34
+      }
+    ]
+  },
+  {
+    "phase": "after",
+    "viewport": "375",
+    "docHeight": 7680,
+    "totalFields": 51,
+    "hiddenFields": 32,
+    "perceivableFields": 19,
+    "unlabelledPerceivable": 2,
+    "unlabelledPerceivableDetail": [
+      "INPUT:url",
+      "INPUT:file"
+    ],
+    "unlabelledIncludingHidden": 34,
+    "interactiveTotal": 113,
+    "sub44Total": 34,
+    "sub44InPrefsForm": 0,
+    "sub44Elsewhere": 34,
+    "sub44Sample": [
+      {
+        "id": "BUTTON:Mano pranešimai",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "id": "profile-opportunities-link",
+        "w": 168,
+        "h": 42
+      },
+      {
+        "id": "profile-cv-export-link",
+        "w": 168,
+        "h": 42
+      },
+      {
+        "id": "profile-documents-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "profile-gallery-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "room-my-spaces-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "profile-add-company",
+        "w": 126,
+        "h": 34
+      },
+      {
+        "id": "worker-languages-add",
+        "w": 116,
+        "h": 36
+      },
+      {
+        "id": "worker-education-add-open",
+        "w": 89,
+        "h": 36
+      },
+      {
+        "id": "worker-achievements-add-open",
+        "w": 89,
+        "h": 36
+      },
+      {
+        "id": "external-profiles-add",
+        "w": 136,
+        "h": 36
+      },
+      {
+        "id": "external-profiles-import-link",
+        "w": 278,
+        "h": 36
+      },
+      {
+        "id": "BUTTON:Pridėti rankiniu būdu",
+        "w": 117,
+        "h": 16
+      },
+      {
+        "id": "INPUT:",
+        "w": 1,
+        "h": 1
+      },
+      {
+        "id": "INPUT:",
+        "w": 258,
+        "h": 22
+      },
+      {
+        "id": "BUTTON:Naudoti CV tekstą",
+        "w": 276,
+        "h": 36
+      },
+      {
+        "id": "SUMMARY:›Įgūdžiai ir darbo ist",
+        "w": 341,
+        "h": 38
+      },
+      {
+        "id": "profile-mano-cv-records-link",
+        "w": 173,
+        "h": 18
+      },
+      {
+        "id": "capability-profile-manual-input",
+        "w": 205,
+        "h": 38
+      },
+      {
+        "id": "capability-profile-manual-add-button",
+        "w": 70,
+        "h": 38
+      },
+      {
+        "id": "SUMMARY:+Pridėti darbo patirtį",
+        "w": 307,
+        "h": 34
+      },
+      {
+        "id": "add-experience-title",
+        "w": 283,
+        "h": 34
+      },
+      {
+        "id": "INPUT:Nuo (mėnuo / metai)",
+        "w": 64,
+        "h": 34
+      },
+      {
+        "id": "INPUT:Nuo (mėnuo / metai)",
+        "w": 96,
+        "h": 34
+      },
+      {
+        "id": "INPUT:Iki (mėnuo / metai)",
+        "w": 64,
+        "h": 34
+      }
+    ]
+  }
+]

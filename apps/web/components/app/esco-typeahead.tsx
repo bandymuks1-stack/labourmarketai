@@ -88,7 +88,7 @@ export function EscoTypeahead({
         aria-label={ariaLabel}
         name={name}
         required={required}
-        className="w-full rounded-md border border-border-default bg-surface-1 px-2 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue"
+        className="min-h-11 w-full rounded-md border border-border-default bg-surface-1 px-2 py-1.5 text-sm text-text-primary outline-none focus:border-brand-blue"
         data-testid={`esco-typeahead-${conceptType}`}
       />
       {open && (

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getReviewReport } from "@/lib/journal/review-report";
 import { PrintButton } from "@/components/app/print-button";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Company review report preview (v1). Read-only summary of the entries the
@@ -33,7 +34,7 @@ export default async function ReviewReportPage({
     (slug) => tUnit(slug),
   );
 
-  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(displayLocale);
+  const fmtDate = (iso: string) => formatUtcDate(iso, displayLocale) ?? "";
 
   return (
     <div className="flex flex-col gap-6">

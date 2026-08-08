@@ -8,12 +8,14 @@ import { buildCompanyDemandTrustCard } from "@/lib/intelligence/trust-card-model
 import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-navigation";
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
+import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
 import {
   buildPlanningZoneView,
   type PlanningZoneEntry,
   type ZoneAction,
 } from "@/lib/workforce/planning-zone-view";
 import type { GapRiskLevel } from "@/lib/workforce/gap-timeline";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Workforce planning zone (Labour Market OS P10) — ONE visual planning zone
@@ -88,7 +90,10 @@ export default async function CompanyWorkforcePlanningPage({
   const result = await getWorkforce();
   if (result.status === "not-authed") {
     return (
-      <div className="flex flex-col gap-6" data-testid="workforce-planning-page">
+      <div
+        className="flex flex-col gap-6"
+        data-testid="workforce-planning-page"
+      >
         {header}
         <p className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted">
           {t("notAuthed")}
@@ -103,6 +108,9 @@ export default async function CompanyWorkforcePlanningPage({
   //    honest unavailable state (why / requirement / disabled sources /
   //    after activation) otherwise. Never a fabricated number (§18).
   const demandIntel = await getCompanyDemandIntelligence();
+  // W12 employer projection — approved unavailability for the workers this
+  // caller manages. Degrades to nothing rather than blocking the page.
+  const availability = await getEmployerWorkerAvailability();
   const demandTrustCard = buildCompanyDemandTrustCard(
     demandIntel.kind === "ok"
       ? {
@@ -130,18 +138,17 @@ export default async function CompanyWorkforcePlanningPage({
     },
   });
 
-  const monthFmt = new Intl.DateTimeFormat(locale, {
+  const monthFmt = createUtcFormatter(locale, {
     month: "long",
     year: "numeric",
   });
-  const dayFmt = new Intl.DateTimeFormat(locale, {
+  const dayFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-  const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
-  const fmtMonth = (monthIso: string) => monthFmt.format(utc(`${monthIso}-01`));
-  const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
+  const fmtMonth = (monthIso: string) => monthFmt(`${monthIso}-01`) ?? "";
+  const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
 
   /** THE one primary CTA of the zone (guard-pinned single testid). Renders a
    *  real Link, the audited demand-intake server action, or nothing. */
@@ -167,7 +174,11 @@ export default async function CompanyWorkforcePlanningPage({
     if (target.kind === "demand-intake") {
       return (
         <form action={openDemandIntakeAsCompanyAction.bind(null, locale)}>
-          <button type="submit" data-testid={testid} className={PRIMARY_CTA_CLASS}>
+          <button
+            type="submit"
+            data-testid={testid}
+            className={PRIMARY_CTA_CLASS}
+          >
             {label} →
           </button>
         </form>
@@ -308,13 +319,70 @@ export default async function CompanyWorkforcePlanningPage({
 
   /* ---------------- empty state ---------------- */
 
+  /* ── WHO IS UNAVAILABLE (W12 employer projection) ────────────────────
+     The gap this closes: an employer could staff days a worker had approved
+     leave for and nothing said so — the only employer-side absence read
+     filters status='requested', an approval queue rather than a schedule.
+
+     Minimum necessary, by owner decision: WHO and WHEN, never WHY. The reason
+     and the absence type are not fetched at all (see
+     lib/planning/employer-availability.ts) — not fetched-and-hidden. Rows are
+     filtered by `worker_absences` RLS via caller_manages_worker, so an
+     unrelated organisation receives nothing from the database.
+
+     Built BEFORE the empty-state early return and rendered in both branches:
+     an employer with no demand entered yet is exactly the one about to
+     schedule somebody, and the first version of this shipped unreachable for
+     them. */
+  const availabilitySection =
+    availability.status === "ok" && availability.unavailability.length > 0 ? (
+      <section
+        className="flex flex-col gap-3 rounded-md border border-state-amber/40 bg-state-amber/5 p-4"
+        data-testid="employer-availability"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("availability.title")}
+        </h2>
+        <p className="text-meta text-text-muted">{t("availability.intro")}</p>
+        <ul className="flex flex-col gap-2">
+          {availability.unavailability.map((u) => (
+            <li
+              key={u.item.id}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2"
+              data-testid={`employer-unavailable-${u.workerId}`}
+            >
+              <span className="text-sm font-semibold text-text-primary">
+                {u.workerName ?? t("availability.unnamedWorker")}
+              </span>
+              <span className="font-mono text-meta uppercase tracking-label text-state-amber">
+                {t("availability.unavailable")}
+              </span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {u.item.startDate ? dayFmt(u.item.startDate) : ""}
+                {u.item.endDate && u.item.endDate !== u.item.startDate
+                  ? ` – ${dayFmt(u.item.endDate)}`
+                  : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null;
+
   if (view.isEmpty) {
     // Calm empty state with a CHOICE of starting points (owner directive:
     // no single funnel) — every option is an equal, real entry action.
     return (
-      <div className="flex flex-col gap-6" data-testid="workforce-planning-page">
+      <div
+        className="flex flex-col gap-6"
+        data-testid="workforce-planning-page"
+      >
         {header}
         <Notes notes={view.notes} />
+        {/* Unavailability is independent of whether any demand has been
+            entered — an employer with an empty planning zone is precisely the
+            one about to schedule someone. */}
+        {availabilitySection}
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
           data-testid="planning-zone-empty"
@@ -342,6 +410,8 @@ export default async function CompanyWorkforcePlanningPage({
 
       <Notes notes={view.notes} />
 
+      {availabilitySection}
+
       {/* Capacity summary — short numbers + one bar, never a text wall. */}
       <section
         className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
@@ -352,13 +422,17 @@ export default async function CompanyWorkforcePlanningPage({
             <span className="font-display text-2xl font-bold tabular-nums text-text-primary">
               {view.totals.requiredHeadcount}
             </span>
-            <span className="text-xs text-text-muted">{t("summary.required")}</span>
+            <span className="text-xs text-text-muted">
+              {t("summary.required")}
+            </span>
           </span>
           <span className="flex items-baseline gap-2">
             <span className="font-display text-2xl font-bold tabular-nums text-text-primary">
               {view.totals.coveredHeadcount}
             </span>
-            <span className="text-xs text-text-muted">{t("summary.available")}</span>
+            <span className="text-xs text-text-muted">
+              {t("summary.available")}
+            </span>
           </span>
           {view.totals.shortfall > 0 ? (
             <span
@@ -432,7 +506,10 @@ export default async function CompanyWorkforcePlanningPage({
 
       {/* Skill gaps — chips, capped short. */}
       {view.missingSkills.length > 0 ? (
-        <section className="flex flex-col gap-2" data-testid="planning-zone-skills">
+        <section
+          className="flex flex-col gap-2"
+          data-testid="planning-zone-skills"
+        >
           <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("skills.title")}
           </h2>
@@ -458,7 +535,10 @@ export default async function CompanyWorkforcePlanningPage({
           command. The TOP recommendation is the ONE primary CTA; further
           recommendations are a quiet text list, and the equal-validity
           starting points below stay available regardless. */}
-      <section className="flex flex-col gap-2" data-testid="planning-zone-action">
+      <section
+        className="flex flex-col gap-2"
+        data-testid="planning-zone-action"
+      >
         <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("action.title")}
         </h2>
@@ -504,7 +584,10 @@ export default async function CompanyWorkforcePlanningPage({
       </section>
 
       {/* Upcoming work — vertical month-bucketed timeline. */}
-      <section className="flex flex-col gap-4" data-testid="planning-zone-timeline">
+      <section
+        className="flex flex-col gap-4"
+        data-testid="planning-zone-timeline"
+      >
         <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
           {t("timeline.title")}
         </h2>
@@ -536,11 +619,16 @@ export default async function CompanyWorkforcePlanningPage({
           </div>
         ))}
         {view.undated.length > 0 ? (
-          <div className="flex flex-col gap-2" data-testid="planning-zone-undated">
+          <div
+            className="flex flex-col gap-2"
+            data-testid="planning-zone-undated"
+          >
             <h3 className="text-sm font-semibold text-text-primary">
               {t("timeline.undated")}
             </h3>
-            <p className="text-xs text-text-muted">{t("timeline.undatedHint")}</p>
+            <p className="text-xs text-text-muted">
+              {t("timeline.undatedHint")}
+            </p>
             <ul className="flex flex-col gap-2">
               {view.undated.map((e) => (
                 <EntryRow key={e.id} entry={e} />

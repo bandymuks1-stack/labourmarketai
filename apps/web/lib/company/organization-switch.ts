@@ -69,7 +69,8 @@ export function workspaceAccentIndex(organizationId: string): number {
 /**
  * Membership-validated active-WORKSPACE resolution.
  *
- *   - a stored org pointer that matches a real membership always wins;
+ *   - an EXPLICIT personal choice always wins (see below);
+ *   - a stored org pointer that matches a real membership wins next;
  *   - company identity with EXACTLY ONE organization → that organization
  *     (an unambiguous default is not a guess — M-P0-2's "single
  *     unambiguous row" doctrine at the workspace level);
@@ -80,12 +81,34 @@ export function workspaceAccentIndex(organizationId: string): number {
  *     workspace silently snap to another org);
  *   - person identity with no valid pointer → the personal workspace;
  *   - never a fabricated org, never a foreign org.
+ *
+ * WHY `PERSONAL_WORKSPACE_ID` IS AN ACCEPTED STORED VALUE (D-20).
+ *
+ * "I chose personal" and "I have never chosen" used to be the SAME stored
+ * state — `null`. The callers flattened an explicit personal pointer to null
+ * one line before calling this, and the single-org rule below then handed the
+ * person straight back to their organization. For a company identity with
+ * exactly one organization — the ordinary employer account — picking the
+ * personal space was undone on the very next page load, so an employer could
+ * not stay in their own worker space to fill their own Work Journal.
+ *
+ * No test caught it because the single-org default is CORRECT and is asserted
+ * as such; the defect was that an explicit choice could not be expressed at
+ * all. Accepting the sentinel here is what separates the two states, and it
+ * belongs in the pure resolver rather than as a short-circuit at each call
+ * site — there are two call sites, and one of them would have been forgotten.
  */
 export function resolveActiveWorkspaceId(
   identity: "person" | "company" | null,
   organizationIds: readonly string[],
   storedOrganizationId: string | null,
 ): string {
+  // An explicit choice outranks every inference below, including the
+  // unambiguous single-org default. Deliberate: an inference may only fill a
+  // gap the person left, never overrule what they actually said.
+  if (storedOrganizationId === PERSONAL_WORKSPACE_ID) {
+    return PERSONAL_WORKSPACE_ID;
+  }
   if (
     storedOrganizationId !== null &&
     organizationIds.includes(storedOrganizationId)
@@ -108,6 +131,10 @@ export function shouldOfferOrganizationSwitch(
 /**
  * Membership-validated active-organization resolution.
  *
+ *   - an EXPLICIT personal choice → null (D-20: no organization is active,
+ *     because the person said so — same reasoning as
+ *     `resolveActiveWorkspaceId`, and both resolvers must agree or the header
+ *     and the surfaces below it describe different contexts);
  *   - stored pointer matches a membership → that org;
  *   - EXACTLY ONE membership → that org (unambiguous default);
  *   - SEVERAL memberships and a stale/null pointer → null, FAIL CLOSED
@@ -115,11 +142,15 @@ export function shouldOfferOrganizationSwitch(
  *     `organizations[0]` fallback silently picked the first/oldest org,
  *     the exact inference the multi-org doctrine forbids);
  *   - no memberships → null (an honest "no company yet" — never fabricated).
+ *
+ * This narrows CONTEXT, never permission: every organization-scoped action
+ * re-validates membership server-side regardless of what is active here.
  */
 export function resolveActiveOrganizationId(
   organizations: readonly SwitchableOrganization[],
   storedActiveOrganizationId: string | null,
 ): string | null {
+  if (storedActiveOrganizationId === PERSONAL_WORKSPACE_ID) return null;
   if (organizations.length === 0) return null;
   if (
     storedActiveOrganizationId !== null &&

@@ -5,8 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, MessageSquareWarning, type LucideIcon } from "lucide-react";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
+import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -23,6 +24,7 @@ import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
  */
 export function AccountMenu() {
   const t = useTranslations("auth.dashboard");
+  const tFeedback = useTranslations("languageFeedback");
   // "Mano CV" findability (worker-workspace UX audit v2): the /cv sheet lives
   // outside the dashboard shell, so the account menu carries a permanent link
   // to it — a worker can always find their CV from any dashboard page.
@@ -127,7 +129,7 @@ export function AccountMenu() {
               role="menuitem"
               onClick={() => setOpen(false)}
               data-testid={l.testid}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
             >
               <l.icon className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {l.label}
@@ -139,7 +141,7 @@ export function AccountMenu() {
             onClick={toggleTheme}
             data-testid="account-menu-theme-toggle"
             aria-label={`${t("account.theme.appearance")}: ${nextTheme === "dark" ? t("account.theme.toDark") : t("account.theme.toLight")}`}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
           >
             {nextTheme === "dark" ? (
               <Moon className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
@@ -153,7 +155,7 @@ export function AccountMenu() {
             role="menuitem"
             onClick={() => setOpen(false)}
             data-testid="account-menu-cv-link"
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
           >
             <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
             {tCv("pageTitle")}
@@ -163,11 +165,33 @@ export function AccountMenu() {
             role="menuitem"
             onClick={() => setOpen(false)}
             data-testid="account-menu-account-link"
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
           >
             <User className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
             {t("tabs.account")}
           </Link>
+          {/* REPORT A PROBLEM — the reporting flow's one entry point.
+              It used to be a floating pill that covered the calendar, the chat
+              composer and the map. Here it is in the same place on every
+              dashboard route, at every width, and it obstructs nothing.
+              The modal itself is mounted by the dashboard layout, so this
+              dispatches the window event it listens for (see
+              language-feedback-widget.tsx). The menu closes first: the modal
+              reads `window.getSelection()` on open, and an open dropdown can
+              hold the selection. */}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event(FEEDBACK_OPEN_EVENT));
+            }}
+            data-testid="language-feedback-open"
+            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+          >
+            <MessageSquareWarning className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+            {tFeedback("menuLabel")}
+          </button>
           <form
             action={`/${locale}/auth/logout`}
             method="post"
@@ -177,7 +201,7 @@ export function AccountMenu() {
               type="submit"
               role="menuitem"
               data-testid="account-menu-signout"
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-state-danger hover:bg-state-danger/10"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-state-danger hover:bg-state-danger/10"
             >
               <LogOut className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               {t("account.logout")}

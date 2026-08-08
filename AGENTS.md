@@ -2,6 +2,127 @@
 
 > 📜 **Read [`docs/PLATFORM_DOCTRINE.md`](docs/PLATFORM_DOCTRINE.md) first** — canonical, permanent, binding platform doctrine. If a task spec contradicts it, the doctrine wins (flag the conflict in the PR).
 
+---
+
+## Universal Engineering Graph Protocol v1
+
+This repository follows the **Universal Engineering Graph Protocol v1**.
+Portfolio reference copy: `C:\Users\Mano\Documents\AI_ENGINEERING_PROTOCOL.md`
+(kept local by owner decision). **The version-controlled source of truth for
+this product is this file plus `CLAUDE.md` and `docs/PLATFORM_DOCTRINE.md`** —
+they stay authoritative wherever they are more specific. The protocol sets a
+floor; it never loosens a LABMA rule.
+
+The purpose is not "an agent completed a task". The purpose is **"the system is
+demonstrably better, safely, with evidence."**
+
+### Execution graph
+
+```
+MISSION → VERIFY REPO → UNDERSTAND → RESEARCH → ARCHITECT → BUILD → INTEGRATE
+→ REVIEW → TEST → EVIDENCE GATE → BUSINESS VALUE GATE
+→ HUMAN CHECKPOINT ONLY WHEN REQUIRED
+→ SHIP → PRODUCTION VERIFY → BUSINESS MEMORY
+```
+
+### Repository identity gate — before ANY write
+
+Git is the source of truth. **Never trust** the terminal title, the previous
+shell cwd, the directory name alone, previous agent output, conversation
+assumptions, or a similarly named repository. This project has dozens of sibling
+worktrees and near-identical directory names (`labourmarketai-*`, `lm-*`,
+`lmai-*`), so a directory name is **not** identity.
+
+```bash
+pwd
+git rev-parse --show-toplevel        # must equal pwd
+git remote -v                        # must be bandymuks1-stack/labourmarketai
+git branch --show-current
+git status --short
+git rev-parse HEAD
+gh repo view                         # when GitHub CLI is available
+gh pr status
+```
+
+Before branching, verify the base: `git fetch origin` then
+`git rev-list --left-right --count HEAD...origin/main` — a local `main` may be
+far behind `origin/main`.
+
+For PR work also run:
+
+```bash
+gh pr view <PR_NUMBER> --json url,headRefName,headRefOid,baseRefName,state
+```
+
+and verify **PR repository == git remote repository**, and — when exact identity
+is claimed — **local `HEAD` == the PR's `headRefOid`**. Never claim exact
+PR/repository identity without this evidence.
+
+If identity does not match → **STOP** for this repository.
+
+### Repository mission
+
+Build an AI-native European labour/work platform connecting workers, employers,
+organizations, opportunities, services, workflows, labour-market intelligence
+and AI assistance.
+
+Direction: EU-wide · chat-first · Personal / Organization contexts (later
+Project / Object contexts) · real worker and employer journeys · real labour/job
+supply · calendar & work scheduling · **evidence-based reputation** ·
+Workforce & Organization Simulation · multilingual · GDPR/privacy aware ·
+SEO + AI-search visibility · market & competitor intelligence.
+
+- **Reputation: NO star-rating reputation.**
+- **Public functionality: visible functionality must actually work.**
+
+### Value gate
+
+**Real worker/employer journeys become measurably more useful.**
+
+Volume is not value. "Job importer executed" is not the outcome — *real current
+jobs are visible, correctly attributed, searchable and usable* is. Classify
+every outcome as `VALUE_PRODUCED` · `TECHNICALLY_VERIFIED_VALUE_PENDING` ·
+`DISCOVERY_ONLY` · `NO_VALUE` · `BLOCKED`.
+
+### Evidence gate and truthful status
+
+`NOT STARTED` · `DISCOVERED` · `DESIGNED` · `IMPLEMENTED` · `TESTED` ·
+`DEPLOYED` · `PRODUCTION VERIFIED` · `BUSINESS VERIFIED`
+
+**"Implemented" ≠ "working". "Tests pass" ≠ "business value produced".** Never
+call IMPLEMENTED work DONE before the required verification happened. Always
+distinguish `FACT` / `ASSUMPTION` / `DECISION` / `HYPOTHESIS` / `EVIDENCE` /
+`ARTIFACT` / `OPEN QUESTION` / `RISK` — never silently convert an assumption
+into a fact.
+
+### Non-negotiables
+
+1. Verify repository identity before any write.
+2. Never expose secrets or private customer data — not in code, logs, error
+   messages, commits or reports. Report env vars as
+   `NAME | PRESENT/ABSENT | SCOPE`, never the value.
+3. Never make purchases, paid API commitments, subscription or billing changes
+   without explicit owner approval.
+4. Never fabricate production results, jobs, payments, metrics, tests,
+   screenshots or database records.
+5. Never claim "done" without evidence (command + output, query result, real
+   screenshot, CI/PR link, production response).
+6. Production-impacting changes require **production verification** after
+   landing — build ≠ deployment, deployment ≠ verified behavior.
+7. Existing working functionality must not regress; reuse existing architecture
+   before creating a parallel system.
+8. Human checkpoints are scarce and meaningful — only genuine human-only actions
+   (passwords, MFA, CAPTCHA, payment/purchase/subscription, legal acceptance,
+   irreversible production actions, major owner product decisions, ambiguous
+   repository identity, plus every owner gate defined below). Block that one
+   action; finish everything else; request ONE precise action.
+9. Never blindly rewrite existing agent instructions — merge.
+10. When the working tree holds unrelated dirty or untracked files, staging must
+    be **path-scoped** — the `git add .` in the Commit workflow below assumes a
+    tree that contains only your slice.
+
+---
+
 ## Auto-commit policy
 
 After completing any work session, agents MUST automatically commit and push 
@@ -54,16 +175,21 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
 - Migration files (`supabase/migrations/*.sql`) — **commit and push automatically**
 - **PROD APPLY AUTONOMY (conditional — DI decision 2026-06-12).** The old hard
   blocker ("running migrations on production is NEVER automatic") is replaced.
+  This is the canonical policy for this repository; `CLAUDE.md` → Migrations
+  points here and must not restate an absolute prohibition.
   The executing agent MAY apply a **merged** migration to prod via Supabase MCP
   `apply_migration` when **ALL** hold:
-  - (a) classified **GREEN** by the upgraded `migration-safety` patterns;
+  - (a) classified **GREEN** by the upgraded `migration-safety` patterns
+    (= reviewed, non-destructive, no irreversible data loss);
   - (b) strictly **additive/widening** — existing rows and behavior stay valid;
   - (c) a tested rollback script exists at
     `supabase/rollbacks/<same_name>.down.sql` in the same PR;
-  - (d) immediately after apply, **verify the change on prod via an MCP read
+  - (d) the **correct production target is verified** before applying, and
+    immediately after apply, **verify the change on prod via an MCP read
     query and record the verification output in the task log**;
   - (e) reported in the session summary as
-    `APPLIED TO PROD: <name> (rollback: <file>)`.
+    `APPLIED TO PROD: <name> (rollback: <file>)`;
+  - (f) no owner-only credential or approval is required to perform it.
 
   If **ANY** condition fails or is uncertain → **stop and hand off to the owner
   review channel. Uncertainty itself is a RED signal; reclassification only
@@ -171,6 +297,6 @@ Non-negotiable principles for the sequence:
 - No tiler hardcode
 - New worker must start without company / project
 - CV is the central living trust object
-- No unlabeled fake data (placeholders allowed only when visually marked `Sample` / `Demo`); no fake verification; no fake AI (§7)
+- No unlabeled fake data — placeholders allowed only when visually marked as `preview` / `concept` / `not live yet`; the word "demo" is banned from all product copy (doctrine §18, enforced by `lib/guards/product-copy-forbidden-terms.test.ts`); no fake verification; no fake AI (§7). Internal fixtures / test / sample data may exist where technically necessary, but stay clearly separated from production truth and are never presented to users as real functionality.
 
 See the strategic doc for full rationale.

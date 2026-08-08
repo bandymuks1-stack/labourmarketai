@@ -441,11 +441,27 @@ describe("NO new DB migration in this PR", () => {
     // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
-    // Bumped 190 -> 191 for booking→engagement org-first company resolution
+    // Bumped 190 -> 191 for the W12 employer absence privacy hardening
+    // (20260808120000_worker_absence_scheduling_view_v1) — merged in #1089 and
+    // APPLIED to production 2026-08-08 via Supabase MCP. Gate record:
+    // docs/human-gates/w12-absence-privacy-hardening-gate.md.
+    // Bumped 191 -> 192 for the W14 item 6 retention redaction
+    // (20260808130000_ai_runs_retention_redaction_v1) — owner-approved
+    // 2026-08-08. Adds a SECURITY DEFINER function that nulls ONLY
+    // ai_runs.output_excerpt past the 90-day horizon; grants NO table
+    // UPDATE/DELETE to any role, so the append-only guarantee is unchanged.
+    // Rollback paired.
+    // RESOLVED COLLISION: #1089 and this branch both claimed 190 -> 191. The
+    // slot was RECOUNTED against post-#1089 main, not summed — `git ls-tree -r
+    // origin/main supabase/migrations/` = 191 .sql files, and this branch adds
+    // exactly one.
+    // Bumped 192 -> 193 for booking→engagement org-first company resolution
     // (`20260807140000_booking_engagement_org_resolution_v1` — single
-    // function-body replacement, owner-gated, UNAPPLIED, paired rollback).
-    // Still no migration from the market-map layer.
-    expect(count).toBeLessThanOrEqual(191);
+    // function-body replacement, owner-gated, paired rollback). RECOUNTED
+    // against post-#1091 main rather than summed: origin/main holds 192 .sql
+    // files, this branch adds exactly one. NOTE: Draft #1092 (retention
+    // scheduler) also claims 193 and must recount to 194 after this lands.
+    expect(count).toBeLessThanOrEqual(193);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

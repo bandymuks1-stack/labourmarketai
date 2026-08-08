@@ -7,6 +7,7 @@ import {
   buildWeekView,
   buildYearOverview,
   conflictItemIds,
+  visibleConflictPartners,
   hiddenConflictSources,
   detectConflicts,
   isPlanningSourceType,
@@ -25,6 +26,7 @@ import {
   getPlanning,
   type PlanningSources,
 } from "@/lib/planning/planning";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -51,8 +53,20 @@ import {
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Toolbar control base. `min-h-[2.75rem]` is the product's 44px touch minimum —
+ * the same value the feedback trigger is pinned to and the one an external
+ * tester measured this toolbar failing.
+ *
+ * WHY IT MATTERED HERE. Every calendar control is in this string: the five view
+ * chips, prev / today / next, the eight source filters and the date-picker
+ * submit. At `min-h-9` (36px) all of them were 8px under the minimum, on the
+ * one surface whose entire job is tapping small date targets on a phone. It is
+ * also the row a thumb reaches for first, so the miss rate lands on navigation
+ * rather than on something recoverable.
+ */
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-[2.75rem] items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -154,25 +168,32 @@ export default async function PlanningPage({
     result.items,
     visibleItems,
   );
+  // The other half of the same question: when the partner IS on screen, name
+  // it, so a flagged row explains itself instead of just alarming.
+  const shownConflicts = visibleConflictPartners(
+    conflicts,
+    result.items,
+    visibleItems,
+  );
 
-  const dayFmt = new Intl.DateTimeFormat(locale, {
+  const dayFmt = createUtcFormatter(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
-  const shortFmt = new Intl.DateTimeFormat(locale, {
+  const shortFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
   });
-  const monthFmt = new Intl.DateTimeFormat(locale, {
+  const monthFmt = createUtcFormatter(locale, {
     month: "long",
     year: "numeric",
   });
-  const monthOnlyFmt = new Intl.DateTimeFormat(locale, { month: "long" });
-  const stripFmt = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
+  const monthOnlyFmt = createUtcFormatter(locale, { month: "long" });
+  const stripFmt = createUtcFormatter(locale, { weekday: "narrow" });
   const utc = (dayIso: string) => new Date(`${dayIso}T00:00:00Z`);
-  const fmtDay = (dayIso: string) => dayFmt.format(utc(dayIso));
-  const fmtShort = (dayIso: string) => shortFmt.format(utc(dayIso));
+  const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
+  const fmtShort = (dayIso: string) => shortFmt(dayIso) ?? "";
 
   /**
    * Localized duration. Two honest shapes only, both from real source data:
@@ -197,6 +218,8 @@ export default async function PlanningPage({
     const conflict = conflictIds.has(item.id);
     // Non-empty only when the filter is hiding every partner of this conflict.
     const hiddenSources = hiddenConflicts.get(item.id) ?? [];
+    // Non-empty when at least one partner is rendered on this same page.
+    const shownPartners = shownConflicts.get(item.id) ?? [];
     const contextKey =
       item.sourceType === "booking" || item.sourceType === "invitation"
         ? `context.${item.roleContext}`
@@ -228,6 +251,22 @@ export default async function PlanningPage({
               </span>
             ) : null}
           </span>
+          {shownPartners.length > 0 ? (
+            <span
+              className="text-meta text-state-danger"
+              data-testid={`planning-conflict-with-${item.id}`}
+            >
+              {t("conflict.withVisible", {
+                partners: shownPartners
+                  .map(
+                    (p) =>
+                      `${t(`source.${p.sourceType}`)}: ${p.label ?? t(`fallback.${p.sourceType}`)}`,
+                  )
+                  .join(", "),
+                date: fmtShort(shownPartners[0].overlapStart),
+              })}
+            </span>
+          ) : null}
           {hiddenSources.length > 0 ? (
             <span
               className="text-meta text-state-danger"
@@ -334,10 +373,20 @@ export default async function PlanningPage({
 
   /* ---------------- view-specific projections ---------------- */
 
+  // Both builders DERIVE truth of their own (conflicts, the journal mark, the
+  // "unfilled" mark), so each gets the render list AND the full model. Passing
+  // only `visibleItems` re-created the slice-3 defect inside them: the month
+  // cell showed no conflict while the row beneath it showed one, and a day the
+  // person had recorded was marked unfilled because `?source=booking` had
+  // removed the journal rows that prove it. Count still follows the filter.
   const agenda =
-    view === "agenda" ? buildAgenda(visibleItems, utc(anchor)) : null;
+    view === "agenda"
+      ? buildAgenda(visibleItems, utc(anchor), undefined, result.items)
+      : null;
   const monthGrid =
-    view === "month" ? buildMonthGrid(anchor, visibleItems, today) : null;
+    view === "month"
+      ? buildMonthGrid(anchor, visibleItems, today, result.items)
+      : null;
   const weekDays =
     view === "week" ? buildWeekView(anchor, visibleItems, today) : null;
   const yearCells =
@@ -352,7 +401,7 @@ export default async function PlanningPage({
     view === "year"
       ? anchor.slice(0, 4)
       : view === "month"
-        ? monthFmt.format(utc(firstOf(anchor)))
+        ? (monthFmt(firstOf(anchor)) ?? "")
         : view === "week"
           ? `${fmtShort(weekDays?.[0]?.day ?? anchor)} – ${fmtShort(weekDays?.[6]?.day ?? anchor)}`
           : fmtDay(anchor);
@@ -441,7 +490,7 @@ export default async function PlanningPage({
             type="date"
             name="date"
             defaultValue={anchor}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
+            className="min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
           />
           <button type="submit" className={`${CHIP_BASE} ${CHIP_IDLE}`}>
             {t("nav.go")}
@@ -488,7 +537,7 @@ export default async function PlanningPage({
                 key={`hdr-${cell.day}`}
                 className="text-center font-mono text-meta uppercase tracking-label text-text-muted"
               >
-                {stripFmt.format(utc(cell.day))}
+                {stripFmt(cell.day)}
               </span>
             ))}
             {monthGrid.weeks.flat().map((cell) => (
@@ -499,9 +548,11 @@ export default async function PlanningPage({
                 className={`flex min-h-14 min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-1.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
                   cell.isToday
                     ? "border-brand-blue/60 bg-brand-blue/5"
-                    : cell.inMonth
-                      ? "border-ink-600 bg-ink-800/20"
-                      : "border-ink-700/60 bg-transparent opacity-50"
+                    : cell.isUnfilled
+                      ? "border-state-warning/50 bg-state-warning/5"
+                      : cell.inMonth
+                        ? "border-ink-600 bg-ink-800/20"
+                        : "border-ink-700/60 bg-transparent opacity-50"
                 }`}
               >
                 <span className="text-sm font-semibold tabular-nums text-text-primary">
@@ -520,8 +571,49 @@ export default async function PlanningPage({
                 ) : (
                   <span className="h-5 text-meta text-text-muted">·</span>
                 )}
+                {/* D-13 — WHICH DAYS DID I FILL, AND WHICH DID I MISS.
+                    The count alone cannot answer either: a day holding one
+                    booking and a day holding one journal entry both read "1".
+                    The marker is not colour-only — it carries its own text for
+                    a screen reader, and the unfilled state also changes the
+                    cell's border, so neither meaning depends on hue alone. */}
+                {cell.hasJournal ? (
+                  <span
+                    data-testid={`planning-month-journal-${cell.day}`}
+                    className="size-1.5 rounded-full bg-brand-cyan"
+                  >
+                    <span className="sr-only">{t("month.legend.journal")}</span>
+                  </span>
+                ) : cell.isUnfilled ? (
+                  <span
+                    data-testid={`planning-month-unfilled-${cell.day}`}
+                    className="size-1.5 rounded-full border border-state-warning"
+                  >
+                    <span className="sr-only">{t("month.legend.unfilled")}</span>
+                  </span>
+                ) : (
+                  <span className="size-1.5" />
+                )}
               </Link>
             ))}
+          </div>
+          {/* The legend is what turns two small marks into an answerable
+              question — without it the dots are decoration. */}
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted"
+            data-testid="planning-month-legend"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="size-1.5 rounded-full bg-brand-cyan" />
+              {t("month.legend.journal")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="size-1.5 rounded-full border border-state-warning"
+              />
+              {t("month.legend.unfilled")}
+            </span>
           </div>
           <p className="text-xs text-text-muted">{t("month.hint")}</p>
         </section>
@@ -589,7 +681,7 @@ export default async function PlanningPage({
               }`}
             >
               <span className="text-sm font-semibold capitalize text-text-primary">
-                {monthOnlyFmt.format(utc(`${m.month}-01`))}
+                {monthOnlyFmt(`${m.month}-01`)}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("year.count", { count: m.count })}
@@ -624,7 +716,7 @@ export default async function PlanningPage({
                   }`}
                 >
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {stripFmt.format(utc(d.day))}
+                    {stripFmt(d.day)}
                   </span>
                   <span className="text-sm font-semibold tabular-nums text-text-primary">
                     {d.day.slice(8, 10)}
@@ -641,6 +733,18 @@ export default async function PlanningPage({
                     </span>
                   ) : (
                     <span className="h-5 text-meta text-text-muted">·</span>
+                  )}
+                  {/* Same journal mark as the month grid — the current week is
+                      where "have I logged today yet?" is actually asked. */}
+                  {d.hasJournal ? (
+                    <span
+                      data-testid={`planning-strip-journal-${d.day}`}
+                      className="size-1.5 rounded-full bg-brand-cyan"
+                    >
+                      <span className="sr-only">{t("month.legend.journal")}</span>
+                    </span>
+                  ) : (
+                    <span className="size-1.5" />
                   )}
                 </Link>
               ))}
@@ -689,12 +793,29 @@ export default async function PlanningPage({
             </section>
           )}
 
-          {agenda.pastCount > 0 ? (
-            /* Honest history note: finished items are not hidden silently. */
-            <p className="text-xs text-text-muted" data-testid="planning-past-note">
-              {t("pastHidden", { count: agenda.pastCount })}
-            </p>
-          ) : null}
+          {/* THE PAST NEEDS A DOOR, NOT ONLY AN APOLOGY (D-13).
+              The agenda is forward-only by design, so this note was the single
+              place that admitted history exists — and it was a dead end. A
+              worker asking "which days have I already filled?" had to know to
+              switch views and then page backwards. The month view answers the
+              question directly, so the note now leads there. It is rendered
+              whether or not anything expired: "nothing finished recently" is
+              not a reason to hide the way back. */}
+          <p
+            className="flex flex-wrap items-center gap-2 text-xs text-text-muted"
+            data-testid="planning-past-note"
+          >
+            {agenda.pastCount > 0
+              ? t("pastHidden", { count: agenda.pastCount })
+              : null}
+            <Link
+              href={planningHref({ view: "month", date: anchor, source: sourceFilter, today }) as "/dashboard"}
+              data-testid="planning-past-link"
+              className={`${CHIP_BASE} ${CHIP_IDLE}`}
+            >
+              {t("pastLink")}
+            </Link>
+          </p>
         </>
       ) : null}
 

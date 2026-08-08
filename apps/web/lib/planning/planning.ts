@@ -21,6 +21,7 @@ import {
   combineInvitationItems,
   daySpanDays,
   hrefForSource,
+  journalStartDay,
   planningMeta,
   projectAbsenceItem,
   projectFinanceItem,
@@ -493,19 +494,65 @@ async function readJournalItems(
     return { state: { status: "workers-only", count: 0 }, items: [] };
   }
 
-  const res = await asAny(supabase)
-    .from("journal_entries")
-    .select(
-      "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id",
-    )
-    .eq("worker_id", workerRes.data.id)
-    .is("deleted_at", null)
-    .is("superseded_by", null)
-    .gte("created_at", `${rangeStart}T00:00:00Z`)
-    .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
-    .order("created_at", { ascending: true })
+  const ENTRY_COLUMNS =
+    "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id";
+  const liveEntries = () =>
+    asAny(supabase)
+      .from("journal_entries")
+      .select(ENTRY_COLUMNS)
+      .eq("worker_id", workerRes.data.id)
+      .is("deleted_at", null)
+      .is("superseded_by", null);
+
+  // WHICH ENTRIES THE VISIBLE RANGE CONTAINS — asked of the day the work
+  // HAPPENED, not the day the row was typed.
+  //
+  // THE DEFECT THIS EXISTS FOR (D-13). The projection places an entry on its
+  // own `work_date` (journalStartDay), but this read bounded the query by
+  // `created_at`. The two columns disagree by design — logging Monday's shift
+  // on Friday is the normal case, and "I am filling in last month now" is the
+  // exact behaviour the Work Journal invites. So an entry worked in June and
+  // typed in August was never READ while looking at June: the day rendered
+  // empty, and a worker asking "which days did I fill?" was told "none".
+  // Nothing errored and no test failed — the row simply was not in the result
+  // set. A worker can only trust "this day is empty" if the query asked about
+  // that day.
+  //
+  // Two bounded, RLS-scoped reads instead of one, merged by id:
+  //   A. entries whose stated work_date falls in the range (the metrics table
+  //      is the only place that day lives), and
+  //   B. entries CREATED in the range — which keeps every entry that never
+  //      carried a work_date at all, exactly where `created_at` still puts it.
+  // Neither read can widen scope: both are filtered to this worker's own live
+  // entries, and the metrics table's own SELECT policy re-checks the parent.
+  const workDateIdsRes = await asAny(supabase)
+    .from("journal_entry_metrics")
+    .select("entry_id")
+    .eq("metric_slug", "work_date")
+    .gte("value_text", rangeStart)
+    .lte("value_text", rangeEnd)
     .limit(PLANNING_JOURNAL_READ_LIMIT);
-  if (res.error) {
+  const workDateIds = [
+    ...new Set(
+      ((workDateIdsRes.data ?? []) as { entry_id: string }[]).map(
+        (m) => m.entry_id,
+      ),
+    ),
+  ];
+
+  const [createdRes, workedRes] = await Promise.all([
+    liveEntries()
+      .gte("created_at", `${rangeStart}T00:00:00Z`)
+      .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
+      .order("created_at", { ascending: true })
+      .limit(PLANNING_JOURNAL_READ_LIMIT),
+    workDateIds.length > 0
+      ? liveEntries().in("id", workDateIds).limit(PLANNING_JOURNAL_READ_LIMIT)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  // A failed work_date lookup must not silently shrink the answer back to the
+  // defect above, so it is a real error rather than a quiet fallback.
+  if (createdRes.error || workedRes.error || workDateIdsRes.error) {
     return { state: { status: "error", count: 0 }, items: [] };
   }
 
@@ -515,6 +562,19 @@ async function readJournalItems(
     created_at: string;
     correction_of: string | null;
     engagement_context_id: string | null;
+  };
+  const byId = new Map<string, Row>();
+  for (const row of [
+    ...((createdRes.data ?? []) as Row[]),
+    ...((workedRes.data ?? []) as Row[]),
+  ]) {
+    if (!byId.has(row.id)) byId.set(row.id, row);
+  }
+  const res = {
+    data: [...byId.values()].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    ),
+    error: null,
   };
   // ONE ACTIVE ENTRY PER CHAIN (owner audit P0.7). Editing a CONFIRMED entry
   // creates a correction row whose `correction_of` points at the original —
@@ -534,14 +594,23 @@ async function readJournalItems(
   // renders, it just says less (never something invented).
   const liveRows = rows.filter((e) => !correctedIds.has(e.id));
   const entryIds = liveRows.map((e) => e.id);
-  const metricsByEntry = new Map<string, { hours: string | null; site: string | null }>();
+  const metricsByEntry = new Map<
+    string,
+    { hours: string | null; site: string | null; workDate: string | null }
+  >();
   const orgByEngagement = new Map<string, string | null>();
   if (entryIds.length > 0) {
     const [metricsRes, ecRes] = await Promise.all([
       asAny(supabase)
         .from("journal_entry_metrics")
-        .select("journal_entry_id, metric_slug, value_text, value_numeric, unit_slug")
-        .in("journal_entry_id", entryIds)
+        // The FK column is `entry_id`. This read asked for `journal_entry_id`,
+        // which does not exist — so the request errored on every call, the
+        // "degrades to null meta" branch swallowed it, and the hours and site
+        // this block exists to show were silently never rendered. An honest
+        // degradation path hides a typo forever; the column name is pinned by
+        // a test now.
+        .select("entry_id, metric_slug, value_text, value_numeric, unit_slug")
+        .in("entry_id", entryIds)
         .limit(PLANNING_JOURNAL_READ_LIMIT * 8),
       (async () => {
         const ecIds = [
@@ -560,16 +629,29 @@ async function readJournalItems(
     ]);
     if (!metricsRes.error) {
       type MetricRow = {
-        journal_entry_id: string;
+        entry_id: string;
         metric_slug: string;
         value_text: string | null;
         value_numeric: number | null;
         unit_slug: string | null;
       };
       for (const m of (metricsRes.data ?? []) as MetricRow[]) {
-        const cur = metricsByEntry.get(m.journal_entry_id) ?? { hours: null, site: null };
+        const cur = metricsByEntry.get(m.entry_id) ?? {
+          hours: null,
+          site: null,
+          workDate: null,
+        };
         if (m.metric_slug === "site_name" && m.value_text?.trim()) {
           cur.site = m.value_text.trim();
+        }
+        // THE DAY THE WORK HAPPENED, as the worker stated it. Already stored
+        // by the save action (`work_date`, source `worker_input`) — it was
+        // simply never read here, so "įrašyk vakarykštį darbą" landed on the
+        // day the row was TYPED. A plain ISO day needs no timezone conversion
+        // (W12: one UTC-pinned formatter, and this value never enters it);
+        // anything not exactly YYYY-MM-DD is ignored rather than guessed at.
+        if (m.metric_slug === "work_date" && m.value_text?.trim()) {
+          cur.workDate = m.value_text.trim();
         }
         // A TIME unit on the quantity metric means the number IS a duration.
         if (
@@ -580,7 +662,7 @@ async function readJournalItems(
         ) {
           cur.hours = `${m.value_numeric}|${m.unit_slug}`;
         }
-        metricsByEntry.set(m.journal_entry_id, cur);
+        metricsByEntry.set(m.entry_id, cur);
       }
     }
     if (!ecRes.error) {
@@ -602,17 +684,25 @@ async function readJournalItems(
   const items: PlanningItem[] = liveRows
     .map((e) => {
     const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
+    const metrics = metricsByEntry.get(e.id);
     return {
       id: `journal:${e.id}`,
       sourceType: "journal" as const,
       sourceId: e.id,
       label: firstLine ? (firstLine.length > 80 ? `${firstLine.slice(0, 79)}…` : firstLine) : null,
       detail: null,
-      startDate: toIsoDay(e.created_at),
+      // THE DAY WORKED, not the day typed. `created_at` is when the row was
+      // written, so an entry logged in the evening for yesterday's shift —
+      // "įrašyk vakarykštį darbą į žurnalą", a first-class journal phrase —
+      // appeared on the wrong calendar day, and a worker checking which days
+      // they had filled was reading fiction. The worker's own `work_date` wins
+      // when present; `created_at` stays the fallback for entries that never
+      // carried one.
+      startDate: journalStartDay(metrics?.workDate, e.created_at),
       endDate: null,
       status: "recorded",
       ...(() => {
-        const m = metricsByEntry.get(e.id);
+        const m = metrics;
         const org = e.engagement_context_id
           ? (orgByEngagement.get(e.engagement_context_id) ?? null)
           : null;

@@ -14,6 +14,7 @@ import {
   getAiRunsSummary,
   getUsageLedgerSummary,
 } from "@/lib/admin/ai-cost";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -221,13 +222,42 @@ export default async function AdminTelemetryPage({
           <p className="text-meta text-text-muted">
             First-party conversion counts for paid-ad readiness — landing →
             CTA → registration, and company-need submissions. Event
-            occurrences over the recent window, not unique visitors; no
-            revenue attribution. Use the &ldquo;exclude admins&rdquo; filter
-            below to remove owner/test navigation.
+            occurrences over the last {funnel.windowDays} days, not unique
+            visitors; no revenue attribution. Use the &ldquo;exclude
+            admins&rdquo; filter below to remove owner/test navigation.
             {funnel.excludedPreview > 0
               ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
               : ""}
+            {funnel.excludedAdmin > 0
+              ? ` ${funnel.excludedAdmin} platform-admin event(s) excluded.`
+              : ""}
           </p>
+          {/* W14 item 5 — the limit of the exclusion, stated where the numbers
+              are read. Admin exclusion can only remove AUTHENTICATED internal
+              activity; browsing the landing page while logged out is, in the
+              data, identical to a real visitor. Saying so is what stops these
+              counts being read as certified-clean. */}
+          <p
+            className="text-meta text-text-muted"
+            data-testid="telemetry-funnel-contamination"
+          >
+            {funnel.historicalContaminationUnknown}
+          </p>
+          {/* The window returned more events than one read covers. Every share
+              is withheld rather than computed from a partial population, and
+              the counts below are floors — saying so is the difference between
+              a cautious number and a wrong one. */}
+          {funnel.truncated ? (
+            <p
+              className="rounded-md border border-state-warning/50 bg-state-warning/5 px-3 py-2 text-meta text-state-warning"
+              data-testid="telemetry-funnel-truncated"
+            >
+              This window holds more events than a single read covers, so the
+              counts below are lower bounds (&ldquo;at least&rdquo;) and no
+              conversion share can be stated. Narrow the window to get exact
+              figures.
+            </p>
+          ) : null}
         </div>
         {!funnel.available ? (
           <p className="text-sm text-text-secondary">
@@ -242,22 +272,38 @@ export default async function AdminTelemetryPage({
                   className="rounded-md border border-ink-600/60 px-3 py-2"
                 >
                   <div className="font-mono text-lg text-text-primary">
-                    {s.count}
+                    {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
                   </div>
                   <div className="text-meta text-text-muted">{s.label}</div>
                 </div>
               ))}
             </div>
             <div className="flex flex-col gap-1">
+              {/* W14 item 7 — THREE outcomes, three renderings. `pct === null`
+                  covers two different facts, and one dash for both told the
+                  reader nothing: "no landings yet" and "the read hit its cap so
+                  no share can be stated" are different answers. A measured 0%
+                  is a third thing again — an answer, not an absence. The note
+                  under each rate has been computed since #1086 and was shown
+                  nowhere. */}
               {funnel.rates.map((r) => (
-                <div
-                  key={r.label}
-                  className="flex items-center justify-between gap-3 text-xs"
-                >
-                  <span className="text-text-secondary">{r.label}</span>
-                  <span className="font-mono text-text-primary">
-                    {r.pct === null ? "—" : `${r.pct}%`}
-                  </span>
+                <div key={r.label} className="flex flex-col gap-0.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="text-text-secondary">{r.label}</span>
+                    <span
+                      className={`font-mono ${
+                        r.state === "ok" ? "text-text-primary" : "text-text-muted"
+                      }`}
+                      data-testid={`funnel-rate-${r.state}`}
+                    >
+                      {r.state === "ok"
+                        ? `${r.pct}%`
+                        : r.state === "truncated"
+                          ? "not stated"
+                          : "no data yet"}
+                    </span>
+                  </div>
+                  <span className="text-meta text-text-muted">{r.note}</span>
                 </div>
               ))}
             </div>
@@ -674,7 +720,7 @@ export default async function AdminTelemetryPage({
                   data-testid={`pilot-event-${r.id}`}
                 >
                   <td className="px-3 py-2 font-mono text-meta text-text-secondary whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString(locale)}
+                    {formatUtcDateTime(r.created_at, locale)}
                   </td>
                   <td className="px-3 py-2 font-mono text-meta uppercase tracking-label text-text-muted">
                     {r.result}

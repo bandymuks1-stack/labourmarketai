@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -68,11 +69,11 @@ export function ForgotPasswordForm() {
   }
 
   const disabled = status === "sending";
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
+       it an early submit GETs the address into the URL. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -91,7 +92,7 @@ export function ForgotPasswordForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 

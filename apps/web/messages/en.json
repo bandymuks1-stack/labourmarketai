@@ -451,6 +451,7 @@
     "noResults": "Nothing found. Try another word — e.g. CV, journal, team, documents, pricing.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Recently opened",
+    "startersLabel": "Start here",
     "objectsLabel": "Your own records",
     "objectsLoading": "Searching your own records…",
     "objectsError": "Your records could not be searched right now. The page links above still work.",
@@ -485,7 +486,8 @@
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
       "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
       "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
-      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data."
+      "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data.",
+      "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests."
     },
     "worker": {
       "evidence": {
@@ -519,7 +521,12 @@
         "title": "Demand requests",
         "open": "Open",
         "total": "Total",
-        "link": "Open the demand intake"
+        "link": "Open the demand intake",
+        "structured": "Structured",
+        "shortlisted": "Shortlisted",
+        "interest": "Worker interest",
+        "timeToFillDays": "Median days to fill",
+        "timeToFillUnmeasured": "Time to fill is not measurable yet — no accepted bookings exist. No number is shown instead of real data."
       },
       "projects": {
         "title": "Projects by status",
@@ -701,42 +708,6 @@
       "trust": "Trust / readiness"
     }
   },
-  "marketplaceHub": {
-    "title": "Marketplace",
-    "subtitle": "One compact place that connects you, your companies, the map and messages.",
-    "notFakeNote": "Only real listings, companies and products are shown. Anything still being prepared is marked as “preparing”.",
-    "map": {
-      "title": "Map",
-      "desc": "Your real signals and market signals on the map.",
-      "cta": "Open map"
-    },
-    "opportunities": {
-      "title": "Work, needs, opportunities",
-      "desc": "Real opportunities and search.",
-      "cta": "View opportunities"
-    },
-    "offers": {
-      "title": "Company & personal offers",
-      "desc": "The offers section is still being prepared."
-    },
-    "shop": {
-      "title": "Shop, services, rentals, real estate",
-      "desc": "Products, services, rentals and real-estate listings are still being prepared."
-    },
-    "individual": {
-      "title": "Individual activity",
-      "desc": "Act as an independent provider — managed in your personal profile.",
-      "cta": "Open profile"
-    },
-    "company": {
-      "title": "Company channels",
-      "desc": "The selected company’s commercial channel and settings.",
-      "cta": "Open company",
-      "noCompanyCta": "Add company",
-      "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel."
-    },
-    "prepareBadge": "Preparing"
-  },
   "profileAvatar": {
     "upload": "Upload photo",
     "change": "Change photo",
@@ -800,13 +771,13 @@
     "candidates": {
       "context": "Company · Hire",
       "whatTitle": "What you can do here",
-      "whatBody": "Review candidates and shortlists for your needs.",
-      "primaryLabel": "Find workers",
-      "nextLine": "Next: mark the ones who fit and start a conversation.",
+      "whatBody": "Keep your own private notes about people and providers you want to engage — including those who have not registered yet.",
+      "primaryLabel": "Find registered workers",
+      "nextLine": "Next: when one of them registers, link the draft to their real account.",
       "flow": {
-        "step1": "Add a candidate or review your drafts.",
-        "step2": "The system keeps them private until you decide.",
-        "step3": "Mark the ones who fit and start a conversation."
+        "step1": "Add a person or provider you want to remember, or review your drafts.",
+        "step2": "Only you can see these notes — they are not shared with your organisation.",
+        "step3": "When they register, link the draft to their real account."
       }
     },
     "buyer": {
@@ -1206,6 +1177,12 @@
     "lead": "Here's what we already know about you.",
     "explainer": "This is what an employer sees when deciding what work you fit.",
     "notVerified": "This is information you provided yourself — not yet reviewed. Records build trust, but you can add it later.",
+    "doneDisclosure": "What is already in place",
+    "askWorkspace": "Ask in the workspace",
+    "state": {
+      "done": "Done",
+      "todo": "Still needed"
+    },
     "primaryAction": "Add what's missing",
     "primaryActionJournal": "Add a work record",
     "journalLink": "Work journal",
@@ -2821,6 +2798,14 @@
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
     "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
+  },
+  "profileIdentityNotice": {
+    "title": "This is your person profile",
+    "bodySectionsEmpty": "Your account currently has an organisation identity only — the person identity has not been added. The person sections below (CV, availability and work preferences, languages, education, achievements, trust signals) belong to this page but are empty, because there is no person data yet. Nothing is filled in automatically.",
+    "bodySectionsHidden": "Your account currently has an organisation identity only — a person identity does not exist yet. Person sections (CV, availability and work preferences, languages, education, achievements, trust signals) are not shown because there is no person data to show. Nothing is hidden by mistake and nothing was lost.",
+    "companyProfileHint": "Your organisation's details live in the company profile.",
+    "companyProfileLink": "Open company profile",
+    "addIdentityHint": "To also work as a person, add the person identity in the role switcher at the top of the page. Nothing is created or filled in for you automatically."
   },
   "skillGroups": {
     "profession": "Profession / work direction",
@@ -6281,7 +6266,8 @@
         "comment": "Comment",
         "user": "User"
       }
-    }
+    },
+    "menuLabel": "Report a problem"
   },
   "common": {
     "localeSwitch": "Language",
@@ -6808,7 +6794,7 @@
       "availability": "Availability",
       "availableFrom": "Available from",
       "relocate": "Willing to relocate",
-      "transport": "Has own transport",
+      "transport": "Can get to work independently",
       "yes": "Yes",
       "no": "No",
       "status": {
@@ -8678,6 +8664,7 @@
     "pastHidden": "Finished items are not shown here: {count}. You can still find them on their own pages.",
     "conflict": {
       "flag": "Dates overlap",
+      "withVisible": "Overlaps with {partners} from {date}.",
       "hiddenByFilter": "Overlaps with {sources} hidden by this filter."
     },
     "context": {
@@ -8721,7 +8708,11 @@
       "recorded": "Recorded"
     },
     "month": {
-      "hint": "Tap a day to see that day’s items."
+      "hint": "Tap a day to see that day’s items.",
+      "legend": {
+        "journal": "Journal filled",
+        "unfilled": "Worked, not filled"
+      }
     },
     "day": {
       "empty": "Nothing on this day."
@@ -8746,7 +8737,8 @@
         "minutes": "min",
         "days": "d"
       }
-    }
+    },
+    "pastLink": "Past days"
   },
   "workforcePlanning": {
     "eyebrow": "Company workspace",
@@ -8763,7 +8755,7 @@
       "title": "Other starting points",
       "demand": "Create a work need or position",
       "project": "Create a project",
-      "candidates": "Browse candidates",
+      "candidates": "Your candidate drafts",
       "network": "Find people and companies"
     },
     "summary": {
@@ -8824,6 +8816,12 @@
       "demandError": "Work needs could not be read right now.",
       "projectError": "Projects could not be read right now.",
       "capacityError": "Part of the capacity data could not be read right now."
+    },
+    "availability": {
+      "title": "Who is unavailable",
+      "intro": "Approved time off for workers you manage. Dates only — the reason stays private to the worker.",
+      "unavailable": "Unavailable",
+      "unnamedWorker": "Worker"
     }
   },
   "tasks": {
@@ -9261,11 +9259,11 @@
   "workerPrefs": {
     "title": "Work preferences",
     "hint": "State only what actually applies to you — anything left as “Not stated” stays not stated. These preferences are shared only under your privacy consents.",
-    "willingToRelocate": "Willing to relocate for work",
-    "needsAccommodation": "Needs accommodation provided",
-    "hasTransport": "Has own transport",
-    "teamAvailable": "Can work in a team",
-    "soloAvailable": "Can work solo",
+    "willingToRelocate": "I am willing to relocate for work",
+    "needsAccommodation": "I need accommodation provided",
+    "hasTransport": "I can get to work on my own",
+    "teamAvailable": "I can work in a team",
+    "soloAvailable": "I can work on my own",
     "maxTripDays": "Longest work trip (days)",
     "contractType": "Preferred contract type",
     "note": "Availability note",
@@ -9294,12 +9292,12 @@
         "gross": "Gross (before taxes)",
         "net": "Net (take-home)"
       },
-      "nightShifts": "Willing to work night shifts",
-      "weekendShifts": "Willing to work weekends",
-      "overtime": "Willing to work overtime",
+      "nightShifts": "I am willing to work night shifts",
+      "weekendShifts": "I am willing to work weekends",
+      "overtime": "I am willing to work overtime",
       "licenceCategories": "Driving licence categories",
-      "ownVehicle": "Has own vehicle",
-      "ownTools": "Has own tools",
+      "ownVehicle": "I have my own vehicle",
+      "ownTools": "I have my own tools",
       "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
       "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
     }
@@ -9424,7 +9422,10 @@
       }
     },
     "organizations": {
-      "title": "My companies"
+      "title": "My companies",
+      "noCompanyCta": "Add company",
+      "noCompanyDesc": "You don’t have a company yet. Create your first one to get a company channel.",
+      "individualDesc": "Act as an independent provider — managed in your personal profile."
     },
     "relationships": {
       "title": "Active relationships",
@@ -9815,10 +9816,10 @@
     "chooseLevel": "Choose level",
     "perMonth": "€/month",
     "availabilityKeys": {
-      "willingToRelocate": "Willing to relocate",
-      "hasTransport": "Has own transport",
-      "nightShiftsOk": "Can work night shifts",
-      "weekendShiftsOk": "Can work weekends"
+      "willingToRelocate": "I am willing to relocate",
+      "hasTransport": "I have my own transport",
+      "nightShiftsOk": "I can work night shifts",
+      "weekendShiftsOk": "I can work weekends"
     },
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",
@@ -10718,7 +10719,7 @@
         "salaryMax": "Salary to (€)",
         "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Willing to relocate?",
-        "hasTransport": "Have your own transport?",
+        "hasTransport": "Can you get to work on your own?",
         "needsAccommodation": "Need accommodation?",
         "availabilityNote": "Note (optional)",
         "availabilityNotePlaceholder": "e.g. available from August, prefer 2-week rotations",
@@ -11182,6 +11183,7 @@
       "actionNotAuthorized": "You cannot do this from here.",
       "bookingStart": "Start",
       "bookingEnd": "Expected end",
+      "bookingEndHint": "Leave empty to book a single day — an empty end does not hold the worker beyond the start date.",
       "bookingNote": "Note",
       "projectError": "We could not read the project.",
       "projectNoCompany": "You are not acting for a company right now, so there are no company projects here.",
@@ -11203,6 +11205,8 @@
       "projectStagesEmpty": "No stages have been entered for this project.",
       "projectStagesUnavailable": "Stages cannot be read in this environment, so we are not showing an empty list as if there were none.",
       "projectAssignWorker": "Assign a worker",
+      "projectOpenOperations": "Open project management",
+      "projectOpenProject": "Open the project",
       "projectCompletedNoAssign": "The project is completed, so nobody new can be assigned to it.",
       "projectTerminal": "A completed project cannot be updated. It stays as history.",
       "projectActionPublish": "Publish project",

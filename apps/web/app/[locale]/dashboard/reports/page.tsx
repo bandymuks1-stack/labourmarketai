@@ -296,14 +296,64 @@ function OrgSections({
           {t("org.demand.title")}
         </h2>
         {demand.state === "ok" ? (
-          <dl className="grid grid-cols-2 gap-2 sm:max-w-sm">
-            <MetricTile label={t("org.demand.open")} value={demand.open} />
-            <MetricTile label={t("org.demand.total")} value={demand.total} />
-          </dl>
+          <>
+            {/* W8/W14-6: the ORGANIZATION rollup (org demand spine). */}
+            <dl
+              className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+              data-testid="reports-org-demand-rollup"
+            >
+              <MetricTile label={t("org.demand.open")} value={demand.open} />
+              <MetricTile label={t("org.demand.total")} value={demand.total} />
+              <MetricTile
+                label={t("org.demand.structured")}
+                value={demand.structured}
+              />
+              <MetricTile
+                label={t("org.demand.shortlisted")}
+                value={demand.shortlisted}
+              />
+              {demand.interest && demand.interest.state === "ok" ? (
+                <MetricTile
+                  label={t("org.demand.interest")}
+                  value={demand.interest.total}
+                />
+              ) : null}
+              {demand.timeToFill && demand.timeToFill.state === "measured" ? (
+                <MetricTile
+                  label={t("org.demand.timeToFillDays")}
+                  value={demand.timeToFill.medianDays}
+                />
+              ) : null}
+            </dl>
+            {/* A-12: an unmeasured fact is SAID to be unmeasured — never a
+                zero. Production has no accepted bookings yet, so time-to-fill
+                has no denominator. */}
+            {!demand.timeToFill || demand.timeToFill.state === "unmeasured" ? (
+              <p
+                className={EMPTY_CLASS}
+                data-testid="reports-demand-ttf-unmeasured"
+              >
+                {t("org.demand.timeToFillUnmeasured")}
+              </p>
+            ) : null}
+            <BasisNote t={t} basisKey="orgDemandOrg" />
+          </>
+        ) : demand.state === "own" ? (
+          <>
+            {/* Personal fallback: no org context resolved — these are the
+                caller's OWN requests, and the basis label says so. */}
+            <dl className="grid grid-cols-2 gap-2 sm:max-w-sm">
+              <MetricTile label={t("org.demand.open")} value={demand.open} />
+              <MetricTile label={t("org.demand.total")} value={demand.total} />
+            </dl>
+            <BasisNote t={t} basisKey="orgDemand" />
+          </>
         ) : (
-          <UnavailableNote t={t} state={demand.state} />
+          <>
+            <UnavailableNote t={t} state={demand.state} />
+            <BasisNote t={t} basisKey="orgDemand" />
+          </>
         )}
-        <BasisNote t={t} basisKey="orgDemand" />
         <Link
           href="/dashboard"
           className={LINK_CLASS}

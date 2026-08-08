@@ -26,6 +26,7 @@ import {
   listProjectTasks,
   type MyTasksResult,
 } from "@/lib/tasks/tasks";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Work tasks (control room PR D, capability gap map §3) — the role-aware
@@ -147,7 +148,7 @@ export default async function TasksPage({
     listManagedProjects(),
   ]);
 
-  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
   const now = new Date();
 
   /* ---------------------------------------------------------------- */
@@ -202,7 +203,7 @@ export default async function TasksPage({
           <span>{t(`status.${task.status}`)}</span>
           {task.dueAt ? (
             <span className={overdue ? "text-state-danger" : undefined}>
-              {t("dueLabel")}: {dateFmt.format(new Date(task.dueAt))}
+              {t("dueLabel")}: {dateFmt(task.dueAt)}
             </span>
           ) : null}
           {overdue ? (

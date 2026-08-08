@@ -65,10 +65,20 @@ export function CvInputPanel({
             className="flex flex-col gap-1 rounded-md border border-dashed border-ink-600 p-2 opacity-70"
             data-testid="cv-image-ocr-seam"
           >
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {/* W7-S4 (W7-S2 debt A-1): the seam's label was a plain sibling
+                `<span>`, so the file input was the profile's other unnamed
+                perceivable input — a screen reader announced a disabled file
+                control with no idea what it was for. Named from the visible
+                label; the seam stays exactly as disabled and as honest. */}
+            <span
+              id="cv-image-ocr-label"
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+            >
               {tImport("imageOcr.label")}
             </span>
             <input
+              id="cv-image-ocr-input"
+              aria-labelledby="cv-image-ocr-label"
               type="file"
               accept="image/jpeg,image/png"
               disabled
@@ -99,6 +109,7 @@ export function CvInputPanel({
           <Button
             type="button"
             size="sm"
+            className="min-h-11"
             onClick={() => onPasteSubmit(pasted)}
             disabled={!canSubmit}
           >

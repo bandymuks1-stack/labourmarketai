@@ -94,32 +94,35 @@ async function assertNoHorizontalScroll(page: Page): Promise<void> {
 }
 
 /**
- * Every fixed control on the conversation surface must be REACHABLE.
+ * THE COMPOSER'S SEND CONTROL MUST OWN ITS OWN HIT-TEST.
  *
- * The composer takes `z-50` to win the hit-test against the global
- * language-feedback FAB. That alone leaves the FAB visible but permanently
- * unclickable, so the surface lifts it via `--feedback-fab-bottom`. Assert the
- * outcome, not the mechanism: the topmost element at the FAB's own centre is
- * the FAB. (Waits for hydration — the lift is applied by the chrome effect.)
+ * This used to assert the opposite side of the same collision: a floating
+ * language-feedback button sat on the send control, so the surface lifted the
+ * button out of the way with `--feedback-fab-bottom`, and this checked that the
+ * BUTTON was still clickable. That pinned the workaround — it would have gone
+ * red on any attempt to remove the floating control, and it said nothing about
+ * the control that actually matters here.
+ *
+ * The feedback trigger is a menu item now and nothing floats over the chat, so
+ * the assertion is the one that was always the point: at the send button's own
+ * centre, the browser hits the send button.
  */
-async function assertFabIsClickable(page: Page): Promise<void> {
-  await page.waitForFunction(
-    () => document.documentElement.dataset.surface === "conversation",
-    null,
-    { timeout: 15_000 },
-  );
-  const fab = page.getByTestId("language-feedback-open");
-  const box = await fab.boundingBox();
-  expect(box, "the language-feedback FAB should be laid out").not.toBeNull();
-  const hit = await page.evaluate(
-    ([x, y]) =>
-      document
-        .elementFromPoint(x as number, y as number)
-        ?.closest("[data-testid]")
-        ?.getAttribute("data-testid") ?? null,
+async function assertComposerSendIsClickable(page: Page): Promise<void> {
+  const send = page.locator('[data-testid="composer-send"]').first();
+  await expect(send).toBeVisible({ timeout: 15_000 });
+  const box = await send.boundingBox();
+  expect(box, "the composer send control should be laid out").not.toBeNull();
+  const ownsItsCentre = await page.evaluate(
+    ([x, y]) => {
+      const el = document.querySelector('[data-testid="composer-send"]');
+      const top = document.elementFromPoint(x as number, y as number);
+      return !!el && (el === top || el.contains(top));
+    },
     [box!.x + box!.width / 2, box!.y + box!.height / 2],
   );
-  expect(hit, "another fixed control is covering the FAB").toBe("language-feedback-open");
+  expect(ownsItsCentre, "another control is covering the composer's send button").toBe(
+    true,
+  );
 }
 
 test.describe("Conversation UI — authenticated /dashboard (desktop)", () => {
@@ -149,7 +152,7 @@ test.describe("Conversation UI — authenticated /dashboard (desktop)", () => {
     await findWorkOutcome(page, () => say(page, "Rask man darbą Nyderlanduose."));
 
     await assertNoHorizontalScroll(page);
-    await assertFabIsClickable(page);
+    await assertComposerSendIsClickable(page);
   });
 
   test("the CV path opens the REAL import flow inside the stream", async ({ page }, testInfo) => {
@@ -306,7 +309,7 @@ test.describe("Conversation UI — authenticated /dashboard (mobile)", () => {
 
     await page.screenshot({ path: testInfo.outputPath("dashboard-mobile.png"), fullPage: false });
     await assertNoHorizontalScroll(page);
-    await assertFabIsClickable(page);
+    await assertComposerSendIsClickable(page);
   });
 
   test("the employer-match card fits the phone — no horizontal scroll with the interest control", async ({ page }, testInfo) => {

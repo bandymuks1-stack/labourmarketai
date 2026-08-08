@@ -93,7 +93,26 @@ export interface ConversationActionDescriptor {
   /** True when the underlying RPC/table may be unapplied → the dispatcher must
    *  surface the honest `needs_migration` state instead of a hard error. */
   readonly migrationSensitive: boolean;
-  /** Non-PII usage event emitted when the action is issued. */
+  /**
+   * The non-PII funnel event this action BELONGS TO — a contract declaration,
+   * **NOT an emitter**.
+   *
+   * CORRECTED 2026-08-08. This used to read "emitted when the action is
+   * issued", which was false: nothing reads this field. It is assigned here,
+   * type-checked against `FunnelEventName` by `action-registry.test.ts`, and
+   * never passed to `trackFunnel`, `emitServerFunnelEvent` or `TelemetryView`.
+   *
+   * The mistake was not harmless. A structural guard checked that this file
+   * CONTAINS the string `dashboardViewed` and concluded the event was covered;
+   * `dashboard_viewed` — the activation funnel's first step — was in fact never
+   * sent by anything, so the step reported zero because nobody was counting.
+   * Twelve of the thirteen events declared here happen to be emitted by their
+   * own surfaces, which is why only one gap existed and why it stayed hidden.
+   *
+   * If you need an event sent, add a real emitter on the surface.
+   * `w14-dashboard-viewed-emitter.test.ts` pins that every event declared here
+   * has one.
+   */
   readonly telemetryEvent: FunnelEventName;
   /** The existing Advanced-mode route that performs this action today. Used as
    *  the deep-link target and as the "open the full screen" affordance. Must be

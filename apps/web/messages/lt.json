@@ -451,6 +451,7 @@
     "noResults": "Nieko nerasta. Pabandykite kitą žodį — pvz., CV, žurnalas, komanda, dokumentai, kainos.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Neseniai atidaryta",
+    "startersLabel": "Pradėkite nuo čia",
     "objectsLabel": "Jūsų įrašai",
     "objectsLoading": "Ieškoma jūsų įrašuose…",
     "objectsError": "Šiuo metu jūsų įrašų paieška nepavyko. Puslapių nuorodos viršuje veikia toliau.",
@@ -485,7 +486,8 @@
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
       "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
       "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
-      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų."
+      "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų.",
+      "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis."
     },
     "worker": {
       "evidence": {
@@ -519,7 +521,12 @@
         "title": "Paklausos užklausos",
         "open": "Atviros",
         "total": "Iš viso",
-        "link": "Atidaryti paklausos pateikimą"
+        "link": "Atidaryti paklausos pateikimą",
+        "structured": "Struktūruotos",
+        "shortlisted": "Atrinkti kandidatai",
+        "interest": "Darbuotojų susidomėjimas",
+        "timeToFillDays": "Mediana d. iki užpildymo",
+        "timeToFillUnmeasured": "Užpildymo laiko dar neįmanoma išmatuoti — nėra priimtų rezervacijų. Vietoje tikrų duomenų skaičius nerodomas."
       },
       "projects": {
         "title": "Projektai pagal būseną",
@@ -701,42 +708,6 @@
       "trust": "Pasitikėjimas / pasirengimas"
     }
   },
-  "marketplaceHub": {
-    "title": "Prekyvietė",
-    "subtitle": "Viena kompaktiška vieta, jungianti tave, tavo įmones, žemėlapį ir žinutes.",
-    "notFakeNote": "Rodomi tik tikri skelbimai, įmonės ir prekės. Kas dar ruošiama — pažymėta „ruošiama“ būsena.",
-    "map": {
-      "title": "Žemėlapis",
-      "desc": "Tikri tavo ir rinkos signalai žemėlapyje.",
-      "cta": "Atidaryti žemėlapį"
-    },
-    "opportunities": {
-      "title": "Darbai, poreikiai, galimybės",
-      "desc": "Tikros galimybės ir paieška.",
-      "cta": "Žiūrėti galimybes"
-    },
-    "offers": {
-      "title": "Įmonių ir asmenų pasiūlymai",
-      "desc": "Pasiūlymų skiltis dar ruošiama."
-    },
-    "shop": {
-      "title": "Parduotuvė, paslaugos, nuoma, NT",
-      "desc": "Prekių, paslaugų, nuomos ir NT skelbimai dar ruošiami."
-    },
-    "individual": {
-      "title": "Individuali veikla",
-      "desc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.",
-      "cta": "Atidaryti profilį"
-    },
-    "company": {
-      "title": "Įmonės kanalai",
-      "desc": "Pasirinktos įmonės komercinis kanalas ir nustatymai.",
-      "cta": "Atidaryti įmonę",
-      "noCompanyCta": "Pridėti įmonę",
-      "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas."
-    },
-    "prepareBadge": "Ruošiama"
-  },
   "profileAvatar": {
     "upload": "Įkelti nuotrauką",
     "change": "Pakeisti nuotrauką",
@@ -800,13 +771,13 @@
     "candidates": {
       "context": "Įmonė · Samdyti",
       "whatTitle": "Ką čia galite padaryti",
-      "whatBody": "Peržiūrėkite kandidatus ir trumpuosius sąrašus pagal savo poreikius.",
-      "primaryLabel": "Ieškoti darbuotojų",
-      "nextLine": "Po to: pažymėkite tinkamus ir pradėkite pokalbį.",
+      "whatBody": "Laikykite savo privačius užrašus apie žmones ir paslaugų teikėjus, su kuriais norite dirbti — įskaitant tuos, kurie dar neužsiregistravę.",
+      "primaryLabel": "Rasti registruotų darbuotojų",
+      "nextLine": "Po to: kai kuris nors iš jų užsiregistruos, susiekite juodraštį su tikra paskyra.",
       "flow": {
-        "step1": "Įrašykite kandidatą arba peržiūrėkite juodraščius.",
-        "step2": "Sistema laiko juos privačiai, kol nuspręsite.",
-        "step3": "Pažymėkite tinkamus ir pradėkite pokalbį."
+        "step1": "Pridėkite žmogų ar paslaugų teikėją, kurį norite įsiminti, arba peržiūrėkite juodraščius.",
+        "step2": "Šiuos užrašus matote tik jūs — jie nėra dalijami su jūsų organizacija.",
+        "step3": "Kai jie užsiregistruos, susiekite juodraštį su tikra jų paskyra."
       }
     },
     "buyer": {
@@ -1206,6 +1177,12 @@
     "lead": "Štai ką apie jus jau žinome.",
     "explainer": "Pagal tai darbdavys sprendžia, kokiam darbui tinkate.",
     "notVerified": "Tai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.",
+    "doneDisclosure": "Kas jau paruošta",
+    "askWorkspace": "Paklausti darbo erdvėje",
+    "state": {
+      "done": "Atlikta",
+      "todo": "Dar reikia"
+    },
     "primaryAction": "Pridėti, ko trūksta",
     "primaryActionJournal": "Pridėti darbo įrašą",
     "journalLink": "Darbo žurnalas",
@@ -2821,6 +2798,14 @@
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
     "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
+  },
+  "profileIdentityNotice": {
+    "title": "Čia — jūsų asmens profilis",
+    "bodySectionsEmpty": "Šiuo metu jūsų paskyra turi tik organizacijos tapatybę — asmens tapatybė nepridėta. Žemiau esančios asmens skiltys (CV, prieinamumas ir darbo nuostatos, kalbos, išsilavinimas, pasiekimai, pasitikėjimo signalai) priklauso šiam puslapiui, bet yra tuščios, nes asmens duomenų dar nėra. Automatiškai niekas neužpildoma.",
+    "bodySectionsHidden": "Šiuo metu jūsų paskyra turi tik organizacijos tapatybę — asmens tapatybės dar nėra. Asmens skiltys (CV, prieinamumas ir darbo nuostatos, kalbos, išsilavinimas, pasiekimai, pasitikėjimo signalai) nerodomos, nes nėra asmens duomenų. Niekas nepaslėpta per klaidą ir niekas neprarasta.",
+    "companyProfileHint": "Jūsų organizacijos informacija yra įmonės profilyje.",
+    "companyProfileLink": "Atidaryti įmonės profilį",
+    "addIdentityHint": "Norėdami veikti ir kaip asmuo, pridėkite asmens tapatybę vaidmenų perjungiklyje puslapio viršuje. Automatiškai niekas nesukuriama ir neužpildoma."
   },
   "skillGroups": {
     "profession": "Profesija / darbo kryptis",
@@ -6281,7 +6266,8 @@
         "comment": "Pastaba",
         "user": "Vartotojas"
       }
-    }
+    },
+    "menuLabel": "Pranešti apie problemą"
   },
   "common": {
     "localeSwitch": "Kalba",
@@ -6808,7 +6794,7 @@
       "availability": "Prieinamumas",
       "availableFrom": "Gali pradėti nuo",
       "relocate": "Gali persikelti",
-      "transport": "Turi nuosavą transportą",
+      "transport": "Į darbą atvyksta savarankiškai",
       "yes": "Taip",
       "no": "Ne",
       "status": {
@@ -8678,6 +8664,7 @@
     "pastHidden": "Pasibaigę įrašai čia nerodomi: {count}. Juos rasite jų pačių puslapiuose.",
     "conflict": {
       "flag": "Datos persidengia",
+      "withVisible": "Sutampa su {partners} nuo {date}.",
       "hiddenByFilter": "Sutampa su {sources}, kurį slepia šis filtras."
     },
     "context": {
@@ -8721,7 +8708,11 @@
       "recorded": "Užfiksuota"
     },
     "month": {
-      "hint": "Paspauskite dieną, kad pamatytumėte tos dienos įrašus."
+      "hint": "Paspauskite dieną, kad pamatytumėte tos dienos įrašus.",
+      "legend": {
+        "journal": "Žurnalas užpildytas",
+        "unfilled": "Dirbta, neužpildyta"
+      }
     },
     "day": {
       "empty": "Šią dieną įrašų nėra."
@@ -8746,7 +8737,8 @@
         "minutes": "min.",
         "days": "d."
       }
-    }
+    },
+    "pastLink": "Ankstesnės dienos"
   },
   "workforcePlanning": {
     "eyebrow": "Įmonės erdvė",
@@ -8763,7 +8755,7 @@
       "title": "Kiti pradžios taškai",
       "demand": "Sukurti darbo poreikį ar poziciją",
       "project": "Sukurti projektą",
-      "candidates": "Peržiūrėti kandidatus",
+      "candidates": "Kandidatų juodraščiai",
       "network": "Rasti žmones ir įmones"
     },
     "summary": {
@@ -8824,6 +8816,12 @@
       "demandError": "Darbo poreikių šiuo metu nepavyko nuskaityti.",
       "projectError": "Projektų šiuo metu nepavyko nuskaityti.",
       "capacityError": "Dalies pajėgumo duomenų šiuo metu nepavyko nuskaityti."
+    },
+    "availability": {
+      "title": "Kas nedirba",
+      "intro": "Patvirtintos jūsų valdomų darbuotojų atostogos. Tik datos — priežastis lieka darbuotojo privatumu.",
+      "unavailable": "Nedirba",
+      "unnamedWorker": "Darbuotojas"
     }
   },
   "tasks": {
@@ -9262,10 +9260,10 @@
     "title": "Darbo pageidavimai",
     "hint": "Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.",
     "willingToRelocate": "Galiu persikelti dėl darbo",
-    "needsAccommodation": "Reikalingas apgyvendinimas",
-    "hasTransport": "Turiu nuosavą transportą",
+    "needsAccommodation": "Man reikalingas apgyvendinimas",
+    "hasTransport": "Galiu savarankiškai atvykti į darbą",
     "teamAvailable": "Galiu dirbti komandoje",
-    "soloAvailable": "Galiu dirbti vienas",
+    "soloAvailable": "Galiu dirbti savarankiškai",
     "maxTripDays": "Ilgiausia komandiruotė (dienomis)",
     "contractType": "Pageidaujama sutarties forma",
     "note": "Pastaba apie užimtumą",
@@ -9294,12 +9292,12 @@
         "gross": "Bruto (prieš mokesčius)",
         "net": "Neto (į rankas)"
       },
-      "nightShifts": "Gali dirbti naktinėmis pamainomis",
-      "weekendShifts": "Gali dirbti savaitgaliais",
-      "overtime": "Gali dirbti viršvalandžius",
+      "nightShifts": "Galiu dirbti naktinėmis pamainomis",
+      "weekendShifts": "Galiu dirbti savaitgaliais",
+      "overtime": "Galiu dirbti viršvalandžius",
       "licenceCategories": "Vairuotojo pažymėjimo kategorijos",
-      "ownVehicle": "Turi nuosavą automobilį",
-      "ownTools": "Turi nuosavus įrankius",
+      "ownVehicle": "Turiu nuosavą automobilį",
+      "ownTools": "Turiu nuosavus įrankius",
       "notEnabled": "Šie papildomi pageidavimai dar neįjungti — čia kol kas niekas nesaugoma.",
       "notSaved": "Išsaugota, išskyrus papildomus pageidavimus — ta dalis dar neįjungta."
     }
@@ -9424,7 +9422,10 @@
       }
     },
     "organizations": {
-      "title": "Mano įmonės"
+      "title": "Mano įmonės",
+      "noCompanyCta": "Pridėti įmonę",
+      "noCompanyDesc": "Dar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.",
+      "individualDesc": "Veik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje."
     },
     "relationships": {
       "title": "Aktyvūs ryšiai",
@@ -9815,10 +9816,10 @@
     "chooseLevel": "Pasirinkite lygį",
     "perMonth": "€/mėn.",
     "availabilityKeys": {
-      "willingToRelocate": "Gali persikelti",
-      "hasTransport": "Turi nuosavą transportą",
-      "nightShiftsOk": "Gali dirbti naktinėmis pamainomis",
-      "weekendShiftsOk": "Gali dirbti savaitgaliais"
+      "willingToRelocate": "Galiu persikelti",
+      "hasTransport": "Turiu nuosavą transportą",
+      "nightShiftsOk": "Galiu dirbti naktinėmis pamainomis",
+      "weekendShiftsOk": "Galiu dirbti savaitgaliais"
     },
     "imageOcr": {
       "label": "CV nuotrauka / paveikslėlis (JPG, PNG)",
@@ -10718,7 +10719,7 @@
         "salaryMax": "Atlygis iki (€)",
         "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Ar sutinki persikelti?",
-        "hasTransport": "Ar turi savo transportą?",
+        "hasTransport": "Ar galite savarankiškai atvykti į darbą?",
         "needsAccommodation": "Ar reikia apgyvendinimo?",
         "availabilityNote": "Pastaba (nebūtina)",
         "availabilityNotePlaceholder": "Pvz., laisvas nuo rugpjūčio, mieliau 2 savaičių pamainos",
@@ -11182,6 +11183,7 @@
       "actionNotAuthorized": "Iš čia to padaryti negalite.",
       "bookingStart": "Pradžia",
       "bookingEnd": "Numatoma pabaiga",
+      "bookingEndHint": "Palikus tuščia rezervuojama tik viena diena — tuščia pabaiga darbuotojo po pradžios datos nerezervuoja.",
       "bookingNote": "Pastaba",
       "projectError": "Nepavyko nuskaityti projekto.",
       "projectNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia įmonės projektų nėra.",
@@ -11203,6 +11205,8 @@
       "projectStagesEmpty": "Šiam projektui etapų dar neįvesta.",
       "projectStagesUnavailable": "Šioje aplinkoje etapų nuskaityti negalima, todėl nerodome tuščio sąrašo, tarsi jų nebūtų.",
       "projectAssignWorker": "Priskirti darbuotoją",
+      "projectOpenOperations": "Atidaryti projekto valdymą",
+      "projectOpenProject": "Atidaryti projektą",
       "projectCompletedNoAssign": "Projektas užbaigtas, todėl naujų žmonių jam priskirti nebegalima.",
       "projectTerminal": "Užbaigto projekto atnaujinti nebegalima. Jis lieka kaip istorija.",
       "projectActionPublish": "Publikuoti projektą",

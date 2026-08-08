@@ -160,11 +160,13 @@ describe("§5.2 landing and product cannot drift apart", () => {
 });
 
 describe("§5.2 the card stays reachable in the authenticated product", () => {
-  it("the chat, the journal page and the live profile all mount the card", () => {
+  it("the chat, the journal page and the profile hub all mount the card", () => {
     for (const rel of [
       "components/app/conversation/chat/conversation-chat.tsx",
       "app/[locale]/dashboard/journal/page.tsx",
-      "components/app/live-profile-section.tsx",
+      // W7-S1: `live-profile-section.tsx` was ABSORBED into the profile hub.
+      // The card read moved with it — same canonical model, same surface.
+      "components/app/profile-hub-overview.tsx",
     ]) {
       expect(read(rel), rel).toContain("WorkerPlayerCard");
     }

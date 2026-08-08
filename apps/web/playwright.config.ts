@@ -29,6 +29,22 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: !LOCAL_STACK,
   workers: LOCAL_STACK ? 1 : undefined,
+  /**
+   * LOCAL-STACK RUNS GET A LONGER PER-TEST BUDGET.
+   *
+   * Same root cause as the serial-worker rule above: these runs share ONE `next
+   * dev` server, which compiles each route on its first request. A cold
+   * /dashboard or /dashboard/planning can exceed Playwright's 30s default
+   * before `load` fires, and the failure surfaces as `page.goto: net::ERR_ABORTED`
+   * or a bare timeout — which reads exactly like a broken page. It cost a full
+   * debugging cycle on 2026-08-08 before the entries in question were confirmed
+   * present in the database all along.
+   *
+   * This raises the DEADLINE only. Every individual `expect` keeps its own
+   * timeout, so a genuinely missing element still fails in seconds rather than
+   * hanging for two minutes.
+   */
+  timeout: LOCAL_STACK ? 120_000 : 30_000,
   forbidOnly: !!process.env.CI,
   retries: LOCAL_STACK ? 0 : process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",

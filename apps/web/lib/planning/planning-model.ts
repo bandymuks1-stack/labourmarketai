@@ -287,6 +287,30 @@ export function toIsoDay(iso: string | null | undefined): string | null {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Which calendar day a Work Journal entry belongs on.
+ *
+ * THE DAY WORKED, not the day typed. The save action stores the worker's own
+ * `work_date` metric, but the projection read only `created_at` — so an entry
+ * logged in the evening for yesterday's shift ("įrašyk vakarykštį darbą į
+ * žurnalą", a first-class journal phrase) landed on the wrong day, and a worker
+ * checking which days they had filled was reading fiction.
+ *
+ * `createdAt` remains the fallback for entries that never carried a work date.
+ * A `workDate` that is not exactly YYYY-MM-DD is ignored rather than guessed
+ * at — a malformed value must not silently move an entry to a wrong day. Being
+ * a plain day already, it never enters a timezone conversion (W12: one
+ * UTC-pinned formatter, and this value bypasses it by construction).
+ */
+export function journalStartDay(
+  workDate: string | null | undefined,
+  createdAt: string | null | undefined,
+): string | null {
+  const wd = typeof workDate === "string" ? workDate.trim() : "";
+  if (DAY_RX.test(wd)) return wd;
+  return toIsoDay(createdAt);
+}
+
 /** dayIso + n calendar days (UTC-safe plain date math). */
 export function addDays(dayIso: string, n: number): string {
   const d = new Date(`${dayIso}T00:00:00Z`);
@@ -450,6 +474,86 @@ export function hiddenConflictSources(
   return out;
 }
 
+/** One counterpart of a conflict that the reader can actually see on the page. */
+export interface VisibleConflictPartner {
+  readonly id: string;
+  readonly sourceType: PlanningItem["sourceType"];
+  /** The partner's own label, or null → the caller renders its fallback noun. */
+  readonly label: string | null;
+  /** First shared day of the two inclusive ranges, "YYYY-MM-DD" (UTC). */
+  readonly overlapStart: string;
+}
+
+/**
+ * W12 item C — the VISIBLE counterpart of `hiddenConflictSources`.
+ *
+ * THE DEFECT THIS EXISTS FOR. A conflicted row rendered a bare red badge:
+ * "Dates overlap". Overlap with *what*? The page already knew — `detectConflicts`
+ * returns the pair and the first shared day — and it already said so when the
+ * partner was HIDDEN by a filter. So the reader learned strictly LESS when the
+ * partner was on screen than when it was filtered away, which is backwards.
+ * Naming the counterpart turns a flag into something a person can act on
+ * without opening every row on the day to find the collision themselves.
+ *
+ * NO NEW DISCLOSURE, BY CONSTRUCTION. Two independent reasons: every conflict
+ * partner is already the caller's OWN dated commitment (`isConflictEligible`
+ * admits only incoming accepted bookings, personally assigned projects and own
+ * approved absences), and this function returns partners that are in
+ * `visibleItems` — i.e. rows whose label and dates the same page is rendering
+ * anyway. It adds no field the reader cannot already read one row away.
+ *
+ * That is why this may carry the LABEL while `hiddenConflictSources`
+ * deliberately carries only the source TYPE: a hidden partner is one the
+ * reader's own filter removed, so it is named as narrowly as still explains
+ * the badge.
+ *
+ * Pure. No new read, no new store — it re-reads the conflicts the page has
+ * already computed from the full (unfiltered) model.
+ */
+export function visibleConflictPartners(
+  conflicts: readonly PlanningConflict[],
+  allItems: readonly PlanningItem[],
+  visibleItems: readonly PlanningItem[],
+): ReadonlyMap<string, readonly VisibleConflictPartner[]> {
+  const visibleIds = new Set(visibleItems.map((i) => i.id));
+  const byId = new Map(allItems.map((i) => [i.id, i]));
+  const out = new Map<string, VisibleConflictPartner[]>();
+
+  const note = (ownerId: string, partnerId: string, overlapStart: string): void => {
+    // Both ends must be on screen: the hidden case is the other function's job,
+    // and naming an off-screen row here would duplicate that note.
+    if (!visibleIds.has(ownerId) || !visibleIds.has(partnerId)) return;
+    const partner = byId.get(partnerId);
+    if (!partner) return;
+    const list = out.get(ownerId) ?? [];
+    if (list.some((p) => p.id === partner.id)) return;
+    list.push({
+      id: partner.id,
+      sourceType: partner.sourceType,
+      label: partner.label,
+      overlapStart,
+    });
+    out.set(ownerId, list);
+  };
+
+  for (const c of conflicts) {
+    note(c.aId, c.bId, c.overlapStart);
+    note(c.bId, c.aId, c.overlapStart);
+  }
+
+  // Earliest overlap first, then a stable tiebreak, so the rendered sentence
+  // never reshuffles between two requests over identical data.
+  for (const [, list] of out) {
+    list.sort(
+      (x, y) =>
+        x.overlapStart.localeCompare(y.overlapStart) ||
+        x.sourceType.localeCompare(y.sourceType) ||
+        x.id.localeCompare(y.id),
+    );
+  }
+  return out;
+}
+
 /* ------------------------------------------------------------------ */
 /* Agenda — compact, mobile-safe day grouping (no calendar library)    */
 /* ------------------------------------------------------------------ */
@@ -468,6 +572,9 @@ export interface WeekStripDay {
   readonly count: number;
   /** A conflicting item covers this day. */
   readonly hasConflict: boolean;
+  /** A Work Journal entry is recorded on this day (D-13) — same distinction
+   *  the month grid makes, so the two surfaces cannot disagree. */
+  readonly hasJournal: boolean;
 }
 
 export interface PlanningAgenda {
@@ -494,16 +601,36 @@ function sortItems(a: PlanningItem, b: PlanningItem): number {
   return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
 }
 
+/** Dated items that still lie ahead — the set planning reasons about. Past
+ *  bands are history and stay on their own source surface. */
+function activeDated(
+  items: readonly PlanningItem[],
+  todayIso: string,
+): readonly PlanningItem[] {
+  return items.filter((it) => {
+    if (!it.startDate) return false;
+    const end = effectiveEndDay(it);
+    return !(end && end < todayIso);
+  });
+}
+
 /**
  * Build the compact agenda for a reference date (pure, deterministic).
  * Grouping rule: ongoing → today; future within the window → its start day;
  * beyond the window → "later"; no start date → "undated"; already finished →
  * counted, not listed (planning looks forward; history stays on the source).
+ *
+ * `truthItems` is the FULL model when the caller renders a filtered subset.
+ * The grouped lists and the strip COUNTS follow `items` (a filter decides what
+ * is shown), while conflicts and the strip's journal mark are derived from
+ * `truthItems` — a source filter must not be able to change what is true.
+ * Defaults to `items`, so every caller that never filters is unaffected.
  */
 export function buildAgenda(
   items: readonly PlanningItem[],
   referenceDate: Date,
   windowDays: number = PLANNING_WINDOW_DAYS,
+  truthItems: readonly PlanningItem[] = items,
 ): PlanningAgenda {
   const today = referenceDate.toISOString().slice(0, 10);
   const windowEnd = addDays(today, Math.max(windowDays, 1) - 1);
@@ -542,8 +669,10 @@ export function buildAgenda(
   }));
 
   // Conflicts run over every non-past dated item (`active` includes the
-  // "later" ones) so an overlap is never hidden by the window size.
-  const conflicts = detectConflicts(active);
+  // "later" ones) so an overlap is never hidden by the window size — and over
+  // the FULL model, so a source filter cannot hide one either.
+  const truthActive = truthItems === items ? active : activeDated(truthItems, today);
+  const conflicts = detectConflicts(truthActive);
   const conflictIds = conflictItemIds(conflicts);
 
   const weekStrip: WeekStripDay[] = [];
@@ -554,7 +683,15 @@ export function buildAgenda(
       day,
       isToday: i === 0,
       count: covering.length,
+      // A rendered row is marked when it really is in conflict — the partner
+      // may well be one the filter removed, which is precisely the case that
+      // used to lose the mark.
       hasConflict: covering.some((it) => conflictIds.has(it.id)),
+      // "Did I record this day?" is a fact about the day, not about what the
+      // filter is showing.
+      hasJournal: truthActive.some(
+        (it) => it.sourceType === "journal" && itemCoversDay(it, day),
+      ),
     });
   }
 
@@ -606,6 +743,37 @@ export interface CalendarDayCell {
   readonly isToday: boolean;
   readonly count: number;
   readonly hasConflict: boolean;
+  /** A Work Journal entry is recorded on this day (D-13). A bare `count`
+   *  cannot answer "which days did I fill?" — a day holding one booking and a
+   *  day holding one journal entry both render "1". */
+  readonly hasJournal: boolean;
+  /** A PAST day the person was committed to work (their own accepted booking
+   *  or a project they are assigned to) that carries no journal entry yet —
+   *  the "still unfilled" question. Never set for today or the future: a day
+   *  that has not happened cannot be missing its record. */
+  readonly isUnfilled: boolean;
+}
+
+/**
+ * Does this row mean the person was ACTUALLY EXPECTED TO WORK that day?
+ *
+ * Deliberately narrow, and narrower than `isConflictEligible`: only the
+ * caller's OWN confirmed commitments count — an accepted incoming booking and
+ * a project they are personally assigned to. A proposal is not yet work; a
+ * managed project band is somebody else's schedule; an absence is the
+ * opposite of work; an invitation or finance row says nothing about a shift.
+ *
+ * This predicate exists so "unfilled" can only ever be claimed about a day the
+ * product can PROVE was a working day. Marking every empty past day as unfilled
+ * would nag people about weekends and holidays the product knows nothing about.
+ */
+export function indicatesExpectedWork(item: PlanningItem): boolean {
+  if (!item.startDate) return false;
+  if (item.sourceType === "booking") {
+    return item.status === "accepted" && item.roleContext === "incoming";
+  }
+  if (item.sourceType === "project") return item.roleContext === "assigned";
+  return false;
 }
 
 export interface MonthGrid {
@@ -633,12 +801,13 @@ export function buildMonthGrid(
   anchorDay: string,
   items: readonly PlanningItem[],
   todayIso: string,
+  truthItems: readonly PlanningItem[] = items,
 ): MonthGrid {
   const month = anchorDay.slice(0, 7);
   const gridStart = startOfWeekMonday(firstDayOfMonth(anchorDay));
   const lastOfMonth = addDays(addMonths(firstDayOfMonth(anchorDay), 1), -1);
   const gridEnd = addDays(startOfWeekMonday(lastOfMonth), 6);
-  const conflictIds = conflictItemIds(detectConflicts(items));
+  const conflictIds = conflictItemIds(detectConflicts(truthItems));
 
   const weeks: CalendarDayCell[][] = [];
   for (let cursor = gridStart; cursor <= gridEnd; cursor = addDays(cursor, 7)) {
@@ -646,12 +815,27 @@ export function buildMonthGrid(
     for (let i = 0; i < 7; i++) {
       const day = addDays(cursor, i);
       const covering = itemsForDay(items, day);
+      // The two marks below answer questions about the DAY, so they read the
+      // full model. Reading the filtered list made `?source=booking` erase the
+      // journal rows that prove a day was recorded, and the cell then claimed
+      // the day was unfilled — a false statement about the person's own work.
+      const truthCovering =
+        truthItems === items ? covering : itemsForDay(truthItems, day);
+      const hasJournal = truthCovering.some((it) => it.sourceType === "journal");
       row.push({
         day,
         inMonth: day.slice(0, 7) === month,
         isToday: day === todayIso,
+        // COUNT is a render question — it still follows the filter.
         count: covering.length,
         hasConflict: covering.some((it) => conflictIds.has(it.id)),
+        hasJournal,
+        // Strictly BEFORE today: today is still being lived, and a future day
+        // cannot be missing a record of work that has not happened.
+        isUnfilled:
+          day < todayIso &&
+          !hasJournal &&
+          truthCovering.some(indicatesExpectedWork),
       });
     }
     weeks.push(row);

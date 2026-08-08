@@ -11,6 +11,49 @@
 > **Naming note:** the repo filename (`YYYYMMDDHHMMSS_*` per §16) and the ledger
 > `version` differ for everything applied via MCP `apply_migration` — the tool
 > stamps its own apply-time timestamp. Both identify the migration by `name`.
+>
+> **⚠️ COVERAGE BOUNDARY (added 2026-08-07).** This file has never stated from
+> which date it claims completeness, so "no row here" has meant two different
+> things at once. Reconciled against production on 2026-08-07
+> (`docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md`, 190 repo files ×
+> 187 prod rows, read-only):
+>
+> * **After `20260720190000`** — this file is expected to be COMPLETE. An absent
+>   row is drift and should be investigated. (Three such gaps were found on
+>   2026-08-07 and are recorded below.)
+> * **`20260702130000` … `20260720190000`** — the 26-migration drift window
+>   documented below. 19 remain unwritten; the notice, not this boundary, is
+>   their record.
+> * **Before `20260702130000`** — **63 applied migrations have no row here** and
+>   never did. This file does NOT claim completeness for that era. Absence
+>   proves nothing; query production.
+>
+> **Matching a migration is name-based, and one name is currently ambiguous:**
+> `company_memberships_v1` exists as TWO repo files — `20260714210000_*` (DRAFT,
+> never applied) and `20260806090000_*` (applied, prod `20260805195716`). A
+> name-based check reports the draft as applied. See the reconciliation §4.
+
+---
+
+### ✅ APPLIED TO PROD — `20260808120000_worker_absence_scheduling_view_v1` (W12 employer absence privacy)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-08** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger name | `worker_absence_scheduling_view_v1` (version/name apply-time drift — match on `name`, per the doctrine at the top of this file) |
+| PR | **#1089**, merged to main as `ca3d0fa3` |
+| Owner gate | Product-direction approval given 2026-08-08, recorded in `docs/human-gates/w12-absence-privacy-hardening-gate.md`. Migration sha256 `530c262c…917a7`, rollback `dfd7b275…2ca4`, comment-stripped executable sha256 `f544129d893386090f3bb2ce9ba7dd5a2d2f233714c5e6db3b2f445d29d9a1ad`. Marker covers exactly two findings (`grant-or-revoke`, `alter-drop-policy`) |
+
+**Preflight (read-only, immediately before apply)**: `worker_absences` held **0 rows**, so the change could not affect a single existing record; the live `worker_absences_select` expression matched the pre-change form byte-for-byte; neither `20260808120000` nor `20260808130000` was in the prod ledger.
+
+**What it does**: narrows `worker_absences_select` so a manager reaches the whole row only while `status = 'requested'` (the window in which the free-text note is what they are being asked to act on); adds the definer view `public.worker_absence_scheduling` exposing `id, worker_id, start_date, end_date, half_day, status` for **approved** absences, carrying `caller_manages_worker() OR is_admin() OR self` as its own predicate. Worker self-access and admin branches unchanged. Writes are untouched — request/review/cancel are SECURITY DEFINER RPCs.
+
+**Post-apply verified (independent read-back, not inferred)**: the live policy now reads `… OR (caller_manages_worker(worker_id) AND (status = 'requested'::text)) OR is_admin()`; the view exists with **exactly** `id,worker_id,start_date,end_date,half_day,status`; grants are `authenticated:SELECT` plus the table owner's implicit set, and **`anon` holds nothing**.
+
+**Accepted consequence (owner, explicit)**: a manager loses the ability to read the reason for an absence they have already approved. That is the intent of the minimum-necessary model, not a side effect.
+
+**Not done / out of scope**: no data touched, no row created. The paired rollback stays unexecuted.
 
 ---
 
@@ -462,6 +505,65 @@ pinned). **0** ERROR-level findings.
 
 **migration-safety:** RED → **GREEN [human-gated]**, with all three findings still
 recorded as approved notices. The gate script was not modified.
+
+---
+
+## ⚠️ RECONCILIATION 2026-08-07 — two MORE applied migrations were unrecorded, both AFTER the 2026-08-01 notice
+
+**Ledger-integrity reconciliation, NOT a new apply. Nothing was applied,
+changed, or migrated on 2026-08-07** — these rows only close record gaps found
+by a read-only diff of all 190 repo migration files against production
+`schema_migrations` (187 rows). Full method + classification:
+`docs/audits/APPLIED_LEDGER_FULL_RECONCILIATION_2026-08.md`.
+
+These two sit **after** the 26-migration window below, so the drift notice does
+not account for them. Each was verified by probing the objects it creates. A
+third candidate — `20260723180000_agency_real_client_bridge_v1` — turned out to
+be recorded already, under the Deferred heading; see the placement note below.
+
+### ✅ APPLIED TO PROD (RECONCILIATION ROW 2026-08-07) — `20260727120000_secdef_public_grant_hygiene_v1`
+
+Prod ledger version `20260727125759`, name `20260727120000_secdef_public_grant_hygiene_v1`
+(apply-time version drift — match on `name`). File carries `@human-gate-approved`.
+
+Security audit 2026-07-27 findings L-01 / L-08: revokes the **implicit `PUBLIC`
+EXECUTE** grant (visible as a leading `=X/postgres` in `proacl`) left on three
+SECDEF functions that were granted to `anon, authenticated` without an
+accompanying revoke. It **grants nothing to anyone** — `anon` and
+`authenticated` keep their explicit grants, so the public business-profile page
+is unchanged. Idempotent (REVOKE on an absent grant is a no-op). Paired
+rollback: `supabase/rollbacks/20260727120000_secdef_public_grant_hygiene_v1.down.sql`.
+
+*Not to be confused with the schema-level `CREATE` revoke, which lives in the
+still-unapplied owner-gated #879. Production still has `anon` holding CREATE on
+schema `public` — verified 2026-08-07, unchanged by this migration and not its job.*
+
+### ✅ APPLIED TO PROD (RECONCILIATION ROW 2026-08-07) — `20260727180000_journal_entry_skill_provenance_v1`
+
+Prod ledger version `20260727183554`. **Verified in production:**
+`journal_entry_skills.provenance` (`text`) exists.
+
+PR-C: stores HOW an entry↔skill link came to exist, so the UI stops re-deriving
+it at render time from indirect signals. Additive single column; no draft
+header, no gate marker required.
+
+### ℹ️ PLACEMENT NOTE — `20260723180000_agency_real_client_bridge_v1` is APPLIED, and recorded under "Deferred"
+
+**Not a new finding, and not a gate problem.** The full apply record already
+exists in this file — inside the **Deferred (committed/known, NOT applied)**
+bullet for this migration, which carries `PRODUCTION APPLIED 2026-07-23 (owner
+gate OWNER_GATE_APPROVED_FOR_PR_860)`, the prod version `20260723155658`, both
+file SHA-256s, the dependency resolution, post-apply verification and a full
+production two-subject E2E.
+
+The `DRAFT — DO NOT APPLY` header on the migration file is **deliberately**
+unedited: editing it would alter the owner-pinned approved SHA, so
+migration-safety stays RED by design and PR #860 stays DRAFT/unmerged on purpose.
+
+Recorded here only because an applied migration living under a heading that says
+"NOT applied" defeats every name-based check that reads the applied half of this
+file — including the first pass of the 2026-08-07 reconciliation, which reported
+it as unrecorded before the Deferred bullet was read. **No owner action.**
 
 ---
 
@@ -936,6 +1038,8 @@ Both entries below were applied to production in the order shown, with a full ve
   **Rollback available, NOT executed and NOT authorised.** `supabase/rollbacks/20260802150000_booking_atomic_double_booking_v1.down.sql` drops only the exclusion constraint and restores the pre-slice RPC bodies verbatim. It mutates no booking row, and it **deliberately leaves `btree_gist` installed** — dropping a shared extension is never part of a feature rollback, and an installed-but-unused extension is inert. Running it restores a KNOWN P0: two employers can hold overlapping accepted bookings for the same worker under concurrency.
 
 ## Deferred (committed/known, NOT applied)
+- **`20260717130000_open_markets_countries_draft_v1.sql` — six newly opened markets (GE / BE / FR / ES / AT / CH). HUMAN GATE: do NOT apply without explicit owner OK.** *Added to this list 2026-08-07 by the full reconciliation — it was previously in NEITHER inventory: absent from production AND absent from this Deferred list, so a reader consulting either would not learn the file exists.* Additive `insert … on conflict do nothing` seeds only, which is why the file's own header warns that "the static migration-safety gate may classify it GREEN — the DRAFT header above is authoritative". Verified absent from production 2026-08-07 (read-only). The owner decides whether these six markets become selectable `countries` rows at all.
+- **`20260714210000_company_memberships_v1.sql` — SUPERSEDED DRAFT, never applied. Do not apply.** *Added 2026-08-07.* This is the Sprint v2 §5 multi-company-switching draft (164 lines, `DRAFT — needs-human-gate`). The capability shipped instead through `20260806090000_company_memberships_v1.sql` (236 lines, `@human-gate-approved`, M-P0-4), applied to production as prod ledger version `20260805195716`. **The two files share the slug `company_memberships_v1`, so any name-based check reports this unapplied draft as applied** — the reason it is called out here explicitly. Resolution (owner): rename this file to a distinct slug, or delete it. See reconciliation §4.
 - ~~**`20260802120000_experience_records_v1.sql`** — W6 slice 3 experience records.~~ **NO LONGER DEFERRED: APPLIED TO PRODUCTION 2026-08-04 15:12:14 UTC** under Owner Decision 3 ("W6 — APPLY EXPERIENCE RECORDS MIGRATION"). See the APPLIED row above for the full apply, verification and no-business-row-change record. The state is no longer `W6_SLICE_3_MERGED_PENDING_PRODUCTION_MIGRATION_APPROVAL` but `W6_EXPERIENCE_SCHEMA_PRODUCTION_ACTIVE_UI_CODE_PRESENT_AUTHENTICATED_WRITE_PROOF_PENDING`. NOTE: the migration file's own header still says Owner Decision 3 "has NOT been given" — that sentence is now historical and was deliberately left unedited, because the file is the artefact the owner approved and its `@human-gate-approved` marker must not be disturbed.
 - **`20260713120000_company_locations_v1.sql` — company operating geography (F12.4/5, production UX repair v2). HUMAN GATE: do NOT apply without explicit owner OK.** New `company_locations` table (headquarters / operating / desired_market; ISO country; bounded region/city/label; optional both-or-neither approx coords — COMPANY geography only, never worker coordinates; single-HQ partial unique index; 50-row cap in RPC). RLS SELECT owner/admin only (fail-closed, no public read in v1); writes RPC-only (`save_company_location_v1` / `remove_company_location_v1`, SECURITY DEFINER, owner-checked, authenticated-only grants). Consumer: company workspace Locations section + market-map company layer detect 42P01 and show an honest "prepared, owner activation pending" state until applied. Paired rollback: `supabase/rollbacks/20260713120000_company_locations_v1.down.sql`.
 - **`20260713160000_agency_clients_v1.sql` — staffing-agency client records + demand→client link (canonical journey P5). HUMAN GATE: do NOT apply without explicit owner OK.** New `agency_clients` table (client CRM records owned by the agency's canonical `companies` row; name 2..160 + bounded contact_name/contact_email/note; 200-row cap in RPC) + ONE additive nullable FK `customer_requests.agency_client_id` (ON DELETE SET NULL — removing a client never deletes a demand). Reuse investigation recorded in the migration header: `customers` (0026) is a SELF-owned buyer identity (`unique (profile_id)`, owns_customer = `profile_id = auth.uid()`) and cannot hold N agency-owned client records; `customer_requests.customer_id` is auto-resolved to the caller's own customers row inside `save_customer_request` only. RLS SELECT `owns_company(company_id)` or admin (fail-closed, no anon/worker read); writes RPC-only (`save_agency_client_v1` / `remove_agency_client_v1` / `set_demand_agency_client_v1`, SECURITY DEFINER, owner-checked, authenticated-only grants). Consumer: staffing-agency "Klientai" panel on /dashboard/company detects 42P01/PGRST205/42703 and shows an honest "prepared, owner activation pending" state (demand list + scouting links work today; linking is truthfully disabled) until applied. Paired rollback: `supabase/rollbacks/20260713160000_agency_clients_v1.down.sql`.

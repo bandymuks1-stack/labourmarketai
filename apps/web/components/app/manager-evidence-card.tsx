@@ -1,5 +1,6 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import type { ManagerEvidence } from "@/lib/operations/manager-evidence";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Manager / reviewer evidence card. Shows that leadership activity is backed by
@@ -21,7 +22,7 @@ export async function ManagerEvidenceCard({ evidence }: { evidence: ManagerEvide
   if (evidence.lastActivity) {
     stats.push({
       label: t("lastActivity"),
-      value: new Date(evidence.lastActivity).toLocaleDateString(locale),
+      value: formatUtcDate(evidence.lastActivity, locale) ?? "",
     });
   }
 

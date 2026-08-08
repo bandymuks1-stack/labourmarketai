@@ -451,6 +451,7 @@
     "noResults": "Niets gevonden. Probeer een ander woord — bijv. CV, werkjournaal, ploeg, documenten, prijzen.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Onlangs geopend",
+    "startersLabel": "Begin hier",
     "objectsLabel": "Je eigen records",
     "objectsLoading": "Zoeken in je eigen records…",
     "objectsError": "Je records konden nu niet doorzocht worden. De paginalinks hierboven blijven werken.",
@@ -485,7 +486,8 @@
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
       "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
       "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
-      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens."
+      "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens.",
+      "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken."
     },
     "worker": {
       "evidence": {
@@ -519,7 +521,12 @@
         "title": "Vraagaanvragen",
         "open": "Open",
         "total": "Totaal",
-        "link": "Open de vraagintake"
+        "link": "Open de vraagintake",
+        "structured": "Gestructureerd",
+        "shortlisted": "Op de shortlist",
+        "interest": "Interesse van werkers",
+        "timeToFillDays": "Mediane dagen tot invulling",
+        "timeToFillUnmeasured": "De invultijd is nog niet meetbaar — er zijn geen geaccepteerde boekingen. Er wordt geen getal getoond in plaats van echte data."
       },
       "projects": {
         "title": "Projecten per status",
@@ -701,42 +708,6 @@
       "trust": "Vertrouwen / gereedheid"
     }
   },
-  "marketplaceHub": {
-    "title": "Marktplaats",
-    "subtitle": "Eén compacte plek die jou, je bedrijven, de kaart en berichten verbindt.",
-    "notFakeNote": "Alleen echte vermeldingen, bedrijven en producten worden getoond. Wat nog wordt voorbereid, is gemarkeerd als “in voorbereiding”.",
-    "map": {
-      "title": "Kaart",
-      "desc": "Je echte signalen en marktsignalen op de kaart.",
-      "cta": "Open kaart"
-    },
-    "opportunities": {
-      "title": "Werk, behoeften, kansen",
-      "desc": "Echte kansen en zoeken.",
-      "cta": "Bekijk kansen"
-    },
-    "offers": {
-      "title": "Bedrijfs- en persoonlijke aanbiedingen",
-      "desc": "Het aanbiedingenonderdeel wordt nog voorbereid."
-    },
-    "shop": {
-      "title": "Winkel, diensten, verhuur, vastgoed",
-      "desc": "Producten, diensten, verhuur en vastgoed worden nog voorbereid."
-    },
-    "individual": {
-      "title": "Individuele activiteit",
-      "desc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel.",
-      "cta": "Open profiel"
-    },
-    "company": {
-      "title": "Bedrijfskanalen",
-      "desc": "Het commerciële kanaal en de instellingen van het geselecteerde bedrijf.",
-      "cta": "Open bedrijf",
-      "noCompanyCta": "Bedrijf toevoegen",
-      "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen."
-    },
-    "prepareBadge": "In voorbereiding"
-  },
   "profileAvatar": {
     "upload": "Foto uploaden",
     "change": "Foto wijzigen",
@@ -800,13 +771,13 @@
     "candidates": {
       "context": "Bedrijf · Werven",
       "whatTitle": "Wat je hier kunt doen",
-      "whatBody": "Bekijk kandidaten en shortlists voor je behoeften.",
-      "primaryLabel": "Werknemers vinden",
-      "nextLine": "Volgende: markeer wie past en start een gesprek.",
+      "whatBody": "Houd je eigen privénotities bij over mensen en aanbieders met wie je wilt werken — ook als ze zich nog niet hebben geregistreerd.",
+      "primaryLabel": "Geregistreerde werknemers zoeken",
+      "nextLine": "Volgende: zodra iemand zich registreert, koppel je het concept aan hun echte account.",
       "flow": {
-        "step1": "Voeg een kandidaat toe of bekijk je concepten.",
-        "step2": "Het systeem houdt ze privé totdat jij beslist.",
-        "step3": "Markeer wie past en start een gesprek."
+        "step1": "Voeg een persoon of aanbieder toe die je wilt onthouden, of bekijk je concepten.",
+        "step2": "Alleen jij ziet deze notities — ze worden niet gedeeld met je organisatie.",
+        "step3": "Zodra ze zich registreren, koppel je het concept aan hun echte account."
       }
     },
     "buyer": {
@@ -1206,6 +1177,12 @@
     "lead": "Dit is wat we al over je weten.",
     "explainer": "Hierop beoordeelt een werkgever welk werk bij je past.",
     "notVerified": "Dit is informatie die je zelf hebt opgegeven — nog niet beoordeeld. Registraties bouwen vertrouwen op, maar je kunt dat later toevoegen.",
+    "doneDisclosure": "Wat er al is",
+    "askWorkspace": "Vraag het in de werkruimte",
+    "state": {
+      "done": "Klaar",
+      "todo": "Nog nodig"
+    },
     "primaryAction": "Vul aan wat ontbreekt",
     "primaryActionJournal": "Werkregistratie toevoegen",
     "journalLink": "Werkjournaal",
@@ -2821,6 +2798,14 @@
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
     "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
+  },
+  "profileIdentityNotice": {
+    "title": "Dit is je persoonsprofiel",
+    "bodySectionsEmpty": "Je account heeft op dit moment alleen een organisatie-identiteit — de persoonsidentiteit is niet toegevoegd. De persoonssecties hieronder (cv, beschikbaarheid en werkvoorkeuren, talen, opleiding, prestaties, vertrouwenssignalen) horen bij deze pagina maar zijn leeg, omdat er nog geen persoonsgegevens zijn. Er wordt niets automatisch ingevuld.",
+    "bodySectionsHidden": "Je account heeft op dit moment alleen een organisatie-identiteit — er is nog geen persoonsidentiteit. Persoonssecties (cv, beschikbaarheid en werkvoorkeuren, talen, opleiding, prestaties, vertrouwenssignalen) worden niet getoond omdat er geen persoonsgegevens zijn. Er is niets per ongeluk verborgen en niets verloren gegaan.",
+    "companyProfileHint": "De gegevens van je organisatie staan in het bedrijfsprofiel.",
+    "companyProfileLink": "Bedrijfsprofiel openen",
+    "addIdentityHint": "Wil je ook als persoon werken, voeg dan de persoonsidentiteit toe via de rolwisselaar bovenaan de pagina. Er wordt niets automatisch aangemaakt of ingevuld."
   },
   "skillGroups": {
     "profession": "Beroep / werkrichting",
@@ -6281,7 +6266,8 @@
         "comment": "Opmerking",
         "user": "Gebruiker"
       }
-    }
+    },
+    "menuLabel": "Probleem melden"
   },
   "common": {
     "localeSwitch": "Taal",
@@ -6808,7 +6794,7 @@
       "availability": "Beschikbaarheid",
       "availableFrom": "Beschikbaar vanaf",
       "relocate": "Bereid te verhuizen",
-      "transport": "Eigen vervoer",
+      "transport": "Kan zelfstandig naar het werk komen",
       "yes": "Ja",
       "no": "Nee",
       "status": {
@@ -8678,6 +8664,7 @@
     "pastHidden": "Afgeronde items worden hier niet getoond: {count}. Je vindt ze terug op hun eigen pagina's.",
     "conflict": {
       "flag": "Data overlappen",
+      "withVisible": "Overlapt met {partners} vanaf {date}.",
       "hiddenByFilter": "Overlapt met {sources} die door dit filter wordt verborgen."
     },
     "context": {
@@ -8721,7 +8708,11 @@
       "recorded": "Vastgelegd"
     },
     "month": {
-      "hint": "Tik op een dag om de items van die dag te zien."
+      "hint": "Tik op een dag om de items van die dag te zien.",
+      "legend": {
+        "journal": "Dagboek ingevuld",
+        "unfilled": "Gewerkt, niet ingevuld"
+      }
     },
     "day": {
       "empty": "Niets op deze dag."
@@ -8746,7 +8737,8 @@
         "minutes": "min",
         "days": "d"
       }
-    }
+    },
+    "pastLink": "Eerdere dagen"
   },
   "workforcePlanning": {
     "eyebrow": "Bedrijfsomgeving",
@@ -8763,7 +8755,7 @@
       "title": "Andere startpunten",
       "demand": "Werkbehoefte of positie aanmaken",
       "project": "Project aanmaken",
-      "candidates": "Kandidaten bekijken",
+      "candidates": "Kandidaat-concepten",
       "network": "Mensen en bedrijven vinden"
     },
     "summary": {
@@ -8824,6 +8816,12 @@
       "demandError": "Werkbehoeften konden nu niet worden gelezen.",
       "projectError": "Projecten konden nu niet worden gelezen.",
       "capacityError": "Een deel van de capaciteitsgegevens kon nu niet worden gelezen."
+    },
+    "availability": {
+      "title": "Wie is niet beschikbaar",
+      "intro": "Goedgekeurd verlof van medewerkers die u beheert. Alleen datums — de reden blijft privé.",
+      "unavailable": "Niet beschikbaar",
+      "unnamedWorker": "Medewerker"
     }
   },
   "tasks": {
@@ -9261,11 +9259,11 @@
   "workerPrefs": {
     "title": "Werkvoorkeuren",
     "hint": "Geef alleen op wat echt voor u geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven. Deze voorkeuren worden alleen gedeeld volgens uw privacytoestemmingen.",
-    "willingToRelocate": "Bereid te verhuizen voor werk",
-    "needsAccommodation": "Heeft huisvesting nodig",
-    "hasTransport": "Heeft eigen vervoer",
-    "teamAvailable": "Kan in teamverband werken",
-    "soloAvailable": "Kan zelfstandig werken",
+    "willingToRelocate": "Ik ben bereid te verhuizen voor werk",
+    "needsAccommodation": "Ik heb huisvesting nodig",
+    "hasTransport": "Ik kan zelfstandig naar het werk komen",
+    "teamAvailable": "Ik kan in teamverband werken",
+    "soloAvailable": "Ik kan zelfstandig werken",
     "maxTripDays": "Langste werkreis (dagen)",
     "contractType": "Gewenste contractvorm",
     "note": "Opmerking over beschikbaarheid",
@@ -9294,12 +9292,12 @@
         "gross": "Bruto (voor belastingen)",
         "net": "Netto (op de hand)"
       },
-      "nightShifts": "Bereid om nachtdiensten te werken",
-      "weekendShifts": "Bereid om in het weekend te werken",
-      "overtime": "Bereid om overuren te werken",
+      "nightShifts": "Ik ben bereid om nachtdiensten te werken",
+      "weekendShifts": "Ik ben bereid om in het weekend te werken",
+      "overtime": "Ik ben bereid om overuren te werken",
       "licenceCategories": "Rijbewijscategorieën",
-      "ownVehicle": "Heeft eigen voertuig",
-      "ownTools": "Heeft eigen gereedschap",
+      "ownVehicle": "Ik heb een eigen voertuig",
+      "ownTools": "Ik heb eigen gereedschap",
       "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
       "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
     }
@@ -9424,7 +9422,10 @@
       }
     },
     "organizations": {
-      "title": "Mijn bedrijven"
+      "title": "Mijn bedrijven",
+      "noCompanyCta": "Bedrijf toevoegen",
+      "noCompanyDesc": "Je hebt nog geen bedrijf. Maak je eerste bedrijf aan om een bedrijfskanaal te krijgen.",
+      "individualDesc": "Werk als zelfstandige aanbieder — beheerd in je persoonlijke profiel."
     },
     "relationships": {
       "title": "Actieve relaties",
@@ -9815,10 +9816,10 @@
     "chooseLevel": "Kies niveau",
     "perMonth": "€/maand",
     "availabilityKeys": {
-      "willingToRelocate": "Bereid te verhuizen",
-      "hasTransport": "Eigen vervoer",
-      "nightShiftsOk": "Kan nachtdiensten werken",
-      "weekendShiftsOk": "Kan in het weekend werken"
+      "willingToRelocate": "Ik ben bereid te verhuizen",
+      "hasTransport": "Ik heb eigen vervoer",
+      "nightShiftsOk": "Ik kan nachtdiensten werken",
+      "weekendShiftsOk": "Ik kan in het weekend werken"
     },
     "imageOcr": {
       "label": "Cv-foto / afbeelding (JPG, PNG)",
@@ -10718,7 +10719,7 @@
         "salaryMax": "Loon tot (€)",
         "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Bereid te verhuizen?",
-        "hasTransport": "Eigen vervoer?",
+        "hasTransport": "Kun je zelfstandig naar het werk komen?",
         "needsAccommodation": "Huisvesting nodig?",
         "availabilityNote": "Notitie (optioneel)",
         "availabilityNotePlaceholder": "Bijv. beschikbaar vanaf augustus, liefst 2-weekse rotaties",
@@ -11182,6 +11183,7 @@
       "actionNotAuthorized": "Dit kun je hier niet doen.",
       "bookingStart": "Start",
       "bookingEnd": "Verwacht einde",
+      "bookingEndHint": "Leeg laten boekt één dag — een leeg einde houdt de persoon niet vast na de startdatum.",
       "bookingNote": "Notitie",
       "projectError": "We konden het project niet lezen.",
       "projectNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsprojecten.",
@@ -11203,6 +11205,8 @@
       "projectStagesEmpty": "Voor dit project zijn nog geen fasen ingevoerd.",
       "projectStagesUnavailable": "Fasen kunnen in deze omgeving niet gelezen worden, dus tonen we geen lege lijst alsof er geen zijn.",
       "projectAssignWorker": "Een medewerker toewijzen",
+      "projectOpenOperations": "Open projectbeheer",
+      "projectOpenProject": "Open het project",
       "projectCompletedNoAssign": "Het project is afgerond, dus er kan niemand nieuw aan worden toegewezen.",
       "projectTerminal": "Een afgerond project kan niet meer worden gewijzigd. Het blijft als historie bestaan.",
       "projectActionPublish": "Project publiceren",

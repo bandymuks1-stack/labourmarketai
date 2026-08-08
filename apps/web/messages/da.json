@@ -2249,7 +2249,7 @@
     "hint": "Angiv kun det, der faktisk gælder for dig — alt, der står som ”Ikke angivet”, forbliver ikke angivet. Disse præferencer deles kun i henhold til dine privatlivssamtykker.",
     "willingToRelocate": "Villig til at flytte for arbejde",
     "needsAccommodation": "Har brug for indkvartering",
-    "hasTransport": "Har egen transport",
+    "hasTransport": "Jeg kan selv komme på arbejde",
     "teamAvailable": "Kan arbejde i sjak",
     "soloAvailable": "Kan arbejde alene",
     "maxTripDays": "Længste udstationering (dage)",
@@ -2455,7 +2455,7 @@
       "title": "Andre startpunkter",
       "demand": "Opret arbejdsbehov eller stilling",
       "project": "Opret projekt",
-      "candidates": "Se kandidater",
+      "candidates": "Dine kandidatudkast",
       "network": "Find personer og virksomheder"
     },
     "summary": {
@@ -2516,6 +2516,12 @@
       "demandError": "Arbejdsbehov kunne ikke læses lige nu.",
       "projectError": "Projekter kunne ikke læses lige nu.",
       "capacityError": "En del af kapacitetsdataene kunne ikke læses lige nu."
+    },
+    "availability": {
+      "title": "Hvem er ikke tilgængelig",
+      "intro": "Godkendt fravær for medarbejdere, du administrerer. Kun datoer — årsagen forbliver privat.",
+      "unavailable": "Ikke tilgængelig",
+      "unnamedWorker": "Medarbejder"
     }
   },
   "intelligence": {
@@ -3213,7 +3219,7 @@
         "salaryMax": "[EN] Salary to (€)",
         "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
-        "hasTransport": "[EN] Have your own transport?",
+        "hasTransport": "Kan du selv komme på arbejde?",
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
@@ -4129,5 +4135,13 @@
       "employerHasNotClaimed": "Denne arbejdsgiver administrerer ikke opslaget på labourmarket.ai endnu, så ansøgningen sker via den oprindelige annonce.",
       "employerManagesHere": "Denne arbejdsgiver administrerer opslaget på labourmarket.ai."
     }
+  },
+  "profileIdentityNotice": {
+    "title": "Dette er din personprofil",
+    "bodySectionsEmpty": "Din konto har i øjeblikket kun en organisationsidentitet — personidentiteten er ikke tilføjet. Personsektionerne nedenfor (CV, tilgængelighed og arbejdspræferencer, sprog, uddannelse, resultater, tillidssignaler) hører til denne side, men er tomme, fordi der endnu ikke er persondata. Intet udfyldes automatisk.",
+    "bodySectionsHidden": "Din konto har i øjeblikket kun en organisationsidentitet — der findes endnu ingen personidentitet. Personsektioner (CV, tilgængelighed og arbejdspræferencer, sprog, uddannelse, resultater, tillidssignaler) vises ikke, fordi der ikke er persondata. Intet er skjult ved en fejl, og intet er gået tabt.",
+    "companyProfileHint": "Din organisations oplysninger findes i virksomhedsprofilen.",
+    "companyProfileLink": "Åbn virksomhedsprofil",
+    "addIdentityHint": "Vil du også arbejde som person, kan du tilføje personidentiteten i rolleskifteren øverst på siden. Intet oprettes eller udfyldes automatisk."
   }
 }

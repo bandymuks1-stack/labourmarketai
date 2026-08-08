@@ -1,0 +1,6557 @@
+[
+  {
+    "identity": "company",
+    "route": "/lt/dashboard",
+    "label": "dashboard-home",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 1431,
+    "console": [
+      "warning: [pilot-events] fire failed {eventName: login_succeeded, name: TypeError, message: Failed to fetch}",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 900,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Labas, Dev. Kuo šiandien galiu padėti?"
+    ],
+    "h2": [
+      "Tavo darbas dabar"
+    ],
+    "cardBorders": 0,
+    "sections": 0,
+    "buttons": 12,
+    "links": 4,
+    "chatRoot": {
+      "y": 0,
+      "h": 900,
+      "w": 1440
+    },
+    "panel": {
+      "y": 65,
+      "h": 835,
+      "w": 352
+    },
+    "map": {
+      "y": 108,
+      "h": 272,
+      "w": 319
+    },
+    "composer": {
+      "y": 545,
+      "h": 52,
+      "w": 632
+    },
+    "intro": null,
+    "smallTargets": 7,
+    "unlabelledInputs": 1,
+    "testids": [
+      {
+        "id": "conversation-chat",
+        "y": 0,
+        "h": 900,
+        "w": 1440
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "conversation-thread",
+        "y": 65,
+        "h": 835,
+        "w": 1088
+      },
+      {
+        "id": "msg-greeting",
+        "y": 388,
+        "h": 136,
+        "w": 736
+      },
+      {
+        "id": "assistant-mark",
+        "y": 388,
+        "h": 20,
+        "w": 20
+      },
+      {
+        "id": "chat-chip-f:company.create-demand",
+        "y": 481,
+        "h": 44,
+        "w": 150
+      },
+      {
+        "id": "chat-chip-candidates",
+        "y": 481,
+        "h": 44,
+        "w": 105
+      },
+      {
+        "id": "chat-chip-projects",
+        "y": 481,
+        "h": 44,
+        "w": 92
+      },
+      {
+        "id": "conversation-opening-composer",
+        "y": 545,
+        "h": 52,
+        "w": 736
+      },
+      {
+        "id": "composer-attach",
+        "y": 553,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "composer-input",
+        "y": 545,
+        "h": 52,
+        "w": 632
+      },
+      {
+        "id": "composer-send",
+        "y": 553,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "context-panel",
+        "y": 65,
+        "h": 835,
+        "w": 352
+      },
+      {
+        "id": "workspace-map",
+        "y": 108,
+        "h": 272,
+        "w": 319
+      },
+      {
+        "id": "workspace-map-unmapped",
+        "y": 344,
+        "h": 36,
+        "w": 319
+      },
+      {
+        "id": "context-panel-work",
+        "y": 396,
+        "h": 40,
+        "w": 319
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 780,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nLabourMarket\nDev Construction\nLietuvių\nD\n\nL\nLABOURMARKET AI\n\nLabas, Dev. Kuo šiandien galiu padėti?\nReikia darbuotojų\nKandidatai\nProjektai\nTavo darbas dabar\n3\n2\n+\n−\n Leaflet | © OpenStreetMap contributors\nRealios galimybės ir projektai, sugrupuoti pagal vietą\ndar 2 galimybės be nurodytos vietos — jos matomos pokalbio paieškoje\n\nTavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.\n\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-dashboard-home-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/company",
+    "label": "company",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 15164,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/company",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 7028,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Įmonės darbo erdvė"
+    ],
+    "h2": [
+      "Dev Construction BVNL",
+      "Ką čia galite padaryti",
+      "Personalo agentūros",
+      "Įmonės pasiruošimas",
+      "Operacijų erdvė",
+      "Komandos / brigados",
+      "Įmonės darbuotojai",
+      "Vietos",
+      "Galerija",
+      "Darbo pasirengimo signalai",
+      "Organizacijos nariai ir peržiūra",
+      "Viešas verslo profilis",
+      "Ieškoti darbuotojo ar komandos",
+      "Jūsų pateikti poreikiai",
+      "Vidinės pagalbos užklausos",
+      "Raskite darbuotojų šiam poreikiui"
+    ],
+    "cardBorders": 18,
+    "sections": 22,
+    "buttons": 24,
+    "links": 54,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 65,
+    "unlabelledInputs": 13,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 86
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 179
+      },
+      {
+        "id": "role-switcher-active-org",
+        "y": 28,
+        "h": 20,
+        "w": 109
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "company-dashboard",
+        "y": 101,
+        "h": 6831,
+        "w": 1344
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 106,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 101,
+        "h": 26,
+        "w": 113
+      },
+      {
+        "id": "company-context",
+        "y": 131,
+        "h": 18,
+        "w": 1344
+      },
+      {
+        "id": "company-dashboard-type-chip",
+        "y": 221,
+        "h": 24,
+        "w": 53
+      },
+      {
+        "id": "company-control-bar",
+        "y": 269,
+        "h": 44,
+        "w": 1344
+      },
+      {
+        "id": "company-control-team",
+        "y": 269,
+        "h": 40,
+        "w": 176
+      },
+      {
+        "id": "company-control-projects",
+        "y": 269,
+        "h": 40,
+        "w": 131
+      },
+      {
+        "id": "company-control-invitations",
+        "y": 269,
+        "h": 40,
+        "w": 204
+      },
+      {
+        "id": "company-control-locations",
+        "y": 269,
+        "h": 40,
+        "w": 109
+      },
+      {
+        "id": "company-control-gallery",
+        "y": 269,
+        "h": 40,
+        "w": 117
+      },
+      {
+        "id": "company-control-calendar",
+        "y": 269,
+        "h": 40,
+        "w": 116
+      },
+      {
+        "id": "company-decisions-strip",
+        "y": 337,
+        "h": 68,
+        "w": 1344
+      },
+      {
+        "id": "company-decision-review",
+        "y": 363,
+        "h": 42,
+        "w": 215
+      },
+      {
+        "id": "feature-note-company",
+        "y": 429,
+        "h": 38,
+        "w": 1344
+      },
+      {
+        "id": "company-next-actions",
+        "y": 491,
+        "h": 142,
+        "w": 1344
+      },
+      {
+        "id": "company-name-link",
+        "y": 515,
+        "h": 22,
+        "w": 179
+      },
+      {
+        "id": "company-next-actions-status",
+        "y": 514,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-next-actions-explainer",
+        "y": 548,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "company-action-next-actions",
+        "y": 656,
+        "h": 257,
+        "w": 1344
+      },
+      {
+        "id": "company-action-flow",
+        "y": 740,
+        "h": 80,
+        "w": 1310
+      },
+      {
+        "id": "company-action-primary",
+        "y": 832,
+        "h": 36,
+        "w": 233
+      },
+      {
+        "id": "client-bridge-section",
+        "y": 937,
+        "h": 210,
+        "w": 1344
+      },
+      {
+        "id": "client-bridge-invites",
+        "y": 1026,
+        "h": 42,
+        "w": 1302
+      },
+      {
+        "id": "client-bridge-active",
+        "y": 1084,
+        "h": 42,
+        "w": 1302
+      },
+      {
+        "id": "company-readiness",
+        "y": 1171,
+        "h": 156,
+        "w": 1344
+      },
+      {
+        "id": "company-readiness-missing",
+        "y": 1256,
+        "h": 24,
+        "w": 1310
+      },
+      {
+        "id": "company-ops-workspace",
+        "y": 1351,
+        "h": 547,
+        "w": 1344
+      },
+      {
+        "id": "company-ops-counts",
+        "y": 1440,
+        "h": 74,
+        "w": 1302
+      },
+      {
+        "id": "company-ops-count-pending",
+        "y": 1440,
+        "h": 74,
+        "w": 320
+      },
+      {
+        "id": "company-ops-count-accepted",
+        "y": 1440,
+        "h": 74,
+        "w": 320
+      },
+      {
+        "id": "company-ops-count-members",
+        "y": 1440,
+        "h": 74,
+        "w": 320
+      },
+      {
+        "id": "company-ops-count-review",
+        "y": 1440,
+        "h": 74,
+        "w": 320
+      },
+      {
+        "id": "company-ops-team-link",
+        "y": 1622,
+        "h": 16,
+        "w": 148
+      },
+      {
+        "id": "company-ops-review-link",
+        "y": 1622,
+        "h": 16,
+        "w": 135
+      },
+      {
+        "id": "company-ops-projects",
+        "y": 1667,
+        "h": 210,
+        "w": 645
+      },
+      {
+        "id": "company-ops-projects-count",
+        "y": 1761,
+        "h": 18,
+        "w": 611
+      },
+      {
+        "id": "company-ops-projects-linking",
+        "y": 1787,
+        "h": 39,
+        "w": 611
+      },
+      {
+        "id": "company-ops-projects-create",
+        "y": 1834,
+        "h": 26,
+        "w": 176
+      },
+      {
+        "id": "company-ops-projects-manage",
+        "y": 1834,
+        "h": 26,
+        "w": 172
+      },
+      {
+        "id": "company-ops-needs-link",
+        "y": 1739,
+        "h": 16,
+        "w": 122
+      },
+      {
+        "id": "company-assignment-connections",
+        "y": 1922,
+        "h": 154,
+        "w": 1344
+      },
+      {
+        "id": "company-assignment-connection-calendar",
+        "y": 1989,
+        "h": 70,
+        "w": 322
+      },
+      {
+        "id": "company-assignment-connection-map",
+        "y": 1989,
+        "h": 70,
+        "w": 322
+      },
+      {
+        "id": "company-assignment-connection-evidence",
+        "y": 1989,
+        "h": 70,
+        "w": 322
+      },
+      {
+        "id": "company-assignment-connection-workforce",
+        "y": 1989,
+        "h": 70,
+        "w": 322
+      },
+      {
+        "id": "company-dashboard-pilot-disclaimer",
+        "y": 2100,
+        "h": 54,
+        "w": 1344
+      },
+      {
+        "id": "org-tier1-warning",
+        "y": 2178,
+        "h": 87,
+        "w": 1344
+      },
+      {
+        "id": "team-brigades-panel",
+        "y": 2289,
+        "h": 233,
+        "w": 1344
+      },
+      {
+        "id": "team-brigades-empty",
+        "y": 2401,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "team-create-name",
+        "y": 2470,
+        "h": 30,
+        "w": 209
+      },
+      {
+        "id": "team-create-submit",
+        "y": 2464,
+        "h": 36,
+        "w": 136
+      },
+      {
+        "id": "company-invite-link",
+        "y": 2545,
+        "h": 38,
+        "w": 94
+      },
+      {
+        "id": "company-workers-section",
+        "y": 2607,
+        "h": 1161,
+        "w": 1344
+      },
+      {
+        "id": "company-workers-active-list",
+        "y": 2720,
+        "h": 511,
+        "w": 1302
+      },
+      {
+        "id": "company-worker-row-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 2748,
+        "h": 483,
+        "w": 1302
+      },
+      {
+        "id": "company-worker-open-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 2761,
+        "h": 20,
+        "w": 34
+      },
+      {
+        "id": "message-button-messageWorker",
+        "y": 2794,
+        "h": 26,
+        "w": 126
+      },
+      {
+        "id": "company-worker-next-action-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 2872,
+        "h": 18,
+        "w": 1275
+      },
+      {
+        "id": "worker-ops-role-form-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 2902,
+        "h": 290,
+        "w": 1275
+      },
+      {
+        "id": "worker-ops-role-select-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 2957,
+        "h": 46,
+        "w": 1257
+      },
+      {
+        "id": "worker-ops-title-input-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 3031,
+        "h": 32,
+        "w": 1257
+      },
+      {
+        "id": "worker-ops-save-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 3071,
+        "h": 26,
+        "w": 102
+      },
+      {
+        "id": "worker-ops-review-toggle-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 3121,
+        "h": 13,
+        "w": 13
+      },
+      {
+        "id": "worker-ops-review-disabled-note-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 3140,
+        "h": 20,
+        "w": 1257
+      },
+      {
+        "id": "worker-ops-bridge-reason-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 3164,
+        "h": 20,
+        "w": 1257
+      },
+      {
+        "id": "company-workers-ops-setup-note",
+        "y": 3251,
+        "h": 36,
+        "w": 1302
+      },
+      {
+        "id": "company-workers-coordination-note",
+        "y": 3307,
+        "h": 86,
+        "w": 1302
+      },
+      {
+        "id": "company-workers-invite-form",
+        "y": 3413,
+        "h": 270,
+        "w": 1302
+      },
+      {
+        "id": "company-workers-invite-email",
+        "y": 3485,
+        "h": 38,
+        "w": 1302
+      },
+      {
+        "id": "company-workers-invite-note",
+        "y": 3555,
+        "h": 58,
+        "w": 1302
+      },
+      {
+        "id": "company-workers-invite-submit",
+        "y": 3647,
+        "h": 36,
+        "w": 142
+      },
+      {
+        "id": "company-workers-pending-list",
+        "y": 3703,
+        "h": 44,
+        "w": 1302
+      },
+      {
+        "id": "company-locations-section",
+        "y": 3792,
+        "h": 256,
+        "w": 1344
+      },
+      {
+        "id": "company-locations-empty",
+        "y": 3881,
+        "h": 46,
+        "w": 1302
+      },
+      {
+        "id": "company-location-add-form",
+        "y": 3943,
+        "h": 84,
+        "w": 1302
+      },
+      {
+        "id": "company-location-add-submit",
+        "y": 3974,
+        "h": 40,
+        "w": 115
+      },
+      {
+        "id": "company-gallery-section",
+        "y": 4072,
+        "h": 348,
+        "w": 1344
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000009",
+        "y": 4157,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000008",
+        "y": 4157,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000002",
+        "y": 4207,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000003",
+        "y": 4207,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000004",
+        "y": 4257,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000006",
+        "y": 4257,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000007",
+        "y": 4307,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000005",
+        "y": 4307,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000001",
+        "y": 4357,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "company-gallery-project-eeeeeeee-0000-0000-0000-000000000001",
+        "y": 4357,
+        "h": 42,
+        "w": 647
+      },
+      {
+        "id": "worker-readiness-summary",
+        "y": 4444,
+        "h": 136,
+        "w": 1344
+      },
+      {
+        "id": "worker-readiness-row",
+        "y": 4520,
+        "h": 42,
+        "w": 1310
+      },
+      {
+        "id": "org-members-panel",
+        "y": 4603,
+        "h": 339,
+        "w": 1344
+      },
+      {
+        "id": "org-member-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 4692,
+        "h": 42,
+        "w": 1302
+      },
+      {
+        "id": "org-member-role-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 4701,
+        "h": 24,
+        "w": 104
+      },
+      {
+        "id": "org-member-owner-locked-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 4704,
+        "h": 18,
+        "w": 181
+      },
+      {
+        "id": "org-member-99999999-0000-0000-0000-000000000001",
+        "y": 4742,
+        "h": 54,
+        "w": 1302
+      },
+      {
+        "id": "org-member-role-99999999-0000-0000-0000-000000000001",
+        "y": 4757,
+        "h": 24,
+        "w": 113
+      },
+      {
+        "id": "toggle-review-99999999-0000-0000-0000-000000000001",
+        "y": 4751,
+        "h": 36,
+        "w": 142
+      },
+      {
+        "id": "remove-member-99999999-0000-0000-0000-000000000001",
+        "y": 4751,
+        "h": 36,
+        "w": 198
+      },
+      {
+        "id": "org-member-99999999-0000-0000-0000-000000000002",
+        "y": 4804,
+        "h": 42,
+        "w": 1302
+      },
+      {
+        "id": "org-member-role-99999999-0000-0000-0000-000000000002",
+        "y": 4813,
+        "h": 24,
+        "w": 104
+      },
+      {
+        "id": "org-member-owner-locked-99999999-0000-0000-0000-000000000002",
+        "y": 4816,
+        "h": 18,
+        "w": 181
+      },
+      {
+        "id": "business-public-profile-panel",
+        "y": 4966,
+        "h": 598,
+        "w": 1344
+      },
+      {
+        "id": "business-description-input",
+        "y": 5271,
+        "h": 98,
+        "w": 1310
+      },
+      {
+        "id": "company-dashboard-first-action",
+        "y": 5588,
+        "h": 602,
+        "w": 1344
+      },
+      {
+        "id": "demand-intake-section",
+        "y": 5613,
+        "h": 552,
+        "w": 1294
+      },
+      {
+        "id": "demand-form",
+        "y": 5741,
+        "h": 385,
+        "w": 1294
+      },
+      {
+        "id": "demand-prefill-last",
+        "y": 5785,
+        "h": 38,
+        "w": 269
+      },
+      {
+        "id": "demand-role",
+        "y": 5861,
+        "h": 46,
+        "w": 1294
+      },
+      {
+        "id": "demand-description",
+        "y": 5945,
+        "h": 106,
+        "w": 1294
+      },
+      {
+        "id": "demand-next",
+        "y": 6088,
+        "h": 36,
+        "w": 91
+      },
+      {
+        "id": "demand-save-draft",
+        "y": 6088,
+        "h": 38,
+        "w": 220
+      },
+      {
+        "id": "journey-progress-helper",
+        "y": 6146,
+        "h": 20,
+        "w": 1294
+      },
+      {
+        "id": "demand-requests-readback",
+        "y": 6214,
+        "h": 163,
+        "w": 1344
+      },
+      {
+        "id": "demand-readback-worker-visibility-note",
+        "y": 6287,
+        "h": 38,
+        "w": 1302
+      },
+      {
+        "id": "help-request-panel",
+        "y": 6401,
+        "h": 232,
+        "w": 1344
+      },
+      {
+        "id": "help-request-type-recruiter",
+        "y": 6496,
+        "h": 52,
+        "w": 426
+      },
+      {
+        "id": "help-request-type-accounting",
+        "y": 6496,
+        "h": 52,
+        "w": 426
+      },
+      {
+        "id": "help-request-type-legal",
+        "y": 6496,
+        "h": 52,
+        "w": 426
+      },
+      {
+        "id": "help-request-type-documents",
+        "y": 6556,
+        "h": 52,
+        "w": 426
+      },
+      {
+        "id": "help-request-type-demand_filling",
+        "y": 6556,
+        "h": 52,
+        "w": 426
+      },
+      {
+        "id": "company-scouting-bridge",
+        "y": 6657,
+        "h": 231,
+        "w": 1344
+      },
+      {
+        "id": "company-scouting-bridge-cta",
+        "y": 6833,
+        "h": 34,
+        "w": 154
+      },
+      {
+        "id": "company-dashboard-profile-link",
+        "y": 6912,
+        "h": 20,
+        "w": 330
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nLietuvių\nDev Construction\n▾\nD\n← Veiksmų centras\nMano erdvės →\n\nĮMONĖ · PROFILIS IR POREIKIAI\n\nĮmonės darbo erdvė\n\nĮmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.\n\nKITA\nSusiję darbuotojai\n1\nProjektai\n10\nLaukiantys pakvietimai\n0\nVietos\n0\nGalerija\n0\nKalendorius\n\nLAUKIA JŪSŲ SPRENDIMO\n\n14\nŽurnalo įrašai peržiūrai\nJūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.\nDev Construction BVNL\nAKTYVI · NEPATVIRTINTA\n\nAktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.\n\nSukurti paklausą →\nKą čia galite padaryti\n\nTvarkykite įmonės duomenis ir pateikite darbuotojų poreikį.\n\n1\nĮrašykite poreikį (profesija, vieta, kiek žmonių).\n2\nSistema struktūruoja poreikį ir paruošia atrankai.\n3\nPeržiūrėkite tinkamus ir pradėkite pokalbį.\nNaujas poreikis / projektas\n\nPo to: poreikis išsaugomas jūsų paskyroje ir paruoštas atrankai.\n\nPersonalo agentūros\n\nPriimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.\n\nRYŠIO KVIETIMAI\n\nLaukiančių kvietimų nėra.\n\nPRIJUNGTOS AGENTŪROS\n\nKol kas prijungtų agentūrų nėra.\n\nĮmonės pasiruošimas\nNEUŽBAIGTA\n\nKo realiam samdymui reikia iš tavo įmonės. Tai nėra teisinė konsultacija — detales pasitikslink su buhalteriu ar patarėju.\n\nRegistracijos numeris\nSąskaitų el. paštas\n\nDAR NEPATVIRTINTA (ŽMOGAUS ADMINISTRATORIAUS SPRENDIMAS)\n\nOperacijų erdvė\n\nKą jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.\n\nLAUKIANTYS KVIETIMAI\n0\nPRIIMTI DARBUOTOJAI\n1\nORGANIZACIJOS NARIAI\n3\nĮJUNGTA PERŽIŪRA\n1\nDarbuotojai / Komanda\n\nPakvieskite darbuotojus, matykite priimtų sąrašą, pridėkite juos prie organizacijos ir įjunkite žurnalo peržiūrą — viskas žemiau šiame puslapyje.\n\nDarbuotojai / Komanda →\nŽurnalo peržiūra\n\n1) darbuotojas priima · 2) pridedate prie organizacijos · 3) įjungiate peržiūrą · 4) darbuotojas žymi darbą · 5) jūs patvirtinate.\n\nPeržiūrėti įrašus (14) →\nProjektai, objektai ir užsakovai\nStruktūra paruošta\n\nČia matote projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.\n\nProjektai: 10\n\nSusiejimas su darbo žurnalu dar neįj",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-company-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/market-map",
+    "label": "market-map",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 19494,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/market-map",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 2744,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Žemėlapis",
+      "Mano rinkos žemėlapis"
+    ],
+    "h2": [
+      "Tavo vieta rinkos žemėlapyje",
+      "Žemėlapio sluoksniai",
+      "Trys dalykai žemėlapyje",
+      "Tvarkyti savo lokacijas",
+      "Prieinamumas ir mobilumas",
+      "Įgūdžių signalai",
+      "Įmonių poreikių signalai",
+      "Rinkos atlasas",
+      "Ką galite padaryti dabar",
+      "Darbo rinkos pasaulio žemėlapis"
+    ],
+    "cardBorders": 12,
+    "sections": 16,
+    "buttons": 31,
+    "links": 55,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 54,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 86
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 179
+      },
+      {
+        "id": "role-switcher-active-org",
+        "y": 28,
+        "h": 20,
+        "w": 109
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "market-map-page-header",
+        "y": 101,
+        "h": 59,
+        "w": 1344
+      },
+      {
+        "id": "market-recognize-entry",
+        "y": 176,
+        "h": 56,
+        "w": 1344
+      },
+      {
+        "id": "market-map-base",
+        "y": 247,
+        "h": 961,
+        "w": 1344
+      },
+      {
+        "id": "map-locator-auto",
+        "y": 339,
+        "h": 46,
+        "w": 1294
+      },
+      {
+        "id": "map-locator-manual-toggle",
+        "y": 401,
+        "h": 16,
+        "w": 182
+      },
+      {
+        "id": "location-panel",
+        "y": 433,
+        "h": 614,
+        "w": 1294
+      },
+      {
+        "id": "market-map-live",
+        "y": 446,
+        "h": 512,
+        "w": 1268
+      },
+      {
+        "id": "location-map-tap-hint",
+        "y": 966,
+        "h": 18,
+        "w": 1268
+      },
+      {
+        "id": "map-locator-radius",
+        "y": 1083,
+        "h": 41,
+        "w": 161
+      },
+      {
+        "id": "map-locator-radius-help",
+        "y": 1128,
+        "h": 20,
+        "w": 1294
+      },
+      {
+        "id": "market-map-base-empty",
+        "y": 1164,
+        "h": 20,
+        "w": 1294
+      },
+      {
+        "id": "map-layers-legend",
+        "y": 1224,
+        "h": 279,
+        "w": 1344
+      },
+      {
+        "id": "map-layers-visible",
+        "y": 1312,
+        "h": 121,
+        "w": 1344
+      },
+      {
+        "id": "map-layer-fix-link",
+        "y": 1312,
+        "h": 58,
+        "w": 1344
+      },
+      {
+        "id": "map-layer-fix-link",
+        "y": 1375,
+        "h": 58,
+        "w": 1344
+      },
+      {
+        "id": "map-layers-future",
+        "y": 1475,
+        "h": 28,
+        "w": 1344
+      },
+      {
+        "id": "market-map-entity-layers",
+        "y": 1519,
+        "h": 955,
+        "w": 1344
+      },
+      {
+        "id": "entity-layers-never-mixed",
+        "y": 1583,
+        "h": 20,
+        "w": 1310
+      },
+      {
+        "id": "entity-layers-legend",
+        "y": 1615,
+        "h": 185,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-toggle-person_presence",
+        "y": 1615,
+        "h": 58,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-toggle-company_territory",
+        "y": 1678,
+        "h": 58,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-toggle-project_location",
+        "y": 1742,
+        "h": 58,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-person_presence",
+        "y": 1811,
+        "h": 69,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-empty-person_presence",
+        "y": 1835,
+        "h": 20,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-company_territory",
+        "y": 1892,
+        "h": 69,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-empty-company_territory",
+        "y": 1916,
+        "h": 20,
+        "w": 1310
+      },
+      {
+        "id": "entity-layer-project_location",
+        "y": 1973,
+        "h": 484,
+        "w": 1310
+      },
+      {
+        "id": "market-map-connections",
+        "y": 2490,
+        "h": 106,
+        "w": 1344
+      },
+      {
+        "id": "market-map-connection-marketplace",
+        "y": 2529,
+        "h": 54,
+        "w": 434
+      },
+      {
+        "id": "market-map-connection-opportunities",
+        "y": 2529,
+        "h": 54,
+        "w": 434
+      },
+      {
+        "id": "market-map-connection-bookings",
+        "y": 2529,
+        "h": 54,
+        "w": 434
+      },
+      {
+        "id": "market-map-advanced",
+        "y": 2612,
+        "h": 36,
+        "w": 1344
+      },
+      {
+        "id": "market-map-capture",
+        "y": 2664,
+        "h": 740,
+        "w": 1344
+      },
+      {
+        "id": "capture-preferred",
+        "y": 2768,
+        "h": 321,
+        "w": 1302
+      },
+      {
+        "id": "capture-preferred-country",
+        "y": 2820,
+        "h": 37,
+        "w": 647
+      },
+      {
+        "id": "capture-intent-work",
+        "y": 2892,
+        "h": 26,
+        "w": 52
+      },
+      {
+        "id": "capture-intent-find_job",
+        "y": 2892,
+        "h": 26,
+        "w": 96
+      },
+      {
+        "id": "capture-intent-sell_services",
+        "y": 2892,
+        "h": 26,
+        "w": 118
+      },
+      {
+        "id": "capture-intent-buy_services",
+        "y": 2892,
+        "h": 26,
+        "w": 112
+      },
+      {
+        "id": "capture-intent-join_team",
+        "y": 2892,
+        "h": 26,
+        "w": 151
+      },
+      {
+        "id": "capture-intent-hire_team",
+        "y": 2892,
+        "h": 26,
+        "w": 123
+      },
+      {
+        "id": "capture-intent-project_interest",
+        "y": 2892,
+        "h": 26,
+        "w": 71
+      },
+      {
+        "id": "capture-intent-relocate",
+        "y": 2892,
+        "h": 26,
+        "w": 74
+      },
+      {
+        "id": "capture-intent-remote_if_possible",
+        "y": 2892,
+        "h": 26,
+        "w": 129
+      },
+      {
+        "id": "capture-preferred-priority-select",
+        "y": 2950,
+        "h": 37,
+        "w": 647
+      },
+      {
+        "id": "capture-preferred-note",
+        "y": 2950,
+        "h": 38,
+        "w": 647
+      },
+      {
+        "id": "capture-preferred-add",
+        "y": 3021,
+        "h": 36,
+        "w": 131
+      },
+      {
+        "id": "capture-login",
+        "y": 3109,
+        "h": 164,
+        "w": 1302
+      },
+      {
+        "id": "capture-login-country",
+        "y": 3201,
+        "h": 37,
+        "w": 320
+      },
+      {
+        "id": "capture-login-not_requested",
+        "y": 3246,
+        "h": 26,
+        "w": 93
+      },
+      {
+        "id": "capture-login-consented",
+        "y": 3246,
+        "h": 26,
+        "w": 64
+      },
+      {
+        "id": "capture-login-revoked",
+        "y": 3246,
+        "h": 26,
+        "w": 68
+      },
+      {
+        "id": "capture-demand",
+        "y": 3292,
+        "h": 91,
+        "w": 1302
+      },
+      {
+        "id": "capture-demand-add",
+        "y": 3365,
+        "h": 18,
+        "w": 158
+      },
+      {
+        "id": "market-map-readiness",
+        "y": 3420,
+        "h": 264,
+        "w": 1344
+      },
+      {
+        "id": "readiness-availability",
+        "y": 3441,
+        "h": 108,
+        "w": 1302
+      },
+      {
+        "id": "readiness-state",
+        "y": 3500,
+        "h": 22,
+        "w": 177
+      },
+      {
+        "id": "readiness-mobility-add",
+        "y": 3530,
+        "h": 18,
+        "w": 251
+      },
+      {
+        "id": "readiness-capabilities",
+        "y": 3568,
+        "h": 95,
+        "w": 1302
+      },
+      {
+        "id": "capabilities-add",
+        "y": 3645,
+        "h": 18,
+        "w": 150
+      },
+      {
+        "id": "feature-note-market-map",
+        "y": 3700,
+        "h": 38,
+        "w": 1344
+      },
+      {
+        "id": "market-map-shell",
+        "y": 3753,
+        "h": 1661,
+        "w": 1344
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 3753,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "market-map-owner-scope-note",
+        "y": 3860,
+        "h": 57,
+        "w": 1344
+      },
+      {
+        "id": "market-map-filters",
+        "y": 3941,
+        "h": 72,
+        "w": 1344
+      },
+      {
+        "id": "market-map-canvas",
+        "y": 4037,
+        "h": 1013,
+        "w": 1000
+      },
+      {
+        "id": "market-map-my-signals",
+        "y": 4062,
+        "h": 808,
+        "w": 950
+      },
+      {
+        "id": "market-map-country-level-notice",
+        "y": 4113,
+        "h": 34,
+        "w": 950
+      },
+      {
+        "id": "market-map-filter-chips",
+        "y": 4159,
+        "h": 26,
+        "w": 950
+      },
+      {
+        "id": "market-map-filter-all",
+        "y": 4159,
+        "h": 26,
+        "w": 42
+      },
+      {
+        "id": "market-map-filter-profile_location",
+        "y": 4159,
+        "h": 26,
+        "w": 61
+      },
+      {
+        "id": "market-map-filter-company_location",
+        "y": 4159,
+        "h": 26,
+        "w": 57
+      },
+      {
+        "id": "market-map-filter-login_location",
+        "y": 4159,
+        "h": 26,
+        "w": 97
+      },
+      {
+        "id": "market-map-filter-preferred_location",
+        "y": 4159,
+        "h": 26,
+        "w": 123
+      },
+      {
+        "id": "market-map-filter-company_need_location",
+        "y": 4159,
+        "h": 26,
+        "w": 70
+      },
+      {
+        "id": "market-map-filter-project_location",
+        "y": 4159,
+        "h": 26,
+        "w": 71
+      },
+      {
+        "id": "market-map-category-profile_location",
+        "y": 4197,
+        "h": 102,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-profile_location",
+        "y": 4268,
+        "h": 18,
+        "w": 148
+      },
+      {
+        "id": "market-map-category-company_location",
+        "y": 4307,
+        "h": 102,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-company_location",
+        "y": 4378,
+        "h": 18,
+        "w": 149
+      },
+      {
+        "id": "market-map-category-login_location",
+        "y": 4417,
+        "h": 100,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-login_location",
+        "y": 4485,
+        "h": 18,
+        "w": 229
+      },
+      {
+        "id": "market-map-category-preferred_location",
+        "y": 4524,
+        "h": 100,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-preferred_location",
+        "y": 4593,
+        "h": 18,
+        "w": 144
+      },
+      {
+        "id": "market-map-category-company_need_location",
+        "y": 4632,
+        "h": 100,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-company_need_location",
+        "y": 4700,
+        "h": 18,
+        "w": 180
+      },
+      {
+        "id": "market-map-category-project_location",
+        "y": 4739,
+        "h": 130,
+        "w": 950
+      },
+      {
+        "id": "market-map-cta-project_location",
+        "y": 4838,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "market-map-demand-empty",
+        "y": 4889,
+        "h": 135,
+        "w": 950
+      },
+      {
+        "id": "market-map-demand-add",
+        "y": 4981,
+        "h": 26,
+        "w": 206
+      },
+      {
+        "id": "market-map-legend",
+        "y": 4037,
+        "h": 120,
+        "w": 320
+      },
+      {
+        "id": "market-map-layers",
+        "y": 4181,
+        "h": 732,
+        "w": 320
+      },
+      {
+        "id": "market-map-layer-workers",
+        "y": 4228,
+        "h": 81,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-workers-status",
+        "y": 4236,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-layer-demand",
+        "y": 4319,
+        "h": 65,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-demand-status",
+        "y": 4319,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-layer-projects",
+        "y": 4394,
+        "h": 46,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-projects-status",
+        "y": 4394,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-next-stage",
+        "y": 4455,
+        "h": 440,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-accommodation",
+        "y": 4494,
+        "h": 65,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-accommodation-status",
+        "y": 4494,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-layer-teams",
+        "y": 4567,
+        "h": 64,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-teams-status",
+        "y": 4567,
+        "h": 42,
+        "w": 115
+      },
+      {
+        "id": "market-map-layer-readiness",
+        "y": 4639,
+        "h": 64,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-readiness-status",
+        "y": 4639,
+        "h": 42,
+        "w": 85
+      },
+      {
+        "id": "market-map-layer-rates",
+        "y": 4710,
+        "h": 65,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-rates-status",
+        "y": 4710,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-layer-countryFit",
+        "y": 4783,
+        "h": 65,
+        "w": 286
+      },
+      {
+        "id": "market-map-layer-countryFit-status",
+        "y": 4783,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-atlas-layers",
+        "y": 5073,
+        "h": 161,
+        "w": 1344
+      },
+      {
+        "id": "market-map-atlas-kinds",
+        "y": 5154,
+        "h": 28,
+        "w": 1302
+      },
+      {
+        "id": "market-map-next-actions",
+        "y": 5258,
+        "h": 156,
+        "w": 1344
+      },
+      {
+        "id": "market-map-action-workerCountry",
+        "y": 5315,
+        "h": 46,
+        "w": 426
+      },
+      {
+        "id": "market-map-action-companyNeed",
+        "y": 5315,
+        "h": 46,
+        "w": 426
+      },
+      {
+        "id": "market-map-action-project",
+        "y": 5315,
+        "h": 46,
+        "w": 426
+      },
+      {
+        "id": "market-map-accommodation-note",
+        "y": 5373,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "labour-market-world-map",
+        "y": 5430,
+        "h": 809,
+        "w": 1344
+      },
+      {
+        "id": "world-map-canvas",
+        "y": 5605,
+        "h": 609,
+        "w": 974
+      },
+      {
+        "id": "world-map-routes",
+        "y": 5606,
+        "h": 607,
+        "w": 972
+      },
+      {
+        "id": "world-zone-profileHub",
+        "y": 5863,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-profileHub-cta",
+        "y": 5863,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-profileHub-state",
+        "y": 5908,
+        "h": 17,
+        "w": 124
+      },
+      {
+        "id": "world-zone-skillsEvidence",
+        "y": 5734,
+        "h": 109,
+        "w": 150
+      },
+      {
+        "id": "world-zone-skillsEvidence-cta",
+        "y": 5734,
+        "h": 109,
+        "w": 150
+      },
+      {
+        "id": "world-zone-skillsEvidence-state",
+        "y": 5779,
+        "h": 33,
+        "w": 124
+      },
+      {
+        "id": "world-zone-availability",
+        "y": 5644,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-availability-cta",
+        "y": 5644,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-availability-state",
+        "y": 5673,
+        "h": 33,
+        "w": 124
+      },
+      {
+        "id": "world-zone-workNeeds",
+        "y": 5734,
+        "h": 109,
+        "w": 150
+      },
+      {
+        "id": "world-zone-workNeeds-cta",
+        "y": 5734,
+        "h": 109,
+        "w": 150
+      },
+      {
+        "id": "world-zone-workNeeds-state",
+        "y": 5779,
+        "h": 33,
+        "w": 124
+      },
+      {
+        "id": "world-zone-teams",
+        "y": 6094,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-teams-cta",
+        "y": 6094,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-teams-state",
+        "y": 6139,
+        "h": 17,
+        "w": 124
+      },
+      {
+        "id": "world-zone-company",
+        "y": 5948,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-company-cta",
+        "y": 5948,
+        "h": 93,
+        "w": 150
+      },
+      {
+        "id": "world-zone-company-state",
+        "y": 5993,
+        "h": 17,
+        "w": 124
+      },
+      {
+        "id": "world-zone-marketPulse",
+        "y": 5940,
+        "h": 110,
+        "w": 150
+      },
+      {
+        "id": "world-zone-marketPulse-cta",
+        "y": 5940,
+        "h": 110,
+        "w": 150
+      },
+      {
+        "id": "world-zone-marketPulse-state",
+        "y": 5969,
+        "h": 50,
+        "w": 124
+      },
+      {
+        "id": "world-zone-trust",
+        "y": 6077,
+        "h": 126,
+        "w": 150
+      },
+      {
+        "id": "world-zone-trust-cta",
+        "y": 6077,
+        "h": 126,
+        "w": 150
+      },
+      {
+        "id": "world-zone-trust-state",
+        "y": 6122,
+        "h": 50,
+        "w": 124
+      },
+      {
+        "id": "world-map-legend",
+        "y": 5605,
+        "h": 186,
+        "w": 300
+      },
+      {
+        "id": "world-map-real-count",
+        "y": 5936,
+        "h": 16,
+        "w": 266
+      },
+      {
+        "id": "world-map-profile-cta",
+        "y": 5960,
+        "h": 16,
+        "w": 92
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nLietuvių\nDev Construction\n▾\nD\nŽemėlapis\n\nTavo ir rinkos vaizdas viename žemėlapyje.\n\nPASAKYKITE, KO IEŠKOTE AR KĄ SIŪLOTE\nPirmiausia atsakykite į kelis klausimus, kad parodytume mažiau, bet geresnių variantų, o ne ilgą sąrašą.\nPradėti čia\n→\nTavo vieta rinkos žemėlapyje\n\nŠią vietą ir spindulį naudojame tavo signalams žemėlapyje.\n\nNaudoti mano buvimo vietą\nNurodyti vietą rankiniu būdu\n+\n−\n Leaflet | © OpenStreetMap contributors\n\nBakstelėkite žemėlapį, kad pažymėtumėte savo vietą\n\nVieta dar nepasirinkta\n\n25 km spindulys\n\nAtstumas nuo pasirinktos vietos\n10 km spindulys\n25 km spindulys\n50 km spindulys\n100 km spindulys\nSpindulys – paieškos zona aplink pasirinktą tašką: 25 km reiškia darbus ir paklausą iki 25 km nuo to taško.\n\nDar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu.\n\nŽemėlapio sluoksniai\n\nŽemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami.\n\nMATOMA DABAR\nMano žmogaus signalas: Dev Company\nPridėkite savo vietą, kad būtumėte rodomi rinkos žemėlapyje\nĮmonės sluoksnis: Dev Construction\nvieta dar nepridėta\nBŪSIMI SLUOKSNIAI\nRUOŠIAMA\nDarbuotojai\nĮmonės\nKomandos / brigados\nGalimybės\nDarbo poreikiai\nPaslaugos\nNuoma / būstas\nParduotuvės / pasiūlymai\nPrieinamumas / kalendorius\nPasitikėjimas / pasirengimas\nTrys dalykai žemėlapyje\n\nŽemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.\n\nŠie trys dalykai niekada nesujungiami į vieną žymeklį. Susisiekimas visada vyksta tik per LabourMarket.ai platformą — žemėlapyje niekada nerodomi telefonai ar el. pašto adresai.\n\nŽmonės\nŽmonių skaičius pagal sritį (užpildytas kvadratas)\n0\nĮmonių teritorijos\nVeiklos teritorijos kontūras (brūkšninis žiedas) — niekada taškas\n0\nProjektų vietos\nProjekto žymeklis (rombas)\n10\nŽMONĖS\n\nŽmonių skaičių rodyti dar nėra. Žmonės čia matomi tik kaip srities skaičiai, kai srityje susikaupia pakankamai sutikimą davusių žmonių (tikslus skaičius — tik nuo 5).\n\nŽmonės rodomi tik kaip srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“.\n\nĮMONIŲ TERITORIJOS\n\nĮmonių teritorijų dar nėra. Pridėkite įmonės veiklos vietas įmonės darbo erdvėje.\n\nĮmonių teritorijos braižomos kaip kontūrinės sritys iš įmonės įvestos geografijos — niekada kaip",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-market-map-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/projects",
+    "label": "projects",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 9600,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/projects",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 4219,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Projektai ir priskyrimai"
+    ],
+    "h2": [
+      "Ką čia galite padaryti",
+      "Tavo projektai",
+      "Ruošiama — projektai ir komandos"
+    ],
+    "cardBorders": 24,
+    "sections": 14,
+    "buttons": 9,
+    "links": 68,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 60,
+    "unlabelledInputs": 8,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 16,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "dashboard-tab-overview",
+        "y": 12,
+        "h": 52,
+        "w": 86
+      },
+      {
+        "id": "dashboard-tab-journal_text_first",
+        "y": 12,
+        "h": 52,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-planning",
+        "y": 22,
+        "h": 32,
+        "w": 103
+      },
+      {
+        "id": "dashboard-tab-communication",
+        "y": 22,
+        "h": 32,
+        "w": 73
+      },
+      {
+        "id": "dashboard-tab-market_map",
+        "y": 22,
+        "h": 32,
+        "w": 92
+      },
+      {
+        "id": "dashboard-tab-network",
+        "y": 22,
+        "h": 32,
+        "w": 63
+      },
+      {
+        "id": "header-search-button",
+        "y": 20,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 21,
+        "h": 34,
+        "w": 179
+      },
+      {
+        "id": "role-switcher-active-org",
+        "y": 28,
+        "h": 20,
+        "w": 109
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 16,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 101,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "company-context",
+        "y": 121,
+        "h": 18,
+        "w": 1200
+      },
+      {
+        "id": "projects-model-note",
+        "y": 214,
+        "h": 77,
+        "w": 492
+      },
+      {
+        "id": "company-action-next-actions",
+        "y": 314,
+        "h": 257,
+        "w": 1200
+      },
+      {
+        "id": "company-action-flow",
+        "y": 398,
+        "h": 80,
+        "w": 1166
+      },
+      {
+        "id": "company-action-primary",
+        "y": 490,
+        "h": 36,
+        "w": 167
+      },
+      {
+        "id": "arena-confirm-pulse",
+        "y": 594,
+        "h": 86,
+        "w": 1200
+      },
+      {
+        "id": "confirm-pulse-cta",
+        "y": 615,
+        "h": 44,
+        "w": 167
+      },
+      {
+        "id": "project-map",
+        "y": 705,
+        "h": 1034,
+        "w": 1200
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 756,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 870,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 870,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 756,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 870,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 870,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 960,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1074,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1074,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 960,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1074,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1074,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1164,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1278,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1278,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1164,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1278,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1278,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1368,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1482,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1482,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1368,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1482,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1482,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1572,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1686,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1686,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1572,
+        "h": 102,
+        "w": 550
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1686,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1686,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "draft-section",
+        "y": 1763,
+        "h": 2360,
+        "w": 1200
+      },
+      {
+        "id": "project-create",
+        "y": 1793,
+        "h": 254,
+        "w": 672
+      },
+      {
+        "id": "project-assign",
+        "y": 2071,
+        "h": 252,
+        "w": 672
+      },
+      {
+        "id": "project-assignments",
+        "y": 2347,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 2422,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 2450,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 2450,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 2527,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 2602,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 2630,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 2630,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 2707,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 2782,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 2810,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 2810,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 2887,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 2962,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 2990,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 2990,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3067,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 3142,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 3170,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 3170,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3247,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 3322,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 3350,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 3350,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3427,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 3502,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 3530,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 3530,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3607,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 3682,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 3710,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 3710,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3787,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 3862,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 3890,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 3890,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 3967,
+        "h": 156,
+        "w": 672
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 4042,
+        "h": 16,
+        "w": 630
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 4070,
+        "h": 32,
+        "w": 311
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 4070,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\nMano erdvė\nDarbo žurnalas\nKalendorius\nŽinutės\nŽemėlapis\nRyšiai\nLietuvių\nDev Construction\n▾\nD\n← Veiksmų centras\n\nĮMONĖ · PROJEKTAI\n\nProjektai ir priskyrimai\n\nSukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.\n\nŠi lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs. Kaip veikia šis modelis →\n\nKą čia galite padaryti\n\nValdykite projektus ir operacijas vienoje vietoje.\n\n1\nSukurkite projektą (pavadinimas, vieta).\n2\nPriskirkite darbuotojus prie projekto.\n3\nSekite eigą ir komandas projekto eigos rodinyje.\nNaujas projektas\n\nPo to: sekite eigą ir komandas, kol projektas juda.\n\n14\n14 įrašų laukia tavo patvirtinimo\nVienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.\nPatvirtinti dabar →\nTAVO PROJEKTAI\nRotterdam Kralingen — vidaus apdaila\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRotterdam Maasvlakte — plieno konstrukcijos\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nEindhoven campus — silpnos srovės\nEINDHOVEN\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nAmsterdam Noord — renovacija\nAMSTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nDuisburg Logistikzentrum\nDUISBURG\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nAntwerpen terminal\nANTWERPEN\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nGdansk stocznia\nGDANSK\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nHamburg Hafen — Elektro\nHAMBURG\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRotterdam haven — elektros instaliacija\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRenovation Works – Amsterdam\nAMSTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRUOŠIAMA — PROJEKTAI IR KOMANDOS\n\nNaujas projektas\n\nPAVADINIMAS\nMIESTAS (NEPRIVALOMA)\nSukurti projektą\n\nPriskirti darbuotoją projektui\n\nPROJEKTAS\nPasirinkite projektą\nRotterdam Kralingen — vidaus apdaila · Rotterdam\nRotterdam Maasvlakte — plieno konstrukcijos · Rotterdam\nEindhoven campus — silpnos srovės · Eindhoven\nAmsterdam Noord — renovacija · Amsterdam\nDuisburg Logistikzentrum · Duisburg\nAntwerpen terminal · Antwerpen\nGdansk stocznia · Gdansk\nHamburg Hafen — Elektro · Hamburg\nRotterdam haven — elektros instaliacija · Rotterdam\nRenovation Works – Amsterdam · Amsterdam\nDARBUOTOJAS\nPasirinkite darbuotoją\na",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-projects-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/planning",
+    "label": "planning",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 11742,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/planning",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 1453,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Kalendorius"
+    ],
+    "h2": [
+      "Vėliau",
+      "Dar be datos"
+    ],
+    "cardBorders": 0,
+    "sections": 2,
+    "buttons": 7,
+    "links": 35,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 22,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "planning-page",
+        "y": 89,
+        "h": 1332,
+        "w": 1344
+      },
+      {
+        "id": "planning-views",
+        "y": 195,
+        "h": 36,
+        "w": 1344
+      },
+      {
+        "id": "planning-view-agenda",
+        "y": 195,
+        "h": 36,
+        "w": 121
+      },
+      {
+        "id": "planning-view-day",
+        "y": 195,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-view-week",
+        "y": 195,
+        "h": 36,
+        "w": 86
+      },
+      {
+        "id": "planning-view-month",
+        "y": 195,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-view-year",
+        "y": 195,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-date-nav",
+        "y": 255,
+        "h": 36,
+        "w": 1344
+      },
+      {
+        "id": "planning-nav-prev",
+        "y": 255,
+        "h": 36,
+        "w": 44
+      },
+      {
+        "id": "planning-nav-today",
+        "y": 255,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-nav-next",
+        "y": 255,
+        "h": 36,
+        "w": 44
+      },
+      {
+        "id": "planning-period-label",
+        "y": 263,
+        "h": 20,
+        "w": 187
+      },
+      {
+        "id": "planning-date-picker",
+        "y": 255,
+        "h": 36,
+        "w": 199
+      },
+      {
+        "id": "planning-filters",
+        "y": 315,
+        "h": 36,
+        "w": 1344
+      },
+      {
+        "id": "planning-filter-all",
+        "y": 315,
+        "h": 36,
+        "w": 61
+      },
+      {
+        "id": "planning-filter-booking",
+        "y": 315,
+        "h": 36,
+        "w": 121
+      },
+      {
+        "id": "planning-filter-project",
+        "y": 315,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-task",
+        "y": 315,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-journal",
+        "y": 315,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-finance",
+        "y": 315,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-invitation",
+        "y": 315,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-absence",
+        "y": 315,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-stage",
+        "y": 315,
+        "h": 36,
+        "w": 78
+      },
+      {
+        "id": "planning-week-strip",
+        "y": 375,
+        "h": 106,
+        "w": 1344
+      },
+      {
+        "id": "planning-strip-2026-08-07",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-08",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-09",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-10",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-11",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-12",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-strip-2026-08-13",
+        "y": 401,
+        "h": 80,
+        "w": 189
+      },
+      {
+        "id": "planning-agenda",
+        "y": 505,
+        "h": 916,
+        "w": 1344
+      },
+      {
+        "id": "planning-later",
+        "y": 531,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000008",
+        "y": 531,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-duration-project:2b000000-0000-0000-0000-000000000008",
+        "y": 572,
+        "h": 18,
+        "w": 52
+      },
+      {
+        "id": "planning-undated",
+        "y": 673,
+        "h": 748,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000001",
+        "y": 673,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000002",
+        "y": 757,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000003",
+        "y": 841,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000004",
+        "y": 925,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000005",
+        "y": 1009,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000006",
+        "y": 1093,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000007",
+        "y": 1177,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000009",
+        "y": 1261,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "planning-item-project:eeeeeeee-0000-0000-0000-000000000001",
+        "y": 1345,
+        "h": 76,
+        "w": 1344
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nLabourMarket\nDev Construction\nLietuvių\nD\n\nKALENDORIUS\n\nKalendorius\n\nRezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Paspaudę eilutę pateksite ten, kur ji sukurta.\n\nDARBOTVARKĖ\nDIENA\nSAVAITĖ\nMĖNUO\nMETAI\n←\nŠIANDIEN\n→\nrugpjūčio 7 d., penktadienis\nPasirinkti datą\nEITI\nTIPAS\nVISI\nREZERVACIJA\nPROJEKTAS\nUŽDUOTIS\nŽURNALAS\nFINANSAI\nKVIETIMAS\nATOSTOGOS\nETAPAI\nARTIMIAUSIOS 7 DIENOS\nP\n07\n·\nŠ\n08\n·\nS\n09\n·\nP\n10\n·\nA\n11\n·\nT\n12\n·\nK\n13\n·\nVĖLIAU\nPROJEKTAS\nRotterdam Maasvlakte — plieno konstrukcijos\n09-06 – 03-05\n181 D.\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nDAR BE DATOS\n\nŠie įrašai egzistuoja, bet datos dar neįrašytos.\n\nPROJEKTAS\nRotterdam haven — elektros instaliacija\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nPROJEKTAS\nEindhoven campus — silpnos srovės\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nEINDHOVEN\nPROJEKTAS\nAmsterdam Noord — renovacija\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nAMSTERDAM\nPROJEKTAS\nDuisburg Logistikzentrum\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nDUISBURG\nPROJEKTAS\nHamburg Hafen — Elektro\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nHAMBURG\nPROJEKTAS\nAntwerpen terminal\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nANTWERPEN\nPROJEKTAS\nGdansk stocznia\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nGDANSK\nPROJEKTAS\nRotterdam Kralingen — vidaus apdaila\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nPROJEKTAS\nRenovation Works – Amsterdam\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nAMSTERDAM\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-planning-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/journal",
+    "label": "journal",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 17742,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/journal",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 2367,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Darbo žurnalas"
+    ],
+    "h2": [
+      "Dev Company",
+      "Kaip pagerinti pasiruošimą",
+      "Darbo įrašai"
+    ],
+    "cardBorders": 3,
+    "sections": 6,
+    "buttons": 6,
+    "links": 20,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 12,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 162
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 94,
+        "h": 26,
+        "w": 113
+      },
+      {
+        "id": "journal-nav-subtitle",
+        "y": 129,
+        "h": 23,
+        "w": 1344
+      },
+      {
+        "id": "page-quick-nav",
+        "y": 176,
+        "h": 58,
+        "w": 1360
+      },
+      {
+        "id": "mano-cv-player-card-lead",
+        "y": 690,
+        "h": 1557,
+        "w": 1344
+      },
+      {
+        "id": "worker-player-card",
+        "y": 729,
+        "h": 1039,
+        "w": 1310
+      },
+      {
+        "id": "player-card-avatar-monogram",
+        "y": 778,
+        "h": 56,
+        "w": 56
+      },
+      {
+        "id": "readiness-ring",
+        "y": 755,
+        "h": 102,
+        "w": 80
+      },
+      {
+        "id": "player-card-readiness",
+        "y": 877,
+        "h": 74,
+        "w": 1260
+      },
+      {
+        "id": "player-card-workcard",
+        "y": 971,
+        "h": 28,
+        "w": 253
+      },
+      {
+        "id": "player-card-skill-signals",
+        "y": 1019,
+        "h": 64,
+        "w": 1260
+      },
+      {
+        "id": "player-card-visualizations",
+        "y": 1103,
+        "h": 70,
+        "w": 1260
+      },
+      {
+        "id": "player-card-evidence-chart",
+        "y": 1103,
+        "h": 70,
+        "w": 624
+      },
+      {
+        "id": "player-card-skill-chart",
+        "y": 1103,
+        "h": 70,
+        "w": 624
+      },
+      {
+        "id": "player-card-history-timeline",
+        "y": 1192,
+        "h": 70,
+        "w": 1260
+      },
+      {
+        "id": "player-card-skills",
+        "y": 1282,
+        "h": 119,
+        "w": 306
+      },
+      {
+        "id": "player-card-candidate",
+        "y": 1282,
+        "h": 119,
+        "w": 306
+      },
+      {
+        "id": "player-card-evidence",
+        "y": 1282,
+        "h": 119,
+        "w": 306
+      },
+      {
+        "id": "player-card-attention",
+        "y": 1282,
+        "h": 119,
+        "w": 306
+      },
+      {
+        "id": "player-card-work-history",
+        "y": 1421,
+        "h": 68,
+        "w": 1260
+      },
+      {
+        "id": "player-card-documents",
+        "y": 1509,
+        "h": 92,
+        "w": 624
+      },
+      {
+        "id": "player-card-reputation",
+        "y": 1509,
+        "h": 92,
+        "w": 624
+      },
+      {
+        "id": "player-card-thermometer",
+        "y": 1621,
+        "h": 68,
+        "w": 1260
+      },
+      {
+        "id": "player-card-thermometer-missing",
+        "y": 1656,
+        "h": 20,
+        "w": 1234
+      },
+      {
+        "id": "player-card-latest-evidence",
+        "y": 1708,
+        "h": 35,
+        "w": 1260
+      },
+      {
+        "id": "worker-readiness-panel",
+        "y": 1784,
+        "h": 447,
+        "w": 1310
+      },
+      {
+        "id": "readiness-pillars",
+        "y": 1869,
+        "h": 268,
+        "w": 1268
+      },
+      {
+        "id": "readiness-step-profession",
+        "y": 1880,
+        "h": 16,
+        "w": 121
+      },
+      {
+        "id": "readiness-step-availability",
+        "y": 1926,
+        "h": 16,
+        "w": 145
+      },
+      {
+        "id": "readiness-step-skills",
+        "y": 1972,
+        "h": 16,
+        "w": 100
+      },
+      {
+        "id": "readiness-step-journal",
+        "y": 2018,
+        "h": 16,
+        "w": 84
+      },
+      {
+        "id": "readiness-step-evidence",
+        "y": 2064,
+        "h": 16,
+        "w": 123
+      },
+      {
+        "id": "readiness-step-workCard",
+        "y": 2110,
+        "h": 16,
+        "w": 103
+      },
+      {
+        "id": "readiness-country-fit",
+        "y": 2153,
+        "h": 57,
+        "w": 1268
+      },
+      {
+        "id": "journal-review-not-enabled-note",
+        "y": 2272,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "journal-log-via-chat",
+        "y": 258,
+        "h": 109,
+        "w": 1344
+      },
+      {
+        "id": "journal-log-via-chat-cta",
+        "y": 306,
+        "h": 44,
+        "w": 213
+      },
+      {
+        "id": "journal-log-via-voice-cta",
+        "y": 306,
+        "h": 44,
+        "w": 115
+      },
+      {
+        "id": "journal-entries",
+        "y": 391,
+        "h": 276,
+        "w": 1344
+      },
+      {
+        "id": "journal-status-details",
+        "y": 431,
+        "h": 34,
+        "w": 1344
+      },
+      {
+        "id": "journal-who-can-confirm",
+        "y": 464,
+        "h": 20,
+        "w": 1318
+      },
+      {
+        "id": "journal-cv-bridge",
+        "y": 491,
+        "h": 20,
+        "w": 1318
+      },
+      {
+        "id": "journal-cv-bridge-link",
+        "y": 493,
+        "h": 15,
+        "w": 85
+      },
+      {
+        "id": "journal-proof-loop",
+        "y": 519,
+        "h": 20,
+        "w": 1318
+      },
+      {
+        "id": "journal-proof-loop-cv-link",
+        "y": 521,
+        "h": 15,
+        "w": 33
+      },
+      {
+        "id": "journal-empty-state",
+        "y": 477,
+        "h": 190,
+        "w": 1344
+      },
+      {
+        "id": "journal-empty-state-cta",
+        "y": 597,
+        "h": 44,
+        "w": 178
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nLabourMarket\nDev Construction\nLietuvių\nD\nDarbo žurnalas\nMano erdvės →\n\nParodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.\n\nVIRŠUS\nKORTELĖ\nĮRAŠAI\n›\nKORTELĖ\nDC\nDARBUOTOJO KORTELĖ\nDev Company\n\nTavo profilio apžvalga. Skaičiai tikri — nieko nepridėta.\n\n0/6\nPRADŽIA\nPASIRUOŠIMAS\n0/6 ŽINGSNIŲ ATLIKTA\nToliau:\nProfesija\nPrieinamumas\nĮgūdžiai\nDarbo žurnalas\nĮrašai\nDarbo kortelė\nDARBO KORTELĖ NEPATEIKTA\nDARBO KORTELĖ\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n\nTokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.\n\nDARBO ĮRAŠAI LAIKE\n\nDar nėra įrašų — pirmas darbo įrašas pradės šį grafiką.\n\nKIEK DARBO ĮRAŠŲ UŽ KIEKVIENĄ ĮGŪDĮ\n\nDar nėra įgūdžių su darbo įrašais.\n\nDARBO ISTORIJOS LAIKO JUOSTA\n\nBe datos: 3 — laiko juostoje nerodomi\n\n0\nĮGŪDŽIAI\nTavo nurodyti įgūdžiai (dar neperžiūrėti).\n0\nKANDIDATINIAI ĮGŪDŽIAI\nĮgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, neperžiūrėta).\n0\nĮRAŠAI\nTavo darbo žurnalo įrašai.\n0\nREIKIA DĖMESIO\nŠiuo metu nieko nereikia daryti.\nDARBO ISTORIJA\nDev Construction\nDev Construction\nDOKUMENTAI\nDar nėra įrašytų dokumentų.\nKITŲ ATSAKAS\nKiti dar nieko nepažymėjo tavo įrašuose.\nTik realūs vadovų ar užsakovų atsakymai. Jokio bendro žmogaus balo.\nRINKOS AKTYVUMAS\nNepakanka rinkos duomenų\nNAUJAUSIAS ĮRAŠAS\nĮrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.\nKaip pagerinti pasiruošimą\n\nŠtai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.\n\nProfesija nurodyta\nNurodyti profesiją\nPrieinamumas nurodytas\nNurodyti prieinamumą\nPridėti įgūdžiai\nPridėti įgūdžių\nDarbo žurnalo įrašai\nRašyti įrašą\nĮgūdžiai paremti darbu\nPridėti darbo įrašą\nDarbo kortelė pateikta\nPateikti kortelę\nDarbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų.\n\nĮrašai privatūs, kol nepasirinksite kitaip. Peržiūros sluoksnis rodomas tik kai yra reali peržiūra.\n\nŽurnalo peržiūra dar neįjungta. Galite žymėti darbą jau dabar — bet kad įrašai būtų peržiūrimi, organizacijos savininkas turi įjungti jūsų žurnalo peržiūrą.\n\nDarbas fiksuojamas pokalbyje — parašyk, ką dirbai, ir įrašas atsiras čia.\n\nUžfiksuoti darbą pokalbyje\nĮrašyti balsu\nDarbo įrašai\nKaip naudojami jūsų įrašai?\nPradėkite kurti darbo įrašus\n\nKol kas neturite darbo įrašų — jūsų įrašai atsiras čia.\n\nSukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.\n\nSukurti pirmą įrašą →\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-journal-1440.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard",
+    "label": "dashboard-home",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 2099,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 812,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Labas, Dev. Kuo šiandien galiu padėti?"
+    ],
+    "h2": [
+      "Tavo darbas dabar"
+    ],
+    "cardBorders": 0,
+    "sections": 0,
+    "buttons": 12,
+    "links": 4,
+    "chatRoot": {
+      "y": 0,
+      "h": 812,
+      "w": 375
+    },
+    "panel": {
+      "y": 757,
+      "h": 55,
+      "w": 375
+    },
+    "map": {
+      "y": 0,
+      "h": 0,
+      "w": 0
+    },
+    "composer": {
+      "y": 509,
+      "h": 52,
+      "w": 239
+    },
+    "intro": null,
+    "smallTargets": 2,
+    "unlabelledInputs": 1,
+    "testids": [
+      {
+        "id": "conversation-chat",
+        "y": 0,
+        "h": 812,
+        "w": 375
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "conversation-thread",
+        "y": 65,
+        "h": 692,
+        "w": 375
+      },
+      {
+        "id": "msg-greeting",
+        "y": 281,
+        "h": 209,
+        "w": 343
+      },
+      {
+        "id": "assistant-mark",
+        "y": 281,
+        "h": 20,
+        "w": 20
+      },
+      {
+        "id": "chat-chip-f:company.create-demand",
+        "y": 393,
+        "h": 44,
+        "w": 150
+      },
+      {
+        "id": "chat-chip-candidates",
+        "y": 393,
+        "h": 44,
+        "w": 105
+      },
+      {
+        "id": "chat-chip-projects",
+        "y": 445,
+        "h": 44,
+        "w": 92
+      },
+      {
+        "id": "conversation-opening-composer",
+        "y": 509,
+        "h": 52,
+        "w": 343
+      },
+      {
+        "id": "composer-attach",
+        "y": 517,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "composer-input",
+        "y": 509,
+        "h": 52,
+        "w": 239
+      },
+      {
+        "id": "composer-send",
+        "y": 517,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "context-panel",
+        "y": 757,
+        "h": 55,
+        "w": 375
+      },
+      {
+        "id": "context-panel-toggle",
+        "y": 768,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 628,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nDev Construction\nD\n\nL\nLABOURMARKET AI\n\nLabas, Dev. Kuo šiandien galiu padėti?\nReikia darbuotojų\nKandidatai\nProjektai\nTavo darbas dabar\nIšskleisti\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-dashboard-home-375.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/company",
+    "label": "company",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 8019,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/company",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 10419,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Įmonės darbo erdvė"
+    ],
+    "h2": [
+      "Dev Construction BVNL",
+      "Ką čia galite padaryti",
+      "Personalo agentūros",
+      "Įmonės pasiruošimas",
+      "Operacijų erdvė",
+      "Komandos / brigados",
+      "Įmonės darbuotojai",
+      "Vietos",
+      "Galerija",
+      "Darbo pasirengimo signalai",
+      "Organizacijos nariai ir peržiūra",
+      "Viešas verslo profilis",
+      "Ieškoti darbuotojo ar komandos",
+      "Jūsų pateikti poreikiai",
+      "Vidinės pagalbos užklausos",
+      "Raskite darbuotojų šiam poreikiui"
+    ],
+    "cardBorders": 18,
+    "sections": 22,
+    "buttons": 24,
+    "links": 54,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 60,
+    "unlabelledInputs": 13,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "company-dashboard",
+        "y": 81,
+        "h": 10194,
+        "w": 343
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 86,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 81,
+        "h": 26,
+        "w": 113
+      },
+      {
+        "id": "company-context",
+        "y": 111,
+        "h": 18,
+        "w": 343
+      },
+      {
+        "id": "company-dashboard-type-chip",
+        "y": 241,
+        "h": 24,
+        "w": 53
+      },
+      {
+        "id": "company-control-bar",
+        "y": 289,
+        "h": 44,
+        "w": 343
+      },
+      {
+        "id": "company-control-team",
+        "y": 289,
+        "h": 40,
+        "w": 176
+      },
+      {
+        "id": "company-control-projects",
+        "y": 289,
+        "h": 40,
+        "w": 131
+      },
+      {
+        "id": "company-control-invitations",
+        "y": 289,
+        "h": 40,
+        "w": 204
+      },
+      {
+        "id": "company-control-locations",
+        "y": 289,
+        "h": 40,
+        "w": 109
+      },
+      {
+        "id": "company-control-gallery",
+        "y": 289,
+        "h": 40,
+        "w": 117
+      },
+      {
+        "id": "company-control-calendar",
+        "y": 289,
+        "h": 40,
+        "w": 116
+      },
+      {
+        "id": "company-decisions-strip",
+        "y": 357,
+        "h": 68,
+        "w": 343
+      },
+      {
+        "id": "company-decision-review",
+        "y": 383,
+        "h": 42,
+        "w": 215
+      },
+      {
+        "id": "feature-note-company",
+        "y": 449,
+        "h": 77,
+        "w": 343
+      },
+      {
+        "id": "company-next-actions",
+        "y": 550,
+        "h": 213,
+        "w": 343
+      },
+      {
+        "id": "company-name-link",
+        "y": 574,
+        "h": 22,
+        "w": 179
+      },
+      {
+        "id": "company-next-actions-status",
+        "y": 607,
+        "h": 24,
+        "w": 208
+      },
+      {
+        "id": "company-next-actions-explainer",
+        "y": 639,
+        "h": 59,
+        "w": 301
+      },
+      {
+        "id": "company-action-next-actions",
+        "y": 786,
+        "h": 344,
+        "w": 343
+      },
+      {
+        "id": "company-action-flow",
+        "y": 893,
+        "h": 126,
+        "w": 309
+      },
+      {
+        "id": "company-action-primary",
+        "y": 1030,
+        "h": 36,
+        "w": 233
+      },
+      {
+        "id": "client-bridge-section",
+        "y": 1154,
+        "h": 270,
+        "w": 343
+      },
+      {
+        "id": "client-bridge-invites",
+        "y": 1303,
+        "h": 42,
+        "w": 301
+      },
+      {
+        "id": "client-bridge-active",
+        "y": 1361,
+        "h": 42,
+        "w": 301
+      },
+      {
+        "id": "company-readiness",
+        "y": 1448,
+        "h": 206,
+        "w": 343
+      },
+      {
+        "id": "company-readiness-missing",
+        "y": 1565,
+        "h": 24,
+        "w": 309
+      },
+      {
+        "id": "company-ops-workspace",
+        "y": 1678,
+        "h": 1158,
+        "w": 343
+      },
+      {
+        "id": "company-ops-counts",
+        "y": 1787,
+        "h": 192,
+        "w": 301
+      },
+      {
+        "id": "company-ops-count-pending",
+        "y": 1787,
+        "h": 92,
+        "w": 147
+      },
+      {
+        "id": "company-ops-count-accepted",
+        "y": 1787,
+        "h": 92,
+        "w": 147
+      },
+      {
+        "id": "company-ops-count-members",
+        "y": 1887,
+        "h": 92,
+        "w": 147
+      },
+      {
+        "id": "company-ops-count-review",
+        "y": 1887,
+        "h": 92,
+        "w": 147
+      },
+      {
+        "id": "company-ops-team-link",
+        "y": 2126,
+        "h": 16,
+        "w": 148
+      },
+      {
+        "id": "company-ops-review-link",
+        "y": 2283,
+        "h": 16,
+        "w": 135
+      },
+      {
+        "id": "company-ops-projects",
+        "y": 2328,
+        "h": 350,
+        "w": 301
+      },
+      {
+        "id": "company-ops-projects-count",
+        "y": 2508,
+        "h": 18,
+        "w": 267
+      },
+      {
+        "id": "company-ops-projects-linking",
+        "y": 2534,
+        "h": 59,
+        "w": 267
+      },
+      {
+        "id": "company-ops-projects-create",
+        "y": 2601,
+        "h": 26,
+        "w": 176
+      },
+      {
+        "id": "company-ops-projects-manage",
+        "y": 2635,
+        "h": 26,
+        "w": 172
+      },
+      {
+        "id": "company-ops-needs-link",
+        "y": 2782,
+        "h": 16,
+        "w": 122
+      },
+      {
+        "id": "company-assignment-connections",
+        "y": 2860,
+        "h": 356,
+        "w": 343
+      },
+      {
+        "id": "company-assignment-connection-calendar",
+        "y": 2943,
+        "h": 54,
+        "w": 309
+      },
+      {
+        "id": "company-assignment-connection-map",
+        "y": 3005,
+        "h": 54,
+        "w": 309
+      },
+      {
+        "id": "company-assignment-connection-evidence",
+        "y": 3067,
+        "h": 54,
+        "w": 309
+      },
+      {
+        "id": "company-assignment-connection-workforce",
+        "y": 3129,
+        "h": 70,
+        "w": 309
+      },
+      {
+        "id": "company-dashboard-pilot-disclaimer",
+        "y": 3240,
+        "h": 114,
+        "w": 343
+      },
+      {
+        "id": "org-tier1-warning",
+        "y": 3378,
+        "h": 146,
+        "w": 343
+      },
+      {
+        "id": "team-brigades-panel",
+        "y": 3547,
+        "h": 435,
+        "w": 343
+      },
+      {
+        "id": "team-brigades-empty",
+        "y": 3798,
+        "h": 40,
+        "w": 301
+      },
+      {
+        "id": "team-create-name",
+        "y": 3887,
+        "h": 30,
+        "w": 209
+      },
+      {
+        "id": "team-create-submit",
+        "y": 3925,
+        "h": 36,
+        "w": 136
+      },
+      {
+        "id": "company-invite-link",
+        "y": 4006,
+        "h": 38,
+        "w": 94
+      },
+      {
+        "id": "company-workers-section",
+        "y": 4068,
+        "h": 1420,
+        "w": 343
+      },
+      {
+        "id": "company-workers-active-list",
+        "y": 4241,
+        "h": 576,
+        "w": 301
+      },
+      {
+        "id": "company-worker-row-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4269,
+        "h": 548,
+        "w": 301
+      },
+      {
+        "id": "company-worker-open-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4282,
+        "h": 20,
+        "w": 34
+      },
+      {
+        "id": "message-button-messageWorker",
+        "y": 4315,
+        "h": 26,
+        "w": 126
+      },
+      {
+        "id": "company-worker-next-action-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4393,
+        "h": 36,
+        "w": 274
+      },
+      {
+        "id": "worker-ops-role-form-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4441,
+        "h": 337,
+        "w": 274
+      },
+      {
+        "id": "worker-ops-role-select-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4496,
+        "h": 46,
+        "w": 256
+      },
+      {
+        "id": "worker-ops-title-input-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4570,
+        "h": 40,
+        "w": 256
+      },
+      {
+        "id": "worker-ops-save-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4618,
+        "h": 26,
+        "w": 102
+      },
+      {
+        "id": "worker-ops-review-toggle-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4668,
+        "h": 13,
+        "w": 13
+      },
+      {
+        "id": "worker-ops-review-disabled-note-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4687,
+        "h": 59,
+        "w": 256
+      },
+      {
+        "id": "worker-ops-bridge-reason-6de9ab98-8130-4bad-89a2-6e470dbb5cb4",
+        "y": 4750,
+        "h": 20,
+        "w": 256
+      },
+      {
+        "id": "company-workers-ops-setup-note",
+        "y": 4837,
+        "h": 72,
+        "w": 301
+      },
+      {
+        "id": "company-workers-coordination-note",
+        "y": 4929,
+        "h": 152,
+        "w": 301
+      },
+      {
+        "id": "company-workers-invite-form",
+        "y": 5101,
+        "h": 302,
+        "w": 301
+      },
+      {
+        "id": "company-workers-invite-email",
+        "y": 5205,
+        "h": 38,
+        "w": 301
+      },
+      {
+        "id": "company-workers-invite-note",
+        "y": 5275,
+        "h": 58,
+        "w": 301
+      },
+      {
+        "id": "company-workers-invite-submit",
+        "y": 5367,
+        "h": 36,
+        "w": 142
+      },
+      {
+        "id": "company-workers-pending-list",
+        "y": 5423,
+        "h": 44,
+        "w": 301
+      },
+      {
+        "id": "company-locations-section",
+        "y": 5512,
+        "h": 473,
+        "w": 343
+      },
+      {
+        "id": "company-locations-empty",
+        "y": 5621,
+        "h": 65,
+        "w": 301
+      },
+      {
+        "id": "company-location-add-form",
+        "y": 5702,
+        "h": 262,
+        "w": 301
+      },
+      {
+        "id": "company-location-add-submit",
+        "y": 5911,
+        "h": 40,
+        "w": 275
+      },
+      {
+        "id": "company-gallery-section",
+        "y": 6009,
+        "h": 598,
+        "w": 343
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000009",
+        "y": 6094,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000008",
+        "y": 6144,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000002",
+        "y": 6194,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000003",
+        "y": 6244,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000004",
+        "y": 6294,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000006",
+        "y": 6344,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000007",
+        "y": 6394,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000005",
+        "y": 6444,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-2b000000-0000-0000-0000-000000000001",
+        "y": 6494,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "company-gallery-project-eeeeeeee-0000-0000-0000-000000000001",
+        "y": 6544,
+        "h": 42,
+        "w": 427
+      },
+      {
+        "id": "worker-readiness-summary",
+        "y": 6631,
+        "h": 199,
+        "w": 343
+      },
+      {
+        "id": "worker-readiness-row",
+        "y": 6727,
+        "h": 86,
+        "w": 309
+      },
+      {
+        "id": "org-members-panel",
+        "y": 6854,
+        "h": 603,
+        "w": 343
+      },
+      {
+        "id": "org-member-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 7003,
+        "h": 96,
+        "w": 301
+      },
+      {
+        "id": "org-member-role-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 7012,
+        "h": 24,
+        "w": 104
+      },
+      {
+        "id": "org-member-owner-locked-32f915fc-b91a-4838-925e-b4250a7fddd8",
+        "y": 7072,
+        "h": 18,
+        "w": 181
+      },
+      {
+        "id": "org-member-99999999-0000-0000-0000-000000000001",
+        "y": 7107,
+        "h": 130,
+        "w": 301
+      },
+      {
+        "id": "org-member-role-99999999-0000-0000-0000-000000000001",
+        "y": 7116,
+        "h": 24,
+        "w": 113
+      },
+      {
+        "id": "toggle-review-99999999-0000-0000-0000-000000000001",
+        "y": 7148,
+        "h": 36,
+        "w": 142
+      },
+      {
+        "id": "remove-member-99999999-0000-0000-0000-000000000001",
+        "y": 7192,
+        "h": 36,
+        "w": 198
+      },
+      {
+        "id": "org-member-99999999-0000-0000-0000-000000000002",
+        "y": 7245,
+        "h": 96,
+        "w": 301
+      },
+      {
+        "id": "org-member-role-99999999-0000-0000-0000-000000000002",
+        "y": 7254,
+        "h": 24,
+        "w": 104
+      },
+      {
+        "id": "org-member-owner-locked-99999999-0000-0000-0000-000000000002",
+        "y": 7314,
+        "h": 18,
+        "w": 181
+      },
+      {
+        "id": "business-public-profile-panel",
+        "y": 7481,
+        "h": 780,
+        "w": 343
+      },
+      {
+        "id": "business-description-input",
+        "y": 7878,
+        "h": 98,
+        "w": 309
+      },
+      {
+        "id": "company-dashboard-first-action",
+        "y": 8285,
+        "h": 751,
+        "w": 343
+      },
+      {
+        "id": "demand-intake-section",
+        "y": 8306,
+        "h": 709,
+        "w": 301
+      },
+      {
+        "id": "demand-form",
+        "y": 8511,
+        "h": 445,
+        "w": 301
+      },
+      {
+        "id": "demand-prefill-last",
+        "y": 8555,
+        "h": 38,
+        "w": 269
+      },
+      {
+        "id": "demand-role",
+        "y": 8647,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "demand-description",
+        "y": 8731,
+        "h": 106,
+        "w": 301
+      },
+      {
+        "id": "demand-next",
+        "y": 8874,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "demand-save-draft",
+        "y": 8918,
+        "h": 38,
+        "w": 301
+      },
+      {
+        "id": "journey-progress-helper",
+        "y": 8976,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "demand-requests-readback",
+        "y": 9060,
+        "h": 320,
+        "w": 343
+      },
+      {
+        "id": "demand-readback-worker-visibility-note",
+        "y": 9172,
+        "h": 116,
+        "w": 301
+      },
+      {
+        "id": "help-request-panel",
+        "y": 9404,
+        "h": 435,
+        "w": 343
+      },
+      {
+        "id": "help-request-type-recruiter",
+        "y": 9530,
+        "h": 52,
+        "w": 309
+      },
+      {
+        "id": "help-request-type-accounting",
+        "y": 9590,
+        "h": 52,
+        "w": 309
+      },
+      {
+        "id": "help-request-type-legal",
+        "y": 9650,
+        "h": 52,
+        "w": 309
+      },
+      {
+        "id": "help-request-type-documents",
+        "y": 9710,
+        "h": 52,
+        "w": 309
+      },
+      {
+        "id": "help-request-type-demand_filling",
+        "y": 9770,
+        "h": 52,
+        "w": 309
+      },
+      {
+        "id": "company-scouting-bridge",
+        "y": 9863,
+        "h": 368,
+        "w": 343
+      },
+      {
+        "id": "company-scouting-bridge-cta",
+        "y": 10176,
+        "h": 34,
+        "w": 154
+      },
+      {
+        "id": "company-dashboard-profile-link",
+        "y": 10255,
+        "h": 20,
+        "w": 330
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\n▾\nD\n← Veiksmų centras\nMano erdvės →\n\nĮMONĖ · PROFILIS IR POREIKIAI\n\nĮmonės darbo erdvė\n\nĮmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.\n\nKITA\nSusiję darbuotojai\n1\nProjektai\n10\nLaukiantys pakvietimai\n0\nVietos\n0\nGalerija\n0\nKalendorius\n\nLAUKIA JŪSŲ SPRENDIMO\n\n14\nŽurnalo įrašai peržiūrai\nJūsų įmonės erdvė: kelkite poreikius, samdykite, valdykite komandas ir projektus, pirkite ar parduokite paslaugas.\nDev Construction BVNL\nAKTYVI · NEPATVIRTINTA\n\nAktyvi ir naudojama dabar. Bazinės automatinės patikros praėjo. Dar ne tapatybės patvirtinta — tai atskiras, stipresnis žingsnis.\n\nSukurti paklausą →\nKą čia galite padaryti\n\nTvarkykite įmonės duomenis ir pateikite darbuotojų poreikį.\n\n1\nĮrašykite poreikį (profesija, vieta, kiek žmonių).\n2\nSistema struktūruoja poreikį ir paruošia atrankai.\n3\nPeržiūrėkite tinkamus ir pradėkite pokalbį.\nNaujas poreikis / projektas\n\nPo to: poreikis išsaugomas jūsų paskyroje ir paruoštas atrankai.\n\nPersonalo agentūros\n\nPriimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.\n\nRYŠIO KVIETIMAI\n\nLaukiančių kvietimų nėra.\n\nPRIJUNGTOS AGENTŪROS\n\nKol kas prijungtų agentūrų nėra.\n\nĮmonės pasiruošimas\nNEUŽBAIGTA\n\nKo realiam samdymui reikia iš tavo įmonės. Tai nėra teisinė konsultacija — detales pasitikslink su buhalteriu ar patarėju.\n\nRegistracijos numeris\nSąskaitų el. paštas\n\nDAR NEPATVIRTINTA (ŽMOGAUS ADMINISTRATORIAUS SPRENDIMAS)\n\nOperacijų erdvė\n\nKą jau galite valdyti šiandien šiame puslapyje ir kas bus toliau.\n\nLAUKIANTYS KVIETIMAI\n0\nPRIIMTI DARBUOTOJAI\n1\nORGANIZACIJOS NARIAI\n3\nĮJUNGTA PERŽIŪRA\n1\nDarbuotojai / Komanda\n\nPakvieskite darbuotojus, matykite priimtų sąrašą, pridėkite juos prie organizacijos ir įjunkite žurnalo peržiūrą — viskas žemiau šiame puslapyje.\n\nDarbuotojai / Komanda →\nŽurnalo peržiūra\n\n1) darbuotojas priima · 2) pridedate prie organizacijos · 3) įjungiate peržiūrą · 4) darbuotojas žymi darbą · 5) jūs patvirtinate.\n\nPeržiūrėti įrašus (14) →\nProjektai, objektai ir užsakovai\nStruktūra paruošta\n\nČia matote projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.\n\nProjektai: 10\n\nSusiejimas su darbo žurnalu dar neįjungtas. Projekto kontekstą jau galite sukurti, bet niekas neužpildoma automatiškai.\n\nSuku",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-company-375.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/market-map",
+    "label": "market-map",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 10956,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/market-map",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 3522,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Žemėlapis",
+      "Mano rinkos žemėlapis"
+    ],
+    "h2": [
+      "Tavo vieta rinkos žemėlapyje",
+      "Žemėlapio sluoksniai",
+      "Trys dalykai žemėlapyje",
+      "Tvarkyti savo lokacijas",
+      "Prieinamumas ir mobilumas",
+      "Įgūdžių signalai",
+      "Įmonių poreikių signalai",
+      "Rinkos atlasas",
+      "Ką galite padaryti dabar",
+      "Darbo rinkos pasaulio žemėlapis"
+    ],
+    "cardBorders": 12,
+    "sections": 16,
+    "buttons": 31,
+    "links": 55,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 49,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "market-map-page-header",
+        "y": 81,
+        "h": 59,
+        "w": 343
+      },
+      {
+        "id": "market-recognize-entry",
+        "y": 156,
+        "h": 80,
+        "w": 343
+      },
+      {
+        "id": "market-map-base",
+        "y": 251,
+        "h": 1056,
+        "w": 343
+      },
+      {
+        "id": "map-locator-auto",
+        "y": 362,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "map-locator-manual-toggle",
+        "y": 424,
+        "h": 16,
+        "w": 182
+      },
+      {
+        "id": "location-panel",
+        "y": 456,
+        "h": 656,
+        "w": 301
+      },
+      {
+        "id": "market-map-live",
+        "y": 469,
+        "h": 536,
+        "w": 275
+      },
+      {
+        "id": "location-map-tap-hint",
+        "y": 1013,
+        "h": 36,
+        "w": 275
+      },
+      {
+        "id": "map-locator-radius",
+        "y": 1148,
+        "h": 41,
+        "w": 301
+      },
+      {
+        "id": "map-locator-radius-help",
+        "y": 1193,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "market-map-base-empty",
+        "y": 1248,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "map-layers-legend",
+        "y": 1324,
+        "h": 473,
+        "w": 343
+      },
+      {
+        "id": "map-layers-visible",
+        "y": 1450,
+        "h": 141,
+        "w": 343
+      },
+      {
+        "id": "map-layer-fix-link",
+        "y": 1450,
+        "h": 77,
+        "w": 343
+      },
+      {
+        "id": "map-layer-fix-link",
+        "y": 1533,
+        "h": 58,
+        "w": 343
+      },
+      {
+        "id": "map-layers-future",
+        "y": 1633,
+        "h": 164,
+        "w": 343
+      },
+      {
+        "id": "market-map-entity-layers",
+        "y": 1813,
+        "h": 1267,
+        "w": 343
+      },
+      {
+        "id": "entity-layers-never-mixed",
+        "y": 1916,
+        "h": 78,
+        "w": 309
+      },
+      {
+        "id": "entity-layers-legend",
+        "y": 2006,
+        "h": 243,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-toggle-person_presence",
+        "y": 2006,
+        "h": 77,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-toggle-company_territory",
+        "y": 2089,
+        "h": 97,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-toggle-project_location",
+        "y": 2192,
+        "h": 58,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-person_presence",
+        "y": 2261,
+        "h": 147,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-empty-person_presence",
+        "y": 2285,
+        "h": 59,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-company_territory",
+        "y": 2420,
+        "h": 128,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-empty-company_territory",
+        "y": 2444,
+        "h": 39,
+        "w": 309
+      },
+      {
+        "id": "entity-layer-project_location",
+        "y": 2560,
+        "h": 503,
+        "w": 309
+      },
+      {
+        "id": "market-map-connections",
+        "y": 3096,
+        "h": 230,
+        "w": 343
+      },
+      {
+        "id": "market-map-connection-marketplace",
+        "y": 3135,
+        "h": 54,
+        "w": 317
+      },
+      {
+        "id": "market-map-connection-opportunities",
+        "y": 3197,
+        "h": 54,
+        "w": 317
+      },
+      {
+        "id": "market-map-connection-bookings",
+        "y": 3259,
+        "h": 54,
+        "w": 317
+      },
+      {
+        "id": "market-map-advanced",
+        "y": 3342,
+        "h": 36,
+        "w": 343
+      },
+      {
+        "id": "market-map-capture",
+        "y": 3394,
+        "h": 1080,
+        "w": 343
+      },
+      {
+        "id": "capture-preferred",
+        "y": 3514,
+        "h": 610,
+        "w": 309
+      },
+      {
+        "id": "capture-preferred-country",
+        "y": 3566,
+        "h": 37,
+        "w": 309
+      },
+      {
+        "id": "capture-intent-work",
+        "y": 3703,
+        "h": 26,
+        "w": 52
+      },
+      {
+        "id": "capture-intent-find_job",
+        "y": 3703,
+        "h": 26,
+        "w": 96
+      },
+      {
+        "id": "capture-intent-sell_services",
+        "y": 3703,
+        "h": 26,
+        "w": 118
+      },
+      {
+        "id": "capture-intent-buy_services",
+        "y": 3735,
+        "h": 26,
+        "w": 112
+      },
+      {
+        "id": "capture-intent-join_team",
+        "y": 3735,
+        "h": 26,
+        "w": 151
+      },
+      {
+        "id": "capture-intent-hire_team",
+        "y": 3767,
+        "h": 26,
+        "w": 123
+      },
+      {
+        "id": "capture-intent-project_interest",
+        "y": 3767,
+        "h": 26,
+        "w": 71
+      },
+      {
+        "id": "capture-intent-relocate",
+        "y": 3767,
+        "h": 26,
+        "w": 74
+      },
+      {
+        "id": "capture-intent-remote_if_possible",
+        "y": 3799,
+        "h": 26,
+        "w": 129
+      },
+      {
+        "id": "capture-preferred-priority-select",
+        "y": 3857,
+        "h": 37,
+        "w": 309
+      },
+      {
+        "id": "capture-preferred-note",
+        "y": 3922,
+        "h": 38,
+        "w": 309
+      },
+      {
+        "id": "capture-preferred-add",
+        "y": 4037,
+        "h": 36,
+        "w": 131
+      },
+      {
+        "id": "capture-login",
+        "y": 4144,
+        "h": 203,
+        "w": 309
+      },
+      {
+        "id": "capture-login-country",
+        "y": 4275,
+        "h": 37,
+        "w": 309
+      },
+      {
+        "id": "capture-login-not_requested",
+        "y": 4320,
+        "h": 26,
+        "w": 93
+      },
+      {
+        "id": "capture-login-consented",
+        "y": 4320,
+        "h": 26,
+        "w": 64
+      },
+      {
+        "id": "capture-login-revoked",
+        "y": 4320,
+        "h": 26,
+        "w": 68
+      },
+      {
+        "id": "capture-demand",
+        "y": 4366,
+        "h": 91,
+        "w": 309
+      },
+      {
+        "id": "capture-demand-add",
+        "y": 4439,
+        "h": 18,
+        "w": 158
+      },
+      {
+        "id": "market-map-readiness",
+        "y": 4490,
+        "h": 295,
+        "w": 343
+      },
+      {
+        "id": "readiness-availability",
+        "y": 4507,
+        "h": 127,
+        "w": 309
+      },
+      {
+        "id": "readiness-state",
+        "y": 4586,
+        "h": 22,
+        "w": 177
+      },
+      {
+        "id": "readiness-mobility-add",
+        "y": 4616,
+        "h": 18,
+        "w": 251
+      },
+      {
+        "id": "readiness-capabilities",
+        "y": 4654,
+        "h": 114,
+        "w": 309
+      },
+      {
+        "id": "capabilities-add",
+        "y": 4750,
+        "h": 18,
+        "w": 150
+      },
+      {
+        "id": "feature-note-market-map",
+        "y": 4801,
+        "h": 57,
+        "w": 343
+      },
+      {
+        "id": "market-map-shell",
+        "y": 4874,
+        "h": 3159,
+        "w": 343
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 4874,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "market-map-owner-scope-note",
+        "y": 5039,
+        "h": 116,
+        "w": 343
+      },
+      {
+        "id": "market-map-filters",
+        "y": 5179,
+        "h": 72,
+        "w": 343
+      },
+      {
+        "id": "market-map-canvas",
+        "y": 5275,
+        "h": 1207,
+        "w": 343
+      },
+      {
+        "id": "market-map-my-signals",
+        "y": 5300,
+        "h": 982,
+        "w": 293
+      },
+      {
+        "id": "market-map-country-level-notice",
+        "y": 5371,
+        "h": 53,
+        "w": 293
+      },
+      {
+        "id": "market-map-filter-chips",
+        "y": 5436,
+        "h": 58,
+        "w": 293
+      },
+      {
+        "id": "market-map-filter-all",
+        "y": 5436,
+        "h": 26,
+        "w": 42
+      },
+      {
+        "id": "market-map-filter-profile_location",
+        "y": 5436,
+        "h": 26,
+        "w": 61
+      },
+      {
+        "id": "market-map-filter-company_location",
+        "y": 5436,
+        "h": 26,
+        "w": 57
+      },
+      {
+        "id": "market-map-filter-login_location",
+        "y": 5436,
+        "h": 26,
+        "w": 97
+      },
+      {
+        "id": "market-map-filter-preferred_location",
+        "y": 5468,
+        "h": 26,
+        "w": 123
+      },
+      {
+        "id": "market-map-filter-company_need_location",
+        "y": 5468,
+        "h": 26,
+        "w": 70
+      },
+      {
+        "id": "market-map-filter-project_location",
+        "y": 5468,
+        "h": 26,
+        "w": 71
+      },
+      {
+        "id": "market-map-category-profile_location",
+        "y": 5506,
+        "h": 102,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-profile_location",
+        "y": 5577,
+        "h": 18,
+        "w": 148
+      },
+      {
+        "id": "market-map-category-company_location",
+        "y": 5616,
+        "h": 102,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-company_location",
+        "y": 5687,
+        "h": 18,
+        "w": 149
+      },
+      {
+        "id": "market-map-category-login_location",
+        "y": 5726,
+        "h": 119,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-login_location",
+        "y": 5814,
+        "h": 18,
+        "w": 229
+      },
+      {
+        "id": "market-map-category-preferred_location",
+        "y": 5853,
+        "h": 100,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-preferred_location",
+        "y": 5921,
+        "h": 18,
+        "w": 144
+      },
+      {
+        "id": "market-map-category-company_need_location",
+        "y": 5960,
+        "h": 100,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-company_need_location",
+        "y": 6029,
+        "h": 18,
+        "w": 180
+      },
+      {
+        "id": "market-map-category-project_location",
+        "y": 6068,
+        "h": 214,
+        "w": 293
+      },
+      {
+        "id": "market-map-cta-project_location",
+        "y": 6251,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "market-map-demand-empty",
+        "y": 6302,
+        "h": 155,
+        "w": 293
+      },
+      {
+        "id": "market-map-demand-add",
+        "y": 6413,
+        "h": 26,
+        "w": 206
+      },
+      {
+        "id": "market-map-legend",
+        "y": 6505,
+        "h": 120,
+        "w": 343
+      },
+      {
+        "id": "market-map-layers",
+        "y": 6649,
+        "h": 694,
+        "w": 343
+      },
+      {
+        "id": "market-map-layer-workers",
+        "y": 6696,
+        "h": 81,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-workers-status",
+        "y": 6704,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-layer-demand",
+        "y": 6787,
+        "h": 65,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-demand-status",
+        "y": 6787,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-layer-projects",
+        "y": 6862,
+        "h": 46,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-projects-status",
+        "y": 6862,
+        "h": 24,
+        "w": 66
+      },
+      {
+        "id": "market-map-next-stage",
+        "y": 6924,
+        "h": 403,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-accommodation",
+        "y": 6963,
+        "h": 46,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-accommodation-status",
+        "y": 6963,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-layer-teams",
+        "y": 7016,
+        "h": 46,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-teams-status",
+        "y": 7016,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-layer-readiness",
+        "y": 7070,
+        "h": 64,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-readiness-status",
+        "y": 7070,
+        "h": 42,
+        "w": 92
+      },
+      {
+        "id": "market-map-layer-rates",
+        "y": 7141,
+        "h": 65,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-rates-status",
+        "y": 7141,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-layer-countryFit",
+        "y": 7214,
+        "h": 65,
+        "w": 309
+      },
+      {
+        "id": "market-map-layer-countryFit-status",
+        "y": 7214,
+        "h": 24,
+        "w": 118
+      },
+      {
+        "id": "market-map-atlas-layers",
+        "y": 7367,
+        "h": 311,
+        "w": 343
+      },
+      {
+        "id": "market-map-atlas-kinds",
+        "y": 7487,
+        "h": 100,
+        "w": 301
+      },
+      {
+        "id": "market-map-next-actions",
+        "y": 7702,
+        "h": 331,
+        "w": 343
+      },
+      {
+        "id": "market-map-action-workerCountry",
+        "y": 7759,
+        "h": 66,
+        "w": 301
+      },
+      {
+        "id": "market-map-action-companyNeed",
+        "y": 7837,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "market-map-action-project",
+        "y": 7895,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "market-map-accommodation-note",
+        "y": 7953,
+        "h": 59,
+        "w": 301
+      },
+      {
+        "id": "labour-market-world-map",
+        "y": 8049,
+        "h": 1518,
+        "w": 343
+      },
+      {
+        "id": "world-map-path",
+        "y": 8316,
+        "h": 819,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-profileHub",
+        "y": 8316,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-profileHub-cta",
+        "y": 8316,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-skillsEvidence",
+        "y": 8414,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-skillsEvidence-cta",
+        "y": 8414,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-availability",
+        "y": 8511,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-availability-cta",
+        "y": 8511,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-workNeeds",
+        "y": 8609,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-workNeeds-cta",
+        "y": 8609,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-teams",
+        "y": 8706,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-teams-cta",
+        "y": 8706,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-company",
+        "y": 8804,
+        "h": 98,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-company-cta",
+        "y": 8804,
+        "h": 82,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-marketPulse",
+        "y": 8901,
+        "h": 117,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-marketPulse-cta",
+        "y": 8901,
+        "h": 101,
+        "w": 265
+      },
+      {
+        "id": "world-zone-m-trust",
+        "y": 9018,
+        "h": 117,
+        "w": 301
+      },
+      {
+        "id": "world-zone-m-trust-cta",
+        "y": 9018,
+        "h": 101,
+        "w": 265
+      },
+      {
+        "id": "world-map-legend",
+        "y": 9155,
+        "h": 186,
+        "w": 301
+      },
+      {
+        "id": "world-map-real-count",
+        "y": 9486,
+        "h": 16,
+        "w": 267
+      },
+      {
+        "id": "world-map-profile-cta",
+        "y": 9510,
+        "h": 16,
+        "w": 92
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-active-indicator",
+        "y": 748,
+        "h": 2,
+        "w": 38
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\n▾\nD\nŽemėlapis\n\nTavo ir rinkos vaizdas viename žemėlapyje.\n\nPASAKYKITE, KO IEŠKOTE AR KĄ SIŪLOTE\nPirmiausia atsakykite į kelis klausimus, kad parodytume mažiau, bet geresnių variantų, o ne ilgą sąrašą.\nPradėti čia\n→\nTavo vieta rinkos žemėlapyje\n\nŠią vietą ir spindulį naudojame tavo signalams žemėlapyje.\n\nNaudoti mano buvimo vietą\nNurodyti vietą rankiniu būdu\n+\n−\n Leaflet | © OpenStreetMap contributors\n\nBakstelėkite žemėlapį, kad pažymėtumėte savo vietą\n\nVieta dar nepasirinkta\n\n25 km spindulys\n\nAtstumas nuo pasirinktos vietos\n10 km spindulys\n25 km spindulys\n50 km spindulys\n100 km spindulys\nSpindulys – paieškos zona aplink pasirinktą tašką: 25 km reiškia darbus ir paklausą iki 25 km nuo to taško.\n\nDar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu.\n\nŽemėlapio sluoksniai\n\nŽemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami.\n\nMATOMA DABAR\nMano žmogaus signalas: Dev Company\nPridėkite savo vietą, kad būtumėte rodomi rinkos žemėlapyje\nĮmonės sluoksnis: Dev Construction\nvieta dar nepridėta\nBŪSIMI SLUOKSNIAI\nRUOŠIAMA\nDarbuotojai\nĮmonės\nKomandos / brigados\nGalimybės\nDarbo poreikiai\nPaslaugos\nNuoma / būstas\nParduotuvės / pasiūlymai\nPrieinamumas / kalendorius\nPasitikėjimas / pasirengimas\nTrys dalykai žemėlapyje\n\nŽemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.\n\nŠie trys dalykai niekada nesujungiami į vieną žymeklį. Susisiekimas visada vyksta tik per LabourMarket.ai platformą — žemėlapyje niekada nerodomi telefonai ar el. pašto adresai.\n\nŽmonės\nŽmonių skaičius pagal sritį (užpildytas kvadratas)\n0\nĮmonių teritorijos\nVeiklos teritorijos kontūras (brūkšninis žiedas) — niekada taškas\n0\nProjektų vietos\nProjekto žymeklis (rombas)\n10\nŽMONĖS\n\nŽmonių skaičių rodyti dar nėra. Žmonės čia matomi tik kaip srities skaičiai, kai srityje susikaupia pakankamai sutikimą davusių žmonių (tikslus skaičius — tik nuo 5).\n\nŽmonės rodomi tik kaip srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“.\n\nĮMONIŲ TERITORIJOS\n\nĮmonių teritorijų dar nėra. Pridėkite įmonės veiklos vietas įmonės darbo erdvėje.\n\nĮmonių teritorijos braižomos kaip kontūrinės sritys iš įmonės įvestos geografijos — niekada kaip į asmenį panašūs žymekliai.\n\nPROJEKTŲ VIETOS\nAmsterdam, Nyderlandai\nsrities lygis\nRotter",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-market-map-375.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/projects",
+    "label": "projects",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 6457,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/projects",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 6544,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Projektai ir priskyrimai"
+    ],
+    "h2": [
+      "Ką čia galite padaryti",
+      "Tavo projektai",
+      "Ruošiama — projektai ir komandos"
+    ],
+    "cardBorders": 24,
+    "sections": 14,
+    "buttons": 9,
+    "links": 68,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 55,
+    "unlabelledInputs": 8,
+    "testids": [
+      {
+        "id": "workspace-chip",
+        "y": 6,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "header-search-button",
+        "y": 10,
+        "h": 36,
+        "w": 36
+      },
+      {
+        "id": "role-switcher-toggle",
+        "y": 11,
+        "h": 34,
+        "w": 54
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 6,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "back-to-action-center",
+        "y": 81,
+        "h": 16,
+        "w": 111
+      },
+      {
+        "id": "company-context",
+        "y": 101,
+        "h": 18,
+        "w": 343
+      },
+      {
+        "id": "projects-model-note",
+        "y": 239,
+        "h": 96,
+        "w": 343
+      },
+      {
+        "id": "company-action-next-actions",
+        "y": 359,
+        "h": 302,
+        "w": 343
+      },
+      {
+        "id": "company-action-flow",
+        "y": 466,
+        "h": 103,
+        "w": 309
+      },
+      {
+        "id": "company-action-primary",
+        "y": 581,
+        "h": 36,
+        "w": 167
+      },
+      {
+        "id": "arena-confirm-pulse",
+        "y": 685,
+        "h": 209,
+        "w": 343
+      },
+      {
+        "id": "confirm-pulse-cta",
+        "y": 829,
+        "h": 44,
+        "w": 301
+      },
+      {
+        "id": "project-map",
+        "y": 918,
+        "h": 2538,
+        "w": 343
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 969,
+        "h": 130,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1111,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1151,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1241,
+        "h": 130,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1383,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1423,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1513,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1627,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1667,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 1757,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 1871,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 1911,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 2001,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 2115,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 2155,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 2245,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 2359,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 2399,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 2489,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 2603,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 2643,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 2733,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 2847,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 2887,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 2977,
+        "h": 130,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 3119,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 3159,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "project-stadium-link",
+        "y": 3249,
+        "h": 102,
+        "w": 301
+      },
+      {
+        "id": "project-operations-link",
+        "y": 3363,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-card-chat-cta",
+        "y": 3403,
+        "h": 32,
+        "w": 201
+      },
+      {
+        "id": "draft-section",
+        "y": 3480,
+        "h": 2920,
+        "w": 343
+      },
+      {
+        "id": "project-create",
+        "y": 3510,
+        "h": 254,
+        "w": 343
+      },
+      {
+        "id": "project-assign",
+        "y": 3788,
+        "h": 252,
+        "w": 343
+      },
+      {
+        "id": "project-assignments",
+        "y": 4064,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 4159,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 4187,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 4231,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 4308,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 4403,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 4431,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 4475,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 4552,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 4647,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 4675,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 4719,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 4796,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 4891,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 4919,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 4963,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 5040,
+        "h": 200,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 5115,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 5143,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 5187,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 5264,
+        "h": 200,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 5339,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 5367,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 5411,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 5488,
+        "h": 200,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 5563,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 5591,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 5635,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 5712,
+        "h": 200,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 5787,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 5815,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 5859,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 5936,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 6031,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 6059,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 6103,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "project-assignments",
+        "y": 6180,
+        "h": 220,
+        "w": 343
+      },
+      {
+        "id": "project-no-assignments",
+        "y": 6275,
+        "h": 16,
+        "w": 301
+      },
+      {
+        "id": "roster-assign-link",
+        "y": 6303,
+        "h": 36,
+        "w": 301
+      },
+      {
+        "id": "roster-operations-link",
+        "y": 6347,
+        "h": 32,
+        "w": 225
+      },
+      {
+        "id": "bottom-nav-overview",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-journal_text_first",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-planning",
+        "y": 748,
+        "h": 64,
+        "w": 65
+      },
+      {
+        "id": "bottom-nav-communication",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-market_map",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "bottom-nav-network",
+        "y": 748,
+        "h": 64,
+        "w": 62
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "LabourMarket.ai\nDev Construction\n▾\nD\n← Veiksmų centras\n\nĮMONĖ · PROJEKTAI\n\nProjektai ir priskyrimai\n\nSukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.\n\nŠi lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs. Kaip veikia šis modelis →\n\nKą čia galite padaryti\n\nValdykite projektus ir operacijas vienoje vietoje.\n\n1\nSukurkite projektą (pavadinimas, vieta).\n2\nPriskirkite darbuotojus prie projekto.\n3\nSekite eigą ir komandas projekto eigos rodinyje.\nNaujas projektas\n\nPo to: sekite eigą ir komandas, kol projektas juda.\n\n14\n14 įrašų laukia tavo patvirtinimo\nVienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.\nPatvirtinti dabar →\nTAVO PROJEKTAI\nRotterdam Kralingen — vidaus apdaila\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRotterdam Maasvlakte — plieno konstrukcijos\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nEindhoven campus — silpnos srovės\nEINDHOVEN\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nAmsterdam Noord — renovacija\nAMSTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nDuisburg Logistikzentrum\nDUISBURG\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nAntwerpen terminal\nANTWERPEN\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nGdansk stocznia\nGDANSK\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nHamburg Hafen — Elektro\nHAMBURG\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRotterdam haven — elektros instaliacija\nROTTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRenovation Works – Amsterdam\nAMSTERDAM\n0\nKOMANDOJE\nATIDARYTI PROJEKTO EIGĄ →\nPOKALBIS DĖL PROJEKTO\nRUOŠIAMA — PROJEKTAI IR KOMANDOS\n\nNaujas projektas\n\nPAVADINIMAS\nMIESTAS (NEPRIVALOMA)\nSukurti projektą\n\nPriskirti darbuotoją projektui\n\nPROJEKTAS\nPasirinkite projektą\nRotterdam Kralingen — vidaus apdaila · Rotterdam\nRotterdam Maasvlakte — plieno konstrukcijos · Rotterdam\nEindhoven campus — silpnos srovės · Eindhoven\nAmsterdam Noord — renovacija · Amsterdam\nDuisburg Logistikzentrum · Duisburg\nAntwerpen terminal · Antwerpen\nGdansk stocznia · Gdansk\nHamburg Hafen — Elektro · Hamburg\nRotterdam haven — elektros instaliacija · Rotterdam\nRenovation Works – Amsterdam · Amsterdam\nDARBUOTOJAS\nPasirinkite darbuotoją\naaaaaaaa\nPriskirti\n\nRotterdam Kralingen — vidaus apdaila · Rotterdam\n\nPRISKIRTI DARBUOTOJA",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-projects-375.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/planning",
+    "label": "planning",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 7100,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/planning",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 2177,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Kalendorius"
+    ],
+    "h2": [
+      "Vėliau",
+      "Dar be datos"
+    ],
+    "cardBorders": 0,
+    "sections": 2,
+    "buttons": 7,
+    "links": 35,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 21,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "planning-page",
+        "y": 89,
+        "h": 2048,
+        "w": 343
+      },
+      {
+        "id": "planning-views",
+        "y": 235,
+        "h": 80,
+        "w": 343
+      },
+      {
+        "id": "planning-view-agenda",
+        "y": 235,
+        "h": 36,
+        "w": 121
+      },
+      {
+        "id": "planning-view-day",
+        "y": 235,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-view-week",
+        "y": 235,
+        "h": 36,
+        "w": 86
+      },
+      {
+        "id": "planning-view-month",
+        "y": 279,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-view-year",
+        "y": 279,
+        "h": 36,
+        "w": 69
+      },
+      {
+        "id": "planning-date-nav",
+        "y": 339,
+        "h": 108,
+        "w": 343
+      },
+      {
+        "id": "planning-nav-prev",
+        "y": 339,
+        "h": 36,
+        "w": 44
+      },
+      {
+        "id": "planning-nav-today",
+        "y": 339,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-nav-next",
+        "y": 339,
+        "h": 36,
+        "w": 44
+      },
+      {
+        "id": "planning-period-label",
+        "y": 383,
+        "h": 20,
+        "w": 187
+      },
+      {
+        "id": "planning-date-picker",
+        "y": 411,
+        "h": 36,
+        "w": 199
+      },
+      {
+        "id": "planning-filters",
+        "y": 471,
+        "h": 168,
+        "w": 343
+      },
+      {
+        "id": "planning-filter-all",
+        "y": 471,
+        "h": 36,
+        "w": 61
+      },
+      {
+        "id": "planning-filter-booking",
+        "y": 471,
+        "h": 36,
+        "w": 121
+      },
+      {
+        "id": "planning-filter-project",
+        "y": 515,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-task",
+        "y": 515,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-journal",
+        "y": 515,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-finance",
+        "y": 559,
+        "h": 36,
+        "w": 95
+      },
+      {
+        "id": "planning-filter-invitation",
+        "y": 559,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-absence",
+        "y": 559,
+        "h": 36,
+        "w": 104
+      },
+      {
+        "id": "planning-filter-stage",
+        "y": 603,
+        "h": 36,
+        "w": 78
+      },
+      {
+        "id": "planning-week-strip",
+        "y": 663,
+        "h": 106,
+        "w": 343
+      },
+      {
+        "id": "planning-strip-2026-08-07",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-08",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-09",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-10",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-11",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-12",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-strip-2026-08-13",
+        "y": 689,
+        "h": 80,
+        "w": 46
+      },
+      {
+        "id": "planning-agenda",
+        "y": 793,
+        "h": 1344,
+        "w": 343
+      },
+      {
+        "id": "planning-later",
+        "y": 819,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000008",
+        "y": 819,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-duration-project:2b000000-0000-0000-0000-000000000008",
+        "y": 888,
+        "h": 18,
+        "w": 52
+      },
+      {
+        "id": "planning-undated",
+        "y": 1015,
+        "h": 1122,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000001",
+        "y": 1015,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000002",
+        "y": 1153,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000003",
+        "y": 1291,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000004",
+        "y": 1429,
+        "h": 102,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000005",
+        "y": 1539,
+        "h": 102,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000006",
+        "y": 1649,
+        "h": 102,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000007",
+        "y": 1759,
+        "h": 102,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:2b000000-0000-0000-0000-000000000009",
+        "y": 1869,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "planning-item-project:eeeeeeee-0000-0000-0000-000000000001",
+        "y": 2007,
+        "h": 130,
+        "w": 343
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nDev Construction\nD\n\nKALENDORIUS\n\nKalendorius\n\nRezervacijos, projektų datos ir užduočių terminai vienoje dienotvarkėje. Paspaudę eilutę pateksite ten, kur ji sukurta.\n\nDARBOTVARKĖ\nDIENA\nSAVAITĖ\nMĖNUO\nMETAI\n←\nŠIANDIEN\n→\nrugpjūčio 7 d., penktadienis\nPasirinkti datą\nEITI\nTIPAS\nVISI\nREZERVACIJA\nPROJEKTAS\nUŽDUOTIS\nŽURNALAS\nFINANSAI\nKVIETIMAS\nATOSTOGOS\nETAPAI\nARTIMIAUSIOS 7 DIENOS\nP\n07\n·\nŠ\n08\n·\nS\n09\n·\nP\n10\n·\nA\n11\n·\nT\n12\n·\nK\n13\n·\nVĖLIAU\nPROJEKTAS\nRotterdam Maasvlakte — plieno konstrukcijos\n09-06 – 03-05\n181 D.\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nDAR BE DATOS\n\nŠie įrašai egzistuoja, bet datos dar neįrašytos.\n\nPROJEKTAS\nRotterdam haven — elektros instaliacija\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nPROJEKTAS\nEindhoven campus — silpnos srovės\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nEINDHOVEN\nPROJEKTAS\nAmsterdam Noord — renovacija\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nAMSTERDAM\nPROJEKTAS\nDuisburg Logistikzentrum\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nDUISBURG\nPROJEKTAS\nHamburg Hafen — Elektro\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nHAMBURG\nPROJEKTAS\nAntwerpen terminal\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nANTWERPEN\nPROJEKTAS\nGdansk stocznia\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nGDANSK\nPROJEKTAS\nRotterdam Kralingen — vidaus apdaila\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nROTTERDAM\nPROJEKTAS\nRenovation Works – Amsterdam\nDAR BE DATOS\nVYKDOMAS\nPROJEKTAS\nAMSTERDAM\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-planning-375.png"
+  },
+  {
+    "identity": "company",
+    "route": "/lt/dashboard/journal",
+    "label": "journal",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 5366,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/journal",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 3413,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Darbo žurnalas"
+    ],
+    "h2": [
+      "Dev Company",
+      "Kaip pagerinti pasiruošimą",
+      "Darbo įrašai"
+    ],
+    "cardBorders": 3,
+    "sections": 6,
+    "buttons": 6,
+    "links": 20,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 11,
+    "unlabelledInputs": 0,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 160
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 94,
+        "h": 26,
+        "w": 113
+      },
+      {
+        "id": "journal-nav-subtitle",
+        "y": 129,
+        "h": 46,
+        "w": 343
+      },
+      {
+        "id": "page-quick-nav",
+        "y": 199,
+        "h": 58,
+        "w": 359
+      },
+      {
+        "id": "mano-cv-player-card-lead",
+        "y": 832,
+        "h": 2396,
+        "w": 343
+      },
+      {
+        "id": "worker-player-card",
+        "y": 871,
+        "h": 1640,
+        "w": 309
+      },
+      {
+        "id": "player-card-avatar-monogram",
+        "y": 916,
+        "h": 56,
+        "w": 56
+      },
+      {
+        "id": "readiness-ring",
+        "y": 893,
+        "h": 102,
+        "w": 80
+      },
+      {
+        "id": "player-card-readiness",
+        "y": 1015,
+        "h": 152,
+        "w": 267
+      },
+      {
+        "id": "player-card-workcard",
+        "y": 1187,
+        "h": 28,
+        "w": 253
+      },
+      {
+        "id": "player-card-skill-signals",
+        "y": 1235,
+        "h": 83,
+        "w": 267
+      },
+      {
+        "id": "player-card-visualizations",
+        "y": 1338,
+        "h": 189,
+        "w": 267
+      },
+      {
+        "id": "player-card-evidence-chart",
+        "y": 1338,
+        "h": 89,
+        "w": 267
+      },
+      {
+        "id": "player-card-skill-chart",
+        "y": 1439,
+        "h": 88,
+        "w": 267
+      },
+      {
+        "id": "player-card-history-timeline",
+        "y": 1546,
+        "h": 88,
+        "w": 267
+      },
+      {
+        "id": "player-card-skills",
+        "y": 1654,
+        "h": 196,
+        "w": 128
+      },
+      {
+        "id": "player-card-candidate",
+        "y": 1654,
+        "h": 196,
+        "w": 128
+      },
+      {
+        "id": "player-card-evidence",
+        "y": 1861,
+        "h": 137,
+        "w": 128
+      },
+      {
+        "id": "player-card-attention",
+        "y": 1861,
+        "h": 137,
+        "w": 128
+      },
+      {
+        "id": "player-card-work-history",
+        "y": 2018,
+        "h": 68,
+        "w": 267
+      },
+      {
+        "id": "player-card-documents",
+        "y": 2107,
+        "h": 68,
+        "w": 267
+      },
+      {
+        "id": "player-card-reputation",
+        "y": 2187,
+        "h": 131,
+        "w": 267
+      },
+      {
+        "id": "player-card-thermometer",
+        "y": 2338,
+        "h": 68,
+        "w": 267
+      },
+      {
+        "id": "player-card-thermometer-missing",
+        "y": 2373,
+        "h": 20,
+        "w": 241
+      },
+      {
+        "id": "player-card-latest-evidence",
+        "y": 2425,
+        "h": 65,
+        "w": 267
+      },
+      {
+        "id": "worker-readiness-panel",
+        "y": 2527,
+        "h": 684,
+        "w": 309
+      },
+      {
+        "id": "readiness-pillars",
+        "y": 2631,
+        "h": 388,
+        "w": 267
+      },
+      {
+        "id": "readiness-step-profession",
+        "y": 2652,
+        "h": 16,
+        "w": 121
+      },
+      {
+        "id": "readiness-step-availability",
+        "y": 2718,
+        "h": 16,
+        "w": 145
+      },
+      {
+        "id": "readiness-step-skills",
+        "y": 2774,
+        "h": 16,
+        "w": 100
+      },
+      {
+        "id": "readiness-step-journal",
+        "y": 2830,
+        "h": 16,
+        "w": 84
+      },
+      {
+        "id": "readiness-step-evidence",
+        "y": 2906,
+        "h": 16,
+        "w": 123
+      },
+      {
+        "id": "readiness-step-workCard",
+        "y": 2982,
+        "h": 16,
+        "w": 103
+      },
+      {
+        "id": "readiness-country-fit",
+        "y": 3035,
+        "h": 155,
+        "w": 267
+      },
+      {
+        "id": "journal-review-not-enabled-note",
+        "y": 3252,
+        "h": 59,
+        "w": 343
+      },
+      {
+        "id": "journal-log-via-chat",
+        "y": 281,
+        "h": 184,
+        "w": 343
+      },
+      {
+        "id": "journal-log-via-chat-cta",
+        "y": 351,
+        "h": 44,
+        "w": 213
+      },
+      {
+        "id": "journal-log-via-voice-cta",
+        "y": 403,
+        "h": 44,
+        "w": 115
+      },
+      {
+        "id": "journal-entries",
+        "y": 488,
+        "h": 320,
+        "w": 343
+      },
+      {
+        "id": "journal-status-details",
+        "y": 528,
+        "h": 34,
+        "w": 343
+      },
+      {
+        "id": "journal-who-can-confirm",
+        "y": 561,
+        "h": 39,
+        "w": 317
+      },
+      {
+        "id": "journal-cv-bridge",
+        "y": 608,
+        "h": 39,
+        "w": 317
+      },
+      {
+        "id": "journal-cv-bridge-link",
+        "y": 630,
+        "h": 15,
+        "w": 85
+      },
+      {
+        "id": "journal-proof-loop",
+        "y": 655,
+        "h": 39,
+        "w": 317
+      },
+      {
+        "id": "journal-proof-loop-cv-link",
+        "y": 677,
+        "h": 15,
+        "w": 33
+      },
+      {
+        "id": "journal-empty-state",
+        "y": 574,
+        "h": 234,
+        "w": 343
+      },
+      {
+        "id": "journal-empty-state-cta",
+        "y": 739,
+        "h": 44,
+        "w": 178
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nDev Construction\nD\nDarbo žurnalas\nMano erdvės →\n\nParodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.\n\nVIRŠUS\nKORTELĖ\nĮRAŠAI\n›\nKORTELĖ\nDC\nDARBUOTOJO KORTELĖ\nDev Company\n\nTavo profilio apžvalga. Skaičiai tikri — nieko nepridėta.\n\n0/6\nPRADŽIA\nPASIRUOŠIMAS\n0/6 ŽINGSNIŲ ATLIKTA\nToliau:\nProfesija\nPrieinamumas\nĮgūdžiai\nDarbo žurnalas\nĮrašai\nDarbo kortelė\nDARBO KORTELĖ NEPATEIKTA\nDARBO KORTELĖ\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n\nTokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.\n\nDARBO ĮRAŠAI LAIKE\n\nDar nėra įrašų — pirmas darbo įrašas pradės šį grafiką.\n\nKIEK DARBO ĮRAŠŲ UŽ KIEKVIENĄ ĮGŪDĮ\n\nDar nėra įgūdžių su darbo įrašais.\n\nDARBO ISTORIJOS LAIKO JUOSTA\n\nBe datos: 3 — laiko juostoje nerodomi\n\n0\nĮGŪDŽIAI\nTavo nurodyti įgūdžiai (dar neperžiūrėti).\n0\nKANDIDATINIAI ĮGŪDŽIAI\nĮgūdžiai, kuriuos pridėjai savais žodžiais (tikslinama, neperžiūrėta).\n0\nĮRAŠAI\nTavo darbo žurnalo įrašai.\n0\nREIKIA DĖMESIO\nŠiuo metu nieko nereikia daryti.\nDARBO ISTORIJA\nDev Construction\nDev Construction\nDOKUMENTAI\nDar nėra įrašytų dokumentų.\nKITŲ ATSAKAS\nKiti dar nieko nepažymėjo tavo įrašuose.\nTik realūs vadovų ar užsakovų atsakymai. Jokio bendro žmogaus balo.\nRINKOS AKTYVUMAS\nNepakanka rinkos duomenų\nNAUJAUSIAS ĮRAŠAS\nĮrašų dar nėra — pirmas žurnalo įrašas bus pirmasis.\nKaip pagerinti pasiruošimą\n\nŠtai ką dar verta sutvarkyti, kad jūsų kortelė būtų stipresnė.\n\nProfesija nurodyta\nNurodyti profesiją\nPrieinamumas nurodytas\nNurodyti prieinamumą\nPridėti įgūdžiai\nPridėti įgūdžių\nDarbo žurnalo įrašai\nRašyti įrašą\nĮgūdžiai paremti darbu\nPridėti darbo įrašą\nDarbo kortelė pateikta\nPateikti kortelę\nDarbui kitoje šalyje reikia atitinkamų dokumentų. Be jų nesate rodomi kaip pasiruošę dirbti užsienyje — matote tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų.\n\nĮrašai privatūs, kol nepasirinksite kitaip. Peržiūros sluoksnis rodomas tik kai yra reali peržiūra.\n\nŽurnalo peržiūra dar neįjungta. Galite žymėti darbą jau dabar — bet kad įrašai būtų peržiūrimi, organizacijos savininkas turi įjungti jūsų žurnalo peržiūrą.\n\nDarbas fiksuojamas pokalbyje — parašyk, ką dirbai, ir įrašas atsiras čia.\n\nUžfiksuoti darbą pokalbyje\nĮrašyti balsu\nDarbo įrašai\nKaip naudojami jūsų įrašai?\nPradėkite kurti darbo įrašus\n\nKol kas neturite darbo įrašų — jūsų įrašai atsiras čia.\n\nSukurkite pirmą įrašą žemiau — jis lieka privatus, kol jį pateiksite.\n\nSukurti pirmą įrašą →\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\company-journal-375.png"
+  }
+]

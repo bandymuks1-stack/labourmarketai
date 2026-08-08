@@ -14,6 +14,7 @@ import {
   loadTailoredNeed,
   type TailoredNeedResult,
 } from "@/lib/cv-export/tailored";
+import { formatUtcDate } from "@/lib/time/display";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -80,7 +81,7 @@ export default async function VerifiedCvPage({
     redirect(`/${locale}/auth/login`);
   }
 
-  const generatedAt = new Date().toLocaleDateString(locale);
+  const generatedAt = formatUtcDate(new Date(), locale) ?? "";
 
   if (!result.ok) {
     // Honest worker-only gate: the Verified CV is built from the worker's
@@ -185,7 +186,7 @@ export default async function VerifiedCvPage({
   if (priv.availableFrom) {
     privateRows.push({
       label: t("privateDetails.availableFrom"),
-      value: new Date(priv.availableFrom).toLocaleDateString(locale),
+      value: formatUtcDate(priv.availableFrom, locale) ?? "",
     });
   }
   if (priv.willingToRelocate !== null) {
@@ -389,12 +390,8 @@ export default async function VerifiedCvPage({
                 const roleLabel = tRel.has(e.relationship)
                   ? tRel(e.relationship)
                   : e.relationship;
-                const start = e.startedAt
-                  ? new Date(e.startedAt).toLocaleDateString(locale)
-                  : null;
-                const end = e.endedAt
-                  ? new Date(e.endedAt).toLocaleDateString(locale)
-                  : null;
+                const start = formatUtcDate(e.startedAt, locale);
+                const end = formatUtcDate(e.endedAt, locale);
                 const range =
                   start && end
                     ? `${start} – ${end}`
@@ -481,7 +478,7 @@ export default async function VerifiedCvPage({
                   ) : null}
                   {d.validUntil ? (
                     <span className="text-xs text-zinc-500">
-                      {t("validUntil")}: {new Date(d.validUntil).toLocaleDateString(locale)}
+                      {t("validUntil")}: {formatUtcDate(d.validUntil, locale)}
                     </span>
                   ) : null}
                 </li>
@@ -499,7 +496,7 @@ export default async function VerifiedCvPage({
                   <span className="font-medium">{c.title}</span>
                   {c.achievedAt ? (
                     <span className="text-xs text-zinc-600">
-                      {new Date(c.achievedAt).getFullYear()}
+                      {formatUtcDate(c.achievedAt, locale, { year: "numeric" })}
                     </span>
                   ) : null}
                   <span className="text-meta uppercase tracking-wide text-zinc-500">
@@ -592,7 +589,7 @@ export default async function VerifiedCvPage({
                 <li key={p.title} className={`flex items-baseline gap-2 ${bodyText}`}>
                   <span className="font-medium">{p.title}</span>
                   <span className="text-xs text-zinc-500">
-                    {new Date(p.lastConfirmedAt).toLocaleDateString(locale)}
+                    {formatUtcDate(p.lastConfirmedAt, locale)}
                   </span>
                 </li>
               ))}
@@ -619,9 +616,7 @@ export default async function VerifiedCvPage({
                   {a.achievedAt || a.description ? (
                     <span className="text-xs text-zinc-600">
                       {[
-                        a.achievedAt
-                          ? new Date(a.achievedAt).toLocaleDateString(locale)
-                          : null,
+                        formatUtcDate(a.achievedAt, locale),
                         a.description,
                       ]
                         .filter(Boolean)
@@ -652,7 +647,7 @@ export default async function VerifiedCvPage({
                 {cv.proof.map((row, i) => (
                   <tr key={`${row.confirmedAt}-${i}`} className="border-b border-zinc-200">
                     <td className="py-1.5 pr-3">
-                      {new Date(row.entryDate).toLocaleDateString(locale)}
+                      {formatUtcDate(row.entryDate, locale)}
                     </td>
                     <td className="py-1.5 pr-3">{row.projectTitle ?? "—"}</td>
                     <td className="py-1.5">

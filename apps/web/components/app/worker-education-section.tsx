@@ -189,14 +189,14 @@ export function WorkerEducationSection({
                         });
                         setOpen(true);
                       }}
-                      className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
                     >
                       {t("edit")}
                     </button>
                     <button
                       type="button"
                       onClick={() => remove(entry.id)}
-                      className="rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
+                      className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:border-state-danger hover:text-state-danger"
                       data-testid={`worker-education-remove-${entry.id}`}
                     >
                       {t("remove")}
@@ -215,7 +215,7 @@ export function WorkerEducationSection({
             <Button
               type="button"
               size="sm"
-              className="w-fit"
+              className="w-fit min-h-11"
               onClick={() => {
                 setForm(EMPTY_FORM);
                 setOpen(true);
@@ -231,26 +231,28 @@ export function WorkerEducationSection({
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label>{t("institution")}</Label>
+                  <Label id="education-institution-label">{t("institution")}</Label>
                   <input
                     type="text"
+                    aria-labelledby="education-institution-label"
                     value={form.institution}
                     maxLength={200}
                     onChange={(e) => setForm({ ...form, institution: e.target.value })}
                     placeholder={t("institutionPlaceholder")}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                    className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                     data-testid="worker-education-institution"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>{t("program")}</Label>
+                  <Label id="education-program-label">{t("program")}</Label>
                   <input
                     type="text"
+                    aria-labelledby="education-program-label"
                     value={form.program}
                     maxLength={200}
                     onChange={(e) => setForm({ ...form, program: e.target.value })}
                     placeholder={t("programPlaceholder")}
-                    className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                    className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -266,37 +268,40 @@ export function WorkerEducationSection({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label>{t("startYear")}</Label>
+                    <Label id="education-start-year-label">{t("startYear")}</Label>
                     <input
                       type="number"
                       inputMode="numeric"
+                      aria-labelledby="education-start-year-label"
                       min={1900}
                       max={2100}
                       value={form.startYear}
                       onChange={(e) => setForm({ ...form, startYear: e.target.value })}
                       placeholder={t("yearPlaceholder")}
-                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
+                      className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label>{t("endYear")}</Label>
+                    <Label id="education-end-year-label">{t("endYear")}</Label>
                     <input
                       type="number"
                       inputMode="numeric"
+                      aria-labelledby="education-end-year-label"
                       min={1900}
                       max={2100}
                       value={form.endYear}
                       disabled={form.isCurrent}
                       onChange={(e) => setForm({ ...form, endYear: e.target.value })}
                       placeholder={t("yearPlaceholder")}
-                      className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-50"
+                      className="min-h-11 w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue disabled:opacity-50"
                     />
                   </div>
                 </div>
               </div>
-              <label className="flex items-center gap-2 text-sm text-text-secondary">
+              <label className="inline-flex min-h-11 items-center gap-2 text-sm text-text-secondary">
                 <input
                   type="checkbox"
+                  className="size-5"
                   checked={form.isCurrent}
                   onChange={(e) => setForm({ ...form, isCurrent: e.target.checked })}
                 />
@@ -306,6 +311,7 @@ export function WorkerEducationSection({
                 <Button
                   type="button"
                   size="sm"
+                  className="min-h-11"
                   loading={pending}
                   disabled={pending || form.institution.trim().length < 2 || form.typeSlug === ""}
                   onClick={submit}
@@ -320,7 +326,7 @@ export function WorkerEducationSection({
                     setForm(EMPTY_FORM);
                     setError(null);
                   }}
-                  className="text-xs text-text-secondary hover:text-text-primary"
+                  className="inline-flex min-h-11 items-center text-xs text-text-secondary hover:text-text-primary"
                 >
                   {t("cancel")}
                 </button>

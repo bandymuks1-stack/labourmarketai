@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import type { IntelligenceTimelineV1 } from "@/lib/intelligence/timeline";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Intelligence TIMELINE renderer (Trust Layer v1) — shows how an insight
@@ -24,7 +25,7 @@ export async function IntelligenceTimeline({
   const tc = (code: string) =>
     t(code.replace(/^intelligence\./, "") as never) as string;
 
-  const dateFmt = new Intl.DateTimeFormat(locale, {
+  const dateFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -33,7 +34,7 @@ export async function IntelligenceTimeline({
   });
   const fmtIso = (iso: string): string => {
     const ms = Date.parse(iso);
-    return Number.isFinite(ms) ? dateFmt.format(new Date(ms)) : iso;
+    return Number.isFinite(ms) ? (dateFmt(ms) ?? iso) : iso;
   };
 
   return (

@@ -27,6 +27,7 @@ import type {
   FunnelEventName,
   FunnelMetadata,
 } from "@/lib/telemetry/funnel-events";
+import { isNonProductionHostname } from "@/lib/telemetry/production-host";
 
 const SESSION_KEY = "lm.pilot.session";
 const startTimes = new Map<string, number>();
@@ -196,15 +197,15 @@ export function recordEvent(
 
 /** Production hosts. Anything else (localhost, 127.0.0.1, *.vercel.app
  *  preview deploys) is a non-production origin whose funnel events must not
- *  pollute the owner's real acquisition metrics. */
+ *  pollute the owner's real acquisition metrics.
+ *
+ *  The rule itself now lives in `production-host.ts` and is shared with the
+ *  SERVER emitter, which previously stamped nothing — so one preview session
+ *  produced half-marked telemetry (client events excluded, server events
+ *  counted as real). */
 function isNonProductionHost(): boolean {
   if (typeof window === "undefined") return false;
-  const host = window.location.hostname.toLowerCase();
-  if (host === "labourmarket-ai.vercel.app") return false; // managed prod alias
-  if (host === "labourmarket.ai" || host.endsWith(".labourmarket.ai")) {
-    return false;
-  }
-  return true;
+  return isNonProductionHostname(window.location.hostname);
 }
 
 /** Record an activation-funnel event (P0-A). Thin, type-safe wrapper over

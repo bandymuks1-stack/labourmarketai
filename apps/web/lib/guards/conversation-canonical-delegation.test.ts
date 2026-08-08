@@ -183,31 +183,43 @@ describe("structure — exactly one conversation surface", () => {
 });
 
 describe("reachability — no fixed control is buried by the chat's bottom stack", () => {
-  it("the conversation surface really lifts the language-feedback FAB", () => {
-    // The widget exposes `--feedback-fab-bottom` on the contract that "a
-    // surface with a bottom bar sets this variable to its own height". The
-    // conversation home has two stacked bottom elements AND gives the composer
-    // `z-50`, so skipping the lift leaves the FAB visible but unclickable —
-    // half a fix is worse than none, because it looks done.
+  /**
+   * THIS TEST USED TO PIN A WORKAROUND.
+   *
+   * It asserted that the conversation surface lifts the floating feedback
+   * button via `--feedback-fab-bottom`, because the button sat on the
+   * composer's send control and silently ate the tap. That made the workaround
+   * permanent: the guard would have gone red on any attempt to remove it, and
+   * stayed green for as long as a floating control kept covering things
+   * elsewhere (the calendar, the map).
+   *
+   * The cause is fixed instead of compensated — the trigger is a menu item, so
+   * nothing floats over the composer at all. What is pinned now is the property
+   * that actually matters and that the lift was only approximating: the
+   * feedback trigger must not be a fixed-position element.
+   */
+  it("the feedback trigger cannot cover the composer, because nothing floats", () => {
     const widget = read("components/app/language-feedback-widget.tsx");
-    expect(widget).toMatch(/--feedback-fab-bottom/);
+    // No fixed-position TRIGGER. The modal itself is legitimately
+    // `fixed inset-0` while open — that is a dialog the user just asked for,
+    // not a resting control sitting on the page — so the assertion targets the
+    // resting geometry the FAB used, not the string "fixed".
+    expect(widget).not.toMatch(/className="fixed right-3/);
+    // The lift must be gone from the RENDERED geometry. Matched as the Tailwind
+    // utility rather than as the bare variable name, because the widget's
+    // comment explains why the variable was deleted — and prose about a class
+    // must never break an assertion about what the component renders (the same
+    // rule the other half of this guard set already follows).
+    expect(widget).not.toMatch(/bottom-\[var\(--feedback-fab-bottom/);
+    // The workaround must be gone from the stylesheet too, or it will be
+    // re-adopted by the next floating control someone adds.
+    expect(read("app/globals.css")).not.toMatch(/--feedback-fab-bottom:/);
 
-    // The flag must land on <html>: the FAB is a SIBLING of the chrome, so a
-    // custom property set inside the chat subtree could never cascade to it.
-    const chrome = read("components/app/dashboard-chrome.tsx");
-    expect(chrome).toMatch(/document\.documentElement/);
-    expect(chrome).toMatch(/dataset\.surface\s*=\s*["']conversation["']/);
-    // …and it must be cleaned up, or every other route inherits the lift.
-    expect(chrome).toMatch(/delete\s+root\.dataset\.surface/);
-
-    // Both breakpoints are defined — mobile carries the extra bottom nav.
-    const css = read("app/globals.css");
-    expect(css).toMatch(
-      /html\[data-surface="conversation"\][\s\S]{0,120}--feedback-fab-bottom/,
-    );
-    expect(css).toMatch(
-      /@media\s*\(min-width:\s*768px\)[\s\S]{0,200}--feedback-fab-bottom/,
-    );
+    // The trigger lives in the account menu — one predictable place present on
+    // every dashboard route, obstructing nothing.
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/data-testid="language-feedback-open"/);
+    expect(menu).toMatch(/FEEDBACK_OPEN_EVENT/);
   });
 });
 

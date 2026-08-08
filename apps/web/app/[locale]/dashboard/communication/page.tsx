@@ -18,6 +18,7 @@ import {
 } from "@/lib/communication/inbox-priority";
 import { ConversationQuickReply } from "@/components/app/conversation-quick-reply";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { formatUtcDateTime } from "@/lib/time/display";
 
 /**
  * Communication v1 — thread list page.
@@ -308,7 +309,7 @@ export default async function CommunicationListPage({
               ·
             </span>
             <span className="text-text-muted">
-              {new Date(c.updated_at).toLocaleString(locale)}
+              {formatUtcDateTime(c.updated_at, locale)}
             </span>
           </div>
         </Link>

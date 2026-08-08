@@ -13,6 +13,7 @@ import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 /** Map of callback-route `?error=…` codes to a translation key under
  *  `auth.errors.oauth.*`. Any code not listed here falls through to the
@@ -109,11 +110,17 @@ export function LoginForm() {
   }
 
   const disabled = status === "signing";
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+    /* `method="post"` is the PRE-HYDRATION fallback, not a real endpoint.
+       Without it a submit issued before React attaches `onSubmit` falls back to
+       the browser default — a GET to this URL with every field as a query
+       parameter — which put the password in the address bar, the history, the
+       server access log and any Referer:
+         /lt/auth/login?email=…&password=…
+       Reproduced in a real browser on 2026-08-07. POST keeps the values in a
+       request body that nothing here reads. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
@@ -191,7 +198,7 @@ export function LoginForm() {
             setEmail(e.target.value);
             if (passwordFailed) setPasswordFailed(false);
           }}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
@@ -212,7 +219,7 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 

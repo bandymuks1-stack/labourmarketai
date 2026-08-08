@@ -10,6 +10,7 @@ import { QuickConfirmBatch } from "@/components/app/quick-confirm-batch";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
+import { utcDayKey, utcTodayKey } from "@/lib/time/display";
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
  *  gated reviewable set as the inbox, same write RPCs; this view only cuts
@@ -42,12 +43,12 @@ export default async function QuickConfirmPage({
     skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
   }));
 
-  // "Confirm all of today" — strictly the entries created today (the
-  // reviewer's server day); older backlog stays per-card.
-  const todayKey = new Date().toDateString();
-  const todays = entries.filter(
-    (e) => new Date(e.createdAt).toDateString() === todayKey,
-  );
+  // "Confirm all of today" — strictly the entries created today. "Today" is
+  // the canonical UTC day (W12), the same day the entry is filed under
+  // everywhere else; deriving it from the server's ambient zone made the batch
+  // disagree with the date printed on the cards it was batching.
+  const todayKey = utcTodayKey();
+  const todays = entries.filter((e) => utcDayKey(e.createdAt) === todayKey);
 
   // Exceptions pyramid (DESIGN_SOUL §3): the REAL server-flagged exceptions
   // for the batch candidates, surfaced BEFORE the confirm click. RPC absent

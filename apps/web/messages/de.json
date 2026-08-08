@@ -451,6 +451,7 @@
     "noResults": "Nichts gefunden. Versuchen Sie ein anderes Wort — z. B. Lebenslauf, Journal, Team, Dokumente, Preise.",
     "shortcutHint": "Ctrl / ⌘ K",
     "recentLabel": "Zuletzt geöffnet",
+    "startersLabel": "Hier starten",
     "objectsLabel": "Ihre eigenen Einträge",
     "objectsLoading": "Ihre eigenen Einträge werden durchsucht…",
     "objectsError": "Ihre Einträge konnten gerade nicht durchsucht werden. Die Seitenlinks oben funktionieren weiterhin.",
@@ -485,7 +486,8 @@
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
       "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
       "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
-      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten."
+      "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten.",
+      "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben."
     },
     "worker": {
       "evidence": {
@@ -519,7 +521,12 @@
         "title": "Bedarfsanfragen",
         "open": "Offen",
         "total": "Gesamt",
-        "link": "Bedarfserfassung öffnen"
+        "link": "Bedarfserfassung öffnen",
+        "structured": "Strukturiert",
+        "shortlisted": "Auf der Shortlist",
+        "interest": "Interesse von Arbeitskräften",
+        "timeToFillDays": "Median-Tage bis zur Besetzung",
+        "timeToFillUnmeasured": "Die Besetzungszeit ist noch nicht messbar — es gibt keine angenommenen Buchungen. Anstelle echter Daten wird keine Zahl angezeigt."
       },
       "projects": {
         "title": "Projekte nach Status",
@@ -701,42 +708,6 @@
       "trust": "Vertrauen / Bereitschaft"
     }
   },
-  "marketplaceHub": {
-    "title": "Marktplatz",
-    "subtitle": "Ein kompakter Ort, der Sie, Ihre Unternehmen, die Karte und Nachrichten verbindet.",
-    "notFakeNote": "Es werden nur echte Einträge, Unternehmen und Produkte angezeigt. Was noch vorbereitet wird, ist als „In Vorbereitung“ markiert.",
-    "map": {
-      "title": "Karte",
-      "desc": "Ihre echten Signale und Marktsignale auf der Karte.",
-      "cta": "Karte öffnen"
-    },
-    "opportunities": {
-      "title": "Arbeit, Bedarfe, Chancen",
-      "desc": "Echte Chancen und Suche.",
-      "cta": "Chancen ansehen"
-    },
-    "offers": {
-      "title": "Unternehmens- & persönliche Angebote",
-      "desc": "Der Angebotsbereich wird noch vorbereitet."
-    },
-    "shop": {
-      "title": "Shop, Dienstleistungen, Vermietungen, Immobilien",
-      "desc": "Produkte, Dienstleistungen, Vermietungen und Immobilien werden noch vorbereitet."
-    },
-    "individual": {
-      "title": "Individuelle Tätigkeit",
-      "desc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil.",
-      "cta": "Profil öffnen"
-    },
-    "company": {
-      "title": "Unternehmenskanäle",
-      "desc": "Der kommerzielle Kanal und die Einstellungen des ausgewählten Unternehmens.",
-      "cta": "Unternehmen öffnen",
-      "noCompanyCta": "Unternehmen hinzufügen",
-      "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten."
-    },
-    "prepareBadge": "In Vorbereitung"
-  },
   "profileAvatar": {
     "upload": "Foto hochladen",
     "change": "Foto ändern",
@@ -800,13 +771,13 @@
     "candidates": {
       "context": "Unternehmen · Einstellen",
       "whatTitle": "Was Sie hier tun können",
-      "whatBody": "Prüfen Sie Kandidaten und Shortlists für Ihre Bedarfe.",
-      "primaryLabel": "Arbeitskräfte finden",
-      "nextLine": "Als Nächstes: Markieren Sie die Passenden und starten Sie eine Unterhaltung.",
+      "whatBody": "Halten Sie Ihre eigenen privaten Notizen zu Personen und Anbietern fest, mit denen Sie arbeiten möchten — auch zu noch nicht registrierten.",
+      "primaryLabel": "Registrierte Mitarbeiter finden",
+      "nextLine": "Als Nächstes: Sobald sich jemand registriert, verknüpfen Sie den Entwurf mit dem echten Konto.",
       "flow": {
-        "step1": "Fügen Sie einen Kandidaten hinzu oder prüfen Sie Ihre Entwürfe.",
-        "step2": "Das System hält sie privat, bis Sie sich entscheiden.",
-        "step3": "Markieren Sie die Passenden und starten Sie eine Unterhaltung."
+        "step1": "Fügen Sie eine Person oder einen Anbieter hinzu, oder sehen Sie Ihre Entwürfe durch.",
+        "step2": "Diese Notizen sehen nur Sie — sie werden nicht mit Ihrer Organisation geteilt.",
+        "step3": "Sobald sie sich registrieren, verknüpfen Sie den Entwurf mit dem echten Konto."
       }
     },
     "buyer": {
@@ -1206,6 +1177,12 @@
     "lead": "Das wissen wir bereits über Sie.",
     "explainer": "Danach beurteilt ein Arbeitgeber, welche Arbeit zu Ihnen passt.",
     "notVerified": "Dies sind Angaben, die Sie selbst gemacht haben — noch nicht geprüft. Nachweise schaffen Vertrauen, Sie können sie aber auch später hinzufügen.",
+    "doneDisclosure": "Was bereits vorhanden ist",
+    "askWorkspace": "Im Arbeitsbereich fragen",
+    "state": {
+      "done": "Erledigt",
+      "todo": "Noch offen"
+    },
     "primaryAction": "Fehlendes ergänzen",
     "primaryActionJournal": "Arbeitsnachweis hinzufügen",
     "journalLink": "Arbeitsjournal",
@@ -2821,6 +2798,14 @@
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
     "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
+  },
+  "profileIdentityNotice": {
+    "title": "Dies ist Ihr Personenprofil",
+    "bodySectionsEmpty": "Ihr Konto hat derzeit nur eine Organisationsidentität — die Personenidentität wurde nicht hinzugefügt. Die Personenbereiche unten (Lebenslauf, Verfügbarkeit und Arbeitspräferenzen, Sprachen, Ausbildung, Erfolge, Vertrauenssignale) gehören zu dieser Seite, sind aber leer, weil es noch keine Personendaten gibt. Es wird nichts automatisch ausgefüllt.",
+    "bodySectionsHidden": "Ihr Konto hat derzeit nur eine Organisationsidentität — eine Personenidentität existiert noch nicht. Personenbereiche (Lebenslauf, Verfügbarkeit und Arbeitspräferenzen, Sprachen, Ausbildung, Erfolge, Vertrauenssignale) werden nicht angezeigt, weil es keine Personendaten gibt. Nichts ist versehentlich verborgen und nichts ist verloren gegangen.",
+    "companyProfileHint": "Die Angaben Ihrer Organisation finden Sie im Unternehmensprofil.",
+    "companyProfileLink": "Unternehmensprofil öffnen",
+    "addIdentityHint": "Um auch als Person zu arbeiten, fügen Sie die Personenidentität im Rollenwechsler oben auf der Seite hinzu. Es wird nichts automatisch angelegt oder ausgefüllt."
   },
   "skillGroups": {
     "profession": "Beruf / Arbeitsrichtung",
@@ -6281,7 +6266,8 @@
         "comment": "Kommentar",
         "user": "Benutzer"
       }
-    }
+    },
+    "menuLabel": "Problem melden"
   },
   "common": {
     "localeSwitch": "Sprache",
@@ -6808,7 +6794,7 @@
       "availability": "Verfügbarkeit",
       "availableFrom": "Verfügbar ab",
       "relocate": "Umzugsbereit",
-      "transport": "Eigenes Fahrzeug",
+      "transport": "Kann selbstständig zur Arbeit kommen",
       "yes": "Ja",
       "no": "Nein",
       "status": {
@@ -8678,6 +8664,7 @@
     "pastHidden": "Abgeschlossene Einträge werden hier nicht angezeigt: {count}. Sie bleiben auf ihren eigenen Seiten.",
     "conflict": {
       "flag": "Termine überschneiden sich",
+      "withVisible": "Überschneidet sich mit {partners} ab {date}.",
       "hiddenByFilter": "Überschneidet sich mit {sources}, das dieser Filter ausblendet."
     },
     "context": {
@@ -8721,7 +8708,11 @@
       "recorded": "Erfasst"
     },
     "month": {
-      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen."
+      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen.",
+      "legend": {
+        "journal": "Journal ausgefüllt",
+        "unfilled": "Gearbeitet, nicht erfasst"
+      }
     },
     "day": {
       "empty": "An diesem Tag gibt es keine Einträge."
@@ -8746,7 +8737,8 @@
         "minutes": "Min.",
         "days": "T"
       }
-    }
+    },
+    "pastLink": "Frühere Tage"
   },
   "workforcePlanning": {
     "eyebrow": "Firmenbereich",
@@ -8763,7 +8755,7 @@
       "title": "Weitere Einstiegspunkte",
       "demand": "Arbeitsbedarf oder Position anlegen",
       "project": "Projekt anlegen",
-      "candidates": "Kandidaten ansehen",
+      "candidates": "Kandidaten-Entwürfe",
       "network": "Personen und Firmen finden"
     },
     "summary": {
@@ -8824,6 +8816,12 @@
       "demandError": "Arbeitsbedarfe konnten gerade nicht gelesen werden.",
       "projectError": "Projekte konnten gerade nicht gelesen werden.",
       "capacityError": "Ein Teil der Kapazitätsdaten konnte gerade nicht gelesen werden."
+    },
+    "availability": {
+      "title": "Wer nicht verfügbar ist",
+      "intro": "Genehmigte Abwesenheiten der von Ihnen verwalteten Mitarbeitenden. Nur Daten — der Grund bleibt privat.",
+      "unavailable": "Nicht verfügbar",
+      "unnamedWorker": "Mitarbeiter/in"
     }
   },
   "tasks": {
@@ -9261,11 +9259,11 @@
   "workerPrefs": {
     "title": "Arbeitspräferenzen",
     "hint": "Geben Sie nur an, was wirklich auf Sie zutrifft — alles, was auf „Keine Angabe“ steht, bleibt ohne Angabe. Diese Präferenzen werden nur gemäß Ihren Datenschutz-Einwilligungen geteilt.",
-    "willingToRelocate": "Bereit, für die Arbeit umzuziehen",
-    "needsAccommodation": "Benötigt gestellte Unterkunft",
-    "hasTransport": "Eigenes Fahrzeug vorhanden",
-    "teamAvailable": "Kann im Team arbeiten",
-    "soloAvailable": "Kann allein arbeiten",
+    "willingToRelocate": "Ich bin bereit, für die Arbeit umzuziehen",
+    "needsAccommodation": "Ich benötige eine gestellte Unterkunft",
+    "hasTransport": "Ich kann selbstständig zur Arbeit kommen",
+    "teamAvailable": "Ich kann im Team arbeiten",
+    "soloAvailable": "Ich kann allein arbeiten",
     "maxTripDays": "Längste Montagereise (Tage)",
     "contractType": "Bevorzugte Vertragsform",
     "note": "Hinweis zur Verfügbarkeit",
@@ -9294,12 +9292,12 @@
         "gross": "Brutto (vor Steuern)",
         "net": "Netto (ausgezahlt)"
       },
-      "nightShifts": "Bereit, Nachtschichten zu arbeiten",
-      "weekendShifts": "Bereit, am Wochenende zu arbeiten",
-      "overtime": "Bereit, Überstunden zu machen",
+      "nightShifts": "Ich bin bereit, Nachtschichten zu arbeiten",
+      "weekendShifts": "Ich bin bereit, am Wochenende zu arbeiten",
+      "overtime": "Ich bin bereit, Überstunden zu machen",
       "licenceCategories": "Führerscheinklassen",
-      "ownVehicle": "Hat eigenes Fahrzeug",
-      "ownTools": "Hat eigenes Werkzeug",
+      "ownVehicle": "Ich habe ein eigenes Fahrzeug",
+      "ownTools": "Ich habe eigenes Werkzeug",
       "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
       "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
     }
@@ -9424,7 +9422,10 @@
       }
     },
     "organizations": {
-      "title": "Meine Unternehmen"
+      "title": "Meine Unternehmen",
+      "noCompanyCta": "Unternehmen hinzufügen",
+      "noCompanyDesc": "Sie haben noch kein Unternehmen. Erstellen Sie Ihr erstes, um einen Unternehmenskanal zu erhalten.",
+      "individualDesc": "Treten Sie als unabhängiger Anbieter auf — verwaltet in Ihrem persönlichen Profil."
     },
     "relationships": {
       "title": "Aktive Beziehungen",
@@ -9815,10 +9816,10 @@
     "chooseLevel": "Niveau wählen",
     "perMonth": "€/Monat",
     "availabilityKeys": {
-      "willingToRelocate": "Umzugsbereit",
-      "hasTransport": "Eigenes Fahrzeug",
-      "nightShiftsOk": "Kann Nachtschichten arbeiten",
-      "weekendShiftsOk": "Kann am Wochenende arbeiten"
+      "willingToRelocate": "Ich bin umzugsbereit",
+      "hasTransport": "Ich habe ein eigenes Fahrzeug",
+      "nightShiftsOk": "Ich kann Nachtschichten arbeiten",
+      "weekendShiftsOk": "Ich kann am Wochenende arbeiten"
     },
     "imageOcr": {
       "label": "Lebenslauf-Foto / Bild (JPG, PNG)",
@@ -10718,7 +10719,7 @@
         "salaryMax": "Lohn bis (€)",
         "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Umzugsbereit?",
-        "hasTransport": "Eigenes Fahrzeug?",
+        "hasTransport": "Können Sie selbstständig zur Arbeit kommen?",
         "needsAccommodation": "Unterkunft nötig?",
         "availabilityNote": "Notiz (optional)",
         "availabilityNotePlaceholder": "z. B. verfügbar ab August, bevorzugt 2-Wochen-Rotationen",
@@ -11182,6 +11183,7 @@
       "actionNotAuthorized": "Das kannst du von hier aus nicht tun.",
       "bookingStart": "Beginn",
       "bookingEnd": "Voraussichtliches Ende",
+      "bookingEndHint": "Leer lassen bucht nur einen einzelnen Tag — ein leeres Ende hält die Person nicht über das Startdatum hinaus.",
       "bookingNote": "Notiz",
       "projectError": "Das Projekt konnte nicht gelesen werden.",
       "projectNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensprojekte.",
@@ -11203,6 +11205,8 @@
       "projectStagesEmpty": "Für dieses Projekt wurden noch keine Phasen erfasst.",
       "projectStagesUnavailable": "Phasen können in dieser Umgebung nicht gelesen werden — deshalb zeigen wir keine leere Liste, als gäbe es keine.",
       "projectAssignWorker": "Mitarbeiter zuweisen",
+      "projectOpenOperations": "Projektsteuerung öffnen",
+      "projectOpenProject": "Projekt öffnen",
       "projectCompletedNoAssign": "Das Projekt ist abgeschlossen — es kann niemand mehr zugewiesen werden.",
       "projectTerminal": "Ein abgeschlossenes Projekt kann nicht mehr geändert werden. Es bleibt als Historie erhalten.",
       "projectActionPublish": "Projekt veröffentlichen",

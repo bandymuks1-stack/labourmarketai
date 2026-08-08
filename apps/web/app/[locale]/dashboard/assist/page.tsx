@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAssistView } from "@/lib/assist/assist";
 import { ORG_SUMMARY_SOURCE_KEYS } from "@/lib/assist/assist-model";
 import type { Role } from "@/lib/auth/actions";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * AI assistance centre (control room PR J, capability gap map §10) — ONE
@@ -60,7 +61,7 @@ export default async function AssistPage({
   const tAll = await getTranslations();
 
   const view = await getAssistView(role);
-  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
 
   const sourcesList = (keys: readonly string[], testid: string) => (
     <p
@@ -243,9 +244,9 @@ export default async function AssistPage({
                           </span>
                           {p.startDate ? (
                             <span>
-                              {dateFmt.format(new Date(p.startDate))}
+                              {dateFmt(p.startDate)}
                               {p.endDate
-                                ? ` – ${dateFmt.format(new Date(p.endDate))}`
+                                ? ` – ${dateFmt(p.endDate) ?? ""}`
                                 : ""}
                             </span>
                           ) : null}

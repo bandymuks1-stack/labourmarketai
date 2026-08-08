@@ -425,12 +425,16 @@ const COMPANY_DEMAND_READ_LIMIT = 500;
  * defence in depth, not a replacement for RLS: `auth.uid()` is the server's
  * own session, never a client-supplied id.
  *
- * KNOWN AND DELIBERATELY NOT FIXED HERE: the same predicate is also too
- * NARROW. `customer_requests` has a `profile_id` and no organization column,
- * so a legitimate co-manager of the same organization sees their own requests
- * only, not their organization's. Fixing that requires an organization column
- * and a policy change — schema work, owner-gated, and a different slice.
- * Being consistently too narrow is honest; being silently too wide is not.
+ * STAGE B (W8/W14-7, this slice): the predicate used to be `profile_id =
+ * user.id` — deliberately too NARROW, because `customer_requests` had no
+ * organization column. Migration `20260806200000` added exactly that
+ * organization column (applied to prod 2026-08-06, membership-gated via
+ * `has_org_demand_access`), so the read now scopes to the RESOLVED
+ * organization: a legitimate co-manager sees their organization's demand,
+ * and personal (NULL-org) rows stay out of a COMPANY surface. The scope
+ * still comes from the canonical employer-company resolver below —
+ * server-resolved, no caller-supplied id — so the `is_admin()` RLS branch
+ * remains exactly as unreachable as before (W14 P0-3).
  */
 export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntelligence> {
   const supabase = await createClient();
@@ -442,10 +446,9 @@ export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntel
   // Stage A workspace gate: this is a COMPANY surface read — it requires a
   // resolved company workspace via the ONE canonical resolver, fail-closed.
   // Without it there is no company viewer, so `no_viewer` is the honest
-  // state (never rendered as "the company has no demand"). The owner
-  // predicate below stays: the gate scopes the SURFACE, the predicate scopes
-  // the ROWS (W14 P0-3) — both are needed until the organization column
-  // exists (Stage B).
+  // state (never rendered as "the company has no demand"). The gate scopes
+  // the SURFACE, the org predicate below scopes the ROWS (W14 P0-3 +
+  // Stage B) — both remain.
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "no_viewer" };
 
@@ -458,10 +461,11 @@ export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntel
   const { data, error } = await asAny(supabase)
     .from("customer_requests")
     .select("role_or_work_type, country, location, team_size, created_at")
-    // W14 P0-3: the owner predicate. Without it an admin viewer cross-
-    // aggregated every tenant on a company surface. `user.id` is the server's
-    // own session — never a client-supplied organization or profile id.
-    .eq("profile_id", user.id)
+    // W14 P0-3 + W8 Stage B: the org predicate. Without one an admin viewer
+    // cross-aggregated every tenant on a company surface. The id comes from
+    // `requireEmployerCompany()` — the server's own resolution of the active
+    // workspace + membership — never from client input.
+    .eq("organization_id", employer.organizationId)
     .gte("created_at", windowStart)
     .limit(COMPANY_DEMAND_READ_LIMIT);
   if (error || !Array.isArray(data) || data.length === 0) {

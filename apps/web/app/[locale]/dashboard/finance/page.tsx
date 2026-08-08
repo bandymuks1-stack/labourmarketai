@@ -27,6 +27,7 @@ import {
   type FinanceRecordType,
 } from "@/lib/finance/finance-model";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
+import { createUtcFormatter } from "@/lib/time/display";
 
 /**
  * Operational finance records (control room PR I, capability gap map §9) —
@@ -211,7 +212,7 @@ export default async function FinancePage({
     return true;
   });
 
-  const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateFmt = createUtcFormatter(locale, { dateStyle: "medium" });
 
   function hiddenContext() {
     return (
@@ -287,7 +288,7 @@ export default async function FinancePage({
           <span>{t(`status.${record.status}`)}</span>
           {record.dueDate ? (
             <span className={overdue ? "text-state-danger" : undefined}>
-              {t("dueLabel")}: {dateFmt.format(new Date(record.dueDate))}
+              {t("dueLabel")}: {dateFmt(record.dueDate)}
             </span>
           ) : null}
           {overdue ? (
@@ -300,7 +301,7 @@ export default async function FinancePage({
           ) : null}
           {record.paidAt ? (
             <span className="text-state-success">
-              {t("paidLabel")}: {dateFmt.format(new Date(record.paidAt))}
+              {t("paidLabel")}: {dateFmt(record.paidAt)}
             </span>
           ) : null}
           {record.projectId ? <span>{t("projectLinked")}</span> : null}

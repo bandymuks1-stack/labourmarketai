@@ -172,6 +172,38 @@ describe("company.create-demand delegates to the canonical §17 intake", () => {
     expect(r).toEqual({ ok: true, data: { requestId: UUID2, status: "draft" } });
   });
 
+  it("draft: forwards the worker count — an employer reported it vanishing", async () => {
+    // The employer filled 4 concrete workers, ticked "Išsaugoti kaip
+    // juodraštį", was told "Išsaugota." — and the count was gone. The submit
+    // leg had always passed `teamSize`; only the draft leg dropped it, so the
+    // defect depended on a checkbox. `objectContaining` cannot catch a MISSING
+    // field, which is why this asserts the value explicitly.
+    asMock(saveDemandDraftAction).mockResolvedValue({ id: UUID2 });
+    await COMPANY_EXECUTORS["company.create-demand"](
+      COMPANY_ACTION_SCHEMAS["company.create-demand"].parse({
+        mode: "draft",
+        description: "Reikia 4 betonuotojų.",
+        role: "Betonuotojai",
+        location: "Peleniškiai, Pakruojis",
+        teamSize: 4,
+        urgency: "this_week",
+      }),
+      ctx,
+    );
+    const payload = asMock(saveDemandDraftAction).mock.calls[0][1] as Record<
+      string,
+      unknown
+    >;
+    expect(payload.teamSize).toBe("4");
+    // and nothing else the employer typed is lost on the way either
+    expect(payload).toMatchObject({
+      title: "Betonuotojai",
+      capabilities: "Reikia 4 betonuotojų.",
+      location: "Peleniškiai, Pakruojis",
+      timing: "this_week",
+    });
+  });
+
   it("draft: a canonical throw or null row is a failure, never success", async () => {
     asMock(saveDemandDraftAction).mockRejectedValue(new Error("save failed: RLS"));
     const input = COMPANY_ACTION_SCHEMAS["company.create-demand"].parse({

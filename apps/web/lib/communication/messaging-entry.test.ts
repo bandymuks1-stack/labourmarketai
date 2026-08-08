@@ -37,11 +37,27 @@ describe("entry points wired into both directions", () => {
     expect(sec).toMatch(/labelKey="messageWorker"/);
     expect(sec).toMatch(/profileId=\{w\.profileId\}/);
   });
-  it("worker → company button on the profile, only when employer resolves", () => {
-    const page = read("app/[locale]/dashboard/profile/page.tsx");
+  // W7-S4: this entry point moved from `/dashboard/profile` to
+  // `/dashboard/network`. The assertion's INTENT is unchanged — the
+  // worker→company direction exists, exactly once, and only when a real
+  // employer resolves. Only the page it is asserted against changed.
+  // (Not the communication pages: `message-counterpart-restricted.test.ts`
+  // bans contact buttons there, and that P0 guard stands.)
+  it("worker → company button on the network page, only when employer resolves", () => {
+    const page = read("app/[locale]/dashboard/network/page.tsx");
     expect(page).toMatch(/labelKey="messageCompany"/);
     expect(page).toMatch(/employerOwnerProfileId &&/);
     expect(page).toMatch(/getEmployerOwnerProfileId/);
+  });
+
+  it("the profile no longer carries a second copy of the same entry point", () => {
+    // Comment-free: the profile still explains where the button went, and
+    // that note names it.
+    const profile = read("app/[locale]/dashboard/profile/page.tsx")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^[ \t]*\/\/.*$/gm, "");
+    expect(profile).not.toMatch(/<MessageButton/);
+    expect(profile).not.toMatch(/getEmployerOwnerProfileId\(/);
   });
   it("button renders nothing without a resolved profile (no dead button)", () => {
     const btn = read("components/app/message-button.tsx");
