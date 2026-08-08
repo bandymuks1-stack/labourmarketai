@@ -228,6 +228,20 @@ export default async function AdminTelemetryPage({
             {funnel.excludedPreview > 0
               ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
               : ""}
+            {funnel.excludedAdmin > 0
+              ? ` ${funnel.excludedAdmin} platform-admin event(s) excluded.`
+              : ""}
+          </p>
+          {/* W14 item 5 — the limit of the exclusion, stated where the numbers
+              are read. Admin exclusion can only remove AUTHENTICATED internal
+              activity; browsing the landing page while logged out is, in the
+              data, identical to a real visitor. Saying so is what stops these
+              counts being read as certified-clean. */}
+          <p
+            className="text-meta text-text-muted"
+            data-testid="telemetry-funnel-contamination"
+          >
+            {funnel.historicalContaminationUnknown}
           </p>
           {/* The window returned more events than one read covers. Every share
               is withheld rather than computed from a partial population, and

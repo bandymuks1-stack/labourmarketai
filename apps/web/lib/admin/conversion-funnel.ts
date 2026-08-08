@@ -2,6 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  classifyEvent,
+  isBusinessFunnelCountable,
+  HISTORICAL_CONTAMINATION_UNKNOWN,
+} from "@/lib/analytics/population";
 
 /**
  * Acquisition-funnel summary for the owner (Pre-Advertising Launch Readiness
@@ -104,6 +109,12 @@ export type AcquisitionFunnel = {
   totalEvents: number;
   /** Count of non-production (localhost / preview) events excluded. */
   excludedPreview: number;
+  /** Count of platform-admin (owner / staff) events excluded — internal
+   *  navigation is not acquisition traffic. */
+  excludedAdmin: number;
+  /** Why no period can be certified free of internal activity. Rendered
+   *  verbatim so the panel cannot paraphrase the caveat away. */
+  historicalContaminationUnknown: string;
   /** Days of history the numbers describe — the panel states it. */
   windowDays: number;
   /** The read came back AT the row cap: more events exist in the window than
@@ -116,6 +127,8 @@ export type AcquisitionFunnel = {
 type FunnelRow = {
   event_name: string;
   metadata: Record<string, unknown> | null;
+  /** Set server-side from `auth.getUser()`; NULL for anonymous events. */
+  profile_id?: string | null;
 };
 
 /** A rate, or null. Null covers BOTH "no denominator" and "the denominator we
@@ -164,8 +177,10 @@ export async function getAcquisitionFunnel(
   // `created_at` is SELECTED as well as filtered: a window cannot be applied
   // to a column the read does not carry, and the ordering below is what makes
   // the cap keep the most recent rows instead of an arbitrary slice.
+  // `profile_id` (W14 item 5) is what makes internal activity classifiable at
+  // all — without it the funnel cannot tell the owner from a prospect.
   const { data, error } = await fromAny("pilot_events")
-    .select("event_name, metadata, created_at")
+    .select("event_name, metadata, created_at, profile_id")
     .in("event_name", names)
     .gte("created_at", funnelWindowStart(now))
     .order("created_at", { ascending: false })
@@ -179,13 +194,49 @@ export async function getAcquisitionFunnel(
       sources: [],
       totalEvents: 0,
       excludedPreview: 0,
+      excludedAdmin: 0,
+      historicalContaminationUnknown: HISTORICAL_CONTAMINATION_UNKNOWN,
       windowDays: FUNNEL_WINDOW_DAYS,
       truncated: false,
       countsAreLowerBound: false,
     };
   }
 
-  return summariseFunnel((data ?? []) as FunnelRow[]);
+  return summariseFunnel((data ?? []) as FunnelRow[], await readAdminIds(supabase));
+}
+
+/**
+ * The platform admin set — the owner and staff, NOT employers or workers.
+ *
+ * Two sources because the product carries two: a durable grant
+ * (`profile_roles.role = 'admin'`) and the currently-active role
+ * (`profiles.active_role = 'admin'`). Either makes the actor internal for
+ * acquisition purposes.
+ *
+ * A failed read yields an EMPTY set, which means "exclude nobody" — the
+ * pre-existing behaviour. Failing the other way would silently delete real
+ * traffic from the owner's funnel, which is the worse error: an inflated
+ * number is visibly suspicious, a deflated one is not.
+ */
+async function readAdminIds(supabase: SupabaseClient): Promise<Set<string>> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const [granted, active] = await Promise.all([
+      sb.from("profile_roles").select("profile_id").eq("role", "admin"),
+      sb.from("profiles").select("id").eq("active_role", "admin"),
+    ]);
+    const ids = new Set<string>();
+    for (const r of (granted?.data ?? []) as { profile_id: string }[]) {
+      if (r.profile_id) ids.add(r.profile_id);
+    }
+    for (const r of (active?.data ?? []) as { id: string }[]) {
+      if (r.id) ids.add(r.id);
+    }
+    return ids;
+  } catch {
+    return new Set<string>();
+  }
 }
 
 /**
@@ -195,6 +246,7 @@ export async function getAcquisitionFunnel(
  */
 export function summariseFunnel(
   allRows: readonly FunnelRow[],
+  adminProfileIds: ReadonlySet<string> = new Set<string>(),
 ): AcquisitionFunnel {
   // TRUNCATION IS JUDGED ON ROWS READ, BEFORE ANY FILTERING. Preview rows are
   // dropped below, which shrinks the array; deciding completeness afterwards
@@ -202,10 +254,17 @@ export function summariseFunnel(
   // confident percentages built on a partial population.
   const truncated = allRows.length >= FUNNEL_MAX_ROWS;
 
-  // Exclude events fired from non-production origins (localhost / Vercel
-  // preview) so dev/preview traffic never inflates the owner's real funnel.
-  const rows = allRows.filter((r) => r.metadata?.["preview_host"] !== true);
-  const excludedPreview = allRows.length - rows.length;
+  // ── W14 item 5: ONE population boundary, applied uniformly ──────────────
+  // Every event feeding every rate passes the same test, so the rule cannot
+  // be applied to a numerator and forgotten on its denominator. Excluding
+  // preview origins and platform-admin activity leaves identified real users
+  // and anonymous visitors — the population the acquisition question is
+  // actually about. `lib/analytics/population.ts` owns the definitions.
+  const classify = (r: FunnelRow) =>
+    classifyEvent({ profileId: r.profile_id, metadata: r.metadata }, adminProfileIds);
+  const rows = allRows.filter((r) => isBusinessFunnelCountable(classify(r)));
+  const excludedPreview = allRows.filter((r) => classify(r) === "preview").length;
+  const excludedAdmin = allRows.filter((r) => classify(r) === "admin").length;
   const countByEvent = new Map<string, number>();
   const sourceCounts = new Map<string, number>();
   for (const r of rows) {
@@ -304,6 +363,8 @@ export function summariseFunnel(
     sources,
     totalEvents: rows.length,
     excludedPreview,
+    excludedAdmin,
+    historicalContaminationUnknown: HISTORICAL_CONTAMINATION_UNKNOWN,
     windowDays: FUNNEL_WINDOW_DAYS,
     truncated,
     countsAreLowerBound: truncated,
