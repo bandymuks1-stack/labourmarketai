@@ -96,7 +96,15 @@ describe("the server emitters resolve the real locale", () => {
 
   it("the shared server emitter resolves attribution AND locale before inserting", () => {
     const src = byRel("lib/telemetry/server-funnel.ts")!.code;
-    expect(src).toMatch(/Promise\.all\(\[analyticsAttributionMetadata\(\), serverEventLocale\(\)\]\)/);
+    // THE PROPERTY: both resolvers are awaited CONCURRENTLY, in one
+    // Promise.all, before the insert. Pinning the exact two-element literal
+    // instead made this fail the moment a third resolver was added to the same
+    // call (W14 item 5's preview marker) — a green-to-red flip that said
+    // nothing about the behaviour it exists to protect.
+    const all = src.match(/Promise\.all\(\[([\s\S]*?)\]\)/);
+    expect(all, "the emitter must resolve its inputs in one Promise.all").toBeTruthy();
+    expect(all![1]).toMatch(/analyticsAttributionMetadata\(\)/);
+    expect(all![1]).toMatch(/serverEventLocale\(\)/);
     // Still fire-and-forget: a telemetry failure must never break the action.
     expect(src).toMatch(/\.catch\(/);
     expect(src).toMatch(/^\s*void /m);

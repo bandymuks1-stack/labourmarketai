@@ -62,24 +62,31 @@ describe("W14 — the funnel window is real, not prose", () => {
     // A RECORDING fake: it exercises the real code path and records what the
     // module actually asked the database for. Not a source-text assertion —
     // #1085 showed why reading the caller's text proves nothing.
-    const calls: Record<string, unknown[]> = {};
-    const record = (name: string) => (...args: unknown[]) => {
-      calls[name] = args;
-      return chain;
-    };
-    const chain: Record<string, unknown> = {
-      select: record("select"),
-      in: record("in"),
-      gte: record("gte"),
-      order: record("order"),
-      limit: (...args: unknown[]) => {
-        calls.limit = args;
-        return Promise.resolve({ data: [], error: null });
-      },
-    };
+    // The funnel reads more than one table — it also resolves the platform
+    // admin set for the W14 item-5 population boundary. So calls are recorded
+    // PER TABLE: a single shared `calls` object recorded whichever read
+    // happened to run last, which made this assert the wrong query.
+    type Rec = Record<string, unknown[]>;
+    const byTable = new Map<string, Rec>();
     const fake = {
       from: (t: string) => {
-        calls.from = [t];
+        const calls: Rec = byTable.get(t) ?? {};
+        byTable.set(t, calls);
+        const chain: Record<string, unknown> = {};
+        for (const m of ["select", "in", "gte", "order", "eq"]) {
+          chain[m] = (...args: unknown[]) => {
+            calls[m] = args;
+            return chain;
+          };
+        }
+        chain.limit = (...args: unknown[]) => {
+          calls.limit = args;
+          return Promise.resolve({ data: [], error: null });
+        };
+        // The admin reads end at `.eq(...)` rather than `.limit(...)`, so the
+        // chain has to be awaitable at any point.
+        chain.then = (res: (v: unknown) => unknown) =>
+          Promise.resolve({ data: [], error: null }).then(res);
         return chain;
       },
     };
@@ -87,10 +94,13 @@ describe("W14 — the funnel window is real, not prose", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await getAcquisitionFunnel(fake as any);
 
-    expect(calls.from).toEqual(["pilot_events"]);
+    expect([...byTable.keys()]).toContain("pilot_events");
+    const calls = byTable.get("pilot_events")!;
     // created_at must be SELECTED — a window cannot be applied to a column
     // the read does not carry.
     expect(String(calls.select?.[0])).toContain("created_at");
+    // …and profile_id, without which internal activity cannot be classified.
+    expect(String(calls.select?.[0])).toContain("profile_id");
     // …bounded in time,
     expect(calls.gte?.[0]).toBe("created_at");
     expect(typeof calls.gte?.[1]).toBe("string");

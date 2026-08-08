@@ -23,10 +23,33 @@
  * deliberately distinguishable from them in any per-session analysis.
  */
 import "server-only";
+import { headers } from "next/headers";
+
 import { recordTelemetryEvent } from "./actions";
 import { analyticsAttributionMetadata } from "./analytics-attribution";
 import { serverEventLocale } from "./server-locale";
+import { isNonProductionHostname } from "./production-host";
 import type { FunnelEventName, FunnelMetadata } from "./funnel-events";
+
+/**
+ * `{ preview_host: true }` when this request did not arrive on a production
+ * host, `{}` otherwise.
+ *
+ * The request's own `Host` header is the evidence — not `VERCEL_ENV`, which a
+ * missing or mistyped value would silently reclassify the whole funnel by, and
+ * not `NODE_ENV`, which says nothing about which database is being written to.
+ * A header that cannot be read at all yields `{}`: the row stays counted,
+ * which is the pre-existing behaviour, so a header failure can never blank the
+ * owner's funnel.
+ */
+async function serverPreviewMarker(): Promise<Record<string, true>> {
+  try {
+    const host = (await headers()).get("host");
+    return isNonProductionHostname(host) ? { preview_host: true } : {};
+  } catch {
+    return {};
+  }
+}
 
 export function emitServerFunnelEvent(
   event: FunnelEventName,
@@ -44,8 +67,12 @@ export function emitServerFunnelEvent(
   // billing_subject) — resolved HERE so all emit sites inherit it and no
   // call site can fabricate an organization. Explicit metadata wins on key
   // collision (there is none today; the attribution keys are reserved).
-  void Promise.all([analyticsAttributionMetadata(), serverEventLocale()])
-    .then(([attribution, locale]) =>
+  void Promise.all([
+    analyticsAttributionMetadata(),
+    serverEventLocale(),
+    serverPreviewMarker(),
+  ])
+    .then(([attribution, locale, previewMarker]) =>
       recordTelemetryEvent({
         sessionId: `server:${opts.source}`.slice(0, 64),
         route: opts.route ?? "/dashboard",
@@ -55,7 +82,17 @@ export function emitServerFunnelEvent(
         locale,
         eventName: event,
         result: "info",
-        metadata: { ...attribution, ...(opts.metadata ?? {}) },
+        // W14 item 5: the preview marker, from the SAME host rule the client
+        // emitter uses. Server events carried none, so a localhost or preview
+        // session had its client half excluded from the funnel and its server
+        // half counted as production — and `pnpm dev` writes to the
+        // production project, so that was ordinary development polluting the
+        // owner's mid-funnel rates. Explicit metadata still wins last.
+        metadata: {
+          ...attribution,
+          ...previewMarker,
+          ...(opts.metadata ?? {}),
+        },
       }),
     )
     .catch(() => {
