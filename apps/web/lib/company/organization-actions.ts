@@ -11,6 +11,7 @@ import {
   ACTIVE_WORKSPACE_COOKIE,
   getWorkspaceContext,
 } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 
 /**
  * Switch the ACTIVE organization for the current profile (Company
@@ -133,10 +134,25 @@ export async function clearActiveOrganization(): Promise<SwitchOrganizationResul
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "not-authenticated" };
 
-  // Session pointer first — clearing it returns this session to the
-  // personal workspace immediately, migration or not (owner audit P0.1).
+  // Session pointer first — this returns the session to the personal
+  // workspace immediately, migration or not (owner audit P0.1).
+  //
+  // D-20: it is SET to the personal sentinel, not deleted. Deleting it left no
+  // record that a choice had been made, so the next request could not tell
+  // "chose personal" from "never chose" — and for a company identity with
+  // exactly one organization the single-org default handed the person straight
+  // back to that organization. The employer could not stay in their own
+  // personal space at all. Same cookie attributes as the organization pointer,
+  // so the choice survives navigation and reload identically in both
+  // directions.
   const jar = await cookies();
-  jar.delete(ACTIVE_WORKSPACE_COOKIE);
+  jar.set(ACTIVE_WORKSPACE_COOKIE, PERSONAL_WORKSPACE_ID, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 180,
+  });
 
   const { error } = await asAny(supabase)
     .from("profiles")

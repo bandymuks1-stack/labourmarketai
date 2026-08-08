@@ -503,3 +503,96 @@ completed by a person.
 - **Production behaviour is not established by any local run.** Everything in
   session 2 was verified against the LOCAL stack. Preview and production
   verification are recorded separately.
+
+---
+
+# Session 3 — post-gate continuous delivery (2026-08-08)
+
+**Base:** `main` = `a04cb609`. Worktree `lmai-auth`, branch
+`feat/cc/auth-provider-readiness-v1`.
+
+## D-21 — CORRECTION: Google OAuth is configured in production, not gated
+
+**This overturns the session-2 classification.** Gate 1 recorded Google as
+`CONFIGURATION_GATED` on the reasoning that the credential half lives outside
+the repo and no round trip had been performed. The first half of that was wrong,
+and it was checkable without any credential.
+
+| | |
+|---|---|
+| **Method** | A read-only GET to the production Supabase authorize endpoint — `https://<ref>.supabase.co/auth/v1/authorize?provider=google` — creates nothing. A disabled provider answers with a validation error; an enabled one redirects to Google. |
+| **Result** | It redirects to `accounts.google.com/v3/signin/identifier` — the real account chooser. |
+| **Parameters observed** (all public by construction) | `client_id` present, ending `…29t.apps.googleusercontent.com` · `redirect_uri=https://<ref>.supabase.co/auth/v1/callback` · `scope=email profile` · `response_type=code` |
+| **Status** | `VERIFIED_CONFIGURED` — provider enabled, real OAuth client registered, callback correct. **No owner action is required for Google.** |
+| **Still NOT verified** | The completion of a round trip. Consenting would create a real production account, so it was not done. That step belongs to human acceptance. |
+| **Why it looked gated** | `supabase/config.toml` has no `[auth.external.google]` block, so Google genuinely cannot be exercised on the LOCAL stack. Local absence was read as production absence. |
+| **Incidental finding** | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is declared in `lib/env.ts` but is **vestigial** — the current flow is `signInWithOAuth`, which resolves the client id server-side at the Supabase auth host. Nothing reads the variable. Not removed here (out of scope for a context fix); recorded as `DEFER_P2` cleanup. |
+
+**Lesson recorded:** "the credentials are outside the repo" describes where a
+secret lives, not whether a provider works. The provider's own public endpoint
+answers the question, and it costs one request.
+
+## D-22 — LinkedIn / Facebook / Instagram: unchanged, and unchanged deliberately
+
+Re-derived from current `main`; no new evidence. LinkedIn and Facebook remain
+`NOT_IMPLEMENTED` (their only occurrences in app source are a CV-import slug and
+in-app-browser detection for geolocation errors). Meta/Instagram remains
+`NOT_APPROPRIATE`.
+
+Per the standing rule — **no dead buttons** — no provider button was added.
+Adding one before the provider can complete authentication would be exactly the
+"decorative promise" the Google row exists to warn about.
+
+## D-20 — FIXED (was P1, unfixed at gate 1)
+
+The product decision was made: an explicit personal selection must be respected.
+Implemented in the smallest existing mechanism (session cookie + the two pure
+resolvers), **no migration**, authorization unchanged. See the commit for the
+three-layer root cause and both negative controls. `20260714210000` remains
+owner-gated and unapplied, so the choice is session-scoped by design.
+
+## D-23 — Identity collision: duplicate accounts are structurally impossible, and that was worth proving
+
+The scenario the audit had to answer: `person@example.com` registers with
+email/password; later Google (or any provider) returns the same address. Does
+the product end up with a duplicate profile, a duplicate personal workspace, a
+duplicate CV, a duplicate worker identity?
+
+**Answered from the database, not from assumption.**
+
+```
+CREATE UNIQUE INDEX users_email_partial_key
+  ON auth.users USING btree (email) WHERE (is_sso_user = false)
+```
+
+Email is UNIQUE in `auth.users` for every non-SSO user. A second row for the
+same address cannot exist, so `handle_new_user` — the trigger that creates
+`public.profiles`, keyed on `new.id` with `on conflict (id) do nothing` — can
+only ever fire once per email. Every downstream identity (`profiles`, `workers`,
+`organizations`, memberships, journal, CV) hangs off `auth.users.id`, so the
+whole duplicate class is closed at its root.
+
+| Risk | Verdict | Basis |
+|---|---|---|
+| Duplicate `auth.users` row | **Impossible** (non-SSO) | DB unique partial index |
+| Duplicate `profiles` row | **Impossible** | trigger keys on `auth.users.id`, `on conflict do nothing` |
+| Duplicate personal workspace / CV / worker / memberships | **Impossible** | all key off `auth.users.id` |
+
+**What this does NOT settle.** Whether GoTrue *links* the new provider identity
+to the existing user (the person signs in successfully) or *refuses* it (the
+person is blocked and must use their password) is a Supabase project setting —
+`auth.identities` is the linking table, and every local fixture currently holds
+exactly one `email` identity, so no linked pair exists to observe. That is a
+**UX** question, not a data-integrity one, and it cannot be determined from this
+repo. Determining it in production would require completing a real OAuth
+consent, which creates a production account.
+
+**Deliberately not "fixed".** The instruction was not to auto-merge accounts on
+an email assumption. Nothing here does: the guarantee is a database constraint,
+not an inference, and no merging logic was added. If the provider refuses rather
+than links, the correct repair is an explicit account-link confirmation flow —
+recorded as the next auth slice, not invented now.
+
+**Evidence level:** the impossibility is `VERIFIED` against the live local
+schema (which is the same migration lineage as production). The link-vs-refuse
+behaviour is `NOT_ENOUGH_EVIDENCE`.
