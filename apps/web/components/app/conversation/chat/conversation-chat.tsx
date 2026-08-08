@@ -159,6 +159,7 @@ export type ChatLabels = {
   userProfile: string;
   userOffers: string;
   userJobs: string;
+  userFindWork: string;
   // Orchestrator intent responses (deterministic; honest where a real
   // mechanism does not yet exist).
   clarifyWorkLog: string;
@@ -503,7 +504,7 @@ export function ConversationChat({
   ]);
 
   const openForm = useCallback(
-    (actionId: string, onCloseOverride?: () => void) => {
+    (actionId: string, onCloseOverride?: () => void, continueLabel?: string) => {
       // ONE form renderer, BOTH sides (rebuild W4): worker specs and company
       // specs share InlineActionForm + the canonical dispatcher.
       const spec = getWorkerForm(actionId) ?? getCompanyForm(actionId);
@@ -525,6 +526,9 @@ export function ConversationChat({
                 ? companyFollowup
                 : () => startProfileSummaryRef.current("profile"))
             }
+            // Beta audit W-J1: when the caller's next step is a real action
+            // (not "add another row"), the button says so.
+            continueLabel={continueLabel}
           />,
         );
       }
@@ -680,14 +684,18 @@ export function ConversationChat({
             [labels.searchAskCriteria, ...known, ...missingBlock].join("\n"),
           );
           // The dialog's answer form; when it closes, the search actually runs.
-          openForm("worker.save-work-card", doFindWork);
+          // Beta audit W-J1: that continuation was real but hid behind a button
+          // labelled "Add another", so the sentence above ("fill this in and
+          // I'll search right away") ended at a dead card and the search never
+          // ran. The button now carries the name of what it does.
+          openForm("worker.save-work-card", doFindWork, labels.userFindWork);
           return;
         }
         // Criteria complete (or the read degraded) → the real search now.
         doFindWork();
       })
       .catch(() => doFindWork());
-  }, [assistant, labels.searchAskCriteria, openForm, doFindWork]);
+  }, [assistant, labels.searchAskCriteria, labels.userFindWork, openForm, doFindWork]);
 
   const profileChips: ChoiceChip[] = useMemo(
     () => [
