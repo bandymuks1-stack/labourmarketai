@@ -8816,6 +8816,12 @@
       "demandError": "Darbo poreikių šiuo metu nepavyko nuskaityti.",
       "projectError": "Projektų šiuo metu nepavyko nuskaityti.",
       "capacityError": "Dalies pajėgumo duomenų šiuo metu nepavyko nuskaityti."
+    },
+    "availability": {
+      "title": "Kas nedirba",
+      "intro": "Patvirtintos jūsų valdomų darbuotojų atostogos. Tik datos — priežastis lieka darbuotojo privatumu.",
+      "unavailable": "Nedirba",
+      "unnamedWorker": "Darbuotojas"
     }
   },
   "tasks": {

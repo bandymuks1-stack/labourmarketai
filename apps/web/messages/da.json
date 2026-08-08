@@ -2516,6 +2516,12 @@
       "demandError": "Arbejdsbehov kunne ikke læses lige nu.",
       "projectError": "Projekter kunne ikke læses lige nu.",
       "capacityError": "En del af kapacitetsdataene kunne ikke læses lige nu."
+    },
+    "availability": {
+      "title": "Hvem er ikke tilgængelig",
+      "intro": "Godkendt fravær for medarbejdere, du administrerer. Kun datoer — årsagen forbliver privat.",
+      "unavailable": "Ikke tilgængelig",
+      "unnamedWorker": "Medarbejder"
     }
   },
   "intelligence": {
