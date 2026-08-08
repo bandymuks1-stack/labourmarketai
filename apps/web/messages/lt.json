@@ -6266,7 +6266,8 @@
         "comment": "Pastaba",
         "user": "Vartotojas"
       }
-    }
+    },
+    "menuLabel": "Pranešti apie problemą"
   },
   "common": {
     "localeSwitch": "Kalba",
@@ -8707,7 +8708,11 @@
       "recorded": "Užfiksuota"
     },
     "month": {
-      "hint": "Paspauskite dieną, kad pamatytumėte tos dienos įrašus."
+      "hint": "Paspauskite dieną, kad pamatytumėte tos dienos įrašus.",
+      "legend": {
+        "journal": "Žurnalas užpildytas",
+        "unfilled": "Dirbta, neužpildyta"
+      }
     },
     "day": {
       "empty": "Šią dieną įrašų nėra."
@@ -8732,7 +8737,8 @@
         "minutes": "min.",
         "days": "d."
       }
-    }
+    },
+    "pastLink": "Ankstesnės dienos"
   },
   "workforcePlanning": {
     "eyebrow": "Įmonės erdvė",

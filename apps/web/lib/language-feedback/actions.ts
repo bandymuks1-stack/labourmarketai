@@ -25,7 +25,7 @@ export type SubmitLanguageFeedbackInput = {
 };
 
 export type SubmitLanguageFeedbackResult =
-  | { ok: true; id: string }
+  | { ok: true }
   | { ok: false; code: SubmitLanguageFeedbackErrorCode; message: string };
 
 export type SubmitLanguageFeedbackErrorCode =
@@ -86,27 +86,31 @@ export async function submitLanguageFeedback(
   const fromAny = (supabase as any).from.bind(supabase) as (
     name: string,
   ) => {
-    insert: (row: Record<string, unknown>) => {
-      select: (cols: string) => {
-        single: () => Promise<{
-          data: { id: string } | null;
-          error: { message?: string } | null;
-        }>;
-      };
-    };
+    insert: (row: Record<string, unknown>) => Promise<{
+      error: { message?: string } | null;
+    }>;
   };
-  const { data: row, error } = await fromAny("language_feedback")
-    .insert({
-      route,
-      locale,
-      selected_text: selectedText,
-      comment,
-      user_id: userId,
-    })
-    .select("id")
-    .single();
+  // WRITE ONLY — never read the row back.
+  //
+  // This used to be `.insert(...).select("id").single()`. `RETURNING` is
+  // evaluated under the SELECT policy, and this table's SELECT policy is
+  // `is_admin()` — so for every ordinary user Postgres rejected the whole
+  // statement with "new row violates row-level security policy" and rolled the
+  // insert back. The reporting mechanism therefore worked for administrators
+  // and for nobody else: exactly the people it exists for could not file a
+  // report, and the inbox stayed empty. Proven directly against the database —
+  // the same INSERT succeeds without `RETURNING` and fails with it.
+  //
+  // Nothing consumed the returned id, so the fix is to stop asking for it.
+  const { error } = await fromAny("language_feedback").insert({
+    route,
+    locale,
+    selected_text: selectedText,
+    comment,
+    user_id: userId,
+  });
 
-  if (error || !row) {
+  if (error) {
     console.error("[language-feedback] insert failed:", error?.message);
     return {
       ok: false,
@@ -114,5 +118,5 @@ export async function submitLanguageFeedback(
       message: `Pranešimo išsiųsti nepavyko: ${error?.message ?? "nežinoma klaida"}`,
     };
   }
-  return { ok: true, id: row.id as string };
+  return { ok: true };
 }

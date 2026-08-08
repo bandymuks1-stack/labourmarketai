@@ -6266,7 +6266,8 @@
         "comment": "Comment",
         "user": "User"
       }
-    }
+    },
+    "menuLabel": "Report a problem"
   },
   "common": {
     "localeSwitch": "Language",
@@ -8707,7 +8708,11 @@
       "recorded": "Recorded"
     },
     "month": {
-      "hint": "Tap a day to see that day’s items."
+      "hint": "Tap a day to see that day’s items.",
+      "legend": {
+        "journal": "Journal filled",
+        "unfilled": "Worked, not filled"
+      }
     },
     "day": {
       "empty": "Nothing on this day."
@@ -8732,7 +8737,8 @@
         "minutes": "min",
         "days": "d"
       }
-    }
+    },
+    "pastLink": "Past days"
   },
   "workforcePlanning": {
     "eyebrow": "Company workspace",

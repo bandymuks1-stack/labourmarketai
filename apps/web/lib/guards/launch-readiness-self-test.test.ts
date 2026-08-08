@@ -56,7 +56,13 @@ describe("Launch Readiness — worker path shows honest empty states", () => {
   it("Work Journal renders an EmptyState whose single CTA opens the conversation (§6.1)", () => {
     const j = readApp("app/[locale]/dashboard/journal/page.tsx");
     expect(j).toContain("EmptyState");
-    expect(j).toContain('cta={{ label: t("listEmptyCta"), href: "/dashboard" }}');
+    // Pin the DESTINATION (the conversation), not the exact source line: this
+    // assertion used to hold a verbatim copy of the call site, so adding the
+    // `?intent=log-work` hand-off — which is what makes the CTA actually land
+    // in the work-log flow — broke a guard that had nothing to say about it.
+    expect(j).toMatch(
+      /cta=\{\{\s*label:\s*t\("listEmptyCta"\),\s*href:\s*"\/dashboard(\?intent=log-work)?"\s*\}\}/,
+    );
   });
 
   it("Player card shows a real verified-empty state and never fakes verification", () => {

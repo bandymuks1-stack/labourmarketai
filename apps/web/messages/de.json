@@ -6266,7 +6266,8 @@
         "comment": "Kommentar",
         "user": "Benutzer"
       }
-    }
+    },
+    "menuLabel": "Problem melden"
   },
   "common": {
     "localeSwitch": "Sprache",
@@ -8707,7 +8708,11 @@
       "recorded": "Erfasst"
     },
     "month": {
-      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen."
+      "hint": "Tippen Sie auf einen Tag, um die Einträge dieses Tages zu sehen.",
+      "legend": {
+        "journal": "Journal ausgefüllt",
+        "unfilled": "Gearbeitet, nicht erfasst"
+      }
     },
     "day": {
       "empty": "An diesem Tag gibt es keine Einträge."
@@ -8732,7 +8737,8 @@
         "minutes": "Min.",
         "days": "T"
       }
-    }
+    },
+    "pastLink": "Frühere Tage"
   },
   "workforcePlanning": {
     "eyebrow": "Firmenbereich",
