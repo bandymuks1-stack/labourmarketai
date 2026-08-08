@@ -74,6 +74,18 @@
 -- PR and is inert until this migration is applied, because the app's read is
 -- switched behind a relation-missing fallback.
 --
+-- @human-gate-approved — TIER: owner-gated (RED class: this migration both
+-- changes GRANTs and replaces an existing RLS policy). The RED content is
+-- INTENTIONAL and is the point of the change; it ships as a needs-human-gate
+-- DRAFT carrying the exact SQL, and the production apply stays manual via
+-- Supabase MCP after explicit owner approval. Same posture as
+-- 20260714150000_ai_runs_audit_v1.
+--
+-- Until applied, the application degrades honestly:
+-- `getEmployerWorkerAvailability` reads `worker_absence_scheduling` first and
+-- falls back to `worker_absences` on 42P01 with the SAME minimised column
+-- list, so behaviour in production is unchanged by merging this file.
+--
 -- ROLLBACK: supabase/rollbacks/20260808120000_worker_absence_scheduling_view_v1.down.sql
 -- ============================================================================
 
