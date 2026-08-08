@@ -1991,13 +1991,19 @@ describe("no migration files added by this sprint", () => {
     // UPDATE/DELETE to any role, so the append-only guarantee is unchanged.
     // Rollback paired. Shared slot RECOUNTED against post-#1089 main rather
     // than summed: origin/main holds 191 .sql files, this branch adds one.
-    // Bumped 192 -> 193 for the W14 item 6 retention SCHEDULER
-    // (20260808140000_ai_runs_retention_schedule_v1) — DRAFT,
-    // OWNER_APPROVAL_REQUIRED_BEFORE_APPLY. pg_cron + append-only sweep
-    // telemetry + one definer wrapper calling ONLY the approved capability +
-    // an operator health read + one daily job. Rollback paired. Recounted
-    // against post-#1091 main: 192 files there, this branch adds one.
-    const SPRINT_BASELINE = 193;
+    // 192 -> 193: booking→engagement org-first company resolution
+    // (20260807140000_booking_engagement_org_resolution_v1) — replaces ONE
+    // function body (respond_booking_request_v3) so an organization-stamped
+    // demand resolves via organizations.legacy_company_id instead of the
+    // multi-company 'ambiguous_company' dead-end (live 2026-08-06, booking
+    // 88a43ead). Merged as #1047 and APPLIED to production 2026-08-08.
+    // 193 -> 194: the W14 item 6 retention SCHEDULER
+    // (20260808140000_ai_runs_retention_schedule_v1) — pg_cron + append-only
+    // sweep telemetry + one definer wrapper calling ONLY the approved
+    // capability + an operator health read + one daily job. Rollback paired.
+    // Shared slot RECOUNTED against post-#1047 main as #1047's own note
+    // predicted: 193 files there, this branch adds one.
+    const SPRINT_BASELINE = 194;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

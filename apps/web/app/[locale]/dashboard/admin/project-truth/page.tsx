@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { checkEngagementInvariant } from "@/lib/booking/engagement-invariant";
 import { showPlaceholderMarkers } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -172,6 +173,11 @@ export default async function ProjectTruthPage({
   })();
   const hasAnonKey = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+  // Accepted-booking → engagement invariant (beta stabilization §7). The
+  // 2026-08-06 non-mint lived only in an RPC response nobody stored; this
+  // re-derives the answer from the rows themselves on every page load.
+  const engagementInvariant = await checkEngagementInvariant();
   // Report the EFFECTIVE marker state (PR15: forced true in production
   // regardless of the env var — lib/env.ts showPlaceholderMarkers).
   const placeholderMarkersEnabled = showPlaceholderMarkers;
@@ -284,6 +290,58 @@ export default async function ProjectTruthPage({
       {/* ──────────────────────────────────────────────────────── */}
       {/* Section 3 — Counts you can currently see                */}
       {/* ──────────────────────────────────────────────────────── */}
+      {/* ──────────────────────────────────────────────────────── */}
+      {/* Accepted-booking → engagement invariant (§7)             */}
+      {/* ──────────────────────────────────────────────────────── */}
+      <section
+        className="card-border flex flex-col gap-3 p-4"
+        data-testid="project-truth-engagement-invariant"
+      >
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          Booking → engagement invariant
+        </h2>
+        <p className="text-xs text-text-secondary">
+          Every accepted booking whose demand resolves to a company must hold an
+          engagement (or be covered by an active one). The 2026-08-06 defect was
+          exactly this state going silent — this check re-derives it from the
+          rows on every load, so it can never depend on someone reading raw
+          counts again.
+        </p>
+        {engagementInvariant.status === "ok" ? (
+          <div className="flex flex-col gap-2">
+            <p
+              className={`font-display text-2xl font-bold ${
+                engagementInvariant.violationCount > 0
+                  ? "text-state-danger"
+                  : "text-state-success"
+              }`}
+              data-testid="engagement-invariant-verdict"
+            >
+              {engagementInvariant.violationCount > 0
+                ? `${engagementInvariant.violationCount} VIOLATION(S) — accepted without the promised engagement`
+                : `HOLDS — ${engagementInvariant.acceptedCount} accepted booking(s), 0 violations`}
+            </p>
+            {engagementInvariant.rows
+              .filter((r) => r.status !== "engaged")
+              .map((r) => (
+                <p key={r.bookingId} className="font-mono text-meta text-text-muted">
+                  {r.bookingId.slice(0, 8)}… · {r.status}
+                  {r.reason ? ` (${r.reason})` : ""}
+                  {r.resolvedCompanyId
+                    ? ` → company ${r.resolvedCompanyId.slice(0, 8)}…`
+                    : ""}
+                </p>
+              ))}
+          </div>
+        ) : (
+          <p className="text-sm text-state-amber" data-testid="engagement-invariant-verdict">
+            {engagementInvariant.status === "unavailable"
+              ? "Not measurable on this stack — a consulted relation is absent. That is an honest unknown, not a pass."
+              : "Invariant read failed — treat as unknown, not as a pass."}
+          </p>
+        )}
+      </section>
+
       <section className="card-border flex flex-col gap-3 p-4" data-testid="project-truth-counts">
         <h2 className="font-display text-lg font-semibold text-text-primary">
           3. What this session CAN see (RLS-filtered)

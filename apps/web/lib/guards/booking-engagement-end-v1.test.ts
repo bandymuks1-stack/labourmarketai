@@ -642,6 +642,15 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
       // Added in the same commit as that record.
       "20260807090000_org_owner_membership_seed_v1.sql",
+      // 2026-08-08: booking→engagement org-first resolution (#1047) gained
+      // its marker under the beta-stabilization P0 owner decision ("APPROVE
+      // proceeding with #1047 PROVIDED current-code re-verification proves…"),
+      // recorded with the re-verification (39/39 DB proof incl. sibling
+      // isolation + RLS visibility) in
+      // docs/human-gates/booking-engagement-org-resolution-gate.md. Added in
+      // the same commit as that record. Executable sha256 unchanged by the
+      // marker: da6ae1cd…cd8c2.
+      "20260807140000_booking_engagement_org_resolution_v1.sql",
       // 2026-08-08: W12 employer absence privacy hardening. The marker records
       // that the RED content (a GRANT and an ALTER/DROP POLICY) is INTENTIONAL
       // — narrowing the policy IS the change. Owner decision given 2026-08-08,

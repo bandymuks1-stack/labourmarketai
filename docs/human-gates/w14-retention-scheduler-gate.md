@@ -3,7 +3,33 @@
 Migration: `supabase/migrations/20260808140000_ai_runs_retention_schedule_v1.sql`
 Rollback:  `supabase/rollbacks/20260808140000_ai_runs_retention_schedule_v1.down.sql`
 
-State: `AI_RUNS_RETENTION_SCHEDULER_BUILT_AND_PROVEN_APPLY_NOT_APPROVED`
+State: `AI_RUNS_RETENTION_SCHEDULER_APPROVED_APPLY_IN_PROGRESS`
+
+## OWNER DECISION — GIVEN 2026-08-08 (beta stabilization command §15)
+
+> pg_cron MAY be used if it is verified to be the correct supported mechanism
+> for this Supabase project and does not create an unnecessary architectural
+> dependency. This is NOT permission to blindly install it. First diagnose
+> #1092 Preview.
+
+Both conditions are now met, and the diagnosis changed a belief:
+
+**Supabase Preview failure — DIAGNOSED, and it was NOT pg_cron.** The check
+run's own output reads: *"Maximum number of concurrent branches reached. You
+can update this limit in Project Integrations Settings"* — conclusion
+`cancelled`. A preview-branch **quota** on the project's branching
+integration, unrelated to this PR's content. The earlier comment on #1092
+suspected `create extension pg_cron` because that was the only differentiator
+vs #1089/#1091; the actual differentiator was branch-slot availability at push
+time. That suspicion is hereby corrected on the record.
+
+**pg_cron support — VERIFIED on this exact project, not assumed.** The
+production instance's own `pg_available_extensions` lists `pg_cron` at
+`default_version 1.6.4`, `installed_version` null — available, supported,
+installable by `create extension`, and it is Supabase's own scheduling
+primitive rather than a new architectural dependency. The alternatives were
+re-derived (below) and both would ADD a dependency: a new production
+credential in GitHub Actions, or a new `vercel.json` + route + `CRON_SECRET`.
 
 ## What is and is not already approved
 
