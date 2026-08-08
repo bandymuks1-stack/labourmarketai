@@ -727,7 +727,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Ciemny motyw",
     "themeToLight": "Jasny motyw",
-    "how": "Jak to działa"
+    "how": "Jak to działa",
+    "menuOpen": "Menu",
+    "menuClose": "Zamknij menu"
   },
   "pages": {
     "agencies": {

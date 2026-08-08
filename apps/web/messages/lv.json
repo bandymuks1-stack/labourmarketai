@@ -727,7 +727,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Tumšais motīvs",
     "themeToLight": "Gaišais motīvs",
-    "how": "Kā tas darbojas"
+    "how": "Kā tas darbojas",
+    "menuOpen": "Izvēlne",
+    "menuClose": "Aizvērt izvēlni"
   },
   "pages": {
     "agencies": {

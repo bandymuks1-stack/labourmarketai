@@ -37,7 +37,21 @@ const NATIVE: Record<string, string> = {
  * from `window.location` at the moment the menu opens (client-only —
  * avoids a useSearchParams Suspense boundary on statically rendered pages).
  */
-export function LocaleSwitcher({ className }: { className?: string }) {
+export function LocaleSwitcher({
+  className,
+  compactBelowSm = false,
+}: {
+  className?: string;
+  /**
+   * Show the locale CODE ("LT") instead of the native name ("Lietuvių")
+   * below `sm`. OPT-IN, because it is a downgrade in clarity that only a
+   * width-starved host should pay: the public header at 320px cannot spend
+   * the 109px the native name costs (beta foundation audit M1 measurement).
+   * The footer, the account page and the dashboard have the room and keep
+   * the full name.
+   */
+  compactBelowSm?: boolean;
+}) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("common");
@@ -77,7 +91,18 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         )}
       >
         <Globe aria-hidden className="h-3.5 w-3.5 text-text-muted" />
-        <span>{NATIVE[active] ?? active.toUpperCase()}</span>
+        {/* The button keeps its `localeSwitch` aria-label in both modes, so
+            the ACCESSIBLE name never shrinks with the visible text. */}
+        {compactBelowSm ? (
+          <>
+            <span className="hidden sm:inline">
+              {NATIVE[active] ?? active.toUpperCase()}
+            </span>
+            <span className="sm:hidden">{active.toUpperCase()}</span>
+          </>
+        ) : (
+          <span>{NATIVE[active] ?? active.toUpperCase()}</span>
+        )}
         <ChevronDown
           aria-hidden
           className={cn(

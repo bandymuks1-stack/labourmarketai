@@ -4322,7 +4322,9 @@
     "startNow": "Jetzt starten",
     "themeToDark": "Dunkles Design",
     "themeToLight": "Helles Design",
-    "how": "So funktioniert es"
+    "how": "So funktioniert es",
+    "menuOpen": "Menü",
+    "menuClose": "Menü schließen"
   },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",

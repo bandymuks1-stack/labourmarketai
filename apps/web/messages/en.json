@@ -4322,7 +4322,9 @@
     "startNow": "Start now",
     "themeToDark": "Dark theme",
     "themeToLight": "Light theme",
-    "how": "How it works"
+    "how": "How it works",
+    "menuOpen": "Menu",
+    "menuClose": "Close menu"
   },
   "hero": {
     "chip": "General labour-market platform",

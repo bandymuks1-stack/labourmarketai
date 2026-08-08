@@ -64,12 +64,18 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
         // "partners" was removed with its nav item on 2026-07-31 (its landing
         // section left with the rebuild). The key is gone from all 11 locale
         // catalogues; this list is what stops it drifting back in unused.
+        //
+        // menuOpen/menuClose: the mobile disclosure button's accessible name
+        // (beta foundation audit M1). Below `lg` the six primary links are
+        // display:none, so the phone header needs its own labelled control.
         [
           "about",
           "agencies",
           "companies",
           "how",
           "login",
+          "menuClose",
+          "menuOpen",
           "pricing",
           "startNow",
           "themeToDark",
