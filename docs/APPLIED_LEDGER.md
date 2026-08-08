@@ -35,6 +35,28 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260808120000_worker_absence_scheduling_view_v1` (W12 employer absence privacy)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-08** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger name | `worker_absence_scheduling_view_v1` (version/name apply-time drift — match on `name`, per the doctrine at the top of this file) |
+| PR | **#1089**, merged to main as `ca3d0fa3` |
+| Owner gate | Product-direction approval given 2026-08-08, recorded in `docs/human-gates/w12-absence-privacy-hardening-gate.md`. Migration sha256 `530c262c…917a7`, rollback `dfd7b275…2ca4`, comment-stripped executable sha256 `f544129d893386090f3bb2ce9ba7dd5a2d2f233714c5e6db3b2f445d29d9a1ad`. Marker covers exactly two findings (`grant-or-revoke`, `alter-drop-policy`) |
+
+**Preflight (read-only, immediately before apply)**: `worker_absences` held **0 rows**, so the change could not affect a single existing record; the live `worker_absences_select` expression matched the pre-change form byte-for-byte; neither `20260808120000` nor `20260808130000` was in the prod ledger.
+
+**What it does**: narrows `worker_absences_select` so a manager reaches the whole row only while `status = 'requested'` (the window in which the free-text note is what they are being asked to act on); adds the definer view `public.worker_absence_scheduling` exposing `id, worker_id, start_date, end_date, half_day, status` for **approved** absences, carrying `caller_manages_worker() OR is_admin() OR self` as its own predicate. Worker self-access and admin branches unchanged. Writes are untouched — request/review/cancel are SECURITY DEFINER RPCs.
+
+**Post-apply verified (independent read-back, not inferred)**: the live policy now reads `… OR (caller_manages_worker(worker_id) AND (status = 'requested'::text)) OR is_admin()`; the view exists with **exactly** `id,worker_id,start_date,end_date,half_day,status`; grants are `authenticated:SELECT` plus the table owner's implicit set, and **`anon` holds nothing**.
+
+**Accepted consequence (owner, explicit)**: a manager loses the ability to read the reason for an absence they have already approved. That is the intent of the minimum-necessary model, not a side effect.
+
+**Not done / out of scope**: no data touched, no row created. The paired rollback stays unexecuted.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260807090000_org_owner_membership_seed_v1` (Finding-2 / M-P0-4 gap closure)
 
 | Field | Value |
