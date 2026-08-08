@@ -121,6 +121,7 @@ export default async function ProfilePage({
     tExt,
     tFeatureNotes,
     tIdentityNotice,
+    tPrivacySections,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -147,6 +148,11 @@ export default async function ProfilePage({
     // W7-S5b: the non-worker identity notice joins the ONE batch — never a
     // standalone await (W7-S3 ratchet).
     getTranslations("profileIdentityNotice"),
+    // Beta foundation audit: the employer-visibility consent lives on
+    // /dashboard/privacy, which had no entry point in the worker journey —
+    // supply stayed structurally invisible to scouting. Reuses the existing
+    // privacyConsent.sections.visibility label in every locale.
+    getTranslations("privacyConsent.sections"),
   ]);
 
   /**
@@ -656,6 +662,19 @@ export default async function ProfilePage({
                 data-testid="profile-documents-link"
               >
                 {tDocs("title")}
+              </Link>
+            ) : null}
+            {/* Beta audit F1: the discoverability consent gate is the supply
+                switch for the whole employer marketplace, and /dashboard/privacy
+                was reachable only via Account. Give the worker a first-class
+                entry next to the other profile actions. */}
+            {workerId ? (
+              <Link
+                href={"/dashboard/privacy" as "/dashboard"}
+                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                data-testid="profile-visibility-link"
+              >
+                {tPrivacySections("visibility")}
               </Link>
             ) : null}
             {/* F13: the personal gallery gets a clear person-context entry. */}
