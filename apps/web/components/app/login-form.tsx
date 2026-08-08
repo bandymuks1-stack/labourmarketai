@@ -13,6 +13,7 @@ import { getSafeReturnPath } from "@/lib/auth/redirect";
 import { isVercelPreviewHost } from "@/lib/auth/oauth-trace";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 /** Map of callback-route `?error=…` codes to a translation key under
  *  `auth.errors.oauth.*`. Any code not listed here falls through to the
@@ -109,8 +110,6 @@ export function LoginForm() {
   }
 
   const disabled = status === "signing";
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   return (
     /* `method="post"` is the PRE-HYDRATION fallback, not a real endpoint.
@@ -199,7 +198,7 @@ export function LoginForm() {
             setEmail(e.target.value);
             if (passwordFailed) setPasswordFailed(false);
           }}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
@@ -220,7 +219,7 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
