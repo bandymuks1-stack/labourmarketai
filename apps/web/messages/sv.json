@@ -727,7 +727,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Mörkt tema",
     "themeToLight": "Ljust tema",
-    "how": "Så fungerar det"
+    "how": "Så fungerar det",
+    "menuOpen": "Meny",
+    "menuClose": "Stäng meny"
   },
   "pages": {
     "agencies": {

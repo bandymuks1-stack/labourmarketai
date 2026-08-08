@@ -4322,7 +4322,9 @@
     "startNow": "Pradėti dabar",
     "themeToDark": "Tamsi tema",
     "themeToLight": "Šviesi tema",
-    "how": "Kaip veikia"
+    "how": "Kaip veikia",
+    "menuOpen": "Meniu",
+    "menuClose": "Uždaryti meniu"
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",

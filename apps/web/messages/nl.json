@@ -4322,7 +4322,9 @@
     "startNow": "Begin nu",
     "themeToDark": "Donker thema",
     "themeToLight": "Licht thema",
-    "how": "Hoe het werkt"
+    "how": "Hoe het werkt",
+    "menuOpen": "Menu",
+    "menuClose": "Menu sluiten"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
