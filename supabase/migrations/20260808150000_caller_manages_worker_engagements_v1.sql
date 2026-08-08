@@ -99,6 +99,20 @@
 --     its own owner decision; this migration only closes the gap the audit
 --     found. Company OWNERS only.
 --
+-- SELF-REVIEW EDGE CASE (pre-existing, NOT introduced here, stated so the
+-- reviewer does not have to derive it): 20260718150000's header notes that
+-- "worker self-review is impossible: caller_manages_worker is false for the
+-- worker themselves". That holds for an ordinary worker before and after this
+-- change. It has always had one structural exception — a person who is BOTH a
+-- worker and a company owner can already reach themselves through the ROSTER
+-- branch by adding their own worker row to their own company. The engagement
+-- branch adds a second route to the SAME pre-existing exception (self-propose
+-- a booking, self-accept), not a new class of one. Closing it properly means
+-- an actor-identity rule (`worker.profile_id <> auth.uid()`) applied to BOTH
+-- branches, which would change existing roster behaviour and therefore needs
+-- its own owner decision — deliberately out of scope for an A1 fix. Related
+-- known self-dealing item: audit P2 "S1 self-shell in scouting pool".
+--
 -- ── BLAST RADIUS (every call site of caller_manages_worker, enumerated) ─────
 --   a) `worker_absences_select` RLS policy — WIDENS as intended. Managers
 --      still only reach `status='requested'` rows (20260808120000 narrowing
