@@ -642,6 +642,17 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
       // Added in the same commit as that record.
       "20260807090000_org_owner_membership_seed_v1.sql",
+      // 2026-08-08: W12 employer absence privacy hardening. THIS ENTRY IS
+      // UNLIKE EVERY OTHER ONE ABOVE and the difference is the point: those
+      // markers were added under an owner decision ALREADY GIVEN, recorded in
+      // a human-gate doc or the applied ledger. This marker records only that
+      // the RED content (a GRANT and an ALTER/DROP POLICY) is INTENTIONAL —
+      // narrowing the policy IS the change — so it ships as a needs-human-gate
+      // DRAFT carrying the exact SQL. NO APPLY APPROVAL EXISTS YET. The same
+      // posture as 20260714150000_ai_runs_audit_v1, which predates this list's
+      // cutoff. Design + local per-role proof:
+      // docs/audits/W12_EMPLOYER_ABSENCE_PRIVACY_HARDENING.md.
+      "20260808120000_worker_absence_scheduling_view_v1.sql",
     ]);
   });
 
