@@ -137,6 +137,36 @@ merge identities.
 | **User impact** | P2 — a tester who hits a problem during **signup or login** has no way to report it, which is exactly where a first-time tester struggles |
 | **Recommended action** | Owner decision: the RLS INSERT policy already allows `user_id IS NULL`, so anonymous reporting is possible without a schema change |
 
+## D-11 — Journal entries were dated the day they were TYPED
+
+| | |
+|---|---|
+| **Requirement** | The tester's most-wanted improvement: a calendar showing which days are filled |
+| **Current evidence** | The journal **already projects** into `/dashboard/planning` as a `ŽURNALAS` source. But `startDate: toIsoDay(e.created_at)` used the row's write time, while the save action had been storing the worker's own `work_date` metric all along (`source=worker_input`) — nothing read it. |
+| **Status** | **REGRESSED** → fixed |
+| **User impact** | P1 — "įrašyk vakarykštį darbą į žurnalą" is a first-class journal phrase, and it silently produced a mis-dated record. A worker checking which days they had filled was reading the days they happened to be typing. |
+| **Action** | PR #1081 — pure `journalStartDay(workDate, createdAt)` |
+| **Verification** | VERIFIED. Two entries logged today for 2026-08-07 rendered on 08-08 before; after, they leave the forward window and the surface's own counter reads *"Pasibaigę įrašai čia nerodomi: 2"*. 6 unit cases. |
+
+## D-12 — Journal hours and site name could never load
+
+| | |
+|---|---|
+| **Current evidence** | The follow-up read selected and filtered `journal_entry_metrics.journal_entry_id`. **That column does not exist** — it is `entry_id`. The request errored on every call; the "degrades to null meta" branch swallowed it. |
+| **Status** | **REGRESSED** → fixed |
+| **User impact** | P2 — the real hours and site name the block exists to show were never rendered, and never would be |
+| **Why it survived** | An honest-degradation path hides a typo *forever*: the failure mode is indistinguishable from "this entry has no metrics". Degradation must be honest about *why* it degraded, or it becomes camouflage. |
+| **Verification** | VERIFIED — column name corrected; entry site `Peleniškiai objektas` is a real stored metric that was not reaching the surface |
+
+## D-13 — The canonical calendar is forward-only
+
+| | |
+|---|---|
+| **Evidence** | `/dashboard/planning` defaults to `ARTIMIAUSIOS 7 DIENOS` and states *"Pasibaigę įrašai čia nerodomi: N"* |
+| **Status** | **PARTIAL** — honest, but it does not answer the tester's actual question |
+| **User impact** | P1 for the calendar requirement: *"which days have I filled?"* is a question about the PAST, and the default view excludes the past by design |
+| **Recommended action** | The next calendar slice. `DIENA / SAVAITĖ / MĖNUO / METAI` view modes already exist — establish which of them show past days before building anything new. **Do not build a second calendar.** |
+
 ---
 
 ## Not reproduced
@@ -191,9 +221,9 @@ the header.
 |---|---|
 | VERIFIED_WORKING | 1 (email/password auth) |
 | WORKING_BUT_HARD_TO_DISCOVER | 1 (D-04, fixed) |
-| PARTIAL | 4 (D-02 fixed, D-07, D-08, D-10) |
+| PARTIAL | 5 (D-02 fixed, D-07, D-08, D-10, D-13) |
 | IMPLEMENTED_BUT_UNREACHABLE | 1 (D-04b, fixed) |
-| REGRESSED | 3 (D-01, D-03, D-05 — all fixed) |
+| REGRESSED | 5 (D-01, D-03, D-05, D-11, D-12 — all fixed) |
 | NOT_IMPLEMENTED | 3 (LinkedIn, Facebook, Instagram auth) |
 | CONFIGURATION_GATED | 1 (Google) |
 | OWNER_GATED | 1 (feedback categories migration) |
