@@ -1980,7 +1980,13 @@ describe("no migration files added by this sprint", () => {
     // membership + guarded one-time backfill for post-backfill orphan orgs
     // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
     // shared slot: 189+this = 190.
-    const SPRINT_BASELINE = 190;
+    // Bumped 190 -> 191 for the W12 employer absence privacy hardening
+    // (20260808120000_worker_absence_scheduling_view_v1) — DRAFT,
+    // OWNER_APPROVAL_REQUIRED_BEFORE_APPLY, NOT applied to production.
+    // Narrows worker_absences_select so a manager reads the free-text reason
+    // only while a request is pending, and adds a scheduling-only view that
+    // has no reason column to leak. Rollback paired.
+    const SPRINT_BASELINE = 191;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
