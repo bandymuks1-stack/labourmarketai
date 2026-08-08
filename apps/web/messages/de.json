@@ -8816,6 +8816,12 @@
       "demandError": "Arbeitsbedarfe konnten gerade nicht gelesen werden.",
       "projectError": "Projekte konnten gerade nicht gelesen werden.",
       "capacityError": "Ein Teil der Kapazitätsdaten konnte gerade nicht gelesen werden."
+    },
+    "availability": {
+      "title": "Wer nicht verfügbar ist",
+      "intro": "Genehmigte Abwesenheiten der von Ihnen verwalteten Mitarbeitenden. Nur Daten — der Grund bleibt privat.",
+      "unavailable": "Nicht verfügbar",
+      "unnamedWorker": "Mitarbeiter/in"
     }
   },
   "tasks": {

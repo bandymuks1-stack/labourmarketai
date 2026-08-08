@@ -8816,6 +8816,12 @@
       "demandError": "Werkbehoeften konden nu niet worden gelezen.",
       "projectError": "Projecten konden nu niet worden gelezen.",
       "capacityError": "Een deel van de capaciteitsgegevens kon nu niet worden gelezen."
+    },
+    "availability": {
+      "title": "Wie is niet beschikbaar",
+      "intro": "Goedgekeurd verlof van medewerkers die u beheert. Alleen datums — de reden blijft privé.",
+      "unavailable": "Niet beschikbaar",
+      "unnamedWorker": "Medewerker"
     }
   },
   "tasks": {

@@ -2516,6 +2516,12 @@
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
+    },
+    "availability": {
+      "title": "Hvem er utilgjengelig",
+      "intro": "Godkjent fravær for ansatte du administrerer. Kun datoer — årsaken forblir privat.",
+      "unavailable": "Utilgjengelig",
+      "unnamedWorker": "Ansatt"
     }
   },
   "intelligence": {

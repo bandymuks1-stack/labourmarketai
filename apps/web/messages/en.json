@@ -8816,6 +8816,12 @@
       "demandError": "Work needs could not be read right now.",
       "projectError": "Projects could not be read right now.",
       "capacityError": "Part of the capacity data could not be read right now."
+    },
+    "availability": {
+      "title": "Who is unavailable",
+      "intro": "Approved time off for workers you manage. Dates only — the reason stays private to the worker.",
+      "unavailable": "Unavailable",
+      "unnamedWorker": "Worker"
     }
   },
   "tasks": {

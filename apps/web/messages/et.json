@@ -2516,6 +2516,12 @@
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
+    },
+    "availability": {
+      "title": "Kes ei ole saadaval",
+      "intro": "Teie hallatavate töötajate kinnitatud puudumised. Ainult kuupäevad — põhjus jääb privaatseks.",
+      "unavailable": "Pole saadaval",
+      "unnamedWorker": "Töötaja"
     }
   },
   "intelligence": {
