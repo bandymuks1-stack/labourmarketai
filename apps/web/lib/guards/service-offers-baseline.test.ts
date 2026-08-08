@@ -102,9 +102,28 @@ describe("Guard: service offers integrate with the baseline and stay honest", ()
     }
   });
 
-  it("offers are rendered on the pricing page", () => {
+  // M7 (beta foundation audit 2026-08-08) INVERTED this assertion. It used to
+  // require `ServiceOffers` on /pricing. That is exactly the defect: the beta
+  // labour-market pricing page must not also sell AI-automation agency work at
+  // €900–€1,900 while its own tiers say pricing is still being prepared. The
+  // component and its copy stay intact and guarded above — only the HOST is
+  // gone, and where the offers belong next is an owner decision.
+  it("offers are NOT rendered on the beta labour-market pricing page", () => {
     const pricing = read("app/[locale]/(marketing)/pricing/page.tsx");
-    expect(pricing).toContain("ServiceOffers");
+    // Import-based, so the explanatory comment naming <ServiceOffers /> stays
+    // legal: a component that is never imported cannot render.
+    expect(
+      /^\s*import[^;]*service-offers/m.test(pricing),
+      "/pricing must not import service-offers (M7)",
+    ).toBe(false);
+    expect(
+      /<ServiceOffers\s*\/?>/.test(pricing.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "")),
+      "/pricing must not render <ServiceOffers /> (M7)",
+    ).toBe(false);
+  });
+
+  it("the component and its copy survive for a future owner-chosen host", () => {
+    expect(offers).toContain("export async function ServiceOffers");
   });
 });
 
