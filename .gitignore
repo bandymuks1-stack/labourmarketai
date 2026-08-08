@@ -38,6 +38,15 @@ next-env.d.ts
 **/owner-chrome-profile/
 
 # playwright / e2e local artifacts (never committed)
+#
+# The glob is the actual guarantee. Every entry below it was added one at a
+# time as someone invented a new suffix, which only protects the variants
+# already thought of: the beta foundation audit (2026-08-09) minted
+# `.storage-state-worker.json` and `.storage-state-employer.json` — real
+# session tokens, one `git add -A` away from being committed, because the
+# dash spelling matched none of the dot-spelled lines. Any file whose name
+# starts with `.storage-state` holds a session and is ignored from here on.
+/apps/web/tests/e2e/.storage-state*.json
 /apps/web/tests/e2e/.storage-state.json
 /apps/web/tests/e2e/.storage-state.company.json
 /apps/web/tests/e2e/.storage-state.worker.json
