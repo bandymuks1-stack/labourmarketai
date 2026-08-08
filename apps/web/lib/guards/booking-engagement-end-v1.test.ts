@@ -642,6 +642,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/fresh-organization-owner-membership-v1-gate.md.
       // Added in the same commit as that record.
       "20260807090000_org_owner_membership_seed_v1.sql",
+      // 2026-08-08: W14 item 6 retention redaction. Like the W12 privacy
+      // migration on its own branch, this marker records only that the RED
+      // content (a SECURITY DEFINER function + a GRANT) is INTENTIONAL — the
+      // constrained mutation path IS the mechanism — so it ships as a
+      // needs-human-gate DRAFT with the exact SQL. NO APPLY APPROVAL EXISTS
+      // YET. Contract + local per-property proof:
+      // docs/audits/W14_ITEM6_AI_RUNS_RETENTION_CONTRACT.md.
+      "20260808130000_ai_runs_retention_redaction_v1.sql",
     ]);
   });
 
