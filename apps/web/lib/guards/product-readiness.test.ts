@@ -1980,7 +1980,14 @@ describe("no migration files added by this sprint", () => {
     // membership + guarded one-time backfill for post-backfill orphan orgs
     // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
     // shared slot: 189+this = 190.
-    const SPRINT_BASELINE = 190;
+    // 190 -> 191: worker board org attribution fix
+    // (20260807130000_worker_demand_org_attribution_v1) — recreates
+    // list_open_demand_for_workers so the company resolves through the
+    // demand's organization (legacy_company_id) with a deterministic
+    // pre-org fallback; one row per demand by construction. RPC replacement
+    // only, ZERO DML, paired rollback, owner-gated RED, ships UNAPPLIED
+    // (docs/human-gates/worker-demand-org-attribution-gate.md).
+    const SPRINT_BASELINE = 191;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

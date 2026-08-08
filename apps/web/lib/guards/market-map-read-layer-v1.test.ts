@@ -441,7 +441,11 @@ describe("NO new DB migration in this PR", () => {
     // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
-    expect(count).toBeLessThanOrEqual(190);
+    // Bumped 190 -> 191 for the worker board org attribution fix
+    // (`20260807130000_worker_demand_org_attribution_v1` — one row per
+    // demand, company resolved via the demand's organization; owner-gated
+    // RED, paired rollback, ships UNAPPLIED).
+    expect(count).toBeLessThanOrEqual(191);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
