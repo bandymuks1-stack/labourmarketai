@@ -123,6 +123,13 @@ export const COMPANY_EXECUTORS: {
           capabilities: input.description,
           location: input.location ?? undefined,
           timing: input.urgency ?? undefined,
+          // HOW MANY workers. The submit leg below has always passed this
+          // through to `team_size`; the draft leg did not, so an employer who
+          // ticked "save as draft" was told "Išsaugota." while the worker
+          // count — the number the whole request is about — was discarded.
+          // Sent as a string because the draft payload is string-only.
+          teamSize:
+            input.teamSize == null ? undefined : String(input.teamSize),
           notes: input.notes ?? undefined,
         });
         return row

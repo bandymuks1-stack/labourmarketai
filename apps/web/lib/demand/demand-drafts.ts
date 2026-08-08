@@ -46,6 +46,16 @@ export type CompanyRequestPayload = {
   capabilities?: string;
   location?: string;
   timing?: string;
+  /**
+   * HOW MANY workers the need is for. Stored as the decimal string the rest of
+   * this payload uses, because `sanitize` accepts strings only.
+   *
+   * It was missing entirely until an employer reported that their request "did
+   * not save": the submit leg persists `team_size`, but the DRAFT leg silently
+   * dropped the count — so ticking "Išsaugoti kaip juodraštį" lost the single
+   * number the request is about while the UI reported success.
+   */
+  teamSize?: string;
   /** Organisation's role ON THIS need — situational, not a permanent identity. */
   projectRole?:
     | "client"
@@ -109,6 +119,7 @@ const ALLOWED_KEYS: Record<DraftType, ReadonlySet<string>> = {
     "capabilities",
     "location",
     "timing",
+    "teamSize",
     "projectRole",
     "accommodation",
     "languages",
@@ -160,7 +171,14 @@ function rowToDraft(r: unknown): DemandDraftRow | null {
   };
 }
 
-function sanitize<T extends DemandDraftPayload>(
+/**
+ * Drop everything that is not an allowed, non-empty string field of this draft
+ * type. Exported for tests: the allowlist is a silent data-loss surface — a
+ * field the form collects but this set omits is discarded while the UI still
+ * reports "Išsaugota.", which is exactly how the draft leg lost an employer's
+ * worker count. Pure; no IO.
+ */
+export function sanitizeDemandDraftPayload<T extends DemandDraftPayload>(
   type: DraftType,
   raw: unknown,
 ): T {
@@ -237,7 +255,7 @@ export async function saveDemandDraft(
     organizationId = employer.organizationId;
   }
 
-  const payload = sanitize(type, rawPayload);
+  const payload = sanitizeDemandDraftPayload(type, rawPayload);
   const title =
     typeof (payload as { title?: unknown }).title === "string"
       ? ((payload as { title?: string }).title ?? null)
