@@ -551,7 +551,7 @@ resolvers), **no migration**, authorization unchanged. See the commit for the
 three-layer root cause and both negative controls. `20260714210000` remains
 owner-gated and unapplied, so the choice is session-scoped by design.
 
-## D-23 — Identity collision: duplicate accounts are structurally impossible, and that was worth proving
+## D-23 — Identity collision: duplicate auth ROWS are prevented; provider LINKING is still unverified
 
 The scenario the audit had to answer: `person@example.com` registers with
 email/password; later Google (or any provider) returns the same address. Does
@@ -569,8 +569,20 @@ Email is UNIQUE in `auth.users` for every non-SSO user. A second row for the
 same address cannot exist, so `handle_new_user` — the trigger that creates
 `public.profiles`, keyed on `new.id` with `on conflict (id) do nothing` — can
 only ever fire once per email. Every downstream identity (`profiles`, `workers`,
-`organizations`, memberships, journal, CV) hangs off `auth.users.id`, so the
-whole duplicate class is closed at its root.
+`organizations`, memberships, journal, CV) hangs off `auth.users.id`.
+
+**THIS COVERS ONE CLASS ONLY, AND THE ORIGINAL WORDING OVERCLAIMED IT.** An
+earlier revision of this row was headed "duplicate accounts are structurally
+impossible" — accurate about ROWS, but it reads as a verdict on the whole social
+collision problem, which is not proven. The two halves must stay separate:
+
+| Question | Verdict |
+|---|---|
+| Can a second ordinary non-SSO `auth.users` row exist for one email? | **NO — VERIFIED** (DB unique partial index) |
+| Does a social provider LINK to the existing user, or REFUSE the sign-in? | **NOT VERIFIED** (GoTrue project behaviour) |
+
+A refusal would strand a real person at the login screen with a valid account.
+That is a live unknown, not a closed one.
 
 | Risk | Verdict | Basis |
 |---|---|---|

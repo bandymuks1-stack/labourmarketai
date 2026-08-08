@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 
 const MIN_PASSWORD = 8;
 
@@ -74,8 +75,6 @@ export function ResetPasswordForm() {
     }
   }
 
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   if (ready === "checking") {
     return (
@@ -127,7 +126,7 @@ export function ResetPasswordForm() {
           minLength={MIN_PASSWORD}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
@@ -140,7 +139,7 @@ export function ResetPasswordForm() {
           required
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className={inputCls}
+          className={AUTH_INPUT_CLASS}
         />
       </label>
 
