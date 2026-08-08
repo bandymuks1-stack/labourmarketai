@@ -34,6 +34,27 @@ export default async function LegalNoticePage({
     </div>
   );
 
+  /**
+   * Beta foundation audit M11. The published addresses were rendered as plain
+   * text, so the only contact channel on the whole public site could not be
+   * used from the page that carries it — while several legal pages tell the
+   * reader to get in touch. Same values, now actionable. `min-h-11` keeps the
+   * mobile touch floor the rest of the product holds itself to.
+   */
+  const mailRow = (label: string, address: string, testid?: string) => (
+    <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
+      <dt className="w-48 shrink-0 text-text-muted">{label}</dt>
+      <dd data-testid={testid}>
+        <a
+          href={`mailto:${address}`}
+          className="inline-flex min-h-11 items-center text-text-primary underline decoration-ink-500 underline-offset-4 hover:decoration-text-primary"
+        >
+          {address}
+        </a>
+      </dd>
+    </div>
+  );
+
   return (
     <article
       className="mx-auto max-w-3xl px-6 py-16 sm:px-12"
@@ -61,8 +82,12 @@ export default async function LegalNoticePage({
             t("registeredOffice"),
             `${PLATFORM_OPERATOR.address.street}, ${PLATFORM_OPERATOR.address.city}, ${PLATFORM_OPERATOR.address.country}`,
           )}
-          {row(t("email"), PRIVACY_CONTACT_EMAIL)}
-          {row(t("businessEmail"), PLATFORM_OPERATOR.businessEmail)}
+          {mailRow(t("email"), PRIVACY_CONTACT_EMAIL, "legal-notice-email")}
+          {mailRow(
+            t("businessEmail"),
+            PLATFORM_OPERATOR.businessEmail,
+            "legal-notice-business-email",
+          )}
           {row(t("representedBy"), `${PLATFORM_OPERATOR.director}, ${t("director")}`)}
         </dl>
       </section>
