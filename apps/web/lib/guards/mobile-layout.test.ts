@@ -135,14 +135,35 @@ describe("mobile layout invariants", () => {
       expect(src).toContain('className="fixed inset-0 z-50 flex items-end');
     });
 
-    it("floating report button is a small fixed-size icon (can't be pushed off-screen, #11)", () => {
-      // IA cleanup v2: the always-on wide pill (which followed every page and
-      // covered content) is now a compact, fixed 9×9 icon-only button — a fixed
-      // size inherently can't overflow regardless of locale string length, and
-      // it sits at reduced opacity until hovered so it never competes with
-      // page content.
-      expect(src).toMatch(/h-9 w-9/);
-      expect(src).toMatch(/opacity-60/);
+    it("floating report button is findable and tappable on a phone", () => {
+      // THIS ASSERTION USED TO PIN THE DEFECT. IA cleanup v2 (#11) shrank the
+      // control to `h-9 w-9` at `opacity-60` with its label only in `title` /
+      // `aria-label`, and this test certified exactly that. Both reveals are
+      // HOVER-only, which a touch device does not have — so on mobile the
+      // reporting button was an unlabelled, 60%-opaque 36px glyph. The owner
+      // could not find it, and neither could an external tester. A guard that
+      // pins cosmetic values cannot notice that.
+      //
+      // What actually matters, and what is pinned now:
+      //   - at least the 44px minimum touch target;
+      //   - a label rendered as TEXT, not only as a hover affordance;
+      //   - no permanent transparency that hides it on a touch device.
+      // Read the TRIGGER's own className, not the whole file — a prose
+      // mention of a utility class in a comment must never satisfy or break
+      // an assertion about what the button actually renders.
+      const trigger = /className="(fixed right-3[^"]*)"/.exec(src)?.[1] ?? "";
+      expect(trigger).not.toBe("");
+      expect(trigger).toContain("min-h-[2.75rem]");
+      // No resting transparency: `hover:opacity-*` would be fine, a permanent
+      // `opacity-*` is not — a touch device never leaves the resting state.
+      expect(trigger).not.toMatch(/(^|\s)opacity-\d+/);
+      // The label is real text, not a hover-only title/aria affordance.
+      expect(src).toMatch(
+        /<span className="whitespace-nowrap">\{t\("openLabel"\)\}<\/span>/,
+      );
+      // The cleanup's real intent still holds: it stays a corner pill, never a
+      // full-width bar that covers content.
+      expect(trigger).toContain("fixed right-3");
     });
   });
 });

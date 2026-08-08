@@ -110,12 +110,30 @@ export function LanguageFeedbackWidget() {
            the click but buries the FAB, leaving an interactive control visible
            and unreachable. Neither control may lose: a surface with a bottom
            bar sets this variable to its own height so both stay usable. */
-        className="fixed right-3 z-40 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-subtle bg-surface-1/70 text-xs text-text-muted opacity-60 shadow-sm backdrop-blur transition bottom-[var(--feedback-fab-bottom,calc(5rem+env(safe-area-inset-bottom)))] hover:border-brand-blue hover:text-text-primary hover:opacity-100 md:bottom-[var(--feedback-fab-bottom,1rem)]"
+        className="fixed right-3 z-40 inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-full border border-border-subtle bg-surface-1/90 px-3 text-xs font-medium text-text-secondary shadow-sm backdrop-blur transition bottom-[var(--feedback-fab-bottom,calc(5rem+env(safe-area-inset-bottom)))] hover:border-brand-blue hover:text-text-primary md:bottom-[var(--feedback-fab-bottom,1rem)]"
         data-testid="language-feedback-open"
         aria-label={t("openAria")}
         title={t("openLabel")}
       >
         <span aria-hidden>✎</span>
+        {/* THE LABEL IS VISIBLE, AND THE TARGET IS A REAL TOUCH TARGET.
+            IA cleanup v2 (#11) reduced this control to a 36px, 60%-opaque,
+            icon-only glyph whose label lived in `title` / `aria-label`. Both
+            of those reveal on HOVER, which a phone does not have — so on the
+            surface where testers actually work it was an unlabelled, faded
+            pencil. The owner could no longer find the reporting button, and an
+            external tester never found it either.
+
+            The label is the EXISTING `openLabel` string, already translated in
+            every locale, so this adds no i18n debt.
+
+            MEASURED TRADE-OFF. A floating button always overlays something:
+            at 412px on /dashboard/planning the 36px version already covered
+            one calendar cell, and this wider pill covers three. Discoverability
+            was chosen deliberately over that (a report control nobody can find
+            has no value); a non-floating entry point is the real fix and is
+            recorded in the requirement-drift ledger. */}
+        <span className="whitespace-nowrap">{t("openLabel")}</span>
       </button>
       {open && (
         <div
