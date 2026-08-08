@@ -207,6 +207,60 @@ describe("honest non-mint states stay honest — visible, not violations", () =>
   });
 });
 
+describe("the owner-classified LEGACY_EXCEPTION (88a43ead) is visible, not RED", () => {
+  const LEGACY_ID = "88a43ead-2fe1-4891-bdae-8b5019f980d9";
+
+  it("the exact legacy booking id → legacy_exception, zero violations", async () => {
+    const out = await run({
+      bookings: [booking(LEGACY_ID, "d1")],
+      demands: [{ id: "d1", profile_id: OWNER, organization_id: "org-a" }],
+      orgs: [{ id: "org-a", legacy_company_id: "co-a" }],
+      companies: [{ id: "co-a", profile_id: OWNER }],
+      engagements: [],
+    });
+    expect(out.status).toBe("ok");
+    if (out.status !== "ok") return;
+    expect(out.violationCount).toBe(0);
+    // Still LISTED — the exception is visible, never hidden.
+    expect(out.rows[0]).toMatchObject({
+      bookingId: LEGACY_ID,
+      status: "legacy_exception",
+      resolvedCompanyId: "co-a",
+    });
+  });
+
+  it("NEGATIVE CONTROL: any other booking in the same state is still a VIOLATION", async () => {
+    const out = await run({
+      bookings: [booking(LEGACY_ID, "d1"), booking("b-new", "d1")],
+      demands: [{ id: "d1", profile_id: OWNER, organization_id: "org-a" }],
+      orgs: [{ id: "org-a", legacy_company_id: "co-a" }],
+      companies: [{ id: "co-a", profile_id: OWNER }],
+      engagements: [],
+    });
+    expect(out.status).toBe("ok");
+    if (out.status !== "ok") return;
+    expect(out.violationCount).toBe(1);
+    expect(out.rows.find((r) => r.bookingId === "b-new")?.status).toBe("VIOLATION");
+  });
+
+  it("an ENGAGED legacy id reports engaged, not legacy_exception", async () => {
+    // The allowlist only downgrades what would otherwise be a violation —
+    // it never rewrites a healthy state.
+    const out = await run({
+      bookings: [booking(LEGACY_ID, "d1")],
+      demands: [{ id: "d1", profile_id: OWNER, organization_id: "org-a" }],
+      orgs: [{ id: "org-a", legacy_company_id: "co-a" }],
+      companies: [{ id: "co-a", profile_id: OWNER }],
+      engagements: [
+        { company_id: "co-a", worker_id: WORKER, source_booking_id: LEGACY_ID, status: "active" },
+      ],
+    });
+    expect(out.status).toBe("ok");
+    if (out.status !== "ok") return;
+    expect(out.rows[0].status).toBe("engaged");
+  });
+});
+
 describe("degradation is honest", () => {
   it("a missing relation is `unavailable`, never a comforting zero", async () => {
     const out = await run({

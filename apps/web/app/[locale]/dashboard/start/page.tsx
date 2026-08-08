@@ -251,12 +251,11 @@ export default async function ActivitySetupHubPage({
                 </dd>
               </div>
             </dl>
-            <Link
-              href={"/dashboard/agency" as "/dashboard"}
-              className="self-start text-xs text-text-secondary hover:underline"
-            >
-              {label("Eiti į agentūros dashboardą →", "Go to agency dashboard →")}
-            </Link>
+            {/* Beta audit F2: this linked "/dashboard/agency", a route that
+                does not exist (the typed-routes cast hid the 404). The agency
+                workspace is still `preparing` in the feature catalogue, so no
+                honest destination exists yet — the dead link is removed
+                rather than pointed somewhere it does not belong. */}
           </article>
         ) : null}
 

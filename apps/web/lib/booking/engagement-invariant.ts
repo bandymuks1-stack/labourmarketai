@@ -56,7 +56,26 @@ export type EngagementInvariantStatus =
   | "engaged"
   | "covered_active"
   | "honest_non_mint"
+  | "legacy_exception"
   | "VIOLATION";
+
+/**
+ * OWNER DECISION (beta stabilization command, 2026-08-08): booking
+ * `88a43ead` was accepted on 2026-08-06 — before the org-first resolution
+ * fix (20260807140000) existed — between two QA-SYNTHETIC subjects. The
+ * owner classified it LEGACY_EXCEPTION: the historical row is preserved
+ * (no engagement is manufactured, nothing is deleted or mutated), it stays
+ * VISIBLE in the invariant listing, but it no longer counts as a CURRENT
+ * violation, so the project-truth page can distinguish "the product is
+ * failing now" from "a known pre-fix QA row exists".
+ *
+ * A booking id belongs here ONLY with an explicit owner decision recorded
+ * in the audit trail. Any OTHER accepted booking that resolves a company
+ * and lacks an engagement still goes RED.
+ */
+const LEGACY_EXCEPTION_BOOKING_IDS: ReadonlySet<string> = new Set([
+  "88a43ead-2fe1-4891-bdae-8b5019f980d9",
+]);
 
 export interface EngagementInvariantRow {
   readonly bookingId: string;
@@ -219,6 +238,9 @@ export async function checkEngagementInvariant(): Promise<EngagementInvariantRes
     }
     if (activePairs.has(`${company}:${b.worker_id}`)) {
       return { bookingId: b.id, workerId: b.worker_id, status: "covered_active", reason: null, resolvedCompanyId: company };
+    }
+    if (LEGACY_EXCEPTION_BOOKING_IDS.has(b.id)) {
+      return { bookingId: b.id, workerId: b.worker_id, status: "legacy_exception", reason: null, resolvedCompanyId: company };
     }
     return { bookingId: b.id, workerId: b.worker_id, status: "VIOLATION", reason: null, resolvedCompanyId: company };
   });
