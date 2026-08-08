@@ -455,7 +455,14 @@ describe("NO new DB migration in this PR", () => {
     // slot was RECOUNTED against post-#1089 main, not summed — `git ls-tree -r
     // origin/main supabase/migrations/` = 191 .sql files, and this branch adds
     // exactly one.
-    expect(count).toBeLessThanOrEqual(192);
+    // Bumped 192 -> 193 for the W14 item 6 retention SCHEDULER
+    // (20260808140000_ai_runs_retention_schedule_v1) — DRAFT,
+    // OWNER_APPROVAL_REQUIRED_BEFORE_APPLY. Installs pg_cron, adds an
+    // append-only sweep-telemetry table, one definer wrapper that calls ONLY
+    // the approved retention capability with no argument, an operator health
+    // read, and one daily job. Rollback paired. Recounted against post-#1091
+    // main: origin/main holds 192 .sql files, this branch adds exactly one.
+    expect(count).toBeLessThanOrEqual(193);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
