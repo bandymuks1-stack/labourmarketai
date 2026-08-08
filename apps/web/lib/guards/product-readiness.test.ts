@@ -1991,7 +1991,16 @@ describe("no migration files added by this sprint", () => {
     // UPDATE/DELETE to any role, so the append-only guarantee is unchanged.
     // Rollback paired. Shared slot RECOUNTED against post-#1089 main rather
     // than summed: origin/main holds 191 .sql files, this branch adds one.
-    const SPRINT_BASELINE = 192;
+    // 192 -> 193: booking→engagement org-first company resolution
+    // (20260807140000_booking_engagement_org_resolution_v1) — replaces ONE
+    // function body (respond_booking_request_v3) so an organization-stamped
+    // demand resolves via organizations.legacy_company_id instead of the
+    // multi-company 'ambiguous_company' dead-end (live 2026-08-06, booking
+    // 88a43ead). Owner-gated RED, paired rollback restores the W12 body
+    // verbatim. Shared slot RECOUNTED against post-#1091 main: 192 files
+    // there, this branch adds one. Draft #1092 also claims 193 → it recounts
+    // to 194 after this lands.
+    const SPRINT_BASELINE = 193;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

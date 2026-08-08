@@ -455,7 +455,13 @@ describe("NO new DB migration in this PR", () => {
     // slot was RECOUNTED against post-#1089 main, not summed — `git ls-tree -r
     // origin/main supabase/migrations/` = 191 .sql files, and this branch adds
     // exactly one.
-    expect(count).toBeLessThanOrEqual(192);
+    // Bumped 192 -> 193 for booking→engagement org-first company resolution
+    // (`20260807140000_booking_engagement_org_resolution_v1` — single
+    // function-body replacement, owner-gated, paired rollback). RECOUNTED
+    // against post-#1091 main rather than summed: origin/main holds 192 .sql
+    // files, this branch adds exactly one. NOTE: Draft #1092 (retention
+    // scheduler) also claims 193 and must recount to 194 after this lands.
+    expect(count).toBeLessThanOrEqual(193);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
