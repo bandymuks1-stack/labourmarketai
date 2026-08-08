@@ -107,26 +107,9 @@ describe("mobile layout invariants", () => {
     });
   });
 
-  describe("language feedback widget (apps/web/components/app/language-feedback-widget.tsx)", () => {
+  describe("language feedback reporting", () => {
     const src = read("components/app/language-feedback-widget.tsx");
-
-    it("floating report button clears the bottom nav at all widths where the nav is visible", () => {
-      // The BottomNav is `md:hidden`, so the button must clear it on every
-      // width below `md`. It must also include the iOS safe-area inset so it
-      // never sits on the home indicator.
-      //
-      // The offset is now read from `--feedback-fab-bottom` so a surface that
-      // owns the bottom of the viewport (the conversation composer) can push
-      // the button clear of its own controls instead of being overlapped by
-      // it. The DEFAULTS below are unchanged, which is what this test pins:
-      // every page that does not set the variable keeps exactly the previous
-      // geometry.
-      expect(src).toContain("calc(5rem+env(safe-area-inset-bottom))");
-      expect(src).toMatch(/bottom-\[var\(--feedback-fab-bottom,/);
-      // IA cleanup v2 (#11): reduced to a low-profile button; desktop offset
-      // tightened to 1rem (previously the literal `md:bottom-4`).
-      expect(src).toMatch(/md:bottom-\[var\(--feedback-fab-bottom,1rem\)\]/);
-    });
+    const menu = read("components/app/account-menu.tsx");
 
     it("modal container fits a 360px viewport (max-w-md + p-4 backdrop)", () => {
       // p-4 outer padding keeps 16px gutters on each side; max-w-md
@@ -135,35 +118,70 @@ describe("mobile layout invariants", () => {
       expect(src).toContain('className="fixed inset-0 z-50 flex items-end');
     });
 
-    it("floating report button is findable and tappable on a phone", () => {
-      // THIS ASSERTION USED TO PIN THE DEFECT. IA cleanup v2 (#11) shrank the
-      // control to `h-9 w-9` at `opacity-60` with its label only in `title` /
-      // `aria-label`, and this test certified exactly that. Both reveals are
-      // HOVER-only, which a touch device does not have — so on mobile the
-      // reporting button was an unlabelled, 60%-opaque 36px glyph. The owner
-      // could not find it, and neither could an external tester. A guard that
-      // pins cosmetic values cannot notice that.
-      //
-      // What actually matters, and what is pinned now:
-      //   - at least the 44px minimum touch target;
-      //   - a label rendered as TEXT, not only as a hover affordance;
-      //   - no permanent transparency that hides it on a touch device.
-      // Read the TRIGGER's own className, not the whole file — a prose
-      // mention of a utility class in a comment must never satisfy or break
-      // an assertion about what the button actually renders.
-      const trigger = /className="(fixed right-3[^"]*)"/.exec(src)?.[1] ?? "";
+    /**
+     * THIS BLOCK HAS PINNED THE DEFECT TWICE, IN OPPOSITE DIRECTIONS.
+     *
+     * First it asserted `h-9 w-9` + `opacity-60` + an `aria-label`-only label,
+     * certifying a control no phone user could see. That was replaced by a
+     * labelled 44px pill — which was findable, and covered three calendar cells
+     * at 412px, because it still floated.
+     *
+     * Both rounds pinned the GEOMETRY OF A FLOATING BUTTON, so both could only
+     * ever trade discoverability against obstruction. What is pinned now is the
+     * pair of properties the product actually needs, which a floating control
+     * could not hold at once:
+     *   - the trigger is reachable from a predictable place on every route, and
+     *   - it is not fixed-position, so it covers nothing.
+     */
+    it("the report trigger is a labelled menu item, not a floating overlay", () => {
+      // Nothing floats: the resting trigger is gone from the widget entirely.
+      expect(src).not.toMatch(/className="fixed right-3/);
+      // The modal is still allowed to be fixed — it is a dialog, not a resting
+      // control — so this asserts the absence of the FAB, not of `fixed`.
+      expect(src).toMatch(/FEEDBACK_OPEN_EVENT/);
+
+      // The trigger is a real, labelled menu item. Read the BUTTON's own
+      // markup: a class or key named in a comment must neither satisfy nor
+      // break an assertion about what actually renders.
+      // NOT `<button[^>]*…`: the element's own onClick contains `=>`, so a
+      // negated-`>` class stops inside the arrow function and never reaches the
+      // testid. Bounded lazy any-character matching is what actually spans a
+      // JSX element with handlers in it.
+      const trigger =
+        /<button[\s\S]{0,400}?data-testid="language-feedback-open"[\s\S]{0,600}?<\/button>/.exec(
+          menu,
+        )?.[0] ?? "";
       expect(trigger).not.toBe("");
-      expect(trigger).toContain("min-h-[2.75rem]");
-      // No resting transparency: `hover:opacity-*` would be fine, a permanent
-      // `opacity-*` is not — a touch device never leaves the resting state.
+      // Visible text, not a hover-only title/aria affordance.
+      expect(trigger).toMatch(/\{tFeedback\("menuLabel"\)\}/);
+      // No resting transparency — a touch device never leaves the resting state.
       expect(trigger).not.toMatch(/(^|\s)opacity-\d+/);
-      // The label is real text, not a hover-only title/aria affordance.
-      expect(src).toMatch(
-        /<span className="whitespace-nowrap">\{t\("openLabel"\)\}<\/span>/,
-      );
-      // The cleanup's real intent still holds: it stays a corner pill, never a
-      // full-width bar that covers content.
-      expect(trigger).toContain("fixed right-3");
+      // It opens the modal the layout mounts, rather than navigating away.
+      expect(trigger).toMatch(/FEEDBACK_OPEN_EVENT/);
+    });
+
+    it("the account-menu trigger itself meets the 44px touch floor", () => {
+      // The menu items are `py-2` text rows inside a dropdown; the control a
+      // thumb has to hit FIRST is the avatar trigger, which is the one with a
+      // fixed size. `size-11` = 44px.
+      expect(menu).toMatch(/inline-flex size-11 items-center justify-center/);
+    });
+  });
+
+  describe("calendar toolbar (apps/web/app/[locale]/dashboard/planning/page.tsx)", () => {
+    const src = read("app/[locale]/dashboard/planning/page.tsx");
+
+    it("every toolbar control meets the 44px touch minimum", () => {
+      // An external tester measured these at 36px (`min-h-9`). ONE shared
+      // CHIP_BASE covers the view switcher, prev/today/next, the source filters
+      // and the date-picker submit — so the whole toolbar was under the floor
+      // on the one surface built entirely out of small tap targets.
+      const chipBase = /const CHIP_BASE =\s*\n?\s*"([^"]*)"/.exec(src)?.[1] ?? "";
+      expect(chipBase).not.toBe("");
+      expect(chipBase).toContain("min-h-[2.75rem]");
+      expect(chipBase).not.toMatch(/min-h-9\b/);
+      // The native date input sits in the same row and is tapped just as often.
+      expect(src).toMatch(/type="date"[\s\S]{0,200}min-h-\[2\.75rem\]/);
     });
   });
 });

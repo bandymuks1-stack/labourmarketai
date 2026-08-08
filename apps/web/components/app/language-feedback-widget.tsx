@@ -8,19 +8,46 @@ import { submitLanguageFeedback } from "@/lib/language-feedback/actions";
 import { recordEvent } from "@/lib/telemetry/task";
 
 /**
- * Floating tester-feedback widget. Mounted inside the dashboard layout so
- * it's only visible to authenticated sessions — no public landing/login
- * exposure. The DB-side RLS (`is_admin()` SELECT) keeps the inbox private
- * even if the widget is ever surfaced publicly later.
+ * Tester-feedback reporting. Mounted inside the dashboard layout so it's only
+ * reachable from authenticated sessions — no public landing/login exposure. The
+ * DB-side RLS (`is_admin()` SELECT) keeps the inbox private even if the flow is
+ * ever surfaced publicly later.
  *
  * Workflow:
- *   1. Tester highlights a confusing word/section anywhere on the page.
- *   2. Clicks the floating "Pranešti apie tekstą" pill.
+ *   1. Tester (optionally) highlights a confusing word/section on the page.
+ *   2. Opens "Pranešti apie problemą" from the account menu.
  *   3. Modal opens with the captured selection prefilled (read-only),
  *      route + locale stamped, and a comment textarea.
  *   4. Submit hits `submitLanguageFeedback` → row in language_feedback
  *      with status='open', visible only to admins.
+ *
+ * THERE IS NO FLOATING TRIGGER ANY MORE, and that is the point.
+ *
+ * The control was a fixed-position pill, and a fixed-position pill always
+ * covers something. The history is three separate workarounds for one cause:
+ *   - it sat on the conversation composer's send button and silently
+ *     intercepted the tap, which is why `--feedback-fab-bottom` was invented so
+ *     the composer could shove it out of the way;
+ *   - it was hidden outright on /dashboard/market-map, because it obstructed
+ *     the map controls;
+ *   - at 412px on /dashboard/planning it covered three calendar cells — and
+ *     shrinking it to a 36px icon to cover fewer had already made it
+ *     undiscoverable, which is the defect the previous commit fixed.
+ * Discoverability and non-obstruction cannot both be won by tuning the geometry
+ * of something that floats over the page.
+ *
+ * The trigger now lives in the ACCOUNT MENU: one predictable place, present in
+ * the header on every dashboard route at every width, already a 44px target,
+ * and it covers nothing. All three workarounds above are deleted with it, and
+ * reporting became available on the map surface, where it never was.
+ *
+ * The menu is a client component in the header and this modal is mounted by the
+ * layout, so they are not in one React tree; the menu opens this via a window
+ * event. That is deliberately the smallest possible coupling — no new provider,
+ * no context threaded through server components, nothing else can grow on it.
  */
+export const FEEDBACK_OPEN_EVENT = "labourmarket:feedback-open";
+
 export function LanguageFeedbackWidget() {
   const t = useTranslations("languageFeedback");
   const locale = useLocale();
@@ -32,6 +59,19 @@ export function LanguageFeedbackWidget() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // The account menu's "report a problem" item opens this. Registered before
+  // any early return below, so the listener exists on EVERY dashboard route —
+  // a menu item that silently does nothing on one surface is worse than no
+  // menu item.
+  useEffect(() => {
+    const onOpen = () => {
+      recordEvent("language_feedback_opened");
+      setOpen(true);
+    };
+    window.addEventListener(FEEDBACK_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(FEEDBACK_OPEN_EVENT, onOpen);
+  }, []);
 
   // When the modal opens, capture the current window selection (≤240 chars)
   // and focus the comment textarea. The selection is read-only inside the
@@ -77,64 +117,11 @@ export function LanguageFeedbackWidget() {
     });
   }
 
-  // On the map workspace the floating button would obstruct the map controls /
-  // identity marker, so it is hidden there (the map is map-first). Feedback
-  // stays available on every other page. (Hooks above always run first.)
-  if (pathname.startsWith("/dashboard/market-map")) return null;
+  // The map surface no longer needs an exception: with no floating control
+  // there is nothing to obstruct the map, so reporting works there too.
 
   return (
     <>
-      {/* IA cleanup v2 (#11): reduced from an always-on wide pill that
-          followed every page and covered content, to a small, low-profile
-          icon-only report action. The label now lives in the tooltip /
-          aria-label only, and it sits at lower opacity until hovered so it
-          never competes with page content. The full report flow is unchanged. */}
-      <button
-        type="button"
-        onClick={() => {
-          recordEvent("language_feedback_opened");
-          setOpen(true);
-        }}
-        /* The bottom offset reads `--feedback-fab-bottom` so a surface that
-           owns the bottom of the viewport can push this button clear of its
-           own controls. Each fallback reproduces the previous value exactly
-           (5rem + safe-area on mobile, 1rem from `md:` up), so every existing
-           page is unchanged. Arbitrary Tailwind values are used rather than an
-           inline `style`, because an inline style would beat the `md:`
-           breakpoint and pin the desktop button at the mobile offset.
-
-           WHY IT IS A VARIABLE. A fixed `z-40` button pinned 5rem from the
-           bottom sat directly on top of the conversation composer's send
-           button on mobile, where the composer spans the full width — the FAB
-           silently intercepted the click. Raising the composer's z-index fixes
-           the click but buries the FAB, leaving an interactive control visible
-           and unreachable. Neither control may lose: a surface with a bottom
-           bar sets this variable to its own height so both stay usable. */
-        className="fixed right-3 z-40 inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-full border border-border-subtle bg-surface-1/90 px-3 text-xs font-medium text-text-secondary shadow-sm backdrop-blur transition bottom-[var(--feedback-fab-bottom,calc(5rem+env(safe-area-inset-bottom)))] hover:border-brand-blue hover:text-text-primary md:bottom-[var(--feedback-fab-bottom,1rem)]"
-        data-testid="language-feedback-open"
-        aria-label={t("openAria")}
-        title={t("openLabel")}
-      >
-        <span aria-hidden>✎</span>
-        {/* THE LABEL IS VISIBLE, AND THE TARGET IS A REAL TOUCH TARGET.
-            IA cleanup v2 (#11) reduced this control to a 36px, 60%-opaque,
-            icon-only glyph whose label lived in `title` / `aria-label`. Both
-            of those reveal on HOVER, which a phone does not have — so on the
-            surface where testers actually work it was an unlabelled, faded
-            pencil. The owner could no longer find the reporting button, and an
-            external tester never found it either.
-
-            The label is the EXISTING `openLabel` string, already translated in
-            every locale, so this adds no i18n debt.
-
-            MEASURED TRADE-OFF. A floating button always overlays something:
-            at 412px on /dashboard/planning the 36px version already covered
-            one calendar cell, and this wider pill covers three. Discoverability
-            was chosen deliberately over that (a report control nobody can find
-            has no value); a non-floating entry point is the real fix and is
-            recorded in the requirement-drift ledger. */}
-        <span className="whitespace-nowrap">{t("openLabel")}</span>
-      </button>
       {open && (
         <div
           role="dialog"

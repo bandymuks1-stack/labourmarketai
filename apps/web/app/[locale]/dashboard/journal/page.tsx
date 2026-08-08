@@ -52,6 +52,10 @@ import {
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { formatUtcDate, utcDayKey } from "@/lib/time/display";
+// ONE day-resolution rule for the Work Journal, shared with the canonical
+// calendar (lib/planning/planning-model.ts) so a record cannot sit on one day
+// here and another day there.
+import { journalStartDay } from "@/lib/planning/planning-model";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -537,7 +541,27 @@ export default async function JournalPage({
     totalMinutes: number;
     entries: JournalEntryRow[];
   }[] = [];
-  const isoDayOf = (createdAt: string): string => utcDayKey(createdAt) ?? "";
+  /**
+   * THE DAY AN ENTRY BELONGS TO — the day WORKED, resolved by the one shared
+   * `journalStartDay` the canonical calendar uses.
+   *
+   * THE REGRESSION THIS CLOSES. The calendar started placing entries on their
+   * own `work_date`; this page kept grouping by `created_at`. The same entry
+   * then had two different days depending on which surface you asked, and the
+   * diary's own "open in calendar" link — built from THIS key — sent the worker
+   * to a day the calendar had just moved the entry off, landing them on an
+   * empty day view. Yesterday's shift logged tonight is the ordinary case, so
+   * this was not an edge: it was the normal path.
+   *
+   * One function decides the day for both surfaces, so they cannot disagree
+   * again. `created_at` remains the fallback for entries that never carried a
+   * work date, which is every historical row.
+   */
+  const workDateOf = (e: JournalEntryRow): string | null =>
+    (e.journal_entry_metrics ?? []).find((m) => m.metric_slug === "work_date")
+      ?.value_text ?? null;
+  const isoDayOf = (e: JournalEntryRow): string =>
+    journalStartDay(workDateOf(e), e.created_at) ?? utcDayKey(e.created_at) ?? "";
   // Evidence drill-down (W5 slice 3): resolve ?skill= against the worker's
   // OWN skill set and narrow the diary to entries linked to it. Unknown slug
   // or links unavailable → no filter, never an invented empty diary. The
@@ -552,8 +576,17 @@ export default async function JournalPage({
         (linksByEntry.get(e.id) ?? []).includes(skillFilter.id),
       )
     : (entries ?? []);
-  for (const e of diaryEntries) {
-    const label = formatUtcDate(e.created_at, locale) ?? "";
+  // Entries arrive `created_at`-desc, which is no longer the same order as the
+  // day worked — so they are re-sorted by the resolved day before grouping.
+  // Without this an entry logged today for last week would open its own group
+  // between two of today's rows instead of joining last week's day.
+  const diaryEntriesByDay = [...diaryEntries].sort((a, b) => {
+    const cmp = isoDayOf(b).localeCompare(isoDayOf(a));
+    return cmp !== 0 ? cmp : b.created_at.localeCompare(a.created_at);
+  });
+  for (const e of diaryEntriesByDay) {
+    const isoKey = isoDayOf(e);
+    const label = formatUtcDate(isoKey, locale) ?? "";
     // Day total = sum of each entry's time metric (hours/minutes only). "days"
     // and non-time quantities are never summed, so the figure is real, not
     // invented; days with no time entry simply show no hours.
@@ -569,14 +602,17 @@ export default async function JournalPage({
           : timeMetric.value_numeric
         : 0;
     const last = entryDayGroups[entryDayGroups.length - 1];
-    if (last && last.key === label) {
+    // Keyed by the ISO day, not by the formatted label: two different days can
+    // format identically in some locales, and the key is what `?date=` filters
+    // on — so the label must never be the identity.
+    if (last && last.isoKey === isoKey) {
       last.entries.push(e);
       last.totalMinutes += mins;
     } else {
       entryDayGroups.push({
-        key: label,
+        key: isoKey,
         label,
-        isoKey: isoDayOf(e.created_at),
+        isoKey,
         totalMinutes: mins,
         entries: [e],
       });

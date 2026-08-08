@@ -494,19 +494,65 @@ async function readJournalItems(
     return { state: { status: "workers-only", count: 0 }, items: [] };
   }
 
-  const res = await asAny(supabase)
-    .from("journal_entries")
-    .select(
-      "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id",
-    )
-    .eq("worker_id", workerRes.data.id)
-    .is("deleted_at", null)
-    .is("superseded_by", null)
-    .gte("created_at", `${rangeStart}T00:00:00Z`)
-    .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
-    .order("created_at", { ascending: true })
+  const ENTRY_COLUMNS =
+    "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id";
+  const liveEntries = () =>
+    asAny(supabase)
+      .from("journal_entries")
+      .select(ENTRY_COLUMNS)
+      .eq("worker_id", workerRes.data.id)
+      .is("deleted_at", null)
+      .is("superseded_by", null);
+
+  // WHICH ENTRIES THE VISIBLE RANGE CONTAINS — asked of the day the work
+  // HAPPENED, not the day the row was typed.
+  //
+  // THE DEFECT THIS EXISTS FOR (D-13). The projection places an entry on its
+  // own `work_date` (journalStartDay), but this read bounded the query by
+  // `created_at`. The two columns disagree by design — logging Monday's shift
+  // on Friday is the normal case, and "I am filling in last month now" is the
+  // exact behaviour the Work Journal invites. So an entry worked in June and
+  // typed in August was never READ while looking at June: the day rendered
+  // empty, and a worker asking "which days did I fill?" was told "none".
+  // Nothing errored and no test failed — the row simply was not in the result
+  // set. A worker can only trust "this day is empty" if the query asked about
+  // that day.
+  //
+  // Two bounded, RLS-scoped reads instead of one, merged by id:
+  //   A. entries whose stated work_date falls in the range (the metrics table
+  //      is the only place that day lives), and
+  //   B. entries CREATED in the range — which keeps every entry that never
+  //      carried a work_date at all, exactly where `created_at` still puts it.
+  // Neither read can widen scope: both are filtered to this worker's own live
+  // entries, and the metrics table's own SELECT policy re-checks the parent.
+  const workDateIdsRes = await asAny(supabase)
+    .from("journal_entry_metrics")
+    .select("entry_id")
+    .eq("metric_slug", "work_date")
+    .gte("value_text", rangeStart)
+    .lte("value_text", rangeEnd)
     .limit(PLANNING_JOURNAL_READ_LIMIT);
-  if (res.error) {
+  const workDateIds = [
+    ...new Set(
+      ((workDateIdsRes.data ?? []) as { entry_id: string }[]).map(
+        (m) => m.entry_id,
+      ),
+    ),
+  ];
+
+  const [createdRes, workedRes] = await Promise.all([
+    liveEntries()
+      .gte("created_at", `${rangeStart}T00:00:00Z`)
+      .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
+      .order("created_at", { ascending: true })
+      .limit(PLANNING_JOURNAL_READ_LIMIT),
+    workDateIds.length > 0
+      ? liveEntries().in("id", workDateIds).limit(PLANNING_JOURNAL_READ_LIMIT)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  // A failed work_date lookup must not silently shrink the answer back to the
+  // defect above, so it is a real error rather than a quiet fallback.
+  if (createdRes.error || workedRes.error || workDateIdsRes.error) {
     return { state: { status: "error", count: 0 }, items: [] };
   }
 
@@ -516,6 +562,19 @@ async function readJournalItems(
     created_at: string;
     correction_of: string | null;
     engagement_context_id: string | null;
+  };
+  const byId = new Map<string, Row>();
+  for (const row of [
+    ...((createdRes.data ?? []) as Row[]),
+    ...((workedRes.data ?? []) as Row[]),
+  ]) {
+    if (!byId.has(row.id)) byId.set(row.id, row);
+  }
+  const res = {
+    data: [...byId.values()].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    ),
+    error: null,
   };
   // ONE ACTIVE ENTRY PER CHAIN (owner audit P0.7). Editing a CONFIRMED entry
   // creates a correction row whose `correction_of` points at the original —

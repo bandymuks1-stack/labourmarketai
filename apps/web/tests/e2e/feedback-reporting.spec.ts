@@ -36,6 +36,18 @@ async function loginAsWorker(page: Page): Promise<void> {
 const trigger = (page: Page) =>
   page.locator('[data-testid="language-feedback-open"]');
 
+/**
+ * Open the reporter the way a user does: the account menu, then the item.
+ *
+ * The control used to be a floating pill. It was findable, and it covered three
+ * calendar cells at 412px — a floating trigger can only trade discoverability
+ * against obstruction. It is a menu item now, so both hold at once.
+ */
+async function openFeedback(page: Page): Promise<void> {
+  await page.locator('[data-testid="account-menu-trigger"]').click();
+  await trigger(page).click();
+}
+
 test.describe("In-app problem reporting", () => {
   test.skip(!HAS_TEST_SUPABASE, "Needs the local Supabase stack (pnpm e2e:local).");
   test.use({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
@@ -43,6 +55,16 @@ test.describe("In-app problem reporting", () => {
   test("the report control is findable and tappable on a phone", async ({ page }) => {
     await loginAsWorker(page);
     await page.goto("/lt/dashboard/journal");
+
+    // Reachable from the header on this route, in the same place as everywhere.
+    const menu = page.locator('[data-testid="account-menu-trigger"]');
+    await expect(menu).toBeVisible();
+    const menuBox = await menu.boundingBox();
+    expect(menuBox).not.toBeNull();
+    expect(menuBox!.height).toBeGreaterThanOrEqual(44);
+    expect(menuBox!.width).toBeGreaterThanOrEqual(44);
+
+    await menu.click();
     const t = trigger(page);
     await expect(t).toBeVisible();
 
@@ -66,10 +88,65 @@ test.describe("In-app problem reporting", () => {
     expect(ownsItsCentre).toBe(true);
   });
 
+  /**
+   * THE OBSTRUCTION HALF OF THE SAME REQUIREMENT.
+   *
+   * The previous fix made the control findable by making it a labelled pill,
+   * and measured — but accepted — that it then covered three calendar cells at
+   * 412px. Discoverability and non-obstruction are BOTH requirements, so this
+   * asserts the second one directly, at the width where it was measured
+   * failing, by hit-testing the cells rather than looking at a screenshot.
+   */
+  test("no floating control covers the calendar at 412px", async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 });
+    await loginAsWorker(page);
+    await page.goto("/lt/dashboard/planning?view=month");
+    await expect(page.locator('[data-testid="planning-month"]')).toBeVisible();
+
+    // Every rendered day cell must own its own centre point. A cell whose
+    // centre hits something else is a cell the user cannot tap.
+    //
+    // EACH CELL IS SCROLLED INTO VIEW FIRST. `elementFromPoint` is
+    // viewport-relative and returns null for anything below the fold, so
+    // hit-testing the grid where it happens to sit reports every off-screen
+    // cell as obstructed — which is what the first run of this test did. The
+    // cells further down are exactly the ones a bottom-anchored control would
+    // cover, so skipping them would have made the test useless in the one
+    // region it exists to check.
+    const covered = await page.evaluate(() => {
+      const bad: string[] = [];
+      for (const cell of document.querySelectorAll(
+        '[data-testid^="planning-month-cell-"]',
+      )) {
+        cell.scrollIntoView({ block: "center" });
+        const r = cell.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        // Still not in view (page too short to centre it) — nothing to assert.
+        if (cy < 0 || cy > window.innerHeight) continue;
+        const top = document.elementFromPoint(cx, cy);
+        if (!(cell === top || cell.contains(top))) {
+          const blocker =
+            top?.closest("[data-testid]")?.getAttribute("data-testid") ??
+            top?.tagName ??
+            "null";
+          bad.push(`${cell.getAttribute("data-testid")} <- ${blocker}`);
+        }
+      }
+      return bad;
+    });
+    expect(covered, "calendar cells obstructed by another control").toEqual([]);
+
+    // And the reporter is still reachable on this very route.
+    await page.locator('[data-testid="account-menu-trigger"]').click();
+    await expect(trigger(page)).toBeVisible();
+  });
+
   test("a non-admin's report is ACCEPTED, not refused by RLS", async ({ page }) => {
     await loginAsWorker(page);
     await page.goto("/lt/dashboard/journal");
-    await trigger(page).click();
+    await openFeedback(page);
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
@@ -95,7 +172,7 @@ test.describe("In-app problem reporting", () => {
     await page.goto("/lt/dashboard/journal");
     const before = page.url();
 
-    await trigger(page).click();
+    await openFeedback(page);
     const dialog = page.getByRole("dialog");
     await dialog.locator("textarea").last().fill("Nesuprantu šio teksto (e2e).");
     await dialog.getByRole("button", { name: /Išsiųsti/ }).click();
@@ -113,7 +190,7 @@ test.describe("In-app problem reporting", () => {
   }) => {
     await loginAsWorker(page);
     await page.goto("/lt/dashboard/journal");
-    await trigger(page).click();
+    await openFeedback(page);
     const dialog = page.getByRole("dialog");
 
     // Below the 3-character minimum the send control stays disabled, so no

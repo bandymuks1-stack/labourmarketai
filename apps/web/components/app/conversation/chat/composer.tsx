@@ -106,10 +106,12 @@ export function Composer({
   }
 
   return (
-    // `relative z-50` keeps the composer above the global language-feedback FAB
-    // (fixed, `z-40`, lifted by `--feedback-fab-bottom` on this surface).
-    // Sending a message is the primary action here and must never lose a
-    // hit-test to a secondary affordance.
+    // `relative z-50` keeps the composer above the page's own stacked content.
+    // It previously also had to out-rank the floating language-feedback button,
+    // which sat on the send control and silently intercepted the tap; that
+    // button is gone (it lives in the account menu now), so the only thing this
+    // still guards is the composer's own bottom stack. Sending a message is the
+    // primary action here and must never lose a hit-test.
     <div
       className={
         variant === "bar"

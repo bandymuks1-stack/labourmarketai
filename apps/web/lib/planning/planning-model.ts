@@ -572,6 +572,9 @@ export interface WeekStripDay {
   readonly count: number;
   /** A conflicting item covers this day. */
   readonly hasConflict: boolean;
+  /** A Work Journal entry is recorded on this day (D-13) — same distinction
+   *  the month grid makes, so the two surfaces cannot disagree. */
+  readonly hasJournal: boolean;
 }
 
 export interface PlanningAgenda {
@@ -659,6 +662,7 @@ export function buildAgenda(
       isToday: i === 0,
       count: covering.length,
       hasConflict: covering.some((it) => conflictIds.has(it.id)),
+      hasJournal: covering.some((it) => it.sourceType === "journal"),
     });
   }
 
@@ -710,6 +714,37 @@ export interface CalendarDayCell {
   readonly isToday: boolean;
   readonly count: number;
   readonly hasConflict: boolean;
+  /** A Work Journal entry is recorded on this day (D-13). A bare `count`
+   *  cannot answer "which days did I fill?" — a day holding one booking and a
+   *  day holding one journal entry both render "1". */
+  readonly hasJournal: boolean;
+  /** A PAST day the person was committed to work (their own accepted booking
+   *  or a project they are assigned to) that carries no journal entry yet —
+   *  the "still unfilled" question. Never set for today or the future: a day
+   *  that has not happened cannot be missing its record. */
+  readonly isUnfilled: boolean;
+}
+
+/**
+ * Does this row mean the person was ACTUALLY EXPECTED TO WORK that day?
+ *
+ * Deliberately narrow, and narrower than `isConflictEligible`: only the
+ * caller's OWN confirmed commitments count — an accepted incoming booking and
+ * a project they are personally assigned to. A proposal is not yet work; a
+ * managed project band is somebody else's schedule; an absence is the
+ * opposite of work; an invitation or finance row says nothing about a shift.
+ *
+ * This predicate exists so "unfilled" can only ever be claimed about a day the
+ * product can PROVE was a working day. Marking every empty past day as unfilled
+ * would nag people about weekends and holidays the product knows nothing about.
+ */
+export function indicatesExpectedWork(item: PlanningItem): boolean {
+  if (!item.startDate) return false;
+  if (item.sourceType === "booking") {
+    return item.status === "accepted" && item.roleContext === "incoming";
+  }
+  if (item.sourceType === "project") return item.roleContext === "assigned";
+  return false;
 }
 
 export interface MonthGrid {
@@ -750,12 +785,18 @@ export function buildMonthGrid(
     for (let i = 0; i < 7; i++) {
       const day = addDays(cursor, i);
       const covering = itemsForDay(items, day);
+      const hasJournal = covering.some((it) => it.sourceType === "journal");
       row.push({
         day,
         inMonth: day.slice(0, 7) === month,
         isToday: day === todayIso,
         count: covering.length,
         hasConflict: covering.some((it) => conflictIds.has(it.id)),
+        hasJournal,
+        // Strictly BEFORE today: today is still being lived, and a future day
+        // cannot be missing a record of work that has not happened.
+        isUnfilled:
+          day < todayIso && !hasJournal && covering.some(indicatesExpectedWork),
       });
     }
     weeks.push(row);

@@ -6266,7 +6266,8 @@
         "comment": "Opmerking",
         "user": "Gebruiker"
       }
-    }
+    },
+    "menuLabel": "Probleem melden"
   },
   "common": {
     "localeSwitch": "Taal",
@@ -8707,7 +8708,11 @@
       "recorded": "Vastgelegd"
     },
     "month": {
-      "hint": "Tik op een dag om de items van die dag te zien."
+      "hint": "Tik op een dag om de items van die dag te zien.",
+      "legend": {
+        "journal": "Dagboek ingevuld",
+        "unfilled": "Gewerkt, niet ingevuld"
+      }
     },
     "day": {
       "empty": "Niets op deze dag."
@@ -8732,7 +8737,8 @@
         "minutes": "min",
         "days": "d"
       }
-    }
+    },
+    "pastLink": "Eerdere dagen"
   },
   "workforcePlanning": {
     "eyebrow": "Bedrijfsomgeving",

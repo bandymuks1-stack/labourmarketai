@@ -53,8 +53,20 @@ import { createUtcFormatter } from "@/lib/time/display";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Toolbar control base. `min-h-[2.75rem]` is the product's 44px touch minimum —
+ * the same value the feedback trigger is pinned to and the one an external
+ * tester measured this toolbar failing.
+ *
+ * WHY IT MATTERED HERE. Every calendar control is in this string: the five view
+ * chips, prev / today / next, the eight source filters and the date-picker
+ * submit. At `min-h-9` (36px) all of them were 8px under the minimum, on the
+ * one surface whose entire job is tapping small date targets on a phone. It is
+ * also the row a thumb reaches for first, so the miss rate lands on navigation
+ * rather than on something recoverable.
+ */
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-[2.75rem] items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -468,7 +480,7 @@ export default async function PlanningPage({
             type="date"
             name="date"
             defaultValue={anchor}
-            className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
+            className="min-h-[2.75rem] rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
           />
           <button type="submit" className={`${CHIP_BASE} ${CHIP_IDLE}`}>
             {t("nav.go")}
@@ -526,9 +538,11 @@ export default async function PlanningPage({
                 className={`flex min-h-14 min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-1.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
                   cell.isToday
                     ? "border-brand-blue/60 bg-brand-blue/5"
-                    : cell.inMonth
-                      ? "border-ink-600 bg-ink-800/20"
-                      : "border-ink-700/60 bg-transparent opacity-50"
+                    : cell.isUnfilled
+                      ? "border-state-warning/50 bg-state-warning/5"
+                      : cell.inMonth
+                        ? "border-ink-600 bg-ink-800/20"
+                        : "border-ink-700/60 bg-transparent opacity-50"
                 }`}
               >
                 <span className="text-sm font-semibold tabular-nums text-text-primary">
@@ -547,8 +561,49 @@ export default async function PlanningPage({
                 ) : (
                   <span className="h-5 text-meta text-text-muted">·</span>
                 )}
+                {/* D-13 — WHICH DAYS DID I FILL, AND WHICH DID I MISS.
+                    The count alone cannot answer either: a day holding one
+                    booking and a day holding one journal entry both read "1".
+                    The marker is not colour-only — it carries its own text for
+                    a screen reader, and the unfilled state also changes the
+                    cell's border, so neither meaning depends on hue alone. */}
+                {cell.hasJournal ? (
+                  <span
+                    data-testid={`planning-month-journal-${cell.day}`}
+                    className="size-1.5 rounded-full bg-brand-cyan"
+                  >
+                    <span className="sr-only">{t("month.legend.journal")}</span>
+                  </span>
+                ) : cell.isUnfilled ? (
+                  <span
+                    data-testid={`planning-month-unfilled-${cell.day}`}
+                    className="size-1.5 rounded-full border border-state-warning"
+                  >
+                    <span className="sr-only">{t("month.legend.unfilled")}</span>
+                  </span>
+                ) : (
+                  <span className="size-1.5" />
+                )}
               </Link>
             ))}
+          </div>
+          {/* The legend is what turns two small marks into an answerable
+              question — without it the dots are decoration. */}
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted"
+            data-testid="planning-month-legend"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="size-1.5 rounded-full bg-brand-cyan" />
+              {t("month.legend.journal")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="size-1.5 rounded-full border border-state-warning"
+              />
+              {t("month.legend.unfilled")}
+            </span>
           </div>
           <p className="text-xs text-text-muted">{t("month.hint")}</p>
         </section>
@@ -669,6 +724,18 @@ export default async function PlanningPage({
                   ) : (
                     <span className="h-5 text-meta text-text-muted">·</span>
                   )}
+                  {/* Same journal mark as the month grid — the current week is
+                      where "have I logged today yet?" is actually asked. */}
+                  {d.hasJournal ? (
+                    <span
+                      data-testid={`planning-strip-journal-${d.day}`}
+                      className="size-1.5 rounded-full bg-brand-cyan"
+                    >
+                      <span className="sr-only">{t("month.legend.journal")}</span>
+                    </span>
+                  ) : (
+                    <span className="size-1.5" />
+                  )}
                 </Link>
               ))}
             </div>
@@ -716,12 +783,29 @@ export default async function PlanningPage({
             </section>
           )}
 
-          {agenda.pastCount > 0 ? (
-            /* Honest history note: finished items are not hidden silently. */
-            <p className="text-xs text-text-muted" data-testid="planning-past-note">
-              {t("pastHidden", { count: agenda.pastCount })}
-            </p>
-          ) : null}
+          {/* THE PAST NEEDS A DOOR, NOT ONLY AN APOLOGY (D-13).
+              The agenda is forward-only by design, so this note was the single
+              place that admitted history exists — and it was a dead end. A
+              worker asking "which days have I already filled?" had to know to
+              switch views and then page backwards. The month view answers the
+              question directly, so the note now leads there. It is rendered
+              whether or not anything expired: "nothing finished recently" is
+              not a reason to hide the way back. */}
+          <p
+            className="flex flex-wrap items-center gap-2 text-xs text-text-muted"
+            data-testid="planning-past-note"
+          >
+            {agenda.pastCount > 0
+              ? t("pastHidden", { count: agenda.pastCount })
+              : null}
+            <Link
+              href={planningHref({ view: "month", date: anchor, source: sourceFilter, today }) as "/dashboard"}
+              data-testid="planning-past-link"
+              className={`${CHIP_BASE} ${CHIP_IDLE}`}
+            >
+              {t("pastLink")}
+            </Link>
+          </p>
         </>
       ) : null}
 
