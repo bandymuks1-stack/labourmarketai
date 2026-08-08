@@ -88,7 +88,14 @@ export type EmployerAvailabilityResult =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyClient = any;
 
-const RELATION_NOT_FOUND = "42P01";
+/** A relation the database does not have. TWO codes, not one, and the second
+ *  is the one that actually fires in production: `42P01` is raw Postgres
+ *  `undefined_table`, but PostgREST answers a request for a relation missing
+ *  from its schema cache with `PGRST205` and never reaches Postgres at all.
+ *  Verified in this repo — see `lib/agency/clients-model.ts`. Handling only
+ *  `42P01` would have made the owner-gated fallback below dead code on the
+ *  hosted stack, which is exactly the window it exists for. */
+const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
 const UNDEFINED_COLUMN = "42703";
 
 /**
@@ -147,13 +154,13 @@ export async function getEmployerWorkerAvailability(): Promise<EmployerAvailabil
     // The hardened relation is absent on a stack where the owner-gated
     // migration has not been applied — fall back rather than degrade the
     // feature to nothing.
-    if (code === RELATION_NOT_FOUND) {
+    if (MISSING_RELATION.has(code ?? "")) {
       absRes = await readAbsences("worker_absences");
     }
   }
   if (absRes.error) {
     const code = (absRes.error as { code?: string }).code;
-    if (code === RELATION_NOT_FOUND || code === UNDEFINED_COLUMN) {
+    if (MISSING_RELATION.has(code ?? "") || code === UNDEFINED_COLUMN) {
       return { status: "unavailable" };
     }
     return { status: "error" };

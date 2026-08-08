@@ -83,13 +83,61 @@ it awaits their decision.
 | unrelated employer → base table | `(no rows)` | `(no rows)` ✅ |
 | pending absence shown as unavailability | — | **no** ✅ only approved projects |
 
+## Re-proven pre-merge on a throwaway container — 23/23
+
+`scripts/db-proof/w12-absence-privacy.sh` (+ `.prelude.sql`, `.seed.sql`)
+executes the migration and the rollback **verbatim** against a disposable
+`postgres:15` container — never the shared local stack, never production.
+Every probe runs under `set local role authenticated` (or `anon`), so RLS
+genuinely decides. Phases: BEFORE → APPLY → AFTER → ROLLBACK → RE-APPLY.
+
+Beyond the table above it also pins, all PASS:
+
+- the view's column list is **exactly** `id,worker_id,start_date,end_date,half_day,status`, and `pg_attribute` holds no `note` and no `absence_type` for it;
+- the approved row is unreachable **on the base table** for the manager, not merely unselected;
+- the manager's base-table result narrows to exactly the 1 pending row;
+- **admin** still reads all 3 rows — privileges not broadened and not narrowed;
+- **anon** is denied on both the base table and the view;
+- the view excludes `rejected`/`cancelled`, so only approved absence is scheduling truth;
+- **no** `INSERT`/`UPDATE`/`DELETE` grant on `worker_absences` was added for `authenticated`;
+- `anon` holds **zero** grants on the view;
+- the rollback restores the prior read byte-for-byte, and re-applying is clean.
+
+Writes are unaffected because they never pass through this policy:
+`request` / `review` / `cancel` are SECURITY DEFINER RPCs
+(`20260718150000`), so narrowing a SELECT policy cannot break approval — the
+`RETURNING`-under-a-narrowed-policy trap does not apply here.
+
 ## Application change (inert until applied)
 
 `lib/planning/employer-availability.ts` reads `worker_absence_scheduling` first
-and falls back to `worker_absences` on `42P01` (relation not found), with the
-**same minimised column list** either way. So the app is correct on a stack with
-the migration and on a stack without it, and this PR changes no behaviour in
+and falls back to `worker_absences` on a missing relation, with the **same
+minimised column list** either way. So the app is correct on a stack with the
+migration and on a stack without it, and this PR changes no behaviour in
 production until the migration is approved.
+
+### Defect found during pre-merge verification, and fixed
+
+The first version of that fallback recognised **only `42P01`**. That is raw
+Postgres `undefined_table` — but PostgREST answers a request for a relation
+missing from its **schema cache** with **`PGRST205`**, and never reaches
+Postgres at all. This repo had already established that fact
+(`lib/agency/clients-model.ts`: `MISSING_TABLE_CODES = {42P01, PGRST205}`,
+pinned by `lib/agency/clients-model.test.ts`).
+
+So on the hosted stack the fallback would have been **dead code in exactly the
+window it exists for**: between merging this PR and applying the owner-gated
+migration, `getEmployerWorkerAvailability()` would have returned `error`, and
+`/dashboard/company/planning` renders the availability section only on `ok` —
+the W12 employer capability shipped in #1087 would have **silently
+disappeared** from production until the migration landed. Not a crash; a quiet
+regression, which is worse.
+
+Fixed here, and pinned by a new case in
+`lib/guards/w12-employer-availability.test.ts` that drives the real module with
+each code and asserts it retries the base table. Mutation-checked: reverting
+the set to `{42P01}` alone fails that case with
+`code PGRST205 must not degrade to error: expected 'error' to be 'ok'`.
 
 ## Files
 

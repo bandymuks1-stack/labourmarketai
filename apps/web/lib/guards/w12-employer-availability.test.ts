@@ -110,6 +110,52 @@ describe("W12 employer — minimum necessary visibility is enforced by the query
     vi.resetModules();
   });
 
+  it("falls back to the base table on BOTH missing-relation codes", async () => {
+    // THE WINDOW THIS GUARDS. Between merging this PR and applying the
+    // owner-gated migration, `worker_absence_scheduling` does not exist in
+    // production. PostgREST answers that with `PGRST205` (schema cache), NOT
+    // with Postgres' `42P01` — the request never reaches Postgres. A fallback
+    // that recognised only `42P01` would be dead code on the hosted stack and
+    // the employer availability section would silently vanish from
+    // /dashboard/company/planning until the migration landed.
+    for (const code of ["42P01", "PGRST205"]) {
+      const relations: string[] = [];
+      const builder = (relation: string) => {
+        relations.push(relation);
+        const first = relation === "worker_absence_scheduling";
+        const chain: Record<string, unknown> = {
+          select: () => chain,
+          eq: () => chain,
+          in: () => chain,
+          order: () => chain,
+          limit: () =>
+            Promise.resolve(
+              first
+                ? { data: null, error: { code } }
+                : { data: [], error: null },
+            ),
+        };
+        return chain;
+      };
+      vi.doMock("@/lib/supabase/server", () => ({
+        createClient: async () => ({
+          auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
+          from: (relation: string) => builder(relation),
+        }),
+      }));
+      vi.resetModules();
+      const mod = await import("@/lib/planning/employer-availability");
+      const out = await mod.getEmployerWorkerAvailability();
+      // It fell back rather than erroring, and it fell back to the base table.
+      expect(out.status, `code ${code} must not degrade to error`).toBe("ok");
+      expect(relations, `code ${code} must retry the base table`).toContain(
+        "worker_absences",
+      );
+      vi.doUnmock("@/lib/supabase/server");
+      vi.resetModules();
+    }
+  });
+
   it("does not name the private columns anywhere in the module", () => {
     // Belt and braces: not selected above, and not reachable via a later
     // convenience read added to the same file.
