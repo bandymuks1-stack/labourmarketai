@@ -2003,7 +2003,17 @@ describe("no migration files added by this sprint", () => {
     // capability + an operator health read + one daily job. Rollback paired.
     // Shared slot RECOUNTED against post-#1047 main as #1047's own note
     // predicted: 193 files there, this branch adds one.
-    const SPRINT_BASELINE = 194;
+    // 194 -> 195: beta-audit P1 defect A1
+    // (20260808150000_caller_manages_worker_engagements_v1) — teaches
+    // caller_manages_worker about company_worker_engagements so an employer
+    // holding an ACTIVE accepted-booking engagement can finally see and
+    // approve that worker's absence requests, and RESTORES the project-assign
+    // engagement OR-branch that W11's 20260804120000 silently reverted
+    // (confirmed missing in production 2026-08-08). Function bodies only: no
+    // table, column, policy or grant added, zero DML at apply time. Paired
+    // rollback. Ships UNAPPLIED and deliberately WITHOUT
+    // `@human-gate-approved` — owner-gated for prod apply.
+    const SPRINT_BASELINE = 195;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
