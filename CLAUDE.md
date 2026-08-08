@@ -55,9 +55,24 @@ First line ≤72 chars, present tense, no period. Body (optional) explains WHY.
 ## Migrations
 
 - Migration files (`supabase/migrations/*.sql`) — **commit and push automatically**
-- Running migrations on production — **NEVER automatic.** Agents never run 
-  `pnpm supabase db push` or `prisma migrate deploy` against production. 
-  DI runs migrations manually via Supabase SQL Editor or local CLI.
+- **Running migrations on production — conditional, not absolute.** The former
+  "NEVER automatic" rule is superseded (owner decision; canonical policy detail
+  lives in [`AGENTS.md` → Migrations → PROD APPLY AUTONOMY](AGENTS.md)). A
+  production migration may be applied autonomously **only when ALL** hold:
+  repository policy explicitly permits it (it does — see `AGENTS.md`); the
+  migration has been reviewed; it is safe/reversible or has a verified recovery
+  path; required tests/checks pass; the **correct production target is
+  verified**; no destructive/irreversible data loss is involved; and no
+  owner-only credential/approval is required.
+
+  **Risky, destructive, ambiguous or irreversible migrations REQUIRE a human
+  checkpoint.** Uncertainty is itself a stop signal — reclassification only
+  moves in the cautious direction (RED → human review, never the reverse).
+
+  Apply always via Supabase MCP `apply_migration` — **never**
+  `pnpm supabase db push` or `prisma migrate deploy` against production (repo
+  filenames don't match the ledger versions; a push would re-run applied
+  migrations). RED-class migrations stay owner-channel only.
 - **Naming (binding, see PLATFORM_DOCTRINE §16):** NEW migrations are named
   `YYYYMMDDHHMMSS_snake_case.sql` (14-digit UTC timestamp prefix). The legacy
   sequential `000N_*.sql` files (`0001`–`0036`) are already applied and
