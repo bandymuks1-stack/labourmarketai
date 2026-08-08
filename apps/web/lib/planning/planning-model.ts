@@ -601,16 +601,36 @@ function sortItems(a: PlanningItem, b: PlanningItem): number {
   return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
 }
 
+/** Dated items that still lie ahead — the set planning reasons about. Past
+ *  bands are history and stay on their own source surface. */
+function activeDated(
+  items: readonly PlanningItem[],
+  todayIso: string,
+): readonly PlanningItem[] {
+  return items.filter((it) => {
+    if (!it.startDate) return false;
+    const end = effectiveEndDay(it);
+    return !(end && end < todayIso);
+  });
+}
+
 /**
  * Build the compact agenda for a reference date (pure, deterministic).
  * Grouping rule: ongoing → today; future within the window → its start day;
  * beyond the window → "later"; no start date → "undated"; already finished →
  * counted, not listed (planning looks forward; history stays on the source).
+ *
+ * `truthItems` is the FULL model when the caller renders a filtered subset.
+ * The grouped lists and the strip COUNTS follow `items` (a filter decides what
+ * is shown), while conflicts and the strip's journal mark are derived from
+ * `truthItems` — a source filter must not be able to change what is true.
+ * Defaults to `items`, so every caller that never filters is unaffected.
  */
 export function buildAgenda(
   items: readonly PlanningItem[],
   referenceDate: Date,
   windowDays: number = PLANNING_WINDOW_DAYS,
+  truthItems: readonly PlanningItem[] = items,
 ): PlanningAgenda {
   const today = referenceDate.toISOString().slice(0, 10);
   const windowEnd = addDays(today, Math.max(windowDays, 1) - 1);
@@ -649,8 +669,10 @@ export function buildAgenda(
   }));
 
   // Conflicts run over every non-past dated item (`active` includes the
-  // "later" ones) so an overlap is never hidden by the window size.
-  const conflicts = detectConflicts(active);
+  // "later" ones) so an overlap is never hidden by the window size — and over
+  // the FULL model, so a source filter cannot hide one either.
+  const truthActive = truthItems === items ? active : activeDated(truthItems, today);
+  const conflicts = detectConflicts(truthActive);
   const conflictIds = conflictItemIds(conflicts);
 
   const weekStrip: WeekStripDay[] = [];
@@ -661,8 +683,15 @@ export function buildAgenda(
       day,
       isToday: i === 0,
       count: covering.length,
+      // A rendered row is marked when it really is in conflict — the partner
+      // may well be one the filter removed, which is precisely the case that
+      // used to lose the mark.
       hasConflict: covering.some((it) => conflictIds.has(it.id)),
-      hasJournal: covering.some((it) => it.sourceType === "journal"),
+      // "Did I record this day?" is a fact about the day, not about what the
+      // filter is showing.
+      hasJournal: truthActive.some(
+        (it) => it.sourceType === "journal" && itemCoversDay(it, day),
+      ),
     });
   }
 
@@ -772,12 +801,13 @@ export function buildMonthGrid(
   anchorDay: string,
   items: readonly PlanningItem[],
   todayIso: string,
+  truthItems: readonly PlanningItem[] = items,
 ): MonthGrid {
   const month = anchorDay.slice(0, 7);
   const gridStart = startOfWeekMonday(firstDayOfMonth(anchorDay));
   const lastOfMonth = addDays(addMonths(firstDayOfMonth(anchorDay), 1), -1);
   const gridEnd = addDays(startOfWeekMonday(lastOfMonth), 6);
-  const conflictIds = conflictItemIds(detectConflicts(items));
+  const conflictIds = conflictItemIds(detectConflicts(truthItems));
 
   const weeks: CalendarDayCell[][] = [];
   for (let cursor = gridStart; cursor <= gridEnd; cursor = addDays(cursor, 7)) {
@@ -785,18 +815,27 @@ export function buildMonthGrid(
     for (let i = 0; i < 7; i++) {
       const day = addDays(cursor, i);
       const covering = itemsForDay(items, day);
-      const hasJournal = covering.some((it) => it.sourceType === "journal");
+      // The two marks below answer questions about the DAY, so they read the
+      // full model. Reading the filtered list made `?source=booking` erase the
+      // journal rows that prove a day was recorded, and the cell then claimed
+      // the day was unfilled — a false statement about the person's own work.
+      const truthCovering =
+        truthItems === items ? covering : itemsForDay(truthItems, day);
+      const hasJournal = truthCovering.some((it) => it.sourceType === "journal");
       row.push({
         day,
         inMonth: day.slice(0, 7) === month,
         isToday: day === todayIso,
+        // COUNT is a render question — it still follows the filter.
         count: covering.length,
         hasConflict: covering.some((it) => conflictIds.has(it.id)),
         hasJournal,
         // Strictly BEFORE today: today is still being lived, and a future day
         // cannot be missing a record of work that has not happened.
         isUnfilled:
-          day < todayIso && !hasJournal && covering.some(indicatesExpectedWork),
+          day < todayIso &&
+          !hasJournal &&
+          truthCovering.some(indicatesExpectedWork),
       });
     }
     weeks.push(row);
