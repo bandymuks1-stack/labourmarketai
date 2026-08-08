@@ -88,7 +88,14 @@ export type EmployerAvailabilityResult =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyClient = any;
 
-const RELATION_NOT_FOUND = "42P01";
+/** A relation the database does not have. TWO codes, not one, and the second
+ *  is the one that actually fires in production: `42P01` is raw Postgres
+ *  `undefined_table`, but PostgREST answers a request for a relation missing
+ *  from its schema cache with `PGRST205` and never reaches Postgres at all.
+ *  Verified in this repo — see `lib/agency/clients-model.ts`. Handling only
+ *  `42P01` would have made the owner-gated fallback below dead code on the
+ *  hosted stack, which is exactly the window it exists for. */
+const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
 const UNDEFINED_COLUMN = "42703";
 
 /**
@@ -125,15 +132,35 @@ export async function getEmployerWorkerAvailability(): Promise<EmployerAvailabil
 
   // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
   // module header: this is the enforcement point, not the component.
-  const absRes = await (supabase as AnyClient)
-    .from("worker_absences")
-    .select("id, worker_id, start_date, end_date, status")
-    .in("status", [...UNAVAILABLE_STATUSES])
-    .order("start_date", { ascending: true })
-    .limit(ABSENCE_READ_LIMIT);
+  //
+  // DEFENCE IN DEPTH, when the database offers it. `worker_absence_scheduling`
+  // (migration 20260808120000, OWNER-GATED — not applied yet) is a relation
+  // that has no reason column at all, so the guarantee stops depending on this
+  // module's discipline. Until it exists the base table is read exactly as
+  // before, with the same minimised column list; the fallback is what makes
+  // this change inert until the migration is approved and applied.
+  const SCHEDULING_COLUMNS = "id, worker_id, start_date, end_date, status";
+  const readAbsences = (relation: string) =>
+    (supabase as AnyClient)
+      .from(relation)
+      .select(SCHEDULING_COLUMNS)
+      .in("status", [...UNAVAILABLE_STATUSES])
+      .order("start_date", { ascending: true })
+      .limit(ABSENCE_READ_LIMIT);
+
+  let absRes = await readAbsences("worker_absence_scheduling");
   if (absRes.error) {
     const code = (absRes.error as { code?: string }).code;
-    if (code === RELATION_NOT_FOUND || code === UNDEFINED_COLUMN) {
+    // The hardened relation is absent on a stack where the owner-gated
+    // migration has not been applied — fall back rather than degrade the
+    // feature to nothing.
+    if (MISSING_RELATION.has(code ?? "")) {
+      absRes = await readAbsences("worker_absences");
+    }
+  }
+  if (absRes.error) {
+    const code = (absRes.error as { code?: string }).code;
+    if (MISSING_RELATION.has(code ?? "") || code === UNDEFINED_COLUMN) {
       return { status: "unavailable" };
     }
     return { status: "error" };

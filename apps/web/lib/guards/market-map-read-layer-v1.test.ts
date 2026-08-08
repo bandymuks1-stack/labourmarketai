@@ -441,13 +441,21 @@ describe("NO new DB migration in this PR", () => {
     // (`20260807090000_org_owner_membership_seed_v1` — org-create owner
     // membership seed trigger + guarded backfill; merge of post-#1040 main
     // recounted the shared slot: 189+this = 190).
-    // Bumped 190 -> 191 for the W14 item 6 retention redaction
-    // (20260808130000_ai_runs_retention_redaction_v1) — DRAFT,
-    // OWNER_APPROVAL_REQUIRED_BEFORE_APPLY, NOT applied to production.
-    // Adds a SECURITY DEFINER function that nulls ONLY ai_runs.output_excerpt
-    // past the 90-day horizon; grants NO table UPDATE/DELETE to any role, so
-    // the append-only guarantee is unchanged. Rollback paired.
-    expect(count).toBeLessThanOrEqual(191);
+    // Bumped 190 -> 191 for the W12 employer absence privacy hardening
+    // (20260808120000_worker_absence_scheduling_view_v1) — merged in #1089 and
+    // APPLIED to production 2026-08-08 via Supabase MCP. Gate record:
+    // docs/human-gates/w12-absence-privacy-hardening-gate.md.
+    // Bumped 191 -> 192 for the W14 item 6 retention redaction
+    // (20260808130000_ai_runs_retention_redaction_v1) — owner-approved
+    // 2026-08-08. Adds a SECURITY DEFINER function that nulls ONLY
+    // ai_runs.output_excerpt past the 90-day horizon; grants NO table
+    // UPDATE/DELETE to any role, so the append-only guarantee is unchanged.
+    // Rollback paired.
+    // RESOLVED COLLISION: #1089 and this branch both claimed 190 -> 191. The
+    // slot was RECOUNTED against post-#1089 main, not summed — `git ls-tree -r
+    // origin/main supabase/migrations/` = 191 .sql files, and this branch adds
+    // exactly one.
+    expect(count).toBeLessThanOrEqual(192);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

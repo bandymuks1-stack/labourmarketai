@@ -1980,13 +1980,18 @@ describe("no migration files added by this sprint", () => {
     // membership + guarded one-time backfill for post-backfill orphan orgs
     // (2026-08-06 PROD_QA finding). Merge of post-#1040 main recounted the
     // shared slot: 189+this = 190.
-    // Bumped 190 -> 191 for the W14 item 6 retention redaction
-    // (20260808130000_ai_runs_retention_redaction_v1) — DRAFT,
-    // OWNER_APPROVAL_REQUIRED_BEFORE_APPLY, NOT applied to production.
-    // Adds a SECURITY DEFINER function that nulls ONLY ai_runs.output_excerpt
-    // past the 90-day horizon; grants NO table UPDATE/DELETE to any role, so
-    // the append-only guarantee is unchanged. Rollback paired.
-    const SPRINT_BASELINE = 191;
+    // Bumped 190 -> 191 for the W12 employer absence privacy hardening
+    // (20260808120000_worker_absence_scheduling_view_v1) — merged in #1089 and
+    // APPLIED to production 2026-08-08 via Supabase MCP. Gate record:
+    // docs/human-gates/w12-absence-privacy-hardening-gate.md.
+    // Bumped 191 -> 192 for the W14 item 6 retention redaction
+    // (20260808130000_ai_runs_retention_redaction_v1) — owner-approved
+    // 2026-08-08. Adds a SECURITY DEFINER function that nulls ONLY
+    // ai_runs.output_excerpt past the 90-day horizon; grants NO table
+    // UPDATE/DELETE to any role, so the append-only guarantee is unchanged.
+    // Rollback paired. Shared slot RECOUNTED against post-#1089 main rather
+    // than summed: origin/main holds 191 .sql files, this branch adds one.
+    const SPRINT_BASELINE = 192;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

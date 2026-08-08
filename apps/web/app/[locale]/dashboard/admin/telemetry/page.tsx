@@ -279,15 +279,31 @@ export default async function AdminTelemetryPage({
               ))}
             </div>
             <div className="flex flex-col gap-1">
+              {/* W14 item 7 — THREE outcomes, three renderings. `pct === null`
+                  covers two different facts, and one dash for both told the
+                  reader nothing: "no landings yet" and "the read hit its cap so
+                  no share can be stated" are different answers. A measured 0%
+                  is a third thing again — an answer, not an absence. The note
+                  under each rate has been computed since #1086 and was shown
+                  nowhere. */}
               {funnel.rates.map((r) => (
-                <div
-                  key={r.label}
-                  className="flex items-center justify-between gap-3 text-xs"
-                >
-                  <span className="text-text-secondary">{r.label}</span>
-                  <span className="font-mono text-text-primary">
-                    {r.pct === null ? "—" : `${r.pct}%`}
-                  </span>
+                <div key={r.label} className="flex flex-col gap-0.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="text-text-secondary">{r.label}</span>
+                    <span
+                      className={`font-mono ${
+                        r.state === "ok" ? "text-text-primary" : "text-text-muted"
+                      }`}
+                      data-testid={`funnel-rate-${r.state}`}
+                    >
+                      {r.state === "ok"
+                        ? `${r.pct}%`
+                        : r.state === "truncated"
+                          ? "not stated"
+                          : "no data yet"}
+                    </span>
+                  </div>
+                  <span className="text-meta text-text-muted">{r.note}</span>
                 </div>
               ))}
             </div>
