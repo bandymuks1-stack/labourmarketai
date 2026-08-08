@@ -211,8 +211,14 @@ const RULES: IntentRule[] = [
       p("(pertrauk|pietūs|pietus|break|lunch|обед|перерыв)", 1),
       // "objekte / site / на объекте" — a work site
       p("(objekt|statyb|site|site\\b|стройк|объект)", 1),
-      // explicit journal words
-      p("(žurnal|įrašyk\\s+darb|log\\s+work|записать\\s+работу)", 2),
+      // explicit journal words. The LT stem was the only one here, so an
+      // English "fill in my work journal" or a Russian "запиши работу в
+      // журнал" fell through to the unknown fallback while the identical
+      // Lithuanian sentence reached the flow — the journal was LT-only
+      // through its own single intake. The other launch locales' words for
+      // the journal belong here for the same reason.
+      p("(žurnal|journal|журнал|tagebuch|dagboek)", 2),
+      p("(įrašyk\\s+darb|log\\s+work|record\\s+work|записать\\s+работу)", 2),
     ],
   },
   {
@@ -477,4 +483,41 @@ export function classifyIntent(text: string): IntentMatch {
     if (score > best.score) best = { intent: rule.intent, score, matched };
   }
   return best;
+}
+
+/**
+ * Does the sentence ASK for the Work Journal itself, rather than merely
+ * mention work?
+ *
+ * WHY THIS EXISTS. `extractWorkLog` reports `hasSignal: false` for a sentence
+ * that carries no date and no hours — which is true of every *request* ("O
+ * žurnalo neužpildysi?", "Užpildyk darbo žurnalą"). The chat used to answer
+ * every such sentence with the one clarify question, so a worker who asked for
+ * the journal was told to state a day and a duration, and asking again got the
+ * SAME sentence back. The journal was unreachable through the only intake the
+ * product has (chat-first, owner audit §6.1): a real tester hit exactly this
+ * loop.
+ *
+ * A request is not ambiguous — it is a decision. When the user names the
+ * journal, the flow opens and collects the missing facts in its own fields;
+ * the clarify question stays for a genuinely vague work mention ("dirbau"),
+ * where the product really does not know what is being asked.
+ *
+ * Pure and diacritic-folded like the rest of this module, so "uzpildyk zurnala"
+ * typed without diacritics behaves identically.
+ */
+const JOURNAL_REQUEST_PATTERNS: readonly RegExp[] = [
+  // the journal named directly (LT žurnalas / EN journal / RU журнал /
+  // DE Tagebuch / NL dagboek — the launch locales' own word)
+  p("(zurnal|journal|журнал|tagebuch|dagboek)").re,
+  // an imperative to record work, with no journal word ("įrašyk darbą")
+  p("(irasyk|uzfiksuok|uzrasyk|log)\\s+(mano\\s+)?darb").re,
+  p("record\\s+(my\\s+)?work").re,
+  p("записать\\s+работу").re,
+];
+
+export function isExplicitJournalRequest(text: string): boolean {
+  const q = fold(text ?? "");
+  if (!q.trim()) return false;
+  return JOURNAL_REQUEST_PATTERNS.some((re) => re.test(q));
 }

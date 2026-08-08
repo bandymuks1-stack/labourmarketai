@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyIntent } from "./intent-router";
+import { classifyIntent, isExplicitJournalRequest } from "./intent-router";
 
 /**
  * The deterministic intent router is the always-on floor of the conversation
@@ -77,5 +77,63 @@ describe("diacritic folding — LT without diacritics reaches the same intent", 
 
   it("folding never turns an unrelated sentence into a false match", () => {
     expect(classifyIntent("labas").intent).toBe("unknown");
+  });
+});
+
+/**
+ * `isExplicitJournalRequest` — the predicate that decides whether the chat
+ * OPENS the work-log flow or answers with the clarify question.
+ *
+ * WHY IT IS PINNED. A real tester could not fill the Work Journal: every
+ * request ("O žurnalo neužpildysi?") carries no date and no hours, so the chat
+ * answered "which day and how long did you work?" — and rephrasing returned
+ * the identical sentence. Chat is the journal's ONLY intake (owner audit
+ * §6.1), so the journal was unreachable. These cases keep a request separated
+ * from a vague mention.
+ */
+describe("isExplicitJournalRequest — a request opens the flow", () => {
+  const requests = [
+    "O žurnalo neužpildysi?", // the tester's own words
+    "Užpildyk darbo žurnalą",
+    "Įrašyk vakarykštį darbą į žurnalą",
+    "Šiandien dirbau nuo 8 iki 17, įrašyk į žurnalą",
+    "užpildyk žurnalą",
+    "gal gali užpildyti darbo žurnalą?",
+    "noriu užpildyti darbo žurnalą",
+    "pildyk žurnalą",
+    "reikia užpildyti žurnalą",
+    "darbo žurnalas",
+    "uzpildyk zurnala", // typed without diacritics
+    "fill in my work journal",
+    "запиши работу в журнал",
+  ];
+  for (const t of requests) {
+    it(`"${t}" is an explicit journal request`, () => {
+      expect(isExplicitJournalRequest(t)).toBe(true);
+    });
+  }
+
+  // A vague work mention is genuinely ambiguous — the product does not know
+  // what is being asked, so the ONE clarify question stays correct there.
+  const notRequests = [
+    "dirbau",
+    "šiandien dirbau",
+    "Ieškau darbo",
+    "labas",
+    "",
+    "Rask man darbą Nyderlanduose.",
+  ];
+  for (const t of notRequests) {
+    it(`"${t}" is NOT an explicit journal request`, () => {
+      expect(isExplicitJournalRequest(t)).toBe(false);
+    });
+  }
+
+  // The two halves must agree: everything the predicate calls a request must
+  // still ROUTE to log-work, otherwise the flow would never be reached.
+  it("every explicit journal request also classifies as log-work", () => {
+    for (const t of requests) {
+      expect(classifyIntent(t).intent).toBe("log-work");
+    }
   });
 });

@@ -53,7 +53,10 @@ describe("Guard: first-use surfaces wire EmptyState with a single honest CTA", (
   it("journal empty state has exactly one CTA → the conversation (owner audit §6.1)", () => {
     const src = read("app/[locale]/dashboard/journal/page.tsx");
     // A new record starts in the CONVERSATION — the empty state points there.
-    expect(src).toMatch(/href:\s*"\/dashboard"/);
+    // The `?intent=log-work` hand-off is part of that destination, not a
+    // different one: without it the CTA landed on the generic greeting, which
+    // a real tester read as being thrown out of the journal.
+    expect(src).toMatch(/href:\s*"\/dashboard(\?intent=log-work)?"/);
     // No on-page create anchor remains (the composer is edit-mode only).
     expect(src).not.toMatch(/href:\s*"#journal-composer"/);
   });

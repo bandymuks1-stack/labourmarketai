@@ -31,7 +31,10 @@ import { getWorkerForm } from "@/lib/conversation/worker-forms";
 import { getCompanyForm } from "@/lib/conversation/company-forms";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
-import { classifyIntent } from "@/lib/conversation/intent-router";
+import {
+  classifyIntent,
+  isExplicitJournalRequest,
+} from "@/lib/conversation/intent-router";
 import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
 import { findWorkForChat } from "@/lib/conversation/find-work";
@@ -1251,13 +1254,23 @@ export function ConversationChat({
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string, opts?: { photoFirst?: boolean }) => {
+    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean }) => {
       const draft = extractWorkLog(text, todayIso());
       // A photo-led log is a deliberate request to attach evidence, so the
       // flow opens even with nothing parsed — the short text stays required
       // inside it. A TYPED sentence with no signal still gets the one clarify
       // question rather than a form nobody asked for.
-      if (!draft.hasSignal && !opts?.photoFirst) {
+      //
+      // `explicit` is the same escape hatch for a sentence that ASKED for the
+      // journal ("Užpildyk darbo žurnalą") or for the log-work chip / the
+      // journal page's hand-off. Those are decisions, not vague mentions: the
+      // clarify question answered them with "which day and how long did you
+      // work?", and asking again returned the identical sentence — the loop a
+      // real tester reported, which made the journal unfillable because chat
+      // is its ONLY intake (owner audit §6.1). Opening the flow asks for the
+      // same facts in fields that can actually be submitted. Same flow, same
+      // `createJournalEntry` — no second intake path.
+      if (!draft.hasSignal && !opts?.photoFirst && !opts?.explicit) {
         // Data unclear → ask ONE concrete question (brief §3).
         assistant(labels.clarifyWorkLog);
         return;
@@ -1288,6 +1301,43 @@ export function ConversationChat({
    * explicit confirm + createJournalEntry — no second write path). An unclear
    * transcript gets the one clarify question and the text stays on screen.
    */
+  /**
+   * Journal → chat hand-off (real-user acceptance). The Work Journal page has
+   * no composer by design (chat-first intake, owner audit §6.1), so its
+   * "record work" CTA navigates here. Landing on the GENERIC greeting is what
+   * the tester described as being thrown back to the first page: they pressed
+   * the journal's own fill button and arrived somewhere that said nothing
+   * about the journal. `?intent=log-work` makes the hand-off land IN the
+   * work-log flow, so the navigation reads as continuing one task instead of
+   * losing it.
+   *
+   * Consumed once per mount, then stripped from the URL so a later Back /
+   * refresh does not silently re-open the flow over the user's conversation.
+   */
+  const logWorkIntentConsumedRef = useRef(false);
+  useEffect(() => {
+    if (logWorkIntentConsumedRef.current) return;
+    if (!auth?.profile || identity !== "person") return;
+    let wanted = false;
+    try {
+      wanted =
+        new URLSearchParams(window.location.search).get("intent") ===
+        "log-work";
+    } catch {
+      wanted = false;
+    }
+    if (!wanted) return;
+    logWorkIntentConsumedRef.current = true;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("intent");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* URL cleanup is cosmetic — never block the flow on it. */
+    }
+    startWorkLog("", { explicit: true });
+  }, [auth?.profile, identity, startWorkLog]);
+
   const voiceDraftConsumedRef = useRef(false);
   useEffect(() => {
     if (voiceDraftConsumedRef.current) return;
@@ -1362,8 +1412,11 @@ export function ConversationChat({
         case "logwork":
           user(labels.userLogWork);
           // Opens the SAME deterministic work-log flow the typed sentence
-          // reaches; an empty draft asks the one concrete clarify question.
-          withTyping(() => startWorkLog(""));
+          // reaches. Pressing "log my work" IS the explicit request, so the
+          // flow opens with an empty draft and collects the day/duration in
+          // its own fields — answering a deliberate tap with a question the
+          // user then had to retype was the dead end the tester hit.
+          withTyping(() => startWorkLog("", { explicit: true }));
           break;
         case "agenda":
           user(labels.userAgenda);
@@ -1599,7 +1652,10 @@ export function ConversationChat({
             handleChip({ id: "offers", label: "" });
             break;
           case "log-work":
-            startWorkLog(text);
+            // A sentence that NAMES the journal is a request, not a vague
+            // mention: open the flow instead of answering with the clarify
+            // question the user cannot escape by rephrasing.
+            startWorkLog(text, { explicit: isExplicitJournalRequest(text) });
             break;
           // Honest blocked/hint answers explain themselves; repeating the same
           // four-item menu under every one of them taught users to ignore the

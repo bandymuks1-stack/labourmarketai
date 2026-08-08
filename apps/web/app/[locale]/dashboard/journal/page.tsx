@@ -779,7 +779,11 @@ export default async function JournalPage({
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href="/dashboard"
+                // `?intent=log-work` — the chat opens the work-log flow on
+                // arrival. Without it this CTA dropped the worker on the
+                // generic greeting, which is what the tester reported as
+                // being thrown back to the first page.
+                href={"/dashboard?intent=log-work" as "/dashboard"}
                 className="inline-flex min-h-[2.75rem] w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
                 data-testid="journal-log-via-chat-cta"
               >
@@ -987,7 +991,11 @@ export default async function JournalPage({
             title={t("listEmptyTitle")}
             why={t("listEmpty")}
             next={t("listEmptyNext")}
-            cta={{ label: t("listEmptyCta"), href: "/dashboard" }}
+            // Same hand-off as the log-via-chat CTA: land IN the work-log
+            // flow, not on the generic greeting. "Create your first entry"
+            // that drops the worker on the home screen is the exact
+            // interaction the tester read as being thrown out of the journal.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
           />
         ) : (
           <div className="flex flex-col gap-4">
