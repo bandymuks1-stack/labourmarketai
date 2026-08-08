@@ -21,6 +21,7 @@ import {
   combineInvitationItems,
   daySpanDays,
   hrefForSource,
+  journalStartDay,
   planningMeta,
   projectAbsenceItem,
   projectFinanceItem,
@@ -534,14 +535,23 @@ async function readJournalItems(
   // renders, it just says less (never something invented).
   const liveRows = rows.filter((e) => !correctedIds.has(e.id));
   const entryIds = liveRows.map((e) => e.id);
-  const metricsByEntry = new Map<string, { hours: string | null; site: string | null }>();
+  const metricsByEntry = new Map<
+    string,
+    { hours: string | null; site: string | null; workDate: string | null }
+  >();
   const orgByEngagement = new Map<string, string | null>();
   if (entryIds.length > 0) {
     const [metricsRes, ecRes] = await Promise.all([
       asAny(supabase)
         .from("journal_entry_metrics")
-        .select("journal_entry_id, metric_slug, value_text, value_numeric, unit_slug")
-        .in("journal_entry_id", entryIds)
+        // The FK column is `entry_id`. This read asked for `journal_entry_id`,
+        // which does not exist — so the request errored on every call, the
+        // "degrades to null meta" branch swallowed it, and the hours and site
+        // this block exists to show were silently never rendered. An honest
+        // degradation path hides a typo forever; the column name is pinned by
+        // a test now.
+        .select("entry_id, metric_slug, value_text, value_numeric, unit_slug")
+        .in("entry_id", entryIds)
         .limit(PLANNING_JOURNAL_READ_LIMIT * 8),
       (async () => {
         const ecIds = [
@@ -560,16 +570,29 @@ async function readJournalItems(
     ]);
     if (!metricsRes.error) {
       type MetricRow = {
-        journal_entry_id: string;
+        entry_id: string;
         metric_slug: string;
         value_text: string | null;
         value_numeric: number | null;
         unit_slug: string | null;
       };
       for (const m of (metricsRes.data ?? []) as MetricRow[]) {
-        const cur = metricsByEntry.get(m.journal_entry_id) ?? { hours: null, site: null };
+        const cur = metricsByEntry.get(m.entry_id) ?? {
+          hours: null,
+          site: null,
+          workDate: null,
+        };
         if (m.metric_slug === "site_name" && m.value_text?.trim()) {
           cur.site = m.value_text.trim();
+        }
+        // THE DAY THE WORK HAPPENED, as the worker stated it. Already stored
+        // by the save action (`work_date`, source `worker_input`) — it was
+        // simply never read here, so "įrašyk vakarykštį darbą" landed on the
+        // day the row was TYPED. A plain ISO day needs no timezone conversion
+        // (W12: one UTC-pinned formatter, and this value never enters it);
+        // anything not exactly YYYY-MM-DD is ignored rather than guessed at.
+        if (m.metric_slug === "work_date" && m.value_text?.trim()) {
+          cur.workDate = m.value_text.trim();
         }
         // A TIME unit on the quantity metric means the number IS a duration.
         if (
@@ -580,7 +603,7 @@ async function readJournalItems(
         ) {
           cur.hours = `${m.value_numeric}|${m.unit_slug}`;
         }
-        metricsByEntry.set(m.journal_entry_id, cur);
+        metricsByEntry.set(m.entry_id, cur);
       }
     }
     if (!ecRes.error) {
@@ -602,17 +625,25 @@ async function readJournalItems(
   const items: PlanningItem[] = liveRows
     .map((e) => {
     const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
+    const metrics = metricsByEntry.get(e.id);
     return {
       id: `journal:${e.id}`,
       sourceType: "journal" as const,
       sourceId: e.id,
       label: firstLine ? (firstLine.length > 80 ? `${firstLine.slice(0, 79)}…` : firstLine) : null,
       detail: null,
-      startDate: toIsoDay(e.created_at),
+      // THE DAY WORKED, not the day typed. `created_at` is when the row was
+      // written, so an entry logged in the evening for yesterday's shift —
+      // "įrašyk vakarykštį darbą į žurnalą", a first-class journal phrase —
+      // appeared on the wrong calendar day, and a worker checking which days
+      // they had filled was reading fiction. The worker's own `work_date` wins
+      // when present; `created_at` stays the fallback for entries that never
+      // carried one.
+      startDate: journalStartDay(metrics?.workDate, e.created_at),
       endDate: null,
       status: "recorded",
       ...(() => {
-        const m = metricsByEntry.get(e.id);
+        const m = metrics;
         const org = e.engagement_context_id
           ? (orgByEngagement.get(e.engagement_context_id) ?? null)
           : null;

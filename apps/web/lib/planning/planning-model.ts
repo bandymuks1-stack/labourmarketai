@@ -287,6 +287,30 @@ export function toIsoDay(iso: string | null | undefined): string | null {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Which calendar day a Work Journal entry belongs on.
+ *
+ * THE DAY WORKED, not the day typed. The save action stores the worker's own
+ * `work_date` metric, but the projection read only `created_at` — so an entry
+ * logged in the evening for yesterday's shift ("įrašyk vakarykštį darbą į
+ * žurnalą", a first-class journal phrase) landed on the wrong day, and a worker
+ * checking which days they had filled was reading fiction.
+ *
+ * `createdAt` remains the fallback for entries that never carried a work date.
+ * A `workDate` that is not exactly YYYY-MM-DD is ignored rather than guessed
+ * at — a malformed value must not silently move an entry to a wrong day. Being
+ * a plain day already, it never enters a timezone conversion (W12: one
+ * UTC-pinned formatter, and this value bypasses it by construction).
+ */
+export function journalStartDay(
+  workDate: string | null | undefined,
+  createdAt: string | null | undefined,
+): string | null {
+  const wd = typeof workDate === "string" ? workDate.trim() : "";
+  if (DAY_RX.test(wd)) return wd;
+  return toIsoDay(createdAt);
+}
+
 /** dayIso + n calendar days (UTC-safe plain date math). */
 export function addDays(dayIso: string, n: number): string {
   const d = new Date(`${dayIso}T00:00:00Z`);
