@@ -665,6 +665,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // docs/human-gates/w14-ai-runs-retention-gate.md; contract + proof:
       // docs/audits/W14_ITEM6_AI_RUNS_RETENTION.md.
       "20260808130000_ai_runs_retention_redaction_v1.sql",
+      // 2026-08-08: W14 item 6 retention SCHEDULER. The marker records that the
+      // RED content (CREATE EXTENSION pg_cron, a new SECURITY DEFINER wrapper,
+      // GRANTs, and a scheduled job) is INTENTIONAL — the caller IS the
+      // mechanism. NO APPLY APPROVAL EXISTS YET: the 2026-08-08 owner decision
+      // approved the retention CAPABILITY, not installing a new database
+      // extension. Gate record: docs/human-gates/w14-retention-scheduler-gate.md.
+      "20260808140000_ai_runs_retention_schedule_v1.sql",
     ]);
   });
 

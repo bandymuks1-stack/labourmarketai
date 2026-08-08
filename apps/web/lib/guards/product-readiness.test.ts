@@ -1996,11 +1996,14 @@ describe("no migration files added by this sprint", () => {
     // function body (respond_booking_request_v3) so an organization-stamped
     // demand resolves via organizations.legacy_company_id instead of the
     // multi-company 'ambiguous_company' dead-end (live 2026-08-06, booking
-    // 88a43ead). Owner-gated RED, paired rollback restores the W12 body
-    // verbatim. Shared slot RECOUNTED against post-#1091 main: 192 files
-    // there, this branch adds one. Draft #1092 also claims 193 → it recounts
-    // to 194 after this lands.
-    const SPRINT_BASELINE = 193;
+    // 88a43ead). Merged as #1047 and APPLIED to production 2026-08-08.
+    // 193 -> 194: the W14 item 6 retention SCHEDULER
+    // (20260808140000_ai_runs_retention_schedule_v1) — pg_cron + append-only
+    // sweep telemetry + one definer wrapper calling ONLY the approved
+    // capability + an operator health read + one daily job. Rollback paired.
+    // Shared slot RECOUNTED against post-#1047 main as #1047's own note
+    // predicted: 193 files there, this branch adds one.
+    const SPRINT_BASELINE = 194;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

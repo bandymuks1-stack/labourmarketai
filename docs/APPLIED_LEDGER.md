@@ -35,6 +35,28 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260807140000_booking_engagement_org_resolution_v1` (#1047, the beta P0)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-08** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger name | `booking_engagement_org_resolution_v1` (match on `name`) |
+| PR | **#1047**, merged to main as `40c5bff1` |
+| Owner gate | Beta-stabilization P0 decision 2026-08-08 (conditional on re-verification; condition met), recorded in `docs/human-gates/booking-engagement-org-resolution-gate.md`. Executable sha256 `da6ae1cd56abc5c382424452ddb5d3a737d429c103032c0e93f78dedeffcd8c2` — identical before/after the marker. Marker covers exactly three findings (`security-definer-function`, `grant-or-revoke`, `data-dml`) |
+
+**What it does**: replaces ONE function body (`respond_booking_request_v3`) so an organization-stamped demand resolves its engagement company deterministically via `customer_requests.organization_id → organizations.legacy_company_id`; the NULL-org profile-singleton fallback is byte-preserved. Closes the live 2026-08-06 defect where the accepted booking `88a43ead…` minted nothing because its owner holds two companies.
+
+**Pre-apply checks** (the migration's own list, run immediately before): `organization_id` column present (1), `company_worker_engagements` present, exactly one v3. Production coverage measured: 19/19 demands org-stamped, 0 company-orgs without a bound company, 0 dangling pointers (structurally impossible — FK without ON DELETE).
+
+**Post-apply verified (read-back, not inferred)**: live v3 body contains the org-first branch (`v_demand_org` → `legacy_company_id`); SECDEF with pinned `search_path`; EXECUTE authenticated-only, anon false; **zero rows moved** — bookings 2, engagements 0, events 4, all identical pre/post. Apply-time DML: none (the classifier's `data-dml` finding matches the UPDATE inside the function body).
+
+**Proof on record**: `scripts/db-proof/booking-engagement-org-resolution.sh` — **39/39** on a throwaway container, BEFORE phase reproducing the live defect against the production v3 first; incl. sibling-company isolation (S9), already_active (S10), and per-role RLS visibility (S11). Silence fix shipped in the same PR: `lib/booking/engagement-invariant.ts` + the admin project-truth section (9/9 behavioural guard, mutation-checked).
+
+**Known open item, deliberate**: the historical booking `88a43ead…` remains accepted-without-engagement. The idempotent replay branch reports `already_recorded` WITHOUT re-running the engagement branch (by design), so the fix does not retroactively mint. Repair is a separate owner decision — classified NEEDS_OWNER_APPROVAL; the invariant surface shows it as a VIOLATION until decided. The paired rollback stays unexecuted.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260808120000_worker_absence_scheduling_view_v1` (W12 employer absence privacy)
 
 | Field | Value |

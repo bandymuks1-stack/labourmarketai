@@ -459,9 +459,16 @@ describe("NO new DB migration in this PR", () => {
     // (`20260807140000_booking_engagement_org_resolution_v1` — single
     // function-body replacement, owner-gated, paired rollback). RECOUNTED
     // against post-#1091 main rather than summed: origin/main holds 192 .sql
-    // files, this branch adds exactly one. NOTE: Draft #1092 (retention
-    // scheduler) also claims 193 and must recount to 194 after this lands.
-    expect(count).toBeLessThanOrEqual(193);
+    // files, this branch adds exactly one. Merged as #1047 and APPLIED to
+    // production 2026-08-08.
+    // Bumped 193 -> 194 for the W14 item 6 retention SCHEDULER
+    // (20260808140000_ai_runs_retention_schedule_v1) — installs pg_cron, adds
+    // an append-only sweep-telemetry table, one definer wrapper that calls
+    // ONLY the approved retention capability with no argument, an operator
+    // health read, and one daily job. Rollback paired. RECOUNTED against
+    // post-#1047 main as that branch's own note predicted: origin/main holds
+    // 193 .sql files, this branch adds exactly one.
+    expect(count).toBeLessThanOrEqual(194);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
