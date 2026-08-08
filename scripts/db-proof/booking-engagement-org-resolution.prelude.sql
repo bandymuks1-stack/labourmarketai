@@ -134,3 +134,39 @@ create table if not exists public.company_worker_engagements (
 create unique index if not exists company_worker_engagements_active_pair_idx
   on public.company_worker_engagements (company_id, worker_id)
   where status = 'active';
+
+-- ── §9 visibility: the REAL 20260723120000 read posture, verbatim ──────────
+-- Copied so the proof can answer "who SEES the minted engagement" under real
+-- roles, not just "was it minted". owns_company is the real 0001 helper.
+grant usage on schema public to authenticated, anon;
+grant usage on schema auth to authenticated, anon;
+grant execute on function auth.uid() to authenticated, anon;
+grant execute on function public.is_admin() to authenticated, anon;
+
+create or replace function public.owns_company(c uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.companies x where x.id = c and x.profile_id = auth.uid()
+  )
+$$;
+grant execute on function public.owns_company(uuid) to authenticated;
+
+alter table public.company_worker_engagements enable row level security;
+
+drop policy if exists company_worker_engagements_select on public.company_worker_engagements;
+create policy company_worker_engagements_select
+  on public.company_worker_engagements for select
+  using (
+    public.owns_company(company_id)
+    or exists (
+      select 1 from public.workers w
+       where w.id = worker_id and w.profile_id = auth.uid()
+    )
+    or public.is_admin()
+  );
+
+grant select on public.company_worker_engagements to authenticated;
+revoke insert, update, delete on public.company_worker_engagements from authenticated;
+revoke all on public.company_worker_engagements from anon;
+revoke all on public.company_worker_engagements from public;
+grant select on public.workers to authenticated;

@@ -58,7 +58,14 @@ insert into public.customer_requests (id, profile_id, organization_id) values
   -- D6: org-stamped (OA) — overlap-guard booking
   ('e0000000-0000-4000-8000-000000000006', 'a0000000-0000-4000-8000-00000000000a', '0a000000-0000-4000-8000-00000000000a'),
   -- D7: org-stamped (OA) — decline path
-  ('e0000000-0000-4000-8000-000000000007', 'a0000000-0000-4000-8000-00000000000a', '0a000000-0000-4000-8000-00000000000a');
+  ('e0000000-0000-4000-8000-000000000007', 'a0000000-0000-4000-8000-00000000000a', '0a000000-0000-4000-8000-00000000000a'),
+  -- D8: org-stamped (OB) — the SIBLING company of the SAME owner. §4's exact
+  -- question: a booking whose demand belongs to B must engage under CB, and
+  -- CA must not receive it merely because one profile owns both.
+  ('e0000000-0000-4000-8000-000000000008', 'a0000000-0000-4000-8000-00000000000a', '0b000000-0000-4000-8000-00000000000b'),
+  -- D9: org-stamped (OA) — second booking for a worker ALREADY actively
+  -- engaged with CA (the already_active idempotency arm).
+  ('e0000000-0000-4000-8000-000000000009', 'a0000000-0000-4000-8000-00000000000a', '0a000000-0000-4000-8000-00000000000a');
 
 -- Proposed bookings ------------------------------------------------------ --
 insert into public.booking_requests
@@ -90,4 +97,13 @@ insert into public.booking_requests
   -- B6: decline path (worker 3, disjoint dates)
   ('b0000000-0000-4000-8000-000000000007', 'a0000000-0000-4000-8000-00000000000a',
    'e0000000-0000-4000-8000-000000000007', 'd0000000-0000-4000-8000-000000000003',
-   'proposed', date '2026-12-01', date '2026-12-03');
+   'proposed', date '2026-12-01', date '2026-12-03'),
+  -- B7: SIBLING-company demand (OB) — worker 3, disjoint dates
+  ('b0000000-0000-4000-8000-000000000008', 'a0000000-0000-4000-8000-00000000000a',
+   'e0000000-0000-4000-8000-000000000008', 'd0000000-0000-4000-8000-000000000003',
+   'proposed', date '2026-11-10', date '2026-11-12'),
+  -- B8: worker 1 AGAIN under OA→CA, disjoint from B_BEFORE/B1/B5 — the
+  -- already_active arm (worker 1 gains an active CA engagement via B1)
+  ('b0000000-0000-4000-8000-000000000009', 'a0000000-0000-4000-8000-00000000000a',
+   'e0000000-0000-4000-8000-000000000009', 'd0000000-0000-4000-8000-000000000001',
+   'proposed', date '2026-12-10', date '2026-12-12');

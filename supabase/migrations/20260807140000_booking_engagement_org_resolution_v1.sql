@@ -1,9 +1,23 @@
 -- ============================================================================
 -- DRAFT — needs-human-gate — DO NOT APPLY automatically.
 -- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`. Ships UNAPPLIED and deliberately WITHOUT
--- `@human-gate-approved` — RED in migration-safety CI is the intended state
--- until the owner reviews (SECURITY DEFINER replacement + grants = RED-class).
+-- Never `db push`.
+--
+-- @human-gate-approved — OWNER DECISION GIVEN 2026-08-08 (beta stabilization
+-- P0 command): "APPROVE proceeding with #1047 PROVIDED current-code
+-- re-verification proves that it fixes organization/company resolution
+-- without weakening authorization, cross-org isolation, booking integrity,
+-- or engagement ownership." That re-verification ran and is recorded in
+-- docs/human-gates/booking-engagement-org-resolution-gate.md (39/39 DB proof
+-- incl. sibling-company isolation, already_active, per-role RLS visibility).
+-- The marker covers exactly the three classifier findings, all of which ARE
+-- the mechanism: [security-definer-function] (the v3 body replacement —
+-- redefining the existing SECDEF function is the fix), [grant-or-revoke]
+-- (re-stating the function's own unchanged EXECUTE posture after
+-- CREATE OR REPLACE), [data-dml] (the UPDATE inside the function body — the
+-- accept itself; the migration performs zero statement-level DML at apply
+-- time). This comment-only marker leaves the comment-stripped EXECUTABLE
+-- sha256 unchanged: da6ae1cd56abc5c382424452ddb5d3a737d429c103032c0e93f78dedeffcd8c2.
 --
 -- 20260807140000 — booking→engagement bridge: organization-first company
 -- resolution (post-M-P0-6 follow-through).

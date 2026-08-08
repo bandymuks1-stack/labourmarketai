@@ -51,14 +51,30 @@ function v3Body(src: string): string {
   return rest.slice(0, end === -1 ? undefined : end);
 }
 
-describe("owner gate — draft, never self-approved, paired rollback", () => {
-  it("ships as an UNAPPLIED owner-gated draft", () => {
+describe("owner gate — decision recorded, marker bound to it, paired rollback", () => {
+  it("carries the human-gate marker UNDER the recorded 2026-08-08 owner decision", () => {
     const m = migration();
     expect(m).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY automatically/);
-    // Deliberately NOT self-annotated — RED is the intended CI state until the
-    // owner reviews (repo rule: never self-add the annotation). Header prose
-    // may mention the annotation; a standalone annotation line must not exist.
-    expect(m).not.toMatch(/^--\s*@human-gate-approved/m);
+    // FLIPPED 2026-08-08. This guard originally pinned the OPPOSITE state —
+    // "never self-add the annotation" — because no decision existed. The
+    // beta-stabilization P0 command supplied one ("APPROVE proceeding with
+    // #1047 PROVIDED current-code re-verification proves…"), the
+    // re-verification ran (39/39 DB proof), and the marker was added in the
+    // SAME commit as the gate record, per the repo procedure. The guard now
+    // pins that the marker exists AND names its gate doc — a marker without
+    // its recorded decision is exactly what this must catch next.
+    expect(m).toMatch(/^--\s*@human-gate-approved/m);
+    expect(m).toMatch(/booking-engagement-org-resolution-gate\.md/);
+  });
+
+  it("the marker is comment-only — the approved EXECUTABLE hash is untouched", () => {
+    // The owner decision binds to the comment-stripped executable sha256.
+    // Adding the marker must not have changed a single executable byte.
+    const exec = migration()
+      .split(/\r?\n/)
+      .filter((l) => !/^\s*--/.test(l))
+      .join("\n");
+    expect(exec).not.toMatch(/@human-gate-approved/);
   });
 
   it("asserts its M-P0-6 dependency before replacing anything", () => {

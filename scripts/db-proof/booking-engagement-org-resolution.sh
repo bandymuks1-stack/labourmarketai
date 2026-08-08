@@ -28,6 +28,7 @@ P_W1='c0000000-0000-4000-8000-000000000001'    # worker 1's profile
 P_W2='c0000000-0000-4000-8000-000000000002'    # worker 2's profile
 P_W3='c0000000-0000-4000-8000-000000000003'    # worker 3's profile
 CA='ca000000-0000-4000-8000-0000000000ca'      # company A (org OA's canonical company)
+CB='cb000000-0000-4000-8000-0000000000cb'      # company B (org OB's canonical company, SAME owner)
 CS='cc000000-0000-4000-8000-0000000000cc'      # single owner's company
 B_BEFORE='b0000000-0000-4000-8000-000000000001'
 B1='b0000000-0000-4000-8000-000000000002'
@@ -36,6 +37,8 @@ B3='b0000000-0000-4000-8000-000000000004'
 B4='b0000000-0000-4000-8000-000000000005'
 B5='b0000000-0000-4000-8000-000000000006'
 B6='b0000000-0000-4000-8000-000000000007'
+B7='b0000000-0000-4000-8000-000000000008'
+B8='b0000000-0000-4000-8000-000000000009'
 
 psqlf() { docker exec -i "$CT" psql -U postgres -v ON_ERROR_STOP=0 "$@"; }
 q()     { docker exec -i "$CT" psql -U postgres -tAc "$1" 2>&1; }
@@ -183,6 +186,59 @@ echo
 echo "--- S8: a NON-addressed caller can never accept / mint ---"
 R=$(respond "$B5" accepted "$P_W2")
 check "S8: foreign caller rejected (42501 text)" "1" "$(echo "$R" | grep -c 'Only the addressed worker may respond')"
+
+echo
+echo "--- S9: SIBLING company of the SAME owner — demand belongs to B ---"
+# §4's exact question. One profile owns CA and CB. This demand is stamped with
+# OB, so the engagement must land under CB — and CA must NOT receive it merely
+# because the same profile owns it. Under the old body this was the
+# ambiguous_company dead-end; under org-first it is deterministic.
+R=$(respond "$B7" accepted "$P_W3")
+check "S9: engagement created" "created" "$(engagement_of "$R")"
+check "S9: company = CB, the DEMAND'S org company" "$CB" "$(company_for "$B7")"
+check "S9: sibling CA received NOTHING from this booking" "0" \
+  "$(q "select count(*) from public.company_worker_engagements where source_booking_id='$B7' and company_id='$CA';")"
+check "S9: exactly one engagement row" "1" "$(rows_for "$B7")"
+
+echo
+echo "--- S10: worker ALREADY actively engaged with the resolved company ---"
+# Worker 1 gained an active CA engagement via B1 (S1). A second accepted
+# booking resolving to the SAME company must not mint a second active
+# engagement — the already_active arm, previously only reachable in the
+# singleton fallback, now exercised through the org-first path.
+R=$(respond "$B8" accepted "$P_W1")
+check "S10: accept stands" "accepted" "$(status_of "$B8")"
+check "S10: reported already_active, not created" "already_active" "$(engagement_of "$R")"
+check "S10: NO second engagement row minted for this booking" "0" "$(rows_for "$B8")"
+check "S10: worker 1 still holds exactly ONE active CA engagement" "1" \
+  "$(q "select count(*) from public.company_worker_engagements where company_id='$CA' and worker_id='d0000000-0000-4000-8000-000000000001' and status='active';")"
+
+echo
+echo "--- S11: WHO SEES the minted engagement (real RLS, real roles) ---"
+# §9's visibility question, answered under `set local role authenticated`
+# (never the superuser): the engagement's company owner and its subject
+# worker each see the B1 row; an unrelated authenticated profile sees zero;
+# anon is denied outright.
+see_b1() { # $1=actor_profile
+  docker exec -i "$CT" psql -U postgres -tA -v ON_ERROR_STOP=0 2>&1 <<SQL | grep -vE '^(BEGIN|COMMIT|SET)$' | sed '/^$/d' | head -1
+begin;
+set local role authenticated;
+set local app.uid = '$1';
+select count(*) from public.company_worker_engagements where source_booking_id='$B1';
+commit;
+SQL
+}
+ANON_B1=$(docker exec -i "$CT" psql -U postgres -tA -v ON_ERROR_STOP=0 2>&1 <<SQL | grep -c 'permission denied'
+begin;
+set local role anon;
+select count(*) from public.company_worker_engagements;
+commit;
+SQL
+)
+check "S11: company owner (P_OWN) sees the engagement"      "1" "$(see_b1 "$P_OWN")"
+check "S11: the subject worker (P_W1) sees the engagement"  "1" "$(see_b1 "$P_W1")"
+check "S11: an unrelated profile (P_W2) sees NOTHING"       "0" "$(see_b1 "$P_W2")"
+check "S11: anon is DENIED at the grant layer"              "1" "$ANON_B1"
 
 echo
 echo "=============================================================="
