@@ -12,7 +12,6 @@ export async function generateMetadata({
   return buildPageMetadataFor("pricing", locale, "/pricing");
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
-import { ServiceOffers } from "@/components/marketing/service-offers";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 import {
   ConciergeAccessBanner,
@@ -51,7 +50,14 @@ export default async function PricingPage({
       <ConciergeOfferSection />
       <PricingTable />
       <PrePaymentPlanBoundary />
-      <ServiceOffers />
+      {/* M7 (beta foundation audit 2026-08-08): <ServiceOffers /> — the
+          AI-automation agency offer list (€900–€1,900) — is NOT rendered on
+          the beta labour-market pricing page. Concrete service prices next to
+          the labour-market tiers, whose own price is "being prepared", read as
+          this product's price and sell a different business. The component and
+          its `services.*` copy are kept intact and unchanged; the owner decides
+          where the offers belong (a separate /services page is the obvious
+          home). Pinned by lib/guards/pricing-page-beta-honesty.test.ts. */}
 
       <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">
         <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
