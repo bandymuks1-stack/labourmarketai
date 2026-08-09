@@ -46,7 +46,6 @@ export function SupplyDemandChart() {
     >
       <header className="mb-3 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
-          <span className="live-dot" aria-hidden />
           {t("panel.supplyDemand")}
         </h3>
         <span className="inline-flex items-center gap-1.5 rounded-sm border border-state-amber/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
