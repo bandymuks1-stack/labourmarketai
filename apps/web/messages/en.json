@@ -440,6 +440,7 @@
       "pending_bookings": "Clears when you respond to the booking proposal.",
       "booking_responses": "Clears when you open the bookings page.",
       "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
+      "pending_absence_reviews": "Clears when you approve or reject the request on the leave & absence page.",
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
     }
   },
@@ -3982,6 +3983,7 @@
         "pending_bookings": "Booking proposals awaiting response",
         "booking_responses": "Answers to your booking proposals",
         "open_task_attention": "Tasks needing attention",
+        "pending_absence_reviews": "Leave requests to review",
         "new_job_matches": "New job listings that fit you"
       },
       "label": "My notifications",

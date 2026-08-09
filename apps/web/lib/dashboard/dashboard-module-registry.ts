@@ -385,6 +385,11 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
     iconKey: "leave",
     roles: ["worker", "company", "agency"],
     surfaces: ["grid", "command"],
+    // Only the REVIEW side is an attention signal. A worker's own pending
+    // request is not something they act on — the reviewer is the one being
+    // waited for, and the count is self-excluded and role-gated to match
+    // (lib/leave/absences.ts → getPendingAbsenceReviewCount).
+    attentionSignalIds: ["pending-absence-reviews"],
   },
 
   // ── Organisation workspace door ──────────────────────────────────────

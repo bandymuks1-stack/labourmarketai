@@ -12,6 +12,7 @@ import {
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunities";
 import type { FeatureKey } from "@/lib/config/feature-availability";
@@ -42,6 +43,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     invitations,
     taskAttention,
     newJobMatches,
+    pendingAbsenceReviews,
   ] = await Promise.all([
     getUnreadConversationCount(),
     getPendingIncomingRequestCount(),
@@ -53,6 +55,9 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     // Request-cached with the recommendation surfaces (ONE read model);
     // 0 for non-workers and while the gated seen store is unapplied.
     getNewMarketplaceMatchCount(),
+    // Role-gated inside the reader (0 for worker / client), self-excluded,
+    // and 0 while the leave migration is unapplied.
+    getPendingAbsenceReviewCount(),
   ]);
   return {
     unreadConversations,
@@ -63,6 +68,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingInvitations: invitations.length,
     openTaskAttention: taskAttention.total,
     newJobMatches,
+    pendingAbsenceReviews,
   };
 });
 

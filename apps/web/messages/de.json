@@ -440,6 +440,7 @@
       "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
       "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
       "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
+      "pending_absence_reviews": "Verschwindet, sobald Sie den Antrag auf der Seite Urlaub & Abwesenheit genehmigen oder ablehnen.",
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
     }
   },
@@ -3982,6 +3983,7 @@
         "pending_bookings": "Buchungsvorschläge, die auf eine Antwort warten",
         "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
         "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
+        "pending_absence_reviews": "Abwesenheitsanträge zur Prüfung",
         "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen"
       },
       "label": "Meine Benachrichtigungen",

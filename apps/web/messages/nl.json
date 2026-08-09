@@ -440,6 +440,7 @@
       "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
       "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
       "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
+      "pending_absence_reviews": "Verdwijnt zodra u de aanvraag op de pagina Verlof & afwezigheid goedkeurt of afwijst.",
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
     }
   },
@@ -3982,6 +3983,7 @@
         "pending_bookings": "Boekingsvoorstellen die op een reactie wachten",
         "booking_responses": "Antwoorden op je boekingsvoorstellen",
         "open_task_attention": "Taken die aandacht vragen",
+        "pending_absence_reviews": "Verlofaanvragen ter beoordeling",
         "new_job_matches": "Nieuwe vacatures die bij je passen"
       },
       "label": "Mijn meldingen",
