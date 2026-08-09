@@ -468,7 +468,14 @@ describe("NO new DB migration in this PR", () => {
     // health read, and one daily job. Rollback paired. RECOUNTED against
     // post-#1047 main as that branch's own note predicted: origin/main holds
     // 193 .sql files, this branch adds exactly one.
-    expect(count).toBeLessThanOrEqual(194);
+    // Bumped 194 -> 195 for public vacancy persistence v1
+    // (20260809160000_public_vacancy_persistence_v1) — two tables giving the
+    // already-built vacancy pipeline somewhere to put a vacancy. Still nothing
+    // from the market-map read layer. Owner-gated, paired rollback, ships
+    // UNAPPLIED. RECOUNTED against origin/main 0d8de71d rather than summed:
+    // `git ls-tree -r origin/main supabase/migrations/` = 194 .sql files, and
+    // this branch adds exactly one.
+    expect(count).toBeLessThanOrEqual(195);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

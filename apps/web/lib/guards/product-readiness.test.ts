@@ -2003,7 +2003,21 @@ describe("no migration files added by this sprint", () => {
     // capability + an operator health read + one daily job. Rollback paired.
     // Shared slot RECOUNTED against post-#1047 main as #1047's own note
     // predicted: 193 files there, this branch adds one.
-    const SPRINT_BASELINE = 194;
+    // 194 -> 195: public vacancy persistence v1
+    // (20260809160000_public_vacancy_persistence_v1) — the missing floor under
+    // the vacancy pipeline. Two tables (`public_vacancies`,
+    // `vacancy_import_cursors`), no function, no SECURITY DEFINER, no DML.
+    // Reads for `public_vacancies` are deliberately open to anon+authenticated
+    // for ACTIVE rows only (already-public CC0 public-employment-service ads);
+    // writes are service_role only, enforced twice (REVOKE-then-GRANT, and no
+    // write policy). `vacancy_import_cursors` is RLS-enabled with NO policies
+    // — operator-only by construction. Rollback paired and safe at any time:
+    // both tables hold only re-fetchable public data. Owner-gated, ships
+    // UNAPPLIED — creating the tables imports nothing, because governance
+    // activation (arbetsformedlingen is still `owner_review`) and the env kill
+    // switch both remain closed. Counted against origin/main 0d8de71d: 194
+    // .sql files there, this branch adds exactly one.
+    const SPRINT_BASELINE = 195;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
