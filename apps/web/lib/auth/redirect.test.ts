@@ -215,7 +215,7 @@ describe("W7 slice 3 — a query can never create an open redirect", () => {
     expect(getSafeReturnPath("/lt/dashboard\nLocation: //evil", "lt")).toBe(
       "/lt/dashboard",
     );
-    expect(getSafeReturnPath("/lt/dashboard ", "lt")).toBe("/lt/dashboard");
+    expect(getSafeReturnPath("/lt/dashboard\u0000", "lt")).toBe("/lt/dashboard");
   });
 
   it("does not treat a query value as part of the path", () => {
