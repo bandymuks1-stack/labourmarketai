@@ -40,6 +40,18 @@ import { evaluateVacancySwitch } from "../vacancy-import/vacancy-kill-switch";
 const APP_ROOT = join(__dirname, "..", "..");
 const PURE_DIR = join(APP_ROOT, "lib", "vacancy-sources");
 const SERVER_DIR = join(APP_ROOT, "lib", "vacancy-import");
+/**
+ * The PERSISTENCE layer, added with `20260809160000_public_vacancy_
+ * persistence_v1`. It is a THIRD directory rather than more files under
+ * `lib/vacancy-import/**` on purpose: that folder is the NETWORK layer and
+ * section (i) below pins that it holds no database client. Persistence
+ * genuinely needs one, so it gets its own folder and the mirrored pin — this
+ * layer may hold a client but may never call `fetch`.
+ *
+ * Net effect: no single module in the vacancy pipeline can both read the
+ * internet and write the database.
+ */
+const STORE_DIR = join(APP_ROOT, "lib", "vacancy-store");
 
 const read = (p: string) => readFileSync(p, "utf8");
 /** Strip block + line comments so scans check real CODE only. */
@@ -335,6 +347,72 @@ describe("(i) the pipeline collects no contacts and sends nothing", () => {
       .filter((f) => /["']@?\/?(lib\/supabase|@supabase)\//.test(code(read(f))))
       .map(rel);
     expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+});
+
+// ── (j) the persistence layer is a database layer and nothing else ──────────
+
+describe("(j) the store layer writes the database and never touches a network", () => {
+  it("no module in the store layer calls fetch or names an http(s) endpoint", () => {
+    // The mirror image of (d). The adapter is the only module allowed to
+    // fetch; the store is the only one allowed a database client. Neither may
+    // become the other, because a module holding both is exactly the shape
+    // that turns an ingest bug into a data-exfiltration bug.
+    const offenders = sourcesIn(STORE_DIR)
+      .filter((f) => !/\.test\.tsx?$/.test(f))
+      .filter((f) => {
+        const src = code(read(f));
+        return /\bfetch\s*\(/.test(src) || /https?:\/\//.test(src);
+      })
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the store layer never imports the adapter, the importer or the kill switch", () => {
+    // Persistence must stay callable without dragging the network layer in.
+    // A runner composes the two; neither imports the other.
+    const offenders = sourcesIn(STORE_DIR)
+      .filter((f) => !/\.test\.tsx?$/.test(f))
+      .filter((f) =>
+        /["']@?\/?(lib\/)?vacancy-import\//.test(code(read(f))) ||
+        /["']\.\/vacancy-(adapter|importer|kill-switch)["']/.test(code(read(f))),
+      )
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the store layer is server-only", () => {
+    // A persistence module reachable from a client bundle would ship the
+    // service-role shape into the browser's dependency graph.
+    const entry = join(STORE_DIR, "vacancy-repository.ts");
+    expect(existsSync(entry)).toBe(true);
+    expect(read(entry)).toMatch(/^import "server-only";/m);
+  });
+
+  it("the store writes ONLY the two tables the migration creates", () => {
+    // A persistence layer that quietly learned to write `customer_requests`
+    // would turn an external ad into a platform demand record — the exact
+    // thing the contract forbids. Pin the table names it may name.
+    const ALLOWED = new Set(["public_vacancies", "vacancy_import_cursors"]);
+    const src = code(read(join(STORE_DIR, "vacancy-repository.ts")));
+    const tables = [...src.matchAll(/\.from\(([A-Z_]+|"[a-z_]+")\)/g)].map(
+      (m) => m[1].replace(/"/g, ""),
+    );
+    const constants = [...src.matchAll(/const\s+[A-Z_]+_TABLE\s*=\s*"([a-z_]+)"/g)].map(
+      (m) => m[1],
+    );
+    for (const t of constants) {
+      expect(ALLOWED.has(t), `store names an unexpected table: ${t}`).toBe(true);
+    }
+    // Every `.from(...)` goes through one of those constants, never a literal
+    // typed at the call site.
+    for (const t of tables) {
+      expect(
+        t.endsWith("_TABLE") || ALLOWED.has(t),
+        `store reaches a table outside the pinned set: ${t}`,
+      ).toBe(true);
+    }
+    expect(constants.length).toBeGreaterThan(0);
   });
 });
 
