@@ -83,7 +83,24 @@ export function CvInputPanel({
               accept="image/jpeg,image/png"
               disabled
               aria-disabled="true"
-              className="text-xs text-text-muted"
+              // `w-full` IS LOAD-BEARING. An <input type="file"> with no
+              // explicit width has an intrinsic min-content of ~258px here,
+              // and a grid item's `min-width: auto` floor means the card
+              // CANNOT shrink below it: the card sat at 302px inside a 246px
+              // grid column and pushed the profile 19px past a 320px viewport.
+              // `document.scrollWidth` still read exactly 320, so the page
+              // never reported the overflow it was hiding.
+              //
+              // Measured at 320px, on this input:
+              //   min-w-0      -> 302px card, still +19px   (no effect)
+              //   max-w-full   -> 302px card, still +19px   (no effect)
+              //   w-full       -> 220px card, +0px, input stays visible (202px)
+              //   w-0 min-w-0  -> +0px, but the input renders 0px wide
+              // Same root cause as #1100 (the landing hero ask input), which
+              // needed `w-0` because it was a `flex-1` ROW item that grew back.
+              // This one is a block child, so `w-full` is the variant that
+              // clears the floor WITHOUT hiding the control.
+              className="w-full text-xs text-text-muted"
             />
             <span className="text-meta leading-relaxed text-text-muted">
               {tImport("imageOcr.note")}

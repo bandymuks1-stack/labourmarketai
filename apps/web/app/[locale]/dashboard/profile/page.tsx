@@ -634,7 +634,17 @@ export default async function ProfilePage({
               debt (A-2), and the row had to be consistent to take the network
               handoff below without one odd-sized chip. Visual size is
               unchanged; only the tap area grew. */}
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
+          {/* `sm:shrink-0` is REMOVED, and its absence is load-bearing. The
+              row already declared `sm:flex-wrap`, but `shrink-0` meant the
+              row was never given a width narrower than its max-content, so
+              the wrap could not engage: at 768px it measured 903px wide and
+              pushed 183px past the viewport, leaving the last chip
+              (`room-my-spaces-link`) entirely off-screen. `scrollWidth` read
+              exactly 768, so the page could not even be scrolled to it.
+              Measured at 768: shrink-0 -> 903px wide, +183px, one line;
+              without it -> 672px, +0px, wraps to two lines. `min-w-0` alone
+              changes nothing, which is why the shrink flag is the fix. */}
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:justify-center sm:[&>a]:justify-start">
             {workerId ? (
               <Link
                 href={"/dashboard/opportunities" as "/dashboard"}
