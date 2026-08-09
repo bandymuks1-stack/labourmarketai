@@ -1984,7 +1984,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Punkter til drøftelse",
-      "missing": "Manglende oplysninger"
+      "missing": "Manglende oplysninger",
+      "blocking": "Blokerende krav"
     },
     "missingSide": {
       "worker": "Kandidaten har ikke angivet: {criterion}",
@@ -2065,6 +2066,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Opfylder de angivne krav",
+      "blocked": "Opfylder ikke et angivet krav",
+      "evidence": {
+        "confirmed": "Dokumentation: bekræftet af leder",
+        "mixed": "Dokumentation: delvist bekræftet",
+        "unverified": "Dokumentation: kun selvangivet"
+      }
     }
   },
   "waze": {

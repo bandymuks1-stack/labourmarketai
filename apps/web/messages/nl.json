@@ -6922,7 +6922,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Bespreekpunten",
-      "missing": "Ontbrekende informatie"
+      "missing": "Ontbrekende informatie",
+      "blocking": "Blokkerende eisen"
     },
     "missingSide": {
       "worker": "De kandidaat heeft niet opgegeven: {criterion}",
@@ -7123,6 +7124,15 @@
       "reasonRequired": "Voor “Geen fit” is een korte reden nodig.",
       "save": "Opslaan",
       "cancel": "Annuleren"
+    },
+    "verdict": {
+      "eligible": "Voldoet aan de gestelde eisen",
+      "blocked": "Voldoet niet aan een gestelde eis",
+      "evidence": {
+        "confirmed": "Bewijs: door manager bevestigd",
+        "mixed": "Bewijs: deels bevestigd",
+        "unverified": "Bewijs: alleen zelf opgegeven"
+      }
     }
   },
   "planBoundary": {

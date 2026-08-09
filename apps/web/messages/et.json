@@ -1984,7 +1984,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Blokeerivad nõuded"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2065,6 +2066,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Vastab esitatud nõuetele",
+      "blocked": "Ei vasta esitatud nõudele",
+      "evidence": {
+        "confirmed": "Tõendid: juhi kinnitatud",
+        "mixed": "Tõendid: osaliselt kinnitatud",
+        "unverified": "Tõendid: ainult enda deklareeritud"
+      }
     }
   },
   "waze": {
