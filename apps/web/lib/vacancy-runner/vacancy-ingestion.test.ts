@@ -10,10 +10,10 @@
  *   5. the imported path's numbers come from the repository's exact
  *      partition, not from the batch size.
  *
- * Activation is simulated by patching `getSourceProfile` — the ONE lookup the
- * shared import boundary uses — because governance in the real registry is
- * `owner_review` and the imported path would otherwise be untestable before
- * the owner flips it. The patch is per-test and explicit.
+ * Governance states are simulated by patching `getSourceProfile` — the ONE
+ * lookup the shared import boundary uses. The real registry row is now `on`
+ * (owner-approved 2026-08-09), so the PRE-activation states are the ones that
+ * need the override. The patch is per-test and explicit.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -168,9 +168,12 @@ describe("blocked states cost nothing and claim nothing", () => {
   });
 
   it("env on but governance owner_review: dry run fetches, is `blocked`, and REPORTS the waiting evidence", async () => {
-    // This is the state the owner reads to decide activation: the records are
-    // well-formed, counted, and none entered.
+    // This is the state the owner read to decide activation: the records are
+    // well-formed, counted, and none entered. The registry row is `on` since
+    // 2026-08-09, so the pre-activation state needs the explicit override —
+    // the boundary must keep refusing any FUTURE provider in this state.
     enableEnv();
+    ctl.activationOverride = "owner_review";
     stubFetch([ad(), ad({ id: "ad-2" })]);
     const { client, ops } = fakeDb();
 
@@ -349,7 +352,7 @@ describe("source health is readable before the store exists", () => {
     const se = health.find((h) => h.providerKey === "arbetsformedlingen")!;
     expect(se.countryIso).toBe("SE");
     expect(se.legalStatus).toBe("confirmed");
-    expect(se.activation).toBe("owner_review");
+    expect(se.activation).toBe("on");
     expect(se.operational).toBe(false);
     expect(se.switchBlockedReason).toBe("provider_disabled");
     expect(se.cursors).toEqual([]);

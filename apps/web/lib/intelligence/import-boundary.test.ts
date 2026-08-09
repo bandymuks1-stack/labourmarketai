@@ -17,20 +17,23 @@ function importFor(sourceKey: string): ExternalObservationImportV1 {
 }
 
 describe("external observation import boundary", () => {
-  it("allows ONLY eurostat today; refuses every other registered source", () => {
+  it("allows ONLY the owner-activated externals; refuses every other registered source", () => {
+    // eurostat (metrics, 2026-07-15) and arbetsformedlingen (vacancies,
+    // 2026-08-09). Note the source-level gate passing arbetsformedlingen
+    // imports NO metric observation: its importPolicy is null, so the
+    // per-observation metric_policy check still refuses everything (pinned
+    // in observation-validation.test.ts).
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
     for (const p of INTELLIGENCE_SOURCE_PROFILES) {
       const result = validateExternalImport(importFor(p.key));
-      if (p.key === "eurostat") {
-        expect(result.ok, p.key).toBe(true);
-      } else {
-        expect(result.ok, p.key).toBe(false);
-      }
+      expect(result.ok, p.key).toBe(ACTIVATED.has(p.key));
     }
   });
 
-  it("refuses every non-internal source EXCEPT eurostat with an honest governance reason", () => {
+  it("refuses every non-internal source outside the activated set with an honest governance reason", () => {
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
+      (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -45,7 +48,7 @@ describe("external observation import boundary", () => {
     }
   });
 
-  it("allows eurostat — the one activated external source", () => {
+  it("allows eurostat — the activated metrics source", () => {
     const result = validateExternalImport(importFor("eurostat"));
     expect(result.ok).toBe(true);
   });

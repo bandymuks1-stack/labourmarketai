@@ -1,6 +1,28 @@
 # HUMAN GATE — Arbetsförmedlingen (Sweden) source ACTIVATION
 
-State: `AWAITING_OWNER_DECISION` — nothing is activated.
+State: `APPROVED` — owner decision recorded 2026-08-09.
+
+## Owner decision (2026-08-09)
+
+The owner explicitly approved Arbetsförmedlingen / Sweden activation under a
+staged safety regime ("APPROVE ARBETSFÖRMEDLINGEN / SWEDEN ACTIVATION, bet tik
+pagal saugų etapais vykdomą režimą"). The approval covers exactly the two
+actions this gate describes (governance flip + env switch) and the staged
+operator sequence: re-verification from current origin/main, DRY RUN first
+(must not advance cursor, must not write), a deliberately BOUNDED first real
+import, then a second run proving idempotency. The approval does NOT cover:
+paid APIs, purchases, source-governance bypasses, mass import without a
+healthy dry run, pricing changes, contacting users, raising the 5,000-per-
+session accept cap without measurement, or activating any other source.
+
+Re-verification before the flip (same day): origin/main `73a37f54`,
+PRs #1107/#1108/#1109 MERGED, migration `20260809160000` applied (prod ledger
+`20260809175828`), both tables present with 0 rows, RLS on, grants exactly
+`authenticated:SELECT` on `public_vacancies` (no anon) and service_role-only
+on `vacancy_import_cursors`, kill-switch fail-closed behaviour re-read from
+`vacancy-kill-switch.ts`, cursor discipline re-read from
+`vacancy-ingestion.ts` (dry runs never write; cursor advances only on a
+fully-fetched persist run).
 
 This is the gate the persistence gate (`public-vacancy-persistence-gate.md`)
 said would be separate. Storage exists in production since 2026-08-09 (ledger
