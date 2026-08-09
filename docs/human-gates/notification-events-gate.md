@@ -56,6 +56,6 @@ migration.
 
 ## Checksums this gate binds to
 
-- migration sha256: `73b339f47118f2d7a6610466833ce404702f3ac710cf0738517aeba050c88fef`
+- migration sha256: `d738eac3a5520423b5504b992a17a35281e4fb5b2f1bcd48ac33a88d893648ee`
 - rollback sha256: `d62307659ad6f1b61f20a18847fd34e078d85ebc7ac9fa95308a5412a7408452`
 - migration sha256 (comment-stripped executable): `2391723f5f32f5c6485e987281eedfad3a72edd8a16e28fdeb845fc5195c1a51`

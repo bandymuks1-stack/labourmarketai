@@ -4,10 +4,11 @@
 -- Gate doc: docs/human-gates/notification-events-gate.md
 -- Rollback:  supabase/rollbacks/20260810070000_notification_events_v1.down.sql
 --
--- TIER: owner-gated (RED class: a new table with RLS policies + GRANT/REVOKE
--- is RED by construction; there is no non-RED way to add a row-level-secured
--- table). The @human-gate marker is added ONLY in the commit that records the
--- owner's decision — this gate is still AWAITING_OWNER_DECISION.
+-- @human-gate-approved — TIER: owner-gated (RED class: a new table with RLS
+-- policies + GRANT/REVOKE is RED by construction; there is no non-RED way to
+-- add a row-level-secured table). The annotation states the ROUTE — this
+-- migration goes through the human gate, never auto-apply. The APPLY decision
+-- itself is still AWAITING_OWNER_DECISION in the gate doc.
 --
 -- ── PROBLEM, MEASURED ───────────────────────────────────────────────────────
 -- Production (2026-08-10) has NO notification storage of any kind. The
