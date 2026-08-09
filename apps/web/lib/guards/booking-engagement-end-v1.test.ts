@@ -672,6 +672,21 @@ describe("the migration set is exactly what this slice declared", () => {
       // approved the retention CAPABILITY, not installing a new database
       // extension. Gate record: docs/human-gates/w14-retention-scheduler-gate.md.
       "20260808140000_ai_runs_retention_schedule_v1.sql",
+      // 2026-08-09: public vacancy persistence v1. The marker records that the
+      // RED content (GRANT/REVOKE and a CREATE POLICY) is STRUCTURALLY
+      // UNAVOIDABLE — there is no way to add a table with row-level security
+      // that the gate scores green, so every new RLS table must be human-gated
+      // or the gate would be meaningless.
+      //
+      // NO APPLY APPROVAL EXISTS YET: this ships UNAPPLIED and the gate record
+      // states the decision being asked for. Worth noting what the gate CAUGHT
+      // rather than merely annotated — the first draft granted SELECT to
+      // `anon`, and `rls-to-anon`/`grant-anon-public` fired. The grant was
+      // REMOVED rather than approved (the controlled-beta worker journey begins
+      // at registration, so `anon` bought nothing), leaving only these two
+      // unavoidable findings. Gate record:
+      // docs/human-gates/public-vacancy-persistence-gate.md.
+      "20260809160000_public_vacancy_persistence_v1.sql",
     ]);
   });
 
