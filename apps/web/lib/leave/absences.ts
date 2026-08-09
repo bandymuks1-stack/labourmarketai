@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import {
   ABSENCE_STATUSES,
   ABSENCE_TYPES,
+  canReviewAbsences,
+  pendingAbsenceReviews,
   type AbsenceStatus,
   type AbsenceType,
   type ManagerAbsencesData,
@@ -99,6 +101,19 @@ export async function getMyAbsences(): Promise<MyAbsencesData> {
   return { applied: true, workerId, absences };
 }
 
+/** The caller's own worker row id, or null when they have none. */
+async function callerWorkerId(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string | null> {
+  const { data } = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 /** Pending absence requests for workers the caller manages (RLS-scoped). */
 export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> {
   const supabase = await createClient();
@@ -106,6 +121,8 @@ export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { applied: false };
+
+  const selfWorkerId = await callerWorkerId(supabase, user.id);
 
   const res = await asAny(supabase)
     .from("worker_absences")
@@ -120,8 +137,41 @@ export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> 
     }
     return { applied: true, pending: [] };
   }
-  const pending = ((res.data ?? []) as (Row & { workers?: { display_name?: string | null } })[])
+  const rows = ((res.data ?? []) as (Row & { workers?: { display_name?: string | null } })[])
     .map((r) => toAbsence(r, r.workers?.display_name ?? null))
     .filter((a): a is WorkerAbsence => a !== null);
-  return { applied: true, pending };
+  // The `self` branch of the SELECT policy hands back the caller's OWN
+  // request; nobody reviews their own time off. See pendingAbsenceReviews.
+  return { applied: true, pending: pendingAbsenceReviews(rows, selfWorkerId) };
+}
+
+/**
+ * How many absence requests are waiting on THIS person — the notification
+ * spine's count.
+ *
+ * Carries its own role gate on purpose. The absences PAGE only calls
+ * `getManagerPendingAbsences` for company/agency roles, but the spine loads
+ * every count for every role in one pass, so without this gate a worker's bell
+ * would carry a review row the page would never show them.
+ *
+ * Returns 0 — never throws — on: signed out, a non-reviewing role, and the
+ * unapplied-migration states the read model already reports as
+ * `applied: false`.
+ */
+export async function getPendingAbsenceReviewCount(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("active_role")
+    .eq("id", user.id)
+    .single();
+  if (!canReviewAbsences(profile?.active_role)) return 0;
+
+  const data = await getManagerPendingAbsences();
+  return data.applied ? data.pending.length : 0;
 }

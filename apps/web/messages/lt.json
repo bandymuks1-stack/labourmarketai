@@ -440,6 +440,7 @@
       "pending_bookings": "Išnyksta, kai atsakote į rezervacijos pasiūlymą.",
       "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį.",
       "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
+      "pending_absence_reviews": "Išnyksta, kai atostogų ir nebuvimo puslapyje patvirtinate arba atmetate prašymą.",
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
     }
   },
@@ -3982,6 +3983,7 @@
         "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
         "booking_responses": "Atsakymai į rezervacijų pasiūlymus",
         "open_task_attention": "Užduotys, kurioms reikia dėmesio",
+        "pending_absence_reviews": "Prašymai peržiūrai: atostogos ir nebuvimas",
         "new_job_matches": "Nauji jums tinkantys darbo skelbimai"
       },
       "label": "Mano pranešimai",

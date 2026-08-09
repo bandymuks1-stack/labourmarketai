@@ -56,6 +56,21 @@ export interface SpineCounts {
    *  accounts and 0 while the owner-gated seen store is unapplied — a count
    *  that could never clear would be permanent noise, not a signal. */
   readonly newJobMatches: number;
+  /** Absence requests waiting on THIS reviewer — `status='requested'` rows
+   *  for workers they manage, with their own request excluded.
+   *
+   *  The self-exclusion is load-bearing, not tidiness. `worker_absences`'s
+   *  SELECT policy is `self OR (caller_manages_worker(worker_id) AND
+   *  status='requested') OR is_admin()`, so a status-only read hands back the
+   *  caller's own pending request through the `self` branch. Counting it would
+   *  tell someone their own time off is waiting for their approval, and no
+   *  review they could perform would ever clear it.
+   *
+   *  0 for roles that never review (worker / client), and 0 while the leave
+   *  migration is unapplied — state-derived like pending-bookings, so
+   *  approving or rejecting IS what clears it. No seen-marker exists or is
+   *  needed. */
+  readonly pendingAbsenceReviews: number;
 }
 
 export interface SpineSignalDef {
@@ -133,6 +148,17 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     // tasks is a module card, not a primary-nav tab (badge stays card-level).
     href: "/dashboard/tasks",
     count: (c) => c.openTaskAttention,
+  },
+  {
+    id: "pending-absence-reviews",
+    type: "pending_absence_reviews",
+    // Approving or rejecting on the absences page IS what clears this — the
+    // count is derived from current `requested` state, never a read marker
+    // (same shape as pending-bookings). A person waiting on you, so it ranks
+    // above passive news; no featureKey because absences is a module card,
+    // not a primary-nav tab, so the badge stays card-level.
+    href: "/dashboard/absences",
+    count: (c) => c.pendingAbsenceReviews,
   },
   {
     id: "new-job-matches",
