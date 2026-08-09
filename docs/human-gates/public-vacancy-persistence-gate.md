@@ -3,7 +3,20 @@
 Migration: `supabase/migrations/20260809160000_public_vacancy_persistence_v1.sql`
 Rollback:  `supabase/rollbacks/20260809160000_public_vacancy_persistence_v1.down.sql`
 
-State: `AWAITING_OWNER_DECISION` — ships UNAPPLIED.
+State: `APPLIED_TO_PRODUCTION_2026-08-09` — prod ledger version `20260809175828`.
+
+## OWNER DECISION — GIVEN 2026-08-09
+
+The owner approved the architecture in the continuation command that opened
+this session ("#1107 ARCHITECTURE APPROVED"), conditional on a 9-point
+re-verification immediately before apply. All nine were verified and recorded
+in the APPLIED_LEDGER entry: head unchanged, checksums byte-identical, DDL
+surface exactly as reviewed, no activation, no import caller, no anon SELECT,
+governance `owner_review`, kill switch closed, CI green. Post-apply read-back:
+both tables exist with 0 rows, RLS on, grants exactly as designed. The same
+decision explicitly does NOT activate any source: "NEAKTYVUOK mokamų ar
+teisiškai nepatvirtintų šaltinių" — source activation remains a separate
+owner gate.
 
 ## Checksums this gate binds to
 
