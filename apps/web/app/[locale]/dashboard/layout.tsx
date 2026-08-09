@@ -188,7 +188,28 @@ export default async function DashboardLayout({
         <span className="flex min-w-0">
           <WorkspaceChip />
         </span>
-        <DashboardTabs className="hidden md:flex" />
+        {/* `min-w-0` is LOAD-BEARING, and `overflow-x-auto` is what makes it
+            safe. A flex item's default `min-width: auto` floors this nav at
+            its max-content width, so from the md breakpoint — where the tabs
+            first appear — it claimed 492px and refused to give any back. The
+            row then measured 999px inside a 768px viewport, and because
+            `html`/`body` are `overflow-x: hidden` the page could NOT be
+            scrolled sideways to reach the rest.
+            What that cost, measured at 768px:
+              brand              0px wide  (squeezed out of existence)
+              account menu   955..999px    entirely off-screen, so LOGOUT and
+                                           the report-a-problem entry point
+                                           were unreachable
+              notifications / role switcher / search / locale — same
+            `document.documentElement.scrollWidth` still read exactly 768,
+            which is why nothing ever reported it; `document.body.scrollWidth`
+            read 999.
+            With `min-w-0` the nav shrinks to 141px and the account menu comes
+            back to 676..720. `overflow-x-auto` then keeps the tabs themselves
+            reachable by scrolling instead of letting them spill over the
+            controls — the same treatment the company page's chip strip uses.
+            Broken range was 768px up to ~999px: tablets and small laptops. */}
+        <DashboardTabs className="hidden min-w-0 overflow-x-auto md:flex [-webkit-overflow-scrolling:touch]" />
         <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
           <HeaderSearch />
           <LocaleSwitcher className="hidden md:flex" />
