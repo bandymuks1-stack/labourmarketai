@@ -23,6 +23,7 @@ import { computeVacancyContentHash } from "@/lib/vacancy-sources/vacancy-hash";
 import type { PublicVacancyV1 } from "@/lib/vacancy-sources/vacancy-contract";
 
 const SEEN_AT = "2026-08-09T10:00:00.000Z";
+const SESSION_ID = `arbetsformedlingen-snapshot-${SEEN_AT}`;
 
 function vacancy(over: Partial<PublicVacancyV1> = {}): PublicVacancyV1 {
   const identity = {
@@ -140,7 +141,7 @@ function fakeClient(options: {
 describe("persistVacancies — exact accounting", () => {
   it("an empty batch touches the database at all", async () => {
     const { client, ops } = fakeClient();
-    const result = await persistVacancies(client, [], SEEN_AT);
+    const result = await persistVacancies(client, [], SEEN_AT, SESSION_ID);
 
     expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 0 });
     // Not merely "wrote nothing" — it must not even open a read.
@@ -153,12 +154,20 @@ describe("persistVacancies — exact accounting", () => {
       client,
       [vacancy({ externalId: "ad-1" }), vacancy({ externalId: "ad-2" })],
       SEEN_AT,
+      SESSION_ID,
     );
 
     expect(result).toEqual({ inserted: 2, updated: 0, unchanged: 0 });
     const upserts = ops.filter((o) => o.kind === "upsert");
     expect(upserts).toHaveLength(1);
-    expect((upserts[0].payload as unknown[]).length).toBe(2);
+    const rows = upserts[0].payload as { import_session_id: string | null }[];
+    expect(rows.length).toBe(2);
+    // Every inserted row is traceable to the run that produced it. This is the
+    // regression test for the 87 production rows that shipped with the column
+    // silently null.
+    for (const row of rows) {
+      expect(row.import_session_id).toBe(SESSION_ID);
+    }
   });
 
   it("STEADY STATE: re-importing an unchanged ad writes no row and counts it as neither inserted nor updated", async () => {
@@ -175,7 +184,7 @@ describe("persistVacancies — exact accounting", () => {
       ],
     });
 
-    const result = await persistVacancies(client, [a, b], SEEN_AT);
+    const result = await persistVacancies(client, [a, b], SEEN_AT, SESSION_ID);
 
     expect(result).toEqual({ inserted: 0, updated: 0, unchanged: 2 });
     expect(ops.filter((o) => o.kind === "upsert")).toHaveLength(0);
@@ -204,14 +213,18 @@ describe("persistVacancies — exact accounting", () => {
       ],
     });
 
-    const result = await persistVacancies(client, [revised], SEEN_AT);
+    const result = await persistVacancies(client, [revised], SEEN_AT, SESSION_ID);
 
     expect(result).toEqual({ inserted: 0, updated: 1, unchanged: 0 });
     const upserts = ops.filter((o) => o.kind === "upsert");
     expect(upserts).toHaveLength(1);
-    expect((upserts[0].payload as { title_raw: string }[])[0].title_raw).toBe(
-      "Snickare (uppdaterad)",
-    );
+    const written = (upserts[0].payload as {
+      title_raw: string;
+      import_session_id: string | null;
+    }[])[0];
+    expect(written.title_raw).toBe("Snickare (uppdaterad)");
+    // A rewrite re-attributes the row to the session that changed it.
+    expect(written.import_session_id).toBe(SESSION_ID);
   });
 
   it("partitions a mixed batch into all three buckets in one pass", async () => {
@@ -238,6 +251,7 @@ describe("persistVacancies — exact accounting", () => {
       client,
       [unchanged, changed, fresh],
       SEEN_AT,
+      SESSION_ID,
     );
 
     expect(result).toEqual({ inserted: 1, updated: 1, unchanged: 1 });
@@ -247,14 +261,25 @@ describe("persistVacancies — exact accounting", () => {
 describe("toPublicVacancyRow — the mapping is where a persistence layer lies", () => {
   it("stores a publisher WITHDRAWAL as inactive rather than deleting or hiding it", async () => {
     const removed = vacancy({ externalId: "ad-9", lifecycle: "removed" });
-    const row = toPublicVacancyRow(removed, SEEN_AT);
+    const row = toPublicVacancyRow(removed, SEEN_AT, SESSION_ID);
 
     expect(row.is_active).toBe(false);
     expect(row.lifecycle).toBe("removed");
   });
 
   it("keeps a live ad active", () => {
-    expect(toPublicVacancyRow(vacancy(), SEEN_AT).is_active).toBe(true);
+    expect(toPublicVacancyRow(vacancy(), SEEN_AT, SESSION_ID).is_active).toBe(true);
+  });
+
+  it("stamps the import session verbatim, and stores an absent session as null", () => {
+    // The session is a RUN fact handed in by the caller — the mapper neither
+    // invents one nor drops one. Both directions matter: the stamped id is
+    // what makes a row traceable, and null must remain expressible for rows
+    // whose session is genuinely unknown.
+    expect(toPublicVacancyRow(vacancy(), SEEN_AT, SESSION_ID).import_session_id).toBe(
+      SESSION_ID,
+    );
+    expect(toPublicVacancyRow(vacancy(), SEEN_AT, null).import_session_id).toBeNull();
   });
 
   it("does NOT fold expiry into is_active — a fact with a timestamp stays a fact", () => {
@@ -262,7 +287,7 @@ describe("toPublicVacancyRow — the mapping is where a persistence layer lies",
     // it has expired is a question about *now*, answered by the read layer.
     // Baking it in at write time makes the row wrong as soon as time passes.
     const expired = vacancy({ expiresAt: "2020-01-01T00:00:00.000Z" });
-    const row = toPublicVacancyRow(expired, SEEN_AT);
+    const row = toPublicVacancyRow(expired, SEEN_AT, SESSION_ID);
 
     expect(row.is_active).toBe(true);
     expect(row.expires_at).toBe("2020-01-01T00:00:00.000Z");
@@ -278,7 +303,7 @@ describe("toPublicVacancyRow — the mapping is where a persistence layer lies",
         provider: null,
       },
     });
-    const row = toPublicVacancyRow(untranslated, SEEN_AT);
+    const row = toPublicVacancyRow(untranslated, SEEN_AT, SESSION_ID);
 
     expect(row.translation_status).toBe("unavailable");
     expect(row.translation_title_text).toBeNull();
@@ -295,7 +320,7 @@ describe("toPublicVacancyRow — the mapping is where a persistence layer lies",
       skillSlugs: ["formwork"],
       categorizationOrigin: "derived",
     });
-    const row = toPublicVacancyRow(categorized, SEEN_AT);
+    const row = toPublicVacancyRow(categorized, SEEN_AT, SESSION_ID);
 
     expect(row.occupation_raw).toBe("Snickare");
     expect(row.occupation_concept_id).toBe("sv-ssyk-7115");
@@ -306,16 +331,20 @@ describe("toPublicVacancyRow — the mapping is where a persistence layer lies",
 
   it("preserves an empty description on a links-channel record instead of nulling it", () => {
     const link = vacancy({ channel: "links", descriptionRaw: "" });
-    expect(toPublicVacancyRow(link, SEEN_AT).description_raw).toBe("");
+    expect(toPublicVacancyRow(link, SEEN_AT, SESSION_ID).description_raw).toBe("");
   });
 
   it("is deterministic — the same input and clock produce an identical row", () => {
     const v = vacancy();
-    expect(toPublicVacancyRow(v, SEEN_AT)).toEqual(toPublicVacancyRow(v, SEEN_AT));
+    expect(toPublicVacancyRow(v, SEEN_AT, SESSION_ID)).toEqual(
+      toPublicVacancyRow(v, SEEN_AT, SESSION_ID),
+    );
   });
 
   it("never defaults an unstated headcount to 1", () => {
-    expect(toPublicVacancyRow(vacancy({ positions: null }), SEEN_AT).positions).toBeNull();
+    expect(
+      toPublicVacancyRow(vacancy({ positions: null }), SEEN_AT, SESSION_ID).positions,
+    ).toBeNull();
   });
 });
 
