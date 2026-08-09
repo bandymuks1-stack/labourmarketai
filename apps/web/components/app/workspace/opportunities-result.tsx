@@ -428,7 +428,6 @@ function ExternalRow({ row }: { row: import("@/lib/marketplace/worker-opportunit
   // The SAME label keys the board's external section uses — one vocabulary
   // for external ads, whichever surface renders them.
   const tOpp = useTranslations("opportunities");
-  const tRoot = useTranslations();
   return (
     <li
       className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0"
@@ -442,9 +441,7 @@ function ExternalRow({ row }: { row: import("@/lib/marketplace/worker-opportunit
         {" · "}
         {tOpp("external.publishedOn", { date: row.publishedAt })}
       </span>
-      <span className="text-meta text-text-muted">
-        {tRoot.has(row.attributionCode) ? tRoot(row.attributionCode as never) : row.attributionCode}
-      </span>
+      <span className="text-meta text-text-muted">{row.attributionText}</span>
       {row.originalUrl ? (
         <a
           href={`https://${row.originalUrl.replace(/^https?:\/\//, "")}`}
