@@ -30,9 +30,24 @@ import { PROVIDER_ADAPTER_REGISTRY } from "../ai/runtime/providers/adapter-contr
 
 const APP_ROOT = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(p, "utf8");
-/** Strip block + line comments so scans check real CODE only. */
+/**
+ * Strip block + line comments so scans check real CODE only.
+ *
+ * THE `//` IN A URL IS NOT A COMMENT — and getting this wrong disabled check
+ * (f) below completely. The previous pattern — match a double slash then
+ * everything to end of line — deleted the rest of any line holding a URL, so
+ * `const U = "https://api.openai.com/v1/chat/completions"` reduced to
+ * `const U = "https:` and the host scan found nothing. The guard reported
+ * green for the one thing it exists to prevent, and its own detector self-test
+ * agreed — because that self-test ran the regex against a RAW string and never
+ * through this function.
+ *
+ * Requiring the `//` not to be preceded by `:` keeps a URL intact while still
+ * removing a real `// comment`. The self-test at the bottom now runs THROUGH
+ * this function, which is the only version of it that could have caught this.
+ */
 const code = (s: string) =>
-  s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+  s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
 
 function walk(dir: string, acc: string[] = []): string[] {
   if (!existsSync(dir)) return acc;
@@ -158,6 +173,20 @@ describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", ()
       offenders,
       `provider API host referenced outside runtime/providers:\n${offenders.join("\n")}`,
     ).toEqual([]);
+  });
+
+  it("the detector survives the comment stripper (regression)", () => {
+    // THE TEST THAT WAS MISSING. Every assertion below used to run the regex
+    // against a raw literal, so it proved the regex worked and proved nothing
+    // about the scan — which fed the regex `code(read(file))`. A real
+    // hardcoded vendor URL was invisible to check (f) for as long as that was
+    // true. Scanning goes through `code()`, so the detector self-test must too.
+    const realLeak =
+      'const ENDPOINT = "https://api.openai.com/v1/chat/completions";';
+    expect(PROVIDER_HOSTS.test(code(realLeak))).toBe(true);
+    // A commented-out mention is still correctly ignored.
+    expect(PROVIDER_HOSTS.test(code("// talks about api.openai.com"))).toBe(false);
+    expect(PROVIDER_HOSTS.test(code("/* api.deepl.com in prose */"))).toBe(false);
   });
 
   it("the detector is real", () => {
