@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Varsel",
+        "pending_invitations": "Invitasjoner venter på svar fra deg",
+        "unread_messages": "Uleste meldinger",
+        "incoming_service_requests": "Tjenesteforespørsler venter på svar",
+        "service_request_responses": "Svar på forespørslene dine",
+        "pending_bookings": "Bookingforslag venter på svar",
+        "booking_responses": "Svar på bookingforslagene dine",
+        "open_task_attention": "Oppgaver som trenger oppmerksomhet",
+        "pending_absence_reviews": "Fraværssøknader til vurdering",
+        "new_job_matches": "Nye stillinger som passer deg",
+        "event_booking_proposed": "Du har mottatt et bookingforslag",
+        "event_booking_accepted": "Bookingforslaget ditt ble akseptert",
+        "event_booking_declined": "Bookingforslaget ditt ble avslått",
+        "event_absence_requested": "Et fravær ble registrert for deg",
+        "event_absence_approved": "Fraværet ditt ble godkjent",
+        "event_absence_rejected": "Fraværet ditt ble avslått",
+        "event_engagement_created": "Et nytt engasjement ble opprettet"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

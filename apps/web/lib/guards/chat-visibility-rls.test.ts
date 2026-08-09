@@ -273,10 +273,24 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    closed governance row or env switch are refused by the runner
     //    regardless of the admin's wishes. Touches no chat table, sends
     //    nothing outbound.
+    //  - lib/notifications/event-emitters.ts — durable notification events
+    //    v1. Emits ONE append-only notification_events row per completed
+    //    domain write (booking propose/respond, absence request/review,
+    //    engagement creation), for the OTHER party — a cross-user insert no
+    //    user-session client can perform, and notification_events by design
+    //    grants authenticated NO INSERT at all (users must not fabricate
+    //    events), so service role is the only write path — the audit-store
+    //    pattern. Recipients are resolved from the domain rows themselves;
+    //    metadata is allowlisted (country/roleSlug/startDate — never free
+    //    text). Fire-and-forget AFTER the domain RPC succeeded; touches no
+    //    chat table, sends nothing outbound. Owner-gated store
+    //    (docs/human-gates/notification-events-gate.md) — every call
+    //    degrades to feature_unavailable until applied.
+    //
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
-    // ai_runs audit row / the two operator-only vacancy tables (the reads
-    // write nothing at all).
+    // ai_runs audit row / the two operator-only vacancy tables / the
+    // append-only notification_events rows (the reads write nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
@@ -289,6 +303,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/customer-store.ts",
       "lib/billing/subscription-store.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/notifications/event-emitters.ts",
       "lib/sales/lead-intake.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",

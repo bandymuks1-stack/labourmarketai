@@ -3985,7 +3985,14 @@
         "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
         "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
         "pending_absence_reviews": "Abwesenheitsanträge zur Prüfung",
-        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen"
+        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen",
+        "event_booking_proposed": "Sie haben einen Buchungsvorschlag erhalten",
+        "event_booking_accepted": "Ihr Buchungsvorschlag wurde angenommen",
+        "event_booking_declined": "Ihr Buchungsvorschlag wurde abgelehnt",
+        "event_absence_requested": "Für Sie wurde eine Abwesenheit eingetragen",
+        "event_absence_approved": "Ihre Abwesenheit wurde genehmigt",
+        "event_absence_rejected": "Ihre Abwesenheit wurde abgelehnt",
+        "event_engagement_created": "Ein neues Engagement wurde erstellt"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

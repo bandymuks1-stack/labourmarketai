@@ -3985,7 +3985,14 @@
         "booking_responses": "Antwoorden op je boekingsvoorstellen",
         "open_task_attention": "Taken die aandacht vragen",
         "pending_absence_reviews": "Verlofaanvragen ter beoordeling",
-        "new_job_matches": "Nieuwe vacatures die bij je passen"
+        "new_job_matches": "Nieuwe vacatures die bij je passen",
+        "event_booking_proposed": "Je hebt een boekingsvoorstel ontvangen",
+        "event_booking_accepted": "Je boekingsvoorstel is geaccepteerd",
+        "event_booking_declined": "Je boekingsvoorstel is afgewezen",
+        "event_absence_requested": "Er is een afwezigheid voor je geregistreerd",
+        "event_absence_approved": "Je afwezigheid is goedgekeurd",
+        "event_absence_rejected": "Je afwezigheid is afgewezen",
+        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",

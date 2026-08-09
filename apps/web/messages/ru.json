@@ -3985,7 +3985,14 @@
         "booking_responses": "Ответы на ваши предложения бронирования",
         "open_task_attention": "Задачи, требующие внимания",
         "pending_absence_reviews": "Заявки на отсутствие: на рассмотрение",
-        "new_job_matches": "Новые подходящие вам объявления о работе"
+        "new_job_matches": "Новые подходящие вам объявления о работе",
+        "event_booking_proposed": "Вы получили предложение бронирования",
+        "event_booking_accepted": "Ваше предложение бронирования принято",
+        "event_booking_declined": "Ваше предложение бронирования отклонено",
+        "event_absence_requested": "Для вас зарегистрировано отсутствие",
+        "event_absence_approved": "Ваше отсутствие одобрено",
+        "event_absence_rejected": "Ваше отсутствие отклонено",
+        "event_engagement_created": "Создано новое сотрудничество"
       },
       "label": "Мои уведомления",
       "emptyTitle": "Сейчас ничего не требует вашего внимания.",

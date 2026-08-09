@@ -687,6 +687,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // unavoidable findings. Gate record:
       // docs/human-gates/public-vacancy-persistence-gate.md.
       "20260809160000_public_vacancy_persistence_v1.sql",
+      // 2026-08-10: durable notification events v1. The marker records that
+      // the RED content (GRANT/REVOKE incl. a COLUMN-level UPDATE grant on
+      // read_at, and two CREATE POLICY statements) is STRUCTURALLY
+      // UNAVOIDABLE for a new RLS table — same class as the vacancy
+      // persistence entry above. NO APPLY APPROVAL EXISTS YET: ships
+      // UNAPPLIED; the gate record states the decision being asked for.
+      // Gate record: docs/human-gates/notification-events-gate.md.
+      "20260810070000_notification_events_v1.sql",
     ]);
   });
 

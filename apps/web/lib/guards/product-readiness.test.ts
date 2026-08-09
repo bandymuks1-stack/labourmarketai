@@ -2017,7 +2017,19 @@ describe("no migration files added by this sprint", () => {
     // activation (arbetsformedlingen is still `owner_review`) and the env kill
     // switch both remain closed. Counted against origin/main 0d8de71d: 194
     // .sql files there, this branch adds exactly one.
-    const SPRINT_BASELINE = 195;
+    // 195 -> 196: durable notification events v1
+    // (20260810070000_notification_events_v1) — ONE append-only table
+    // (`notification_events`) closing the "no notification storage" gap:
+    // recipient-scoped RLS (SELECT own + column-level UPDATE of read_at
+    // only), service_role as the only writer (authenticated has NO INSERT —
+    // users cannot fabricate events), (recipient, dedupe_key) UNIQUE for
+    // idempotent emitters, bounded allowlisted metadata. Rollback paired and
+    // safe (drops the table; every reader/writer degrades to
+    // feature_unavailable — the pre-migration bell). Owner-gated, ships
+    // UNAPPLIED: docs/human-gates/notification-events-gate.md. Counted
+    // against origin/main 97bc3ff8: 195 .sql files there, this branch adds
+    // exactly one.
+    const SPRINT_BASELINE = 196;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

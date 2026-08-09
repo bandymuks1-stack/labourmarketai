@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Notifikation",
+        "pending_invitations": "Invitationer afventer dit svar",
+        "unread_messages": "Ulæste beskeder",
+        "incoming_service_requests": "Serviceanmodninger afventer svar",
+        "service_request_responses": "Svar på dine anmodninger",
+        "pending_bookings": "Bookingforslag afventer svar",
+        "booking_responses": "Svar på dine bookingforslag",
+        "open_task_attention": "Opgaver der kræver opmærksomhed",
+        "pending_absence_reviews": "Fraværsanmodninger til gennemgang",
+        "new_job_matches": "Nye jobopslag der passer til dig",
+        "event_booking_proposed": "Du har modtaget et bookingforslag",
+        "event_booking_accepted": "Dit bookingforslag blev accepteret",
+        "event_booking_declined": "Dit bookingforslag blev afvist",
+        "event_absence_requested": "Der er registreret et fravær for dig",
+        "event_absence_approved": "Dit fravær blev godkendt",
+        "event_absence_rejected": "Dit fravær blev afvist",
+        "event_engagement_created": "Et nyt engagement blev oprettet"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

@@ -3985,7 +3985,14 @@
         "booking_responses": "Atsakymai į rezervacijų pasiūlymus",
         "open_task_attention": "Užduotys, kurioms reikia dėmesio",
         "pending_absence_reviews": "Prašymai peržiūrai: atostogos ir nebuvimas",
-        "new_job_matches": "Nauji jums tinkantys darbo skelbimai"
+        "new_job_matches": "Nauji jums tinkantys darbo skelbimai",
+        "event_booking_proposed": "Gavai rezervacijos pasiūlymą",
+        "event_booking_accepted": "Tavo rezervacijos pasiūlymas priimtas",
+        "event_booking_declined": "Tavo rezervacijos pasiūlymas atmestas",
+        "event_absence_requested": "Tau užregistruotas neatvykimas",
+        "event_absence_approved": "Tavo neatvykimas patvirtintas",
+        "event_absence_rejected": "Tavo neatvykimas atmestas",
+        "event_engagement_created": "Sukurtas naujas bendradarbiavimas"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",

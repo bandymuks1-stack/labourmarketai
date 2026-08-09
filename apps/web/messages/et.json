@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Teavitus",
+        "pending_invitations": "Kutsed ootavad sinu vastust",
+        "unread_messages": "Lugemata sõnumid",
+        "incoming_service_requests": "Teenusepäringud ootavad vastust",
+        "service_request_responses": "Vastused sinu päringutele",
+        "pending_bookings": "Broneeringu ettepanekud ootavad vastust",
+        "booking_responses": "Vastused sinu broneeringu ettepanekutele",
+        "open_task_attention": "Tähelepanu vajavad ülesanded",
+        "pending_absence_reviews": "Läbivaatamist ootavad puudumised",
+        "new_job_matches": "Uued sulle sobivad tööpakkumised",
+        "event_booking_proposed": "Said broneeringu ettepaneku",
+        "event_booking_accepted": "Sinu broneeringu ettepanek võeti vastu",
+        "event_booking_declined": "Sinu broneeringu ettepanek lükati tagasi",
+        "event_absence_requested": "Sinule registreeriti puudumine",
+        "event_absence_approved": "Sinu puudumine kiideti heaks",
+        "event_absence_rejected": "Sinu puudumine lükati tagasi",
+        "event_engagement_created": "Loodi uus koostöö"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

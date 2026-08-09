@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Powiadomienie",
+        "pending_invitations": "Zaproszenia czekają na Twoją odpowiedź",
+        "unread_messages": "Nieprzeczytane wiadomości",
+        "incoming_service_requests": "Zapytania o usługi czekają na odpowiedź",
+        "service_request_responses": "Odpowiedzi na Twoje zapytania",
+        "pending_bookings": "Propozycje rezerwacji czekają na odpowiedź",
+        "booking_responses": "Odpowiedzi na Twoje propozycje rezerwacji",
+        "open_task_attention": "Zadania wymagające uwagi",
+        "pending_absence_reviews": "Wnioski o nieobecność do rozpatrzenia",
+        "new_job_matches": "Nowe pasujące oferty pracy",
+        "event_booking_proposed": "Otrzymałeś propozycję rezerwacji",
+        "event_booking_accepted": "Twoja propozycja rezerwacji została przyjęta",
+        "event_booking_declined": "Twoja propozycja rezerwacji została odrzucona",
+        "event_absence_requested": "Zgłoszono dla Ciebie nieobecność",
+        "event_absence_approved": "Twoja nieobecność została zatwierdzona",
+        "event_absence_rejected": "Twoja nieobecność została odrzucona",
+        "event_engagement_created": "Utworzono nową współpracę"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

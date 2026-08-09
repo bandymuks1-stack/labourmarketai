@@ -3985,7 +3985,14 @@
         "booking_responses": "Answers to your booking proposals",
         "open_task_attention": "Tasks needing attention",
         "pending_absence_reviews": "Leave requests to review",
-        "new_job_matches": "New job listings that fit you"
+        "new_job_matches": "New job listings that fit you",
+        "event_booking_proposed": "You received a booking proposal",
+        "event_booking_accepted": "Your booking proposal was accepted",
+        "event_booking_declined": "Your booking proposal was declined",
+        "event_absence_requested": "An absence was filed for you",
+        "event_absence_approved": "Your absence was approved",
+        "event_absence_rejected": "Your absence was rejected",
+        "event_engagement_created": "A new engagement was created"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
