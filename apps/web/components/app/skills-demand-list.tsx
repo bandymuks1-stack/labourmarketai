@@ -28,7 +28,6 @@ export function SkillsDemandList() {
     >
       <header className="mb-3 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
-          <span className="live-dot" aria-hidden />
           {t("panel.topSkills")}
         </h3>
       </header>
