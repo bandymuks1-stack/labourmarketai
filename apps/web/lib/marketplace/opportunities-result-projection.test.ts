@@ -93,6 +93,8 @@ function ready(matches: Record<string, unknown>[], over: Record<string, unknown>
     matches,
     totalRecommendable: matches.length,
     newCount: matches.length,
+    externalCards: [],
+    totalExternal: 0,
     ...rest,
     // Merged LAST and separately, so overriding one capability cannot silently
     // drop the others (an earlier version of this helper did exactly that and
@@ -269,5 +271,82 @@ describe("actionability through the canonical interest path", () => {
     // could disagree with it — so the panel renders read-only rows.
     expect(res.interestLabels).toBeNull();
     expect(resolveLabelsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("external public-source ads cross the boundary with their provenance", () => {
+  /** A canonical external card, as the use case returns it. */
+  function extCard(key: string, over: Record<string, unknown> = {}) {
+    return {
+      key,
+      view: {
+        title: "Snickare till byggprojekt",
+        employerName: "Bygg AB",
+        city: "Stockholm",
+        country: "SE",
+        publishedAt: "2026-08-09T14:08:35.000Z",
+        provenance: {
+          attributionCode: "vacancySources.attribution.arbetsformedlingen",
+          applicationRoute: "source_original",
+          applicationUrl: "https://arbetsformedlingen.se/platsbanken/annonser/1",
+        },
+        ...over,
+      },
+      capabilities: {},
+      match: {},
+      matchingGaps: [],
+    };
+  }
+
+  it("projects the compact row with attribution and the original URL — nothing else", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([], { externalCards: [extCard("arbetsformedlingen:1")], totalExternal: 1 }),
+    );
+    const res = await loadOpportunitiesResultAction();
+    if (res.kind !== "ready") throw new Error("expected ready");
+    expect(res.external).toEqual([
+      {
+        key: "arbetsformedlingen:1",
+        title: "Snickare till byggprojekt",
+        employerName: "Bygg AB",
+        city: "Stockholm",
+        country: "SE",
+        publishedAt: "2026-08-09",
+        originalUrl: "https://arbetsformedlingen.se/platsbanken/annonser/1",
+        attributionCode: "vacancySources.attribution.arbetsformedlingen",
+      },
+    ]);
+    expect(res.totalExternal).toBe(1);
+  });
+
+  it("slices to the contract's external display cap and reports the true total", async () => {
+    const cards = Array.from({ length: 9 }, (_, i) => extCard(`arbetsformedlingen:${i}`));
+    loadMatchesMock.mockResolvedValue(
+      ready([], { externalCards: cards, totalExternal: 9 }),
+    );
+    const res = await loadOpportunitiesResultAction();
+    if (res.kind !== "ready") throw new Error("expected ready");
+    expect(res.external).toHaveLength(5);
+    expect(res.totalExternal).toBe(9);
+  });
+
+  it("a card without a source_original route carries a NULL url — no invented action", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([], {
+        externalCards: [
+          extCard("arbetsformedlingen:2", {
+            provenance: {
+              attributionCode: "vacancySources.attribution.arbetsformedlingen",
+              applicationRoute: "none",
+              applicationUrl: null,
+            },
+          }),
+        ],
+        totalExternal: 1,
+      }),
+    );
+    const res = await loadOpportunitiesResultAction();
+    if (res.kind !== "ready") throw new Error("expected ready");
+    expect(res.external[0].originalUrl).toBeNull();
   });
 });

@@ -120,6 +120,7 @@ describe("an unclaimed external ad", () => {
     const row = toPublicVacancyRow(
       vacancy({ applicationUrl: "arbetsformedlingen.se/ad/1" }),
       NOW,
+      null,
     );
     const result = await loadExternalVacancyCards(
       clientWith({ data: [row] }),
@@ -139,7 +140,7 @@ describe("an unclaimed external ad", () => {
   });
 
   it("carries per-card attribution and the honest provenance codes", async () => {
-    const row = toPublicVacancyRow(vacancy(), NOW);
+    const row = toPublicVacancyRow(vacancy(), NOW, null);
     const result = await loadExternalVacancyCards(
       clientWith({ data: [row] }),
       SUBJECT,
@@ -156,7 +157,7 @@ describe("an unclaimed external ad", () => {
 describe("matching honesty", () => {
   it("an ad the recognizer could not read yields insufficient data, not a score", async () => {
     // skillSlugs empty -> no requirement set -> the ONE engine's honest answer.
-    const row = toPublicVacancyRow(vacancy({ skillSlugs: [] }), NOW);
+    const row = toPublicVacancyRow(vacancy({ skillSlugs: [] }), NOW, null);
     const result = await loadExternalVacancyCards(
       clientWith({ data: [row] }),
       SUBJECT,
@@ -177,6 +178,7 @@ describe("matching honesty", () => {
         compensation: { currency: "SEK", min: 30000, max: 40000, description: null },
       }),
       NOW,
+      null,
     );
     const result = await loadExternalVacancyCards(
       clientWith({ data: [row] }),
@@ -195,10 +197,12 @@ describe("matching honesty", () => {
     const readable = toPublicVacancyRow(
       vacancy({ externalId: "readable", skillSlugs: ["formwork"], professionSlug: "carpenter" }),
       NOW,
+      null,
     );
     const unreadable = toPublicVacancyRow(
       vacancy({ externalId: "unreadable", skillSlugs: [] }),
       NOW,
+      null,
     );
     const result = await loadExternalVacancyCards(
       clientWith({ data: [unreadable, readable] }),

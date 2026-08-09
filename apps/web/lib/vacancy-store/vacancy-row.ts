@@ -98,6 +98,12 @@ export interface PublicVacancyRowV1 {
 /**
  * Canonical record -> table row. Pure. `seenAt` is the caller's capture clock.
  *
+ * `importSessionId` is the runner's session — a RUN fact, not a vacancy fact,
+ * which is why it arrives as a parameter instead of widening the pure
+ * `PublicVacancyV1` contract. It is required (not defaulted) so a caller that
+ * has no session must SAY null; a silent default is how 87 production rows
+ * once landed with the column empty.
+ *
  * A `links`-channel record legitimately has an empty description: that feed
  * carries identity, employer, location and a canonical URL but no body. The
  * empty string is stored as-is rather than as null, matching the contract's
@@ -106,6 +112,7 @@ export interface PublicVacancyRowV1 {
 export function toPublicVacancyRow(
   vacancy: PublicVacancyV1,
   seenAt: string,
+  importSessionId: string | null,
 ): PublicVacancyRowV1 {
   return {
     provider_key: vacancy.providerKey,
@@ -166,7 +173,7 @@ export function toPublicVacancyRow(
 
     transform_version: vacancy.transformVersion,
     request_ref: vacancy.requestRef,
-    import_session_id: null,
+    import_session_id: importSessionId,
 
     is_active: vacancy.lifecycle === "published",
 
@@ -176,7 +183,10 @@ export function toPublicVacancyRow(
 }
 
 /** The natural key, as one string. Used to partition a batch against what is
- *  already stored without a second round trip per record. */
+ *  already stored without a second round trip per record. The separator is a
+ *  NUL, which neither half can contain — written as an escape, because a raw
+ *  NUL byte in the source makes ripgrep treat the whole file as binary and
+ *  silently drop it from every code search. */
 export function vacancyRowKey(providerKey: string, externalId: string): string {
   return `${providerKey}\u0000${externalId}`;
 }

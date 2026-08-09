@@ -190,18 +190,23 @@ export async function runVacancyIngestionSession(
     let persistedUpdated = 0;
     let persistedUnchanged = 0;
 
+    // One session id for the whole run: the importer logs under it and the
+    // writer stamps it onto every stored row, so a row in `public_vacancies`
+    // traces back to exactly one ingestion session.
+    const sessionId = `${provider.key}-${req.channel}-${req.nowIso}`;
+
     const result = await runVacancyImport({
       provider,
       channel: req.channel,
       mode: req.mode,
-      sessionId: `${provider.key}-${req.channel}-${req.nowIso}`,
+      sessionId,
       startedAtIso: req.nowIso,
       finishedAtIso: req.nowIso,
       capturedAt: req.nowIso,
       dedupState,
       cursor: cursor.cursorValue,
       persist: async (rows) => {
-        const outcome = await persistVacancies(client, rows, req.nowIso);
+        const outcome = await persistVacancies(client, rows, req.nowIso, sessionId);
         persistedInserted = outcome.inserted;
         persistedUpdated = outcome.updated;
         persistedUnchanged = outcome.unchanged;

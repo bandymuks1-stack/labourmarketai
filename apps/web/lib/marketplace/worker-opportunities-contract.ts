@@ -123,6 +123,11 @@ import type { JobRecommendation } from "@/lib/opportunities/recommendations-mode
  */
 export const OPPORTUNITIES_RESULT_LIMIT = 5;
 
+/** How many EXTERNAL public-source ads the result shows before deferring to
+ *  the full board. Same reasoning as the platform limit above: fixed in the
+ *  contract so no client can widen its own read. */
+export const OPPORTUNITIES_RESULT_EXTERNAL_LIMIT = 5;
+
 /**
  * What the opportunities RESULT hands its panel — the client-safe projection of
  * `MarketplaceMatchesView` (W3 row 5).
@@ -172,6 +177,17 @@ export type OpportunitiesResultView =
        * that cannot write.
        */
       readonly interestLabels: InterestLabelBag | null;
+      /**
+       * External public-source ads (real-supply train) — the displayed slice.
+       * The SAME rows the board's external section renders, projected to the
+       * facts a compact row can honestly show. The panel is the conversation's
+       * renderer, so "find me work" must surface these too: a chat that says
+       * "nothing matched" while the board shows real ads would make the two
+       * surfaces disagree about whether work exists.
+       */
+      readonly external: readonly OpportunitiesResultExternalRow[];
+      /** How many external ads exist beyond the shown slice's cap. */
+      readonly totalExternal: number;
     };
 
 /** The 10 strings `WorkerInterestButton` needs. Declared here, in the pure
@@ -188,6 +204,32 @@ export interface InterestLabelBag {
   readonly contactedLink: string;
   readonly contactEmployer: string;
   readonly contactError: string;
+}
+
+/**
+ * One EXTERNAL public-source ad, as the panel renders it.
+ *
+ * A projection of `ExternalOpportunityCardV1` limited to what a compact row
+ * can honestly show. Provenance is NOT optional: the attribution code and the
+ * publisher's original URL travel with every row, because an external ad
+ * rendered without its source would read as a labourmarket.ai posting — the
+ * exact dishonesty the presentation contract forbids. No platform action is
+ * carried at all: the ONLY route on an unclaimed ad is the original
+ * advertisement.
+ */
+export interface OpportunitiesResultExternalRow {
+  /** Stable render key: provider + the publisher's own id. */
+  readonly key: string;
+  readonly title: string;
+  readonly employerName: string | null;
+  readonly city: string | null;
+  readonly country: string | null;
+  /** ISO date (sliced) the publisher stated. */
+  readonly publishedAt: string;
+  /** The publisher's original advertisement — the one action. */
+  readonly originalUrl: string | null;
+  /** i18n code for the mandatory source attribution line. */
+  readonly attributionCode: string;
 }
 
 /**
