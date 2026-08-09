@@ -3347,6 +3347,7 @@
       "forgot_password": "Passwort vergessen?",
       "reset_password_cta": "Passwort zurücksetzen",
       "reset_password_help": "Wir senden Ihnen einen Link zum Zurücksetzen per E-Mail — Ihr altes Passwort brauchen Sie nicht.",
+      "reset_success": "Passwort aktualisiert. Melden Sie sich mit Ihrem neuen Passwort an.",
       "submit_label": "Anmelden",
       "signing": "Anmeldung läuft...",
       "no_account": "Noch kein Konto?",

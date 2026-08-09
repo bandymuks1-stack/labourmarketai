@@ -101,6 +101,23 @@ test.describe("Auth smoke — protected routes + login surface (no test DB neede
     await page.goto("/lt/dashboard/market-map");
     await expect(page).toHaveURL(/next=%2Flt%2Fdashboard%2Fmarket-map/);
   });
+
+  // `reset-password` lands the user here with `?reset=1` once the new password
+  // has saved. For a long time nothing read it, so the confirmation the person
+  // most needs — "yes, that worked" — was never shown. Asserted in a browser
+  // because a source guard cannot tell a rendered notice from a dead branch.
+  test("?reset=1 confirms the new password saved", async ({ page }) => {
+    await page.goto("/lt/auth/login?reset=1");
+    await expect(page.getByTestId("login-reset-success")).toBeVisible();
+  });
+
+  test("a plain login has no reset confirmation to be confused by", async ({
+    page,
+  }) => {
+    await page.goto("/lt/auth/login");
+    await expect(page.locator("form").first()).toBeVisible();
+    await expect(page.getByTestId("login-reset-success")).toHaveCount(0);
+  });
 });
 
 test.describe("Onboarding entity creation (migration 0006)", () => {

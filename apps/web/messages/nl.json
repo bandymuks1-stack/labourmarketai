@@ -3347,6 +3347,7 @@
       "forgot_password": "Wachtwoord vergeten?",
       "reset_password_cta": "Wachtwoord resetten",
       "reset_password_help": "We e-mailen je een resetlink — je oude wachtwoord heb je niet nodig.",
+      "reset_success": "Wachtwoord bijgewerkt. Log in met je nieuwe wachtwoord.",
       "submit_label": "Inloggen",
       "signing": "Bezig met inloggen...",
       "no_account": "Nog geen account?",
