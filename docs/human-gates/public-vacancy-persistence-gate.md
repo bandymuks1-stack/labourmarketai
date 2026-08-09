@@ -7,10 +7,10 @@ State: `AWAITING_OWNER_DECISION` — ships UNAPPLIED.
 
 ## Checksums this gate binds to
 
-- migration sha256 `6ab1f00d7b471975df2c94ec63fe2f816758c377a9b3dee79566feb64eb4c5ef`
+- migration sha256 `00d9cd878a008c40b283550ca3fad181a8a06d8d1c5a3415c45cf0004e1f3143`
 - rollback sha256 `c91fbe7505509f68e95c3985924c1e3ae664165789b0facdd8ef4b152ec5aa6a`
 - comment-stripped **executable** sha256
-  `389fef0d2dbb7fc5f5ac9a6c6fa2c031cb28b67fe25a62838b4b0bfecb9721c6`
+  `c7e99beaa2b202796e7372d93b08678016307594ca349e6358c12d0228c4ddb6`
   (recompute: `grep -v "^\s*--" supabase/migrations/20260809160000_public_vacancy_persistence_v1.sql | sha256sum`)
 
 ## Why this exists
@@ -55,13 +55,26 @@ applied on its own merits, separately from the decision to start ingesting.
 
 ## Security shape, stated explicitly
 
-**`public_vacancies` is readable by `anon` and `authenticated`** for rows where
-`is_active`. That is a deliberate product decision:
+**`public_vacancies` is readable by `authenticated` only**, for rows where
+`is_active`. **`anon` gets nothing.**
 
-- the rows are already-public CC0 ads that a public employment service
-  publishes on its own website, carrying per-row attribution; and
-- a job board that demands a login before admitting a job exists is precisely
-  what the beta is trying to stop being.
+An earlier draft of this migration also granted `SELECT` to `anon`, reasoning
+that these are already-public CC0 ads and a job board should not demand a login
+to admit a job exists. That reasoning is sound for a *public* job board and
+wrong for this one today: the controlled-beta worker journey begins at
+registration, so every worker meant to see these rows is authenticated by the
+time they look. An `anon` grant would have bought the product nothing while
+being the single most sensitive line in the file.
+
+The CI migration-safety gate agreed — it raised `rls-to-anon` and
+`grant-anon-public` against the earlier draft. Those two findings are now
+**gone entirely rather than bypassed**; only `grant-or-revoke` and
+`alter-drop-policy` remain, and those are structurally unavoidable for any new
+table with row-level security.
+
+Opening this to `anon` later is a real product decision (public,
+SEO-indexable job pages) and deserves its own migration and its own gate
+record, rather than arriving as a side effect of provisioning storage.
 
 Withdrawn ads (`is_active = false`) are readable by **no one** but
 `service_role` — a removed ad stops being findable the moment the publisher
@@ -69,10 +82,10 @@ withdraws it.
 
 Writes are `service_role` only, enforced twice on purpose:
 
-- **privileges** — `REVOKE ALL` first, then `GRANT SELECT` to `anon` and
-  `authenticated`. Granting without revoking leaves Supabase's default
-  privileges in place, which is how a table ends up wider than its migration
-  reads; and
+- **privileges** — `REVOKE ALL` first (including `anon`, which is never
+  re-granted), then `GRANT SELECT` to `authenticated` only. Granting without
+  revoking leaves Supabase's default privileges in place, which is how a table
+  ends up wider than its migration reads; and
 - **RLS** — no `INSERT`/`UPDATE`/`DELETE` policy exists at all, so even a role
   holding the privilege is still refused.
 

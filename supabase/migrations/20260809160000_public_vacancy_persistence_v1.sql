@@ -42,23 +42,39 @@
 --     platform user, worker or profile is referenced. There is deliberately no
 --     foreign key to `profiles`, `workers` or `companies`.
 --
+-- @human-gate-approved — TIER: owner-gated (RED class: this migration creates
+-- RLS policies and changes privileges with GRANT/REVOKE, which the migration
+-- safety gate classes RED by construction for ANY new table. There is no
+-- non-RED way to add a table with row-level security. Ships UNAPPLIED; the
+-- owner decision is recorded in
+-- docs/human-gates/public-vacancy-persistence-gate.md.)
+--
 -- ── RLS DECISION, STATED EXPLICITLY ────────────────────────────────────────
 --
--- `public_vacancies` is READABLE BY `anon` AND `authenticated` for rows where
--- `is_active`. That is a DELIBERATE product decision, not an oversight:
---   * the rows are already-public CC0 job ads whose publisher asks only to be
---     credited (attribution is carried per-row and pinned by the boundary
---     guard), and
---   * a job board that requires a login before it will admit a job exists is
---     the thing the beta is trying to stop being.
--- Withdrawn ads (`is_active = false`) are NOT readable — a removed ad must
--- stop being findable the moment the publisher withdraws it.
+-- `public_vacancies` is READABLE BY `authenticated` ONLY, for rows where
+-- `is_active`. `anon` gets NOTHING.
+--
+-- An earlier draft of this migration granted SELECT to `anon` too, reasoning
+-- that these are already-public CC0 ads and a job board should not demand a
+-- login to admit a job exists. That reasoning is sound for a PUBLIC job board
+-- and wrong for THIS one, today: the controlled-beta worker journey begins at
+-- registration, so every worker who is meant to see these rows is
+-- authenticated by the time they look. An `anon` grant would therefore buy the
+-- product nothing while being the single most sensitive line in the file — and
+-- the one the safety gate flags first.
+--
+-- Opening this to `anon` later is a real product decision (public SEO-indexable
+-- job pages) and deserves its own migration and its own gate record, rather
+-- than arriving as a side effect of provisioning storage.
+--
+-- Withdrawn ads (`is_active = false`) are NOT readable by any role but
+-- service_role — a removed ad must stop being findable the moment the
+-- publisher withdraws it.
 --
 -- Writes are service_role only. This is enforced TWICE, on purpose:
---   * privileges: REVOKE ALL first, then GRANT exactly SELECT to anon and
---     authenticated. Granting without revoking first leaves Supabase's default
---     privileges in place and is how a table ends up anon-writable while the
---     migration reads as if it did not; and
+--   * privileges: REVOKE ALL first, then GRANT exactly SELECT to authenticated.
+--     Granting without revoking first leaves Supabase's default privileges in
+--     place and is how a table ends up wider than its migration reads; and
 --   * RLS: no INSERT/UPDATE/DELETE policy exists, so even a role that somehow
 --     held the privilege would still be refused by row-level security.
 --
@@ -223,24 +239,26 @@ create index if not exists public_vacancies_fulltext_idx
 comment on table public.public_vacancies is
   'External public-employment-service job ads, imported under source governance. '
   'CC0/open-licence public content only. No platform identity, no personal data. '
-  'Read: anon+authenticated for active rows. Write: service_role only.';
+  'Read: authenticated only, active rows only. Write: service_role only.';
 
 alter table public.public_vacancies enable row level security;
 
 -- Privileges: revoke first so Supabase default privileges cannot leave a wider
--- grant in place than this migration appears to give.
+-- grant in place than this migration appears to give. `anon` is revoked and
+-- never re-granted.
 revoke all on public.public_vacancies from anon, authenticated;
-grant select on public.public_vacancies to anon, authenticated;
+grant select on public.public_vacancies to authenticated;
 grant all on public.public_vacancies to service_role;
 
--- The ONLY policy. Active rows are world-readable; withdrawn ads are not
--- readable by anyone but service_role. There is deliberately no INSERT,
--- UPDATE or DELETE policy — ingestion runs as service_role.
+-- The ONLY policy. A signed-in user reads active rows; withdrawn ads are not
+-- readable by anyone but service_role, and `anon` reads nothing at all. There
+-- is deliberately no INSERT, UPDATE or DELETE policy — ingestion runs as
+-- service_role.
 drop policy if exists public_vacancies_read_active on public.public_vacancies;
 create policy public_vacancies_read_active
   on public.public_vacancies
   for select
-  to anon, authenticated
+  to authenticated
   using (is_active);
 
 -- ── vacancy_import_cursors ─────────────────────────────────────────────────
