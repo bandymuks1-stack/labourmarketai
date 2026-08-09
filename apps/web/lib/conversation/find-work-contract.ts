@@ -17,6 +17,11 @@
  *  nothing slices the result again afterwards. */
 export const CONVERSATION_FIND_WORK_LIMIT = 3;
 
+/** How many EXTERNAL public-source ads the conversation's sentence counts —
+ *  aliased to the panel's own display cap so the chat's claim and the panel's
+ *  rendering can never drift apart (the chat states it, the panel proves it). */
+export { OPPORTUNITIES_RESULT_EXTERNAL_LIMIT as CONVERSATION_FIND_WORK_EXTERNAL_LIMIT } from "@/lib/marketplace/worker-opportunities-contract";
+
 /**
  * What "find work" hands back to the chat.
  *
@@ -35,7 +40,10 @@ export type FindWorkResult =
   | {
       kind: "matches";
       /** How many rows the panel will render — the chat states it, the panel
-       *  proves it. Never a number this module invented. */
+       *  proves it. Never a number this module invented. Counts BOTH platform
+       *  matches and external public-source ads, because the panel renders
+       *  both: the chat and the panel must never disagree about whether work
+       *  exists. */
       count: number;
       intro: string;
     }

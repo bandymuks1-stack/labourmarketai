@@ -9,7 +9,10 @@ import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import type { MyInterestViewRow } from "@/lib/opportunities/my-interest-view";
-import type { ExternalVacanciesResultV1 } from "@/lib/opportunities/external-vacancies";
+import type {
+  ExternalOpportunityCardV1,
+  ExternalVacanciesResultV1,
+} from "@/lib/opportunities/external-vacancies";
 import { writeOpportunitySeen } from "@/lib/opportunities/seen";
 import { runMarkShown, type MarkShownPorts } from "./worker-opportunities-shown-core";
 import type {
@@ -128,6 +131,12 @@ export type MarketplaceMatchesView =
       /** Unseen matches — 0 while the seen store is unapplied (a badge that
        *  cannot clear is noise, not a signal). */
       readonly newCount: number;
+      /** External public-source ads from the SAME underlying board read
+       *  (real-supply train), already narrowed by the caller's filters. The
+       *  conversation answers "find me work" with these too — the board and
+       *  the chat must never disagree about whether work exists. */
+      readonly externalCards: readonly ExternalOpportunityCardV1[];
+      readonly totalExternal: number;
     };
 
 /**
@@ -196,6 +205,8 @@ export async function loadWorkerOpportunityMatches(input: {
     matches: result.recommendations,
     totalRecommendable: result.totalRecommendable,
     newCount: result.newCount,
+    externalCards: result.externalCards,
+    totalExternal: result.totalExternal,
   };
 }
 

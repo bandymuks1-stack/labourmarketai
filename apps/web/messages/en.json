@@ -10978,7 +10978,8 @@
       "fitWeak": "Weak fit",
       "fitInsufficient": "Not enough data",
       "locationReason": "Location: {location}",
-      "roleReason": "Need: {role}"
+      "roleReason": "Need: {role}",
+      "introExternal": "There are {count} public job ads from official sources in the panel — applying happens through the original advertisement."
     },
     "summary": {
       "introProfile": "Here's your profile as it stands: {done} of {total} essentials are saved.",

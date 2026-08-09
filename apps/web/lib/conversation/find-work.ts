@@ -8,6 +8,7 @@ import { loadWorkerOpportunityMatches } from "@/lib/marketplace/worker-opportuni
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import {
   CONVERSATION_FIND_WORK_LIMIT,
+  CONVERSATION_FIND_WORK_EXTERNAL_LIMIT,
   type FindWorkResult,
 } from "./find-work-contract";
 
@@ -59,11 +60,20 @@ export async function findWorkForChat(
     return { kind: "blocked", message: t("blockedNoWorker") };
   }
   // Honest blocked state: without the gated worker-visibility RPC there is no
-  // demand data at all, so "no matches" would be a false claim.
-  if (!view.capabilities.boardAvailable) {
+  // PLATFORM demand data. External public-source ads read from their own
+  // store, so they still count — "blocked" is only the answer when NOTHING
+  // can be shown.
+  const externalShown = Math.min(
+    view.totalExternal,
+    CONVERSATION_FIND_WORK_EXTERNAL_LIMIT,
+  );
+  if (!view.capabilities.boardAvailable && externalShown === 0) {
     return { kind: "blocked", message: t("blockedNoAccess") };
   }
-  if (view.matches.length === 0) {
+  const platformShown = view.capabilities.boardAvailable
+    ? view.matches.length
+    : 0;
+  if (platformShown === 0 && externalShown === 0) {
     return { kind: "empty", message: t("emptyState") };
   }
 
@@ -71,12 +81,18 @@ export async function findWorkForChat(
   // panel renders the rows, so nothing here is localized per row and no id is
   // carried: the panel reads them from the same use case and reports what IT
   // actually rendered (rendering is the read event, canonical decision §10).
+  // External ads get their own sentence: "public ads from official sources"
+  // is a different claim than "matches on this platform", and folding the two
+  // into one number would blur who is offering what.
+  const introParts: string[] = [];
+  if (platformShown === 1) introParts.push(t("introOne"));
+  else if (platformShown > 1) introParts.push(t("intro", { count: platformShown }));
+  if (externalShown > 0) {
+    introParts.push(t("introExternal", { count: externalShown }));
+  }
   return {
     kind: "matches",
-    count: view.matches.length,
-    intro:
-      view.matches.length === 1
-        ? t("introOne")
-        : t("intro", { count: view.matches.length }),
+    count: platformShown + externalShown,
+    intro: introParts.join(" "),
   };
 }
