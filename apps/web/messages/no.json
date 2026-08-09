@@ -1960,6 +1960,25 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Offentlige stillingsannonser",
+      "sectionNote": "Annonser fra offisielle offentlige arbeidsformidlinger. De publiseres av arbeidsgiveren ved kilden — labourmarket.ai viser dem så du kan finne dem; søknad skjer via originalannonsen.",
+      "openOriginal": "Åpne originalannonsen",
+      "noApplicationRoute": "Kilden har ikke publisert en søknadsadresse for denne annonsen.",
+      "publishedOn": "Publisert {date}",
+      "positions": "{count} stilling(er)",
+      "payAsPublished": "Lønn som publisert",
+      "gapsTitle": "Ikke oppgitt i annonsen",
+      "gap": {
+        "no_city": "by",
+        "no_country": "land",
+        "no_language_requirement": "språkkrav",
+        "no_profession": "yrke",
+        "no_requirement_set": "kompetansekrav",
+        "no_start_date": "startdato",
+        "pay_not_comparable": "lønn ikke sammenlignbar (ikke i EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Publisert av en offentlig arbeidsformidling. Vist her slik at du kan finne den — det er ikke en labourmarket.ai-annonse.",
       "employerHasNotClaimed": "Denne arbeidsgiveren administrerer ikke annonsen på labourmarket.ai ennå, så søknaden går via den opprinnelige annonsen.",
       "employerManagesHere": "Denne arbeidsgiveren administrerer annonsen på labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivering",
+      "colCountry": "Land",
+      "colFailures": "Feilserie",
+      "colLastSuccess": "Siste suksess",
+      "colLegal": "Juridisk status",
+      "colSource": "Kilde",
+      "colStored": "Lagret (aktive)",
+      "colSwitch": "Kjørebryter",
+      "errorsLabel": "Feil",
+      "importDisabledReason": "Kjørebryteren for denne kilden er lukket. Den åpnes av eieren (miljø), ikke av denne siden.",
+      "intro": "Eksterne offentlige stillingsannonsekilder: styring, kjøretilstand og importhelse. En prøvekjøring leser og teller, men lagrer ingenting; en import skriver bare når eieren har aktivert kilden og åpnet kjørebryteren.",
+      "mAccepted": "Akseptert",
+      "mDuplicate": "Duplikater",
+      "mInserted": "Satt inn",
+      "mRejected": "Avvist",
+      "mSeen": "Sett",
+      "mUnchanged": "Uendret",
+      "mUpdated": "Oppdatert",
+      "mWaiting": "Venter på aktivering",
+      "refused": "Avvist",
+      "resultTitle": "Siste kjøring",
+      "runDry": "Prøvekjøring",
+      "runImport": "Importer",
+      "runTitle": "Kjør",
+      "running": "Kjører…",
+      "statusLabel": "Status",
+      "switchClosed": "lukket",
+      "switchOpen": "åpen",
+      "title": "Stillingsannonsekilder"
     }
   },
   "profileIdentityNotice": {

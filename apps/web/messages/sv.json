@@ -1960,6 +1960,25 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Offentliga jobbannonser",
+      "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
+      "openOriginal": "Öppna originalannonsen",
+      "noApplicationRoute": "Källan har inte publicerat någon ansökningsadress för denna annons.",
+      "publishedOn": "Publicerad {date}",
+      "positions": "{count} tjänst(er)",
+      "payAsPublished": "Lön som publicerad",
+      "gapsTitle": "Ej angivet i annonsen",
+      "gap": {
+        "no_city": "stad",
+        "no_country": "land",
+        "no_language_requirement": "språkkrav",
+        "no_profession": "yrke",
+        "no_requirement_set": "kompetenskrav",
+        "no_start_date": "startdatum",
+        "pay_not_comparable": "lön ej jämförbar (ej i EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Publicerad av en offentlig arbetsförmedling. Visas här så att du kan hitta den — det är inte en labourmarket.ai-annons.",
       "employerHasNotClaimed": "Den här arbetsgivaren hanterar inte annonsen på labourmarket.ai ännu, så ansökan sker via ursprungsannonsen.",
       "employerManagesHere": "Den här arbetsgivaren hanterar annonsen på labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivering",
+      "colCountry": "Land",
+      "colFailures": "Felserie",
+      "colLastSuccess": "Senaste framgång",
+      "colLegal": "Juridisk status",
+      "colSource": "Källa",
+      "colStored": "Sparat (aktiva)",
+      "colSwitch": "Körbrytare",
+      "errorsLabel": "Fel",
+      "importDisabledReason": "Körbrytaren för denna källa är stängd. Den öppnas av ägaren (miljö), inte av denna sida.",
+      "intro": "Externa offentliga jobbannonskällor: styrning, körstatus och importhälsa. En provkörning läser och räknar men sparar inget; en import skriver bara när ägaren har aktiverat källan och öppnat körbrytaren.",
+      "mAccepted": "Accepterade",
+      "mDuplicate": "Dubbletter",
+      "mInserted": "Infogade",
+      "mRejected": "Avvisade",
+      "mSeen": "Sedda",
+      "mUnchanged": "Oförändrade",
+      "mUpdated": "Uppdaterade",
+      "mWaiting": "Väntar på aktivering",
+      "refused": "Avvisad",
+      "resultTitle": "Senaste körning",
+      "runDry": "Provkörning",
+      "runImport": "Importera",
+      "runTitle": "Kör",
+      "running": "Kör…",
+      "statusLabel": "Status",
+      "switchClosed": "stängd",
+      "switchOpen": "öppen",
+      "title": "Jobbannonskällor"
     }
   },
   "profileIdentityNotice": {

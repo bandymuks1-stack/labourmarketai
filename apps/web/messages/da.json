@@ -1960,6 +1960,25 @@
         "remote": "Fjernarbejde",
         "hybrid": "Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Offentlige jobannoncer",
+      "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "openOriginal": "Åbn den originale annonce",
+      "noApplicationRoute": "Kilden har ikke udgivet en ansøgningsadresse for denne annonce.",
+      "publishedOn": "Udgivet {date}",
+      "positions": "{count} stilling(er)",
+      "payAsPublished": "Løn som udgivet",
+      "gapsTitle": "Ikke angivet i annoncen",
+      "gap": {
+        "no_city": "by",
+        "no_country": "land",
+        "no_language_requirement": "sprogkrav",
+        "no_profession": "erhverv",
+        "no_requirement_set": "kompetencekrav",
+        "no_start_date": "startdato",
+        "pay_not_comparable": "løn ikke sammenlignelig (ikke i EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Offentliggjort af en offentlig jobformidling. Vist her, så du kan finde den — det er ikke et labourmarket.ai-opslag.",
       "employerHasNotClaimed": "Denne arbejdsgiver administrerer ikke opslaget på labourmarket.ai endnu, så ansøgningen sker via den oprindelige annonce.",
       "employerManagesHere": "Denne arbejdsgiver administrerer opslaget på labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivering",
+      "colCountry": "Land",
+      "colFailures": "Fejlserie",
+      "colLastSuccess": "Seneste succes",
+      "colLegal": "Juridisk status",
+      "colSource": "Kilde",
+      "colStored": "Gemt (aktive)",
+      "colSwitch": "Driftskontakt",
+      "errorsLabel": "Fejl",
+      "importDisabledReason": "Denne kildes driftskontakt er lukket. Den åbnes af ejeren (miljø), ikke af denne side.",
+      "intro": "Eksterne offentlige jobannonce-kilder: governance, driftstilstand og import-sundhed. En prøvekørsel læser og tæller, men gemmer intet; en import skriver kun, når ejeren har aktiveret kilden og åbnet driftskontakten.",
+      "mAccepted": "Accepteret",
+      "mDuplicate": "Dubletter",
+      "mInserted": "Indsat",
+      "mRejected": "Afvist",
+      "mSeen": "Set",
+      "mUnchanged": "Uændret",
+      "mUpdated": "Opdateret",
+      "mWaiting": "Afventer aktivering",
+      "refused": "Afvist",
+      "resultTitle": "Seneste kørsel",
+      "runDry": "Prøvekørsel",
+      "runImport": "Importér",
+      "runTitle": "Kør",
+      "running": "Kører…",
+      "statusLabel": "Status",
+      "switchClosed": "lukket",
+      "switchOpen": "åben",
+      "title": "Jobannonce-kilder"
     }
   },
   "profileIdentityNotice": {

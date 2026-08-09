@@ -1960,6 +1960,25 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Publiski darba sludinājumi",
+      "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "openOriginal": "Atvērt oriģinālo sludinājumu",
+      "noApplicationRoute": "Avots šim sludinājumam nav publicējis pieteikšanās adresi.",
+      "publishedOn": "Publicēts {date}",
+      "positions": "{count} vieta(s)",
+      "payAsPublished": "Atalgojums kā publicēts",
+      "gapsTitle": "Sludinājumā nav norādīts",
+      "gap": {
+        "no_city": "pilsēta",
+        "no_country": "valsts",
+        "no_language_requirement": "valodu prasības",
+        "no_profession": "profesija",
+        "no_requirement_set": "prasmju prasības",
+        "no_start_date": "sākuma datums",
+        "pay_not_comparable": "atalgojums nav salīdzināms (nav EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Publicējis valsts nodarbinātības dienests. Rādām šeit, lai jūs to atrastu — tas nav labourmarket.ai sludinājums.",
       "employerHasNotClaimed": "Šis darba devējs vēl nepārvalda šo sludinājumu labourmarket.ai, tāpēc pieteikšanās notiek caur oriģinālo sludinājumu.",
       "employerManagesHere": "Šis darba devējs pārvalda šo sludinājumu labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivizācija",
+      "colCountry": "Valsts",
+      "colFailures": "Kļūdu sērija",
+      "colLastSuccess": "Pēdējais panākums",
+      "colLegal": "Juridiskais statuss",
+      "colSource": "Avots",
+      "colStored": "Saglabāts (aktīvie)",
+      "colSwitch": "Izpildes slēdzis",
+      "errorsLabel": "Kļūdas",
+      "importDisabledReason": "Šī avota izpildes slēdzis ir aizvērts. To atver īpašnieks (vide), nevis šī lapa.",
+      "intro": "Ārējie publiskie darba sludinājumu avoti: pārvaldība, izpildes stāvoklis un importa veselība. Izmēģinājuma palaišana lasa un skaita, bet neko nesaglabā; imports raksta tikai tad, kad īpašnieks ir aktivizējis avotu un atvēris izpildes slēdzi.",
+      "mAccepted": "Pieņemts",
+      "mDuplicate": "Dublikāti",
+      "mInserted": "Ievietots",
+      "mRejected": "Noraidīts",
+      "mSeen": "Redzēts",
+      "mUnchanged": "Nemainīts",
+      "mUpdated": "Atjaunināts",
+      "mWaiting": "Gaida aktivizāciju",
+      "refused": "Noraidīts",
+      "resultTitle": "Pēdējā palaišana",
+      "runDry": "Izmēģinājums",
+      "runImport": "Importēt",
+      "runTitle": "Palaist",
+      "running": "Notiek…",
+      "statusLabel": "Statuss",
+      "switchClosed": "aizvērts",
+      "switchOpen": "atvērts",
+      "title": "Vakanču avoti"
     }
   },
   "profileIdentityNotice": {

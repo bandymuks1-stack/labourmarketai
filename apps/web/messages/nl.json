@@ -7921,6 +7921,25 @@
         "contacted": "Bedrijf nam contact op",
         "withdrawn": "Ingetrokken"
       }
+    },
+    "external": {
+      "sectionTitle": "Openbare vacatures",
+      "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "openOriginal": "Originele advertentie openen",
+      "noApplicationRoute": "De bron heeft voor deze advertentie geen sollicitatieadres gepubliceerd.",
+      "publishedOn": "Gepubliceerd {date}",
+      "positions": "{count} plaats(en)",
+      "payAsPublished": "Loon zoals gepubliceerd",
+      "gapsTitle": "Niet vermeld in de advertentie",
+      "gap": {
+        "no_city": "stad",
+        "no_country": "land",
+        "no_language_requirement": "taaleisen",
+        "no_profession": "beroep",
+        "no_requirement_set": "vaardigheidseisen",
+        "no_start_date": "startdatum",
+        "pay_not_comparable": "loon niet vergelijkbaar (niet in EUR)"
+      }
     }
   },
   "workerIntake": {
@@ -11943,6 +11962,37 @@
       "externalPublicSource": "Gepubliceerd door een openbare arbeidsbemiddeling. Hier vermeld zodat u het kunt vinden — het is geen labourmarket.ai-vacature.",
       "employerHasNotClaimed": "Deze werkgever beheert deze vacature nog niet op labourmarket.ai, dus solliciteren gaat via de oorspronkelijke advertentie.",
       "employerManagesHere": "Deze werkgever beheert deze vacature op labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Activering",
+      "colCountry": "Land",
+      "colFailures": "Foutreeks",
+      "colLastSuccess": "Laatste succes",
+      "colLegal": "Juridische status",
+      "colSource": "Bron",
+      "colStored": "Opgeslagen (actief)",
+      "colSwitch": "Runtime-schakelaar",
+      "errorsLabel": "Fouten",
+      "importDisabledReason": "De runtime-schakelaar van deze bron is gesloten. Openen is een actie van de eigenaar (omgeving), niet van deze pagina.",
+      "intro": "Externe openbare vacaturebronnen: governance, runtime-status en importgezondheid. Een proefrun leest en telt maar slaat niets op; een import schrijft alleen wanneer de eigenaar de bron heeft geactiveerd en de runtime-schakelaar heeft geopend.",
+      "mAccepted": "Geaccepteerd",
+      "mDuplicate": "Duplicaten",
+      "mInserted": "Ingevoegd",
+      "mRejected": "Afgewezen",
+      "mSeen": "Gezien",
+      "mUnchanged": "Ongewijzigd",
+      "mUpdated": "Bijgewerkt",
+      "mWaiting": "Wacht op activering",
+      "refused": "Geweigerd",
+      "resultTitle": "Laatste run",
+      "runDry": "Proefrun",
+      "runImport": "Importeren",
+      "runTitle": "Uitvoeren",
+      "running": "Bezig…",
+      "statusLabel": "Status",
+      "switchClosed": "gesloten",
+      "switchOpen": "open",
+      "title": "Vacaturebronnen"
     }
   }
 }

@@ -9,6 +9,7 @@ import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import type { MyInterestViewRow } from "@/lib/opportunities/my-interest-view";
+import type { ExternalVacanciesResultV1 } from "@/lib/opportunities/external-vacancies";
 import { writeOpportunitySeen } from "@/lib/opportunities/seen";
 import { runMarkShown, type MarkShownPorts } from "./worker-opportunities-shown-core";
 import type {
@@ -91,6 +92,9 @@ export type MarketplaceBoardView =
       readonly opportunities: readonly OpportunityCard[];
       readonly savedRequestIds: readonly string[];
       readonly myInterestRows: readonly MyInterestViewRow[];
+      /** External public-source ads (real-supply train) — same board, same
+       *  engine, provenance carried. Empty until a source is activated. */
+      readonly externalVacancies: ExternalVacanciesResultV1;
     };
 
 export type MarketplaceMatchesView =
@@ -150,6 +154,7 @@ export async function loadWorkerOpportunityBoard(
     opportunities: board.opportunities,
     savedRequestIds: board.savedRequestIds,
     myInterestRows: board.myInterestRows,
+    externalVacancies: board.externalVacancies,
   };
 }
 

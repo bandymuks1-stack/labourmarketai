@@ -7921,6 +7921,25 @@
         "contacted": "Unternehmen hat Kontakt aufgenommen",
         "withdrawn": "Zurückgezogen"
       }
+    },
+    "external": {
+      "sectionTitle": "Öffentliche Stellenanzeigen",
+      "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "openOriginal": "Originalanzeige öffnen",
+      "noApplicationRoute": "Die Quelle hat für diese Anzeige keine Bewerbungsadresse veröffentlicht.",
+      "publishedOn": "Veröffentlicht {date}",
+      "positions": "{count} Stelle(n)",
+      "payAsPublished": "Vergütung wie veröffentlicht",
+      "gapsTitle": "In der Anzeige nicht angegeben",
+      "gap": {
+        "no_city": "Stadt",
+        "no_country": "Land",
+        "no_language_requirement": "Sprachanforderungen",
+        "no_profession": "Beruf",
+        "no_requirement_set": "Qualifikationsanforderungen",
+        "no_start_date": "Startdatum",
+        "pay_not_comparable": "Vergütung nicht vergleichbar (nicht in EUR)"
+      }
     }
   },
   "workerIntake": {
@@ -11943,6 +11962,37 @@
       "externalPublicSource": "Von einer öffentlichen Arbeitsvermittlung veröffentlicht. Hier gelistet, damit Sie es finden — es ist keine labourmarket.ai-Stellenanzeige.",
       "employerHasNotClaimed": "Dieser Arbeitgeber verwaltet diese Anzeige noch nicht auf labourmarket.ai, daher läuft die Bewerbung über die ursprüngliche Anzeige.",
       "employerManagesHere": "Dieser Arbeitgeber verwaltet diese Anzeige auf labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivierung",
+      "colCountry": "Land",
+      "colFailures": "Fehlerserie",
+      "colLastSuccess": "Letzter Erfolg",
+      "colLegal": "Rechtsstatus",
+      "colSource": "Quelle",
+      "colStored": "Gespeichert (aktiv)",
+      "colSwitch": "Laufzeitschalter",
+      "errorsLabel": "Fehler",
+      "importDisabledReason": "Der Laufzeitschalter dieser Quelle ist geschlossen. Ihn öffnet der Eigentümer (Umgebung), nicht diese Seite.",
+      "intro": "Externe öffentliche Stellenanzeigen-Quellen: Governance, Laufzeitstatus und Import-Zustand. Ein Probelauf liest und zählt, speichert aber nichts; ein Import schreibt nur, wenn der Eigentümer die Quelle aktiviert und den Laufzeitschalter geöffnet hat.",
+      "mAccepted": "Akzeptiert",
+      "mDuplicate": "Duplikate",
+      "mInserted": "Eingefügt",
+      "mRejected": "Abgelehnt",
+      "mSeen": "Gesehen",
+      "mUnchanged": "Unverändert",
+      "mUpdated": "Aktualisiert",
+      "mWaiting": "Wartet auf Aktivierung",
+      "refused": "Abgelehnt",
+      "resultTitle": "Letzter Lauf",
+      "runDry": "Probelauf",
+      "runImport": "Importieren",
+      "runTitle": "Ausführen",
+      "running": "Läuft…",
+      "statusLabel": "Status",
+      "switchClosed": "geschlossen",
+      "switchOpen": "offen",
+      "title": "Stellenanzeigen-Quellen"
     }
   }
 }

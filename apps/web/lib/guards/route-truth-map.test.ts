@@ -123,6 +123,12 @@ const CLASSIFICATION: Record<string, string> = {
   // INTELLIGENCE_INSPECTOR_ENABLED flag, honest disabled/needs-migration
   // states, no mutation, no source activation.
   "dashboard/admin/intelligence-observations": "INTERNAL_ADMIN",
+  // Vacancy source operator console (real-supply train) — superadmin-only
+  // registry × governance × switch × cursor-health view plus two run actions
+  // (dry run writes nothing; persist is refused unless the owner's governance
+  // activation AND env switch are both open — the page can surface those
+  // levers, never pull them).
+  "dashboard/admin/vacancy-sources": "INTERNAL_ADMIN",
   // Manual import sandbox (Manual Import Sandbox v1) — superadmin +
   // INTELLIGENCE_SANDBOX_ENABLED flag; pure DRY-RUN over owner-supplied
   // local files. No persistence path exists; every run banners

@@ -253,13 +253,29 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    write policy (owner/admin SELECT only), webhook + checkout-session
     //    flows have no user session on the write side, so service-role is
     //    the only write path. Touches no chat table, sends nothing outbound.
+    //  - app/[locale]/dashboard/admin/vacancy-sources/page.tsx +
+    //    lib/vacancy-runner/vacancy-admin-actions.ts — the vacancy-source
+    //    operator console (real-supply train). Superadmin-gated twice: the
+    //    admin layout + per-page requireSuperadmin for the page, and an
+    //    explicit isSuperadmin() FIRST in every action. Service role is
+    //    genuinely required, not convenient: `vacancy_import_cursors` is
+    //    RLS-enabled with ZERO policies (operator-only by construction), so
+    //    no user-session client can read checkpoint health or record a run.
+    //    Writes touch ONLY the two vacancy tables (pinned by
+    //    vacancy-source-boundary section (j) — the store layer may name only
+    //    `public_vacancies` and `vacancy_import_cursors`). Imports past a
+    //    closed governance row or env switch are refused by the runner
+    //    regardless of the admin's wishes. Touches no chat table, sends
+    //    nothing outbound.
     // None touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
-    // ai_runs audit row (the reads write nothing at all).
+    // ai_runs audit row / the two operator-only vacancy tables (the reads
+    // write nothing at all).
     expect(
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      "app/[locale]/dashboard/admin/vacancy-sources/page.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
@@ -269,6 +285,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/company/claim-public-intake.ts",
       "lib/sales/lead-intake.ts",
       "lib/usage/usage-cost-store.ts",
+      "lib/vacancy-runner/vacancy-admin-actions.ts",
     ]);
   });
 

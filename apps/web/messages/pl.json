@@ -1960,6 +1960,25 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Publiczne ogłoszenia o pracę",
+      "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
+      "openOriginal": "Otwórz oryginalne ogłoszenie",
+      "noApplicationRoute": "Źródło nie opublikowało adresu aplikowania dla tego ogłoszenia.",
+      "publishedOn": "Opublikowano {date}",
+      "positions": "{count} miejsc(a)",
+      "payAsPublished": "Wynagrodzenie jak opublikowano",
+      "gapsTitle": "Nie podano w ogłoszeniu",
+      "gap": {
+        "no_city": "miasto",
+        "no_country": "kraj",
+        "no_language_requirement": "wymagania językowe",
+        "no_profession": "zawód",
+        "no_requirement_set": "wymagane umiejętności",
+        "no_start_date": "data rozpoczęcia",
+        "pay_not_comparable": "wynagrodzenie nieporównywalne (nie w EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Opublikowane przez publiczną służbę zatrudnienia. Pokazujemy tutaj, abyś mógł je znaleźć — to nie jest ogłoszenie labourmarket.ai.",
       "employerHasNotClaimed": "Ten pracodawca nie zarządza jeszcze tym ogłoszeniem na labourmarket.ai, więc aplikacja przebiega przez oryginalne ogłoszenie.",
       "employerManagesHere": "Ten pracodawca zarządza tym ogłoszeniem na labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktywacja",
+      "colCountry": "Kraj",
+      "colFailures": "Seria błędów",
+      "colLastSuccess": "Ostatni sukces",
+      "colLegal": "Status prawny",
+      "colSource": "Źródło",
+      "colStored": "Zapisane (aktywne)",
+      "colSwitch": "Przełącznik",
+      "errorsLabel": "Błędy",
+      "importDisabledReason": "Przełącznik uruchomieniowy tego źródła jest zamknięty. Otwiera go właściciel (środowisko), nie ta strona.",
+      "intro": "Zewnętrzne publiczne źródła ogłoszeń o pracę: nadzór, stan działania i kondycja importu. Przebieg próbny czyta i liczy, ale niczego nie zapisuje; import zapisuje tylko wtedy, gdy właściciel aktywował źródło i otworzył przełącznik uruchomieniowy.",
+      "mAccepted": "Przyjęte",
+      "mDuplicate": "Duplikaty",
+      "mInserted": "Wstawione",
+      "mRejected": "Odrzucone",
+      "mSeen": "Widziane",
+      "mUnchanged": "Bez zmian",
+      "mUpdated": "Zaktualizowane",
+      "mWaiting": "Czeka na aktywację",
+      "refused": "Odmowa",
+      "resultTitle": "Ostatni przebieg",
+      "runDry": "Przebieg próbny",
+      "runImport": "Importuj",
+      "runTitle": "Uruchom",
+      "running": "W toku…",
+      "statusLabel": "Status",
+      "switchClosed": "zamknięty",
+      "switchOpen": "otwarty",
+      "title": "Źródła ogłoszeń"
     }
   },
   "profileIdentityNotice": {
