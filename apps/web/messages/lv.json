@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Paziņojums",
+        "pending_invitations": "Uzaicinājumi gaida tavu atbildi",
+        "unread_messages": "Nelasītas ziņas",
+        "incoming_service_requests": "Pakalpojumu pieprasījumi gaida atbildi",
+        "service_request_responses": "Atbildes uz taviem pieprasījumiem",
+        "pending_bookings": "Rezervācijas piedāvājumi gaida atbildi",
+        "booking_responses": "Atbildes uz taviem rezervācijas piedāvājumiem",
+        "open_task_attention": "Uzdevumi, kam vajadzīga uzmanība",
+        "pending_absence_reviews": "Izskatāmi prombūtnes pieprasījumi",
+        "new_job_matches": "Jauni tev piemēroti darba sludinājumi",
+        "event_booking_proposed": "Tu saņēmi rezervācijas piedāvājumu",
+        "event_booking_accepted": "Tavs rezervācijas piedāvājums pieņemts",
+        "event_booking_declined": "Tavs rezervācijas piedāvājums noraidīts",
+        "event_absence_requested": "Tev reģistrēta prombūtne",
+        "event_absence_approved": "Tava prombūtne apstiprināta",
+        "event_absence_rejected": "Tava prombūtne noraidīta",
+        "event_engagement_created": "Izveidota jauna sadarbība"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

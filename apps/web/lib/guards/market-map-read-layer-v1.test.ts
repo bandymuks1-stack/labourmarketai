@@ -475,7 +475,15 @@ describe("NO new DB migration in this PR", () => {
     // UNAPPLIED. RECOUNTED against origin/main 0d8de71d rather than summed:
     // `git ls-tree -r origin/main supabase/migrations/` = 194 .sql files, and
     // this branch adds exactly one.
-    expect(count).toBeLessThanOrEqual(195);
+    // Bumped 195 -> 196 for durable notification events v1
+    // (20260810070000_notification_events_v1) — one append-only per-recipient
+    // events table with recipient-scoped RLS and a service_role-only write
+    // path. Nothing from the market-map read layer. Owner-gated, paired
+    // rollback, ships UNAPPLIED
+    // (docs/human-gates/notification-events-gate.md). RECOUNTED against
+    // origin/main 97bc3ff8: 195 .sql files there, this branch adds exactly
+    // one.
+    expect(count).toBeLessThanOrEqual(196);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

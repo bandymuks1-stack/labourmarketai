@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Avisering",
+        "pending_invitations": "Inbjudningar väntar på ditt svar",
+        "unread_messages": "Olästa meddelanden",
+        "incoming_service_requests": "Tjänsteförfrågningar väntar på svar",
+        "service_request_responses": "Svar på dina förfrågningar",
+        "pending_bookings": "Bokningsförslag väntar på svar",
+        "booking_responses": "Svar på dina bokningsförslag",
+        "open_task_attention": "Uppgifter som behöver uppmärksamhet",
+        "pending_absence_reviews": "Frånvaroansökningar att granska",
+        "new_job_matches": "Nya platsannonser som passar dig",
+        "event_booking_proposed": "Du har fått ett bokningsförslag",
+        "event_booking_accepted": "Ditt bokningsförslag accepterades",
+        "event_booking_declined": "Ditt bokningsförslag avböjdes",
+        "event_absence_requested": "En frånvaro registrerades för dig",
+        "event_absence_approved": "Din frånvaro godkändes",
+        "event_absence_rejected": "Din frånvaro avböjdes",
+        "event_engagement_created": "Ett nytt engagemang skapades"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",

@@ -20,6 +20,8 @@ import {
   SPINE_SIGNALS,
   type SpineCounts,
 } from "@/lib/notifications/spine-signals";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { readMyNotificationEvents } from "@/lib/notifications/events";
 
 /**
  * Notification spine v1 — IO half. Loads every spine count in one parallel
@@ -90,4 +92,38 @@ export function buildNavBadges(
     badges[s.featureKey] = (badges[s.featureKey] ?? 0) + count;
   }
   return badges;
+}
+
+/**
+ * DURABLE notification events, shaped for the same bell the derived spine
+ * feeds. Distinct from the spine by construction:
+ *   - each row is a stored FACT ("your absence was approved"), not a derived
+ *     count — so it carries its real created_at and its real read state;
+ *   - no `href`: durable rows clear by MARKING READ (the panel's existing
+ *     rule — "has an href" means "derived, clears by visiting"; rows without
+ *     one are exactly what re-enables the persisted mark-all-read control);
+ *   - type is namespaced `event_<event_type>` so the panel's localized
+ *     type-label map can carry copy per event without colliding with the
+ *     derived signal vocabulary.
+ *
+ * While the owner-gated notification_events store is unapplied this returns
+ * [] and the product renders exactly what it rendered before.
+ */
+export async function getDurableNotifications(): Promise<
+  readonly {
+    id: string;
+    type: string;
+    created_at: string;
+    read_at: string | null;
+  }[]
+> {
+  const supabase = await createServerClient();
+  const feed = await readMyNotificationEvents(supabase);
+  if (feed.kind !== "ready") return [];
+  return feed.events.map((e) => ({
+    id: e.id,
+    type: `event_${e.eventType}`,
+    created_at: e.createdAt,
+    read_at: e.readAt,
+  }));
 }
