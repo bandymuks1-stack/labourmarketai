@@ -228,8 +228,17 @@ export interface OpportunitiesResultExternalRow {
   readonly publishedAt: string;
   /** The publisher's original advertisement — the one action. */
   readonly originalUrl: string | null;
-  /** i18n code for the mandatory source attribution line. */
-  readonly attributionCode: string;
+  /**
+   * The mandatory source attribution line, RESOLVED server-side.
+   *
+   * Text, not a code, for the same reason `InterestLabelBag` travels with the
+   * view: the panel is a client component and the client message bundle does
+   * not carry the `vacancySources` namespace — a code handed across this
+   * boundary rendered raw in production (observed 2026-08-10). The ONE
+   * server-side resolution also keeps every surface speaking identical
+   * attribution wording.
+   */
+  readonly attributionText: string;
 }
 
 /**

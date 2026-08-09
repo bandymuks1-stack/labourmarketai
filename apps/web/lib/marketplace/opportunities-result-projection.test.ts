@@ -29,6 +29,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const loadMatchesMock = vi.fn();
 const resolveLabelsMock = vi.fn();
 
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn(async () => "lt"),
+  // Root translator: echoes the key so a test can see WHICH code the action
+  // resolved — mirroring find-work.test.ts's namespaced variant.
+  getTranslations: vi.fn(async (ns?: string) => {
+    const t = (key: string, values?: Record<string, unknown>) => {
+      const full = ns ? `${ns}.${key}` : key;
+      return values ? `${full}(${JSON.stringify(values)})` : full;
+    };
+    (t as unknown as { has: (k: string) => boolean }).has = () => true;
+    return t;
+  }),
+}));
+
 vi.mock("@/lib/marketplace/worker-opportunities", () => ({
   loadWorkerOpportunityMatches: (...args: unknown[]) => loadMatchesMock(...args),
   markOpportunitiesShown: vi.fn(),
@@ -298,7 +312,7 @@ describe("external public-source ads cross the boundary with their provenance", 
     };
   }
 
-  it("projects the compact row with attribution and the original URL — nothing else", async () => {
+  it("projects the compact row with RESOLVED attribution and the original URL — nothing else", async () => {
     loadMatchesMock.mockResolvedValue(
       ready([], { externalCards: [extCard("arbetsformedlingen:1")], totalExternal: 1 }),
     );
@@ -313,7 +327,10 @@ describe("external public-source ads cross the boundary with their provenance", 
         country: "SE",
         publishedAt: "2026-08-09",
         originalUrl: "https://arbetsformedlingen.se/platsbanken/annonser/1",
-        attributionCode: "vacancySources.attribution.arbetsformedlingen",
+        // TEXT, resolved server-side (the mock echoes the key). A raw CODE
+        // here rendered verbatim in production on 2026-08-10 — the client
+        // bundle has no vacancySources namespace.
+        attributionText: "vacancySources.attribution.arbetsformedlingen",
       },
     ]);
     expect(res.totalExternal).toBe(1);

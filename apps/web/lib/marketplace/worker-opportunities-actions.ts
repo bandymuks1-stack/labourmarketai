@@ -8,6 +8,8 @@ import {
   type MarkShownOutcome,
   type OpportunitiesResultView,
 } from "./worker-opportunities-contract";
+import { getTranslations } from "next-intl/server";
+
 import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
 import {
   loadWorkerOpportunityMatches,
@@ -113,10 +115,18 @@ export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResu
       : null,
     // External public-source ads — the SAME rows the board section renders,
     // projected to the compact row contract. Provenance travels with every
-    // row; the original ad is the only action.
-    external: view.externalCards
-      .slice(0, OPPORTUNITIES_RESULT_EXTERNAL_LIMIT)
-      .map((c) => ({
+    // row; the original ad is the only action. Attribution is resolved HERE,
+    // server-side: the client bundle has no `vacancySources` namespace, so a
+    // code crossing this boundary renders raw (observed in production
+    // 2026-08-10).
+    external: await (async () => {
+      const cards = view.externalCards.slice(
+        0,
+        OPPORTUNITIES_RESULT_EXTERNAL_LIMIT,
+      );
+      if (cards.length === 0) return [];
+      const tRoot = await getTranslations();
+      return cards.map((c) => ({
         key: c.key,
         title: c.view.title,
         employerName: c.view.employerName,
@@ -127,8 +137,9 @@ export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResu
           c.view.provenance.applicationRoute === "source_original"
             ? c.view.provenance.applicationUrl
             : null,
-        attributionCode: c.view.provenance.attributionCode,
-      })),
+        attributionText: tRoot(c.view.provenance.attributionCode as never),
+      }));
+    })(),
     totalExternal: view.totalExternal,
   };
 }
