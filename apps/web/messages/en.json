@@ -3347,6 +3347,7 @@
       "forgot_password": "Forgot password?",
       "reset_password_cta": "Reset password",
       "reset_password_help": "We'll email you a reset link — you don't need your old password.",
+      "reset_success": "Password updated. Sign in with your new password.",
       "submit_label": "Sign in",
       "signing": "Signing in...",
       "no_account": "No account yet?",
