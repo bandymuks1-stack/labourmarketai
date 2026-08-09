@@ -74,11 +74,17 @@ const CURSOR_TABLE = "vacancy_import_cursors";
  * `seenAt` is the caller's capture clock — the same value the importer used
  * for the run — so a row's `last_seen_at` reflects when the batch was captured
  * rather than when this function happened to be reached.
+ *
+ * `sessionId` is the runner's import session, stamped onto every row this call
+ * inserts or rewrites so a stored ad is traceable to the run that produced it.
+ * Required, not defaulted: a batch reaching the writer always comes from a
+ * session, and a default here is how the column once shipped silently null.
  */
 export async function persistVacancies(
   client: VacancyDbClient,
   vacancies: readonly PublicVacancyV1[],
   seenAt: string,
+  sessionId: string,
 ): Promise<VacancyPersistResultV1> {
   if (vacancies.length === 0) {
     return { inserted: 0, updated: 0, unchanged: 0 };
@@ -111,7 +117,7 @@ export async function persistVacancies(
   const toTouch: PublicVacancyRowV1[] = [];
 
   for (const vacancy of vacancies) {
-    const row = toPublicVacancyRow(vacancy, seenAt);
+    const row = toPublicVacancyRow(vacancy, seenAt, sessionId);
     const storedHash = storedHashByKey.get(
       vacancyRowKey(vacancy.providerKey, vacancy.externalId),
     );

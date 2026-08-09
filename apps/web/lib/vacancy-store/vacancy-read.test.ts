@@ -225,7 +225,7 @@ describe("paging is bounded", () => {
 
   it("reports hasMore from the extra row rather than a second count query", async () => {
     const rows = Array.from({ length: 11 }, (_, i) =>
-      toPublicVacancyRow(vacancy({ externalId: `ad-${i}` }), NOW),
+      toPublicVacancyRow(vacancy({ externalId: `ad-${i}` }), NOW, null),
     );
     const { client } = fakeClient({ data: rows });
 
@@ -256,14 +256,14 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
       },
     });
 
-    const row = toPublicVacancyRow(original, NOW);
+    const row = toPublicVacancyRow(original, NOW, null);
     const back = fromPublicVacancyRow(row as unknown as Record<string, unknown>);
 
     expect(back).toEqual(original);
   });
 
   it("reads numeric columns that PostgREST returns as strings", () => {
-    const row = toPublicVacancyRow(vacancy(), NOW) as unknown as Record<string, unknown>;
+    const row = toPublicVacancyRow(vacancy(), NOW, null) as unknown as Record<string, unknown>;
     // PostgREST serialises `numeric` as a string; a naive typeof check would
     // silently drop the salary.
     const back = fromPublicVacancyRow({
@@ -277,7 +277,7 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
   });
 
   it("keeps 'never asked for a translation' distinct from 'asked and got nothing'", () => {
-    const row = toPublicVacancyRow(vacancy(), NOW) as unknown as Record<string, unknown>;
+    const row = toPublicVacancyRow(vacancy(), NOW, null) as unknown as Record<string, unknown>;
     expect(fromPublicVacancyRow(row).translation).toBeNull();
 
     const asked = fromPublicVacancyRow({
@@ -290,7 +290,7 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
   });
 
   it("never promotes a derived categorization into a publisher fact", () => {
-    const row = toPublicVacancyRow(vacancy(), NOW) as unknown as Record<string, unknown>;
+    const row = toPublicVacancyRow(vacancy(), NOW, null) as unknown as Record<string, unknown>;
     const back = fromPublicVacancyRow({ ...row, categorization_origin: "nonsense" });
     // An unrecognised origin falls back to `derived` — the weaker claim.
     expect(back.categorizationOrigin).toBe("derived");
