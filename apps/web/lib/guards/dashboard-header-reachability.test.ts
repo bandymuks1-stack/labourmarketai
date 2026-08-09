@@ -78,6 +78,31 @@ describe("dashboard header reachability", () => {
     expect(layoutSrc).toMatch(/ml-auto flex shrink-0 items-center/);
   });
 
+  /**
+   * Reachable is not the same as tappable. `account-menu.tsx` states the rule
+   * in its own comment — "size-11 = the 44px touch-target floor every header
+   * control keeps" — and its immediate neighbour, the notification bell,
+   * measured 36x36 at 375px. A control cluster is only as good as its
+   * smallest member, so the floor is asserted across the cluster, not per file.
+   */
+  it("every header control in the cluster clears the 44px touch floor", () => {
+    const CLUSTER: ReadonlyArray<[string, string]> = [
+      ["components/app/account-menu.tsx", "account menu"],
+      ["components/app/notification-panel.tsx", "notification bell"],
+    ];
+    for (const [file, name] of CLUSTER) {
+      const src = readFileSync(resolve(REPO_ROOT, file), "utf8");
+      expect(
+        src,
+        `${name}: the dashboard header trigger must be size-11 (44px). ` +
+          "h-9 w-9 is 36px and leaves one under-sized target in a row of 44px controls.",
+      ).toMatch(/\bsize-11\b/);
+      expect(src, `${name}: still uses the old 36px h-9 w-9 box`).not.toMatch(
+        /\bh-9 w-9\b/,
+      );
+    }
+  });
+
   it("the tabs remain hidden below the md breakpoint", () => {
     // Below md the tabs are replaced by the bottom nav; if they ever render
     // on a phone the row is over-constrained again, at a much smaller width.
