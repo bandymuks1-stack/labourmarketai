@@ -39,8 +39,21 @@ import {
 
 const APP_ROOT = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(APP_ROOT, p), "utf8");
+
+/**
+ * Strip comments so scans check real CODE, not the prose that explains a ban.
+ *
+ * THE `//` IN A URL IS NOT A COMMENT. The obvious line-comment pattern — match
+ * a double slash then everything to end of line — deletes the rest of any line
+ * containing a URL, which silently blinds every host check to exactly the
+ * string it exists to find. Requiring the double slash NOT to be preceded by a
+ * colon keeps `https://…` intact while still removing a real `// like this`.
+ *
+ * A caught instance of this, not a hypothetical: this guard's own negative
+ * control failed to fire because of it. See the self-test at the bottom.
+ */
 const code = (s: string) =>
-  s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+  s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
 
 const OPS_MODULES = [
   "lib/ops/control-commands.ts",
@@ -287,7 +300,15 @@ describe("LabourMarket.ai does not run its own control bot", () => {
   it("no ops module references the Telegram API or a bot token", () => {
     for (const m of OPS_MODULES) {
       const src = code(read(m));
-      expect(/api\.telegram\.org/.test(src), `${m} calls Telegram directly`).toBe(false);
+      // A SUBSTRING check, not a regex. CodeQL is right to flag an unanchored
+      // host pattern (js/regex/missing-regexp-anchor): a regex for a hostname
+      // invites the reading "this validates a URL", and an unanchored one
+      // would match `evil.com/api.telegram.org`. Nothing here validates a URL
+      // — it asks whether this source file mentions the host at all — and
+      // `includes` says exactly that with no anchoring question to get wrong.
+      expect(src.includes("api.telegram.org"), `${m} calls Telegram directly`).toBe(
+        false,
+      );
       expect(/BOT_TOKEN|bot\$\{|sendMessage/.test(src), `${m} holds bot mechanics`).toBe(
         false,
       );
@@ -300,6 +321,24 @@ describe("LabourMarket.ai does not run its own control bot", () => {
     const src = read("lib/notifications/telegram-owner-alerts.ts");
     expect(src).toMatch(/Agentai OS bridge \(PREFERRED\)/);
     expect(src).toMatch(/needs NO Telegram bot token/i);
+  });
+
+  it("the comment stripper does not blind the host check (regression)", () => {
+    // The bug this guard shipped with for about ten minutes: a naive line-
+    // comment strip eats the rest of any line containing a URL, so a real
+    // `fetch("https://api.telegram.org/…")` became `fetch("https:` and the
+    // check passed. The stripper must remove PROSE without removing the thing
+    // being searched for.
+    const realLeak = 'const u = "https://api.telegram.org/bot1/sendMessage";';
+    expect(code(realLeak)).toContain("api.telegram.org");
+    // …while a genuine line comment is still removed.
+    expect(code("const x = 1; // mentions api.telegram.org")).not.toContain(
+      "api.telegram.org",
+    );
+    // …and a block comment too.
+    expect(code("/* mentions api.telegram.org */ const x = 1;")).not.toContain(
+      "api.telegram.org",
+    );
   });
 
   it("commands this deployment cannot truthfully answer are marked as such", () => {
