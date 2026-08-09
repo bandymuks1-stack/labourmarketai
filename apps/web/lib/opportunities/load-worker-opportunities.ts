@@ -31,6 +31,10 @@ import {
   readStructuredDemandPublic,
   type StructuredDemandPublic,
 } from "./structured-public";
+import {
+  loadExternalVacancyCards,
+  type ExternalVacanciesResultV1,
+} from "./external-vacancies";
 
 /**
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
@@ -104,6 +108,12 @@ export type WorkerOpportunitiesResult =
        *  owner-gated interest table is absent. */
       readonly myInterestRows: readonly MyInterestViewRow[];
       readonly opportunities: readonly OpportunityCard[];
+      /** External public-source job ads (real-supply train), matched by the
+       *  SAME engine and rendered on the SAME board — an imported vacancy is
+       *  an opportunity, never a second product. Empty until the owner
+       *  activates a source; `available` is false only while the store's
+       *  owner-gated migration is unapplied. */
+      readonly externalVacancies: ExternalVacanciesResultV1;
     };
 
 export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResult> {
@@ -227,6 +237,15 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
   );
   const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
 
+  // External public-source ads, RLS-scoped through the worker's OWN client —
+  // a board that needed service_role to render would mean the policy was
+  // wrong. Matched with the SAME subject the platform demands used above.
+  const externalVacancies = await loadExternalVacancyCards(
+    supabase,
+    ctx.subject,
+    { nowIso: new Date().toISOString() },
+  );
+
   return {
     kind: "ready",
     readiness,
@@ -236,5 +255,6 @@ export async function loadWorkerOpportunities(): Promise<WorkerOpportunitiesResu
     savedRequestIds: [...mySaved.requestIds],
     myInterestRows,
     opportunities,
+    externalVacancies,
   };
 }

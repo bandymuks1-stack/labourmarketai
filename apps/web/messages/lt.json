@@ -7921,6 +7921,25 @@
         "contacted": "Įmonė susisiekė",
         "withdrawn": "Atšaukta"
       }
+    },
+    "external": {
+      "sectionTitle": "Vieši darbo skelbimai",
+      "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "openOriginal": "Atidaryti originalų skelbimą",
+      "noApplicationRoute": "Šaltinis nepaskelbė šio skelbimo kandidatavimo adreso.",
+      "publishedOn": "Paskelbta {date}",
+      "positions": "{count} vietos (-ų)",
+      "payAsPublished": "Atlygis kaip paskelbta",
+      "gapsTitle": "Skelbime nenurodyta",
+      "gap": {
+        "no_city": "miestas",
+        "no_country": "šalis",
+        "no_language_requirement": "kalbų reikalavimai",
+        "no_profession": "profesija",
+        "no_requirement_set": "įgūdžių reikalavimai",
+        "no_start_date": "pradžios data",
+        "pay_not_comparable": "atlygis nepalyginamas (ne EUR)"
+      }
     }
   },
   "workerIntake": {
@@ -11943,6 +11962,37 @@
       "externalPublicSource": "Paskelbta valstybinėje užimtumo tarnyboje. Rodome čia, kad rastumėte — tai nėra labourmarket.ai skelbimas.",
       "employerHasNotClaimed": "Šis darbdavys dar netvarko šio skelbimo labourmarket.ai, todėl kandidatuojama per originalų skelbimą.",
       "employerManagesHere": "Šis darbdavys tvarko šį skelbimą labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktyvavimas",
+      "colCountry": "Šalis",
+      "colFailures": "Klaidų serija",
+      "colLastSuccess": "Paskutinė sėkmė",
+      "colLegal": "Teisinė būsena",
+      "colSource": "Šaltinis",
+      "colStored": "Saugoma (aktyvūs)",
+      "colSwitch": "Vykdymo jungiklis",
+      "errorsLabel": "Klaidos",
+      "importDisabledReason": "Šio šaltinio vykdymo jungiklis uždarytas. Jį atidaro savininkas (aplinkos kintamasis), ne šis puslapis.",
+      "intro": "Išoriniai vieši darbo skelbimų šaltiniai: valdysena, vykdymo būsena ir importo būklė. Bandomasis paleidimas skaito ir skaičiuoja, bet nieko nesaugo; importas rašo tik tada, kai savininkas aktyvavo šaltinį ir atidarė vykdymo jungiklį.",
+      "mAccepted": "Priimta",
+      "mDuplicate": "Dublikatai",
+      "mInserted": "Įrašyta",
+      "mRejected": "Atmesta",
+      "mSeen": "Peržiūrėta",
+      "mUnchanged": "Nepakitę",
+      "mUpdated": "Atnaujinta",
+      "mWaiting": "Laukia aktyvavimo",
+      "refused": "Atmesta",
+      "resultTitle": "Paskutinis paleidimas",
+      "runDry": "Bandomasis",
+      "runImport": "Importuoti",
+      "runTitle": "Paleisti",
+      "running": "Vykdoma…",
+      "statusLabel": "Būsena",
+      "switchClosed": "uždarytas",
+      "switchOpen": "atidarytas",
+      "title": "Skelbimų šaltiniai"
     }
   }
 }

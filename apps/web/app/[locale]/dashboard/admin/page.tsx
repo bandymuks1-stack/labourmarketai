@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
+import { VacancySourcesSection } from "@/components/admin/vacancy-sources-section";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getDemandDraftCounts } from "@/lib/demand/demand-drafts";
@@ -709,6 +710,11 @@ export default async function AdminDashboardPage({
       {/* Launch band (PR12): real launch signals + the 15-item launch board
           with proof-cited statuses (CI-guarded — no fake launch readiness). */}
       <AdminLaunchBoard signals={launchSignals} />
+
+      {/* Vacancy sources — external ingestion registry/governance/health +
+          the operator run panel (real-supply train). A SECTION here, not a
+          page: the constitution blocks new screens, and rightly. */}
+      <VacancySourcesSection />
 
       <section className="flex flex-col gap-3" data-testid="admin-control-areas">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">

@@ -1960,6 +1960,25 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Avalikud töökuulutused",
+      "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "openOriginal": "Ava originaalkuulutus",
+      "noApplicationRoute": "Allikas ei avaldanud selle kuulutuse kandideerimisaadressi.",
+      "publishedOn": "Avaldatud {date}",
+      "positions": "{count} kohta",
+      "payAsPublished": "Tasu nagu avaldatud",
+      "gapsTitle": "Kuulutuses märkimata",
+      "gap": {
+        "no_city": "linn",
+        "no_country": "riik",
+        "no_language_requirement": "keelenõuded",
+        "no_profession": "amet",
+        "no_requirement_set": "oskusnõuded",
+        "no_start_date": "alguskuupäev",
+        "pay_not_comparable": "tasu pole võrreldav (mitte EUR)"
+      }
     }
   },
   "scouting": {
@@ -4136,6 +4155,37 @@
       "externalPublicSource": "Avaldatud avaliku tööturuameti poolt. Näitame siin, et te selle leiaksite — see ei ole labourmarket.ai kuulutus.",
       "employerHasNotClaimed": "See tööandja ei halda seda kuulutust veel labourmarket.ai-s, seega kandideerimine käib originaalkuulutuse kaudu.",
       "employerManagesHere": "See tööandja haldab seda kuulutust labourmarket.ai-s."
+    },
+    "admin": {
+      "colActivation": "Aktiveerimine",
+      "colCountry": "Riik",
+      "colFailures": "Vigade seeria",
+      "colLastSuccess": "Viimane õnnestumine",
+      "colLegal": "Õiguslik seisund",
+      "colSource": "Allikas",
+      "colStored": "Salvestatud (aktiivsed)",
+      "colSwitch": "Käituslüliti",
+      "errorsLabel": "Vead",
+      "importDisabledReason": "Selle allika käituslüliti on suletud. Selle avab omanik (keskkond), mitte see leht.",
+      "intro": "Välised avalikud töökuulutuste allikad: haldus, käitusseisund ja impordi tervis. Proovikäivitus loeb ja loendab, kuid ei salvesta midagi; import kirjutab ainult siis, kui omanik on allika aktiveerinud ja käituslüliti avanud.",
+      "mAccepted": "Vastu võetud",
+      "mDuplicate": "Duplikaadid",
+      "mInserted": "Lisatud",
+      "mRejected": "Tagasi lükatud",
+      "mSeen": "Nähtud",
+      "mUnchanged": "Muutmata",
+      "mUpdated": "Uuendatud",
+      "mWaiting": "Ootab aktiveerimist",
+      "refused": "Keeldutud",
+      "resultTitle": "Viimane käivitus",
+      "runDry": "Proovikäivitus",
+      "runImport": "Impordi",
+      "runTitle": "Käivita",
+      "running": "Töötab…",
+      "statusLabel": "Olek",
+      "switchClosed": "suletud",
+      "switchOpen": "avatud",
+      "title": "Töökuulutuste allikad"
     }
   },
   "profileIdentityNotice": {
