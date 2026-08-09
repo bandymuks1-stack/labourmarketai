@@ -6922,7 +6922,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Discussion points",
-      "missing": "Missing information"
+      "missing": "Missing information",
+      "blocking": "Blocking requirements"
     },
     "missingSide": {
       "worker": "The candidate has not stated: {criterion}",
@@ -7123,6 +7124,15 @@
       "reasonRequired": "Marking “Not a fit” needs a short reason.",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "verdict": {
+      "eligible": "Meets the stated requirements",
+      "blocked": "Does not meet a stated requirement",
+      "evidence": {
+        "confirmed": "Evidence: manager-confirmed",
+        "mixed": "Evidence: partly confirmed",
+        "unverified": "Evidence: self-declared only"
+      }
     }
   },
   "planBoundary": {

@@ -1984,7 +1984,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Blokkerende krav"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2065,6 +2066,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Oppfyller de oppgitte kravene",
+      "blocked": "Oppfyller ikke et oppgitt krav",
+      "evidence": {
+        "confirmed": "Dokumentasjon: bekreftet av leder",
+        "mixed": "Dokumentasjon: delvis bekreftet",
+        "unverified": "Dokumentasjon: kun selvoppgitt"
+      }
     }
   },
   "waze": {

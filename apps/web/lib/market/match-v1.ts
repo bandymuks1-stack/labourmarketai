@@ -76,14 +76,24 @@ export type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 export { sourceToEvidence } from "@/lib/evidence/evidence-tier";
 import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 
-/** Need-context coverage weight per evidence tier (manager > journal > self).
- *  Used ONLY to classify the need-context match status — never exposed or
- *  persisted as a person score. */
-const EVIDENCE_WEIGHT: Record<EvidenceTier, number> = {
-  manager_confirmed: 1.0,
-  work_journal: 0.7,
-  self_declared: 0.4,
-};
+/**
+ * EVIDENCE CONFIDENCE — the answer to "how sure are we the matched skills are
+ * real", kept SEPARATE from the answer to "does the skill set match".
+ *
+ * The ladder module's own doctrine says "this is an evidence ladder, NOT
+ * reputation" — yet until 2026-08-09 a weight table (manager 1.0 / journal
+ * 0.7 / self 0.4) multiplied straight into the status thresholds, so a worker
+ * with 100% coverage who had honestly declared every skill could never leave
+ * "weak" (0.4 < the 0.5 "possible" floor). That converts unverified evidence
+ * into a bad-candidate verdict — exactly the reputation-shaped conclusion the
+ * doctrine forbids, and it punishes the honest new profile hardest.
+ *
+ * The separation (owner directive, 2026-08-09): STATUS measures functional
+ * match quality from raw coverage; this label carries the verification truth
+ * beside it. "High match, unverified evidence" is now expressible — and an
+ * employer reads both facts instead of one number that silently blended them.
+ */
+export type MatchEvidenceConfidence = "confirmed" | "mixed" | "unverified";
 
 export interface MatchSubjectSkill {
   /** Canonical skill id — the catalogue slug (legacy: an ESCO URI). */
@@ -304,6 +314,17 @@ export interface MatchResultV1 {
     readonly matchedJournalSupported: number;
     readonly matchedSelfDeclared: number;
   };
+  /**
+   * Verification truth over the MATCHED skills, separate from `status` by
+   * design (status = match quality; this = evidence confidence):
+   *   - "confirmed"  every matched skill is manager-confirmed;
+   *   - "mixed"      some are confirmed/journal-supported, some declared;
+   *   - "unverified" every matched skill is self-declared only;
+   *   - null         nothing matched, so there is no evidence to grade.
+   * NEVER folded back into status — "strong match, unverified evidence" is a
+   * legitimate, expressible verdict, not a contradiction to be averaged away.
+   */
+  readonly evidenceConfidence: MatchEvidenceConfidence | null;
   readonly reasons: readonly MatchReason[];
   readonly gaps: readonly MatchGap[];
   readonly missingData: readonly MatchMissingDataCode[];
@@ -405,6 +426,7 @@ export function matchWorkerToNeed(
       status: "insufficient_data",
       skillFit: null,
       evidence: { matchedManagerConfirmed: 0, matchedJournalSupported: 0, matchedSelfDeclared: 0 },
+      evidenceConfidence: null,
       reasons,
       gaps,
       missingData,
@@ -426,25 +448,30 @@ export function matchWorkerToNeed(
     missingData.push("need_recognized_not_confirmed");
   }
 
-  // ── Evidence breakdown over the MATCHED skills + weighted coverage. ──
+  // ── Evidence breakdown over the MATCHED skills. ──
   const tierByUri = new Map<string, EvidenceTier>();
   for (const s of subject.skills) tierByUri.set(s.uri, s.evidence);
 
   let matchedManagerConfirmed = 0;
   let matchedJournalSupported = 0;
   let matchedSelfDeclared = 0;
-  let weightedMatched = 0;
   for (const uri of skillFit.matchedUris) {
     const tier = tierByUri.get(uri) ?? "self_declared";
-    weightedMatched += EVIDENCE_WEIGHT[tier];
     if (tier === "manager_confirmed") matchedManagerConfirmed += 1;
     else if (tier === "work_journal") matchedJournalSupported += 1;
     else matchedSelfDeclared += 1;
   }
-  // Need-context, evidence-weighted coverage in [0,1]. NOT a person score:
-  // it only exists for THIS need and is never returned/persisted as a number.
-  const evidenceWeightedCoverage =
-    skillFit.needTotal > 0 ? weightedMatched / skillFit.needTotal : 0;
+  // The verification truth over the matched set — carried BESIDE status,
+  // never multiplied into it (see MatchEvidenceConfidence).
+  const matchedCount = skillFit.matchedTotal;
+  const evidenceConfidence: MatchEvidenceConfidence | null =
+    matchedCount === 0
+      ? null
+      : matchedManagerConfirmed === matchedCount
+        ? "confirmed"
+        : matchedSelfDeclared === matchedCount
+          ? "unverified"
+          : "mixed";
 
   if (subject.skills.length === 0) {
     missingData.push("no_subject_skills");
@@ -1355,11 +1382,25 @@ export function matchWorkerToNeed(
     }
   }
 
-  // ── Deterministic status from evidence-weighted coverage, then caps. ──
+  // ── Deterministic status from RAW coverage, then caps. ──
+  // Status answers ONE question: does the skill set functionally match? The
+  // verification question travels beside it as `evidenceConfidence` and is
+  // never multiplied in — the pre-2026-08-09 weighted blend meant a fully
+  // matching, honestly self-declared worker could never leave "weak", which
+  // is a reputation verdict wearing a match costume.
+  //
+  // A worker with NO recorded skills at all is INSUFFICIENT DATA, not weak:
+  // "we cannot evaluate this profile" and "this profile does not fit" are
+  // different verdicts, and collapsing them punishes the empty profile. A
+  // worker WITH skills, none of which match a stated requirement set, is
+  // genuinely weak — that is a measured mismatch, not missing data.
+  const rawCoverage =
+    skillFit.needTotal > 0 ? skillFit.matchedTotal / skillFit.needTotal : 0;
   let status: MatchStatus;
-  if (skillFit.matchedTotal === 0) status = "weak";
-  else if (evidenceWeightedCoverage >= 0.8) status = "strong";
-  else if (evidenceWeightedCoverage >= 0.5) status = "possible";
+  if (skillFit.matchedTotal === 0) {
+    status = subject.skills.length === 0 ? "insufficient_data" : "weak";
+  } else if (rawCoverage >= 0.8) status = "strong";
+  else if (rawCoverage >= 0.5) status = "possible";
   else status = "weak";
 
   // Apply compatibility caps (never upgrade, only cap downward). STRUCTURAL
@@ -1394,6 +1435,7 @@ export function matchWorkerToNeed(
     status,
     skillFit,
     evidence: { matchedManagerConfirmed, matchedJournalSupported, matchedSelfDeclared },
+    evidenceConfidence,
     reasons,
     gaps,
     missingData,

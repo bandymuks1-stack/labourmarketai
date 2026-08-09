@@ -6922,7 +6922,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Aptartini klausimai",
-      "missing": "Trūkstama informacija"
+      "missing": "Trūkstama informacija",
+      "blocking": "Blokuojantys reikalavimai"
     },
     "missingSide": {
       "worker": "Kandidatas nenurodė: {criterion}",
@@ -7123,6 +7124,15 @@
       "reasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
       "save": "Išsaugoti",
       "cancel": "Atšaukti"
+    },
+    "verdict": {
+      "eligible": "Atitinka nurodytus reikalavimus",
+      "blocked": "Neatitinka nurodyto reikalavimo",
+      "evidence": {
+        "confirmed": "Įrodymai: patvirtinta vadovo",
+        "mixed": "Įrodymai: iš dalies patvirtinta",
+        "unverified": "Įrodymai: tik paties deklaruota"
+      }
     }
   },
   "planBoundary": {

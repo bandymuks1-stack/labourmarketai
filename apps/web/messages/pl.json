@@ -1984,7 +1984,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Wymagania blokujące"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2065,6 +2066,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Spełnia podane wymagania",
+      "blocked": "Nie spełnia podanego wymagania",
+      "evidence": {
+        "confirmed": "Dowody: potwierdzone przez menedżera",
+        "mixed": "Dowody: częściowo potwierdzone",
+        "unverified": "Dowody: tylko samodzielnie zadeklarowane"
+      }
     }
   },
   "waze": {

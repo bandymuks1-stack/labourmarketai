@@ -6922,7 +6922,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Gesprächspunkte",
-      "missing": "Fehlende Informationen"
+      "missing": "Fehlende Informationen",
+      "blocking": "Blockierende Anforderungen"
     },
     "missingSide": {
       "worker": "Der Kandidat hat nicht angegeben: {criterion}",
@@ -7123,6 +7124,15 @@
       "reasonRequired": "Für „Passt nicht“ ist eine kurze Begründung nötig.",
       "save": "Speichern",
       "cancel": "Abbrechen"
+    },
+    "verdict": {
+      "eligible": "Erfüllt die genannten Anforderungen",
+      "blocked": "Erfüllt eine genannte Anforderung nicht",
+      "evidence": {
+        "confirmed": "Nachweis: vom Manager bestätigt",
+        "mixed": "Nachweis: teilweise bestätigt",
+        "unverified": "Nachweis: nur selbst angegeben"
+      }
     }
   },
   "planBoundary": {
