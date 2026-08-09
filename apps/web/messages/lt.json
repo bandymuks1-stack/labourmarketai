@@ -10978,7 +10978,8 @@
       "fitWeak": "Silpnas atitikimas",
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
-      "roleReason": "Poreikis: {role}"
+      "roleReason": "Poreikis: {role}",
+      "introExternal": "Skydelyje yra {count} viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą."
     },
     "summary": {
       "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",

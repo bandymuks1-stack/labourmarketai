@@ -10978,7 +10978,8 @@
       "fitWeak": "Zwakke match",
       "fitInsufficient": "Onvoldoende gegevens",
       "locationReason": "Locatie: {location}",
-      "roleReason": "Behoefte: {role}"
+      "roleReason": "Behoefte: {role}",
+      "introExternal": "In het paneel staan {count} openbare vacatures uit officiële bronnen — solliciteren gebeurt via de originele advertentie."
     },
     "summary": {
       "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",

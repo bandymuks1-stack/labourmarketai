@@ -10978,7 +10978,8 @@
       "fitWeak": "Schwache Übereinstimmung",
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
-      "roleReason": "Bedarf: {role}"
+      "roleReason": "Bedarf: {role}",
+      "introExternal": "Im Panel gibt es {count} öffentliche Stellenanzeigen aus offiziellen Quellen — die Bewerbung erfolgt über die Originalanzeige."
     },
     "summary": {
       "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",

@@ -3463,7 +3463,8 @@
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
-      "roleReason": "[EN] Need: {role}"
+      "roleReason": "[EN] Need: {role}",
+      "introExternal": "Det er {count} offentlige stillingsannonser fra offisielle kilder i panelet — søknad skjer via den originale annonsen."
     },
     "summary": {
       "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
