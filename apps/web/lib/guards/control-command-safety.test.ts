@@ -297,18 +297,27 @@ describe("the audit record carries no raw input and no secret", () => {
 // ── 5. One Telegram owner — no second bot ─────────────────────────────────
 
 describe("LabourMarket.ai does not run its own control bot", () => {
-  it("no ops module references the Telegram API or a bot token", () => {
+  it("no ops module holds bot mechanics", () => {
+    // THERE IS DELIBERATELY NO HOSTNAME CHECK HERE, and it is worth saying why
+    // rather than leaving its absence to be read as an oversight.
+    //
+    // An earlier version asserted the source does not mention the Telegram API
+    // host. CodeQL flagged it twice — as an unanchored host regex, then, once
+    // rewritten with `includes`, as incomplete URL sanitization. Both alerts
+    // are false here (this searches SOURCE TEXT in a test; there is no URL and
+    // no request), and the tempting move is to disguise the literal until the
+    // scanner stops noticing. That is worse than the alert: it leaves a check
+    // whose shape lies about what it does.
+    //
+    // The honest resolution is that the check was REDUNDANT. Section 1 already
+    // asserts these modules contain no `fetch(` at all, which strictly
+    // subsumes "does not call Telegram" — a module that cannot make a request
+    // cannot make one to any host. What remains worth checking is the bot
+    // MECHANICS, which no network assertion covers: a token or a sendMessage
+    // payload assembled here would mean this file is trying to become the bot,
+    // whoever ends up sending it.
     for (const m of OPS_MODULES) {
       const src = code(read(m));
-      // A SUBSTRING check, not a regex. CodeQL is right to flag an unanchored
-      // host pattern (js/regex/missing-regexp-anchor): a regex for a hostname
-      // invites the reading "this validates a URL", and an unanchored one
-      // would match `evil.com/api.telegram.org`. Nothing here validates a URL
-      // — it asks whether this source file mentions the host at all — and
-      // `includes` says exactly that with no anchoring question to get wrong.
-      expect(src.includes("api.telegram.org"), `${m} calls Telegram directly`).toBe(
-        false,
-      );
       expect(/BOT_TOKEN|bot\$\{|sendMessage/.test(src), `${m} holds bot mechanics`).toBe(
         false,
       );
@@ -329,15 +338,20 @@ describe("LabourMarket.ai does not run its own control bot", () => {
     // `fetch("https://api.telegram.org/…")` became `fetch("https:` and the
     // check passed. The stripper must remove PROSE without removing the thing
     // being searched for.
-    const realLeak = 'const u = "https://api.telegram.org/bot1/sendMessage";';
-    expect(code(realLeak)).toContain("api.telegram.org");
+    // A neutral host stands in for a vendor one on purpose: what is under test
+    // is whether the `//` of a URL survives the stripper, and that is true of
+    // any URL. Using a real API host here would make this assertion look like
+    // host validation to a scanner, which is the confusion the check above
+    // exists to avoid repeating.
+    const realLeak = 'const u = "https://vendor.example.com/v1/send";';
+    expect(code(realLeak)).toContain("vendor.example.com");
     // …while a genuine line comment is still removed.
-    expect(code("const x = 1; // mentions api.telegram.org")).not.toContain(
-      "api.telegram.org",
+    expect(code("const x = 1; // mentions vendor.example.com")).not.toContain(
+      "vendor.example.com",
     );
     // …and a block comment too.
-    expect(code("/* mentions api.telegram.org */ const x = 1;")).not.toContain(
-      "api.telegram.org",
+    expect(code("/* mentions vendor.example.com */ const x = 1;")).not.toContain(
+      "vendor.example.com",
     );
   });
 
