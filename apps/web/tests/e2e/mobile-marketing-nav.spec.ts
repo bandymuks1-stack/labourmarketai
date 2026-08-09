@@ -64,10 +64,12 @@ test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
  * off-screen — a green assertion over a broken header. Element boxes are
  * measured directly instead, which cannot be hidden by a clip.
  *
- * Scoped to the header on purpose. At 320px the LANDING still overflows by
- * ~29px (hero ask chips, the market-map demo caption) — pre-existing, in
- * components this PR does not touch. Asserting page-wide zero here would
- * fail for someone else's defect and teach the next person to ignore it.
+ * Scoped to the header on purpose: this spec's subject is the nav, and a
+ * page-wide assertion here would fail for defects in components it does not
+ * touch. The ~29px landing overflow this comment used to record as
+ * pre-existing (hero ask chips, the market-map demo caption) was fixed on
+ * 2026-08-09 and is now measured page-wide, at 320/360/375, by
+ * landing-mobile-overflow.spec.ts. The two specs together leave no gap.
  */
 async function headerOverflow(page: Page): Promise<string[]> {
   return page.evaluate(() => {
