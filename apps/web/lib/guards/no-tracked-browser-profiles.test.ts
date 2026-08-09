@@ -57,7 +57,21 @@ const SESSION_ARTIFACTS: ReadonlyArray<RegExp> = [
   /(^|\/)Cookies(-journal)?$/,
   /(^|\/)Login Data(-journal)?$/,
   /(^|\/)Web Data(-journal)?$/,
-  /(^|\/)\.storage-state\.json$/,
+  // Playwright storage state = a real Supabase auth cookie on disk.
+  //
+  // This used to be the single literal `.storage-state.json`, which is the
+  // same enumeration mistake `.gitignore` made twice. It would NOT have
+  // caught `.storage-state.worker.json`, `.storage-state-employer.json`, or
+  // the mobile sweep's `.company-state.json` (2026-08-09) — all of which
+  // carry an `sb-*-auth-token`. Both patterns below describe the CLASS:
+  // anything named like a storage state anywhere, and anything state-shaped
+  // inside the e2e directory whatever it gets called next.
+  //
+  // This guard matters more than the ignore rule, because `git add -f` — the
+  // habitual command in this repo — bypasses `.gitignore` entirely and this
+  // is keyed on what git actually TRACKS.
+  /(^|\/)\.storage-state[^/]*\.json$/,
+  /(^|\/)tests\/e2e\/[^/]*state[^/]*\.json$/i,
   /(^|\/)shared_proto_db\//,
 ];
 
