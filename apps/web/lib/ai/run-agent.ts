@@ -19,7 +19,11 @@
  * is unit/eval-tested via the mock provider with no env, key, or network. The
  * server wrapper `runAiAgent` resolves env config + the prompt entry.
  */
-import { dispatchAiCompletion } from "./runtime/run-core";
+import {
+  dispatchAiCompletion,
+  type ChainDispatchContext,
+} from "./runtime/run-core";
+import type { AiProviderState } from "./runtime/provider-chain";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
@@ -67,10 +71,18 @@ export type AiAgentOutcome<T = unknown> =
       readonly routing?: AiRoutingAuditRecord;
     };
 
-/** Injectable dispatcher seam (tests exercise timeout/fallback without a network). */
+/**
+ * Injectable dispatcher seam (tests exercise timeout/fallback without a
+ * network).
+ *
+ * The third parameter is OPTIONAL so every existing two-argument override stays
+ * assignable — a function that ignores an argument is assignable to a type that
+ * declares it, so no test had to change to accommodate the chain.
+ */
 export type AiDispatcher = (
   request: AiCompletionRequest,
   cfg: AiRuntimeConfig,
+  chain?: ChainDispatchContext,
 ) => Promise<AiCompletionResult>;
 
 export interface RunAgentOptions {
@@ -94,6 +106,15 @@ export interface RunAgentOptions {
   /** Profile the run relates to — used ONLY by the server wrapper for the
    *  ai_runs audit row (the core never reads it). */
   readonly profileId?: string;
+  /**
+   * Observed readiness of every chain provider (runtime/provider-health.ts).
+   *
+   * PRESENT → run-core walks the free-first provider chain. ABSENT → it keeps
+   * the legacy single-provider behaviour exactly. The server wrapper supplies
+   * it from real configuration; leaving it out is how every existing caller and
+   * test stays on the path it was written for.
+   */
+  readonly providerStates?: readonly AiProviderState[];
   /** Test seam: replaces the real run-core dispatcher. */
   readonly dispatchOverride?: AiDispatcher;
 }
@@ -216,8 +237,13 @@ export async function runAiAgentCore<T = unknown>(
 
   // The routed alias resolves to the PRIMARY provider's candidate model id
   // (anthropic for mock/disabled so tests stay deterministic).
+  // The local runtime has NO candidate table — it hosts exactly the model the
+  // operator pulled, and `providers/local.ts` uses `cfg.localModel`. So the
+  // alias resolves against anthropic's table purely to keep `request.model`
+  // populated for the cloud candidates further down the chain; the local
+  // adapter ignores it by design.
   const modelProvider: AiModelProvider =
-    cfg.state === "live" ? cfg.provider : "anthropic";
+    cfg.state === "live" && cfg.provider !== "local" ? cfg.provider : "anthropic";
   const requestForDecision = (d: TaskRouteDecision): AiCompletionRequest => ({
     agentKey: entry.agent,
     promptVersion: entry.version,
@@ -241,11 +267,18 @@ export async function runAiAgentCore<T = unknown>(
     timeoutMs: Math.min(cfg.timeoutMs, policy.maxLatencyMs),
   };
 
+  // Chain context — supplied only when the caller observed provider states.
+  // Without it run-core keeps its legacy single-provider behaviour.
+  const chainFor = (d: TaskRouteDecision): ChainDispatchContext | undefined =>
+    opts.providerStates
+      ? { decision: d, states: opts.providerStates }
+      : undefined;
+
   let effectiveDecision = decision;
   let fallbackReason: string | null = null;
   const startedAt = Date.now();
   let result = await withLatencyTimeout(
-    dispatcher(request, guardedCfg),
+    dispatcher(request, guardedCfg, chainFor(decision)),
     policy.maxLatencyMs,
   );
 
@@ -264,7 +297,11 @@ export async function runAiAgentCore<T = unknown>(
       effectiveDecision = fbDecision;
       fallbackReason = "latency_timeout";
       result = await withLatencyTimeout(
-        dispatcher(requestForDecision(fbDecision), guardedCfg),
+        dispatcher(
+          requestForDecision(fbDecision),
+          guardedCfg,
+          chainFor(fbDecision),
+        ),
         policy.maxLatencyMs,
       );
     }
@@ -278,8 +315,14 @@ export async function runAiAgentCore<T = unknown>(
   ): AiRoutingAuditRecord =>
     buildRoutingAuditRecord(effectiveDecision, {
       ...auditBase,
+      // Which adapter ACTUALLY handled it. On the chain path a failure can come
+      // from a candidate several places down the list, and `result.provider`
+      // carries that — falling back to `cfg.provider` would have recorded the
+      // primary provider as the one that failed when it never ran.
       providerAdapter:
-        result.status === "ok" ? result.provider : providerKindFor(cfg),
+        result.status === "ok"
+          ? result.provider
+          : (result.provider ?? providerKindFor(cfg)),
       schemaValidation,
       confidence,
       latencyMs,

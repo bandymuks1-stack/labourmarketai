@@ -24,6 +24,7 @@
 import type { AiTaskType, TaskRouteDecision } from "../task-routing";
 
 export type AiProviderAdapterId =
+  | "local"
   | "anthropic"
   | "openai"
   | "gemini"
@@ -60,6 +61,19 @@ const LLM_TASKS: readonly AiTaskType[] = [
 ];
 
 export const PROVIDER_ADAPTER_REGISTRY: readonly AiProviderAdapterDescriptor[] = [
+  {
+    id: "local",
+    displayName: "Local OpenAI-compatible runtime",
+    status: "wired_env_gated",
+    capabilities: LLM_TASKS,
+    notes:
+      "Real chat-completions wire in providers/local.ts against an OPERATOR-CONFIGURED " +
+      "base URL — no vendor host is compiled in, so it needs no provider-host " +
+      "allowlist entry. The one adapter that requires NO api key: it authenticates " +
+      "by network location, and AI_LOCAL_API_KEY is optional (for a reverse proxy). " +
+      "Inert unless AI_PROVIDER_MODE=live + AI_LOCAL_ENABLED=true + a VALIDATED " +
+      "AI_LOCAL_BASE_URL + an explicit AI_LOCAL_MODEL.",
+  },
   {
     id: "anthropic",
     displayName: "Anthropic Claude",

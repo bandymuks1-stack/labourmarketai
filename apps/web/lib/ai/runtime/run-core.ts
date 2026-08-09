@@ -1,22 +1,34 @@
 /**
- * AI completion dispatch — pure selection core (Internal LLM Agents v1, PR2 ·
- * AI Router v1).
+ * AI completion dispatch — provider selection + CHAIN TRAVERSAL.
  *
- * Given a resolved {@link AiRuntimeConfig}, selects the active provider and runs
- * one completion. No env read, no server-only: importable by tests so the whole
- * disabled / mock / live selection is exercised without keys. The server
- * wrapper (run.ts) supplies the env-resolved config.
+ * Two dispatch paths live here, and the difference between them is whether the
+ * caller supplied a routed task.
  *
- * Provider selection rules (cheapest-sufficient still rules — the model TIER
- * comes from task routing, this layer only picks the transport):
- *   - disabled / mock behave exactly as before;
- *   - the primary live provider is cfg.provider (anthropic | openai | gemini |
- *     xai). Non-anthropic adapters are fetch-based and DOUBLE env-gated
- *     (per-provider enable flag + key) — without both they return the typed
- *     disabled sentinel, never a faked result;
- *   - a routing languageRouting preference (request.preferredProvider, e.g.
- *     "deepl" for translate_message) is TRIED FIRST on live runs; any non-ok
- *     result falls through honestly to the primary provider.
+ * LEGACY PATH (no chain context) — unchanged, byte for byte in behaviour: one
+ * provider, `cfg.provider`, selected by `providerKindFor`. Every existing
+ * caller and test keeps working exactly as before.
+ *
+ * CHAIN PATH (chain context supplied) — the one #1102 built the ordering module
+ * for and could not yet use. `resolveProviderChain` produces an ORDERED list of
+ * candidates that may serve this task, cheapest class first and privacy-vetoed;
+ * this file walks it. A candidate that fails is CLASSIFIED, and the class — not
+ * the fact of failure — decides whether the next candidate is tried at all.
+ *
+ * WHAT THIS FIXES. Before it, "Anthropic has no key" and "this task has nowhere
+ * to run" were the same event: one provider, no successor, one indistinguishable
+ * failure. Now a run ends in one of four honestly different places — a provider
+ * answered, the deterministic path applies, every candidate was tried and named,
+ * or no candidate was ever allowed to see the payload.
+ *
+ * WHAT IT REFUSES TO DO. It never retries a request-attributed failure across
+ * the whole chain (see `advancePolicyFor`), because handing the same personal
+ * payload to four vendors to receive the same malformed answer is a disclosure
+ * with no upside. And it can never promote a provider the operator did not
+ * configure: health is observed by `provider-health.ts` from real config, and
+ * only `ready` is ever a candidate.
+ *
+ * Pure-ish: no env read, no server-only. The adapters own their own env gates,
+ * and the states come in from the server boundary.
  */
 import { providerKindFor, type AiRuntimeConfig } from "./config-core";
 import type {
@@ -31,6 +43,18 @@ import { openaiCompletionProvider } from "./providers/openai";
 import { geminiCompletionProvider } from "./providers/gemini";
 import { xaiCompletionProvider } from "./providers/xai";
 import { deeplCompletionProvider } from "./providers/deepl";
+import { localCompletionProvider } from "./providers/local";
+import {
+  advancePolicyFor,
+  classifyCompletionFailure,
+  resolveProviderChain,
+  AI_PROVIDER_PROFILES,
+  type AiChainProviderId,
+  type AiProviderProfile,
+  type AiProviderState,
+  type ChainCandidate,
+} from "./provider-chain";
+import type { TaskRouteDecision } from "./task-routing";
 
 export function selectCompletionProvider(
   kind: ReturnType<typeof providerKindFor>,
@@ -38,6 +62,8 @@ export function selectCompletionProvider(
   switch (kind) {
     case "mock":
       return mockCompletionProvider;
+    case "local":
+      return localCompletionProvider;
     case "anthropic":
       return anthropicCompletionProvider;
     case "openai":
@@ -52,21 +78,134 @@ export function selectCompletionProvider(
   }
 }
 
+/** Chain id → adapter. Separate from `selectCompletionProvider` because the
+ *  chain addresses a provider directly, not through `cfg.provider`. */
+function adapterForChainId(id: AiChainProviderId): AiCompletionProvider {
+  switch (id) {
+    case "local":
+      return localCompletionProvider;
+    case "anthropic":
+      return anthropicCompletionProvider;
+    case "openai":
+      return openaiCompletionProvider;
+    case "gemini":
+      return geminiCompletionProvider;
+    case "xai":
+      return xaiCompletionProvider;
+  }
+}
+
+/** What the chain path needs that the legacy path does not. */
+export interface ChainDispatchContext {
+  /** The resolved route — supplies the task type and any block. */
+  readonly decision: TaskRouteDecision;
+  /** Observed provider readiness (provider-health.ts). */
+  readonly states: readonly AiProviderState[];
+  /**
+   * Profile table override. Production always uses the shipped
+   * `AI_PROVIDER_PROFILES`; this exists so a test can INJECT a cost class that
+   * does not exist yet — without it, the free-tier privacy veto has no subject
+   * and could not be proven at the dispatch/adapter-invocation level at all.
+   */
+  readonly profiles?: readonly AiProviderProfile[];
+}
+
+/**
+ * Try the DeepL translation preference first, when the policy asked for it.
+ * Unchanged behaviour, lifted into a helper so both paths share it: a
+ * not-configured or failing secondary provider falls through honestly to the
+ * LLM tier, and nothing is faked.
+ */
+async function tryPreferredSecondary(
+  request: AiCompletionRequest,
+  cfg: AiRuntimeConfig,
+): Promise<AiCompletionResult | null> {
+  if (request.preferredProvider !== "deepl") return null;
+  const preferred = await deeplCompletionProvider.complete(request, cfg);
+  return preferred.status === "ok" ? preferred : null;
+}
+
 export async function dispatchAiCompletion(
   request: AiCompletionRequest,
   cfg: AiRuntimeConfig,
+  chain?: ChainDispatchContext,
 ): Promise<AiCompletionResult> {
   const kind = providerKindFor(cfg);
 
-  // Language-routing preference (task policy → e.g. DeepL for
-  // translate_message). Live runs only — mock stays deterministic and
-  // disabled stays inert. A not-configured / failing secondary provider
-  // falls through to the primary LLM tier; nothing is faked.
-  if (request.preferredProvider === "deepl" && kind !== "disabled" && kind !== "mock") {
-    const preferred = await deeplCompletionProvider.complete(request, cfg);
-    if (preferred.status === "ok") return preferred;
+  // mock and disabled are WHOLE-RUNTIME states. They short-circuit both paths:
+  // a chain that reached a real adapter underneath `mock` would make the mock
+  // runtime meaningless, and one that reached a real adapter underneath
+  // `disabled` would be the exact failure the disabled state exists to prevent.
+  if (kind === "mock" || kind === "disabled") {
+    return selectCompletionProvider(kind).complete(request, cfg);
   }
 
-  const provider = selectCompletionProvider(kind);
-  return provider.complete(request, cfg);
+  if (!chain) {
+    // ── Legacy path — one provider, exactly as before. ────────────────────
+    const preferred = await tryPreferredSecondary(request, cfg);
+    if (preferred) return preferred;
+    return selectCompletionProvider(kind).complete(request, cfg);
+  }
+
+  // ── Chain path ────────────────────────────────────────────────────────────
+  const outcome = resolveProviderChain(
+    chain.decision,
+    chain.states,
+    chain.profiles ?? AI_PROVIDER_PROFILES,
+  );
+
+  if (outcome.kind === "deterministic") {
+    // The caller should have computed this without us. Say so precisely rather
+    // than returning an empty "ok" that looks like a model answered.
+    return {
+      status: "error",
+      code: "unsupported",
+      message: outcome.reason,
+    };
+  }
+  if (outcome.kind === "unavailable") {
+    // Name every candidate and why it was passed over. This string is the
+    // difference between "the AI is off" and "everything is down", which used
+    // to be the same silence.
+    const detail = outcome.skipped
+      .map((s) => `${s.id}: ${s.reason}`)
+      .join("; ");
+    return {
+      status: "error",
+      code: "unsupported",
+      message: detail ? `${outcome.reason} — ${detail}` : outcome.reason,
+    };
+  }
+
+  const preferred = await tryPreferredSecondary(request, cfg);
+  if (preferred) return preferred;
+
+  const candidates: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  let invalidOutputRetries = 0;
+  let last: AiCompletionResult = {
+    status: "error",
+    code: "unsupported",
+    message: "chain produced no candidate",
+  };
+
+  for (const candidate of candidates) {
+    const result = await adapterForChainId(candidate.id).complete(request, cfg);
+    if (result.status === "ok") return result;
+
+    // Attribute the failure to the provider that produced it, so an audit
+    // record cannot claim the primary provider failed when a different
+    // candidate did.
+    last = { ...result, provider: candidate.id };
+
+    const failure = classifyCompletionFailure(result);
+    if (failure === null) return result;
+    const policy = advancePolicyFor(failure);
+    if (policy === "stop") break;
+    if (policy === "advance_once") {
+      if (invalidOutputRetries >= 1) break;
+      invalidOutputRetries += 1;
+    }
+  }
+
+  return last;
 }

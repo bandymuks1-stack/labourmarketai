@@ -33,6 +33,11 @@
  * Pure. No IO, no env, no server-only, no SDK import.
  */
 import type { AiTaskType, TaskRouteDecision } from "./task-routing";
+import {
+  providerEligibleForSensitivity,
+  sensitivityForTask,
+  type AiDataSensitivity,
+} from "./data-sensitivity";
 
 /** Provider ids the chain can order. `local` is the keyless self-hosted seam. */
 export type AiChainProviderId =
@@ -291,6 +296,13 @@ function healthReason(state: AiProviderState | undefined): string {
  * considered — a cost ceiling or a missing human confirmation must not be
  * reportable as "no provider available", because the two call for completely
  * different responses from the caller.
+ *
+ * ELIGIBILITY IS CHECKED BEFORE HEALTH, and the order matters. A provider that
+ * may not lawfully receive this payload is not a provider that happens to be
+ * down: it must be excluded whether it is healthy or not, and it must be
+ * excluded for a reason that says so. Checking health first would let a
+ * privacy exclusion hide behind "unconfigured" and silently become eligible the
+ * day someone adds a key.
  */
 export function resolveProviderChain(
   decision: TaskRouteDecision,
@@ -314,21 +326,44 @@ export function resolveProviderChain(
 
   const byId = new Map(states.map((s) => [s.id, s]));
   const ordered = orderedCandidatesFor(decision.taskType, profiles);
+  const sensitivity = sensitivityForTask(decision.taskType);
   const skipped: SkippedCandidate[] = [];
+  const eligible: AiProviderProfile[] = [];
 
-  for (let i = 0; i < ordered.length; i++) {
-    const p = ordered[i];
+  // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
+  // they are not candidates for the first attempt OR for a later retry.
+  for (const p of ordered) {
+    const verdict = providerEligibleForSensitivity(p, sensitivity);
+    if (verdict.eligible) {
+      eligible.push(p);
+    } else {
+      skipped.push({ id: p.id, reason: verdict.reason });
+    }
+  }
+
+  // Pass 2 — readiness, among those allowed to see the payload at all.
+  for (let i = 0; i < eligible.length; i++) {
+    const p = eligible[i];
     const state = byId.get(p.id);
     if (state?.health === "ready") {
       return {
         kind: "provider",
         selected: { id: p.id, costClass: p.costClass, locality: p.locality },
         skipped,
-        remaining: ordered.slice(i + 1).map((r) => ({
-          id: r.id,
-          costClass: r.costClass,
-          locality: r.locality,
-        })),
+        // READY ONES ONLY. `remaining` exists so a failure can retry down the
+        // chain, and a provider the caller never reported ready is not a retry
+        // candidate — it is a provider that is already known not to work.
+        // Handing it back would make the consumer call adapters that the very
+        // same health observation had just excluded, which is how a chain ends
+        // up "falling back" onto four providers nobody configured.
+        remaining: eligible
+          .slice(i + 1)
+          .filter((r) => byId.get(r.id)?.health === "ready")
+          .map((r) => ({
+            id: r.id,
+            costClass: r.costClass,
+            locality: r.locality,
+          })),
       };
     }
     skipped.push({ id: p.id, reason: healthReason(state) });
@@ -339,12 +374,133 @@ export function resolveProviderChain(
     reason:
       ordered.length === 0
         ? `no provider declares capability for task "${decision.taskType}"`
-        : `every provider for task "${decision.taskType}" is unusable`,
+        : eligible.length === 0
+          ? `no provider may receive ${sensitivity} data for task "${decision.taskType}"`
+          : `every provider for task "${decision.taskType}" is unusable`,
     skipped,
   };
+}
+
+/** The sensitivity class the chain will enforce for a task — exported so the
+ *  caller can name it in an audit record without re-deriving the mapping. */
+export function chainSensitivityFor(task: AiTaskType): AiDataSensitivity {
+  return sensitivityForTask(task);
 }
 
 /** True when the outcome means the caller must NOT present an AI answer. */
 export function mustDegrade(outcome: ChainOutcome): boolean {
   return outcome.kind === "unavailable";
+}
+
+// ── Failure classification — what a failure MEANS for the rest of the chain ──
+
+/**
+ * Why a candidate did not produce a usable answer.
+ *
+ * The distinction that matters is not severity, it is ATTRIBUTION: did this
+ * PROVIDER fail, or did the REQUEST fail? A provider-attributed failure says
+ * nothing about the next provider, so advancing is free information. A
+ * request-attributed failure will reproduce everywhere, and walking the whole
+ * chain with it just pays four times for the same answer — and, when the
+ * request carries a person, hands the same payload to four vendors to learn
+ * nothing.
+ */
+export type ChainFailureClass =
+  /** This provider is not set up (missing key / base URL / model). */
+  | "CONFIGURATION"
+  /** Reachable in principle, not answering now (connection refused, 5xx). */
+  | "UNAVAILABLE"
+  /** Exceeded the clamped timeout or the policy latency ceiling. */
+  | "TIMEOUT"
+  /** Quota or rate limit — the provider is healthy and declining. */
+  | "RATE_LIMIT"
+  /** The provider answered with an error of its own. */
+  | "PROVIDER_ERROR"
+  /** It answered, but the output was not the shape the schema requires. */
+  | "INVALID_OUTPUT"
+  /** Excluded by the sensitivity veto. Not a failure — a refusal. */
+  | "PRIVACY_BLOCK"
+  /** No provider declares this task at all. */
+  | "UNSUPPORTED_CAPABILITY";
+
+export type ChainAdvancePolicy =
+  /** Provider-attributed: try the next candidate. */
+  | "advance"
+  /** Request-attributed: ONE better candidate may still help, no more. */
+  | "advance_once"
+  /** Nothing downstream can change the outcome. Degrade now. */
+  | "stop";
+
+/**
+ * May the chain move on after this failure?
+ *
+ * `INVALID_OUTPUT` is the interesting row, and it is `advance_once` rather than
+ * either extreme. A small local model that drifts off-schema is the single most
+ * likely failure of the free-first ordering, and one escalation to a
+ * structured-output provider genuinely fixes it — that is the whole reason
+ * `structuredOutput` is on the profile. But if the SECOND provider also cannot
+ * hold the shape, the prompt or the schema is what is wrong, and asking a third
+ * and a fourth is just repetition. One retry mirrors the one-tier escalation
+ * ceiling that task-routing already enforces for exactly the same reason.
+ */
+export function advancePolicyFor(
+  failure: ChainFailureClass,
+): ChainAdvancePolicy {
+  switch (failure) {
+    case "CONFIGURATION":
+    case "UNAVAILABLE":
+    case "TIMEOUT":
+    case "RATE_LIMIT":
+    case "PROVIDER_ERROR":
+      return "advance";
+    case "INVALID_OUTPUT":
+      return "advance_once";
+    case "PRIVACY_BLOCK":
+    case "UNSUPPORTED_CAPABILITY":
+      return "stop";
+  }
+}
+
+/**
+ * Map a completion result onto a failure class.
+ *
+ * `disabled` is deliberately CONFIGURATION rather than UNAVAILABLE: an adapter
+ * returning the disabled sentinel is telling us the operator never set it up,
+ * which is a different sentence from "it was set up and it is down", and the
+ * two produce different operator actions.
+ */
+export function classifyCompletionFailure(result: {
+  readonly status: string;
+  readonly code?: string;
+  readonly message?: string;
+}): ChainFailureClass | null {
+  if (result.status === "ok") return null;
+  if (result.status === "disabled") return "CONFIGURATION";
+
+  switch (result.code) {
+    case "timeout":
+      return "TIMEOUT";
+    case "no_api_key":
+      return "CONFIGURATION";
+    case "malformed_output":
+      return "INVALID_OUTPUT";
+    case "unsupported":
+      return "UNSUPPORTED_CAPABILITY";
+    case "budget_exceeded":
+      // Not a provider fault and not fixable by a different provider — the
+      // ceiling belongs to the run, not to the vendor.
+      return "RATE_LIMIT";
+    case "provider_error":
+    default: {
+      // A 429 arrives as a provider_error with the status in the message; rate
+      // limiting is worth separating because it is the one provider failure
+      // that is expected to clear on its own.
+      const m = result.message ?? "";
+      if (/\b429\b|rate.?limit|quota/i.test(m)) return "RATE_LIMIT";
+      if (/\b5\d{2}\b|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|fetch failed/i.test(m)) {
+        return "UNAVAILABLE";
+      }
+      return "PROVIDER_ERROR";
+    }
+  }
 }

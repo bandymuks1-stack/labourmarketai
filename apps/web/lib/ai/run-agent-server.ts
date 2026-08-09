@@ -16,7 +16,7 @@
  *     trail). Persistence failures never affect the run outcome.
  */
 import "server-only";
-import { getAiRuntimeConfig } from "./runtime/config";
+import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import {
   countAiRunsTodayBestEffort,
   persistAiRunAudit,
@@ -42,9 +42,13 @@ export async function runAiAgent<T = unknown>(
     if (counted !== null) runsToday = counted;
   }
 
+  // The server boundary is the only place that can observe what the operator
+  // configured, so it is the only place that can hand the core a chain. Callers
+  // that pass their own states (tests, evals) keep them.
   const outcome = await runAiAgentCore<T>(entry, input, cfg, {
     ...opts,
     runsToday,
+    providerStates: opts.providerStates ?? getAiProviderStates(),
   });
 
   // Append-only audit trail for real (live) runs — never blocks the outcome.

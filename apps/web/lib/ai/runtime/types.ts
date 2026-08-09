@@ -83,8 +83,30 @@ export type AiCompletionResult =
       readonly raw: unknown;
       readonly usage?: AiUsage;
     }
-  | { readonly status: "disabled"; readonly reason: AiDisabledReason }
-  | { readonly status: "error"; readonly code: AiErrorCode; readonly message: string };
+  | {
+      readonly status: "disabled";
+      readonly reason: AiDisabledReason;
+      readonly provider?: AiAttributedProvider;
+    }
+  | {
+      readonly status: "error";
+      readonly code: AiErrorCode;
+      readonly message: string;
+      readonly provider?: AiAttributedProvider;
+    };
+
+/**
+ * Which adapter produced a non-ok result, when the chain knows.
+ *
+ * Absent on the legacy single-provider path, where the failing provider is
+ * `cfg.provider` by construction. Present on the chain path, where it is the
+ * only way the audit trail can avoid blaming the primary provider for a
+ * failure that happened three candidates later.
+ */
+export type AiAttributedProvider =
+  | "mock"
+  | AiProviderKind
+  | AiSecondaryProviderKind;
 
 export function isAiOk(
   r: AiCompletionResult,
