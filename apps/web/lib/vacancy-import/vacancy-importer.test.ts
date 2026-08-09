@@ -1,5 +1,30 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+// The real registry row is `on` since the owner's 2026-08-09 activation
+// decision, so the PRE-activation states these tests pin (the honest refusal
+// a future un-activated provider must still get) are simulated with the same
+// per-test `getSourceProfile` patch the ingestion tests use.
+const ctl = vi.hoisted(() => ({ activationOverride: null as string | null }));
+
+vi.mock("@/lib/intelligence/source-governance", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/intelligence/source-governance")>();
+  return {
+    ...actual,
+    getSourceProfile: (key: string) => {
+      const profile = actual.getSourceProfile(key);
+      if (
+        profile &&
+        key === "arbetsformedlingen" &&
+        ctl.activationOverride !== null
+      ) {
+        return { ...profile, activation: ctl.activationOverride };
+      }
+      return profile;
+    },
+  };
+});
+
 import { runVacancyImport } from "./vacancy-importer";
 import { getVacancyProvider } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { emptyDedupState } from "@/lib/vacancy-sources/vacancy-dedup";
@@ -13,6 +38,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
+  ctl.activationOverride = null;
 });
 
 function enable(): void {
@@ -63,9 +89,10 @@ function request(over: Partial<Parameters<typeof runVacancyImport>[0]> = {}) {
   };
 }
 
-describe("the source is NOT activated — the honest default", () => {
+describe("the source is NOT activated — the honest default for any future provider", () => {
   it("parses and validates but imports NOTHING, reporting validAfterActivation", async () => {
     enable();
+    ctl.activationOverride = "owner_review";
     stubFetch([ad(), ad({ id: "ad-2" })]);
 
     const result = await runVacancyImport(request());
@@ -81,6 +108,7 @@ describe("the source is NOT activated — the honest default", () => {
 
   it("names the ACTIVATION gate — the provider's terms are confirmed, our activation is not", async () => {
     enable();
+    ctl.activationOverride = "owner_review";
     stubFetch([ad()]);
 
     const result = await runVacancyImport(request());
@@ -100,6 +128,7 @@ describe("the source is NOT activated — the honest default", () => {
 
   it("persist mode still writes nothing and says why", async () => {
     enable();
+    ctl.activationOverride = "owner_review";
     stubFetch([ad()]);
     const persist = vi.fn();
 
@@ -343,6 +372,9 @@ describe("failure handling", () => {
 describe("deduplication runs inside the pipeline", () => {
   it("an ad already stored is counted as a duplicate, not re-accepted", async () => {
     enable();
+    // Pin the pre-activation reporting path: dedup must collapse identical
+    // ads even while the source only REPORTS what would be valid.
+    ctl.activationOverride = "owner_review";
     // Compute the hash the parser will produce for this exact ad.
     const probeFetch = [ad()];
     stubFetch(probeFetch);

@@ -16,13 +16,15 @@ describe("intelligence source governance", () => {
     expect(isExternalSourceActive("eurostat")).toBe(true);
   });
 
-  it("every external profile EXCEPT eurostat is INACTIVE", () => {
-    // The invariant is inactivity. Legal status is a separate fact about the
-    // provider, and it changes when a provider actually answers us —
-    // arbetsformedlingen confirmed its terms on 2026-08-04 and is therefore
-    // `confirmed` + `owner_review`, still importing nothing.
+  it("every external profile EXCEPT the owner-activated set is INACTIVE", () => {
+    // The invariant is inactivity-by-default. Exactly two externals carry a
+    // recorded owner activation: eurostat (metrics) and arbetsformedlingen
+    // (vacancies, approved 2026-08-09 —
+    // docs/human-gates/arbetsformedlingen-activation-gate.md). Everything
+    // else imports nothing.
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
+      (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -43,14 +45,17 @@ describe("intelligence source governance", () => {
     }
   });
 
-  it("arbetsformedlingen: provider-confirmed, awaiting OUR activation", () => {
+  it("arbetsformedlingen: provider-confirmed AND owner-activated (2026-08-09)", () => {
     const p = getSourceProfile("arbetsformedlingen");
     expect(p).not.toBeNull();
     expect(p!.legalStatus).toBe("confirmed");
     expect(p!.proposedOnly).toBe(false);
-    expect(p!.activation).toBe("owner_review");
+    // Owner approval recorded in
+    // docs/human-gates/arbetsformedlingen-activation-gate.md. The runtime
+    // env switch is still the second gate — activation alone imports nothing.
+    expect(p!.activation).toBe("on");
     expect(p!.attributionRequired).toBe(true);
-    expect(isExternalSourceActive("arbetsformedlingen")).toBe(false);
+    expect(isExternalSourceActive("arbetsformedlingen")).toBe(true);
   });
 
   it("eurostat profile is confirmed, on, not proposed-only, with a recorded policy", () => {

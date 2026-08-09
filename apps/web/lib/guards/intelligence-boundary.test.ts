@@ -108,23 +108,25 @@ describe("(b) lib/intelligence never imports an LLM SDK", () => {
 
 // ── (c) every external source stays OFF ─────────────────────────────────────
 
-describe("(c) source governance keeps every external source EXCEPT eurostat inactive", () => {
-  // eurostat is the ONE owner-ACTIVATED external source (2026-07-15).
+describe("(c) source governance keeps every external source outside the owner-activated set inactive", () => {
+  // Owner-ACTIVATED externals: eurostat (metrics, 2026-07-15) and
+  // arbetsformedlingen (vacancies, 2026-08-09 —
+  // docs/human-gates/arbetsformedlingen-activation-gate.md).
   //
   // This guard pins INACTIVITY, not ignorance. It used to also assert that
   // every other external source was `unconfirmed` + `proposedOnly` — but
   // those were proxies for "not active", and they stopped being true the
-  // moment a provider actually answered us. Arbetsförmedlingen / JobTech
-  // confirmed on 2026-08-04 that its APIs are free, keyless, notification-
-  // free and CC0, so recording it as `unconfirmed` would now be a lie in the
-  // registry, and lying to satisfy a guard is the worst of both worlds.
+  // moment a provider actually answered us. Recording an answered provider
+  // as `unconfirmed` would be a lie in the registry, and lying to satisfy a
+  // guard is the worst of both worlds.
   //
   // The property that carries the safety is unchanged and asserted directly:
-  // NO external source other than eurostat is active, whatever its legal
-  // status says, because activation is a separate decision.
-  it("no external profile except eurostat is ACTIVE", () => {
+  // NO external source outside the recorded owner-activated set is active,
+  // whatever its legal status says — activation is a separate decision.
+  it("no external profile outside {eurostat, arbetsformedlingen} is ACTIVE", () => {
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
-      (p) => p.sourceKind !== "internal_aggregated" && p.key !== "eurostat",
+      (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );
     expect(external.length).toBeGreaterThan(0);
     for (const p of external) {
@@ -153,7 +155,7 @@ describe("(c) source governance keeps every external source EXCEPT eurostat inac
     }
   });
 
-  it("arbetsformedlingen is provider-confirmed and NOT active — the two are separate", () => {
+  it("arbetsformedlingen is provider-confirmed AND owner-activated — both facts recorded", () => {
     const p = INTELLIGENCE_SOURCE_PROFILES.find(
       (x) => x.key === "arbetsformedlingen",
     )!;
@@ -161,22 +163,28 @@ describe("(c) source governance keeps every external source EXCEPT eurostat inac
     expect(p.legalStatus).toBe("confirmed");
     expect(p.proposedOnly).toBe(false);
     expect(p.attributionRequired).toBe(true);
-    // Our activation decision: still open, so nothing may enter.
-    expect(p.activation).toBe("owner_review");
-    expect(isExternalSourceActive("arbetsformedlingen")).toBe(false);
+    // Owner activation: approved 2026-08-09
+    // (docs/human-gates/arbetsformedlingen-activation-gate.md). The runtime
+    // env switch remains the second, independent gate.
+    expect(p.activation).toBe("on");
+    expect(isExternalSourceActive("arbetsformedlingen")).toBe(true);
   });
 
-  it("eurostat is the only active external source (confirmed, on, policy recorded)", () => {
+  it("the active external set is EXACTLY {eurostat, arbetsformedlingen} — nothing rides along", () => {
     const p = INTELLIGENCE_SOURCE_PROFILES.find((x) => x.key === "eurostat")!;
     expect(p.activation).toBe("on");
     expect(p.legalStatus).toBe("confirmed");
     expect(p.proposedOnly).toBe(false);
     expect(isExternalSourceActive("eurostat")).toBe(true);
-    // exactly one external source is active
+    // Exactly the two owner-approved externals — a third key appearing here
+    // means a source was activated without a recorded owner decision.
     const activeExternals = INTELLIGENCE_SOURCE_PROFILES.filter(
       (x) => x.sourceKind !== "internal_aggregated" && isExternalSourceActive(x.key),
     );
-    expect(activeExternals.map((x) => x.key)).toEqual(["eurostat"]);
+    expect(activeExternals.map((x) => x.key).sort()).toEqual([
+      "arbetsformedlingen",
+      "eurostat",
+    ]);
     // allExternalSourcesOff reflects the activation
     expect(allExternalSourcesOff()).toBe(false);
   });

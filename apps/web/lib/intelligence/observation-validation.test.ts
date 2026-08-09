@@ -113,11 +113,11 @@ describe("validateObservationCandidate — deterministic gate", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("FAIL-CLOSED: every external source EXCEPT eurostat is rejected as not-active", () => {
+  it("FAIL-CLOSED: no external source except eurostat can land a METRIC observation", () => {
     for (const profile of INTELLIGENCE_SOURCE_PROFILES) {
       if (profile.sourceKind === "internal_aggregated") continue;
-      // eurostat is the one activated external source — its source_approved
-      // check passes (it is covered by the eurostat importer/validation tests).
+      // eurostat is the one metric-activated external source — its
+      // source_approved check passes (covered by the eurostat importer tests).
       if (profile.key === "eurostat") continue;
       const obs = validObservation({
         sourceKind: profile.sourceKind,
@@ -127,10 +127,21 @@ describe("validateObservationCandidate — deterministic gate", () => {
       });
       const result = validateObservationCandidate(candidate(obs), CONTEXT);
       expect(result.ok, profile.key).toBe(false);
-      expect(failuresOf(result)).toContainEqual({
-        checkId: "source_approved",
-        reasonCode: "source_not_active",
-      });
+      if (profile.key === "arbetsformedlingen") {
+        // Owner-activated for VACANCIES (2026-08-09) — the source gate
+        // passes, but with importPolicy null the metric_policy check still
+        // refuses every metric observation. This is the fail-closed line the
+        // governance comment promised: activation cannot leak metrics.
+        expect(failuresOf(result)).toContainEqual({
+          checkId: "metric_policy",
+          reasonCode: "import_policy_missing",
+        });
+      } else {
+        expect(failuresOf(result)).toContainEqual({
+          checkId: "source_approved",
+          reasonCode: "source_not_active",
+        });
+      }
     }
   });
 

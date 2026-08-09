@@ -131,10 +131,11 @@ export interface VacancyProviderDescriptorV1 {
  * require no prior notification, and the data is CC0. Attribution is
  * requested by the provider and required by our product policy.
  *
- * The governance row (source-governance.ts) therefore ships legalStatus
- * "confirmed" with activation "owner_review" — approved for integration, not
- * running in production. Every stage below is built and tested but imports
- * nothing until a persistence schema exists and an operator flips the env.
+ * The governance row (source-governance.ts) carries legalStatus "confirmed"
+ * and, since the owner's 2026-08-09 decision
+ * (docs/human-gates/arbetsformedlingen-activation-gate.md), activation "on".
+ * The runtime env switch (VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED) remains
+ * the second, independent gate — code alone still imports nothing.
  *
  * Channel cadence is the provider's own recommendation, encoded in
  * VACANCY_CHANNEL_CADENCE below so an operator cannot invent a harsher one.

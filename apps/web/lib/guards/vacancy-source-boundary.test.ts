@@ -132,23 +132,44 @@ describe("(b) categorization is deterministic — no LLM SDK in the pipeline", (
 // ── (c) every provider stays owner-gated ─────────────────────────────────────
 
 describe("(c) every vacancy provider is OWNER-GATED in source governance", () => {
-  it("each provider has a governance row that is NOT active", () => {
+  // The exact set of providers the owner has activated, each with the date of
+  // the recorded decision. Adding a key here without a real owner decision is
+  // exactly the fabrication this guard exists to catch.
+  const OWNER_ACTIVATED: ReadonlyMap<string, string> = new Map([
+    // docs/human-gates/arbetsformedlingen-activation-gate.md — approved
+    // 2026-08-09 (staged: dry-run first, bounded import, no cap raises).
+    ["arbetsformedlingen", "2026-08-09"],
+  ]);
+
+  it("each provider is either in the recorded owner-activated set or NOT active", () => {
     // Provider permission and OUR activation are separate decisions. A
-    // provider may have confirmed its terms (Arbetsförmedlingen has: CC0,
-    // keyless, no prior notification) and still import nothing, because
-    // activation needs a persistence schema and an operator flip.
+    // provider may have confirmed its terms and still import nothing until
+    // the owner records an activation decision in the set above.
     expect(VACANCY_PROVIDERS.length).toBeGreaterThan(0);
     for (const provider of VACANCY_PROVIDERS) {
       const profile = INTELLIGENCE_SOURCE_PROFILES.find(
         (p) => p.key === provider.governanceSourceKey,
       );
       expect(profile, `${provider.key} governance row`).toBeTruthy();
-      expect(profile!.activation, `${provider.key} activation`).not.toBe("on");
+      // Vacancies are never metric observations — activated or not, no
+      // vacancy provider may hold a metric import policy.
       expect(profile!.importPolicy, `${provider.key} importPolicy`).toBeNull();
-      expect(
-        isExternalSourceActive(provider.key),
-        `${provider.key} active`,
-      ).toBe(false);
+      if (OWNER_ACTIVATED.has(provider.key)) {
+        // An activated provider must have its legal facts recorded — an
+        // active-but-unconfirmed source would be a governance violation.
+        expect(profile!.legalStatus, `${provider.key} legalStatus`).toBe(
+          "confirmed",
+        );
+        expect(isExternalSourceActive(provider.key), provider.key).toBe(true);
+      } else {
+        expect(profile!.activation, `${provider.key} activation`).not.toBe(
+          "on",
+        );
+        expect(
+          isExternalSourceActive(provider.key),
+          `${provider.key} active`,
+        ).toBe(false);
+      }
     }
   });
 
@@ -158,7 +179,9 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
     )!;
     expect(profile.legalStatus).toBe("confirmed");
     expect(profile.proposedOnly).toBe(false);
-    expect(profile.activation).toBe("owner_review");
+    // Owner-approved 2026-08-09 — activation is now ON; the runtime env
+    // switch remains the second, independent gate.
+    expect(profile.activation).toBe("on");
   });
 
   it("no vacancy provider endpoint requires an API key", () => {
@@ -491,14 +514,22 @@ describe("(g) the kill switch fails closed", () => {
   });
 
   it("the env flag alone cannot import anything — governance is the second gate", () => {
-    // Both gates are required. This asserts the pair explicitly so removing
-    // either one fails here rather than silently in production.
+    // Both gates are required. For a provider WITHOUT a recorded owner
+    // activation, flipping the env switch must still import nothing; the
+    // global kill switch must also stop an activated provider instantly.
     for (const provider of VACANCY_PROVIDERS) {
       const envOn = evaluateVacancySwitch(provider.key, {
         [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
       });
       expect(envOn.operational, provider.key).toBe(true);
-      expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
+      if (provider.key !== "arbetsformedlingen") {
+        expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
+      }
+      const killed = evaluateVacancySwitch(provider.key, {
+        [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
+        VACANCY_IMPORT_KILL_SWITCH: "on",
+      });
+      expect(killed.operational, `${provider.key} kill`).toBe(false);
     }
   });
 });
