@@ -164,7 +164,11 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     // call sites (not the helper definition, not scripts, not tests). If a
     // new one appears, this fails so the audit doc must be updated and the
     // new bypass justified.
-    const roots = ["app", "lib"];
+    // `components` joined the scan 2026-08-09, when the vacancy-sources
+    // section became the FIRST server component to call createAdminClient —
+    // an unscanned root is a blind spot, and registering my own caller while
+    // leaving the hole open would be exploiting the guard, not passing it.
+    const roots = ["app", "lib", "components"];
     const callers: string[] = [];
     const walk = (absDir: string, relDir: string) => {
       for (const e of readdirSync(absDir, { withFileTypes: true })) {
@@ -253,11 +257,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    write policy (owner/admin SELECT only), webhook + checkout-session
     //    flows have no user session on the write side, so service-role is
     //    the only write path. Touches no chat table, sends nothing outbound.
-    //  - app/[locale]/dashboard/admin/vacancy-sources/page.tsx +
+    //  - components/admin/vacancy-sources-section.tsx +
     //    lib/vacancy-runner/vacancy-admin-actions.ts — the vacancy-source
-    //    operator console (real-supply train). Superadmin-gated twice: the
-    //    admin layout + per-page requireSuperadmin for the page, and an
-    //    explicit isSuperadmin() FIRST in every action. Service role is
+    //    operator SECTION on the admin control room (real-supply train; a
+    //    section, not a page — the constitution blocks new screens).
+    //    Superadmin-gated twice: the admin layout + requireSuperadmin around
+    //    the rendering page, and an explicit isSuperadmin() FIRST in every
+    //    action. Service role is
     //    genuinely required, not convenient: `vacancy_import_cursors` is
     //    RLS-enabled with ZERO policies (operator-only by construction), so
     //    no user-session client can read checkpoint health or record a run.
@@ -275,7 +281,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
-      "app/[locale]/dashboard/admin/vacancy-sources/page.tsx",
+      "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",

@@ -1,46 +1,45 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
-import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readVacancySourceHealth } from "@/lib/vacancy-runner/vacancy-ingestion";
 import { VacancySourceRunPanel } from "@/components/admin/vacancy-source-run-panel";
 
 /**
- * VACANCY SOURCES — the operator console for external job-ad ingestion
+ * VACANCY SOURCES — the operator section for external job-ad ingestion
  * (SOURCE_REGISTRY × SOURCE_GOVERNANCE × runtime switch × cursor health ×
  * stored rows, one row per provider).
  *
- * Fail-closed gates, in order:
- *   1. the admin layout + per-page requireSuperadmin (defense-in-depth);
- *   2. every RUN action re-checks isSuperadmin itself — an action is an HTTP
- *      endpoint regardless of which page renders it;
- *   3. a PERSIST run is refused by the runner unless governance activation
- *      AND the env kill switch are both open. Nothing on this page can
- *      override either — it can only make their state visible.
+ * A SECTION on the existing admin control room, deliberately NOT a new page:
+ * the product constitution's world-state lock blocks new screens
+ * (`needsNoNewPage` is a blocking answer, and not one of the waivable
+ * readiness fields), and an operator console has no claim to an exemption the
+ * worker journey does not get. The admin index already is "one coherent
+ * control surface, not a flat grid of tiles" — this is one more coherent
+ * area on it.
  *
- * The health read tolerates the not-yet-provisioned store, so this page is
+ * Fail-closed gates, in order:
+ *   1. rendered ONLY inside /dashboard/admin (admin layout + page
+ *      requireSuperadmin);
+ *   2. every RUN action re-checks isSuperadmin itself — an action is an HTTP
+ *      endpoint regardless of which surface renders it;
+ *   3. a PERSIST run is refused by the runner unless governance activation
+ *      AND the env kill switch are both open. Nothing here can override
+ *      either — the section can only make their state visible.
+ *
+ * The health read tolerates the not-yet-provisioned store, so this section is
  * honest BEFORE the persistence migration is applied, not only after.
  */
-
-export const dynamic = "force-dynamic";
-
-export default async function VacancySourcesPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  await requireSuperadmin(locale);
-
+export async function VacancySourcesSection() {
   const t = await getTranslations("vacancySources.admin");
   const health = await readVacancySourceHealth(createAdminClient());
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <p className="mt-1 max-w-3xl text-sm text-text-muted">{t("intro")}</p>
+    <section className="flex flex-col gap-3" data-testid="admin-vacancy-sources">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        <p className="max-w-3xl text-xs text-text-secondary">{t("intro")}</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -134,6 +133,6 @@ export default async function VacancySourcesPage({
           errorsLabel: t("errorsLabel"),
         }}
       />
-    </div>
+    </section>
   );
 }
