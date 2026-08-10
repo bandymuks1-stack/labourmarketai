@@ -381,7 +381,26 @@ export function HeroLiveDemo() {
             placeholder={t("askPlaceholder")}
             aria-label={t("askPlaceholder")}
             data-testid="hero-ask-input"
-            className="min-h-11 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
+            // `w-0` IS LOAD-BEARING — it is what keeps the whole landing inside
+            // a 320px viewport. An <input> without an explicit width has an
+            // intrinsic `size`-based min-content of ~205px, and `min-w-0` does
+            // NOT remove that from the intrinsic-sizing pass. Measured on
+            // 2026-08-09 at 320px, that 205px propagated outward:
+            //
+            //   input 205 + gap 8 + submit 78 = form min-content 291
+            //   + card padding/border 34       = card min-content 325
+            //   -> the hero grid track was sized 325 inside a 272px container
+            //
+            // and dragged the map column, the "Demonstracija" badge and the map
+            // caption out to x=349 with it — body.scrollWidth 349 vs 320.
+            // `html { overflow-x: hidden }` then CLIPPED the excess instead of
+            // scrolling it, so the right edge was silently cut off.
+            //
+            // `w-0` makes the min-content contribution 0; `flex-1` still grows
+            // the field to fill the row, so nothing changes visually above
+            // 320px. Proven by bounding-box measurement in
+            // tests/e2e/landing-mobile-overflow.spec.ts.
+            className="min-h-11 w-0 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
           />
           <button
             type="submit"
@@ -463,7 +482,10 @@ export function HeroLiveDemo() {
           revealCount={reveal}
         />
 
-        <p className="flex items-center gap-1.5 text-meta text-text-muted">
+        <p
+          data-testid="hero-map-hint"
+          className="flex items-center gap-1.5 text-meta text-text-muted"
+        >
           <ArrowRight className="size-3.5 shrink-0" aria-hidden />
           {t("mapHint")}
         </p>

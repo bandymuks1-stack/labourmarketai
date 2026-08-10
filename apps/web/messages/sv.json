@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Avisering",
+        "pending_invitations": "Inbjudningar väntar på ditt svar",
+        "unread_messages": "Olästa meddelanden",
+        "incoming_service_requests": "Tjänsteförfrågningar väntar på svar",
+        "service_request_responses": "Svar på dina förfrågningar",
+        "pending_bookings": "Bokningsförslag väntar på svar",
+        "booking_responses": "Svar på dina bokningsförslag",
+        "open_task_attention": "Uppgifter som behöver uppmärksamhet",
+        "pending_absence_reviews": "Frånvaroansökningar att granska",
+        "new_job_matches": "Nya platsannonser som passar dig",
+        "event_booking_proposed": "Du har fått ett bokningsförslag",
+        "event_booking_accepted": "Ditt bokningsförslag accepterades",
+        "event_booking_declined": "Ditt bokningsförslag avböjdes",
+        "event_absence_requested": "En frånvaro registrerades för dig",
+        "event_absence_approved": "Din frånvaro godkändes",
+        "event_absence_rejected": "Din frånvaro avböjdes",
+        "event_engagement_created": "Ett nytt engagemang skapades"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",
@@ -727,7 +746,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Mörkt tema",
     "themeToLight": "Ljust tema",
-    "how": "Så fungerar det"
+    "how": "Så fungerar det",
+    "menuOpen": "Meny",
+    "menuClose": "Stäng meny"
   },
   "pages": {
     "agencies": {
@@ -1958,12 +1979,32 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Offentliga jobbannonser",
+      "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
+      "openOriginal": "Öppna originalannonsen",
+      "noApplicationRoute": "Källan har inte publicerat någon ansökningsadress för denna annons.",
+      "publishedOn": "Publicerad {date}",
+      "positions": "{count} tjänst(er)",
+      "payAsPublished": "Lön som publicerad",
+      "gapsTitle": "Ej angivet i annonsen",
+      "gap": {
+        "no_city": "stad",
+        "no_country": "land",
+        "no_language_requirement": "språkkrav",
+        "no_profession": "yrke",
+        "no_requirement_set": "kompetenskrav",
+        "no_start_date": "startdatum",
+        "pay_not_comparable": "lön ej jämförbar (ej i EUR)"
+      }
     }
   },
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Blockerande krav"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2044,6 +2085,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Uppfyller de angivna kraven",
+      "blocked": "Uppfyller inte ett angivet krav",
+      "evidence": {
+        "confirmed": "Underlag: bekräftat av chef",
+        "mixed": "Underlag: delvis bekräftat",
+        "unverified": "Underlag: endast egenuppgivet"
+      }
     }
   },
   "waze": {
@@ -3432,7 +3482,8 @@
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
-      "roleReason": "[EN] Need: {role}"
+      "roleReason": "[EN] Need: {role}",
+      "introExternal": "Det finns {count} offentliga platsannonser från officiella källor i panelen — ansökan sker via den ursprungliga annonsen."
     },
     "summary": {
       "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -4134,6 +4185,47 @@
       "externalPublicSource": "Publicerad av en offentlig arbetsförmedling. Visas här så att du kan hitta den — det är inte en labourmarket.ai-annons.",
       "employerHasNotClaimed": "Den här arbetsgivaren hanterar inte annonsen på labourmarket.ai ännu, så ansökan sker via ursprungsannonsen.",
       "employerManagesHere": "Den här arbetsgivaren hanterar annonsen på labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivering",
+      "colCountry": "Land",
+      "colFailures": "Felserie",
+      "colLastSuccess": "Senaste framgång",
+      "colLegal": "Juridisk status",
+      "colSource": "Källa",
+      "colStored": "Sparat (aktiva)",
+      "colSwitch": "Körbrytare",
+      "errorsLabel": "Fel",
+      "importDisabledReason": "Körbrytaren för denna källa är stängd. Den öppnas av ägaren (miljö), inte av denna sida.",
+      "intro": "Externa offentliga jobbannonskällor: styrning, körstatus och importhälsa. En provkörning läser och räknar men sparar inget; en import skriver bara när ägaren har aktiverat källan och öppnat körbrytaren.",
+      "mAccepted": "Accepterade",
+      "mDuplicate": "Dubbletter",
+      "mInserted": "Infogade",
+      "mRejected": "Avvisade",
+      "mSeen": "Sedda",
+      "mUnchanged": "Oförändrade",
+      "mUpdated": "Uppdaterade",
+      "mWaiting": "Väntar på aktivering",
+      "refused": "Avvisad",
+      "resultTitle": "Senaste körning",
+      "runDry": "Provkörning",
+      "runImport": "Importera",
+      "runTitle": "Kör",
+      "running": "Kör…",
+      "statusLabel": "Status",
+      "switchClosed": "stängd",
+      "switchOpen": "öppen",
+      "title": "Jobbannonskällor",
+      "checkpointTitle": "Kanal-kontrollpunkter",
+      "checkpointNote": "Senaste körningens status per kanal från cursor-lagret. Full körningsredovisning visas bara vid körningen — beständig körningshistorik kräver en ägargodkänd schemaändring.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Senaste körning",
+      "colLastFailure": "Senaste fel",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Ingen körning ännu",
+      "stateOk": "Senaste körning OK",
+      "stateFailing": "Misslyckas"
     }
   },
   "profileIdentityNotice": {

@@ -65,6 +65,8 @@ export function OpportunitiesResult({
   onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
+  // The board's external-section vocabulary — reused, never restated.
+  const tOpp = useTranslations("opportunities");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // Bumping this re-runs the read — that is the whole of RETRY.
   const [attempt, setAttempt] = useState(0);
@@ -139,9 +141,10 @@ export function OpportunitiesResult({
     );
   }
 
-  if (view.matches.length === 0) {
-    // Honest empty (§18): the read worked, nothing matched, and the ONE
-    // concrete next step is named rather than implied.
+  if (view.matches.length === 0 && view.external.length === 0) {
+    // Honest empty (§18): the read worked, nothing matched — neither a
+    // platform demand nor an external public-source ad — and the ONE concrete
+    // next step is named rather than implied.
     return (
       <Explained
         testId="opportunities-empty"
@@ -156,10 +159,12 @@ export function OpportunitiesResult({
     <div className="flex flex-col gap-3" data-testid="opportunities-view">
       {/* Rendering IS the read event — and only the rows below are reported,
           never the full loaded set. */}
-      <OpportunitiesShownMarker
-        surface="conversation"
-        requestIds={view.matches.map((m) => m.requestId)}
-      />
+      {view.matches.length > 0 && (
+        <OpportunitiesShownMarker
+          surface="conversation"
+          requestIds={view.matches.map((m) => m.requestId)}
+        />
+      )}
 
       {/* PARTIAL: the rows are real, the novelty signal is not trustworthy
           this render, and the panel says which of the two is true. */}
@@ -172,16 +177,18 @@ export function OpportunitiesResult({
         </p>
       )}
 
-      <ul className="flex flex-col divide-y divide-border/40">
-        {view.matches.map((m) => (
-          <MatchRow
-            key={m.requestId}
-            match={m}
-            claimNovelty={!view.seenDegraded}
-            interestLabels={view.interestLabels}
-          />
-        ))}
-      </ul>
+      {view.matches.length > 0 && (
+        <ul className="flex flex-col divide-y divide-border/40">
+          {view.matches.map((m) => (
+            <MatchRow
+              key={m.requestId}
+              match={m}
+              claimNovelty={!view.seenDegraded}
+              interestLabels={view.interestLabels}
+            />
+          ))}
+        </ul>
+      )}
 
       {/* Only stated when there genuinely are more than the shown slice. */}
       {view.totalRecommendable > view.matches.length && (
@@ -190,6 +197,36 @@ export function OpportunitiesResult({
             n: view.totalRecommendable - view.matches.length,
           })}
         </p>
+      )}
+
+      {/* EXTERNAL public-source ads — the same rows the board's external
+          section renders, compact. Provenance on every row; the publisher's
+          original ad is the ONLY action (no platform apply, no interest —
+          the employer never agreed to receive any of that). */}
+      {view.external.length > 0 && (
+        <div
+          className="flex flex-col gap-2"
+          data-testid="opportunities-external-rows"
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {tOpp("external.sectionTitle")} · {view.totalExternal}
+          </span>
+          <ul className="flex flex-col divide-y divide-border/40">
+            {view.external.map((row) => (
+              <ExternalRow key={row.key} row={row} />
+            ))}
+          </ul>
+          {view.totalExternal > view.external.length && (
+            <p
+              className="text-meta text-text-muted"
+              data-testid="opportunities-external-more"
+            >
+              {t("opportunitiesMore", {
+                n: view.totalExternal - view.external.length,
+              })}
+            </p>
+          )}
+        </div>
       )}
 
       <PanelButton
@@ -376,6 +413,49 @@ function MatchRow({
             labels={interestLabels}
           />
         </div>
+      )}
+    </li>
+  );
+}
+
+/**
+ * One EXTERNAL public-source ad, compact. Every value is a field from the
+ * projected row; nothing is derived here. The anchor to the publisher's
+ * original ad mirrors the board section's own control — it is an external
+ * link, not internal routing, so the panel's "no router" rule holds.
+ */
+function ExternalRow({ row }: { row: import("@/lib/marketplace/worker-opportunities-contract").OpportunitiesResultExternalRow }) {
+  // The SAME label keys the board's external section uses — one vocabulary
+  // for external ads, whichever surface renders them.
+  const tOpp = useTranslations("opportunities");
+  return (
+    <li
+      className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0"
+      data-testid="opportunities-external-row"
+    >
+      <span className="text-support font-semibold text-text-primary">
+        {row.title}
+      </span>
+      <span className="text-meta text-text-muted">
+        {[row.employerName, row.city, row.country].filter(Boolean).join(" · ")}
+        {" · "}
+        {tOpp("external.publishedOn", { date: row.publishedAt })}
+      </span>
+      <span className="text-meta text-text-muted">{row.attributionText}</span>
+      {row.originalUrl ? (
+        <a
+          href={`https://${row.originalUrl.replace(/^https?:\/\//, "")}`}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className="w-fit rounded-sm text-meta text-brand-blue underline-offset-2 hover:underline"
+          data-testid="opportunities-external-original"
+        >
+          {tOpp("external.openOriginal")} ↗
+        </a>
+      ) : (
+        <span className="text-meta text-text-muted">
+          {tOpp("external.noApplicationRoute")}
+        </span>
       )}
     </li>
   );

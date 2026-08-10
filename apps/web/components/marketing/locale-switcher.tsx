@@ -37,7 +37,21 @@ const NATIVE: Record<string, string> = {
  * from `window.location` at the moment the menu opens (client-only —
  * avoids a useSearchParams Suspense boundary on statically rendered pages).
  */
-export function LocaleSwitcher({ className }: { className?: string }) {
+export function LocaleSwitcher({
+  className,
+  compactBelowSm = false,
+}: {
+  className?: string;
+  /**
+   * Show the locale CODE ("LT") instead of the native name ("Lietuvių")
+   * below `sm`. OPT-IN, because it is a downgrade in clarity that only a
+   * width-starved host should pay: the public header at 320px cannot spend
+   * the 109px the native name costs (beta foundation audit M1 measurement).
+   * The footer, the account page and the dashboard have the room and keep
+   * the full name.
+   */
+  compactBelowSm?: boolean;
+}) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("common");
@@ -72,12 +86,27 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         aria-expanded={open}
         aria-label={t("localeSwitch")}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/70 px-3 py-1.5",
+          // min-h-11 = the product's 44px touch floor. `py-1.5` alone rendered
+          // this 30px tall in the public header, next to a disclosure button
+          // the floor is guard-pinned on. The minimum only takes effect where
+          // the box was too short — padding, radius and colours are unchanged.
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800/70 px-3 py-1.5",
           "text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary",
         )}
       >
         <Globe aria-hidden className="h-3.5 w-3.5 text-text-muted" />
-        <span>{NATIVE[active] ?? active.toUpperCase()}</span>
+        {/* The button keeps its `localeSwitch` aria-label in both modes, so
+            the ACCESSIBLE name never shrinks with the visible text. */}
+        {compactBelowSm ? (
+          <>
+            <span className="hidden sm:inline">
+              {NATIVE[active] ?? active.toUpperCase()}
+            </span>
+            <span className="sm:hidden">{active.toUpperCase()}</span>
+          </>
+        ) : (
+          <span>{NATIVE[active] ?? active.toUpperCase()}</span>
+        )}
         <ChevronDown
           aria-hidden
           className={cn(
@@ -104,7 +133,12 @@ export function LocaleSwitcher({ className }: { className?: string }) {
                 aria-current={isActive ? "true" : undefined}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                  // Menu rows carry the 44px floor for the same reason the
+                  // mobile nav panel's rows do (`min-h-11`, pinned by
+                  // lib/guards/mobile-marketing-nav.test.ts): a row in an open
+                  // menu is a primary touch control, not decorative chrome.
+                  // These measured 30px — under even the 36px that D-19 fixed.
+                  "flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                   isActive
                     ? "bg-brand-blue/10 text-text-primary"
                     : "text-text-secondary hover:bg-ink-800 hover:text-text-primary",

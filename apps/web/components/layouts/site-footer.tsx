@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
-import { copyrightLine } from "@/lib/legal/entity-identity";
+import { copyrightLine, PRIVACY_CONTACT_EMAIL } from "@/lib/legal/entity-identity";
 
 /** Decorative live-market activity map (brief §10.4): glowing dot grid.
  *  NOT placeholder data — purely ornamental, deterministic coordinates. */
@@ -128,6 +128,20 @@ export async function SiteFooter() {
             <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary">
               {nav("about")}
             </Link>
+            {/* Beta foundation audit M11. Several public legal pages instruct
+                the reader to "get in touch with us", and there was no channel
+                anywhere on the public site to do it — the address existed only
+                as unclickable text on /legal/legal-notice. The `footer.contact`
+                label had been defined in every locale and rendered nowhere.
+                This wires the two together; it publishes nothing that was not
+                already published. */}
+            <a
+              href={`mailto:${PRIVACY_CONTACT_EMAIL}`}
+              className="text-sm text-text-secondary hover:text-text-primary"
+              data-testid="footer-contact"
+            >
+              {t("contact")}
+            </a>
             <LocaleSwitcher className="mt-2" />
           </div>
         </div>

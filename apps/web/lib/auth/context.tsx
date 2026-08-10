@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { markAllNotificationEventsReadAction } from "@/lib/notifications/events-actions";
 import {
   addRole as addRoleAction,
   switchActiveRole as switchActiveRoleAction,
@@ -204,6 +205,11 @@ export function AuthProvider({
   const markAllRead = useCallback(() => {
     const now = new Date().toISOString();
     setNotifications((cur) => cur.map((n) => ({ ...n, read_at: now })));
+    // PERSIST for durable events (notification_events store). Fire-and-forget:
+    // the optimistic state above is correct either way, and while the
+    // owner-gated store is unapplied the action is an honest no-op — exactly
+    // the client-only behaviour this control had before.
+    void markAllNotificationEventsReadAction().catch(() => {});
   }, []);
 
   /** Streamed-spine hydration (P0 perf): the SpineStream server component

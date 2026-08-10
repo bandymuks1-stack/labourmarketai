@@ -11,6 +11,7 @@ import { buildWorkContext } from "@/lib/conversation/context-intelligence";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import { CHIP_FOR_STEP } from "@/lib/conversation/worker-activity-chips";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
+import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 
 /**
  * THE OPENING BRIEF (owner ruling 2026-07-29, W2).
@@ -18,8 +19,9 @@ import { getUnreadConversationCount } from "@/lib/communication/unread";
  * The chat's first words must not be "Kuo šiandien galiu padėti?" — the
  * product KNOWS things about this person, and pretending otherwise is the
  * "search box dressed as a conversation" failure. This composes the opening
- * from the three canonical reads that already exist, in priority order:
+ * from the canonical reads that already exist, in priority order:
  *
+ *   0. a booking proposal awaiting YOUR answer → someone is blocked on you
  *   1. new matching opportunities        → the reason to be here today
  *   2. calendar conflict / overdue work  → the thing that will bite
  *   3. work done today but not logged    → the journal is the spine
@@ -54,6 +56,29 @@ export async function loadOpeningBrief(): Promise<OpeningBrief> {
     seenChip.add(id);
     chips.push({ id, label });
   };
+
+  // 0 ── a company is waiting on THIS person's answer ─────────────────────
+  // Beta audit B1. A proposed booking is the one thing on this screen that
+  // another human is actively blocked on, so it outranks every passive line
+  // below it (the same ladder the notification spine already uses). The offer
+  // cards themselves are ALREADY loaded by the dashboard page and already
+  // render behind the `offers` chip — the only thing missing was ever saying
+  // so. Without this, a worker learns about a real offer only by opening an
+  // unlabelled bell popover or typing the right sentence.
+  //
+  // Bookings deliberately get NO nav entry (owner IA ruling, pinned by
+  // lib/guards/booking-visibility-honest.test.ts) — which is exactly why the
+  // conversation has to carry the signal.
+  try {
+    const pending = await getPendingIncomingBookingCount();
+    if (pending > 0) {
+      const tBookings = await getTranslations("bookings");
+      lines.push(`${tBookings("pendingLink")} — ${tBookings("pendingNote")}`);
+      addChip("offers", t("chipOffers"));
+    }
+  } catch {
+    /* no line — a failed read never invents an offer */
+  }
 
   // 1 ── new matching opportunities ────────────────────────────────────────
   try {

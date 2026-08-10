@@ -440,6 +440,7 @@
       "pending_bookings": "Verdwijnt wanneer je op het boekingsvoorstel reageert.",
       "booking_responses": "Verdwijnt wanneer je de boekingenpagina opent.",
       "open_task_attention": "Verdwijnt zodra de taak is afgerond, gedeblokkeerd of opnieuw ingepland op de takenpagina.",
+      "pending_absence_reviews": "Verdwijnt zodra u de aanvraag op de pagina Verlof & afwezigheid goedkeurt of afwijst.",
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet)."
     }
   },
@@ -3346,6 +3347,7 @@
       "forgot_password": "Wachtwoord vergeten?",
       "reset_password_cta": "Wachtwoord resetten",
       "reset_password_help": "We e-mailen je een resetlink — je oude wachtwoord heb je niet nodig.",
+      "reset_success": "Wachtwoord bijgewerkt. Log in met je nieuwe wachtwoord.",
       "submit_label": "Inloggen",
       "signing": "Bezig met inloggen...",
       "no_account": "Nog geen account?",
@@ -3982,7 +3984,15 @@
         "pending_bookings": "Boekingsvoorstellen die op een reactie wachten",
         "booking_responses": "Antwoorden op je boekingsvoorstellen",
         "open_task_attention": "Taken die aandacht vragen",
-        "new_job_matches": "Nieuwe vacatures die bij je passen"
+        "pending_absence_reviews": "Verlofaanvragen ter beoordeling",
+        "new_job_matches": "Nieuwe vacatures die bij je passen",
+        "event_booking_proposed": "Je hebt een boekingsvoorstel ontvangen",
+        "event_booking_accepted": "Je boekingsvoorstel is geaccepteerd",
+        "event_booking_declined": "Je boekingsvoorstel is afgewezen",
+        "event_absence_requested": "Er is een afwezigheid voor je geregistreerd",
+        "event_absence_approved": "Je afwezigheid is goedgekeurd",
+        "event_absence_rejected": "Je afwezigheid is afgewezen",
+        "event_engagement_created": "Er is een nieuwe samenwerking aangemaakt"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",
@@ -4322,7 +4332,9 @@
     "startNow": "Begin nu",
     "themeToDark": "Donker thema",
     "themeToLight": "Licht thema",
-    "how": "Hoe het werkt"
+    "how": "Hoe het werkt",
+    "menuOpen": "Menu",
+    "menuClose": "Menu sluiten"
   },
   "hero": {
     "chip": "Algemeen arbeidsmarktplatform",
@@ -6917,7 +6929,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Bespreekpunten",
-      "missing": "Ontbrekende informatie"
+      "missing": "Ontbrekende informatie",
+      "blocking": "Blokkerende eisen"
     },
     "missingSide": {
       "worker": "De kandidaat heeft niet opgegeven: {criterion}",
@@ -7118,6 +7131,15 @@
       "reasonRequired": "Voor “Geen fit” is een korte reden nodig.",
       "save": "Opslaan",
       "cancel": "Annuleren"
+    },
+    "verdict": {
+      "eligible": "Voldoet aan de gestelde eisen",
+      "blocked": "Voldoet niet aan een gestelde eis",
+      "evidence": {
+        "confirmed": "Bewijs: door manager bevestigd",
+        "mixed": "Bewijs: deels bevestigd",
+        "unverified": "Bewijs: alleen zelf opgegeven"
+      }
     }
   },
   "planBoundary": {
@@ -7915,6 +7937,25 @@
         "reviewed": "Bedrijf heeft bekeken",
         "contacted": "Bedrijf nam contact op",
         "withdrawn": "Ingetrokken"
+      }
+    },
+    "external": {
+      "sectionTitle": "Openbare vacatures",
+      "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
+      "openOriginal": "Originele advertentie openen",
+      "noApplicationRoute": "De bron heeft voor deze advertentie geen sollicitatieadres gepubliceerd.",
+      "publishedOn": "Gepubliceerd {date}",
+      "positions": "{count} plaats(en)",
+      "payAsPublished": "Loon zoals gepubliceerd",
+      "gapsTitle": "Niet vermeld in de advertentie",
+      "gap": {
+        "no_city": "stad",
+        "no_country": "land",
+        "no_language_requirement": "taaleisen",
+        "no_profession": "beroep",
+        "no_requirement_set": "vaardigheidseisen",
+        "no_start_date": "startdatum",
+        "pay_not_comparable": "loon niet vergelijkbaar (niet in EUR)"
       }
     }
   },
@@ -10944,7 +10985,8 @@
       "fitWeak": "Zwakke match",
       "fitInsufficient": "Onvoldoende gegevens",
       "locationReason": "Locatie: {location}",
-      "roleReason": "Behoefte: {role}"
+      "roleReason": "Behoefte: {role}",
+      "introExternal": "In het paneel staan {count} openbare vacatures uit officiële bronnen — solliciteren gebeurt via de originele advertentie."
     },
     "summary": {
       "introProfile": "Dit is je profiel op dit moment: {done} van {total} basisgegevens zijn opgeslagen.",
@@ -11938,6 +11980,47 @@
       "externalPublicSource": "Gepubliceerd door een openbare arbeidsbemiddeling. Hier vermeld zodat u het kunt vinden — het is geen labourmarket.ai-vacature.",
       "employerHasNotClaimed": "Deze werkgever beheert deze vacature nog niet op labourmarket.ai, dus solliciteren gaat via de oorspronkelijke advertentie.",
       "employerManagesHere": "Deze werkgever beheert deze vacature op labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Activering",
+      "colCountry": "Land",
+      "colFailures": "Foutreeks",
+      "colLastSuccess": "Laatste succes",
+      "colLegal": "Juridische status",
+      "colSource": "Bron",
+      "colStored": "Opgeslagen (actief)",
+      "colSwitch": "Runtime-schakelaar",
+      "errorsLabel": "Fouten",
+      "importDisabledReason": "De runtime-schakelaar van deze bron is gesloten. Openen is een actie van de eigenaar (omgeving), niet van deze pagina.",
+      "intro": "Externe openbare vacaturebronnen: governance, runtime-status en importgezondheid. Een proefrun leest en telt maar slaat niets op; een import schrijft alleen wanneer de eigenaar de bron heeft geactiveerd en de runtime-schakelaar heeft geopend.",
+      "mAccepted": "Geaccepteerd",
+      "mDuplicate": "Duplicaten",
+      "mInserted": "Ingevoegd",
+      "mRejected": "Afgewezen",
+      "mSeen": "Gezien",
+      "mUnchanged": "Ongewijzigd",
+      "mUpdated": "Bijgewerkt",
+      "mWaiting": "Wacht op activering",
+      "refused": "Geweigerd",
+      "resultTitle": "Laatste run",
+      "runDry": "Proefrun",
+      "runImport": "Importeren",
+      "runTitle": "Uitvoeren",
+      "running": "Bezig…",
+      "statusLabel": "Status",
+      "switchClosed": "gesloten",
+      "switchOpen": "open",
+      "title": "Vacaturebronnen",
+      "checkpointTitle": "Kanaal-checkpoints",
+      "checkpointNote": "Status van de laatste run per kanaal uit de cursoropslag. Volledige runverantwoording is alleen zichtbaar op het moment van de run — permanente rungeschiedenis vereist een door de eigenaar goedgekeurde schemawijziging.",
+      "colChannel": "Kanaal",
+      "colState": "Status",
+      "colLastRun": "Laatste run",
+      "colLastFailure": "Laatste fout",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Nog geen run",
+      "stateOk": "Laatste run OK",
+      "stateFailing": "Faalt"
     }
   }
 }

@@ -46,6 +46,11 @@ export function LoginForm() {
   const nextPath = getSafeReturnPath(nextParam, locale);
   const oauthErrorCode = searchParams.get("error");
   const oauthTrace = searchParams.get("trace");
+  // `reset-password` routes here with `?reset=1` after `updateUser` succeeded.
+  // Nothing read it, so the one moment a person most needs confirmation — they
+  // just typed a new password twice — showed them a bare login screen with no
+  // sign it had worked. They cannot tell "saved" from "silently failed".
+  const passwordWasReset = searchParams.get("reset") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "signing" | "error">("idle");
@@ -130,6 +135,18 @@ export function LoginForm() {
         </p>
       </header>
 
+      {passwordWasReset && (
+        // Confirms the reset actually saved, in the place the reset flow
+        // sends people. Carries no account information, so it is safe to
+        // render from a query param alone.
+        <div
+          role="status"
+          className="rounded-md border border-state-live/40 bg-state-live/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="login-reset-success"
+        >
+          {t("reset_success")}
+        </div>
+      )}
       {oauthError && (
         // Surfaced when the callback redirected back here with `?error=…`.
         // The trace id (also a URL param) is shown so the user can quote

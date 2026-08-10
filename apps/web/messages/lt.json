@@ -440,6 +440,7 @@
       "pending_bookings": "Išnyksta, kai atsakote į rezervacijos pasiūlymą.",
       "booking_responses": "Išnyksta, kai atidarote rezervacijų puslapį.",
       "open_task_attention": "Išnyksta, kai užduotis užbaigiama, atblokuojama arba pakeičiamas jos terminas užduočių puslapyje.",
+      "pending_absence_reviews": "Išnyksta, kai atostogų ir nebuvimo puslapyje patvirtinate arba atmetate prašymą.",
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje)."
     }
   },
@@ -3346,6 +3347,7 @@
       "forgot_password": "Pamiršai slaptažodį?",
       "reset_password_cta": "Atkurti slaptažodį",
       "reset_password_help": "Atsiųsime atkūrimo nuorodą jūsų el. paštu — seno slaptažodžio žinoti nereikia.",
+      "reset_success": "Slaptažodis atnaujintas. Prisijunkite su nauju slaptažodžiu.",
       "submit_label": "Prisijungti",
       "signing": "Jungiamasi...",
       "no_account": "Neturi paskyros?",
@@ -3982,7 +3984,15 @@
         "pending_bookings": "Laukiantys rezervacijų pasiūlymai",
         "booking_responses": "Atsakymai į rezervacijų pasiūlymus",
         "open_task_attention": "Užduotys, kurioms reikia dėmesio",
-        "new_job_matches": "Nauji jums tinkantys darbo skelbimai"
+        "pending_absence_reviews": "Prašymai peržiūrai: atostogos ir nebuvimas",
+        "new_job_matches": "Nauji jums tinkantys darbo skelbimai",
+        "event_booking_proposed": "Gavai rezervacijos pasiūlymą",
+        "event_booking_accepted": "Tavo rezervacijos pasiūlymas priimtas",
+        "event_booking_declined": "Tavo rezervacijos pasiūlymas atmestas",
+        "event_absence_requested": "Tau užregistruotas neatvykimas",
+        "event_absence_approved": "Tavo neatvykimas patvirtintas",
+        "event_absence_rejected": "Tavo neatvykimas atmestas",
+        "event_engagement_created": "Sukurtas naujas bendradarbiavimas"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -4322,7 +4332,9 @@
     "startNow": "Pradėti dabar",
     "themeToDark": "Tamsi tema",
     "themeToLight": "Šviesi tema",
-    "how": "Kaip veikia"
+    "how": "Kaip veikia",
+    "menuOpen": "Meniu",
+    "menuClose": "Uždaryti meniu"
   },
   "hero": {
     "chip": "Bendra darbo rinkos platforma",
@@ -6917,7 +6929,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Aptartini klausimai",
-      "missing": "Trūkstama informacija"
+      "missing": "Trūkstama informacija",
+      "blocking": "Blokuojantys reikalavimai"
     },
     "missingSide": {
       "worker": "Kandidatas nenurodė: {criterion}",
@@ -7118,6 +7131,15 @@
       "reasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
       "save": "Išsaugoti",
       "cancel": "Atšaukti"
+    },
+    "verdict": {
+      "eligible": "Atitinka nurodytus reikalavimus",
+      "blocked": "Neatitinka nurodyto reikalavimo",
+      "evidence": {
+        "confirmed": "Įrodymai: patvirtinta vadovo",
+        "mixed": "Įrodymai: iš dalies patvirtinta",
+        "unverified": "Įrodymai: tik paties deklaruota"
+      }
     }
   },
   "planBoundary": {
@@ -7915,6 +7937,25 @@
         "reviewed": "Įmonė peržiūrėjo",
         "contacted": "Įmonė susisiekė",
         "withdrawn": "Atšaukta"
+      }
+    },
+    "external": {
+      "sectionTitle": "Vieši darbo skelbimai",
+      "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
+      "openOriginal": "Atidaryti originalų skelbimą",
+      "noApplicationRoute": "Šaltinis nepaskelbė šio skelbimo kandidatavimo adreso.",
+      "publishedOn": "Paskelbta {date}",
+      "positions": "{count} vietos (-ų)",
+      "payAsPublished": "Atlygis kaip paskelbta",
+      "gapsTitle": "Skelbime nenurodyta",
+      "gap": {
+        "no_city": "miestas",
+        "no_country": "šalis",
+        "no_language_requirement": "kalbų reikalavimai",
+        "no_profession": "profesija",
+        "no_requirement_set": "įgūdžių reikalavimai",
+        "no_start_date": "pradžios data",
+        "pay_not_comparable": "atlygis nepalyginamas (ne EUR)"
       }
     }
   },
@@ -10944,7 +10985,8 @@
       "fitWeak": "Silpnas atitikimas",
       "fitInsufficient": "Trūksta duomenų",
       "locationReason": "Vieta: {location}",
-      "roleReason": "Poreikis: {role}"
+      "roleReason": "Poreikis: {role}",
+      "introExternal": "Skydelyje yra {count} viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą."
     },
     "summary": {
       "introProfile": "Štai tavo profilis šiandien: išsaugota {done} iš {total} esminių dalių.",
@@ -11938,6 +11980,47 @@
       "externalPublicSource": "Paskelbta valstybinėje užimtumo tarnyboje. Rodome čia, kad rastumėte — tai nėra labourmarket.ai skelbimas.",
       "employerHasNotClaimed": "Šis darbdavys dar netvarko šio skelbimo labourmarket.ai, todėl kandidatuojama per originalų skelbimą.",
       "employerManagesHere": "Šis darbdavys tvarko šį skelbimą labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktyvavimas",
+      "colCountry": "Šalis",
+      "colFailures": "Klaidų serija",
+      "colLastSuccess": "Paskutinė sėkmė",
+      "colLegal": "Teisinė būsena",
+      "colSource": "Šaltinis",
+      "colStored": "Saugoma (aktyvūs)",
+      "colSwitch": "Vykdymo jungiklis",
+      "errorsLabel": "Klaidos",
+      "importDisabledReason": "Šio šaltinio vykdymo jungiklis uždarytas. Jį atidaro savininkas (aplinkos kintamasis), ne šis puslapis.",
+      "intro": "Išoriniai vieši darbo skelbimų šaltiniai: valdysena, vykdymo būsena ir importo būklė. Bandomasis paleidimas skaito ir skaičiuoja, bet nieko nesaugo; importas rašo tik tada, kai savininkas aktyvavo šaltinį ir atidarė vykdymo jungiklį.",
+      "mAccepted": "Priimta",
+      "mDuplicate": "Dublikatai",
+      "mInserted": "Įrašyta",
+      "mRejected": "Atmesta",
+      "mSeen": "Peržiūrėta",
+      "mUnchanged": "Nepakitę",
+      "mUpdated": "Atnaujinta",
+      "mWaiting": "Laukia aktyvavimo",
+      "refused": "Atmesta",
+      "resultTitle": "Paskutinis paleidimas",
+      "runDry": "Bandomasis",
+      "runImport": "Importuoti",
+      "runTitle": "Paleisti",
+      "running": "Vykdoma…",
+      "statusLabel": "Būsena",
+      "switchClosed": "uždarytas",
+      "switchOpen": "atidarytas",
+      "title": "Skelbimų šaltiniai",
+      "checkpointTitle": "Kanalų kontroliniai taškai",
+      "checkpointNote": "Paskutinio paleidimo tiesa kiekvienam kanalui iš žymeklių saugyklos. Pilna paleidimo apskaita rodoma tik paleidimo metu — nuolatinei istorijai reikia savininko patvirtinto schemos pakeitimo.",
+      "colChannel": "Kanalas",
+      "colState": "Būsena",
+      "colLastRun": "Paskutinis paleidimas",
+      "colLastFailure": "Paskutinė klaida",
+      "colCursor": "Žymeklis",
+      "stateNoRunYet": "Dar nepaleista",
+      "stateOk": "Paskutinis paleidimas pavyko",
+      "stateFailing": "Nepavyksta"
     }
   }
 }

@@ -11,7 +11,10 @@ const CHAT_KEYS = [
   "chipCv", "chipJobs", "chipProfile", "chipOffers", "chipLang",
   "chipExp", "chipEdu", "chipCard", "chipPrefs", "offersEmpty",
   "searchAskCriteria", "playerCardAfterLog", "playerCardOpened",
-  "fallback", "userCv", "userProfile", "userOffers", "userJobs",
+  // `userFindWork` doubles as the CONTINUE label on the saved criteria form
+  // (beta audit W-J1): the button that actually runs the promised search must
+  // say "Find work", not "Add another". Key already exists in all catalogues.
+  "fallback", "userCv", "userProfile", "userOffers", "userJobs", "userFindWork",
   "chipLogWork", "userLogWork",
   "chipAgenda", "userAgenda", "chipNeedWorkers", "chipCandidates",
   "chipCompanyHub", "companyDemandNext", "chipTasks",

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FeatureNote } from "@/components/app/feature-note";
 import { MatchSignals } from "@/components/app/match-signals";
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
+import { ExternalVacanciesSection } from "@/components/app/external-vacancies-section";
 import { OpportunityDetailsDisclosure } from "@/components/app/opportunity-details-disclosure";
 import {
   OpportunityStructuredChips,
@@ -113,6 +114,9 @@ export default async function OpportunitiesPage({
   //    what is required, which sources are off and what activation changes.
   //    Nothing here fabricates a number (§18).
   const tIntel = await getTranslations("intelligence");
+  // Root translator — provenance/attribution codes are FULL key paths
+  // (vacancySources.*), stored as codes on the record, resolved only here.
+  const tRoot = await getTranslations();
   const salaryIntel = await getWorkerSalaryIntelligence();
   const marketContextCards = buildOpportunityInsightRow(
     salaryIntel.kind === "ok"
@@ -1106,6 +1110,32 @@ export default async function OpportunitiesPage({
               );
             })()
           )}
+
+          {/* External public-source ads (real-supply train) — same board,
+              same engine, provenance always rendered. The section is absent
+              while there is no supply: no dead shell. */}
+          <ExternalVacanciesSection
+            cards={result.externalVacancies.cards}
+            labels={{
+              sectionTitle: t("external.sectionTitle"),
+              sectionNote: t("external.sectionNote"),
+              openOriginal: t("external.openOriginal"),
+              noApplicationRoute: t("external.noApplicationRoute"),
+              publishedOn: (d) => t("external.publishedOn", { date: d }),
+              positionsLabel: (n) => t("external.positions", { count: n }),
+              payAsPublished: t("external.payAsPublished"),
+              gapsTitle: t("external.gapsTitle"),
+              gapLabel: (gap) =>
+                t.has(`external.gap.${gap}`)
+                  ? t(`external.gap.${gap}` as never)
+                  : gap,
+              tierLabels,
+              attributionText: (code) => tRoot(code as never),
+              originNoteText: (code) => tRoot(code as never),
+              managementNoteText: (code) => tRoot(code as never),
+              skillLabel,
+            }}
+          />
 
           <p className="text-meta leading-relaxed text-text-muted">{t("footnote")}</p>
         </>

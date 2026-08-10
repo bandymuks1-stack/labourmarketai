@@ -80,6 +80,7 @@ const ZERO: SpineCounts = {
   pendingInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
+  pendingAbsenceReviews: 0,
 };
 
 const resolveKey = (msgs: unknown, path: string): unknown =>
@@ -308,6 +309,7 @@ describe("3. attention is a deterministic composition of real counts", () => {
         pendingInvitations: 1,
         openTaskAttention: 1,
         newJobMatches: 1,
+        pendingAbsenceReviews: 2,
       },
       documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
       finance: { overdueCount: 1 },
@@ -333,6 +335,7 @@ describe("3. attention is a deterministic composition of real counts", () => {
           pendingInvitations: 1,
           openTaskAttention: 1,
           newJobMatches: 1,
+          pendingAbsenceReviews: 2,
         },
         documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
         finance: { overdueCount: 1 },

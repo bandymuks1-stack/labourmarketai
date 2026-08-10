@@ -262,3 +262,21 @@ audit.
   never prompts, never model output, never a chat table, nothing outbound.
   Failures are logged and swallowed; the run outcome is unaffected. Pinned
   in the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-08-09 — `app/[locale]/dashboard/admin/vacancy-sources/page.tsx` +
+  `lib/vacancy-runner/vacancy-admin-actions.ts`** (real-supply train: the
+  vacancy-source operator console). Superadmin-gated twice — the admin layout
+  plus per-page `requireSuperadmin` for the page, and an explicit
+  `isSuperadmin()` FIRST in every server action (an action is an HTTP
+  endpoint regardless of which page renders it). Service role is genuinely
+  required rather than convenient: `vacancy_import_cursors` is RLS-enabled
+  with ZERO policies (operator-only by construction — applied production
+  migration `20260809160000_public_vacancy_persistence_v1`, prod ledger
+  `20260809175828`), so no user-session client can read checkpoint health or
+  record a run outcome. Writes touch ONLY `public_vacancies` and
+  `vacancy_import_cursors` — pinned by `vacancy-source-boundary.test.ts`
+  section (j), which forbids the store layer from naming any other table.
+  A persist run past a closed governance row or env kill switch is refused by
+  the runner itself regardless of the admin's wishes. No chat table is read
+  or written; nothing is sent outbound. Pinned in the
+  `chat-visibility-rls.test.ts` caller inventory.

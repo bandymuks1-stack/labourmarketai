@@ -57,7 +57,14 @@ export function ThemeToggleIcon({
       title={label}
       className={
         className ??
-        "inline-flex h-9 w-9 items-center justify-center rounded-control border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+        // h-11 w-11 = 44px, the product's touch floor. This control sits in
+        // the public header BETWEEN two siblings the floor is already enforced
+        // on — the mobile disclosure button (`h-11 w-11`, pinned by
+        // lib/guards/mobile-marketing-nav.test.ts) and the locale switcher —
+        // so at 36px it was the one under-sized target in that row. Same
+        // defect class as REQUIREMENT_DRIFT_AUDIT D-19 (36px account-menu
+        // rows). The icon inside is unchanged; only the hit box grew.
+        "inline-flex h-11 w-11 items-center justify-center rounded-control border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
       }
     >
       {next === "dark" ? (

@@ -82,7 +82,7 @@ const schema = z.object({
   // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
   AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
   AI_PROVIDER: z
-    .enum(["anthropic", "openai", "gemini", "xai"])
+    .enum(["local", "anthropic", "openai", "gemini", "xai"])
     .default("anthropic"),
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
@@ -105,6 +105,22 @@ const schema = z.object({
   // it is never a primary AI_PROVIDER value.
   AI_DEEPL_ENABLED: z.enum(["true", "false"]).default("false"),
   DEEPL_API_KEY: z.string().optional(),
+  // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
+  // The ONE provider that needs no key: it authenticates by network location.
+  // Its proof of configuration is instead a VALIDATED base URL plus an explicit
+  // model id (lib/ai/runtime/config-core.ts checkLocalBaseUrl) — two required
+  // values, not one, so nothing is looser here than for a cloud vendor.
+  //
+  // AI_LOCAL_BASE_URL is the origin of an OpenAI-compatible server the operator
+  // runs (Ollama's compatible API, LM Studio, vLLM, …), with or without the
+  // trailing /v1. Plaintext http is accepted ONLY for a loopback host; a remote
+  // runtime must use https, because these prompts carry CVs and journal text.
+  // AI_LOCAL_API_KEY is OPTIONAL — only for a runtime behind a proxy that wants
+  // a bearer token. Leaving it unset is the normal, supported case.
+  AI_LOCAL_ENABLED: z.enum(["true", "false"]).default("false"),
+  AI_LOCAL_BASE_URL: z.string().optional(),
+  AI_LOCAL_MODEL: z.string().optional(),
+  AI_LOCAL_API_KEY: z.string().optional(),
 
   // ── Owner Telegram alerts (server-only; demand-signal notifications) ───────
   // Best-effort owner alert on a PERSISTED /company-need intake. OFF by default:
@@ -180,6 +196,10 @@ const parsed = schema.safeParse({
   XAI_API_KEY: process.env.XAI_API_KEY,
   AI_DEEPL_ENABLED: process.env.AI_DEEPL_ENABLED,
   DEEPL_API_KEY: process.env.DEEPL_API_KEY,
+  AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
+  AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
+  AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,
+  AI_LOCAL_API_KEY: process.env.AI_LOCAL_API_KEY,
   OWNER_TELEGRAM_ALERTS_ENABLED: process.env.OWNER_TELEGRAM_ALERTS_ENABLED,
   OWNER_TELEGRAM_BOT_TOKEN: process.env.OWNER_TELEGRAM_BOT_TOKEN,
   OWNER_TELEGRAM_CHAT_ID: process.env.OWNER_TELEGRAM_CHAT_ID,

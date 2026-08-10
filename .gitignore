@@ -38,6 +38,26 @@ next-env.d.ts
 **/owner-chrome-profile/
 
 # playwright / e2e local artifacts (never committed)
+#
+# The glob is the actual guarantee. Every entry below it was added one at a
+# time as someone invented a new suffix, which only protects the variants
+# already thought of: the beta foundation audit (2026-08-09) minted
+# `.storage-state-worker.json` and `.storage-state-employer.json` — real
+# session tokens, one `git add -A` away from being committed, because the
+# dash spelling matched none of the dot-spelled lines. Any file whose name
+# starts with `.storage-state` holds a session and is ignored from here on.
+#
+# THAT WAS STILL AN ENUMERATION, AND IT FAILED A SECOND TIME (2026-08-09).
+# The rule above pins a PREFIX, so the mobile sweep's `.company-state.json`
+# — a real `sb-127-auth-token` cookie — was committable again. Twice now the
+# fix has been "add the spelling we just met" and twice the next spelling
+# walked past it. The pattern below describes the CLASS instead: any JSON in
+# the e2e directory with `state` in its name is a session artefact and is
+# ignored, whatever anyone calls it next. A committed session token cannot be
+# un-leaked by deleting the file afterwards, so this errs toward over-ignoring
+# — an e2e fixture that genuinely needs committing can be force-added.
+/apps/web/tests/e2e/*state*.json
+/apps/web/tests/e2e/.storage-state*.json
 /apps/web/tests/e2e/.storage-state.json
 /apps/web/tests/e2e/.storage-state.company.json
 /apps/web/tests/e2e/.storage-state.worker.json

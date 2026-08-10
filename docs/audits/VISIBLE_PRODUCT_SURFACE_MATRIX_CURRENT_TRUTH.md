@@ -15,11 +15,20 @@ Three chromes chosen by pathname (`components/app/dashboard-chrome.tsx:34-52`):
 - `panel` (journal, planning, profile, communication): ConversationHeader only — **no tabs, no bottom nav**.
 - `full` (everything else): DashboardTabs (desktop) + BottomNav (mobile).
 
-**Structural finding N1 (P1, discoverability): the primary nav is absent on 5 of the 6
-destinations it links to.** `/dashboard`, `/dashboard/journal`, `/dashboard/planning`,
-`/dashboard/communication`, `/dashboard/profile` never render tabs or bottom nav.
-Verified live: fresh worker's first authenticated page (`/dashboard/profile` after onboarding)
-has zero primary nav; only back-arrow → `/dashboard`, search, notifications, account menu.
+**~~N1 (P1)~~ — WITHDRAWN 2026-08-09. NOT A DEFECT: this is an OWNER RULING.**
+The observation was accurate — `/dashboard`, `/dashboard/journal`, `/dashboard/planning`,
+`/dashboard/communication`, `/dashboard/profile` render no tabs and no bottom nav — but the
+conclusion was wrong. The ruling is recorded in `conversation-header.tsx` and pinned by
+`lib/guards/auth-form-post-fallback-and-finder-starters.test.ts:51-58`: the journal, calendar,
+messages and the card are **projections opened from the conversation**, and the command finder
+is one of their channels. The sanctioned mitigation for the "first session sees zero links"
+hole is `STARTER_COMMAND_IDS` (work_journal, planning, messages, market_map, profile), which
+exists and works.
+
+LESSON FOR THIS AUDIT: three of my first-pass "discoverability defects" (N1, the bookings-nav
+half of B1, and N8) were re-derivations of deliberate IA. An absent nav entry is not evidence
+of a defect in a product whose IA is deliberately conversation-first — the guards encode the
+rulings, and they must be read BEFORE a nav finding is written down.
 
 Nav containers:
 - Desktop tabs + mobile bottom nav: overview, journal, planning, communication, market-map,
@@ -47,7 +56,14 @@ Unlinked routes (deep-link only; details in nav sweep):
   market/recognize, opportunities, people/[id], privacy, projects, reports/evidence,
   service-requests, services, start*, tasks.
 
-**N8 (P1, §14 relevance): `/dashboard/absences` is reachable ONLY via command search.**
+**N8 — DOWNGRADED to WORKING_BUT_HARD_TO_DISCOVER (was P1).** `/dashboard/absences` is reachable
+via command search, which under the ruling above IS a sanctioned channel — and its registry entry
+carries full synonyms in all five active locales ("leave", "holiday", "time off", "atostogos",
+"отпуск", "verlof", "urlaub"), so a person who searches their own words finds it
+(`lib/navigation/command-registry.ts:112-130`). It is NOT, however, in `STARTER_COMMAND_IDS`, so a
+first-time worker who does not think to search never meets it. Given production holds 0 absence
+rows, whether leave joins the five starters is a product-IA decision for the owner — recorded here,
+deliberately NOT taken unilaterally by this audit.
 
 ## 2. Public surface (re-derived + live)
 
@@ -199,16 +215,44 @@ Cookie banner: none — defensible (only essential cookies; no third-party track
 - F3 (§95): engagement-invariant LEGACY_EXCEPTION classification for 88a43ead with
   owner-decision provenance; 3 new behavioural tests incl. negative control.
 
+## 6b. Slices 2–3 (PR #1096) and parallel session results
+
+**Slice 2 — two defects of one shape: the product KNEW and never SAID.**
+- W-J1 (P1, FIXED): the find-work search was wired (`openForm("worker.save-work-card",
+  doFindWork)`) but its only trigger was a button labelled "Add another", so the chat's own
+  promise ("fill this in and I'll search right away") ended at a dead card. `InlineActionForm`
+  now accepts `continueLabel`; the criteria form passes the existing
+  `conversation.chat.userFindWork` key (present in all 11 catalogues → no new keys, no
+  i18n-debt ceiling change). BROWSER-PROVEN: card reads "Saved. | Find work"; pressing it runs
+  the real search and answers honestly.
+- B1 (P1, FIXED — announcement half only): pending offers were ALREADY loaded by
+  `dashboard/page.tsx:73` and ALREADY rendered behind the `offers` chip; only the announcement
+  was missing. `opening-brief.ts` now leads with them (rank 0 — a blocked human outranks passive
+  news), reusing `bookings.pendingLink`/`pendingNote`. BROWSER-PROVEN end-to-end.
+  The "bookings has no nav entry" half of the original B1 finding is **WITHDRAWN**: no nav entry
+  is an owner IA ruling pinned by `lib/guards/booking-visibility-honest.test.ts:43-55`.
+
+**Slice 3 — M11 (P1, FIXED):** public legal copy told readers to "get in touch" while the site
+offered no channel: `footer.contact` was translated in all five locales and rendered nowhere, and
+`/legal/legal-notice` printed both published addresses as unclickable text. Now wired to the
+canonical `PRIVACY_CONTACT_EMAIL` with 44px `mailto:` rows. Nothing new published; no new keys.
+Negative controls proven RED by injecting the pre-fix state, then restored.
+
+**Parallel owner-started sessions (not this session's work):**
+- #1094 MERGED — M6+M7: pricing placeholders and the unrelated AI-agency ServiceOffers block.
+- #1095 Draft (owner-gated, ships UNAPPLIED) — A1 absence-review blindness. Scoping it exposed a
+  SECOND regression live in production: W11's `20260804120000` re-issued `assign_worker_to_project`
+  from a pre-engagement ancestor and silently dropped the
+  `caller_has_booking_engagement_for_project` OR-branch, leaving that helper with zero callers.
+  DB proof 48/48. This is a genuine find that this audit's read-only sweep did NOT catch.
+- Mobile marketing nav (M1) — in progress.
+
 ## 7. Open defects (ledger, not fixed here)
 
-P1: A1 absence-review blind to engagements (needs SECDEF migration — owner-gated);
-    M1 no mobile marketing nav (<1024px loses all 6 header links; needs a real mobile menu);
-    M6 production /pricing shows "Placeholder — pricing TBD" boxes;
-    M7 ServiceOffers (unrelated AI-agency price list) on /pricing — HIDE_FROM_BETA_CANDIDATE;
-    M11 no public contact/feedback channel while legal copy says "get in touch";
-    B1 booking proposals not surfaced on worker home + bookings page unlinked;
-    W-J1 chat "looking for work" promised search never runs;
-    N1 primary nav absent on 5/6 of its own destinations (chrome-mode gate).
+P1 REMAINING: M1 no mobile marketing nav (<1024px loses all six header links; in progress).
+P1 CLOSED SINCE: A1 (#1095 Draft, owner-gated apply) · M6+M7 (#1094 merged) ·
+    B1 + W-J1 (#1096) · M11 (#1096).
+P1 WITHDRAWN AS OWNER RULING: N1 · the bookings-nav half of B1 · N8 downgraded.
 P2: E1 silent onboarding validation; E2 company-onboarding worker copy; A2 absence list refresh;
     S1 self-shell in scouting pool; N3/N4/N5 role leakage (account menu, command finder, inbox);
     M3 landing has no audience section; M9 "Coming soon" vs "open markets" contradiction;

@@ -21,6 +21,10 @@ import {
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import {
+  emitBookingNotification,
+  emitEngagementCreatedNotification,
+} from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /**
@@ -161,9 +165,9 @@ export async function proposeBookingAction(
   // Defense-in-depth: the v3 wrapper (draft migration 20260716121000) also
   // enforces the caps in the DB. Until the owner applies it, fall back to the
   // UNCHANGED applied v1 RPC — the app-layer budget above stays active.
-  let { error } = await asAny(supabase).rpc("propose_booking_request_v3", args);
+  let { data: newBookingId, error } = await asAny(supabase).rpc("propose_booking_request_v3", args);
   if (error && isAbsentFunction(error)) {
-    ({ error } = await asAny(supabase).rpc("propose_booking_request", args));
+    ({ data: newBookingId, error } = await asAny(supabase).rpc("propose_booking_request", args));
   }
   if (error) {
     if (error.code === "P0004" || /limit reached|too many open/i.test(error.message ?? "")) {
@@ -178,6 +182,11 @@ export async function proposeBookingAction(
     source: "booking",
     metadata: { surface: "bookings", role_context: "company" },
   });
+  // Durable notification for the WORKER (fire-and-forget; degrades silently
+  // to nothing while the owner-gated notification_events store is unapplied).
+  if (typeof newBookingId === "string" && newBookingId) {
+    void emitBookingNotification(newBookingId, "booking_proposed");
+  }
   return { kind: "ok", status: "proposed" };
 }
 
@@ -215,6 +224,7 @@ export async function respondBookingAction(input: {
     });
     if (!v2.error) {
       revalidatePath(`/${input.locale}/dashboard/bookings`);
+      void emitBookingNotification(input.bookingId, "booking_declined");
       return { kind: "ok", status: input.decision, reasonStored: true };
     }
     if (!isAbsentFunction(v2.error)) return classify(v2.error);
@@ -224,6 +234,7 @@ export async function respondBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
+    void emitBookingNotification(input.bookingId, "booking_declined");
     return { kind: "ok", status: input.decision, reasonStored: false };
   }
 
@@ -251,7 +262,9 @@ export async function respondBookingAction(input: {
           source: "booking",
           metadata: { surface: "bookings", role_context: "worker" },
         });
+        void emitEngagementCreatedNotification(input.bookingId);
       }
+      void emitBookingNotification(input.bookingId, "booking_accepted");
       return { kind: "ok", status: "accepted", engagement };
     }
     if (!isAbsentFunction(v3.error)) return classify(v3.error);
@@ -261,6 +274,7 @@ export async function respondBookingAction(input: {
     });
     if (v1.error) return classify(v1.error);
     revalidatePath(`/${input.locale}/dashboard/bookings`);
+    void emitBookingNotification(input.bookingId, "booking_accepted");
     return { kind: "ok", status: "accepted", engagement: "needs_migration" };
   }
 
@@ -270,6 +284,7 @@ export async function respondBookingAction(input: {
   });
   if (error) return classify(error);
   revalidatePath(`/${input.locale}/dashboard/bookings`);
+  void emitBookingNotification(input.bookingId, "booking_declined");
   return { kind: "ok", status: input.decision };
 }
 

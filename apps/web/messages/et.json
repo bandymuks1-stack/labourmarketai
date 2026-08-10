@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Teavitus",
+        "pending_invitations": "Kutsed ootavad sinu vastust",
+        "unread_messages": "Lugemata sõnumid",
+        "incoming_service_requests": "Teenusepäringud ootavad vastust",
+        "service_request_responses": "Vastused sinu päringutele",
+        "pending_bookings": "Broneeringu ettepanekud ootavad vastust",
+        "booking_responses": "Vastused sinu broneeringu ettepanekutele",
+        "open_task_attention": "Tähelepanu vajavad ülesanded",
+        "pending_absence_reviews": "Läbivaatamist ootavad puudumised",
+        "new_job_matches": "Uued sulle sobivad tööpakkumised",
+        "event_booking_proposed": "Said broneeringu ettepaneku",
+        "event_booking_accepted": "Sinu broneeringu ettepanek võeti vastu",
+        "event_booking_declined": "Sinu broneeringu ettepanek lükati tagasi",
+        "event_absence_requested": "Sinule registreeriti puudumine",
+        "event_absence_approved": "Sinu puudumine kiideti heaks",
+        "event_absence_rejected": "Sinu puudumine lükati tagasi",
+        "event_engagement_created": "Loodi uus koostöö"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",
@@ -727,7 +746,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Tume teema",
     "themeToLight": "Hele teema",
-    "how": "Kuidas see töötab"
+    "how": "Kuidas see töötab",
+    "menuOpen": "Menüü",
+    "menuClose": "Sulge menüü"
   },
   "pages": {
     "agencies": {
@@ -1958,12 +1979,32 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Avalikud töökuulutused",
+      "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
+      "openOriginal": "Ava originaalkuulutus",
+      "noApplicationRoute": "Allikas ei avaldanud selle kuulutuse kandideerimisaadressi.",
+      "publishedOn": "Avaldatud {date}",
+      "positions": "{count} kohta",
+      "payAsPublished": "Tasu nagu avaldatud",
+      "gapsTitle": "Kuulutuses märkimata",
+      "gap": {
+        "no_city": "linn",
+        "no_country": "riik",
+        "no_language_requirement": "keelenõuded",
+        "no_profession": "amet",
+        "no_requirement_set": "oskusnõuded",
+        "no_start_date": "alguskuupäev",
+        "pay_not_comparable": "tasu pole võrreldav (mitte EUR)"
+      }
     }
   },
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Blokeerivad nõuded"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2044,6 +2085,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Vastab esitatud nõuetele",
+      "blocked": "Ei vasta esitatud nõudele",
+      "evidence": {
+        "confirmed": "Tõendid: juhi kinnitatud",
+        "mixed": "Tõendid: osaliselt kinnitatud",
+        "unverified": "Tõendid: ainult enda deklareeritud"
+      }
     }
   },
   "waze": {
@@ -3432,7 +3482,8 @@
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
-      "roleReason": "[EN] Need: {role}"
+      "roleReason": "[EN] Need: {role}",
+      "introExternal": "Paneelis on {count} avalikku töökuulutust ametlikest allikatest — kandideerimine toimub algse kuulutuse kaudu."
     },
     "summary": {
       "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -4134,6 +4185,47 @@
       "externalPublicSource": "Avaldatud avaliku tööturuameti poolt. Näitame siin, et te selle leiaksite — see ei ole labourmarket.ai kuulutus.",
       "employerHasNotClaimed": "See tööandja ei halda seda kuulutust veel labourmarket.ai-s, seega kandideerimine käib originaalkuulutuse kaudu.",
       "employerManagesHere": "See tööandja haldab seda kuulutust labourmarket.ai-s."
+    },
+    "admin": {
+      "colActivation": "Aktiveerimine",
+      "colCountry": "Riik",
+      "colFailures": "Vigade seeria",
+      "colLastSuccess": "Viimane õnnestumine",
+      "colLegal": "Õiguslik seisund",
+      "colSource": "Allikas",
+      "colStored": "Salvestatud (aktiivsed)",
+      "colSwitch": "Käituslüliti",
+      "errorsLabel": "Vead",
+      "importDisabledReason": "Selle allika käituslüliti on suletud. Selle avab omanik (keskkond), mitte see leht.",
+      "intro": "Välised avalikud töökuulutuste allikad: haldus, käitusseisund ja impordi tervis. Proovikäivitus loeb ja loendab, kuid ei salvesta midagi; import kirjutab ainult siis, kui omanik on allika aktiveerinud ja käituslüliti avanud.",
+      "mAccepted": "Vastu võetud",
+      "mDuplicate": "Duplikaadid",
+      "mInserted": "Lisatud",
+      "mRejected": "Tagasi lükatud",
+      "mSeen": "Nähtud",
+      "mUnchanged": "Muutmata",
+      "mUpdated": "Uuendatud",
+      "mWaiting": "Ootab aktiveerimist",
+      "refused": "Keeldutud",
+      "resultTitle": "Viimane käivitus",
+      "runDry": "Proovikäivitus",
+      "runImport": "Impordi",
+      "runTitle": "Käivita",
+      "running": "Töötab…",
+      "statusLabel": "Olek",
+      "switchClosed": "suletud",
+      "switchOpen": "avatud",
+      "title": "Töökuulutuste allikad",
+      "checkpointTitle": "Kanali kontrollpunktid",
+      "checkpointNote": "Viimase käivituse tõde iga kanali kohta kursorihoidlast. Täielik käivituse arvestus on nähtav ainult käivitamise hetkel — püsiv ajalugu nõuab omaniku kinnitatud skeemimuudatust.",
+      "colChannel": "Kanal",
+      "colState": "Olek",
+      "colLastRun": "Viimane käivitus",
+      "colLastFailure": "Viimane viga",
+      "colCursor": "Kursor",
+      "stateNoRunYet": "Käivitusi pole veel",
+      "stateOk": "Viimane käivitus OK",
+      "stateFailing": "Tõrge"
     }
   },
   "profileIdentityNotice": {

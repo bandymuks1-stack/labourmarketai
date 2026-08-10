@@ -440,6 +440,7 @@
       "pending_bookings": "Clears when you respond to the booking proposal.",
       "booking_responses": "Clears when you open the bookings page.",
       "open_task_attention": "Clears when the task is completed, unblocked or rescheduled on the tasks page.",
+      "pending_absence_reviews": "Clears when you approve or reject the request on the leave & absence page.",
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card)."
     }
   },
@@ -3346,6 +3347,7 @@
       "forgot_password": "Forgot password?",
       "reset_password_cta": "Reset password",
       "reset_password_help": "We'll email you a reset link — you don't need your old password.",
+      "reset_success": "Password updated. Sign in with your new password.",
       "submit_label": "Sign in",
       "signing": "Signing in...",
       "no_account": "No account yet?",
@@ -3982,7 +3984,15 @@
         "pending_bookings": "Booking proposals awaiting response",
         "booking_responses": "Answers to your booking proposals",
         "open_task_attention": "Tasks needing attention",
-        "new_job_matches": "New job listings that fit you"
+        "pending_absence_reviews": "Leave requests to review",
+        "new_job_matches": "New job listings that fit you",
+        "event_booking_proposed": "You received a booking proposal",
+        "event_booking_accepted": "Your booking proposal was accepted",
+        "event_booking_declined": "Your booking proposal was declined",
+        "event_absence_requested": "An absence was filed for you",
+        "event_absence_approved": "Your absence was approved",
+        "event_absence_rejected": "Your absence was rejected",
+        "event_engagement_created": "A new engagement was created"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -4322,7 +4332,9 @@
     "startNow": "Start now",
     "themeToDark": "Dark theme",
     "themeToLight": "Light theme",
-    "how": "How it works"
+    "how": "How it works",
+    "menuOpen": "Menu",
+    "menuClose": "Close menu"
   },
   "hero": {
     "chip": "General labour-market platform",
@@ -6917,7 +6929,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Discussion points",
-      "missing": "Missing information"
+      "missing": "Missing information",
+      "blocking": "Blocking requirements"
     },
     "missingSide": {
       "worker": "The candidate has not stated: {criterion}",
@@ -7118,6 +7131,15 @@
       "reasonRequired": "Marking “Not a fit” needs a short reason.",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "verdict": {
+      "eligible": "Meets the stated requirements",
+      "blocked": "Does not meet a stated requirement",
+      "evidence": {
+        "confirmed": "Evidence: manager-confirmed",
+        "mixed": "Evidence: partly confirmed",
+        "unverified": "Evidence: self-declared only"
+      }
     }
   },
   "planBoundary": {
@@ -7915,6 +7937,25 @@
         "reviewed": "Company reviewed",
         "contacted": "Company contacted you",
         "withdrawn": "Withdrawn"
+      }
+    },
+    "external": {
+      "sectionTitle": "Public job advertisements",
+      "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
+      "openOriginal": "Open the original advertisement",
+      "noApplicationRoute": "The source did not publish an application address for this advertisement.",
+      "publishedOn": "Published {date}",
+      "positions": "{count} position(s)",
+      "payAsPublished": "Pay as published",
+      "gapsTitle": "Not stated in the advertisement",
+      "gap": {
+        "no_city": "city",
+        "no_country": "country",
+        "no_language_requirement": "language requirements",
+        "no_profession": "occupation",
+        "no_requirement_set": "skill requirements",
+        "no_start_date": "start date",
+        "pay_not_comparable": "pay not comparable (not in EUR)"
       }
     }
   },
@@ -10944,7 +10985,8 @@
       "fitWeak": "Weak fit",
       "fitInsufficient": "Not enough data",
       "locationReason": "Location: {location}",
-      "roleReason": "Need: {role}"
+      "roleReason": "Need: {role}",
+      "introExternal": "There are {count} public job ads from official sources in the panel — applying happens through the original advertisement."
     },
     "summary": {
       "introProfile": "Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -11938,6 +11980,47 @@
       "externalPublicSource": "Published on a public employment service. Listed here so you can find it — it is not a labourmarket.ai job posting.",
       "employerHasNotClaimed": "This employer does not manage this listing on labourmarket.ai yet, so applications go through the original advertisement.",
       "employerManagesHere": "This employer manages this listing on labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Activation",
+      "colCountry": "Country",
+      "colFailures": "Failure streak",
+      "colLastSuccess": "Last success",
+      "colLegal": "Legal status",
+      "colSource": "Source",
+      "colStored": "Stored (live)",
+      "colSwitch": "Runtime switch",
+      "errorsLabel": "Errors",
+      "importDisabledReason": "The runtime switch for this source is closed. Opening it is an owner action (environment), not a page action.",
+      "intro": "External public job-ad sources: governance, runtime state and import health. A dry run reads and counts but stores nothing; an import writes only when the owner has activated the source and opened the runtime switch.",
+      "mAccepted": "Accepted",
+      "mDuplicate": "Duplicates",
+      "mInserted": "Inserted",
+      "mRejected": "Rejected",
+      "mSeen": "Seen",
+      "mUnchanged": "Unchanged",
+      "mUpdated": "Updated",
+      "mWaiting": "Awaiting activation",
+      "refused": "Refused",
+      "resultTitle": "Last run",
+      "runDry": "Dry run",
+      "runImport": "Import",
+      "runTitle": "Run",
+      "running": "Running…",
+      "statusLabel": "Status",
+      "switchClosed": "closed",
+      "switchOpen": "open",
+      "title": "Vacancy sources",
+      "checkpointTitle": "Channel checkpoints",
+      "checkpointNote": "Last-run truth per channel, read from the cursor store. Full per-run accounting is only shown at run time — persisted run history requires an owner-approved schema change.",
+      "colChannel": "Channel",
+      "colState": "State",
+      "colLastRun": "Last run",
+      "colLastFailure": "Last failure",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "No run yet",
+      "stateOk": "Last run OK",
+      "stateFailing": "Failing"
     }
   }
 }
