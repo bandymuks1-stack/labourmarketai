@@ -816,6 +816,47 @@
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
       "titleAccent": "[EN] discoverable."
+    },
+    "createCv": {
+      "eyebrow": "Darmowy kreator CV",
+      "title": "Profesjonalne CV,",
+      "titleAccent": "za darmo.",
+      "subcopy": "Stwórz CV od zera lub zaimportuj istniejący PDF lub DOCX. Sprawdź każdy wyodrębniony fakt, wybierz przejrzysty szablon i pobierz PDF — za darmo. Jeśli zechcesz, te same informacje mogą zbudować Twój profil pracownika i pokazać prawdziwe ogłoszenia o pracę z oficjalnych publicznych źródeł.",
+      "cta": "Utwórz moje CV — za darmo",
+      "benefits": [
+        {
+          "title": "Importuj lub zacznij od nowa",
+          "body": "Prześlij istniejące CV (PDF, DOCX lub tekst) albo zacznij od pustej strony. Wyodrębnione fakty pozostają propozycjami, dopóki ich nie potwierdzisz."
+        },
+        {
+          "title": "Uczciwa struktura",
+          "body": "Twoje doświadczenie, wykształcenie, języki i umiejętności są strukturyzowane do Twojej weryfikacji — nic nie jest wymyślane i nic nie jest zapisywane bez Twojego potwierdzenia."
+        },
+        {
+          "title": "Przejrzyste szablony, prawdziwy PDF",
+          "body": "Wybierz profesjonalny szablon i wyeksportuj do PDF A4 przez przeglądarkę — bez znaku wodnego, bez opłat."
+        },
+        {
+          "title": "Więcej niż dokument",
+          "body": "Za Twoją wyraźną zgodą te same fakty mogą zbudować profil pracownika, powiązać umiejętności z europejską taksonomią ESCO i pokazać pasujące publiczne ogłoszenia o pracę."
+        }
+      ],
+      "stepsTitle": "Jak to działa",
+      "steps": [
+        {
+          "title": "Zarejestruj się za darmo",
+          "body": "Konto pozwala edytować CV, a dane pozostają pod Twoją kontrolą — możesz je usunąć w każdej chwili."
+        },
+        {
+          "title": "Dodaj swoje doświadczenie",
+          "body": "Zaimportuj stare CV lub wpisz je ręcznie — potem sprawdź i potwierdź każdy fakt przed użyciem."
+        },
+        {
+          "title": "Pobierz i decyduj",
+          "body": "Wyeksportuj CV jako PDF. Widoczność dla pracodawców to osobny, opcjonalny wybór."
+        }
+      ],
+      "privacyNote": "Twoje CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączysz widoczności — a możesz ją wyłączyć w każdej chwili."
     }
   },
   "playercards": {

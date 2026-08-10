@@ -4508,6 +4508,47 @@
       ],
       "screenshot": "Agenturmodus-Ablauf",
       "cta": "Agenturkonto erstellen"
+    },
+    "createCv": {
+      "eyebrow": "Kostenloser Lebenslauf-Generator",
+      "title": "Ein professioneller Lebenslauf,",
+      "titleAccent": "kostenlos.",
+      "subcopy": "Erstellen Sie einen Lebenslauf von Grund auf oder importieren Sie Ihr vorhandenes PDF oder DOCX. Prüfen Sie jeden extrahierten Fakt, wählen Sie eine klare Vorlage und laden Sie als PDF herunter — kostenlos. Auf Wunsch kann dieselbe Information Ihr Arbeitskraft-Profil aufbauen und echte Stellenanzeigen aus offiziellen öffentlichen Quellen zeigen.",
+      "cta": "Meinen Lebenslauf erstellen — kostenlos",
+      "benefits": [
+        {
+          "title": "Importieren oder neu beginnen",
+          "body": "Laden Sie einen vorhandenen Lebenslauf hoch (PDF, DOCX oder Text) oder beginnen Sie mit einer leeren Seite. Extrahierte Fakten bleiben Vorschläge, bis Sie sie bestätigen."
+        },
+        {
+          "title": "Ehrliche Struktur",
+          "body": "Ihre Erfahrung, Ausbildung, Sprachen und Fähigkeiten werden zur Prüfung strukturiert — nichts wird erfunden und nichts ohne Ihre Bestätigung gespeichert."
+        },
+        {
+          "title": "Klare Vorlagen, echtes PDF",
+          "body": "Wählen Sie eine professionelle Vorlage und exportieren Sie über den Browser als A4-PDF — ohne Wasserzeichen, ohne Bezahlschranke."
+        },
+        {
+          "title": "Mehr als ein Dokument",
+          "body": "Mit Ihrer ausdrücklichen Zustimmung können dieselben Fakten Ihr Arbeitskraft-Profil aufbauen, Ihre Fähigkeiten der europäischen ESCO-Taxonomie zuordnen und passende öffentliche Stellenanzeigen zeigen."
+        }
+      ],
+      "stepsTitle": "So funktioniert es",
+      "steps": [
+        {
+          "title": "Kostenlos registrieren",
+          "body": "Ein Konto hält Ihren Lebenslauf bearbeitbar und Ihre Daten unter Ihrer Kontrolle — Sie können sie jederzeit löschen."
+        },
+        {
+          "title": "Erfahrung hinzufügen",
+          "body": "Importieren Sie Ihren alten Lebenslauf oder tragen Sie ihn ein — prüfen und bestätigen Sie dann jeden Fakt vor der Verwendung."
+        },
+        {
+          "title": "Herunterladen und entscheiden",
+          "body": "Exportieren Sie Ihren Lebenslauf als PDF. Für Arbeitgeber sichtbar zu werden bleibt eine separate, optionale Entscheidung."
+        }
+      ],
+      "privacyNote": "Ihr Lebenslauf bleibt standardmäßig privat. Nichts wird an Arbeitgeber weitergegeben, bis Sie die Sichtbarkeit ausdrücklich aktivieren — und Sie können sie jederzeit deaktivieren."
     }
   },
   "pricing": {

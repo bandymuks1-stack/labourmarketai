@@ -4508,6 +4508,47 @@
       ],
       "screenshot": "Agency mode flow",
       "cta": "Create an agency account"
+    },
+    "createCv": {
+      "eyebrow": "Free CV builder",
+      "title": "A professional CV,",
+      "titleAccent": "free.",
+      "subcopy": "Create a CV from scratch or import your existing PDF or DOCX. Review every extracted fact, pick a clean template and download as PDF — free. If you choose, the same information can build your worker profile and show you real job ads from official public sources.",
+      "cta": "Create my CV — free",
+      "benefits": [
+        {
+          "title": "Import or start fresh",
+          "body": "Upload an existing CV (PDF, DOCX or text) or start from a blank page. Extracted facts stay suggestions until you confirm them."
+        },
+        {
+          "title": "Honest structure",
+          "body": "Your experience, education, languages and skills are structured for your review — nothing is invented and nothing is saved without your confirmation."
+        },
+        {
+          "title": "Clean templates, real PDF",
+          "body": "Choose a professional template and export to A4 PDF through your browser — no watermark, no paywall."
+        },
+        {
+          "title": "More than a document",
+          "body": "With your explicit consent, the same facts can build your worker profile, map your skills to the European ESCO taxonomy and show you matching public job ads."
+        }
+      ],
+      "stepsTitle": "How it works",
+      "steps": [
+        {
+          "title": "Sign up free",
+          "body": "An account keeps your CV editable and your data under your control — you can delete it at any time."
+        },
+        {
+          "title": "Add your experience",
+          "body": "Import your old CV or write it in — then review and confirm each fact before it is used."
+        },
+        {
+          "title": "Download and decide",
+          "body": "Export your CV as PDF. Becoming discoverable to employers stays a separate, optional choice."
+        }
+      ],
+      "privacyNote": "Your CV stays private by default. Nothing is shared with employers unless you explicitly turn on discoverability, and you can turn it off at any time."
     }
   },
   "pricing": {

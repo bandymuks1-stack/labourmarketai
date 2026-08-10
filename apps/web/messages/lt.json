@@ -4508,6 +4508,47 @@
       ],
       "screenshot": "Agentūros režimo srautas",
       "cta": "Sukurti agentūros paskyrą"
+    },
+    "createCv": {
+      "eyebrow": "Nemokamas CV kūrimas",
+      "title": "Profesionalus CV,",
+      "titleAccent": "nemokamai.",
+      "subcopy": "Susikurk CV nuo nulio arba importuok esamą PDF ar DOCX. Peržiūrėk kiekvieną ištrauktą faktą, pasirink tvarkingą šabloną ir atsisiųsk PDF — nemokamai. Jei norėsi, ta pati informacija gali tapti tavo darbuotojo profiliu ir parodyti tikrus darbo skelbimus iš oficialių viešų šaltinių.",
+      "cta": "Kurti mano CV — nemokamai",
+      "benefits": [
+        {
+          "title": "Importuok arba pradėk iš naujo",
+          "body": "Įkelk esamą CV (PDF, DOCX ar tekstą) arba pradėk nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepatvirtini."
+        },
+        {
+          "title": "Sąžininga struktūra",
+          "body": "Tavo patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami tavo peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be tavo patvirtinimo."
+        },
+        {
+          "title": "Tvarkingi šablonai, tikras PDF",
+          "body": "Pasirink profesionalų šabloną ir eksportuok į A4 PDF per naršyklę — be vandens ženklų, be mokesčių."
+        },
+        {
+          "title": "Daugiau nei dokumentas",
+          "body": "Su aiškiu tavo sutikimu tie patys faktai gali sukurti darbuotojo profilį, susieti įgūdžius su Europos ESCO klasifikatoriumi ir parodyti tinkamus viešus darbo skelbimus."
+        }
+      ],
+      "stepsTitle": "Kaip tai veikia",
+      "steps": [
+        {
+          "title": "Registruokis nemokamai",
+          "body": "Paskyra leidžia CV redaguoti, o duomenys lieka tavo kontrolėje — bet kada gali juos ištrinti."
+        },
+        {
+          "title": "Pridėk savo patirtį",
+          "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk ir patvirtink kiekvieną faktą prieš jį panaudojant."
+        },
+        {
+          "title": "Atsisiųsk ir spręsk",
+          "body": "Eksportuok CV kaip PDF. Tapti matomam darbdaviams — atskiras, neprivalomas pasirinkimas."
+        }
+      ],
+      "privacyNote": "Tavo CV pagal nutylėjimą lieka privatus. Niekas nesidalinama su darbdaviais, kol pats neįjungi matomumo, o jį bet kada gali išjungti."
     }
   },
   "pricing": {

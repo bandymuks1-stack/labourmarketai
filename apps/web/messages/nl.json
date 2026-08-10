@@ -4508,6 +4508,47 @@
       ],
       "screenshot": "Uitzendbureau-modusflow",
       "cta": "Maak een uitzendbureau-account aan"
+    },
+    "createCv": {
+      "eyebrow": "Gratis cv-maker",
+      "title": "Een professioneel cv,",
+      "titleAccent": "gratis.",
+      "subcopy": "Maak een cv vanaf nul of importeer je bestaande PDF of DOCX. Controleer elk geëxtraheerd feit, kies een strakke template en download als PDF — gratis. Als je wilt, kan dezelfde informatie je werknemersprofiel opbouwen en echte vacatures uit officiële publieke bronnen tonen.",
+      "cta": "Maak mijn cv — gratis",
+      "benefits": [
+        {
+          "title": "Importeer of begin opnieuw",
+          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze bevestigt."
+        },
+        {
+          "title": "Eerlijke structuur",
+          "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw bevestiging."
+        },
+        {
+          "title": "Strakke templates, echte PDF",
+          "body": "Kies een professionele template en exporteer naar A4-PDF via je browser — zonder watermerk, zonder betaalmuur."
+        },
+        {
+          "title": "Meer dan een document",
+          "body": "Met jouw uitdrukkelijke toestemming kunnen dezelfde feiten je werknemersprofiel opbouwen, je vaardigheden koppelen aan de Europese ESCO-taxonomie en passende publieke vacatures tonen."
+        }
+      ],
+      "stepsTitle": "Hoe het werkt",
+      "steps": [
+        {
+          "title": "Meld je gratis aan",
+          "body": "Met een account blijft je cv bewerkbaar en houd jij je gegevens onder controle — je kunt ze op elk moment verwijderen."
+        },
+        {
+          "title": "Voeg je ervaring toe",
+          "body": "Importeer je oude cv of typ het in — controleer en bevestig daarna elk feit voordat het wordt gebruikt."
+        },
+        {
+          "title": "Download en beslis",
+          "body": "Exporteer je cv als PDF. Vindbaar worden voor werkgevers blijft een aparte, optionele keuze."
+        }
+      ],
+      "privacyNote": "Je cv blijft standaard privé. Er wordt niets met werkgevers gedeeld totdat jij vindbaarheid expliciet inschakelt, en je kunt dit op elk moment uitzetten."
     }
   },
   "pricing": {

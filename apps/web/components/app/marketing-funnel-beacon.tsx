@@ -31,7 +31,8 @@ function audienceFromPath(pathname: string): string {
   const seg = pathname.split("/").filter(Boolean);
   const first = seg[0] && seg[0].length <= 4 ? seg.slice(1) : seg;
   const top = first[0] ?? "";
-  if (top === "for-workers" || top === "worker-intake") return "workers";
+  if (top === "for-workers" || top === "worker-intake" || top === "create-cv")
+    return "workers";
   if (top === "for-companies" || top === "company-need") return "companies";
   if (top === "for-agencies") return "agencies";
   if (!top) return "home";
