@@ -31,6 +31,20 @@ import { join } from "node:path";
  * so the freeze is not the only thing standing between the landing and that
  * number coming back.
  *
+ * MarketPulse liveness honesty (owner directive 2026-08-09, beta train §8) —
+ * the landing MarketPulse section and its four panels rendered a pulsing
+ * `live-dot` over GOVERNED PLACEHOLDER data — visually claiming live market
+ * intelligence the platform is not computing (the verified P2 of the
+ * 2026-08-09 fake-metrics classification). The five dots were removed; copy
+ * and the placeholder registry were NOT touched (the frozen `marketPulse`
+ * namespaces already said "overview", not "live", so no namespace hash
+ * moved). The regeneration touched exactly five file hashes —
+ * market-pulse.tsx, regional-heatmap.tsx, skills-demand-list.tsx,
+ * supply-demand-chart.tsx, recent-matches-feed.tsx — and the removal is
+ * guarded permanently by `public-market-pulse-liveness.test.ts`, so the
+ * freeze is not the only thing standing between the landing and the
+ * fake-liveness coming back.
+ *
  * S3 player-card honesty (owner directive 2026-08-03) — the retired FUT-style
  * concept card (`components/app/player-card.tsx` + `components/app/
  * ovr-ring.tsx`) was DELETED: `/for-workers` was the last public surface

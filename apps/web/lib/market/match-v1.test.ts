@@ -87,7 +87,14 @@ describe("matchWorkerToNeed — status classification", () => {
 });
 
 describe("matchWorkerToNeed — evidence strength influences the result", () => {
-  it("journal-supported skills outrank self-declared at equal coverage", () => {
+  it("equal coverage yields EQUAL status — evidence moves the confidence label, never the verdict", () => {
+    // THE 2026-08-09 SEPARATION (owner directive): status measures functional
+    // match quality; evidence confidence travels beside it. Before this, the
+    // 0.4 self-declared weight meant a fully-matching honest new profile
+    // could never leave "weak" — a reputation verdict wearing a match
+    // costume. This test is the negative control for that blend: if a weight
+    // table ever multiplies into status again, the equal-status assertion
+    // below fails first.
     const base: Partial<MatchSubject> = {
       country: "LT",
       languages: ["lt"],
@@ -102,11 +109,13 @@ describe("matchWorkerToNeed — evidence strength influences the result", () => 
       fullNeed,
       subjectWith([S1, S2, S3], "self_declared", base),
     );
-    // identical coverage (100%), but journal evidence ranks strictly higher
+    // identical coverage (100%) → identical FUNCTIONAL verdict…
     expect(journal.skillFit?.pct).toBe(self.skillFit?.pct);
-    expect(matchStrengthOrder(journal.status)).toBeGreaterThan(
-      matchStrengthOrder(self.status),
-    );
+    expect(journal.status).toBe("strong");
+    expect(self.status).toBe("strong");
+    // …and the verification difference is stated, not blended in.
+    expect(journal.evidenceConfidence).toBe("mixed");
+    expect(self.evidenceConfidence).toBe("unverified");
     expect(journal.evidence.matchedJournalSupported).toBe(3);
     expect(self.evidence.matchedSelfDeclared).toBe(3);
   });
@@ -208,11 +217,24 @@ describe("matchWorkerToNeed — honest missing-data signals", () => {
     expect(r.gaps.some((g) => g.code === "language_missing")).toBe(false);
   });
 
-  it("no subject skills at all → weak, flagged, never invented", () => {
+  it("no subject skills at all → insufficient_data, flagged, never invented", () => {
+    // "We cannot evaluate this profile" and "this profile does not fit" are
+    // different verdicts (2026-08-09 separation). An EMPTY profile is the
+    // first; a profile whose skills simply miss the requirement is the
+    // second — the next test keeps that one genuinely weak.
     const r = matchWorkerToNeed(fullNeed, { skills: [] });
-    expect(r.status).toBe("weak");
+    expect(r.status).toBe("insufficient_data");
+    expect(r.evidenceConfidence).toBeNull();
     expect(r.missingData).toContain("no_subject_skills");
     expect(r.skillFit?.matchedTotal).toBe(0);
+  });
+
+  it("skills present but none matching → weak (a measured mismatch, not missing data)", () => {
+    const r = matchWorkerToNeed(fullNeed, {
+      skills: [{ uri: "esco:unrelated-skill", evidence: "manager_confirmed" }],
+    });
+    expect(r.status).toBe("weak");
+    expect(r.missingData).not.toContain("no_subject_skills");
   });
 });
 

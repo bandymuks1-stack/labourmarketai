@@ -2003,7 +2003,33 @@ describe("no migration files added by this sprint", () => {
     // capability + an operator health read + one daily job. Rollback paired.
     // Shared slot RECOUNTED against post-#1047 main as #1047's own note
     // predicted: 193 files there, this branch adds one.
-    // 194 -> 195: beta-audit P1 defect A1
+    // 194 -> 195: public vacancy persistence v1
+    // (20260809160000_public_vacancy_persistence_v1) — the missing floor under
+    // the vacancy pipeline. Two tables (`public_vacancies`,
+    // `vacancy_import_cursors`), no function, no SECURITY DEFINER, no DML.
+    // Reads for `public_vacancies` are deliberately open to anon+authenticated
+    // for ACTIVE rows only (already-public CC0 public-employment-service ads);
+    // writes are service_role only, enforced twice (REVOKE-then-GRANT, and no
+    // write policy). `vacancy_import_cursors` is RLS-enabled with NO policies
+    // — operator-only by construction. Rollback paired and safe at any time:
+    // both tables hold only re-fetchable public data. Owner-gated, ships
+    // UNAPPLIED — creating the tables imports nothing, because governance
+    // activation (arbetsformedlingen is still `owner_review`) and the env kill
+    // switch both remain closed. Counted against origin/main 0d8de71d: 194
+    // .sql files there, this branch adds exactly one.
+    // 195 -> 196: durable notification events v1
+    // (20260810070000_notification_events_v1) — ONE append-only table
+    // (`notification_events`) closing the "no notification storage" gap:
+    // recipient-scoped RLS (SELECT own + column-level UPDATE of read_at
+    // only), service_role as the only writer (authenticated has NO INSERT —
+    // users cannot fabricate events), (recipient, dedupe_key) UNIQUE for
+    // idempotent emitters, bounded allowlisted metadata. Rollback paired and
+    // safe (drops the table; every reader/writer degrades to
+    // feature_unavailable — the pre-migration bell). Owner-gated, ships
+    // UNAPPLIED: docs/human-gates/notification-events-gate.md. Counted
+    // against origin/main 97bc3ff8: 195 .sql files there, this branch adds
+    // exactly one.
+    // 196 -> 197: beta-audit P1 defect A1
     // (20260808150000_caller_manages_worker_engagements_v1) — teaches
     // caller_manages_worker about company_worker_engagements so an employer
     // holding an ACTIVE accepted-booking engagement can finally see and
@@ -2012,8 +2038,10 @@ describe("no migration files added by this sprint", () => {
     // (confirmed missing in production 2026-08-08). Function bodies only: no
     // table, column, policy or grant added, zero DML at apply time. Paired
     // rollback. Ships UNAPPLIED and deliberately WITHOUT
-    // `@human-gate-approved` — owner-gated for prod apply.
-    const SPRINT_BASELINE = 195;
+    // `@human-gate-approved` — owner-gated for prod apply. RECOUNTED after
+    // merging main (post-#1116, dc354727): 196 .sql files there, this branch
+    // adds exactly one.
+    const SPRINT_BASELINE = 197;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the

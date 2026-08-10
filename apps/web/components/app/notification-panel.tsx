@@ -45,7 +45,12 @@ export function NotificationPanel() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={t("label")}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md border border-ink-500 bg-ink-800 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        // size-11 = 44px, the floor `account-menu.tsx` describes as the one
+        // "every header control keeps" — while this button, its immediate
+        // neighbour in the same cluster, measured 36x36. Measured at 375px on
+        // /lt/dashboard/profile it was the only sub-floor control left in the
+        // dashboard header. The icon inside is unchanged; only the hit box grew.
+        className="relative inline-flex size-11 items-center justify-center rounded-md border border-ink-500 bg-ink-800 text-text-secondary hover:border-brand-blue hover:text-text-primary"
       >
         <svg
           aria-hidden

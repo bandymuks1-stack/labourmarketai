@@ -1,5 +1,4 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Placeholder } from "@/components/ui/Placeholder";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -25,14 +24,15 @@ export async function PricingTable() {
             <p className="mt-2 text-sm text-text-secondary">
               {t(`plans.${slug}.tagline`)}
             </p>
-            <div className="mt-5 font-display text-xl font-bold tracking-tightest text-text-primary">
-              <Placeholder id={`pricing.plan.${slug}`} />
-            </div>
-            {/* Honest price-readiness note exactly where a price would show
-                (CR WAGON 4): reuses the owner-editable readiness state from
-                lib/billing/readiness.ts — never a purchasable claim. */}
+            {/* Price slot (M6, beta foundation audit 2026-08-08): the slot
+                renders ONLY the owner-editable readiness copy from
+                lib/billing/readiness.ts — never a fabricated "pricing TBD"
+                placeholder box (markers are forced ON in production, so the
+                dashed sample chip was visitor-facing). Real prices arrive by
+                the owner promoting `plans.price_eur_monthly` + flipping
+                PRICING_READINESS_STATE; never a purchasable claim. */}
             <p
-              className="mt-1 text-meta text-text-muted"
+              className="mt-5 text-sm font-semibold leading-snug text-text-primary"
               data-testid={`pricing-price-state-${slug}`}
               data-state={PRICING_READINESS_STATE}
             >

@@ -99,7 +99,14 @@ export async function WorkerReadinessPanel({ card }: { card: WorkerPlayerCard })
               data-pillar={p.key}
               data-met={p.met ? "yes" : "no"}
             >
-              <span className="flex items-center gap-2 text-sm text-text-primary">
+              {/* `min-w-0` lets this label shrink. Without it the label's
+                  `min-width: auto` floor wins over `justify-between`, and the
+                  action link beside it — which is legitimately `shrink-0` —
+                  gets pushed OUTSIDE the row: measured at 320px on
+                  /lt/dashboard/journal it ended 26px past the viewport, on a
+                  page whose `scrollWidth` still read exactly 320. The label
+                  wraps instead; the row height is unchanged at 58px. */}
+              <span className="flex min-w-0 items-center gap-2 text-sm text-text-primary">
                 <span
                   aria-hidden
                   className={

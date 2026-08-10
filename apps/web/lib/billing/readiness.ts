@@ -31,9 +31,17 @@ export type PricingReadinessState = "draft_pricing" | "owner_confirmed";
 
 /**
  * OWNER-EDITABLE. Flip to "owner_confirmed" ONLY when the owner has reviewed
- * and confirmed the plan prices/copy (prices live as governed placeholders in
- * content/placeholders.ts — `pricing.plan.*` — and stay "TBD" until then).
- * This state never enables payments; it only describes copy readiness.
+ * and confirmed the plan prices/copy. This state never enables payments; it
+ * only describes copy readiness.
+ *
+ * M6 (beta foundation audit 2026-08-08): while this reads "draft_pricing" the
+ * /pricing price slot renders THIS state's copy and NOTHING ELSE. It no longer
+ * renders the `pricing.plan.*` placeholder: production forces placeholder
+ * markers ON (lib/env.ts), so every price slot showed real visitors a dashed
+ * "Free: pricing TBD" box. Those four registry entries still exist but are now
+ * rendered by nothing — content/placeholders.ts sits inside the owner-gated
+ * landing freeze, so deleting them is a separate owner call. The real price's
+ * only future home is `plans.price_eur_monthly`, surfaced after this flips.
  */
 export const PRICING_READINESS_STATE: PricingReadinessState = "draft_pricing";
 
@@ -207,9 +215,14 @@ export const BILLING_READINESS_ITEMS: readonly BillingReadinessItem[] = [
     proof: "apps/web/lib/billing/entitlements-v1.ts",
   },
   {
+    // M6 (2026-08-08): proof retargeted from content/placeholders.ts to this
+    // file. The pricing copy's real source is PRICING_READINESS_STATE above,
+    // not a placeholder registry entry — the `pricing.plan.*` placeholders it
+    // used to cite are no longer rendered anywhere, so citing them as the
+    // proof of pricing copy would have been a claim about dead content.
     key: "pricing_copy",
     status: "prepared",
-    proof: "apps/web/content/placeholders.ts",
+    proof: "apps/web/lib/billing/readiness.ts",
   },
   {
     key: "provider_connection",

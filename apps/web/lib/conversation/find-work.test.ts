@@ -90,6 +90,8 @@ function ready(matches: Record<string, unknown>[], over: Record<string, unknown>
     matches,
     totalRecommendable: matches.length,
     newCount: matches.length,
+    externalCards: [],
+    totalExternal: 0,
     ...over,
   };
 }
@@ -179,5 +181,64 @@ describe("the answer is a count and a sentence — the panel renders the rows", 
     expect(res).not.toHaveProperty("matches");
     expect(res).not.toHaveProperty("interestLabels");
     expect(Object.keys(res).sort()).toEqual(["count", "intro", "kind"]);
+  });
+});
+
+describe("external public-source ads reach the chat's answer (real-supply train)", () => {
+  it("zero platform matches but real external ads is an ANSWER, not an empty state", async () => {
+    // The exact production state on 2026-08-09: job_demands empty, 87 real
+    // Swedish ads stored. A chat that said "nothing matched" here would
+    // disagree with the board the person opens next.
+    loadMatchesMock.mockResolvedValue(
+      ready([], { externalCards: [{}, {}], totalExternal: 2 }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(2);
+    expect(res.intro).toBe('conversation.findWork.introExternal({"count":2})');
+  });
+
+  it("platform and external counts travel as ONE total with both sentences", async () => {
+    loadMatchesMock.mockResolvedValue(
+      ready([rec(ID.a)], { externalCards: [{}, {}, {}], totalExternal: 3 }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(4);
+    expect(res.intro).toBe(
+      'conversation.findWork.introOne conversation.findWork.introExternal({"count":3})',
+    );
+  });
+
+  it("an unapplied board RPC with real external ads still answers with the ads", async () => {
+    // "blocked" is only the truth when NOTHING can be shown. External ads
+    // read from their own store and do not depend on the gated demand RPC.
+    loadMatchesMock.mockResolvedValue(
+      ready([], {
+        externalCards: [{}],
+        totalExternal: 1,
+        capabilities: {
+          boardAvailable: false,
+          seenAvailable: false,
+          seenReadDegraded: false,
+          interestAvailable: true,
+        },
+      }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    expect(res.count).toBe(1);
+  });
+
+  it("the external count in the sentence is capped at the panel's own display limit", async () => {
+    const cards = Array.from({ length: 9 }, () => ({}));
+    loadMatchesMock.mockResolvedValue(
+      ready([], { externalCards: cards, totalExternal: 9 }),
+    );
+    const res = await findWorkForChat();
+    if (res.kind !== "matches") throw new Error("expected matches");
+    // The chat states what the panel proves — and the panel renders at most
+    // its contract limit, never the full stored set.
+    expect(res.count).toBe(5);
   });
 });

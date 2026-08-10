@@ -33,10 +33,21 @@ export function InlineActionForm({
   spec,
   locale,
   onClose,
+  continueLabel,
 }: {
   spec: WorkerFormSpec;
   locale: string;
   onClose: () => void;
+  /**
+   * Beta audit W-J1. `onClose` is not merely "dismiss" — for several flows it
+   * IS the next step (find-work runs the actual search through it). The done
+   * state used to label that button "Add another" unconditionally, so a chat
+   * that had just promised "fill this in and I'll search right away" ended at
+   * a button whose name denied the promise, and the wired search never ran.
+   * A caller that continues somewhere real names the button after what it
+   * does; everyone else keeps the generic "Add another".
+   */
+  continueLabel?: string;
 }) {
   const t = useTranslations();
   const router = useRouter();
@@ -141,7 +152,7 @@ export function InlineActionForm({
           onClick={onClose}
           className="ua-press -mr-2 inline-flex min-h-11 items-center rounded-control px-2 text-support font-semibold text-brand-blue hover:underline"
         >
-          {t("conversation.forms.ui.addAnother")}
+          {continueLabel ?? t("conversation.forms.ui.addAnother")}
         </button>
       </div>
     );

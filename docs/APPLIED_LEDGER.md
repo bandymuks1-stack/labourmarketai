@@ -35,6 +35,24 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260809160000_public_vacancy_persistence_v1` (#1107, real-supply foundation)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-09** via Supabase MCP `apply_migration` (`{"success":true}`) |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260809175828`, name `public_vacancy_persistence_v1` (match on `name`) |
+| PR | **#1107**, branch `feat/cc/real-beta-train-v1`, applied from exact HEAD `dbdbeb29` |
+| Owner gate | "ARCHITECTURE APPROVED" decision 2026-08-09 (conditional on a 9-point re-verification; ALL NINE conditions verified immediately before apply), recorded in `docs/human-gates/public-vacancy-persistence-gate.md`. Migration sha256 `00d9cd87…f3143`, rollback `c91fbe75…5aa6a`, comment-stripped executable sha256 `c7e99bea…c4ddb6`. Marker covers exactly two findings (`grant-or-revoke`, `alter-drop-policy`) — the first draft's `rls-to-anon`/`grant-anon-public` findings were REMOVED (anon grant deleted), not approved |
+
+**What it does**: creates the two-table floor under the already-complete vacancy pipeline — `public_vacancies` (canonical external public-employment-service ads) and `vacancy_import_cursors` (per-provider/channel checkpoint + health). NO function, NO extension, NO trigger, NO `CREATE OR REPLACE`, NO DML, no FK to any platform-identity table.
+
+**Pre-apply checks (all 9 owner conditions, immediately before)**: PR head `dbdbeb29` = local HEAD, main unchanged `0d8de71d`, MERGEABLE; checksums byte-identical to the gate record; DDL surface = 2 tables + 6 indexes + 1 SELECT policy only; no source activation in the diff; no import caller in the diff; `anon` present only in REVOKE lines; governance `arbetsformedlingen` still `activation: "owner_review"`; kill switch fail-closed (`provider_disabled` when unset); CI green incl. `migration-safety`.
+
+**Post-apply verified (read-back, not inferred)**: both tables exist with **0 rows**; RLS enabled on both; `public_vacancies` grants = exactly `authenticated:SELECT` (anon: none), 1 policy; `vacancy_import_cursors` = 0 policies, 0 anon/authenticated grants. **Zero imports occurred and none can occur**: source governance stays `owner_review` and `VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED` is unset in production. Activating any source is a SEPARATE owner decision.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260807140000_booking_engagement_org_resolution_v1` (#1047, the beta P0)
 
 | Field | Value |

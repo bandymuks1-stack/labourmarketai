@@ -40,6 +40,7 @@ const makeMatch = (over: Partial<MatchResultV1> = {}): MatchResultV1 => ({
     matchedJournalSupported: 1,
     matchedSelfDeclared: 1,
   },
+  evidenceConfidence: "mixed",
   reasons: [{ code: "skill_fit", matched: 4, total: 5, confirmed: 2 }],
   gaps: [],
   missingData: [],

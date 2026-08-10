@@ -13,8 +13,12 @@ export async function MarketPulse() {
     <section className="relative mt-16 overflow-hidden">
       <ConstellationBg />
       <div className="relative mx-auto max-w-container px-6 sm:px-12">
+        {/* No pulsing "live" indicator: the panels below render governed
+            placeholders, and a liveness signal over placeholder data would
+            claim market intelligence the platform is not computing (owner
+            directive 2026-08-09; pinned by
+            lib/guards/public-market-pulse-liveness.test.ts). */}
         <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-          <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
         <h2 className="mt-5 font-display text-4xl font-bold leading-[1.06] tracking-tightest sm:text-5xl">

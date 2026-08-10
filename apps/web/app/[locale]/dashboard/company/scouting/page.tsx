@@ -698,6 +698,62 @@ export default async function CompanyScoutingPage({
                   </span>
                 </div>
 
+                {/* P4-B (2026-08-09): the verdict the employer could never
+                    see. The engine has always computed `eligible` and the
+                    hard-failed criteria behind it, and this surface rendered
+                    neither — a candidate could be silently disqualified by a
+                    licence or shift check with nothing on screen saying so.
+                    Rendered FIRST: a hard failure is the headline, not a
+                    footnote under the strengths. Evidence confidence renders
+                    BESIDE the verdict, separate from match quality by design
+                    — "high match, unverified evidence" is two facts, not a
+                    blended number. */}
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  data-testid={`scout-verdict-${c.workerId}`}
+                  data-eligible={c.match.eligible}
+                >
+                  {c.match.eligible ? (
+                    <span className="rounded-md border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
+                      {t("verdict.eligible")}
+                    </span>
+                  ) : (
+                    <span className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta font-medium text-state-danger">
+                      {t("verdict.blocked")}
+                    </span>
+                  )}
+                  {c.match.evidenceConfidence ? (
+                    <span
+                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                      data-testid={`scout-evidence-confidence-${c.workerId}`}
+                    >
+                      {t(`verdict.evidence.${c.match.evidenceConfidence}` as never)}
+                    </span>
+                  ) : null}
+                </div>
+                {c.match.blocking.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-blocking-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.blocking")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.match.blocking.map((b) => (
+                        <span
+                          key={b.criterion}
+                          className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta text-state-danger"
+                          data-criterion={b.criterion}
+                          title={b.source}
+                        >
+                          {criterionLabel(b.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 {/* Why */}
                 {c.match.reasons.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5">

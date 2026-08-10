@@ -440,6 +440,7 @@
       "pending_bookings": "Verschwindet, wenn Sie auf den Buchungsvorschlag reagieren.",
       "booking_responses": "Verschwindet, wenn Sie die Buchungsseite öffnen.",
       "open_task_attention": "Verschwindet, sobald die Aufgabe auf der Aufgabenseite abgeschlossen, entsperrt oder neu terminiert wurde.",
+      "pending_absence_reviews": "Verschwindet, sobald Sie den Antrag auf der Seite Urlaub & Abwesenheit genehmigen oder ablehnen.",
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen)."
     }
   },
@@ -3346,6 +3347,7 @@
       "forgot_password": "Passwort vergessen?",
       "reset_password_cta": "Passwort zurücksetzen",
       "reset_password_help": "Wir senden Ihnen einen Link zum Zurücksetzen per E-Mail — Ihr altes Passwort brauchen Sie nicht.",
+      "reset_success": "Passwort aktualisiert. Melden Sie sich mit Ihrem neuen Passwort an.",
       "submit_label": "Anmelden",
       "signing": "Anmeldung läuft...",
       "no_account": "Noch kein Konto?",
@@ -3982,7 +3984,15 @@
         "pending_bookings": "Buchungsvorschläge, die auf eine Antwort warten",
         "booking_responses": "Antworten auf Ihre Buchungsvorschläge",
         "open_task_attention": "Aufgaben, die Aufmerksamkeit brauchen",
-        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen"
+        "pending_absence_reviews": "Abwesenheitsanträge zur Prüfung",
+        "new_job_matches": "Neue Stellenanzeigen, die zu Ihnen passen",
+        "event_booking_proposed": "Sie haben einen Buchungsvorschlag erhalten",
+        "event_booking_accepted": "Ihr Buchungsvorschlag wurde angenommen",
+        "event_booking_declined": "Ihr Buchungsvorschlag wurde abgelehnt",
+        "event_absence_requested": "Für Sie wurde eine Abwesenheit eingetragen",
+        "event_absence_approved": "Ihre Abwesenheit wurde genehmigt",
+        "event_absence_rejected": "Ihre Abwesenheit wurde abgelehnt",
+        "event_engagement_created": "Ein neues Engagement wurde erstellt"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -4322,7 +4332,9 @@
     "startNow": "Jetzt starten",
     "themeToDark": "Dunkles Design",
     "themeToLight": "Helles Design",
-    "how": "So funktioniert es"
+    "how": "So funktioniert es",
+    "menuOpen": "Menü",
+    "menuClose": "Menü schließen"
   },
   "hero": {
     "chip": "Allgemeine Arbeitsmarktplattform",
@@ -6917,7 +6929,8 @@
   "scouting": {
     "tiers": {
       "negotiables": "Gesprächspunkte",
-      "missing": "Fehlende Informationen"
+      "missing": "Fehlende Informationen",
+      "blocking": "Blockierende Anforderungen"
     },
     "missingSide": {
       "worker": "Der Kandidat hat nicht angegeben: {criterion}",
@@ -7118,6 +7131,15 @@
       "reasonRequired": "Für „Passt nicht“ ist eine kurze Begründung nötig.",
       "save": "Speichern",
       "cancel": "Abbrechen"
+    },
+    "verdict": {
+      "eligible": "Erfüllt die genannten Anforderungen",
+      "blocked": "Erfüllt eine genannte Anforderung nicht",
+      "evidence": {
+        "confirmed": "Nachweis: vom Manager bestätigt",
+        "mixed": "Nachweis: teilweise bestätigt",
+        "unverified": "Nachweis: nur selbst angegeben"
+      }
     }
   },
   "planBoundary": {
@@ -7915,6 +7937,25 @@
         "reviewed": "Unternehmen hat geprüft",
         "contacted": "Unternehmen hat Kontakt aufgenommen",
         "withdrawn": "Zurückgezogen"
+      }
+    },
+    "external": {
+      "sectionTitle": "Öffentliche Stellenanzeigen",
+      "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "openOriginal": "Originalanzeige öffnen",
+      "noApplicationRoute": "Die Quelle hat für diese Anzeige keine Bewerbungsadresse veröffentlicht.",
+      "publishedOn": "Veröffentlicht {date}",
+      "positions": "{count} Stelle(n)",
+      "payAsPublished": "Vergütung wie veröffentlicht",
+      "gapsTitle": "In der Anzeige nicht angegeben",
+      "gap": {
+        "no_city": "Stadt",
+        "no_country": "Land",
+        "no_language_requirement": "Sprachanforderungen",
+        "no_profession": "Beruf",
+        "no_requirement_set": "Qualifikationsanforderungen",
+        "no_start_date": "Startdatum",
+        "pay_not_comparable": "Vergütung nicht vergleichbar (nicht in EUR)"
       }
     }
   },
@@ -10944,7 +10985,8 @@
       "fitWeak": "Schwache Übereinstimmung",
       "fitInsufficient": "Nicht genug Daten",
       "locationReason": "Ort: {location}",
-      "roleReason": "Bedarf: {role}"
+      "roleReason": "Bedarf: {role}",
+      "introExternal": "Im Panel gibt es {count} öffentliche Stellenanzeigen aus offiziellen Quellen — die Bewerbung erfolgt über die Originalanzeige."
     },
     "summary": {
       "introProfile": "So sieht dein Profil aktuell aus: {done} von {total} Grundangaben sind gespeichert.",
@@ -11938,6 +11980,47 @@
       "externalPublicSource": "Von einer öffentlichen Arbeitsvermittlung veröffentlicht. Hier gelistet, damit Sie es finden — es ist keine labourmarket.ai-Stellenanzeige.",
       "employerHasNotClaimed": "Dieser Arbeitgeber verwaltet diese Anzeige noch nicht auf labourmarket.ai, daher läuft die Bewerbung über die ursprüngliche Anzeige.",
       "employerManagesHere": "Dieser Arbeitgeber verwaltet diese Anzeige auf labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivierung",
+      "colCountry": "Land",
+      "colFailures": "Fehlerserie",
+      "colLastSuccess": "Letzter Erfolg",
+      "colLegal": "Rechtsstatus",
+      "colSource": "Quelle",
+      "colStored": "Gespeichert (aktiv)",
+      "colSwitch": "Laufzeitschalter",
+      "errorsLabel": "Fehler",
+      "importDisabledReason": "Der Laufzeitschalter dieser Quelle ist geschlossen. Ihn öffnet der Eigentümer (Umgebung), nicht diese Seite.",
+      "intro": "Externe öffentliche Stellenanzeigen-Quellen: Governance, Laufzeitstatus und Import-Zustand. Ein Probelauf liest und zählt, speichert aber nichts; ein Import schreibt nur, wenn der Eigentümer die Quelle aktiviert und den Laufzeitschalter geöffnet hat.",
+      "mAccepted": "Akzeptiert",
+      "mDuplicate": "Duplikate",
+      "mInserted": "Eingefügt",
+      "mRejected": "Abgelehnt",
+      "mSeen": "Gesehen",
+      "mUnchanged": "Unverändert",
+      "mUpdated": "Aktualisiert",
+      "mWaiting": "Wartet auf Aktivierung",
+      "refused": "Abgelehnt",
+      "resultTitle": "Letzter Lauf",
+      "runDry": "Probelauf",
+      "runImport": "Importieren",
+      "runTitle": "Ausführen",
+      "running": "Läuft…",
+      "statusLabel": "Status",
+      "switchClosed": "geschlossen",
+      "switchOpen": "offen",
+      "title": "Stellenanzeigen-Quellen",
+      "checkpointTitle": "Kanal-Checkpoints",
+      "checkpointNote": "Stand des letzten Laufs je Kanal aus dem Cursor-Speicher. Die vollständige Laufabrechnung erscheint nur zur Laufzeit — eine dauerhafte Laufhistorie erfordert eine vom Eigentümer freigegebene Schemaänderung.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Letzter Lauf",
+      "colLastFailure": "Letzter Fehler",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Noch kein Lauf",
+      "stateOk": "Letzter Lauf OK",
+      "stateFailing": "Fehlerhaft"
     }
   }
 }

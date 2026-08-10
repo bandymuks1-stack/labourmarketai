@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { ABSENCE_TYPES } from "@/lib/leave/absences-model";
+import { emitAbsenceNotification } from "@/lib/notifications/event-emitters";
 
 /**
  * Leave & absence write actions (Wagon 7 slice). Writes go only through the
@@ -72,16 +73,25 @@ export async function requestAbsenceAction(input: {
     return { ok: false, code: "invalid" };
   }
 
-  const { error } = await asAny(supabase).rpc("request_worker_absence_v1", {
-    p_worker_id: input.workerId,
-    p_absence_type: input.absenceType,
-    p_start_date: input.startDate,
-    p_end_date: input.endDate,
-    p_half_day: !!input.halfDay,
-    p_note: (input.note ?? "").trim().slice(0, 500) || null,
-  });
+  const { data: newAbsenceId, error } = await asAny(supabase).rpc(
+    "request_worker_absence_v1",
+    {
+      p_worker_id: input.workerId,
+      p_absence_type: input.absenceType,
+      p_start_date: input.startDate,
+      p_end_date: input.endDate,
+      p_half_day: !!input.halfDay,
+      p_note: (input.note ?? "").trim().slice(0, 500) || null,
+    },
+  );
   if (error) return mapError(error);
   revalidatePath("/", "layout");
+  // Durable notification (fire-and-forget; silently nothing until the
+  // owner-gated notification_events store is applied). The emitter itself
+  // decides the recipient from the stored row — see event-emitters.ts.
+  if (typeof newAbsenceId === "string" && newAbsenceId) {
+    void emitAbsenceNotification(newAbsenceId, "absence_requested");
+  }
   return { ok: true };
 }
 
@@ -104,6 +114,12 @@ export async function reviewAbsenceAction(input: {
   });
   if (error) return mapError(error);
   revalidatePath("/", "layout");
+  // The absence OUTCOME is the exact event an offline worker never learned
+  // about under the derived-only spine. Fire-and-forget.
+  void emitAbsenceNotification(
+    input.absenceId,
+    input.decision === "approved" ? "absence_approved" : "absence_rejected",
+  );
   return { ok: true };
 }
 

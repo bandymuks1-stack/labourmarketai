@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Paziņojums",
+        "pending_invitations": "Uzaicinājumi gaida tavu atbildi",
+        "unread_messages": "Nelasītas ziņas",
+        "incoming_service_requests": "Pakalpojumu pieprasījumi gaida atbildi",
+        "service_request_responses": "Atbildes uz taviem pieprasījumiem",
+        "pending_bookings": "Rezervācijas piedāvājumi gaida atbildi",
+        "booking_responses": "Atbildes uz taviem rezervācijas piedāvājumiem",
+        "open_task_attention": "Uzdevumi, kam vajadzīga uzmanība",
+        "pending_absence_reviews": "Izskatāmi prombūtnes pieprasījumi",
+        "new_job_matches": "Jauni tev piemēroti darba sludinājumi",
+        "event_booking_proposed": "Tu saņēmi rezervācijas piedāvājumu",
+        "event_booking_accepted": "Tavs rezervācijas piedāvājums pieņemts",
+        "event_booking_declined": "Tavs rezervācijas piedāvājums noraidīts",
+        "event_absence_requested": "Tev reģistrēta prombūtne",
+        "event_absence_approved": "Tava prombūtne apstiprināta",
+        "event_absence_rejected": "Tava prombūtne noraidīta",
+        "event_engagement_created": "Izveidota jauna sadarbība"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",
@@ -727,7 +746,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Tumšais motīvs",
     "themeToLight": "Gaišais motīvs",
-    "how": "Kā tas darbojas"
+    "how": "Kā tas darbojas",
+    "menuOpen": "Izvēlne",
+    "menuClose": "Aizvērt izvēlni"
   },
   "pages": {
     "agencies": {
@@ -1958,12 +1979,32 @@
         "remote": "[EN] Remote",
         "hybrid": "[EN] Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Publiski darba sludinājumi",
+      "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
+      "openOriginal": "Atvērt oriģinālo sludinājumu",
+      "noApplicationRoute": "Avots šim sludinājumam nav publicējis pieteikšanās adresi.",
+      "publishedOn": "Publicēts {date}",
+      "positions": "{count} vieta(s)",
+      "payAsPublished": "Atalgojums kā publicēts",
+      "gapsTitle": "Sludinājumā nav norādīts",
+      "gap": {
+        "no_city": "pilsēta",
+        "no_country": "valsts",
+        "no_language_requirement": "valodu prasības",
+        "no_profession": "profesija",
+        "no_requirement_set": "prasmju prasības",
+        "no_start_date": "sākuma datums",
+        "pay_not_comparable": "atalgojums nav salīdzināms (nav EUR)"
+      }
     }
   },
   "scouting": {
     "tiers": {
       "negotiables": "[EN] Discussion points",
-      "missing": "[EN] Missing information"
+      "missing": "[EN] Missing information",
+      "blocking": "Bloķējošās prasības"
     },
     "missingSide": {
       "worker": "[EN] The candidate has not stated: {criterion}",
@@ -2044,6 +2085,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Atbilst norādītajām prasībām",
+      "blocked": "Neatbilst norādītajai prasībai",
+      "evidence": {
+        "confirmed": "Pierādījumi: apstiprinājis vadītājs",
+        "mixed": "Pierādījumi: daļēji apstiprināti",
+        "unverified": "Pierādījumi: tikai paša deklarēti"
+      }
     }
   },
   "waze": {
@@ -3432,7 +3482,8 @@
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
-      "roleReason": "[EN] Need: {role}"
+      "roleReason": "[EN] Need: {role}",
+      "introExternal": "Panelī ir {count} publisku darba sludinājumu no oficiāliem avotiem — pieteikšanās notiek caur oriģinālo sludinājumu."
     },
     "summary": {
       "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -4134,6 +4185,47 @@
       "externalPublicSource": "Publicējis valsts nodarbinātības dienests. Rādām šeit, lai jūs to atrastu — tas nav labourmarket.ai sludinājums.",
       "employerHasNotClaimed": "Šis darba devējs vēl nepārvalda šo sludinājumu labourmarket.ai, tāpēc pieteikšanās notiek caur oriģinālo sludinājumu.",
       "employerManagesHere": "Šis darba devējs pārvalda šo sludinājumu labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivizācija",
+      "colCountry": "Valsts",
+      "colFailures": "Kļūdu sērija",
+      "colLastSuccess": "Pēdējais panākums",
+      "colLegal": "Juridiskais statuss",
+      "colSource": "Avots",
+      "colStored": "Saglabāts (aktīvie)",
+      "colSwitch": "Izpildes slēdzis",
+      "errorsLabel": "Kļūdas",
+      "importDisabledReason": "Šī avota izpildes slēdzis ir aizvērts. To atver īpašnieks (vide), nevis šī lapa.",
+      "intro": "Ārējie publiskie darba sludinājumu avoti: pārvaldība, izpildes stāvoklis un importa veselība. Izmēģinājuma palaišana lasa un skaita, bet neko nesaglabā; imports raksta tikai tad, kad īpašnieks ir aktivizējis avotu un atvēris izpildes slēdzi.",
+      "mAccepted": "Pieņemts",
+      "mDuplicate": "Dublikāti",
+      "mInserted": "Ievietots",
+      "mRejected": "Noraidīts",
+      "mSeen": "Redzēts",
+      "mUnchanged": "Nemainīts",
+      "mUpdated": "Atjaunināts",
+      "mWaiting": "Gaida aktivizāciju",
+      "refused": "Noraidīts",
+      "resultTitle": "Pēdējā palaišana",
+      "runDry": "Izmēģinājums",
+      "runImport": "Importēt",
+      "runTitle": "Palaist",
+      "running": "Notiek…",
+      "statusLabel": "Statuss",
+      "switchClosed": "aizvērts",
+      "switchOpen": "atvērts",
+      "title": "Vakanču avoti",
+      "checkpointTitle": "Kanālu kontrolpunkti",
+      "checkpointNote": "Pēdējās palaišanas patiesība katram kanālam no kursoru krātuves. Pilna palaišanas uzskaite redzama tikai palaišanas brīdī — pastāvīgai vēsturei nepieciešamas īpašnieka apstiprinātas shēmas izmaiņas.",
+      "colChannel": "Kanāls",
+      "colState": "Stāvoklis",
+      "colLastRun": "Pēdējā palaišana",
+      "colLastFailure": "Pēdējā kļūda",
+      "colCursor": "Kursors",
+      "stateNoRunYet": "Vēl nav palaists",
+      "stateOk": "Pēdējā palaišana OK",
+      "stateFailing": "Neizdodas"
     }
   },
   "profileIdentityNotice": {

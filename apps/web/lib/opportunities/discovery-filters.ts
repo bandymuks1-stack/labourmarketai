@@ -98,6 +98,39 @@ export function applyDiscoveryFilters<T extends { readonly need: OpportunityNeed
   return cards.filter((c) => needMatchesFilters(c.need, f));
 }
 
+/**
+ * Whether ONE external public-source ad passes the active filters.
+ *
+ * External ads carry fewer facts than platform demands, and an unknown is
+ * NEVER treated as a match ("an ad that does not state a language requirement
+ * is not 'no language required'" — the presentation contract's rule, applied
+ * to filtering). So:
+ *   - `profession` filters on the categorizer's declared professionSlug;
+ *   - `country` filters on the publisher's stated country;
+ *   - `start` / `accommodation` / `transport` / `tool` are facts external ads
+ *     do not carry — an active filter there EXCLUDES external ads rather than
+ *     pretending the unknown satisfies the person's stated requirement.
+ */
+export function externalAdMatchesFilters(
+  view: {
+    readonly professionSlug: string | null;
+    readonly country: string | null;
+  },
+  f: DiscoveryFilterState,
+): boolean {
+  if (f.start != null || f.accommodation != null || f.transport != null || f.tool != null) {
+    return false;
+  }
+  if (f.profession != null && view.professionSlug !== f.profession) return false;
+  if (
+    f.country != null &&
+    (view.country ?? "").toUpperCase() !== f.country.toUpperCase()
+  ) {
+    return false;
+  }
+  return true;
+}
+
 /** Stable "newest first" reorder by the RPC's created_at (nulls last). The
  *  input order is the relevance order, so ties keep their relevance rank. */
 export function sortDiscoveryCards<T extends { readonly need: OpportunityNeed }>(

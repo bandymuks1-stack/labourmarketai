@@ -329,7 +329,26 @@
       "emptyTitle": "[EN] No notifications yet",
       "label": "[EN] Notifications",
       "markAllRead": "[EN] Mark all as read",
-      "switchRoleCta": "[EN] Switch to {role} to view"
+      "switchRoleCta": "[EN] Switch to {role} to view",
+      "types": {
+        "generic": "Notifikation",
+        "pending_invitations": "Invitationer afventer dit svar",
+        "unread_messages": "Ulæste beskeder",
+        "incoming_service_requests": "Serviceanmodninger afventer svar",
+        "service_request_responses": "Svar på dine anmodninger",
+        "pending_bookings": "Bookingforslag afventer svar",
+        "booking_responses": "Svar på dine bookingforslag",
+        "open_task_attention": "Opgaver der kræver opmærksomhed",
+        "pending_absence_reviews": "Fraværsanmodninger til gennemgang",
+        "new_job_matches": "Nye jobopslag der passer til dig",
+        "event_booking_proposed": "Du har modtaget et bookingforslag",
+        "event_booking_accepted": "Dit bookingforslag blev accepteret",
+        "event_booking_declined": "Dit bookingforslag blev afvist",
+        "event_absence_requested": "Der er registreret et fravær for dig",
+        "event_absence_approved": "Dit fravær blev godkendt",
+        "event_absence_rejected": "Dit fravær blev afvist",
+        "event_engagement_created": "Et nyt engagement blev oprettet"
+      }
     },
     "onboarding": {
       "back": "[EN] Back",
@@ -727,7 +746,9 @@
     "startNow": "[EN] Start now",
     "themeToDark": "Mørkt tema",
     "themeToLight": "Lyst tema",
-    "how": "Sådan fungerer det"
+    "how": "Sådan fungerer det",
+    "menuOpen": "Menu",
+    "menuClose": "Luk menu"
   },
   "pages": {
     "agencies": {
@@ -1958,12 +1979,32 @@
         "remote": "Fjernarbejde",
         "hybrid": "Hybrid"
       }
+    },
+    "external": {
+      "sectionTitle": "Offentlige jobannoncer",
+      "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "openOriginal": "Åbn den originale annonce",
+      "noApplicationRoute": "Kilden har ikke udgivet en ansøgningsadresse for denne annonce.",
+      "publishedOn": "Udgivet {date}",
+      "positions": "{count} stilling(er)",
+      "payAsPublished": "Løn som udgivet",
+      "gapsTitle": "Ikke angivet i annoncen",
+      "gap": {
+        "no_city": "by",
+        "no_country": "land",
+        "no_language_requirement": "sprogkrav",
+        "no_profession": "erhverv",
+        "no_requirement_set": "kompetencekrav",
+        "no_start_date": "startdato",
+        "pay_not_comparable": "løn ikke sammenlignelig (ikke i EUR)"
+      }
     }
   },
   "scouting": {
     "tiers": {
       "negotiables": "Punkter til drøftelse",
-      "missing": "Manglende oplysninger"
+      "missing": "Manglende oplysninger",
+      "blocking": "Blokerende krav"
     },
     "missingSide": {
       "worker": "Kandidaten har ikke angivet: {criterion}",
@@ -2044,6 +2085,15 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again."
+    },
+    "verdict": {
+      "eligible": "Opfylder de angivne krav",
+      "blocked": "Opfylder ikke et angivet krav",
+      "evidence": {
+        "confirmed": "Dokumentation: bekræftet af leder",
+        "mixed": "Dokumentation: delvist bekræftet",
+        "unverified": "Dokumentation: kun selvangivet"
+      }
     }
   },
   "waze": {
@@ -3432,7 +3482,8 @@
       "fitWeak": "[EN] Weak fit",
       "fitInsufficient": "[EN] Not enough data",
       "locationReason": "[EN] Location: {location}",
-      "roleReason": "[EN] Need: {role}"
+      "roleReason": "[EN] Need: {role}",
+      "introExternal": "Der er {count} offentlige jobopslag fra officielle kilder i panelet — ansøgning sker via den originale annonce."
     },
     "summary": {
       "introProfile": "[EN] Here's your profile as it stands: {done} of {total} essentials are saved.",
@@ -4134,6 +4185,47 @@
       "externalPublicSource": "Offentliggjort af en offentlig jobformidling. Vist her, så du kan finde den — det er ikke et labourmarket.ai-opslag.",
       "employerHasNotClaimed": "Denne arbejdsgiver administrerer ikke opslaget på labourmarket.ai endnu, så ansøgningen sker via den oprindelige annonce.",
       "employerManagesHere": "Denne arbejdsgiver administrerer opslaget på labourmarket.ai."
+    },
+    "admin": {
+      "colActivation": "Aktivering",
+      "colCountry": "Land",
+      "colFailures": "Fejlserie",
+      "colLastSuccess": "Seneste succes",
+      "colLegal": "Juridisk status",
+      "colSource": "Kilde",
+      "colStored": "Gemt (aktive)",
+      "colSwitch": "Driftskontakt",
+      "errorsLabel": "Fejl",
+      "importDisabledReason": "Denne kildes driftskontakt er lukket. Den åbnes af ejeren (miljø), ikke af denne side.",
+      "intro": "Eksterne offentlige jobannonce-kilder: governance, driftstilstand og import-sundhed. En prøvekørsel læser og tæller, men gemmer intet; en import skriver kun, når ejeren har aktiveret kilden og åbnet driftskontakten.",
+      "mAccepted": "Accepteret",
+      "mDuplicate": "Dubletter",
+      "mInserted": "Indsat",
+      "mRejected": "Afvist",
+      "mSeen": "Set",
+      "mUnchanged": "Uændret",
+      "mUpdated": "Opdateret",
+      "mWaiting": "Afventer aktivering",
+      "refused": "Afvist",
+      "resultTitle": "Seneste kørsel",
+      "runDry": "Prøvekørsel",
+      "runImport": "Importér",
+      "runTitle": "Kør",
+      "running": "Kører…",
+      "statusLabel": "Status",
+      "switchClosed": "lukket",
+      "switchOpen": "åben",
+      "title": "Jobannonce-kilder",
+      "checkpointTitle": "Kanal-checkpoints",
+      "checkpointNote": "Seneste kørsels status pr. kanal fra cursor-lageret. Fuldt kørselsregnskab vises kun ved kørslen — varig kørselshistorik kræver en ejer-godkendt skemaændring.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Seneste kørsel",
+      "colLastFailure": "Seneste fejl",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Ingen kørsel endnu",
+      "stateOk": "Seneste kørsel OK",
+      "stateFailing": "Fejler"
     }
   },
   "profileIdentityNotice": {

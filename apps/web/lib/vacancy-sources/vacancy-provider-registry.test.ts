@@ -95,12 +95,14 @@ describe("Arbetsförmedlingen descriptor", () => {
     }
   });
 
-  it("stays OWNER-GATED for production: approved for integration, not active", () => {
+  it("owner-activated 2026-08-09; still never a metric importer", () => {
     const governance = INTELLIGENCE_SOURCE_PROFILES.find(
       (g) => g.key === "arbetsformedlingen",
     )!;
-    expect(governance.activation).toBe("owner_review");
-    expect(governance.activation).not.toBe("on");
+    // docs/human-gates/arbetsformedlingen-activation-gate.md — approved.
+    expect(governance.activation).toBe("on");
+    // Vacancies are not metric observations: even active, this source may
+    // never hold a metric import policy.
     expect(governance.importPolicy).toBeNull();
   });
 

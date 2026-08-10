@@ -177,19 +177,19 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       // therefore "confirmed", and nothing in this file should read as if the
       // provider had not answered.
       //
-      // ACTIVATION IS A DIFFERENT DECISION and is deliberately NOT "on".
-      // "The provider permits us to use this" and "we have decided to run it
-      // in production" are two separate things: the second still needs a
-      // persistence schema (owner), an operator env flip, and a polling
-      // budget. `activation: "owner_review"` is exactly that state —
-      // approved for integration, awaiting our own activation decision.
-      // `isExternalSourceActive` requires "on", so this stays false and the
-      // import boundary still refuses every record with `activation_off`.
+      // ACTIVATION: "on" — OWNER-APPROVED 2026-08-09. The owner explicitly
+      // approved Arbetsförmedlingen activation under the staged regime in
+      // docs/human-gates/arbetsformedlingen-activation-gate.md (dry-run first,
+      // bounded first import, idempotency proof; no cap raises, no other
+      // source enabled by this decision). This flip is HALF the gate: the
+      // provider still imports nothing until the operator env switch
+      // VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED is set in production, and
+      // VACANCY_IMPORT_KILL_SWITCH remains the instant global stop.
       key: "arbetsformedlingen",
       displayNameCode: "intelligence.sources.arbetsformedlingen",
       sourceKind: "public_official",
       legalStatus: "confirmed",
-      activation: "owner_review",
+      activation: "on",
       termsNoteCode: "intelligence.sources.terms.arbetsformedlingen",
       attributionRequired: true,
       homepage: "jobtechdev.se",

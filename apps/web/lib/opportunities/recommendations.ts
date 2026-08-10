@@ -4,11 +4,16 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { loadWorkerOpportunities, type OpportunityCard } from "./load-worker-opportunities";
+import type {
+  ExternalOpportunityCardV1,
+  ExternalVacanciesResultV1,
+} from "./external-vacancies";
 import type { InterestStatus } from "./interest-snapshot";
 import { readMyOpportunitySeen, toSeenState } from "./seen";
 import {
   applyDiscoveryFilters,
   activeFilterCount,
+  externalAdMatchesFilters,
   type DiscoveryFilterState,
 } from "./discovery-filters";
 import {
@@ -75,6 +80,11 @@ export type WorkerJobRecommendationsResult =
       /** Unseen recommendations — the aggregate spine count. 0 while the
        *  seen store is absent (a badge that cannot clear is noise). */
       readonly newCount: number;
+      /** External public-source ads, exactly as the board read returned them
+       *  (real-supply train). Carried so the conversation surfaces answer
+       *  "find me work" with the SAME rows the board shows — no second read,
+       *  no second engine. */
+      readonly externalVacancies: ExternalVacanciesResultV1;
     };
 
 const loadRecommendationsResult = cache(
@@ -110,6 +120,7 @@ const loadRecommendationsResult = cache(
       boardOpportunities: board.opportunities,
       seenState: seen,
       newCount: seen.available ? countUnseenRecommendations(all) : 0,
+      externalVacancies: board.externalVacancies,
     };
   },
 );
@@ -128,6 +139,13 @@ export interface WorkerJobRecommendations {
   /** Total recommendable matches behind the top-N slice. */
   readonly totalRecommendable: number;
   readonly newCount: number;
+  /** External public-source ads from the SAME board read, narrowed by the
+   *  same active filters (an unknown never satisfies a stated filter —
+   *  `externalAdMatchesFilters`). NOT sliced to the platform top-N: the
+   *  caller decides how many to render and reports what it rendered. */
+  readonly externalCards: readonly ExternalOpportunityCardV1[];
+  /** Total external ads behind any slice the caller renders. */
+  readonly totalExternal: number;
 }
 
 /** Top-N recommendations for the signed-in worker. `kind: "no-worker"` for
@@ -148,14 +166,20 @@ export async function getWorkerJobRecommendations(options?: {
   const limit = Math.max(1, options?.limit ?? DEFAULT_LIMIT);
 
   const filters = options?.filters;
-  const filtered =
-    filters && activeFilterCount(filters) > 0
-      ? deriveJobRecommendations(
-          applyDiscoveryFilters(result.boardOpportunities, filters),
-          result.seenState,
-          Date.now(),
-        )
-      : result.all;
+  const filtersActive = filters != null && activeFilterCount(filters) > 0;
+  const filtered = filtersActive
+    ? deriveJobRecommendations(
+        applyDiscoveryFilters(result.boardOpportunities, filters),
+        result.seenState,
+        Date.now(),
+      )
+    : result.all;
+
+  const externalCards = filtersActive
+    ? result.externalVacancies.cards.filter((c) =>
+        externalAdMatchesFilters(c.view, filters),
+      )
+    : result.externalVacancies.cards;
 
   return {
     kind: "ready",
@@ -167,6 +191,8 @@ export async function getWorkerJobRecommendations(options?: {
     recommendations: filtered.slice(0, limit),
     totalRecommendable: filtered.length,
     newCount: result.newCount,
+    externalCards,
+    totalExternal: externalCards.length,
   };
 }
 

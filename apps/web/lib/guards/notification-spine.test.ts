@@ -32,6 +32,7 @@ const ZERO: SpineCounts = {
   pendingInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
+  pendingAbsenceReviews: 0,
 };
 
 describe("spine assembly is count-gated (never fabricates attention)", () => {
@@ -49,6 +50,7 @@ describe("spine assembly is count-gated (never fabricates attention)", () => {
       pendingInvitations: 6,
       openTaskAttention: 7,
       newJobMatches: 8,
+      pendingAbsenceReviews: 9,
     };
     const rows = buildSpineNotifications(all, "worker");
     expect(rows.map((r) => r.id).sort()).toEqual(

@@ -468,15 +468,31 @@ describe("NO new DB migration in this PR", () => {
     // health read, and one daily job. Rollback paired. RECOUNTED against
     // post-#1047 main as that branch's own note predicted: origin/main holds
     // 193 .sql files, this branch adds exactly one.
-    // Bumped 194 -> 195 for the beta-audit P1 defect A1 fix
+    // Bumped 194 -> 195 for public vacancy persistence v1
+    // (20260809160000_public_vacancy_persistence_v1) — two tables giving the
+    // already-built vacancy pipeline somewhere to put a vacancy. Still nothing
+    // from the market-map read layer. Owner-gated, paired rollback, ships
+    // UNAPPLIED. RECOUNTED against origin/main 0d8de71d rather than summed:
+    // `git ls-tree -r origin/main supabase/migrations/` = 194 .sql files, and
+    // this branch adds exactly one.
+    // Bumped 195 -> 196 for durable notification events v1
+    // (20260810070000_notification_events_v1) — one append-only per-recipient
+    // events table with recipient-scoped RLS and a service_role-only write
+    // path. Nothing from the market-map read layer. Owner-gated, paired
+    // rollback, ships UNAPPLIED
+    // (docs/human-gates/notification-events-gate.md). RECOUNTED against
+    // origin/main 97bc3ff8: 195 .sql files there, this branch adds exactly
+    // one.
+    // Bumped 196 -> 197 for the beta-audit P1 defect A1 fix
     // (20260808150000_caller_manages_worker_engagements_v1) — extends
     // caller_manages_worker with an ACTIVE company_worker_engagements branch
     // (the absence-review surface was blind to booking-created engagements)
     // and restores the project-assign engagement OR-branch that W11's
     // 20260804120000 reverted. Three function bodies, paired rollback, no
-    // schema/policy/grant change, zero DML. origin/main holds 194 .sql files,
-    // this branch adds exactly one. Owner-gated: ships UNAPPLIED.
-    expect(count).toBeLessThanOrEqual(195);
+    // schema/policy/grant change, zero DML. RECOUNTED after merging main
+    // (post-#1116, dc354727): origin/main holds 196 .sql files, this branch
+    // adds exactly one. Owner-gated: ships UNAPPLIED.
+    expect(count).toBeLessThanOrEqual(197);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

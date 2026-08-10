@@ -40,6 +40,18 @@ import { evaluateVacancySwitch } from "../vacancy-import/vacancy-kill-switch";
 const APP_ROOT = join(__dirname, "..", "..");
 const PURE_DIR = join(APP_ROOT, "lib", "vacancy-sources");
 const SERVER_DIR = join(APP_ROOT, "lib", "vacancy-import");
+/**
+ * The PERSISTENCE layer, added with `20260809160000_public_vacancy_
+ * persistence_v1`. It is a THIRD directory rather than more files under
+ * `lib/vacancy-import/**` on purpose: that folder is the NETWORK layer and
+ * section (i) below pins that it holds no database client. Persistence
+ * genuinely needs one, so it gets its own folder and the mirrored pin — this
+ * layer may hold a client but may never call `fetch`.
+ *
+ * Net effect: no single module in the vacancy pipeline can both read the
+ * internet and write the database.
+ */
+const STORE_DIR = join(APP_ROOT, "lib", "vacancy-store");
 
 const read = (p: string) => readFileSync(p, "utf8");
 /** Strip block + line comments so scans check real CODE only. */
@@ -120,23 +132,44 @@ describe("(b) categorization is deterministic — no LLM SDK in the pipeline", (
 // ── (c) every provider stays owner-gated ─────────────────────────────────────
 
 describe("(c) every vacancy provider is OWNER-GATED in source governance", () => {
-  it("each provider has a governance row that is NOT active", () => {
+  // The exact set of providers the owner has activated, each with the date of
+  // the recorded decision. Adding a key here without a real owner decision is
+  // exactly the fabrication this guard exists to catch.
+  const OWNER_ACTIVATED: ReadonlyMap<string, string> = new Map([
+    // docs/human-gates/arbetsformedlingen-activation-gate.md — approved
+    // 2026-08-09 (staged: dry-run first, bounded import, no cap raises).
+    ["arbetsformedlingen", "2026-08-09"],
+  ]);
+
+  it("each provider is either in the recorded owner-activated set or NOT active", () => {
     // Provider permission and OUR activation are separate decisions. A
-    // provider may have confirmed its terms (Arbetsförmedlingen has: CC0,
-    // keyless, no prior notification) and still import nothing, because
-    // activation needs a persistence schema and an operator flip.
+    // provider may have confirmed its terms and still import nothing until
+    // the owner records an activation decision in the set above.
     expect(VACANCY_PROVIDERS.length).toBeGreaterThan(0);
     for (const provider of VACANCY_PROVIDERS) {
       const profile = INTELLIGENCE_SOURCE_PROFILES.find(
         (p) => p.key === provider.governanceSourceKey,
       );
       expect(profile, `${provider.key} governance row`).toBeTruthy();
-      expect(profile!.activation, `${provider.key} activation`).not.toBe("on");
+      // Vacancies are never metric observations — activated or not, no
+      // vacancy provider may hold a metric import policy.
       expect(profile!.importPolicy, `${provider.key} importPolicy`).toBeNull();
-      expect(
-        isExternalSourceActive(provider.key),
-        `${provider.key} active`,
-      ).toBe(false);
+      if (OWNER_ACTIVATED.has(provider.key)) {
+        // An activated provider must have its legal facts recorded — an
+        // active-but-unconfirmed source would be a governance violation.
+        expect(profile!.legalStatus, `${provider.key} legalStatus`).toBe(
+          "confirmed",
+        );
+        expect(isExternalSourceActive(provider.key), provider.key).toBe(true);
+      } else {
+        expect(profile!.activation, `${provider.key} activation`).not.toBe(
+          "on",
+        );
+        expect(
+          isExternalSourceActive(provider.key),
+          `${provider.key} active`,
+        ).toBe(false);
+      }
     }
   });
 
@@ -146,7 +179,9 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
     )!;
     expect(profile.legalStatus).toBe("confirmed");
     expect(profile.proposedOnly).toBe(false);
-    expect(profile.activation).toBe("owner_review");
+    // Owner-approved 2026-08-09 — activation is now ON; the runtime env
+    // switch remains the second, independent gate.
+    expect(profile.activation).toBe("on");
   });
 
   it("no vacancy provider endpoint requires an API key", () => {
@@ -338,6 +373,72 @@ describe("(i) the pipeline collects no contacts and sends nothing", () => {
   });
 });
 
+// ── (j) the persistence layer is a database layer and nothing else ──────────
+
+describe("(j) the store layer writes the database and never touches a network", () => {
+  it("no module in the store layer calls fetch or names an http(s) endpoint", () => {
+    // The mirror image of (d). The adapter is the only module allowed to
+    // fetch; the store is the only one allowed a database client. Neither may
+    // become the other, because a module holding both is exactly the shape
+    // that turns an ingest bug into a data-exfiltration bug.
+    const offenders = sourcesIn(STORE_DIR)
+      .filter((f) => !/\.test\.tsx?$/.test(f))
+      .filter((f) => {
+        const src = code(read(f));
+        return /\bfetch\s*\(/.test(src) || /https?:\/\//.test(src);
+      })
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the store layer never imports the adapter, the importer or the kill switch", () => {
+    // Persistence must stay callable without dragging the network layer in.
+    // A runner composes the two; neither imports the other.
+    const offenders = sourcesIn(STORE_DIR)
+      .filter((f) => !/\.test\.tsx?$/.test(f))
+      .filter((f) =>
+        /["']@?\/?(lib\/)?vacancy-import\//.test(code(read(f))) ||
+        /["']\.\/vacancy-(adapter|importer|kill-switch)["']/.test(code(read(f))),
+      )
+      .map(rel);
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
+  it("the store layer is server-only", () => {
+    // A persistence module reachable from a client bundle would ship the
+    // service-role shape into the browser's dependency graph.
+    const entry = join(STORE_DIR, "vacancy-repository.ts");
+    expect(existsSync(entry)).toBe(true);
+    expect(read(entry)).toMatch(/^import "server-only";/m);
+  });
+
+  it("the store writes ONLY the two tables the migration creates", () => {
+    // A persistence layer that quietly learned to write `customer_requests`
+    // would turn an external ad into a platform demand record — the exact
+    // thing the contract forbids. Pin the table names it may name.
+    const ALLOWED = new Set(["public_vacancies", "vacancy_import_cursors"]);
+    const src = code(read(join(STORE_DIR, "vacancy-repository.ts")));
+    const tables = [...src.matchAll(/\.from\(([A-Z_]+|"[a-z_]+")\)/g)].map(
+      (m) => m[1].replace(/"/g, ""),
+    );
+    const constants = [...src.matchAll(/const\s+[A-Z_]+_TABLE\s*=\s*"([a-z_]+)"/g)].map(
+      (m) => m[1],
+    );
+    for (const t of constants) {
+      expect(ALLOWED.has(t), `store names an unexpected table: ${t}`).toBe(true);
+    }
+    // Every `.from(...)` goes through one of those constants, never a literal
+    // typed at the call site.
+    for (const t of tables) {
+      expect(
+        t.endsWith("_TABLE") || ALLOWED.has(t),
+        `store reaches a table outside the pinned set: ${t}`,
+      ).toBe(true);
+    }
+    expect(constants.length).toBeGreaterThan(0);
+  });
+});
+
 // ── (j) internal state names never reach a user ──────────────────────────────
 
 describe("(j) technical state names stay internal", () => {
@@ -413,14 +514,22 @@ describe("(g) the kill switch fails closed", () => {
   });
 
   it("the env flag alone cannot import anything — governance is the second gate", () => {
-    // Both gates are required. This asserts the pair explicitly so removing
-    // either one fails here rather than silently in production.
+    // Both gates are required. For a provider WITHOUT a recorded owner
+    // activation, flipping the env switch must still import nothing; the
+    // global kill switch must also stop an activated provider instantly.
     for (const provider of VACANCY_PROVIDERS) {
       const envOn = evaluateVacancySwitch(provider.key, {
         [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
       });
       expect(envOn.operational, provider.key).toBe(true);
-      expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
+      if (provider.key !== "arbetsformedlingen") {
+        expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
+      }
+      const killed = evaluateVacancySwitch(provider.key, {
+        [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
+        VACANCY_IMPORT_KILL_SWITCH: "on",
+      });
+      expect(killed.operational, `${provider.key} kill`).toBe(false);
     }
   });
 });
