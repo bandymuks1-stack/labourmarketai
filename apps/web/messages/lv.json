@@ -4215,7 +4215,17 @@
       "statusLabel": "Statuss",
       "switchClosed": "aizvērts",
       "switchOpen": "atvērts",
-      "title": "Vakanču avoti"
+      "title": "Vakanču avoti",
+      "checkpointTitle": "Kanālu kontrolpunkti",
+      "checkpointNote": "Pēdējās palaišanas patiesība katram kanālam no kursoru krātuves. Pilna palaišanas uzskaite redzama tikai palaišanas brīdī — pastāvīgai vēsturei nepieciešamas īpašnieka apstiprinātas shēmas izmaiņas.",
+      "colChannel": "Kanāls",
+      "colState": "Stāvoklis",
+      "colLastRun": "Pēdējā palaišana",
+      "colLastFailure": "Pēdējā kļūda",
+      "colCursor": "Kursors",
+      "stateNoRunYet": "Vēl nav palaists",
+      "stateOk": "Pēdējā palaišana OK",
+      "stateFailing": "Neizdodas"
     }
   },
   "profileIdentityNotice": {

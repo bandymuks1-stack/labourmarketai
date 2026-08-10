@@ -4215,7 +4215,17 @@
       "statusLabel": "Status",
       "switchClosed": "lukket",
       "switchOpen": "åben",
-      "title": "Jobannonce-kilder"
+      "title": "Jobannonce-kilder",
+      "checkpointTitle": "Kanal-checkpoints",
+      "checkpointNote": "Seneste kørsels status pr. kanal fra cursor-lageret. Fuldt kørselsregnskab vises kun ved kørslen — varig kørselshistorik kræver en ejer-godkendt skemaændring.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Seneste kørsel",
+      "colLastFailure": "Seneste fejl",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Ingen kørsel endnu",
+      "stateOk": "Seneste kørsel OK",
+      "stateFailing": "Fejler"
     }
   },
   "profileIdentityNotice": {

@@ -4215,7 +4215,17 @@
       "statusLabel": "Olek",
       "switchClosed": "suletud",
       "switchOpen": "avatud",
-      "title": "Töökuulutuste allikad"
+      "title": "Töökuulutuste allikad",
+      "checkpointTitle": "Kanali kontrollpunktid",
+      "checkpointNote": "Viimase käivituse tõde iga kanali kohta kursorihoidlast. Täielik käivituse arvestus on nähtav ainult käivitamise hetkel — püsiv ajalugu nõuab omaniku kinnitatud skeemimuudatust.",
+      "colChannel": "Kanal",
+      "colState": "Olek",
+      "colLastRun": "Viimane käivitus",
+      "colLastFailure": "Viimane viga",
+      "colCursor": "Kursor",
+      "stateNoRunYet": "Käivitusi pole veel",
+      "stateOk": "Viimane käivitus OK",
+      "stateFailing": "Tõrge"
     }
   },
   "profileIdentityNotice": {

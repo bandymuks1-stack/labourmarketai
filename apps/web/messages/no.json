@@ -4215,7 +4215,17 @@
       "statusLabel": "Status",
       "switchClosed": "lukket",
       "switchOpen": "åpen",
-      "title": "Stillingsannonsekilder"
+      "title": "Stillingsannonsekilder",
+      "checkpointTitle": "Kanal-sjekkpunkter",
+      "checkpointNote": "Siste kjørings status per kanal fra cursor-lageret. Fullt kjøringsregnskap vises bare ved kjøringen — varig kjøringshistorikk krever en eier-godkjent skjemaendring.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Siste kjøring",
+      "colLastFailure": "Siste feil",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Ingen kjøring ennå",
+      "stateOk": "Siste kjøring OK",
+      "stateFailing": "Feiler"
     }
   },
   "profileIdentityNotice": {

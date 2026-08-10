@@ -12010,7 +12010,17 @@
       "statusLabel": "Status",
       "switchClosed": "gesloten",
       "switchOpen": "open",
-      "title": "Vacaturebronnen"
+      "title": "Vacaturebronnen",
+      "checkpointTitle": "Kanaal-checkpoints",
+      "checkpointNote": "Status van de laatste run per kanaal uit de cursoropslag. Volledige runverantwoording is alleen zichtbaar op het moment van de run — permanente rungeschiedenis vereist een door de eigenaar goedgekeurde schemawijziging.",
+      "colChannel": "Kanaal",
+      "colState": "Status",
+      "colLastRun": "Laatste run",
+      "colLastFailure": "Laatste fout",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Nog geen run",
+      "stateOk": "Laatste run OK",
+      "stateFailing": "Faalt"
     }
   }
 }
