@@ -826,11 +826,11 @@
       "benefits": [
         {
           "title": "Importér eller start forfra",
-          "body": "Upload et eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Udtrukne fakta forbliver forslag, indtil du bekræfter dem."
+          "body": "Upload et eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Udtrukne fakta forbliver forslag, indtil du accepterer dem."
         },
         {
           "title": "Ærlig struktur",
-          "body": "Din erfaring, uddannelse, sprog og færdigheder struktureres til din gennemgang — intet opdigtes, og intet gemmes uden din bekræftelse."
+          "body": "Din erfaring, uddannelse, sprog og færdigheder struktureres til din gennemgang — intet opdigtes, og intet gemmes uden dit samtykke."
         },
         {
           "title": "Rene skabeloner, ægte PDF",
@@ -849,7 +849,7 @@
         },
         {
           "title": "Tilføj din erfaring",
-          "body": "Importér dit gamle CV eller skriv det ind — gennemgå og bekræft derefter hvert faktum, før det bruges."
+          "body": "Importér dit gamle CV eller skriv det ind — gennemgå derefter hvert faktum og beslut, hvad der bliver, før det bruges."
         },
         {
           "title": "Download og beslut",

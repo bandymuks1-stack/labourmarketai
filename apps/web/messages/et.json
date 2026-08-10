@@ -826,11 +826,11 @@
       "benefits": [
         {
           "title": "Impordi või alusta uuesti",
-          "body": "Laadi üles olemasolev CV (PDF, DOCX või tekst) või alusta tühjalt lehelt. Eraldatud faktid jäävad ettepanekuteks, kuni sa need kinnitad."
+          "body": "Laadi üles olemasolev CV (PDF, DOCX või tekst) või alusta tühjalt lehelt. Eraldatud faktid jäävad ettepanekuteks, kuni sa need vastu võtad."
         },
         {
           "title": "Aus struktuur",
-          "body": "Sinu kogemus, haridus, keeled ja oskused struktureeritakse sinu ülevaatuseks — midagi ei mõelda välja ega salvestata ilma sinu kinnituseta."
+          "body": "Sinu kogemus, haridus, keeled ja oskused struktureeritakse sinu ülevaatuseks — midagi ei mõelda välja ega salvestata ilma sinu nõusolekuta."
         },
         {
           "title": "Puhtad mallid, päris PDF",
@@ -849,7 +849,7 @@
         },
         {
           "title": "Lisa oma kogemus",
-          "body": "Impordi vana CV või kirjuta see sisse — seejärel vaata üle ja kinnita iga fakt enne kasutamist."
+          "body": "Impordi vana CV või kirjuta see sisse — seejärel vaata iga fakt üle ja otsusta enne kasutamist, mis jääb."
         },
         {
           "title": "Laadi alla ja otsusta",

@@ -4518,11 +4518,11 @@
       "benefits": [
         {
           "title": "Importuok arba pradėk iš naujo",
-          "body": "Įkelk esamą CV (PDF, DOCX ar tekstą) arba pradėk nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepatvirtini."
+          "body": "Įkelk esamą CV (PDF, DOCX ar tekstą) arba pradėk nuo tuščio lapo. Ištraukti faktai lieka pasiūlymais, kol jų nepriimi."
         },
         {
           "title": "Sąžininga struktūra",
-          "body": "Tavo patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami tavo peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be tavo patvirtinimo."
+          "body": "Tavo patirtis, išsilavinimas, kalbos ir įgūdžiai struktūruojami tavo peržiūrai — niekas neišgalvojama ir niekas neišsaugoma be tavo sutikimo."
         },
         {
           "title": "Tvarkingi šablonai, tikras PDF",
@@ -4541,7 +4541,7 @@
         },
         {
           "title": "Pridėk savo patirtį",
-          "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk ir patvirtink kiekvieną faktą prieš jį panaudojant."
+          "body": "Importuok seną CV arba įrašyk pats — tada peržiūrėk kiekvieną faktą ir nuspręsk, ką pasilikti, prieš jį panaudojant."
         },
         {
           "title": "Atsisiųsk ir spręsk",

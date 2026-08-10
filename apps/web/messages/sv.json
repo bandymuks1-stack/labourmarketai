@@ -826,11 +826,11 @@
       "benefits": [
         {
           "title": "Importera eller börja om",
-          "body": "Ladda upp ett befintligt CV (PDF, DOCX eller text) eller börja med en tom sida. Extraherade fakta förblir förslag tills du bekräftar dem."
+          "body": "Ladda upp ett befintligt CV (PDF, DOCX eller text) eller börja med en tom sida. Extraherade fakta förblir förslag tills du accepterar dem."
         },
         {
           "title": "Ärlig struktur",
-          "body": "Din erfarenhet, utbildning, språk och färdigheter struktureras för din granskning — inget hittas på och inget sparas utan din bekräftelse."
+          "body": "Din erfarenhet, utbildning, språk och färdigheter struktureras för din granskning — inget hittas på och inget sparas utan ditt samtycke."
         },
         {
           "title": "Rena mallar, riktig PDF",
@@ -849,7 +849,7 @@
         },
         {
           "title": "Lägg till din erfarenhet",
-          "body": "Importera ditt gamla CV eller skriv in det — granska och bekräfta sedan varje faktum innan det används."
+          "body": "Importera ditt gamla CV eller skriv in det — granska sedan varje faktum och bestäm vad som ska behållas innan det används."
         },
         {
           "title": "Ladda ner och bestäm",

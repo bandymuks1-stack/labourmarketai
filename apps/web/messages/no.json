@@ -826,11 +826,11 @@
       "benefits": [
         {
           "title": "Importer eller start på nytt",
-          "body": "Last opp en eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Uttrukne fakta forblir forslag til du bekrefter dem."
+          "body": "Last opp en eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Uttrukne fakta forblir forslag til du aksepterer dem."
         },
         {
           "title": "Ærlig struktur",
-          "body": "Din erfaring, utdanning, språk og ferdigheter struktureres for din gjennomgang — ingenting diktes opp, og ingenting lagres uten din bekreftelse."
+          "body": "Din erfaring, utdanning, språk og ferdigheter struktureres for din gjennomgang — ingenting diktes opp, og ingenting lagres uten ditt samtykke."
         },
         {
           "title": "Rene maler, ekte PDF",
@@ -849,7 +849,7 @@
         },
         {
           "title": "Legg til erfaringen din",
-          "body": "Importer den gamle CV-en din eller skriv den inn — gå så gjennom og bekreft hvert faktum før det brukes."
+          "body": "Importer den gamle CV-en din eller skriv den inn — gå så gjennom hvert faktum og bestem hva som blir med, før det brukes."
         },
         {
           "title": "Last ned og bestem",

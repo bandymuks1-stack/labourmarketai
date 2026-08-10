@@ -4518,11 +4518,11 @@
       "benefits": [
         {
           "title": "Importeer of begin opnieuw",
-          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze bevestigt."
+          "body": "Upload een bestaand cv (PDF, DOCX of tekst) of begin met een leeg blad. Geëxtraheerde feiten blijven suggesties totdat jij ze accepteert."
         },
         {
           "title": "Eerlijke structuur",
-          "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw bevestiging."
+          "body": "Je ervaring, opleiding, talen en vaardigheden worden gestructureerd voor jouw controle — niets wordt verzonnen en niets wordt opgeslagen zonder jouw toestemming."
         },
         {
           "title": "Strakke templates, echte PDF",
@@ -4541,7 +4541,7 @@
         },
         {
           "title": "Voeg je ervaring toe",
-          "body": "Importeer je oude cv of typ het in — controleer en bevestig daarna elk feit voordat het wordt gebruikt."
+          "body": "Importeer je oude cv of typ het in — bekijk daarna elk feit en bepaal wat je houdt voordat het wordt gebruikt."
         },
         {
           "title": "Download en beslis",

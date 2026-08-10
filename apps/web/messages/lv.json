@@ -826,11 +826,11 @@
       "benefits": [
         {
           "title": "Importē vai sāc no jauna",
-          "body": "Augšupielādē esošu CV (PDF, DOCX vai tekstu) vai sāc ar tukšu lapu. Izgūtie fakti paliek ieteikumi, līdz tu tos apstiprini."
+          "body": "Augšupielādē esošu CV (PDF, DOCX vai tekstu) vai sāc ar tukšu lapu. Izgūtie fakti paliek ieteikumi, līdz tu tos pieņem."
         },
         {
           "title": "Godīga struktūra",
-          "body": "Tava pieredze, izglītība, valodas un prasmes tiek strukturētas tavai pārskatīšanai — nekas netiek izdomāts un nekas netiek saglabāts bez tava apstiprinājuma."
+          "body": "Tava pieredze, izglītība, valodas un prasmes tiek strukturētas tavai pārskatīšanai — nekas netiek izdomāts un nekas netiek saglabāts bez tavas piekrišanas."
         },
         {
           "title": "Tīras veidnes, īsts PDF",
@@ -849,7 +849,7 @@
         },
         {
           "title": "Pievieno savu pieredzi",
-          "body": "Importē veco CV vai ieraksti to — tad pārskati un apstiprini katru faktu pirms izmantošanas."
+          "body": "Importē veco CV vai ieraksti to — tad pārskati katru faktu un izlem, kas paliek, pirms tas tiek izmantots."
         },
         {
           "title": "Lejupielādē un izlem",

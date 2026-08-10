@@ -4518,11 +4518,11 @@
       "benefits": [
         {
           "title": "Import or start fresh",
-          "body": "Upload an existing CV (PDF, DOCX or text) or start from a blank page. Extracted facts stay suggestions until you confirm them."
+          "body": "Upload an existing CV (PDF, DOCX or text) or start from a blank page. Extracted facts stay suggestions until you accept them."
         },
         {
           "title": "Honest structure",
-          "body": "Your experience, education, languages and skills are structured for your review — nothing is invented and nothing is saved without your confirmation."
+          "body": "Your experience, education, languages and skills are structured for your review — nothing is invented and nothing is saved without your approval."
         },
         {
           "title": "Clean templates, real PDF",
@@ -4541,7 +4541,7 @@
         },
         {
           "title": "Add your experience",
-          "body": "Import your old CV or write it in — then review and confirm each fact before it is used."
+          "body": "Import your old CV or write it in — then review each fact and decide what to keep before it is used."
         },
         {
           "title": "Download and decide",
