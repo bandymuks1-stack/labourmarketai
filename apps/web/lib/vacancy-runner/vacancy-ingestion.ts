@@ -346,6 +346,29 @@ export interface VacancySourceHealthV1 {
 }
 
 /**
+ * The honest per-channel checkpoint state, derived ONLY from cursor truth.
+ * There is no sessions table (a run's full accounting lives in the action's
+ * return value and nowhere else), so the three states below are everything
+ * the store can actually attest after the fact:
+ *   - `no_run_yet`  — the channel has never been run (distinct from "ran and
+ *                     wrote nothing", which leaves last_run_at set);
+ *   - `failing`     — the most recent run(s) failed (consecutive_failures>0);
+ *   - `ok`          — the last run completed without a recorded failure.
+ * Deeper questions ("how many were inserted last night?") need a persisted
+ * session record — an owner-gated schema decision, deliberately NOT inferred
+ * here.
+ */
+export type VacancyChannelCheckpointState = "no_run_yet" | "ok" | "failing";
+
+export function channelCheckpointState(cursor: {
+  readonly lastRunAt: string | null;
+  readonly consecutiveFailures: number;
+}): VacancyChannelCheckpointState {
+  if (cursor.lastRunAt === null) return "no_run_yet";
+  return cursor.consecutiveFailures > 0 ? "failing" : "ok";
+}
+
+/**
  * The registry × governance × env × storage join, one row per provider —
  * SOURCE_REGISTRY / SOURCE_GOVERNANCE / SOURCE_HEALTH / SOURCE_LAST_SUCCESS /
  * SOURCE_LAST_FAILURE in one honest read. Tolerates the unprovisioned store

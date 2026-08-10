@@ -4215,7 +4215,17 @@
       "statusLabel": "Status",
       "switchClosed": "zamknięty",
       "switchOpen": "otwarty",
-      "title": "Źródła ogłoszeń"
+      "title": "Źródła ogłoszeń",
+      "checkpointTitle": "Punkty kontrolne kanałów",
+      "checkpointNote": "Stan ostatniego uruchomienia dla każdego kanału z magazynu kursorów. Pełne rozliczenie uruchomienia widać tylko w chwili uruchomienia — trwała historia wymaga zatwierdzonej przez właściciela zmiany schematu.",
+      "colChannel": "Kanał",
+      "colState": "Stan",
+      "colLastRun": "Ostatnie uruchomienie",
+      "colLastFailure": "Ostatni błąd",
+      "colCursor": "Kursor",
+      "stateNoRunYet": "Jeszcze nie uruchomiono",
+      "stateOk": "Ostatnie uruchomienie OK",
+      "stateFailing": "Błąd"
     }
   },
   "profileIdentityNotice": {

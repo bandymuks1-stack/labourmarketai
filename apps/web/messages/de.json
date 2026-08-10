@@ -12010,7 +12010,17 @@
       "statusLabel": "Status",
       "switchClosed": "geschlossen",
       "switchOpen": "offen",
-      "title": "Stellenanzeigen-Quellen"
+      "title": "Stellenanzeigen-Quellen",
+      "checkpointTitle": "Kanal-Checkpoints",
+      "checkpointNote": "Stand des letzten Laufs je Kanal aus dem Cursor-Speicher. Die vollständige Laufabrechnung erscheint nur zur Laufzeit — eine dauerhafte Laufhistorie erfordert eine vom Eigentümer freigegebene Schemaänderung.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Letzter Lauf",
+      "colLastFailure": "Letzter Fehler",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Noch kein Lauf",
+      "stateOk": "Letzter Lauf OK",
+      "stateFailing": "Fehlerhaft"
     }
   }
 }

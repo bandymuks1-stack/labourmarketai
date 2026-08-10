@@ -4215,7 +4215,17 @@
       "statusLabel": "Status",
       "switchClosed": "stängd",
       "switchOpen": "öppen",
-      "title": "Jobbannonskällor"
+      "title": "Jobbannonskällor",
+      "checkpointTitle": "Kanal-kontrollpunkter",
+      "checkpointNote": "Senaste körningens status per kanal från cursor-lagret. Full körningsredovisning visas bara vid körningen — beständig körningshistorik kräver en ägargodkänd schemaändring.",
+      "colChannel": "Kanal",
+      "colState": "Status",
+      "colLastRun": "Senaste körning",
+      "colLastFailure": "Senaste fel",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "Ingen körning ännu",
+      "stateOk": "Senaste körning OK",
+      "stateFailing": "Misslyckas"
     }
   },
   "profileIdentityNotice": {
