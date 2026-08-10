@@ -816,6 +816,47 @@
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
       "titleAccent": "[EN] discoverable."
+    },
+    "createCv": {
+      "eyebrow": "Gratis CV-bygger",
+      "title": "Et professionelt CV,",
+      "titleAccent": "gratis.",
+      "subcopy": "Opret et CV fra bunden eller importér dit eksisterende PDF eller DOCX. Gennemgå hvert udtrukket faktum, vælg en ren skabelon og download som PDF — gratis. Hvis du vil, kan de samme oplysninger opbygge din arbejdstagerprofil og vise ægte jobopslag fra officielle offentlige kilder.",
+      "cta": "Opret mit CV — gratis",
+      "benefits": [
+        {
+          "title": "Importér eller start forfra",
+          "body": "Upload et eksisterende CV (PDF, DOCX eller tekst) eller start med en tom side. Udtrukne fakta forbliver forslag, indtil du accepterer dem."
+        },
+        {
+          "title": "Ærlig struktur",
+          "body": "Din erfaring, uddannelse, sprog og færdigheder struktureres til din gennemgang — intet opdigtes, og intet gemmes uden dit samtykke."
+        },
+        {
+          "title": "Rene skabeloner, ægte PDF",
+          "body": "Vælg en professionel skabelon og eksportér til A4-PDF via din browser — uden vandmærke, uden betalingsmur."
+        },
+        {
+          "title": "Mere end et dokument",
+          "body": "Med dit udtrykkelige samtykke kan de samme fakta opbygge din arbejdstagerprofil, forbinde dine færdigheder med det fælles europæiske færdighedskatalog og vise relevante offentlige jobopslag."
+        }
+      ],
+      "stepsTitle": "Sådan fungerer det",
+      "steps": [
+        {
+          "title": "Tilmeld dig gratis",
+          "body": "En konto holder dit CV redigerbart og dine data under din kontrol — du kan slette dem når som helst."
+        },
+        {
+          "title": "Tilføj din erfaring",
+          "body": "Importér dit gamle CV eller skriv det ind — gennemgå derefter hvert faktum og beslut, hvad der bliver, før det bruges."
+        },
+        {
+          "title": "Download og beslut",
+          "body": "Eksportér dit CV som PDF. At blive synlig for arbejdsgivere er et separat, valgfrit valg."
+        }
+      ],
+      "privacyNote": "Dit CV forbliver privat som standard. Intet deles med arbejdsgivere, før du udtrykkeligt slår synlighed til — og du kan slå den fra når som helst."
     }
   },
   "playercards": {

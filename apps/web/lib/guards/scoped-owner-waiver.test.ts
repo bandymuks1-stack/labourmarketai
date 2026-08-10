@@ -240,10 +240,110 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
   });
 
-  it("the LIVE waiver list is EMPTY — W6 removed the last record", () => {
-    // "waiver negali likti vien todėl, kad CI žalias" — the record died with
-    // the debt. Any future entry is a new owner ruling, not a leftover.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(0);
+  it("the LIVE waiver list holds exactly ONE record, and it is the /create-cv ruling", () => {
+    // "waiver negali likti vien todėl, kad CI žalias" — the W3/W4 record died
+    // with its debt in W6, leaving the list empty. The entry below is a NEW
+    // owner ruling (PUBLIC BETA TRAIN V3 §2.1, 2026-08-10), not a leftover.
+    //
+    // Pinning the COUNT is the point: a second record may only ever appear
+    // with a second owner ruling, and this assertion is what forces that
+    // conversation instead of letting the list grow quietly.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(1);
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.id).toBe("public-acquisition-route-create-cv");
+    expect(w.axioms).toEqual(["A-01"]);
+    expect(w.pullRequests).toEqual([1119]);
+    expect(w.owner).toMatch(/PUBLIC BETA TRAIN V3/);
+    // A waiver with no named resolution is a permanent exception wearing a
+    // deadline. This one names the constitution decision that deletes it.
+    expect(w.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
+    expect(w.expiresAt).toBe("2026-12-31");
+  });
+
+  it("the live record excuses SIX findings and no seventh", () => {
+    // The exact set the gate produced on 2026-08-10 for PR #1119. If a future
+    // change to the registry or the gate adds a seventh violation on this
+    // route, the subset rule un-waives the whole run — and this assertion is
+    // what makes that a deliberate edit rather than a surprise in CI.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    for (const f of w.expectedFindings) expect(f.file).toBe("/create-cv");
+  });
+
+  it("the live record lists the page PATH, not only the route id — else it leaks", () => {
+    // THE BUG THIS PINS. `decideWaiver` matches a finding by `finding.what`,
+    // which for a screen is the ROUTE ("/create-cv"). But `touchesWaivedFile`
+    // compares `files` against the real CHANGED FILE PATHS in the diff. With
+    // only the route id listed, NO changed path could ever end with
+    // "/create-cv", every unlisted PR would be classified "unrelated", and it
+    // would inherit the waiver — the exact "nothing new can inherit it"
+    // guarantee this mechanism sells. Listing the page path closes it.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.files).toContain("/create-cv");
+    expect(w.files).toContain("apps/web/app/[locale]/(marketing)/create-cv/page.tsx");
+
+    // Negative control: an unlisted PR whose diff really does contain the page
+    // must be REFUSED, not silently excused.
+    const findings = w.expectedFindings.map((f) => ({
+      code: f.code,
+      axiom: "A-01",
+      what: f.file,
+    }));
+    const blocked = evaluateFindings(
+      findings,
+      {
+        changedFiles: ["apps/web/app/[locale]/(marketing)/create-cv/page.tsx"],
+        pullRequest: 9999,
+        headSha: null,
+        today: "2026-08-10",
+      },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(blocked.pass).toBe(false);
+    expect(blocked.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+
+    // …and the listed PR still passes, so the control above proves the guard,
+    // not a broken waiver.
+    const allowed = evaluateFindings(
+      findings,
+      {
+        changedFiles: ["apps/web/app/[locale]/(marketing)/create-cv/page.tsx"],
+        pullRequest: 1119,
+        headSha: null,
+        today: "2026-08-10",
+      },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(allowed.pass).toBe(true);
+  });
+
+  it("the live record expires, and expiry blocks EVERY pull request", () => {
+    // Deliberate and documented: `decideWaiver` tests `expiresAt` BEFORE the
+    // unrelated-PR escape, and rule 6c re-validates the whole registry on every
+    // run — so past the date these findings block the repository, not just this
+    // route. That is the mechanism's pressure to RESOLVE the debt rather than
+    // renew it, and this test is where that consequence is written down.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    const findings = w.expectedFindings.map((f) => ({
+      code: f.code,
+      axiom: "A-01",
+      what: f.file,
+    }));
+    const v = evaluateFindings(
+      findings,
+      // An unrelated PR: different number, and a diff that never opens the page.
+      { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today: "2027-01-01" },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
   });
 
   it("a future W6 map fix makes the waiver unnecessary, not permanent", () => {

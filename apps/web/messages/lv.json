@@ -816,6 +816,47 @@
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
       "titleAccent": "[EN] discoverable."
+    },
+    "createCv": {
+      "eyebrow": "Bezmaksas CV veidotājs",
+      "title": "Profesionāls CV,",
+      "titleAccent": "bez maksas.",
+      "subcopy": "Izveido CV no nulles vai importē esošo PDF vai DOCX. Pārskati katru izgūto faktu, izvēlies tīru veidni un lejupielādē PDF — bez maksas. Ja vēlies, tā pati informācija var izveidot tavu darbinieka profilu un parādīt īstus darba sludinājumus no oficiāliem publiskiem avotiem.",
+      "cta": "Izveidot manu CV — bez maksas",
+      "benefits": [
+        {
+          "title": "Importē vai sāc no jauna",
+          "body": "Augšupielādē esošu CV (PDF, DOCX vai tekstu) vai sāc ar tukšu lapu. Izgūtie fakti paliek ieteikumi, līdz tu tos pieņem."
+        },
+        {
+          "title": "Godīga struktūra",
+          "body": "Tava pieredze, izglītība, valodas un prasmes tiek strukturētas tavai pārskatīšanai — nekas netiek izdomāts un nekas netiek saglabāts bez tavas piekrišanas."
+        },
+        {
+          "title": "Tīras veidnes, īsts PDF",
+          "body": "Izvēlies profesionālu veidni un eksportē uz A4 PDF caur pārlūku — bez ūdenszīmes, bez maksas sienas."
+        },
+        {
+          "title": "Vairāk nekā dokuments",
+          "body": "Ar tavu skaidru piekrišanu tie paši fakti var izveidot darbinieka profilu, sasaistīt prasmes ar kopīgo Eiropas prasmju katalogu un parādīt atbilstošus publiskus darba sludinājumus."
+        }
+      ],
+      "stepsTitle": "Kā tas darbojas",
+      "steps": [
+        {
+          "title": "Reģistrējies bez maksas",
+          "body": "Konts ļauj CV rediģēt, un dati paliek tavā kontrolē — tos vari izdzēst jebkurā brīdī."
+        },
+        {
+          "title": "Pievieno savu pieredzi",
+          "body": "Importē veco CV vai ieraksti to — tad pārskati katru faktu un izlem, kas paliek, pirms tas tiek izmantots."
+        },
+        {
+          "title": "Lejupielādē un izlem",
+          "body": "Eksportē CV kā PDF. Kļūt redzamam darba devējiem ir atsevišķa, brīvprātīga izvēle."
+        }
+      ],
+      "privacyNote": "Tavs CV pēc noklusējuma paliek privāts. Nekas netiek kopīgots ar darba devējiem, kamēr tu skaidri neieslēdz redzamību — un to jebkurā brīdī vari izslēgt."
     }
   },
   "playercards": {
