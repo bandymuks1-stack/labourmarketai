@@ -12051,7 +12051,17 @@
       "statusLabel": "Būsena",
       "switchClosed": "uždarytas",
       "switchOpen": "atidarytas",
-      "title": "Skelbimų šaltiniai"
+      "title": "Skelbimų šaltiniai",
+      "checkpointTitle": "Kanalų kontroliniai taškai",
+      "checkpointNote": "Paskutinio paleidimo tiesa kiekvienam kanalui iš žymeklių saugyklos. Pilna paleidimo apskaita rodoma tik paleidimo metu — nuolatinei istorijai reikia savininko patvirtinto schemos pakeitimo.",
+      "colChannel": "Kanalas",
+      "colState": "Būsena",
+      "colLastRun": "Paskutinis paleidimas",
+      "colLastFailure": "Paskutinė klaida",
+      "colCursor": "Žymeklis",
+      "stateNoRunYet": "Dar nepaleista",
+      "stateOk": "Paskutinis paleidimas pavyko",
+      "stateFailing": "Nepavyksta"
     }
   }
 }

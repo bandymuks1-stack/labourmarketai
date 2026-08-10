@@ -1,7 +1,10 @@
 import { getTranslations } from "next-intl/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { readVacancySourceHealth } from "@/lib/vacancy-runner/vacancy-ingestion";
+import {
+  channelCheckpointState,
+  readVacancySourceHealth,
+} from "@/lib/vacancy-runner/vacancy-ingestion";
 import { VacancySourceRunPanel } from "@/components/admin/vacancy-source-run-panel";
 
 /**
@@ -105,6 +108,96 @@ export async function VacancySourcesSection() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Per-channel checkpoint truth — the operator's "what happened in the
+          last import?" answered from the cursor store, so it survives reload
+          (the run panel below shows accounting only for a run just triggered
+          in THIS tab). Full per-run history needs a persisted session record,
+          which does not exist yet — an owner-gated schema decision. */}
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm font-semibold text-text-primary">
+          {t("checkpointTitle")}
+        </h3>
+        <p className="max-w-3xl text-xs text-text-muted">
+          {t("checkpointNote")}
+        </p>
+        <div className="overflow-x-auto">
+          <table
+            className="w-full min-w-[720px] text-left text-xs"
+            data-testid="vacancy-channel-checkpoints"
+          >
+            <thead>
+              <tr className="border-b border-ink-500 uppercase tracking-wide text-text-muted">
+                <th className="py-2 pr-4">{t("colSource")}</th>
+                <th className="py-2 pr-4">{t("colChannel")}</th>
+                <th className="py-2 pr-4">{t("colState")}</th>
+                <th className="py-2 pr-4">{t("colLastRun")}</th>
+                <th className="py-2 pr-4">{t("colLastSuccess")}</th>
+                <th className="py-2 pr-4">{t("colLastFailure")}</th>
+                <th className="py-2 pr-4">{t("colCursor")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {health.flatMap((source) =>
+                source.channels.map((channel) => {
+                  const cursor =
+                    source.cursors.find((c) => c.channel === channel) ?? null;
+                  const state = channelCheckpointState({
+                    lastRunAt: cursor?.lastRunAt ?? null,
+                    consecutiveFailures: cursor?.consecutiveFailures ?? 0,
+                  });
+                  const stateLabel =
+                    state === "no_run_yet"
+                      ? t("stateNoRunYet")
+                      : state === "failing"
+                        ? t("stateFailing")
+                        : t("stateOk");
+                  return (
+                    <tr
+                      key={`${source.providerKey}:${channel}`}
+                      className="border-b border-ink-500/40 align-top"
+                      data-testid={`vacancy-checkpoint-${source.providerKey}-${channel}`}
+                    >
+                      <td className="py-2 pr-4 font-medium">
+                        {source.providerKey}
+                      </td>
+                      <td className="py-2 pr-4">{channel}</td>
+                      <td className="py-2 pr-4">
+                        {state === "failing" ? (
+                          <span className="text-status-danger">
+                            {stateLabel}
+                            {cursor?.lastFailureCode
+                              ? ` (${cursor.lastFailureCode})`
+                              : null}
+                          </span>
+                        ) : state === "no_run_yet" ? (
+                          <span className="text-text-muted">{stateLabel}</span>
+                        ) : (
+                          <span className="text-status-success">
+                            {stateLabel}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-4 tabular-nums">
+                        {cursor?.lastRunAt ?? "—"}
+                      </td>
+                      <td className="py-2 pr-4 tabular-nums">
+                        {cursor?.lastSuccessAt ?? "—"}
+                      </td>
+                      <td className="py-2 pr-4 tabular-nums">
+                        {cursor?.lastFailureAt ?? "—"}
+                      </td>
+                      <td className="py-2 pr-4 tabular-nums">
+                        {cursor?.cursorValue ?? "—"}
+                      </td>
+                    </tr>
+                  );
+                }),
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <VacancySourceRunPanel

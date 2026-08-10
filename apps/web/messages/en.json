@@ -12051,7 +12051,17 @@
       "statusLabel": "Status",
       "switchClosed": "closed",
       "switchOpen": "open",
-      "title": "Vacancy sources"
+      "title": "Vacancy sources",
+      "checkpointTitle": "Channel checkpoints",
+      "checkpointNote": "Last-run truth per channel, read from the cursor store. Full per-run accounting is only shown at run time — persisted run history requires an owner-approved schema change.",
+      "colChannel": "Channel",
+      "colState": "State",
+      "colLastRun": "Last run",
+      "colLastFailure": "Last failure",
+      "colCursor": "Cursor",
+      "stateNoRunYet": "No run yet",
+      "stateOk": "Last run OK",
+      "stateFailing": "Failing"
     }
   }
 }
