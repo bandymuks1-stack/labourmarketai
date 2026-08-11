@@ -47,6 +47,43 @@ export type NotificationEntityType =
   | "worker_absence"
   | "engagement";
 
+/**
+ * Where a durable event TAKES YOU.
+ *
+ * A stored event states something that already happened — "your absence was
+ * rejected", "your booking was answered". Telling someone that and giving them
+ * no way to reach the thing is half a notification, and it is what the first
+ * cut shipped: durable rows were merged into the bell with no `href` at all.
+ *
+ * That was not an oversight so much as a coupling — the panel used "has no
+ * href" as its proxy for "this row has a persisted read state", so giving a
+ * durable row a link silently removed the mark-all-read control. The two ideas
+ * are now separate (`durable` says how it clears, `href` says where it goes),
+ * which is what lets a stored event be both readable and reachable.
+ *
+ * Every target is a route that ALREADY EXISTS and already carries this entity
+ * in the derived spine — no new surface, no new nav entry. `engagement` points
+ * at the bookings page deliberately: an engagement is minted when a booking is
+ * accepted, that page renders it, and both recipients (the company owner and
+ * the worker) reach it there.
+ *
+ * Route existence is pinned by lib/guards/notification-event-links.test.ts.
+ */
+export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = {
+  booking_request: "/dashboard/bookings",
+  worker_absence: "/dashboard/absences",
+  engagement: "/dashboard/bookings",
+};
+
+/** The canonical surface for a stored event, or undefined for an unknown
+ *  entity type — an unmapped type renders as a plain row rather than a link
+ *  to nowhere. */
+export function notificationEventHref(
+  entityType: string,
+): string | undefined {
+  return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
+}
+
 /** The ONLY metadata keys an event may carry — safe render hints, never
  *  free-form text. Widening this list is a reviewable act. */
 const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate"] as const;

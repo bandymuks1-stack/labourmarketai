@@ -35,10 +35,13 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   ]);
   const navBadges = buildNavBadges(spineCounts);
   const derived = buildSpineNotifications(spineCounts, activeRole ?? "worker");
-  // Durable rows carry no href (they clear by marking read, not by visiting)
-  // and render under the SAME bell — one attention surface, two honest row
-  // kinds. The employer-outcome events get the company icon; the rest are
-  // worker-facing.
+  // Durable rows render under the SAME bell — one attention surface, two
+  // honest row kinds. They clear by marking read (`durable: true`), and they
+  // ALSO carry the surface their entity lives on (`href`), so "your absence
+  // was rejected" is something you can act on rather than only read. Those two
+  // facts are independent; the panel keys mark-all-read off `durable`, never
+  // off a missing href. The employer-outcome events get the company icon; the
+  // rest are worker-facing.
   const durableRows: Notification[] = durable.map((d) => ({
     id: d.id,
     role:
@@ -49,6 +52,8 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
     payload: {},
     read_at: d.read_at,
     created_at: d.created_at,
+    href: d.href,
+    durable: true,
   }));
   return (
     <SpineHydrator
