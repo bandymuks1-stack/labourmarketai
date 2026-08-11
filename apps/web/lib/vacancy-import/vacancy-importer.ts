@@ -54,6 +54,8 @@ import {
 import {
   computeNextVacancyCursor,
   cursorRequestBound,
+  decodeRecordOffsetCursor,
+  encodeRecordOffsetCursor,
   planVacancyWindows,
 } from "@/lib/vacancy-sources/vacancy-cursor";
 import {
@@ -71,7 +73,7 @@ import {
   type VacancyProviderDescriptorV1,
 } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { getVacancyParser } from "@/lib/vacancy-sources/providers";
-import { fetchVacancyPage } from "./vacancy-adapter";
+import { fetchVacancyJsonLines, fetchVacancyPage } from "./vacancy-adapter";
 import { vacancySwitchState } from "./vacancy-kill-switch";
 
 export type VacancyImportMode = "dry_run" | "persist";
@@ -100,6 +102,13 @@ export interface VacancyImportMetricsV1 {
   readonly windowsPlanned: number;
   /** Time slices actually fetched and parsed — the checkpoint moved by each. */
   readonly windowsCompleted: number;
+  /**
+   * Records crossed WITHOUT being read, to reach this session's resume point
+   * on a record-offset walk. Reported because it is the real cost of resuming
+   * a body the publisher will not let us seek into, and an operator watching a
+   * cold start deserves to see it rather than wonder where the time went.
+   */
+  readonly recordsSkipped: number;
 }
 
 /** LOGGING — one structured, secret-free line per notable event. The importer
@@ -225,6 +234,7 @@ export async function runVacancyImport(
     retriesUsed: 0,
     windowsPlanned: 0,
     windowsCompleted: 0,
+    recordsSkipped: 0,
   };
 
   const switchState = vacancySwitchState(provider.key);
@@ -299,7 +309,109 @@ export async function runVacancyImport(
   /** The end of the newest slice fully consumed — the honest checkpoint. */
   let lastCompletedWindowEnd: string | null = null;
 
-  if (runOverNetwork) {
+  // ── RECORD-OFFSET WALK ───────────────────────────────────────────────────
+  // A body too large to hold and with no time axis to slice on is walked by
+  // RECORD INDEX over a line-delimited transport. State kept here so the
+  // checkpoint below can be built from what was actually consumed.
+  // Keyed on PAGINATION alone. A `record_offset` endpoint that forgot to
+  // declare `json_lines` must not quietly fall through to the paged loop and
+  // request an unbounded body — it reaches the streamed adapter, which refuses
+  // it outright. Wrong configuration therefore fails closed and loudly.
+  const streamedWalk = endpoint?.pagination === "record_offset";
+  /** Index of the next unread record; null when no streamed read happened. */
+  let streamNextOffset: number | null = null;
+  /** True only when the publisher ended the body — i.e. the walk drained. */
+  let streamDrained: boolean | null = null;
+
+  if (runOverNetwork && streamedWalk) {
+    // The checkpoint for this channel is an INDEX, not an instant. A missing
+    // or wrong-shaped value decodes to null and starts the walk over, which
+    // for a full snapshot is always a safe thing to do.
+    const startOffset = decodeRecordOffsetCursor(req.cursor ?? null) ?? 0;
+    counters.pagesRequested += 1;
+
+    const slice = await fetchVacancyJsonLines({
+      provider,
+      channel,
+      query: req.query,
+      apiKey: req.apiKey ?? null,
+      skipRecords: startOffset,
+      // One session consumes at most what one session may accept. Crossing
+      // more than we could ever store would spend bandwidth for nothing.
+      maxRecords: bounds.maxAcceptedPerSession,
+    });
+
+    if (!slice.ok) {
+      counters.pagesFailed += 1;
+      tally(`fetch_${slice.errorCode}`);
+      errors.push(`${channel}:${slice.errorCode}:${slice.detail}`);
+      log("error", "page_fetch_failed", slice.errorCode);
+    } else {
+      counters.bytesFetched += slice.byteLength;
+      counters.recordsSkipped += slice.recordsSkipped;
+      streamNextOffset = slice.nextOffset;
+      streamDrained = slice.completedStream;
+
+      // A body cut short mid-transfer is a FAILED run for health purposes —
+      // the failure streak must see it — but the records already read are
+      // real. They are kept, and the offset checkpoint carries the progress
+      // forward, so an interruption costs one partial session rather than the
+      // whole walk.
+      if (slice.interrupted) {
+        counters.pagesFailed += 1;
+        const cause = slice.interruptionCode ?? "network_error";
+        tally(`fetch_${cause}`);
+        errors.push(`${channel}:${cause}:stream_interrupted`);
+        log("error", "page_fetch_failed", cause);
+      }
+
+      // A line that is not JSON is a rejected ITEM, counted in the same
+      // exact-sum accounting as every other rejection — never silently
+      // dropped, because "scanned" has to mean everything we crossed.
+      if (slice.malformedLines > 0) {
+        counters.itemsSeen += slice.malformedLines;
+        counters.itemsRejectedByParser += slice.malformedLines;
+        for (let i = 0; i < slice.malformedLines; i += 1) {
+          tally("parse_malformed_json_line");
+        }
+      }
+
+      const batch = parser({
+        body: slice.records,
+        channel,
+        capturedAt: req.capturedAt,
+        requestRef: slice.requestRef,
+      });
+
+      if (!batch.ok) {
+        tally(`parse_${batch.bodyReason ?? "unknown"}`);
+        errors.push(`${channel}:${batch.bodyReason ?? "unknown"}`);
+        log("error", "batch_unparseable", batch.bodyReason);
+      } else {
+        counters.itemsSeen += batch.outcomes.length;
+        for (const outcome of batch.outcomes) {
+          if (outcome.kind === "rejected") {
+            counters.itemsRejectedByParser += 1;
+            tally(`parse_${outcome.reason}`);
+            continue;
+          }
+          counters.itemsParsed += 1;
+          parsed.push(outcome.vacancy);
+        }
+        log(
+          "info",
+          "stream_slice_done",
+          `${startOffset}+${slice.records.length}`,
+        );
+      }
+
+      // Whether the walk finished is the operator's headline fact, so it is
+      // stated explicitly rather than left to be inferred from a count.
+      if (!slice.completedStream) {
+        log("warn", "stream_walk_incomplete", slice.stopReason);
+      }
+    }
+  } else if (runOverNetwork) {
     // A snapshot is a one-shot: a single page, never repeated on a schedule.
     const maxPages =
       endpoint.pagination === "none"
@@ -595,12 +707,23 @@ export async function runVacancyImport(
     // just what survived the gates — a record we rejected for our own reasons
     // has still been SEEN, and re-reading it forever would stall the stream.
     // Moves forward only.
-    nextCursor:
-      windowPlan !== null
+    // A RECORD-OFFSET walk checkpoints on the index of the next unread record.
+    // It advances over everything CROSSED — including records we rejected and
+    // lines that were not JSON — for the same reason the timestamp cursor
+    // does: a record we declined for our own reasons has still been seen, and
+    // re-reading it forever would pin the walk in place. The reader returns
+    // offset 0 once the publisher ends the body, which turns the next run into
+    // a fresh reconciliation pass rather than a no-op.
+    nextCursor: streamedWalk
+      ? streamNextOffset !== null
+        ? encodeRecordOffsetCursor(streamNextOffset)
+        : (req.cursor ?? null)
+      : windowPlan !== null
         ? (lastCompletedWindowEnd ?? req.cursor ?? null)
         : computeNextVacancyCursor(req.cursor ?? null, parsed),
-    caughtUp:
-      windowPlan === null
+    caughtUp: streamedWalk
+      ? streamDrained
+      : windowPlan === null
         ? null
         : windowPlan.reachedPresent &&
           counters.windowsCompleted === counters.windowsPlanned,

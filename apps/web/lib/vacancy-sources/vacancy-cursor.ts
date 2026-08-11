@@ -30,9 +30,29 @@ import type { PublicVacancyV1 } from "./vacancy-contract";
  */
 export const VACANCY_CURSOR_OVERLAP_MS = 1_000;
 
+/**
+ * An ISO-8601 instant, and nothing else.
+ *
+ * `Date.parse` alone is NOT safe here, because it is deliberately lenient:
+ * `Date.parse("record-offset:5000")` does not fail — it reads `5000` as a YEAR
+ * and returns 4999-12-31. A checkpoint value of the wrong KIND would therefore
+ * have been silently accepted as a valid instant, and a delta channel handed
+ * one would ask the publisher for changes since the year 4999: a request that
+ * succeeds, returns nothing, and starves the source forever without ever
+ * looking like a failure.
+ *
+ * Matching the shape first means an unrecognised value becomes "no checkpoint"
+ * — which every caller already treats as a reason to refuse or to restart,
+ * never as a reason to guess.
+ */
+const ISO_INSTANT =
+  /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/;
+
 function parsed(iso: string | null | undefined): number | null {
-  if (typeof iso !== "string" || iso.trim().length === 0) return null;
-  const ms = Date.parse(iso);
+  if (typeof iso !== "string") return null;
+  const trimmed = iso.trim();
+  if (trimmed.length === 0 || !ISO_INSTANT.test(trimmed)) return null;
+  const ms = Date.parse(trimmed);
   return Number.isFinite(ms) ? ms : null;
 }
 
@@ -72,6 +92,51 @@ export function cursorRequestBound(cursor: string | null): string | null {
   const ms = parsed(cursor);
   if (ms === null) return null;
   return new Date(ms - VACANCY_CURSOR_OVERLAP_MS).toISOString();
+}
+
+// ── RECORD-OFFSET CHECKPOINT ────────────────────────────────────────────────
+/**
+ * A streamed snapshot has no timestamp to checkpoint on. It is one ordered
+ * body of "everything live right now", far larger than a single session may
+ * consume, and the publisher offers no server-side offset parameter. So the
+ * checkpoint for that channel is a RECORD INDEX: how many lines of the body
+ * have already been crossed.
+ *
+ * It shares the `cursor_value` column with the timestamp checkpoints, which
+ * the schema deliberately treats as an opaque publisher token. Mixing two
+ * meanings in one column is only safe if they cannot be confused for each
+ * other, so the offset carries an explicit prefix and:
+ *
+ *   - `decodeRecordOffsetCursor` returns null for a timestamp cursor, and
+ *   - `cursorRequestBound` / `computeNextVacancyCursor` already return null
+ *     for a prefixed offset (it is not a parseable date).
+ *
+ * Both directions therefore fail CLOSED — a channel handed the wrong kind of
+ * checkpoint refuses to run rather than walking from a garbage position.
+ */
+export const VACANCY_RECORD_OFFSET_PREFIX = "record-offset:";
+
+/** Encode a record index as the stored checkpoint. Negative and non-finite
+ *  values collapse to 0 — a walk restarts rather than seeking nowhere. */
+export function encodeRecordOffsetCursor(offset: number): string {
+  const safe =
+    Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
+  return `${VACANCY_RECORD_OFFSET_PREFIX}${safe}`;
+}
+
+/**
+ * The record index a stored checkpoint represents, or null when the value is
+ * absent, is a timestamp, or is malformed. Null means "start from the
+ * beginning", which for a full snapshot is always a correct thing to do.
+ */
+export function decodeRecordOffsetCursor(cursor: string | null): number | null {
+  if (typeof cursor !== "string") return null;
+  const trimmed = cursor.trim();
+  if (!trimmed.startsWith(VACANCY_RECORD_OFFSET_PREFIX)) return null;
+  const raw = trimmed.slice(VACANCY_RECORD_OFFSET_PREFIX.length);
+  if (!/^\d+$/.test(raw)) return null;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
 // ── TIME-WINDOW WALK ────────────────────────────────────────────────────────

@@ -3,6 +3,8 @@ import {
   VACANCY_CURSOR_OVERLAP_MS,
   computeNextVacancyCursor,
   cursorRequestBound,
+  decodeRecordOffsetCursor,
+  encodeRecordOffsetCursor,
   planVacancyWindows,
 } from "./vacancy-cursor";
 import { computeVacancyContentHash } from "./vacancy-hash";
@@ -174,5 +176,64 @@ describe("planVacancyWindows — the bounded walk", () => {
 
     expect(windows).toEqual([]);
     expect(reachedPresent).toBe(false);
+  });
+});
+
+// ── RECORD-OFFSET CHECKPOINT ────────────────────────────────────────────────
+/**
+ * Two kinds of checkpoint share one opaque `cursor_value` column: a publisher
+ * timestamp for the delta channels, and a record index for the streamed
+ * snapshot. Mixing them is only safe because BOTH directions fail closed, and
+ * that is exactly what these pin.
+ */
+describe("record-offset checkpoints", () => {
+  it("round-trips an index", () => {
+    expect(encodeRecordOffsetCursor(5_000)).toBe("record-offset:5000");
+    expect(decodeRecordOffsetCursor("record-offset:5000")).toBe(5_000);
+    expect(decodeRecordOffsetCursor(encodeRecordOffsetCursor(0))).toBe(0);
+  });
+
+  it("collapses a nonsensical index to a restart rather than seeking nowhere", () => {
+    expect(encodeRecordOffsetCursor(-1)).toBe("record-offset:0");
+    expect(encodeRecordOffsetCursor(Number.NaN)).toBe("record-offset:0");
+    expect(encodeRecordOffsetCursor(Number.POSITIVE_INFINITY)).toBe(
+      "record-offset:0",
+    );
+    expect(encodeRecordOffsetCursor(12.7)).toBe("record-offset:12");
+  });
+
+  it("a TIMESTAMP cursor decodes to no offset — so the walk restarts", () => {
+    expect(decodeRecordOffsetCursor("2026-08-11T09:00:00.000Z")).toBeNull();
+    expect(decodeRecordOffsetCursor(null)).toBeNull();
+    expect(decodeRecordOffsetCursor("")).toBeNull();
+    expect(decodeRecordOffsetCursor("record-offset:")).toBeNull();
+    expect(decodeRecordOffsetCursor("record-offset:abc")).toBeNull();
+    expect(decodeRecordOffsetCursor("record-offset:-4")).toBeNull();
+  });
+
+  it("NEGATIVE CONTROL: raw Date.parse would have accepted an offset as a year", () => {
+    // The trap this guards. Left as an executable note because the fix looks
+    // like pointless strictness until you see what the lenient version did:
+    // it turned a record index into the year 4999, which would have made the
+    // delta channel request changes since 4999-12-31 — a request that
+    // succeeds, returns nothing, and starves the source silently.
+    expect(Number.isNaN(Date.parse("record-offset:5000"))).toBe(false);
+    expect(new Date(Date.parse("record-offset:5000")).getUTCFullYear()).toBe(
+      4999,
+    );
+  });
+
+  it("an OFFSET cursor is never usable as a stream request bound", () => {
+    // The mirror of the case above. A delta channel handed a record offset
+    // must refuse to run, not request an unbounded stream from epoch.
+    expect(cursorRequestBound("record-offset:5000")).toBeNull();
+  });
+
+  it("an OFFSET cursor is never advanced into a timestamp by the delta path", () => {
+    // If the snapshot's checkpoint ever reached `computeNextVacancyCursor` it
+    // would be silently rewritten into an instant, losing the walk position.
+    // It returns a timestamp only from the BATCH, never by coercing the
+    // offset — and the importer keeps the two paths apart entirely.
+    expect(computeNextVacancyCursor("record-offset:5000", [])).toBeNull();
   });
 });
