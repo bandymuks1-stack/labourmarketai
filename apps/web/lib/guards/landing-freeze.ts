@@ -45,6 +45,28 @@ import { join } from "node:path";
  * freeze is not the only thing standing between the landing and the
  * fake-liveness coming back.
  *
+ * Final-CTA nested-interactive fix (owner directive 2026-08-11, PUBLIC BETA
+ * TRAIN V5_1 §2) — the landing's four final CTAs were
+ * `<Link><Button>label</Button></Link>`. The <button> carried every style
+ * including the focus ring, while the <a> that actually navigates was an
+ * unstyled `w-full` box; measured on the sibling /create-cv CTA at 320-1440px
+ * the equivalent anchor was 20px tall against a 44px-looking button. The pair
+ * also formed TWO tab stops for one action, and interactive content inside an
+ * <a> is invalid HTML. The anchor now carries the shared CTA grammar
+ * (`buttonLinkClassName`) directly — SAME classes, same rendered look, only
+ * the element carrying them changed; no copy, colour or layout was touched.
+ *
+ * The regeneration touched EXACTLY ONE file hash — final-cta-band.tsx — and
+ * ZERO namespace hashes, which is the whole proof that nothing else moved:
+ * the i18n drift assertion passed untouched while the file assertion named
+ * this one path. The fix is guarded permanently by
+ * `cta-not-nested-interactive.test.ts`, which RENDERS the band and fails on a
+ * nested control or a missing 44px floor, so the freeze is not the only thing
+ * standing between the landing and the nesting coming back. That guard also
+ * closes a real gap: the browser spec that found this
+ * (tests/e2e/acquisition-cta-touch-floor.spec.ts) does not run in CI, which
+ * executes vitest only.
+ *
  * S3 player-card honesty (owner directive 2026-08-03) — the retired FUT-style
  * concept card (`components/app/player-card.tsx` + `components/app/
  * ovr-ring.tsx`) was DELETED: `/for-workers` was the last public surface

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/marketing/reveal";
 
 /**
@@ -35,13 +36,23 @@ export async function FinalCtaBand() {
           </p>
           <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
             {FINAL_CTA_LINKS.map(({ key, href, variant }) => (
-              <Link key={key} href={href} className="w-full">
-                <Button
-                  variant={variant}
-                  className="w-full rounded-xl transition-transform hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                >
-                  {t(key)} →
-                </Button>
+              /**
+               * The anchor IS the control. It used to wrap a <Button>, which
+               * put the styling — and the focus ring — on a <button> that
+               * navigates nothing, while the element that actually navigates
+               * was an unstyled box and the pair formed two tab stops for one
+               * action. Same rendered look, same classes; only the element
+               * carrying them changed.
+               */
+              <Link
+                key={key}
+                href={href}
+                className={cn(
+                  buttonLinkClassName(variant),
+                  "w-full rounded-xl transition-transform hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                )}
+              >
+                {t(key)} →
               </Link>
             ))}
           </div>
