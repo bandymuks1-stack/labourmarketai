@@ -4,7 +4,7 @@ import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { PageHero } from "@/components/marketing/page-hero";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
 import { TrackedCta } from "@/components/app/tracked-cta";
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 
 export async function generateMetadata({
   params,
@@ -93,8 +93,9 @@ export default async function CreateCvPage({
             href="/auth/signup"
             ctaId="create_cv_footer"
             audience="workers"
+            className={buttonLinkClassName()}
           >
-            <Button>{t("cta")} →</Button>
+            {t("cta")} →
           </TrackedCta>
         </div>
       </section>

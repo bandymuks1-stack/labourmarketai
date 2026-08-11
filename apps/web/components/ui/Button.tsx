@@ -40,6 +40,41 @@ const pillSize = "px-3.5 text-support";
  */
 export const pillLinkClassName = cn(base, variants.pill, pillSize);
 
+/**
+ * THE class for a CTA that NAVIGATES. Put it on the anchor itself
+ * (`<Link className={buttonLinkClassName()}>`), never on a <button> nested
+ * inside one.
+ *
+ * WHY THIS EXISTS. The acquisition funnel wrapped a real <button> in a real
+ * anchor — `<Link><Button>Kurti mano CV</Button></Link>` — at 14 call sites.
+ * Measured on /lt/create-cv at 320-1440px (2026-08-11) that renders:
+ *
+ *     a      "Kurti mano CV — nemokamai →"  264x20   display:inline
+ *     button "Kurti mano CV — nemokamai →"  264x44   display:inline-flex
+ *
+ * The anchor — the element that actually navigates, the one a screen reader
+ * announces, and the first of TWO tab stops the pair creates — is a 20px-tall
+ * inline box with no focus-visible ring, because every style sat on the button
+ * inside it. The 44px-looking control is not the link. Nesting interactive
+ * content inside `<a>` is also invalid HTML, so the DOM the browser builds is
+ * not the one the JSX suggests.
+ *
+ * `min-h-11` (44px) is part of the grammar rather than the call site: the
+ * `sm` size is 36px of padding+line-height, which is what left the header
+ * "Pradėti dabar" CTA under the floor at every width >= 768px.
+ */
+export function buttonLinkClassName(
+  variant: Variant = "primary",
+  size: Size = "md",
+): string {
+  return cn(
+    base,
+    variants[variant],
+    variant === "pill" ? pillSize : sizes[size],
+    "min-h-11",
+  );
+}
+
 /** Inline pending spinner — same border-spinner idiom as `NavLinkPending`, so
  *  the loading affordance is consistent across the app. Honours
  *  prefers-reduced-motion via Tailwind's `motion-reduce` variant. */

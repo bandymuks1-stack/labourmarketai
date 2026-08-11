@@ -118,19 +118,19 @@ export default async function WorkAbroadPage({
             crosses to the app host from apex (PKCE-safe OAuth origin). */}
         <AuthCtaLink
           relPath={`/${locale}/auth/signup`}
-          className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
         >
           {t("ctaProfile")}
         </AuthCtaLink>
         <Link
           href="/labour-market"
-          className="rounded-full border border-border-subtle px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-surface-1"
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-border-subtle px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-surface-1"
         >
           {t("ctaReadiness")}
         </Link>
         <Link
           href="/for-workers"
-          className="rounded-full border border-border-subtle px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-surface-1"
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-border-subtle px-5 py-2.5 text-sm font-semibold text-text-primary hover:bg-surface-1"
         >
           {t("ctaTrades")}
         </Link>

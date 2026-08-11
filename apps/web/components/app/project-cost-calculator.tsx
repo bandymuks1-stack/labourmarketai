@@ -684,7 +684,7 @@ export function ProjectCostCalculator({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <AuthCtaLink
                     relPath={`/${locale}/dashboard/company#demand-intake`}
-                    className="rounded-md bg-brand-blue px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-blue/80"
+                    className="inline-flex min-h-11 items-center justify-center rounded-md bg-brand-blue px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-blue/80"
                   >
                     {labels.result.ctaDashboard}
                   </AuthCtaLink>
