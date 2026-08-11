@@ -70,8 +70,34 @@ describe("Arbetsförmedlingen descriptor", () => {
     for (const channel of ["snapshot", "stream", "links"] as const) {
       expect(providerSupportsChannel(se, channel), channel).toBe(true);
     }
-    expect(getVacancyEndpoint(se, "snapshot")!.pagination).toBe("none");
     expect(getVacancyEndpoint(se, "links")!.pagination).toBe("offset_limit");
+  });
+
+  it("the snapshot is a STREAMED, record-offset walk against the non-deprecated path", () => {
+    // The live snapshot measured 389.94 MiB (37,014 ads, 2026-08-11) — 24×
+    // the buffered transport cap, so it can only be read line by line. Three
+    // facts make that work, and all three must hold together.
+    const snapshot = getVacancyEndpoint(se, "snapshot")!;
+    expect(snapshot.pagination).toBe("record_offset");
+    expect(snapshot.bodyFormat).toBe("json_lines");
+    // `/snapshot` is marked deprecated by the publisher's own swagger contract
+    // and, decisively, ignores the jsonl Accept header — it answers one
+    // newline-free array, which is unreadable at this size.
+    expect(snapshot.path).toBe("/v2/snapshot");
+  });
+
+  it("every record-offset channel is streamed — the pairing is not optional", () => {
+    // A record-offset walk over a buffered body would ask for the whole
+    // 390 MiB in one request, which is the exact failure this replaced.
+    for (const provider of VACANCY_PROVIDERS) {
+      for (const endpoint of provider.endpoints) {
+        if (endpoint.pagination !== "record_offset") continue;
+        expect(
+          endpoint.bodyFormat,
+          `${provider.key}/${endpoint.channel}`,
+        ).toBe("json_lines");
+      }
+    }
   });
 
   it("requires attribution and names it with an i18n code, not a string", () => {

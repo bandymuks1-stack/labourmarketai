@@ -66,13 +66,48 @@ function ad(over: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
-function stubFetch(body: unknown, init: { status?: number } = {}): void {
+/**
+ * Serve the shape the REAL endpoint serves for that path: the snapshot channel
+ * answers line-delimited JSON (`application/jsonl`, one ad per line), every
+ * other channel answers one JSON document. Keying on the URL rather than on a
+ * per-test flag means these tests keep exercising the transport each channel
+ * actually uses, instead of a uniform stub that no endpoint matches.
+ *
+ * `rawBody` overrides the encoding entirely, for the tests that deliberately
+ * serve a malformed or wrong-typed body.
+ */
+function stubFetch(
+  body: unknown,
+  init: { status?: number; rawBody?: string; contentType?: string } = {},
+): void {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockImplementation(async () => {
-      return new Response(JSON.stringify(body), {
+    vi.fn().mockImplementation(async (url: string) => {
+      const jsonLines = String(url).includes("/v2/snapshot");
+      if (init.rawBody !== undefined) {
+        return new Response(init.rawBody, {
+          status: init.status ?? 200,
+          headers: {
+            "content-type":
+              init.contentType ??
+              (jsonLines ? "application/jsonl" : "application/json"),
+          },
+        });
+      }
+      if (!jsonLines) {
+        return new Response(JSON.stringify(body), {
+          status: init.status ?? 200,
+          headers: {
+            "content-type": init.contentType ?? "application/json",
+          },
+        });
+      }
+      const rows = Array.isArray(body) ? body : [body];
+      return new Response(rows.map((r) => JSON.stringify(r)).join("\n") + "\n", {
         status: init.status ?? 200,
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": init.contentType ?? "application/jsonl",
+        },
       });
     }),
   );
@@ -456,11 +491,16 @@ describe("failure handling", () => {
     expect(result.logs.some((l) => l.level === "error")).toBe(true);
   });
 
-  it("an unparseable body is reported, not silently treated as empty", async () => {
+  it("an unparseable BUFFERED body is reported, not silently treated as empty", async () => {
     enable();
     stubFetch({ unexpected: true });
 
-    const result = await runVacancyImport(request());
+    // The links channel still reads one whole JSON document, so a body that
+    // is not a list is a whole-batch failure there. It is checkpointed, so it
+    // needs a cursor before it will touch the network at all.
+    const result = await runVacancyImport(
+      request({ channel: "links", cursor: "2026-08-01T00:00:00.000Z" }),
+    );
 
     expect(
       result.session!.reasonCounts.find(
@@ -468,6 +508,30 @@ describe("failure handling", () => {
       ),
     ).toBeTruthy();
     expect(result.logs.some((l) => l.code === "batch_unparseable")).toBe(true);
+  });
+
+  it("unparseable LINES on the streamed channel are counted, never silently dropped", async () => {
+    enable();
+    // Two good ads around one line that is not JSON at all.
+    stubFetch(null, {
+      rawBody:
+        `${JSON.stringify(ad({ id: "ad-1" }))}\n` +
+        `{ this is not json\n` +
+        `${JSON.stringify(ad({ id: "ad-2" }))}\n`,
+    });
+
+    const result = await runVacancyImport(request());
+
+    // The good ads survive — one bad line must not cost the batch.
+    expect(result.metrics.itemsParsed).toBe(2);
+    // And the bad line is accounted for by a stable reason rather than
+    // vanishing, so `scanned` still means everything we crossed.
+    expect(
+      result.session!.reasonCounts.find(
+        (r) => r.code === "parse_malformed_json_line",
+      )?.count,
+    ).toBe(1);
+    expect(result.metrics.itemsSeen).toBe(3);
   });
 
   it("an unsupported channel never reaches the network", async () => {
@@ -670,5 +734,192 @@ describe("withdrawals — the publisher taking an ad down", () => {
     const rows = persist.mock.calls[0][0] as { lifecycle: string }[];
     expect(rows).toHaveLength(1);
     expect(rows[0].lifecycle).toBe("removed");
+  });
+});
+
+// ── STREAMED SNAPSHOT COLD START ────────────────────────────────────────────
+/**
+ * The snapshot is the cold start, and it is the one channel that could never
+ * work before: the live Swedish body measured 389.94 MiB across 37,014 ads
+ * (2026-08-11), against a 16 MiB buffered cap. It is now read line by line and
+ * walked by record index, so these tests pin the properties that make a
+ * multi-session cold start safe — above all that a session which stopped early
+ * can never be mistaken for one that finished.
+ */
+describe("snapshot cold start — bounded, resumable, honest about finishing", () => {
+  /** A provider whose session budget is 2 records, so a 5-ad body truncates. */
+  const SMALL = {
+    ...PROVIDER,
+    boundOverrides: { ...PROVIDER.boundOverrides, maxAcceptedPerSession: 2 },
+  };
+
+  function ads(n: number, from = 0): Record<string, unknown>[] {
+    return Array.from({ length: n }, (_, i) =>
+      ad({ id: `ad-${from + i}`, headline: `Jobb ${from + i}` }),
+    );
+  }
+
+  it("a body larger than the session budget stops early and says so", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.metrics.itemsParsed).toBe(2);
+    // The load-bearing assertion: an incomplete walk must never read as done.
+    expect(result.caughtUp).toBe(false);
+    expect(result.nextCursor).toBe("record-offset:2");
+    expect(
+      result.logs.some((l) => l.code === "stream_walk_incomplete"),
+    ).toBe(true);
+  });
+
+  it("resumes from the stored offset without re-reading or skipping an ad", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    const result = await runVacancyImport(
+      request({ provider: SMALL, cursor: "record-offset:2" }),
+    );
+
+    expect(result.acceptedVacancies.map((v) => v.externalId)).toEqual([
+      "ad-2",
+      "ad-3",
+    ]);
+    expect(result.metrics.recordsSkipped).toBe(2);
+    expect(result.nextCursor).toBe("record-offset:4");
+    expect(result.caughtUp).toBe(false);
+  });
+
+  it("three sessions drain the body, then the walk resets for reconciliation", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    let cursor: string | null = null;
+    const seen: string[] = [];
+    for (let session = 0; session < 3; session += 1) {
+      const result: Awaited<ReturnType<typeof runVacancyImport>> =
+        await runVacancyImport(request({ provider: SMALL, cursor }));
+      for (const v of result.acceptedVacancies) seen.push(v.externalId);
+      cursor = result.nextCursor;
+      if (result.caughtUp === true) break;
+    }
+
+    expect(seen).toEqual(["ad-0", "ad-1", "ad-2", "ad-3", "ad-4"]);
+    // Drained: the checkpoint resets so the next run reconciles from the top
+    // rather than sitting past the end of a body that keeps changing.
+    expect(cursor).toBe("record-offset:0");
+  });
+
+  it("a body that fits reports the walk COMPLETE", async () => {
+    enable();
+    stubFetch(ads(2));
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.caughtUp).toBe(true);
+    expect(result.nextCursor).toBe("record-offset:0");
+    expect(
+      result.logs.some((l) => l.code === "stream_walk_incomplete"),
+    ).toBe(false);
+  });
+
+  it("REFUSES the deprecated array body instead of reading it as an empty snapshot", async () => {
+    enable();
+    // Exactly what the deprecated /snapshot path does: it accepts the jsonl
+    // Accept header and ignores it, answering one newline-free JSON array.
+    // Read as lines that is zero records — indistinguishable from "Sweden has
+    // no vacancies at all", which would quietly deactivate real supply.
+    stubFetch(null, {
+      rawBody: JSON.stringify(ads(3)),
+      contentType: "application/json",
+    });
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.metrics.itemsParsed).toBe(0);
+    expect(
+      result.logs.some((l) => l.code === "page_fetch_failed"),
+    ).toBe(true);
+    // Nothing was consumed, so the checkpoint must not move.
+    expect(result.nextCursor).toBeNull();
+    expect(result.caughtUp).toBeNull();
+  });
+
+  it("keeps what it read when the body is cut mid-transfer, and still reports failure", async () => {
+    enable();
+    const rows = ads(4).map((r) => JSON.stringify(r));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        // Two complete records are DELIVERED, and only then does the
+        // connection die. Erroring in `start` would discard the queued chunk
+        // and test nothing — the interruption has to land mid-transfer.
+        let pulls = 0;
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls += 1;
+            if (pulls === 1) {
+              controller.enqueue(new TextEncoder().encode(`${rows[0]}\n${rows[1]}\n`));
+              return;
+            }
+            controller.error(new Error("connection reset"));
+          },
+        });
+        return new Response(stream, {
+          status: 200,
+          headers: { "content-type": "application/jsonl" },
+        });
+      }),
+    );
+
+    const result = await runVacancyImport(request({ provider: SMALL }));
+
+    // Real progress is kept — throwing it away would make every interruption
+    // restart a 390 MiB walk from zero.
+    expect(result.metrics.itemsParsed).toBe(2);
+    // But it is still a failed run: the health streak has to see it.
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.caughtUp).toBe(false);
+    expect(result.nextCursor).toBe("record-offset:2");
+  });
+
+  it("a TIMESTAMP cursor on the snapshot channel restarts the walk rather than seeking nowhere", async () => {
+    enable();
+    stubFetch(ads(5));
+
+    // The two checkpoint kinds share one opaque text column. A wrong-shaped
+    // value must fail closed — start over — never be coerced into an index.
+    const result = await runVacancyImport(
+      request({ provider: SMALL, cursor: "2026-08-01T00:00:00.000Z" }),
+    );
+
+    expect(result.metrics.recordsSkipped).toBe(0);
+    expect(result.acceptedVacancies.map((v) => v.externalId)).toEqual([
+      "ad-0",
+      "ad-1",
+    ]);
+  });
+
+  it("asks for line-delimited JSON on the non-deprecated path", async () => {
+    enable();
+    const spy = vi.fn().mockImplementation(async () => {
+      return new Response(`${JSON.stringify(ad())}\n`, {
+        status: 200,
+        headers: { "content-type": "application/jsonl" },
+      });
+    });
+    vi.stubGlobal("fetch", spy);
+
+    await runVacancyImport(request({ provider: SMALL }));
+
+    const [url, init] = spy.mock.calls[0];
+    expect(String(url)).toContain("/v2/snapshot");
+    expect((init.headers as Record<string, string>).Accept).toBe(
+      "application/jsonl",
+    );
+    expect(init.method).toBe("GET");
+    expect(init.redirect).toBe("error");
   });
 });
