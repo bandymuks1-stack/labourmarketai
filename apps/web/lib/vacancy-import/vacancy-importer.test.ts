@@ -182,29 +182,144 @@ describe("channel cadence and the stream checkpoint", () => {
     expect(url).toContain("date=2026-08-03T11%3A59%3A59.000Z");
   });
 
-  it("returns the next checkpoint, advanced over everything SEEN", async () => {
+  it("walks the stream in BOUNDED slices — every request carries both ends", async () => {
     enable();
+    const fetchSpy = vi.fn().mockImplementation(
+      async () =>
+        new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    // 4 h of backlog against a 3 h slice and a 60 s safety lag → two slices.
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
+    );
+
+    // NEGATIVE CONTROL for the deadlock this fix exists to break: the old
+    // behaviour issued exactly ONE request with a start bound only, and its
+    // response therefore grew without limit until it passed the byte cap for
+    // good. More than one request, each closed at both ends, is the whole
+    // difference.
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const urls = fetchSpy.mock.calls.map((c) => new URL(String(c[0])));
+    for (const url of urls) {
+      const start = Date.parse(url.searchParams.get("date")!);
+      const end = Date.parse(url.searchParams.get("updated-before-date")!);
+      expect(Number.isFinite(start) && Number.isFinite(end)).toBe(true);
+      expect(end).toBeGreaterThan(start);
+      // No slice may exceed the descriptor's width — that bound is the only
+      // thing keeping one response affordable.
+      expect(end - start).toBeLessThanOrEqual(3 * 60 * 60 * 1000);
+    }
+
+    // Slice 1 opens at the cursor nudged back by the overlap; the slices abut
+    // exactly, so nothing between them can fall through.
+    expect(urls[0].searchParams.get("date")).toBe("2026-08-04T04:59:59.000Z");
+    expect(urls[0].searchParams.get("updated-before-date")).toBe(
+      "2026-08-04T07:59:59.000Z",
+    );
+    expect(urls[1].searchParams.get("date")).toBe("2026-08-04T07:59:59.000Z");
+
+    // The walk stops short of the present by the safety lag, never at "now".
+    expect(urls[1].searchParams.get("updated-before-date")).toBe(
+      "2026-08-04T08:59:00.000Z",
+    );
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.caughtUp).toBe(true);
+    expect(result.metrics.windowsPlanned).toBe(2);
+    expect(result.metrics.windowsCompleted).toBe(2);
+  });
+
+  it("checkpoints on the CONSUMED SLICE, never on a publisher timestamp", async () => {
+    enable();
+    // The two shapes that make publisher timestamps unusable as a checkpoint,
+    // both measured on the live Swedish stream (2026-08-11):
+    //   - an ad UPDATED inside the slice but PUBLISHED long before it (over
+    //     half of a real slice, the oldest by 11 days) — trusting it rewinds
+    //     the walk into a permanent replay;
+    //   - a withdrawal delta, which carries no publication date at all and so
+    //     falls back to our capture clock — trusting it jerks the checkpoint
+    //     to "now" and silently skips everything in between.
     stubFetch([
-      ad({ id: "a", publication_date: "2026-08-04T08:00:00Z" }),
-      ad({ id: "b", publication_date: "2026-08-04T10:00:00Z" }),
+      ad({ id: "old-but-updated", publication_date: "2026-07-24T06:00:00Z" }),
+      { id: "withdrawn", removed: true },
     ]);
 
     const result = await runVacancyImport(
-      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
     );
 
-    expect(result.nextCursor).toBe("2026-08-04T10:00:00.000Z");
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.nextCursor).not.toBe("2026-07-24T06:00:00.000Z");
+    expect(result.nextCursor).not.toBe(CAPTURED_AT);
   });
 
-  it("a run that fetched nothing leaves the checkpoint untouched", async () => {
+  it("a slice that returns nothing still counts as consumed", async () => {
     enable();
     stubFetch([]);
 
     const result = await runVacancyImport(
-      request({ channel: "stream", cursor: "2026-08-01T00:00:00.000Z" }),
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
     );
 
-    expect(result.nextCursor).toBe("2026-08-01T00:00:00.000Z");
+    // A quiet three hours is ordinary. Refusing to move over an empty slice
+    // would stall the walk permanently the first time Sweden had a slow night.
+    expect(result.nextCursor).toBe("2026-08-04T08:59:00.000Z");
+    expect(result.metrics.windowsCompleted).toBe(2);
+  });
+
+  it("a backlog wider than one session is TRUNCATED HONESTLY, not silently", async () => {
+    enable();
+    stubFetch([]);
+
+    // ~34 days of backlog against a 50-slice-per-session cap.
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-07-01T00:00:00.000Z" }),
+    );
+
+    expect(result.metrics.windowsPlanned).toBe(50);
+    expect(result.metrics.windowsCompleted).toBe(50);
+    // Progress is real and monotonic — 50 slices × 3 h forward from the
+    // overlap-nudged cursor — but the session must NOT claim to be current.
+    expect(result.nextCursor).toBe("2026-07-07T05:59:59.000Z");
+    expect(result.caughtUp).toBe(false);
+  });
+
+  it("a failed slice keeps the slices already consumed", async () => {
+    enable();
+    let call = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        call += 1;
+        // A 4xx is deterministic — the adapter returns it without retrying.
+        return call === 1
+          ? new Response(JSON.stringify([]), {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            })
+          : new Response("nope", { status: 404 });
+      }),
+    );
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: "2026-08-04T05:00:00.000Z" }),
+    );
+
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.metrics.windowsCompleted).toBe(1);
+    // Slice 1 was answered in full, so it stays consumed. Pinning the
+    // checkpoint back to the start on any failure is what let one bad window
+    // freeze the source indefinitely.
+    expect(result.nextCursor).toBe("2026-08-04T07:59:59.000Z");
+    expect(result.caughtUp).toBe(false);
+    // The real classification survives for the operator to read.
+    expect(
+      result.logs.find((l) => l.code === "page_fetch_failed")?.detail,
+    ).toBe("http_error");
   });
 
   it("a snapshot is a ONE-SHOT — a single page, never a paged sweep", async () => {

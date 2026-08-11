@@ -44,8 +44,10 @@ import { assertVacancyProviderOperational } from "./vacancy-kill-switch";
  * forwarded, so this stays a narrow data reader.
  */
 const ALLOWED_QUERY_KEYS: ReadonlySet<string> = new Set([
-  // stream: deltas since an instant
+  // stream: deltas since an instant, and the matching upper bound that keeps
+  // one slice affordable (see the registry's time_window note)
   "date",
+  "updated-before-date",
   // joblinks / paged endpoints
   "offset",
   "limit",
@@ -174,7 +176,12 @@ export async function fetchVacancyPage(
         signal: controller.signal,
         redirect: "error",
       });
-      clearTimeout(timer);
+      // The timer is deliberately NOT cleared here. `fetch` resolves as soon
+      // as the RESPONSE HEADERS arrive, so clearing it at this point would
+      // leave the body transfer — by far the longest part, and the part that
+      // can stall — with no time bound at all. It is cleared in `finally`,
+      // once the body has been read or the attempt has ended, so
+      // `requestTimeoutMs` bounds the whole request as it claims to.
 
       if (!res.ok) {
         lastError = { errorCode: "http_error", detail: String(res.status) };
@@ -234,7 +241,6 @@ export async function fetchVacancyPage(
         body,
       };
     } catch (err) {
-      clearTimeout(timer);
       const aborted =
         err instanceof Error &&
         (err.name === "AbortError" || /abort/i.test(err.message));
@@ -243,6 +249,8 @@ export async function fetchVacancyPage(
         detail: aborted ? "request_timeout" : "fetch_failed",
       };
       // fall through to retry
+    } finally {
+      clearTimeout(timer);
     }
   }
 
