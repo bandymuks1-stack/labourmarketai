@@ -217,10 +217,15 @@ describe("record-offset checkpoints", () => {
     // it turned a record index into the year 4999, which would have made the
     // delta channel request changes since 4999-12-31 — a request that
     // succeeds, returns nothing, and starves the source silently.
-    expect(Number.isNaN(Date.parse("record-offset:5000"))).toBe(false);
-    expect(new Date(Date.parse("record-offset:5000")).getUTCFullYear()).toBe(
-      4999,
-    );
+    const lenient = Date.parse("record-offset:5000");
+    // It does not reject the value...
+    expect(Number.isNaN(lenient)).toBe(false);
+    // ...it reads the index as a YEAR, landing three millennia in the future.
+    // Asserted as a range rather than an exact instant: the lenient parser
+    // resolves to LOCAL midnight, so the precise year straddles 4999/5000
+    // depending on the runner's timezone. The defect is the magnitude, not
+    // the boundary.
+    expect(new Date(lenient).getUTCFullYear()).toBeGreaterThan(4000);
   });
 
   it("an OFFSET cursor is never usable as a stream request bound", () => {
