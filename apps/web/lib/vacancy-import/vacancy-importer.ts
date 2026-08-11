@@ -54,6 +54,7 @@ import {
 import {
   computeNextVacancyCursor,
   cursorRequestBound,
+  planVacancyWindows,
 } from "@/lib/vacancy-sources/vacancy-cursor";
 import {
   evaluateVacancyBatchGate,
@@ -95,6 +96,10 @@ export interface VacancyImportMetricsV1 {
   readonly translationsAvailable: number;
   readonly translationsUnavailable: number;
   readonly retriesUsed: number;
+  /** Time slices this session planned to walk (0 for a non-windowed channel). */
+  readonly windowsPlanned: number;
+  /** Time slices actually fetched and parsed — the checkpoint moved by each. */
+  readonly windowsCompleted: number;
 }
 
 /** LOGGING — one structured, secret-free line per notable event. The importer
@@ -171,6 +176,14 @@ export interface VacancyImportResultV1 {
    * skipped records.
    */
   readonly nextCursor: string | null;
+  /**
+   * For a time-windowed channel: whether the walk reached the present, i.e.
+   * this session drained the whole backlog. False means slices remain and
+   * another run is needed — reported rather than hidden, because a truncated
+   * catch-up that reads as "done" is how stale supply goes unnoticed.
+   * `null` for channels that are not walked.
+   */
+  readonly caughtUp: boolean | null;
 }
 
 export async function runVacancyImport(
@@ -210,6 +223,8 @@ export async function runVacancyImport(
     translationsAvailable: 0,
     translationsUnavailable: 0,
     retriesUsed: 0,
+    windowsPlanned: 0,
+    windowsCompleted: 0,
   };
 
   const switchState = vacancySwitchState(provider.key);
@@ -261,10 +276,37 @@ export async function runVacancyImport(
   if (parser === null) log("error", "no_parser_for_provider", provider.key);
   if (endpoint === null) log("error", "channel_not_supported", channel);
 
+  // ── WINDOW PLAN ──────────────────────────────────────────────────────────
+  // A `time_window` channel is walked in bounded slices instead of being asked
+  // for in one unbounded request. Planned up front so the session's shape (how
+  // much backlog it will drain, and whether any is left over) is known before
+  // the first request rather than discovered by running out.
+  const windowConfig =
+    endpoint?.pagination === "time_window" ? (endpoint.window ?? null) : null;
+  const windowPlan =
+    windowConfig !== null
+      ? planVacancyWindows({
+          fromIso: requestBound,
+          nowIso: req.capturedAt,
+          widthSeconds: windowConfig.widthSeconds,
+          safetyLagSeconds: windowConfig.safetyLagSeconds,
+          maxWindows: bounds.maxPagesPerSession,
+        })
+      : null;
+  if (windowPlan !== null) {
+    counters.windowsPlanned = windowPlan.windows.length;
+  }
+  /** The end of the newest slice fully consumed — the honest checkpoint. */
+  let lastCompletedWindowEnd: string | null = null;
+
   if (runOverNetwork) {
     // A snapshot is a one-shot: a single page, never repeated on a schedule.
     const maxPages =
-      endpoint.pagination === "none" ? 1 : bounds.maxPagesPerSession;
+      endpoint.pagination === "none"
+        ? 1
+        : windowPlan !== null
+          ? windowPlan.windows.length
+          : bounds.maxPagesPerSession;
     let offset = Number(req.query?.offset ?? 0);
 
     for (let page = 0; page < maxPages; page += 1) {
@@ -273,9 +315,15 @@ export async function runVacancyImport(
         query.offset = offset;
         query.limit = bounds.maxItemsPerPage;
       }
-      // Resume point for a checkpointed channel, nudged back by the overlap
-      // so a same-second publication at the boundary is not dropped.
-      if (requestBound !== null) {
+      if (windowPlan !== null && windowConfig !== null) {
+        // Both bounds come from the plan. The publisher's parameter NAMES are
+        // read off the descriptor, so this stage stays country-agnostic.
+        const slice = windowPlan.windows[page];
+        query[windowConfig.startQueryKey] = slice.startIso;
+        query[windowConfig.endQueryKey] = slice.endIso;
+      } else if (requestBound !== null) {
+        // Resume point for a checkpointed channel, nudged back by the overlap
+        // so a same-second publication at the boundary is not dropped.
         query.date = requestBound;
       }
 
@@ -322,6 +370,22 @@ export async function runVacancyImport(
       }
 
       log("info", "page_done", String(batch.outcomes.length));
+
+      if (windowPlan !== null && windowConfig !== null) {
+        // This slice is fully consumed, so the checkpoint may move to its end
+        // — and only to its end. Progress is therefore monotonic even if a
+        // later slice in the same session fails.
+        counters.windowsCompleted += 1;
+        lastCompletedWindowEnd = windowPlan.windows[page].endIso;
+        // A windowed walk never stops on a SHORT page: a quiet three hours is
+        // ordinary and the next slice may be busy. Only the accept cap ends
+        // it early, and the caller learns the backlog is unfinished.
+        if (parsed.length >= bounds.maxAcceptedPerSession) {
+          log("warn", "window_walk_truncated_by_accept_cap", String(page + 1));
+          break;
+        }
+        continue;
+      }
 
       // Stop when the endpoint does not paginate, when the page came back
       // short (the provider has no more), or when the accept cap is already
@@ -513,10 +577,32 @@ export async function runVacancyImport(
     logs,
     persistedInserted,
     persistedUpdated,
-    // Advance the checkpoint over everything the publisher actually gave us,
-    // not just what survived the gates — a record we rejected for our own
-    // reasons has still been SEEN, and re-reading it forever would stall the
-    // stream. Moves forward only.
-    nextCursor: computeNextVacancyCursor(req.cursor ?? null, parsed),
+    // CHECKPOINT.
+    //
+    // A WINDOWED channel checkpoints on the end of the last slice it fully
+    // consumed — never on a publisher timestamp. The publisher's own fields
+    // do not reproduce the axis the endpoint filters on, so inferring the
+    // checkpoint from them is unsound in both directions (measured on the
+    // Swedish stream, 2026-08-11): in one 3.9 h slice, 51.7% of records had a
+    // `publication_date` OLDER than the slice start — the oldest by 11 days —
+    // which would rewind the walk into a permanent replay; and a withdrawal
+    // delta carries no publication date at all, so it falls back to our
+    // capture clock and would jerk the checkpoint to "now", silently skipping
+    // everything between. The slice end is the one bound we actually asked
+    // for and were completely answered on, so it is the only honest one.
+    //
+    // Otherwise: advance over everything the publisher actually gave us, not
+    // just what survived the gates — a record we rejected for our own reasons
+    // has still been SEEN, and re-reading it forever would stall the stream.
+    // Moves forward only.
+    nextCursor:
+      windowPlan !== null
+        ? (lastCompletedWindowEnd ?? req.cursor ?? null)
+        : computeNextVacancyCursor(req.cursor ?? null, parsed),
+    caughtUp:
+      windowPlan === null
+        ? null
+        : windowPlan.reachedPresent &&
+          counters.windowsCompleted === counters.windowsPlanned,
   };
 }

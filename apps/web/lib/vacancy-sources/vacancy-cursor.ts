@@ -73,3 +73,86 @@ export function cursorRequestBound(cursor: string | null): string | null {
   if (ms === null) return null;
   return new Date(ms - VACANCY_CURSOR_OVERLAP_MS).toISOString();
 }
+
+// ── TIME-WINDOW WALK ────────────────────────────────────────────────────────
+/**
+ * Why a stream must be walked in SLICES rather than asked for in one go.
+ *
+ * A delta endpoint that takes only a START bound answers "everything changed
+ * since then" in ONE un-paginated response. That response grows with the gap
+ * since the last successful run, so a transport byte cap turns into a trap:
+ * once the response exceeds the cap the run fails, a failed run correctly
+ * refuses to advance the checkpoint, and the next run therefore asks for an
+ * even WIDER window. The failure feeds itself and the source never recovers
+ * on its own. That is exactly what happened to the Swedish stream between
+ * 2026-08-09 and 2026-08-11 (a 31.9 MiB answer against a 16 MiB cap).
+ *
+ * The cure is to make every request bounded on BOTH sides and to walk the
+ * backlog forward one affordable slice at a time. A slice that succeeds moves
+ * the checkpoint by exactly its own width, so progress is monotonic and a
+ * multi-day backlog drains over one or more sessions instead of deadlocking.
+ */
+export interface VacancyWindowV1 {
+  /** Inclusive start of the slice. */
+  readonly startIso: string;
+  /** Exclusive end of the slice — also the checkpoint once it is consumed. */
+  readonly endIso: string;
+}
+
+export interface VacancyWindowPlanV1 {
+  readonly windows: readonly VacancyWindowV1[];
+  /**
+   * True when the final planned window reaches the present (minus the safety
+   * lag) — i.e. this session would drain the whole backlog. False means the
+   * per-session window cap truncated the plan and a further run is needed.
+   * Reported rather than hidden: a silently truncated catch-up reads as
+   * "caught up" and that is how stale supply goes unnoticed.
+   */
+  readonly reachedPresent: boolean;
+}
+
+/**
+ * Slice `[from, now - safetyLag)` into windows of at most `widthSeconds`,
+ * capped at `maxWindows`.
+ *
+ * `safetyLagSeconds` keeps the newest edge of the walk away from the present:
+ * the publisher's own write is not instantaneous, and a window whose end is
+ * "now" can close over a record that lands a moment later. Since the window
+ * end becomes the checkpoint, that record would be skipped forever. Trailing
+ * the present by a lag costs one extra slice and removes the whole class.
+ *
+ * Pure: no clocks, no IO — `nowIso` is injected like every other clock here.
+ */
+export function planVacancyWindows(args: {
+  readonly fromIso: string | null;
+  readonly nowIso: string;
+  readonly widthSeconds: number;
+  readonly safetyLagSeconds: number;
+  readonly maxWindows: number;
+}): VacancyWindowPlanV1 {
+  const fromMs = parsed(args.fromIso);
+  const nowMs = parsed(args.nowIso);
+  if (fromMs === null || nowMs === null) {
+    return { windows: [], reachedPresent: false };
+  }
+
+  const ceilingMs = nowMs - Math.max(0, args.safetyLagSeconds) * 1_000;
+  // Already level with the present: nothing to walk, and nothing is pending.
+  if (ceilingMs <= fromMs) return { windows: [], reachedPresent: true };
+
+  const widthMs = Math.max(1, Math.floor(args.widthSeconds)) * 1_000;
+  const maxWindows = Math.max(0, Math.floor(args.maxWindows));
+  const windows: VacancyWindowV1[] = [];
+  let edgeMs = fromMs;
+
+  while (edgeMs < ceilingMs && windows.length < maxWindows) {
+    const endMs = Math.min(edgeMs + widthMs, ceilingMs);
+    windows.push({
+      startIso: new Date(edgeMs).toISOString(),
+      endIso: new Date(endMs).toISOString(),
+    });
+    edgeMs = endMs;
+  }
+
+  return { windows, reachedPresent: edgeMs >= ceilingMs };
+}

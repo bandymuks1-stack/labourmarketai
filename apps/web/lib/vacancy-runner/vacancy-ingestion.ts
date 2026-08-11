@@ -104,6 +104,13 @@ export interface VacancyIngestionSessionResultV1 {
     readonly unchanged: number;
   };
   readonly cursorAdvanced: boolean;
+  /**
+   * Time-windowed channels only: whether this session's walk reached the
+   * present. `false` means a backlog remains and another run is due — an
+   * operator reading `imported` alone would otherwise conclude the source is
+   * current when it is merely progressing. `null` for channels not walked.
+   */
+  readonly caughtUp: boolean | null;
   /** Bounded machine codes, never secrets. */
   readonly errors: readonly string[];
 }
@@ -166,6 +173,7 @@ export async function runVacancyIngestionSession(
     mode: req.mode,
     persisted: { inserted: 0, updated: 0, unchanged: 0 },
     cursorAdvanced: false,
+    caughtUp: null as boolean | null,
   };
 
   try {
@@ -215,9 +223,16 @@ export async function runVacancyIngestionSession(
     });
 
     const fetchFailed = result.metrics.pagesFailed > 0;
+    // The DETAIL is what discriminates. Every transport failure logs the same
+    // `page_fetch_failed` code and carries the actual classification
+    // (`response_too_large`, `timeout`, `http_error`, …) in `detail`; dropping
+    // it left `last_failure_code` reading `page_fetch_failed` for every cause
+    // alike, which is precisely why the Swedish stall needed a live diagnostic
+    // session to classify. Both halves are stable machine codes, never a
+    // payload, so joining them cannot leak.
     const errors = result.logs
       .filter((l) => l.level === "error")
-      .map((l) => l.code);
+      .map((l) => (l.detail ? `${l.code}:${l.detail}` : l.code).slice(0, 120));
 
     if (!result.activated) {
       // Well-formed records exist but the owner has not said yes. The dry-run
@@ -232,13 +247,30 @@ export async function runVacancyIngestionSession(
     }
 
     if (fetchFailed) {
-      // Record the failure on the cursor row — health is observable — but
-      // never advance the checkpoint past pages we did not fully see.
+      // Record the failure on the cursor row — health is observable — and
+      // never advance the checkpoint past anything we did not fully see.
+      //
+      // For a channel walked in bounded time slices, the unit of "fully seen"
+      // is the SLICE, not the run: slices consumed before the failure were
+      // completely answered and their rows were written below, so the
+      // checkpoint may stand at the end of the last consumed slice. Without
+      // this, one permanently-failing slice would pin the checkpoint forever
+      // and rebuild the very deadlock the walk exists to break. The run is
+      // still reported as failed, and the failure streak still increments.
+      const partialCursor =
+        req.mode === "persist" &&
+        result.caughtUp !== null &&
+        result.nextCursor !== null &&
+        result.nextCursor !== cursor.cursorValue
+          ? result.nextCursor
+          : null;
+
       await writeVacancyCursor(client, {
         providerKey: provider.key,
         channel: req.channel,
         succeeded: false,
         nextCursor: null,
+        partialCursor,
         previousFailures: cursor.consecutiveFailures,
         failureCode: errors[0] ?? "page_fetch_failed",
         runAtIso: req.nowIso,
@@ -248,6 +280,15 @@ export async function runVacancyIngestionSession(
         status: "fetch_failed",
         blockedReason: null,
         metrics: result.metrics,
+        // Rows consumed before the failure WERE written. Reporting zero here
+        // would understate what production now holds.
+        persisted: {
+          inserted: persistedInserted,
+          updated: persistedUpdated,
+          unchanged: persistedUnchanged,
+        },
+        cursorAdvanced: partialCursor !== null,
+        caughtUp: result.caughtUp,
         errors,
       };
     }
@@ -258,6 +299,7 @@ export async function runVacancyIngestionSession(
         status: "dry_run_complete",
         blockedReason: null,
         metrics: result.metrics,
+        caughtUp: result.caughtUp,
         errors,
       };
     }
@@ -285,6 +327,7 @@ export async function runVacancyIngestionSession(
         unchanged: persistedUnchanged,
       },
       cursorAdvanced: result.nextCursor !== cursor.cursorValue,
+      caughtUp: result.caughtUp,
       errors,
     };
   } catch (err) {

@@ -34,9 +34,16 @@ export interface VacancyChannelEndpointV1 {
   /**
    * Whether the endpoint pages. `none` = one response holds the whole batch
    * (a snapshot); `offset_limit` = classic offset/limit; `cursor` = the
-   * publisher hands back a continuation token.
+   * publisher hands back a continuation token; `time_window` = the endpoint
+   * has no paging of its own and is bounded by a time slice instead, walked
+   * forward by the importer (`window` below is then REQUIRED).
    */
-  readonly pagination: "none" | "offset_limit" | "cursor";
+  readonly pagination: "none" | "offset_limit" | "cursor" | "time_window";
+  /**
+   * Time-slice configuration for a `time_window` endpoint. Required for that
+   * mode and meaningless otherwise.
+   */
+  readonly window?: VacancyChannelWindowV1;
   /**
    * True when the endpoint requires an API key. The adapter refuses to run a
    * key-requiring endpoint unless the owner has provisioned the secret — it
@@ -83,6 +90,27 @@ export interface VacancyChannelCadenceV1 {
  */
 const ONE_MINUTE_SECONDS = 60;
 const ONE_DAY_SECONDS = 24 * 60 * 60;
+
+/**
+ * How a `time_window` channel is sliced. The query-key NAMES live here rather
+ * than in the importer for the same reason every other publisher fact does:
+ * the shared stages must not learn one publisher's parameter vocabulary, or
+ * the next country becomes an edit to the pipeline instead of an entry here.
+ */
+export interface VacancyChannelWindowV1 {
+  /** Query key carrying the INCLUSIVE start of the slice. */
+  readonly startQueryKey: string;
+  /** Query key carrying the EXCLUSIVE end of the slice. */
+  readonly endQueryKey: string;
+  /** Width of one slice, in seconds. Chosen from a MEASURED response size. */
+  readonly widthSeconds: number;
+  /**
+   * Never request closer to `now` than this. The publisher's write is not
+   * instantaneous, and since a consumed window's end becomes the checkpoint,
+   * a record landing just after a window closed would be skipped forever.
+   */
+  readonly safetyLagSeconds: number;
+}
 
 export interface VacancyProviderDescriptorV1 {
   readonly key: VacancyProviderKey;
@@ -164,10 +192,30 @@ const ARBETSFORMEDLINGEN: VacancyProviderDescriptorV1 = {
     },
     {
       // Deltas, polled about once a minute, resuming from the last cursor.
+      //
+      // WALKED IN TIME SLICES, not requested in one go. `/stream` takes only
+      // a start bound and answers with everything changed since it, in a
+      // single un-paginated body — so the response grows with the gap since
+      // the last success and eventually exceeds the transport byte cap for
+      // good (measured 2026-08-11: a ~1.8-day gap answered 31.9 MiB against a
+      // 16 MiB cap, and a failed run cannot advance the checkpoint, so the
+      // next request is wider still). `updated-before-date` is a real,
+      // honoured JobStream parameter — the same request bounded to a ~4 h
+      // slice answered 0.51 MiB — so bounding both ends turns an unbounded
+      // ask into an affordable walk that drains a backlog instead of
+      // deadlocking on it.
       channel: "stream",
       host: "jobstream.api.jobtechdev.se",
       path: "/stream",
-      pagination: "none",
+      pagination: "time_window",
+      window: {
+        startQueryKey: "date",
+        endQueryKey: "updated-before-date",
+        // 3 h measured at ~0.4 MiB — two orders of magnitude under the cap,
+        // so an unusually busy slice still cannot reach it.
+        widthSeconds: 3 * 60 * 60,
+        safetyLagSeconds: ONE_MINUTE_SECONDS,
+      },
       requiresApiKey: false,
       cadence: {
         intervalSeconds: ONE_MINUTE_SECONDS,
