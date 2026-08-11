@@ -92,7 +92,37 @@ export const SCOPED_OWNER_WAIVERS = [
     id: "public-acquisition-route-create-cv",
     axioms: ["A-01"],
     scope: "The public free-CV acquisition route /create-cv (PUBLIC BETA TRAIN V3 §2.1)",
-    pullRequests: [1119],
+    /**
+     * #1119 CREATED the route under the ruling above. #1123 changes its CTA
+     * markup and nothing else, so the owner extended the same ruling to it —
+     * OWNER APPROVAL, PUBLIC BETA TRAIN V5_1 §1 (2026-08-11), verbatim:
+     *   "OWNER APPROVES extending the existing /create-cv
+     *    product-constitution waiver to PR #1123."
+     *   "This approval is specifically for #1123. It is NOT a general
+     *    authority to self-approve future waivers."
+     *
+     * The four conditions the owner attached were checked before this line was
+     * written, by RUNNING the gate at head `bd5ab221` rather than reasoning
+     * about it:
+     *   * "0 new product surface(s) in this diff" — the gate's own words;
+     *   * the diff adds exactly ONE file, a Playwright spec — no route, no
+     *     page, no surface-registry entry;
+     *   * the six findings are byte-identical to `expectedFindings` below,
+     *     same codes, same `/create-cv`, same axiom A-01 — the subset rule is
+     *     satisfied with nothing left over;
+     *   * PR head unchanged from the one the owner reviewed.
+     *
+     * WHAT #1123 ACTUALLY DOES to this route: a <button> nested inside the
+     * anchor is removed, and the anchor itself carries the CTA grammar. The
+     * route's existence, purpose and copy are untouched, which is why the
+     * ruling that approved the route still covers it.
+     *
+     * Nothing is loosened. The six codes, axiom A-01, the file list, the
+     * expiry and the subset rule all still bind; a seventh finding anywhere
+     * still un-waives the whole run; and no other PR, route or axiom inherits
+     * anything from this line.
+     */
+    pullRequests: [1119, 1123],
     // Deliberately empty: the waiver must live IN the branch whose CI honours
     // it, so writing the head SHA down changes the head SHA. The PR number is
     // the binding key; see the module header.

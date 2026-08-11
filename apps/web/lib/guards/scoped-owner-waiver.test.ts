@@ -252,7 +252,17 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     const w = SCOPED_OWNER_WAIVERS[0];
     expect(w.id).toBe("public-acquisition-route-create-cv");
     expect(w.axioms).toEqual(["A-01"]);
-    expect(w.pullRequests).toEqual([1119]);
+    // [1119] -> [1119, 1123] under OWNER APPROVAL, PUBLIC BETA TRAIN V5_1 §1
+    // (2026-08-11): "OWNER APPROVES extending the existing /create-cv
+    // product-constitution waiver to PR #1123 ... This approval is
+    // specifically for #1123."
+    //
+    // The RECORD count above is untouched, which is what this test exists to
+    // pin — #1123 adds no waiver, it joins the ruling that already covers this
+    // route. #1123 changes the route's CTA markup only (a <button> nested in
+    // the anchor becomes the anchor itself); the gate reports "0 new product
+    // surface(s)" and the six excused findings are unchanged.
+    expect(w.pullRequests).toEqual([1119, 1123]);
     expect(w.owner).toMatch(/PUBLIC BETA TRAIN V3/);
     // A waiver with no named resolution is a permanent exception wearing a
     // deadline. This one names the constitution decision that deletes it.

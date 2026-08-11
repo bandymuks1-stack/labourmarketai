@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -72,8 +72,11 @@ export async function SiteNav() {
       >
         {t("login")}
       </AuthCtaLink>
-      <AuthCtaLink relPath={`/${locale}/auth/signup`}>
-        <Button size="sm">{t("startNow")}</Button>
+      <AuthCtaLink
+        relPath={`/${locale}/auth/signup`}
+        className={buttonLinkClassName("primary", "sm")}
+      >
+        {t("startNow")}
       </AuthCtaLink>
     </>
   );
