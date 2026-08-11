@@ -28,7 +28,10 @@ vi.mock("@/lib/intelligence/source-governance", async (importOriginal) => {
 import { runVacancyImport } from "./vacancy-importer";
 import { getVacancyProvider } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { emptyDedupState } from "@/lib/vacancy-sources/vacancy-dedup";
-import { computeVacancyContentHash } from "@/lib/vacancy-sources/vacancy-hash";
+import {
+  computeVacancyContentHash,
+  vacancyIdentityKey,
+} from "@/lib/vacancy-sources/vacancy-hash";
 import type { TranslationProvider } from "@/lib/translation/translation-service";
 
 const PROVIDER = getVacancyProvider("arbetsformedlingen")!;
@@ -574,5 +577,98 @@ describe("translation stage", () => {
 
     expect(result.metrics.translationsAvailable).toBe(0);
     expect(result.metrics.translationsUnavailable).toBe(1);
+  });
+});
+
+describe("withdrawals — the publisher taking an ad down", () => {
+  /** Dedup state that already holds the ad the stream is about to withdraw. */
+  function storing(externalId: string) {
+    return {
+      knownContentHashes: new Set(["stored-hash"]),
+      knownIdentityHashes: new Map([
+        [vacancyIdentityKey("arbetsformedlingen", externalId), "stored-hash"],
+      ]),
+    };
+  }
+
+  // One 2.5 h backlog → exactly one slice, so the stub body is read once.
+  const ONE_SLICE_CURSOR = "2026-08-04T06:30:00.000Z";
+
+  it("accepts a withdrawal that carries no headline", async () => {
+    enable();
+    // What a real JobStream withdrawal looks like: identity plus `removed`,
+    // and nothing else. Requiring a title here rejected every one of them.
+    stubFetch([{ id: "gone-1", removed: true }]);
+
+    const result = await runVacancyImport(
+      request({
+        channel: "stream",
+        cursor: ONE_SLICE_CURSOR,
+        dedupState: storing("gone-1"),
+      }),
+    );
+
+    expect(result.metrics.itemsRejectedByValidation).toBe(0);
+    expect(result.metrics.itemsRemoval).toBe(1);
+    expect(result.acceptedVacancies).toHaveLength(1);
+    expect(result.acceptedVacancies[0].lifecycle).toBe("removed");
+  });
+
+  it("still rejects a PUBLISHED record with no headline", async () => {
+    enable();
+    // NEGATIVE CONTROL: the exemption is for withdrawals only. A live ad
+    // nobody can name is still not a vacancy, and must not slip through on
+    // the back of this change.
+    stubFetch([{ id: "nameless", publication_date: "2026-08-04T06:00:00Z" }]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: ONE_SLICE_CURSOR }),
+    );
+
+    // Refused one stage earlier than the withdrawal case — the parser already
+    // refuses a titleless LIVE ad — so it never reaches validation at all.
+    // The rule itself is pinned directly in vacancy-validation.test.ts.
+    expect(result.metrics.itemsRejectedByParser).toBe(1);
+    expect(result.metrics.itemsParsed).toBe(0);
+    expect(result.acceptedVacancies).toEqual([]);
+  });
+
+  it("still refuses a withdrawal it cannot identify", async () => {
+    enable();
+    // Identity is what actually protects the store — a withdrawal without it
+    // could deactivate anything. The parser rejects it before validation.
+    stubFetch([{ removed: true }]);
+
+    const result = await runVacancyImport(
+      request({ channel: "stream", cursor: ONE_SLICE_CURSOR }),
+    );
+
+    expect(result.metrics.itemsRejectedByParser).toBe(1);
+    expect(result.acceptedVacancies).toEqual([]);
+  });
+
+  it("hands the withdrawal to the writer, which stores it as not-live", async () => {
+    enable();
+    const persist = vi.fn().mockResolvedValue({ inserted: 0, updated: 1 });
+    stubFetch([{ id: "gone-2", removed: true }]);
+
+    await runVacancyImport(
+      request({
+        channel: "stream",
+        mode: "persist",
+        persist,
+        cursor: ONE_SLICE_CURSOR,
+        dedupState: storing("gone-2"),
+      }),
+    );
+
+    // The end of the chain that was dead: the row mapper turns a `removed`
+    // lifecycle into `is_active: false`, and the board reads only active rows.
+    // Without this record reaching the writer, a job the publisher has taken
+    // down stays advertised and its apply link goes nowhere.
+    expect(persist).toHaveBeenCalledTimes(1);
+    const rows = persist.mock.calls[0][0] as { lifecycle: string }[];
+    expect(rows).toHaveLength(1);
+    expect(rows[0].lifecycle).toBe("removed");
   });
 });
