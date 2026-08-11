@@ -111,7 +111,21 @@ export function validateVacancyRecord(
   }
   // A links-channel record legitimately carries no body, but every channel
   // must carry a headline — a vacancy nobody can name is not a vacancy.
-  if (vacancy.titleRaw.trim().length === 0) problems.push("missing_title");
+  //
+  // A WITHDRAWAL is the one exception, and it has to be. A publisher retiring
+  // an ad sends identity plus "removed", not a fresh copy of the headline, so
+  // requiring a title here rejected every withdrawal we ever received — the
+  // parser deliberately admits a titleless removal (see the provider parser)
+  // and this rule then threw it away, which is why `itemsRemoval` was always
+  // zero. The cost of that disagreement is not cosmetic: an ad the publisher
+  // has taken down stays `is_active` in our store forever, so the board keeps
+  // advertising jobs that no longer exist and sends workers to dead links.
+  // A withdrawal still has to be identifiable — `missing_external_id` above
+  // is what actually protects the store — it just does not have to be
+  // re-describable.
+  if (vacancy.lifecycle !== "removed" && vacancy.titleRaw.trim().length === 0) {
+    problems.push("missing_title");
+  }
 
   if (vacancy.publishedAt.trim().length === 0) {
     problems.push("missing_published_at");
