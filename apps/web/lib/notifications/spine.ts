@@ -21,7 +21,10 @@ import {
   type SpineCounts,
 } from "@/lib/notifications/spine-signals";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { readMyNotificationEvents } from "@/lib/notifications/events";
+import {
+  notificationEventHref,
+  readMyNotificationEvents,
+} from "@/lib/notifications/events";
 
 /**
  * Notification spine v1 — IO half. Loads every spine count in one parallel
@@ -115,6 +118,8 @@ export async function getDurableNotifications(): Promise<
     type: string;
     created_at: string;
     read_at: string | null;
+    /** Canonical surface for the entity this event is about. */
+    href?: string;
   }[]
 > {
   const supabase = await createServerClient();
@@ -125,5 +130,9 @@ export async function getDurableNotifications(): Promise<
     type: `event_${e.eventType}`,
     created_at: e.createdAt,
     read_at: e.readAt,
+    // The stored row already knows which entity it is about; this turns that
+    // into somewhere the reader can actually go. Clearing still happens by
+    // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
+    href: notificationEventHref(e.entityType),
   }));
 }

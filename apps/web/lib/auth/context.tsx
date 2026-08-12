@@ -38,6 +38,16 @@ export type Notification = {
    *  a local "mark read" — the bell only ever states what is actually true. */
   count?: number;
   href?: string;
+  /** True for STORED events (`notification_events`), whose read state is
+   *  persisted and cleared by "mark all read".
+   *
+   *  This used to be inferred from `!href`, which forced every stored row to
+   *  be link-less: giving one a destination silently hid the mark-all-read
+   *  control. How a row CLEARS (durable) and where it GOES (href) are separate
+   *  facts, so they are separate fields. Derived signals leave this unset —
+   *  they clear by visiting their surface, and marking them read would be a
+   *  lie the next page-load reverts. */
+  durable?: boolean;
 };
 
 type AuthState = {
