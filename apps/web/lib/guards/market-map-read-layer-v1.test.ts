@@ -483,7 +483,16 @@ describe("NO new DB migration in this PR", () => {
     // (docs/human-gates/notification-events-gate.md). RECOUNTED against
     // origin/main 97bc3ff8: 195 .sql files there, this branch adds exactly
     // one.
-    expect(count).toBeLessThanOrEqual(196);
+    // Bumped 196 -> 197 for the beta-audit P1 defect A1 fix
+    // (20260808150000_caller_manages_worker_engagements_v1) — extends
+    // caller_manages_worker with an ACTIVE company_worker_engagements branch
+    // (the absence-review surface was blind to booking-created engagements)
+    // and restores the project-assign engagement OR-branch that W11's
+    // 20260804120000 reverted. Three function bodies, paired rollback, no
+    // schema/policy/grant change, zero DML. RECOUNTED after merging main
+    // (post-#1116, dc354727): origin/main holds 196 .sql files, this branch
+    // adds exactly one. Owner-gated: ships UNAPPLIED.
+    expect(count).toBeLessThanOrEqual(197);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain
