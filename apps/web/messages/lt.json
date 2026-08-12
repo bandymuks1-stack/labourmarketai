@@ -1377,9 +1377,9 @@
       "errorNoCompany": "Tik įmonės paskyra gali kurti projekto kontekstą.",
       "error": "Nepavyko sukurti. Bandykite dar kartą."
     },
-    "needsTitle": "Poreikiai",
-    "needsBody": "Pateikite struktūruotą poreikį ir sekite jo būseną.",
-    "needsCta": "Atidaryti poreikius",
+    "needsTitle": "Užklausos",
+    "needsBody": "Pateikite struktūruotą užklausą ir sekite jos būseną.",
+    "needsCta": "Atidaryti užklausas",
     "connections": {
       "title": "Paskyrimas susijęs su",
       "intro": "Žmonių paskyrimas jungiasi su planu, žemėlapiu ir įrašu.",
@@ -1395,12 +1395,12 @@
   },
   "demandReadback": {
     "statusOther": "Peržiūrima",
-    "heading": "Jūsų pateikti poreikiai",
+    "heading": "Jūsų pateiktos užklausos",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
-    "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių poreikius darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, poreikiai matomi tik jums ir peržiūros komandai.",
-    "empty": "Dar nepateikėte nė vieno poreikio. Pateikite poreikį viršuje ir jis atsiras čia su savo būsena.",
+    "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, užklausos matomos tik jums ir peržiūros komandai.",
+    "empty": "Dar nepateikėte nė vienos užklausos. Pateikite užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
-    "manageHelp": "Juodraščius galima ištrinti. Pateikto poreikio uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jo atrankos (scouting) vaizde. Pateikto teksto redagavimas dar negalimas.",
+    "manageHelp": "Juodraščius galima ištrinti. Pateiktos užklausos uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jos atrankos (scouting) vaizde. Pateikto teksto redagavimas dar negalimas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",
@@ -1410,7 +1410,7 @@
       "urgency": "Kada reikia",
       "notes": "Pastabos"
     },
-    "scoutLink": "Šio poreikio atitikmenys ir susidomėjimas"
+    "scoutLink": "Šios užklausos atitikmenys ir susidomėjimas"
   },
   "journey": {
     "eyebrow": "Kaip tai veikia",
@@ -4485,7 +4485,7 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbo poreikį"
+      "cta": "Pradėti darbuotojų užklausą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -7523,22 +7523,22 @@
   "conciergeOffer": {
     "banner": {
       "badge": "Ankstyvoji prieiga",
-      "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų poreikio pateikimas nemokamas, o galutinė kaina visada patvirtinama su jumis prieš pradedant bet kokį mokamą darbą.",
-      "cta": "Pateikti darbuotojų poreikį"
+      "body": "Vieši mokėjimai dar neįjungti. Pirmuosius klientus aptarnaujame tiesiogiai: darbuotojų užklausos pateikimas nemokamas, o galutinė kaina visada patvirtinama su jumis prieš pradedant bet kokį mokamą darbą.",
+      "cta": "Pateikti darbuotojų užklausą"
     },
     "title": "Kaip veikia pirmoji mokama paslauga",
     "steps": [
       {
-        "title": "Pateik poreikį nemokamai",
-        "body": "Aprašyk reikalingus darbuotojus ar brigadą poreikio formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
+        "title": "Pateik užklausą nemokamai",
+        "body": "Aprašyk reikalingus darbuotojus ar brigadą užklausos formoje. Jokio mokesčio, jokios kortelės, niekas nepublikuojama automatiškai."
       },
       {
-        "title": "Poreikį peržiūri žmogus",
+        "title": "Užklausą peržiūri žmogus",
         "body": "Operatorius perskaito kiekvieną užklausą, susisiekia ir patikslina apimtį, terminus ir sąlygas prieš bet kokį tolimesnį žingsnį."
       },
       {
         "title": "Gauni rankiniu būdu patikrintą trumpąjį sąrašą",
-        "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal tavo poreikį. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
+        "body": "Realūs kandidatai ar brigados, žmogaus patikrinti pagal tavo užklausą. Jei tinkamo trumpojo sąrašo sudaryti nepavyksta — mokesčio nėra, o mes niekada nežadame, kad kandidatas tikrai bus rastas."
       },
       {
         "title": "Moki tik už suteiktą paslaugą",
@@ -7546,7 +7546,7 @@
       }
     ],
     "note": "Čia dar nėra automatinės darbo biržos ir automatinio parinkimo — ankstyvos prieigos metu atranką koordinuoja žmogus. Ką matai, tas realiai ir veikia.",
-    "ctaLabel": "Pateikti darbuotojų poreikį →"
+    "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {
     "eyebrow": "Pasirengimas paleidimui",
@@ -8056,13 +8056,13 @@
     "bridgeLogin": "Jau turite paskyrą? Prisijungti"
   },
   "companyNeed": {
-    "title": "Pradėti darbo poreikį",
+    "title": "Pradėti darbuotojų užklausą",
     "subtitle": "Aprašykite, kokių žmonių jums reikia. Iš to sukuriame tvarkingą skelbimo juodraštį, kurį peržiūrite — mes neišgalvojame atlyginimo ir nepublikuojame automatiškai.",
     "companyName": "Įmonės pavadinimas",
     "profession": "Reikalingas sektorius ir darbo tipas",
     "country": "Šalis",
     "countryHelp": "Pasirinkite šalį, kurioje reikia darbuotojų.",
-    "honestNote": "Užpildykite poreikį — jį tvarkingai struktūruosime ir paruošime tolesniam kontaktui. Nieko nepublikuojame automatiškai.",
+    "honestNote": "Užpildykite užklausą — ją tvarkingai struktūruosime ir paruošime tolesniam kontaktui. Nieko nepublikuojame automatiškai.",
     "countries": {
       "LT": "Lietuva",
       "LV": "Latvija",
@@ -8076,9 +8076,9 @@
       "FI": "Suomija"
     },
     "contactPerson": "Kontaktinis asmuo",
-    "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šio poreikio.",
+    "contactPersonHelp": "Neprivaloma. Su kuo susisiekti dėl šios užklausos.",
     "contactEmail": "El. paštas susisiekimui",
-    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl jūsų poreikio.",
+    "contactEmailHelp": "Neprivaloma, bet padeda greičiau susisiekti dėl jūsų užklausos.",
     "cityRegion": "Miestas ar regionas",
     "cityRegionHelp": "Neprivaloma. Kur numatytas darbas.",
     "expectedDuration": "Numatoma trukmė",
@@ -8110,7 +8110,7 @@
     "engEmployment": "Įdarbinimas",
     "engSubcontracting": "Subranga",
     "engAgency": "Tiekimas per agentūrą",
-    "description": "Aprašykite poreikį",
+    "description": "Aprašykite užklausą",
     "descriptionHelp": "Koks darbas, kur ir kokie reikalavimai — asistentas pagal tai paruošia tvarkingą skelbimą.",
     "submit": "Sukurti skelbimo juodraštį",
     "aiBadge": "AI pasiūlymas",
@@ -8124,16 +8124,16 @@
     "aiNone": "Pasiūlymas nesukurtas — peržiūrėkite savo duomenis.",
     "statusInvalid": "Kai kuriuos duomenis reikia pataisyti. Patikrinkite formą.",
     "statusError": "Kažkas nepavyko. Bandykite dar kartą.",
-    "bridgeNote": "Kad pateiktumėte šį poreikį tolesniam kontaktui, susikurkite nemokamą paskyrą. Jau turite? Prisijunkite.",
-    "bridgeSignup": "Susikurti paskyrą ir pateikti poreikį",
+    "bridgeNote": "Kad pateiktumėte šią užklausą tolesniam kontaktui, susikurkite nemokamą paskyrą. Jau turite? Prisijunkite.",
+    "bridgeSignup": "Susikurti paskyrą ir pateikti užklausą",
     "bridgeLogin": "Jau turite paskyrą? Prisijungti",
     "autoSuggested": "Pasiūlyta pagal jūsų aprašymą — patikrinkite ir, jei reikia, pataisykite. Nieko nepateikiame automatiškai.",
-    "preparedTitle": "Poreikis paruoštas",
-    "preparedBody": "Tvarkingai sudėliojome jūsų poreikį. Kad jį pateiktumėte tolesniam kontaktui, susikurkite nemokamą paskyrą arba prisijunkite žemiau — tada poreikis atkeliauja komandai.",
-    "receivedTitle": "Poreikis gautas",
-    "receivedBody": "Gavome jūsų poreikį ir laikome jį tolesniam kontaktui su jumis. Kad matytumėte ir tvarkytumėte jį, susikurkite paskyrą arba prisijunkite žemiau.",
-    "partnerRouteTitle": "Statybų poreikiams — partnerių įmonių kelias",
-    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų poreikiams pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
+    "preparedTitle": "Užklausa paruošta",
+    "preparedBody": "Tvarkingai sudėliojome jūsų užklausą. Kad ją pateiktumėte tolesniam kontaktui, susikurkite nemokamą paskyrą arba prisijunkite žemiau — tada užklausa atkeliauja komandai.",
+    "receivedTitle": "Užklausa gauta",
+    "receivedBody": "Gavome jūsų užklausą ir laikome ją tolesniam kontaktui su jumis. Kad matytumėte ir tvarkytumėte ją, susikurkite paskyrą arba prisijunkite žemiau.",
+    "partnerRouteTitle": "Statybų užklausoms — partnerių įmonių kelias",
+    "partnerRouteBody": "Jeigu tinkamo tiesioginio darbuotojo atitikmens dar nėra, statybų užklausoms pirmiausia galime rekomenduoti kreiptis į mūsų partnerę UAB „Nonstop Group“ (LT) — platformos operatorę. Tai padeda greičiau suderinti dokumentus, atsakomybes ir įdarbinimo eigą, kiekvieną žingsnį koordinuojant žmogui."
   },
   "candidatePool": {
     "title": "Kandidatų telkinys",
@@ -10805,7 +10805,7 @@
         "needsAccommodation": "Ar reikia apgyvendinimo?",
         "availabilityNote": "Pastaba (nebūtina)",
         "availabilityNotePlaceholder": "Pvz., laisvas nuo rugpjūčio, mieliau 2 savaičių pamainos",
-        "demandDescription": "Aprašykite poreikį",
+        "demandDescription": "Aprašykite užklausą",
         "demandDescriptionPlaceholder": "Pvz.: reikia 4 mūrininkų Kaune nuo rugpjūčio, darbas 3 mėn., reikalinga patirtis",
         "demandRole": "Pareigos / rolė",
         "demandRolePlaceholder": "Pvz. mūrininkas",
@@ -11157,7 +11157,7 @@
       "fieldEnd": "Pabaiga",
       "fieldSource": "Šaltinis",
       "fieldSkills": "Įgūdžiai",
-      "fieldDemands": "Atvirų poreikių",
+      "fieldDemands": "Atvirų užklausų",
       "fieldWorkspace": "Erdvė",
       "fieldProjectId": "Projekto ID",
       "evalDemand": "Poreikis",
