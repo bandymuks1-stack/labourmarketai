@@ -43,13 +43,33 @@ const APP_ROOT = join(__dirname, "..", "..");
 /** Active locales only — the 6 non-active catalogs are partial by design. */
 const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
 
-/** The employer inquiry transaction chain converted in this slice. */
+/**
+ * Namespaces converted so far. This list IS the scope of the guard — extend it
+ * as each further tranche lands, rather than building a second mechanism.
+ *
+ * Phase 1 (#1126): the employer inquiry transaction chain.
+ * Phase 2: the worker-facing board + admin structuring + activity labels.
+ * Still legacy, deliberately: scouting.*, marketMap.*, waitlist.*, pages.*,
+ * featureNotes.*, crmPipeline.*, companyActionRooms.* — and the FROZEN landing
+ * and `legal.*` namespaces, which are owner decisions, not engineering ones.
+ */
 const INQUIRY_NAMESPACES = [
   "companyNeed",
   "demandReadback",
   "conciergeOffer",
   "companyOps",
+  "opportunities",
+  "needStructuring",
+  "activityTypes",
 ] as const;
+
+/**
+ * Key paths whose legacy stem is NOT the marketplace inquiry noun.
+ * `activityTypes.skill_claim` is RU "Заявка о навыке" — a worker's claim ABOUT
+ * A SKILL, not a request submitted into the marketplace (V6 §4 category D).
+ * Renaming it would make the label wrong, not consistent.
+ */
+const NOT_AN_INQUIRY = new Set(["activityTypes.skill_claim"]);
 
 /**
  * Per-locale legacy request-noun patterns. LT/RU/NL tolerate ZERO occurrences
@@ -67,7 +87,7 @@ const LEGACY: Record<
   de: { re: /bedarf/i, allow: /bei Bedarf/, term: "Bedarf → Anfrage" },
   en: {
     // `[-\s]` so the hyphenated compound ("company-need queue") is caught too.
-    re: /\b(?:company|work|worker|workforce|staffing)[-\s]+needs?\b|\b(?:new|submitted|open|closed|structured|public|anonymous)\s+needs?\b|\b(?:submit|create|post|start|describe|open|your|this|the|a)\s+(?:a\s+|your\s+|the\s+)?needs?\b|\bneeds?\s+(?:from|received|is prepared|submitted|stay private)\b/i,
+    re: /\b(?:company|work|worker|workforce|staffing|project|employer|client)[-\s]+needs?\b|\b(?:new|submitted|open|closed|structured|public|anonymous)\s+needs?\b|\b(?:submit|create|post|start|describe|open|your|this|the|a)\s+(?:a\s+|your\s+|the\s+)?needs?\b|\bneeds?\s+(?:from|received|is prepared|submitted|stay private)\b/i,
     term: "need (noun) → inquiry",
   },
 };
@@ -108,6 +128,7 @@ describe("employer inquiry surfaces use INQUIRY terminology", () => {
         collectStrings(subtree, namespace, strings);
 
         for (const { path, value } of strings) {
+          if (NOT_AN_INQUIRY.has(path)) continue;
           // Strip the documented ordinary-language idiom before testing.
           const probe = allow ? value.replace(new RegExp(allow, "gi"), "") : value;
           if (re.test(probe)) offenders.push(`${path}: "${value}" → ${term}`);

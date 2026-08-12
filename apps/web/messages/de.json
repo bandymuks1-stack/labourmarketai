@@ -2940,8 +2940,8 @@
     "work_done": "Erledigte Arbeit",
     "skill_claim": "Fähigkeitsangabe",
     "service_offer": "Dienstleistungsangebot",
-    "worker_need": "Arbeitsbedarf (Arbeitskraft)",
-    "project_need": "Projektbedarf",
+    "worker_need": "Arbeitsanfrage (Arbeitskraft)",
+    "project_need": "Projektanfrage",
     "team_offer": "Teamangebot",
     "company_activity": "Unternehmenstätigkeit",
     "learning_goal": "Lernziel",
@@ -7668,9 +7668,9 @@
     "structuredNote": "Ihr CV-Text wird automatisch in ein Profil strukturiert — Sie prüfen jeden Vorschlag und entscheiden, was gespeichert wird."
   },
   "needStructuring": {
-    "pageTitle": "Bedarfsstrukturierung",
-    "pageIntro": "Eingereichte Bedarfe ohne strukturierte Felder. Das System schlägt Arbeitsart, Land, Anzahl, Zeitraum und Unterkunft aus dem Text vor — bestätigen oder korrigieren Sie. Nur bestätigte Felder mit festen Auswahlwerten erreichen das Arbeitskraft-Board.",
-    "empty": "Alle eingereichten Bedarfe haben bereits strukturierte Felder.",
+    "pageTitle": "Anfragestrukturierung",
+    "pageIntro": "Eingereichte Anfragen ohne strukturierte Felder. Das System schlägt Arbeitsart, Land, Anzahl, Zeitraum und Unterkunft aus dem Text vor — bestätigen oder korrigieren Sie. Nur bestätigte Felder mit festen Auswahlwerten erreichen das Arbeitskraft-Board.",
+    "empty": "Alle eingereichten Anfragen haben bereits strukturierte Felder.",
     "footnote": "Die Vorschläge sind deterministisch (schlüsselwortbasiert), keine KI. Freitext wird nur hier angezeigt und erreicht niemals das Arbeitskraft-Board.",
     "freeTextHeading": "Originaltext (nur für Admins)",
     "freeText": {
@@ -7794,7 +7794,7 @@
       }
     },
     "title": "Chancen für Sie",
-    "intro": "Hier sehen Sie Arbeitgeber-Bedarfe, die zu Ihnen passen könnten, und was Sie Ihrem Profil hinzufügen sollten, um bereit zu sein.",
+    "intro": "Hier sehen Sie Arbeitgeber-Anfragen, die zu Ihnen passen könnten, und was Sie Ihrem Profil hinzufügen sollten, um bereit zu sein.",
     "noWorkerBody": "Vervollständigen Sie zuerst Ihr Arbeitskraft-Profil, um Chancen zu sehen, die zu Ihnen passen.",
     "readinessTitle": "Ihre Bereitschaft",
     "matchTitle": "Match-Aufschlüsselung",
@@ -7818,7 +7818,7 @@
       "check": "prüfen",
       "unknown": "unbekannt"
     },
-    "readinessIntro": "Je vollständiger Ihr Profil, desto leichter finden Arbeitgeber Sie — und desto präziser können wir passende Bedarfe anzeigen.",
+    "readinessIntro": "Je vollständiger Ihr Profil, desto leichter finden Arbeitgeber Sie — und desto präziser können wir passende Anfragen anzeigen.",
     "ready": {
       "workType": "Branche & Arbeitsart",
       "skills": "Fähigkeiten",
@@ -7830,9 +7830,9 @@
     },
     "ctaProfile": "Profil vervollständigen",
     "needsAccessTitle": "Chancen werden vorbereitet",
-    "needsAccessBody": "Arbeitgeber-Bedarfe erscheinen hier, sobald die Sichtbarkeit für Arbeitskräfte aktiviert ist. Vervollständigen Sie in der Zwischenzeit Ihr Profil, damit Sie bereit sind, sobald passende Bedarfe erscheinen.",
-    "emptyTitle": "Derzeit keine offenen Bedarfe",
-    "emptyBody": "Wenn Arbeitgeber neue Bedarfe einstellen, erscheinen sie hier. In der Zwischenzeit lohnt es sich, Ihr Profil zu vervollständigen.",
+    "needsAccessBody": "Arbeitgeber-Anfragen erscheinen hier, sobald die Sichtbarkeit für Arbeitskräfte aktiviert ist. Vervollständigen Sie in der Zwischenzeit Ihr Profil, damit Sie bereit sind, sobald passende Anfragen erscheinen.",
+    "emptyTitle": "Derzeit keine offenen Anfragen",
+    "emptyBody": "Wenn Arbeitgeber neue Anfragen einstellen, erscheinen sie hier. In der Zwischenzeit lohnt es sich, Ihr Profil zu vervollständigen.",
     "trustNote": "Arbeitskräfte sehen zuerst nur freigegebene oder sicher verwaltete Chancen. Das hilft, Risiken zu verringern und einen verlässlicheren Arbeitsmarkt aufzubauen.",
     "approvedEmptyTitle": "Noch keine freigegebenen Chancen.",
     "approvedEmptyBody": "Vervollständigen Sie Ihr Profil, damit wir Sie besser mit passenden Chancen matchen können, sobald diese freigegeben sind.",
@@ -7851,7 +7851,7 @@
       "country_unknown": "Ihr Land ist nicht angegeben",
       "availability_unknown": "Verfügbarkeit nicht angegeben"
     },
-    "fieldRoleUnknown": "Arbeitsbedarf",
+    "fieldRoleUnknown": "Arbeitsanfrage",
     "fieldCountry": "Land",
     "fieldStart": "Start",
     "fieldTeam": "Personen",
@@ -7892,7 +7892,7 @@
         "insufficient_data": "Noch nicht vergleichbar"
       },
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
-      "recognizedNote": "Anforderungen aus dem Bedarfstext erkannt — noch nicht bestätigt",
+      "recognizedNote": "Anforderungen aus dem Anfragetext erkannt — noch nicht bestätigt",
       "missingPrefix": "fehlend:"
     },
     "recommendations": {
@@ -7969,9 +7969,9 @@
     "myInterest": {
       "title": "Meine Interessen",
       "summary": "Gesamt: {count}",
-      "intro": "Bedarfe, für die Sie Interesse bekundet haben, mit ihrem aktuellen Stand. Der Eintrag bleibt auch nach dem Schließen eines Bedarfs erhalten.",
-      "closed": "Dieser Bedarf ist nicht mehr aktiv",
-      "viewDemand": "Bedarf ansehen",
+      "intro": "Anfragen, für die Sie Interesse bekundet haben, mit ihrem aktuellen Stand. Der Eintrag bleibt auch nach dem Schließen einer Anfrage erhalten.",
+      "closed": "Diese Anfrage ist nicht mehr aktiv",
+      "viewDemand": "Anfrage ansehen",
       "cvLink": "Angepassten Lebenslauf ansehen",
       "status": {
         "interested": "Gesendet",

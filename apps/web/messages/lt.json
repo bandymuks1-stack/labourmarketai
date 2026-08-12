@@ -2940,8 +2940,8 @@
     "work_done": "Atliktas darbas",
     "skill_claim": "Įgūdžio pareiškimas",
     "service_offer": "Paslaugos pasiūlymas",
-    "worker_need": "Darbo poreikis (darbuotojui)",
-    "project_need": "Projekto poreikis",
+    "worker_need": "Darbo užklausa (darbuotojui)",
+    "project_need": "Projekto užklausa",
     "team_offer": "Komandos pasiūlymas",
     "company_activity": "Įmonės veikla",
     "learning_goal": "Mokymosi tikslas",
@@ -7668,9 +7668,9 @@
     "structuredNote": "Perskaitome jūsų CV ir paruošiame profilį, kurį galite peržiūrėti — kiekvieną pasiūlymą tikrinate ir sprendžiate jūs."
   },
   "needStructuring": {
-    "pageTitle": "Poreikių struktūrinimas",
-    "pageIntro": "Pateikti poreikiai be struktūrinių laukų. Sistema pasiūlo darbo tipą, šalį, kiekį, terminą ir apgyvendinimą iš teksto — patvirtinkite arba pataisykite. Į darbuotojų sąrašą patenka tik patvirtinti uždari laukai.",
-    "empty": "Visi pateikti poreikiai jau turi struktūrinius laukus.",
+    "pageTitle": "Užklausų struktūrinimas",
+    "pageIntro": "Pateiktos užklausos be struktūrinių laukų. Sistema pasiūlo darbo tipą, šalį, kiekį, terminą ir apgyvendinimą iš teksto — patvirtinkite arba pataisykite. Į darbuotojų sąrašą patenka tik patvirtinti uždari laukai.",
+    "empty": "Visos pateiktos užklausos jau turi struktūrinius laukus.",
     "footnote": "Pasiūlymai deterministiniai (pagal raktažodžius), ne AI. Laisvas tekstas matomas tik čia ir niekada nepatenka į darbuotojų sąrašą.",
     "freeTextHeading": "Originalus tekstas (matomas tik adminui)",
     "freeText": {
@@ -7794,7 +7794,7 @@
       }
     },
     "title": "Man tinkamos galimybės",
-    "intro": "Čia matysite darbdavių poreikius, kurie gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
+    "intro": "Čia matysite darbdavių užklausas, kurios gali jums tikti, ir ką verta papildyti profilyje, kad būtumėte paruošti.",
     "noWorkerBody": "Pirmiausia užbaikite darbuotojo profilį, kad matytumėte jums tinkančias galimybes.",
     "readinessTitle": "Jūsų pasirengimas",
     "matchTitle": "Atitikimo apžvalga",
@@ -7818,7 +7818,7 @@
       "check": "patikrinti",
       "unknown": "nežinoma"
     },
-    "readinessIntro": "Kuo pilnesnis profilis, tuo lengviau darbdaviams jus rasti ir tuo tiksliau parodome tinkančius poreikius.",
+    "readinessIntro": "Kuo pilnesnis profilis, tuo lengviau darbdaviams jus rasti ir tuo tiksliau parodome tinkančias užklausas.",
     "ready": {
       "workType": "Sektorius ir darbo tipas",
       "skills": "Įgūdžiai",
@@ -7830,9 +7830,9 @@
     },
     "ctaProfile": "Papildyti profilį",
     "needsAccessTitle": "Galimybių sąrašas ruošiamas",
-    "needsAccessBody": "Darbdavių poreikiai čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildykite profilį — taip būsite paruošti, vos atsiradus tinkamiems poreikiams.",
-    "emptyTitle": "Šiuo metu atvirų poreikių nėra",
-    "emptyBody": "Kai darbdaviai pateiks naujų poreikių, jie pasirodys čia. Tuo tarpu verta papildyti profilį.",
+    "needsAccessBody": "Darbdavių užklausos čia pasirodys, kai bus įjungta jų peržiūra darbuotojams. Kol kas užpildykite profilį — taip būsite paruošti, vos atsiradus tinkamoms užklausoms.",
+    "emptyTitle": "Šiuo metu atvirų užklausų nėra",
+    "emptyBody": "Kai darbdaviai pateiks naujų užklausų, jos pasirodys čia. Tuo tarpu verta papildyti profilį.",
     "trustNote": "Darbuotojams pirmiausia rodome tik patvirtintas arba saugiai administruojamas galimybes. Taip mažiname riziką ir padedame kurti patikimesnę darbo rinką.",
     "approvedEmptyTitle": "Patvirtintų galimybių dar nėra.",
     "approvedEmptyBody": "Papildykite savo profilį — taip galėsime geriau parinkti jums tinkamas galimybes, kai jos bus patvirtintos.",
@@ -7851,7 +7851,7 @@
       "country_unknown": "Nenurodyta jūsų šalis",
       "availability_unknown": "Nenurodytas prieinamumas"
     },
-    "fieldRoleUnknown": "Darbo poreikis",
+    "fieldRoleUnknown": "Darbo užklausa",
     "fieldCountry": "Šalis",
     "fieldStart": "Pradžia",
     "fieldTeam": "Žmonių",
@@ -7892,7 +7892,7 @@
         "insufficient_data": "Kol kas nepalyginama"
       },
       "basis": "Atitinka {matched} iš {total} reikalingų įgūdžių ({confirmed} patvirtinti vadovo)",
-      "recognizedNote": "reikalavimai atpažinti iš poreikio teksto — dar nepatvirtinti",
+      "recognizedNote": "reikalavimai atpažinti iš užklausos teksto — dar nepatvirtinti",
       "missingPrefix": "trūksta:"
     },
     "recommendations": {
@@ -7969,9 +7969,9 @@
     "myInterest": {
       "title": "Mano susidomėjimai",
       "summary": "Iš viso: {count}",
-      "intro": "Poreikiai, kuriems parodėte susidomėjimą, ir jų būsena. Įrašas lieka ir tada, kai poreikis uždaromas.",
-      "closed": "Poreikis nebeaktyvus",
-      "viewDemand": "Peržiūrėti poreikį",
+      "intro": "Užklausos, kurioms parodėte susidomėjimą, ir jų būsena. Įrašas lieka ir tada, kai užklausa uždaroma.",
+      "closed": "Užklausa nebeaktyvi",
+      "viewDemand": "Peržiūrėti užklausą",
       "cvLink": "Peržiūrėti pritaikytą CV",
       "status": {
         "interested": "Išsiųsta",
