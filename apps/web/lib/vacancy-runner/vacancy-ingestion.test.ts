@@ -77,11 +77,26 @@ function ad(over: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
+/**
+ * Serve the shape the REAL endpoint serves for that path: the snapshot channel
+ * answers line-delimited JSON (`application/jsonl`, one ad per line), every
+ * other channel answers one JSON document. Keying on the URL rather than on a
+ * per-test flag means these tests keep exercising the transport each channel
+ * actually uses, instead of a uniform stub that no endpoint matches.
+ */
 function stubFetch(body: unknown, status = 200): ReturnType<typeof vi.fn> {
-  const impl = vi.fn().mockImplementation(async () => {
-    return new Response(JSON.stringify(body), {
+  const impl = vi.fn().mockImplementation(async (url: string) => {
+    const jsonLines = String(url).includes("/v2/snapshot");
+    if (!jsonLines) {
+      return new Response(JSON.stringify(body), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    const rows = Array.isArray(body) ? body : [body];
+    return new Response(rows.map((r) => JSON.stringify(r)).join("\n") + "\n", {
       status,
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/jsonl" },
     });
   });
   vi.stubGlobal("fetch", impl);

@@ -223,10 +223,57 @@ export const VACANCY_IMPORT_BOUNDS = {
   maxItemsPerPage: 100,
   /** Most pages one session may request from one provider. */
   maxPagesPerSession: 50,
-  /** Largest single HTTP response body accepted, in bytes. */
+  /**
+   * Largest single HTTP response body accepted, in bytes, for the BUFFERED
+   * transport — the path that reads the whole body into memory before parsing
+   * it. Deliberately unchanged: this bound is what stops any provider from
+   * handing us an unbounded body, and widening it to fit one large publisher
+   * would weaken every other source. A payload too big for this cap needs a
+   * different TRANSPORT, not a bigger number (see the streamed bounds below).
+   */
   maxResponseBytes: 16 * 1024 * 1024,
   /** Per-request timeout. */
   requestTimeoutMs: 20_000,
+  /**
+   * ── STREAMED (line-delimited) TRANSPORT ───────────────────────────────────
+   * These apply ONLY to a channel whose endpoint declares
+   * `bodyFormat: "json_lines"`, where the body is consumed one record at a
+   * time and never assembled. Memory there is bounded by `maxJsonLineBytes`,
+   * not by the total, which is exactly why a larger byte budget is safe here
+   * and would not be safe above.
+   *
+   * Sized from a real measurement of the Swedish snapshot (2026-08-11):
+   * 389.94 MiB, 37,014 ads, ~11 KB per ad, 313 s end to end.
+   */
+  /** Byte budget for the CONSUMED portion of one streamed session. At ~11 KB
+   *  per ad this comfortably covers a full 5,000-record session (~55 MB). */
+  maxStreamedBytes: 96 * 1024 * 1024,
+  /**
+   * Byte budget for the SKIPPED prefix when resuming a streamed walk. The
+   * endpoint offers no server-side offset (confirmed against its swagger
+   * contract), so resuming re-crosses the prefix on the wire. Sized to let the
+   * LAST session of a full Swedish cold start reach its offset (~390 MB) and
+   * to refuse anything materially beyond that.
+   */
+  maxStreamedSkipBytes: 512 * 1024 * 1024,
+  /** Longest single line tolerated on a streamed body. Memory safety: this,
+   *  not the total, is the reader's real memory bound. */
+  maxJsonLineBytes: 2 * 1024 * 1024,
+  /**
+   * Whole-session wall clock for a streamed read. `requestTimeoutMs` bounds a
+   * buffered request; a streamed session legitimately runs for minutes, so it
+   * needs its own, larger bound rather than a widened shared one.
+   *
+   * Sized for the WORST session of a full cold start, not the first. Measured
+   * live 2026-08-11: session 1 (offset 0) moved 52.78 MB, session 2 (offset
+   * 5,000) moved 108.84 MB in 138 s — the skipped prefix is re-crossed because
+   * the endpoint offers no server-side offset. The final session of a Swedish
+   * cold start therefore re-crosses ~390 MB, which at the observed rate lands
+   * around 350-400 s. A 420 s bound would abort exactly the sessions that
+   * finish the walk, so it is set to 900 s to leave real headroom on a
+   * deliberate, operator-run one-off.
+   */
+  streamedSessionTimeoutMs: 900_000,
   /** Retries on TRANSIENT failure only (never on a 4xx). */
   maxRetries: 2,
   /** Linear backoff step between retries. */

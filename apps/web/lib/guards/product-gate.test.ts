@@ -21,6 +21,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// The LIVE waiver records, from the same module the CI gate imports — so the
+// declaration contract below is checked against what really excuses a finding,
+// not against a list of codes copied into a test and left to rot.
+import { SCOPED_OWNER_WAIVERS } from "../../../../.github/scripts/owner-waivers.mjs";
 import { WORLD_ELEMENTS, worldElementIds, MANDATORY_PR_QUESTIONS, FORBIDDEN_CREATIONS } from "../product-gate/world-elements";
 import {
   BEHAVIOR_BINDINGS,
@@ -173,10 +177,22 @@ describe("product gate — the declaration contract", () => {
     // Context Panel. What must hold from now on is not emptiness but validity:
     // every entry answers all four locks, or the gate stops the merge.
     const problems = validateDeclarations(PRODUCT_SURFACES, axiomIds(), worldElementIds());
-    // `reflectedOnMap: false` is the ONE answer the Context Panel cannot yet
-    // give — it carries an owner-approved, self-expiring waiver, and the gate
-    // reports it so the PR stays a human decision. Everything else must pass.
-    const unwaived = problems.filter((p) => p.code !== "not_reflected_on_map");
+
+    // A declaration may only fail an answer that a LIVE owner waiver already
+    // names, on the exact surface it names. Deriving the allowance from
+    // `SCOPED_OWNER_WAIVERS` rather than hardcoding a code has two teeth:
+    // delete the waiver and this test goes red until the answer is really
+    // fixed, and add an unrelated failing answer and it goes red immediately.
+    //
+    // (The previous version filtered `not_reflected_on_map` for the W3 Context
+    // Panel. W6 shipped the map, the panel's answer became a real yes, and the
+    // filter had been dead ever since — exactly the rot this replaces.)
+    const excused = new Set(
+      SCOPED_OWNER_WAIVERS.flatMap((w) =>
+        w.expectedFindings.map((f) => `${f.code}@${f.file}`),
+      ),
+    );
+    const unwaived = problems.filter((p) => !excused.has(`${p.code}@${p.id}`));
     expect(unwaived, JSON.stringify(unwaived, null, 2)).toEqual([]);
   });
 

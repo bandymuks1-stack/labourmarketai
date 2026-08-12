@@ -172,8 +172,13 @@ export function CompanyNeedForm({
         data-testid="company-need-form"
         onFocusCapture={handleFirstInteraction}
       >
+        {/* <h1>, not <h2>: this form carries the only title on /company-need,
+            and the page had NO top-level heading at all (V5.1 finding). The
+            component is rendered on that one route, so promoting the level
+            fixes the document outline without competing with another h1.
+            Visual size is unchanged — text-lg is kept deliberately. */}
         <header className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h2>
+          <h1 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
 

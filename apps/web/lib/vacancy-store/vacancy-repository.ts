@@ -220,6 +220,18 @@ export async function writeVacancyCursor(
     readonly succeeded: boolean;
     /** Only consulted when `succeeded`. */
     readonly nextCursor: string | null;
+    /**
+     * PARTIAL PROGRESS on a FAILED run, for a channel walked in bounded time
+     * slices. A slice that was fetched and parsed in full has been completely
+     * seen, and a later slice failing does not un-see it — so the checkpoint
+     * may stand at the end of the last consumed slice even though the run as
+     * a whole failed. The failure is still recorded in full (this is not a
+     * quiet success): only `cursor_value` moves.
+     *
+     * Null for every non-windowed channel, where one response IS the whole
+     * window and "partial sight is not sight" remains exactly right.
+     */
+    readonly partialCursor?: string | null;
     readonly previousFailures: number;
     /** Stable machine code. Never a message that could carry a secret. */
     readonly failureCode: string | null;
@@ -246,6 +258,12 @@ export async function writeVacancyCursor(
         last_failure_at: input.runAtIso,
         last_failure_code: input.failureCode,
         consecutive_failures: input.previousFailures + 1,
+        // Omit the key entirely when there is no partial progress, so the
+        // upsert leaves any existing checkpoint untouched rather than
+        // overwriting it with null.
+        ...(typeof input.partialCursor === "string"
+          ? { cursor_value: input.partialCursor }
+          : {}),
       };
 
   const { error } = await client

@@ -214,6 +214,108 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     // workspace map now genuinely reacts to the selection, so the answer is a
     // real yes and nothing is excused any more.
   },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // /create-cv — the PUBLIC front door of the free CV chain.
+    //
+    // Owner product decision, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10):
+    //   "YES — labourmarket.ai SHOULD have a dedicated public FREE CV creation
+    //    / acquisition surface. The public CV builder is intentional. Do NOT
+    //    fold it invisibly into /worker-intake merely to avoid adding a page."
+    //
+    // WHY THIS DECLARATION ANSWERS "NO" FIVE TIMES, AND WHY THAT IS THE HONEST
+    // ANSWER. The five WORLD_STATE questions describe a surface INSIDE the
+    // authenticated workspace: does it move World State, is it drawn on the
+    // map, does the AI drive it, can the person stay in the workspace, does it
+    // avoid a new page. An anonymous visitor arriving from a search result has
+    // no World State, no avatar, no map and no assistant — there is no
+    // workspace to stay inside, and the honest answer to all five is "no".
+    //
+    // Answering them "yes" to make the gate green would be a lie of exactly the
+    // kind A-06 exists to prevent, so they are recorded as "no" and excused by
+    // ONE scoped, expiring, owner-approved waiver in
+    // `.github/scripts/owner-waivers.mjs` — the mechanism the owner ruling of
+    // 2026-07-29 built for reviewed transitional debt. The violations stay
+    // detected and stay printed; only the exit code changes, only for this PR,
+    // only until the recorded date.
+    //
+    // WHAT REMOVES THE WAIVER: `gate-learns-public-acquisition-route-category`.
+    // The gate does not currently distinguish a pre-auth public acquisition
+    // route from a workspace screen — the 118 grandfathered BASELINE screens
+    // include `/`, `/for-workers`, `/for-companies` and `/pricing`, none of
+    // which satisfy the five questions either; they escape by being older, not
+    // by being compliant. Teaching the gate that category is a constitution
+    // change and therefore an OWNER decision, not something this train may take
+    // on its own authority.
+    // ═══════════════════════════════════════════════════════════════════════
+    id: "/create-cv",
+    kind: "screen",
+    // A-04: "Multiple valid entry points, suggestions not coercion, progressive
+    // completion — no mandatory long wizard, and no path may be blocked." This
+    // surface IS an entry point, and it coerces nothing: the CV is free, the
+    // profile step is optional, the discoverability step is optional again.
+    originAxiom: "A-04",
+    purpose:
+      "The public, indexable, advert-addressable front door of the free CV chain: a visitor who has never heard of labourmarket.ai learns in one screen that they can build or import a CV for free, export it as a PDF, and — only if they choose — turn the facts they have reviewed into a work profile that improves the jobs they are shown.",
+    whyNotChat:
+      "There is no conversation before authentication. This surface exists precisely where the assistant cannot reach: an anonymous visitor arriving from a search result or an advert, who has not signed up and has nothing for an assistant to operate on. The moment that person starts, the surface hands off into the authenticated CV flow the assistant does drive — it adds no second flow of its own.",
+    whyNotExistingComponent:
+      "Every existing CV surface sits behind authentication, and `robots.ts` disallows the `/*/cv` prefix outright, so no current component can be indexed or pointed at by an advert. `/worker-intake` is a post-signup onboarding step, not an acquisition promise: it answers 'what do we need from you' to someone who already joined, not 'what do I get' to someone deciding whether to.",
+    owner:
+      "Product / worker acquisition — owner decision, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10)",
+    // A pure read surface. Every write it leads to belongs to the CV chain that
+    // already owns it (upload/extract, per-fact confirm, profile write). It
+    // deliberately owns NO action, so A-08 cannot be violated.
+    ownsAction: null,
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no new element: the CV is the avatar's work identity rendered for the outside world, and this surface is the public doorway to it. What did not exist was a doorway an anonymous person could find — the element was reachable only by people already inside.",
+    chatIntegration:
+      "One-way, by design: the surface starts the existing CV chain and the assistant takes over from the first authenticated screen onward. It dispatches nothing, holds no conversation state, and introduces no second flow the assistant would have to learn.",
+    avatarEffect:
+      "None by itself, and that is the honesty constraint: extracted facts are suggestions until the person confirms them one by one, and only confirmed facts reach the avatar's profile. A visitor who exports a PDF and leaves has changed nothing about any avatar.",
+    mapEffect:
+      "None. A pre-auth acquisition page draws nothing on the World Map — recorded as `reflectedOnMap: false` rather than dressed up as a map effect.",
+    journalRelation:
+      "Downstream and deliberately subordinate: the CV seeds an initial skill claim set, but the Work Journal remains the source of proven skills. The surface never presents an imported CV line as evidence of anything — it presents it as something the person said about themselves.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "avatar"
+    hasTimeline: true, // the profile's confirmed facts are dated state
+    hasHistory: true, // CV imports and confirmations are recorded events
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    // All five are "no", honestly. See the header comment: a pre-auth public
+    // route has no World State to change, no map to appear on, no assistant to
+    // be driven by, no workspace to stay inside, and it is by definition a new
+    // page. Excused by the scoped owner waiver, not by a rewritten answer.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    // These are real yeses: the chain this surface opens acts on the avatar
+    // Entity that already exists, and needs no new type, role or relationship.
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot control a page that renders before World State exists.
+    worldStateCanControlIt: false,
+  },
 ] as const;
 
 /**

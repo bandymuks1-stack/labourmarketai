@@ -816,6 +816,47 @@
       "subcopy": "[EN] Build one profile, set your availability, and let real demand find you across borders — no recruiters in the middle.",
       "title": "[EN] Your skills,",
       "titleAccent": "[EN] discoverable."
+    },
+    "createCv": {
+      "eyebrow": "Darmowy kreator CV",
+      "title": "Profesjonalne CV,",
+      "titleAccent": "za darmo.",
+      "subcopy": "Stwórz CV od zera lub zaimportuj istniejący PDF lub DOCX. Sprawdź każdy wyodrębniony fakt, wybierz przejrzysty szablon i pobierz PDF — za darmo. Jeśli zechcesz, te same informacje mogą zbudować Twój profil pracownika i pokazać prawdziwe ogłoszenia o pracę z oficjalnych publicznych źródeł.",
+      "cta": "Utwórz moje CV — za darmo",
+      "benefits": [
+        {
+          "title": "Importuj lub zacznij od nowa",
+          "body": "Prześlij istniejące CV (PDF, DOCX lub tekst) albo zacznij od pustej strony. Wyodrębnione fakty pozostają propozycjami, dopóki ich nie zaakceptujesz."
+        },
+        {
+          "title": "Uczciwa struktura",
+          "body": "Twoje doświadczenie, wykształcenie, języki i umiejętności są strukturyzowane do Twojej weryfikacji — nic nie jest wymyślane i nic nie jest zapisywane bez Twojej zgody."
+        },
+        {
+          "title": "Przejrzyste szablony, prawdziwy PDF",
+          "body": "Wybierz profesjonalny szablon i wyeksportuj do PDF A4 przez przeglądarkę — bez znaku wodnego, bez opłat."
+        },
+        {
+          "title": "Więcej niż dokument",
+          "body": "Za Twoją wyraźną zgodą te same fakty mogą zbudować profil pracownika, połączyć umiejętności ze wspólnym europejskim katalogiem umiejętności i pokazać pasujące publiczne ogłoszenia o pracę."
+        }
+      ],
+      "stepsTitle": "Jak to działa",
+      "steps": [
+        {
+          "title": "Zarejestruj się za darmo",
+          "body": "Konto pozwala edytować CV, a dane pozostają pod Twoją kontrolą — możesz je usunąć w każdej chwili."
+        },
+        {
+          "title": "Dodaj swoje doświadczenie",
+          "body": "Zaimportuj stare CV lub wpisz je ręcznie — potem przejrzyj każdy fakt i zdecyduj, co zostaje, zanim zostanie użyty."
+        },
+        {
+          "title": "Pobierz i decyduj",
+          "body": "Wyeksportuj CV jako PDF. Widoczność dla pracodawców to osobny, opcjonalny wybór."
+        }
+      ],
+      "privacyNote": "Twoje CV domyślnie pozostaje prywatne. Nic nie jest udostępniane pracodawcom, dopóki wyraźnie nie włączysz widoczności — a możesz ją wyłączyć w każdej chwili."
     }
   },
   "playercards": {
@@ -1983,6 +2024,10 @@
     "external": {
       "sectionTitle": "Publiczne ogłoszenia o pracę",
       "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
+      "freshnessDelayed": "Ogłoszenia ostatnio odświeżone {date}. Aktualizacje z tego źródła są chwilowo opóźnione, więc część stanowisk może być już zajęta.",
+      "freshnessStale": "Ogłoszenia ostatnio odświeżone {date}. Od tego czasu nie zostały potwierdzone — sprawdź aktualną dostępność w oryginalnym ogłoszeniu.",
+      "freshnessUnknown": "Nie możemy potwierdzić, kiedy te ogłoszenia były ostatnio odświeżane. Sprawdź aktualną dostępność w oryginalnym ogłoszeniu.",
+      "freshnessUnavailable": "Ogłoszenia zewnętrzne są chwilowo niedostępne.",
       "openOriginal": "Otwórz oryginalne ogłoszenie",
       "noApplicationRoute": "Źródło nie opublikowało adresu aplikowania dla tego ogłoszenia.",
       "publishedOn": "Opublikowano {date}",

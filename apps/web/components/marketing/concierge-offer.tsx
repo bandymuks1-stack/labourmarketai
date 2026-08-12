@@ -38,7 +38,7 @@ export async function ConciergeAccessBanner() {
         </p>
         <Link
           href="/company-need"
-          className="rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
         >
           {t("cta")}
         </Link>
@@ -80,7 +80,7 @@ export async function ConciergeOfferSection() {
       <div className="mt-6">
         <Link
           href="/company-need"
-          className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
         >
           {t("ctaLabel")}
         </Link>

@@ -11,7 +11,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildPageMetadataFor("workerIntake", locale, "/worker-intake");
 }
-import { Button } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   WorkerIntakeForm,
   type WorkerIntakeFormLabels,
@@ -105,11 +105,17 @@ export default async function WorkerIntakePage({
           {/* AuthCtaLink (plain <a>, not the SPA Link): auth is a full-page
               boundary. Single-domain policy: the link stays relative — the
               whole flow lives on labourmarket.ai. */}
-          <AuthCtaLink relPath={`/${locale}/auth/signup`}>
-            <Button>{t("bridgeSignup")} →</Button>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/signup`}
+            className={buttonLinkClassName()}
+          >
+            {t("bridgeSignup")} →
           </AuthCtaLink>
-          <AuthCtaLink relPath={`/${locale}/auth/login`}>
-            <Button variant="secondary">{t("bridgeLogin")}</Button>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/login`}
+            className={buttonLinkClassName("secondary")}
+          >
+            {t("bridgeLogin")}
           </AuthCtaLink>
         </div>
       </div>

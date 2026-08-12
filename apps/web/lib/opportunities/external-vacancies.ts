@@ -28,8 +28,13 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   searchPublicVacancies,
+  readSupplyLastRefreshedAt,
   type VacancySearchFiltersV1,
 } from "@/lib/vacancy-store/vacancy-read";
+import {
+  classifySourceFreshness,
+  type SourceFreshnessV1,
+} from "@/lib/vacancy-sources/source-freshness";
 import {
   buildNeedFromVacancy,
   type VacancyMatchingGap,
@@ -66,6 +71,12 @@ export interface ExternalVacanciesResultV1 {
   /** False ONLY when the store is not provisioned (migration unapplied). */
   readonly available: boolean;
   readonly cards: readonly ExternalOpportunityCardV1[];
+  /**
+   * How recently the supply behind these cards was re-confirmed at the
+   * publisher. The board renders a notice for every state except `current`,
+   * so an ad that has not been re-confirmed is never shown as though it had.
+   */
+  readonly freshness: SourceFreshnessV1;
 }
 
 /** Most ads the board loads per render. The board is a shortlist, not an
@@ -85,8 +96,28 @@ export async function loadExternalVacancyCards(
   });
 
   if (result.status === "not_provisioned") {
-    return { available: false, cards: [] };
+    return {
+      available: false,
+      cards: [],
+      freshness: classifySourceFreshness({
+        lastRefreshedAt: null,
+        nowIso: options.nowIso ?? new Date().toISOString(),
+        unavailable: true,
+      }),
+    };
   }
+
+  // Age of the supply, read through the same client and the same active/expiry
+  // predicate as the cards above — it describes THESE rows, not a wider view.
+  const refreshed = await readSupplyLastRefreshedAt(client, {
+    country: options.country ?? null,
+    nowIso: options.nowIso ?? new Date().toISOString(),
+  });
+  const freshness = classifySourceFreshness({
+    lastRefreshedAt: refreshed.lastRefreshedAt,
+    nowIso: options.nowIso ?? new Date().toISOString(),
+    unavailable: refreshed.status === "not_provisioned",
+  });
 
   const cards = result.vacancies
     .map((vacancy): ExternalOpportunityCardV1 => {
@@ -113,5 +144,5 @@ export async function loadExternalVacancyCards(
     // Same comparator as the platform board — one ranking rule, not two.
     .sort((a, b) => compareMatches(a.match, b.match));
 
-  return { available: true, cards };
+  return { available: true, cards, freshness };
 }

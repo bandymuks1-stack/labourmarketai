@@ -2029,6 +2029,20 @@ describe("no migration files added by this sprint", () => {
     // UNAPPLIED: docs/human-gates/notification-events-gate.md. Counted
     // against origin/main 97bc3ff8: 195 .sql files there, this branch adds
     // exactly one.
+    // 196 -> 197: beta-audit P1 defect A1
+    // (20260808150000_caller_manages_worker_engagements_v1) — teaches
+    // caller_manages_worker about company_worker_engagements so an employer
+    // holding an ACTIVE accepted-booking engagement can finally see and
+    // approve that worker's absence requests, and RESTORES the project-assign
+    // engagement OR-branch that W11's 20260804120000 silently reverted
+    // (confirmed missing in production 2026-08-08). Function bodies only: no
+    // table, column, policy or grant added, zero DML at apply time. Paired
+    // rollback. Ships UNAPPLIED and deliberately WITHOUT
+    // `@human-gate-approved` — owner-gated for prod apply. RECOUNTED after
+    // merging main (post-#1116, dc354727): 196 .sql files there, this branch
+    // adds exactly one.
+    // Merged as #1095 and APPLIED to production 2026-08-12 (ledger
+    // 20260812180224).
     // 196 -> 197: `20260809120000_can_view_worker_booking_engagement_v1` —
     // ONE `create or replace function public.can_view_worker(uuid)` adding a
     // single OR-branch (an ACTIVE accepted-booking engagement owned by the
@@ -2047,7 +2061,7 @@ describe("no migration files added by this sprint", () => {
     // neither references the other's objects — but whichever merges second
     // must RECOUNT git ls-tree and take the slot to 198. Never sum, and never take either side of a rebase
     // verbatim.
-    const SPRINT_BASELINE = 197;
+    const SPRINT_BASELINE = 198;
     // Bumped 173 -> 177 for the usage_cost_events HISTORY RECONCILIATION —
     // four migrations ALREADY APPLIED to production on 2026-07-28 via MCP
     // (ledger versions 20260728114008/114254/114301/114353), restored to the
