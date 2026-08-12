@@ -315,3 +315,133 @@ describe("the memo records the decision honestly", () => {
     expect(m).toMatch(/project_worker_assignments/);
   });
 });
+
+/**
+ * MEMO CONDITIONS C1 / C2a / C2b — the disclosure this predicate makes true.
+ *
+ * The owner's approval (TRAIN_V6_3 §3) is conditional: the widening "MUST NOT
+ * be blindly applied in its previous disclosure state". C1 is the accept-screen
+ * transparency (Art. 5(1)(a)); C2a is the factual legal-basis documentation;
+ * C2b reconciles the public "anonymised preview only" claim with the actual
+ * lifecycle. These guards fail RED if any of the three is removed or silently
+ * broadened — and equally if the copy starts over-claiming.
+ */
+describe("C1 — the accept screen states the disclosure before the worker accepts", () => {
+  const ACTIVE = ["en", "lt", "ru", "de", "nl"] as const;
+  const CATALOGUE = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
+  const messages = (l: string) =>
+    JSON.parse(readFileSync(join(APP_ROOT, "messages", `${l}.json`), "utf8"));
+  const disclosure = (l: string) => messages(l).conversation.booking.confirmAcceptDisclosure;
+
+  it("exists in ALL 11 catalogues (doctrine §2.4 — new keys land everywhere)", () => {
+    for (const l of CATALOGUE) {
+      expect(typeof disclosure(l), l).toBe("string");
+      expect(disclosure(l).length, l).toBeGreaterThan(40);
+    }
+  });
+
+  it("is really translated in the 5 ROUTED locales (no [EN] placeholder)", () => {
+    for (const l of ACTIVE) expect(disclosure(l), l).not.toMatch(/^\[EN\]/);
+  });
+
+  it("is rendered on the accept confirmation, not merely defined", () => {
+    const page = readRepo("apps/web/app/[locale]/dashboard/page.tsx");
+    expect(page).toContain('confirmAcceptDisclosure: tC("confirmAcceptDisclosure")');
+    const cmp = readRepo("apps/web/components/app/conversation/worker-booking-action.tsx");
+    expect(cmp).toContain("labels.confirmAcceptDisclosure");
+    expect(cmp).toContain("conversation-booking-accept-disclosure");
+    // It must sit on the ACCEPT branch — a disclosure shown on decline is useless.
+    const acceptBlock = cmp.slice(cmp.indexOf('phase.decision === "accepted"'));
+    expect(acceptBlock.indexOf("labels.confirmAcceptDisclosure")).toBeGreaterThan(-1);
+  });
+
+  it("scopes the disclosure to ONE company and does not over-claim (EN)", () => {
+    const en: string = disclosure("en");
+    expect(en).toMatch(/only this company/i);
+    expect(en).toMatch(/contact details stay private/i);
+    expect(en).toMatch(/no other employer/i);
+    // Must NOT imply public exposure or general discoverability.
+    expect(en).not.toMatch(/\bpublic(ly)?\b/i);
+    expect(en).not.toMatch(/all employers/i);
+    expect(en).not.toMatch(/anyone can/i);
+  });
+
+  it("tells the worker the access is revocable and time-bound", () => {
+    expect(disclosure("en")).toMatch(/while the engagement is active/i);
+    expect(disclosure("en")).toMatch(/end it at any time/i);
+  });
+});
+
+describe("C2a — the legal-basis matrix names the engagement arm factually", () => {
+  const MATRIX = "docs/legal/legal-basis-matrix-v1.md";
+  const matrix = () => readRepo(MATRIX);
+  // The prose is hard-wrapped at ~78 cols, so a sentence-level assertion must
+  // read the CONTENT, not the layout. Collapsing whitespace keeps the phrase
+  // requirement exact while letting the author re-wrap freely.
+  const matrixFlat = () => matrix().replace(/\s+/g, " ");
+
+  it("row 4 names company_worker_engagements explicitly", () => {
+    const row = matrix()
+      .split("\n")
+      .find((l) => l.includes("Visibility inside an ACCEPTED work relationship"));
+    expect(row).toBeDefined();
+    expect(row).toContain("company_worker_engagements");
+    // engagement_contexts must survive — this arm is ADDED, not substituted.
+    expect(row).toContain("engagement_contexts");
+  });
+
+  it("records who the arm admits, what it admits, and how it ends", () => {
+    const m = matrix();
+    expect(m).toContain("Accepted-booking engagement — factual basis note");
+    expect(m).toContain("respond_booking_request_v3");
+    expect(m).toContain("owns_company");
+    expect(m).toContain("end_company_worker_engagement_v2");
+  });
+
+  it("names what the arm does NOT admit — minimisation stays stated", () => {
+    const m = matrix();
+    for (const excluded of ["worker_documents", "worker_external_profiles", "journal entries"]) {
+      expect(m, excluded).toContain(excluded);
+    }
+  });
+
+  it("keeps discovery consent a SEPARATE purpose (no consent absorption)", () => {
+    const m = matrix();
+    expect(m).toMatch(/Art\. 7\(3\)/);
+    expect(m).toContain("profile_discoverability");
+    expect(matrixFlat()).toMatch(/does not restore that worker to scouting/i);
+  });
+
+  it("carries the C3 standing rule", () => {
+    expect(matrixFlat()).toMatch(/no further branch is added to `can_view_worker`/i);
+  });
+});
+
+describe("C2b — the public data-access matrix stops under-claiming", () => {
+  const ACTIVE = ["en", "lt", "ru", "de", "nl"] as const;
+  const seeNote = (l: string) =>
+    JSON.parse(readFileSync(join(APP_ROOT, "messages", `${l}.json`), "utf8")).legal.dataAccess
+      .matrix.rows.workerCard.seeNote;
+
+  it("is reconciled in every routed locale (all 5 changed together)", () => {
+    for (const l of ACTIVE) expect(seeNote(l).length, l).toBeGreaterThan(200);
+  });
+
+  it("scopes 'anonymised preview only' to SCOUTING rather than to all time (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/^In scouting/);
+    expect(en).toMatch(/anonymised preview only/i);
+  });
+
+  it("states the accepted-engagement case instead of hiding it (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/after a worker accepts a booking/i);
+    expect(en).toMatch(/as long as that engagement is active/i);
+  });
+
+  it("still promises contact privacy and no third-company access (EN)", () => {
+    const en: string = seeNote("en");
+    expect(en).toMatch(/contact details stay private/i);
+    expect(en).toMatch(/no other company gains access/i);
+  });
+});

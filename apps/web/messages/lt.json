@@ -4950,7 +4950,7 @@
           },
           "workerCard": {
             "surface": "Darbuotojo kortelė paieškoje",
-            "seeNote": "Įmonės mato tik nuasmenintą peržiūrą — be vardo ir be kontaktų be darbuotojo leidimo. Darbuotojas mato savo pilną kortelę.",
+            "seeNote": "Paieškoje įmonės mato tik nuasmenintą peržiūrą — be vardo ir be kontaktų be darbuotojo leidimo. Kai darbuotojas priima pasiūlymą, jo priimta įmonė mato to darbuotojo profilio kortelę (vardą, įgūdžius, profesijas, kalbas, pasiekiamumą) tol, kol tas darbo santykis aktyvus; kontaktai lieka privačias ir kitos įmonės prieigos negauna. Darbuotojas mato savo pilną kortelę.",
             "editNote": "Kortelę keisti gali tik pats darbuotojas (ir, kai reikia, administratorius)."
           },
           "workJournal": {
@@ -10766,6 +10766,7 @@
       "offerTitle": "Darbo pasiūlymas",
       "confirmAcceptTitle": "Priimti šį pasiūlymą?",
       "confirmAcceptBody": "Priėmimas patvirtina įsipareigojimą darbdaviui — tai tvirtas žingsnis, ne juodraštis.",
+      "confirmAcceptDisclosure": "Priėmus ši įmonė — ir tik ši įmonė — matys tavo profilio kortelę: vardą, įgūdžius, profesijas, kalbas ir pasiekiamumą. Kontaktai lieka privačias, kitos įmonės prieigos negauna, ir tai neįtraukia tavęs į darbdavių paiešką. Prieiga galioja, kol darbo santykis aktyvus — bet kada gali jį baigti.",
       "confirmDeclineTitle": "Atmesti šį pasiūlymą?",
       "confirmCta": "Taip, patvirtinti",
       "cancelCta": "Atšaukti",

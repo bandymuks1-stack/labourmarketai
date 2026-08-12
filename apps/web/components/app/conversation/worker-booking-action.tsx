@@ -23,6 +23,13 @@ export type BookingActionLabels = {
   decline: string;
   confirmAcceptTitle: string;
   confirmAcceptBody: string;
+  /**
+   * GDPR Art. 5(1)(a) transparency — states the identity disclosure the accept
+   * itself causes, BEFORE the worker accepts. Condition C1 of
+   * docs/human-gates/can-view-worker-booking-engagement-gate.md; the
+   * `can_view_worker` booking-engagement branch may not be applied without it.
+   */
+  confirmAcceptDisclosure: string;
   confirmDeclineTitle: string;
   confirmCta: string;
   cancelCta: string;
@@ -159,9 +166,17 @@ export function WorkerBookingAction({
               : labels.confirmDeclineTitle}
           </p>
           {phase.decision === "accepted" && (
-            <p className="text-support leading-relaxed text-text-secondary">
-              {labels.confirmAcceptBody}
-            </p>
+            <>
+              <p className="text-support leading-relaxed text-text-secondary">
+                {labels.confirmAcceptBody}
+              </p>
+              <p
+                className="text-support leading-relaxed text-text-secondary"
+                data-testid="conversation-booking-accept-disclosure"
+              >
+                {labels.confirmAcceptDisclosure}
+              </p>
+            </>
           )}
           <ChatActionRow>
             <ChatAction

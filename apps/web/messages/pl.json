@@ -3275,6 +3275,7 @@
       "offerTitle": "[EN] Job offer",
       "confirmAcceptTitle": "[EN] Accept this offer?",
       "confirmAcceptBody": "[EN] Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
+      "confirmAcceptDisclosure": "[EN] Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
       "confirmDeclineTitle": "[EN] Decline this offer?",
       "confirmCta": "[EN] Yes, confirm",
       "cancelCta": "[EN] Cancel",

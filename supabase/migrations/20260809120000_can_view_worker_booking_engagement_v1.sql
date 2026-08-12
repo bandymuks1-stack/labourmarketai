@@ -9,10 +9,42 @@
 --
 -- OWNER DECISION MEMO (read this first — it is the actual deliverable):
 --   docs/human-gates/can-view-worker-booking-engagement-gate.md
--- This file implements its recommendation. The memo's conditions C1 (accept
--- screen must state the disclosure) and C2 (legal-basis matrix + public
--- data-access matrix copy) are NOT satisfied by this file and are named there
--- as blocking on the APPLY, not on the merge.
+-- This file implements its recommendation.
+--
+-- ── CONDITION STATUS AT THIS COMMIT (2026-08-12) ────────────────────────────
+-- The owner gave a conditional written approval of this change
+-- (LABOURMARKET_AI_PUBLIC_BETA_COMPLETION_TRAIN_V6_3 §3): it "MUST NOT be
+-- blindly applied in its previous disclosure state", and may be merged and
+-- applied only once C1, C2a and C2b hold. They now hold — this branch carries
+-- the work — but the RED marker is deliberately still ABSENT (see above):
+--
+--   C1  SATISFIED — the accept-confirmation screen states the disclosure
+--       BEFORE the worker accepts. Key `conversation.booking.
+--       confirmAcceptDisclosure`, present in all 11 catalogues and translated
+--       in the 5 routed locales (en/lt/ru/de/nl); rendered by
+--       apps/web/components/app/conversation/worker-booking-action.tsx under
+--       data-testid `conversation-booking-accept-disclosure`.
+--   C2a SATISFIED — docs/legal/legal-basis-matrix-v1.md row 4 now names
+--       `company_worker_engagements` explicitly, plus a factual basis note
+--       recording who the arm admits, what it admits, how it ends, and its
+--       relation to discovery consent.
+--   C2b SATISFIED — `legal.dataAccess.matrix.rows.workerCard.seeNote` now
+--       scopes "anonymised preview only" to SCOUTING and states the
+--       accepted-engagement case, in the same 5 routed locales.
+--   C3  STANDING — no further branch may be added to `can_view_worker`
+--       without a paired legal-basis-matrix entry in the same PR.
+--
+-- The disclosure copy deliberately does NOT imply public profile exposure,
+-- discoverability by all employers, access for unrelated companies, or any
+-- override of the `profile_discoverability` consent arm. Privacy minimisation
+-- is unchanged: contact details, documents, external profiles and journal
+-- entries remain outside this predicate.
+--
+-- REMAINING BLOCKER — one human action, nothing else:
+--   a HUMAN must add the line `-- @human-gate-approved` to this file (an
+--   agent adding it was refused by the harness permission classifier on
+--   2026-08-12, and routing around that refusal is forbidden). Until then
+--   migration-safety stays RED, the PR stays DRAFT, and NOTHING is applied.
 --
 -- 20260809120000 — can_view_worker learns about booking engagements.
 --

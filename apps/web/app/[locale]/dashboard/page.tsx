@@ -155,6 +155,7 @@ async function loadBookingOffers(
       decline: tB("decline"),
       confirmAcceptTitle: tC("confirmAcceptTitle"),
       confirmAcceptBody: tC("confirmAcceptBody"),
+      confirmAcceptDisclosure: tC("confirmAcceptDisclosure"),
       confirmDeclineTitle: tC("confirmDeclineTitle"),
       confirmCta: tC("confirmCta"),
       cancelCta: tC("cancelCta"),

@@ -4950,7 +4950,7 @@
           },
           "workerCard": {
             "surface": "Arbeitskraft-Karte im Scouting",
-            "seeNote": "Unternehmen sehen nur eine anonymisierte Vorschau — kein Name und keine Kontaktdaten ohne Erlaubnis der Arbeitskraft. Die Arbeitskraft sieht ihre eigene vollständige Karte.",
+            "seeNote": "Im Scouting sehen Unternehmen nur eine anonymisierte Vorschau — kein Name und keine Kontaktdaten ohne Erlaubnis der Arbeitskraft. Nachdem eine Arbeitskraft ein Angebot angenommen hat, sieht das angenommene Unternehmen deren Profilkarte (Name, Fähigkeiten, Berufe, Sprachen, Verfügbarkeit), solange dieses Engagement aktiv ist; Kontaktdaten bleiben privat und kein anderes Unternehmen erhält Zugriff. Die Arbeitskraft sieht ihre eigene vollständige Karte.",
             "editNote": "Nur die Arbeitskraft (und bei Bedarf ein Administrator) kann die Karte ändern."
           },
           "workJournal": {
@@ -10766,6 +10766,7 @@
       "offerTitle": "Stellenangebot",
       "confirmAcceptTitle": "Dieses Angebot annehmen?",
       "confirmAcceptBody": "Die Annahme bestätigt dein Engagement beim Arbeitgeber — ein fester Schritt, kein Entwurf.",
+      "confirmAcceptDisclosure": "Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
       "confirmDeclineTitle": "Dieses Angebot ablehnen?",
       "confirmCta": "Ja, bestätigen",
       "cancelCta": "Abbrechen",

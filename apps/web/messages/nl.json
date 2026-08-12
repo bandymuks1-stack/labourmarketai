@@ -4950,7 +4950,7 @@
           },
           "workerCard": {
             "surface": "Werknemerskaart in scouting",
-            "seeNote": "Bedrijven zien alleen een geanonimiseerde preview — geen naam en geen contactgegevens zonder toestemming van de werknemer. De werknemer ziet de eigen volledige kaart.",
+            "seeNote": "In scouting zien bedrijven alleen een geanonimiseerde preview — geen naam en geen contactgegevens zonder toestemming van de werknemer. Nadat een werknemer een aanbod heeft geaccepteerd, ziet het geaccepteerde bedrijf de profielkaart van die werknemer (naam, vaardigheden, beroepen, talen, beschikbaarheid) zolang die opdracht actief is; contactgegevens blijven privé en geen ander bedrijf krijgt toegang. De werknemer ziet de eigen volledige kaart.",
             "editNote": "Alleen de werknemer (en, wanneer nodig, een beheerder) kan de kaart wijzigen."
           },
           "workJournal": {
@@ -10766,6 +10766,7 @@
       "offerTitle": "Vacature-aanbod",
       "confirmAcceptTitle": "Dit aanbod accepteren?",
       "confirmAcceptBody": "Accepteren bevestigt je opdracht bij de werkgever — een vaste stap, geen concept.",
+      "confirmAcceptDisclosure": "Door te accepteren ziet dit bedrijf — en alleen dit bedrijf — je profielkaart: naam, vaardigheden, beroepen, talen en beschikbaarheid. Je contactgegevens blijven privé, geen ander bedrijf krijgt toegang, en je wordt hierdoor niet opgenomen in het werkgeverszoeken. De toegang geldt zolang de opdracht actief is — je kunt die op elk moment beïindigen.",
       "confirmDeclineTitle": "Dit aanbod weigeren?",
       "confirmCta": "Ja, bevestigen",
       "cancelCta": "Annuleren",
