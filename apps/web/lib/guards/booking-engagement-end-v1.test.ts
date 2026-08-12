@@ -672,6 +672,20 @@ describe("the migration set is exactly what this slice declared", () => {
       // approved the retention CAPABILITY, not installing a new database
       // extension. Gate record: docs/human-gates/w14-retention-scheduler-gate.md.
       "20260808140000_ai_runs_retention_schedule_v1.sql",
+      // 2026-08-12: beta-audit P1 defect A1 (#1095). The marker records that
+      // the RED content (three SECURITY DEFINER function bodies + their
+      // GRANT/REVOKE posture) is INTENTIONAL — replacing the authorization
+      // predicate IS the change. Unlike most entries above, an APPLY APPROVAL
+      // DOES EXIST: the owner gave "#1095 = APPROVED YES" in the public beta
+      // completion train v6.2 directive, and the marker was added in the same
+      // commit that recorded it. Before the marker was added, every premise in
+      // the migration header was re-read from PRODUCTION (the A1 defect, the
+      // free `_by_roster` name and W11's reverted engagement bridge were all
+      // still live), and the two "body preserved from the APPLIED migration"
+      // claims were proven by normalised-md5 comparison against production
+      // `pg_proc.prosrc` rather than by eye. Guard for that provenance:
+      // lib/guards/caller-manages-worker-engagements.test.ts.
+      "20260808150000_caller_manages_worker_engagements_v1.sql",
       // 2026-08-09: public vacancy persistence v1. The marker records that the
       // RED content (GRANT/REVOKE and a CREATE POLICY) is STRUCTURALLY
       // UNAVOIDABLE — there is no way to add a table with row-level security
