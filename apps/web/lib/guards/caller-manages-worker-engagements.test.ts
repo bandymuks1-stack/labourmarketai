@@ -61,31 +61,55 @@ function fnBody(src: string, signature: string): string {
   return rest.slice(0, next === -1 ? undefined : next);
 }
 
-describe("owner gate — draft, never self-approved, paired rollback", () => {
-  it("carries the DRAFT needs-human-gate header and the never-db-push rule", () => {
+describe("owner gate — approved 2026-08-12, never self-approved, paired rollback", () => {
+  it("still forbids db push and still routes the apply through Supabase MCP", () => {
+    // These two rules survive the owner decision unchanged. An approval is
+    // permission to APPLY, never permission to change HOW it is applied.
     const m = migration();
-    expect(m).toMatch(/DRAFT — needs-human-gate — DO NOT APPLY automatically/);
     expect(m).toMatch(/Apply ONLY via Supabase MCP apply_migration/);
     expect(m).toMatch(/Never `db push`/);
   });
 
-  it("does NOT carry `@human-gate-approved` — no owner decision exists yet", () => {
-    // The agent must never self-approve. migration-safety CI going RED on this
-    // file is the intended, honest state until the owner reviews it. If a
-    // decision is later given, replace this assertion with one naming the
-    // decision (the repo convention is that the rule MOVES, never disappears).
+  it("carries `@human-gate-approved` ONLY together with the named owner decision", () => {
+    // THE RULE MOVED, IT DID NOT DISAPPEAR (see this file's history).
     //
-    // This is the REAL gate's own pattern, copied from
-    // .github/scripts/migration-safety.mjs (`const ANNOTATION`), not a
-    // convenience approximation: the marker only counts as given when it
-    // OPENS a comment line. The header's prose mention of the marker (in the
-    // sentence explaining why it is deliberately absent) must NOT read as an
-    // approval — and under the real gate it does not.
+    // Before 2026-08-12 this asserted the marker was ABSENT, because no owner
+    // decision existed and the agent must never self-approve. The owner then
+    // gave an explicit decision ("#1095 = APPROVED YES", public beta
+    // completion train v6.2), so the assertion now pins the ONE thing that
+    // still makes self-approval detectable: the marker may exist only if the
+    // file also NAMES the decision that authorised it.
+    //
+    // Negative control: an agent that pastes `-- @human-gate-approved` onto a
+    // future migration (or strips the provenance line from this one) to get
+    // past migration-safety CI turns this test RED, because the marker alone
+    // no longer satisfies it.
+    //
+    // Pattern copied verbatim from the REAL gate
+    // (.github/scripts/migration-safety.mjs `const ANNOTATION`), not an
+    // approximation: the marker only counts when it OPENS a comment line.
     const ANNOTATION = /(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i;
-    expect(migration()).not.toMatch(ANNOTATION);
-    // …and the prose mention really is present, so the assertion above is
-    // proving the line-anchoring, not merely the absence of the string.
-    expect(migration()).toContain("@human-gate-approved");
+    const m = migration();
+    expect(m).toMatch(ANNOTATION);
+    expect(m).toMatch(/OWNER-APPROVED 2026-08-12/);
+    expect(m).toMatch(
+      /marker above was added ONLY on that explicit\s*--\s*owner instruction/,
+    );
+  });
+
+  it("records that every header premise was re-verified against production before merge", () => {
+    // The premises this migration rests on (the A1 defect is live, the name
+    // is free, W11's revert is live) were TRUE when the PR was written on
+    // 2026-08-08. A migration that sat in draft for four days must not be
+    // merged on stale facts, so the re-read is part of the artefact.
+    const m = migration();
+    expect(m).toMatch(/RE-VERIFIED AGAINST PRODUCTION 2026-08-12 BEFORE MERGE/);
+    // The two "body preserved from the APPLIED migration" claims are the ones
+    // a reviewer cannot check by eye. They were proven by normalised-md5
+    // comparison against production `pg_proc.prosrc`, and the digests are
+    // recorded so the proof is reproducible rather than asserted.
+    expect(m).toContain("0595bf33df9029f9aea83b7db4d61488");
+    expect(m).toContain("58b6d2f458466d39212dd200bb38dc77");
   });
 
   it("ships a paired rollback that the migration points at", () => {

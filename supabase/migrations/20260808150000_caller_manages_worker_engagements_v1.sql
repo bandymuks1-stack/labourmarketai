@@ -1,10 +1,33 @@
+-- @human-gate-approved
 -- ============================================================================
--- DRAFT — needs-human-gate — DO NOT APPLY automatically.
--- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
--- Never `db push`. Ships UNAPPLIED and deliberately WITHOUT
--- `@human-gate-approved` — RED in migration-safety CI is the intended state
--- until the owner reviews (SECURITY DEFINER function bodies + grants =
--- RED-class). The agent must never add that marker on its own initiative.
+-- OWNER-APPROVED 2026-08-12 — "#1095 = APPROVED YES" (public beta completion
+-- train v6.2 directive). The marker above was added ONLY on that explicit
+-- owner instruction; it was deliberately absent while the PR was a draft.
+-- Apply ONLY via Supabase MCP apply_migration. Never `db push`.
+--
+-- RE-VERIFIED AGAINST PRODUCTION 2026-08-12 BEFORE MERGE (project
+-- gorgitwvdzxbnaxhrsrw), every premise in this header re-read from
+-- pg_proc/pg_policies rather than trusted:
+--   * caller_manages_worker.prosrc mentions company_worker_engagements → FALSE
+--     (the A1 defect is still live);
+--   * caller_manages_worker_by_roster → 0 rows (the name is still free);
+--   * assign_worker_to_project.prosrc mentions
+--     caller_has_booking_engagement_for_project → FALSE (Problem 2, the W11
+--     revert, is still live);
+--   * caller_has_booking_engagement_for_project still exists and is still
+--     orphaned (zero callers in the database).
+-- The two "body preserved from the APPLIED migration" claims below were
+-- proven MECHANICALLY, not by eye, by comparing comment-stripped
+-- whitespace-normalised md5 of this file's bodies against production
+-- pg_proc.prosrc:
+--   * caller_manages_worker_by_roster body == PROD caller_manages_worker
+--       md5 0595bf33df9029f9aea83b7db4d61488 (303 chars) — EXACT MATCH;
+--   * assign_worker_to_project body, with the ONE new authorization clause
+--     reverted to the production clause, == PROD assign_worker_to_project
+--       md5 58b6d2f458466d39212dd200bb38dc77 (1190 chars) — EXACT MATCH.
+-- So this migration provably changes exactly one authorization line in
+-- assign_worker_to_project and nothing else in that body — W11's
+-- completed-project guard included.
 --
 -- 20260808150000 — caller_manages_worker learns about booking engagements
 -- (beta foundation audit P1 defect A1) + restores the project-assign
