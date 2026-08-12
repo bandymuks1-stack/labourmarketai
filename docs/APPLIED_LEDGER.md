@@ -35,6 +35,66 @@
 
 ---
 
+### ✅ APPLIED TO PROD — `20260809120000_can_view_worker_booking_engagement_v1` (#1097, GDPR identity-disclosure predicate)
+
+| Field | Value |
+|---|---|
+| Applied | **2026-08-12** via Supabase MCP `apply_migration` (`{"success":true}`). Never `db push` |
+| Production project | `gorgitwvdzxbnaxhrsrw` |
+| Production ledger version | `20260812214302`, name `can_view_worker_booking_engagement_v1` (match on `name` — prod stamps APPLY TIME as `version`, the documented drift) |
+| PR | **#1097**, branch `feat/cc/can-view-worker-booking-engagement-v1`, squash-merged as main **`ae556355`** (from `343d8957`) |
+| Owner gate | **TWO-STAGE, and the distinction matters.** Train v6.3 §3 approved only the PREPARATION: the widening "MUST NOT be blindly applied in its previous disclosure state" and could be merged/applied only once C1/C2a/C2b held. Those shipped in `520cfcf1` while the migration stayed deliberately UNMARKED. Train v6.4 §1 "OWNER APPROVAL A" then granted the marker outright, scoped to this migration only; it was added in commit `aca4e5e0`, the same commit that recorded the decision |
+| Checksums | migration file sha256 `142c78d7…`; comment-stripped executable sha256 `a55c22d7…` (62 lines) |
+
+**What it does**: ONE `create or replace function public.can_view_worker(uuid)`.
+The applied `20260711130000` body is preserved and exactly one OR-branch is added
+to the legitimate-interest arm — an ACTIVE `company_worker_engagements` row whose
+company the caller owns. No table, column, index, constraint, trigger or policy
+added or changed. **Zero DML.** The three `revoke`/`grant` statements re-state the
+existing posture rather than widening it.
+
+**Why it was needed**: the database was already HALF-disclosing. The applied
+`list_booking_engagement_workers_v1` (prod `20260723182516`) is SECURITY DEFINER
+and already hands the engaging company owner `display_name` and `profile_id`
+under exactly these three conditions, bypassing `can_view_worker`. The RLS
+predicate contradicted a disclosure the database performs; this makes them agree
+and extends it to the professional-summary tables.
+
+**PRODUCTION READ-BACK (verified, not asserted).** Before → after:
+
+| Property | Before | After |
+|---|---|---|
+| body md5 (whitespace-normalised) | `74b4a804…` | `ef27b2ff…` |
+| body length | 1196 | 2348 |
+| `company_worker_engagements` branch | **false** | **true** |
+| consent arm (`worker_profile_discoverable`) | intact | **intact** |
+| roster / `engagement_contexts` / `project_worker_assignments` arms | intact | **intact** |
+| `stable`, `security definer` | yes | **yes** |
+| ACL | — | `postgres=X/postgres`, `authenticated=X/postgres` — **anon and PUBLIC hold NOTHING** |
+| policies still bound | — | `workers_select`, `worker_skills_select`, `worker_professions_select`, `worker_languages_select` |
+
+`owns_company` was re-read from production and is caller-bound
+(`companies.profile_id = auth.uid()`), which is what confines the new branch to
+the single company holding that engagement.
+
+**WHAT WAS NOT PROVEN, STATED PLAINLY.** The per-role behavioural proof —
+unrelated employer, sibling company, ENDED engagement, withdrawn-consent
+subject, worker self-access — was **NOT executed**. The branch ships
+`scripts/db-proof/can-view-worker-booking-engagement.sh`, which spins up a
+throwaway Postgres and runs the real migration and rollback verbatim under
+`set local role authenticated`; the harness could not be started in this session
+(container creation refused by the harness permission classifier, and routing
+around that refusal is forbidden). Production cannot substitute: it holds
+**0 rows in `company_worker_engagements`**, so every branch evaluates false and
+no behavioural signal exists there. The narrowness above is therefore proven
+STRUCTURALLY (predicate text + `owns_company` body + ACL + policy bindings),
+not behaviourally. **Running that harness is the top follow-up.**
+
+**Rollback**: `supabase/rollbacks/20260809120000_can_view_worker_booking_engagement_v1.down.sql`
+restores the `20260711130000` body verbatim. Not executed.
+
+---
+
 ### ✅ APPLIED TO PROD — `20260808150000_caller_manages_worker_engagements_v1` (#1095, beta-audit P1 defect A1)
 
 | Field | Value |
