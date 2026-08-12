@@ -1116,9 +1116,26 @@ export default async function OpportunitiesPage({
               while there is no supply: no dead shell. */}
           <ExternalVacanciesSection
             cards={result.externalVacancies.cards}
+            freshness={result.externalVacancies.freshness}
             labels={{
               sectionTitle: t("external.sectionTitle"),
               sectionNote: t("external.sectionNote"),
+              // How old this supply is, in the worker's own words. The date is
+              // locale-formatted; no infrastructure state is ever surfaced.
+              freshnessNotice: (freshness) => {
+                // `dateFmt` is the page's existing UTC-pinned formatter.
+                // `last_seen_at` is a UTC instant; formatting it in the
+                // server's ambient zone would show the reader a different day
+                // for a value meant to be exact (W12 doctrine).
+                const date = dateFmt(freshness.lastRefreshedAt);
+                if (freshness.state === "unavailable")
+                  return t("external.freshnessUnavailable");
+                if (!date || freshness.state === "unknown")
+                  return t("external.freshnessUnknown");
+                return freshness.state === "stale"
+                  ? t("external.freshnessStale", { date })
+                  : t("external.freshnessDelayed", { date });
+              },
               openOriginal: t("external.openOriginal"),
               noApplicationRoute: t("external.noApplicationRoute"),
               publishedOn: (d) => t("external.publishedOn", { date: d }),

@@ -2024,6 +2024,10 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
+      "freshnessDelayed": "Annonserna uppdaterades senast {date}. Uppdateringar från den här källan är tillfälligt försenade, så vissa tjänster kan redan vara tillsatta.",
+      "freshnessStale": "Annonserna uppdaterades senast {date}. De har inte bekräftats sedan dess — kontrollera aktuell tillgänglighet i den ursprungliga annonsen.",
+      "freshnessUnknown": "Vi kan inte bekräfta när dessa annonser senast uppdaterades. Kontrollera aktuell tillgänglighet i den ursprungliga annonsen.",
+      "freshnessUnavailable": "Externa annonser är tillfälligt otillgängliga.",
       "openOriginal": "Öppna originalannonsen",
       "noApplicationRoute": "Källan har inte publicerat någon ansökningsadress för denna annons.",
       "publishedOn": "Publicerad {date}",

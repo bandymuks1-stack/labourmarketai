@@ -7983,6 +7983,10 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
+      "freshnessDelayed": "Anzeigen zuletzt aktualisiert am {date}. Aktualisierungen aus dieser Quelle verzögern sich vorübergehend, daher sind manche Stellen möglicherweise schon besetzt.",
+      "freshnessStale": "Anzeigen zuletzt aktualisiert am {date}. Sie wurden seitdem nicht erneut bestätigt — prüfen Sie die Originalanzeige des Herausgebers auf aktuelle Verfügbarkeit.",
+      "freshnessUnknown": "Wir können nicht bestätigen, wann diese Anzeigen zuletzt aktualisiert wurden. Prüfen Sie die Originalanzeige auf aktuelle Verfügbarkeit.",
+      "freshnessUnavailable": "Externe Anzeigen sind vorübergehend nicht verfügbar.",
       "openOriginal": "Originalanzeige öffnen",
       "noApplicationRoute": "Die Quelle hat für diese Anzeige keine Bewerbungsadresse veröffentlicht.",
       "publishedOn": "Veröffentlicht {date}",

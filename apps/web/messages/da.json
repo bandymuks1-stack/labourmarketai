@@ -2024,6 +2024,10 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
+      "freshnessDelayed": "Opslagene blev sidst opdateret {date}. Opdateringer fra denne kilde er midlertidigt forsinkede, så nogle stillinger kan allerede være besat.",
+      "freshnessStale": "Opslagene blev sidst opdateret {date}. De er ikke bekræftet siden — tjek det oprindelige opslag for aktuel tilgængelighed.",
+      "freshnessUnknown": "Vi kan ikke bekræfte, hvornår disse opslag sidst blev opdateret. Tjek det oprindelige opslag for aktuel tilgængelighed.",
+      "freshnessUnavailable": "Eksterne opslag er midlertidigt utilgængelige.",
       "openOriginal": "Åbn den originale annonce",
       "noApplicationRoute": "Kilden har ikke udgivet en ansøgningsadresse for denne annonce.",
       "publishedOn": "Udgivet {date}",

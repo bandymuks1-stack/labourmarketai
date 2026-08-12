@@ -84,14 +84,42 @@ function vacancy(over: Partial<PublicVacancyV1> = {}): PublicVacancyV1 {
   } as PublicVacancyV1;
 }
 
-function clientWith(result: { data?: unknown; error?: unknown }) {
+/**
+ * The loader issues TWO reads against the same table: the page of ads
+ * (`.range`) and the newest `last_seen_at` (`.limit(1)`). `freshness` lets a
+ * test pin the second one; by default it answers with the same NOW the ads
+ * were captured at, so freshness is `current` and stays out of the way of the
+ * assertions that are not about it.
+ */
+function clientWith(
+  result: { data?: unknown; error?: unknown },
+  freshness?: { lastSeenAt?: string | null; error?: unknown },
+) {
   const chain: Record<string, unknown> = {};
   const self = () => chain;
   chain.select = self;
   chain.eq = self;
   chain.or = self;
   chain.order = self;
-  chain.range = self;
+  chain.range = () => ({
+    then: (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
+      Promise.resolve({
+        data: result.data ?? [],
+        error: result.error ?? null,
+      }).then(ok, err),
+  });
+  chain.limit = () => ({
+    then: (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
+      Promise.resolve({
+        data:
+          freshness?.lastSeenAt === undefined
+            ? [{ last_seen_at: NOW }]
+            : freshness.lastSeenAt === null
+              ? []
+              : [{ last_seen_at: freshness.lastSeenAt }],
+        error: freshness?.error ?? result.error ?? null,
+      }).then(ok, err),
+  });
   chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
     Promise.resolve({ data: result.data ?? [], error: result.error ?? null }).then(ok, err);
   return { from: () => chain as never } as never;
@@ -104,14 +132,18 @@ describe("store states stay distinguishable", () => {
       SUBJECT,
       { nowIso: NOW },
     );
-    expect(result).toEqual({ available: false, cards: [] });
+    expect(result.available).toBe(false);
+    expect(result.cards).toEqual([]);
+    // An unreadable store must NOT read as fresh supply.
+    expect(result.freshness.state).toBe("unavailable");
   });
 
   it("provisioned-but-empty store -> available:true, no cards", async () => {
     const result = await loadExternalVacancyCards(clientWith({ data: [] }), SUBJECT, {
       nowIso: NOW,
     });
-    expect(result).toEqual({ available: true, cards: [] });
+    expect(result.available).toBe(true);
+    expect(result.cards).toEqual([]);
   });
 });
 
@@ -210,5 +242,47 @@ describe("matching honesty", () => {
       { nowIso: NOW },
     );
     expect(result.cards[0].key).toBe("arbetsformedlingen:readable");
+  });
+});
+
+/**
+ * SUPPLY FRESHNESS ON THE BOARD.
+ *
+ * The defect this closes: on 2026-08-12 production served 87 Swedish ads, all
+ * flagged active, none re-confirmed since 2026-08-09 20:05Z — with nothing on
+ * screen saying so. The loader must carry that age to the card list.
+ */
+describe("supply freshness reaches the board", () => {
+  const row = () => toPublicVacancyRow(vacancy(), NOW, null);
+
+  it("reports current supply when the last refresh is recent", async () => {
+    const result = await loadExternalVacancyCards(
+      clientWith({ data: [row()] }, { lastSeenAt: "2026-08-09T17:00:00.000Z" }),
+      SUBJECT,
+      { nowIso: NOW },
+    );
+    expect(result.freshness.state).toBe("current");
+  });
+
+  /** NEGATIVE CONTROL — the real production numbers. */
+  it("reports STALE, never current, for the real 2026-08-12 Swedish supply", async () => {
+    const result = await loadExternalVacancyCards(
+      clientWith({ data: [row()] }, { lastSeenAt: "2026-08-09T20:05:32.975Z" }),
+      SUBJECT,
+      { nowIso: "2026-08-12T06:16:00.000Z" },
+    );
+    expect(result.cards).toHaveLength(1);
+    expect(result.freshness.state).toBe("stale");
+    expect(result.freshness.state).not.toBe("current");
+    expect(result.freshness.lastRefreshedAt).toBe("2026-08-09T20:05:32.975Z");
+  });
+
+  it("reports unknown — not current — when no row carries a refresh time", async () => {
+    const result = await loadExternalVacancyCards(
+      clientWith({ data: [row()] }, { lastSeenAt: null }),
+      SUBJECT,
+      { nowIso: NOW },
+    );
+    expect(result.freshness.state).toBe("unknown");
   });
 });

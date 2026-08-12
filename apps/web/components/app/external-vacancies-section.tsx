@@ -23,10 +23,16 @@ import type { ReactNode } from "react";
  */
 import { MatchTierExplanation } from "@/components/app/match-tier-explanation";
 import type { ExternalOpportunityCardV1 } from "@/lib/opportunities/external-vacancies";
+import {
+  freshnessNeedsNotice,
+  type SourceFreshnessV1,
+} from "@/lib/vacancy-sources/source-freshness";
 
 export interface ExternalVacanciesLabels {
   readonly sectionTitle: string;
   readonly sectionNote: string;
+  /** Worker-facing sentence for a non-current supply state. */
+  readonly freshnessNotice: (freshness: SourceFreshnessV1) => string;
   readonly openOriginal: string;
   readonly noApplicationRoute: string;
   readonly publishedOn: (iso: string) => string;
@@ -45,11 +51,20 @@ export interface ExternalVacanciesLabels {
 export function ExternalVacanciesSection({
   cards,
   labels,
+  freshness,
 }: {
   readonly cards: readonly ExternalOpportunityCardV1[];
   readonly labels: ExternalVacanciesLabels;
+  readonly freshness: SourceFreshnessV1;
 }): ReactNode {
   if (cards.length === 0) return null;
+
+  // Every state except `current` is stated plainly. The platform does not
+  // control these vacancies and cannot promise one is still open, so supply
+  // that has not been re-confirmed is never presented as though it had been.
+  const notice = freshnessNeedsNotice(freshness.state)
+    ? labels.freshnessNotice(freshness)
+    : null;
 
   return (
     <section
@@ -65,6 +80,17 @@ export function ExternalVacanciesSection({
           {labels.sectionNote}
         </p>
       </div>
+
+      {notice ? (
+        <p
+          className="rounded-md border border-ink-500 bg-ink-900/40 p-3 text-meta leading-relaxed text-text-secondary"
+          data-testid="external-freshness-notice"
+          data-freshness-state={freshness.state}
+          role="status"
+        >
+          {notice}
+        </p>
+      ) : null}
 
       <ul className="flex flex-col gap-4">
         {cards.map(({ key, view, capabilities, match, matchingGaps }) => (
